@@ -106,7 +106,6 @@ class RecentTasks {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "RecentTasks" : TAG_AM;
     private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
     private static final String TAG_TASKS = TAG + POSTFIX_TASKS;
-    private static final boolean TRIMMED = true;
 
     private static final int DEFAULT_INITIAL_CAPACITY = 5;
 
@@ -134,7 +133,7 @@ class RecentTasks {
         /**
          * Called when a task is removed from the recent tasks list.
          */
-        void onRecentTaskRemoved(TaskRecord task, boolean wasTrimmed);
+        void onRecentTaskRemoved(TaskRecord task, boolean wasTrimmed, boolean killProcess);
     }
 
     /**
@@ -322,9 +321,9 @@ class RecentTasks {
         }
     }
 
-    private void notifyTaskRemoved(TaskRecord task, boolean wasTrimmed) {
+    private void notifyTaskRemoved(TaskRecord task, boolean wasTrimmed, boolean killProcess) {
         for (int i = 0; i < mCallbacks.size(); i++) {
-            mCallbacks.get(i).onRecentTaskRemoved(task, wasTrimmed);
+            mCallbacks.get(i).onRecentTaskRemoved(task, wasTrimmed, killProcess);
         }
     }
 
@@ -544,6 +543,16 @@ class RecentTasks {
 
             mSupervisor.removeTaskByIdLocked(tr.taskId, true, REMOVE_FROM_RECENTS,
                     "remove-package-task");
+        }
+    }
+
+    void removeAllVisibleTasks() {
+        for (int i = mTasks.size() - 1; i >= 0; --i) {
+            final TaskRecord tr = mTasks.get(i);
+            if (isVisibleRecentTask(tr)) {
+                mTasks.remove(i);
+                notifyTaskRemoved(tr, true /* wasTrimmed */, true /* killProcess */);
+            }
         }
     }
 
@@ -1048,7 +1057,7 @@ class RecentTasks {
      */
     void remove(TaskRecord task) {
         mTasks.remove(task);
-        notifyTaskRemoved(task, !TRIMMED);
+        notifyTaskRemoved(task, false /* wasTrimmed */, false /* killProcess */);
     }
 
     /**
@@ -1060,7 +1069,7 @@ class RecentTasks {
         // Remove from the end of the list until we reach the max number of recents
         while (recentsCount > mGlobalMaxNumTasks) {
             final TaskRecord tr = mTasks.remove(recentsCount - 1);
-            notifyTaskRemoved(tr, TRIMMED);
+            notifyTaskRemoved(tr, true /* wasTrimmed */, false /* killProcess */);
             recentsCount--;
             if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "Trimming over max-recents task=" + tr
                     + " max=" + mGlobalMaxNumTasks);
@@ -1114,7 +1123,7 @@ class RecentTasks {
 
             // Task is no longer active, trim it from the list
             mTasks.remove(task);
-            notifyTaskRemoved(task, TRIMMED);
+            notifyTaskRemoved(task, true /* wasTrimmed */, false /* killProcess */);
             notifyTaskPersisterLocked(task, false /* flush */);
         }
     }
@@ -1268,7 +1277,7 @@ class RecentTasks {
         // callbacks here.
         final TaskRecord removedTask = mTasks.remove(removeIndex);
         if (removedTask != task) {
-            notifyTaskRemoved(removedTask, !TRIMMED);
+            notifyTaskRemoved(removedTask, false /* wasTrimmed */, false /* killProcess */);
             if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "Trimming task=" + removedTask
                     + " for addition of task=" + task);
         }

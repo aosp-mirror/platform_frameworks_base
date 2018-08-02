@@ -1668,6 +1668,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
+    public void removeAllVisibleRecentTasks() {
+        enforceCallerIsRecentsOrHasPermission(REMOVE_TASKS, "removeAllVisibleRecentTasks()");
+        synchronized (mGlobalLock) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                getRecentTasks().removeAllVisibleTasks();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    @Override
     public boolean shouldUpRecreateTask(IBinder token, String destAffinity) {
         synchronized (mGlobalLock) {
             final ActivityRecord srec = ActivityRecord.forTokenLocked(token);

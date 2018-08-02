@@ -139,6 +139,7 @@ interface IActivityTaskManager {
     ComponentName getCallingActivity(in IBinder token);
     void setFocusedTask(int taskId);
     boolean removeTask(int taskId);
+    void removeAllVisibleRecentTasks();
     List<ActivityManager.RunningTaskInfo> getTasks(int maxNum);
     List<ActivityManager.RunningTaskInfo> getFilteredTasks(int maxNum, int ignoreActivityType,
             int ignoreWindowingMode);
