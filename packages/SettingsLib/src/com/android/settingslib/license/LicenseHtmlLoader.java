@@ -16,14 +16,17 @@
 
 package com.android.settingslib.license;
 
+import static com.android.settingslib.license.LicenseHtmlLoaderCompat.generateHtmlFile;
+import static com.android.settingslib.license.LicenseHtmlLoaderCompat.getCachedHtmlFile;
+import static com.android.settingslib.license.LicenseHtmlLoaderCompat.getVaildXmlFiles;
+import static com.android.settingslib.license.LicenseHtmlLoaderCompat.isCachedHtmlFileOutdated;
+
 import android.content.Context;
-import androidx.annotation.VisibleForTesting;
 import android.util.Log;
 
 import com.android.settingslib.utils.AsyncLoader;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,14 +34,6 @@ import java.util.List;
  */
 public class LicenseHtmlLoader extends AsyncLoader<File> {
     private static final String TAG = "LicenseHtmlLoader";
-
-    private static final String[] DEFAULT_LICENSE_XML_PATHS = {
-            "/system/etc/NOTICE.xml.gz",
-            "/vendor/etc/NOTICE.xml.gz",
-            "/odm/etc/NOTICE.xml.gz",
-            "/oem/etc/NOTICE.xml.gz",
-            "/product/etc/NOTICE.xml.gz"};
-    private static final String NOTICE_HTML_FILE_NAME = "NOTICE.html";
 
     private Context mContext;
 
@@ -63,7 +58,7 @@ public class LicenseHtmlLoader extends AsyncLoader<File> {
             return null;
         }
 
-        File cachedHtmlFile = getCachedHtmlFile();
+        File cachedHtmlFile = getCachedHtmlFile(mContext);
         if (!isCachedHtmlFileOutdated(xmlFiles, cachedHtmlFile)
                 || generateHtmlFile(xmlFiles, cachedHtmlFile)) {
             return cachedHtmlFile;
@@ -72,40 +67,4 @@ public class LicenseHtmlLoader extends AsyncLoader<File> {
         return null;
     }
 
-    @VisibleForTesting
-    List<File> getVaildXmlFiles() {
-        final List<File> xmlFiles = new ArrayList();
-        for (final String xmlPath : DEFAULT_LICENSE_XML_PATHS) {
-            File file = new File(xmlPath);
-            if (file.exists() && file.length() != 0) {
-                xmlFiles.add(file);
-            }
-        }
-        return xmlFiles;
-    }
-
-    @VisibleForTesting
-    File getCachedHtmlFile() {
-        return new File(mContext.getCacheDir(), NOTICE_HTML_FILE_NAME);
-    }
-
-    @VisibleForTesting
-    boolean isCachedHtmlFileOutdated(List<File> xmlFiles, File cachedHtmlFile) {
-        boolean outdated = true;
-        if (cachedHtmlFile.exists() && cachedHtmlFile.length() != 0) {
-            outdated = false;
-            for (File file : xmlFiles) {
-                if (cachedHtmlFile.lastModified() < file.lastModified()) {
-                    outdated = true;
-                    break;
-                }
-            }
-        }
-        return outdated;
-    }
-
-    @VisibleForTesting
-    boolean generateHtmlFile(List<File> xmlFiles, File htmlFile) {
-        return LicenseHtmlGeneratorFromXml.generateHtml(xmlFiles, htmlFile);
-    }
 }

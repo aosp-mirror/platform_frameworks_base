@@ -17,44 +17,43 @@
 package com.android.settingslib.license;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implementation;
+import org.robolectric.annotation.Implements;
+import org.robolectric.annotation.Resetter;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
+@Config(shadows = LicenseHtmlLoaderCompatTest.ShadowLicenseHtmlLoaderCompat.class)
 public class LicenseHtmlLoaderCompatTest {
+
     @Mock
     private Context mContext;
-
-    LicenseHtmlLoaderCompat newLicenseHtmlLoader(ArrayList<File> xmlFiles,
-            File cachedHtmlFile, boolean isCachedHtmlFileOutdated,
-            boolean generateHtmlFileSucceeded) {
-        LicenseHtmlLoaderCompat loader = spy(new LicenseHtmlLoaderCompat(mContext));
-        doReturn(xmlFiles).when(loader).getVaildXmlFiles();
-        doReturn(cachedHtmlFile).when(loader).getCachedHtmlFile();
-        doReturn(isCachedHtmlFileOutdated).when(loader).isCachedHtmlFileOutdated(any(), any());
-        doReturn(generateHtmlFileSucceeded).when(loader).generateHtmlFile(any(), any());
-        return loader;
-    }
+    private LicenseHtmlLoaderCompat mLoader;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mLoader = new LicenseHtmlLoaderCompat(mContext);
+    }
+
+    @After
+    public void tearDown() {
+        ShadowLicenseHtmlLoaderCompat.reset();
     }
 
     @Test
@@ -63,10 +62,9 @@ public class LicenseHtmlLoaderCompatTest {
         xmlFiles.add(new File("test.xml"));
         File cachedHtmlFile = new File("test.html");
 
-        LicenseHtmlLoaderCompat loader = newLicenseHtmlLoader(xmlFiles, cachedHtmlFile, true, true);
+        setupFakeData(xmlFiles, cachedHtmlFile, true, true);
 
-        assertThat(loader.loadInBackground()).isEqualTo(cachedHtmlFile);
-        verify(loader).generateHtmlFile(any(), any());
+        assertThat(mLoader.loadInBackground()).isEqualTo(cachedHtmlFile);
     }
 
     @Test
@@ -74,10 +72,9 @@ public class LicenseHtmlLoaderCompatTest {
         ArrayList<File> xmlFiles = new ArrayList();
         File cachedHtmlFile = new File("test.html");
 
-        LicenseHtmlLoaderCompat loader = newLicenseHtmlLoader(xmlFiles, cachedHtmlFile, true, true);
+        setupFakeData(xmlFiles, cachedHtmlFile, true, true);
 
-        assertThat(loader.loadInBackground()).isNull();
-        verify(loader, never()).generateHtmlFile(any(), any());
+        assertThat(mLoader.loadInBackground()).isNull();
     }
 
     @Test
@@ -86,11 +83,9 @@ public class LicenseHtmlLoaderCompatTest {
         xmlFiles.add(new File("test.xml"));
         File cachedHtmlFile = new File("test.html");
 
-        LicenseHtmlLoaderCompat loader = newLicenseHtmlLoader(xmlFiles, cachedHtmlFile, false,
-                true);
+        setupFakeData(xmlFiles, cachedHtmlFile, false, true);
 
-        assertThat(loader.loadInBackground()).isEqualTo(cachedHtmlFile);
-        verify(loader, never()).generateHtmlFile(any(), any());
+        assertThat(mLoader.loadInBackground()).isEqualTo(cachedHtmlFile);
     }
 
     @Test
@@ -99,10 +94,56 @@ public class LicenseHtmlLoaderCompatTest {
         xmlFiles.add(new File("test.xml"));
         File cachedHtmlFile = new File("test.html");
 
-        LicenseHtmlLoaderCompat loader = newLicenseHtmlLoader(xmlFiles, cachedHtmlFile, true,
-                false);
+        setupFakeData(xmlFiles, cachedHtmlFile, true, false);
 
-        assertThat(loader.loadInBackground()).isNull();
-        verify(loader).generateHtmlFile(any(), any());
+        assertThat(mLoader.loadInBackground()).isNull();
+    }
+
+    void setupFakeData(ArrayList<File> xmlFiles,
+            File cachedHtmlFile, boolean isCachedHtmlFileOutdated,
+            boolean generateHtmlFileSucceeded) {
+
+        ShadowLicenseHtmlLoaderCompat.sValidXmlFiles = xmlFiles;
+        ShadowLicenseHtmlLoaderCompat.sCachedHtmlFile = cachedHtmlFile;
+        ShadowLicenseHtmlLoaderCompat.sIsCachedHtmlFileOutdated = isCachedHtmlFileOutdated;
+        ShadowLicenseHtmlLoaderCompat.sGenerateHtmlFileSucceeded = generateHtmlFileSucceeded;
+    }
+
+    @Implements(LicenseHtmlLoaderCompat.class)
+    public static class ShadowLicenseHtmlLoaderCompat {
+
+
+        public static List<File> sValidXmlFiles;
+        public static File sCachedHtmlFile;
+        public static boolean sIsCachedHtmlFileOutdated;
+        public static boolean sGenerateHtmlFileSucceeded;
+
+        @Resetter
+        public static void reset() {
+            sValidXmlFiles = null;
+            sCachedHtmlFile = null;
+            sIsCachedHtmlFileOutdated = false;
+            sGenerateHtmlFileSucceeded = false;
+        }
+
+        @Implementation
+        static List<File> getVaildXmlFiles() {
+            return sValidXmlFiles;
+        }
+
+        @Implementation
+        static File getCachedHtmlFile(Context context) {
+            return sCachedHtmlFile;
+        }
+
+        @Implementation
+        static boolean isCachedHtmlFileOutdated(List<File> xmlFiles, File cachedHtmlFile) {
+            return sIsCachedHtmlFileOutdated;
+        }
+
+        @Implementation
+        static boolean generateHtmlFile(List<File> xmlFiles, File htmlFile) {
+            return sGenerateHtmlFileSucceeded;
+        }
     }
 }
