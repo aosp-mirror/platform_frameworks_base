@@ -63,7 +63,7 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         mApplicationHandle.dispatchingTimeoutNanos =
                 WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
 
-        mWindowHandle = new InputWindowHandle(mApplicationHandle, null, null, displayId);
+        mWindowHandle = new InputWindowHandle(mApplicationHandle, null, displayId);
         mWindowHandle.name = name;
         mWindowHandle.inputChannel = mServerChannel;
         mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;

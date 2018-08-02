@@ -8,16 +8,19 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.app.ActivityManager;
 import android.os.Debug;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
-import com.android.server.input.InputApplicationHandle;
+import android.view.InputApplicationHandle;
 import com.android.server.input.InputManagerService;
-import com.android.server.input.InputWindowHandle;
+import android.view.InputWindowHandle;
+import android.view.InputChannel;
 
 import java.io.PrintWriter;
+import java.util.HashMap;
 
 final class InputManagerCallback implements InputManagerService.WindowManagerCallbacks {
     private final WindowManagerService mService;
@@ -48,13 +51,13 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
      * Called by the InputManager.
      */
     @Override
-    public void notifyInputChannelBroken(InputWindowHandle inputWindowHandle) {
-        if (inputWindowHandle == null) {
+    public void notifyInputChannelBroken(IBinder token) {
+        if (token == null) {
             return;
         }
 
         synchronized (mService.mGlobalLock) {
-            WindowState windowState = (WindowState) inputWindowHandle.windowState;
+            WindowState windowState = mService.windowForClientLocked(null, token, false);
             if (windowState != null) {
                 Slog.i(TAG_WM, "WINDOW DIED " + windowState);
                 windowState.removeIfPossible();
@@ -70,13 +73,13 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
      */
     @Override
     public long notifyANR(InputApplicationHandle inputApplicationHandle,
-            InputWindowHandle inputWindowHandle, String reason) {
+            IBinder token, String reason) {
         AppWindowToken appWindowToken = null;
         WindowState windowState = null;
         boolean aboveSystem = false;
         synchronized (mService.mGlobalLock) {
-            if (inputWindowHandle != null) {
-                windowState = (WindowState) inputWindowHandle.windowState;
+            if (token != null) {
+                windowState = mService.windowForClientLocked(null, token, false);
                 if (windowState != null) {
                     appWindowToken = windowState.mAppToken;
                 }
@@ -188,8 +191,8 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
      */
     @Override
     public long interceptKeyBeforeDispatching(
-            InputWindowHandle focus, KeyEvent event, int policyFlags) {
-        WindowState windowState = focus != null ? (WindowState) focus.windowState : null;
+            IBinder focus, KeyEvent event, int policyFlags) {
+        WindowState windowState = mService.windowForClientLocked(null, focus, false);
         return mService.mPolicy.interceptKeyBeforeDispatching(windowState, event, policyFlags);
     }
 
@@ -199,8 +202,8 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
      */
     @Override
     public KeyEvent dispatchUnhandledKey(
-            InputWindowHandle focus, KeyEvent event, int policyFlags) {
-        WindowState windowState = focus != null ? (WindowState) focus.windowState : null;
+            IBinder focus, KeyEvent event, int policyFlags) {
+        WindowState windowState = mService.windowForClientLocked(null, focus, false);
         return mService.mPolicy.dispatchUnhandledKey(windowState, event, policyFlags);
     }
 
