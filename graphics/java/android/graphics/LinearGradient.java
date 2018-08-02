@@ -19,6 +19,7 @@ package android.graphics;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 
 public class LinearGradient extends Shader {
 
@@ -31,15 +32,24 @@ public class LinearGradient extends Shader {
      */
     private int mType;
 
+    @UnsupportedAppUsage
     private float mX0;
+    @UnsupportedAppUsage
     private float mY0;
+    @UnsupportedAppUsage
     private float mX1;
+    @UnsupportedAppUsage
     private float mY1;
+    @UnsupportedAppUsage
     private int[] mColors;
+    @UnsupportedAppUsage
     private float[] mPositions;
+    @UnsupportedAppUsage
     private int mColor0;
+    @UnsupportedAppUsage
     private int mColor1;
 
+    @UnsupportedAppUsage
     private TileMode mTileMode;
 
     /**

@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * A camera instance can be used to compute 3D transformations and
  * generate a matrix that can be applied, for instance, on a
@@ -174,5 +176,6 @@ public class Camera {
     private native void nativeGetMatrix(long native_matrix);
     private native void nativeApplyToCanvas(long native_canvas);
 
+    @UnsupportedAppUsage
     long native_instance;
 }
