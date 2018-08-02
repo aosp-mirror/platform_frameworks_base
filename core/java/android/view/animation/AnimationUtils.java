@@ -19,6 +19,7 @@ package android.view.animation;
 import android.annotation.AnimRes;
 import android.annotation.InterpolatorRes;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -157,6 +158,7 @@ public class AnimationUtils {
         return createAnimationFromXml(c, parser, null, Xml.asAttributeSet(parser));
     }
 
+    @UnsupportedAppUsage
     private static Animation createAnimationFromXml(Context c, XmlPullParser parser,
             AnimationSet parent, AttributeSet attrs) throws XmlPullParserException, IOException {
 
