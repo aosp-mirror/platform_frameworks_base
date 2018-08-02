@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.systemui.fingerprint;
+package com.android.systemui.biometrics;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -26,6 +26,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -56,6 +57,8 @@ public class FingerprintDialogView extends LinearLayout {
     private static final int ANIMATION_DURATION_SHOW = 250; // ms
     private static final int ANIMATION_DURATION_AWAY = 350; // ms
 
+    private static final int MSG_CLEAR_MESSAGE = 1;
+
     private static final int STATE_NONE = 0;
     private static final int STATE_FINGERPRINT = 1;
     private static final int STATE_FINGERPRINT_ERROR = 2;
@@ -68,17 +71,16 @@ public class FingerprintDialogView extends LinearLayout {
     private final int mErrorColor;
     private final int mTextColor;
     private final int mFingerprintColor;
+    private final float mDisplayWidth;
+    private final DialogViewCallback mCallback;
 
     private ViewGroup mLayout;
     private final TextView mErrorText;
-    private Handler mHandler;
     private Bundle mBundle;
     private final LinearLayout mDialog;
     private int mLastState;
     private boolean mAnimatingAway;
     private boolean mWasForceRemoved;
-
-    private final float mDisplayWidth;
 
     private final Runnable mShowAnimationRunnable = new Runnable() {
         @Override
@@ -98,9 +100,23 @@ public class FingerprintDialogView extends LinearLayout {
         }
     };
 
-    public FingerprintDialogView(Context context, Handler handler) {
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch(msg.what) {
+                case MSG_CLEAR_MESSAGE:
+                    handleClearMessage();
+                    break;
+                default:
+                    Log.e(TAG, "Unhandled message: " + msg.what);
+                    break;
+            }
+        }
+    };
+
+    public FingerprintDialogView(Context context, DialogViewCallback callback) {
         super(context);
-        mHandler = handler;
+        mCallback = callback;
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mAnimationTranslationOffset = getResources()
@@ -138,7 +154,7 @@ public class FingerprintDialogView extends LinearLayout {
                     downPressed = false;
                 } else if (event.getAction() == KeyEvent.ACTION_UP && downPressed == true) {
                     downPressed = false;
-                    mHandler.obtainMessage(FingerprintDialogImpl.MSG_USER_CANCELED).sendToTarget();
+                    mCallback.onUserCanceled();
                 }
                 return true;
             }
@@ -155,11 +171,11 @@ public class FingerprintDialogView extends LinearLayout {
         setDismissesDialog(rightSpace);
 
         negative.setOnClickListener((View v) -> {
-            mHandler.obtainMessage(FingerprintDialogImpl.MSG_BUTTON_NEGATIVE).sendToTarget();
+            mCallback.onNegativePressed();
         });
 
         positive.setOnClickListener((View v) -> {
-            mHandler.obtainMessage(FingerprintDialogImpl.MSG_BUTTON_POSITIVE).sendToTarget();
+            mCallback.onPositivePressed();
         });
 
         mLayout.setFocusableInTouchMode(true);
@@ -230,8 +246,7 @@ public class FingerprintDialogView extends LinearLayout {
     private void setDismissesDialog(View v) {
         v.setClickable(true);
         v.setOnTouchListener((View view, MotionEvent event) -> {
-            mHandler.obtainMessage(FingerprintDialogImpl.MSG_HIDE_DIALOG, true /* userCanceled */)
-                    .sendToTarget();
+            mCallback.onUserCanceled();
             return true;
         });
     }
@@ -289,7 +304,7 @@ public class FingerprintDialogView extends LinearLayout {
     }
 
     // Clears the temporary message and shows the help message.
-    protected void resetMessage() {
+    private void handleClearMessage() {
         updateFingerprintIcon(STATE_FINGERPRINT);
         mErrorText.setText(R.string.fingerprint_dialog_touch_sensor);
         mErrorText.setTextColor(mTextColor);
@@ -297,12 +312,12 @@ public class FingerprintDialogView extends LinearLayout {
 
     // Shows an error/help message
     private void showTemporaryMessage(String message) {
-        mHandler.removeMessages(FingerprintDialogImpl.MSG_CLEAR_MESSAGE);
+        mHandler.removeMessages(MSG_CLEAR_MESSAGE);
         updateFingerprintIcon(STATE_FINGERPRINT_ERROR);
         mErrorText.setText(message);
         mErrorText.setTextColor(mErrorColor);
         mErrorText.setContentDescription(message);
-        mHandler.sendMessageDelayed(mHandler.obtainMessage(FingerprintDialogImpl.MSG_CLEAR_MESSAGE),
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CLEAR_MESSAGE),
                 BiometricPrompt.HIDE_DIALOG_DELAY);
     }
 
@@ -312,8 +327,7 @@ public class FingerprintDialogView extends LinearLayout {
 
     public void showErrorMessage(String error) {
         showTemporaryMessage(error);
-        mHandler.sendMessageDelayed(mHandler.obtainMessage(FingerprintDialogImpl.MSG_HIDE_DIALOG,
-                false /* userCanceled */), BiometricPrompt.HIDE_DIALOG_DELAY);
+        mCallback.onErrorShown();
     }
 
     private void updateFingerprintIcon(int newState) {

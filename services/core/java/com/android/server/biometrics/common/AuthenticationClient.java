@@ -114,7 +114,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
         if (mBundle != null) {
             try {
                 if (acquiredInfo != BiometricConstants.BIOMETRIC_ACQUIRED_GOOD) {
-                    mStatusBarService.onFingerprintHelp(
+                    mStatusBarService.onBiometricHelp(
                             mFingerprintManager.getAcquiredString(acquiredInfo, vendorCode));
                 }
                 return false; // acquisition continues
@@ -143,7 +143,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
         }
         if (mBundle != null) {
             try {
-                mStatusBarService.onFingerprintError(
+                mStatusBarService.onBiometricError(
                         mFingerprintManager.getErrorString(error, vendorCode));
             } catch (RemoteException e) {
                 Slog.e(getLogTag(), "Remote exception when sending error", e);
@@ -162,9 +162,9 @@ public abstract class AuthenticationClient extends ClientMonitor {
         if (mBundle != null) {
             try {
                 if (authenticated) {
-                    mStatusBarService.onFingerprintAuthenticated();
+                    mStatusBarService.onBiometricAuthenticated();
                 } else {
-                    mStatusBarService.onFingerprintHelp(getContext().getResources().getString(
+                    mStatusBarService.onBiometricHelp(getContext().getResources().getString(
                             com.android.internal.R.string.fingerprint_not_recognized));
                 }
             } catch (RemoteException e) {
@@ -224,7 +224,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
 
                     // Send the lockout message to the system dialog
                     if (mBundle != null) {
-                        mStatusBarService.onFingerprintError(
+                        mStatusBarService.onBiometricError(
                                 mFingerprintManager.getErrorString(errorCode, 0 /* vendorCode */));
                     }
                 } catch (RemoteException e) {
@@ -263,7 +263,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             // If authenticating with system dialog, show the dialog
             if (mBundle != null) {
                 try {
-                    mStatusBarService.showFingerprintDialog(mBundle, mDialogReceiver);
+                    mStatusBarService.showBiometricDialog(mBundle, mDialogReceiver);
                 } catch (RemoteException e) {
                     Slog.e(getLogTag(), "Unable to show fingerprint dialog", e);
                 }
@@ -301,7 +301,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             // after BiometricPrompt.HIDE_DIALOG_DELAY
             if (mBundle != null && !mDialogDismissed && !mInLockout) {
                 try {
-                    mStatusBarService.hideFingerprintDialog();
+                    mStatusBarService.hideBiometricDialog();
                 } catch (RemoteException e) {
                     Slog.e(getLogTag(), "Unable to hide fingerprint dialog", e);
                 }
