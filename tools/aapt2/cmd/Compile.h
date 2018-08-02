@@ -18,7 +18,8 @@
 #define AAPT2_COMPILE_H
 
 #include "androidfw/StringPiece.h"
-
+#include "format/Archive.h"
+#include "process/IResourceTableConsumer.h"
 #include "Command.h"
 #include "Diagnostics.h"
 #include "ResourceTable.h"
@@ -28,6 +29,7 @@ namespace aapt {
 struct CompileOptions {
   std::string output_path;
   Maybe<std::string> res_dir;
+  Maybe<std::string> res_zip;
   Maybe<std::string> generate_text_symbols_path;
   Maybe<Visibility::Level> visibility;
   bool pseudolocalize = false;
@@ -36,6 +38,7 @@ struct CompileOptions {
   bool verbose = false;
 };
 
+/** Parses flags and compiles resources to be used in linking.  */
 class CompileCommand : public Command {
  public:
   explicit CompileCommand(IDiagnostics* diagnostic) : Command("compile", "c"),
@@ -43,6 +46,8 @@ class CompileCommand : public Command {
     SetDescription("Compiles resources to be linked into an apk.");
     AddRequiredFlag("-o", "Output path", &options_.output_path);
     AddOptionalFlag("--dir", "Directory to scan for resources", &options_.res_dir);
+    AddOptionalFlag("--zip", "Zip file containing the res directory to scan for resources",
+        &options_.res_zip);
     AddOptionalFlag("--output-text-symbols",
         "Generates a text file containing the resource symbols in the\n"
             "specified file", &options_.generate_text_symbols_path);
@@ -51,10 +56,10 @@ class CompileCommand : public Command {
     AddOptionalSwitch("--no-crunch", "Disables PNG processing", &options_.no_png_crunch);
     AddOptionalSwitch("--legacy", "Treat errors that used to be valid in AAPT as warnings",
         &options_.legacy_mode);
-    AddOptionalSwitch("-v", "Enables verbose logging", &options_.verbose);
     AddOptionalFlag("--visibility",
         "Sets the visibility of the compiled resources to the specified\n"
             "level. Accepted levels: public, private, default", &visibility_);
+    AddOptionalSwitch("-v", "Enables verbose logging", &options_.verbose);
   }
 
   int Action(const std::vector<std::string>& args) override;
@@ -65,6 +70,8 @@ class CompileCommand : public Command {
   Maybe<std::string> visibility_;
 };
 
+int Compile(IAaptContext* context, io::IFileCollection* inputs,
+             IArchiveWriter* output_writer, CompileOptions& options);
 }// namespace aapt
 
 #endif //AAPT2_COMPILE_H

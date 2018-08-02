@@ -149,6 +149,10 @@ StringPiece GetExtension(const StringPiece& path) {
   return {};
 }
 
+bool IsHidden(const android::StringPiece& path) {
+  return util::StartsWith(GetFilename(path), ".");
+}
+
 void AppendPath(std::string* base, StringPiece part) {
   CHECK(base != nullptr);
   const bool base_has_trailing_sep = (!base->empty() && *(base->end() - 1) == sDirSep);

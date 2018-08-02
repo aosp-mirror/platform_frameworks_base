@@ -105,10 +105,7 @@ bool ConvertApk(IAaptContext* context, unique_ptr<LoadedApk> apk, IApkSerializer
   std::unique_ptr<io::IFileCollectionIterator> iterator = apk->GetFileCollection()->Iterator();
   while (iterator->HasNext()) {
     io::IFile* file = iterator->Next();
-
     std::string path = file->GetSource().path;
-    // The name of the path has the format "<zip-file-name>@<path-to-file>".
-    path = path.substr(path.find('@') + 1);
 
     // Manifest, resource table and resources have already been taken care of.
     if (path == kAndroidManifestPath ||
