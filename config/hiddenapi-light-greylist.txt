@@ -48,13 +48,6 @@ Landroid/accounts/IAccountManagerResponse$Stub;-><init>()V
 Landroid/accounts/IAccountManagerResponse$Stub;->asInterface(Landroid/os/IBinder;)Landroid/accounts/IAccountManagerResponse;
 Landroid/accounts/IAccountManagerResponse;->onError(ILjava/lang/String;)V
 Landroid/accounts/IAccountManagerResponse;->onResult(Landroid/os/Bundle;)V
-Landroid/animation/Animator;->reverse()V
-Landroid/animation/ArgbEvaluator;->getInstance()Landroid/animation/ArgbEvaluator;
-Landroid/animation/LayoutTransition;->cancel()V
-Landroid/animation/LayoutTransition;->cancel(I)V
-Landroid/animation/ValueAnimator;->animateValue(F)V
-Landroid/animation/ValueAnimator;->mDuration:J
-Landroid/animation/ValueAnimator;->sDurationScale:F
 Landroid/app/ActionBar;->collapseActionView()Z
 Landroid/app/ActionBar;->DISPLAY_TITLE_MULTIPLE_LINES:I
 Landroid/app/ActionBar;->setShowHideAnimationEnabled(Z)V

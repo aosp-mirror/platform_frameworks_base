@@ -19,6 +19,7 @@ package android.animation;
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Looper;
 import android.os.Trace;
 import android.util.AndroidRuntimeException;
@@ -75,6 +76,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     /**
      * Internal constants
      */
+    @UnsupportedAppUsage
     private static float sDurationScale = 1.0f;
 
     /**
@@ -200,6 +202,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     //
 
     // How long the animation should last in ms
+    @UnsupportedAppUsage
     private long mDuration = 300;
 
     // The amount of time in ms to delay starting the animation after start() is called. Note
@@ -1534,6 +1537,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      * @param fraction The elapsed fraction of the animation.
      */
     @CallSuper
+    @UnsupportedAppUsage
     void animateValue(float fraction) {
         fraction = mInterpolator.getInterpolation(fraction);
         mCurrentFraction = fraction;
