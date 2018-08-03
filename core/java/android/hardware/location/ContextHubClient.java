@@ -102,7 +102,7 @@ public class ContextHubClient implements Closeable {
     /**
      * Sends a message to a nanoapp through the Context Hub Service.
      *
-     * This function returns TRANSACTION_SUCCESS if the message has reached the HAL, but
+     * This function returns RESULT_SUCCESS if the message has reached the HAL, but
      * does not guarantee delivery of the message to the target nanoapp.
      *
      * @param message the message object to send
