@@ -16,6 +16,7 @@
 
 package com.android.ims.internal.uce.presence;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -45,6 +46,7 @@ public class PresServiceInfo implements Parcelable {
      * Gets the media type.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getMediaType() {
         return mMediaCap;
     }
@@ -61,6 +63,7 @@ public class PresServiceInfo implements Parcelable {
      * Gets the service ID.
      * @hide
      */
+    @UnsupportedAppUsage
     public String getServiceId() {
         return mServiceID;
     }
@@ -76,6 +79,7 @@ public class PresServiceInfo implements Parcelable {
      * Gets the service description.
      * @hide
      */
+    @UnsupportedAppUsage
     public String getServiceDesc() {
         return mServiceDesc;
     }
@@ -92,6 +96,7 @@ public class PresServiceInfo implements Parcelable {
      * Gets the service version.
      * @hide
      */
+    @UnsupportedAppUsage
     public String getServiceVer() {
         return mServiceVer;
     }
