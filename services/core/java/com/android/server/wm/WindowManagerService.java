@@ -7422,7 +7422,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 accessibilityController = mAccessibilityController;
             }
             if (accessibilityController != null) {
-                accessibilityController.performComputeChangedWindowsNotLocked();
+                accessibilityController.performComputeChangedWindowsNotLocked(true);
             }
         }
 

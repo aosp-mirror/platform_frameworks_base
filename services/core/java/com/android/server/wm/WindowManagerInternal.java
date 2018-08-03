@@ -410,7 +410,7 @@ public abstract class WindowManagerInternal {
     public abstract boolean isDockedDividerResizing();
 
     /**
-     * Requests the window manager to recompute the windows for accessibility.
+     * Requests the window manager to resend the windows for accessibility.
      */
     public abstract void computeWindowsForAccessibility();
 
