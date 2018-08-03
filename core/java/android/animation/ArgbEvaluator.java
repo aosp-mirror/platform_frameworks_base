@@ -16,6 +16,8 @@
 
 package android.animation;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * This evaluator can be used to perform type interpolation between integer
  * values that represent ARGB colors.
@@ -31,6 +33,7 @@ public class ArgbEvaluator implements TypeEvaluator {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static ArgbEvaluator getInstance() {
         return sInstance;
     }
