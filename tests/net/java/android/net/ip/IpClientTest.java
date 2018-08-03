@@ -32,7 +32,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.INetd;
@@ -62,8 +61,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.List;
@@ -84,6 +81,7 @@ public class IpClientTest {
     private static final int TEST_IFINDEX = 1001;
     // See RFC 7042#section-2.1.2 for EUI-48 documentation values.
     private static final MacAddress TEST_MAC = MacAddress.fromString("00:00:5E:00:53:01");
+    private static final int TEST_TIMEOUT_MS = 200;
 
     @Mock private Context mContext;
     @Mock private INetworkManagementService mNMService;
@@ -126,8 +124,8 @@ public class IpClientTest {
     private IpClient makeIpClient(String ifname) throws Exception {
         setTestInterfaceParams(ifname);
         final IpClient ipc = new IpClient(mContext, ifname, mCb, mDependecies);
-        verify(mNMService, timeout(100).times(1)).disableIpv6(ifname);
-        verify(mNMService, timeout(100).times(1)).clearInterfaceAddresses(ifname);
+        verify(mNMService, timeout(TEST_TIMEOUT_MS).times(1)).disableIpv6(ifname);
+        verify(mNMService, timeout(TEST_TIMEOUT_MS).times(1)).clearInterfaceAddresses(ifname);
         ArgumentCaptor<BaseNetworkObserver> arg =
                 ArgumentCaptor.forClass(BaseNetworkObserver.class);
         verify(mNMService, times(1)).registerObserver(arg.capture());
@@ -200,13 +198,13 @@ public class IpClientTest {
 
         ipc.startProvisioning(config);
         verify(mCb, times(1)).setNeighborDiscoveryOffload(true);
-        verify(mCb, timeout(100).times(1)).setFallbackMulticastFilter(false);
+        verify(mCb, timeout(TEST_TIMEOUT_MS).times(1)).setFallbackMulticastFilter(false);
         verify(mCb, never()).onProvisioningFailure(any());
 
         ipc.shutdown();
-        verify(mNMService, timeout(100).times(1)).disableIpv6(iface);
-        verify(mNMService, timeout(100).times(1)).clearInterfaceAddresses(iface);
-        verify(mCb, timeout(100).times(1))
+        verify(mNMService, timeout(TEST_TIMEOUT_MS).times(1)).disableIpv6(iface);
+        verify(mNMService, timeout(TEST_TIMEOUT_MS).times(1)).clearInterfaceAddresses(iface);
+        verify(mCb, timeout(TEST_TIMEOUT_MS).times(1))
                 .onLinkPropertiesChange(eq(makeEmptyLinkProperties(iface)));
     }
 
@@ -230,12 +228,12 @@ public class IpClientTest {
 
         ipc.startProvisioning(config);
         verify(mCb, times(1)).setNeighborDiscoveryOffload(true);
-        verify(mCb, timeout(100).times(1)).setFallbackMulticastFilter(false);
+        verify(mCb, timeout(TEST_TIMEOUT_MS).times(1)).setFallbackMulticastFilter(false);
         verify(mCb, never()).onProvisioningFailure(any());
 
         for (String addr : addresses) {
             String[] parts = addr.split("/");
-            verify(mNetd, timeout(100).times(1))
+            verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1))
                     .interfaceAddAddress(iface, parts[0], Integer.parseInt(parts[1]));
         }
 
@@ -244,7 +242,7 @@ public class IpClientTest {
         // Add N - 1 addresses
         for (int i = 0; i < lastAddr; i++) {
             mObserver.addressUpdated(iface, new LinkAddress(addresses[i]));
-            verify(mCb, timeout(100)).onLinkPropertiesChange(any());
+            verify(mCb, timeout(TEST_TIMEOUT_MS)).onLinkPropertiesChange(any());
             reset(mCb);
         }
 
@@ -252,12 +250,12 @@ public class IpClientTest {
         mObserver.addressUpdated(iface, new LinkAddress(addresses[lastAddr]));
         LinkProperties want = linkproperties(links(addresses), routes(prefixes));
         want.setInterfaceName(iface);
-        verify(mCb, timeout(100).times(1)).onProvisioningSuccess(eq(want));
+        verify(mCb, timeout(TEST_TIMEOUT_MS).times(1)).onProvisioningSuccess(eq(want));
 
         ipc.shutdown();
-        verify(mNMService, timeout(100).times(1)).disableIpv6(iface);
-        verify(mNMService, timeout(100).times(1)).clearInterfaceAddresses(iface);
-        verify(mCb, timeout(100).times(1))
+        verify(mNMService, timeout(TEST_TIMEOUT_MS).times(1)).disableIpv6(iface);
+        verify(mNMService, timeout(TEST_TIMEOUT_MS).times(1)).clearInterfaceAddresses(iface);
+        verify(mCb, timeout(TEST_TIMEOUT_MS).times(1))
                 .onLinkPropertiesChange(eq(makeEmptyLinkProperties(iface)));
     }
 

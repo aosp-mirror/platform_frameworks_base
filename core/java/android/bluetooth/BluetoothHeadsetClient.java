@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -476,6 +477,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return <code>true</code> if command has been issued successfully; <code>false</code>
      * otherwise; upon completion HFP sends {@link #ACTION_CONNECTION_STATE_CHANGED} intent.
      */
+    @UnsupportedAppUsage
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
         final IBluetoothHeadsetClient service = mService;
@@ -498,6 +500,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return <code>true</code> if command has been issued successfully; <code>false</code>
      * otherwise; upon completion HFP sends {@link #ACTION_CONNECTION_STATE_CHANGED} intent.
      */
+    @UnsupportedAppUsage
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
         final IBluetoothHeadsetClient service = mService;
@@ -720,6 +723,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return <code>true</code> if command has been issued successfully; <code>false</code>
      * otherwise; upon completion HFP sends {@link #ACTION_CALL_CHANGED} intent.
      */
+    @UnsupportedAppUsage
     public boolean acceptCall(BluetoothDevice device, int flag) {
         if (DBG) log("acceptCall()");
         final IBluetoothHeadsetClient service = mService;
@@ -766,6 +770,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * #EXTRA_AG_FEATURE_REJECT_CALL}. This method invocation will fail silently when feature is not
      * supported.</p>
      */
+    @UnsupportedAppUsage
     public boolean rejectCall(BluetoothDevice device) {
         if (DBG) log("rejectCall()");
         final IBluetoothHeadsetClient service = mService;
@@ -943,6 +948,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      *
      * Note: This is an internal function and shouldn't be exposed
      */
+    @UnsupportedAppUsage
     public int getAudioState(BluetoothDevice device) {
         if (VDBG) log("getAudioState");
         final IBluetoothHeadsetClient service = mService;

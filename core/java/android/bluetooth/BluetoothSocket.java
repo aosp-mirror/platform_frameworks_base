@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.annotation.UnsupportedAppUsage;
 import android.net.LocalSocket;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelUuid;
@@ -110,6 +111,7 @@ public final class BluetoothSocket implements Closeable {
     public static final int TYPE_L2CAP_LE = 4;
 
     /*package*/ static final int EBADFD = 77;
+    @UnsupportedAppUsage
     /*package*/ static final int EADDRINUSE = 98;
 
     /*package*/ static final int SEC_FLAG_ENCRYPT = 1;
@@ -129,10 +131,13 @@ public final class BluetoothSocket implements Closeable {
     private boolean mExcludeSdp = false; /* when true no SPP SDP record will be created */
     private boolean mAuthMitm = false;   /* when true Man-in-the-middle protection will be enabled*/
     private boolean mMin16DigitPin = false; /* Minimum 16 digit pin for sec mode 2 connections */
+    @UnsupportedAppUsage
     private ParcelFileDescriptor mPfd;
+    @UnsupportedAppUsage
     private LocalSocket mSocket;
     private InputStream mSocketIS;
     private OutputStream mSocketOS;
+    @UnsupportedAppUsage
     private int mPort;  /* RFCOMM channel or L2CAP psm */
     private int mFd;
     private String mServiceName;
@@ -517,6 +522,7 @@ public final class BluetoothSocket implements Closeable {
      *
      * @throws IOException if an i/o error occurs.
      */
+    @UnsupportedAppUsage
     /*package*/ void flush() throws IOException {
         if (mSocketOS == null) throw new IOException("flush is called on null OutputStream");
         if (VDBG) Log.d(TAG, "flush: " + mSocketOS);

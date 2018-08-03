@@ -27,6 +27,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.graphics.FontListParser;
 import android.graphics.fonts.FontVariationAxis;
@@ -94,6 +95,7 @@ public class Typeface {
     /** The NORMAL style of the default monospace typeface. */
     public static final Typeface MONOSPACE;
 
+    @UnsupportedAppUsage
     static Typeface[] sDefaults;
     private static final LongSparseArray<SparseArray<Typeface>> sTypefaceCache =
             new LongSparseArray<>(3);
@@ -105,6 +107,7 @@ public class Typeface {
     private static final LruCache<String, Typeface> sDynamicTypefaceCache = new LruCache<>(16);
 
     static Typeface sDefaultTypeface;
+    @UnsupportedAppUsage
     static Map<String, Typeface> sSystemFontMap;
     static FontFamily[] sFallbackFonts;
     private static final Object sLock = new Object();
@@ -114,6 +117,7 @@ public class Typeface {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public long native_instance;
 
     // Style
@@ -122,6 +126,7 @@ public class Typeface {
     public static final int ITALIC = 2;
     public static final int BOLD_ITALIC = 3;
 
+    @UnsupportedAppUsage
     private int mStyle = 0;
     private int mWeight = 0;
 
@@ -137,6 +142,7 @@ public class Typeface {
     private int[] mSupportedAxes;
     private static final int[] EMPTY_AXES = {};
 
+    @UnsupportedAppUsage
     private static void setDefault(Typeface t) {
         sDefaultTypeface = t;
         nativeSetDefault(t.native_instance);
@@ -840,6 +846,7 @@ public class Typeface {
      *
      * @param families array of font families
      */
+    @UnsupportedAppUsage
     private static Typeface createFromFamilies(FontFamily[] families) {
         long[] ptrArray = new long[families.length];
         for (int i = 0; i < families.length; i++) {
@@ -862,6 +869,7 @@ public class Typeface {
      *               upright font is used.
      * @param families array of font families
      */
+    @UnsupportedAppUsage
     private static Typeface createFromFamiliesWithDefault(FontFamily[] families,
                 int weight, int italic) {
         long[] ptrArray = new long[families.length + sFallbackFonts.length];
@@ -875,6 +883,7 @@ public class Typeface {
     }
 
     // don't allow clients to call this directly
+    @UnsupportedAppUsage
     private Typeface(long ni) {
         if (ni == 0) {
             throw new RuntimeException("native typeface cannot be made");
@@ -1065,10 +1074,12 @@ public class Typeface {
     // TODO: clean up: change List<FontVariationAxis> to FontVariationAxis[]
     private static native long nativeCreateFromTypefaceWithVariation(
             long native_instance, List<FontVariationAxis> axes);
+    @UnsupportedAppUsage
     private static native long nativeCreateWeightAlias(long native_instance, int weight);
     private static native void nativeUnref(long native_instance);
     private static native int  nativeGetStyle(long native_instance);
     private static native int  nativeGetWeight(long native_instance);
+    @UnsupportedAppUsage
     private static native long nativeCreateFromArray(long[] familyArray, int weight, int italic);
     private static native void nativeSetDefault(long native_instance);
     private static native int[] nativeGetSupportedAxes(long native_instance);

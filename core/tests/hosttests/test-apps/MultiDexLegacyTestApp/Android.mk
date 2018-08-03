@@ -38,7 +38,7 @@ LOCAL_MIN_SDK_VERSION := 8
 
 include $(BUILD_PACKAGE)
 
-$(mainDexList): $(full_classes_proguard_jar) | $(MAINDEXCLASSES)
+$(mainDexList): $(full_classes_pre_proguard_jar) | $(MAINDEXCLASSES)
 	$(hide) mkdir -p $(dir $@)
 	$(MAINDEXCLASSES) $< 1>$@
 	echo "com/android/multidexlegacytestapp/Test.class" >> $@
@@ -69,7 +69,7 @@ LOCAL_MIN_SDK_VERSION := 8
 
 include $(BUILD_PACKAGE)
 
-$(mainDexList2): $(full_classes_proguard_jar) | $(MAINDEXCLASSES)
+$(mainDexList2): $(full_classes_pre_proguard_jar) | $(MAINDEXCLASSES)
 	$(hide) mkdir -p $(dir $@)
 	$(MAINDEXCLASSES) $< 1>$@
 	echo "com/android/multidexlegacytestapp/Test.class" >> $@

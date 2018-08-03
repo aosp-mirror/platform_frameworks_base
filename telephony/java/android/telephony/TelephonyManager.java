@@ -1471,7 +1471,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getNeighboringCellInfo(mContext.getOpPackageName());
+            return telephony.getNeighboringCellInfo(mContext.getOpPackageName(),
+                    mContext.getApplicationInfo().targetSdkVersion);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -6554,7 +6555,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.canChangeDtmfToneLength();
+                return telephony.canChangeDtmfToneLength(mSubId, getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#canChangeDtmfToneLength", e);
@@ -6573,7 +6574,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.isWorldPhone();
+                return telephony.isWorldPhone(mSubId, getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isWorldPhone", e);

@@ -17,6 +17,7 @@
 package android.nfc;
 
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 
 /**
@@ -44,6 +45,7 @@ public final class NfcManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public NfcManager(Context context) {
         NfcAdapter adapter;
         context = context.getApplicationContext();

@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.UnsupportedAppUsage;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -32,6 +33,7 @@ import java.io.OutputStream;
  */
 public class Picture {
     private Canvas mRecordingCanvas;
+    @UnsupportedAppUsage
     private long mNativePicture;
 
     private static final int WORKING_STREAM_STORAGE = 16 * 1024;

@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * <p>This class contains the list of alpha compositing and blending modes
  * that can be passed to {@link PorterDuffXfermode}, a specialized implementation
@@ -364,6 +366,7 @@ public class PorterDuff {
         /**
          * @hide
          */
+        @UnsupportedAppUsage
         public final int nativeInt;
     }
 

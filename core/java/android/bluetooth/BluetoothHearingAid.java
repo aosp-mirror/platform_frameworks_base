@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -108,6 +109,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * receive.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @UnsupportedAppUsage
     public static final String ACTION_ACTIVE_DEVICE_CHANGED =
             "android.bluetooth.hearingaid.profile.action.ACTIVE_DEVICE_CHANGED";
 
@@ -401,6 +403,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean setActiveDevice(@Nullable BluetoothDevice device) {
         if (DBG) log("setActiveDevice(" + device + ")");
         try {
@@ -432,6 +435,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * @hide
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @UnsupportedAppUsage
     public List<BluetoothDevice> getActiveDevices() {
         if (VDBG) log("getActiveDevices()");
         try {

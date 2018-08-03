@@ -19,6 +19,7 @@ package android.graphics.pdf;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Matrix;
@@ -116,6 +117,7 @@ public final class PdfRenderer implements AutoCloseable {
 
     private ParcelFileDescriptor mInput;
 
+    @UnsupportedAppUsage
     private Page mCurrentPage;
 
     /** @hide */
@@ -242,6 +244,7 @@ public final class PdfRenderer implements AutoCloseable {
         }
     }
 
+    @UnsupportedAppUsage
     private void doClose() {
         if (mCurrentPage != null) {
             mCurrentPage.close();

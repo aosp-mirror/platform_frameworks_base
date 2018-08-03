@@ -25,6 +25,7 @@ import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.content.pm.ActivityInfo.Config;
@@ -301,6 +302,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     private static final boolean DBG_ANIMATION_VECTOR_DRAWABLE = false;
 
     /** Local, mutable animator set. */
+    @UnsupportedAppUsage
     private VectorDrawableAnimator mAnimatorSet;
 
     /**
@@ -309,6 +311,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
      */
     private Resources mRes;
 
+    @UnsupportedAppUsage
     private AnimatedVectorDrawableState mAnimatedVectorState;
 
     /** The animator set that is parsed from the xml. */
@@ -638,6 +641,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
      * Force to animate on UI thread.
      * @hide
      */
+    @UnsupportedAppUsage
     public void forceAnimationOnUI() {
         if (mAnimatorSet instanceof VectorDrawableAnimatorRT) {
             VectorDrawableAnimatorRT animator = (VectorDrawableAnimatorRT) mAnimatorSet;
@@ -1768,6 +1772,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         }
 
         // onFinished: should be called from native
+        @UnsupportedAppUsage
         private static void callOnFinished(VectorDrawableAnimatorRT set, int id) {
             set.onAnimationEnd(id);
         }
