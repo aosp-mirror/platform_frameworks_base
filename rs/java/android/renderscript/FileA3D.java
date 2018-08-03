@@ -19,6 +19,7 @@ package android.renderscript;
 import java.io.File;
 import java.io.InputStream;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 
@@ -53,6 +54,7 @@ public class FileA3D extends BaseObj {
         * @deprecated in API 16
         * RenderScript Mesh object
         **/
+        @UnsupportedAppUsage
         MESH (1);
 
         int mID;
@@ -100,6 +102,7 @@ public class FileA3D extends BaseObj {
         * @return type of a renderscript object the index entry
         *         describes
         */
+        @UnsupportedAppUsage
         public EntryType getEntryType() {
             return mEntryType;
         }
@@ -109,6 +112,7 @@ public class FileA3D extends BaseObj {
         * Used to load the object described by the index entry
         * @return base renderscript object described by the entry
         */
+        @UnsupportedAppUsage
         public BaseObj getObject() {
             mRS.validate();
             BaseObj obj = internalCreate(mRS, this);
@@ -212,6 +216,7 @@ public class FileA3D extends BaseObj {
     *
     * @return entry in the a3d file described by the index
     */
+    @UnsupportedAppUsage
     public IndexEntry getIndexEntry(int index) {
         if(getIndexEntryCount() == 0 || index < 0 || index >= mFileEntries.length) {
             return null;
@@ -284,6 +289,7 @@ public class FileA3D extends BaseObj {
     *
     * @return a3d file containing renderscript objects
     */
+    @UnsupportedAppUsage
     static public FileA3D createFromResource(RenderScript rs, Resources res, int id) {
 
         rs.validate();
