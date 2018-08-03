@@ -55,7 +55,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private Scroller mScroller;
 
     private AnimatorSet mBounceAnimatorSet;
-    private int mAnimatingToPage = -1;
     private float mLastExpansion;
 
     public PagedTileLayout(Context context, AttributeSet attrs) {
@@ -95,40 +94,16 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        // Suppress all touch event during reveal animation.
-        if (mAnimatingToPage != -1) {
-            return true;
-        }
-        return super.onInterceptTouchEvent(ev);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        // Suppress all touch event during reveal animation.
-        if (mAnimatingToPage != -1) {
-            return true;
-        }
-        return super.onTouchEvent(ev);
-    }
-
-    @Override
     public void computeScroll() {
         if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
-            scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
-            float pageFraction = (float) getScrollX() / getWidth();
-            int position = (int) pageFraction;
-            float positionOffset = pageFraction - position;
-            mOnPageChangeListener.onPageScrolled(position, positionOffset, getScrollX());
+            fakeDragBy(getScrollX() - mScroller.getCurrX());
             // Keep on drawing until the animation has finished.
             postInvalidateOnAnimation();
             return;
-        }
-        if (mAnimatingToPage != -1) {
-            setCurrentItem(mAnimatingToPage, true);
+        } else if (isFakeDragging()) {
+            endFakeDrag();
             mBounceAnimatorSet.start();
             setOffscreenPageLimit(1);
-            mAnimatingToPage = -1;
         }
         super.computeScroll();
     }
@@ -287,7 +262,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     public void startTileReveal(Set<String> tileSpecs, final Runnable postAnimation) {
-        if (tileSpecs.isEmpty() || mPages.size() < 2 || getScrollX() != 0) {
+        if (tileSpecs.isEmpty() || mPages.size() < 2 || getScrollX() != 0 || !beginFakeDrag()) {
             // Do not start the reveal animation unless there are tiles to animate, multiple
             // TilePages available and the user has not already started dragging.
             return;
@@ -305,6 +280,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         if (bounceAnims.isEmpty()) {
             // All tileSpecs are on the first page. Nothing to do.
             // TODO: potentially show a bounce animation for first page QS tiles
+            endFakeDrag();
             return;
         }
 
@@ -317,10 +293,10 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                 postAnimation.run();
             }
         });
-        mAnimatingToPage = lastPageNumber;
-        setOffscreenPageLimit(mAnimatingToPage); // Ensure the page to reveal has been inflated.
-        mScroller.startScroll(getScrollX(), getScrollY(), getWidth() * mAnimatingToPage, 0,
-                REVEAL_SCROLL_DURATION_MILLIS);
+        setOffscreenPageLimit(lastPageNumber); // Ensure the page to reveal has been inflated.
+        int dx = getWidth() * lastPageNumber;
+        mScroller.startScroll(getScrollX(), getScrollY(), isLayoutRtl() ? -dx  : dx, 0,
+            REVEAL_SCROLL_DURATION_MILLIS);
         postInvalidateOnAnimation();
     }
 
