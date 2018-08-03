@@ -71,11 +71,14 @@ const int FIELD_ID_END_BUCKET_ELAPSED_MILLIS = 8;
 GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& metric,
                                          const int conditionIndex,
                                          const sp<ConditionWizard>& wizard, const int pullTagId,
+                                         const int triggerAtomId, const int atomId,
                                          const int64_t timeBaseNs, const int64_t startTimeNs,
                                          const sp<StatsPullerManager>& pullerManager)
     : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, wizard),
       mPullerManager(pullerManager),
       mPullTagId(pullTagId),
+      mTriggerAtomId(triggerAtomId),
+      mAtomId(atomId),
       mIsPulled(pullTagId != -1),
       mMinBucketSizeNs(metric.min_bucket_size_nanos()),
       mDimensionSoftLimit(StatsdStats::kAtomDimensionKeySizeLimitMap.find(pullTagId) !=
@@ -272,12 +275,12 @@ void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                     uint64_t atomsToken =
                         protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
                                            FIELD_ID_ATOM);
-                    writeFieldValueTreeToStream(mTagId, *(atom.mFields), protoOutput);
+                    writeFieldValueTreeToStream(mAtomId, *(atom.mFields), protoOutput);
                     protoOutput->end(atomsToken);
                 }
                 const bool truncateTimestamp =
                         android::util::AtomsInfo::kNotTruncatingTimestampAtomWhiteList.find(
-                                mTagId) ==
+                                mAtomId) ==
                         android::util::AtomsInfo::kNotTruncatingTimestampAtomWhiteList.end();
                 for (const auto& atom : bucket.mGaugeAtoms) {
                     const int64_t elapsedTimestampNs =  truncateTimestamp ?
@@ -410,13 +413,17 @@ void GaugeMetricProducer::onMatchedLogEventInternalLocked(
         return;
     }
     int64_t eventTimeNs = event.GetElapsedTimestampNs();
-    mTagId = event.GetTagId();
     if (eventTimeNs < mCurrentBucketStartTimeNs) {
         VLOG("Gauge Skip event due to late arrival: %lld vs %lld", (long long)eventTimeNs,
              (long long)mCurrentBucketStartTimeNs);
         return;
     }
     flushIfNeededLocked(eventTimeNs);
+
+    if (mTriggerAtomId == event.GetTagId()) {
+        pullLocked(eventTimeNs);
+        return;
+    }
 
     // When gauge metric wants to randomly sample the output atom, we just simply use the first
     // gauge in the given bucket.
