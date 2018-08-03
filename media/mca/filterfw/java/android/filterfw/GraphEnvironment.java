@@ -17,6 +17,7 @@
 
 package android.filterfw;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.filterfw.core.AsyncRunner;
 import android.filterfw.core.FilterGraph;
@@ -83,6 +84,7 @@ public class GraphEnvironment extends MffEnvironment {
     /**
      * Create a new GraphEnvironment with default components.
      */
+    @UnsupportedAppUsage
     public GraphEnvironment() {
         super(null);
     }
@@ -128,6 +130,7 @@ public class GraphEnvironment extends MffEnvironment {
      * @param resourceId    The ID of the graph resource to load.
      * @return              A unique ID for the graph.
      */
+    @UnsupportedAppUsage
     public int loadGraph(Context context, int resourceId) {
         // Read the file into a graph
         FilterGraph graph = null;
@@ -180,6 +183,7 @@ public class GraphEnvironment extends MffEnvironment {
                             MODE_SYNCHRONOUS or MODE_ASYNCHRONOUS.
      * @return              A GraphRunner instance for this graph.
      */
+    @UnsupportedAppUsage
     public GraphRunner getRunner(int graphId, int executionMode) {
         switch (executionMode) {
             case MODE_ASYNCHRONOUS:
