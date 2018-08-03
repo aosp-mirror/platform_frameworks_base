@@ -76,7 +76,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CO
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_BAR_EXPANDED;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
@@ -128,7 +128,6 @@ import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_UNCOVERED;
-import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 import static com.android.server.wm.WindowManagerPolicyProto.FOCUSED_APP_TOKEN;
@@ -223,7 +222,6 @@ import android.service.vr.IPersistentVrStateCallbacks;
 import android.speech.RecognizerIntent;
 import android.telecom.TelecomManager;
 import android.util.ArraySet;
-import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.LongSparseArray;
@@ -269,7 +267,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
-import com.android.internal.policy.KeyguardDismissCallback;
 import com.android.internal.policy.PhoneWindow;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
@@ -4331,8 +4328,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (!isKeyguardShowing) {
                 navTranslucent &= areTranslucentBarsAllowed();
             }
-            boolean statusBarExpandedNotKeyguard = !isKeyguardShowing && mStatusBar != null
-                    && (mStatusBar.getAttrs().privateFlags & PRIVATE_FLAG_STATUS_BAR_EXPANDED) != 0;
+            boolean statusBarForcesShowingNavigation = !isKeyguardShowing && mStatusBar != null
+                    && (mStatusBar.getAttrs().privateFlags
+                            & PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION) != 0;
 
             // When the navigation bar isn't visible, we put up a fake input window to catch all
             // touch events. This way we can detect when the user presses anywhere to bring back the
@@ -4358,7 +4356,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             navVisible |= !canHideNavigationBar();
 
             boolean updateSysUiVisibility = layoutNavigationBar(displayFrames, uiMode, navVisible,
-                    navTranslucent, navAllowedHidden, statusBarExpandedNotKeyguard);
+                    navTranslucent, navAllowedHidden, statusBarForcesShowingNavigation);
             if (DEBUG_LAYOUT) Slog.i(TAG, "mDock rect:" + displayFrames.mDock);
             updateSysUiVisibility |= layoutStatusBar(displayFrames, sysui, isKeyguardShowing);
             if (updateSysUiVisibility) {
@@ -4511,7 +4509,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private boolean layoutNavigationBar(DisplayFrames displayFrames, int uiMode, boolean navVisible,
             boolean navTranslucent, boolean navAllowedHidden,
-            boolean statusBarExpandedNotKeyguard) {
+            boolean statusBarForcesShowingNavigation) {
         if (mNavigationBar == null) {
             return false;
         }
@@ -4545,7 +4543,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         = displayFrames.mRestrictedOverscan.bottom = top;
             } else {
                 // We currently want to hide the navigation UI - unless we expanded the status bar.
-                mNavigationBarController.setBarShowingLw(statusBarExpandedNotKeyguard);
+                mNavigationBarController.setBarShowingLw(statusBarForcesShowingNavigation);
             }
             if (navVisible && !navTranslucent && !navAllowedHidden
                     && !mNavigationBar.isAnimatingLw()
@@ -4568,7 +4566,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         = displayFrames.mRestrictedOverscan.right = left;
             } else {
                 // We currently want to hide the navigation UI - unless we expanded the status bar.
-                mNavigationBarController.setBarShowingLw(statusBarExpandedNotKeyguard);
+                mNavigationBarController.setBarShowingLw(statusBarForcesShowingNavigation);
             }
             if (navVisible && !navTranslucent && !navAllowedHidden
                     && !mNavigationBar.isAnimatingLw()
@@ -4591,7 +4589,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         displayFrames.mRestrictedOverscan.left = right;
             } else {
                 // We currently want to hide the navigation UI - unless we expanded the status bar.
-                mNavigationBarController.setBarShowingLw(statusBarExpandedNotKeyguard);
+                mNavigationBarController.setBarShowingLw(statusBarForcesShowingNavigation);
             }
             if (navVisible && !navTranslucent && !navAllowedHidden
                     && !mNavigationBar.isAnimatingLw()
@@ -5401,19 +5399,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mStatusBarController.setShowTransparent(true /* transparent */);
             }
 
-            boolean statusBarExpanded =
-                    (mStatusBar.getAttrs().privateFlags & PRIVATE_FLAG_STATUS_BAR_EXPANDED) != 0;
+            boolean statusBarForcesShowingNavigation
+                    = (mStatusBar.getAttrs().privateFlags
+                            & PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION) != 0;
             boolean topAppHidesStatusBar = topAppHidesStatusBar();
             if (mForceStatusBar || mForceStatusBarFromKeyguard || mForceStatusBarTransparent
-                    || statusBarExpanded) {
+                    || statusBarForcesShowingNavigation) {
                 if (DEBUG_LAYOUT) Slog.v(TAG, "Showing status bar: forced");
                 if (mStatusBarController.setBarShowingLw(true)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT;
                 }
                 // Maintain fullscreen layout until incoming animation is complete.
                 topIsFullscreen = mTopIsFullscreen && mStatusBar.isAnimatingLw();
-                // Transient status bar on the lockscreen is not allowed
-                if ((mForceStatusBarFromKeyguard || statusBarExpanded)
+                // Transient status bar is not allowed if status bar is on lockscreen or status bar
+                // is expecting the navigation keys from the user.
+                if ((mForceStatusBarFromKeyguard || statusBarForcesShowingNavigation)
                         && mStatusBarController.isTransientShowing()) {
                     mStatusBarController.updateVisibilityLw(false /*transientAllowed*/,
                             mLastSystemUiFlags, mLastSystemUiFlags);
