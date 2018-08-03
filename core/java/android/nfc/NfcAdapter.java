@@ -20,6 +20,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.OnActivityPausedListener;
@@ -325,6 +326,7 @@ public final class NfcAdapter {
     // Final after first constructor, except for
     // attemptDeadServiceRecovery() when NFC crashes - we accept a best effort
     // recovery
+    @UnsupportedAppUsage
     static INfcAdapter sService;
     static INfcTag sTagService;
     static INfcCardEmulation sCardEmulationService;
@@ -490,6 +492,7 @@ public final class NfcAdapter {
      * or throws if NFC is not available.
      * @hide
      */
+    @UnsupportedAppUsage
     public static synchronized NfcAdapter getNfcAdapter(Context context) {
         if (!sIsInitialized) {
             sHasNfcFeature = hasNfcFeature();
@@ -593,6 +596,7 @@ public final class NfcAdapter {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static NfcAdapter getDefaultAdapter() {
         // introduced in API version 9 (GB 2.3)
         // deprecated in API version 10 (GB 2.3.3)
@@ -615,6 +619,7 @@ public final class NfcAdapter {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public Context getContext() {
         return mContext;
     }
@@ -623,6 +628,7 @@ public final class NfcAdapter {
      * Returns the binder interface to the service.
      * @hide
      */
+    @UnsupportedAppUsage
     public INfcAdapter getService() {
         isEnabled();  // NOP call to recover sService if it is stale
         return sService;
@@ -676,6 +682,7 @@ public final class NfcAdapter {
      * NFC service dead - attempt best effort recovery
      * @hide
      */
+    @UnsupportedAppUsage
     public void attemptDeadServiceRecovery(Exception e) {
         Log.e(TAG, "NFC service dead - attempting to recover", e);
         INfcAdapter service = getServiceInterface();
@@ -746,6 +753,7 @@ public final class NfcAdapter {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getAdapterState() {
         try {
             return sService.getState();
@@ -1227,6 +1235,7 @@ public final class NfcAdapter {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setNdefPushMessageCallback(CreateNdefMessageCallback callback, Activity activity,
             int flags) {
         if (activity == null) {
@@ -1862,6 +1871,7 @@ public final class NfcAdapter {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public INfcAdapterExtras getNfcAdapterExtrasInterface() {
         if (mContext == null) {
             throw new UnsupportedOperationException("You need a context on NfcAdapter to use the "
