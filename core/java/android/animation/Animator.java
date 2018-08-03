@@ -17,6 +17,7 @@
 package android.animation;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ConstantState;
 
@@ -460,6 +461,7 @@ public abstract class Animator implements Cloneable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void reverse() {
         throw new IllegalStateException("Reverse is not supported");
     }
