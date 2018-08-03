@@ -722,6 +722,19 @@ public class MagnificationController implements Handler.Callback {
         }
     }
 
+    /**
+     * Resets magnification if last magnifying service is disabled.
+     *
+     * @param connectionId the connection ID be disabled.
+     * @return {@code true} on success, {@code false} on failure
+     */
+    boolean resetIfNeeded(int connectionId) {
+        if (mIdOfLastServiceToMagnify == connectionId) {
+            return resetIfNeeded(true /*animate*/);
+        }
+        return false;
+    }
+
     void setForceShowMagnifiableBounds(boolean show) {
         if (mRegistered) {
             mWindowManager.setForceShowMagnifiableBounds(show);

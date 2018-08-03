@@ -111,6 +111,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         UserState userState = mUserStateWeakReference.get();
         if (userState == null) return;
         userState.removeServiceLocked(this);
+        mSystemSupport.getMagnificationController().resetIfNeeded(mId);
         resetLocked();
     }
 
@@ -257,9 +258,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             if (userState != null) {
                 userState.serviceDisconnectedLocked(this);
             }
-            if (mId == mSystemSupport.getMagnificationController().getIdOfLastServiceToMagnify()) {
-                mSystemSupport.getMagnificationController().resetIfNeeded(true);
-            }
+            mSystemSupport.getMagnificationController().resetIfNeeded(mId);
             mSystemSupport.onClientChange(false);
         }
     }
