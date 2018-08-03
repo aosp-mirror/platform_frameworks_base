@@ -3451,7 +3451,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         stack.moveToFront(reason, task);
         // Report top activity change to tracking services and WM
         if (r == getTopResumedActivity()) {
-            // TODO(b/111541062): Support tracking multiple resumed activities
+            // TODO(b/111361570): Support multiple focused apps in WM
             mService.setResumedActivityUncheckLocked(r, reason);
         }
         return true;
