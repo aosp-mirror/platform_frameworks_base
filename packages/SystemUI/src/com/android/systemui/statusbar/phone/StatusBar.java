@@ -56,7 +56,6 @@ import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.TaskStackBuilder;
 import android.app.UiModeManager;
-import android.app.WallpaperColors;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
@@ -67,8 +66,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
-import android.content.om.IOverlayManager;
-import android.content.om.OverlayInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -1414,7 +1411,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onPerformRemoveNotification(StatusBarNotification n) {
         if (mStackScroller.hasPulsingNotifications() &&
-                    !mHeadsUpManager.hasHeadsUpNotifications()) {
+                    !mHeadsUpManager.hasNotifications()) {
             // We were showing a pulse for a notification, but no notifications are pulsing anymore.
             // Finish the pulse.
             mDozeScrimController.pulseOutNow();
@@ -4835,7 +4832,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 @Override
                 public void onPulseStarted() {
                     callback.onPulseStarted();
-                    if (mHeadsUpManager.hasHeadsUpNotifications()) {
+                    if (mHeadsUpManager.hasNotifications()) {
                         // Only pulse the stack scroller if there's actually something to show.
                         // Otherwise just show the always-on screen.
                         setPulsing(true);
@@ -5108,7 +5105,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         final boolean wasOccluded = mIsOccluded;
         dismissKeyguardThenExecute(() -> {
             // TODO: Some of this code may be able to move to NotificationEntryManager.
-            if (mHeadsUpManager != null && mHeadsUpManager.isHeadsUp(notificationKey)) {
+            if (mHeadsUpManager != null && mHeadsUpManager.contains(notificationKey)) {
                 // Release the HUN notification to the shade.
 
                 if (isPresenterFullyCollapsed()) {
@@ -5117,7 +5114,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 //
                 // In most cases, when FLAG_AUTO_CANCEL is set, the notification will
                 // become canceled shortly by NoMan, but we can't assume that.
-                mHeadsUpManager.releaseImmediately(notificationKey);
+                mHeadsUpManager.removeNotification(sbn.getKey(),
+                        true /* releaseImmediately */);
             }
             StatusBarNotification parentToCancel = null;
             if (shouldAutoCancel(sbn) && mGroupManager.isOnlyChildInGroup(sbn)) {

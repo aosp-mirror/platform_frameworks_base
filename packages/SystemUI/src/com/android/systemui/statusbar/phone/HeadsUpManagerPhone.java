@@ -31,7 +31,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.ScreenDecorations;
@@ -55,7 +54,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
        ViewTreeObserver.OnComputeInternalInsetsListener, VisualStabilityManager.Callback,
        OnHeadsUpChangedListener, ConfigurationController.ConfigurationListener {
     private static final String TAG = "HeadsUpManagerPhone";
-    private static final boolean DEBUG = false;
 
     private final View mStatusBarWindowView;
     private final NotificationGroupManager mGroupManager;
@@ -114,7 +112,9 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         addListener(new OnHeadsUpChangedListener() {
             @Override
             public void onHeadsUpPinnedModeChanged(boolean hasPinnedNotification) {
-                if (DEBUG) Log.w(TAG, "onHeadsUpPinnedModeChanged");
+                if (Log.isLoggable(TAG, Log.WARN)) {
+                    Log.w(TAG, "onHeadsUpPinnedModeChanged");
+                }
                 updateTouchableRegionListener();
             }
         });
@@ -153,7 +153,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
      */
     public boolean shouldSwallowClick(@NonNull String key) {
         HeadsUpManager.HeadsUpEntry entry = getHeadsUpEntry(key);
-        return entry != null && mClock.currentTimeMillis() < entry.postTime;
+        return entry != null && mClock.currentTimeMillis() < entry.mPostTime;
     }
 
     public void onExpandingFinished() {
@@ -162,9 +162,9 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             mReleaseOnExpandFinish = false;
         } else {
             for (NotificationData.Entry entry : mEntriesToRemoveAfterExpand) {
-                if (isHeadsUp(entry.key)) {
+                if (contains(entry.key)) {
                     // Maybe the heads-up was removed already
-                    removeHeadsUpEntry(entry);
+                    removeAlertEntry(entry.key);
                 }
             }
         }
@@ -235,25 +235,12 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         }
     }
 
-    @VisibleForTesting
-    public void removeMinimumDisplayTimeForTesting() {
-        mMinimumDisplayTime = 0;
-        mHeadsUpNotificationDecay = 0;
-        mTouchAcceptanceDelay = 0;
-    }
-
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //  HeadsUpManager public methods overrides:
 
     @Override
     public boolean isTrackingHeadsUp() {
         return mTrackingHeadsUp;
-    }
-
-    @Override
-    public void snooze() {
-        super.snooze();
-        mReleaseOnExpandFinish = true;
     }
 
     /**
@@ -263,14 +250,15 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
      * for a bit since it wasn't shown long enough
      */
     @Override
-    public boolean removeNotification(@NonNull String key, boolean ignoreEarliestRemovalTime) {
-        if (wasShownLongEnough(key) || ignoreEarliestRemovalTime) {
-            return super.removeNotification(key, ignoreEarliestRemovalTime);
-        } else {
-            HeadsUpEntryPhone entry = getHeadsUpEntryPhone(key);
-            entry.removeAsSoonAsPossible();
-            return false;
-        }
+    public boolean removeNotification(@NonNull String key, boolean releaseImmediately) {
+        return super.removeNotification(key, canRemoveImmediately(key)
+                || releaseImmediately);
+    }
+
+    @Override
+    public void snooze() {
+        super.snooze();
+        mReleaseOnExpandFinish = true;
     }
 
     public void addSwipedOutNotification(@NonNull String key) {
@@ -354,9 +342,9 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     public void onReorderingAllowed() {
         mBar.getNotificationScrollLayout().setHeadsUpGoingAwayAnimationsAllowed(false);
         for (NotificationData.Entry entry : mEntriesToRemoveWhenReorderingAllowed) {
-            if (isHeadsUp(entry.key)) {
+            if (contains(entry.key)) {
                 // Maybe the heads-up was removed already
-                removeHeadsUpEntry(entry);
+                removeAlertEntry(entry.key);
             }
         }
         mEntriesToRemoveWhenReorderingAllowed.clear();
@@ -367,14 +355,14 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     //  HeadsUpManager utility (protected) methods overrides:
 
     @Override
-    protected HeadsUpEntry createHeadsUpEntry() {
+    protected HeadsUpEntry createAlertEntry() {
         return mEntryPool.acquire();
     }
 
     @Override
-    protected void releaseHeadsUpEntry(HeadsUpEntry entry) {
-        entry.reset();
-        mEntryPool.release((HeadsUpEntryPhone) entry);
+    protected void onAlertEntryRemoved(AlertEntry alertEntry) {
+        super.onAlertEntryRemoved(alertEntry);
+        mEntryPool.release((HeadsUpEntryPhone) alertEntry);
     }
 
     @Override
@@ -394,7 +382,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
     @Nullable
     private HeadsUpEntryPhone getHeadsUpEntryPhone(@NonNull String key) {
-        return (HeadsUpEntryPhone) getHeadsUpEntry(key);
+        return (HeadsUpEntryPhone) mAlertEntries.get(key);
     }
 
     @Nullable
@@ -402,7 +390,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         return (HeadsUpEntryPhone) getTopHeadsUpEntry();
     }
 
-    private boolean wasShownLongEnough(@NonNull String key) {
+    private boolean canRemoveImmediately(@NonNull String key) {
         if (mSwipedOutKeys.contains(key)) {
             // We always instantly dismiss views being manually swiped out.
             mSwipedOutKeys.remove(key);
@@ -461,33 +449,29 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
                     mVisualStabilityManager.addReorderingAllowedCallback(
                             HeadsUpManagerPhone.this);
                 } else if (!mTrackingHeadsUp) {
-                    removeHeadsUpEntry(entry);
+                    removeAlertEntry(entry.key);
                 } else {
                     mEntriesToRemoveAfterExpand.add(entry);
                 }
             };
 
-            super.setEntry(entry, removeHeadsUpRunnable);
-        }
-
-        public boolean wasShownLongEnough() {
-            return earliestRemovaltime < mClock.currentTimeMillis();
+            setEntry(entry, removeHeadsUpRunnable);
         }
 
         @Override
         public void updateEntry(boolean updatePostTime) {
             super.updateEntry(updatePostTime);
 
-            if (mEntriesToRemoveAfterExpand.contains(entry)) {
-                mEntriesToRemoveAfterExpand.remove(entry);
+            if (mEntriesToRemoveAfterExpand.contains(mEntry)) {
+                mEntriesToRemoveAfterExpand.remove(mEntry);
             }
-            if (mEntriesToRemoveWhenReorderingAllowed.contains(entry)) {
-                mEntriesToRemoveWhenReorderingAllowed.remove(entry);
+            if (mEntriesToRemoveWhenReorderingAllowed.contains(mEntry)) {
+                mEntriesToRemoveWhenReorderingAllowed.remove(mEntry);
             }
         }
 
         @Override
-        public void expanded(boolean expanded) {
+        public void setExpanded(boolean expanded) {
             if (this.expanded == expanded) {
                 return;
             }
