@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -358,6 +359,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * @param deliveredIntent intent issued when message is delivered
      * @return true if the message is enqueued, false on error
      */
+    @UnsupportedAppUsage
     public boolean sendMessage(BluetoothDevice device, Uri[] contacts, String message,
             PendingIntent sentIntent, PendingIntent deliveredIntent) {
         if (DBG) Log.d(TAG, "sendMessage(" + device + ", " + contacts + ", " + message);
