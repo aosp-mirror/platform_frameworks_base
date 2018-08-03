@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.ParcelUuid;
 
 import java.nio.ByteBuffer;
@@ -37,16 +38,20 @@ public final class BluetoothUuid {
      * The following 128 bit values are calculated as:
      *  uuid * 2^96 + BASE_UUID
      */
+    @UnsupportedAppUsage
     public static final ParcelUuid AudioSink =
             ParcelUuid.fromString("0000110B-0000-1000-8000-00805F9B34FB");
     public static final ParcelUuid AudioSource =
             ParcelUuid.fromString("0000110A-0000-1000-8000-00805F9B34FB");
+    @UnsupportedAppUsage
     public static final ParcelUuid AdvAudioDist =
             ParcelUuid.fromString("0000110D-0000-1000-8000-00805F9B34FB");
+    @UnsupportedAppUsage
     public static final ParcelUuid HSP =
             ParcelUuid.fromString("00001108-0000-1000-8000-00805F9B34FB");
     public static final ParcelUuid HSP_AG =
             ParcelUuid.fromString("00001112-0000-1000-8000-00805F9B34FB");
+    @UnsupportedAppUsage
     public static final ParcelUuid Handsfree =
             ParcelUuid.fromString("0000111E-0000-1000-8000-00805F9B34FB");
     public static final ParcelUuid Handsfree_AG =
@@ -55,20 +60,24 @@ public final class BluetoothUuid {
             ParcelUuid.fromString("0000110E-0000-1000-8000-00805F9B34FB");
     public static final ParcelUuid AvrcpTarget =
             ParcelUuid.fromString("0000110C-0000-1000-8000-00805F9B34FB");
+    @UnsupportedAppUsage
     public static final ParcelUuid ObexObjectPush =
             ParcelUuid.fromString("00001105-0000-1000-8000-00805f9b34fb");
     public static final ParcelUuid Hid =
             ParcelUuid.fromString("00001124-0000-1000-8000-00805f9b34fb");
+    @UnsupportedAppUsage
     public static final ParcelUuid Hogp =
             ParcelUuid.fromString("00001812-0000-1000-8000-00805f9b34fb");
     public static final ParcelUuid PANU =
             ParcelUuid.fromString("00001115-0000-1000-8000-00805F9B34FB");
+    @UnsupportedAppUsage
     public static final ParcelUuid NAP =
             ParcelUuid.fromString("00001116-0000-1000-8000-00805F9B34FB");
     public static final ParcelUuid BNEP =
             ParcelUuid.fromString("0000000f-0000-1000-8000-00805F9B34FB");
     public static final ParcelUuid PBAP_PCE =
             ParcelUuid.fromString("0000112e-0000-1000-8000-00805F9B34FB");
+    @UnsupportedAppUsage
     public static final ParcelUuid PBAP_PSE =
             ParcelUuid.fromString("0000112f-0000-1000-8000-00805F9B34FB");
     public static final ParcelUuid MAP =
@@ -92,10 +101,12 @@ public final class BluetoothUuid {
     /** Length of bytes for 128 bit UUID */
     public static final int UUID_BYTES_128_BIT = 16;
 
+    @UnsupportedAppUsage
     public static final ParcelUuid[] RESERVED_UUIDS = {
             AudioSink, AudioSource, AdvAudioDist, HSP, Handsfree, AvrcpController, AvrcpTarget,
             ObexObjectPush, PANU, NAP, MAP, MNS, MAS, SAP};
 
+    @UnsupportedAppUsage
     public static boolean isAudioSource(ParcelUuid uuid) {
         return uuid.equals(AudioSource);
     }
@@ -104,6 +115,7 @@ public final class BluetoothUuid {
         return uuid.equals(AudioSink);
     }
 
+    @UnsupportedAppUsage
     public static boolean isAdvAudioDist(ParcelUuid uuid) {
         return uuid.equals(AdvAudioDist);
     }
@@ -120,6 +132,7 @@ public final class BluetoothUuid {
         return uuid.equals(AvrcpController);
     }
 
+    @UnsupportedAppUsage
     public static boolean isAvrcpTarget(ParcelUuid uuid) {
         return uuid.equals(AvrcpTarget);
     }
@@ -162,6 +175,7 @@ public final class BluetoothUuid {
      * @param uuidArray - Array of ParcelUuids
      * @param uuid
      */
+    @UnsupportedAppUsage
     public static boolean isUuidPresent(ParcelUuid[] uuidArray, ParcelUuid uuid) {
         if ((uuidArray == null || uuidArray.length == 0) && uuid == null) {
             return true;
@@ -183,6 +197,7 @@ public final class BluetoothUuid {
      * @param uuidA - List of ParcelUuids
      * @param uuidB - List of ParcelUuids
      */
+    @UnsupportedAppUsage
     public static boolean containsAnyUuid(ParcelUuid[] uuidA, ParcelUuid[] uuidB) {
         if (uuidA == null && uuidB == null) return true;
 
@@ -330,6 +345,7 @@ public final class BluetoothUuid {
      * @param parcelUuid
      * @return true if the parcelUuid can be converted to 16 bit uuid, false otherwise.
      */
+    @UnsupportedAppUsage
     public static boolean is16BitUuid(ParcelUuid parcelUuid) {
         UUID uuid = parcelUuid.getUuid();
         if (uuid.getLeastSignificantBits() != BASE_UUID.getUuid().getLeastSignificantBits()) {
@@ -345,6 +361,7 @@ public final class BluetoothUuid {
      * @param parcelUuid
      * @return true if the parcelUuid can be converted to 32 bit uuid, false otherwise.
      */
+    @UnsupportedAppUsage
     public static boolean is32BitUuid(ParcelUuid parcelUuid) {
         UUID uuid = parcelUuid.getUuid();
         if (uuid.getLeastSignificantBits() != BASE_UUID.getUuid().getLeastSignificantBits()) {

@@ -18,6 +18,7 @@ package android.bluetooth;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -129,6 +130,7 @@ public final class BluetoothPan implements BluetoothProfile {
      * Create a BluetoothPan proxy object for interacting with the local
      * Bluetooth Service which handles the Pan profile
      */
+    @UnsupportedAppUsage
     /*package*/ BluetoothPan(Context context, ServiceListener l) {
         mContext = context;
         mServiceListener = l;
@@ -142,6 +144,7 @@ public final class BluetoothPan implements BluetoothProfile {
         doBind();
     }
 
+    @UnsupportedAppUsage
     boolean doBind() {
         Intent intent = new Intent(IBluetoothPan.class.getName());
         ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
@@ -154,6 +157,7 @@ public final class BluetoothPan implements BluetoothProfile {
         return true;
     }
 
+    @UnsupportedAppUsage
     /*package*/ void close() {
         if (VDBG) log("close()");
 
@@ -236,6 +240,7 @@ public final class BluetoothPan implements BluetoothProfile {
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
         final IBluetoothPan service = mPanService;
@@ -276,6 +281,7 @@ public final class BluetoothPan implements BluetoothProfile {
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
         final IBluetoothPan service = mPanService;
@@ -348,6 +354,7 @@ public final class BluetoothPan implements BluetoothProfile {
         return BluetoothProfile.STATE_DISCONNECTED;
     }
 
+    @UnsupportedAppUsage
     public void setBluetoothTethering(boolean value) {
         if (DBG) log("setBluetoothTethering(" + value + ")");
         final IBluetoothPan service = mPanService;
@@ -360,6 +367,7 @@ public final class BluetoothPan implements BluetoothProfile {
         }
     }
 
+    @UnsupportedAppUsage
     public boolean isTetheringOn() {
         if (VDBG) log("isTetheringOn()");
         final IBluetoothPan service = mPanService;
@@ -392,14 +400,17 @@ public final class BluetoothPan implements BluetoothProfile {
         }
     };
 
+    @UnsupportedAppUsage
     private boolean isEnabled() {
         return mAdapter.getState() == BluetoothAdapter.STATE_ON;
     }
 
+    @UnsupportedAppUsage
     private static boolean isValidDevice(BluetoothDevice device) {
         return device != null && BluetoothAdapter.checkBluetoothAddress(device.getAddress());
     }
 
+    @UnsupportedAppUsage
     private static void log(String msg) {
         Log.d(TAG, msg);
     }

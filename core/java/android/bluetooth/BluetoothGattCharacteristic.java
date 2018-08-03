@@ -15,6 +15,7 @@
  */
 package android.bluetooth;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
@@ -182,6 +183,7 @@ public class BluetoothGattCharacteristic implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     protected int mInstance;
 
     /**
@@ -218,6 +220,7 @@ public class BluetoothGattCharacteristic implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     protected BluetoothGattService mService;
 
     /**
@@ -381,6 +384,7 @@ public class BluetoothGattCharacteristic implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     /*package*/ void setService(BluetoothGattService service) {
         mService = service;
     }
@@ -464,6 +468,7 @@ public class BluetoothGattCharacteristic implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setKeySize(int keySize) {
         mKeySize = keySize;
     }
