@@ -228,16 +228,16 @@ public class TileUtils {
 
         HashMap<String, DashboardCategory> categoryMap = new HashMap<>();
         for (Tile tile : tiles) {
-            DashboardCategory category = categoryMap.get(tile.category);
+            final String categoryKey = tile.getCategory();
+            DashboardCategory category = categoryMap.get(categoryKey);
             if (category == null) {
-                category = new DashboardCategory();
-                category.key = tile.category;
+                category = new DashboardCategory(categoryKey);
 
                 if (category == null) {
-                    Log.w(LOG_TAG, "Couldn't find category " + tile.category);
+                    Log.w(LOG_TAG, "Couldn't find category " + categoryKey);
                     continue;
                 }
-                categoryMap.put(category.key, category);
+                categoryMap.put(categoryKey, category);
             }
             category.addTile(tile);
         }
@@ -269,13 +269,13 @@ public class TileUtils {
             intent.setPackage(SETTING_PKG);
         }
         getTilesForIntent(context, user, intent, addedCache, defaultCategory, outTiles,
-                usePriority, true);
+                usePriority);
     }
 
     public static void getTilesForIntent(
             Context context, UserHandle user, Intent intent,
             Map<Pair<String, String>, Tile> addedCache, String defaultCategory, List<Tile> outTiles,
-            boolean usePriority, boolean checkCategory) {
+            boolean usePriority) {
         PackageManager pm = context.getPackageManager();
         List<ResolveInfo> results = pm.queryIntentActivitiesAsUser(intent,
                 PackageManager.GET_META_DATA, user.getIdentifier());
@@ -289,7 +289,7 @@ public class TileUtils {
             String categoryKey = defaultCategory;
 
             // Load category
-            if (checkCategory && ((metaData == null) || !metaData.containsKey(EXTRA_CATEGORY_KEY))
+            if ((metaData == null || !metaData.containsKey(EXTRA_CATEGORY_KEY))
                     && categoryKey == null) {
                 Log.w(LOG_TAG, "Found " + resolved.activityInfo.name + " for intent "
                         + intent + " missing metadata "
@@ -302,12 +302,10 @@ public class TileUtils {
             Pair<String, String> key = new Pair<>(activityInfo.packageName, activityInfo.name);
             Tile tile = addedCache.get(key);
             if (tile == null) {
-                tile = new Tile(activityInfo);
+                tile = new Tile(activityInfo, categoryKey);
                 tile.intent = new Intent().setClassName(
                         activityInfo.packageName, activityInfo.name);
-                tile.category = categoryKey;
                 tile.priority = usePriority ? resolved.priority : 0;
-                tile.metaData = activityInfo.metaData;
                 updateTileData(context, tile, activityInfo, activityInfo.applicationInfo, pm);
                 if (DEBUG) Log.d(LOG_TAG, "Adding tile " + tile.title);
                 addedCache.put(key, tile);
@@ -325,31 +323,16 @@ public class TileUtils {
     private static boolean updateTileData(Context context, Tile tile,
             ActivityInfo activityInfo, ApplicationInfo applicationInfo, PackageManager pm) {
         if (applicationInfo.isSystemApp()) {
-            boolean forceTintIcon = false;
             CharSequence title = null;
             String summary = null;
             String keyHint = null;
-            boolean isIconTintable = false;
 
             // Get the activity's meta-data
             try {
                 Resources res = pm.getResourcesForApplication(applicationInfo.packageName);
                 Bundle metaData = activityInfo.metaData;
 
-                if (!context.getPackageName().equals(applicationInfo.packageName)) {
-                    isIconTintable = true;
-                    forceTintIcon = true;
-                }
-
                 if (res != null && metaData != null) {
-                    if (metaData.containsKey(META_DATA_PREFERENCE_ICON_TINTABLE)) {
-                        if (forceTintIcon) {
-                            Log.w(LOG_TAG, "Ignoring icon tintable for " + activityInfo);
-                        } else {
-                            isIconTintable =
-                                    metaData.getBoolean(META_DATA_PREFERENCE_ICON_TINTABLE);
-                        }
-                    }
                     if (metaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
                         if (metaData.get(META_DATA_PREFERENCE_TITLE) instanceof Integer) {
                             title = res.getString(metaData.getInt(META_DATA_PREFERENCE_TITLE));
@@ -390,7 +373,6 @@ public class TileUtils {
                     activityInfo.name);
             // Suggest a key for this tile
             tile.key = keyHint;
-            tile.isIconTintable = isIconTintable;
 
             return true;
         }
