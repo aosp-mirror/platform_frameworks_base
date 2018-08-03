@@ -24,25 +24,14 @@ import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class DashboardCategory implements Parcelable {
 
     /**
-     * Title of the category that is shown to the user.
-     */
-    public CharSequence title;
-
-    /**
      * Key used for placing external tiles.
      */
     public String key;
-
-    /**
-     * Used to control display order.
-     */
-    public int priority;
 
     /**
      * List of the category's children
@@ -75,14 +64,6 @@ public class DashboardCategory implements Parcelable {
         mTiles.add(tile);
     }
 
-    public synchronized void addTile(int n, Tile tile) {
-        mTiles.add(n, tile);
-    }
-
-    public synchronized void removeTile(Tile tile) {
-        mTiles.remove(tile);
-    }
-
     public synchronized void removeTile(int n) {
         mTiles.remove(n);
     }
@@ -99,7 +80,7 @@ public class DashboardCategory implements Parcelable {
      * Sort priority value for tiles in this category.
      */
     public void sortTiles() {
-        Collections.sort(mTiles, TILE_COMPARATOR);
+        Collections.sort(mTiles, Tile.TILE_COMPARATOR);
     }
 
     /**
@@ -136,9 +117,7 @@ public class DashboardCategory implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        TextUtils.writeToParcel(title, dest, flags);
         dest.writeString(key);
-        dest.writeInt(priority);
 
         final int count = mTiles.size();
         dest.writeInt(count);
@@ -150,9 +129,7 @@ public class DashboardCategory implements Parcelable {
     }
 
     public void readFromParcel(Parcel in) {
-        title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         key = in.readString();
-        priority = in.readInt();
 
         final int count = in.readInt();
 
@@ -172,13 +149,5 @@ public class DashboardCategory implements Parcelable {
             return new DashboardCategory[size];
         }
     };
-
-    public static final Comparator<Tile> TILE_COMPARATOR =
-            new Comparator<Tile>() {
-                @Override
-                public int compare(Tile lhs, Tile rhs) {
-                    return rhs.priority - lhs.priority;
-                }
-            };
 
 }
