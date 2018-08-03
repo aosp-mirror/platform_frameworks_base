@@ -75,7 +75,7 @@ public class ManifestConfigSource implements ConfigSource {
                 // should use the network security config.
                 boolean usesCleartextTraffic =
                         (mApplicationInfo.flags & ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC) != 0
-                        && mApplicationInfo.targetSandboxVersion < 2;
+                        && !mApplicationInfo.isInstantApp();
                 source = new DefaultConfigSource(usesCleartextTraffic, mApplicationInfo);
             }
             mConfigSource = source;

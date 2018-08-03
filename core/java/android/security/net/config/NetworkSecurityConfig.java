@@ -185,7 +185,7 @@ public final class NetworkSecurityConfig {
                 .addCertificatesEntryRef(
                         new CertificatesEntryRef(SystemCertificateSource.getInstance(), false));
         final boolean cleartextTrafficPermitted = info.targetSdkVersion < Build.VERSION_CODES.P
-                && info.targetSandboxVersion < 2;
+                && !info.isInstantApp();
         builder.setCleartextTrafficPermitted(cleartextTrafficPermitted);
         // Applications targeting N and above must opt in into trusting the user added certificate
         // store.
