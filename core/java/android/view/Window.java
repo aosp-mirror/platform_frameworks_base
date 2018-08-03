@@ -854,7 +854,7 @@ public abstract class Window {
     }
 
     /**
-     * Set an observer to collect frame stats for each frame rendererd in this window.
+     * Set an observer to collect frame stats for each frame rendered in this window.
      *
      * Must be in hardware rendering mode.
      */
