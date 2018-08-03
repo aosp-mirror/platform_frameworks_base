@@ -194,7 +194,7 @@ public abstract class PanelBar extends FrameLayout {
             pv.collapse(delayed, speedUpFactor);
             waiting = true;
         } else {
-            pv.resetViews();
+            pv.resetViews(false /* animate */);
             pv.setExpandedFraction(0); // just in case
             pv.cancelPeek();
         }
