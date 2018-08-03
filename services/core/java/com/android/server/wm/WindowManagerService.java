@@ -6916,10 +6916,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void registerDockedStackListener(IDockedStackListener listener) {
-        if (!checkCallingPermission(REGISTER_WINDOW_MANAGER_LISTENERS,
-                "registerDockedStackListener()")) {
-            return;
-        }
+        mAtmInternal.enforceCallerIsRecentsOrHasPermission(REGISTER_WINDOW_MANAGER_LISTENERS,
+                "registerDockedStackListener()");
         synchronized (mWindowMap) {
             // TODO(multi-display): The listener is registered on the default display only.
             getDefaultDisplayContentLocked().mDividerControllerLocked.registerDockedStackListener(
