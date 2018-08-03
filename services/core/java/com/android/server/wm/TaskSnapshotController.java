@@ -38,7 +38,6 @@ import android.view.DisplayListCanvas;
 import android.view.RenderNode;
 import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
-import android.view.View;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -219,15 +218,32 @@ class TaskSnapshotController {
         return TaskSnapshotSurface.create(mService, token, snapshot);
     }
 
-    private TaskSnapshot snapshotTask(Task task) {
-        final AppWindowToken top = task.getTopChild();
-        if (top == null) {
-            return null;
+    /**
+     * Find the window for a given task to take a snapshot. Top child of the task is usually the one
+     * we're looking for, but during app transitions, trampoline activities can appear in the
+     * children, which should be ignored.
+     */
+    @Nullable private AppWindowToken findAppTokenForSnapshot(Task task) {
+        for (int i = task.getChildCount() - 1; i >= 0; --i) {
+            final AppWindowToken appWindowToken = task.getChildAt(i);
+            if (appWindowToken == null || !appWindowToken.isSurfaceShowing()
+                    || appWindowToken.findMainWindow() == null) {
+                continue;
+            }
+            final boolean hasVisibleChild = appWindowToken.forAllWindows(
+                    // Ensure at least one window for the top app is visible before attempting to
+                    // take a screenshot. Visible here means that the WSA surface is shown and has
+                    // an alpha greater than 0.
+                    ws -> ws.mWinAnimator != null && ws.mWinAnimator.getShown()
+                            && ws.mWinAnimator.mLastAlpha > 0f, true  /* traverseTopToBottom */);
+            if (hasVisibleChild) {
+                return appWindowToken;
+            }
         }
-        final WindowState mainWindow = top.findMainWindow();
-        if (mainWindow == null) {
-            return null;
-        }
+        return null;
+    }
+
+    @Nullable private TaskSnapshot snapshotTask(Task task) {
         if (!mService.mPolicy.isScreenOn()) {
             if (DEBUG_SCREENSHOT) {
                 Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
@@ -235,27 +251,22 @@ class TaskSnapshotController {
             return null;
         }
         if (task.getSurfaceControl() == null) {
-            return null;
-        }
-
-        if (top.hasCommittedReparentToAnimationLeash()) {
             if (DEBUG_SCREENSHOT) {
-                Slog.w(TAG_WM, "Failed to take screenshot. App is animating " + top);
+                Slog.w(TAG_WM, "Failed to take screenshot. No surface control for " + task);
             }
             return null;
         }
 
-        final boolean hasVisibleChild = top.forAllWindows(
-                // Ensure at least one window for the top app is visible before attempting to take
-                // a screenshot. Visible here means that the WSA surface is shown and has an alpha
-                // greater than 0.
-                ws -> (ws.mAppToken == null || ws.mAppToken.isSurfaceShowing())
-                        && ws.mWinAnimator != null && ws.mWinAnimator.getShown()
-                        && ws.mWinAnimator.mLastAlpha > 0f, true);
-
-        if (!hasVisibleChild) {
+        final AppWindowToken appWindowToken = findAppTokenForSnapshot(task);
+        if (appWindowToken == null) {
             if (DEBUG_SCREENSHOT) {
                 Slog.w(TAG_WM, "Failed to take screenshot. No visible windows for " + task);
+            }
+            return null;
+        }
+        if (appWindowToken.hasCommittedReparentToAnimationLeash()) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.w(TAG_WM, "Failed to take screenshot. App is animating " + appWindowToken);
             }
             return null;
         }
@@ -265,19 +276,24 @@ class TaskSnapshotController {
         task.getBounds(mTmpRect);
         mTmpRect.offsetTo(0, 0);
 
+        final WindowState mainWindow = appWindowToken.findMainWindow();
+        if (mainWindow == null) {
+            Slog.w(TAG_WM, "Failed to take screenshot. No main window for " + task);
+            return null;
+        }
         final GraphicBuffer buffer = SurfaceControl.captureLayers(
                 task.getSurfaceControl().getHandle(), mTmpRect, scaleFraction);
-        final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
         if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
             if (DEBUG_SCREENSHOT) {
                 Slog.w(TAG_WM, "Failed to take screenshot for " + task);
             }
             return null;
         }
-        return new TaskSnapshot(buffer, top.getConfiguration().orientation,
+        final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
+        return new TaskSnapshot(buffer, appWindowToken.getConfiguration().orientation,
                 getInsets(mainWindow), isLowRamDevice /* reduced */, scaleFraction /* scale */,
                 true /* isRealSnapshot */, task.getWindowingMode(), getSystemUiVisibility(task),
-                !top.fillsParent() || isWindowTranslucent);
+                !appWindowToken.fillsParent() || isWindowTranslucent);
     }
 
     private boolean shouldDisableSnapshots() {
