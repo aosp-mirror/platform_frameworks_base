@@ -17,6 +17,7 @@
 package android.bluetooth;
 
 import android.annotation.SdkConstant;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -281,6 +282,7 @@ public class BluetoothPbap implements BluetoothProfile {
      */
     // TODO: This is currently being used by SettingsLib and will be used in the future.
     // TODO: Must specify target device. Implement this in the service.
+    @UnsupportedAppUsage
     public boolean disconnect(BluetoothDevice device) {
         log("disconnect()");
         final IBluetoothPbap service = mService;

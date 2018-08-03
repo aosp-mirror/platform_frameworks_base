@@ -48,10 +48,11 @@ public final class LocationAccessPolicy {
      * @param pkgName Package name of the application requesting access
      * @param uid The uid of the package
      * @param pid The pid of the package
+     * @param throwOnDeniedPermission Whether to throw if the location permission is denied.
      * @return boolean true or false if permissions is granted
      */
     public static boolean canAccessCellLocation(@NonNull Context context, @NonNull String pkgName,
-            int uid, int pid) throws SecurityException {
+            int uid, int pid, boolean throwOnDeniedPermission) throws SecurityException {
         Trace.beginSection("TelephonyLocationCheck");
         try {
             // Always allow the phone process and system server to access location. This avoid
@@ -68,10 +69,11 @@ public final class LocationAccessPolicy {
             // where a legacy app the user is not using tracks their location.
             // Granting ACCESS_FINE_LOCATION to an app automatically grants it
             // ACCESS_COARSE_LOCATION.
-
-            if (context.checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION, pid, uid) ==
-                    PackageManager.PERMISSION_DENIED) {
-                if (DBG) Log.w(TAG, "Permission checked failed (" + pid + "," + uid + ")");
+            if (throwOnDeniedPermission) {
+                context.enforcePermission(Manifest.permission.ACCESS_COARSE_LOCATION,
+                        pid, uid, "canAccessCellLocation");
+            } else if (context.checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
+                    pid, uid) == PackageManager.PERMISSION_DENIED) {
                 return false;
             }
             final int opCode = AppOpsManager.permissionToOpCode(

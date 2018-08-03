@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
@@ -100,6 +101,7 @@ public class BluetoothGattDescriptor implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     protected int mInstance;
 
     /**
@@ -114,6 +116,7 @@ public class BluetoothGattDescriptor implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     protected BluetoothGattCharacteristic mCharacteristic;
 
     /**
@@ -205,6 +208,7 @@ public class BluetoothGattDescriptor implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     /*package*/ void setCharacteristic(BluetoothGattCharacteristic characteristic) {
         mCharacteristic = characteristic;
     }

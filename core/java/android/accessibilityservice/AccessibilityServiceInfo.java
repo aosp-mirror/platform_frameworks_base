@@ -16,6 +16,7 @@
 
 package android.accessibilityservice;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -660,6 +661,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setCapabilities(int capabilities) {
         mCapabilities = capabilities;
     }

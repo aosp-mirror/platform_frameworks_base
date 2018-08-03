@@ -180,15 +180,17 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -hidePackage com.android.server
 
 # Convert an sdk level to a "since" argument.
-since-arg = -since $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/$(1)/public/api/android.*) $(1)
+since-arg = -since $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/$(1)/public/api/android.$(2)) $(1)
 
-finalized_sdks := $(patsubst $(HISTORICAL_SDK_VERSIONS_ROOT)/%/public/api/android.xml,%,\
-    $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/*/public/api/android.xml))
-finalized_sdks += $(patsubst $(HISTORICAL_SDK_VERSIONS_ROOT)/%/public/api/android.txt,%,\
-    $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/*/public/api/android.txt))
-finalized_sdks := $(call numerically_sort,$(finalized_sdks))
+finalized_xml_sdks := $(call numerically_sort,\
+    $(patsubst $(HISTORICAL_SDK_VERSIONS_ROOT)/%/public/api/android.xml,%,\
+    $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/*/public/api/android.xml)))
+finalized_txt_sdks := $(call numerically_sort,\
+     $(patsubst $(HISTORICAL_SDK_VERSIONS_ROOT)/%/public/api/android.txt,%,\
+    $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/*/public/api/android.txt)))
 
-framework_docs_LOCAL_DROIDDOC_OPTIONS += $(foreach sdk,$(finalized_sdks),$(call since-arg,$(sdk)))
+framework_docs_LOCAL_DROIDDOC_OPTIONS += $(foreach sdk,$(finalized_xml_sdks),$(call since-arg,$(sdk),xml))
+framework_docs_LOCAL_DROIDDOC_OPTIONS += $(foreach sdk,$(finalized_txt_sdks),$(call since-arg,$(sdk),txt))
 ifneq ($(PLATFORM_VERSION_CODENAME),REL)
   framework_docs_LOCAL_DROIDDOC_OPTIONS += \
       -since ./frameworks/base/api/current.txt $(PLATFORM_VERSION_CODENAME)
@@ -594,8 +596,8 @@ LOCAL_BLACKLIST := $(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST)
 LOCAL_SRC_GREYLIST := frameworks/base/config/hiddenapi-light-greylist.txt
 LOCAL_SRC_VENDOR_LIST := frameworks/base/config/hiddenapi-vendor-list.txt
 LOCAL_SRC_FORCE_BLACKLIST := frameworks/base/config/hiddenapi-force-blacklist.txt
-LOCAL_SRC_PUBLIC_API := $(INTERNAL_PLATFORM_DEX_API_FILE)
-LOCAL_SRC_PRIVATE_API := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
+LOCAL_SRC_PUBLIC_API := $(INTERNAL_PLATFORM_HIDDENAPI_PUBLIC_LIST)
+LOCAL_SRC_PRIVATE_API := $(INTERNAL_PLATFORM_HIDDENAPI_PRIVATE_LIST)
 LOCAL_SRC_REMOVED_API := $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE)
 
 LOCAL_SRC_ALL := \
@@ -654,7 +656,7 @@ $(LOCAL_LIGHT_GREYLIST): REGEX_SERIALIZATION := \
     "writeObject\(Ljava/io/ObjectOutputStream;\)V" \
     "writeReplace\(\)Ljava/lang/Object;"
 $(LOCAL_LIGHT_GREYLIST): $(LOCAL_SRC_ALL)
-	sort $(LOCAL_SRC_GREYLIST) $(LOCAL_SRC_VENDOR_LIST) \
+	sort $(LOCAL_SRC_GREYLIST) $(LOCAL_SRC_VENDOR_LIST) $(PRIVATE_GREYLIST_INPUTS) \
 	     <(grep -E "\->("$(subst $(space),"|",$(REGEX_SERIALIZATION))")$$" \
 	               $(LOCAL_SRC_PRIVATE_API)) \
 	     <(comm -12 <(sort $(LOCAL_SRC_REMOVED_API)) <(sort $(LOCAL_SRC_PRIVATE_API))) \

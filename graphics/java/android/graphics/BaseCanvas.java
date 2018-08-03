@@ -20,6 +20,7 @@ import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas.VertexMode;
 import android.text.GraphicsOperations;
 import android.text.SpannableString;
@@ -41,6 +42,7 @@ public abstract class BaseCanvas {
      * Should only be assigned in constructors (or setBitmap if software canvas),
      * freed by NativeAllocation.
      */
+    @UnsupportedAppUsage
     protected long mNativeCanvasWrapper;
 
     /**

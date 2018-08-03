@@ -23,6 +23,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -120,6 +121,7 @@ public class RippleDrawable extends LayerDrawable {
     private final Rect mDirtyBounds = new Rect();
 
     /** Mirrors mLayerState with some extra information. */
+    @UnsupportedAppUsage
     private RippleState mState;
 
     /** The masking layer, e.g. the layer with id R.id.mask. */
@@ -160,6 +162,7 @@ public class RippleDrawable extends LayerDrawable {
     private Paint mRipplePaint;
 
     /** Target density of the display into which ripples are drawn. */
+    @UnsupportedAppUsage
     private int mDensity;
 
     /** Whether bounds are being overridden. */
@@ -910,6 +913,7 @@ public class RippleDrawable extends LayerDrawable {
         mMask.draw(canvas);
     }
 
+    @UnsupportedAppUsage
     private Paint getRipplePaint() {
         if (mRipplePaint == null) {
             mRipplePaint = new Paint();
@@ -960,6 +964,7 @@ public class RippleDrawable extends LayerDrawable {
      * @param forceSoftware true if RenderThread animations should be disabled, false otherwise
      * @hide
      */
+    @UnsupportedAppUsage
     public void setForceSoftware(boolean forceSoftware) {
         mForceSoftware = forceSoftware;
     }
@@ -990,6 +995,7 @@ public class RippleDrawable extends LayerDrawable {
 
     static class RippleState extends LayerState {
         int[] mTouchThemeAttrs;
+        @UnsupportedAppUsage
         ColorStateList mColor = ColorStateList.valueOf(Color.MAGENTA);
         int mMaxRadius = RADIUS_AUTO;
 

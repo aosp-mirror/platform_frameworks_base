@@ -23,6 +23,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.content.res.Resources;
@@ -54,6 +55,7 @@ import java.io.IOException;
 public class RotateDrawable extends DrawableWrapper {
     private static final int MAX_LEVEL = 10000;
 
+    @UnsupportedAppUsage
     private RotateState mState;
 
     /**

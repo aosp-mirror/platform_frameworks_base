@@ -104,7 +104,11 @@ public class KeyStore {
     public static final int FLAG_CRITICAL_TO_DEVICE_ENCRYPTION = 1 << 3;
 
     // States
-    public enum State { UNLOCKED, LOCKED, UNINITIALIZED };
+    public enum State {
+        UNLOCKED,
+        LOCKED,
+        UNINITIALIZED
+    };
 
     private int mError = NO_ERROR;
 

@@ -20,6 +20,7 @@ import android.annotation.CheckResult;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import android.annotation.UnsupportedAppUsage;
 import android.text.TextUtils;
 import java.io.PrintWriter;
 import java.util.regex.Matcher;
@@ -189,6 +190,7 @@ public final class Rect implements Parcelable {
      * Print short representation to given writer.
      * @hide
      */
+    @UnsupportedAppUsage
     public void printShortString(PrintWriter pw) {
         pw.print('['); pw.print(left); pw.print(',');
         pw.print(top); pw.print("]["); pw.print(right);
@@ -643,6 +645,7 @@ public final class Rect implements Parcelable {
      * Scales up the rect by the given scale.
      * @hide
      */
+    @UnsupportedAppUsage
     public void scale(float scale) {
         if (scale != 1.0f) {
             left = (int) (left * scale + 0.5f);

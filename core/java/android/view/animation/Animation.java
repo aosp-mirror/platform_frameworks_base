@@ -19,6 +19,7 @@ package android.view.animation;
 import android.annotation.AnimRes;
 import android.annotation.ColorInt;
 import android.annotation.InterpolatorRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.RectF;
@@ -183,6 +184,7 @@ public abstract class Animation implements Cloneable {
     /**
      * The animation listener to be notified when the animation starts, ends or repeats.
      */
+    @UnsupportedAppUsage
     AnimationListener mListener;
 
     /**
@@ -209,9 +211,13 @@ public abstract class Animation implements Cloneable {
     private boolean mMore = true;
     private boolean mOneMoreTime = true;
 
+    @UnsupportedAppUsage
     RectF mPreviousRegion = new RectF();
+    @UnsupportedAppUsage
     RectF mRegion = new RectF();
+    @UnsupportedAppUsage
     Transformation mTransformation = new Transformation();
+    @UnsupportedAppUsage
     Transformation mPreviousTransformation = new Transformation();
 
     private final CloseGuard guard = CloseGuard.get();
@@ -317,6 +323,7 @@ public abstract class Animation implements Cloneable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void detach() {
         if (mStarted && !mEnded) {
             mEnded = true;
@@ -1019,6 +1026,7 @@ public abstract class Animation implements Cloneable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void getInvalidateRegion(int left, int top, int right, int bottom,
             RectF invalidate, Transformation transformation) {
 
@@ -1050,6 +1058,7 @@ public abstract class Animation implements Cloneable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void initializeInvalidateRegion(int left, int top, int right, int bottom) {
         final RectF region = mPreviousRegion;
         region.set(left, top, right, bottom);
