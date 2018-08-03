@@ -16,6 +16,7 @@
 
 package android.view.animation;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Matrix;
 
 /**
@@ -38,6 +39,7 @@ public class TranslateYAnimation extends TranslateAnimation {
     /**
      * Constructor. Passes in 0 for the x parameters of TranslateAnimation
      */
+    @UnsupportedAppUsage
     public TranslateYAnimation(int fromYType, float fromYValue, int toYType, float toYValue) {
         super(ABSOLUTE, 0, ABSOLUTE, 0, fromYType, fromYValue, toYType, toYValue);
     }
