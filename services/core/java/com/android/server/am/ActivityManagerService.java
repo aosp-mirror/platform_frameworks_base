@@ -3620,8 +3620,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         mPendingStarts.remove(startSeq);
                         app.pendingStart = false;
                         forceStopPackageLocked(app.info.packageName, UserHandle.getAppId(app.uid),
-                                false, false, true, false, false,
-                                UserHandle.getUserId(app.userId), "start failure");
+                                false, false, true, false, false, app.userId, "start failure");
                     }
                 }
             });
@@ -3637,8 +3636,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.e(TAG, "Failure starting process " + app.processName, e);
                 app.pendingStart = false;
                 forceStopPackageLocked(app.info.packageName, UserHandle.getAppId(app.uid),
-                        false, false, true, false, false,
-                        UserHandle.getUserId(app.userId), "start failure");
+                        false, false, true, false, false, app.userId, "start failure");
             }
             return app.pid > 0;
         }
