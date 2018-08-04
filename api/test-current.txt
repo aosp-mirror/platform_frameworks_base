@@ -1328,30 +1328,47 @@ package android.util.proto {
     method public void writeRawZigZag64(long);
   }
 
-  public final class ProtoOutputStream {
+  public final class ProtoInputStream extends android.util.proto.ProtoStream {
+    ctor public ProtoInputStream(java.io.InputStream, int);
+    ctor public ProtoInputStream(java.io.InputStream);
+    ctor public ProtoInputStream(byte[]);
+    method public int decodeZigZag32(int);
+    method public long decodeZigZag64(long);
+    method public java.lang.String dumpDebugData();
+    method public void end(long);
+    method public int getFieldNumber();
+    method public int getOffset();
+    method public int getWireType();
+    method public boolean isNextField(long) throws java.io.IOException;
+    method public int nextField() throws java.io.IOException;
+    method public boolean readBoolean(long) throws java.io.IOException;
+    method public byte[] readBytes(long) throws java.io.IOException;
+    method public double readDouble(long) throws java.io.IOException;
+    method public float readFloat(long) throws java.io.IOException;
+    method public int readInt(long) throws java.io.IOException;
+    method public long readLong(long) throws java.io.IOException;
+    method public java.lang.String readString(long) throws java.io.IOException;
+    method public void skip() throws java.io.IOException;
+    method public long start(long) throws java.io.IOException;
+    field public static final int NO_MORE_FIELDS = -1; // 0xffffffff
+  }
+
+  public final class ProtoOutputStream extends android.util.proto.ProtoStream {
     ctor public ProtoOutputStream();
     ctor public ProtoOutputStream(int);
     ctor public ProtoOutputStream(java.io.OutputStream);
     ctor public ProtoOutputStream(java.io.FileDescriptor);
     method public static int checkFieldId(long, long);
-    method public static int convertObjectIdToOrdinal(int);
     method public void dump(java.lang.String);
     method public void end(long);
     method public deprecated void endObject(long);
     method public deprecated void endRepeatedObject(long);
     method public void flush();
     method public byte[] getBytes();
-    method public static int getDepthFromToken(long);
-    method public static int getObjectIdFromToken(long);
-    method public static boolean getRepeatedFromToken(long);
-    method public static int getSizePosFromToken(long);
-    method public static int getTagSizeFromToken(long);
     method public static long makeFieldId(int, long);
-    method public static long makeToken(int, boolean, int, int, int);
     method public long start(long);
     method public deprecated long startObject(long);
     method public deprecated long startRepeatedObject(long);
-    method public static java.lang.String token2String(long);
     method public void write(long, double);
     method public void write(long, float);
     method public void write(long, int);
@@ -1408,6 +1425,27 @@ package android.util.proto {
     method public void writeTag(int, int);
     method public deprecated void writeUInt32(long, int);
     method public deprecated void writeUInt64(long, long);
+  }
+
+  public class ProtoParseException extends java.lang.RuntimeException {
+    ctor public ProtoParseException(java.lang.String);
+  }
+
+  public abstract class ProtoStream {
+    ctor public ProtoStream();
+    method public static int convertObjectIdToOrdinal(int);
+    method public static int getDepthFromToken(long);
+    method public static java.lang.String getFieldCountString(long);
+    method public static java.lang.String getFieldIdString(long);
+    method public static java.lang.String getFieldTypeString(long);
+    method public static int getObjectIdFromToken(long);
+    method public static int getOffsetFromToken(long);
+    method public static boolean getRepeatedFromToken(long);
+    method public static int getTagSizeFromToken(long);
+    method public static java.lang.String getWireTypeString(int);
+    method public static long makeFieldId(int, long);
+    method public static long makeToken(int, boolean, int, int, int);
+    method public static java.lang.String token2String(long);
     field public static final long FIELD_COUNT_MASK = 16492674416640L; // 0xf0000000000L
     field public static final long FIELD_COUNT_PACKED = 5497558138880L; // 0x50000000000L
     field public static final long FIELD_COUNT_REPEATED = 2199023255552L; // 0x20000000000L
@@ -1427,6 +1465,7 @@ package android.util.proto {
     field public static final long FIELD_TYPE_INT64 = 12884901888L; // 0x300000000L
     field public static final long FIELD_TYPE_MASK = 1095216660480L; // 0xff00000000L
     field public static final long FIELD_TYPE_MESSAGE = 47244640256L; // 0xb00000000L
+    field protected static final java.lang.String[] FIELD_TYPE_NAMES;
     field public static final long FIELD_TYPE_SFIXED32 = 64424509440L; // 0xf00000000L
     field public static final long FIELD_TYPE_SFIXED64 = 68719476736L; // 0x1000000000L
     field public static final int FIELD_TYPE_SHIFT = 32; // 0x20
@@ -1436,7 +1475,6 @@ package android.util.proto {
     field public static final long FIELD_TYPE_UINT32 = 55834574848L; // 0xd00000000L
     field public static final long FIELD_TYPE_UINT64 = 17179869184L; // 0x400000000L
     field public static final long FIELD_TYPE_UNKNOWN = 0L; // 0x0L
-    field public static final java.lang.String TAG = "ProtoOutputStream";
     field public static final int WIRE_TYPE_END_GROUP = 4; // 0x4
     field public static final int WIRE_TYPE_FIXED32 = 5; // 0x5
     field public static final int WIRE_TYPE_FIXED64 = 1; // 0x1
@@ -1446,8 +1484,8 @@ package android.util.proto {
     field public static final int WIRE_TYPE_VARINT = 0; // 0x0
   }
 
-  public class ProtoParseException extends java.lang.RuntimeException {
-    ctor public ProtoParseException(java.lang.String);
+  public class WireTypeMismatchException extends android.util.proto.ProtoParseException {
+    ctor public WireTypeMismatchException(java.lang.String);
   }
 
 }
