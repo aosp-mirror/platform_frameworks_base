@@ -65,7 +65,7 @@
     <string name="notification_channel_failure" msgid="9042250774797916414">"విఫలమైన ముద్రణలు"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"ఫైల్‌ను సృష్టించలేకపోయాము"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"కొన్ని ముద్రణ సేవలు నిలిపివేయబడ్డాయి"</string>
-    <string name="print_searching_for_printers" msgid="6550424555079932867">"ప్రింటర్‌ల కోసం శోధిస్తోంది"</string>
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"ప్రింటర్‌ల కోసం వెతుకుతోంది"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"ముద్రణ సేవలు ఏవీ ప్రారంభించలేదు"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"ప్రింటర్‌లు కనుగొనబడలేదు"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"ప్రింటర్‌లను జోడించడం సాధ్యపడలేదు"</string>
