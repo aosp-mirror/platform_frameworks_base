@@ -386,7 +386,7 @@ static bool createPkgSandbox(uid_t uid, const char* package_name, std::string& p
     // Create /mnt/user/0/package/<package-name>
     userid_t user_id = multiuser_get_user_id(uid);
     StringAppendF(&pkg_sandbox_dir, "/%d", user_id);
-    if (fs_prepare_dir(pkg_sandbox_dir.c_str(), 0700, AID_ROOT, AID_ROOT) != 0) {
+    if (fs_prepare_dir(pkg_sandbox_dir.c_str(), 0751, AID_ROOT, AID_ROOT) != 0) {
         *error_msg = CREATE_ERROR("fs_prepare_dir failed on %s", pkg_sandbox_dir.c_str());
         return false;
     }
