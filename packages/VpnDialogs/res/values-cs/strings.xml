@@ -25,8 +25,8 @@
     <string name="data_received" msgid="4062776929376067820">"Přijato:"</string>
     <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> bajtů / <xliff:g id="NUMBER_1">%2$s</xliff:g> paketů"</string>
     <string name="always_on_disconnected_title" msgid="1906740176262776166">"Nelze se připojit k trvalé VPN"</string>
-    <string name="always_on_disconnected_message" msgid="555634519845992917">"Aplikace <xliff:g id="VPN_APP_0">%1$s</xliff:g> je nastavena k trvalému připojení, ale nyní se nemůže připojit. Než se telefon bude moci připojit pomocí aplikace <xliff:g id="VPN_APP_1">%1$s</xliff:g>, použije veřejnou síť."</string>
-    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"Aplikace <xliff:g id="VPN_APP">%1$s</xliff:g> je nastavena k trvalému připojení, ale nyní se nemůže připojit. Než se budete moci připojit pomocí VPN, zůstanete offline."</string>
+    <string name="always_on_disconnected_message" msgid="555634519845992917">"Aplikace <xliff:g id="VPN_APP_0">%1$s</xliff:g> je nastavena k trvalému připojení, ale teď se nemůže připojit. Než se telefon bude moci připojit pomocí aplikace <xliff:g id="VPN_APP_1">%1$s</xliff:g>, použije veřejnou síť."</string>
+    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"Aplikace <xliff:g id="VPN_APP">%1$s</xliff:g> je nastavena k trvalému připojení, ale teď se nemůže připojit. Než se budete moci připojit pomocí VPN, zůstanete offline."</string>
     <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
     <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"Změnit nastavení VPN"</string>
     <string name="configure" msgid="4905518375574791375">"Konfigurovat"</string>
