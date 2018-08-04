@@ -31,19 +31,26 @@ public class DashboardCategory implements Parcelable {
     /**
      * Key used for placing external tiles.
      */
-    public String key;
+    public final String key;
 
     /**
      * List of the category's children
      */
     private List<Tile> mTiles = new ArrayList<>();
 
-    public DashboardCategory() {
-        // Empty
+    public DashboardCategory(String key) {
+        this.key = key;
     }
 
     DashboardCategory(Parcel in) {
-        readFromParcel(in);
+        key = in.readString();
+
+        final int count = in.readInt();
+
+        for (int n = 0; n < count; n++) {
+            Tile tile = Tile.CREATOR.createFromParcel(in);
+            mTiles.add(tile);
+        }
     }
 
     /**
@@ -127,18 +134,6 @@ public class DashboardCategory implements Parcelable {
             tile.writeToParcel(dest, flags);
         }
     }
-
-    public void readFromParcel(Parcel in) {
-        key = in.readString();
-
-        final int count = in.readInt();
-
-        for (int n = 0; n < count; n++) {
-            Tile tile = Tile.CREATOR.createFromParcel(in);
-            mTiles.add(tile);
-        }
-    }
-
 
     public static final Creator<DashboardCategory> CREATOR = new Creator<DashboardCategory>() {
         public DashboardCategory createFromParcel(Parcel source) {
