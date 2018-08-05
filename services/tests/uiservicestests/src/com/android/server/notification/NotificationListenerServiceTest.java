@@ -95,6 +95,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             assertEquals(getUserSentiment(i), ranking.getUserSentiment());
             assertEquals(getHidden(i), ranking.isSuspended());
             assertActionsEqual(getSmartActions(key, i), ranking.getSmartActions());
+            assertEquals(getSmartReplies(key, i), ranking.getSmartReplies());
         }
     }
 
@@ -112,6 +113,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         Bundle userSentiment = new Bundle();
         Bundle mHidden = new Bundle();
         Bundle smartActions = new Bundle();
+        Bundle smartReplies = new Bundle();
 
         for (int i = 0; i < mKeys.length; i++) {
             String key = mKeys[i];
@@ -130,12 +132,13 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             userSentiment.putInt(key, getUserSentiment(i));
             mHidden.putBoolean(key, getHidden(i));
             smartActions.putParcelableArrayList(key, getSmartActions(key, i));
+            smartReplies.putCharSequenceArrayList(key, getSmartReplies(key, i));
         }
         NotificationRankingUpdate update = new NotificationRankingUpdate(mKeys,
                 interceptedKeys.toArray(new String[0]), visibilityOverrides,
                 suppressedVisualEffects, importance, explanation, overrideGroupKeys,
                 channels, overridePeople, snoozeCriteria, showBadge, userSentiment, mHidden,
-                smartActions);
+                smartActions, smartReplies);
         return update;
     }
 
@@ -214,6 +217,14 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             actions.add(new Notification.Action.Builder(null /*icon*/, key, intent).build());
         }
         return actions;
+    }
+
+    private ArrayList<CharSequence> getSmartReplies(String key, int index) {
+        ArrayList<CharSequence> choices = new ArrayList<>();
+        for (int i = 0; i < index; i++) {
+            choices.add("choice_" + key + "_" + i);
+        }
+        return choices;
     }
 
     private void assertActionsEqual(

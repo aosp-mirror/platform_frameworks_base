@@ -19,12 +19,19 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.app.WindowConfiguration;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Environment;
+import android.provider.Settings;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
+import android.view.Display;
+import android.view.DisplayInfo;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 
@@ -43,37 +50,48 @@ import org.xmlpull.v1.XmlSerializer;
 /**
  * Current persistent settings about a display
  */
-public class DisplaySettings {
+class DisplaySettings {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplaySettings" : TAG_WM;
 
+    private final WindowManagerService mService;
     private final AtomicFile mFile;
     private final HashMap<String, Entry> mEntries = new HashMap<String, Entry>();
 
-    public static class Entry {
-        public final String name;
-        public int overscanLeft;
-        public int overscanTop;
-        public int overscanRight;
-        public int overscanBottom;
+    private static class Entry {
+        private final String name;
+        private int overscanLeft;
+        private int overscanTop;
+        private int overscanRight;
+        private int overscanBottom;
+        private int windowingMode = WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
-        public Entry(String _name) {
+        private Entry(String _name) {
             name = _name;
         }
     }
 
-    public DisplaySettings() {
-        File dataDir = Environment.getDataDirectory();
-        File systemDir = new File(dataDir, "system");
-        mFile = new AtomicFile(new File(systemDir, "display_settings.xml"), "wm-displays");
+    DisplaySettings(WindowManagerService service) {
+        this(service, new File(Environment.getDataDirectory(), "system"));
     }
 
-    public void getOverscanLocked(String name, String uniqueId, Rect outRect) {
+    @VisibleForTesting
+    DisplaySettings(WindowManagerService service, File folder) {
+        mService = service;
+        mFile = new AtomicFile(new File(folder, "display_settings.xml"), "wm-displays");
+    }
+
+    private Entry getEntry(String name, String uniqueId) {
         // Try to get the entry with the unique if possible.
         // Else, fall back on the display name.
         Entry entry;
         if (uniqueId == null || (entry = mEntries.get(uniqueId)) == null) {
             entry = mEntries.get(name);
         }
+        return entry;
+    }
+
+    private void getOverscanLocked(String name, String uniqueId, Rect outRect) {
+        final Entry entry = getEntry(name, uniqueId);
         if (entry != null) {
             outRect.left = entry.overscanLeft;
             outRect.top = entry.overscanTop;
@@ -84,7 +102,7 @@ public class DisplaySettings {
         }
     }
 
-    public void setOverscanLocked(String uniqueId, String name, int left, int top, int right,
+    void setOverscanLocked(String uniqueId, String name, int left, int top, int right,
             int bottom) {
         if (left == 0 && top == 0 && right == 0 && bottom == 0) {
             // Right now all we are storing is overscan; if there is no overscan,
@@ -105,7 +123,47 @@ public class DisplaySettings {
         entry.overscanBottom = bottom;
     }
 
-    public void readSettingsLocked() {
+    private int getWindowingModeLocked(String name, String uniqueId, int displayId) {
+        final Entry entry = getEntry(name, uniqueId);
+        int windowingMode = entry != null ? entry.windowingMode
+                : WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+        // This display used to be in freeform, but we don't support freeform anymore, so fall
+        // back to fullscreen.
+        if (windowingMode == WindowConfiguration.WINDOWING_MODE_FREEFORM
+                && !mService.mSupportsFreeformWindowManagement) {
+            return WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+        }
+        // No record is present so use default windowing mode policy.
+        if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
+            if (displayId == Display.DEFAULT_DISPLAY) {
+                windowingMode = (mService.mIsPc && mService.mSupportsFreeformWindowManagement)
+                        ? WindowConfiguration.WINDOWING_MODE_FREEFORM
+                        : WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+            } else {
+                windowingMode = mService.mSupportsFreeformWindowManagement
+                        ? WindowConfiguration.WINDOWING_MODE_FREEFORM
+                        : WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+            }
+        }
+        return windowingMode;
+    }
+
+    void applySettingsToDisplayLocked(DisplayContent dc) {
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
+
+        // Setting windowing mode first, because it may override overscan values later.
+        dc.setWindowingMode(getWindowingModeLocked(displayInfo.name, displayInfo.uniqueId,
+                dc.getDisplayId()));
+
+        final Rect rect = new Rect();
+        getOverscanLocked(displayInfo.name, displayInfo.uniqueId, rect);
+        displayInfo.overscanLeft = rect.left;
+        displayInfo.overscanTop = rect.top;
+        displayInfo.overscanRight = rect.right;
+        displayInfo.overscanBottom = rect.bottom;
+    }
+
+    void readSettingsLocked() {
         FileInputStream stream;
         try {
             stream = mFile.openRead();
@@ -169,11 +227,15 @@ public class DisplaySettings {
     }
 
     private int getIntAttribute(XmlPullParser parser, String name) {
+        return getIntAttribute(parser, name, 0 /* defaultValue */);
+    }
+
+    private int getIntAttribute(XmlPullParser parser, String name, int defaultValue) {
         try {
             String str = parser.getAttributeValue(null, name);
-            return str != null ? Integer.parseInt(str) : 0;
+            return str != null ? Integer.parseInt(str) : defaultValue;
         } catch (NumberFormatException e) {
-            return 0;
+            return defaultValue;
         }
     }
 
@@ -186,12 +248,14 @@ public class DisplaySettings {
             entry.overscanTop = getIntAttribute(parser, "overscanTop");
             entry.overscanRight = getIntAttribute(parser, "overscanRight");
             entry.overscanBottom = getIntAttribute(parser, "overscanBottom");
+            entry.windowingMode = getIntAttribute(parser, "windowingMode",
+                    WindowConfiguration.WINDOWING_MODE_UNDEFINED);
             mEntries.put(name, entry);
         }
         XmlUtils.skipCurrentTag(parser);
     }
 
-    public void writeSettingsLocked() {
+    void writeSettingsLocked() {
         FileOutputStream stream;
         try {
             stream = mFile.startWrite();
@@ -220,6 +284,9 @@ public class DisplaySettings {
                 }
                 if (entry.overscanBottom != 0) {
                     out.attribute(null, "overscanBottom", Integer.toString(entry.overscanBottom));
+                }
+                if (entry.windowingMode != WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
+                    out.attribute(null, "windowingMode", Integer.toString(entry.windowingMode));
                 }
                 out.endTag(null, "display");
             }

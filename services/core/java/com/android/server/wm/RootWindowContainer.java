@@ -134,6 +134,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     // transaction from the global transaction.
     private final SurfaceControl.Transaction mDisplayTransaction = new SurfaceControl.Transaction();
 
+    private final Consumer<DisplayContent> mDisplayContentConfigChangesConsumer =
+            mService.mPolicy::onConfigurationChanged;
+
     private final Consumer<WindowState> mCloseSystemDialogsConsumer = w -> {
         if (w.mHasSurface) {
             try {
@@ -221,16 +224,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Adding display=" + display);
 
-        final DisplayInfo displayInfo = dc.getDisplayInfo();
-        final Rect rect = new Rect();
-        mService.mDisplaySettings.getOverscanLocked(displayInfo.name, displayInfo.uniqueId, rect);
-        displayInfo.overscanLeft = rect.left;
-        displayInfo.overscanTop = rect.top;
-        displayInfo.overscanRight = rect.right;
-        displayInfo.overscanBottom = rect.bottom;
+        mService.mDisplaySettings.applySettingsToDisplayLocked(dc);
+
         if (mService.mDisplayManagerInternal != null) {
             mService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(
-                    displayId, displayInfo);
+                    displayId, dc.getDisplayInfo());
             dc.configureDisplayPolicy();
 
             // Tap Listeners are supported for:
@@ -379,7 +377,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         prepareFreezingTaskBounds();
         super.onConfigurationChanged(newParentConfig);
 
-        mService.mPolicy.onConfigurationChanged();
+        forAllDisplays(mDisplayContentConfigChangesConsumer);
     }
 
     /**

@@ -36,6 +36,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -1229,32 +1230,40 @@ public class NotificationContentView extends FrameLayout {
         boolean hasRemoteInput = false;
         RemoteInput remoteInputWithChoices = null;
         PendingIntent pendingIntentWithChoices = null;
+        CharSequence[] choices = null;
 
         Notification.Action[] actions = entry.notification.getNotification().actions;
         if (actions != null) {
             for (Notification.Action a : actions) {
-                if (a.getRemoteInputs() != null) {
-                    for (RemoteInput ri : a.getRemoteInputs()) {
-                        boolean showRemoteInputView = ri.getAllowFreeFormInput();
-                        boolean showSmartReplyView = enableSmartReplies && ri.getChoices() != null
-                                && ri.getChoices().length > 0;
-                        if (showRemoteInputView) {
-                            hasRemoteInput = true;
+                if (a.getRemoteInputs() == null) {
+                    continue;
+                }
+                for (RemoteInput ri : a.getRemoteInputs()) {
+                    boolean showRemoteInputView = ri.getAllowFreeFormInput();
+                    boolean showSmartReplyView = enableSmartReplies
+                            && (ArrayUtils.isEmpty(ri.getChoices())
+                            || (showRemoteInputView && !ArrayUtils.isEmpty(entry.smartReplies)));
+                    if (showRemoteInputView) {
+                        hasRemoteInput = true;
+                    }
+                    if (showSmartReplyView) {
+                        remoteInputWithChoices = ri;
+                        pendingIntentWithChoices = a.actionIntent;
+                        if (!ArrayUtils.isEmpty(ri.getChoices())) {
+                            choices = ri.getChoices();
+                        } else {
+                            choices = entry.smartReplies;
                         }
-                        if (showSmartReplyView) {
-                            remoteInputWithChoices = ri;
-                            pendingIntentWithChoices = a.actionIntent;
-                        }
-                        if (showRemoteInputView || showSmartReplyView) {
-                            break;
-                        }
+                    }
+                    if (showRemoteInputView || showSmartReplyView) {
+                        break;
                     }
                 }
             }
         }
 
         applyRemoteInput(entry, hasRemoteInput);
-        applySmartReplyView(remoteInputWithChoices, pendingIntentWithChoices, entry);
+        applySmartReplyView(remoteInputWithChoices, pendingIntentWithChoices, entry, choices);
     }
 
     private void applyRemoteInput(NotificationData.Entry entry, boolean hasRemoteInput) {
@@ -1356,10 +1365,10 @@ public class NotificationContentView extends FrameLayout {
     }
 
     private void applySmartReplyView(RemoteInput remoteInput, PendingIntent pendingIntent,
-            NotificationData.Entry entry) {
+            NotificationData.Entry entry, CharSequence[] choices) {
         if (mExpandedChild != null) {
             mExpandedSmartReplyView =
-                    applySmartReplyView(mExpandedChild, remoteInput, pendingIntent, entry);
+                    applySmartReplyView(mExpandedChild, remoteInput, pendingIntent, entry, choices);
             if (mExpandedSmartReplyView != null && remoteInput != null
                     && remoteInput.getChoices() != null && remoteInput.getChoices().length > 0) {
                 mSmartReplyController.smartRepliesAdded(entry, remoteInput.getChoices().length);
@@ -1369,7 +1378,7 @@ public class NotificationContentView extends FrameLayout {
 
     private SmartReplyView applySmartReplyView(
             View view, RemoteInput remoteInput, PendingIntent pendingIntent,
-            NotificationData.Entry entry) {
+            NotificationData.Entry entry, CharSequence[] choices) {
         View smartReplyContainerCandidate = view.findViewById(
                 com.android.internal.R.id.smart_reply_container);
         if (!(smartReplyContainerCandidate instanceof LinearLayout)) {
@@ -1406,7 +1415,8 @@ public class NotificationContentView extends FrameLayout {
         }
         if (smartReplyView != null) {
             smartReplyView.setRepliesFromRemoteInput(remoteInput, pendingIntent,
-                    mSmartReplyController, entry, smartReplyContainer);
+                    mSmartReplyController, entry, smartReplyContainer, choices
+            );
             smartReplyContainer.setVisibility(View.VISIBLE);
         }
         return smartReplyView;

@@ -17,6 +17,7 @@
 
     <application android:name=".PackageInstallerApplication"
             android:label="@string/app_name"
+            android:icon="@drawable/ic_app_icon"
             android:allowBackup="false"
             android:theme="@style/DialogWhenLarge"
             android:supportsRtl="true"

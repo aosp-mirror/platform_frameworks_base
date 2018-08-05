@@ -19,6 +19,7 @@ package com.android.packageinstaller;
 import static com.android.packageinstaller.PackageUtil.getMaxTargetSdkVersionForUid;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
@@ -34,8 +35,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
-
-import androidx.annotation.Nullable;
 
 /**
  * Select which activity is the first visible activity of the installation and forward the intent to

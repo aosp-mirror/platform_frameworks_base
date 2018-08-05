@@ -17,6 +17,7 @@
 
 package android.filterfw.format;
 
+import android.annotation.UnsupportedAppUsage;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.MutableFrameFormat;
 import android.graphics.Bitmap;
@@ -48,6 +49,7 @@ public class ImageFormat {
         return result;
     }
 
+    @UnsupportedAppUsage
     public static MutableFrameFormat create(int width,
                                             int height,
                                             int colorspace,
@@ -59,6 +61,7 @@ public class ImageFormat {
                       target);
     }
 
+    @UnsupportedAppUsage
     public static MutableFrameFormat create(int colorspace, int target) {
         return create(FrameFormat.SIZE_UNSPECIFIED,
                       FrameFormat.SIZE_UNSPECIFIED,
@@ -67,6 +70,7 @@ public class ImageFormat {
                       target);
     }
 
+    @UnsupportedAppUsage
     public static MutableFrameFormat create(int colorspace) {
         return create(FrameFormat.SIZE_UNSPECIFIED,
                       FrameFormat.SIZE_UNSPECIFIED,

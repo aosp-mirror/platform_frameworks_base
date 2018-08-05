@@ -17,6 +17,8 @@
 package com.android.packageinstaller;
 
 import android.Manifest;
+import android.annotation.NonNull;
+import android.annotation.StringRes;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -46,11 +48,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
-
-import com.android.packageinstaller.permission.ui.OverlayTouchActivity;
 
 import java.io.File;
 

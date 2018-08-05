@@ -2033,7 +2033,7 @@ public class VectorDrawable extends Drawable {
                 if (fillColors instanceof  GradientColor) {
                     mFillColors = fillColors;
                     fillGradient = ((GradientColor) fillColors).getShader();
-                } else if (fillColors.isStateful()) {
+                } else if (fillColors.isStateful() || fillColors.canApplyTheme()) {
                     mFillColors = fillColors;
                 } else {
                     mFillColors = null;
@@ -2049,7 +2049,7 @@ public class VectorDrawable extends Drawable {
                 if (strokeColors instanceof GradientColor) {
                     mStrokeColors = strokeColors;
                     strokeGradient = ((GradientColor) strokeColors).getShader();
-                } else if (strokeColors.isStateful()) {
+                } else if (strokeColors.isStateful() || strokeColors.canApplyTheme()) {
                     mStrokeColors = strokeColors;
                 } else {
                     mStrokeColors = null;

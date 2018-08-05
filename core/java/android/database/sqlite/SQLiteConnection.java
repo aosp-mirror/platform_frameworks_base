@@ -19,6 +19,7 @@ package android.database.sqlite;
 import android.database.Cursor;
 import android.database.CursorWindow;
 import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteDebug.Consts;
 import android.database.sqlite.SQLiteDebug.DbStats;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
@@ -34,7 +35,6 @@ import dalvik.system.CloseGuard;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
@@ -89,8 +89,6 @@ import java.util.Map;
 public final class SQLiteConnection implements CancellationSignal.OnCancelListener {
     private static final String TAG = "SQLiteConnection";
     private static final boolean DEBUG = false;
-
-    public static volatile boolean sLocalDebug = false;
 
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
     private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
@@ -212,7 +210,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private void open() {
         mConnectionPtr = nativeOpen(mConfiguration.path, mConfiguration.openFlags,
                 mConfiguration.label,
-                SQLiteDebug.DEBUG_SQL_STATEMENTS, SQLiteDebug.DEBUG_SQL_TIME,
+                SQLiteDebug.Consts.DEBUG_SQL_STATEMENTS, SQLiteDebug.Consts.DEBUG_SQL_TIME,
                 mConfiguration.lookasideSlotSize, mConfiguration.lookasideSlotCount);
         setPageSize();
         setForeignKeyModeFromConfiguration();
@@ -993,10 +991,6 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     }
 
     private void bindArguments(PreparedStatement statement, Object[] bindArgs) {
-        if (sLocalDebug) {
-            Log.v(TAG, statement.mSql + " with args " + Arrays.toString(bindArgs));
-        }
-
         final int count = bindArgs != null ? bindArgs.length : 0;
         if (count != statement.mNumParameters) {
             throw new SQLiteBindOrColumnIndexOutOfRangeException(
@@ -1097,7 +1091,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         printer.println("  isPrimaryConnection: " + mIsPrimaryConnection);
         printer.println("  onlyAllowReadOnlyOperations: " + mOnlyAllowReadOnlyOperations);
 
-        mRecentOperations.dump(printer, verbose);
+        mRecentOperations.dump(printer);
 
         if (verbose) {
             mPreparedStatementCache.dump(printer);
@@ -1407,7 +1401,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 operation.mFinished = true;
                 final long execTime = operation.mEndTime - operation.mStartTime;
                 mPool.onStatementExecuted(execTime);
-                return SQLiteDebug.DEBUG_LOG_SLOW_QUERIES && SQLiteDebug.shouldLogSlowQuery(
+                return SQLiteDebug.Consts.DEBUG_LOG_SLOW_QUERIES && SQLiteDebug.shouldLogSlowQuery(
                         execTime);
             }
             return false;
@@ -1416,7 +1410,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         private void logOperationLocked(int cookie, String detail) {
             final Operation operation = getOperationLocked(cookie);
             StringBuilder msg = new StringBuilder();
-            operation.describe(msg, false);
+            operation.describe(msg, true);
             if (detail != null) {
                 msg.append(", ").append(detail);
             }
@@ -1446,7 +1440,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             }
         }
 
-        public void dump(Printer printer, boolean verbose) {
+        public void dump(Printer printer) {
             synchronized (mOperations) {
                 printer.println("  Most recently executed operations:");
                 int index = mIndex;
@@ -1463,7 +1457,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                         String formattedStartTime = opDF.format(new Date(operation.mStartWallTime));
                         msg.append(formattedStartTime);
                         msg.append("] ");
-                        operation.describe(msg, verbose);
+                        operation.describe(msg, false); // Never dump bingargs in a bugreport
                         printer.println(msg.toString());
 
                         if (index > 0) {
@@ -1498,7 +1492,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         public Exception mException;
         public int mCookie;
 
-        public void describe(StringBuilder msg, boolean verbose) {
+        public void describe(StringBuilder msg, boolean allowBindArgsLog) {
             msg.append(mKind);
             if (mFinished) {
                 msg.append(" took ").append(mEndTime - mStartTime).append("ms");
@@ -1510,7 +1504,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             if (mSql != null) {
                 msg.append(", sql=\"").append(trimSqlForDisplay(mSql)).append("\"");
             }
-            if (verbose && mBindArgs != null && mBindArgs.size() != 0) {
+            if (allowBindArgsLog && Consts.DEBUG_LOG_BIND_ARGS
+                    && mBindArgs != null && mBindArgs.size() != 0) {
                 msg.append(", bindArgs=[");
                 final int count = mBindArgs.size();
                 for (int i = 0; i < count; i++) {

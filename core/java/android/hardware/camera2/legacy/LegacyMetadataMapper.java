@@ -781,6 +781,7 @@ public class LegacyMetadataMapper {
                     CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE                   ,
                     CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE                       ,
                     CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE                    ,
+                    CameraCharacteristics.SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE    ,
                     CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE                    ,
                     CameraCharacteristics.SENSOR_ORIENTATION                              ,
                     CameraCharacteristics.STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES     ,
@@ -941,11 +942,12 @@ public class LegacyMetadataMapper {
         // Use the largest jpeg size (by area) for both active array and pixel array
         Size largestJpegSize = getLargestSupportedJpegSizeByArea(p);
         /*
-         * sensor.info.activeArraySize
+         * sensor.info.activeArraySize, and preCorrectionActiveArraySize
          */
         {
             Rect activeArrayRect = ParamsUtils.createRect(largestJpegSize);
             m.set(SENSOR_INFO_ACTIVE_ARRAY_SIZE, activeArrayRect);
+            m.set(SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE, activeArrayRect);
         }
 
         /*

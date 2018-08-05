@@ -701,6 +701,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public int addAccessibilityInteractionConnection(IWindow windowToken,
             IAccessibilityInteractionConnection connection, String packageName,
             int userId) throws RemoteException {
+        final int windowId;
         synchronized (mLock) {
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
@@ -713,7 +714,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             packageName = mSecurityPolicy.resolveValidReportedPackageLocked(
                     packageName, UserHandle.getCallingAppId(), resolvedUserId);
 
-            final int windowId = sNextWindowId++;
+            windowId = sNextWindowId++;
             // If the window is from a process that runs across users such as
             // the system UI or the system we add it to the global state that
             // is shared across users.
@@ -741,8 +742,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             + " and  token: " + windowToken.asBinder());
                 }
             }
-            return windowId;
         }
+        WindowManagerInternal wm = LocalServices.getService(WindowManagerInternal.class);
+        wm.computeWindowsForAccessibility();
+        return windowId;
     }
 
     @Override

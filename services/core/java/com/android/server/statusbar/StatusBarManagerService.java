@@ -547,50 +547,50 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
-    public void showFingerprintDialog(Bundle bundle, IBiometricPromptReceiver receiver) {
+    public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver) {
         if (mBar != null) {
             try {
-                mBar.showFingerprintDialog(bundle, receiver);
+                mBar.showBiometricDialog(bundle, receiver);
             } catch (RemoteException ex) {
             }
         }
     }
 
     @Override
-    public void onFingerprintAuthenticated() {
+    public void onBiometricAuthenticated() {
         if (mBar != null) {
             try {
-                mBar.onFingerprintAuthenticated();
+                mBar.onBiometricAuthenticated();
             } catch (RemoteException ex) {
             }
         }
     }
 
     @Override
-    public void onFingerprintHelp(String message) {
+    public void onBiometricHelp(String message) {
         if (mBar != null) {
             try {
-                mBar.onFingerprintHelp(message);
+                mBar.onBiometricHelp(message);
             } catch (RemoteException ex) {
             }
         }
     }
 
     @Override
-    public void onFingerprintError(String error) {
+    public void onBiometricError(String error) {
         if (mBar != null) {
             try {
-                mBar.onFingerprintError(error);
+                mBar.onBiometricError(error);
             } catch (RemoteException ex) {
             }
         }
     }
 
     @Override
-    public void hideFingerprintDialog() {
+    public void hideBiometricDialog() {
         if (mBar != null) {
             try {
-                mBar.hideFingerprintDialog();
+                mBar.hideBiometricDialog();
             } catch (RemoteException ex) {
             }
         }

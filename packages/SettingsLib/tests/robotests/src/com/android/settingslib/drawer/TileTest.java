@@ -31,19 +31,19 @@ public class TileTest {
         mActivityInfo = new ActivityInfo();
         mActivityInfo.packageName = RuntimeEnvironment.application.getPackageName();
         mActivityInfo.icon = R.drawable.ic_plus;
-        mTile = new Tile(mActivityInfo);
-        mTile.metaData = new Bundle();
+        mActivityInfo.metaData = new Bundle();
+        mTile = new Tile(mActivityInfo, "category");
     }
 
     @Test
     public void isPrimaryProfileOnly_profilePrimary_shouldReturnTrue() {
-        mTile.metaData.putString(META_DATA_KEY_PROFILE, PROFILE_PRIMARY);
+        mActivityInfo.metaData.putString(META_DATA_KEY_PROFILE, PROFILE_PRIMARY);
         assertThat(mTile.isPrimaryProfileOnly()).isTrue();
     }
 
     @Test
     public void isPrimaryProfileOnly_profileAll_shouldReturnFalse() {
-        mTile.metaData.putString(META_DATA_KEY_PROFILE, PROFILE_ALL);
+        mActivityInfo.metaData.putString(META_DATA_KEY_PROFILE, PROFILE_ALL);
         assertThat(mTile.isPrimaryProfileOnly()).isFalse();
     }
 
@@ -54,27 +54,27 @@ public class TileTest {
 
     @Test
     public void isPrimaryProfileOnly_nullMetadata_shouldReturnFalse() {
-        mTile.metaData = null;
+        mActivityInfo.metaData = null;
         assertThat(mTile.isPrimaryProfileOnly()).isFalse();
     }
 
     @Test
     public void getIcon_noContextOrMetadata_returnNull() {
-        final Tile tile = new Tile(new ActivityInfo());
+        final Tile tile = new Tile(new ActivityInfo(), "category");
         assertThat(tile.getIcon(null)).isNull();
         assertThat(tile.getIcon(RuntimeEnvironment.application)).isNull();
     }
 
     @Test
     public void getIcon_providedByUri_returnNull() {
-        mTile.metaData.putString(META_DATA_PREFERENCE_ICON_URI, "content://foobar/icon");
+        mActivityInfo.metaData.putString(META_DATA_PREFERENCE_ICON_URI, "content://foobar/icon");
 
         assertThat(mTile.getIcon(RuntimeEnvironment.application)).isNull();
     }
 
     @Test
     public void getIcon_hasIconMetadata_returnIcon() {
-        mTile.metaData.putInt(META_DATA_PREFERENCE_ICON, R.drawable.ic_info);
+        mActivityInfo.metaData.putInt(META_DATA_PREFERENCE_ICON, R.drawable.ic_info);
 
         assertThat(mTile.getIcon(RuntimeEnvironment.application).getResId())
                 .isEqualTo(R.drawable.ic_info);
@@ -82,9 +82,39 @@ public class TileTest {
 
     @Test
     public void getIcon_noIconMetadata_returnActivityIcon() {
-        mTile.metaData.putInt(META_DATA_PREFERENCE_ICON, 0);
+        mActivityInfo.metaData.putInt(META_DATA_PREFERENCE_ICON, 0);
 
         assertThat(mTile.getIcon(RuntimeEnvironment.application).getResId())
                 .isEqualTo(mActivityInfo.icon);
+    }
+
+    @Test
+    public void isIconTintable_hasMetadata_shouldReturnIconTintableMetadata() {
+        final Tile tile = new Tile(mActivityInfo, "category");
+
+        mActivityInfo.metaData.putBoolean(TileUtils.META_DATA_PREFERENCE_ICON_TINTABLE, false);
+        assertThat(tile.isIconTintable(RuntimeEnvironment.application)).isFalse();
+
+        mActivityInfo.metaData.putBoolean(TileUtils.META_DATA_PREFERENCE_ICON_TINTABLE, true);
+        assertThat(tile.isIconTintable(RuntimeEnvironment.application)).isTrue();
+    }
+
+    @Test
+    public void isIconTintable_noIcon_shouldReturnFalse() {
+        final Tile tile = new Tile(mActivityInfo, "category");
+
+        assertThat(tile.isIconTintable(RuntimeEnvironment.application)).isFalse();
+    }
+
+    @Test
+    public void isIconTintable_noMetadata_shouldReturnPackageNameCheck() {
+        final Tile tile1 = new Tile(mActivityInfo, "category");
+        assertThat(tile1.isIconTintable(RuntimeEnvironment.application)).isFalse();
+
+        final ActivityInfo activityInfo = new ActivityInfo();
+        activityInfo.packageName = "blah";
+
+        final Tile tile2 = new Tile(activityInfo, "category");
+        assertThat(tile2.isIconTintable(RuntimeEnvironment.application)).isTrue();
     }
 }

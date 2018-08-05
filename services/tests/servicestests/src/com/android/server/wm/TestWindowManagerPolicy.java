@@ -31,7 +31,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.proto.ProtoOutputStream;
-import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.IWindow;
 import android.view.IWindowManager;
@@ -73,14 +72,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     }
 
-    @Override
-    public boolean isDefaultOrientationForced() {
-        return false;
-    }
-
-    @Override
-    public void setInitialDisplaySize(Display display, int width, int height, int density) {
-
+    public void setDefaultDisplay(DisplayContentInfo displayContentInfo) {
     }
 
     @Override
@@ -389,22 +381,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     public void onKeyguardOccludedChangedLw(boolean occluded) {
     }
 
-    @Override
-    public int rotationForOrientationLw(int orientation, int lastRotation, boolean defaultDisplay) {
-        return rotationToReport;
-    }
-
-    @Override
-    public boolean rotationHasCompatibleMetricsLw(int orientation, int rotation) {
-        return true;
-    }
-
-    @Override
-    public void setRotationLw(int rotation) {
-
-    }
-
-    @Override
     public void setSafeMode(boolean safeMode) {
 
     }
@@ -436,11 +412,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void enableScreenAfterBoot() {
-
-    }
-
-    @Override
-    public void setCurrentOrientationLw(int newOrientation) {
 
     }
 
@@ -562,12 +533,13 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void onConfigurationChanged() {
+    public void onConfigurationChanged(DisplayContentInfo displayContentInfo) {
 
     }
 
     @Override
-    public boolean shouldRotateSeamlessly(int oldRotation, int newRotation) {
+    public boolean shouldRotateSeamlessly(DisplayRotation displayRotation, int oldRotation,
+            int newRotation) {
         return false;
     }
 

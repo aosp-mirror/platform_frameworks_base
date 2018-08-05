@@ -56,7 +56,7 @@ import com.android.server.testing.shadows.ShadowAppBackupUtils;
 import com.android.server.testing.shadows.ShadowBackupPolicyEnforcer;
 import com.android.server.testing.shadows.ShadowBinder;
 import com.android.server.testing.shadows.ShadowKeyValueBackupJob;
-import com.android.server.testing.shadows.ShadowPerformBackupTask;
+import com.android.server.testing.shadows.ShadowKeyValueBackupTask;
 import java.io.File;
 import java.util.List;
 import org.junit.After;
@@ -72,7 +72,6 @@ import org.robolectric.shadows.ShadowContextWrapper;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowPackageManager;
 import org.robolectric.shadows.ShadowSettings;
-import org.robolectric.shadows.ShadowSystemClock;
 
 @RunWith(FrameworkRobolectricTestRunner.class)
 @Config(
@@ -668,7 +667,7 @@ public class BackupManagerServiceTest {
     }
 
     private void tearDownForRequestBackup() {
-        ShadowPerformBackupTask.reset();
+        ShadowKeyValueBackupTask.reset();
     }
 
     @Test
@@ -755,12 +754,12 @@ public class BackupManagerServiceTest {
 
         assertThat(result).isEqualTo(BackupManager.SUCCESS);
         verify(mObserver).onResult(PACKAGE_1, BackupManager.ERROR_BACKUP_NOT_ALLOWED);
-        // TODO: We probably don't need to kick-off PerformBackupTask when list is empty
+        // TODO: We probably don't need to kick-off KeyValueBackupTask when list is empty
         tearDownForRequestBackup();
     }
 
     @Test
-    @Config(shadows = ShadowPerformBackupTask.class)
+    @Config(shadows = ShadowKeyValueBackupTask.class)
     public void testRequestBackup_whenPackageIsKeyValue() throws Exception {
         setUpForRequestBackup(PACKAGE_1);
         BackupManagerService backupManagerService = createBackupManagerServiceForRequestBackup();
@@ -769,15 +768,15 @@ public class BackupManagerServiceTest {
 
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(BackupManager.SUCCESS);
-        ShadowPerformBackupTask shadowTask = ShadowPerformBackupTask.getLastCreated();
+        ShadowKeyValueBackupTask shadowTask = ShadowKeyValueBackupTask.getLastCreated();
         assertThat(shadowTask.getQueue()).containsExactly(new BackupRequest(PACKAGE_1));
         assertThat(shadowTask.getPendingFullBackups()).isEmpty();
-        // TODO: Assert more about PerformBackupTask
+        // TODO: Assert more about KeyValueBackupTask
         tearDownForRequestBackup();
     }
 
     @Test
-    @Config(shadows = ShadowPerformBackupTask.class)
+    @Config(shadows = ShadowKeyValueBackupTask.class)
     public void testRequestBackup_whenPackageIsFullBackup() throws Exception {
         setUpForRequestBackup(PACKAGE_1);
         ShadowAppBackupUtils.setAppGetsFullBackup(PACKAGE_1);
@@ -787,10 +786,10 @@ public class BackupManagerServiceTest {
 
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(BackupManager.SUCCESS);
-        ShadowPerformBackupTask shadowTask = ShadowPerformBackupTask.getLastCreated();
+        ShadowKeyValueBackupTask shadowTask = ShadowKeyValueBackupTask.getLastCreated();
         assertThat(shadowTask.getQueue()).isEmpty();
         assertThat(shadowTask.getPendingFullBackups()).containsExactly(PACKAGE_1);
-        // TODO: Assert more about PerformBackupTask
+        // TODO: Assert more about KeyValueBackupTask
         tearDownForRequestBackup();
     }
 

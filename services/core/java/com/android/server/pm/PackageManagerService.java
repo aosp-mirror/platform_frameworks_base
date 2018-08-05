@@ -17293,13 +17293,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         "Instant app package must target at least O");
                 return;
             }
-            if (pkg.applicationInfo.targetSandboxVersion != 2) {
-                Slog.w(TAG, "Instant app package " + pkg.packageName
-                        + " does not target targetSandboxVersion 2");
-                res.setError(INSTALL_FAILED_INSTANT_APP_INVALID,
-                        "Instant app package must use targetSandboxVersion 2");
-                return;
-            }
             if (pkg.mSharedUserId != null) {
                 Slog.w(TAG, "Instant app package " + pkg.packageName
                         + " may not declare sharedUserId.");

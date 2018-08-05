@@ -134,6 +134,9 @@ public class ButtonDispatcher {
                 ((ButtonInterface) mViews.get(i)).setImageDrawable(mImageDrawable);
             }
         }
+        if (mImageDrawable != null) {
+            mImageDrawable.setCallback(mCurrentView);
+        }
     }
 
     public void setVisibility(int visibility) {
@@ -266,6 +269,9 @@ public class ButtonDispatcher {
 
     public void setCurrentView(View currentView) {
         mCurrentView = currentView.findViewById(mId);
+        if (mImageDrawable != null) {
+            mImageDrawable.setCallback(mCurrentView);
+        }
     }
 
     public void setVertical(boolean vertical) {

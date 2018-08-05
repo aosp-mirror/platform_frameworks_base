@@ -280,6 +280,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         if (bounceAnims.isEmpty()) {
             // All tileSpecs are on the first page. Nothing to do.
             // TODO: potentially show a bounce animation for first page QS tiles
+            endFakeDrag();
             return;
         }
 
@@ -293,8 +294,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             }
         });
         setOffscreenPageLimit(lastPageNumber); // Ensure the page to reveal has been inflated.
-        mScroller.startScroll(getScrollX(), getScrollY(), getWidth() * lastPageNumber, 0,
-                REVEAL_SCROLL_DURATION_MILLIS);
+        int dx = getWidth() * lastPageNumber;
+        mScroller.startScroll(getScrollX(), getScrollY(), isLayoutRtl() ? -dx  : dx, 0,
+            REVEAL_SCROLL_DURATION_MILLIS);
         postInvalidateOnAnimation();
     }
 

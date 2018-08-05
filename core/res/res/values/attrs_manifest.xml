@@ -1358,7 +1358,10 @@
     <!-- Specifies the target sandbox this app wants to use. Higher sandbox versions
          will have increasing levels of security.
 
-         <p>The default value of this attribute is <code>1</code>. -->
+         <p>The default value of this attribute is <code>1</code>.
+         <p>
+         @deprecated The security properties have been moved to
+         {@link android.os.Build.VERSION Build.VERSION} 27 and 28. -->
     <attr name="targetSandboxVersion" format="integer" />
 
     <!-- The user-visible SDK version (ex. 26) of the framework against which the application was

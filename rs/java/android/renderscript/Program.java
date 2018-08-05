@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.util.Log;
 
@@ -45,6 +46,7 @@ public class Program extends BaseObj {
      *
      **/
     public enum TextureType {
+        @UnsupportedAppUsage
         TEXTURE_2D (0),
         TEXTURE_CUBE (1);
 
@@ -199,20 +201,30 @@ public class Program extends BaseObj {
 
 
     public static class BaseProgramBuilder {
+        @UnsupportedAppUsage
         RenderScript mRS;
+        @UnsupportedAppUsage
         Element mInputs[];
+        @UnsupportedAppUsage
         Element mOutputs[];
+        @UnsupportedAppUsage
         Type mConstants[];
         Type mTextures[];
         TextureType mTextureTypes[];
         String mTextureNames[];
+        @UnsupportedAppUsage
         int mInputCount;
+        @UnsupportedAppUsage
         int mOutputCount;
+        @UnsupportedAppUsage
         int mConstantCount;
+        @UnsupportedAppUsage
         int mTextureCount;
+        @UnsupportedAppUsage
         String mShader;
 
 
+        @UnsupportedAppUsage
         protected BaseProgramBuilder(RenderScript rs) {
             mRS = rs;
             mInputs = new Element[MAX_INPUT];

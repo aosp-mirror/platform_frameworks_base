@@ -17,6 +17,7 @@
 package android.bluetooth.le;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.bluetooth.BluetoothUuid;
 import android.os.ParcelUuid;
 import android.util.ArrayMap;
@@ -174,6 +175,7 @@ public final class ScanRecord {
      * @param scanRecord The scan record of Bluetooth LE advertisement and/or scan response.
      * @hide
      */
+    @UnsupportedAppUsage
     public static ScanRecord parseFromBytes(byte[] scanRecord) {
         if (scanRecord == null) {
             return null;

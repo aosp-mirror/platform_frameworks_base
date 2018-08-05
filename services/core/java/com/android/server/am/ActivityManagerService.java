@@ -3620,8 +3620,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         mPendingStarts.remove(startSeq);
                         app.pendingStart = false;
                         forceStopPackageLocked(app.info.packageName, UserHandle.getAppId(app.uid),
-                                false, false, true, false, false,
-                                UserHandle.getUserId(app.userId), "start failure");
+                                false, false, true, false, false, app.userId, "start failure");
                     }
                 }
             });
@@ -3637,8 +3636,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.e(TAG, "Failure starting process " + app.processName, e);
                 app.pendingStart = false;
                 forceStopPackageLocked(app.info.packageName, UserHandle.getAppId(app.uid),
-                        false, false, true, false, false,
-                        UserHandle.getUserId(app.userId), "start failure");
+                        false, false, true, false, false, app.userId, "start failure");
             }
             return app.pid > 0;
         }
@@ -6019,10 +6017,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             // We deprecated Build.SERIAL and it is not accessible to
-            // apps that target the v2 security sandbox and to apps that
-            // target APIs higher than O MR1. Since access to the serial
+            // Instant Apps and target APIs higher than O MR1. Since access to the serial
             // is now behind a permission we push down the value.
-            final String buildSerial = (appInfo.targetSandboxVersion < 2
+            final String buildSerial = (!appInfo.isInstantApp()
                     && appInfo.targetSdkVersion < Build.VERSION_CODES.P)
                             ? sTheRealBuildSerial : Build.UNKNOWN;
 

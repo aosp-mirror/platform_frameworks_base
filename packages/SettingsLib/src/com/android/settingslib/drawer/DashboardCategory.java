@@ -24,37 +24,33 @@ import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class DashboardCategory implements Parcelable {
 
     /**
-     * Title of the category that is shown to the user.
-     */
-    public CharSequence title;
-
-    /**
      * Key used for placing external tiles.
      */
-    public String key;
-
-    /**
-     * Used to control display order.
-     */
-    public int priority;
+    public final String key;
 
     /**
      * List of the category's children
      */
     private List<Tile> mTiles = new ArrayList<>();
 
-    public DashboardCategory() {
-        // Empty
+    public DashboardCategory(String key) {
+        this.key = key;
     }
 
     DashboardCategory(Parcel in) {
-        readFromParcel(in);
+        key = in.readString();
+
+        final int count = in.readInt();
+
+        for (int n = 0; n < count; n++) {
+            Tile tile = Tile.CREATOR.createFromParcel(in);
+            mTiles.add(tile);
+        }
     }
 
     /**
@@ -75,14 +71,6 @@ public class DashboardCategory implements Parcelable {
         mTiles.add(tile);
     }
 
-    public synchronized void addTile(int n, Tile tile) {
-        mTiles.add(n, tile);
-    }
-
-    public synchronized void removeTile(Tile tile) {
-        mTiles.remove(tile);
-    }
-
     public synchronized void removeTile(int n) {
         mTiles.remove(n);
     }
@@ -99,7 +87,7 @@ public class DashboardCategory implements Parcelable {
      * Sort priority value for tiles in this category.
      */
     public void sortTiles() {
-        Collections.sort(mTiles, TILE_COMPARATOR);
+        Collections.sort(mTiles, Tile.TILE_COMPARATOR);
     }
 
     /**
@@ -136,9 +124,7 @@ public class DashboardCategory implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        TextUtils.writeToParcel(title, dest, flags);
         dest.writeString(key);
-        dest.writeInt(priority);
 
         final int count = mTiles.size();
         dest.writeInt(count);
@@ -149,20 +135,6 @@ public class DashboardCategory implements Parcelable {
         }
     }
 
-    public void readFromParcel(Parcel in) {
-        title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-        key = in.readString();
-        priority = in.readInt();
-
-        final int count = in.readInt();
-
-        for (int n = 0; n < count; n++) {
-            Tile tile = Tile.CREATOR.createFromParcel(in);
-            mTiles.add(tile);
-        }
-    }
-
-
     public static final Creator<DashboardCategory> CREATOR = new Creator<DashboardCategory>() {
         public DashboardCategory createFromParcel(Parcel source) {
             return new DashboardCategory(source);
@@ -172,13 +144,5 @@ public class DashboardCategory implements Parcelable {
             return new DashboardCategory[size];
         }
     };
-
-    public static final Comparator<Tile> TILE_COMPARATOR =
-            new Comparator<Tile>() {
-                @Override
-                public int compare(Tile lhs, Tile rhs) {
-                    return rhs.priority - lhs.priority;
-                }
-            };
 
 }

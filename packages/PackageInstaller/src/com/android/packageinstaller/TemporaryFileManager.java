@@ -16,11 +16,11 @@
 
 package com.android.packageinstaller;
 
+import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.SystemClock;
-import androidx.annotation.NonNull;
 import android.util.Log;
 
 import java.io.File;

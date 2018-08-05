@@ -50,7 +50,6 @@ import android.provider.Settings.Global;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Pair;
-import android.widget.RemoteViews;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
@@ -60,16 +59,12 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.annotation.Config;
-import org.robolectric.annotation.Implementation;
-import org.robolectric.annotation.Implements;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(shadows = TileUtilsTest.TileUtilsShadowRemoteViews.class)
 public class TileUtilsTest {
 
     private Context mContext;
@@ -113,11 +108,10 @@ public class TileUtilsTest {
                 .thenReturn(info);
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */, true /* forceTintExternalIcon */);
+                null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles.size()).isEqualTo(1);
-        assertThat(outTiles.get(0).category).isEqualTo(testCategory);
+        assertThat(outTiles.get(0).getCategory()).isEqualTo(testCategory);
     }
 
     @Test
@@ -134,8 +128,7 @@ public class TileUtilsTest {
                 .thenReturn(info);
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */, true /* forceTintExternalIcon */);
+                null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles.size()).isEqualTo(1);
         assertThat(outTiles.get(0).key).isEqualTo(keyHint);
@@ -154,8 +147,7 @@ public class TileUtilsTest {
                 .thenReturn(info);
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */, true /* forceTintExternalIcon */);
+                null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles.isEmpty()).isTrue();
     }
@@ -178,7 +170,7 @@ public class TileUtilsTest {
                 .thenReturn(info);
 
         List<DashboardCategory> categoryList = TileUtils.getCategories(mContext, cache, testAction);
-        assertThat(categoryList.get(0).getTile(0).category).isEqualTo(testCategory);
+        assertThat(categoryList.get(0).getTile(0).getCategory()).isEqualTo(testCategory);
     }
 
     @Test
@@ -214,8 +206,7 @@ public class TileUtilsTest {
                 .thenReturn(info);
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */, true /* forceTintExternalIcon */);
+                null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles.size()).isEqualTo(1);
         assertThat(outTiles.get(0).title).isEqualTo("my title");
@@ -238,15 +229,13 @@ public class TileUtilsTest {
                 .thenReturn("my localized title");
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */, true /* forceTintExternalIcon */);
-
+                null /* defaultCategory */, outTiles, false /* usePriority */);
         assertThat(outTiles.size()).isEqualTo(1);
         assertThat(outTiles.get(0).title).isEqualTo("my localized title");
 
         // Icon should be tintable because the tile is not from settings package, and
         // "forceTintExternalIcon" is set
-        assertThat(outTiles.get(0).isIconTintable).isTrue();
+        assertThat(outTiles.get(0).isIconTintable(mContext)).isTrue();
     }
 
     @Test
@@ -265,11 +254,9 @@ public class TileUtilsTest {
                 .thenReturn(info);
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */, true /* forceTintExternalIcon */);
+                null /* defaultCategory */, outTiles, false /* usePriority */);
 
-        assertThat(outTiles.size()).isEqualTo(1);
-        assertThat(outTiles.get(0).isIconTintable).isFalse();
+        assertThat(outTiles.get(0).isIconTintable(mContext)).isFalse();
     }
 
     @Test
@@ -288,11 +275,9 @@ public class TileUtilsTest {
                 .thenReturn(info);
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */, false /* forceTintExternalIcon */);
+                null /* defaultCategory */, outTiles, false /* usePriority */);
 
-        assertThat(outTiles.size()).isEqualTo(1);
-        assertThat(outTiles.get(0).isIconTintable).isTrue();
+        assertThat(outTiles.get(0).isIconTintable(mContext)).isTrue();
     }
 
     @Test
@@ -310,8 +295,7 @@ public class TileUtilsTest {
 
         // Case 1: No provider associated with the uri specified.
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */, true /* forceTintExternalIcon */);
+                null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles.size()).isEqualTo(1);
         assertThat(outTiles.get(0).getIcon(mContext).getResId()).isEqualTo(314159);
@@ -328,8 +312,7 @@ public class TileUtilsTest {
                 .thenReturn(mIContentProvider);
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */, true /* forceTintExternalIcon */);
+                null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles.size()).isEqualTo(1);
         assertThat(outTiles.get(0).getIcon(mContext).getResId()).isEqualTo(314159);
@@ -350,8 +333,7 @@ public class TileUtilsTest {
                 .thenReturn(info);
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */, true /* forceTintExternalIcon */);
+                null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles.size()).isEqualTo(1);
     }
@@ -411,19 +393,6 @@ public class TileUtilsTest {
                 info.activityInfo.metaData = new Bundle();
             }
             info.activityInfo.metaData.putString(key, value);
-        }
-    }
-
-    @Implements(RemoteViews.class)
-    public static class TileUtilsShadowRemoteViews {
-
-        private Integer overrideViewId;
-        private CharSequence overrideText;
-
-        @Implementation
-        public void setTextViewText(int viewId, CharSequence text) {
-            overrideViewId = viewId;
-            overrideText = text;
         }
     }
 }

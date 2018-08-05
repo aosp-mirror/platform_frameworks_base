@@ -48,7 +48,7 @@ public class BinderCallsStatsPerfTest {
 
     @Before
     public void setUp() {
-        mBinderCallsStats = new BinderCallsStats(new Random());
+        mBinderCallsStats = new BinderCallsStats(new BinderCallsStats.Injector());
     }
 
     @After

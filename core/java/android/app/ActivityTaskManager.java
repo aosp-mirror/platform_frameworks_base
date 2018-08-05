@@ -204,6 +204,19 @@ public class ActivityTaskManager {
     }
 
     /**
+     * Removes all visible recent tasks from the system.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.REMOVE_TASKS)
+    public void removeAllVisibleRecentTasks() {
+        try {
+            getService().removeAllVisibleRecentTasks();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return the maximum number of recents entries that we will maintain and show.
      * @hide
      */

@@ -30,6 +30,7 @@ import com.android.systemui.SysuiTestCase;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.List;
 
 @SmallTest
 public class NotificationUiAdjustmentTest extends SysuiTestCase {
@@ -41,8 +42,8 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
         Notification.Action action =
                 createActionBuilder("first", R.drawable.ic_corp_icon, pendingIntent).build();
         assertThat(NotificationUiAdjustment.needReinflate(
-                new NotificationUiAdjustment("first", Collections.emptyList()),
-                new NotificationUiAdjustment("second", Collections.singletonList(action))))
+                createUiAdjustmentFromSmartActions("first", Collections.emptyList()),
+                createUiAdjustmentFromSmartActions("second", Collections.singletonList(action))))
                 .isTrue();
     }
 
@@ -56,8 +57,8 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
                 createActionBuilder("second", R.drawable.ic_corp_icon, pendingIntent).build();
 
         assertThat(NotificationUiAdjustment.needReinflate(
-                new NotificationUiAdjustment("first", Collections.singletonList(firstAction)),
-                new NotificationUiAdjustment("second", Collections.singletonList(secondAction))))
+                createUiAdjustmentFromSmartActions("first", Collections.singletonList(firstAction)),
+                createUiAdjustmentFromSmartActions("second", Collections.singletonList(secondAction))))
                 .isTrue();
     }
 
@@ -72,8 +73,8 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
                         .build();
 
         assertThat(NotificationUiAdjustment.needReinflate(
-                new NotificationUiAdjustment("first", Collections.singletonList(firstAction)),
-                new NotificationUiAdjustment("second", Collections.singletonList(secondAction))))
+                createUiAdjustmentFromSmartActions("first", Collections.singletonList(firstAction)),
+                createUiAdjustmentFromSmartActions("second", Collections.singletonList(secondAction))))
                 .isTrue();
     }
 
@@ -91,8 +92,8 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
                         .build();
 
         assertThat(NotificationUiAdjustment.needReinflate(
-                new NotificationUiAdjustment("first", Collections.singletonList(firstAction)),
-                new NotificationUiAdjustment("second", Collections.singletonList(secondAction))))
+                createUiAdjustmentFromSmartActions("first", Collections.singletonList(firstAction)),
+                createUiAdjustmentFromSmartActions("second", Collections.singletonList(secondAction))))
                 .isTrue();
     }
 
@@ -116,8 +117,8 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
                         .build();
 
         assertThat(NotificationUiAdjustment.needReinflate(
-                new NotificationUiAdjustment("first", Collections.singletonList(firstAction)),
-                new NotificationUiAdjustment("second", Collections.singletonList(secondAction))))
+                createUiAdjustmentFromSmartActions("first", Collections.singletonList(firstAction)),
+                createUiAdjustmentFromSmartActions("second", Collections.singletonList(secondAction))))
                 .isTrue();
     }
 
@@ -141,8 +142,8 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
                         .build();
 
         assertThat(NotificationUiAdjustment.needReinflate(
-                new NotificationUiAdjustment("first", Collections.singletonList(firstAction)),
-                new NotificationUiAdjustment("second", Collections.singletonList(secondAction))))
+                createUiAdjustmentFromSmartActions("first", Collections.singletonList(firstAction)),
+                createUiAdjustmentFromSmartActions("second", Collections.singletonList(secondAction))))
                 .isTrue();
     }
 
@@ -163,8 +164,25 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
                         .addRemoteInput(secondRemoteInput).build();
 
         assertThat(NotificationUiAdjustment.needReinflate(
-                new NotificationUiAdjustment("first", Collections.singletonList(firstAction)),
-                new NotificationUiAdjustment("second", Collections.singletonList(secondAction))))
+                createUiAdjustmentFromSmartActions("first", Collections.singletonList(firstAction)),
+                createUiAdjustmentFromSmartActions(
+                        "second", Collections.singletonList(secondAction))))
+                .isFalse();
+    }
+
+    @Test
+    public void needReinflate_differentSmartReplies() {
+        assertThat(NotificationUiAdjustment.needReinflate(
+                createUiAdjustmentFromSmartReplies("first", new CharSequence[]{"a", "b"}),
+                createUiAdjustmentFromSmartReplies("first", new CharSequence[] {"b", "a"})))
+                .isTrue();
+    }
+
+    @Test
+    public void needReinflate_sameSmartReplies() {
+        assertThat(NotificationUiAdjustment.needReinflate(
+                createUiAdjustmentFromSmartReplies("first", new CharSequence[] {"a", "b"}),
+                createUiAdjustmentFromSmartReplies("first", new CharSequence[] {"a", "b"})))
                 .isFalse();
     }
 
@@ -176,5 +194,15 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
 
     private RemoteInput createRemoteInput(String resultKey, String label, CharSequence[] choices) {
         return new RemoteInput.Builder(resultKey).setLabel(label).setChoices(choices).build();
+    }
+
+    private NotificationUiAdjustment createUiAdjustmentFromSmartActions(
+            String key, List<Notification.Action> actions) {
+        return new NotificationUiAdjustment(key, actions, new CharSequence[0]);
+    }
+
+    private NotificationUiAdjustment createUiAdjustmentFromSmartReplies(
+            String key, CharSequence[] replies) {
+        return new NotificationUiAdjustment(key, Collections.emptyList(), replies);
     }
 }

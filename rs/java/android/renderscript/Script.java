@@ -16,6 +16,7 @@
 
 package android.renderscript;
 
+import android.annotation.UnsupportedAppUsage;
 import android.util.SparseArray;
 
 /**
@@ -475,8 +476,10 @@ public class Script extends BaseObj {
      *
      */
     public static class Builder {
+        @UnsupportedAppUsage
         RenderScript mRS;
 
+        @UnsupportedAppUsage
         Builder(RenderScript rs) {
             mRS = rs;
         }

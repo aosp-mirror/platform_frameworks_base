@@ -35,6 +35,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -59,12 +60,6 @@ public class Tile implements Parcelable {
     public CharSequence summary;
 
     /**
-     * Whether the icon can be tinted. This should be set to true for monochrome (single-color)
-     * icons that can be tinted to match the design.
-     */
-    public boolean isIconTintable;
-
-    /**
      * Intent to launch when the preference is selected.
      */
     public Intent intent;
@@ -74,15 +69,7 @@ public class Tile implements Parcelable {
      */
     public ArrayList<UserHandle> userHandle = new ArrayList<>();
 
-    /**
-     * Optional additional data for use by subclasses of the activity
-     */
-    public Bundle extras;
-
-    /**
-     * Category in which the tile should be placed.
-     */
-    public String category;
+    private String mCategory;
 
     /**
      * Priority of the intent filter that created this tile, used for display ordering.
@@ -92,22 +79,23 @@ public class Tile implements Parcelable {
     /**
      * The metaData from the activity that defines this tile.
      */
-    public Bundle metaData;
+    private Bundle mMetaData;
 
     /**
      * Optional key to use for this tile.
      */
     public String key;
 
-
     private final String mActivityPackage;
     private final String mActivityName;
     private ActivityInfo mActivityInfo;
 
-    public Tile(ActivityInfo activityInfo) {
+    public Tile(ActivityInfo activityInfo, String category) {
         mActivityInfo = activityInfo;
         mActivityPackage = mActivityInfo.packageName;
         mActivityName = mActivityInfo.name;
+        mMetaData = activityInfo.metaData;
+        mCategory = category;
     }
 
     @Override
@@ -132,12 +120,32 @@ public class Tile implements Parcelable {
         for (int i = 0; i < N; i++) {
             userHandle.get(i).writeToParcel(dest, flags);
         }
-        dest.writeBundle(extras);
-        dest.writeString(category);
+        dest.writeString(mCategory);
         dest.writeInt(priority);
-        dest.writeBundle(metaData);
+        dest.writeBundle(mMetaData);
         dest.writeString(key);
-        dest.writeBoolean(isIconTintable);
+    }
+
+    /**
+     * Category in which the tile should be placed.
+     */
+    public String getCategory() {
+        return mCategory;
+    }
+
+    public void setCategory(String newCategoryKey) {
+        mCategory = newCategoryKey;
+    }
+
+    /**
+     * Priority of the intent filter that created this tile, used for display ordering.
+     */
+    public int getPriority() {
+        return 0;
+    }
+
+    public Bundle getMetaData() {
+        return mMetaData;
     }
 
     /**
@@ -146,17 +154,17 @@ public class Tile implements Parcelable {
      * @attr ref android.R.styleable#PreferenceHeader_icon
      */
     public Icon getIcon(Context context) {
-        if (context == null || metaData == null) {
+        if (context == null || mMetaData == null) {
             return null;
         }
 
-        int iconResId = metaData.getInt(META_DATA_PREFERENCE_ICON);
+        int iconResId = mMetaData.getInt(META_DATA_PREFERENCE_ICON);
         // Set the icon
         if (iconResId == 0) {
             // Only fallback to activityinfo.icon if metadata does not contain ICON_URI.
             // ICON_URI should be loaded in app UI when need the icon object. Handling IPC at this
             // level is too complex because we don't have a strong threading contract for this class
-            if (!metaData.containsKey(META_DATA_PREFERENCE_ICON_URI)) {
+            if (!mMetaData.containsKey(META_DATA_PREFERENCE_ICON_URI)) {
                 iconResId = getActivityInfo(context).icon;
             }
         }
@@ -165,6 +173,21 @@ public class Tile implements Parcelable {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Whether the icon can be tinted. This is true when icon needs to be monochrome (single-color)
+     */
+    public boolean isIconTintable(Context context) {
+        if (mMetaData != null
+                && mMetaData.containsKey(TileUtils.META_DATA_PREFERENCE_ICON_TINTABLE)) {
+            return mMetaData.getBoolean(TileUtils.META_DATA_PREFERENCE_ICON_TINTABLE);
+        }
+        final String pkgName = context.getPackageName();
+        // If this drawable is coming from outside Settings, tint it to match the color.
+        final ActivityInfo activityInfo = getActivityInfo(context);
+        return activityInfo != null
+                && !TextUtils.equals(pkgName, activityInfo.packageName);
     }
 
     Tile(Parcel in) {
@@ -179,12 +202,10 @@ public class Tile implements Parcelable {
         for (int i = 0; i < N; i++) {
             userHandle.add(UserHandle.CREATOR.createFromParcel(in));
         }
-        extras = in.readBundle();
-        category = in.readString();
+        mCategory = in.readString();
         priority = in.readInt();
-        metaData = in.readBundle();
+        mMetaData = in.readBundle();
         key = in.readString();
-        isIconTintable = in.readBoolean();
     }
 
     private ActivityInfo getActivityInfo(Context context) {
@@ -211,9 +232,12 @@ public class Tile implements Parcelable {
     };
 
     public boolean isPrimaryProfileOnly() {
-        String profile = metaData != null ?
-                metaData.getString(META_DATA_KEY_PROFILE) : PROFILE_ALL;
+        String profile = mMetaData != null ?
+                mMetaData.getString(META_DATA_KEY_PROFILE) : PROFILE_ALL;
         profile = (profile != null ? profile : PROFILE_ALL);
         return TextUtils.equals(profile, PROFILE_PRIMARY);
     }
+
+    public static final Comparator<Tile> TILE_COMPARATOR =
+            (lhs, rhs) -> rhs.priority - lhs.priority;
 }

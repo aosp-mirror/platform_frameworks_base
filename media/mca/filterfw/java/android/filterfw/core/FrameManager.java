@@ -17,6 +17,7 @@
 
 package android.filterfw.core;
 
+import android.annotation.UnsupportedAppUsage;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.MutableFrameFormat;
@@ -28,10 +29,13 @@ public abstract class FrameManager {
 
     private FilterContext mContext;
 
+    @UnsupportedAppUsage
     public abstract Frame newFrame(FrameFormat format);
 
+    @UnsupportedAppUsage
     public abstract Frame newBoundFrame(FrameFormat format, int bindingType, long bindingId);
 
+    @UnsupportedAppUsage
     public Frame duplicateFrame(Frame frame) {
         Frame result = newFrame(frame.getFormat());
         result.setDataFromFrame(frame);

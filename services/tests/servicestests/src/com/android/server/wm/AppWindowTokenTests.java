@@ -42,6 +42,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+
 /**
  * Tests for the {@link AppWindowToken} class.
  *
@@ -162,6 +166,9 @@ public class AppWindowTokenTests extends WindowTestsBase {
         sWm.mDisplayReady = true;
         sWm.mDisplayEnabled = true;
 
+        final DisplayRotation spiedRotation = spy(mDisplayContent.getDisplayRotation());
+        mDisplayContent.setDisplayRotation(spiedRotation);
+
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
                 TYPE_BASE_APPLICATION);
         attrs.setTitle("AppWindow");
@@ -169,20 +176,21 @@ public class AppWindowTokenTests extends WindowTestsBase {
         mToken.addWindow(appWindow);
 
         // Set initial orientation and update.
-        performRotation(Surface.ROTATION_90);
+        performRotation(spiedRotation, Surface.ROTATION_90);
         appWindow.resizeReported = false;
 
         // Update the rotation to perform 180 degree rotation and check that resize was reported.
-        performRotation(Surface.ROTATION_270);
+        performRotation(spiedRotation, Surface.ROTATION_270);
         assertTrue(appWindow.resizeReported);
+
         appWindow.removeImmediately();
     }
 
-    private void performRotation(int rotationToReport) {
-        ((TestWindowManagerPolicy) sWm.mPolicy).rotationToReport = rotationToReport;
+    private void performRotation(DisplayRotation spiedRotation, int rotationToReport) {
+        doReturn(rotationToReport).when(spiedRotation).rotationForOrientation(anyInt(), anyInt());
         sWm.updateRotation(false, false);
-        // Simulate animator finishing orientation change
-        sWm.mRoot.mOrientationChangeComplete = true;
+        // Prevent the next rotation from being deferred by animation.
+        sWm.mAnimator.setScreenRotationAnimationLocked(mDisplayContent.getDisplayId(), null);
         sWm.mRoot.performSurfacePlacement(false /* recoveringMemory */);
     }
 

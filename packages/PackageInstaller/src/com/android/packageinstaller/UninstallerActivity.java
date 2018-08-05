@@ -21,6 +21,8 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static com.android.packageinstaller.PackageUtil.getMaxTargetSdkVersionForUid;
 
 import android.Manifest;
+import android.annotation.NonNull;
+import android.annotation.StringRes;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -52,8 +54,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
-import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
 import android.util.Log;
 
 import com.android.packageinstaller.handheld.ErrorDialogFragment;

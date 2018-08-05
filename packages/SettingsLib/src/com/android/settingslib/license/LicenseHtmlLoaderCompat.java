@@ -25,22 +25,21 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.annotation.VisibleForTesting;
-
 /**
  * LicenseHtmlLoader is a loader which loads a license html file from default license xml files.
  */
 public class LicenseHtmlLoaderCompat extends AsyncLoaderCompat<File> {
     private static final String TAG = "LicenseHtmlLoaderCompat";
 
-    private static final String[] DEFAULT_LICENSE_XML_PATHS = {
+    static final String[] DEFAULT_LICENSE_XML_PATHS = {
             "/system/etc/NOTICE.xml.gz",
             "/vendor/etc/NOTICE.xml.gz",
             "/odm/etc/NOTICE.xml.gz",
-            "/oem/etc/NOTICE.xml.gz"};
-    private static final String NOTICE_HTML_FILE_NAME = "NOTICE.html";
+            "/oem/etc/NOTICE.xml.gz",
+            "/product/etc/NOTICE.xml.gz"};
+    static final String NOTICE_HTML_FILE_NAME = "NOTICE.html";
 
-    private Context mContext;
+    private final Context mContext;
 
     public LicenseHtmlLoaderCompat(Context context) {
         super(context);
@@ -63,7 +62,7 @@ public class LicenseHtmlLoaderCompat extends AsyncLoaderCompat<File> {
             return null;
         }
 
-        File cachedHtmlFile = getCachedHtmlFile();
+        File cachedHtmlFile = getCachedHtmlFile(mContext);
         if (!isCachedHtmlFileOutdated(xmlFiles, cachedHtmlFile)
                 || generateHtmlFile(xmlFiles, cachedHtmlFile)) {
             return cachedHtmlFile;
@@ -72,8 +71,7 @@ public class LicenseHtmlLoaderCompat extends AsyncLoaderCompat<File> {
         return null;
     }
 
-    @VisibleForTesting
-    List<File> getVaildXmlFiles() {
+    static List<File> getVaildXmlFiles() {
         final List<File> xmlFiles = new ArrayList();
         for (final String xmlPath : DEFAULT_LICENSE_XML_PATHS) {
             File file = new File(xmlPath);
@@ -84,13 +82,11 @@ public class LicenseHtmlLoaderCompat extends AsyncLoaderCompat<File> {
         return xmlFiles;
     }
 
-    @VisibleForTesting
-    File getCachedHtmlFile() {
-        return new File(mContext.getCacheDir(), NOTICE_HTML_FILE_NAME);
+    static File getCachedHtmlFile(Context context) {
+        return new File(context.getCacheDir(), NOTICE_HTML_FILE_NAME);
     }
 
-    @VisibleForTesting
-    boolean isCachedHtmlFileOutdated(List<File> xmlFiles, File cachedHtmlFile) {
+    static boolean isCachedHtmlFileOutdated(List<File> xmlFiles, File cachedHtmlFile) {
         boolean outdated = true;
         if (cachedHtmlFile.exists() && cachedHtmlFile.length() != 0) {
             outdated = false;
@@ -104,8 +100,7 @@ public class LicenseHtmlLoaderCompat extends AsyncLoaderCompat<File> {
         return outdated;
     }
 
-    @VisibleForTesting
-    boolean generateHtmlFile(List<File> xmlFiles, File htmlFile) {
+    static boolean generateHtmlFile(List<File> xmlFiles, File htmlFile) {
         return LicenseHtmlGeneratorFromXml.generateHtml(xmlFiles, htmlFile);
     }
 }

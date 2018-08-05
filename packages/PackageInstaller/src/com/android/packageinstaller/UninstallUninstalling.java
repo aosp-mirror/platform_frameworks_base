@@ -16,6 +16,7 @@
 
 package com.android.packageinstaller;
 
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.AlertDialog;
@@ -34,7 +35,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import androidx.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 

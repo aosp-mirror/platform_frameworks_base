@@ -247,6 +247,9 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
         if (mScreenStateReceiver != null) {
             mScreenStateReceiver.unregister();
         }
+        // Check if need to reset when MagnificationGestureHandler is the last magnifying service.
+        mMagnificationController.resetIfNeeded(
+                AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
         clearAndTransitionToStateDetecting();
     }
 

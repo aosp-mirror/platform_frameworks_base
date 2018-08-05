@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
@@ -569,7 +570,7 @@ class WindowSurfacePlacer {
             // animation after the old one finally finishes. It's better to defer the
             // app transition.
             if (screenRotationAnimation != null && screenRotationAnimation.isAnimating() &&
-                    mService.rotationNeedsUpdateLocked()) {
+                    mService.getDefaultDisplayContentLocked().rotationNeedsUpdate()) {
                 if (DEBUG_APP_TRANSITIONS) {
                     Slog.v(TAG, "Delaying app transition for screen rotation animation to finish");
                 }
@@ -636,10 +637,15 @@ class WindowSurfacePlacer {
             return transit;
         }
 
-        // if wallpaper is animating in or out set oldWallpaper to null else to wallpaper
         final WindowState wallpaperTarget = mWallpaperControllerLocked.getWallpaperTarget();
-        final WindowState oldWallpaper = mWallpaperControllerLocked.isWallpaperTargetAnimating()
-                ? null : wallpaperTarget;
+        final boolean showWallpaper = wallpaperTarget != null
+                && (wallpaperTarget.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0;
+        // If wallpaper is animating or wallpaperTarget doesn't have SHOW_WALLPAPER flag set,
+        // don't consider upgrading to wallpaper transition.
+        final WindowState oldWallpaper =
+                (mWallpaperControllerLocked.isWallpaperTargetAnimating() || !showWallpaper)
+                        ? null
+                        : wallpaperTarget;
         final ArraySet<AppWindowToken> openingApps = mService.mOpeningApps;
         final ArraySet<AppWindowToken> closingApps = mService.mClosingApps;
         final AppWindowToken topOpeningApp = getTopApp(mService.mOpeningApps,

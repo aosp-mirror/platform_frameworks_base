@@ -22,10 +22,8 @@ import android.os.PowerManager;
 import android.util.DebugUtils;
 import android.util.ExceptionUtils;
 import android.util.Log;
-import android.util.Pools.SimplePool;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
-import android.view.Choreographer;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputFilter;
@@ -104,30 +102,11 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             | FLAG_FEATURE_AUTOCLICK | FLAG_FEATURE_TOUCH_EXPLORATION
             | FLAG_FEATURE_SCREEN_MAGNIFIER | FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER;
 
-    private final Runnable mProcessBatchedEventsRunnable = new Runnable() {
-        @Override
-        public void run() {
-            final long frameTimeNanos = mChoreographer.getFrameTimeNanos();
-            if (DEBUG) {
-                Slog.i(TAG, "Begin batch processing for frame: " + frameTimeNanos);
-            }
-            processBatchedEvents(frameTimeNanos);
-            if (DEBUG) {
-                Slog.i(TAG, "End batch processing.");
-            }
-            if (mEventQueue != null) {
-                scheduleProcessBatchedEvents();
-            }
-        }
-    };
-
     private final Context mContext;
 
     private final PowerManager mPm;
 
     private final AccessibilityManagerService mAms;
-
-    private final Choreographer mChoreographer;
 
     private boolean mInstalled;
 
@@ -147,8 +126,6 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     private EventStreamTransformation mEventHandler;
 
-    private MotionEventHolder mEventQueue;
-
     private EventStreamState mMouseStreamState;
 
     private EventStreamState mTouchScreenStreamState;
@@ -160,7 +137,6 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         mContext = context;
         mAms = service;
         mPm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        mChoreographer = Choreographer.getInstance();
     }
 
     @Override
@@ -274,7 +250,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             return;
         }
 
-        batchMotionEvent(event, policyFlags);
+        handleMotionEvent(event, policyFlags);
     }
 
     private void processKeyEvent(EventStreamState state, KeyEvent event, int policyFlags) {
@@ -285,68 +261,14 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         mEventHandler.onKeyEvent(event, policyFlags);
     }
 
-    private void scheduleProcessBatchedEvents() {
-        mChoreographer.postCallback(Choreographer.CALLBACK_INPUT,
-                mProcessBatchedEventsRunnable, null);
-    }
-
-    private void batchMotionEvent(MotionEvent event, int policyFlags) {
-        if (DEBUG) {
-            Slog.i(TAG, "Batching event: " + event + ", policyFlags: " + policyFlags);
-        }
-        if (mEventQueue == null) {
-            mEventQueue = MotionEventHolder.obtain(event, policyFlags);
-            scheduleProcessBatchedEvents();
-            return;
-        }
-        if (mEventQueue.event.addBatch(event)) {
-            return;
-        }
-        MotionEventHolder holder = MotionEventHolder.obtain(event, policyFlags);
-        holder.next = mEventQueue;
-        mEventQueue.previous = holder;
-        mEventQueue = holder;
-    }
-
-    private void processBatchedEvents(long frameNanos) {
-        MotionEventHolder current = mEventQueue;
-        if (current == null) {
-            return;
-        }
-        while (current.next != null) {
-            current = current.next;
-        }
-        while (true) {
-            if (current == null) {
-                mEventQueue = null;
-                break;
-            }
-            if (current.event.getEventTimeNano() >= frameNanos) {
-                // Finished with this choreographer frame. Do the rest on the next one.
-                current.next = null;
-                break;
-            }
-            handleMotionEvent(current.event, current.policyFlags);
-            MotionEventHolder prior = current;
-            current = current.previous;
-            prior.recycle();
-        }
-    }
-
     private void handleMotionEvent(MotionEvent event, int policyFlags) {
         if (DEBUG) {
-            Slog.i(TAG, "Handling batched event: " + event + ", policyFlags: " + policyFlags);
+            Slog.i(TAG, "Handling motion event: " + event + ", policyFlags: " + policyFlags);
         }
-        // Since we do batch processing it is possible that by the time the
-        // next batch is processed the event handle had been set to null.
-        if (mEventHandler != null) {
-            mPm.userActivity(event.getEventTime(), false);
-            MotionEvent transformedEvent = MotionEvent.obtain(event);
-            mEventHandler.onMotionEvent(transformedEvent, event, policyFlags);
-            transformedEvent.recycle();
-        } else {
-            if (DEBUG) Slog.d(TAG, "mEventHandler == null for " + event);
-        }
+        mPm.userActivity(event.getEventTime(), false);
+        MotionEvent transformedEvent = MotionEvent.obtain(event);
+        mEventHandler.onMotionEvent(transformedEvent, event, policyFlags);
+        transformedEvent.recycle();
     }
 
     @Override
@@ -469,9 +391,6 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     }
 
     private void disableFeatures() {
-        // Give the features a chance to process any batched events so we'll keep a consistent
-        // event stream
-        processBatchedEvents(Long.MAX_VALUE);
         if (mMotionEventInjector != null) {
             mAms.setMotionEventInjector(null);
             mMotionEventInjector.onDestroy();
@@ -513,36 +432,6 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     @Override
     public void onDestroy() {
         /* ignore */
-    }
-
-    private static class MotionEventHolder {
-        private static final int MAX_POOL_SIZE = 32;
-        private static final SimplePool<MotionEventHolder> sPool =
-                new SimplePool<MotionEventHolder>(MAX_POOL_SIZE);
-
-        public int policyFlags;
-        public MotionEvent event;
-        public MotionEventHolder next;
-        public MotionEventHolder previous;
-
-        public static MotionEventHolder obtain(MotionEvent event, int policyFlags) {
-            MotionEventHolder holder = sPool.acquire();
-            if (holder == null) {
-                holder = new MotionEventHolder();
-            }
-            holder.event = MotionEvent.obtain(event);
-            holder.policyFlags = policyFlags;
-            return holder;
-        }
-
-        public void recycle() {
-            event.recycle();
-            event = null;
-            policyFlags = 0;
-            next = null;
-            previous = null;
-            sPool.release(this);
-        }
     }
 
     /**

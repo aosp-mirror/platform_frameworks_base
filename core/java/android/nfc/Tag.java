@@ -16,6 +16,7 @@
 
 package android.nfc;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.nfc.tech.IsoDep;
 import android.nfc.tech.MifareClassic;
@@ -110,6 +111,7 @@ import java.util.HashMap;
  * <p>
  */
 public final class Tag implements Parcelable {
+    @UnsupportedAppUsage
     final byte[] mId;
     final int[] mTechList;
     final String[] mTechStringList;
@@ -235,6 +237,7 @@ public final class Tag implements Parcelable {
      * For use by NfcService only.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getServiceHandle() {
         return mServiceHandle;
     }
@@ -355,6 +358,7 @@ public final class Tag implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public INfcTag getTagService() {
         return mTagService;
     }

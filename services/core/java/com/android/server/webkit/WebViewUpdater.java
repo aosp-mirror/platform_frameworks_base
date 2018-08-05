@@ -504,20 +504,20 @@ class WebViewUpdater {
 
     private static boolean providerHasValidSignature(WebViewProviderInfo provider,
             PackageInfo packageInfo, SystemInterface systemInterface) {
-        if (systemInterface.systemIsDebuggable()) {
-            return true;
-        }
-        // If no signature is declared, instead check whether the package is included in the
-        // system.
-        if (provider.signatures == null || provider.signatures.length == 0) {
-            return packageInfo.applicationInfo.isSystemApp();
-        }
+        // Skip checking signatures on debuggable builds, for development purposes.
+        if (systemInterface.systemIsDebuggable()) return true;
+
+        // Allow system apps to be valid providers regardless of signature.
+        if (packageInfo.applicationInfo.isSystemApp()) return true;
+
+        // We don't support packages with multiple signatures.
         if (packageInfo.signatures.length != 1) return false;
 
-        // Return whether the package signature matches any of the valid signatures
+        // If any of the declared signatures match the package signature, it's valid.
         for (Signature signature : provider.signatures) {
             if (signature.equals(packageInfo.signatures[0])) return true;
         }
+
         return false;
     }
 

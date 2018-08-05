@@ -17,15 +17,16 @@
 package android.ext.services.notification;
 
 import static android.app.NotificationManager.IMPORTANCE_MIN;
-import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
+import static android.service.notification.NotificationListenerService.Ranking
+        .USER_SENTIMENT_NEGATIVE;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
-import android.ext.services.R;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -193,23 +194,27 @@ public class Assistant extends NotificationAssistantService {
         if (DEBUG) Log.i(TAG, "ENQUEUED " + sbn.getKey());
         ArrayList<Notification.Action> actions =
                 mSmartActionsHelper.suggestActions(this, sbn);
-        if (actions.isEmpty()) {
-            return null;
-        }
-        return createEnqueuedNotificationAdjustment(sbn, actions);
+        ArrayList<CharSequence> replies = mSmartActionsHelper.suggestReplies(this, sbn);
+        return createEnqueuedNotificationAdjustment(sbn, actions, replies);
     }
 
     /** A convenience helper for creating an adjustment for an SBN. */
+    @Nullable
     private Adjustment createEnqueuedNotificationAdjustment(
             @NonNull StatusBarNotification statusBarNotification,
-            @NonNull ArrayList<Notification.Action> smartActions) {
+            @NonNull ArrayList<Notification.Action> smartActions,
+            @NonNull ArrayList<CharSequence> smartReplies) {
+        if (smartActions.isEmpty() && smartReplies.isEmpty()) {
+            return null;
+        }
         Bundle signals = new Bundle();
         signals.putParcelableArrayList(Adjustment.KEY_SMART_ACTIONS, smartActions);
+        signals.putCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES, smartReplies);
         return new Adjustment(
                 statusBarNotification.getPackageName(),
                 statusBarNotification.getKey(),
                 signals,
-                "smart action" /* explanation */,
+                "smart action, reply" /* explanation */,
                 statusBarNotification.getUserId());
     }
 

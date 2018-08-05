@@ -28,6 +28,7 @@ import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
@@ -343,10 +344,12 @@ public class InputMethodService extends AbstractInputMethodService {
 
     InputMethodManager mImm;
     
+    @UnsupportedAppUsage
     int mTheme = 0;
     
     LayoutInflater mInflater;
     TypedArray mThemeAttrs;
+    @UnsupportedAppUsage
     View mRootView;
     SoftInputWindow mWindow;
     boolean mInitialized;
@@ -378,8 +381,10 @@ public class InputMethodService extends AbstractInputMethodService {
 
     boolean mFullscreenApplied;
     boolean mIsFullscreen;
+    @UnsupportedAppUsage
     View mExtractView;
     boolean mExtractViewHidden;
+    @UnsupportedAppUsage
     ExtractEditText mExtractEditText;
     ViewGroup mExtractAccessories;
     View mExtractAction;
@@ -402,6 +407,7 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     boolean mShouldClearInsetOfPreviousIme;
 
+    @UnsupportedAppUsage
     final Insets mTmpInsets = new Insets();
     final int[] mTmpLocation = new int[2];
 
@@ -811,6 +817,7 @@ public class InputMethodService extends AbstractInputMethodService {
             mService.getContentResolver().unregisterContentObserver(this);
         }
 
+        @UnsupportedAppUsage
         private boolean shouldShowImeWithHardKeyboard() {
             // Lazily initialize as needed.
             if (mShowImeWithHardKeyboard == ShowImeWithHardKeyboardType.UNKNOWN) {
@@ -850,6 +857,7 @@ public class InputMethodService extends AbstractInputMethodService {
             return "SettingsObserver{mShowImeWithHardKeyboard=" + mShowImeWithHardKeyboard  + "}";
         }
     }
+    @UnsupportedAppUsage
     private SettingsObserver mSettingsObserver;
 
     /**
@@ -2492,6 +2500,7 @@ public class InputMethodService extends AbstractInputMethodService {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void onExtractedDeleteText(int start, int end) {
         InputConnection conn = getCurrentInputConnection();
         if (conn != null) {
@@ -2504,6 +2513,7 @@ public class InputMethodService extends AbstractInputMethodService {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void onExtractedReplaceText(int start, int end, CharSequence text) {
         InputConnection conn = getCurrentInputConnection();
         if (conn != null) {
@@ -2515,6 +2525,7 @@ public class InputMethodService extends AbstractInputMethodService {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void onExtractedSetSpan(Object span, int start, int end, int flags) {
         InputConnection conn = getCurrentInputConnection();
         if (conn != null) {
