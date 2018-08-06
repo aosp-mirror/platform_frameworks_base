@@ -146,8 +146,9 @@ class ResourceTableType {
 
   explicit ResourceTableType(const ResourceType type) : type(type) {}
 
-  ResourceEntry* FindEntry(const android::StringPiece& name);
-  ResourceEntry* FindOrCreateEntry(const android::StringPiece& name);
+  ResourceEntry* FindEntry(const android::StringPiece& name, Maybe<uint8_t> id = Maybe<uint8_t>());
+  ResourceEntry* FindOrCreateEntry(const android::StringPiece& name,
+                                   Maybe<uint8_t> id = Maybe<uint8_t>());
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceTableType);
@@ -163,8 +164,9 @@ class ResourceTablePackage {
   std::vector<std::unique_ptr<ResourceTableType>> types;
 
   ResourceTablePackage() = default;
-  ResourceTableType* FindType(ResourceType type);
-  ResourceTableType* FindOrCreateType(const ResourceType type);
+  ResourceTableType* FindType(ResourceType type, Maybe<uint8_t> id = Maybe<uint8_t>());
+  ResourceTableType* FindOrCreateType(const ResourceType type,
+                                      Maybe<uint8_t> id = Maybe<uint8_t>());
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceTablePackage);
@@ -174,13 +176,17 @@ class ResourceTablePackage {
 class ResourceTable {
  public:
   ResourceTable() = default;
+  explicit ResourceTable(bool validate_resources) : validate_resources_(validate_resources) {}
 
-  enum class CollisionResult { kKeepOriginal, kConflict, kTakeNew };
+  enum class CollisionResult { kKeepBoth, kKeepOriginal, kConflict, kTakeNew };
 
   using CollisionResolverFunc = std::function<CollisionResult(Value*, Value*)>;
 
   // When a collision of resources occurs, this method decides which value to keep.
   static CollisionResult ResolveValueCollision(Value* existing, Value* incoming);
+
+  // When a collision of resources occurs, this method keeps both values
+  static CollisionResult IgnoreCollision(Value* existing, Value* incoming);
 
   bool AddResource(const ResourceNameRef& name, const ConfigDescription& config,
                    const android::StringPiece& product, std::unique_ptr<Value> value,
@@ -207,6 +213,8 @@ class ResourceTable {
                                 const ConfigDescription& config,
                                 const android::StringPiece& product, std::unique_ptr<Value> value,
                                 IDiagnostics* diag);
+
+  bool GetValidateResources();
 
   bool SetVisibility(const ResourceNameRef& name, const Visibility& visibility, IDiagnostics* diag);
   bool SetVisibilityMangled(const ResourceNameRef& name, const Visibility& visibility,
@@ -298,6 +306,9 @@ class ResourceTable {
   bool SetSymbolStateImpl(const ResourceNameRef& name, const ResourceId& res_id,
                           const Visibility& symbol, NameValidator name_validator,
                           IDiagnostics* diag);
+
+  // Controls whether the table validates resource names and prevents duplicate resource names
+  bool validate_resources_ = true;
 
   DISALLOW_COPY_AND_ASSIGN(ResourceTable);
 };
