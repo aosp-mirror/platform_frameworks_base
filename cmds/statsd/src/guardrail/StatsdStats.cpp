@@ -180,12 +180,12 @@ void StatsdStats::noteConfigReset(const ConfigKey& key) {
     noteConfigResetInternalLocked(key);
 }
 
-void StatsdStats::noteLogLost(int64_t timestampNs) {
+void StatsdStats::noteLogLost(int64_t timestampNs, int32_t count) {
     lock_guard<std::mutex> lock(mLock);
     if (mLogLossTimestampNs.size() == kMaxLoggerErrors) {
         mLogLossTimestampNs.pop_front();
     }
-    mLogLossTimestampNs.push_back(timestampNs);
+    mLogLossTimestampNs.push_back(std::make_pair(timestampNs, count));
 }
 
 void StatsdStats::noteBroadcastSent(const ConfigKey& key) {
@@ -529,7 +529,8 @@ void StatsdStats::dumpStats(FILE* out) const {
     }
 
     for (const auto& loss : mLogLossTimestampNs) {
-        fprintf(out, "Log loss detected at %lld (elapsedRealtimeNs)\n", (long long)loss);
+        fprintf(out, "Log loss: %lld (elapsedRealtimeNs) - %d (count)\n", (long long)loss.first,
+                loss.second);
     }
 }
 
@@ -687,7 +688,7 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
 
     for (const auto& loss : mLogLossTimestampNs) {
         proto.write(FIELD_TYPE_INT64 | FIELD_ID_LOG_LOSS_STATS | FIELD_COUNT_REPEATED,
-                    (long long)loss);
+                    (long long)loss.first);
     }
 
     for (const auto& restart : mSystemServerRestartSec) {

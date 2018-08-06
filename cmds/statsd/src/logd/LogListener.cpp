@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-#include "logd/LogReader.h"
-
-#include <log/log_read.h>
-
-#include <utils/Errors.h>
-
-#include <time.h>
-#include <unistd.h>
-
-using namespace android;
-using namespace std;
+#include "logd/LogListener.h"
 
 namespace android {
 namespace os {
