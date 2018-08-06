@@ -90,7 +90,7 @@ public class BinderCallsStatsTest {
         assertEquals(1, uidEntry.recordedCallCount);
         // Still sampled even for another API.
         callStatsList = new ArrayList(uidEntry.getCallStatsList());
-        assertEquals(2, callStatsList.size());
+        assertEquals(1, callStatsList.size());
     }
 
     @Test
@@ -221,20 +221,13 @@ public class BinderCallsStatsTest {
         assertEquals(10, uidEntry.cpuTimeMicros);
 
         List<BinderCallsStats.CallStat> callStatsList = new ArrayList(uidEntry.getCallStatsList());
-        assertEquals(2, callStatsList.size());
+        assertEquals(1, callStatsList.size());
 
         BinderCallsStats.CallStat callStats = callStatsList.get(0);
         assertEquals(1, callStats.callCount);
         assertEquals(1, callStats.recordedCallCount);
         assertEquals(10, callStats.cpuTimeMicros);
         assertEquals(10, callStats.maxCpuTimeMicros);
-
-        // Only call count should is tracked, rest is sampled.
-        callStats = callStatsList.get(1);
-        assertEquals(1, callStats.callCount);
-        assertEquals(0, callStats.recordedCallCount);
-        assertEquals(0, callStats.cpuTimeMicros);
-        assertEquals(0, callStats.maxCpuTimeMicros);
     }
 
     private static class BinderWithGetTransactionName extends Binder {
@@ -586,6 +579,7 @@ public class BinderCallsStatsTest {
                     };
                 }
             });
+            setSamplingInterval(1);
         }
 
         @Override
