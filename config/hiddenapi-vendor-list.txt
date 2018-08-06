@@ -381,13 +381,6 @@ Landroid/system/Os;->setsockoptIfreq(Ljava/io/FileDescriptor;IILjava/lang/String
 Landroid/system/Os;->setsockoptTimeval(Ljava/io/FileDescriptor;IILandroid/system/StructTimeval;)V
 Landroid/system/PacketSocketAddress;-><init>(I[B)V
 Landroid/system/PacketSocketAddress;-><init>(SI)V
-Landroid/telecom/ParcelableCall;->CREATOR:Landroid/os/Parcelable$Creator;
-Landroid/telecom/ParcelableCall;->getConnectTimeMillis()J
-Landroid/telecom/ParcelableCall;->getDisconnectCause()Landroid/telecom/DisconnectCause;
-Landroid/telecom/ParcelableCall;->getHandle()Landroid/net/Uri;
-Landroid/telecom/ParcelableCall;->getId()Ljava/lang/String;
-Landroid/telecom/TelecomManager;->from(Landroid/content/Context;)Landroid/telecom/TelecomManager;
-Landroid/telecom/VideoProfile$CameraCapabilities;-><init>(IIZF)V
 Landroid/telephony/euicc/DownloadableSubscription;->encodedActivationCode:Ljava/lang/String;
 Landroid/telephony/euicc/DownloadableSubscription;->setAccessRules([Landroid/telephony/UiccAccessRule;)V
 Landroid/telephony/euicc/DownloadableSubscription;->setCarrierName(Ljava/lang/String;)V
