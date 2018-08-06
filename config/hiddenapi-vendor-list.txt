@@ -681,13 +681,6 @@ Lcom/android/internal/location/ProviderRequest;-><init>()V
 Lcom/android/internal/location/ProviderRequest;->interval:J
 Lcom/android/internal/location/ProviderRequest;->locationRequests:Ljava/util/List;
 Lcom/android/internal/location/ProviderRequest;->reportLocation:Z
-Lcom/android/internal/os/BatteryStatsImpl;->getDischargeCurrentLevel()I
-Lcom/android/internal/os/BatteryStatsImpl;->getDischargeStartLevel()I
-Lcom/android/internal/os/BatteryStatsImpl;->getPhoneOnTime(JI)J
-Lcom/android/internal/os/BatteryStatsImpl;->getPhoneSignalScanningTime(JI)J
-Lcom/android/internal/os/BatteryStatsImpl;->getPhoneSignalStrengthTime(IJI)J
-Lcom/android/internal/os/BatteryStatsImpl;->getScreenBrightnessTime(IJI)J
-Lcom/android/internal/os/BatteryStatsImpl;->getWifiOnTime(JI)J
 Lcom/android/internal/os/SomeArgs;->arg2:Ljava/lang/Object;
 Lcom/android/internal/os/SomeArgs;->arg3:Ljava/lang/Object;
 Lcom/android/internal/os/SomeArgs;->obtain()Lcom/android/internal/os/SomeArgs;
