@@ -16,7 +16,8 @@
 
 package com.android.internal.os;
 
-import android.content.Context;
+import static org.junit.Assert.assertEquals;
+
 import android.content.Intent;
 import android.os.BatteryManager;
 import android.os.Binder;
@@ -33,16 +34,14 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
