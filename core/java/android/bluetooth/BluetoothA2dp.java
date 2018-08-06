@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -117,6 +118,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @UnsupportedAppUsage
     public static final String ACTION_ACTIVE_DEVICE_CHANGED =
             "android.bluetooth.a2dp.profile.action.ACTIVE_DEVICE_CHANGED";
 
@@ -137,6 +139,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @UnsupportedAppUsage
     public static final String ACTION_CODEC_CONFIG_CHANGED =
             "android.bluetooth.a2dp.profile.action.CODEC_CONFIG_CHANGED";
 
@@ -160,6 +163,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int OPTIONAL_CODECS_SUPPORT_UNKNOWN = -1;
 
     /**
@@ -167,6 +171,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int OPTIONAL_CODECS_NOT_SUPPORTED = 0;
 
     /**
@@ -174,6 +179,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int OPTIONAL_CODECS_SUPPORTED = 1;
 
     /**
@@ -182,6 +188,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int OPTIONAL_CODECS_PREF_UNKNOWN = -1;
 
     /**
@@ -189,6 +196,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int OPTIONAL_CODECS_PREF_DISABLED = 0;
 
     /**
@@ -196,6 +204,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int OPTIONAL_CODECS_PREF_ENABLED = 1;
 
     private Context mContext;
@@ -268,6 +277,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
         return true;
     }
 
+    @UnsupportedAppUsage
     /*package*/ void close() {
         mServiceListener = null;
         IBluetoothManager mgr = mAdapter.getBluetoothManager();
@@ -315,6 +325,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
         try {
@@ -357,6 +368,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
         try {
@@ -460,6 +472,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean setActiveDevice(@Nullable BluetoothDevice device) {
         if (DBG) log("setActiveDevice(" + device + ")");
         try {
@@ -490,6 +503,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     @Nullable
+    @UnsupportedAppUsage
     public BluetoothDevice getActiveDevice() {
         if (VDBG) log("getActiveDevice()");
         try {
@@ -556,6 +570,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @hide
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @UnsupportedAppUsage
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");
         try {
@@ -671,6 +686,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @return the current codec status
      * @hide
      */
+    @UnsupportedAppUsage
     public BluetoothCodecStatus getCodecStatus(BluetoothDevice device) {
         if (DBG) Log.d(TAG, "getCodecStatus(" + device + ")");
         try {
@@ -698,6 +714,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @param codecConfig the codec configuration preference
      * @hide
      */
+    @UnsupportedAppUsage
     public void setCodecConfigPreference(BluetoothDevice device,
                                          BluetoothCodecConfig codecConfig) {
         if (DBG) Log.d(TAG, "setCodecConfigPreference(" + device + ")");
@@ -723,6 +740,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * active A2DP Bluetooth device.
      * @hide
      */
+    @UnsupportedAppUsage
     public void enableOptionalCodecs(BluetoothDevice device) {
         if (DBG) Log.d(TAG, "enableOptionalCodecs(" + device + ")");
         enableDisableOptionalCodecs(device, true);
@@ -735,6 +753,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * active A2DP Bluetooth device.
      * @hide
      */
+    @UnsupportedAppUsage
     public void disableOptionalCodecs(BluetoothDevice device) {
         if (DBG) Log.d(TAG, "disableOptionalCodecs(" + device + ")");
         enableDisableOptionalCodecs(device, false);
@@ -775,6 +794,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * OPTIONAL_CODECS_SUPPORTED.
      * @hide
      */
+    @UnsupportedAppUsage
     public int supportsOptionalCodecs(BluetoothDevice device) {
         try {
             mServiceLock.readLock().lock();
@@ -799,6 +819,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * OPTIONAL_CODECS_PREF_DISABLED.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getOptionalCodecsEnabled(BluetoothDevice device) {
         try {
             mServiceLock.readLock().lock();
@@ -824,6 +845,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * OPTIONAL_CODECS_PREF_DISABLED.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setOptionalCodecsEnabled(BluetoothDevice device, int value) {
         try {
             if (value != BluetoothA2dp.OPTIONAL_CODECS_PREF_UNKNOWN
@@ -854,6 +876,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static String stateToString(int state) {
         switch (state) {
             case STATE_DISCONNECTED:

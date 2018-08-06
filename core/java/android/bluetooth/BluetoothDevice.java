@@ -21,6 +21,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Parcel;
@@ -115,6 +116,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @UnsupportedAppUsage
     public static final String ACTION_DISAPPEARED =
             "android.bluetooth.device.action.DISAPPEARED";
 
@@ -186,6 +188,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @UnsupportedAppUsage
     public static final String ACTION_ALIAS_CHANGED =
             "android.bluetooth.device.action.ALIAS_CHANGED";
 
@@ -306,6 +309,7 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String EXTRA_REASON = "android.bluetooth.device.extra.REASON";
 
     /**
@@ -346,6 +350,7 @@ public final class BluetoothDevice implements Parcelable {
 
     /** @hide */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @UnsupportedAppUsage
     public static final String ACTION_SDP_RECORD =
             "android.bluetooth.device.action.SDP_RECORD";
 
@@ -390,6 +395,7 @@ public final class BluetoothDevice implements Parcelable {
             "android.bluetooth.device.action.PAIRING_REQUEST";
     /** @hide */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @UnsupportedAppUsage
     public static final String ACTION_PAIRING_CANCEL =
             "android.bluetooth.device.action.PAIRING_CANCEL";
 
@@ -481,6 +487,7 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int UNBOND_REASON_AUTH_FAILED = 1;
 
     /**
@@ -489,6 +496,7 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int UNBOND_REASON_AUTH_REJECTED = 2;
 
     /**
@@ -503,6 +511,7 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int UNBOND_REASON_REMOTE_DEVICE_DOWN = 4;
 
     /**
@@ -510,6 +519,7 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int UNBOND_REASON_DISCOVERY_IN_PROGRESS = 5;
 
     /**
@@ -517,6 +527,7 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int UNBOND_REASON_AUTH_TIMEOUT = 6;
 
     /**
@@ -524,6 +535,7 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int UNBOND_REASON_REPEATED_ATTEMPTS = 7;
 
     /**
@@ -532,6 +544,7 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int UNBOND_REASON_REMOTE_AUTH_CANCELED = 8;
 
     /**
@@ -610,6 +623,7 @@ public final class BluetoothDevice implements Parcelable {
             "android.bluetooth.device.extra.SDP_RECORD";
 
     /** @hide */
+    @UnsupportedAppUsage
     public static final String EXTRA_SDP_SEARCH_STATUS =
             "android.bluetooth.device.extra.SDP_SEARCH_STATUS";
     /**
@@ -720,6 +734,7 @@ public final class BluetoothDevice implements Parcelable {
     private final String mAddress;
 
     /*package*/
+    @UnsupportedAppUsage
     static IBluetooth getService() {
         synchronized (BluetoothDevice.class) {
             if (sService == null) {
@@ -763,6 +778,7 @@ public final class BluetoothDevice implements Parcelable {
      * @throws IllegalArgumentException address is invalid
      * @hide
      */
+    @UnsupportedAppUsage
     /*package*/ BluetoothDevice(String address) {
         getService();  // ensures sService is initialized
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
@@ -887,6 +903,7 @@ public final class BluetoothDevice implements Parcelable {
      * @return the Bluetooth alias, or null if no alias or there was a problem
      * @hide
      */
+    @UnsupportedAppUsage
     public String getAlias() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -911,6 +928,7 @@ public final class BluetoothDevice implements Parcelable {
      * @return true on success, false on error
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean setAlias(String alias) {
         final IBluetooth service = sService;
         if (service == null) {
@@ -934,6 +952,7 @@ public final class BluetoothDevice implements Parcelable {
      * @see #getAlias()
      * @see #getName()
      */
+    @UnsupportedAppUsage
     public String getAliasName() {
         String name = getAlias();
         if (name == null) {
@@ -952,6 +971,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @UnsupportedAppUsage
     public int getBatteryLevel() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1010,6 +1030,7 @@ public final class BluetoothDevice implements Parcelable {
      * @throws IllegalArgumentException if an invalid transport was specified
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean createBond(int transport) {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1063,6 +1084,7 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public boolean isBondingInitiatedLocally() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1355,6 +1377,7 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public boolean setPasskey(int passkey) {
         //TODO(BT)
         /*
@@ -1395,6 +1418,7 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public boolean cancelPairingUserInput() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1410,6 +1434,7 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public boolean isBluetoothDock() {
         // TODO(BT)
         /*
@@ -1435,6 +1460,7 @@ public final class BluetoothDevice implements Parcelable {
      * #ACCESS_UNKNOWN}, {@link #ACCESS_ALLOWED} or {@link #ACCESS_REJECTED}.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getPhonebookAccessPermission() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1479,6 +1505,7 @@ public final class BluetoothDevice implements Parcelable {
      * {@link #ACCESS_ALLOWED} or {@link #ACCESS_REJECTED}.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getMessageAccessPermission() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1501,6 +1528,7 @@ public final class BluetoothDevice implements Parcelable {
      * @return Whether the value has been successfully set.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean setMessageAccessPermission(int value) {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1543,6 +1571,7 @@ public final class BluetoothDevice implements Parcelable {
      * @return Whether the value has been successfully set.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean setSimAccessPermission(int value) {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1581,6 +1610,7 @@ public final class BluetoothDevice implements Parcelable {
      * permissions
      * @hide
      */
+    @UnsupportedAppUsage
     public BluetoothSocket createRfcommSocket(int channel) throws IOException {
         if (!isBluetoothEnabled()) {
             Log.e(TAG, "Bluetooth is not enabled");
@@ -1733,6 +1763,7 @@ public final class BluetoothDevice implements Parcelable {
      * permissions.
      * @hide
      */
+    @UnsupportedAppUsage
     public BluetoothSocket createInsecureRfcommSocket(int port) throws IOException {
         if (!isBluetoothEnabled()) {
             Log.e(TAG, "Bluetooth is not enabled");
@@ -1752,6 +1783,7 @@ public final class BluetoothDevice implements Parcelable {
      * permissions.
      * @hide
      */
+    @UnsupportedAppUsage
     public BluetoothSocket createScoSocket() throws IOException {
         if (!isBluetoothEnabled()) {
             Log.e(TAG, "Bluetooth is not enabled");
@@ -1769,6 +1801,7 @@ public final class BluetoothDevice implements Parcelable {
      * @return the pin code as a UTF-8 byte array, or null if it is an invalid Bluetooth pin.
      * @hide
      */
+    @UnsupportedAppUsage
     public static byte[] convertPinToBytes(String pin) {
         if (pin == null) {
             return null;
@@ -1900,6 +1933,7 @@ public final class BluetoothDevice implements Parcelable {
      * operations.
      * @hide
      */
+    @UnsupportedAppUsage
     public BluetoothGatt connectGatt(Context context, boolean autoConnect,
             BluetoothGattCallback callback, int transport,
             boolean opportunistic, int phy, Handler handler) {
