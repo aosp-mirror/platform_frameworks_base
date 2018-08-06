@@ -633,8 +633,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.mConfig.manualRule.zenMode =
                 Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         mZenModeHelperSpy.mConfig.manualRule.component = new ComponentName("a", "a");
+        mZenModeHelperSpy.mConfig.manualRule.pkg = "a";
         mZenModeHelperSpy.mConfig.manualRule.enabled = true;
-        mZenModeHelperSpy.mConfig.manualRule.snoozing = true;
 
         ZenModeConfig expected = mZenModeHelperSpy.mConfig.copy();
 
@@ -645,7 +645,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.nextTag();
         mZenModeHelperSpy.readXml(parser, false);
 
-        assertEquals(expected, mZenModeHelperSpy.mConfig);
+        assertEquals("Config mismatch: current vs expected: "
+                + mZenModeHelperSpy.mConfig.diff(expected), expected, mZenModeHelperSpy.mConfig);
     }
 
     @Test
@@ -662,7 +663,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         customRule.name = "Custom Rule";
         customRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         customRule.conditionId = ZenModeConfig.toScheduleConditionId(customRuleInfo);
-        customRule.component = new ComponentName("android", "ScheduleConditionProvider");
+        customRule.configurationActivity
+                = new ComponentName("android", "ScheduleConditionProvider");
+        customRule.pkg = customRule.configurationActivity.getPackageName();
         automaticRules.put("customRule", customRule);
         mZenModeHelperSpy.mConfig.automaticRules = automaticRules;
 
@@ -674,7 +677,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
         mZenModeHelperSpy.readXml(parser, true);
-        assertEquals(original, mZenModeHelperSpy.mConfig);
+        assertEquals("Config mismatch: current vs original: "
+                + mZenModeHelperSpy.mConfig.diff(original), original, mZenModeHelperSpy.mConfig);
         assertEquals(original.hashCode(), mZenModeHelperSpy.mConfig.hashCode());
     }
 

@@ -3131,7 +3131,11 @@ public class NotificationManagerService extends SystemService {
                 throws RemoteException {
             Preconditions.checkNotNull(automaticZenRule, "automaticZenRule is null");
             Preconditions.checkNotNull(automaticZenRule.getName(), "Name is null");
-            Preconditions.checkNotNull(automaticZenRule.getOwner(), "Owner is null");
+            if (automaticZenRule.getOwner() == null
+                    && automaticZenRule.getConfigurationActivity() == null) {
+                throw new NullPointerException(
+                        "Rule must have a conditionproviderservice and/or configuration activity");
+            }
             Preconditions.checkNotNull(automaticZenRule.getConditionId(), "ConditionId is null");
             enforcePolicyAccess(Binder.getCallingUid(), "addAutomaticZenRule");
 
@@ -3144,7 +3148,11 @@ public class NotificationManagerService extends SystemService {
                 throws RemoteException {
             Preconditions.checkNotNull(automaticZenRule, "automaticZenRule is null");
             Preconditions.checkNotNull(automaticZenRule.getName(), "Name is null");
-            Preconditions.checkNotNull(automaticZenRule.getOwner(), "Owner is null");
+            if (automaticZenRule.getOwner() == null
+                    && automaticZenRule.getConfigurationActivity() == null) {
+                throw new NullPointerException(
+                        "Rule must have a conditionproviderservice and/or configuration activity");
+            }
             Preconditions.checkNotNull(automaticZenRule.getConditionId(), "ConditionId is null");
             enforcePolicyAccess(Binder.getCallingUid(), "updateAutomaticZenRule");
 
@@ -3175,6 +3183,16 @@ public class NotificationManagerService extends SystemService {
             enforceSystemOrSystemUI("getRuleInstanceCount");
 
             return mZenModeHelper.getCurrentInstanceCount(owner);
+        }
+
+        @Override
+        public void setAutomaticZenRuleState(String id, Condition condition) {
+            Preconditions.checkNotNull(id, "id is null");
+            Preconditions.checkNotNull(condition, "Condition is null");
+
+            enforcePolicyAccess(Binder.getCallingUid(), "setAutomaticZenRuleState");
+
+            mZenModeHelper.setAutomaticZenRuleState(id, condition);
         }
 
         @Override

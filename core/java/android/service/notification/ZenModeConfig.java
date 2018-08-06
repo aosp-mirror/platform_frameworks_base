@@ -142,6 +142,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String RULE_ATT_SNOOZING = "snoozing";
     private static final String RULE_ATT_NAME = "name";
     private static final String RULE_ATT_COMPONENT = "component";
+    private static final String RULE_ATT_CONFIG_ACTIVITY = "configActivity";
     private static final String RULE_ATT_ZEN = "zen";
     private static final String RULE_ATT_CONDITION_ID = "conditionId";
     private static final String RULE_ATT_CREATION_TIME = "creationTime";
@@ -269,7 +270,7 @@ public class ZenModeConfig implements Parcelable {
         return buffer.toString();
     }
 
-    private Diff diff(ZenModeConfig to) {
+    public Diff diff(ZenModeConfig to) {
         final Diff d = new Diff();
         if (to == null) {
             return d.addLine("config", "delete");
@@ -623,7 +624,6 @@ public class ZenModeConfig implements Parcelable {
     public static ZenRule readRuleXml(XmlPullParser parser) {
         final ZenRule rt = new ZenRule();
         rt.enabled = safeBoolean(parser, RULE_ATT_ENABLED, true);
-        rt.snoozing = safeBoolean(parser, RULE_ATT_SNOOZING, false);
         rt.name = parser.getAttributeValue(null, RULE_ATT_NAME);
         final String zen = parser.getAttributeValue(null, RULE_ATT_ZEN);
         rt.zenMode = tryParseZenMode(zen, -1);
@@ -633,6 +633,12 @@ public class ZenModeConfig implements Parcelable {
         }
         rt.conditionId = safeUri(parser, RULE_ATT_CONDITION_ID);
         rt.component = safeComponentName(parser, RULE_ATT_COMPONENT);
+        rt.configurationActivity = safeComponentName(parser, RULE_ATT_CONFIG_ACTIVITY);
+        rt.pkg = (rt.component != null)
+                ? rt.component.getPackageName()
+                : (rt.configurationActivity != null)
+                        ? rt.configurationActivity.getPackageName()
+                        : null;
         rt.creationTime = safeLong(parser, RULE_ATT_CREATION_TIME, 0);
         rt.enabler = parser.getAttributeValue(null, RULE_ATT_ENABLER);
         rt.condition = readConditionXml(parser);
@@ -649,13 +655,16 @@ public class ZenModeConfig implements Parcelable {
 
     public static void writeRuleXml(ZenRule rule, XmlSerializer out) throws IOException {
         out.attribute(null, RULE_ATT_ENABLED, Boolean.toString(rule.enabled));
-        out.attribute(null, RULE_ATT_SNOOZING, Boolean.toString(rule.snoozing));
         if (rule.name != null) {
             out.attribute(null, RULE_ATT_NAME, rule.name);
         }
         out.attribute(null, RULE_ATT_ZEN, Integer.toString(rule.zenMode));
         if (rule.component != null) {
             out.attribute(null, RULE_ATT_COMPONENT, rule.component.flattenToString());
+        }
+        if (rule.configurationActivity != null) {
+            out.attribute(null, RULE_ATT_CONFIG_ACTIVITY,
+                    rule.configurationActivity.flattenToString());
         }
         if (rule.conditionId != null) {
             out.attribute(null, RULE_ATT_CONDITION_ID, rule.conditionId.toString());
@@ -1452,12 +1461,15 @@ public class ZenModeConfig implements Parcelable {
         public Uri conditionId;          // required for automatic
         public Condition condition;      // optional
         public ComponentName component;  // optional
+        public ComponentName configurationActivity; // optional
         public String id;                // required for automatic (unique)
         @UnsupportedAppUsage
         public long creationTime;        // required for automatic
-        public String enabler;          // package name, only used for manual rules.
+        // package name, only used for manual rules when they have turned DND on.
+        public String enabler;
         public ZenPolicy zenPolicy;
         public boolean modified;    // rule has been modified from initial creation
+        public String pkg;
 
         public ZenRule() { }
 
@@ -1471,6 +1483,7 @@ public class ZenModeConfig implements Parcelable {
             conditionId = source.readParcelable(null);
             condition = source.readParcelable(null);
             component = source.readParcelable(null);
+            configurationActivity = source.readParcelable(null);
             if (source.readInt() == 1) {
                 id = source.readString();
             }
@@ -1480,6 +1493,7 @@ public class ZenModeConfig implements Parcelable {
             }
             zenPolicy = source.readParcelable(null);
             modified = source.readInt() == 1;
+            pkg = source.readString();
         }
 
         @Override
@@ -1501,6 +1515,7 @@ public class ZenModeConfig implements Parcelable {
             dest.writeParcelable(conditionId, 0);
             dest.writeParcelable(condition, 0);
             dest.writeParcelable(component, 0);
+            dest.writeParcelable(configurationActivity, 0);
             if (id != null) {
                 dest.writeInt(1);
                 dest.writeString(id);
@@ -1516,6 +1531,7 @@ public class ZenModeConfig implements Parcelable {
             }
             dest.writeParcelable(zenPolicy, 0);
             dest.writeInt(modified ? 1 : 0);
+            dest.writeString(pkg);
         }
 
         @Override
@@ -1528,7 +1544,9 @@ public class ZenModeConfig implements Parcelable {
                     .append(",zenMode=").append(Global.zenModeToString(zenMode))
                     .append(",conditionId=").append(conditionId)
                     .append(",condition=").append(condition)
+                    .append(",pkg=").append(pkg)
                     .append(",component=").append(component)
+                    .append(",configActivity=").append(configurationActivity)
                     .append(",creationTime=").append(creationTime)
                     .append(",enabler=").append(enabler)
                     .append(",zenPolicy=").append(zenPolicy)
@@ -1537,6 +1555,7 @@ public class ZenModeConfig implements Parcelable {
         }
 
         /** @hide */
+        // TODO: add configuration activity
         public void writeToProto(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
 
@@ -1600,6 +1619,9 @@ public class ZenModeConfig implements Parcelable {
             if (!Objects.equals(component, to.component)) {
                 d.addLine(item, "component", component, to.component);
             }
+            if (!Objects.equals(configurationActivity, to.configurationActivity)) {
+                d.addLine(item, "configActivity", configurationActivity, to.configurationActivity);
+            }
             if (!Objects.equals(id, to.id)) {
                 d.addLine(item, "id", id, to.id);
             }
@@ -1615,6 +1637,9 @@ public class ZenModeConfig implements Parcelable {
             if (modified != to.modified) {
                 d.addLine(item, "modified", modified, to.modified);
             }
+            if (pkg != to.pkg) {
+                d.addLine(item, "pkg", pkg, to.pkg);
+            }
         }
 
         @Override
@@ -1629,20 +1654,22 @@ public class ZenModeConfig implements Parcelable {
                     && Objects.equals(other.conditionId, conditionId)
                     && Objects.equals(other.condition, condition)
                     && Objects.equals(other.component, component)
+                    && Objects.equals(other.configurationActivity, configurationActivity)
                     && Objects.equals(other.id, id)
                     && Objects.equals(other.enabler, enabler)
                     && Objects.equals(other.zenPolicy, zenPolicy)
+                    && Objects.equals(other.pkg, pkg)
                     && other.modified == modified;
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
-                    component, id, enabler, zenPolicy, modified);
+                    component, configurationActivity, pkg, id, enabler, zenPolicy, modified);
         }
 
         public boolean isAutomaticActive() {
-            return enabled && !snoozing && component != null && isTrueOrUnknown();
+            return enabled && !snoozing && pkg != null && isTrueOrUnknown();
         }
 
         public boolean isTrueOrUnknown() {
