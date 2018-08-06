@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -63,6 +64,7 @@ public final class BluetoothClass implements Parcelable {
     private final int mClass;
 
     /** @hide */
+    @UnsupportedAppUsage
     public BluetoothClass(int classInt) {
         mClass = classInt;
     }
@@ -322,8 +324,10 @@ public final class BluetoothClass implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static final int PROFILE_HEADSET = 0;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int PROFILE_A2DP = 1;
     /** @hide */
     public static final int PROFILE_OPP = 2;
@@ -346,6 +350,7 @@ public final class BluetoothClass implements Parcelable {
      * @return True if this device might support specified profile.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean doesClassMatch(int profile) {
         if (profile == PROFILE_A2DP) {
             if (hasService(Service.RENDER)) {
