@@ -59,7 +59,7 @@ import java.util.function.ToDoubleFunction;
 public class BinderCallsStats implements BinderInternal.Observer {
     public static final boolean ENABLED_DEFAULT = false;
     public static final boolean DETAILED_TRACKING_DEFAULT = true;
-    public static final int PERIODIC_SAMPLING_INTERVAL_DEFAULT = 10;
+    public static final int PERIODIC_SAMPLING_INTERVAL_DEFAULT = 100;
 
     private static final String TAG = "BinderCallsStats";
     private static final int CALL_SESSIONS_POOL_SIZE = 100;
