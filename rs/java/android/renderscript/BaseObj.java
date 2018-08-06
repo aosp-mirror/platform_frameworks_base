@@ -16,6 +16,7 @@
 
 package android.renderscript;
 
+import android.annotation.UnsupportedAppUsage;
 import dalvik.system.CloseGuard;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -73,6 +74,7 @@ public class BaseObj {
     final CloseGuard guard = CloseGuard.get();
     private boolean mDestroyed;
     private String mName;
+    @UnsupportedAppUsage
     RenderScript mRS;
 
     /**
