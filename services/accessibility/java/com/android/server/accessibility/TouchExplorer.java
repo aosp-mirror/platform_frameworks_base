@@ -572,6 +572,8 @@ class TouchExplorer extends BaseEventStreamTransformation
                             }
                         }
 
+                        // Remove move history before send injected non-move events
+                        event = MotionEvent.obtainNoHistory(event);
                         if (isDraggingGesture(event)) {
                             // Two pointers moving in the same direction within
                             // a given distance perform a drag.
@@ -602,6 +604,7 @@ class TouchExplorer extends BaseEventStreamTransformation
 
                         // More than two pointers are delegated to the view hierarchy.
                         mCurrentState = STATE_DELEGATING;
+                        event = MotionEvent.obtainNoHistory(event);
                         sendDownForAllNotInjectedPointers(event, policyFlags);
                     }
                 }
@@ -690,6 +693,8 @@ class TouchExplorer extends BaseEventStreamTransformation
                             // The two pointers are moving either in different directions or
                             // no close enough => delegate the gesture to the view hierarchy.
                             mCurrentState = STATE_DELEGATING;
+                            // Remove move history before send injected non-move events
+                            event = MotionEvent.obtainNoHistory(event);
                             // Send an event to the end of the drag gesture.
                             sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits,
                                     policyFlags);
@@ -699,6 +704,7 @@ class TouchExplorer extends BaseEventStreamTransformation
                     } break;
                     default: {
                         mCurrentState = STATE_DELEGATING;
+                        event = MotionEvent.obtainNoHistory(event);
                         // Send an event to the end of the drag gesture.
                         sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits,
                                 policyFlags);
