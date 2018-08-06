@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -41,16 +42,23 @@ public final class BluetoothGatt implements BluetoothProfile {
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
+    @UnsupportedAppUsage
     private IBluetoothGatt mService;
+    @UnsupportedAppUsage
     private volatile BluetoothGattCallback mCallback;
     private Handler mHandler;
+    @UnsupportedAppUsage
     private int mClientIf;
     private BluetoothDevice mDevice;
+    @UnsupportedAppUsage
     private boolean mAutoConnect;
+    @UnsupportedAppUsage
     private int mAuthRetryState;
     private int mConnState;
     private final Object mStateLock = new Object();
+    @UnsupportedAppUsage
     private Boolean mDeviceBusy = false;
+    @UnsupportedAppUsage
     private int mTransport;
     private int mPhy;
     private boolean mOpportunistic;
@@ -810,6 +818,7 @@ public final class BluetoothGatt implements BluetoothProfile {
     /**
      * Unregister the current application and callbacks.
      */
+    @UnsupportedAppUsage
     private void unregisterApp() {
         if (DBG) Log.d(TAG, "unregisterApp() - mClientIf=" + mClientIf);
         if (mService == null || mClientIf == 0) return;
@@ -845,6 +854,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * automatically connect as soon as the remote device becomes available (true).
      * @return true, if the connection attempt was initiated successfully
      */
+    @UnsupportedAppUsage
     /*package*/ boolean connect(Boolean autoConnect, BluetoothGattCallback callback,
             Handler handler) {
         if (DBG) {
@@ -1407,6 +1417,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean refresh() {
         if (DBG) Log.d(TAG, "refresh() - device: " + mDevice.getAddress());
         if (mService == null || mClientIf == 0) return false;

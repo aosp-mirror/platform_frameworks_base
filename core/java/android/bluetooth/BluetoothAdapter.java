@@ -23,6 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -633,6 +634,7 @@ public final class BluetoothAdapter {
     private static PeriodicAdvertisingManager sPeriodicAdvertisingManager;
 
     private final IBluetoothManager mManagerService;
+    @UnsupportedAppUsage
     private IBluetooth mService;
     private final ReentrantReadWriteLock mServiceLock = new ReentrantReadWriteLock();
 
@@ -988,6 +990,7 @@ public final class BluetoothAdapter {
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     @AdapterState
+    @UnsupportedAppUsage
     public int getLeState() {
         int state = BluetoothAdapter.STATE_OFF;
 
@@ -1098,6 +1101,7 @@ public final class BluetoothAdapter {
      * @return true to indicate adapter shutdown has begun, or false on immediate error
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean disable(boolean persist) {
 
         try {
@@ -1149,6 +1153,7 @@ public final class BluetoothAdapter {
      * @return true to indicate that the config file was successfully cleared
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean factoryReset() {
         try {
             mServiceLock.readLock().lock();
@@ -1172,6 +1177,7 @@ public final class BluetoothAdapter {
      * @return the UUIDs supported by the local Bluetooth Adapter.
      * @hide
      */
+    @UnsupportedAppUsage
     public ParcelUuid[] getUuids() {
         if (getState() != STATE_ON) {
             return null;
@@ -1438,6 +1444,7 @@ public final class BluetoothAdapter {
      * @return true if the scan mode was set, false otherwise
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean setScanMode(@ScanMode int mode, int duration) {
         if (getState() != STATE_ON) {
             return false;
@@ -1456,6 +1463,7 @@ public final class BluetoothAdapter {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public boolean setScanMode(int mode) {
         if (getState() != STATE_ON) {
             return false;
@@ -1465,6 +1473,7 @@ public final class BluetoothAdapter {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getDiscoverableTimeout() {
         if (getState() != STATE_ON) {
             return -1;
@@ -1483,6 +1492,7 @@ public final class BluetoothAdapter {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setDiscoverableTimeout(int timeout) {
         if (getState() != STATE_ON) {
             return;
@@ -2007,6 +2017,7 @@ public final class BluetoothAdapter {
      * #STATE_CONNECTING} or {@link #STATE_DISCONNECTED}
      * @hide
      */
+    @UnsupportedAppUsage
     public int getConnectionState() {
         if (getState() != STATE_ON) {
             return BluetoothAdapter.STATE_DISCONNECTED;
@@ -2094,6 +2105,7 @@ public final class BluetoothAdapter {
      * permissions, or channel in use.
      * @hide
      */
+    @UnsupportedAppUsage
     public BluetoothServerSocket listenUsingRfcommOn(int channel, boolean mitm,
             boolean min16DigitPin) throws IOException {
         BluetoothServerSocket socket =
@@ -2206,6 +2218,7 @@ public final class BluetoothAdapter {
      * permissions, or channel in use.
      * @hide
      */
+    @UnsupportedAppUsage
     public BluetoothServerSocket listenUsingEncryptedRfcommWithServiceRecord(String name, UUID uuid)
             throws IOException {
         return createNewRfcommSocketAndRecord(name, uuid, false, true);
@@ -2749,6 +2762,7 @@ public final class BluetoothAdapter {
         return true;
     }
 
+    @UnsupportedAppUsage
     /*package*/ IBluetoothManager getBluetoothManager() {
         return mManagerService;
     }
@@ -2756,6 +2770,7 @@ public final class BluetoothAdapter {
     private final ArrayList<IBluetoothManagerCallback> mProxyServiceStateCallbacks =
             new ArrayList<IBluetoothManagerCallback>();
 
+    @UnsupportedAppUsage
     /*package*/ IBluetooth getBluetoothService(IBluetoothManagerCallback cb) {
         synchronized (mProxyServiceStateCallbacks) {
             if (cb == null) {
