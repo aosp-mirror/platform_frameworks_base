@@ -1901,6 +1901,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // TODO(b/111504081): Consolidate seamless rotation logic.
             if (win.mPendingForcedSeamlessRotate != null && !mWaitingForConfig) {
                 win.mPendingForcedSeamlessRotate.finish(win.mToken, win);
+                win.mFinishForcedSeamlessRotateFrameNumber = win.getFrameNumber();
                 win.mPendingForcedSeamlessRotate = null;
             }
 

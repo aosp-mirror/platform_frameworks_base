@@ -21,8 +21,12 @@ import static android.view.Surface.ROTATION_90;
 
 import android.graphics.Matrix;
 import android.view.DisplayInfo;
+import android.view.Surface.Rotation;
 
 import com.android.server.wm.utils.CoordinateTransforms;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Helper class for forced seamless rotation.
@@ -37,8 +41,13 @@ public class ForcedSeamlessRotator {
 
     private final Matrix mTransform = new Matrix();
     private final float[] mFloat9 = new float[9];
+    private final int mOldRotation;
+    private final int mNewRotation;
 
     public ForcedSeamlessRotator(int oldRotation, int newRotation, DisplayInfo info) {
+        mOldRotation = oldRotation;
+        mNewRotation = newRotation;
+
         final boolean flipped = info.rotation == ROTATION_90 || info.rotation == ROTATION_270;
         final int h = flipped ? info.logicalWidth : info.logicalHeight;
         final int w = flipped ? info.logicalHeight : info.logicalWidth;
@@ -55,6 +64,16 @@ public class ForcedSeamlessRotator {
      */
     public void unrotate(WindowToken token) {
         token.getPendingTransaction().setMatrix(token.getSurfaceControl(), mTransform, mFloat9);
+    }
+
+    /**
+     * Returns the rotation of the display before it started rotating.
+     *
+     * @return the old rotation of the display
+     */
+    @Rotation
+    public int getOldRotation() {
+        return mOldRotation;
     }
 
     /**
@@ -76,5 +95,17 @@ public class ForcedSeamlessRotator {
                     win.mWinAnimator.mSurfaceController.mSurfaceControl.getHandle(),
                     win.getFrameNumber());
         }
+    }
+
+    public void dump(PrintWriter pw) {
+        pw.print("{old="); pw.print(mOldRotation); pw.print(", new="); pw.print(mNewRotation);
+        pw.print("}");
+    }
+
+    @Override
+    public String toString() {
+        StringWriter sw = new StringWriter();
+        dump(new PrintWriter(sw));
+        return "ForcedSeamlessRotator" + sw.toString();
     }
 }
