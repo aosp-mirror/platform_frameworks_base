@@ -4811,7 +4811,6 @@ Landroid/text/SpannableStringBuilder;->mText:[C
 Landroid/text/SpannableStringBuilder;->sendToSpanWatchers(III)V
 Landroid/text/SpannableStringBuilder;->substring(II)Ljava/lang/String;
 Landroid/text/SpannableStringInternal;-><init>(Ljava/lang/CharSequence;II)V
-Landroid/text/SpannableStringInternal;->charAt(I)C
 Landroid/text/SpannableStringInternal;->checkRange(Ljava/lang/String;II)V
 Landroid/text/SpannableStringInternal;->COLUMNS:I
 Landroid/text/SpannableStringInternal;->copySpans(Landroid/text/SpannableStringInternal;II)V
@@ -4819,14 +4818,12 @@ Landroid/text/SpannableStringInternal;->copySpans(Landroid/text/Spanned;II)V
 Landroid/text/SpannableStringInternal;->EMPTY:[Ljava/lang/Object;
 Landroid/text/SpannableStringInternal;->END:I
 Landroid/text/SpannableStringInternal;->FLAGS:I
-Landroid/text/SpannableStringInternal;->getChars(II[CI)V
 Landroid/text/SpannableStringInternal;->getSpanEnd(Ljava/lang/Object;)I
 Landroid/text/SpannableStringInternal;->getSpanFlags(Ljava/lang/Object;)I
 Landroid/text/SpannableStringInternal;->getSpans(IILjava/lang/Class;)[Ljava/lang/Object;
 Landroid/text/SpannableStringInternal;->getSpanStart(Ljava/lang/Object;)I
 Landroid/text/SpannableStringInternal;->isIndexFollowsNextLine(I)Z
 Landroid/text/SpannableStringInternal;->isOutOfCopyRange(IIII)Z
-Landroid/text/SpannableStringInternal;->length()I
 Landroid/text/SpannableStringInternal;->mSpanCount:I
 Landroid/text/SpannableStringInternal;->mSpanData:[I
 Landroid/text/SpannableStringInternal;->mSpans:[Ljava/lang/Object;
