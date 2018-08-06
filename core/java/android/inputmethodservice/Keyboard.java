@@ -18,6 +18,7 @@ package android.inputmethodservice;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.XmlRes;
 import android.content.Context;
 import android.content.res.Resources;
@@ -110,18 +111,21 @@ public class Keyboard {
     private int mKeyHeight;
     
     /** Total height of the keyboard, including the padding and keys */
+    @UnsupportedAppUsage
     private int mTotalHeight;
     
     /** 
      * Total width of the keyboard, including left side gaps and keys, but not any gaps on the
      * right side.
      */
+    @UnsupportedAppUsage
     private int mTotalWidth;
     
     /** List of keys in this keyboard */
     private List<Key> mKeys;
     
     /** List of modifier keys such as Shift & Alt, if any */
+    @UnsupportedAppUsage
     private List<Key> mModifierKeys;
     
     /** Width of the screen available to fit the keyboard */
@@ -623,6 +627,7 @@ public class Keyboard {
         rows.add(row);
     }
 
+    @UnsupportedAppUsage
     final void resize(int newWidth, int newHeight) {
         int numRows = rows.size();
         for (int rowIndex = 0; rowIndex < numRows; ++rowIndex) {
