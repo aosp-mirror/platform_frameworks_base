@@ -1064,9 +1064,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
         /**
          * Reset the observer's state, returns true if the timer/counter is inactive
-         * so can be completely dropped.
+         * so it can be destroyed.
          * @param detachIfReset detach if true, no-op if false.
-         * @return Returns true if the timer/counter is inactive.
+         * @return Returns true if the timer/counter is inactive and can be destroyed.
          */
         boolean reset(boolean detachIfReset);
         /**
@@ -1128,11 +1128,7 @@ public class BatteryStatsImpl extends BatteryStats {
          *                   If false, use ArrayList for mObservers list.
         */
         public TimeBase(boolean isLongList) {
-            if (isLongList) {
-                mObservers = new HashSet<TimeBaseObs>();
-            } else  {
-                mObservers = new ArrayList<TimeBaseObs>();
-            }
+            mObservers = isLongList ? new HashSet<>() : new ArrayList<>();
         }
 
         public TimeBase() {
@@ -1229,11 +1225,6 @@ public class BatteryStatsImpl extends BatteryStats {
             return mRunning;
         }
 
-        /**
-         * Normally we do not use Iterator in framework code to avoid alloc/dealloc
-         * Iterator object, here is an exception because mObservers' type is Collection
-         * instead of list.
-         */
         public boolean setRunning(boolean running, long uptime, long realtime) {
             if (mRunning != running) {
                 mRunning = running;
@@ -1242,6 +1233,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     mRealtimeStart = realtime;
                     long batteryUptime = mUnpluggedUptime = getUptime(uptime);
                     long batteryRealtime = mUnpluggedRealtime = getRealtime(realtime);
+                    // Normally we do not use Iterator in framework code to avoid alloc/dealloc
+                    // Iterator object, here is an exception because mObservers' type is Collection
+                    // instead of list.
                     final Iterator<TimeBaseObs> iter = mObservers.iterator();
                     while (iter.hasNext()) {
                         iter.next().onTimeStarted(realtime, batteryUptime, batteryRealtime);
@@ -1251,6 +1245,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     mPastRealtime += realtime - mRealtimeStart;
                     long batteryUptime = getUptime(uptime);
                     long batteryRealtime = getRealtime(realtime);
+                    // Normally we do not use Iterator in framework code to avoid alloc/dealloc
+                    // Iterator object, here is an exception because mObservers' type is Collection
+                    // instead of list.
                     final Iterator<TimeBaseObs> iter = mObservers.iterator();
                     while (iter.hasNext()) {
                         iter.next().onTimeStopped(realtime, batteryUptime, batteryRealtime);
@@ -6624,8 +6621,8 @@ public class BatteryStatsImpl extends BatteryStats {
         return true;
     }
 
-
-    private static boolean resetIfNotNull(ControllerActivityCounterImpl counter, boolean detachIfReset) {
+    private static boolean resetIfNotNull(ControllerActivityCounterImpl counter,
+            boolean detachIfReset) {
         if (counter != null) {
             counter.reset(detachIfReset);
         }
@@ -6981,6 +6978,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             if (mProcStateTimeMs[procState] == null
                     || mProcStateTimeMs[procState].getSize() != cpuTimesMs.length) {
+                detachIfNotNull(mProcStateTimeMs[procState]);
                 mProcStateTimeMs[procState] = new LongSamplingCounterArray(
                         mBsi.mOnBatteryTimeBase);
             }
@@ -7675,6 +7673,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
 
         void initUserActivityLocked() {
+            detachIfNotNull(mUserActivityCounters);
             mUserActivityCounters = new Counter[NUM_USER_ACTIVITY_TYPES];
             for (int i=0; i<NUM_USER_ACTIVITY_TYPES; i++) {
                 mUserActivityCounters[i] = new Counter(mBsi.mOnBatteryTimeBase);
@@ -9887,7 +9886,6 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             t = new DualTimer(mBsi.mClocks, this, BatteryStats.SENSOR, timers,
                     mBsi.mOnBatteryTimeBase, mOnBatteryBackgroundTimeBase);
-            detachIfNotNull(se.mTimer);
             se.mTimer = t;
             return t;
         }
@@ -14187,8 +14185,8 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             for (int ip = 0; ip < NP; ip++) {
                 String pkgName = in.readString();
+                detachIfNotNull(u.mPackageStats.get(pkgName));
                 Uid.Pkg p = u.getPackageStatsLocked(pkgName);
-                p.detach();
                 final int NWA = in.readInt();
                 if (NWA > 10000) {
                     throw new ParcelFormatException("File corrupt: too many wakeup alarms " + NWA);
