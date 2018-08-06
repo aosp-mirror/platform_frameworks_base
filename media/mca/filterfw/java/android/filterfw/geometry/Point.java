@@ -17,6 +17,7 @@
 
 package android.filterfw.geometry;
 
+import android.annotation.UnsupportedAppUsage;
 import java.lang.Math;
 
 /**
@@ -24,12 +25,16 @@ import java.lang.Math;
  */
 public class Point {
 
+    @UnsupportedAppUsage
     public float x;
+    @UnsupportedAppUsage
     public float y;
 
+    @UnsupportedAppUsage
     public Point() {
     }
 
+    @UnsupportedAppUsage
     public Point(float x, float y) {
         this.x = x;
         this.y = y;
