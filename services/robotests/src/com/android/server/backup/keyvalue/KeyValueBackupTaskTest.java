@@ -1382,6 +1382,7 @@ public class KeyValueBackupTaskTest {
         verify(agentMock.agent).onQuotaExceeded(anyLong(), eq(1234L));
         assertEventLogged(EventLogTags.BACKUP_QUOTA_EXCEEDED, PACKAGE_1.packageName);
         assertBackupNotPendingFor(PACKAGE_1);
+        // TODO: Assert about state/staging files (possible bug)
     }
 
     @Test

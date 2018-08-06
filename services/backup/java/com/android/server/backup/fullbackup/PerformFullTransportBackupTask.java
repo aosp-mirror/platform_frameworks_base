@@ -136,7 +136,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     CountDownLatch mLatch;
     FullBackupJob mJob;             // if a scheduled job needs to be finished afterwards
     IBackupObserver mBackupObserver;
-    IBackupManagerMonitor mMonitor;
+    @Nullable private IBackupManagerMonitor mMonitor;
     boolean mUserInitiated;
     SinglePackageBackupRunner mBackupRunner;
     private final int mBackupRunnerOpToken;
@@ -154,7 +154,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             IFullBackupRestoreObserver observer,
             String[] whichPackages, boolean updateSchedule,
             FullBackupJob runningJob, CountDownLatch latch, IBackupObserver backupObserver,
-            IBackupManagerMonitor monitor, @Nullable OnTaskFinishedListener listener,
+            @Nullable IBackupManagerMonitor monitor, @Nullable OnTaskFinishedListener listener,
             boolean userInitiated) {
         super(observer);
         this.backupManagerService = backupManagerService;
