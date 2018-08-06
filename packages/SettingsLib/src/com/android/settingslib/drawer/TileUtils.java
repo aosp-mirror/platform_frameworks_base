@@ -65,20 +65,17 @@ public class TileUtils {
      *
      * <p>A summary my be defined by meta-data named {@link #META_DATA_PREFERENCE_SUMMARY}
      */
-    public static final String EXTRA_SETTINGS_ACTION =
-            "com.android.settings.action.EXTRA_SETTINGS";
+    public static final String EXTRA_SETTINGS_ACTION = "com.android.settings.action.EXTRA_SETTINGS";
 
     /**
      * @See {@link #EXTRA_SETTINGS_ACTION}.
      */
-    private static final String IA_SETTINGS_ACTION =
-            "com.android.settings.action.IA_SETTINGS";
+    private static final String IA_SETTINGS_ACTION = "com.android.settings.action.IA_SETTINGS";
 
     /**
      * Same as #EXTRA_SETTINGS_ACTION but used for the platform Settings activities.
      */
-    private static final String SETTINGS_ACTION =
-            "com.android.settings.action.SETTINGS";
+    private static final String SETTINGS_ACTION = "com.android.settings.action.SETTINGS";
 
     private static final String OPERATOR_SETTINGS =
             "com.android.settings.OPERATOR_APPLICATION_SETTING";
@@ -110,6 +107,12 @@ public class TileUtils {
      * to specify the key that should be used for the preference.
      */
     public static final String META_DATA_PREFERENCE_KEYHINT = "com.android.settings.keyhint";
+
+    /**
+     * Order of the item that should be displayed on screen. Bigger value items displays closer on
+     * top.
+     */
+    public static final String META_DATA_KEY_ORDER = "com.android.settings.order";
 
     /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
@@ -303,7 +306,6 @@ public class TileUtils {
             Tile tile = addedCache.get(key);
             if (tile == null) {
                 tile = new Tile(activityInfo, categoryKey);
-                tile.priority = usePriority ? resolved.priority : 0;
                 updateTileData(context, tile, activityInfo, activityInfo.applicationInfo, pm);
                 if (DEBUG) Log.d(LOG_TAG, "Adding tile " + tile.title);
                 addedCache.put(key, tile);
@@ -323,7 +325,6 @@ public class TileUtils {
         if (applicationInfo.isSystemApp()) {
             CharSequence title = null;
             String summary = null;
-            String keyHint = null;
 
             // Get the activity's meta-data
             try {
@@ -345,13 +346,6 @@ public class TileUtils {
                             summary = metaData.getString(META_DATA_PREFERENCE_SUMMARY);
                         }
                     }
-                    if (metaData.containsKey(META_DATA_PREFERENCE_KEYHINT)) {
-                        if (metaData.get(META_DATA_PREFERENCE_KEYHINT) instanceof Integer) {
-                            keyHint = res.getString(metaData.getInt(META_DATA_PREFERENCE_KEYHINT));
-                        } else {
-                            keyHint = metaData.getString(META_DATA_PREFERENCE_KEYHINT);
-                        }
-                    }
                 }
             } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
                 if (DEBUG) Log.d(LOG_TAG, "Couldn't find info", e);
@@ -366,8 +360,6 @@ public class TileUtils {
             // Set title and summary for the preference
             tile.title = title;
             tile.summary = summary;
-            // Suggest a key for this tile
-            tile.key = keyHint;
             return true;
         }
 

@@ -1,5 +1,6 @@
 package com.android.settingslib.drawer;
 
+import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_ORDER;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON_URI;
@@ -119,5 +120,30 @@ public class TileTest {
 
         final Tile tile2 = new Tile(activityInfo, "category");
         assertThat(tile2.isIconTintable(RuntimeEnvironment.application)).isTrue();
+    }
+
+    @Test
+    public void getPriority_noMetadata_return0() {
+        final Tile tile = new Tile(mActivityInfo, "category");
+
+        assertThat(tile.getOrder()).isEqualTo(0);
+    }
+
+    @Test
+    public void getPriority_badMetadata_return0() {
+        mActivityInfo.metaData.putString(META_DATA_KEY_ORDER, "1");
+
+        final Tile tile = new Tile(mActivityInfo, "category");
+
+        assertThat(tile.getOrder()).isEqualTo(0);
+    }
+
+    @Test
+    public void getPriority_validMetadata_returnMetadataValue() {
+        mActivityInfo.metaData.putInt(META_DATA_KEY_ORDER, 1);
+
+        final Tile tile = new Tile(mActivityInfo, "category");
+
+        assertThat(tile.getOrder()).isEqualTo(1);
     }
 }

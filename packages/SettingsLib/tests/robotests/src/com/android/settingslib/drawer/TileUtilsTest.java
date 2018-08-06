@@ -16,6 +16,12 @@
 
 package com.android.settingslib.drawer;
 
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON_URI;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY_URI;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -47,7 +53,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings.Global;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Pair;
 
@@ -131,7 +136,7 @@ public class TileUtilsTest {
                 null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles.size()).isEqualTo(1);
-        assertThat(outTiles.get(0).key).isEqualTo(keyHint);
+        assertThat(outTiles.get(0).getKey(mContext)).isEqualTo(keyHint);
     }
 
     @Test
@@ -361,16 +366,16 @@ public class TileUtilsTest {
         info.activityInfo.name = "123";
         info.activityInfo.metaData = new Bundle();
         info.activityInfo.metaData.putString("com.android.settings.category", category);
-        info.activityInfo.metaData.putInt("com.android.settings.icon", 314159);
-        info.activityInfo.metaData.putString("com.android.settings.summary", "static-summary");
+        info.activityInfo.metaData.putInt(META_DATA_PREFERENCE_ICON, 314159);
+        info.activityInfo.metaData.putString(META_DATA_PREFERENCE_SUMMARY, "static-summary");
         if (keyHint != null) {
-            info.activityInfo.metaData.putString("com.android.settings.keyhint", keyHint);
+            info.activityInfo.metaData.putString(META_DATA_PREFERENCE_KEYHINT, keyHint);
         }
         if (iconUri != null) {
-            info.activityInfo.metaData.putString("com.android.settings.icon_uri", iconUri);
+            info.activityInfo.metaData.putString(META_DATA_PREFERENCE_ICON_URI, iconUri);
         }
         if (summaryUri != null) {
-            info.activityInfo.metaData.putString("com.android.settings.summary_uri", summaryUri);
+            info.activityInfo.metaData.putString(META_DATA_PREFERENCE_SUMMARY_URI, summaryUri);
         }
         if (titleResId != 0) {
             info.activityInfo.metaData.putInt(TileUtils.META_DATA_PREFERENCE_TITLE, titleResId);
@@ -382,17 +387,5 @@ public class TileUtilsTest {
             info.activityInfo.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
         }
         return info;
-    }
-
-    private void addMetadataToInfo(ResolveInfo info, String key, String value) {
-        if (!TextUtils.isEmpty(key)) {
-            if (info.activityInfo == null) {
-                info.activityInfo = new ActivityInfo();
-            }
-            if (info.activityInfo.metaData == null) {
-                info.activityInfo.metaData = new Bundle();
-            }
-            info.activityInfo.metaData.putString(key, value);
-        }
     }
 }
