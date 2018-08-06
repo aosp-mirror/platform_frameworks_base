@@ -25,6 +25,7 @@ import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_
 import android.animation.LayoutTransition;
 import android.animation.LayoutTransition.TransitionListener;
 import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.DrawableRes;
@@ -61,6 +62,7 @@ import android.widget.FrameLayout;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.DockedStackExistsListener;
+import com.android.systemui.Interpolators;
 import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
@@ -483,14 +485,15 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         Context lightContext = new ContextThemeWrapper(ctx, dualToneLightTheme);
         Context darkContext = new ContextThemeWrapper(ctx, dualToneDarkTheme);
 
-        if (oldConfig.orientation != newConfig.orientation
-                || oldConfig.densityDpi != newConfig.densityDpi) {
+        final boolean orientationChange = oldConfig.orientation != newConfig.orientation;
+        final boolean densityChange = oldConfig.densityDpi != newConfig.densityDpi;
+        final boolean dirChange = oldConfig.getLayoutDirection() != newConfig.getLayoutDirection();
+
+        if (orientationChange || densityChange) {
             mDockedIcon = getDrawable(lightContext, darkContext, R.drawable.ic_sysbar_docked);
             mHomeDefaultIcon = getHomeDrawable(lightContext, darkContext);
         }
-        if (oldConfig.densityDpi != newConfig.densityDpi
-                || oldConfig.getLayoutDirection() != newConfig.getLayoutDirection()) {
-            mBackIcon = getBackDrawable(lightContext, darkContext);
+        if (densityChange || dirChange) {
             mRecentIcon = getDrawable(lightContext, darkContext, R.drawable.ic_sysbar_recent);
             mMenuIcon = getDrawable(lightContext, darkContext, R.drawable.ic_sysbar_menu);
 
@@ -505,6 +508,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             if (ALTERNATE_CAR_MODE_UI) {
                 updateCarModeIcons(ctx);
             }
+        }
+        if (orientationChange || densityChange || dirChange) {
+            mBackIcon = getBackDrawable(lightContext, darkContext);
         }
     }
 
@@ -527,9 +533,26 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     private void orientBackButton(KeyButtonDrawable drawable) {
         final boolean useAltBack =
-            (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
-        drawable.setRotation(useAltBack
-                ? -90 : (getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) ? 180 : 0);
+                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
+        final boolean isRtl = getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+        float degrees = useAltBack
+                ? (isRtl ? 270 : -90)
+                : (isRtl ? 180 : 0);
+        if (drawable.getRotation() == degrees) {
+            return;
+        }
+
+        // Animate the back button's rotation to the new degrees and only in portrait move up the
+        // back button to line up with the other buttons
+        float targetY = !mOverviewProxyService.shouldShowSwipeUpUI() && !mVertical && useAltBack
+                ? - getResources().getDimension(R.dimen.navbar_back_button_ime_offset)
+                : 0;
+        ObjectAnimator navBarAnimator = ObjectAnimator.ofPropertyValuesHolder(drawable,
+                PropertyValuesHolder.ofFloat(KeyButtonDrawable.KEY_DRAWABLE_ROTATE, degrees),
+                PropertyValuesHolder.ofFloat(KeyButtonDrawable.KEY_DRAWABLE_TRANSLATE_Y, targetY));
+        navBarAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        navBarAnimator.setDuration(200);
+        navBarAnimator.start();
     }
 
     private void orientHomeButton(KeyButtonDrawable drawable) {

@@ -28,8 +28,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 
-import com.android.systemui.R;
-
 /**
  * A drawable which adds shadow around a child drawable.
  */
@@ -60,6 +58,23 @@ public class ShadowKeyDrawable extends Drawable {
         }
     }
 
+    public void setTranslationX(float x) {
+        setTranslation(x, mState.mTranslationY);
+    }
+
+    public void setTranslationY(float y) {
+        setTranslation(mState.mTranslationX, y);
+    }
+
+    public void setTranslation(float x, float y) {
+        if (mState.mTranslationX != x || mState.mTranslationY != y) {
+            mState.mTranslationX = x;
+            mState.mTranslationY = y;
+            mState.mLastDrawnBitmap = null;
+            invalidateSelf();
+        }
+    }
+
     public void setShadowProperties(int x, int y, int size, int color) {
         if (mState.mShadowOffsetX != x || mState.mShadowOffsetY != y
                 || mState.mShadowSize != size || mState.mShadowColor != color) {
@@ -74,6 +89,14 @@ public class ShadowKeyDrawable extends Drawable {
 
     public float getRotation() {
         return mState.mRotateDegrees;
+    }
+
+    public float getTranslationX() {
+        return mState.mTranslationX;
+    }
+
+    public float getTranslationY() {
+        return mState.mTranslationY;
     }
 
     @Override
@@ -151,6 +174,7 @@ public class ShadowKeyDrawable extends Drawable {
         // Call mutate, so that the pixel allocation by the underlying vector drawable is cleared.
         final Drawable d = mState.mChildState.newDrawable().mutate();
         d.setBounds(0, 0, mState.mBaseWidth, mState.mBaseHeight);
+        canvas.translate(mState.mTranslationX, mState.mTranslationY);
         d.draw(canvas);
 
         if (mState.mShadowSize > 0) {
@@ -168,9 +192,9 @@ public class ShadowKeyDrawable extends Drawable {
             canvas.rotate(mState.mRotateDegrees, width / 2, height / 2);
 
             final float shadowOffsetX = (float) (Math.sin(radians) * mState.mShadowOffsetY
-                    + Math.cos(radians) * mState.mShadowOffsetX);
+                    + Math.cos(radians) * mState.mShadowOffsetX) - mState.mTranslationX;
             final float shadowOffsetY = (float) (Math.cos(radians) * mState.mShadowOffsetY
-                    - Math.sin(radians) * mState.mShadowOffsetX);
+                    - Math.sin(radians) * mState.mShadowOffsetX) - mState.mTranslationY;
 
             canvas.drawBitmap(shadow, offset[0] + shadowOffsetX, offset[1] + shadowOffsetY, paint);
             d.draw(canvas);
@@ -189,6 +213,8 @@ public class ShadowKeyDrawable extends Drawable {
         int mBaseWidth;
         int mBaseHeight;
         float mRotateDegrees;
+        float mTranslationX;
+        float mTranslationY;
         int mShadowOffsetX;
         int mShadowOffsetY;
         int mShadowSize;

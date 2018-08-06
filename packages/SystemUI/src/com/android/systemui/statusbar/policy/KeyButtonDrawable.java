@@ -22,6 +22,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.util.FloatProperty;
 import android.view.Gravity;
 
 import com.android.systemui.R;
@@ -32,6 +33,32 @@ import com.android.systemui.statusbar.phone.ShadowKeyDrawable;
  * navigation bar mode.
  */
 public class KeyButtonDrawable extends LayerDrawable {
+
+    public static final FloatProperty<KeyButtonDrawable> KEY_DRAWABLE_ROTATE =
+        new FloatProperty<KeyButtonDrawable>("KeyButtonRotation") {
+            @Override
+            public void setValue(KeyButtonDrawable drawable, float degree) {
+                drawable.setRotation(degree);
+            }
+
+            @Override
+            public Float get(KeyButtonDrawable drawable) {
+                return drawable.getRotation();
+            }
+        };
+
+    public static final FloatProperty<KeyButtonDrawable> KEY_DRAWABLE_TRANSLATE_Y =
+        new FloatProperty<KeyButtonDrawable>("KeyButtonTranslateY") {
+            @Override
+            public void setValue(KeyButtonDrawable drawable, float y) {
+                drawable.setTranslationY(y);
+            }
+
+            @Override
+            public Float get(KeyButtonDrawable drawable) {
+                return drawable.getTranslationY();
+            }
+        };
 
     private final boolean mHasDarkDrawable;
 
@@ -82,5 +109,34 @@ public class KeyButtonDrawable extends LayerDrawable {
         if (mHasDarkDrawable && getDrawable(1) instanceof ShadowKeyDrawable) {
             ((ShadowKeyDrawable) getDrawable(1)).setRotation(degrees);
         }
+    }
+
+    public void setTranslationY(float y) {
+        if (getDrawable(0) instanceof ShadowKeyDrawable) {
+            ((ShadowKeyDrawable) getDrawable(0)).setTranslationY(y);
+        }
+        if (mHasDarkDrawable && getDrawable(1) instanceof ShadowKeyDrawable) {
+            ((ShadowKeyDrawable) getDrawable(1)).setTranslationY(y);
+        }
+    }
+
+    public float getRotation() {
+        if (getDrawable(0) instanceof ShadowKeyDrawable) {
+            return ((ShadowKeyDrawable) getDrawable(0)).getRotation();
+        }
+        if (mHasDarkDrawable && getDrawable(1) instanceof ShadowKeyDrawable) {
+            return ((ShadowKeyDrawable) getDrawable(1)).getRotation();
+        }
+        return 0;
+    }
+
+    public float getTranslationY() {
+        if (getDrawable(0) instanceof ShadowKeyDrawable) {
+            return ((ShadowKeyDrawable) getDrawable(0)).getTranslationY();
+        }
+        if (mHasDarkDrawable && getDrawable(1) instanceof ShadowKeyDrawable) {
+            return ((ShadowKeyDrawable) getDrawable(1)).getTranslationY();
+        }
+        return 0;
     }
 }
