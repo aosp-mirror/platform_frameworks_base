@@ -224,6 +224,13 @@ public class CarrierConfigManager {
     public static final String
             KEY_ALLOW_EMERGENCY_NUMBERS_IN_CALL_LOG_BOOL = "allow_emergency_numbers_in_call_log_bool";
 
+    /**
+     * A string array containing numbers that shouldn't be included in the call log.
+     * @hide
+     */
+    public static final String KEY_UNLOGGABLE_NUMBERS_STRING_ARRAY =
+            "unloggable_numbers_string_array";
+
     /** If true, removes the Voice Privacy option from Call Settings */
     public static final String KEY_VOICE_PRIVACY_DISABLE_UI_BOOL = "voice_privacy_disable_ui_bool";
 
@@ -2032,6 +2039,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_AUTO_RETRY_FAILED_WIFI_EMERGENCY_CALL, false);
         sDefaults.putBoolean(KEY_ADDITIONAL_CALL_SETTING_BOOL, true);
         sDefaults.putBoolean(KEY_ALLOW_EMERGENCY_NUMBERS_IN_CALL_LOG_BOOL, false);
+        sDefaults.putStringArray(KEY_UNLOGGABLE_NUMBERS_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_ALLOW_LOCAL_DTMF_TONES_BOOL, true);
         sDefaults.putBoolean(KEY_PLAY_CALL_RECORDING_TONE_BOOL, false);
         sDefaults.putBoolean(KEY_APN_EXPAND_BOOL, true);
