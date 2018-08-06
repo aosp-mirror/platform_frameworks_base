@@ -318,8 +318,7 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
     private CachedBluetoothDevice getCachedBluetoothDevice(BluetoothDevice d) {
         CachedBluetoothDevice cachedDevice = mCachedDeviceManager.findDevice(d);
         if (cachedDevice == null) {
-            cachedDevice = mCachedDeviceManager.addDevice(
-                    mLocalBluetoothAdapter, mProfileManager, d);
+            cachedDevice = mCachedDeviceManager.addDevice(mLocalBluetoothAdapter, d);
         }
         return cachedDevice;
     }

@@ -117,7 +117,6 @@ public class LocalBluetoothProfileManager {
         mUseMapClient = mContext.getResources().getBoolean(R.bool.enable_pbap_pce_profile);
         // pass this reference to adapter and event manager (circular dependency)
         mLocalAdapter.setProfileManager(this);
-        mEventManager.setProfileManager(this);
 
         ParcelUuid[] uuids = adapter.getUuids();
 
@@ -344,8 +343,7 @@ public class LocalBluetoothProfileManager {
             CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
             if (cachedDevice == null) {
                 Log.w(TAG, "StateChangedHandler found new device: " + device);
-                cachedDevice = mDeviceManager.addDevice(mLocalAdapter,
-                        LocalBluetoothProfileManager.this, device);
+                cachedDevice = mDeviceManager.addDevice(mLocalAdapter, device);
             }
             onReceiveInternal(intent, cachedDevice);
         }
