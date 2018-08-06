@@ -498,7 +498,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     + reason);
             setResumedActivity(record, reason + " - onActivityStateChanged");
             if (record == mStackSupervisor.getTopResumedActivity()) {
-                // TODO(b/111541062): Support tracking multiple resumed activities
+                // TODO(b/111361570): Support multiple focused apps in WM
                 mService.setResumedActivityUncheckLocked(record, reason);
             }
             mStackSupervisor.mRecentTasks.add(record.getTask());
@@ -3423,7 +3423,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
 
         // Move focus to next focusable stack if possible.
-        if (adjustFocusToNextFocusableStack(myReason) != null) {
+        final ActivityStack nextFocusableStack = adjustFocusToNextFocusableStack(myReason);
+        if (nextFocusableStack != null) {
+            final ActivityRecord top = nextFocusableStack.topRunningActivityLocked();
+            if (top != null && top == mStackSupervisor.getTopResumedActivity()) {
+                // TODO(b/111361570): Remove this and update focused app per-display in
+                // WindowManager every time an activity becomes resumed in
+                // ActivityTaskManagerService#setResumedActivityUncheckLocked().
+                mService.setResumedActivityUncheckLocked(top, reason);
+            }
             return;
         }
 
