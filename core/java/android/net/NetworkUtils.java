@@ -126,51 +126,122 @@ public class NetworkUtils {
     public native static boolean queryUserAccess(int uid, int netId);
 
     /**
-     * Convert a IPv4 address from an integer to an InetAddress.
-     * @param hostAddress an int corresponding to the IPv4 address in network byte order
+     * @see #intToInet4AddressHTL(int)
+     * @deprecated Use either {@link #intToInet4AddressHTH(int)}
+     *             or {@link #intToInet4AddressHTL(int)}
      */
+    @Deprecated
     public static InetAddress intToInetAddress(int hostAddress) {
-        byte[] addressBytes = { (byte)(0xff & hostAddress),
-                                (byte)(0xff & (hostAddress >> 8)),
-                                (byte)(0xff & (hostAddress >> 16)),
-                                (byte)(0xff & (hostAddress >> 24)) };
+        return intToInet4AddressHTL(hostAddress);
+    }
+
+    /**
+     * Convert a IPv4 address from an integer to an InetAddress (0x04030201 -> 1.2.3.4)
+     *
+     * <p>This method uses the higher-order int bytes as the lower-order IPv4 address bytes,
+     * which is an unusual convention. Consider {@link #intToInet4AddressHTH(int)} instead.
+     * @param hostAddress an int coding for an IPv4 address, where higher-order int byte is
+     *                    lower-order IPv4 address byte
+     */
+    public static InetAddress intToInet4AddressHTL(int hostAddress) {
+        return intToInet4AddressHTH(Integer.reverseBytes(hostAddress));
+    }
+
+    /**
+     * Convert a IPv4 address from an integer to an InetAddress (0x01020304 -> 1.2.3.4)
+     * @param hostAddress an int coding for an IPv4 address
+     */
+    public static InetAddress intToInet4AddressHTH(int hostAddress) {
+        byte[] addressBytes = { (byte) (0xff & (hostAddress >> 24)),
+                (byte) (0xff & (hostAddress >> 16)),
+                (byte) (0xff & (hostAddress >> 8)),
+                (byte) (0xff & hostAddress) };
 
         try {
-           return InetAddress.getByAddress(addressBytes);
+            return InetAddress.getByAddress(addressBytes);
         } catch (UnknownHostException e) {
-           throw new AssertionError();
+            throw new AssertionError();
         }
     }
 
     /**
-     * Convert a IPv4 address from an InetAddress to an integer
-     * @param inetAddr is an InetAddress corresponding to the IPv4 address
-     * @return the IP address as an integer in network byte order
+     * @see #inet4AddressToIntHTL(Inet4Address)
+     * @deprecated Use either {@link #inet4AddressToIntHTH(Inet4Address)}
+     *             or {@link #inet4AddressToIntHTL(Inet4Address)}
      */
+    @Deprecated
     public static int inetAddressToInt(Inet4Address inetAddr)
             throws IllegalArgumentException {
-        byte [] addr = inetAddr.getAddress();
-        return ((addr[3] & 0xff) << 24) | ((addr[2] & 0xff) << 16) |
-                ((addr[1] & 0xff) << 8) | (addr[0] & 0xff);
+        return inet4AddressToIntHTL(inetAddr);
     }
 
     /**
-     * Convert a network prefix length to an IPv4 netmask integer
-     * @param prefixLength
-     * @return the IPv4 netmask as an integer in network byte order
+     * Convert an IPv4 address from an InetAddress to an integer (1.2.3.4 -> 0x01020304)
+     *
+     * <p>This conversion can help order IP addresses: considering the ordering
+     * 192.0.2.1 < 192.0.2.2 < ..., resulting ints will follow that ordering if read as unsigned
+     * integers with {@link Integer#toUnsignedLong}.
+     * @param inetAddr is an InetAddress corresponding to the IPv4 address
+     * @return the IP address as integer
      */
+    public static int inet4AddressToIntHTH(Inet4Address inetAddr)
+            throws IllegalArgumentException {
+        byte [] addr = inetAddr.getAddress();
+        return ((addr[0] & 0xff) << 24) | ((addr[1] & 0xff) << 16)
+                | ((addr[2] & 0xff) << 8) | (addr[3] & 0xff);
+    }
+
+    /**
+     * Convert a IPv4 address from an InetAddress to an integer (1.2.3.4 -> 0x04030201)
+     *
+     * <p>This method stores the higher-order IPv4 address bytes in the lower-order int bytes,
+     * which is an unusual convention. Consider {@link #inet4AddressToIntHTH(Inet4Address)} instead.
+     * @param inetAddr is an InetAddress corresponding to the IPv4 address
+     * @return the IP address as integer
+     */
+    public static int inet4AddressToIntHTL(Inet4Address inetAddr) {
+        return Integer.reverseBytes(inet4AddressToIntHTH(inetAddr));
+    }
+
+    /**
+     * @see #prefixLengthToV4NetmaskIntHTL(int)
+     * @deprecated Use either {@link #prefixLengthToV4NetmaskIntHTH(int)}
+     *             or {@link #prefixLengthToV4NetmaskIntHTL(int)}
+     */
+    @Deprecated
     public static int prefixLengthToNetmaskInt(int prefixLength)
+            throws IllegalArgumentException {
+        return prefixLengthToV4NetmaskIntHTL(prefixLength);
+    }
+
+    /**
+     * Convert a network prefix length to an IPv4 netmask integer (prefixLength 17 -> 0xffff8000)
+     * @return the IPv4 netmask as an integer
+     */
+    public static int prefixLengthToV4NetmaskIntHTH(int prefixLength)
             throws IllegalArgumentException {
         if (prefixLength < 0 || prefixLength > 32) {
             throw new IllegalArgumentException("Invalid prefix length (0 <= prefix <= 32)");
         }
-        int value = 0xffffffff << (32 - prefixLength);
-        return Integer.reverseBytes(value);
+        // (int)a << b is equivalent to a << (b & 0x1f): can't shift by 32 (-1 << 32 == -1)
+        return prefixLength == 0 ? 0 : 0xffffffff << (32 - prefixLength);
+    }
+
+    /**
+     * Convert a network prefix length to an IPv4 netmask integer (prefixLength 17 -> 0x0080ffff).
+     *
+     * <p>This method stores the higher-order IPv4 address bytes in the lower-order int bytes,
+     * which is an unusual convention. Consider {@link #prefixLengthToV4NetmaskIntHTH(int)} instead.
+     * @return the IPv4 netmask as an integer
+     */
+    public static int prefixLengthToV4NetmaskIntHTL(int prefixLength)
+            throws IllegalArgumentException {
+        return Integer.reverseBytes(prefixLengthToV4NetmaskIntHTH(prefixLength));
     }
 
     /**
      * Convert a IPv4 netmask integer to a prefix length
-     * @param netmask as an integer in network byte order
+     * @param netmask as an integer (0xff000000 for a /8 subnet)
      * @return the network prefix length
      */
     public static int netmaskIntToPrefixLength(int netmask) {
