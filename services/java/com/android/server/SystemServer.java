@@ -28,6 +28,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
+import android.database.sqlite.SQLiteGlobal;
 import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
@@ -346,6 +347,10 @@ public final class SystemServer {
             Binder.setWarnOnBlocking(true);
             // The system server should always load safe labels
             PackageItemInfo.setForceSafeLabels(true);
+
+            // Default to FULL within the system server.
+            SQLiteGlobal.sDefaultSyncMode = SQLiteGlobal.SYNC_MODE_FULL;
+
             // Deactivate SQLiteCompatibilityWalFlags until settings provider is initialized
             SQLiteCompatibilityWalFlags.init(null);
 
