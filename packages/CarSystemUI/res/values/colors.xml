@@ -19,7 +19,7 @@
     <color name="car_accent">#356FE5</color>
     <!-- colors for user switcher -->
     <color name="car_user_switcher_background_color">#000000</color>
-    <color name="car_user_switcher_name_text_color">@color/car_title2_light</color>
+    <color name="car_user_switcher_name_text_color">@color/car_body1_light</color>
     <color name="car_user_switcher_add_user_background_color">#131313</color>
     <color name="car_nav_icon_fill_color">@color/car_grey_50</color>
     <!-- colors for seekbar -->
