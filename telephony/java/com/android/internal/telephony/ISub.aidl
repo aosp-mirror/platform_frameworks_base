@@ -156,6 +156,42 @@ interface ISub {
      */
     int setDataRoaming(int roaming, int subId);
 
+    /**
+     * Switch to a certain subscription
+     *
+     * @param opportunistic whether it’s opportunistic subscription.
+     * @param subId the unique SubscriptionInfo index in database
+     * @return the number of records updated
+     */
+    int setOpportunistic(boolean opportunistic, int subId);
+
+    /**
+     * Set parent subId by simInfo index
+     *
+     * @param parentSubId: subId of its parent subscription.
+     * @param subId the unique SubscriptionInfo index in database
+     * @return the number of records updated
+     */
+    int setParentSubId(int parentSubId, int subId);
+
+    /**
+     * Set preferred default data.
+     * Set on which slot default data will be on.
+     *
+     * @param slotId which slot is preferred to for cellular data.
+     * @hide
+     *
+     */
+    int setPreferredData(int slotId);
+
+    /**
+     * Get User downloaded Profiles.
+     *
+     *  Provide all available user downloaded profile on the phone.
+     *  @param slotId on which phone the switch will operate on
+     */
+    List<SubscriptionInfo> getOpportunisticSubscriptions(int slotId, String callingPackage);
+
     int getSlotIndex(int subId);
 
     int[] getSubId(int slotIndex);
@@ -186,7 +222,7 @@ interface ISub {
 
     int[] getActiveSubIdList();
 
-    void setSubscriptionProperty(int subId, String propKey, String propValue);
+    int setSubscriptionProperty(int subId, String propKey, String propValue);
 
     String getSubscriptionProperty(int subId, String propKey, String callingPackage);
 
