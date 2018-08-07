@@ -19,7 +19,9 @@
 <resources>
     <!-- Name of Guest Profile. [CHAR LIMIT=30] -->
     <string name="car_guest">Guest</string>
-    <!-- Name of Add User Profile. [CHAR LIMIT=30] -->
+    <!-- Title for button that starts a guest session. [CHAR LIMIT=30] -->
+    <string name="start_guest_session">Guest</string>
+    <!-- Title for button that  adds a new user. [CHAR LIMIT=30] -->
     <string name="car_add_user">Add User</string>
     <!-- Default name of the new user created. [CHAR LIMIT=30] -->
     <string name="car_new_user">New User</string>
