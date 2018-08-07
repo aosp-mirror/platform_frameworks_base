@@ -103,9 +103,9 @@ public class KeyguardClockPositionAlgorithm {
     private float mDarkAmount;
 
     /**
-     * If keyguard will require a password or just fade away.
+     * If keyguard will just fade away or will require a password.
      */
-    private boolean mCurrentlySecure;
+    private boolean mFadeAway;
 
     /**
      * Dozing and receiving a notification (AOD notification.)
@@ -135,7 +135,7 @@ public class KeyguardClockPositionAlgorithm {
 
     public void setup(int minTopMargin, int maxShadeBottom, int notificationStackHeight,
             float panelExpansion, int parentHeight,
-            int keyguardStatusHeight, float dark, boolean secure, boolean pulsing,
+            int keyguardStatusHeight, float dark, boolean fadeAway, boolean pulsing,
             int bouncerTop) {
         mMinTopMargin = minTopMargin + mContainerTopPadding;
         mMaxShadeBottom = maxShadeBottom;
@@ -144,7 +144,7 @@ public class KeyguardClockPositionAlgorithm {
         mHeight = parentHeight;
         mKeyguardStatusHeight = keyguardStatusHeight;
         mDarkAmount = dark;
-        mCurrentlySecure = secure;
+        mFadeAway = fadeAway;
         mPulsing = pulsing;
         mBouncerTop = bouncerTop;
     }
@@ -198,7 +198,7 @@ public class KeyguardClockPositionAlgorithm {
 
         float clockYRegular = getExpandedClockPosition();
         boolean hasEnoughSpace = mMinTopMargin + mKeyguardStatusHeight < mBouncerTop;
-        float clockYTarget = mCurrentlySecure && hasEnoughSpace ?
+        float clockYTarget = !mFadeAway && hasEnoughSpace ?
                 mMinTopMargin : -mKeyguardStatusHeight;
 
         // Move clock up while collapsing the shade
@@ -218,11 +218,11 @@ public class KeyguardClockPositionAlgorithm {
      */
     private float getClockAlpha(int y) {
         float alphaKeyguard;
-        if (mCurrentlySecure) {
-            alphaKeyguard = 1;
-        } else {
+        if (mFadeAway) {
             alphaKeyguard = Math.max(0, y / Math.max(1f, getExpandedClockPosition()));
             alphaKeyguard = Interpolators.ACCELERATE.getInterpolation(alphaKeyguard);
+        } else {
+            alphaKeyguard = 1;
         }
         return MathUtils.lerp(alphaKeyguard, 1f, mDarkAmount);
     }
