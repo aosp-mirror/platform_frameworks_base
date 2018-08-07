@@ -41,6 +41,8 @@ import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.fullbackup.PerformAdbBackupTask;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
+import com.android.server.backup.keyvalue.BackupRequest;
+import com.android.server.backup.keyvalue.KeyValueBackupTask;
 import com.android.server.backup.params.AdbBackupParams;
 import com.android.server.backup.params.AdbParams;
 import com.android.server.backup.params.AdbRestoreParams;

@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server.backup;
+package com.android.server.backup.keyvalue;
 
 import static android.app.backup.BackupManager.ERROR_AGENT_FAILURE;
 import static android.app.backup.BackupManager.ERROR_BACKUP_NOT_ALLOWED;
@@ -25,9 +25,12 @@ import static android.app.backup.BackupManager.SUCCESS;
 import static android.app.backup.ForwardingBackupAgent.forward;
 
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.createBackupWakeLock;
-import static com.android.server.backup.testing.BackupManagerServiceTestUtils.createInitializedBackupManagerService;
-import static com.android.server.backup.testing.BackupManagerServiceTestUtils.setUpBackupManagerServiceBasics;
-import static com.android.server.backup.testing.BackupManagerServiceTestUtils.setUpBinderCallerAndApplicationAsSystem;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils
+        .createInitializedBackupManagerService;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils
+        .setUpBackupManagerServiceBasics;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils
+        .setUpBinderCallerAndApplicationAsSystem;
 import static com.android.server.backup.testing.PackageData.PM_PACKAGE;
 import static com.android.server.backup.testing.PackageData.fullBackupPackage;
 import static com.android.server.backup.testing.PackageData.keyValuePackage;
@@ -90,10 +93,14 @@ import android.util.Pair;
 
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
+import com.android.server.backup.BackupManagerService;
+import com.android.server.backup.BackupRestoreTask;
+import com.android.server.backup.DataChangedJournal;
+import com.android.server.backup.KeyValueBackupJob;
+import com.android.server.backup.PackageManagerBackupAgent;
+import com.android.server.backup.TransportManager;
 import com.android.server.backup.internal.BackupHandler;
-import com.android.server.backup.internal.BackupRequest;
 import com.android.server.backup.internal.OnTaskFinishedListener;
-import com.android.server.backup.internal.KeyValueBackupTask;
 import com.android.server.backup.testing.PackageData;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils;
@@ -1795,10 +1802,10 @@ public class KeyValueBackupTaskTest {
      *   <li>The transport being initialized with {@link IBackupTransport#initializeDevice()}
      *   <li>{@link BackupManagerService#resetBackupState(File)} being called, which will:
      *       <ul>
-     *         <li>Call {@link ProcessedPackagesJournal#reset()}
-     *         <li>Reset current token to 0
-     *         <li>Delete state files
-     *         <li>Mark data changed for every key-value participant
+     *         <li>Reset processed packages journal.
+     *         <li>Reset current token to 0.
+     *         <li>Delete state files.
+     *         <li>Mark data changed for every key-value participant.
      *       </ul>
      * </ul>
      */

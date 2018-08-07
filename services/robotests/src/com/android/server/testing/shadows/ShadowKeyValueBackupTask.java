@@ -22,15 +22,14 @@ import android.app.backup.IBackupObserver;
 
 import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.DataChangedJournal;
-import com.android.server.backup.internal.BackupRequest;
 import com.android.server.backup.internal.OnTaskFinishedListener;
-import com.android.server.backup.internal.KeyValueBackupTask;
+import com.android.server.backup.keyvalue.BackupRequest;
+import com.android.server.backup.keyvalue.KeyValueBackupTask;
 import com.android.server.backup.transport.TransportClient;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Implements(KeyValueBackupTask.class)

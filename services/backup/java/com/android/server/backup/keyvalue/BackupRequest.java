@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server.backup.internal;
+package com.android.server.backup.keyvalue;
 
 import java.util.Objects;
 
