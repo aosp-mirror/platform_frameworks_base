@@ -628,7 +628,8 @@ public class Build {
          * October 2013: Android 4.4, KitKat, another tasty treat.
          *
          * <p>Applications targeting this or a later release will get these
-         * new changes in behavior:</p>
+         * new changes in behavior. For more information about this release, see the
+         * <a href="/about/versions/kitkat/">Android KitKat overview</a>.</p>
          * <ul>
          * <li> The default result of
          * {@link android.preference.PreferenceActivity#isValidFragment(String)
@@ -678,7 +679,8 @@ public class Build {
          * November 2014: Lollipop.  A flat one with beautiful shadows.  But still tasty.
          *
          * <p>Applications targeting this or a later release will get these
-         * new changes in behavior:</p>
+         * new changes in behavior.  For more information about this release, see the
+         * <a href="/about/versions/lollipop/">Android Lollipop overview</a>.</p>
          * <ul>
          * <li> {@link android.content.Context#bindService Context.bindService} now
          * requires an explicit Intent, and will throw an exception if given an implicit
@@ -707,6 +709,8 @@ public class Build {
 
         /**
          * March 2015: Lollipop with an extra sugar coating on the outside!
+         * For more information about this release, see the
+         * <a href="/about/versions/android-5.1">Android 5.1 APIs</a>.
          */
         public static final int LOLLIPOP_MR1 = 22;
 
@@ -714,7 +718,8 @@ public class Build {
          * M is for Marshmallow!
          *
          * <p>Applications targeting this or a later release will get these
-         * new changes in behavior:</p>
+         * new changes in behavior. For more information about this release, see the
+         * <a href="/about/versions/marshmallow/">Android 6.0 Marshmallow overview</a>.</p>
          * <ul>
          * <li> Runtime permissions.  Dangerous permissions are no longer granted at
          * install time, but must be requested by the application at runtime through
@@ -745,7 +750,8 @@ public class Build {
          * N is for Nougat.
          *
          * <p>Applications targeting this or a later release will get these
-         * new changes in behavior:</p>
+         * new changes in behavior. For more information about this release, see
+         * the <a href="/about/versions/nougat/">Android Nougat overview</a>.</p>
          * <ul>
          * <li> {@link android.app.DownloadManager.Request#setAllowedNetworkTypes
          * DownloadManager.Request.setAllowedNetworkTypes}
@@ -795,7 +801,9 @@ public class Build {
         public static final int N = 24;
 
         /**
-         * N MR1: Nougat++.
+         * N MR1: Nougat++. For more information about this release, see
+         * <a href="/about/versions/nougat/android-7.1">Android 7.1 for
+         * Developers</a>.
          */
         public static final int N_MR1 = 25;
 
@@ -803,7 +811,8 @@ public class Build {
          * O.
          *
          * <p>Applications targeting this or a later release will get these
-         * new changes in behavior:</p>
+         * new changes in behavior. For more information about this release, see
+         * the <a href="/about/versions/oreo/">Android Oreo overview</a>.</p>
          * <ul>
          * <li><a href="{@docRoot}about/versions/oreo/background.html">Background execution limits</a>
          * are applied to the application.</li>
@@ -892,13 +901,16 @@ public class Build {
          * O MR1.
          *
          * <p>Applications targeting this or a later release will get these
-         * new changes in behavior:</p>
+         * new changes in behavior. For more information about this release, see
+         * <a href="/about/versions/oreo/android-8.1">Android 8.1 features and
+         * APIs</a>.</p>
          * <ul>
          * <li>Apps exporting and linking to apk shared libraries must explicitly
          * enumerate all signing certificates in a consistent order.</li>
          * <li>{@link android.R.attr#screenOrientation} can not be used to request a fixed
          * orientation if the associated activity is not fullscreen and opaque.</li>
          * </ul>
+         *
          */
         public static final int O_MR1 = 27;
 
@@ -906,7 +918,8 @@ public class Build {
          * P.
          *
          * <p>Applications targeting this or a later release will get these
-         * new changes in behavior:</p>
+         * new changes in behavior. For more information about this release, see the
+         * <a href="/about/versions/pie/">Android 9 Pie overview</a>.</p>
          * <ul>
          * <li>{@link android.app.Service#startForeground Service.startForeground} requires
          * that apps hold the permission
@@ -914,6 +927,7 @@ public class Build {
          * <li>{@link android.widget.LinearLayout} will always remeasure weighted children,
          * even if there is no excess space.</li>
          * </ul>
+         *
          */
         public static final int P = 28;
     }
