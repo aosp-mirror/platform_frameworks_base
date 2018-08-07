@@ -941,9 +941,10 @@ message MetricsEvent {
     // OS: 6.0
     NOTIFICATION_ZEN_MODE_EVENT_RULE = 146;
 
-    // ACTION: App notification settings > Block Notifications
+    // ACTION: App notification settings > Block Notifications or long press on
+    // notification blocks.
     // CATEGORY: SETTINGS
-    // OS: 6.0
+    // OS: 9.0
     ACTION_BAN_APP_NOTES = 147;
 
     // ACTION: Notification shade > Dismiss all button
