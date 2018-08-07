@@ -32,6 +32,7 @@ import android.app.job.JobParameters;
 import android.app.job.JobProtoEnums;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
+import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -2723,6 +2724,55 @@ public class JobSchedulerService extends com.android.server.SystemService
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
                 (new JobSchedulerShellCommand(JobSchedulerService.this)).exec(
                         this, in, out, err, args, callback, resultReceiver);
+        }
+
+        /**
+         * <b>For internal system user only!</b>
+         * Returns a list of all currently-executing jobs.
+         */
+        @Override
+        public List<JobInfo> getStartedJobs() {
+            final int uid = Binder.getCallingUid();
+            if (uid != Process.SYSTEM_UID) {
+                throw new SecurityException(
+                    "getStartedJobs() is system internal use only.");
+            }
+
+            final ArrayList<JobInfo> runningJobs;
+
+            synchronized (mLock) {
+                runningJobs = new ArrayList<>(mActiveServices.size());
+                for (JobServiceContext jsc : mActiveServices) {
+                    final JobStatus job = jsc.getRunningJobLocked();
+                    if (job != null) {
+                        runningJobs.add(job.getJob());
+                    }
+                }
+            }
+
+            return runningJobs;
+        }
+
+        /**
+         * <b>For internal system user only!</b>
+         * Returns a snapshot of the state of all jobs known to the system.
+         *
+         * <p class="note">This is a slow operation, so it should be called sparingly.
+         */
+        @Override
+        public List<JobSnapshot> getAllJobSnapshots() {
+            final int uid = Binder.getCallingUid();
+            if (uid != Process.SYSTEM_UID) {
+                throw new SecurityException(
+                    "getAllJobSnapshots() is system internal use only.");
+            }
+            synchronized (mLock) {
+                final ArrayList<JobSnapshot> snapshots = new ArrayList<>(mJobs.size());
+                mJobs.forEachJob((job) -> snapshots.add(
+                        new JobSnapshot(job.getJob(), job.getSatisfiedConstraintFlags(),
+                                isReadyToBeExecutedLocked(job))));
+                return snapshots;
+            }
         }
     };
 

@@ -17,6 +17,7 @@
 package android.app.job;
 
 import android.app.job.JobInfo;
+import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
 
  /**
@@ -31,4 +32,6 @@ interface IJobScheduler {
     void cancelAll();
     List<JobInfo> getAllPendingJobs();
     JobInfo getPendingJob(int jobId);
+    List<JobInfo> getStartedJobs();
+    List<JobSnapshot> getAllJobSnapshots();
 }
