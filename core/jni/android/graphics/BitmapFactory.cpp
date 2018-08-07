@@ -360,7 +360,7 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
     // use the default.
     SkImageInfo bitmapInfo = decodeInfo;
     if (decodeInfo.colorSpace() && decodeInfo.colorSpace()->isSRGB()) {
-        bitmapInfo = bitmapInfo.makeColorSpace(GraphicsJNI::colorSpaceForType(decodeColorType));
+        bitmapInfo = bitmapInfo.makeColorSpace(decodeInfo.refColorSpace());
     }
 
     if (decodeColorType == kGray_8_SkColorType) {

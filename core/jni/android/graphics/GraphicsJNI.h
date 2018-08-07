@@ -104,11 +104,6 @@ public:
             int srcStride, int x, int y, int width, int height,
             const SkBitmap& dstBitmap);
 
-    static sk_sp<SkColorSpace> defaultColorSpace();
-    static sk_sp<SkColorSpace> linearColorSpace();
-    static sk_sp<SkColorSpace> colorSpaceForType(SkColorType type);
-    static bool isColorSpaceSRGB(SkColorSpace* colorSpace);
-
     static SkColorSpaceTransferFn getNativeTransferParameters(JNIEnv* env, jobject transferParams);
     static SkMatrix44 getNativeXYZMatrix(JNIEnv* env, jfloatArray xyzD50);
     static sk_sp<SkColorSpace> getNativeColorSpace(JNIEnv* env, jobject colorSpace);

@@ -332,8 +332,7 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
     SkImageInfo info = SkImageInfo::Make(outBuffer.width, outBuffer.height,
                                          convertPixelFormat(outBuffer.format),
                                          outBuffer.format == PIXEL_FORMAT_RGBX_8888
-                                                 ? kOpaque_SkAlphaType : kPremul_SkAlphaType,
-                                         GraphicsJNI::defaultColorSpace());
+                                                 ? kOpaque_SkAlphaType : kPremul_SkAlphaType);
 
     SkBitmap bitmap;
     ssize_t bpr = outBuffer.stride * bytesPerPixel(outBuffer.format);
