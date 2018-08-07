@@ -1173,6 +1173,8 @@ doc_defaults {
     srcs_lib_whitelist_dirs: frameworks_base_subdirs,
     srcs_lib_whitelist_pkgs: packages_to_document,
     libs: [
+        "conscrypt",
+        "bouncycastle",
         "voip-common",
         "android.test.mock",
         "android-support-annotations",
