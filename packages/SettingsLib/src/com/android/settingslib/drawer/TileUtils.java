@@ -303,8 +303,6 @@ public class TileUtils {
             Tile tile = addedCache.get(key);
             if (tile == null) {
                 tile = new Tile(activityInfo, categoryKey);
-                tile.intent = new Intent().setClassName(
-                        activityInfo.packageName, activityInfo.name);
                 tile.priority = usePriority ? resolved.priority : 0;
                 updateTileData(context, tile, activityInfo, activityInfo.applicationInfo, pm);
                 if (DEBUG) Log.d(LOG_TAG, "Adding tile " + tile.title);
@@ -368,12 +366,8 @@ public class TileUtils {
             // Set title and summary for the preference
             tile.title = title;
             tile.summary = summary;
-            // Replace the intent with this specific activity
-            tile.intent = new Intent().setClassName(activityInfo.packageName,
-                    activityInfo.name);
             // Suggest a key for this tile
             tile.key = keyHint;
-
             return true;
         }
 

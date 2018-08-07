@@ -30,6 +30,7 @@ public class TileTest {
     public void setUp() {
         mActivityInfo = new ActivityInfo();
         mActivityInfo.packageName = RuntimeEnvironment.application.getPackageName();
+        mActivityInfo.name = "abc";
         mActivityInfo.icon = R.drawable.ic_plus;
         mActivityInfo.metaData = new Bundle();
         mTile = new Tile(mActivityInfo, "category");
@@ -60,7 +61,8 @@ public class TileTest {
 
     @Test
     public void getIcon_noContextOrMetadata_returnNull() {
-        final Tile tile = new Tile(new ActivityInfo(), "category");
+        mActivityInfo.metaData = null;
+        final Tile tile = new Tile(mActivityInfo, "category");
         assertThat(tile.getIcon(null)).isNull();
         assertThat(tile.getIcon(RuntimeEnvironment.application)).isNull();
     }
@@ -113,6 +115,7 @@ public class TileTest {
 
         final ActivityInfo activityInfo = new ActivityInfo();
         activityInfo.packageName = "blah";
+        activityInfo.name = "abc";
 
         final Tile tile2 = new Tile(activityInfo, "category");
         assertThat(tile2.isIconTintable(RuntimeEnvironment.application)).isTrue();
