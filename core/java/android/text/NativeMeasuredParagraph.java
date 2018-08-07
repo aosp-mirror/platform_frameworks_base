@@ -36,10 +36,19 @@ public class NativeMeasuredParagraph {
             NativeMeasuredParagraph.class.getClassLoader(), nGetReleaseFunc(), 1024);
 
     private long mNativePtr;
+    private @NonNull char[] mChars;
 
     // Use builder instead.
-    private NativeMeasuredParagraph(long ptr) {
+    private NativeMeasuredParagraph(long ptr, @NonNull char[] chars) {
         mNativePtr = ptr;
+        mChars = chars;
+    }
+
+    /**
+     * Returns a characters of this paragraph.
+     */
+    public char[] getChars() {
+        return mChars;
     }
 
     /**
@@ -126,7 +135,7 @@ public class NativeMeasuredParagraph {
             try {
                 long ptr = nBuildNativeMeasuredParagraph(mNativePtr, text, computeHyphenation,
                         computeLayout);
-                NativeMeasuredParagraph res = new NativeMeasuredParagraph(ptr);
+                NativeMeasuredParagraph res = new NativeMeasuredParagraph(ptr, text);
                 sRegistry.registerNativeAllocation(res, ptr);
                 return res;
             } finally {
