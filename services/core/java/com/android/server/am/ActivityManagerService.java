@@ -1336,7 +1336,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 IApplicationThread thread) {
             if (DEBUG_ALL) Slog.v(
                 TAG, "New death recipient " + this
-                + " for thread " + thread.asBinder());
+                 + " for thread " + thread.asBinder());
             mApp = app;
             mPid = pid;
             mAppThread = thread;

@@ -19,6 +19,7 @@ package com.android.internal.app;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -41,14 +42,14 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import java.util.ArrayList;
-import java.util.List;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -56,6 +57,9 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class IntentForwarderActivityTest {
@@ -549,8 +553,8 @@ public class IntentForwarderActivityTest {
         }
 
         @Override
-        public void startActivityAsCaller(Intent intent, @Nullable Bundle options, boolean
-                ignoreTargetSecurity, int userId) {
+        public void startActivityAsCaller(Intent intent, @Nullable Bundle options,
+                IBinder permissionToken, boolean ignoreTargetSecurity, int userId) {
             mStartActivityIntent = intent;
             mUserIdActivityLaunchedIn = userId;
         }

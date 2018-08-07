@@ -2211,6 +2211,12 @@
                 android:protectionLevel="signature" />
     <uses-permission android:name="android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS" />
 
+    <!-- Allows an application to start an activity as another app, provided that app has been
+         granted a permissionToken from the ActivityManagerService.
+         @hide -->
+    <permission android:name="android.permission.START_ACTIVITY_AS_CALLER"
+        android:protectionLevel="signature" />
+
     <!-- @deprecated The {@link android.app.ActivityManager#restartPackage}
         API is no longer supported. -->
     <permission android:name="android.permission.RESTART_PACKAGES"

@@ -18,6 +18,7 @@ package com.android.systemui.screenshot;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+
 import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_ACTION_INTENT;
 import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_CANCEL_NOTIFICATION;
 import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_DISALLOW_ENTER_PIP;
@@ -66,7 +67,6 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,6 +74,7 @@ import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.Toast;
+
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
@@ -81,6 +82,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.NotificationChannels;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
