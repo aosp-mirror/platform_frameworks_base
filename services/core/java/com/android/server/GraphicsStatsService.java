@@ -175,7 +175,8 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
                     0,
                     UserHandle.getUserId(uid));
             synchronized (mLock) {
-                pfd = requestBufferForProcessLocked(token, uid, pid, packageName, info.versionCode);
+                pfd = requestBufferForProcessLocked(token, uid, pid, packageName,
+                        info.getLongVersionCode());
             }
         } catch (PackageManager.NameNotFoundException ex) {
             throw new RemoteException("Unable to find package: '" + packageName + "'");
@@ -197,7 +198,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
     }
 
     private ParcelFileDescriptor requestBufferForProcessLocked(IGraphicsStatsCallback token,
-            int uid, int pid, String packageName, int versionCode) throws RemoteException {
+            int uid, int pid, String packageName, long versionCode) throws RemoteException {
         ActiveBuffer buffer = fetchActiveBuffersLocked(token, uid, pid, packageName, versionCode);
         scheduleRotateLocked();
         return getPfd(buffer.mProcessBuffer);
@@ -292,7 +293,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
     }
 
     private ActiveBuffer fetchActiveBuffersLocked(IGraphicsStatsCallback token, int uid, int pid,
-            String packageName, int versionCode) throws RemoteException {
+            String packageName, long versionCode) throws RemoteException {
         int size = mActive.size();
         long today = normalizeDate(System.currentTimeMillis()).getTimeInMillis();
         for (int i = 0; i < size; i++) {
@@ -381,19 +382,19 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
     private static native int nGetAshmemSize();
     private static native long nCreateDump(int outFd, boolean isProto);
     private static native void nAddToDump(long dump, String path, String packageName,
-            int versionCode, long startTime, long endTime, byte[] data);
+            long versionCode, long startTime, long endTime, byte[] data);
     private static native void nAddToDump(long dump, String path);
     private static native void nFinishDump(long dump);
-    private static native void nSaveBuffer(String path, String packageName, int versionCode,
+    private static native void nSaveBuffer(String path, String packageName, long versionCode,
             long startTime, long endTime, byte[] data);
 
     private final class BufferInfo {
         final String packageName;
-        final int versionCode;
+        final long versionCode;
         long startTime;
         long endTime;
 
-        BufferInfo(String packageName, int versionCode, long startTime) {
+        BufferInfo(String packageName, long versionCode, long startTime) {
             this.packageName = packageName;
             this.versionCode = versionCode;
             this.startTime = startTime;
@@ -408,7 +409,8 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
         final IBinder mToken;
         MemoryFile mProcessBuffer;
 
-        ActiveBuffer(IGraphicsStatsCallback token, int uid, int pid, String packageName, int versionCode)
+        ActiveBuffer(IGraphicsStatsCallback token, int uid, int pid, String packageName,
+                long versionCode)
                 throws RemoteException, IOException {
             mInfo = new BufferInfo(packageName, versionCode, System.currentTimeMillis());
             mUid = uid;

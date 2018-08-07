@@ -187,7 +187,6 @@ public class HdmiTimerRecordSources {
      * Base class for time-related information.
      * @hide
      */
-    @SystemApi
     /* package */ static class TimeUnit {
         /* package */ final int mHour;
         /* package */ final int mMinute;

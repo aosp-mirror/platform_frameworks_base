@@ -16,7 +16,6 @@
 
 package android.provider;
 
-import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.system.OsConstants.SEEK_SET;
 
 import static com.android.internal.util.Preconditions.checkArgument;
@@ -51,6 +50,7 @@ import android.os.RemoteException;
 import android.os.storage.StorageVolume;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.util.DataUnit;
 import android.util.Log;
 
 import libcore.io.IoUtils;
@@ -173,7 +173,7 @@ public final class DocumentsContract {
     /**
      * Buffer is large enough to rewind past any EXIF headers.
      */
-    private static final int THUMBNAIL_BUFFER_SIZE = (int) (128 * KB_IN_BYTES);
+    private static final int THUMBNAIL_BUFFER_SIZE = (int) DataUnit.KIBIBYTES.toBytes(128);
 
     /** {@hide} */
     public static final String EXTERNAL_STORAGE_PROVIDER_AUTHORITY =
@@ -187,9 +187,6 @@ public final class DocumentsContract {
 
     /** {@hide} */
     public static final String METADATA_EXIF = "android:documentExif";
-
-    /** {@hide} */
-    public static final String EXTRA_METADATA_TAGS = "android:documentMetadataTags";
 
     /**
      * Constants related to a document, including {@link Cursor} column names
@@ -741,7 +738,9 @@ public final class DocumentsContract {
     private static final String PATH_DOCUMENT = "document";
     private static final String PATH_CHILDREN = "children";
     private static final String PATH_SEARCH = "search";
-    private static final String PATH_TREE = "tree";
+    // TODO(b/72055774): make private again once ScopedAccessProvider is refactored
+    /** {@hide} */
+    public static final String PATH_TREE = "tree";
 
     private static final String PARAM_QUERY = "query";
     private static final String PARAM_MANAGE = "manage";
@@ -1397,38 +1396,42 @@ public final class DocumentsContract {
 
     /**
      * Returns metadata associated with the document. The type of metadata returned
-     * is specific to the document type. For example image files will largely return EXIF
-     * metadata.
+     * is specific to the document type. For example the data returned for an image
+     * file will likely consist primarily or soley of EXIF metadata.
      *
-     * <p>The returned {@link Bundle} will contain zero or more entries.
-     * <p>Each entry represents a specific type of metadata.
+     * <p>The returned {@link Bundle} will contain zero or more entries depending
+     * on the type of data supported by the document provider.
      *
-     * <p>if tags == null, then a list of default tags will be used.
+     * <ol>
+     * <li>A {@link DocumentsContract.METADATA_TYPES} containing a {@code String[]} value.
+     *     The string array identifies the type or types of metadata returned. Each
+     *     value in the can be used to access a {@link Bundle} of data
+     *     containing that type of data.
+     * <li>An entry each for each type of returned metadata. Each set of metadata is
+     *     itself represented as a bundle and accessible via a string key naming
+     *     the type of data.
+     * </ol>
      *
-     * @param documentUri a Document URI
-     * @param tags an array of keys to choose which data are added to the Bundle. If the Document
-     *             is a JPG or ExifInterface compatible, send keys from {@link ExifInterface}.
-     *             If tags are null, a set of default tags will be used. If the tags don't
-     *             match with any relevant data, they will not be added to the Bundle.
-     * @return a Bundle of Bundles. If metadata exists within the Bundle, there will also
-     * be a String under DocumentsContract.METADATA_TYPES that will return a String[] of the
-     * types of metadata gathered.
-     *
-     * <pre><code>
-     *     Bundle metadata = DocumentsContract.getDocumentMetadata(resolver, imageDocUri, tags);
-     *     int imageLength = metadata.getInt(ExifInterface.TAG_IMAGE_LENGTH);
+     * <p>Example:
+     * <p><pre><code>
+     *     Bundle metadata = DocumentsContract.getDocumentMetadata(client, imageDocUri, tags);
+     *     if (metadata.containsKey(DocumentsContract.METADATA_EXIF)) {
+     *         Bundle exif = metadata.getBundle(DocumentsContract.METADATA_EXIF);
+     *         int imageLength = exif.getInt(ExifInterface.TAG_IMAGE_LENGTH);
+     *     }
      * </code></pre>
      *
+     * @param documentUri a Document URI
+     * @return a Bundle of Bundles.
      * {@hide}
      */
-    public static Bundle getDocumentMetadata(ContentResolver resolver, Uri documentUri,
-            @Nullable String[] tags)
+    public static Bundle getDocumentMetadata(ContentResolver resolver, Uri documentUri)
             throws FileNotFoundException {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 documentUri.getAuthority());
 
         try {
-            return getDocumentMetadata(client, documentUri, tags);
+            return getDocumentMetadata(client, documentUri);
         } catch (Exception e) {
             Log.w(TAG, "Failed to get document metadata");
             rethrowIfNecessary(resolver, e);
@@ -1440,35 +1443,39 @@ public final class DocumentsContract {
 
     /**
      * Returns metadata associated with the document. The type of metadata returned
-     * is specific to the document type. For example image files will largely return EXIF
-     * metadata.
+     * is specific to the document type. For example the data returned for an image
+     * file will likely consist primarily or soley of EXIF metadata.
      *
-     * <p>The returned {@link Bundle} will contain zero or more entries.
-     * <p>Each entry represents a specific type of metadata.
+     * <p>The returned {@link Bundle} will contain zero or more entries depending
+     * on the type of data supported by the document provider.
      *
-     * <p>if tags == null, then a list of default tags will be used.
+     * <ol>
+     * <li>A {@link DocumentsContract.METADATA_TYPES} containing a {@code String[]} value.
+     *     The string array identifies the type or types of metadata returned. Each
+     *     value in the can be used to access a {@link Bundle} of data
+     *     containing that type of data.
+     * <li>An entry each for each type of returned metadata. Each set of metadata is
+     *     itself represented as a bundle and accessible via a string key naming
+     *     the type of data.
+     * </ol>
      *
-     * @param documentUri a Document URI
-     * @param tags an array of keys to choose which data are added to the Bundle. If the Document
-     *             is a JPG or ExifInterface compatible, send keys from {@link ExifInterface}.
-     *             If tags are null, a set of default tags will be used. If the tags don't
-     *             match with any relevant data, they will not be added to the Bundle.
-     * @return a Bundle of Bundles. If metadata exists within the Bundle, there will also
-     * be a String under DocumentsContract.METADATA_TYPES that will return a String[] of the
-     * types of metadata gathered.
-     *
-     * <pre><code>
+     * <p>Example:
+     * <p><pre><code>
      *     Bundle metadata = DocumentsContract.getDocumentMetadata(client, imageDocUri, tags);
-     *     int imageLength = metadata.getInt(ExifInterface.TAG_IMAGE_LENGTH);
+     *     if (metadata.containsKey(DocumentsContract.METADATA_EXIF)) {
+     *         Bundle exif = metadata.getBundle(DocumentsContract.METADATA_EXIF);
+     *         int imageLength = exif.getInt(ExifInterface.TAG_IMAGE_LENGTH);
+     *     }
      * </code></pre>
      *
+     * @param documentUri a Document URI
+     * @return a Bundle of Bundles.
      * {@hide}
      */
-    public static Bundle getDocumentMetadata(ContentProviderClient client,
-            Uri documentUri, @Nullable String[] tags) throws RemoteException {
+    public static Bundle getDocumentMetadata(
+            ContentProviderClient client, Uri documentUri) throws RemoteException {
         final Bundle in = new Bundle();
         in.putParcelable(EXTRA_URI, documentUri);
-        in.putStringArray(EXTRA_METADATA_TAGS, tags);
 
         final Bundle out = client.call(METHOD_GET_DOCUMENT_METADATA, null, in);
 

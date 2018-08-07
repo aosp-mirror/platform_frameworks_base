@@ -16,7 +16,6 @@
 
 package android.mtp;
 
-import android.content.Context;
 import android.os.storage.StorageVolume;
 
 /**
@@ -31,15 +30,13 @@ public class MtpStorage {
     private final int mStorageId;
     private final String mPath;
     private final String mDescription;
-    private final long mReserveSpace;
     private final boolean mRemovable;
     private final long mMaxFileSize;
 
-    public MtpStorage(StorageVolume volume, Context context) {
-        mStorageId = volume.getStorageId();
-        mPath = volume.getPath();
-        mDescription = volume.getDescription(context);
-        mReserveSpace = volume.getMtpReserveSpace() * 1024L * 1024L;
+    public MtpStorage(StorageVolume volume, int storageId) {
+        mStorageId = storageId;
+        mPath = volume.getInternalPath();
+        mDescription = volume.getDescription(null);
         mRemovable = volume.isRemovable();
         mMaxFileSize = volume.getMaxFileSize();
     }
@@ -69,16 +66,6 @@ public class MtpStorage {
      */
     public final String getDescription() {
         return mDescription;
-    }
-
-   /**
-     * Returns the amount of space to reserve on the storage file system.
-     * This can be set to a non-zero value to prevent MTP from filling up the entire storage.
-     *
-     * @return reserved space in bytes.
-     */
-    public final long getReserveSpace() {
-        return mReserveSpace;
     }
 
    /**

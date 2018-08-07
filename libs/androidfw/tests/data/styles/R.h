@@ -48,6 +48,9 @@ struct R {
       StyleOne = 0x7f020000u,
       StyleTwo = 0x7f020001u,
       StyleThree = 0x7f020002u,
+      StyleFour = 0x7f020003u,
+      StyleFive = 0x7f020004u,
+      StyleSix = 0x7f020005u,
     };
   };
 };

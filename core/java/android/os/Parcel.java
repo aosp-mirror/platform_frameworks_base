@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Size;
 import android.util.SizeF;
@@ -190,6 +191,7 @@ import java.util.Set;
  * {@link #readSparseArray(ClassLoader)}.
  */
 public final class Parcel {
+
     private static final boolean DEBUG_RECYCLE = false;
     private static final boolean DEBUG_ARRAY_MAP = false;
     private static final String TAG = "Parcel";
@@ -207,6 +209,12 @@ public final class Parcel {
     private ArrayMap<Class, Object> mClassCookies;
 
     private RuntimeException mStack;
+
+    /**
+     * Whether or not to parcel the stack trace of an exception. This has a performance
+     * impact, so should only be included in specific processes and only on debug builds.
+     */
+    private static boolean sParcelExceptionStackTrace;
 
     private static final int POOL_SIZE = 6;
     private static final Parcel[] sOwnedPool = new Parcel[POOL_SIZE];
@@ -323,6 +331,11 @@ public final class Parcel {
     private static native boolean nativeHasFileDescriptors(long nativePtr);
     private static native void nativeWriteInterfaceToken(long nativePtr, String interfaceName);
     private static native void nativeEnforceInterface(long nativePtr, String interfaceName);
+
+    /** Last time exception with a stack trace was written */
+    private static volatile long sLastWriteExceptionStackTrace;
+    /** Used for throttling of writing stack trace, which is costly */
+    private static final int WRITE_EXCEPTION_STACK_TRACE_THRESHOLD_MS = 1000;
 
     @CriticalNative
     private static native long nativeGetBlobAshmemSize(long nativePtr);
@@ -558,6 +571,22 @@ public final class Parcel {
     /** @hide */
     public final void adoptClassCookies(Parcel from) {
         mClassCookies = from.mClassCookies;
+    }
+
+    /** @hide */
+    public Map<Class, Object> copyClassCookies() {
+        return new ArrayMap<>(mClassCookies);
+    }
+
+    /** @hide */
+    public void putClassCookies(Map<Class, Object> cookies) {
+        if (cookies == null) {
+            return;
+        }
+        if (mClassCookies == null) {
+            mClassCookies = new ArrayMap<>();
+        }
+        mClassCookies.putAll(cookies);
     }
 
     /**
@@ -1339,6 +1368,13 @@ public final class Parcel {
      * @see Parcelable
      */
     public final <T extends Parcelable> void writeTypedList(List<T> val) {
+        writeTypedList(val, 0);
+    }
+
+    /**
+     * @hide
+     */
+    public <T extends Parcelable> void writeTypedList(List<T> val, int parcelableFlags) {
         if (val == null) {
             writeInt(-1);
             return;
@@ -1347,13 +1383,7 @@ public final class Parcel {
         int i=0;
         writeInt(N);
         while (i < N) {
-            T item = val.get(i);
-            if (item != null) {
-                writeInt(1);
-                item.writeToParcel(this, 0);
-            } else {
-                writeInt(0);
-            }
+            writeTypedObject(val.get(i), parcelableFlags);
             i++;
         }
     }
@@ -1455,157 +1485,11 @@ public final class Parcel {
             int N = val.length;
             writeInt(N);
             for (int i = 0; i < N; i++) {
-                T item = val[i];
-                if (item != null) {
-                    writeInt(1);
-                    item.writeToParcel(this, parcelableFlags);
-                } else {
-                    writeInt(0);
-                }
+                writeTypedObject(val[i], parcelableFlags);
             }
         } else {
             writeInt(-1);
         }
-    }
-
-    /**
-     * Write a uniform (all items are null or the same class) array list of
-     * parcelables.
-     *
-     * @param list The list to write.
-     *
-     * @hide
-     */
-    public final <T extends Parcelable> void writeTypedArrayList(@Nullable ArrayList<T> list,
-            int parcelableFlags) {
-        if (list != null) {
-            int N = list.size();
-            writeInt(N);
-            boolean wroteCreator = false;
-            for (int i = 0; i < N; i++) {
-                T item = list.get(i);
-                if (item != null) {
-                    writeInt(1);
-                    if (!wroteCreator) {
-                        writeParcelableCreator(item);
-                        wroteCreator = true;
-                    }
-                    item.writeToParcel(this, parcelableFlags);
-                } else {
-                    writeInt(0);
-                }
-            }
-        } else {
-            writeInt(-1);
-        }
-    }
-
-    /**
-     * Reads a uniform (all items are null or the same class) array list of
-     * parcelables.
-     *
-     * @return The list or null.
-     *
-     * @hide
-     */
-    public final @Nullable <T> ArrayList<T> readTypedArrayList(@Nullable ClassLoader loader) {
-        int N = readInt();
-        if (N <= 0) {
-            return null;
-        }
-        Parcelable.Creator<?> creator = null;
-        ArrayList<T> result = new ArrayList<T>(N);
-        for (int i = 0; i < N; i++) {
-            if (readInt() != 0) {
-                if (creator == null) {
-                    creator = readParcelableCreator(loader);
-                    if (creator == null) {
-                        return null;
-                    }
-                }
-                final T parcelable;
-                if (creator instanceof Parcelable.ClassLoaderCreator<?>) {
-                    Parcelable.ClassLoaderCreator<?> classLoaderCreator =
-                            (Parcelable.ClassLoaderCreator<?>) creator;
-                    parcelable = (T) classLoaderCreator.createFromParcel(this, loader);
-                } else {
-                    parcelable = (T) creator.createFromParcel(this);
-                }
-                result.add(parcelable);
-            } else {
-                result.add(null);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Write a uniform (all items are null or the same class) array set of
-     * parcelables.
-     *
-     * @param set The set to write.
-     *
-     * @hide
-     */
-    public final <T extends Parcelable> void writeTypedArraySet(@Nullable ArraySet<T> set,
-            int parcelableFlags) {
-        if (set != null) {
-            int N = set.size();
-            writeInt(N);
-            boolean wroteCreator = false;
-            for (int i = 0; i < N; i++) {
-                T item = set.valueAt(i);
-                if (item != null) {
-                    writeInt(1);
-                    if (!wroteCreator) {
-                        writeParcelableCreator(item);
-                        wroteCreator = true;
-                    }
-                    item.writeToParcel(this, parcelableFlags);
-                } else {
-                    writeInt(0);
-                }
-            }
-        } else {
-            writeInt(-1);
-        }
-    }
-
-    /**
-     * Reads a uniform (all items are null or the same class) array set of
-     * parcelables.
-     *
-     * @return The set or null.
-     *
-     * @hide
-     */
-    public final @Nullable <T> ArraySet<T> readTypedArraySet(@Nullable ClassLoader loader) {
-        int N = readInt();
-        if (N <= 0) {
-            return null;
-        }
-        Parcelable.Creator<?> creator = null;
-        ArraySet<T> result = new ArraySet<T>(N);
-        for (int i = 0; i < N; i++) {
-            T parcelable = null;
-            if (readInt() != 0) {
-                if (creator == null) {
-                    creator = readParcelableCreator(loader);
-                    if (creator == null) {
-                        return null;
-                    }
-                }
-                if (creator instanceof Parcelable.ClassLoaderCreator<?>) {
-                    Parcelable.ClassLoaderCreator<?> classLoaderCreator =
-                            (Parcelable.ClassLoaderCreator<?>) creator;
-                    parcelable = (T) classLoaderCreator.createFromParcel(this, loader);
-                } else {
-                    parcelable = (T) creator.createFromParcel(this);
-                }
-            }
-            result.append(parcelable);
-        }
-        return result;
     }
 
     /**
@@ -1824,6 +1708,11 @@ public final class Parcel {
         }
     }
 
+    /** @hide For debugging purposes */
+    public static void setStackTraceParceling(boolean enabled) {
+        sParcelExceptionStackTrace = enabled;
+    }
+
     /**
      * Special function for writing an exception result at the header of
      * a parcel, to be used when returning an exception from a transaction.
@@ -1881,6 +1770,27 @@ public final class Parcel {
             throw new RuntimeException(e);
         }
         writeString(e.getMessage());
+        final long timeNow = sParcelExceptionStackTrace ? SystemClock.elapsedRealtime() : 0;
+        if (sParcelExceptionStackTrace && (timeNow - sLastWriteExceptionStackTrace
+                > WRITE_EXCEPTION_STACK_TRACE_THRESHOLD_MS)) {
+            sLastWriteExceptionStackTrace = timeNow;
+            final int sizePosition = dataPosition();
+            writeInt(0); // Header size will be filled in later
+            StackTraceElement[] stackTrace = e.getStackTrace();
+            final int truncatedSize = Math.min(stackTrace.length, 5);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < truncatedSize; i++) {
+                sb.append("\tat ").append(stackTrace[i]).append('\n');
+            }
+            writeString(sb.toString());
+            final int payloadPosition = dataPosition();
+            setDataPosition(sizePosition);
+            // Write stack trace header size. Used in native side to skip the header
+            writeInt(payloadPosition - sizePosition);
+            setDataPosition(payloadPosition);
+        } else {
+            writeInt(0);
+        }
         switch (code) {
             case EX_SERVICE_SPECIFIC:
                 writeInt(((ServiceSpecificException) e).errorCode);
@@ -1991,32 +1901,60 @@ public final class Parcel {
      * @param msg The exception message.
      */
     public final void readException(int code, String msg) {
+        String remoteStackTrace = null;
+        final int remoteStackPayloadSize = readInt();
+        if (remoteStackPayloadSize > 0) {
+            remoteStackTrace = readString();
+        }
+        Exception e = createException(code, msg);
+        // Attach remote stack trace if availalble
+        if (remoteStackTrace != null) {
+            RemoteException cause = new RemoteException(
+                    "Remote stack trace:\n" + remoteStackTrace, null, false, false);
+            try {
+                Throwable rootCause = ExceptionUtils.getRootCause(e);
+                if (rootCause != null) {
+                    rootCause.initCause(cause);
+                }
+            } catch (RuntimeException ex) {
+                Log.e(TAG, "Cannot set cause " + cause + " for " + e, ex);
+            }
+        }
+        SneakyThrow.sneakyThrow(e);
+    }
+
+    /**
+     * Creates an exception with the given message.
+     *
+     * @param code Used to determine which exception class to throw.
+     * @param msg The exception message.
+     */
+    private Exception createException(int code, String msg) {
         switch (code) {
             case EX_PARCELABLE:
                 if (readInt() > 0) {
-                    SneakyThrow.sneakyThrow(
-                            (Exception) readParcelable(Parcelable.class.getClassLoader()));
+                    return (Exception) readParcelable(Parcelable.class.getClassLoader());
                 } else {
-                    throw new RuntimeException(msg + " [missing Parcelable]");
+                    return new RuntimeException(msg + " [missing Parcelable]");
                 }
             case EX_SECURITY:
-                throw new SecurityException(msg);
+                return new SecurityException(msg);
             case EX_BAD_PARCELABLE:
-                throw new BadParcelableException(msg);
+                return new BadParcelableException(msg);
             case EX_ILLEGAL_ARGUMENT:
-                throw new IllegalArgumentException(msg);
+                return new IllegalArgumentException(msg);
             case EX_NULL_POINTER:
-                throw new NullPointerException(msg);
+                return new NullPointerException(msg);
             case EX_ILLEGAL_STATE:
-                throw new IllegalStateException(msg);
+                return new IllegalStateException(msg);
             case EX_NETWORK_MAIN_THREAD:
-                throw new NetworkOnMainThreadException();
+                return new NetworkOnMainThreadException();
             case EX_UNSUPPORTED_OPERATION:
-                throw new UnsupportedOperationException(msg);
+                return new UnsupportedOperationException(msg);
             case EX_SERVICE_SPECIFIC:
-                throw new ServiceSpecificException(readInt(), msg);
+                return new ServiceSpecificException(readInt(), msg);
         }
-        throw new RuntimeException("Unknown exception code: " + code
+        return new RuntimeException("Unknown exception code: " + code
                 + " msg " + msg);
     }
 
@@ -2442,11 +2380,7 @@ public final class Parcel {
         }
         ArrayList<T> l = new ArrayList<T>(N);
         while (N > 0) {
-            if (readInt() != 0) {
-                l.add(c.createFromParcel(this));
-            } else {
-                l.add(null);
-            }
+            l.add(readTypedObject(c));
             N--;
         }
         return l;
@@ -2469,18 +2403,10 @@ public final class Parcel {
         int N = readInt();
         int i = 0;
         for (; i < M && i < N; i++) {
-            if (readInt() != 0) {
-                list.set(i, c.createFromParcel(this));
-            } else {
-                list.set(i, null);
-            }
+            list.set(i, readTypedObject(c));
         }
         for (; i<N; i++) {
-            if (readInt() != 0) {
-                list.add(c.createFromParcel(this));
-            } else {
-                list.add(null);
-            }
+            list.add(readTypedObject(c));
         }
         for (; i<M; i++) {
             list.remove(N);
@@ -2538,9 +2464,6 @@ public final class Parcel {
     /**
      * Read into the given List items String objects that were written with
      * {@link #writeStringList} at the current dataPosition().
-     *
-     * @return A newly created ArrayList containing strings with the same data
-     *         as those that were previously written.
      *
      * @see #writeStringList
      */
@@ -2628,9 +2551,7 @@ public final class Parcel {
         }
         T[] l = c.newArray(N);
         for (int i=0; i<N; i++) {
-            if (readInt() != 0) {
-                l[i] = c.createFromParcel(this);
-            }
+            l[i] = readTypedObject(c);
         }
         return l;
     }
@@ -2639,11 +2560,7 @@ public final class Parcel {
         int N = readInt();
         if (N == val.length) {
             for (int i=0; i<N; i++) {
-                if (readInt() != 0) {
-                    val[i] = c.createFromParcel(this);
-                } else {
-                    val[i] = null;
-                }
+                val[i] = readTypedObject(c);
             }
         } else {
             throw new RuntimeException("bad array lengths");
@@ -2872,8 +2789,8 @@ public final class Parcel {
                     Class<?> parcelableClass = Class.forName(name, false /* initialize */,
                             parcelableClassLoader);
                     if (!Parcelable.class.isAssignableFrom(parcelableClass)) {
-                        throw new BadParcelableException("Parcelable protocol requires that the "
-                                + "class implements Parcelable");
+                        throw new BadParcelableException("Parcelable protocol requires subclassing "
+                                + "from Parcelable on class " + name);
                     }
                     Field f = parcelableClass.getField("CREATOR");
                     if ((f.getModifiers() & Modifier.STATIC) == 0) {

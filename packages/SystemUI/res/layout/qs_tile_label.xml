@@ -41,10 +41,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:clickable="false"
-            android:maxLines="2"
             android:padding="0dp"
             android:gravity="center"
-            android:ellipsize="end"
+            android:ellipsize="marquee"
             android:textAppearance="@style/TextAppearance.QS.TileLabel"
             android:textColor="?android:attr/textColorPrimary"/>
 
@@ -75,12 +74,13 @@
         android:layout_alignEnd="@id/label_group"
         android:layout_below="@id/label_group"
         android:clickable="false"
-        android:maxLines="1"
+        android:ellipsize="marquee"
+        android:singleLine="true"
         android:padding="0dp"
         android:visibility="gone"
         android:gravity="center"
         android:textAppearance="@style/TextAppearance.QS.TileLabel"
-        android:textColor="?android:attr/textColorPrimary"/>
+        android:textColor="?android:attr/textColorSecondary"/>
 
     <View
         android:id="@+id/underline"

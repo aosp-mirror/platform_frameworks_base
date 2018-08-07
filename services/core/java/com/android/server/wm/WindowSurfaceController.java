@@ -17,14 +17,16 @@
 package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.view.Surface.SCALING_MODE_SCALE_TO_WINDOW;
+
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static android.view.Surface.SCALING_MODE_SCALE_TO_WINDOW;
+import static com.android.server.wm.WindowSurfaceControllerProto.LAYER;
+import static com.android.server.wm.WindowSurfaceControllerProto.SHOWN;
 
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -33,6 +35,7 @@ import android.graphics.Region;
 import android.os.IBinder;
 import android.os.Debug;
 import android.os.Trace;
+import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -50,14 +53,14 @@ class WindowSurfaceController {
 
     final WindowStateAnimator mAnimator;
 
-    private SurfaceControlWithBackground mSurfaceControl;
+    SurfaceControl mSurfaceControl;
 
     // Should only be set from within setShown().
     private boolean mSurfaceShown = false;
     private float mSurfaceX = 0;
     private float mSurfaceY = 0;
-    private float mSurfaceW = 0;
-    private float mSurfaceH = 0;
+    private int mSurfaceW = 0;
+    private int mSurfaceH = 0;
 
     // Initialize to the identity matrix.
     private float mLastDsdx = 1;
@@ -83,6 +86,8 @@ class WindowSurfaceController {
     private final int mWindowType;
     private final Session mWindowSession;
 
+    private final SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
+
     public WindowSurfaceController(SurfaceSession s, String name, int w, int h, int format,
             int flags, WindowStateAnimator animator, int windowType, int ownerUid) {
         mAnimator = animator;
@@ -98,24 +103,16 @@ class WindowSurfaceController {
         mWindowSession = win.mSession;
 
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "new SurfaceControl");
-        mSurfaceControl = new SurfaceControlWithBackground(
-                s, name, w, h, format, flags, windowType, ownerUid, this);
+        final SurfaceControl.Builder b = win.makeSurface()
+                .setParent(win.getSurfaceControl())
+                .setName(name)
+                .setSize(w, h)
+                .setFormat(format)
+                .setFlags(flags)
+                .setMetadata(windowType, ownerUid);
+        mSurfaceControl = b.build();
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-
-        if (mService.mRoot.mSurfaceTraceEnabled) {
-            mSurfaceControl = new RemoteSurfaceTrace(
-                    mService.mRoot.mSurfaceTraceFd.getFileDescriptor(), mSurfaceControl, win);
-        }
     }
-
-    void installRemoteTrace(FileDescriptor fd) {
-        mSurfaceControl = new RemoteSurfaceTrace(fd, mSurfaceControl, mAnimator.mWin);
-    }
-
-    void removeRemoteTrace() {
-        mSurfaceControl = new SurfaceControlWithBackground(mSurfaceControl);
-    }
-
 
     private void logSurface(String msg, RuntimeException where) {
         String str = "  SURFACE " + msg + ": " + title;
@@ -140,27 +137,29 @@ class WindowSurfaceController {
         }
     }
 
-    void hideInTransaction(String reason) {
+    void hide(SurfaceControl.Transaction transaction, String reason) {
         if (SHOW_TRANSACTIONS) logSurface("HIDE ( " + reason + " )", null);
         mHiddenForOtherReasons = true;
 
         mAnimator.destroyPreservedSurfaceLocked();
-        updateVisibility();
+        if (mSurfaceShown) {
+            hideSurface(transaction);
+        }
     }
 
-    private void hideSurface() {
+    private void hideSurface(SurfaceControl.Transaction transaction) {
         if (mSurfaceControl == null) {
             return;
         }
         setShown(false);
         try {
-            mSurfaceControl.hide();
+            transaction.hide(mSurfaceControl);
         } catch (RuntimeException e) {
             Slog.w(TAG, "Exception hiding surface in " + this);
         }
     }
 
-    void destroyInTransaction() {
+    void destroyNotInTransaction() {
         if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
             Slog.i(TAG, "Destroying surface " + this + " called by " + Debug.getCallers(8));
         }
@@ -236,25 +235,6 @@ class WindowSurfaceController {
         }
     }
 
-    void setLayer(int layer) {
-        if (mSurfaceControl != null) {
-            mService.openSurfaceTransaction();
-            try {
-                if (mAnimator.mWin.usesRelativeZOrdering()) {
-                    mSurfaceControl.setRelativeLayer(
-                            mAnimator.mWin.getParentWindow()
-                            .mWinAnimator.mSurfaceController.mSurfaceControl.getHandle(),
-                            -1);
-                } else {
-                    mSurfaceLayer = layer;
-                    mSurfaceControl.setLayer(layer);
-                }
-            } finally {
-                mService.closeSurfaceTransaction();
-            }
-        }
-    }
-
     void setLayerStackInTransaction(int layerStack) {
         if (mSurfaceControl != null) {
             mSurfaceControl.setLayerStack(layerStack);
@@ -262,6 +242,11 @@ class WindowSurfaceController {
     }
 
     void setPositionInTransaction(float left, float top, boolean recoveringMemory) {
+        setPosition(null, left, top, recoveringMemory);
+    }
+
+    void setPosition(SurfaceControl.Transaction t, float left, float top,
+            boolean recoveringMemory) {
         final boolean surfaceMoved = mSurfaceX != left || mSurfaceY != top;
         if (surfaceMoved) {
             mSurfaceX = left;
@@ -271,7 +256,11 @@ class WindowSurfaceController {
                 if (SHOW_TRANSACTIONS) logSurface(
                         "POS (setPositionInTransaction) @ (" + left + "," + top + ")", null);
 
-                mSurfaceControl.setPosition(left, top);
+                if (t == null) {
+                    mSurfaceControl.setPosition(left, top);
+                } else {
+                    t.setPosition(mSurfaceControl, left, top);
+                }
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Error positioning surface of " + this
                         + " pos=(" + left + "," + top + ")", e);
@@ -288,6 +277,11 @@ class WindowSurfaceController {
 
     void setMatrixInTransaction(float dsdx, float dtdx, float dtdy, float dsdy,
             boolean recoveringMemory) {
+        setMatrix(null, dsdx, dtdx, dtdy, dsdy, false);
+    }
+
+    void setMatrix(SurfaceControl.Transaction t, float dsdx, float dtdx,
+            float dtdy, float dsdy, boolean recoveringMemory) {
         final boolean matrixChanged = mLastDsdx != dsdx || mLastDtdx != dtdx ||
                                       mLastDtdy != dtdy || mLastDsdy != dsdy;
         if (!matrixChanged) {
@@ -302,8 +296,11 @@ class WindowSurfaceController {
         try {
             if (SHOW_TRANSACTIONS) logSurface(
                     "MATRIX [" + dsdx + "," + dtdx + "," + dtdy + "," + dsdy + "]", null);
-            mSurfaceControl.setMatrix(
-                    dsdx, dtdx, dtdy, dsdy);
+            if (t == null) {
+                mSurfaceControl.setMatrix(dsdx, dtdx, dtdy, dsdy);
+            } else {
+                t.setMatrix(mSurfaceControl, dsdx, dtdx, dtdy, dsdy);
+            }
         } catch (RuntimeException e) {
             // If something goes wrong with the surface (such
             // as running out of memory), don't take down the
@@ -376,7 +373,7 @@ class WindowSurfaceController {
         try {
             mSurfaceControl.setTransparentRegionHint(region);
         } finally {
-            mService.closeSurfaceTransaction();
+            mService.closeSurfaceTransaction("setTransparentRegion");
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     "<<< CLOSE TRANSACTION setTransparentRegion");
         }
@@ -394,7 +391,7 @@ class WindowSurfaceController {
         try {
             mSurfaceControl.setOpaque(isOpaque);
         } finally {
-            mService.closeSurfaceTransaction();
+            mService.closeSurfaceTransaction("setOpaqueLocked");
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setOpaqueLocked");
         }
     }
@@ -411,7 +408,7 @@ class WindowSurfaceController {
         try {
             mSurfaceControl.setSecure(isSecure);
         } finally {
-            mService.closeSurfaceTransaction();
+            mService.closeSurfaceTransaction("setSecure");
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setSecureLocked");
         }
     }
@@ -432,7 +429,8 @@ class WindowSurfaceController {
     private boolean updateVisibility() {
         if (mHiddenForCrop || mHiddenForOtherReasons) {
             if (mSurfaceShown) {
-                hideSurface();
+                hideSurface(mTmpTransaction);
+                SurfaceControl.mergeToGlobalTransaction(mTmpTransaction);
             }
             return false;
         } else {
@@ -526,14 +524,20 @@ class WindowSurfaceController {
         return mSurfaceY;
     }
 
-    float getWidth() {
+    int getWidth() {
         return mSurfaceW;
     }
 
-    float getHeight() {
+    int getHeight() {
         return mSurfaceH;
     }
 
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(SHOWN, mSurfaceShown);
+        proto.write(LAYER, mSurfaceLayer);
+        proto.end(token);
+    }
 
     public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         if (dumpAll) {
@@ -554,263 +558,5 @@ class WindowSurfaceController {
     @Override
     public String toString() {
         return mSurfaceControl.toString();
-    }
-
-    static class SurfaceTrace extends SurfaceControl {
-        private final static String SURFACE_TAG = TAG_WITH_CLASS_NAME ? "SurfaceTrace" : TAG_WM;
-        private final static boolean LOG_SURFACE_TRACE = DEBUG_SURFACE_TRACE;
-        final static ArrayList<SurfaceTrace> sSurfaces = new ArrayList<SurfaceTrace>();
-
-        private float mSurfaceTraceAlpha = 0;
-        private int mLayer;
-        private final PointF mPosition = new PointF();
-        private final Point mSize = new Point();
-        private final Rect mWindowCrop = new Rect();
-        private final Rect mFinalCrop = new Rect();
-        private boolean mShown = false;
-        private int mLayerStack;
-        private boolean mIsOpaque;
-        private float mDsdx, mDtdx, mDsdy, mDtdy;
-        private final String mName;
-
-        public SurfaceTrace(SurfaceSession s, String name, int w, int h, int format, int flags,
-                        int windowType, int ownerUid)
-                    throws OutOfResourcesException {
-            super(s, name, w, h, format, flags, windowType, ownerUid);
-            mName = name != null ? name : "Not named";
-            mSize.set(w, h);
-            if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
-                    + Debug.getCallers(3));
-            synchronized (sSurfaces) {
-                sSurfaces.add(0, this);
-            }
-        }
-
-        public SurfaceTrace(SurfaceSession s,
-                        String name, int w, int h, int format, int flags) {
-            super(s, name, w, h, format, flags);
-            mName = name != null ? name : "Not named";
-            mSize.set(w, h);
-            if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
-                    + Debug.getCallers(3));
-            synchronized (sSurfaces) {
-                sSurfaces.add(0, this);
-            }
-        }
-
-        @Override
-        public void setAlpha(float alpha) {
-            if (mSurfaceTraceAlpha != alpha) {
-                if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "setAlpha(" + alpha + "): OLD:" + this +
-                        ". Called by " + Debug.getCallers(3));
-                mSurfaceTraceAlpha = alpha;
-            }
-            super.setAlpha(alpha);
-        }
-
-        @Override
-        public void setLayer(int zorder) {
-            if (zorder != mLayer) {
-                if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "setLayer(" + zorder + "): OLD:" + this
-                        + ". Called by " + Debug.getCallers(3));
-                mLayer = zorder;
-            }
-            super.setLayer(zorder);
-
-            synchronized (sSurfaces) {
-                sSurfaces.remove(this);
-                int i;
-                for (i = sSurfaces.size() - 1; i >= 0; i--) {
-                    SurfaceTrace s = sSurfaces.get(i);
-                    if (s.mLayer < zorder) {
-                        break;
-                    }
-                }
-                sSurfaces.add(i + 1, this);
-            }
-        }
-
-        @Override
-        public void setPosition(float x, float y) {
-            if (x != mPosition.x || y != mPosition.y) {
-                if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "setPosition(" + x + "," + y + "): OLD:"
-                        + this + ". Called by " + Debug.getCallers(3));
-                mPosition.set(x, y);
-            }
-            super.setPosition(x, y);
-        }
-
-        @Override
-        public void setGeometryAppliesWithResize() {
-            if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "setGeometryAppliesWithResize(): OLD: "
-                    + this + ". Called by" + Debug.getCallers(3));
-            super.setGeometryAppliesWithResize();
-        }
-
-        @Override
-        public void setSize(int w, int h) {
-            if (w != mSize.x || h != mSize.y) {
-                if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "setSize(" + w + "," + h + "): OLD:"
-                        + this + ". Called by " + Debug.getCallers(3));
-                mSize.set(w, h);
-            }
-            super.setSize(w, h);
-        }
-
-        @Override
-        public void setWindowCrop(Rect crop) {
-            if (crop != null) {
-                if (!crop.equals(mWindowCrop)) {
-                    if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "setWindowCrop("
-                            + crop.toShortString() + "): OLD:" + this + ". Called by "
-                            + Debug.getCallers(3));
-                    mWindowCrop.set(crop);
-                }
-            }
-            super.setWindowCrop(crop);
-        }
-
-        @Override
-        public void setFinalCrop(Rect crop) {
-            if (crop != null) {
-                if (!crop.equals(mFinalCrop)) {
-                    if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "setFinalCrop("
-                            + crop.toShortString() + "): OLD:" + this + ". Called by "
-                            + Debug.getCallers(3));
-                    mFinalCrop.set(crop);
-                }
-            }
-            super.setFinalCrop(crop);
-        }
-
-        @Override
-        public void setLayerStack(int layerStack) {
-            if (layerStack != mLayerStack) {
-                if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "setLayerStack(" + layerStack + "): OLD:"
-                        + this + ". Called by " + Debug.getCallers(3));
-                mLayerStack = layerStack;
-            }
-            super.setLayerStack(layerStack);
-        }
-
-        @Override
-        public void setOpaque(boolean isOpaque) {
-            if (isOpaque != mIsOpaque) {
-                if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "setOpaque(" + isOpaque + "): OLD:"
-                        + this + ". Called by " + Debug.getCallers(3));
-                mIsOpaque = isOpaque;
-            }
-            super.setOpaque(isOpaque);
-        }
-
-        @Override
-        public void setSecure(boolean isSecure) {
-            super.setSecure(isSecure);
-        }
-
-        @Override
-        public void setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
-            if (dsdx != mDsdx || dtdx != mDtdx || dsdy != mDsdy || dtdy != mDtdy) {
-                if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "setMatrix(" + dsdx + "," + dtdx + ","
-                        + dsdy + "," + dtdy + "): OLD:" + this + ". Called by "
-                        + Debug.getCallers(3));
-                mDsdx = dsdx;
-                mDtdx = dtdx;
-                mDsdy = dsdy;
-                mDtdy = dtdy;
-            }
-            super.setMatrix(dsdx, dtdx, dsdy, dtdy);
-        }
-
-        @Override
-        public void hide() {
-            if (mShown) {
-                if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "hide: OLD:" + this + ". Called by "
-                        + Debug.getCallers(3));
-                mShown = false;
-            }
-            super.hide();
-        }
-
-        @Override
-        public void show() {
-            if (!mShown) {
-                if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "show: OLD:" + this + ". Called by "
-                        + Debug.getCallers(3));
-                mShown = true;
-            }
-            super.show();
-        }
-
-        @Override
-        public void destroy() {
-            super.destroy();
-            if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "destroy: " + this + ". Called by "
-                    + Debug.getCallers(3));
-            synchronized (sSurfaces) {
-                sSurfaces.remove(this);
-            }
-        }
-
-        @Override
-        public void release() {
-            super.release();
-            if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "release: " + this + ". Called by "
-                    + Debug.getCallers(3));
-            synchronized (sSurfaces) {
-                sSurfaces.remove(this);
-            }
-        }
-
-        @Override
-        public void setTransparentRegionHint(Region region) {
-            if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "setTransparentRegionHint(" + region
-                    + "): OLD: " + this + " . Called by " + Debug.getCallers(3));
-            super.setTransparentRegionHint(region);
-        }
-
-        static void dumpAllSurfaces(PrintWriter pw, String header) {
-            synchronized (sSurfaces) {
-                final int N = sSurfaces.size();
-                if (N <= 0) {
-                    return;
-                }
-                if (header != null) {
-                    pw.println(header);
-                }
-                pw.println("WINDOW MANAGER SURFACES (dumpsys window surfaces)");
-                for (int i = 0; i < N; i++) {
-                    SurfaceTrace s = sSurfaces.get(i);
-                    pw.print("  Surface #"); pw.print(i); pw.print(": #");
-                            pw.print(Integer.toHexString(System.identityHashCode(s)));
-                            pw.print(" "); pw.println(s.mName);
-                    pw.print("    mLayerStack="); pw.print(s.mLayerStack);
-                            pw.print(" mLayer="); pw.println(s.mLayer);
-                    pw.print("    mShown="); pw.print(s.mShown); pw.print(" mAlpha=");
-                            pw.print(s.mSurfaceTraceAlpha); pw.print(" mIsOpaque=");
-                            pw.println(s.mIsOpaque);
-                    pw.print("    mPosition="); pw.print(s.mPosition.x); pw.print(",");
-                            pw.print(s.mPosition.y);
-                            pw.print(" mSize="); pw.print(s.mSize.x); pw.print("x");
-                            pw.println(s.mSize.y);
-                    pw.print("    mCrop="); s.mWindowCrop.printShortString(pw); pw.println();
-                    pw.print("    mFinalCrop="); s.mFinalCrop.printShortString(pw); pw.println();
-                    pw.print("    Transform: ("); pw.print(s.mDsdx); pw.print(", ");
-                            pw.print(s.mDtdx); pw.print(", "); pw.print(s.mDsdy);
-                            pw.print(", "); pw.print(s.mDtdy); pw.println(")");
-                }
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "Surface " + Integer.toHexString(System.identityHashCode(this)) + " "
-                    + mName + " (" + mLayerStack + "): shown=" + mShown + " layer=" + mLayer
-                    + " alpha=" + mSurfaceTraceAlpha + " " + mPosition.x + "," + mPosition.y
-                    + " " + mSize.x + "x" + mSize.y
-                    + " crop=" + mWindowCrop.toShortString()
-                    + " opaque=" + mIsOpaque
-                    + " (" + mDsdx + "," + mDtdx + "," + mDsdy + "," + mDtdy + ")";
-        }
     }
 }

@@ -52,6 +52,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 
 LOCAL_JAVA_LIBRARIES := \
 	android.test.runner \
+	android.test.base \
 
 LOCAL_PACKAGE_NAME := FrameworksLowpanApiTests
 LOCAL_PRIVATE_PLATFORM_APIS := true

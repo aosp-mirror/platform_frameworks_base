@@ -1,0 +1,6 @@
+# See system/core/logcat/event.logtags for a description of the format of this file.
+
+option java_package com.android.internal.app;
+
+53000 harmful_app_warning_uninstall (package_name|3)
+53001 harmful_app_warning_launch_anyway (package_name|3)

@@ -605,7 +605,9 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGi
     }
   }
 
-  if (!is_system_server) {
+  // If this zygote isn't root, it won't be able to create a process group,
+  // since the directory is owned by root.
+  if (!is_system_server && getuid() == 0) {
       int rc = createProcessGroup(uid, getpid());
       if (rc != 0) {
           if (rc == -EROFS) {
@@ -817,7 +819,6 @@ static pid_t ForkCommon(JNIEnv* env, jstring java_se_name, bool is_system_server
   if (sigprocmask(SIG_UNBLOCK, &sigchld, nullptr) == -1) {
     fail_fn(CREATE_ERROR("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno)));
   }
-
   return pid;
 }
 

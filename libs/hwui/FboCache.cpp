@@ -27,8 +27,7 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-FboCache::FboCache()
-        : mMaxSize(0) {}
+FboCache::FboCache() : mMaxSize(0) {}
 
 FboCache::~FboCache() {
     clear();
@@ -79,5 +78,5 @@ bool FboCache::put(GLuint fbo) {
     return false;
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

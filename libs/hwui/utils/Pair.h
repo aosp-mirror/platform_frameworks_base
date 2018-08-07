@@ -27,34 +27,34 @@ struct Pair {
     F first;
     S second;
 
-    Pair() { }
-    Pair(const Pair& o) : first(o.first), second(o.second) { }
-    Pair(const F& f, const S& s) : first(f), second(s)  { }
+    Pair() {}
+    Pair(const Pair& o) : first(o.first), second(o.second) {}
+    Pair(const F& f, const S& s) : first(f), second(s) {}
 
-    inline const F& getFirst() const {
-        return first;
-    }
+    inline const F& getFirst() const { return first; }
 
-    inline const S& getSecond() const {
-        return second;
-    }
+    inline const S& getSecond() const { return second; }
 };
 
-}; // namespace uirenderer
+};  // namespace uirenderer
 
 template <typename F, typename S>
-struct trait_trivial_ctor< uirenderer::Pair<F, S> >
-{ enum { value = aggregate_traits<F, S>::has_trivial_ctor }; };
+struct trait_trivial_ctor<uirenderer::Pair<F, S> > {
+    enum { value = aggregate_traits<F, S>::has_trivial_ctor };
+};
 template <typename F, typename S>
-struct trait_trivial_dtor< uirenderer::Pair<F, S> >
-{ enum { value = aggregate_traits<F, S>::has_trivial_dtor }; };
+struct trait_trivial_dtor<uirenderer::Pair<F, S> > {
+    enum { value = aggregate_traits<F, S>::has_trivial_dtor };
+};
 template <typename F, typename S>
-struct trait_trivial_copy< uirenderer::Pair<F, S> >
-{ enum { value = aggregate_traits<F, S>::has_trivial_copy }; };
+struct trait_trivial_copy<uirenderer::Pair<F, S> > {
+    enum { value = aggregate_traits<F, S>::has_trivial_copy };
+};
 template <typename F, typename S>
-struct trait_trivial_move< uirenderer::Pair<F, S> >
-{ enum { value = aggregate_traits<F, S>::has_trivial_move }; };
+struct trait_trivial_move<uirenderer::Pair<F, S> > {
+    enum { value = aggregate_traits<F, S>::has_trivial_move };
+};
 
-}; // namespace android
+};  // namespace android
 
-#endif // ANDROID_HWUI_PAIR_H
+#endif  // ANDROID_HWUI_PAIR_H

@@ -31,11 +31,12 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.view.Choreographer;
 import android.view.SurfaceControl;
-import android.view.WindowManagerPolicy;
 
 import com.android.server.AnimationThread;
+import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 /**
  * Singleton class that carries out the animations and Surface operations in a separate task
@@ -47,20 +48,17 @@ public class WindowAnimator {
     final WindowManagerService mService;
     final Context mContext;
     final WindowManagerPolicy mPolicy;
-    private final WindowSurfacePlacer mWindowPlacerLocked;
 
     /** Is any window animating? */
     private boolean mAnimating;
-    private boolean mLastAnimating;
-
-    /** Is any app window animating? */
-    boolean mAppWindowAnimating;
+    private boolean mLastRootAnimating;
 
     final Choreographer.FrameCallback mAnimationFrameCallback;
 
     /** Time of current animation step. Reset on each iteration */
     long mCurrentTime;
 
+    boolean mAppWindowAnimating;
     /** Skip repeated AppWindowTokens initialization. Note that AppWindowsToken's version of this
      * is a long initialized to Long.MIN_VALUE so that it doesn't match this value on startup. */
     int mAnimTransactionSequence;
@@ -76,7 +74,7 @@ public class WindowAnimator {
 
     SparseArray<DisplayContentsAnimator> mDisplayContentsAnimators = new SparseArray<>(2);
 
-    boolean mInitialized = false;
+    private boolean mInitialized = false;
 
     // When set to true the animator will go over all windows after an animation frame is posted and
     // check if some got replaced and can be removed.
@@ -90,11 +88,19 @@ public class WindowAnimator {
      */
     private boolean mAnimationFrameCallbackScheduled;
 
+    /**
+     * A list of runnable that need to be run after {@link WindowContainer#prepareSurfaces} is
+     * executed and the corresponding transaction is closed and applied.
+     */
+    private final ArrayList<Runnable> mAfterPrepareSurfacesRunnables = new ArrayList<>();
+    private boolean mInExecuteAfterPrepareSurfacesRunnables;
+
+    private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
+
     WindowAnimator(final WindowManagerService service) {
         mService = service;
         mContext = service.mContext;
         mPolicy = service.mPolicy;
-        mWindowPlacerLocked = service.mWindowPlacerLocked;
         AnimationThread.getHandler().runWithScissors(
                 () -> mChoreographer = Choreographer.getSfInstance(), 0 /* timeout */);
 
@@ -143,21 +149,10 @@ public class WindowAnimator {
             scheduleAnimation();
         }
 
-        // Simulate back-pressure by opening and closing an empty animation transaction. This makes
-        // sure that an animation frame is at least presented once on the screen. We do this outside
-        // of the regular transaction such that we can avoid holding the window manager lock in case
-        // we receive back-pressure from SurfaceFlinger. Since closing an animation transaction
-        // without the window manager locks leads to ordering issues (as the transaction will be
-        // processed only at the beginning of the next frame which may result in another transaction
-        // that was executed later in WM side gets executed first on SF side), we don't update any
-        // Surface properties here such that reordering doesn't cause issues.
-        mService.executeEmptyAnimationTransaction();
-
         synchronized (mService.mWindowMap) {
             mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
             mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
             mAnimating = false;
-            mAppWindowAnimating = false;
             if (DEBUG_WINDOW_TRACE) {
                 Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
             }
@@ -170,8 +165,7 @@ public class WindowAnimator {
                 final int numDisplays = mDisplayContentsAnimators.size();
                 for (int i = 0; i < numDisplays; i++) {
                     final int displayId = mDisplayContentsAnimators.keyAt(i);
-                    final DisplayContent dc = mService.mRoot.getDisplayContentOrCreate(displayId);
-                    dc.stepAppWindowsAnimation(mCurrentTime);
+                    final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
                     DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.valueAt(i);
 
                     final ScreenRotationAnimation screenRotationAnimation =
@@ -200,31 +194,25 @@ public class WindowAnimator {
                     ++mAnimTransactionSequence;
                     dc.updateWindowsForAnimator(this);
                     dc.updateWallpaperForAnimator(this);
-                    dc.prepareWindowSurfaces();
+                    dc.prepareSurfaces();
                 }
 
                 for (int i = 0; i < numDisplays; i++) {
                     final int displayId = mDisplayContentsAnimators.keyAt(i);
-                    final DisplayContent dc = mService.mRoot.getDisplayContentOrCreate(displayId);
+                    final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
 
                     dc.checkAppWindowsReadyToShow();
 
                     final ScreenRotationAnimation screenRotationAnimation =
                             mDisplayContentsAnimators.valueAt(i).mScreenRotationAnimation;
                     if (screenRotationAnimation != null) {
-                        screenRotationAnimation.updateSurfacesInTransaction();
+                        screenRotationAnimation.updateSurfaces(mTransaction);
                     }
-
-                    orAnimating(dc.animateDimLayers());
                     orAnimating(dc.getDockedDividerController().animate(mCurrentTime));
                     //TODO (multidisplay): Magnification is supported only for the default display.
                     if (accessibilityController != null && dc.isDefaultDisplay) {
                         accessibilityController.drawMagnifiedRegionBorderIfNeededLocked();
                     }
-                }
-
-                if (mService.mDragState != null) {
-                    mAnimating |= mService.mDragState.stepAnimationLocked(mCurrentTime);
                 }
 
                 if (!mAnimating) {
@@ -234,10 +222,12 @@ public class WindowAnimator {
                 if (mService.mWatermark != null) {
                     mService.mWatermark.drawIfNeeded();
                 }
+
+                SurfaceControl.mergeToGlobalTransaction(mTransaction);
             } catch (RuntimeException e) {
                 Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
             } finally {
-                mService.closeSurfaceTransaction();
+                mService.closeSurfaceTransaction("WindowAnimator");
                 if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION animate");
             }
 
@@ -248,10 +238,11 @@ public class WindowAnimator {
             }
 
             if (hasPendingLayoutChanges || doRequest) {
-                mWindowPlacerLocked.requestTraversal();
+                mService.mWindowPlacerLocked.requestTraversal();
             }
 
-            if (mAnimating && !mLastAnimating) {
+            final boolean rootAnimating = mService.mRoot.isSelfOrChildAnimating();
+            if (rootAnimating && !mLastRootAnimating) {
 
                 // Usually app transitions but quite a load onto the system already (with all the
                 // things happening in app), so pause task snapshot persisting to not increase the
@@ -259,22 +250,22 @@ public class WindowAnimator {
                 mService.mTaskSnapshotController.setPersisterPaused(true);
                 Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
             }
-            if (!mAnimating && mLastAnimating) {
-                mWindowPlacerLocked.requestTraversal();
+            if (!rootAnimating && mLastRootAnimating) {
+                mService.mWindowPlacerLocked.requestTraversal();
                 mService.mTaskSnapshotController.setPersisterPaused(false);
                 Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
             }
 
-            mLastAnimating = mAnimating;
+            mLastRootAnimating = rootAnimating;
 
             if (mRemoveReplacedWindows) {
                 mService.mRoot.removeReplacedWindows();
                 mRemoveReplacedWindows = false;
             }
 
-            mService.stopUsingSavedSurfaceLocked();
             mService.destroyPreservedSurfaceLocked();
-            mService.mWindowPlacerLocked.destroyPendingSurfaces();
+
+            executeAfterPrepareSurfacesRunnables();
 
             if (DEBUG_WINDOW_TRACE) {
                 Slog.i(TAG, "!!! animate: exit mAnimating=" + mAnimating
@@ -299,9 +290,6 @@ public class WindowAnimator {
         if ((bulkUpdateParams & WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE) != 0) {
             builder.append(" ORIENTATION_CHANGE_COMPLETE");
         }
-        if ((bulkUpdateParams & WindowSurfacePlacer.SET_TURN_ON_SCREEN) != 0) {
-            builder.append(" TURN_ON_SCREEN");
-        }
         return builder.toString();
     }
 
@@ -315,7 +303,7 @@ public class WindowAnimator {
                     pw.println(":");
             final DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.valueAt(i);
             final DisplayContent dc =
-                    mService.mRoot.getDisplayContentOrCreate(mDisplayContentsAnimators.keyAt(i));
+                    mService.mRoot.getDisplayContent(mDisplayContentsAnimators.keyAt(i));
             dc.dumpWindowAnimators(pw, subPrefix);
             if (displayAnimator.mScreenRotationAnimation != null) {
                 pw.print(subPrefix); pw.println("mScreenRotationAnimation:");
@@ -349,7 +337,7 @@ public class WindowAnimator {
         if (displayId < 0) {
             return 0;
         }
-        final DisplayContent displayContent = mService.mRoot.getDisplayContentOrCreate(displayId);
+        final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
         return (displayContent != null) ? displayContent.pendingLayoutChanges : 0;
     }
 
@@ -357,7 +345,7 @@ public class WindowAnimator {
         if (displayId < 0) {
             return;
         }
-        final DisplayContent displayContent = mService.mRoot.getDisplayContentOrCreate(displayId);
+        final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
         if (displayContent != null) {
             displayContent.pendingLayoutChanges |= changes;
         }
@@ -437,5 +425,38 @@ public class WindowAnimator {
 
     void orAnimating(boolean animating) {
         mAnimating |= animating;
+    }
+
+    /**
+     * Adds a runnable to be executed after {@link WindowContainer#prepareSurfaces} is called and
+     * the corresponding transaction is closed and applied.
+     */
+    void addAfterPrepareSurfacesRunnable(Runnable r) {
+        // If runnables are already being handled in executeAfterPrepareSurfacesRunnable, then just
+        // immediately execute the runnable passed in.
+        if (mInExecuteAfterPrepareSurfacesRunnables) {
+            r.run();
+            return;
+        }
+
+        mAfterPrepareSurfacesRunnables.add(r);
+        scheduleAnimation();
+    }
+
+    void executeAfterPrepareSurfacesRunnables() {
+
+        // Don't even think about to start recursing!
+        if (mInExecuteAfterPrepareSurfacesRunnables) {
+            return;
+        }
+        mInExecuteAfterPrepareSurfacesRunnables = true;
+
+        // Traverse in order they were added.
+        final int size = mAfterPrepareSurfacesRunnables.size();
+        for (int i = 0; i < size; i++) {
+            mAfterPrepareSurfacesRunnables.get(i).run();
+        }
+        mAfterPrepareSurfacesRunnables.clear();
+        mInExecuteAfterPrepareSurfacesRunnables = false;
     }
 }

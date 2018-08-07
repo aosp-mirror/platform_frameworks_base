@@ -20,13 +20,15 @@
 #include <utils/PropertyMap.h>
 #include <utils/String8.h>
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 using namespace android;
 
-static const char* gProgName = "validatekeymaps";
+static const char* kProgName = "validatekeymaps";
+static bool gQuiet = false;
 
 enum FileType {
     FILETYPE_UNKNOWN,
@@ -36,15 +38,32 @@ enum FileType {
     FILETYPE_INPUTDEVICECONFIGURATION,
 };
 
+static void log(const char* fmt, ...) {
+    if (gQuiet) {
+        return;
+    }
+    va_list args;
+    va_start(args, fmt);
+    vfprintf(stdout, fmt, args);
+    va_end(args);
+}
+
+static void error(const char* fmt,  ...) {
+    va_list args;
+    va_start(args, fmt);
+    vfprintf(stderr, fmt, args);
+    va_end(args);
+}
 
 static void usage() {
-    fprintf(stderr, "Keymap Validation Tool\n\n");
-    fprintf(stderr, "Usage:\n");
-    fprintf(stderr,
-        " %s [*.kl] [*.kcm] [*.idc] [virtualkeys.*] [...]\n"
+    error("Keymap Validation Tool\n\n");
+    error("Usage:\n");
+    error(
+        " %s [-q] [*.kl] [*.kcm] [*.idc] [virtualkeys.*] [...]\n"
         "   Validates the specified key layouts, key character maps, \n"
-        "   input device configurations, or virtual key definitions.\n\n",
-        gProgName);
+        "   input device configurations, or virtual key definitions.\n\n"
+        "   -q Quiet; do not write anything to standard out.\n",
+        kProgName);
 }
 
 static FileType getFileType(const char* filename) {
@@ -69,19 +88,19 @@ static FileType getFileType(const char* filename) {
 }
 
 static bool validateFile(const char* filename) {
-    fprintf(stdout, "Validating file '%s'...\n", filename);
+    log("Validating file '%s'...\n", filename);
 
     FileType fileType = getFileType(filename);
     switch (fileType) {
     case FILETYPE_UNKNOWN:
-        fprintf(stderr, "Supported file types: *.kl, *.kcm, virtualkeys.*\n\n");
+        error("Supported file types: *.kl, *.kcm, virtualkeys.*\n\n");
         return false;
 
     case FILETYPE_KEYLAYOUT: {
         sp<KeyLayoutMap> map;
         status_t status = KeyLayoutMap::load(String8(filename), &map);
         if (status) {
-            fprintf(stderr, "Error %d parsing key layout file.\n\n", status);
+            error("Error %d parsing key layout file.\n\n", status);
             return false;
         }
         break;
@@ -92,7 +111,7 @@ static bool validateFile(const char* filename) {
         status_t status = KeyCharacterMap::load(String8(filename),
                 KeyCharacterMap::FORMAT_ANY, &map);
         if (status) {
-            fprintf(stderr, "Error %d parsing key character map file.\n\n", status);
+            error("Error %d parsing key character map file.\n\n", status);
             return false;
         }
         break;
@@ -102,7 +121,7 @@ static bool validateFile(const char* filename) {
         PropertyMap* map;
         status_t status = PropertyMap::load(String8(filename), &map);
         if (status) {
-            fprintf(stderr, "Error %d parsing input device configuration file.\n\n", status);
+            error("Error %d parsing input device configuration file.\n\n", status);
             return false;
         }
         delete map;
@@ -113,7 +132,7 @@ static bool validateFile(const char* filename) {
         VirtualKeyMap* map;
         status_t status = VirtualKeyMap::load(String8(filename), &map);
         if (status) {
-            fprintf(stderr, "Error %d parsing virtual key definition file.\n\n", status);
+            error("Error %d parsing virtual key definition file.\n\n", status);
             return false;
         }
         delete map;
@@ -121,7 +140,7 @@ static bool validateFile(const char* filename) {
     }
     }
 
-    fputs("No errors.\n\n", stdout);
+    log("No errors.\n\n");
     return true;
 }
 
@@ -133,15 +152,19 @@ int main(int argc, const char** argv) {
 
     int result = 0;
     for (int i = 1; i < argc; i++) {
+        if (i == 1 && !strcmp(argv[1], "-q")) {
+            gQuiet = true;
+            continue;
+        }
         if (!validateFile(argv[i])) {
             result = 1;
         }
     }
 
     if (result) {
-        fputs("Failed!\n", stderr);
+        error("Failed!\n");
     } else {
-        fputs("Success.\n", stdout);
+        log("Success.\n");
     }
     return result;
 }

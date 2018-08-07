@@ -20,10 +20,8 @@
 class OpPropAnimation;
 
 static TestScene::Registrar _Shapes(TestScene::Info{
-    "opprops",
-    "A minimal demonstration of CanvasProperty drawing operations.",
-    TestScene::simpleCreateScene<OpPropAnimation>
-});
+        "opprops", "A minimal demonstration of CanvasProperty drawing operations.",
+        TestScene::simpleCreateScene<OpPropAnimation>});
 
 class OpPropAnimation : public TestScene {
 public:
@@ -42,8 +40,9 @@ public:
 
     sp<RenderNode> content;
     void createContent(int width, int height, Canvas& canvas) override {
-        content = TestUtils::createNode(0, 0, width, height,
-                [this, width, height](RenderProperties& props, Canvas& canvas) {
+        content = TestUtils::createNode(0, 0, width, height, [this, width, height](
+                                                                     RenderProperties& props,
+                                                                     Canvas& canvas) {
             mPaint->value.setAntiAlias(true);
             mPaint->value.setColor(Color::Blue_500);
 
@@ -54,9 +53,9 @@ public:
             mCircleY->value = height * 0.75;
 
             canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
-            canvas.drawRoundRect(mRoundRectLeft.get(), mRoundRectTop.get(),
-                    mRoundRectRight.get(), mRoundRectBottom.get(),
-                    mRoundRectRx.get(), mRoundRectRy.get(), mPaint.get());
+            canvas.drawRoundRect(mRoundRectLeft.get(), mRoundRectTop.get(), mRoundRectRight.get(),
+                                 mRoundRectBottom.get(), mRoundRectRx.get(), mRoundRectRy.get(),
+                                 mPaint.get());
             canvas.drawCircle(mCircleX.get(), mCircleY.get(), mCircleRadius.get(), mPaint.get());
         });
         canvas.drawRenderNode(content.get());

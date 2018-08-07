@@ -18,6 +18,7 @@ package android.graphics;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
 
@@ -119,6 +120,21 @@ public class Point implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(x);
         out.writeInt(y);
+    }
+
+    /**
+     * Write to a protocol buffer output stream.
+     * Protocol buffer message definition at {@link android.graphics.PointProto}
+     *
+     * @param protoOutputStream Stream to write the Rect object to.
+     * @param fieldId           Field Id of the Rect as defined in the parent message
+     * @hide
+     */
+    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
+        final long token = protoOutputStream.start(fieldId);
+        protoOutputStream.write(PointProto.X, x);
+        protoOutputStream.write(PointProto.Y, y);
+        protoOutputStream.end(token);
     }
 
     public static final Parcelable.Creator<Point> CREATOR = new Parcelable.Creator<Point>() {

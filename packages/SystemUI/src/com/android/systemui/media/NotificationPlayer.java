@@ -133,12 +133,19 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
                             + mNotificationRampTimeMs + "ms"); }
                     try {
                         Thread.sleep(mNotificationRampTimeMs);
-                        player.start();
                     } catch (InterruptedException e) {
                         Log.e(mTag, "Exception while sleeping to sync notification playback"
                                 + " with ducking", e);
                     }
-                    if (DEBUG) { Log.d(mTag, "player.start"); }
+                    try {
+                        player.start();
+                        if (DEBUG) { Log.d(mTag, "player.start"); }
+                    } catch (Exception e) {
+                        player.release();
+                        player = null;
+                        // playing the notification didn't work, revert the focus request
+                        abandonAudioFocusAfterError();
+                    }
                     if (mPlayer != null) {
                         if (DEBUG) { Log.d(mTag, "mPlayer.release"); }
                         mPlayer.release();
@@ -147,12 +154,24 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
                 }
                 catch (Exception e) {
                     Log.w(mTag, "error loading sound for " + mCmd.uri, e);
+                    // playing the notification didn't work, revert the focus request
+                    abandonAudioFocusAfterError();
                 }
                 this.notify();
             }
             Looper.loop();
         }
     };
+
+    private void abandonAudioFocusAfterError() {
+        synchronized (mQueueAudioFocusLock) {
+            if (mAudioManagerWithAudioFocus != null) {
+                if (DEBUG) Log.d(mTag, "abandoning focus after playback error");
+                mAudioManagerWithAudioFocus.abandonAudioFocus(null);
+                mAudioManagerWithAudioFocus = null;
+            }
+        }
+    }
 
     private void startSound(Command cmd) {
         // Preparing can be slow, so if there is something else

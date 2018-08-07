@@ -25,11 +25,14 @@ import static org.mockito.Mockito.when;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.backup.IBackupManager;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -37,8 +40,10 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
+import android.database.Cursor;
 import android.media.IAudioService;
 import android.net.IIpConnectivityMetrics;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -49,6 +54,7 @@ import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.security.KeyChain;
 import android.telephony.TelephonyManager;
+import android.test.mock.MockContentProvider;
 import android.test.mock.MockContentResolver;
 import android.util.ArrayMap;
 import android.util.Pair;
@@ -56,6 +62,7 @@ import android.view.IWindowManager;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.net.NetworkPolicyManagerInternal;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,6 +80,8 @@ public class MockSystemServices {
     public final SystemPropertiesForMock systemProperties;
     public final UserManager userManager;
     public final UserManagerInternal userManagerInternal;
+    public final UsageStatsManagerInternal usageStatsManagerInternal;
+    public final NetworkPolicyManagerInternal networkPolicyManagerInternal;
     public final PackageManagerInternal packageManagerInternal;
     public final UserManagerForMock userManagerForMock;
     public final PowerManagerForMock powerManager;
@@ -82,6 +91,7 @@ public class MockSystemServices {
     public final IIpConnectivityMetrics iipConnectivityMetrics;
     public final IWindowManager iwindowManager;
     public final IActivityManager iactivityManager;
+    public ActivityManagerInternal activityManagerInternal;
     public final IPackageManager ipackageManager;
     public final IBackupManager ibackupManager;
     public final IAudioService iaudioService;
@@ -107,6 +117,9 @@ public class MockSystemServices {
         systemProperties = mock(SystemPropertiesForMock.class);
         userManager = mock(UserManager.class);
         userManagerInternal = mock(UserManagerInternal.class);
+        usageStatsManagerInternal = mock(UsageStatsManagerInternal.class);
+        networkPolicyManagerInternal = mock(NetworkPolicyManagerInternal.class);
+
         userManagerForMock = mock(UserManagerForMock.class);
         packageManagerInternal = mock(PackageManagerInternal.class);
         powerManager = mock(PowerManagerForMock.class);
@@ -116,6 +129,7 @@ public class MockSystemServices {
         iipConnectivityMetrics = mock(IIpConnectivityMetrics.class);
         iwindowManager = mock(IWindowManager.class);
         iactivityManager = mock(IActivityManager.class);
+        activityManagerInternal = mock(ActivityManagerInternal.class);
         ipackageManager = mock(IPackageManager.class);
         ibackupManager = mock(IBackupManager.class);
         iaudioService = mock(IAudioService.class);
@@ -132,6 +146,23 @@ public class MockSystemServices {
         packageManager = spy(realContext.getPackageManager());
 
         contentResolver = new MockContentResolver();
+        contentResolver.addProvider("telephony", new MockContentProvider(realContext) {
+            @Override
+            public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+                return 0;
+            }
+
+            @Override
+            public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+                    String sortOrder) {
+                return null;
+            }
+
+            @Override
+            public int delete(Uri uri, String selection, String[] selectionArgs) {
+                return 0;
+            }
+        });
         contentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
 
         // Add the system user with a fake profile group already set up (this can happen in the real
@@ -177,6 +208,13 @@ public class MockSystemServices {
                 invocation -> {
                     final int userId1 = (int) invocation.getArguments()[0];
                     return getUserInfo(userId1);
+                }
+        );
+        when(userManager.getProfileParent(anyInt())).thenAnswer(
+                invocation -> {
+                    final int userId1 = (int) invocation.getArguments()[0];
+                    final UserInfo ui = getUserInfo(userId1);
+                    return ui == null ? null : getUserInfo(ui.profileGroupId);
                 }
         );
         when(userManager.getProfiles(anyInt())).thenAnswer(
@@ -377,6 +415,9 @@ public class MockSystemServices {
         }
 
         public void settingsGlobalPutString(String name, String value) {
+        }
+
+        public void settingsSystemPutStringForUser(String name, String value, int callingUserId) {
         }
 
         public int settingsGlobalGetInt(String name, int value) {

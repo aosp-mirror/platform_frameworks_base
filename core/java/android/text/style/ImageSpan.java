@@ -17,6 +17,8 @@
 package android.text.style;
 
 import android.annotation.DrawableRes;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -27,18 +29,49 @@ import android.util.Log;
 
 import java.io.InputStream;
 
+/**
+ * Span that replaces the text it's attached to with a {@link Drawable} that can be aligned with
+ * the bottom or with the baseline of the surrounding text. The drawable can be constructed from
+ * varied sources:
+ * <ul>
+ * <li>{@link Bitmap} - see {@link #ImageSpan(Context, Bitmap)} and
+ * {@link #ImageSpan(Context, Bitmap, int)}
+ * </li>
+ * <li>{@link Drawable} - see {@link #ImageSpan(Drawable, int)}</li>
+ * <li>resource id - see {@link #ImageSpan(Context, int, int)}</li>
+ * <li>{@link Uri} - see {@link #ImageSpan(Context, Uri, int)}</li>
+ * </ul>
+ * The default value for the vertical alignment is {@link DynamicDrawableSpan#ALIGN_BOTTOM}
+ * <p>
+ * For example, an <code>ImagedSpan</code> can be used like this:
+ * <pre>
+ * SpannableString string = SpannableString("Bottom: span.\nBaseline: span.");
+ * // using the default alignment: ALIGN_BOTTOM
+ * string.setSpan(ImageSpan(this, R.mipmap.ic_launcher), 7, 8, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+ * string.setSpan(ImageSpan(this, R.mipmap.ic_launcher, DynamicDrawableSpan.ALIGN_BASELINE),
+ * 22, 23, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+ * </pre>
+ * <img src="{@docRoot}reference/android/images/text/style/imagespan.png" />
+ * <figcaption>Text with <code>ImageSpan</code>s aligned bottom and baseline.</figcaption>
+ */
 public class ImageSpan extends DynamicDrawableSpan {
+
+    @Nullable
     private Drawable mDrawable;
+    @Nullable
     private Uri mContentUri;
+    @DrawableRes
     private int mResourceId;
+    @Nullable
     private Context mContext;
+    @Nullable
     private String mSource;
 
     /**
      * @deprecated Use {@link #ImageSpan(Context, Bitmap)} instead.
      */
     @Deprecated
-    public ImageSpan(Bitmap b) {
+    public ImageSpan(@NonNull Bitmap b) {
         this(null, b, ALIGN_BOTTOM);
     }
 
@@ -46,80 +79,143 @@ public class ImageSpan extends DynamicDrawableSpan {
      * @deprecated Use {@link #ImageSpan(Context, Bitmap, int)} instead.
      */
     @Deprecated
-    public ImageSpan(Bitmap b, int verticalAlignment) {
+    public ImageSpan(@NonNull Bitmap b, int verticalAlignment) {
         this(null, b, verticalAlignment);
     }
 
-    public ImageSpan(Context context, Bitmap b) {
-        this(context, b, ALIGN_BOTTOM);
+    /**
+     * Constructs an {@link ImageSpan} from a {@link Context} and a {@link Bitmap} with the default
+     * alignment {@link DynamicDrawableSpan#ALIGN_BOTTOM}
+     *
+     * @param context context used to create a drawable from {@param bitmap} based on the display
+     *                metrics of the resources
+     * @param bitmap  bitmap to be rendered
+     */
+    public ImageSpan(@NonNull Context context, @NonNull Bitmap bitmap) {
+        this(context, bitmap, ALIGN_BOTTOM);
     }
 
     /**
+     * Constructs an {@link ImageSpan} from a {@link Context}, a {@link Bitmap} and a vertical
+     * alignment.
+     *
+     * @param context           context used to create a drawable from {@param bitmap} based on
+     *                          the display metrics of the resources
+     * @param bitmap            bitmap to be rendered
      * @param verticalAlignment one of {@link DynamicDrawableSpan#ALIGN_BOTTOM} or
-     * {@link DynamicDrawableSpan#ALIGN_BASELINE}.
+     *                          {@link DynamicDrawableSpan#ALIGN_BASELINE}
      */
-    public ImageSpan(Context context, Bitmap b, int verticalAlignment) {
+    public ImageSpan(@NonNull Context context, @NonNull Bitmap bitmap, int verticalAlignment) {
         super(verticalAlignment);
         mContext = context;
         mDrawable = context != null
-                ? new BitmapDrawable(context.getResources(), b)
-                : new BitmapDrawable(b);
+                ? new BitmapDrawable(context.getResources(), bitmap)
+                : new BitmapDrawable(bitmap);
         int width = mDrawable.getIntrinsicWidth();
         int height = mDrawable.getIntrinsicHeight();
-        mDrawable.setBounds(0, 0, width > 0 ? width : 0, height > 0 ? height : 0); 
-    }
-
-    public ImageSpan(Drawable d) {
-        this(d, ALIGN_BOTTOM);
+        mDrawable.setBounds(0, 0, width > 0 ? width : 0, height > 0 ? height : 0);
     }
 
     /**
-     * @param verticalAlignment one of {@link DynamicDrawableSpan#ALIGN_BOTTOM} or
-     * {@link DynamicDrawableSpan#ALIGN_BASELINE}.
+     * Constructs an {@link ImageSpan} from a drawable with the default
+     * alignment {@link DynamicDrawableSpan#ALIGN_BOTTOM}.
+     *
+     * @param drawable drawable to be rendered
      */
-    public ImageSpan(Drawable d, int verticalAlignment) {
-        super(verticalAlignment);
-        mDrawable = d;
-    }
-
-    public ImageSpan(Drawable d, String source) {
-        this(d, source, ALIGN_BOTTOM);
+    public ImageSpan(@NonNull Drawable drawable) {
+        this(drawable, ALIGN_BOTTOM);
     }
 
     /**
+     * Constructs an {@link ImageSpan} from a drawable and a vertical alignment.
+     *
+     * @param drawable          drawable to be rendered
      * @param verticalAlignment one of {@link DynamicDrawableSpan#ALIGN_BOTTOM} or
-     * {@link DynamicDrawableSpan#ALIGN_BASELINE}.
+     *                          {@link DynamicDrawableSpan#ALIGN_BASELINE}
      */
-    public ImageSpan(Drawable d, String source, int verticalAlignment) {
+    public ImageSpan(@NonNull Drawable drawable, int verticalAlignment) {
         super(verticalAlignment);
-        mDrawable = d;
+        mDrawable = drawable;
+    }
+
+    /**
+     * Constructs an {@link ImageSpan} from a drawable and a source with the default
+     * alignment {@link DynamicDrawableSpan#ALIGN_BOTTOM}
+     *
+     * @param drawable drawable to be rendered
+     * @param source   drawable's Uri source
+     */
+    public ImageSpan(@NonNull Drawable drawable, @NonNull String source) {
+        this(drawable, source, ALIGN_BOTTOM);
+    }
+
+    /**
+     * Constructs an {@link ImageSpan} from a drawable, a source and a vertical alignment.
+     *
+     * @param drawable          drawable to be rendered
+     * @param source            drawable's uri source
+     * @param verticalAlignment one of {@link DynamicDrawableSpan#ALIGN_BOTTOM} or
+     *                          {@link DynamicDrawableSpan#ALIGN_BASELINE}
+     */
+    public ImageSpan(@NonNull Drawable drawable, @NonNull String source, int verticalAlignment) {
+        super(verticalAlignment);
+        mDrawable = drawable;
         mSource = source;
     }
 
-    public ImageSpan(Context context, Uri uri) {
+    /**
+     * Constructs an {@link ImageSpan} from a {@link Context} and a {@link Uri} with the default
+     * alignment {@link DynamicDrawableSpan#ALIGN_BOTTOM}. The Uri source can be retrieved via
+     * {@link #getSource()}
+     *
+     * @param context context used to create a drawable from {@param bitmap} based on the display
+     *                metrics of the resources
+     * @param uri     {@link Uri} used to construct the drawable that will be rendered
+     */
+    public ImageSpan(@NonNull Context context, @NonNull Uri uri) {
         this(context, uri, ALIGN_BOTTOM);
     }
 
     /**
+     * Constructs an {@link ImageSpan} from a {@link Context}, a {@link Uri} and a vertical
+     * alignment. The Uri source can be retrieved via {@link #getSource()}
+     *
+     * @param context           context used to create a drawable from {@param bitmap} based on
+     *                          the display
+     *                          metrics of the resources
+     * @param uri               {@link Uri} used to construct the drawable that will be rendered.
      * @param verticalAlignment one of {@link DynamicDrawableSpan#ALIGN_BOTTOM} or
-     * {@link DynamicDrawableSpan#ALIGN_BASELINE}.
+     *                          {@link DynamicDrawableSpan#ALIGN_BASELINE}
      */
-    public ImageSpan(Context context, Uri uri, int verticalAlignment) {
+    public ImageSpan(@NonNull Context context, @NonNull Uri uri, int verticalAlignment) {
         super(verticalAlignment);
         mContext = context;
         mContentUri = uri;
         mSource = uri.toString();
     }
 
-    public ImageSpan(Context context, @DrawableRes int resourceId) {
+    /**
+     * Constructs an {@link ImageSpan} from a {@link Context} and a resource id with the default
+     * alignment {@link DynamicDrawableSpan#ALIGN_BOTTOM}
+     *
+     * @param context    context used to retrieve the drawable from resources
+     * @param resourceId drawable resource id based on which the drawable is retrieved
+     */
+    public ImageSpan(@NonNull Context context, @DrawableRes int resourceId) {
         this(context, resourceId, ALIGN_BOTTOM);
     }
 
     /**
+     * Constructs an {@link ImageSpan} from a {@link Context}, a resource id and a vertical
+     * alignment.
+     *
+     * @param context           context used to retrieve the drawable from resources
+     * @param resourceId        drawable resource id based on which the drawable is retrieved.
      * @param verticalAlignment one of {@link DynamicDrawableSpan#ALIGN_BOTTOM} or
-     * {@link DynamicDrawableSpan#ALIGN_BASELINE}.
+     *                          {@link DynamicDrawableSpan#ALIGN_BASELINE}
      */
-    public ImageSpan(Context context, @DrawableRes int resourceId, int verticalAlignment) {
+    public ImageSpan(@NonNull Context context, @DrawableRes int resourceId,
+            int verticalAlignment) {
         super(verticalAlignment);
         mContext = context;
         mResourceId = resourceId;
@@ -128,10 +224,10 @@ public class ImageSpan extends DynamicDrawableSpan {
     @Override
     public Drawable getDrawable() {
         Drawable drawable = null;
-        
+
         if (mDrawable != null) {
             drawable = mDrawable;
-        } else  if (mContentUri != null) {
+        } else if (mContentUri != null) {
             Bitmap bitmap = null;
             try {
                 InputStream is = mContext.getContentResolver().openInputStream(
@@ -142,7 +238,7 @@ public class ImageSpan extends DynamicDrawableSpan {
                         drawable.getIntrinsicHeight());
                 is.close();
             } catch (Exception e) {
-                Log.e("sms", "Failed to loaded content " + mContentUri, e);
+                Log.e("ImageSpan", "Failed to loaded content " + mContentUri, e);
             }
         } else {
             try {
@@ -150,8 +246,8 @@ public class ImageSpan extends DynamicDrawableSpan {
                 drawable.setBounds(0, 0, drawable.getIntrinsicWidth(),
                         drawable.getIntrinsicHeight());
             } catch (Exception e) {
-                Log.e("sms", "Unable to find resource: " + mResourceId);
-            }                
+                Log.e("ImageSpan", "Unable to find resource: " + mResourceId);
+            }
         }
 
         return drawable;
@@ -159,9 +255,12 @@ public class ImageSpan extends DynamicDrawableSpan {
 
     /**
      * Returns the source string that was saved during construction.
+     *
+     * @return the source string that was saved during construction
+     * @see #ImageSpan(Drawable, String) and this{@link #ImageSpan(Context, Uri)}
      */
+    @Nullable
     public String getSource() {
         return mSource;
     }
-
 }

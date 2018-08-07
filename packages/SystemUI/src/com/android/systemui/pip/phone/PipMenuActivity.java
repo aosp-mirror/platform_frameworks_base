@@ -16,6 +16,10 @@
 
 package com.android.systemui.pip.phone;
 
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.provider.Settings.ACTION_PICTURE_IN_PICTURE_SETTINGS;
+
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ACTIONS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ALLOW_TIMEOUT;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_CONTROLLER_MESSENGER;
@@ -39,6 +43,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.PendingIntent.CanceledException;
 import android.app.RemoteAction;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Color;
@@ -46,16 +51,18 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
@@ -105,6 +112,7 @@ public class PipMenuActivity extends Activity {
     private Drawable mBackgroundDrawable;
     private View mMenuContainer;
     private LinearLayout mActionsGroup;
+    private View mSettingsButton;
     private View mDismissButton;
     private ImageView mExpandButton;
     private int mBetweenActionPaddingLand;
@@ -218,6 +226,11 @@ public class PipMenuActivity extends Activity {
             }
             return true;
         });
+        mSettingsButton = findViewById(R.id.settings);
+        mSettingsButton.setAlpha(0);
+        mSettingsButton.setOnClickListener((v) -> {
+            showSettings();
+        });
         mDismissButton = findViewById(R.id.dismiss);
         mDismissButton.setAlpha(0);
         mDismissButton.setOnClickListener((v) -> {
@@ -329,7 +342,7 @@ public class PipMenuActivity extends Activity {
                 mHandler.post(() -> {
                     event.getAnimationTrigger().decrement();
                 });
-            }, true /* notifyMenuVisibility */);
+            }, true /* notifyMenuVisibility */, false /* isDismissing */);
         }
     }
 
@@ -352,12 +365,14 @@ public class PipMenuActivity extends Activity {
             ObjectAnimator menuAnim = ObjectAnimator.ofFloat(mMenuContainer, View.ALPHA,
                     mMenuContainer.getAlpha(), 1f);
             menuAnim.addUpdateListener(mMenuBgUpdateListener);
+            ObjectAnimator settingsAnim = ObjectAnimator.ofFloat(mSettingsButton, View.ALPHA,
+                    mSettingsButton.getAlpha(), 1f);
             ObjectAnimator dismissAnim = ObjectAnimator.ofFloat(mDismissButton, View.ALPHA,
                     mDismissButton.getAlpha(), 1f);
             if (menuState == MENU_STATE_FULL) {
-                mMenuContainerAnimator.playTogether(menuAnim, dismissAnim);
+                mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim);
             } else {
-                mMenuContainerAnimator.play(dismissAnim);
+                mMenuContainerAnimator.playTogether(dismissAnim);
             }
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_IN);
             mMenuContainerAnimator.setDuration(MENU_FADE_DURATION);
@@ -381,10 +396,12 @@ public class PipMenuActivity extends Activity {
     }
 
     private void hideMenu() {
-        hideMenu(null /* animationFinishedRunnable */, true /* notifyMenuVisibility */);
+        hideMenu(null /* animationFinishedRunnable */, true /* notifyMenuVisibility */,
+                false /* isDismissing */);
     }
 
-    private void hideMenu(final Runnable animationFinishedRunnable, boolean notifyMenuVisibility) {
+    private void hideMenu(final Runnable animationFinishedRunnable, boolean notifyMenuVisibility,
+            boolean isDismissing) {
         if (mMenuState != MENU_STATE_NONE) {
             cancelDelayedFinish();
             if (notifyMenuVisibility) {
@@ -394,9 +411,11 @@ public class PipMenuActivity extends Activity {
             ObjectAnimator menuAnim = ObjectAnimator.ofFloat(mMenuContainer, View.ALPHA,
                     mMenuContainer.getAlpha(), 0f);
             menuAnim.addUpdateListener(mMenuBgUpdateListener);
+            ObjectAnimator settingsAnim = ObjectAnimator.ofFloat(mSettingsButton, View.ALPHA,
+                    mSettingsButton.getAlpha(), 0f);
             ObjectAnimator dismissAnim = ObjectAnimator.ofFloat(mDismissButton, View.ALPHA,
                     mDismissButton.getAlpha(), 0f);
-            mMenuContainerAnimator.playTogether(menuAnim, dismissAnim);
+            mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim);
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_OUT);
             mMenuContainerAnimator.setDuration(MENU_FADE_DURATION);
             mMenuContainerAnimator.addListener(new AnimatorListenerAdapter() {
@@ -405,7 +424,12 @@ public class PipMenuActivity extends Activity {
                     if (animationFinishedRunnable != null) {
                         animationFinishedRunnable.run();
                     }
-                    finish();
+
+                    if (!isDismissing) {
+                        // If we are dismissing the PiP, then don't try to pre-emptively finish the
+                        // menu activity
+                        finish();
+                    }
                 }
             });
             mMenuContainerAnimator.start();
@@ -526,6 +550,7 @@ public class PipMenuActivity extends Activity {
         final float menuAlpha = 1 - fraction;
         if (mMenuState == MENU_STATE_FULL) {
             mMenuContainer.setAlpha(menuAlpha);
+            mSettingsButton.setAlpha(menuAlpha);
             mDismissButton.setAlpha(menuAlpha);
             final float interpolatedAlpha =
                     MENU_BACKGROUND_ALPHA * menuAlpha + DISMISS_BACKGROUND_ALPHA * fraction;
@@ -565,7 +590,7 @@ public class PipMenuActivity extends Activity {
         hideMenu(() -> {
             sendEmptyMessage(PipMenuActivityController.MESSAGE_EXPAND_PIP,
                     "Could not notify controller to expand PIP");
-        }, false /* notifyMenuVisibility */);
+        }, false /* notifyMenuVisibility */, false /* isDismissing */);
     }
 
     private void minimizePip() {
@@ -579,13 +604,26 @@ public class PipMenuActivity extends Activity {
         hideMenu(() -> {
             sendEmptyMessage(PipMenuActivityController.MESSAGE_DISMISS_PIP,
                     "Could not notify controller to dismiss PIP");
-        }, false /* notifyMenuVisibility */);
+        }, false /* notifyMenuVisibility */, true /* isDismissing */);
     }
 
     private void showPipMenu() {
         Message m = Message.obtain();
         m.what = PipMenuActivityController.MESSAGE_SHOW_MENU;
         sendMessage(m, "Could not notify controller to show PIP menu");
+    }
+
+    private void showSettings() {
+        final Pair<ComponentName, Integer> topPipActivityInfo =
+                PipUtils.getTopPinnedActivity(this, ActivityManager.getService());
+        if (topPipActivityInfo.first != null) {
+            final UserHandle user = UserHandle.of(topPipActivityInfo.second);
+            final Intent settingsIntent = new Intent(ACTION_PICTURE_IN_PICTURE_SETTINGS,
+                    Uri.fromParts("package", topPipActivityInfo.first.getPackageName(), null));
+            settingsIntent.putExtra(Intent.EXTRA_USER_HANDLE, user);
+            settingsIntent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(settingsIntent);
+        }
     }
 
     private void notifyActivityCallback(Messenger callback) {

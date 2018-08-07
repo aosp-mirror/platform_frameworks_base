@@ -20,11 +20,12 @@ import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Log;
-import android.util.Pair;
 import android.view.autofill.AutofillId;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
@@ -43,9 +44,9 @@ import java.util.regex.Pattern;
  *
  * <pre class="prettyprint">
  *   new ImageTransformation.Builder(ccNumberId, Pattern.compile("^4815.*$"),
- *                                   R.drawable.ic_credit_card_logo1)
- *     .addOption(Pattern.compile("^1623.*$"), R.drawable.ic_credit_card_logo2)
- *     .addOption(Pattern.compile("^42.*$"), R.drawable.ic_credit_card_logo3)
+ *                                   R.drawable.ic_credit_card_logo1, "Brand 1")
+ *     .addOption(Pattern.compile("^1623.*$"), R.drawable.ic_credit_card_logo2, "Brand 2")
+ *     .addOption(Pattern.compile("^42.*$"), R.drawable.ic_credit_card_logo3, "Brand 3")
  *     .build();
  * </pre>
  *
@@ -59,7 +60,7 @@ public final class ImageTransformation extends InternalTransformation implements
     private static final String TAG = "ImageTransformation";
 
     private final AutofillId mId;
-    private final ArrayList<Pair<Pattern, Integer>> mOptions;
+    private final ArrayList<Option> mOptions;
 
     private ImageTransformation(Builder builder) {
         mId = builder.mId;
@@ -82,17 +83,21 @@ public final class ImageTransformation extends InternalTransformation implements
         }
 
         for (int i = 0; i < size; i++) {
-            final Pair<Pattern, Integer> option = mOptions.get(i);
+            final Option option = mOptions.get(i);
             try {
-                if (option.first.matcher(value).matches()) {
+                if (option.pattern.matcher(value).matches()) {
                     Log.d(TAG, "Found match at " + i + ": " + option);
-                    parentTemplate.setImageViewResource(childViewId, option.second);
+                    parentTemplate.setImageViewResource(childViewId, option.resId);
+                    if (option.contentDescription != null) {
+                        parentTemplate.setContentDescription(childViewId,
+                                option.contentDescription);
+                    }
                     return;
                 }
             } catch (Exception e) {
                 // Do not log full exception to avoid PII leaking
-                Log.w(TAG, "Error matching regex #" + i + "(" + option.first.pattern() + ") on id "
-                        + option.second + ": " + e.getClass());
+                Log.w(TAG, "Error matching regex #" + i + "(" + option.pattern + ") on id "
+                        + option.resId + ": " + e.getClass());
                 throw e;
 
             }
@@ -105,22 +110,41 @@ public final class ImageTransformation extends InternalTransformation implements
      */
     public static class Builder {
         private final AutofillId mId;
-        private final ArrayList<Pair<Pattern, Integer>> mOptions = new ArrayList<>();
+        private final ArrayList<Option> mOptions = new ArrayList<>();
         private boolean mDestroyed;
 
         /**
-         * Create a new builder for a autofill id and add a first option.
+         * Creates a new builder for a autofill id and add a first option.
          *
          * @param id id of the screen field that will be used to evaluate whether the image should
          * be used.
          * @param regex regular expression defining what should be matched to use this image.
          * @param resId resource id of the image (in the autofill service's package). The
          * {@link RemoteViews presentation} must contain a {@link ImageView} child with that id.
+         *
+         * @deprecated use
+         * {@link #ImageTransformation.Builder(AutofillId, Pattern, int, CharSequence)} instead.
          */
+        @Deprecated
         public Builder(@NonNull AutofillId id, @NonNull Pattern regex, @DrawableRes int resId) {
             mId = Preconditions.checkNotNull(id);
-
             addOption(regex, resId);
+        }
+
+        /**
+         * Creates a new builder for a autofill id and add a first option.
+         *
+         * @param id id of the screen field that will be used to evaluate whether the image should
+         * be used.
+         * @param regex regular expression defining what should be matched to use this image.
+         * @param resId resource id of the image (in the autofill service's package). The
+         * {@link RemoteViews presentation} must contain a {@link ImageView} child with that id.
+         * @param contentDescription content description to be applied in the child view.
+         */
+        public Builder(@NonNull AutofillId id, @NonNull Pattern regex, @DrawableRes int resId,
+                @NonNull CharSequence contentDescription) {
+            mId = Preconditions.checkNotNull(id);
+            addOption(regex, resId, contentDescription);
         }
 
         /**
@@ -131,16 +155,42 @@ public final class ImageTransformation extends InternalTransformation implements
          * {@link RemoteViews presentation} must contain a {@link ImageView} child with that id.
          *
          * @return this build
+         *
+         * @deprecated use {@link #addOption(Pattern, int, CharSequence)} instead.
          */
+        @Deprecated
         public Builder addOption(@NonNull Pattern regex, @DrawableRes int resId) {
+            addOptionInternal(regex, resId, null);
+            return this;
+        }
+
+        /**
+         * Adds an option to replace the child view with a different image and content description
+         * when the regex matches.
+         *
+         * @param regex regular expression defining what should be matched to use this image.
+         * @param resId resource id of the image (in the autofill service's package). The
+         * {@link RemoteViews presentation} must contain a {@link ImageView} child with that id.
+         * @param contentDescription content description to be applied in the child view.
+         *
+         * @return this build
+         */
+        public Builder addOption(@NonNull Pattern regex, @DrawableRes int resId,
+                @NonNull CharSequence contentDescription) {
+            addOptionInternal(regex, resId, Preconditions.checkNotNull(contentDescription));
+            return this;
+        }
+
+        private void addOptionInternal(@NonNull Pattern regex, @DrawableRes int resId,
+                @Nullable CharSequence contentDescription) {
             throwIfDestroyed();
 
             Preconditions.checkNotNull(regex);
             Preconditions.checkArgument(resId != 0);
 
-            mOptions.add(new Pair<>(regex, resId));
-            return this;
+            mOptions.add(new Option(regex, resId, contentDescription));
         }
+
 
         /**
          * Creates a new {@link ImageTransformation} instance.
@@ -178,15 +228,18 @@ public final class ImageTransformation extends InternalTransformation implements
         parcel.writeParcelable(mId, flags);
 
         final int size = mOptions.size();
-        final Pattern[] regexs = new Pattern[size];
+        final Pattern[] patterns = new Pattern[size];
         final int[] resIds = new int[size];
+        final CharSequence[] contentDescriptions = new String[size];
         for (int i = 0; i < size; i++) {
-            Pair<Pattern, Integer> regex = mOptions.get(i);
-            regexs[i] = regex.first;
-            resIds[i] = regex.second;
+            final Option option = mOptions.get(i);
+            patterns[i] = option.pattern;
+            resIds[i] = option.resId;
+            contentDescriptions[i] = option.contentDescription;
         }
-        parcel.writeSerializable(regexs);
+        parcel.writeSerializable(patterns);
         parcel.writeIntArray(resIds);
+        parcel.writeCharSequenceArray(contentDescriptions);
     }
 
     public static final Parcelable.Creator<ImageTransformation> CREATOR =
@@ -197,15 +250,22 @@ public final class ImageTransformation extends InternalTransformation implements
 
             final Pattern[] regexs = (Pattern[]) parcel.readSerializable();
             final int[] resIds = parcel.createIntArray();
+            final CharSequence[] contentDescriptions = parcel.readCharSequenceArray();
 
             // Always go through the builder to ensure the data ingested by the system obeys the
             // contract of the builder to avoid attacks using specially crafted parcels.
-            final ImageTransformation.Builder builder = new ImageTransformation.Builder(id,
-                    regexs[0], resIds[0]);
+            final CharSequence contentDescription = contentDescriptions[0];
+            final ImageTransformation.Builder builder = (contentDescription != null)
+                    ? new ImageTransformation.Builder(id, regexs[0], resIds[0], contentDescription)
+                    : new ImageTransformation.Builder(id, regexs[0], resIds[0]);
 
             final int size = regexs.length;
             for (int i = 1; i < size; i++) {
-                builder.addOption(regexs[i], resIds[i]);
+                if (contentDescriptions[i] != null) {
+                    builder.addOption(regexs[i], resIds[i], contentDescriptions[i]);
+                } else {
+                    builder.addOption(regexs[i], resIds[i]);
+                }
             }
 
             return builder.build();
@@ -216,4 +276,16 @@ public final class ImageTransformation extends InternalTransformation implements
             return new ImageTransformation[size];
         }
     };
+
+    private static final class Option {
+        public final Pattern pattern;
+        public final int resId;
+        public final CharSequence contentDescription;
+
+        Option(Pattern pattern, int resId, CharSequence contentDescription) {
+            this.pattern = pattern;
+            this.resId = resId;
+            this.contentDescription = TextUtils.trimNoCopySpans(contentDescription);
+        }
+    }
 }

@@ -21,6 +21,7 @@
 #include <unordered_set>
 
 #include "android-base/macros.h"
+#include "androidfw/StringPiece.h"
 
 #include "Resource.h"
 #include "SdkConstants.h"
@@ -33,18 +34,15 @@ class ResourceTable;
 class ResourceEntry;
 struct ConfigDescription;
 
-/**
- * Defines the location in which a value exists. This determines visibility of
- * other package's private symbols.
- */
+// Defines the context in which a resource value is defined. Most resources are defined with the
+// implicit package name of their compilation context. Understanding the package name of a resource
+// allows to determine visibility of other symbols which may or may not have their packages defined.
 struct CallSite {
-  ResourceNameRef resource;
+  std::string package;
 };
 
-/**
- * Determines whether a versioned resource should be created. If a versioned
- * resource already exists, it takes precedence.
- */
+// Determines whether a versioned resource should be created. If a versioned resource already
+// exists, it takes precedence.
 bool ShouldGenerateVersionedResource(const ResourceEntry* entry, const ConfigDescription& config,
                                      const ApiVersion sdk_version_to_generate);
 
@@ -62,39 +60,26 @@ class AutoVersioner : public IResourceTableConsumer {
   DISALLOW_COPY_AND_ASSIGN(AutoVersioner);
 };
 
-/**
- * If any attribute resource values are defined as public, this consumer will
- * move all private
- * attribute resource values to a private ^private-attr type, avoiding backwards
- * compatibility
- * issues with new apps running on old platforms.
- *
- * The Android platform ignores resource attributes it doesn't recognize, so an
- * app developer can
- * use new attributes in their layout XML files without worrying about
- * versioning. This assumption
- * actually breaks on older platforms. OEMs may add private attributes that are
- * used internally.
- * AAPT originally assigned all private attributes IDs immediately proceeding
- * the public attributes'
- * IDs.
- *
- * This means that on a newer Android platform, an ID previously assigned to a
- * private attribute
- * may end up assigned to a public attribute.
- *
- * App developers assume using the newer attribute is safe on older platforms
- * because it will
- * be ignored. Instead, the platform thinks the new attribute is an older,
- * private attribute and
- * will interpret it as such. This leads to unintended styling and exceptions
- * thrown due to
- * unexpected types.
- *
- * By moving the private attributes to a completely different type, this ID
- * conflict will never
- * occur.
- */
+// If any attribute resource values are defined as public, this consumer will move all private
+// attribute resource values to a private ^private-attr type, avoiding backwards compatibility
+// issues with new apps running on old platforms.
+//
+// The Android platform ignores resource attributes it doesn't recognize, so an app developer can
+// use new attributes in their layout XML files without worrying about versioning. This assumption
+// actually breaks on older platforms. OEMs may add private attributes that are used internally.
+// AAPT originally assigned all private attributes IDs immediately proceeding the public attributes'
+// IDs.
+//
+// This means that on a newer Android platform, an ID previously assigned to a private attribute
+// may end up assigned to a public attribute.
+//
+// App developers assume using the newer attribute is safe on older platforms because it will
+// be ignored. Instead, the platform thinks the new attribute is an older, private attribute and
+// will interpret it as such. This leads to unintended styling and exceptions thrown due to
+// unexpected types.
+//
+// By moving the private attributes to a completely different type, this ID conflict will never
+// occur.
 class PrivateAttributeMover : public IResourceTableConsumer {
  public:
   PrivateAttributeMover() = default;
@@ -126,14 +111,10 @@ class ProductFilter : public IResourceTableConsumer {
   std::unordered_set<std::string> products_;
 };
 
-/**
- * Removes namespace nodes and URI information from the XmlResource.
- *
- * Once an XmlResource is processed by this consumer, it is no longer able to
- * have its attributes
- * parsed. As such, this XmlResource must have already been processed by
- * XmlReferenceLinker.
- */
+// Removes namespace nodes and URI information from the XmlResource.
+//
+// Once an XmlResource is processed by this consumer, it is no longer able to have its attributes
+// parsed. As such, this XmlResource must have already been processed by XmlReferenceLinker.
 class XmlNamespaceRemover : public IXmlResourceConsumer {
  public:
   explicit XmlNamespaceRemover(bool keep_uris = false) : keep_uris_(keep_uris){};
@@ -146,11 +127,8 @@ class XmlNamespaceRemover : public IXmlResourceConsumer {
   bool keep_uris_;
 };
 
-/**
- * Resolves attributes in the XmlResource and compiles string values to resource
- * values.
- * Once an XmlResource is processed by this linker, it is ready to be flattened.
- */
+// Resolves attributes in the XmlResource and compiles string values to resource values.
+// Once an XmlResource is processed by this linker, it is ready to be flattened.
 class XmlReferenceLinker : public IXmlResourceConsumer {
  public:
   XmlReferenceLinker() = default;

@@ -13,7 +13,16 @@
 #   include frameworks/base/packages/SettingsLib/common.mk
 #
 
-LOCAL_STATIC_ANDROID_LIBRARIES += \
+LOCAL_STATIC_JAVA_LIBRARIES += \
     android-support-annotations \
+    android-arch-lifecycle-common
+
+LOCAL_STATIC_ANDROID_LIBRARIES += \
     android-support-v4 \
+    android-arch-lifecycle-runtime \
+    android-support-v7-recyclerview \
+    android-support-v7-preference \
+    android-support-v7-appcompat \
+    android-support-v14-preference \
     SettingsLib
+

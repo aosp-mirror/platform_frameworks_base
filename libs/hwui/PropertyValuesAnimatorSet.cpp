@@ -23,11 +23,11 @@ namespace android {
 namespace uirenderer {
 
 void PropertyValuesAnimatorSet::addPropertyAnimator(PropertyValuesHolder* propertyValuesHolder,
-        Interpolator* interpolator, nsecs_t startDelay, nsecs_t duration, int repeatCount,
-        RepeatMode repeatMode) {
-
-    PropertyAnimator* animator = new PropertyAnimator(propertyValuesHolder,
-            interpolator, startDelay, duration, repeatCount, repeatMode);
+                                                    Interpolator* interpolator, nsecs_t startDelay,
+                                                    nsecs_t duration, int repeatCount,
+                                                    RepeatMode repeatMode) {
+    PropertyAnimator* animator = new PropertyAnimator(
+            propertyValuesHolder, interpolator, startDelay, duration, repeatCount, repeatMode);
     mAnimators.emplace_back(animator);
 
     // Check whether any child animator is infinite after adding it them to the set.
@@ -36,8 +36,7 @@ void PropertyValuesAnimatorSet::addPropertyAnimator(PropertyValuesHolder* proper
     }
 }
 
-PropertyValuesAnimatorSet::PropertyValuesAnimatorSet()
-        : BaseRenderNodeAnimator(1.0f) {
+PropertyValuesAnimatorSet::PropertyValuesAnimatorSet() : BaseRenderNodeAnimator(1.0f) {
     setStartValue(0);
     mLastFraction = 0.0f;
     setInterpolator(new LinearInterpolator());
@@ -77,7 +76,7 @@ void PropertyValuesAnimatorSet::onPlayTimeChanged(nsecs_t playTime) {
             // have the final say on what the property value should be.
             (*it)->setFraction(0, 0);
         }
-    } else  {
+    } else {
         for (auto& anim : mAnimators) {
             anim->setCurrentPlayTime(playTime);
         }
@@ -116,9 +115,8 @@ void PropertyValuesAnimatorSet::init() {
     // Sort the animators by their total duration. Note that all the animators in the set start at
     // the same time, so the ones with longer total duration (which includes start delay) will
     // be the ones that end later.
-    std::sort(mAnimators.begin(), mAnimators.end(), [](auto& a, auto&b) {
-        return a->getTotalDuration() < b->getTotalDuration();
-    });
+    std::sort(mAnimators.begin(), mAnimators.end(),
+              [](auto& a, auto& b) { return a->getTotalDuration() < b->getTotalDuration(); });
     mDuration = mAnimators.empty() ? 0 : mAnimators[mAnimators.size() - 1]->getTotalDuration();
     mInitialized = true;
 }
@@ -128,17 +126,19 @@ uint32_t PropertyValuesAnimatorSet::dirtyMask() {
 }
 
 PropertyAnimator::PropertyAnimator(PropertyValuesHolder* holder, Interpolator* interpolator,
-        nsecs_t startDelay, nsecs_t duration, int repeatCount,
-        RepeatMode repeatMode)
-        : mPropertyValuesHolder(holder), mInterpolator(interpolator), mStartDelay(startDelay),
-          mDuration(duration) {
+                                   nsecs_t startDelay, nsecs_t duration, int repeatCount,
+                                   RepeatMode repeatMode)
+        : mPropertyValuesHolder(holder)
+        , mInterpolator(interpolator)
+        , mStartDelay(startDelay)
+        , mDuration(duration) {
     if (repeatCount < 0) {
         mRepeatCount = UINT32_MAX;
     } else {
         mRepeatCount = repeatCount;
     }
     mRepeatMode = repeatMode;
-    mTotalDuration = ((nsecs_t) mRepeatCount + 1) * mDuration + mStartDelay;
+    mTotalDuration = ((nsecs_t)mRepeatCount + 1) * mDuration + mStartDelay;
 }
 
 void PropertyAnimator::setCurrentPlayTime(nsecs_t playTime) {
@@ -155,7 +155,7 @@ void PropertyAnimator::setCurrentPlayTime(nsecs_t playTime) {
     } else {
         // play time here is in range [mStartDelay, mTotalDuration)
         iteration = (playTime - mStartDelay) / mDuration;
-        currentIterationFraction = ((playTime - mStartDelay) % mDuration) / (float) mDuration;
+        currentIterationFraction = ((playTime - mStartDelay) % mDuration) / (float)mDuration;
     }
     setFraction(currentIterationFraction, iteration);
 }
@@ -182,6 +182,5 @@ void PropertyAnimator::setFraction(float fraction, long iteration) {
 void PropertyAnimatorSetListener::onAnimationFinished(BaseRenderNodeAnimator* animator) {
     mSet->onFinished(animator);
 }
-
 }
 }

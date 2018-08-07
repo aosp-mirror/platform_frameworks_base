@@ -23,9 +23,7 @@ namespace uirenderer {
 
 class ProfileRenderer : public IProfileRenderer {
 public:
-    ProfileRenderer(BakedOpRenderer& renderer)
-            : mRenderer(renderer) {
-    }
+    ProfileRenderer(BakedOpRenderer& renderer) : mRenderer(renderer) {}
 
     void drawRect(float left, float top, float right, float bottom, const SkPaint& paint) override;
     void drawRects(const float* rects, int count, const SkPaint& paint) override;

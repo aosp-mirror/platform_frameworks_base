@@ -13,17 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
 
 #ifndef DIRECTORY_CLEANER_H
 #define DIRECTORY_CLEANER_H
 
+#include <sys/types.h>
 #include <utils/Errors.h>
 
-#include <sys/types.h>
+namespace android {
+namespace os {
+namespace incidentd {
 
-using namespace android;
-
-status_t create_directory(const char* directory);
+android::status_t create_directory(const char* directory);
 void clean_directory(const char* directory, off_t maxSize, size_t maxCount);
 
-#endif // DIRECTORY_CLEANER_H
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android
+
+#endif  // DIRECTORY_CLEANER_H

@@ -21,18 +21,24 @@ import android.annotation.Nullable;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
+import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.TypeReference;
+import android.hardware.camera2.utils.SurfaceUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.ArraySet;
+import android.util.Log;
+import android.util.SparseArray;
 import android.view.Surface;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-
+import java.util.Set;
 
 /**
  * <p>An immutable package of settings and outputs needed to capture a single
@@ -198,8 +204,29 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         }
     }
 
-    private final HashSet<Surface> mSurfaceSet;
-    private final CameraMetadataNative mSettings;
+    private final String            TAG = "CaptureRequest-JV";
+
+    private final ArraySet<Surface> mSurfaceSet = new ArraySet<Surface>();
+
+    // Speed up sending CaptureRequest across IPC:
+    // mSurfaceConverted should only be set to true during capture request
+    // submission by {@link #convertSurfaceToStreamId}. The method will convert
+    // surfaces to stream/surface indexes based on passed in stream configuration at that time.
+    // This will save significant unparcel time for remote camera device.
+    // Once the request is submitted, camera device will call {@link #recoverStreamIdToSurface}
+    // to reset the capture request back to its original state.
+    private final Object           mSurfacesLock = new Object();
+    private boolean                mSurfaceConverted = false;
+    private int[]                  mStreamIdxArray;
+    private int[]                  mSurfaceIdxArray;
+
+    private static final ArraySet<Surface> mEmptySurfaceSet = new ArraySet<Surface>();
+
+    private String mLogicalCameraId;
+    private CameraMetadataNative mLogicalCameraSettings;
+    private final HashMap<String, CameraMetadataNative> mPhysicalCameraSettings =
+            new HashMap<String, CameraMetadataNative>();
+
     private boolean mIsReprocess;
     // If this request is part of constrained high speed request list that was created by
     // {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList}
@@ -216,9 +243,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * Used by Binder to unparcel this object only.
      */
     private CaptureRequest() {
-        mSettings = new CameraMetadataNative();
-        setNativeInstance(mSettings);
-        mSurfaceSet = new HashSet<Surface>();
         mIsReprocess = false;
         mReprocessableSessionId = CameraCaptureSession.SESSION_ID_NONE;
     }
@@ -230,9 +254,15 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      */
     @SuppressWarnings("unchecked")
     private CaptureRequest(CaptureRequest source) {
-        mSettings = new CameraMetadataNative(source.mSettings);
-        setNativeInstance(mSettings);
-        mSurfaceSet = (HashSet<Surface>) source.mSurfaceSet.clone();
+        mLogicalCameraId = new String(source.mLogicalCameraId);
+        for (Map.Entry<String, CameraMetadataNative> entry :
+                source.mPhysicalCameraSettings.entrySet()) {
+            mPhysicalCameraSettings.put(new String(entry.getKey()),
+                    new CameraMetadataNative(entry.getValue()));
+        }
+        mLogicalCameraSettings = mPhysicalCameraSettings.get(mLogicalCameraId);
+        setNativeInstance(mLogicalCameraSettings);
+        mSurfaceSet.addAll(source.mSurfaceSet);
         mIsReprocess = source.mIsReprocess;
         mIsPartOfCHSRequestList = source.mIsPartOfCHSRequestList;
         mReprocessableSessionId = source.mReprocessableSessionId;
@@ -253,17 +283,35 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *                               reprocess capture request to the same session where
      *                               the {@link TotalCaptureResult}, used to create the reprocess
      *                               capture, came from.
+     * @param logicalCameraId Camera Id of the actively open camera that instantiates the
+     *                        Builder.
+     *
+     * @param physicalCameraIdSet A set of physical camera ids that can be used to customize
+     *                            the request for a specific physical camera.
      *
      * @throws IllegalArgumentException If creating a reprocess capture request with an invalid
-     *                                  reprocessableSessionId.
+     *                                  reprocessableSessionId, or multiple physical cameras.
      *
      * @see CameraDevice#createReprocessCaptureRequest
      */
     private CaptureRequest(CameraMetadataNative settings, boolean isReprocess,
-            int reprocessableSessionId) {
-        mSettings = CameraMetadataNative.move(settings);
-        setNativeInstance(mSettings);
-        mSurfaceSet = new HashSet<Surface>();
+            int reprocessableSessionId, String logicalCameraId, Set<String> physicalCameraIdSet) {
+        if ((physicalCameraIdSet != null) && isReprocess) {
+            throw new IllegalArgumentException("Create a reprocess capture request with " +
+                    "with more than one physical camera is not supported!");
+        }
+
+        mLogicalCameraId = logicalCameraId;
+        mLogicalCameraSettings = CameraMetadataNative.move(settings);
+        mPhysicalCameraSettings.put(mLogicalCameraId, mLogicalCameraSettings);
+        if (physicalCameraIdSet != null) {
+            for (String physicalId : physicalCameraIdSet) {
+                mPhysicalCameraSettings.put(physicalId, new CameraMetadataNative(
+                            mLogicalCameraSettings));
+            }
+        }
+
+        setNativeInstance(mLogicalCameraSettings);
         mIsReprocess = isReprocess;
         if (isReprocess) {
             if (reprocessableSessionId == CameraCaptureSession.SESSION_ID_NONE) {
@@ -291,7 +339,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      */
     @Nullable
     public <T> T get(Key<T> key) {
-        return mSettings.get(key);
+        return mLogicalCameraSettings.get(key);
     }
 
     /**
@@ -301,7 +349,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     @SuppressWarnings("unchecked")
     @Override
     protected <T> T getProtected(Key<?> key) {
-        return (T) mSettings.get(key);
+        return (T) mLogicalCameraSettings.get(key);
     }
 
     /**
@@ -385,7 +433,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @hide
      */
     public CameraMetadataNative getNativeCopy() {
-        return new CameraMetadataNative(mSettings);
+        return new CameraMetadataNative(mLogicalCameraSettings);
     }
 
     /**
@@ -426,14 +474,16 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         return other != null
                 && Objects.equals(mUserTag, other.mUserTag)
                 && mSurfaceSet.equals(other.mSurfaceSet)
-                && mSettings.equals(other.mSettings)
+                && mPhysicalCameraSettings.equals(other.mPhysicalCameraSettings)
+                && mLogicalCameraId.equals(other.mLogicalCameraId)
+                && mLogicalCameraSettings.equals(other.mLogicalCameraSettings)
                 && mIsReprocess == other.mIsReprocess
                 && mReprocessableSessionId == other.mReprocessableSessionId;
     }
 
     @Override
     public int hashCode() {
-        return HashCodeHelpers.hashCodeGeneric(mSettings, mSurfaceSet, mUserTag);
+        return HashCodeHelpers.hashCodeGeneric(mPhysicalCameraSettings, mSurfaceSet, mUserTag);
     }
 
     public static final Parcelable.Creator<CaptureRequest> CREATOR =
@@ -461,24 +511,44 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @hide
      */
     private void readFromParcel(Parcel in) {
-        mSettings.readFromParcel(in);
-        setNativeInstance(mSettings);
-
-        mSurfaceSet.clear();
-
-        Parcelable[] parcelableArray = in.readParcelableArray(Surface.class.getClassLoader());
-
-        if (parcelableArray == null) {
-            return;
+        int physicalCameraCount = in.readInt();
+        if (physicalCameraCount <= 0) {
+            throw new RuntimeException("Physical camera count" + physicalCameraCount +
+                    " should always be positive");
         }
 
-        for (Parcelable p : parcelableArray) {
-            Surface s = (Surface) p;
-            mSurfaceSet.add(s);
+        //Always start with the logical camera id
+        mLogicalCameraId = in.readString();
+        mLogicalCameraSettings = new CameraMetadataNative();
+        mLogicalCameraSettings.readFromParcel(in);
+        setNativeInstance(mLogicalCameraSettings);
+        mPhysicalCameraSettings.put(mLogicalCameraId, mLogicalCameraSettings);
+        for (int i = 1; i < physicalCameraCount; i++) {
+            String physicalId = in.readString();
+            CameraMetadataNative physicalCameraSettings = new CameraMetadataNative();
+            physicalCameraSettings.readFromParcel(in);
+            mPhysicalCameraSettings.put(physicalId, physicalCameraSettings);
         }
 
         mIsReprocess = (in.readInt() == 0) ? false : true;
         mReprocessableSessionId = CameraCaptureSession.SESSION_ID_NONE;
+
+        synchronized (mSurfacesLock) {
+            mSurfaceSet.clear();
+            Parcelable[] parcelableArray = in.readParcelableArray(Surface.class.getClassLoader());
+            if (parcelableArray != null) {
+                for (Parcelable p : parcelableArray) {
+                    Surface s = (Surface) p;
+                    mSurfaceSet.add(s);
+                }
+            }
+            // Intentionally disallow java side readFromParcel to receive streamIdx/surfaceIdx
+            // Since there is no good way to convert indexes back to Surface
+            int streamSurfaceSize = in.readInt();
+            if (streamSurfaceSize != 0) {
+                throw new RuntimeException("Reading cached CaptureRequest is not supported");
+            }
+        }
     }
 
     @Override
@@ -488,9 +558,34 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        mSettings.writeToParcel(dest, flags);
-        dest.writeParcelableArray(mSurfaceSet.toArray(new Surface[mSurfaceSet.size()]), flags);
+        int physicalCameraCount = mPhysicalCameraSettings.size();
+        dest.writeInt(physicalCameraCount);
+        //Logical camera id and settings always come first.
+        dest.writeString(mLogicalCameraId);
+        mLogicalCameraSettings.writeToParcel(dest, flags);
+        for (Map.Entry<String, CameraMetadataNative> entry : mPhysicalCameraSettings.entrySet()) {
+            if (entry.getKey().equals(mLogicalCameraId)) {
+                continue;
+            }
+            dest.writeString(entry.getKey());
+            entry.getValue().writeToParcel(dest, flags);
+        }
+
         dest.writeInt(mIsReprocess ? 1 : 0);
+
+        synchronized (mSurfacesLock) {
+            final ArraySet<Surface> surfaces = mSurfaceConverted ? mEmptySurfaceSet : mSurfaceSet;
+            dest.writeParcelableArray(surfaces.toArray(new Surface[surfaces.size()]), flags);
+            if (mSurfaceConverted) {
+                dest.writeInt(mStreamIdxArray.length);
+                for (int i = 0; i < mStreamIdxArray.length; i++) {
+                    dest.writeInt(mStreamIdxArray[i]);
+                    dest.writeInt(mSurfaceIdxArray[i]);
+                }
+            } else {
+                dest.writeInt(0);
+            }
+        }
     }
 
     /**
@@ -505,6 +600,99 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      */
     public Collection<Surface> getTargets() {
         return Collections.unmodifiableCollection(mSurfaceSet);
+    }
+
+    /**
+     * Retrieves the logical camera id.
+     * @hide
+     */
+    public String getLogicalCameraId() {
+        return mLogicalCameraId;
+    }
+
+    /**
+     * @hide
+     */
+    public void convertSurfaceToStreamId(
+            final SparseArray<OutputConfiguration> configuredOutputs) {
+        synchronized (mSurfacesLock) {
+            if (mSurfaceConverted) {
+                Log.v(TAG, "Cannot convert already converted surfaces!");
+                return;
+            }
+
+            mStreamIdxArray = new int[mSurfaceSet.size()];
+            mSurfaceIdxArray = new int[mSurfaceSet.size()];
+            int i = 0;
+            for (Surface s : mSurfaceSet) {
+                boolean streamFound = false;
+                for (int j = 0; j < configuredOutputs.size(); ++j) {
+                    int streamId = configuredOutputs.keyAt(j);
+                    OutputConfiguration outConfig = configuredOutputs.valueAt(j);
+                    int surfaceId = 0;
+                    for (Surface outSurface : outConfig.getSurfaces()) {
+                        if (s == outSurface) {
+                            streamFound = true;
+                            mStreamIdxArray[i] = streamId;
+                            mSurfaceIdxArray[i] = surfaceId;
+                            i++;
+                            break;
+                        }
+                        surfaceId++;
+                    }
+                    if (streamFound) {
+                        break;
+                    }
+                }
+
+                if (!streamFound) {
+                    // Check if we can match s by native object ID
+                    long reqSurfaceId = SurfaceUtils.getSurfaceId(s);
+                    for (int j = 0; j < configuredOutputs.size(); ++j) {
+                        int streamId = configuredOutputs.keyAt(j);
+                        OutputConfiguration outConfig = configuredOutputs.valueAt(j);
+                        int surfaceId = 0;
+                        for (Surface outSurface : outConfig.getSurfaces()) {
+                            if (reqSurfaceId == SurfaceUtils.getSurfaceId(outSurface)) {
+                                streamFound = true;
+                                mStreamIdxArray[i] = streamId;
+                                mSurfaceIdxArray[i] = surfaceId;
+                                i++;
+                                break;
+                            }
+                            surfaceId++;
+                        }
+                        if (streamFound) {
+                            break;
+                        }
+                    }
+                }
+
+                if (!streamFound) {
+                    mStreamIdxArray = null;
+                    mSurfaceIdxArray = null;
+                    throw new IllegalArgumentException(
+                            "CaptureRequest contains unconfigured Input/Output Surface!");
+                }
+            }
+            mSurfaceConverted = true;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void recoverStreamIdToSurface() {
+        synchronized (mSurfacesLock) {
+            if (!mSurfaceConverted) {
+                Log.v(TAG, "Cannot convert already converted surfaces!");
+                return;
+            }
+
+            mStreamIdxArray = null;
+            mSurfaceIdxArray = null;
+            mSurfaceConverted = false;
+        }
     }
 
     /**
@@ -538,14 +726,20 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          *                               submits a reprocess capture request to the same session
          *                               where the {@link TotalCaptureResult}, used to create the
          *                               reprocess capture, came from.
+         * @param logicalCameraId Camera Id of the actively open camera that instantiates the
+         *                        Builder.
+         * @param physicalCameraIdSet A set of physical camera ids that can be used to customize
+         *                            the request for a specific physical camera.
          *
          * @throws IllegalArgumentException If creating a reprocess capture request with an invalid
          *                                  reprocessableSessionId.
          * @hide
          */
         public Builder(CameraMetadataNative template, boolean reprocess,
-                int reprocessableSessionId) {
-            mRequest = new CaptureRequest(template, reprocess, reprocessableSessionId);
+                int reprocessableSessionId, String logicalCameraId,
+                Set<String> physicalCameraIdSet) {
+            mRequest = new CaptureRequest(template, reprocess, reprocessableSessionId,
+                    logicalCameraId, physicalCameraIdSet);
         }
 
         /**
@@ -587,7 +781,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          * type to the key.
          */
         public <T> void set(@NonNull Key<T> key, T value) {
-            mRequest.mSettings.set(key, value);
+            mRequest.mLogicalCameraSettings.set(key, value);
         }
 
         /**
@@ -601,7 +795,71 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          */
         @Nullable
         public <T> T get(Key<T> key) {
-            return mRequest.mSettings.get(key);
+            return mRequest.mLogicalCameraSettings.get(key);
+        }
+
+        /**
+         * Set a capture request field to a value. The field definitions can be
+         * found in {@link CaptureRequest}.
+         *
+         * <p>Setting a field to {@code null} will remove that field from the capture request.
+         * Unless the field is optional, removing it will likely produce an error from the camera
+         * device when the request is submitted.</p>
+         *
+         *<p>This method can be called for logical camera devices, which are devices that have
+         * REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA capability and calls to
+         * {@link CameraCharacteristics#getPhysicalCameraIds} return a non-empty set of
+         * physical devices that are backing the logical camera. The camera Id included in the
+         * 'physicalCameraId' argument selects an individual physical device that will receive
+         * the customized capture request field.</p>
+         *
+         * @throws IllegalArgumentException if the physical camera id is not valid
+         *
+         * @param key The metadata field to write.
+         * @param value The value to set the field to, which must be of a matching
+         * @param physicalCameraId A valid physical camera Id. The valid camera Ids can be obtained
+         *                         via calls to {@link CameraCharacteristics#getPhysicalCameraIds}.
+         * @return The builder object.
+         * type to the key.
+         */
+        public <T> Builder setPhysicalCameraKey(@NonNull Key<T> key, T value,
+                @NonNull String physicalCameraId) {
+            if (!mRequest.mPhysicalCameraSettings.containsKey(physicalCameraId)) {
+                throw new IllegalArgumentException("Physical camera id: " + physicalCameraId +
+                        " is not valid!");
+            }
+
+            mRequest.mPhysicalCameraSettings.get(physicalCameraId).set(key, value);
+
+            return this;
+        }
+
+        /**
+         * Get a capture request field value for a specific physical camera Id. The field
+         * definitions can be found in {@link CaptureRequest}.
+         *
+         *<p>This method can be called for logical camera devices, which are devices that have
+         * REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA capability and calls to
+         * {@link CameraCharacteristics#getPhysicalCameraIds} return a non-empty list of
+         * physical devices that are backing the logical camera. The camera Id included in the
+         * 'physicalCameraId' argument selects an individual physical device and returns
+         * its specific capture request field.</p>
+         *
+         * @throws IllegalArgumentException if the key or physical camera id were not valid
+         *
+         * @param key The metadata field to read.
+         * @param physicalCameraId A valid physical camera Id. The valid camera Ids can be obtained
+         *                         via calls to {@link CameraCharacteristics#getPhysicalCameraIds}.
+         * @return The value of that key, or {@code null} if the field is not set.
+         */
+        @Nullable
+        public <T> T getPhysicalCameraKey(Key<T> key,@NonNull String physicalCameraId) {
+            if (!mRequest.mPhysicalCameraSettings.containsKey(physicalCameraId)) {
+                throw new IllegalArgumentException("Physical camera id: " + physicalCameraId +
+                        " is not valid!");
+            }
+
+            return mRequest.mPhysicalCameraSettings.get(physicalCameraId).get(key);
         }
 
         /**
@@ -653,7 +911,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          * @hide
          */
         public boolean isEmpty() {
-            return mRequest.mSettings.isEmpty();
+            return mRequest.mLogicalCameraSettings.isEmpty();
         }
 
     }
@@ -680,7 +938,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * FAST or HIGH_QUALITY will yield a picture with the same white point
      * as what was produced by the camera device in the earlier frame.</p>
      * <p>The expected processing pipeline is as follows:</p>
-     * <p><img alt="White balance processing pipeline" src="../../../../images/camera2/metadata/android.colorCorrection.mode/processing_pipeline.png" /></p>
+     * <p><img alt="White balance processing pipeline" src="/reference/images/camera2/metadata/android.colorCorrection.mode/processing_pipeline.png" /></p>
      * <p>The white balance is encoded by two values, a 4-channel white-balance
      * gain vector (applied in the Bayer domain), and a 3x3 color transform
      * matrix (applied after demosaic).</p>
@@ -981,6 +1239,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *   <li>{@link #CONTROL_AE_MODE_ON_AUTO_FLASH ON_AUTO_FLASH}</li>
      *   <li>{@link #CONTROL_AE_MODE_ON_ALWAYS_FLASH ON_ALWAYS_FLASH}</li>
      *   <li>{@link #CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE ON_AUTO_FLASH_REDEYE}</li>
+     *   <li>{@link #CONTROL_AE_MODE_ON_EXTERNAL_FLASH ON_EXTERNAL_FLASH}</li>
      * </ul></p>
      * <p><b>Available values for this device:</b><br>
      * {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_MODES android.control.aeAvailableModes}</p>
@@ -998,6 +1257,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @see #CONTROL_AE_MODE_ON_AUTO_FLASH
      * @see #CONTROL_AE_MODE_ON_ALWAYS_FLASH
      * @see #CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE
+     * @see #CONTROL_AE_MODE_ON_EXTERNAL_FLASH
      */
     @PublicKey
     public static final Key<Integer> CONTROL_AE_MODE =
@@ -1197,7 +1457,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * is used, all non-zero weights will have the same effect. A region with 0 weight is
      * ignored.</p>
      * <p>If all regions have 0 weight, then no specific metering area needs to be used by the
-     * camera device.</p>
+     * camera device. The capture result will either be a zero weight region as well, or
+     * the region selected by the camera device as the focus area of interest.</p>
      * <p>If the metering region is outside the used {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} returned in
      * capture result metadata, the camera device will ignore the sections outside the crop
      * region and output only the intersection rectangle as the metering region in the result
@@ -1392,10 +1653,13 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * strategy.</p>
      * <p>This control (except for MANUAL) is only effective if
      * <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} != OFF</code> and any 3A routine is active.</p>
-     * <p>ZERO_SHUTTER_LAG will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
-     * contains PRIVATE_REPROCESSING or YUV_REPROCESSING. MANUAL will be supported if
-     * {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains MANUAL_SENSOR. Other intent values are
-     * always supported.</p>
+     * <p>All intents are supported by all devices, except that:
+     *   * ZERO_SHUTTER_LAG will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
+     * PRIVATE_REPROCESSING or YUV_REPROCESSING.
+     *   * MANUAL will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
+     * MANUAL_SENSOR.
+     *   * MOTION_TRACKING will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
+     * MOTION_TRACKING.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #CONTROL_CAPTURE_INTENT_CUSTOM CUSTOM}</li>
@@ -1405,6 +1669,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *   <li>{@link #CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT VIDEO_SNAPSHOT}</li>
      *   <li>{@link #CONTROL_CAPTURE_INTENT_ZERO_SHUTTER_LAG ZERO_SHUTTER_LAG}</li>
      *   <li>{@link #CONTROL_CAPTURE_INTENT_MANUAL MANUAL}</li>
+     *   <li>{@link #CONTROL_CAPTURE_INTENT_MOTION_TRACKING MOTION_TRACKING}</li>
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
@@ -1417,6 +1682,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @see #CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT
      * @see #CONTROL_CAPTURE_INTENT_ZERO_SHUTTER_LAG
      * @see #CONTROL_CAPTURE_INTENT_MANUAL
+     * @see #CONTROL_CAPTURE_INTENT_MOTION_TRACKING
      */
     @PublicKey
     public static final Key<Integer> CONTROL_CAPTURE_INTENT =
@@ -1470,10 +1736,10 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>When set to AUTO, the individual algorithm controls in
      * android.control.* are in effect, such as {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode}.</p>
      * <p>When set to USE_SCENE_MODE, the individual controls in
-     * android.control.* are mostly disabled, and the camera device implements
-     * one of the scene mode settings (such as ACTION, SUNSET, or PARTY)
-     * as it wishes. The camera device scene mode 3A settings are provided by
-     * {@link android.hardware.camera2.CaptureResult capture results}.</p>
+     * android.control.* are mostly disabled, and the camera device
+     * implements one of the scene mode settings (such as ACTION,
+     * SUNSET, or PARTY) as it wishes. The camera device scene mode
+     * 3A settings are provided by {@link android.hardware.camera2.CaptureResult capture results}.</p>
      * <p>When set to OFF_KEEP_STATE, it is similar to OFF mode, the only difference
      * is that this frame will not be used by camera device background 3A statistics
      * update, as if this frame is never captured. This mode can be used in the scenario
@@ -1839,8 +2105,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * the thumbnail data will also be rotated.</p>
      * <p>Note that this orientation is relative to the orientation of the camera sensor, given
      * by {@link CameraCharacteristics#SENSOR_ORIENTATION android.sensor.orientation}.</p>
-     * <p>To translate from the device orientation given by the Android sensor APIs, the following
-     * sample code may be used:</p>
+     * <p>To translate from the device orientation given by the Android sensor APIs for camera
+     * sensors which are not EXTERNAL, the following sample code may be used:</p>
      * <pre><code>private int getJpegOrientation(CameraCharacteristics c, int deviceOrientation) {
      *     if (deviceOrientation == android.view.OrientationEventListener.ORIENTATION_UNKNOWN) return 0;
      *     int sensorOrientation = c.get(CameraCharacteristics.SENSOR_ORIENTATION);
@@ -1859,6 +2125,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *     return jpegOrientation;
      * }
      * </code></pre>
+     * <p>For EXTERNAL cameras the sensor orientation will always be set to 0 and the facing will
+     * also be set to EXTERNAL. The above code is not relevant in such case.</p>
      * <p><b>Units</b>: Degrees in multiples of 90</p>
      * <p><b>Range of valid values:</b><br>
      * 0, 90, 180, 270</p>
@@ -2268,45 +2536,35 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * can run concurrently to the rest of the camera pipeline, but
      * cannot process more than 1 capture at a time.</li>
      * </ul>
-     * <p>The necessary information for the application, given the model above,
-     * is provided via the {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap} field using
+     * <p>The necessary information for the application, given the model above, is provided via
      * {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputMinFrameDuration }.
-     * These are used to determine the maximum frame rate / minimum frame
-     * duration that is possible for a given stream configuration.</p>
+     * These are used to determine the maximum frame rate / minimum frame duration that is
+     * possible for a given stream configuration.</p>
      * <p>Specifically, the application can use the following rules to
      * determine the minimum frame duration it can request from the camera
      * device:</p>
      * <ol>
-     * <li>Let the set of currently configured input/output streams
-     * be called <code>S</code>.</li>
-     * <li>Find the minimum frame durations for each stream in <code>S</code>, by looking
-     * it up in {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap} using {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputMinFrameDuration }
-     * (with its respective size/format). Let this set of frame durations be
-     * called <code>F</code>.</li>
-     * <li>For any given request <code>R</code>, the minimum frame duration allowed
-     * for <code>R</code> is the maximum out of all values in <code>F</code>. Let the streams
-     * used in <code>R</code> be called <code>S_r</code>.</li>
+     * <li>Let the set of currently configured input/output streams be called <code>S</code>.</li>
+     * <li>Find the minimum frame durations for each stream in <code>S</code>, by looking it up in {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputMinFrameDuration }
+     * (with its respective size/format). Let this set of frame durations be called <code>F</code>.</li>
+     * <li>For any given request <code>R</code>, the minimum frame duration allowed for <code>R</code> is the maximum
+     * out of all values in <code>F</code>. Let the streams used in <code>R</code> be called <code>S_r</code>.</li>
      * </ol>
      * <p>If none of the streams in <code>S_r</code> have a stall time (listed in {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration }
-     * using its respective size/format), then the frame duration in <code>F</code>
-     * determines the steady state frame rate that the application will get
-     * if it uses <code>R</code> as a repeating request. Let this special kind of
-     * request be called <code>Rsimple</code>.</p>
-     * <p>A repeating request <code>Rsimple</code> can be <em>occasionally</em> interleaved
-     * by a single capture of a new request <code>Rstall</code> (which has at least
-     * one in-use stream with a non-0 stall time) and if <code>Rstall</code> has the
-     * same minimum frame duration this will not cause a frame rate loss
-     * if all buffers from the previous <code>Rstall</code> have already been
-     * delivered.</p>
-     * <p>For more details about stalling, see
-     * {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration }.</p>
+     * using its respective size/format), then the frame duration in <code>F</code> determines the steady
+     * state frame rate that the application will get if it uses <code>R</code> as a repeating request. Let
+     * this special kind of request be called <code>Rsimple</code>.</p>
+     * <p>A repeating request <code>Rsimple</code> can be <em>occasionally</em> interleaved by a single capture of a
+     * new request <code>Rstall</code> (which has at least one in-use stream with a non-0 stall time) and if
+     * <code>Rstall</code> has the same minimum frame duration this will not cause a frame rate loss if all
+     * buffers from the previous <code>Rstall</code> have already been delivered.</p>
+     * <p>For more details about stalling, see {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration }.</p>
      * <p>This control is only effective if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} is set to
      * OFF; otherwise the auto-exposure algorithm will override this value.</p>
      * <p><b>Units</b>: Nanoseconds</p>
      * <p><b>Range of valid values:</b><br>
-     * See {@link CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION android.sensor.info.maxFrameDuration},
-     * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}. The duration
-     * is capped to <code>max(duration, exposureTime + overhead)</code>.</p>
+     * See {@link CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION android.sensor.info.maxFrameDuration}, {@link android.hardware.camera2.params.StreamConfigurationMap }.
+     * The duration is capped to <code>max(duration, exposureTime + overhead)</code>.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
@@ -2315,7 +2573,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureRequest#CONTROL_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
-     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      * @see CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION
      */
     @PublicKey
@@ -2528,6 +2785,26 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Integer>("android.statistics.lensShadingMapMode", int.class);
 
     /**
+     * <p>A control for selecting whether OIS position information is included in output
+     * result metadata.</p>
+     * <p><b>Possible values:</b>
+     * <ul>
+     *   <li>{@link #STATISTICS_OIS_DATA_MODE_OFF OFF}</li>
+     *   <li>{@link #STATISTICS_OIS_DATA_MODE_ON ON}</li>
+     * </ul></p>
+     * <p><b>Available values for this device:</b><br>
+     * {@link CameraCharacteristics#STATISTICS_INFO_AVAILABLE_OIS_DATA_MODES android.statistics.info.availableOisDataModes}</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#STATISTICS_INFO_AVAILABLE_OIS_DATA_MODES
+     * @see #STATISTICS_OIS_DATA_MODE_OFF
+     * @see #STATISTICS_OIS_DATA_MODE_ON
+     */
+    @PublicKey
+    public static final Key<Integer> STATISTICS_OIS_DATA_MODE =
+            new Key<Integer>("android.statistics.oisDataMode", int.class);
+
+    /**
      * <p>Tonemapping / contrast / gamma curve for the blue
      * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is
      * CONTRAST_CURVE.</p>
@@ -2578,17 +2855,19 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * of points can be less than max (that is, the request doesn't have to
      * always provide a curve with number of points equivalent to
      * {@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS android.tonemap.maxCurvePoints}).</p>
+     * <p>For devices with MONOCHROME capability, only red channel is used. Green and blue channels
+     * are ignored.</p>
      * <p>A few examples, and their corresponding graphical mappings; these
      * only specify the red channel and the precision is limited to 4
      * digits, for conciseness.</p>
      * <p>Linear mapping:</p>
      * <pre><code>android.tonemap.curveRed = [ 0, 0, 1.0, 1.0 ]
      * </code></pre>
-     * <p><img alt="Linear mapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/linear_tonemap.png" /></p>
+     * <p><img alt="Linear mapping curve" src="/reference/images/camera2/metadata/android.tonemap.curveRed/linear_tonemap.png" /></p>
      * <p>Invert mapping:</p>
      * <pre><code>android.tonemap.curveRed = [ 0, 1.0, 1.0, 0 ]
      * </code></pre>
-     * <p><img alt="Inverting mapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/inverse_tonemap.png" /></p>
+     * <p><img alt="Inverting mapping curve" src="/reference/images/camera2/metadata/android.tonemap.curveRed/inverse_tonemap.png" /></p>
      * <p>Gamma 1/2.2 mapping, with 16 control points:</p>
      * <pre><code>android.tonemap.curveRed = [
      *   0.0000, 0.0000, 0.0667, 0.2920, 0.1333, 0.4002, 0.2000, 0.4812,
@@ -2596,7 +2875,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *   0.5333, 0.7515, 0.6000, 0.7928, 0.6667, 0.8317, 0.7333, 0.8685,
      *   0.8000, 0.9035, 0.8667, 0.9370, 0.9333, 0.9691, 1.0000, 1.0000 ]
      * </code></pre>
-     * <p><img alt="Gamma = 1/2.2 tonemapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/gamma_tonemap.png" /></p>
+     * <p><img alt="Gamma = 1/2.2 tonemapping curve" src="/reference/images/camera2/metadata/android.tonemap.curveRed/gamma_tonemap.png" /></p>
      * <p>Standard sRGB gamma mapping, per IEC 61966-2-1:1999, with 16 control points:</p>
      * <pre><code>android.tonemap.curveRed = [
      *   0.0000, 0.0000, 0.0667, 0.2864, 0.1333, 0.4007, 0.2000, 0.4845,
@@ -2604,7 +2883,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *   0.5333, 0.7569, 0.6000, 0.7977, 0.6667, 0.8360, 0.7333, 0.8721,
      *   0.8000, 0.9063, 0.8667, 0.9389, 0.9333, 0.9701, 1.0000, 1.0000 ]
      * </code></pre>
-     * <p><img alt="sRGB tonemapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/srgb_tonemap.png" /></p>
+     * <p><img alt="sRGB tonemapping curve" src="/reference/images/camera2/metadata/android.tonemap.curveRed/srgb_tonemap.png" /></p>
      * <p><b>Range of valid values:</b><br>
      * 0-1 on both input and output coordinates, normalized
      * as a floating-point value such that 0 == black and 1 == white.</p>
@@ -2640,17 +2919,19 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * of points can be less than max (that is, the request doesn't have to
      * always provide a curve with number of points equivalent to
      * {@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS android.tonemap.maxCurvePoints}).</p>
+     * <p>For devices with MONOCHROME capability, only red channel is used. Green and blue channels
+     * are ignored.</p>
      * <p>A few examples, and their corresponding graphical mappings; these
      * only specify the red channel and the precision is limited to 4
      * digits, for conciseness.</p>
      * <p>Linear mapping:</p>
      * <pre><code>curveRed = [ (0, 0), (1.0, 1.0) ]
      * </code></pre>
-     * <p><img alt="Linear mapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/linear_tonemap.png" /></p>
+     * <p><img alt="Linear mapping curve" src="/reference/images/camera2/metadata/android.tonemap.curveRed/linear_tonemap.png" /></p>
      * <p>Invert mapping:</p>
      * <pre><code>curveRed = [ (0, 1.0), (1.0, 0) ]
      * </code></pre>
-     * <p><img alt="Inverting mapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/inverse_tonemap.png" /></p>
+     * <p><img alt="Inverting mapping curve" src="/reference/images/camera2/metadata/android.tonemap.curveRed/inverse_tonemap.png" /></p>
      * <p>Gamma 1/2.2 mapping, with 16 control points:</p>
      * <pre><code>curveRed = [
      *   (0.0000, 0.0000), (0.0667, 0.2920), (0.1333, 0.4002), (0.2000, 0.4812),
@@ -2658,7 +2939,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *   (0.5333, 0.7515), (0.6000, 0.7928), (0.6667, 0.8317), (0.7333, 0.8685),
      *   (0.8000, 0.9035), (0.8667, 0.9370), (0.9333, 0.9691), (1.0000, 1.0000) ]
      * </code></pre>
-     * <p><img alt="Gamma = 1/2.2 tonemapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/gamma_tonemap.png" /></p>
+     * <p><img alt="Gamma = 1/2.2 tonemapping curve" src="/reference/images/camera2/metadata/android.tonemap.curveRed/gamma_tonemap.png" /></p>
      * <p>Standard sRGB gamma mapping, per IEC 61966-2-1:1999, with 16 control points:</p>
      * <pre><code>curveRed = [
      *   (0.0000, 0.0000), (0.0667, 0.2864), (0.1333, 0.4007), (0.2000, 0.4845),
@@ -2666,7 +2947,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *   (0.5333, 0.7569), (0.6000, 0.7977), (0.6667, 0.8360), (0.7333, 0.8721),
      *   (0.8000, 0.9063), (0.8667, 0.9389), (0.9333, 0.9701), (1.0000, 1.0000) ]
      * </code></pre>
-     * <p><img alt="sRGB tonemapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/srgb_tonemap.png" /></p>
+     * <p><img alt="sRGB tonemapping curve" src="/reference/images/camera2/metadata/android.tonemap.curveRed/srgb_tonemap.png" /></p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
@@ -2756,9 +3037,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * PRESET_CURVE</p>
      * <p>The tonemap curve will be defined by specified standard.</p>
      * <p>sRGB (approximated by 16 control points):</p>
-     * <p><img alt="sRGB tonemapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/srgb_tonemap.png" /></p>
+     * <p><img alt="sRGB tonemapping curve" src="/reference/images/camera2/metadata/android.tonemap.curveRed/srgb_tonemap.png" /></p>
      * <p>Rec. 709 (approximated by 16 control points):</p>
-     * <p><img alt="Rec. 709 tonemapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/rec709_tonemap.png" /></p>
+     * <p><img alt="Rec. 709 tonemapping curve" src="/reference/images/camera2/metadata/android.tonemap.curveRed/rec709_tonemap.png" /></p>
      * <p>Note that above figures show a 16 control points approximation of preset
      * curves. Camera devices may apply a different approximation to the curve.</p>
      * <p><b>Possible values:</b>
@@ -2891,6 +3172,49 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     @PublicKey
     public static final Key<Float> REPROCESS_EFFECTIVE_EXPOSURE_FACTOR =
             new Key<Float>("android.reprocess.effectiveExposureFactor", float.class);
+
+    /**
+     * <p>Mode of operation for the lens distortion correction block.</p>
+     * <p>The lens distortion correction block attempts to improve image quality by fixing
+     * radial, tangential, or other geometric aberrations in the camera device's optics.  If
+     * available, the {@link CameraCharacteristics#LENS_DISTORTION android.lens.distortion} field documents the lens's distortion parameters.</p>
+     * <p>OFF means no distortion correction is done.</p>
+     * <p>FAST/HIGH_QUALITY both mean camera device determined distortion correction will be
+     * applied. HIGH_QUALITY mode indicates that the camera device will use the highest-quality
+     * correction algorithms, even if it slows down capture rate. FAST means the camera device
+     * will not slow down capture rate when applying correction. FAST may be the same as OFF if
+     * any correction at all would slow down capture rate.  Every output stream will have a
+     * similar amount of enhancement applied.</p>
+     * <p>The correction only applies to processed outputs such as YUV, JPEG, or DEPTH16; it is not
+     * applied to any RAW output.  Metadata coordinates such as face rectangles or metering
+     * regions are also not affected by correction.</p>
+     * <p>Applications enabling distortion correction need to pay extra attention when converting
+     * image coordinates between corrected output buffers and the sensor array. For example, if
+     * the app supports tap-to-focus and enables correction, it then has to apply the distortion
+     * model described in {@link CameraCharacteristics#LENS_DISTORTION android.lens.distortion} to the image buffer tap coordinates to properly
+     * calculate the tap position on the sensor active array to be used with
+     * {@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}. The same applies in reverse to detected face rectangles if
+     * they need to be drawn on top of the corrected output buffers.</p>
+     * <p><b>Possible values:</b>
+     * <ul>
+     *   <li>{@link #DISTORTION_CORRECTION_MODE_OFF OFF}</li>
+     *   <li>{@link #DISTORTION_CORRECTION_MODE_FAST FAST}</li>
+     *   <li>{@link #DISTORTION_CORRECTION_MODE_HIGH_QUALITY HIGH_QUALITY}</li>
+     * </ul></p>
+     * <p><b>Available values for this device:</b><br>
+     * {@link CameraCharacteristics#DISTORTION_CORRECTION_AVAILABLE_MODES android.distortionCorrection.availableModes}</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AF_REGIONS
+     * @see CameraCharacteristics#DISTORTION_CORRECTION_AVAILABLE_MODES
+     * @see CameraCharacteristics#LENS_DISTORTION
+     * @see #DISTORTION_CORRECTION_MODE_OFF
+     * @see #DISTORTION_CORRECTION_MODE_FAST
+     * @see #DISTORTION_CORRECTION_MODE_HIGH_QUALITY
+     */
+    @PublicKey
+    public static final Key<Integer> DISTORTION_CORRECTION_MODE =
+            new Key<Integer>("android.distortionCorrection.mode", int.class);
 
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code

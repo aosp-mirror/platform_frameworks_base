@@ -1,0 +1,1 @@
+random_battery_type_string

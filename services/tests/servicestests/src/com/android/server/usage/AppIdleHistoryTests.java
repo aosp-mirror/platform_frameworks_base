@@ -16,6 +16,19 @@
 
 package com.android.server.usage;
 
+import static android.app.usage.UsageStatsManager.REASON_MAIN_TIMEOUT;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_MOVE_TO_FOREGROUND;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import android.app.usage.UsageStatsManager;
 import android.os.FileUtils;
 import android.test.AndroidTestCase;
 
@@ -27,6 +40,8 @@ public class AppIdleHistoryTests extends AndroidTestCase {
 
     final static String PACKAGE_1 = "com.android.testpackage1";
     final static String PACKAGE_2 = "com.android.testpackage2";
+
+    final static int USER_ID = 0;
 
     @Override
     protected void setUp() throws Exception {
@@ -42,7 +57,6 @@ public class AppIdleHistoryTests extends AndroidTestCase {
     }
 
     public void testFilesCreation() {
-        final int userId = 0;
         AppIdleHistory aih = new AppIdleHistory(mStorageDir, 0);
 
         aih.updateDisplay(true, /* elapsedRealtime= */ 1000);
@@ -50,9 +64,9 @@ public class AppIdleHistoryTests extends AndroidTestCase {
         // Screen On time file should be written right away
         assertTrue(aih.getScreenOnTimeFile().exists());
 
-        aih.writeAppIdleTimes(userId);
+        aih.writeAppIdleTimes(USER_ID);
         // stats file should be written now
-        assertTrue(new File(new File(mStorageDir, "users/" + userId),
+        assertTrue(new File(new File(mStorageDir, "users/" + USER_ID),
                 AppIdleHistory.APP_IDLE_FILENAME).exists());
     }
 
@@ -77,24 +91,63 @@ public class AppIdleHistoryTests extends AndroidTestCase {
         assertEquals(aih2.getScreenOnTime(13000), 4000);
     }
 
-    public void testPackageEvents() {
+    public void testBuckets() {
         AppIdleHistory aih = new AppIdleHistory(mStorageDir, 1000);
-        aih.setThresholds(4000, 1000);
-        aih.updateDisplay(true, 1000);
-        // App is not-idle by default
-        assertFalse(aih.isIdle(PACKAGE_1, 0, 1500));
-        // Still not idle
-        assertFalse(aih.isIdle(PACKAGE_1, 0, 3000));
-        // Idle now
-        assertTrue(aih.isIdle(PACKAGE_1, 0, 8000));
-        // Not idle
-        assertFalse(aih.isIdle(PACKAGE_2, 0, 9000));
 
-        // Screen off
-        aih.updateDisplay(false, 9100);
-        // Still idle after 10 seconds because screen hasn't been on long enough
-        assertFalse(aih.isIdle(PACKAGE_2, 0, 20000));
-        aih.updateDisplay(true, 21000);
-        assertTrue(aih.isIdle(PACKAGE_2, 0, 23000));
+        aih.setAppStandbyBucket(PACKAGE_1, USER_ID, 1000, STANDBY_BUCKET_ACTIVE,
+                REASON_MAIN_USAGE);
+        // ACTIVE means not idle
+        assertFalse(aih.isIdle(PACKAGE_1, USER_ID, 2000));
+
+        aih.setAppStandbyBucket(PACKAGE_2, USER_ID, 2000, STANDBY_BUCKET_ACTIVE,
+                REASON_MAIN_USAGE);
+        aih.setAppStandbyBucket(PACKAGE_1, USER_ID, 3000, STANDBY_BUCKET_RARE,
+                REASON_MAIN_TIMEOUT);
+
+        assertEquals(aih.getAppStandbyBucket(PACKAGE_1, USER_ID, 3000), STANDBY_BUCKET_RARE);
+        assertEquals(aih.getAppStandbyBucket(PACKAGE_2, USER_ID, 3000), STANDBY_BUCKET_ACTIVE);
+        assertEquals(aih.getAppStandbyReason(PACKAGE_1, USER_ID, 3000), REASON_MAIN_TIMEOUT);
+
+        // RARE is considered idle
+        assertTrue(aih.isIdle(PACKAGE_1, USER_ID, 3000));
+        assertFalse(aih.isIdle(PACKAGE_2, USER_ID, 3000));
+
+        // Check persistence
+        aih.writeAppIdleDurations();
+        aih.writeAppIdleTimes(USER_ID);
+        aih = new AppIdleHistory(mStorageDir, 4000);
+        assertEquals(aih.getAppStandbyBucket(PACKAGE_1, USER_ID, 5000), STANDBY_BUCKET_RARE);
+        assertEquals(aih.getAppStandbyBucket(PACKAGE_2, USER_ID, 5000), STANDBY_BUCKET_ACTIVE);
+        assertEquals(aih.getAppStandbyReason(PACKAGE_1, USER_ID, 5000), REASON_MAIN_TIMEOUT);
+
+        assertTrue(aih.shouldInformListeners(PACKAGE_1, USER_ID, 5000, STANDBY_BUCKET_RARE));
+        assertFalse(aih.shouldInformListeners(PACKAGE_1, USER_ID, 5000, STANDBY_BUCKET_RARE));
+        assertTrue(aih.shouldInformListeners(PACKAGE_1, USER_ID, 5000, STANDBY_BUCKET_FREQUENT));
+    }
+
+    public void testJobRunTime() throws Exception {
+        AppIdleHistory aih = new AppIdleHistory(mStorageDir, 1000);
+
+        aih.setLastJobRunTime(PACKAGE_1, USER_ID, 2000);
+        assertEquals(Long.MAX_VALUE, aih.getTimeSinceLastJobRun(PACKAGE_2, USER_ID, 0));
+        assertEquals(4000, aih.getTimeSinceLastJobRun(PACKAGE_1, USER_ID, 6000));
+
+        aih.setLastJobRunTime(PACKAGE_2, USER_ID, 6000);
+        assertEquals(1000, aih.getTimeSinceLastJobRun(PACKAGE_2, USER_ID, 7000));
+        assertEquals(5000, aih.getTimeSinceLastJobRun(PACKAGE_1, USER_ID, 7000));
+    }
+
+    public void testReason() throws Exception {
+        AppIdleHistory aih = new AppIdleHistory(mStorageDir, 1000);
+        aih.reportUsage(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
+                REASON_SUB_USAGE_MOVE_TO_FOREGROUND, 2000, 0);
+        assertEquals(REASON_MAIN_USAGE | REASON_SUB_USAGE_MOVE_TO_FOREGROUND,
+                aih.getAppStandbyReason(PACKAGE_1, USER_ID, 3000));
+        aih.setAppStandbyBucket(PACKAGE_1, USER_ID, 4000, STANDBY_BUCKET_WORKING_SET,
+                REASON_MAIN_TIMEOUT);
+        aih.writeAppIdleTimes(USER_ID);
+
+        aih = new AppIdleHistory(mStorageDir, 5000);
+        assertEquals(REASON_MAIN_TIMEOUT, aih.getAppStandbyReason(PACKAGE_1, USER_ID, 5000));
     }
 }

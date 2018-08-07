@@ -22,13 +22,14 @@
 
     <alpha android:fromAlpha="0" android:toAlpha="1.0"
         android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-        android:interpolator="@interpolator/decelerate_quart"
-        android:startOffset="300"
-        android:duration="167"/>
+        android:interpolator="@interpolator/linear"
+        android:duration="133"/>
 
-    <translate android:fromYDelta="110%" android:toYDelta="0"
+    <scale android:fromXScale="70%" android:toXScale="100%"
+        android:fromYScale="70%" android:toYScale="100%"
+        android:pivotX="50%"
+        android:pivotY="50%"
         android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-        android:interpolator="@interpolator/decelerate_quint"
-        android:startOffset="300"
-        android:duration="417" />
+        android:interpolator="@interpolator/linear_out_slow_in"
+        android:duration="275" />
 </set>

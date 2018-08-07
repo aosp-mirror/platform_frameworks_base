@@ -23,6 +23,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.BufferOverflowException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -110,7 +111,7 @@ public class MemoryFileTest extends AndroidTestCase {
         try {
             os.write(new byte[] { -1, -1 });
             fail();
-        } catch (IndexOutOfBoundsException expected) {
+        } catch (IndexOutOfBoundsException | BufferOverflowException expected) {
         }
 
         byte[] copy = new byte[file.length()];

@@ -18,24 +18,21 @@ package android.os.storage;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.Resources.NotFoundException;
-import android.os.Environment;
-import android.os.SystemClock;
 import android.test.InstrumentationTestCase;
 import android.util.Log;
-import android.os.Environment;
-import android.os.FileUtils;
-import android.os.storage.OnObbStateChangeListener;
-import android.os.storage.StorageManager;
+
+import libcore.io.Streams;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringReader;
 
 public class StorageManagerBaseTest extends InstrumentationTestCase {
@@ -219,46 +216,21 @@ public class StorageManagerBaseTest extends InstrumentationTestCase {
     }
 
     /**
-     * Helper to copy a raw resource file to an actual specified file
-     *
-     * @param rawResId The raw resource ID of the OBB resource file
-     * @param outFile A File representing the file we want to copy the OBB to
-     * @throws NotFoundException If the resource file could not be found
-     */
-    private void copyRawToFile(int rawResId, File outFile) throws NotFoundException {
-        Resources res = mContext.getResources();
-        InputStream is = null;
-        try {
-            is = res.openRawResource(rawResId);
-        } catch (NotFoundException e) {
-            Log.i(LOG_TAG, "Failed to load resource with id: " + rawResId);
-            throw e;
-        }
-        FileUtils.setPermissions(outFile.getPath(), FileUtils.S_IRWXU | FileUtils.S_IRWXG
-                | FileUtils.S_IRWXO, -1, -1);
-        assertTrue(FileUtils.copyToFile(is, outFile));
-        FileUtils.setPermissions(outFile.getPath(), FileUtils.S_IRWXU | FileUtils.S_IRWXG
-                | FileUtils.S_IRWXO, -1, -1);
-    }
-
-    /**
      * Creates an OBB file (with the given name), into the app's standard files directory
      *
      * @param name The name of the OBB file we want to create/write to
      * @param rawResId The raw resource ID of the OBB file in the package
      * @return A {@link File} representing the file to write to
      */
-    protected File createObbFile(String name, int rawResId) {
-        File outFile = null;
-        try {
-            final File filesDir = mContext.getFilesDir();
-            outFile = new File(filesDir, name);
-            copyRawToFile(rawResId, outFile);
-        } catch (NotFoundException e) {
-            if (outFile != null) {
-                outFile.delete();
-            }
+    protected File createObbFile(String name, int rawResId) throws IOException, Resources.NotFoundException {
+        final File outFile = new File(mContext.getObbDir(), name);
+        outFile.delete();
+
+        try (InputStream in = mContext.getResources().openRawResource(rawResId);
+                OutputStream out = new FileOutputStream(outFile)) {
+            Streams.copy(in, out);
         }
+
         return outFile;
     }
 

@@ -16,6 +16,8 @@
 
 package android.graphics.drawable;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Region;
@@ -105,6 +107,19 @@ public class IconTest extends AndroidTestCase {
             findBitmapDifferences(bm3, test3);
             fail("bitmap3 differs, check " + dir);
         }
+    }
+
+    @SmallTest
+    public void testScaleDownIfNecessary() throws Exception {
+        final Bitmap bm = Bitmap.createBitmap(4321, 78, Bitmap.Config.ARGB_8888);
+        final Icon ic = Icon.createWithBitmap(bm);
+        ic.scaleDownIfNecessary(40, 20);
+
+        assertThat(bm.getWidth()).isEqualTo(4321);
+        assertThat(bm.getHeight()).isEqualTo(78);
+
+        assertThat(ic.getBitmap().getWidth()).isLessThan(41);
+        assertThat(ic.getBitmap().getHeight()).isLessThan(21);
     }
 
     @SmallTest

@@ -32,45 +32,29 @@ class Caches;
 class GlLayer : public Layer {
 public:
     GlLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,
-            SkColorFilter* colorFilter, int alpha, SkBlendMode mode, bool blend);
+            sk_sp<SkColorFilter> colorFilter, int alpha, SkBlendMode mode, bool blend);
     virtual ~GlLayer();
 
-    uint32_t getWidth() const override {
-        return texture.mWidth;
-    }
+    uint32_t getWidth() const override { return texture.mWidth; }
 
-    uint32_t getHeight() const override {
-        return texture.mHeight;
-    }
+    uint32_t getHeight() const override { return texture.mHeight; }
 
     void setSize(uint32_t width, uint32_t height) override {
         texture.updateLayout(width, height, texture.internalFormat(), texture.format(),
-                texture.target());
+                             texture.target());
     }
 
-    void setBlend(bool blend) override {
-        texture.blend = blend;
-    }
+    void setBlend(bool blend) override { texture.blend = blend; }
 
-    bool isBlend() const override {
-        return texture.blend;
-    }
+    bool isBlend() const override { return texture.blend; }
 
-    inline GLuint getTextureId() const {
-        return texture.id();
-    }
+    inline GLuint getTextureId() const { return texture.id(); }
 
-    inline Texture& getTexture() {
-        return texture;
-    }
+    inline Texture& getTexture() { return texture; }
 
-    inline GLenum getRenderTarget() const {
-        return texture.target();
-    }
+    inline GLenum getRenderTarget() const { return texture.target(); }
 
-    inline bool isRenderable() const {
-        return texture.target() != GL_NONE;
-    }
+    inline bool isRenderable() const { return texture.target() != GL_NONE; }
 
     void setRenderTarget(GLenum renderTarget);
 
@@ -89,7 +73,7 @@ private:
      * The texture backing this layer.
      */
     Texture texture;
-}; // struct GlLayer
+};  // struct GlLayer
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

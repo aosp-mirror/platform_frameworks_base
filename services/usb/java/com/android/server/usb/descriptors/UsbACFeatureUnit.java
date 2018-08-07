@@ -46,7 +46,7 @@ public final class UsbACFeatureUnit extends UsbACInterface {
                                 // logical channel
     private byte mUnitName;     // ?:1 Index of a string descriptor, describing this Feature Unit.
 
-    public UsbACFeatureUnit(int length, byte type, byte subtype, byte subClass) {
+    public UsbACFeatureUnit(int length, byte type, byte subtype, int subClass) {
         super(length, type, subtype, subClass);
     }
 

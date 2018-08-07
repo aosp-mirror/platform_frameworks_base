@@ -35,6 +35,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethod;
 import com.android.internal.view.IInputMethodClient;
@@ -49,11 +50,16 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.Manifest;
+import android.annotation.AnyThread;
 import android.annotation.BinderThread;
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
+import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -86,7 +92,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
-import android.hardware.input.InputManagerInternal;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Binder;
@@ -103,13 +108,17 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
+import android.os.ShellCommand;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.service.vr.IVrManager;
+import android.service.vr.IVrStateCallbacks;
 import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.EventLog;
@@ -127,7 +136,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.WindowManagerInternal;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
@@ -145,6 +153,8 @@ import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.android.server.wm.WindowManagerInternal;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -171,8 +181,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class InputMethodManagerService extends IInputMethodManager.Stub
         implements ServiceConnection, Handler.Callback {
     static final boolean DEBUG = false;
-    static final boolean DEBUG_RESTORE = DEBUG || false;
     static final String TAG = "InputMethodManagerService";
+
+    @Retention(SOURCE)
+    @IntDef({ShellCommandResult.SUCCESS, ShellCommandResult.FAILURE})
+    private @interface ShellCommandResult {
+        int SUCCESS = 0;
+        int FAILURE = -1;
+    }
 
     static final int MSG_SHOW_IM_SUBTYPE_PICKER = 1;
     static final int MSG_SHOW_IM_SUBTYPE_ENABLER = 2;
@@ -187,6 +203,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_CREATE_SESSION = 1050;
 
     static final int MSG_START_INPUT = 2000;
+    static final int MSG_START_VR_INPUT = 2010;
 
     static final int MSG_UNBIND_CLIENT = 3000;
     static final int MSG_BIND_CLIENT = 3010;
@@ -239,6 +256,46 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final String ACTION_SHOW_INPUT_METHOD_PICKER =
             "com.android.server.InputMethodManagerService.SHOW_INPUT_METHOD_PICKER";
 
+    /**
+     * Debug flag for overriding runtime {@link SystemProperties}.
+     */
+    @AnyThread
+    private static final class DebugFlag {
+        private static final Object LOCK = new Object();
+        private final String mKey;
+        private final boolean mDefaultValue;
+        @GuardedBy("LOCK")
+        private boolean mValue;
+
+        public DebugFlag(String key, boolean defaultValue) {
+            mKey = key;
+            mDefaultValue = defaultValue;
+            mValue = SystemProperties.getBoolean(key, defaultValue);
+        }
+
+        void refresh() {
+            synchronized (LOCK) {
+                mValue = SystemProperties.getBoolean(mKey, mDefaultValue);
+            }
+        }
+
+        boolean value() {
+            synchronized (LOCK) {
+                return mValue;
+            }
+        }
+    }
+
+    /**
+     * Debug flags that can be overridden using "adb shell setprop <key>"
+     * Note: These flags are cached. To refresh, run "adb shell ime refresh_debug_properties".
+     */
+    private static final class DebugFlags {
+        static final DebugFlag FLAG_OPTIMIZE_START_INPUT =
+                new DebugFlag("debug.optimize_startinput", false);
+    }
+
+
     final Context mContext;
     final Resources mRes;
     final Handler mHandler;
@@ -252,8 +309,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final HardKeyboardListener mHardKeyboardListener;
     private final AppOpsManager mAppOpsManager;
     private final UserManager mUserManager;
-
-    final InputBindResult mNoBinding = new InputBindResult(null, null, null, -1, -1);
 
     // All known input methods.  mMethodMap also serves as the global
     // lock for this class.
@@ -312,6 +367,28 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             method = _method;
             session = _session;
             channel = _channel;
+        }
+    }
+
+    /**
+     * VR state callback.
+     * Listens for when VR mode finishes.
+     */
+    private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
+        @Override
+        public void onVrStateChanged(boolean enabled) {
+            if (!enabled) {
+                restoreNonVrImeFromSettingsNoCheck();
+            }
+        }
+    };
+
+    private void restoreNonVrImeFromSettingsNoCheck() {
+        // switch back to non-VR InputMethod from settings.
+        synchronized (mMethodMap) {
+            final String lastInputId = mSettings.getSelectedInputMethod();
+            setInputMethodLocked(lastInputId,
+                    mSettings.getSelectedInputMethodSubtypeId(lastInputId));
         }
     }
 
@@ -391,7 +468,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     int mCurFocusedWindowSoftInputMode;
 
     /**
-     * The client by which {@link #mCurFocusedWindow} was reported.  Used only for debugging.
+     * The client by which {@link #mCurFocusedWindow} was reported.
      */
     ClientState mCurFocusedWindowClient;
 
@@ -542,6 +619,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final String mSlotIme;
     @HardKeyboardBehavior
     private final int mHardKeyboardBehavior;
+
+    /**
+     * Whether we temporarily allow IMEs implemented in instant apps to run for testing.
+     *
+     * <p>Note: This is quite dangerous.  Don't forget to reset after you finish testing.</p>
+     */
+    private boolean mBindInstantServiceAllowed = false;
 
     /**
      * Internal state snapshot when {@link #MSG_START_INPUT} message is about to be posted to the
@@ -833,15 +917,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     || Intent.ACTION_USER_REMOVED.equals(action)) {
                 updateCurrentProfileIds();
                 return;
-            } else if (Intent.ACTION_SETTING_RESTORED.equals(action)) {
-                final String name = intent.getStringExtra(Intent.EXTRA_SETTING_NAME);
-                if (Settings.Secure.ENABLED_INPUT_METHODS.equals(name)) {
-                    final String prevValue = intent.getStringExtra(
-                            Intent.EXTRA_SETTING_PREVIOUS_VALUE);
-                    final String newValue = intent.getStringExtra(
-                            Intent.EXTRA_SETTING_NEW_VALUE);
-                    restoreEnabledInputMethods(mContext, prevValue, newValue);
-                }
             } else if (Intent.ACTION_LOCALE_CHANGED.equals(action)) {
                 onActionLocaleChanged();
             } else if (ACTION_SHOW_INPUT_METHOD_PICKER.equals(action)) {
@@ -856,6 +931,30 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         .sendToTarget();
             } else {
                 Slog.w(TAG, "Unexpected intent " + intent);
+            }
+        }
+    }
+
+    /**
+     * Start a VR InputMethod that matches IME with package name of {@param component}.
+     * Note: This method is called from {@link android.app.VrManager}.
+     */
+    private void startVrInputMethodNoCheck(@Nullable ComponentName component) {
+        if (component == null) {
+            // clear the current VR-only IME (if any) and restore normal IME.
+            restoreNonVrImeFromSettingsNoCheck();
+            return;
+        }
+
+        synchronized (mMethodMap) {
+            String packageName = component.getPackageName();
+            for (InputMethodInfo info : mMethodList) {
+                if (TextUtils.equals(info.getPackageName(), packageName) && info.isVrOnly()) {
+                    // set this is as current inputMethod without updating settings.
+                    setInputMethodEnabledLocked(info.getId(), true);
+                    setInputMethodLocked(info.getId(), NOT_A_SUBTYPE_ID);
+                    break;
+                }
             }
         }
     }
@@ -880,44 +979,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             updateFromSettingsLocked(true);
             mLastSystemLocales = possibleNewLocale;
         }
-    }
-
-    // Apply the results of a restore operation to the set of enabled IMEs.  Note that this
-    // does not attempt to validate on the fly with any installed device policy, so must only
-    // be run in the context of initial device setup.
-    //
-    // TODO: Move this method to InputMethodUtils with adding unit tests.
-    static void restoreEnabledInputMethods(Context context, String prevValue, String newValue) {
-        if (DEBUG_RESTORE) {
-            Slog.i(TAG, "Restoring enabled input methods:");
-            Slog.i(TAG, "prev=" + prevValue);
-            Slog.i(TAG, " new=" + newValue);
-        }
-        // 'new' is the just-restored state, 'prev' is what was in settings prior to the restore
-        ArrayMap<String, ArraySet<String>> prevMap =
-                InputMethodUtils.parseInputMethodsAndSubtypesString(prevValue);
-        ArrayMap<String, ArraySet<String>> newMap =
-                InputMethodUtils.parseInputMethodsAndSubtypesString(newValue);
-
-        // Merge the restored ime+subtype enabled states into the live state
-        for (ArrayMap.Entry<String, ArraySet<String>> entry : newMap.entrySet()) {
-            final String imeId = entry.getKey();
-            ArraySet<String> prevSubtypes = prevMap.get(imeId);
-            if (prevSubtypes == null) {
-                prevSubtypes = new ArraySet<>(2);
-                prevMap.put(imeId, prevSubtypes);
-            }
-            prevSubtypes.addAll(entry.getValue());
-        }
-
-        final String mergedImesAndSubtypesString =
-                InputMethodUtils.buildInputMethodsAndSubtypesString(prevMap);
-        if (DEBUG_RESTORE) {
-            Slog.i(TAG, "Merged IME string:");
-            Slog.i(TAG, "     " + mergedImesAndSubtypesString);
-        }
-        Settings.Secure.putString(context.getContentResolver(),
-                Settings.Secure.ENABLED_INPUT_METHODS, mergedImesAndSubtypesString);
     }
 
     final class MyPackageMonitor extends PackageMonitor {
@@ -1014,7 +1075,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 final PackageManager pm = mContext.getPackageManager();
                 final List<ResolveInfo> services = pm.queryIntentServicesAsUser(
                         new Intent(InputMethod.SERVICE_INTERFACE).setPackage(packageName),
-                        PackageManager.MATCH_DISABLED_COMPONENTS, getChangingUserId());
+                        getComponentMatchingFlags(PackageManager.MATCH_DISABLED_COMPONENTS),
+                        getChangingUserId());
                 // No need to lock this because we access it only on getRegisteredHandler().
                 if (!services.isEmpty()) {
                     mImePackageAppeared = true;
@@ -1064,6 +1126,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mImePackageAppeared = false;
         }
 
+        @GuardedBy("mMethodMap")
         private boolean shouldRebuildInputMethodListLocked() {
             // This method is guaranteed to be called only by getRegisteredHandler().
 
@@ -1336,6 +1399,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mFileManager = new InputMethodFileManager(mMethodMap, userId);
         mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
                 mSettings, context);
+        // Register VR-state listener.
+        IVrManager vrManager = (IVrManager) ServiceManager.getService(Context.VR_SERVICE);
+        if (vrManager != null) {
+            try {
+                vrManager.registerListener(mVrStateCallbacks);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to register VR mode state listener.");
+            }
+        }
     }
 
     private void resetDefaultImeLocked(Context context) {
@@ -1356,6 +1428,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         setSelectedInputMethodAndSubtypeLocked(defIm, NOT_A_SUBTYPE_ID, false);
     }
 
+    @GuardedBy("mMethodMap")
     private void switchUserLocked(int newUserId) {
         if (DEBUG) Slog.d(TAG, "Switching user stage 1/3. newUserId=" + newUserId
                 + " currentUserId=" + mSettings.getCurrentUserId());
@@ -1464,7 +1537,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 broadcastFilter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
                 broadcastFilter.addAction(Intent.ACTION_USER_ADDED);
                 broadcastFilter.addAction(Intent.ACTION_USER_REMOVED);
-                broadcastFilter.addAction(Intent.ACTION_SETTING_RESTORED);
                 broadcastFilter.addAction(Intent.ACTION_LOCALE_CHANGED);
                 broadcastFilter.addAction(ACTION_SHOW_INPUT_METHOD_PICKER);
                 mContext.registerReceiver(new ImmsBroadcastReceiver(), broadcastFilter);
@@ -1548,11 +1620,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return true;
     }
 
-    private boolean bindCurrentInputMethodService(
+    @GuardedBy("mMethodMap")
+    private boolean bindCurrentInputMethodServiceLocked(
             Intent service, ServiceConnection conn, int flags) {
         if (service == null || conn == null) {
             Slog.e(TAG, "--- bind failed: service = " + service + ", conn = " + conn);
             return false;
+        }
+        if (mBindInstantServiceAllowed) {
+            flags |= Context.BIND_ALLOW_INSTANT;
         }
         return mContext.bindServiceAsUser(service, conn, flags,
                 new UserHandle(mSettings.getCurrentUserId()));
@@ -1560,12 +1636,27 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public List<InputMethodInfo> getInputMethodList() {
+        return getInputMethodList(false /* isVrOnly */);
+    }
+
+    public List<InputMethodInfo> getVrInputMethodList() {
+        return getInputMethodList(true /* isVrOnly */);
+    }
+
+    private List<InputMethodInfo> getInputMethodList(final boolean isVrOnly) {
         // TODO: Make this work even for non-current users?
         if (!calledFromValidUser()) {
             return Collections.emptyList();
         }
         synchronized (mMethodMap) {
-            return new ArrayList<>(mMethodList);
+            ArrayList<InputMethodInfo> methodList = new ArrayList<>();
+            for (InputMethodInfo info : mMethodList) {
+
+                if (info.isVrOnly() == isVrOnly) {
+                    methodList.add(info);
+                }
+            }
+            return methodList;
         }
     }
 
@@ -1628,6 +1719,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (cs != null) {
                 clearClientSessionLocked(cs);
                 if (mCurClient == cs) {
+                    if (mBoundToMethod) {
+                        mBoundToMethod = false;
+                        if (mCurMethod != null) {
+                            executeOrSendMessage(mCurMethod, mCaller.obtainMessageO(
+                                    MSG_UNBIND_INPUT, mCurMethod));
+                        }
+                    }
                     mCurClient = null;
                 }
                 if (mCurFocusedWindowClient == cs) {
@@ -1691,6 +1789,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return flags;
     }
 
+    @GuardedBy("mMethodMap")
+    @NonNull
     InputBindResult attachNewInputLocked(
             /* @InputMethodClient.StartInputReason */ final int startInputReason, boolean initial) {
         if (!mBoundToMethod) {
@@ -1714,11 +1814,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
             showCurrentInputLocked(getAppShowFlags(), null);
         }
-        return new InputBindResult(session.session,
-                (session.channel != null ? session.channel.dup() : null),
+        return new InputBindResult(InputBindResult.ResultCode.SUCCESS_WITH_IME_SESSION,
+                session.session, (session.channel != null ? session.channel.dup() : null),
                 mCurId, mCurSeq, mCurUserActionNotificationSequenceNumber);
     }
 
+    @GuardedBy("mMethodMap")
+    @NonNull
     InputBindResult startInputLocked(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
             IInputMethodClient client, IInputContext inputContext,
@@ -1726,7 +1828,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             @Nullable EditorInfo attribute, int controlFlags) {
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
-            return mNoBinding;
+            return InputBindResult.NO_IME;
         }
 
         ClientState cs = mClients.get(client.asBinder());
@@ -1738,7 +1840,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (attribute == null) {
             Slog.w(TAG, "Ignoring startInput with null EditorInfo."
                     + " uid=" + cs.uid + " pid=" + cs.pid);
-            return null;
+            return InputBindResult.NULL_EDITOR_INFO;
         }
 
         try {
@@ -1752,7 +1854,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     Slog.w(TAG, "Starting input on non-focused client " + cs.client
                             + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
                 }
-                return null;
+                return InputBindResult.NOT_IME_TARGET_WINDOW;
             }
         } catch (RemoteException e) {
         }
@@ -1761,20 +1863,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 controlFlags, startInputReason);
     }
 
+    @GuardedBy("mMethodMap")
+    @NonNull
     InputBindResult startInputUncheckedLocked(@NonNull ClientState cs, IInputContext inputContext,
             /* @InputConnectionInspector.missingMethods */ final int missingMethods,
             @NonNull EditorInfo attribute, int controlFlags,
             /* @InputMethodClient.StartInputReason */ final int startInputReason) {
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
-            return mNoBinding;
+            return InputBindResult.NO_IME;
         }
 
         if (!InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager, cs.uid,
                 attribute.packageName)) {
             Slog.e(TAG, "Rejecting this client as it reported an invalid package name."
                     + " uid=" + cs.uid + " package=" + attribute.packageName);
-            return mNoBinding;
+            return InputBindResult.INVALID_PACKAGE_NAME;
         }
 
         if (mCurClient != cs) {
@@ -1813,7 +1917,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // Return to client, and we will get back with it when
                     // we have had a session made for it.
                     requestClientSessionLocked(cs);
-                    return new InputBindResult(null, null, mCurId, mCurSeq,
+                    return new InputBindResult(
+                            InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION,
+                            null, null, mCurId, mCurSeq,
                             mCurUserActionNotificationSequenceNumber);
                 } else if (SystemClock.uptimeMillis()
                         < (mLastBindTime+TIME_TO_RECONNECT)) {
@@ -1824,7 +1930,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // we can report back.  If it has been too long, we want
                     // to fall through so we can try a disconnect/reconnect
                     // to see if we can get back in touch with the service.
-                    return new InputBindResult(null, null, mCurId, mCurSeq,
+                    return new InputBindResult(
+                            InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
+                            null, null, mCurId, mCurSeq,
                             mCurUserActionNotificationSequenceNumber);
                 } else {
                     EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME,
@@ -1838,13 +1946,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     InputBindResult startInputInnerLocked() {
         if (mCurMethodId == null) {
-            return mNoBinding;
+            return InputBindResult.NO_IME;
         }
 
         if (!mSystemReady) {
             // If the system is not yet ready, we shouldn't be running third
             // party code.
-            return new InputBindResult(null, null, mCurMethodId, mCurSeq,
+            return new InputBindResult(
+                    InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
+                    null, null, mCurMethodId, mCurSeq,
                     mCurUserActionNotificationSequenceNumber);
         }
 
@@ -1861,7 +1971,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 com.android.internal.R.string.input_method_binding_label);
         mCurIntent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
                 mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS), 0));
-        if (bindCurrentInputMethodService(mCurIntent, this, IME_CONNECTION_BIND_FLAGS)) {
+        if (bindCurrentInputMethodServiceLocked(mCurIntent, this, IME_CONNECTION_BIND_FLAGS)) {
             mLastBindTime = SystemClock.uptimeMillis();
             mHaveConnection = true;
             mCurId = info.getId();
@@ -1871,23 +1981,24 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mIWindowManager.addWindowToken(mCurToken, TYPE_INPUT_METHOD, DEFAULT_DISPLAY);
             } catch (RemoteException e) {
             }
-            return new InputBindResult(null, null, mCurId, mCurSeq,
+            return new InputBindResult(
+                    InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
+                    null, null, mCurId, mCurSeq,
                     mCurUserActionNotificationSequenceNumber);
-        } else {
-            mCurIntent = null;
-            Slog.w(TAG, "Failure connecting to input method service: "
-                    + mCurIntent);
         }
-        return null;
+        mCurIntent = null;
+        Slog.w(TAG, "Failure connecting to input method service: " + mCurIntent);
+        return InputBindResult.IME_NOT_CONNECTED;
     }
 
+    @NonNull
     private InputBindResult startInput(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
             IInputMethodClient client, IInputContext inputContext,
             /* @InputConnectionInspector.missingMethods */ final int missingMethods,
             @Nullable EditorInfo attribute, int controlFlags) {
         if (!calledFromValidUser()) {
-            return null;
+            return InputBindResult.INVALID_USER;
         }
         synchronized (mMethodMap) {
             if (DEBUG) {
@@ -2391,16 +2502,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private void notifyInputMethodSubtypeChanged(final int userId,
-            @Nullable final InputMethodInfo inputMethodInfo,
-            @Nullable final InputMethodSubtype subtype) {
-        final InputManagerInternal inputManagerInternal =
-                LocalServices.getService(InputManagerInternal.class);
-        if (inputManagerInternal != null) {
-            inputManagerInternal.onInputMethodSubtypeChanged(userId, inputMethodInfo, subtype);
-        }
-    }
-
     /* package */ void setInputMethodLocked(String id, int subtypeId) {
         InputMethodInfo info = mMethodMap.get(id);
         if (info == null) {
@@ -2435,10 +2536,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         mCurMethod.changeInputMethodSubtype(newSubtype);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failed to call changeInputMethodSubtype");
-                        return;
                     }
                 }
-                notifyInputMethodSubtypeChanged(mSettings.getCurrentUserId(), info, newSubtype);
             }
             return;
         }
@@ -2464,9 +2563,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-
-        notifyInputMethodSubtypeChanged(mSettings.getCurrentUserId(), info,
-                getCurrentInputMethodSubtypeLocked());
     }
 
     @Override
@@ -2527,7 +2623,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     resultReceiver));
             mInputShown = true;
             if (mHaveConnection && !mVisibleBound) {
-                bindCurrentInputMethodService(
+                bindCurrentInputMethodServiceLocked(
                         mCurIntent, mVisibleConnection, IME_VISIBLE_BIND_FLAGS);
                 mVisibleBound = true;
             }
@@ -2542,7 +2638,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     SystemClock.uptimeMillis()-mLastBindTime,1);
             Slog.w(TAG, "Force disconnect/connect to the IME in showCurrentInputLocked()");
             mContext.unbindService(this);
-            bindCurrentInputMethodService(mCurIntent, this, IME_CONNECTION_BIND_FLAGS);
+            bindCurrentInputMethodServiceLocked(mCurIntent, this, IME_CONNECTION_BIND_FLAGS);
         } else {
             if (DEBUG) {
                 Slog.d(TAG, "Can't show input: connection = " + mHaveConnection + ", time = "
@@ -2631,27 +2727,42 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return res;
     }
 
+    @NonNull
     @Override
     public InputBindResult startInputOrWindowGainedFocus(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
             IInputMethodClient client, IBinder windowToken, int controlFlags, int softInputMode,
             int windowFlags, @Nullable EditorInfo attribute, IInputContext inputContext,
-            /* @InputConnectionInspector.missingMethods */ final int missingMethods) {
+            /* @InputConnectionInspector.missingMethods */ final int missingMethods,
+            int unverifiedTargetSdkVersion) {
+        final InputBindResult result;
         if (windowToken != null) {
-            return windowGainedFocus(startInputReason, client, windowToken, controlFlags,
-                    softInputMode, windowFlags, attribute, inputContext, missingMethods);
+            result = windowGainedFocus(startInputReason, client, windowToken, controlFlags,
+                    softInputMode, windowFlags, attribute, inputContext, missingMethods,
+                    unverifiedTargetSdkVersion);
         } else {
-            return startInput(startInputReason, client, inputContext, missingMethods, attribute,
+            result = startInput(startInputReason, client, inputContext, missingMethods, attribute,
                     controlFlags);
         }
+        if (result == null) {
+            // This must never happen, but just in case.
+            Slog.wtf(TAG, "InputBindResult is @NonNull. startInputReason="
+                    + InputMethodClient.getStartInputReason(startInputReason)
+                    + " windowFlags=#" + Integer.toHexString(windowFlags)
+                    + " editorInfo=" + attribute);
+            return InputBindResult.NULL;
+        }
+        return result;
     }
 
+    @NonNull
     private InputBindResult windowGainedFocus(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
             IInputMethodClient client, IBinder windowToken, int controlFlags,
             /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
             int windowFlags, EditorInfo attribute, IInputContext inputContext,
-            /* @InputConnectionInspector.missingMethods */  final int missingMethods) {
+            /* @InputConnectionInspector.missingMethods */  final int missingMethods,
+            int unverifiedTargetSdkVersion) {
         // Needs to check the validity before clearing calling identity
         final boolean calledFromValidUser = calledFromValidUser();
         InputBindResult res = null;
@@ -2667,7 +2778,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         + " attribute=" + attribute
                         + " controlFlags=#" + Integer.toHexString(controlFlags)
                         + " softInputMode=" + InputMethodClient.softInputModeToString(softInputMode)
-                        + " windowFlags=#" + Integer.toHexString(windowFlags));
+                        + " windowFlags=#" + Integer.toHexString(windowFlags)
+                        + " unverifiedTargetSdkVersion=" + unverifiedTargetSdkVersion);
 
                 ClientState cs = mClients.get(client.asBinder());
                 if (cs == null) {
@@ -2686,7 +2798,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             Slog.w(TAG, "Focus gain on non-focused client " + cs.client
                                     + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
                         }
-                        return null;
+                        return InputBindResult.NOT_IME_TARGET_WINDOW;
                     }
                 } catch (RemoteException e) {
                 }
@@ -2696,7 +2808,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     Slog.w(TAG, "If you want to interect with IME, you need "
                             + "android.permission.INTERACT_ACROSS_USERS_FULL");
                     hideCurrentInputLocked(0, null);
-                    return null;
+                    return InputBindResult.INVALID_USER;
                 }
 
                 if (mCurFocusedWindow == windowToken) {
@@ -2708,7 +2820,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         return startInputUncheckedLocked(cs, inputContext, missingMethods,
                                 attribute, controlFlags, startInputReason);
                     }
-                    return null;
+                    return new InputBindResult(
+                            InputBindResult.ResultCode.SUCCESS_REPORT_WINDOW_FOCUS_ONLY,
+                            null, null, null, -1, -1);
                 }
                 mCurFocusedWindow = windowToken;
                 mCurFocusedWindowSoftInputMode = softInputMode;
@@ -2781,28 +2895,54 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         if ((softInputMode &
                                 WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
                             if (DEBUG) Slog.v(TAG, "Window asks to show input going forward");
-                            if (attribute != null) {
-                                res = startInputUncheckedLocked(cs, inputContext,
-                                        missingMethods, attribute, controlFlags, startInputReason);
-                                didStart = true;
+                            if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
+                                    unverifiedTargetSdkVersion, controlFlags)) {
+                                if (attribute != null) {
+                                    res = startInputUncheckedLocked(cs, inputContext,
+                                            missingMethods, attribute, controlFlags,
+                                            startInputReason);
+                                    didStart = true;
+                                }
+                                showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
+                            } else {
+                                Slog.e(TAG, "SOFT_INPUT_STATE_VISIBLE is ignored because"
+                                        + " there is no focused view that also returns true from"
+                                        + " View#onCheckIsTextEditor()");
                             }
-                            showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
                         }
                         break;
                     case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
                         if (DEBUG) Slog.v(TAG, "Window asks to always show input");
-                        if (attribute != null) {
-                            res = startInputUncheckedLocked(cs, inputContext, missingMethods,
-                                    attribute, controlFlags, startInputReason);
-                            didStart = true;
+                        if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
+                                unverifiedTargetSdkVersion, controlFlags)) {
+                            if (attribute != null) {
+                                res = startInputUncheckedLocked(cs, inputContext, missingMethods,
+                                        attribute, controlFlags, startInputReason);
+                                didStart = true;
+                            }
+                            showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
+                        } else {
+                            Slog.e(TAG, "SOFT_INPUT_STATE_ALWAYS_VISIBLE is ignored because"
+                                    + " there is no focused view that also returns true from"
+                                    + " View#onCheckIsTextEditor()");
                         }
-                        showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
                         break;
                 }
 
-                if (!didStart && attribute != null) {
-                    res = startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
-                            controlFlags, startInputReason);
+                if (!didStart) {
+                    if (attribute != null) {
+                        if (!DebugFlags.FLAG_OPTIMIZE_START_INPUT.value()
+                                || (controlFlags
+                                & InputMethodManager.CONTROL_WINDOW_IS_TEXT_EDITOR) != 0) {
+                            res = startInputUncheckedLocked(cs, inputContext, missingMethods,
+                                    attribute,
+                                    controlFlags, startInputReason);
+                        } else {
+                            res = InputBindResult.NO_EDITOR;
+                        }
+                    } else {
+                        res = InputBindResult.NULL_EDITOR_INFO;
+                    }
                 }
             }
         } finally {
@@ -2816,8 +2956,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final int uid = Binder.getCallingUid();
         if (UserHandle.getAppId(uid) == Process.SYSTEM_UID) {
             return true;
-        } else if (mCurClient != null && client != null
-                && mCurClient.client.asBinder() == client.asBinder()) {
+        } else if (mCurFocusedWindowClient != null && client != null
+                && mCurFocusedWindowClient.client.asBinder() == client.asBinder()) {
             return true;
         } else if (mCurIntent != null && InputMethodUtils.checkIfPackageBelongsToUid(
                 mAppOpsManager,
@@ -2850,6 +2990,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // picker.
             mHandler.sendMessage(mCaller.obtainMessageI(
                     MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode));
+        }
+    }
+
+    public boolean isInputMethodPickerShownForTest() {
+        synchronized(mMethodMap) {
+            if (mSwitchingDialog == null) {
+                return false;
+            }
+            return mSwitchingDialog.isShowing();
         }
     }
 
@@ -2890,7 +3039,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public boolean switchToLastInputMethod(IBinder token) {
+    public boolean switchToPreviousInputMethod(IBinder token) {
         if (!calledFromValidUser()) {
             return false;
         }
@@ -3191,6 +3340,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @MainThread
     @Override
     public boolean handleMessage(Message msg) {
         SomeArgs args;
@@ -3352,6 +3502,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_SET_INTERACTIVE:
                 handleSetInteractive(msg.arg1 != 0);
                 return true;
+            case MSG_START_VR_INPUT:
+                startVrInputMethodNoCheck((ComponentName) msg.obj);
+                return true;
             case MSG_SWITCH_IME:
                 handleSwitchInputMethod(msg.arg1 != 0);
                 return true;
@@ -3448,6 +3601,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return false;
     }
 
+    @PackageManager.ResolveInfoFlags
+    private int getComponentMatchingFlags(@PackageManager.ResolveInfoFlags int baseFlags) {
+        synchronized (mMethodMap) {
+            if (mBindInstantServiceAllowed) {
+                baseFlags |= PackageManager.MATCH_INSTANT;
+            }
+            return baseFlags;
+        }
+    }
+
+    @GuardedBy("mMethodMap")
     void buildInputMethodListLocked(boolean resetDefaultEnabledIme) {
         if (DEBUG) {
             Slog.d(TAG, "--- re-buildInputMethodList reset = " + resetDefaultEnabledIme
@@ -3470,7 +3634,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // services depending on the unlock state for the specified user.
         final List<ResolveInfo> services = pm.queryIntentServicesAsUser(
                 new Intent(InputMethod.SERVICE_INTERFACE),
-                PackageManager.GET_META_DATA | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
+                getComponentMatchingFlags(PackageManager.GET_META_DATA
+                        | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS),
                 mSettings.getCurrentUserId());
 
         final HashMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
@@ -3512,7 +3677,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // conservative, but it seems we cannot use it for now (Issue 35176630).
             final List<ResolveInfo> allInputMethodServices = pm.queryIntentServicesAsUser(
                     new Intent(InputMethod.SERVICE_INTERFACE),
-                    PackageManager.MATCH_DISABLED_COMPONENTS, mSettings.getCurrentUserId());
+                    getComponentMatchingFlags(PackageManager.MATCH_DISABLED_COMPONENTS),
+                    mSettings.getCurrentUserId());
             final int N = allInputMethodServices.size();
             for (int i = 0; i < N; ++i) {
                 final ServiceInfo si = allInputMethodServices.get(i).serviceInfo;
@@ -3522,16 +3688,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
 
+        boolean reenableMinimumNonAuxSystemImes = false;
         // TODO: The following code should find better place to live.
         if (!resetDefaultEnabledIme) {
             boolean enabledImeFound = false;
+            boolean enabledNonAuxImeFound = false;
             final List<InputMethodInfo> enabledImes = mSettings.getEnabledInputMethodListLocked();
             final int N = enabledImes.size();
             for (int i = 0; i < N; ++i) {
                 final InputMethodInfo imi = enabledImes.get(i);
                 if (mMethodList.contains(imi)) {
                     enabledImeFound = true;
-                    break;
+                    if (!imi.isAuxiliaryIme()) {
+                        enabledNonAuxImeFound = true;
+                        break;
+                    }
                 }
             }
             if (!enabledImeFound) {
@@ -3540,12 +3711,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 resetDefaultEnabledIme = true;
                 resetSelectedInputMethodAndSubtypeLocked("");
+            } else if (!enabledNonAuxImeFound) {
+                if (DEBUG) {
+                    Slog.i(TAG, "All the enabled non-Aux IMEs are gone. Do partial reset.");
+                }
+                reenableMinimumNonAuxSystemImes = true;
             }
         }
 
-        if (resetDefaultEnabledIme) {
+        if (resetDefaultEnabledIme || reenableMinimumNonAuxSystemImes) {
             final ArrayList<InputMethodInfo> defaultEnabledIme =
-                    InputMethodUtils.getDefaultEnabledImes(mContext, mMethodList);
+                    InputMethodUtils.getDefaultEnabledImes(mContext, mMethodList,
+                            reenableMinimumNonAuxSystemImes);
             final int N = defaultEnabledIme.size();
             for (int i = 0; i < N; ++i) {
                 final InputMethodInfo imi =  defaultEnabledIme.get(i);
@@ -3796,6 +3973,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (mSwitchingDialog != null) {
             mSwitchingDialog.dismiss();
             mSwitchingDialog = null;
+            mSwitchingDialogTitleView = null;
         }
 
         updateSystemUiLocked(mCurToken, mImeWindowVis, mBackDisposition);
@@ -3804,30 +3982,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     // ----------------------------------------------------------------------
-
-    @Override
-    public boolean setInputMethodEnabled(String id, boolean enabled) {
-        // TODO: Make this work even for non-current users?
-        if (!calledFromValidUser()) {
-            return false;
-        }
-        synchronized (mMethodMap) {
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException(
-                        "Requires permission "
-                        + android.Manifest.permission.WRITE_SECURE_SETTINGS);
-            }
-
-            long ident = Binder.clearCallingIdentity();
-            try {
-                return setInputMethodEnabledLocked(id, enabled);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
 
     boolean setInputMethodEnabledLocked(String id, boolean enabled) {
         // Make sure this is a valid input method.
@@ -3872,8 +4026,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private void setSelectedInputMethodAndSubtypeLocked(InputMethodInfo imi, int subtypeId,
             boolean setSubtypeOnly) {
-        // Update the history of InputMethod and Subtype
-        mSettings.saveCurrentInputMethodAndSubtypeToHistory(mCurMethodId, mCurrentSubtype);
+        // Updates to InputMethod are transient in VR mode. Its not included in history.
+        final boolean isVrInput = imi != null && imi.isVrOnly();
+        if (!isVrInput) {
+            // Update the history of InputMethod and Subtype
+            mSettings.saveCurrentInputMethodAndSubtypeToHistory(mCurMethodId, mCurrentSubtype);
+        }
 
         mCurUserActionNotificationSequenceNumber =
                 Math.max(mCurUserActionNotificationSequenceNumber + 1, 1);
@@ -3886,6 +4044,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
                     MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER,
                     mCurUserActionNotificationSequenceNumber, mCurClient));
+        }
+
+        if (isVrInput) {
+            // Updates to InputMethod are transient in VR mode. Any changes to Settings are skipped.
+            return;
         }
 
         // Set Subtype here
@@ -4144,7 +4307,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 Slog.w(TAG, "Couldn't create dir.: " + inputMethodDir.getAbsolutePath());
             }
             final File subtypeFile = new File(inputMethodDir, ADDITIONAL_SUBTYPES_FILE_NAME);
-            mAdditionalInputMethodSubtypeFile = new AtomicFile(subtypeFile);
+            mAdditionalInputMethodSubtypeFile = new AtomicFile(subtypeFile, "input-subtypes");
             if (!subtypeFile.exists()) {
                 // If "subtypes.xml" doesn't exist, create a blank file.
                 writeAdditionalInputMethodSubtypes(
@@ -4347,6 +4510,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mHandler.removeMessages(MSG_HIDE_CURRENT_INPUT_METHOD);
             mHandler.sendEmptyMessage(MSG_HIDE_CURRENT_INPUT_METHOD);
         }
+
+        @Override
+        public void startVrInputMethodNoCheck(@Nullable ComponentName componentName) {
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_START_VR_INPUT, componentName));
+        }
     }
 
     private static String imeWindowStatusToString(final int imeWindowVis) {
@@ -4453,7 +4621,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         synchronized (mMethodMap) {
             p.println("Current Input Method Manager state:");
             int N = mMethodList.size();
-            p.println("  Input Methods: mMethodMapUpdateCount=" + mMethodMapUpdateCount);
+            p.println("  Input Methods: mMethodMapUpdateCount=" + mMethodMapUpdateCount
+                    + " mBindInstantServiceAllowed=" + mBindInstantServiceAllowed);
             for (int i=0; i<N; i++) {
                 InputMethodInfo info = mMethodList.get(i);
                 p.println("  InputMethod #" + i + ":");
@@ -4537,6 +4706,366 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         } else {
             p.println("No input method service.");
+        }
+    }
+
+    @BinderThread
+    @Override
+    public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
+            @Nullable FileDescriptor err,
+            @NonNull String[] args, @Nullable ShellCallback callback,
+            @NonNull ResultReceiver resultReceiver) throws RemoteException {
+        new ShellCommandImpl(this).exec(
+                this, in, out, err, args, callback, resultReceiver);
+    }
+
+    private static final class ShellCommandImpl extends ShellCommand {
+        @NonNull
+        final InputMethodManagerService mService;
+
+        ShellCommandImpl(InputMethodManagerService service) {
+            mService = service;
+        }
+
+        @BinderThread
+        @ShellCommandResult
+        @Override
+        public int onCommand(@Nullable String cmd) {
+            if ("refresh_debug_properties".equals(cmd)) {
+                return refreshDebugProperties();
+            }
+            if ("set-bind-instant-service-allowed".equals(cmd)) {
+                return setBindInstantServiceAllowed();
+            }
+
+            // For existing "adb shell ime <command>".
+            if ("ime".equals(cmd)) {
+                final String imeCommand = getNextArg();
+                if (imeCommand == null || "help".equals(imeCommand) || "-h".equals(imeCommand)) {
+                    onImeCommandHelp();
+                    return ShellCommandResult.SUCCESS;
+                }
+                switch (imeCommand) {
+                    case "list":
+                        return mService.handleShellCommandListInputMethods(this);
+                    case "enable":
+                        return mService.handleShellCommandEnableDisableInputMethod(this, true);
+                    case "disable":
+                        return mService.handleShellCommandEnableDisableInputMethod(this, false);
+                    case "set":
+                        return mService.handleShellCommandSetInputMethod(this);
+                    case "reset":
+                        return mService.handleShellCommandResetInputMethod(this);
+                    default:
+                        getOutPrintWriter().println("Unknown command: " + imeCommand);
+                        return ShellCommandResult.FAILURE;
+                }
+            }
+
+            return handleDefaultCommands(cmd);
+        }
+
+        @BinderThread
+        @ShellCommandResult
+        private int setBindInstantServiceAllowed() {
+            return mService.handleSetBindInstantServiceAllowed(this);
+        }
+
+        @BinderThread
+        @ShellCommandResult
+        private int refreshDebugProperties() {
+            DebugFlags.FLAG_OPTIMIZE_START_INPUT.refresh();
+            return ShellCommandResult.SUCCESS;
+        }
+
+        @BinderThread
+        @Override
+        public void onHelp() {
+            try (PrintWriter pw = getOutPrintWriter()) {
+                pw.println("InputMethodManagerService commands:");
+                pw.println("  help");
+                pw.println("    Prints this help text.");
+                pw.println("  dump [options]");
+                pw.println("    Synonym of dumpsys.");
+                pw.println("  ime <command> [options]");
+                pw.println("    Manipulate IMEs.  Run \"ime help\" for details.");
+                pw.println("  set-bind-instant-service-allowed true|false ");
+                pw.println("    Set whether binding to services provided by instant apps is "
+                        + "allowed.");
+            }
+        }
+
+        private void onImeCommandHelp() {
+            try (IndentingPrintWriter pw =
+                         new IndentingPrintWriter(getOutPrintWriter(), "  ", 100)) {
+                pw.println("ime <command>:");
+                pw.increaseIndent();
+
+                pw.println("list [-a] [-s]");
+                pw.increaseIndent();
+                pw.println("prints all enabled input methods.");
+                pw.increaseIndent();
+                pw.println("-a: see all input methods");
+                pw.println("-s: only a single summary line of each");
+                pw.decreaseIndent();
+                pw.decreaseIndent();
+
+                pw.println("enable <ID>");
+                pw.increaseIndent();
+                pw.println("allows the given input method ID to be used.");
+                pw.decreaseIndent();
+
+                pw.println("disable <ID>");
+                pw.increaseIndent();
+                pw.println("disallows the given input method ID to be used.");
+                pw.decreaseIndent();
+
+                pw.println("set <ID>");
+                pw.increaseIndent();
+                pw.println("switches to the given input method ID.");
+                pw.decreaseIndent();
+
+                pw.println("reset");
+                pw.increaseIndent();
+                pw.println("reset currently selected/enabled IMEs to the default ones as if "
+                        + "the device is initially booted with the current locale.");
+                pw.decreaseIndent();
+
+                pw.decreaseIndent();
+            }
+        }
+    }
+
+    // ----------------------------------------------------------------------
+    // Shell command handlers:
+
+    /**
+     * Handles {@code adb shell cmd input_method set-bind-instant-service-allowed}.
+     *
+     * @param shellCommand {@link ShellCommand} object that is handling this command.
+     * @return Exit code of the command.
+     */
+    @BinderThread
+    @RequiresPermission(android.Manifest.permission.MANAGE_BIND_INSTANT_SERVICE)
+    @ShellCommandResult
+    private int handleSetBindInstantServiceAllowed(@NonNull ShellCommand shellCommand) {
+        final String allowedString = shellCommand.getNextArgRequired();
+        if (allowedString == null) {
+            shellCommand.getErrPrintWriter().println("Error: no true/false specified");
+            return ShellCommandResult.FAILURE;
+        }
+        final boolean allowed = Boolean.parseBoolean(allowedString);
+        synchronized (mMethodMap) {
+            if (mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.MANAGE_BIND_INSTANT_SERVICE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                shellCommand.getErrPrintWriter().print(
+                        "Caller must have MANAGE_BIND_INSTANT_SERVICE permission");
+                return ShellCommandResult.FAILURE;
+            }
+
+            if (mBindInstantServiceAllowed == allowed) {
+                // Nothing to do.
+                return ShellCommandResult.SUCCESS;
+            }
+            mBindInstantServiceAllowed = allowed;
+
+            // Rebuild everything.
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                // Reset the current IME
+                resetSelectedInputMethodAndSubtypeLocked(null);
+                // Also reset the settings of the current IME
+                mSettings.putSelectedInputMethod(null);
+                buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
+                updateInputMethodsFromSettingsLocked(true /* enabledMayChange */);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+        return ShellCommandResult.SUCCESS;
+    }
+
+    /**
+     * Handles {@code adb shell ime list}.
+     * @param shellCommand {@link ShellCommand} object that is handling this command.
+     * @return Exit code of the command.
+     */
+    @BinderThread
+    @ShellCommandResult
+    private int handleShellCommandListInputMethods(@NonNull ShellCommand shellCommand) {
+        boolean all = false;
+        boolean brief = false;
+        while (true) {
+            final String nextOption = shellCommand.getNextOption();
+            if (nextOption == null) {
+                break;
+            }
+            switch (nextOption) {
+                case "-a":
+                    all = true;
+                    break;
+                case "-s":
+                    brief = true;
+                    break;
+            }
+        }
+        final List<InputMethodInfo> methods = all ?
+                getInputMethodList() : getEnabledInputMethodList();
+        final PrintWriter pr = shellCommand.getOutPrintWriter();
+        final Printer printer = x -> pr.println(x);
+        final int N = methods.size();
+        for (int i = 0; i < N; ++i) {
+            if (brief) {
+                pr.println(methods.get(i).getId());
+            } else {
+                pr.print(methods.get(i).getId()); pr.println(":");
+                methods.get(i).dump(printer, "  ");
+            }
+        }
+        return ShellCommandResult.SUCCESS;
+    }
+
+    /**
+     * Handles {@code adb shell ime enable} and {@code adb shell ime disable}.
+     * @param shellCommand {@link ShellCommand} object that is handling this command.
+     * @param enabled {@code true} if the command was {@code adb shell ime enable}.
+     * @return Exit code of the command.
+     */
+    @BinderThread
+    @ShellCommandResult
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    private int handleShellCommandEnableDisableInputMethod(
+            @NonNull ShellCommand shellCommand, boolean enabled) {
+        if (!calledFromValidUser()) {
+            shellCommand.getErrPrintWriter().print(
+                    "Must be called from the foreground user or with INTERACT_ACROSS_USERS_FULL");
+            return ShellCommandResult.FAILURE;
+        }
+        final String id = shellCommand.getNextArgRequired();
+
+        final boolean previouslyEnabled;
+        synchronized (mMethodMap) {
+            if (mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                shellCommand.getErrPrintWriter().print(
+                        "Caller must have WRITE_SECURE_SETTINGS permission");
+                throw new SecurityException(
+                        "Requires permission "
+                                + android.Manifest.permission.WRITE_SECURE_SETTINGS);
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                previouslyEnabled = setInputMethodEnabledLocked(id, enabled);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+        final PrintWriter pr = shellCommand.getOutPrintWriter();
+        pr.print("Input method ");
+        pr.print(id);
+        pr.print(": ");
+        pr.print((enabled == previouslyEnabled) ? "already " : "now ");
+        pr.println(enabled ? "enabled" : "disabled");
+        return ShellCommandResult.SUCCESS;
+    }
+
+    /**
+     * Handles {@code adb shell ime set}.
+     * @param shellCommand {@link ShellCommand} object that is handling this command.
+     * @return Exit code of the command.
+     */
+    @BinderThread
+    @ShellCommandResult
+    private int handleShellCommandSetInputMethod(@NonNull ShellCommand shellCommand) {
+        final String id = shellCommand.getNextArgRequired();
+        setInputMethod(null, id);
+        final PrintWriter pr = shellCommand.getOutPrintWriter();
+        pr.print("Input method ");
+        pr.print(id);
+        pr.println("  selected");
+        return ShellCommandResult.SUCCESS;
+    }
+
+    /**
+     * Handles {@code adb shell ime reset-ime}.
+     * @param shellCommand {@link ShellCommand} object that is handling this command.
+     * @return Exit code of the command.
+     */
+    @BinderThread
+    @ShellCommandResult
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    private int handleShellCommandResetInputMethod(@NonNull ShellCommand shellCommand) {
+        if (!calledFromValidUser()) {
+            shellCommand.getErrPrintWriter().print(
+                    "Must be called from the foreground user or with INTERACT_ACROSS_USERS_FULL");
+            return ShellCommandResult.FAILURE;
+        }
+        synchronized (mMethodMap) {
+            if (mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                shellCommand.getErrPrintWriter().print(
+                        "Caller must have WRITE_SECURE_SETTINGS permission");
+                throw new SecurityException(
+                        "Requires permission "
+                                + android.Manifest.permission.WRITE_SECURE_SETTINGS);
+            }
+            final String nextIme;
+            final List<InputMethodInfo> nextEnabledImes;
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                synchronized (mMethodMap) {
+                    hideCurrentInputLocked(0, null);
+                    unbindCurrentMethodLocked(false);
+                    // Reset the current IME
+                    resetSelectedInputMethodAndSubtypeLocked(null);
+                    // Also reset the settings of the current IME
+                    mSettings.putSelectedInputMethod(null);
+                    // Disable all enabled IMEs.
+                    {
+                        final ArrayList<InputMethodInfo> enabledImes =
+                                mSettings.getEnabledInputMethodListLocked();
+                        final int N = enabledImes.size();
+                        for (int i = 0; i < N; ++i) {
+                            setInputMethodEnabledLocked(enabledImes.get(i).getId(), false);
+                        }
+                    }
+                    // Re-enable with default enabled IMEs.
+                    {
+                        final ArrayList<InputMethodInfo> defaultEnabledIme =
+                                InputMethodUtils.getDefaultEnabledImes(mContext, mMethodList);
+                        final int N = defaultEnabledIme.size();
+                        for (int i = 0; i < N; ++i) {
+                            setInputMethodEnabledLocked(defaultEnabledIme.get(i).getId(), true);
+                        }
+                    }
+                    updateInputMethodsFromSettingsLocked(true /* enabledMayChange */);
+                    InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
+                            mSettings.getEnabledInputMethodListLocked(),
+                            mSettings.getCurrentUserId(),
+                            mContext.getBasePackageName());
+                    nextIme = mSettings.getSelectedInputMethod();
+                    nextEnabledImes = getEnabledInputMethodList();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+            final PrintWriter pr = shellCommand.getOutPrintWriter();
+            pr.println("Reset current and enabled IMEs");
+            pr.println("Newly selected IME:");
+            pr.print("  "); pr.println(nextIme);
+            pr.println("Newly enabled IMEs:");
+            {
+                final int N = nextEnabledImes.size();
+                for (int i = 0; i < N; ++i) {
+                    pr.print("  ");
+                    pr.println(nextEnabledImes.get(i).getId());
+                }
+            }
+            return ShellCommandResult.SUCCESS;
         }
     }
 }

@@ -166,6 +166,11 @@ public class ZygoteProcess {
     private List<String> mApiBlacklistExemptions = Collections.emptyList();
 
     /**
+     * Proportion of hidden API accesses that should be logged to the event log; 0 - 0x10000.
+     */
+    private int mHiddenApiAccessLogSampleRate;
+
+    /**
      * The state of the connection to the primary zygote.
      */
     private ZygoteState primaryZygoteState;
@@ -499,21 +504,40 @@ public class ZygoteProcess {
      * @param exemptions List of hidden API exemption prefixes. Any matching members are treated as
      *        whitelisted/public APIs (i.e. allowed, no logging of usage).
      */
-    public void setApiBlacklistExemptions(List<String> exemptions) {
+    public boolean setApiBlacklistExemptions(List<String> exemptions) {
         synchronized (mLock) {
             mApiBlacklistExemptions = exemptions;
-            maybeSetApiBlacklistExemptions(primaryZygoteState, true);
-            maybeSetApiBlacklistExemptions(secondaryZygoteState, true);
+            boolean ok = maybeSetApiBlacklistExemptions(primaryZygoteState, true);
+            if (ok) {
+                ok = maybeSetApiBlacklistExemptions(secondaryZygoteState, true);
+            }
+            return ok;
+        }
+    }
+
+    /**
+     * Set the precentage of detected hidden API accesses that are logged to the event log.
+     *
+     * <p>This rate will take affect for all new processes forked from the zygote after this call.
+     *
+     * @param rate An integer between 0 and 0x10000 inclusive. 0 means no event logging.
+     */
+    public void setHiddenApiAccessLogSampleRate(int rate) {
+        synchronized (mLock) {
+            mHiddenApiAccessLogSampleRate = rate;
+            maybeSetHiddenApiAccessLogSampleRate(primaryZygoteState);
+            maybeSetHiddenApiAccessLogSampleRate(secondaryZygoteState);
         }
     }
 
     @GuardedBy("mLock")
-    private void maybeSetApiBlacklistExemptions(ZygoteState state, boolean sendIfEmpty) {
+    private boolean maybeSetApiBlacklistExemptions(ZygoteState state, boolean sendIfEmpty) {
         if (state == null || state.isClosed()) {
-            return;
+            Slog.e(LOG_TAG, "Can't set API blacklist exemptions: no zygote connection");
+            return false;
         }
         if (!sendIfEmpty && mApiBlacklistExemptions.isEmpty()) {
-            return;
+            return true;
         }
         try {
             state.writer.write(Integer.toString(mApiBlacklistExemptions.size() + 1));
@@ -529,8 +553,34 @@ public class ZygoteProcess {
             if (status != 0) {
                 Slog.e(LOG_TAG, "Failed to set API blacklist exemptions; status " + status);
             }
+            return true;
         } catch (IOException ioe) {
             Slog.e(LOG_TAG, "Failed to set API blacklist exemptions", ioe);
+            mApiBlacklistExemptions = Collections.emptyList();
+            return false;
+        }
+    }
+
+    private void maybeSetHiddenApiAccessLogSampleRate(ZygoteState state) {
+        if (state == null || state.isClosed()) {
+            return;
+        }
+        if (mHiddenApiAccessLogSampleRate == -1) {
+            return;
+        }
+        try {
+            state.writer.write(Integer.toString(1));
+            state.writer.newLine();
+            state.writer.write("--hidden-api-log-sampling-rate="
+                    + Integer.toString(mHiddenApiAccessLogSampleRate));
+            state.writer.newLine();
+            state.writer.flush();
+            int status = state.inputStream.readInt();
+            if (status != 0) {
+                Slog.e(LOG_TAG, "Failed to set hidden API log sampling rate; status " + status);
+            }
+        } catch (IOException ioe) {
+            Slog.e(LOG_TAG, "Failed to set hidden API log sampling rate", ioe);
         }
     }
 
@@ -549,6 +599,7 @@ public class ZygoteProcess {
                 throw new ZygoteStartFailedEx("Error connecting to primary zygote", ioe);
             }
             maybeSetApiBlacklistExemptions(primaryZygoteState, false);
+            maybeSetHiddenApiAccessLogSampleRate(primaryZygoteState);
         }
         if (primaryZygoteState.matches(abi)) {
             return primaryZygoteState;
@@ -562,6 +613,7 @@ public class ZygoteProcess {
                 throw new ZygoteStartFailedEx("Error connecting to secondary zygote", ioe);
             }
             maybeSetApiBlacklistExemptions(secondaryZygoteState, false);
+            maybeSetHiddenApiAccessLogSampleRate(secondaryZygoteState);
         }
 
         if (secondaryZygoteState.matches(abi)) {
@@ -575,11 +627,12 @@ public class ZygoteProcess {
      * Instructs the zygote to pre-load the classes and native libraries at the given paths
      * for the specified abi. Not all zygotes support this function.
      */
-    public boolean preloadPackageForAbi(String packagePath, String libsPath, String cacheKey,
-                                        String abi) throws ZygoteStartFailedEx, IOException {
+    public boolean preloadPackageForAbi(String packagePath, String libsPath, String libFileName,
+                                        String cacheKey, String abi) throws ZygoteStartFailedEx,
+                                                                            IOException {
         synchronized(mLock) {
             ZygoteState state = openZygoteSocketIfNeeded(abi);
-            state.writer.write("4");
+            state.writer.write("5");
             state.writer.newLine();
 
             state.writer.write("--preload-package");
@@ -589,6 +642,9 @@ public class ZygoteProcess {
             state.writer.newLine();
 
             state.writer.write(libsPath);
+            state.writer.newLine();
+
+            state.writer.write(libFileName);
             state.writer.newLine();
 
             state.writer.write(cacheKey);

@@ -14,6 +14,11 @@
 
 package com.android.systemui.util;
 
+import android.view.View;
+
+import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.statusbar.CommandQueue;
+
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -26,6 +31,54 @@ public class Utils {
     public static <T> void safeForeach(List<T> list, Consumer<T> c) {
         for (int i = list.size() - 1; i >= 0; i--) {
             c.accept(list.get(i));
+        }
+    }
+
+    /**
+     * Sets the visibility of an UI element according to the DISABLE_* flags in
+     * {@link android.app.StatusBarManager}.
+     */
+    public static class DisableStateTracker implements CommandQueue.Callbacks,
+            View.OnAttachStateChangeListener {
+        private final int mMask1;
+        private final int mMask2;
+        private View mView;
+        private boolean mDisabled;
+
+        public DisableStateTracker(int disableMask, int disable2Mask) {
+            mMask1 = disableMask;
+            mMask2 = disable2Mask;
+        }
+
+        @Override
+        public void onViewAttachedToWindow(View v) {
+            mView = v;
+            SysUiServiceProvider.getComponent(v.getContext(), CommandQueue.class)
+                    .addCallbacks(this);
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(View v) {
+            SysUiServiceProvider.getComponent(mView.getContext(), CommandQueue.class)
+                    .removeCallbacks(this);
+            mView = null;
+        }
+
+        /**
+         * Sets visibility of this {@link View} given the states passed from
+         * {@link com.android.systemui.statusbar.CommandQueue.Callbacks#disable(int, int)}.
+         */
+        @Override
+        public void disable(int state1, int state2, boolean animate) {
+            final boolean disabled = ((state1 & mMask1) != 0) || ((state2 & mMask2) != 0);
+            if (disabled == mDisabled) return;
+            mDisabled = disabled;
+            mView.setVisibility(disabled ? View.GONE : View.VISIBLE);
+        }
+
+        /** @return {@code true} if and only if this {@link View} is currently disabled */
+        public boolean isDisabled() {
+            return mDisabled;
         }
     }
 }

@@ -92,6 +92,11 @@ public class HeadsetProfile implements LocalBluetoothProfile {
         return mIsProfileReady;
     }
 
+    @Override
+    public int getProfileId() {
+        return BluetoothProfile.HEADSET;
+    }
+
     HeadsetProfile(Context context, LocalBluetoothAdapter adapter,
             CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {
@@ -161,6 +166,16 @@ public class HeadsetProfile implements LocalBluetoothProfile {
     public BluetoothDevice getActiveDevice() {
         if (mService == null) return null;
         return mService.getActiveDevice();
+    }
+
+    public boolean isAudioOn() {
+        if (mService == null) return false;
+        return mService.isAudioOn();
+    }
+
+    public int getAudioState(BluetoothDevice device) {
+        if (mService == null) return BluetoothHeadset.STATE_AUDIO_DISCONNECTED;
+        return mService.getAudioState(device);
     }
 
     public boolean isPreferred(BluetoothDevice device) {

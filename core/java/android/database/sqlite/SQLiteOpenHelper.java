@@ -17,12 +17,16 @@
 package android.database.sqlite;
 
 import android.annotation.IntRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.database.DatabaseErrorHandler;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.os.FileUtils;
 import android.util.Log;
+
+import com.android.internal.util.Preconditions;
 
 import java.io.File;
 
@@ -54,7 +58,7 @@ public abstract class SQLiteOpenHelper {
 
     private SQLiteDatabase mDatabase;
     private boolean mIsInitializing;
-    private final SQLiteDatabase.OpenParams.Builder mOpenParamsBuilder;
+    private SQLiteDatabase.OpenParams.Builder mOpenParamsBuilder;
 
     /**
      * Create a helper object to create, open, and/or manage a database.
@@ -62,14 +66,15 @@ public abstract class SQLiteOpenHelper {
      * created or opened until one of {@link #getWritableDatabase} or
      * {@link #getReadableDatabase} is called.
      *
-     * @param context to use to open or create the database
+     * @param context to use for locating paths to the the database
      * @param name of the database file, or null for an in-memory database
      * @param factory to use for creating cursor objects, or null for the default
      * @param version number of the database (starting at 1); if the database is older,
      *     {@link #onUpgrade} will be used to upgrade the database; if the database is
      *     newer, {@link #onDowngrade} will be used to downgrade the database
      */
-    public SQLiteOpenHelper(Context context, String name, CursorFactory factory, int version) {
+    public SQLiteOpenHelper(@Nullable Context context, @Nullable String name,
+            @Nullable CursorFactory factory, int version) {
         this(context, name, factory, version, null);
     }
 
@@ -81,7 +86,7 @@ public abstract class SQLiteOpenHelper {
      * <p>Accepts input param: a concrete instance of {@link DatabaseErrorHandler} to be
      * used to handle corruption when sqlite reports database corruption.</p>
      *
-     * @param context to use to open or create the database
+     * @param context to use for locating paths to the the database
      * @param name of the database file, or null for an in-memory database
      * @param factory to use for creating cursor objects, or null for the default
      * @param version number of the database (starting at 1); if the database is older,
@@ -90,9 +95,30 @@ public abstract class SQLiteOpenHelper {
      * @param errorHandler the {@link DatabaseErrorHandler} to be used when sqlite reports database
      * corruption, or null to use the default error handler.
      */
-    public SQLiteOpenHelper(Context context, String name, CursorFactory factory, int version,
-            DatabaseErrorHandler errorHandler) {
+    public SQLiteOpenHelper(@Nullable Context context, @Nullable String name,
+            @Nullable CursorFactory factory, int version,
+            @Nullable DatabaseErrorHandler errorHandler) {
         this(context, name, factory, version, 0, errorHandler);
+    }
+
+    /**
+     * Create a helper object to create, open, and/or manage a database.
+     * This method always returns very quickly.  The database is not actually
+     * created or opened until one of {@link #getWritableDatabase} or
+     * {@link #getReadableDatabase} is called.
+     *
+     * @param context to use for locating paths to the the database
+     * @param name of the database file, or null for an in-memory database
+     * @param version number of the database (starting at 1); if the database is older,
+     *     {@link #onUpgrade} will be used to upgrade the database; if the database is
+     *     newer, {@link #onDowngrade} will be used to downgrade the database
+     * @param openParams configuration parameters that are used for opening {@link SQLiteDatabase}.
+     *        Please note that {@link SQLiteDatabase#CREATE_IF_NECESSARY} flag will always be
+     *        set when the helper opens the database
+     */
+    public SQLiteOpenHelper(@Nullable Context context, @Nullable String name, int version,
+            @NonNull SQLiteDatabase.OpenParams openParams) {
+        this(context, name, version, 0, openParams.toBuilder());
     }
 
     /**
@@ -102,7 +128,7 @@ public abstract class SQLiteOpenHelper {
      * minimumSupportedVersion is found, it is simply deleted and a new database is created with the
      * given name and version
      *
-     * @param context to use to open or create the database
+     * @param context to use for locating paths to the the database
      * @param name the name of the database file, null for a temporary in-memory database
      * @param factory to use for creating cursor objects, null for default
      * @param version the required version of the database
@@ -118,18 +144,26 @@ public abstract class SQLiteOpenHelper {
      * @see #onUpgrade(SQLiteDatabase, int, int)
      * @hide
      */
-    public SQLiteOpenHelper(Context context, String name, CursorFactory factory, int version,
-            int minimumSupportedVersion, DatabaseErrorHandler errorHandler) {
+    public SQLiteOpenHelper(@Nullable Context context, @Nullable String name,
+            @Nullable CursorFactory factory, int version,
+            int minimumSupportedVersion, @Nullable DatabaseErrorHandler errorHandler) {
+        this(context, name, version, minimumSupportedVersion,
+                new SQLiteDatabase.OpenParams.Builder());
+        mOpenParamsBuilder.setCursorFactory(factory);
+        mOpenParamsBuilder.setErrorHandler(errorHandler);
+    }
+
+    private SQLiteOpenHelper(@Nullable Context context, @Nullable String name, int version,
+            int minimumSupportedVersion,
+            @NonNull SQLiteDatabase.OpenParams.Builder openParamsBuilder) {
+        Preconditions.checkNotNull(openParamsBuilder);
         if (version < 1) throw new IllegalArgumentException("Version must be >= 1, was " + version);
 
         mContext = context;
         mName = name;
         mNewVersion = version;
         mMinimumSupportedVersion = Math.max(0, minimumSupportedVersion);
-        mOpenParamsBuilder = new SQLiteDatabase.OpenParams.Builder();
-        mOpenParamsBuilder.setCursorFactory(factory);
-        mOpenParamsBuilder.setErrorHandler(errorHandler);
-        mOpenParamsBuilder.addOpenFlags(SQLiteDatabase.CREATE_IF_NECESSARY);
+        setOpenParamsBuilder(openParamsBuilder);
     }
 
     /**
@@ -163,6 +197,8 @@ public abstract class SQLiteOpenHelper {
                 }
                 mOpenParamsBuilder.setWriteAheadLoggingEnabled(enabled);
             }
+            // Compatibility WAL is disabled if an app disables or enables WAL
+            mOpenParamsBuilder.addOpenFlags(SQLiteDatabase.DISABLE_COMPATIBILITY_WAL);
         }
     }
 
@@ -192,6 +228,30 @@ public abstract class SQLiteOpenHelper {
             }
             mOpenParamsBuilder.setLookasideConfig(slotSize, slotCount);
         }
+    }
+
+    /**
+     * Sets configuration parameters that are used for opening {@link SQLiteDatabase}.
+     * <p>Please note that {@link SQLiteDatabase#CREATE_IF_NECESSARY} flag will always be set when
+     * opening the database
+     *
+     * @param openParams configuration parameters that are used for opening {@link SQLiteDatabase}.
+     * @throws IllegalStateException if the database is already open
+     */
+    public void setOpenParams(@NonNull SQLiteDatabase.OpenParams openParams) {
+        Preconditions.checkNotNull(openParams);
+        synchronized (this) {
+            if (mDatabase != null && mDatabase.isOpen()) {
+                throw new IllegalStateException(
+                        "OpenParams cannot be set after opening the database");
+            }
+            setOpenParamsBuilder(new SQLiteDatabase.OpenParams.Builder(openParams));
+        }
+    }
+
+    private void setOpenParamsBuilder(SQLiteDatabase.OpenParams.Builder openParamsBuilder) {
+        mOpenParamsBuilder = openParamsBuilder;
+        mOpenParamsBuilder.addOpenFlags(SQLiteDatabase.CREATE_IF_NECESSARY);
     }
 
     /**

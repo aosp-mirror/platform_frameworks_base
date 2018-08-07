@@ -16,23 +16,22 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.Before;
 import org.junit.After;
 
-import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for the {@link DisplayContent.TaskStackContainers} container in {@link DisplayContent}.
@@ -50,14 +49,13 @@ public class TaskStackContainersTests extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        mPinnedStack = new StackWindowController(PINNED_STACK_ID, null,
-                mDisplayContent.getDisplayId(), true /* onTop */, new Rect(), sWm).mContainer;
-
+        mPinnedStack = createStackControllerOnStackOnDisplay(
+                WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mDisplayContent).mContainer;
         // Stack should contain visible app window to be considered visible.
         final Task pinnedTask = createTaskInStack(mPinnedStack, 0 /* userId */);
         assertFalse(mPinnedStack.isVisible());
-        final WindowTestUtils.TestAppWindowToken pinnedApp = new WindowTestUtils.TestAppWindowToken(
-                mDisplayContent);
+        final WindowTestUtils.TestAppWindowToken pinnedApp =
+                WindowTestUtils.createTestAppWindowToken(mDisplayContent);
         pinnedTask.addChild(pinnedApp, 0 /* addPos */);
         assertTrue(mPinnedStack.isVisible());
     }

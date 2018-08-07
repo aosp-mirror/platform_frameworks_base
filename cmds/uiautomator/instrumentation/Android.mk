@@ -21,8 +21,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-java-files-under, testrunner-src) \
     $(call all-java-files-under, ../library/core-src)
-LOCAL_JAVA_LIBRARIES := android.test.runner
-LOCAL_STATIC_JAVA_LIBRARIES := legacy-android-test junit
+LOCAL_JAVA_LIBRARIES := android.test.runner.stubs android.test.base.stubs
+LOCAL_STATIC_JAVA_LIBRARIES := junit
 LOCAL_MODULE := uiautomator-instrumentation
 # TODO: change this to 18 when it's available
 LOCAL_SDK_VERSION := current

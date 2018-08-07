@@ -25,6 +25,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
+import android.util.proto.ProtoOutputStream;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -177,7 +178,9 @@ public final class AudioAttributes implements Parcelable {
 
     /**
      * IMPORTANT: when adding new usage types, add them to SDK_USAGES and update SUPPRESSIBLE_USAGES
-     *            if applicable.
+     *            if applicable, as well as audioattributes.proto.
+     *            Also consider adding them to <aaudio/AAudio.h> for the NDK.
+     *            Also consider adding them to UsageTypeConverter for service dump and etc.
      */
 
     /**
@@ -200,6 +203,29 @@ public final class AudioAttributes implements Parcelable {
      * @see #SUPPRESSIBLE_USAGES
      */
     public final static int SUPPRESSIBLE_NEVER = 3;
+    /**
+     * @hide
+     * Denotes a usage for alarms,
+     * will be muted when the Zen mode priority doesn't allow alarms or in Alarms Only Mode
+     * @see #SUPPRESSIBLE_USAGES
+     */
+    public final static int SUPPRESSIBLE_ALARM = 4;
+    /**
+     * @hide
+     * Denotes a usage for media, game, assistant, and navigation
+     * will be muted when the Zen priority mode doesn't allow media
+     * @see #SUPPRESSIBLE_USAGES
+     */
+    public final static int SUPPRESSIBLE_MEDIA = 5;
+    /**
+     * @hide
+     * Denotes a usage for all other sounds not caught in SUPPRESSIBLE_NOTIFICATION,
+     * SUPPRESSIBLE_CALL,SUPPRESSIBLE_NEVER, SUPPRESSIBLE_ALARM or SUPPRESSIBLE_MEDIA.
+     * This includes system, sonification and unknown sounds.
+     * These will be muted when the Zen priority mode doesn't allow sytem sounds
+     * @see #SUPPRESSIBLE_USAGES
+     */
+    public final static int SUPPRESSIBLE_SYSTEM = 6;
 
     /**
      * @hide
@@ -219,6 +245,15 @@ public final class AudioAttributes implements Parcelable {
         SUPPRESSIBLE_USAGES.put(USAGE_NOTIFICATION_EVENT,                SUPPRESSIBLE_NOTIFICATION);
         SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANCE_ACCESSIBILITY,          SUPPRESSIBLE_NEVER);
         SUPPRESSIBLE_USAGES.put(USAGE_VOICE_COMMUNICATION,               SUPPRESSIBLE_NEVER);
+        SUPPRESSIBLE_USAGES.put(USAGE_ALARM,                             SUPPRESSIBLE_ALARM);
+        SUPPRESSIBLE_USAGES.put(USAGE_MEDIA,                             SUPPRESSIBLE_MEDIA);
+        SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANCE_NAVIGATION_GUIDANCE,    SUPPRESSIBLE_MEDIA);
+        SUPPRESSIBLE_USAGES.put(USAGE_GAME,                              SUPPRESSIBLE_MEDIA);
+        SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANT,                         SUPPRESSIBLE_MEDIA);
+        /** default volume assignment is STREAM_MUSIC, handle unknown usage as media */
+        SUPPRESSIBLE_USAGES.put(USAGE_UNKNOWN,                           SUPPRESSIBLE_MEDIA);
+        SUPPRESSIBLE_USAGES.put(USAGE_VOICE_COMMUNICATION_SIGNALLING,    SUPPRESSIBLE_SYSTEM);
+        SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANCE_SONIFICATION,           SUPPRESSIBLE_SYSTEM);
     }
 
     /**
@@ -715,7 +750,7 @@ public final class AudioAttributes implements Parcelable {
         /**
          * @hide
          * Same as {@link #setCapturePreset(int)} but authorizes the use of HOTWORD,
-         * REMOTE_SUBMIX and RADIO_TUNER.
+         * REMOTE_SUBMIX, RADIO_TUNER, VOICE_DOWNLINK, VOICE_UPLINK and VOICE_CALL.
          * @param preset
          * @return the same Builder instance.
          */
@@ -723,7 +758,10 @@ public final class AudioAttributes implements Parcelable {
         public Builder setInternalCapturePreset(int preset) {
             if ((preset == MediaRecorder.AudioSource.HOTWORD)
                     || (preset == MediaRecorder.AudioSource.REMOTE_SUBMIX)
-                    || (preset == MediaRecorder.AudioSource.RADIO_TUNER)) {
+                    || (preset == MediaRecorder.AudioSource.RADIO_TUNER)
+                    || (preset == MediaRecorder.AudioSource.VOICE_DOWNLINK)
+                    || (preset == MediaRecorder.AudioSource.VOICE_UPLINK)
+                    || (preset == MediaRecorder.AudioSource.VOICE_CALL)) {
                 mSource = preset;
             } else {
                 setCapturePreset(preset);
@@ -847,6 +885,25 @@ public final class AudioAttributes implements Parcelable {
                 + " flags=0x" + Integer.toHexString(mFlags).toUpperCase()
                 + " tags=" + mFormattedTags
                 + " bundle=" + (mBundle == null ? "null" : mBundle.toString()));
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+
+        proto.write(AudioAttributesProto.USAGE, mUsage);
+        proto.write(AudioAttributesProto.CONTENT_TYPE, mContentType);
+        proto.write(AudioAttributesProto.FLAGS, mFlags);
+        // mFormattedTags is never null due to assignment in Builder or unmarshalling.
+        for (String t : mFormattedTags.split(";")) {
+            t = t.trim();
+            if (t != "") {
+                proto.write(AudioAttributesProto.TAGS, t);
+            }
+        }
+        // TODO: is the data in mBundle useful for debugging?
+
+        proto.end(token);
     }
 
     /** @hide */
@@ -1001,8 +1058,7 @@ public final class AudioAttributes implements Parcelable {
             case USAGE_ASSISTANCE_ACCESSIBILITY:
                 return AudioSystem.STREAM_ACCESSIBILITY;
             case USAGE_UNKNOWN:
-                return fromGetVolumeControlStream ?
-                        AudioManager.USE_DEFAULT_STREAM_TYPE : AudioSystem.STREAM_MUSIC;
+                return AudioSystem.STREAM_MUSIC;
             default:
                 if (fromGetVolumeControlStream) {
                     throw new IllegalArgumentException("Unknown usage value " + aa.getUsage() +

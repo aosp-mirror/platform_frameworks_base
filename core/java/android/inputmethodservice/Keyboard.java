@@ -627,6 +627,7 @@ public class Keyboard {
         rows.add(row);
     }
 
+    @UnsupportedAppUsage
     final void resize(int newWidth, int newHeight) {
         int numRows = rows.size();
         for (int rowIndex = 0; rowIndex < numRows; ++rowIndex) {

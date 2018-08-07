@@ -16,6 +16,9 @@
 
 package android.text.style;
 
+import android.annotation.IntRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -24,32 +27,71 @@ import android.graphics.drawable.Drawable;
 import java.lang.ref.WeakReference;
 
 /**
+ * Span that replaces the text it's attached to with a {@link Drawable} that can be aligned with
+ * the bottom or with the baseline of the surrounding text.
+ * <p>
+ * For an implementation that constructs the drawable from various sources (<code>Bitmap</code>,
+ * <code>Drawable</code>, resource id or <code>Uri</code>) use {@link ImageSpan}.
+ * <p>
+ * A simple implementation of <code>DynamicDrawableSpan</code> that uses drawables from resources
+ * looks like this:
+ * <pre>
+ * class MyDynamicDrawableSpan extends DynamicDrawableSpan {
  *
+ * private final Context mContext;
+ * private final int mResourceId;
+ *
+ * public MyDynamicDrawableSpan(Context context, @DrawableRes int resourceId) {
+ *     mContext = context;
+ *     mResourceId = resourceId;
+ * }
+ *
+ * {@literal @}Override
+ * public Drawable getDrawable() {
+ *      Drawable drawable = mContext.getDrawable(mResourceId);
+ *      drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+ *      return drawable;
+ * }
+ * }</pre>
+ * The class can be used like this:
+ * <pre>
+ * SpannableString string = new SpannableString("Text with a drawable span");
+ * string.setSpan(new MyDynamicDrawableSpan(context, R.mipmap.ic_launcher), 12, 20, Spanned
+ * .SPAN_EXCLUSIVE_EXCLUSIVE);</pre>
+ * <img src="{@docRoot}reference/android/images/text/style/dynamicdrawablespan.png" />
+ * <figcaption>Replacing text with a drawable.</figcaption>
  */
 public abstract class DynamicDrawableSpan extends ReplacementSpan {
-    private static final String TAG = "DynamicDrawableSpan";
-    
+
     /**
      * A constant indicating that the bottom of this span should be aligned
      * with the bottom of the surrounding text, i.e., at the same level as the
      * lowest descender in the text.
      */
     public static final int ALIGN_BOTTOM = 0;
-    
+
     /**
      * A constant indicating that the bottom of this span should be aligned
      * with the baseline of the surrounding text.
      */
     public static final int ALIGN_BASELINE = 1;
-    
+
     protected final int mVerticalAlignment;
-    
+
+    private WeakReference<Drawable> mDrawableRef;
+
+    /**
+     * Creates a {@link DynamicDrawableSpan}. The default vertical alignment is
+     * {@link #ALIGN_BOTTOM}
+     */
     public DynamicDrawableSpan() {
         mVerticalAlignment = ALIGN_BOTTOM;
     }
 
     /**
-     * @param verticalAlignment one of {@link #ALIGN_BOTTOM} or {@link #ALIGN_BASELINE}.
+     * Creates a {@link DynamicDrawableSpan} based on a vertical alignment.\
+     *
+     * @param verticalAlignment one of {@link #ALIGN_BOTTOM} or {@link #ALIGN_BASELINE}
      */
     protected DynamicDrawableSpan(int verticalAlignment) {
         mVerticalAlignment = verticalAlignment;
@@ -64,22 +106,22 @@ public abstract class DynamicDrawableSpan extends ReplacementSpan {
     }
 
     /**
-     * Your subclass must implement this method to provide the bitmap   
+     * Your subclass must implement this method to provide the bitmap
      * to be drawn.  The dimensions of the bitmap must be the same
      * from each call to the next.
      */
     public abstract Drawable getDrawable();
 
     @Override
-    public int getSize(Paint paint, CharSequence text,
-                         int start, int end,
-                         Paint.FontMetricsInt fm) {
+    public int getSize(@NonNull Paint paint, CharSequence text,
+            @IntRange(from = 0) int start, @IntRange(from = 0) int end,
+            @Nullable Paint.FontMetricsInt fm) {
         Drawable d = getCachedDrawable();
         Rect rect = d.getBounds();
 
         if (fm != null) {
-            fm.ascent = -rect.bottom; 
-            fm.descent = 0; 
+            fm.ascent = -rect.bottom;
+            fm.descent = 0;
 
             fm.top = fm.ascent;
             fm.bottom = 0;
@@ -89,12 +131,12 @@ public abstract class DynamicDrawableSpan extends ReplacementSpan {
     }
 
     @Override
-    public void draw(Canvas canvas, CharSequence text,
-                     int start, int end, float x, 
-                     int top, int y, int bottom, Paint paint) {
+    public void draw(@NonNull Canvas canvas, CharSequence text,
+            @IntRange(from = 0) int start, @IntRange(from = 0) int end, float x,
+            int top, int y, int bottom, @NonNull Paint paint) {
         Drawable b = getCachedDrawable();
         canvas.save();
-        
+
         int transY = bottom - b.getBounds().bottom;
         if (mVerticalAlignment == ALIGN_BASELINE) {
             transY -= paint.getFontMetricsInt().descent;
@@ -109,8 +151,9 @@ public abstract class DynamicDrawableSpan extends ReplacementSpan {
         WeakReference<Drawable> wr = mDrawableRef;
         Drawable d = null;
 
-        if (wr != null)
+        if (wr != null) {
             d = wr.get();
+        }
 
         if (d == null) {
             d = getDrawable();
@@ -119,7 +162,5 @@ public abstract class DynamicDrawableSpan extends ReplacementSpan {
 
         return d;
     }
-
-    private WeakReference<Drawable> mDrawableRef;
 }
 

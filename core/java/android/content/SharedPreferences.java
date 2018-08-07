@@ -30,6 +30,11 @@ import java.util.Set;
  * when they are committed to storage.  Objects that are returned from the
  * various <code>get</code> methods must be treated as immutable by the application.
  *
+ * <p>Note: This class provides strong consistency guarantees. It is using expensive operations
+ * which might slow down an app. Frequently changing properties or properties where loss can be
+ * tolerated should use other mechanisms. For more details read the comments on
+ * {@link Editor#commit()} and {@link Editor#apply()}.
+ *
  * <p><em>Note: This class does not support use across multiple processes.</em>
  *
  * <div class="special reference">

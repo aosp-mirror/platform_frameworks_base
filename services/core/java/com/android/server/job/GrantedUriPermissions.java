@@ -25,6 +25,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -152,5 +153,22 @@ public final class GrantedUriPermissions {
             pw.print(prefix); pw.print("#"); pw.print(i); pw.print(": ");
             pw.println(mUris.get(i));
         }
+    }
+
+    public void dump(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+
+        proto.write(GrantedUriPermissionsDumpProto.FLAGS, mGrantFlags);
+        proto.write(GrantedUriPermissionsDumpProto.SOURCE_USER_ID, mSourceUserId);
+        proto.write(GrantedUriPermissionsDumpProto.TAG, mTag);
+        proto.write(GrantedUriPermissionsDumpProto.PERMISSION_OWNER, mPermissionOwner.toString());
+        for (int i = 0; i < mUris.size(); i++) {
+            Uri u = mUris.get(i);
+            if (u != null) {
+                proto.write(GrantedUriPermissionsDumpProto.URIS, u.toString());
+            }
+        }
+
+        proto.end(token);
     }
 }

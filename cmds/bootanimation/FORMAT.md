@@ -30,7 +30,7 @@ The first line defines the general parameters of the animation:
 
 It is followed by a number of rows of the form:
 
-    TYPE COUNT PAUSE PATH [#RGBHEX CLOCK]
+    TYPE COUNT PAUSE PATH [#RGBHEX [CLOCK1 [CLOCK2]]]
 
   * **TYPE:** a single char indicating what type of animation segment this is:
       + `p` -- this part will play unless interrupted by the end of the boot
@@ -39,10 +39,37 @@ It is followed by a number of rows of the form:
   * **PAUSE:** number of FRAMES to delay after this part ends
   * **PATH:** directory in which to find the frames for this part (e.g. `part0`)
   * **RGBHEX:** _(OPTIONAL)_ a background color, specified as `#RRGGBB`
-  * **CLOCK:** _(OPTIONAL)_ the y-coordinate at which to draw the current time (for watches)
+  * **CLOCK1, CLOCK2:** _(OPTIONAL)_ the coordinates at which to draw the current time (for watches):
+      + If only `CLOCK1` is provided it is the y-coordinate of the clock and the x-coordinate
+        defaults to `c`
+      + If both `CLOCK1` and `CLOCK2` are provided then `CLOCK1` is the x-coordinate and `CLOCK2` is
+        the y-coodinate
+      + Values can be either a positive integer, a negative integer, or `c`
+          - `c` -- will centre the text
+          - `n` -- will position the text n pixels from the start; left edge for x-axis, bottom edge
+            for y-axis
+          - `-n` -- will position the text n pixels from the end; right edge for x-axis, top edge
+            for y-axis
+          - Examples:
+              * `-24` or `c -24` will position the text 24 pixels from the top of the screen,
+                centred horizontally
+              * `16 c` will position the text 16 pixels from the left of the screen, centred
+                vertically
+              * `-32 32` will position the text such that the bottom right corner is 32 pixels above
+                and 32 pixels left of the edges of the screen
 
 There is also a special TYPE, `$SYSTEM`, that loads `/system/media/bootanimation.zip`
 and plays that.
+
+## clock_font.png
+
+The file used to draw the time on top of the boot animation. The font format is as follows:
+  * The file specifies glyphs for the ascii characters 32-127 (0x20-0x7F), both regular weight and
+    bold weight.
+  * The image is divided into a grid of characters
+  * There are 16 columns and 6 rows
+  * Each row is divided in half: regular weight glyphs on the top half, bold glyphs on the bottom
+  * For a NxM image each character glyph will be N/16 pixels wide and M/(12*2) pixels high
 
 ## loading and playing frames
 

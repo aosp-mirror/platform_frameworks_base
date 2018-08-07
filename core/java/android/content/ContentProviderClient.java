@@ -22,6 +22,7 @@ import android.content.res.AssetFileDescriptor;
 import android.database.CrossProcessCursorWrapper;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.DeadObjectException;
@@ -102,8 +103,16 @@ public class ContentProviderClient implements AutoCloseable {
                 if (sAnrHandler == null) {
                     sAnrHandler = new Handler(Looper.getMainLooper(), null, true /* async */);
                 }
+
+                // If the remote process hangs, we're going to kill it, so we're
+                // technically okay doing blocking calls.
+                Binder.allowBlocking(mContentProvider.asBinder());
             } else {
                 mAnrRunnable = null;
+
+                // If we're no longer watching for hangs, revert back to default
+                // blocking behavior.
+                Binder.defaultBlocking(mContentProvider.asBinder());
             }
         }
     }
@@ -511,6 +520,10 @@ public class ContentProviderClient implements AutoCloseable {
     private boolean closeInternal() {
         mCloseGuard.close();
         if (mClosed.compareAndSet(false, true)) {
+            // We can't do ANR checks after we cease to exist! Reset any
+            // blocking behavior changes we might have made.
+            setDetectNotResponding(0);
+
             if (mStable) {
                 return mContentResolver.releaseProvider(mContentProvider);
             } else {

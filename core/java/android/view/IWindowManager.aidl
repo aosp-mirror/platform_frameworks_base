@@ -16,13 +16,13 @@
 
 package android.view;
 
-import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 
+import android.app.IAssistDataReceiver;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -38,6 +38,7 @@ import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
 import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedStackListener;
+import android.view.RemoteAnimationAdapter;
 import android.view.IRotationWatcher;
 import android.view.IWallpaperVisibilityListener;
 import android.view.IWindowSession;
@@ -124,9 +125,13 @@ interface IWindowManager
     void overridePendingAppTransitionMultiThumbFuture(
             IAppTransitionAnimationSpecsFuture specsFuture, IRemoteCallback startedCallback,
             boolean scaleUp);
+    void overridePendingAppTransitionRemote(in RemoteAnimationAdapter remoteAnimationAdapter);
     void executeAppTransition();
 
-    /** Used by system ui to report that recents has shown itself. */
+    /**
+      * Used by system ui to report that recents has shown itself.
+      * @deprecated to be removed once prebuilts are updated
+      */
     void endProlongedAnimations();
 
     // Re-evaluate the current orientation from the caller's state.
@@ -147,8 +152,7 @@ interface IWindowManager
     void exitKeyguardSecurely(IOnKeyguardExitResult callback);
     boolean isKeyguardLocked();
     boolean isKeyguardSecure();
-    boolean inKeyguardRestrictedInputMode();
-    void dismissKeyguard(IKeyguardDismissCallback callback);
+    void dismissKeyguard(IKeyguardDismissCallback callback, CharSequence message);
 
     // Requires INTERACT_ACROSS_USERS_FULL permission
     void setSwitchingUser(boolean switching);
@@ -180,16 +184,10 @@ interface IWindowManager
     void setStrictModeVisualIndicatorPreference(String enabled);
 
     /**
-     * Set whether screen capture is disabled for all windows of a specific user
+     * Set whether screen capture is disabled for all windows of a specific user from
+     * the device policy cache.
      */
-    void setScreenCaptureDisabled(int userId, boolean disabled);
-
-    /**
-     * Testing and debugging infrastructure for writing surface events
-     * to given FD. See RemoteSurfaceTrace.java or Wm.java for format.
-     */
-    void enableSurfaceTrace(in ParcelFileDescriptor fd);
-    void disableSurfaceTrace();
+    void refreshScreenCaptureDisabled(int userId);
 
     // These can only be called with the SET_ORIENTATION permission.
     /**
@@ -272,7 +270,7 @@ interface IWindowManager
     /**
      * Used only for assist -- request a screenshot of the current application.
      */
-    boolean requestAssistScreenshot(IAssistScreenshotReceiver receiver);
+    boolean requestAssistScreenshot(IAssistDataReceiver receiver);
 
     /**
      * Called by the status bar to notify Views of changes to System UI visiblity.
@@ -290,9 +288,24 @@ interface IWindowManager
     oneway void setPipVisibility(boolean visible);
 
     /**
+     * Called by System UI to notify of changes to the visibility and height of the shelf.
+     */
+    void setShelfHeight(boolean visible, int shelfHeight);
+
+    /**
+     * Called by System UI to enable or disable haptic feedback on the navigation bar buttons.
+     */
+    void setNavBarVirtualKeyHapticFeedbackEnabled(boolean enabled);
+
+    /**
      * Device has a software navigation bar (separate from the status bar).
      */
     boolean hasNavigationBar();
+
+    /**
+     * Get the position of the nav bar
+     */
+    int getNavBarPosition();
 
     /**
      * Lock the device immediately with the specified options (can be null).
@@ -332,12 +345,6 @@ interface IWindowManager
     int getDockedStackSide();
 
     /**
-     * Sets whether we are currently in a drag resize operation where we are changing the docked
-     * stack size.
-     */
-    void setDockedStackResizing(boolean resizing);
-
-    /**
      * Sets the region the user can touch the divider. This region will be excluded from the region
      * which is used to cause a focus switch when dispatching touch.
      */
@@ -358,10 +365,10 @@ interface IWindowManager
      * Updates the dim layer used while resizing.
      *
      * @param visible Whether the dim layer should be visible.
-     * @param targetStackId The id of the task stack the dim layer should be placed on.
+     * @param targetWindowingMode The windowing mode of the stack the dim layer should be placed on.
      * @param alpha The translucency of the dim layer, between 0 and 1.
      */
-    void setResizeDimLayer(boolean visible, int targetStackId, float alpha);
+    void setResizeDimLayer(boolean visible, int targetWindowingMode, float alpha);
 
     /**
      * Requests Keyboard Shortcuts from the displayed window.
@@ -385,7 +392,7 @@ interface IWindowManager
     /**
      * Create an input consumer by name.
      */
-    void createInputConsumer(String name, out InputChannel inputChannel);
+    void createInputConsumer(IBinder token, String name, out InputChannel inputChannel);
 
     /**
      * Destroy an input consumer by name.  This method will also dispose the input channels
@@ -399,8 +406,33 @@ interface IWindowManager
     Region getCurrentImeTouchRegion();
 
     /**
+     * Starts a window trace.
+     */
+    void startWindowTrace();
+
+    /**
+     * Stops a window trace.
+     */
+    void stopWindowTrace();
+
+    /**
+     * Returns true if window trace is enabled.
+     */
+    boolean isWindowTraceEnabled();
+
+    /**
      * Requests that the WindowManager sends WindowManagerPolicy#ACTION_USER_ACTIVITY_NOTIFICATION
      * on the next user activity.
      */
     void requestUserActivityNotification();
+
+    /**
+     * Notify WindowManager that it should not override the info in DisplayManager for the specified
+     * display. This can disable letter- or pillar-boxing applied in DisplayManager when the metrics
+     * of the logical display reported from WindowManager do not correspond to the metrics of the
+     * physical display it is based on.
+     *
+     * @param displayId The id of the display.
+     */
+    void dontOverrideDisplayInfo(int displayId);
 }

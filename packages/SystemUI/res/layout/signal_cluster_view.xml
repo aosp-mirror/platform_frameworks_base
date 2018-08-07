@@ -115,27 +115,6 @@
         android:layout_width="wrap_content"
         >
     </LinearLayout>
-    <FrameLayout
-        android:id="@+id/no_sims_combo"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:contentDescription="@string/accessibility_no_sims">
-        <com.android.systemui.statusbar.AlphaOptimizedImageView
-            android:theme="?attr/lightIconTheme"
-            android:id="@+id/no_sims"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:src="@drawable/stat_sys_no_sims"
-            />
-        <com.android.systemui.statusbar.AlphaOptimizedImageView
-            android:theme="?attr/darkIconTheme"
-            android:id="@+id/no_sims_dark"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:src="@drawable/stat_sys_no_sims"
-            android:alpha="0.0"
-            />
-    </FrameLayout>
     <View
         android:id="@+id/wifi_airplane_spacer"
         android:layout_width="@dimen/status_bar_airplane_spacer_width"

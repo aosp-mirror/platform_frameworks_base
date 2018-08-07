@@ -51,7 +51,6 @@ public class CanvasPerfTest {
 
         while (state.keepRunning()) {
             canvas = node.start(200, 200);
-            canvas.setHighContrastText(false);
             int save = canvas.save();
             canvas.clipRect(1, 1, 199, 199);
             canvas.insertReorderBarrier();

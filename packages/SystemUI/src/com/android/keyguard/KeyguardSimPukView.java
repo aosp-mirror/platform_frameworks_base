@@ -181,7 +181,7 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
             }
         }
         if (isEsimLocked) {
-            msg = msg + " " + rez.getString(R.string.kg_sim_lock_instructions_esim);
+            msg = rez.getString(R.string.kg_sim_lock_esim_instructions, msg);
         }
         mSecurityMessageDisplay.setMessage(msg);
         mSimImageView.setImageTintList(ColorStateList.valueOf(color));
@@ -211,7 +211,7 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
     }
 
     @Override
-    protected int getPromtReasonStringRes(int reason) {
+    protected int getPromptReasonStringRes(int reason) {
         // No message on SIM Puk
         return 0;
     }
@@ -230,6 +230,10 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
             int msgId = isDefault ? R.string.kg_puk_enter_puk_hint :
                     R.string.kg_password_puk_failed;
             displayMessage = getContext().getString(msgId);
+        }
+        if (KeyguardEsimArea.isEsimLocked(mContext, mSubId)) {
+            displayMessage = getResources()
+                    .getString(R.string.kg_sim_lock_esim_instructions, displayMessage);
         }
         if (DEBUG) Log.d(LOG_TAG, "getPukPasswordErrorMessage:"
                 + " attemptsRemaining=" + attemptsRemaining + " displayMessage=" + displayMessage);
@@ -455,6 +459,12 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
     @Override
     public boolean startDisappearAnimation(Runnable finishRunnable) {
         return false;
+    }
+
+    @Override
+    public CharSequence getTitle() {
+        return getContext().getString(
+                com.android.internal.R.string.keyguard_accessibility_sim_puk_unlock);
     }
 }
 

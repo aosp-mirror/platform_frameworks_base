@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.job.IJobCallback;
 import android.content.ClipData;
+import android.net.Network;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -35,15 +36,16 @@ import android.os.RemoteException;
 public class JobParameters implements Parcelable {
 
     /** @hide */
-    public static final int REASON_CANCELED = 0;
+    public static final int REASON_CANCELED = JobProtoEnums.STOP_REASON_CANCELLED; // 0.
     /** @hide */
-    public static final int REASON_CONSTRAINTS_NOT_SATISFIED = 1;
+    public static final int REASON_CONSTRAINTS_NOT_SATISFIED =
+            JobProtoEnums.STOP_REASON_CONSTRAINTS_NOT_SATISFIED; //1.
     /** @hide */
-    public static final int REASON_PREEMPT = 2;
+    public static final int REASON_PREEMPT = JobProtoEnums.STOP_REASON_PREEMPT; // 2.
     /** @hide */
-    public static final int REASON_TIMEOUT = 3;
+    public static final int REASON_TIMEOUT = JobProtoEnums.STOP_REASON_TIMEOUT; // 3.
     /** @hide */
-    public static final int REASON_DEVICE_IDLE = 4;
+    public static final int REASON_DEVICE_IDLE = JobProtoEnums.STOP_REASON_DEVICE_IDLE; // 4.
 
     /** @hide */
     public static String getReasonName(int reason) {
@@ -66,14 +68,16 @@ public class JobParameters implements Parcelable {
     private final boolean overrideDeadlineExpired;
     private final Uri[] mTriggeredContentUris;
     private final String[] mTriggeredContentAuthorities;
+    private final Network network;
 
     private int stopReason; // Default value of stopReason is REASON_CANCELED
+    private String debugStopReason; // Human readable stop reason for debugging.
 
     /** @hide */
     public JobParameters(IBinder callback, int jobId, PersistableBundle extras,
             Bundle transientExtras, ClipData clipData, int clipGrantFlags,
             boolean overrideDeadlineExpired, Uri[] triggeredContentUris,
-            String[] triggeredContentAuthorities) {
+            String[] triggeredContentAuthorities, Network network) {
         this.jobId = jobId;
         this.extras = extras;
         this.transientExtras = transientExtras;
@@ -83,6 +87,7 @@ public class JobParameters implements Parcelable {
         this.overrideDeadlineExpired = overrideDeadlineExpired;
         this.mTriggeredContentUris = triggeredContentUris;
         this.mTriggeredContentAuthorities = triggeredContentAuthorities;
+        this.network = network;
     }
 
     /**
@@ -98,6 +103,14 @@ public class JobParameters implements Parcelable {
      */
     public int getStopReason() {
         return stopReason;
+    }
+
+    /**
+     * Reason onStopJob() was called on this job.
+     * @hide
+     */
+    public String getDebugStopReason() {
+        return debugStopReason;
     }
 
     /**
@@ -168,6 +181,28 @@ public class JobParameters implements Parcelable {
      */
     public @Nullable String[] getTriggeredContentAuthorities() {
         return mTriggeredContentAuthorities;
+    }
+
+    /**
+     * Return the network that should be used to perform any network requests
+     * for this job.
+     * <p>
+     * Devices may have multiple active network connections simultaneously, or
+     * they may not have a default network route at all. To correctly handle all
+     * situations like this, your job should always use the network returned by
+     * this method instead of implicitly using the default network route.
+     * <p>
+     * Note that the system may relax the constraints you originally requested,
+     * such as allowing a {@link JobInfo#NETWORK_TYPE_UNMETERED} job to run over
+     * a metered network when there is a surplus of metered data available.
+     *
+     * @return the network that should be used to perform any network requests
+     *         for this job, or {@code null} if this job didn't set any required
+     *         network type.
+     * @see JobInfo.Builder#setRequiredNetworkType(int)
+     */
+    public @Nullable Network getNetwork() {
+        return network;
     }
 
     /**
@@ -257,12 +292,19 @@ public class JobParameters implements Parcelable {
         overrideDeadlineExpired = in.readInt() == 1;
         mTriggeredContentUris = in.createTypedArray(Uri.CREATOR);
         mTriggeredContentAuthorities = in.createStringArray();
+        if (in.readInt() != 0) {
+            network = Network.CREATOR.createFromParcel(in);
+        } else {
+            network = null;
+        }
         stopReason = in.readInt();
+        debugStopReason = in.readString();
     }
 
     /** @hide */
-    public void setStopReason(int reason) {
+    public void setStopReason(int reason, String debugStopReason) {
         stopReason = reason;
+        this.debugStopReason = debugStopReason;
     }
 
     @Override
@@ -286,7 +328,14 @@ public class JobParameters implements Parcelable {
         dest.writeInt(overrideDeadlineExpired ? 1 : 0);
         dest.writeTypedArray(mTriggeredContentUris, flags);
         dest.writeStringArray(mTriggeredContentAuthorities);
+        if (network != null) {
+            dest.writeInt(1);
+            network.writeToParcel(dest, flags);
+        } else {
+            dest.writeInt(0);
+        }
         dest.writeInt(stopReason);
+        dest.writeString(debugStopReason);
     }
 
     public static final Creator<JobParameters> CREATOR = new Creator<JobParameters>() {

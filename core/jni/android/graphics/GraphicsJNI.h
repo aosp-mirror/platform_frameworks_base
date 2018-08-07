@@ -66,10 +66,6 @@ public:
     static SkPixelRef* refSkPixelRef(JNIEnv*, jobject bitmap);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);
 
-    // Given the 'native' long held by the Rasterizer.java object, return a
-    // ref to its SkRasterizer* (or NULL).
-    static sk_sp<SkRasterizer> refNativeRasterizer(jlong rasterizerHandle);
-
     /*
      *  LegacyBitmapConfig is the old enum in Skia that matched the enum int values
      *  in Bitmap.Config. Skia no longer supports this config, but has replaced it

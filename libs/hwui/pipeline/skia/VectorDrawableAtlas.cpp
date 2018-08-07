@@ -19,8 +19,9 @@
 #include <GrRectanizer_pow2.h>
 #include <SkCanvas.h>
 #include <cmath>
-#include "utils/TraceUtils.h"
 #include "renderthread/RenderProxy.h"
+#include "renderthread/RenderThread.h"
+#include "utils/TraceUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -29,8 +30,7 @@ namespace skiapipeline {
 VectorDrawableAtlas::VectorDrawableAtlas(size_t surfaceArea, StorageMode storageMode)
         : mWidth((int)std::sqrt(surfaceArea))
         , mHeight((int)std::sqrt(surfaceArea))
-        , mStorageMode(storageMode) {
-}
+        , mStorageMode(storageMode) {}
 
 void VectorDrawableAtlas::prepareForDraw(GrContext* context) {
     if (StorageMode::allowSharedSurface == mStorageMode) {
@@ -54,8 +54,8 @@ void VectorDrawableAtlas::prepareForDraw(GrContext* context) {
 #define MAX_UNUSED_RATIO 2.0f
 
 bool VectorDrawableAtlas::isFragmented() {
-    return mConsecutiveFailures > MAX_CONSECUTIVE_FAILURES
-            && mPixelUsedByVDs*MAX_UNUSED_RATIO < mPixelAllocated;
+    return mConsecutiveFailures > MAX_CONSECUTIVE_FAILURES &&
+           mPixelUsedByVDs * MAX_UNUSED_RATIO < mPixelAllocated;
 }
 
 void VectorDrawableAtlas::repackIfNeeded(GrContext* context) {
@@ -68,9 +68,9 @@ void VectorDrawableAtlas::repackIfNeeded(GrContext* context) {
 }
 
 // compare to CacheEntry objects based on VD area.
-bool VectorDrawableAtlas::compareCacheEntry(const CacheEntry& first, const CacheEntry& second)
-{
-    return first.VDrect.width()*first.VDrect.height() < second.VDrect.width()*second.VDrect.height();
+bool VectorDrawableAtlas::compareCacheEntry(const CacheEntry& first, const CacheEntry& second) {
+    return first.VDrect.width() * first.VDrect.height() <
+           second.VDrect.width() * second.VDrect.height();
 }
 
 void VectorDrawableAtlas::repack(GrContext* context) {
@@ -87,7 +87,7 @@ void VectorDrawableAtlas::repack(GrContext* context) {
         mRectanizer = std::make_unique<GrRectanizerPow2>(mWidth, mHeight);
     } else {
         if (!mSurface) {
-            return; //nothing to repack
+            return;  // nothing to repack
         }
         mRectanizer.reset();
     }
@@ -105,20 +105,20 @@ void VectorDrawableAtlas::repack(GrContext* context) {
 
     for (CacheEntry& entry : mRects) {
         SkRect currentVDRect = entry.VDrect;
-        SkImage* sourceImage; //copy either from the atlas or from a standalone surface
+        SkImage* sourceImage;  // copy either from the atlas or from a standalone surface
         if (entry.surface) {
             if (!fitInAtlas(currentVDRect.width(), currentVDRect.height())) {
-                continue; //don't even try to repack huge VD
+                continue;  // don't even try to repack huge VD
             }
             sourceImage = entry.surface->makeImageSnapshot().get();
         } else {
             sourceImage = sourceImageAtlas;
         }
-        size_t VDRectArea = currentVDRect.width()*currentVDRect.height();
+        size_t VDRectArea = currentVDRect.width() * currentVDRect.height();
         SkIPoint16 pos;
         if (canvas && mRectanizer->addRect(currentVDRect.width(), currentVDRect.height(), &pos)) {
-            SkRect newRect = SkRect::MakeXYWH(pos.fX, pos.fY, currentVDRect.width(),
-                    currentVDRect.height());
+            SkRect newRect =
+                    SkRect::MakeXYWH(pos.fX, pos.fY, currentVDRect.width(), currentVDRect.height());
             canvas->drawImageRect(sourceImage, currentVDRect, newRect, nullptr);
             entry.VDrect = newRect;
             entry.rect = newRect;
@@ -133,8 +133,7 @@ void VectorDrawableAtlas::repack(GrContext* context) {
             if (!entry.surface) {
                 // A rectangle moved from an atlas to a standalone surface.
                 mPixelUsedByVDs -= VDRectArea;
-                SkRect newRect = SkRect::MakeWH(currentVDRect.width(),
-                        currentVDRect.height());
+                SkRect newRect = SkRect::MakeWH(currentVDRect.width(), currentVDRect.height());
                 entry.surface = createSurface(newRect.width(), newRect.height(), context);
                 auto tempCanvas = entry.surface->getCanvas();
                 tempCanvas->clear(SK_ColorTRANSPARENT);
@@ -157,7 +156,7 @@ AtlasEntry VectorDrawableAtlas::requestNewEntry(int width, int height, GrContext
     }
 
     if (mSurface) {
-        const size_t area = width*height;
+        const size_t area = width * height;
 
         // Use a rectanizer to allocate unused space from the atlas surface.
         bool notTooBig = fitInAtlas(width, height);
@@ -228,21 +227,38 @@ AtlasEntry VectorDrawableAtlas::getEntry(AtlasKey atlasKey) {
 
 void VectorDrawableAtlas::releaseEntry(AtlasKey atlasKey) {
     if (INVALID_ATLAS_KEY != atlasKey) {
+        if (!renderthread::RenderThread::isCurrent()) {
+            {
+                AutoMutex _lock(mReleaseKeyLock);
+                mKeysForRelease.push_back(atlasKey);
+            }
+            // invoke releaseEntry on the renderthread
+            renderthread::RenderProxy::releaseVDAtlasEntries();
+            return;
+        }
         CacheEntry* entry = reinterpret_cast<CacheEntry*>(atlasKey);
         if (!entry->surface) {
             // Store freed atlas rectangles in "mFreeRects" and try to reuse them later, when atlas
             // is full.
             SkRect& removedRect = entry->rect;
-            size_t rectArea = removedRect.width()*removedRect.height();
+            size_t rectArea = removedRect.width() * removedRect.height();
             mFreeRects.emplace(rectArea, removedRect);
             SkRect& removedVDRect = entry->VDrect;
-            size_t VDRectArea = removedVDRect.width()*removedVDRect.height();
+            size_t VDRectArea = removedVDRect.width() * removedVDRect.height();
             mPixelUsedByVDs -= VDRectArea;
             mConsecutiveFailures = 0;
         }
         auto eraseIt = entry->eraseIt;
         mRects.erase(eraseIt);
     }
+}
+
+void VectorDrawableAtlas::delayedReleaseEntries() {
+    AutoMutex _lock(mReleaseKeyLock);
+    for (auto key : mKeysForRelease) {
+        releaseEntry(key);
+    }
+    mKeysForRelease.clear();
 }
 
 sk_sp<SkSurface> VectorDrawableAtlas::createSurface(int width, int height, GrContext* context) {
@@ -252,7 +268,10 @@ sk_sp<SkSurface> VectorDrawableAtlas::createSurface(int width, int height, GrCon
     sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
 #endif
     SkImageInfo info = SkImageInfo::MakeN32(width, height, kPremul_SkAlphaType, colorSpace);
-    return SkSurface::MakeRenderTarget(context, SkBudgeted::kYes, info);
+    // This must have a top-left origin so that calls to surface->canvas->writePixels
+    // performs a basic texture upload instead of a more complex drawing operation
+    return SkSurface::MakeRenderTarget(context, SkBudgeted::kYes, info, 0, kTopLeft_GrSurfaceOrigin,
+                                       nullptr);
 }
 
 void VectorDrawableAtlas::setStorageMode(StorageMode mode) {

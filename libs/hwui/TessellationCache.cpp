@@ -45,7 +45,8 @@ TessellationCache::Description::Description()
     memset(&shape, 0, sizeof(Shape));
 }
 
-TessellationCache::Description::Description(Type type, const Matrix4& transform, const SkPaint& paint)
+TessellationCache::Description::Description(Type type, const Matrix4& transform,
+                                            const SkPaint& paint)
         : type(type)
         , aa(paint.isAntiAlias())
         , cap(paint.getStrokeCap())
@@ -82,7 +83,7 @@ hash_t TessellationCache::Description::hash() const {
     hash = JenkinsHashMix(hash, android::hash_type(strokeWidth));
     hash = JenkinsHashMix(hash, android::hash_type(scaleX));
     hash = JenkinsHashMix(hash, android::hash_type(scaleY));
-    hash = JenkinsHashMixBytes(hash, (uint8_t*) &shape, sizeof(Shape));
+    hash = JenkinsHashMixBytes(hash, (uint8_t*)&shape, sizeof(Shape));
     return JenkinsHashWhiten(hash);
 }
 
@@ -94,25 +95,24 @@ void TessellationCache::Description::setupMatrixAndPaint(Matrix4* matrix, SkPain
     paint->setStrokeWidth(strokeWidth);
 }
 
-TessellationCache::ShadowDescription::ShadowDescription()
-        : nodeKey(nullptr) {
+TessellationCache::ShadowDescription::ShadowDescription() : nodeKey(nullptr) {
     memset(&matrixData, 0, sizeof(matrixData));
 }
 
-TessellationCache::ShadowDescription::ShadowDescription(const SkPath* nodeKey, const Matrix4* drawTransform)
+TessellationCache::ShadowDescription::ShadowDescription(const SkPath* nodeKey,
+                                                        const Matrix4* drawTransform)
         : nodeKey(nodeKey) {
     memcpy(&matrixData, drawTransform->data, sizeof(matrixData));
 }
 
 bool TessellationCache::ShadowDescription::operator==(
         const TessellationCache::ShadowDescription& rhs) const {
-    return nodeKey == rhs.nodeKey
-            && memcmp(&matrixData, &rhs.matrixData, sizeof(matrixData)) == 0;
+    return nodeKey == rhs.nodeKey && memcmp(&matrixData, &rhs.matrixData, sizeof(matrixData)) == 0;
 }
 
 hash_t TessellationCache::ShadowDescription::hash() const {
-    uint32_t hash = JenkinsHashMixBytes(0, (uint8_t*) &nodeKey, sizeof(const void*));
-    hash = JenkinsHashMixBytes(hash, (uint8_t*) &matrixData, sizeof(matrixData));
+    uint32_t hash = JenkinsHashMixBytes(0, (uint8_t*)&nodeKey, sizeof(const void*));
+    hash = JenkinsHashMixBytes(hash, (uint8_t*)&matrixData, sizeof(matrixData));
     return JenkinsHashWhiten(hash);
 }
 
@@ -123,9 +123,7 @@ hash_t TessellationCache::ShadowDescription::hash() const {
 class TessellationCache::TessellationTask : public Task<VertexBuffer*> {
 public:
     TessellationTask(Tessellator tessellator, const Description& description)
-        : tessellator(tessellator)
-        , description(description) {
-    }
+            : tessellator(tessellator), description(description) {}
 
     ~TessellationTask() {}
 
@@ -135,8 +133,7 @@ public:
 
 class TessellationCache::TessellationProcessor : public TaskProcessor<VertexBuffer*> {
 public:
-    explicit TessellationProcessor(Caches& caches)
-            : TaskProcessor<VertexBuffer*>(&caches.tasks) {}
+    explicit TessellationProcessor(Caches& caches) : TaskProcessor<VertexBuffer*>(&caches.tasks) {}
     ~TessellationProcessor() {}
 
     virtual void onProcess(const sp<Task<VertexBuffer*> >& task) override {
@@ -149,10 +146,7 @@ public:
 
 class TessellationCache::Buffer {
 public:
-    explicit Buffer(const sp<Task<VertexBuffer*> >& task)
-            : mTask(task)
-            , mBuffer(nullptr) {
-    }
+    explicit Buffer(const sp<Task<VertexBuffer*> >& task) : mTask(task), mBuffer(nullptr) {}
 
     ~Buffer() {
         mTask.clear();
@@ -203,18 +197,15 @@ static void reverseVertexArray(Vertex* polygon, int len) {
     }
 }
 
-void tessellateShadows(
-        const Matrix4* drawTransform, const Rect* localClip,
-        bool isCasterOpaque, const SkPath* casterPerimeter,
-        const Matrix4* casterTransformXY, const Matrix4* casterTransformZ,
-        const Vector3& lightCenter, float lightRadius,
-        VertexBuffer& ambientBuffer, VertexBuffer& spotBuffer) {
-
+void tessellateShadows(const Matrix4* drawTransform, const Rect* localClip, bool isCasterOpaque,
+                       const SkPath* casterPerimeter, const Matrix4* casterTransformXY,
+                       const Matrix4* casterTransformZ, const Vector3& lightCenter,
+                       float lightRadius, VertexBuffer& ambientBuffer, VertexBuffer& spotBuffer) {
     // tessellate caster outline into a 2d polygon
     std::vector<Vertex> casterVertices2d;
     const float casterRefinementThreshold = 2.0f;
-    PathTessellator::approximatePathOutlineVertices(*casterPerimeter,
-            casterRefinementThreshold, casterVertices2d);
+    PathTessellator::approximatePathOutlineVertices(*casterPerimeter, casterRefinementThreshold,
+                                                    casterVertices2d);
 
     // Shadow requires CCW for now. TODO: remove potential double-reverse
     reverseVertexArray(&casterVertices2d.front(), casterVertices2d.size());
@@ -235,9 +226,8 @@ void tessellateShadows(
     }
 
     // map the centroid of the caster into 3d
-    Vector2 centroid =  ShadowTessellator::centroid2d(
-            reinterpret_cast<const Vector2*>(&casterVertices2d.front()),
-            casterVertexCount);
+    Vector2 centroid = ShadowTessellator::centroid2d(
+            reinterpret_cast<const Vector2*>(&casterVertices2d.front()), casterVertexCount);
     Vector3 centroid3d = {centroid.x, centroid.y, 0};
     mapPointFakeZ(centroid3d, casterTransformXY, casterTransformZ);
 
@@ -257,14 +247,13 @@ void tessellateShadows(
     casterTransformXY->mapRect(casterBounds);
 
     // actual tessellation of both shadows
-    ShadowTessellator::tessellateAmbientShadow(
-            isCasterOpaque, casterPolygon, casterVertexCount, centroid3d,
-            casterBounds, *localClip, maxZ, ambientBuffer);
+    ShadowTessellator::tessellateAmbientShadow(isCasterOpaque, casterPolygon, casterVertexCount,
+                                               centroid3d, casterBounds, *localClip, maxZ,
+                                               ambientBuffer);
 
-    ShadowTessellator::tessellateSpotShadow(
-            isCasterOpaque, casterPolygon, casterVertexCount, centroid3d,
-            *drawTransform, lightCenter, lightRadius, casterBounds, *localClip,
-            spotBuffer);
+    ShadowTessellator::tessellateSpotShadow(isCasterOpaque, casterPolygon, casterVertexCount,
+                                            centroid3d, *drawTransform, lightCenter, lightRadius,
+                                            casterBounds, *localClip, spotBuffer);
 }
 
 class ShadowProcessor : public TaskProcessor<TessellationCache::vertexBuffer_pair_t> {
@@ -278,8 +267,8 @@ public:
         ATRACE_NAME("shadow tessellation");
 
         tessellateShadows(&t->drawTransform, &t->localClip, t->opaque, &t->casterPerimeter,
-                &t->transformXY, &t->transformZ, t->lightCenter, t->lightRadius,
-                t->ambientBuffer, t->spotBuffer);
+                          &t->transformXY, &t->transformZ, t->lightCenter, t->lightRadius,
+                          t->ambientBuffer, t->spotBuffer);
 
         t->setResult(TessellationCache::vertexBuffer_pair_t(&t->ambientBuffer, &t->spotBuffer));
     }
@@ -292,7 +281,8 @@ public:
 TessellationCache::TessellationCache()
         : mMaxSize(MB(1))
         , mCache(LruCache<Description, Buffer*>::kUnlimitedCapacity)
-        , mShadowCache(LruCache<ShadowDescription, Task<vertexBuffer_pair_t*>*>::kUnlimitedCapacity) {
+        , mShadowCache(
+                  LruCache<ShadowDescription, Task<vertexBuffer_pair_t*>*>::kUnlimitedCapacity) {
     mCache.setOnEntryRemovedListener(&mBufferRemovedListener);
     mShadowCache.setOnEntryRemovedListener(&mBufferPairRemovedListener);
     mDebugEnabled = Properties::debugLevel & kDebugCaches;
@@ -323,7 +313,6 @@ uint32_t TessellationCache::getMaxSize() {
 // Caching
 ///////////////////////////////////////////////////////////////////////////////
 
-
 void TessellationCache::trim() {
     uint32_t size = getSize();
     while (size > mMaxSize) {
@@ -343,7 +332,7 @@ void TessellationCache::clear() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void TessellationCache::BufferRemovedListener::operator()(Description& description,
-        Buffer*& buffer) {
+                                                          Buffer*& buffer) {
     delete buffer;
 }
 
@@ -352,32 +341,31 @@ void TessellationCache::BufferRemovedListener::operator()(Description& descripti
 ///////////////////////////////////////////////////////////////////////////////
 
 void TessellationCache::precacheShadows(const Matrix4* drawTransform, const Rect& localClip,
-        bool opaque, const SkPath* casterPerimeter,
-        const Matrix4* transformXY, const Matrix4* transformZ,
-        const Vector3& lightCenter, float lightRadius) {
+                                        bool opaque, const SkPath* casterPerimeter,
+                                        const Matrix4* transformXY, const Matrix4* transformZ,
+                                        const Vector3& lightCenter, float lightRadius) {
     ShadowDescription key(casterPerimeter, drawTransform);
 
     if (mShadowCache.get(key)) return;
-    sp<ShadowTask> task = new ShadowTask(drawTransform, localClip, opaque,
-            casterPerimeter, transformXY, transformZ, lightCenter, lightRadius);
+    sp<ShadowTask> task = new ShadowTask(drawTransform, localClip, opaque, casterPerimeter,
+                                         transformXY, transformZ, lightCenter, lightRadius);
     if (mShadowProcessor == nullptr) {
         mShadowProcessor = new ShadowProcessor(Caches::getInstance());
     }
     mShadowProcessor->add(task);
-    task->incStrong(nullptr); // not using sp<>s, so manually ref while in the cache
+    task->incStrong(nullptr);  // not using sp<>s, so manually ref while in the cache
     mShadowCache.put(key, task.get());
 }
 
 sp<TessellationCache::ShadowTask> TessellationCache::getShadowTask(
-        const Matrix4* drawTransform, const Rect& localClip,
-        bool opaque, const SkPath* casterPerimeter,
-        const Matrix4* transformXY, const Matrix4* transformZ,
+        const Matrix4* drawTransform, const Rect& localClip, bool opaque,
+        const SkPath* casterPerimeter, const Matrix4* transformXY, const Matrix4* transformZ,
         const Vector3& lightCenter, float lightRadius) {
     ShadowDescription key(casterPerimeter, drawTransform);
     ShadowTask* task = static_cast<ShadowTask*>(mShadowCache.get(key));
     if (!task) {
-        precacheShadows(drawTransform, localClip, opaque, casterPerimeter,
-                transformXY, transformZ, lightCenter, lightRadius);
+        precacheShadows(drawTransform, localClip, opaque, casterPerimeter, transformXY, transformZ,
+                        lightCenter, lightRadius);
         task = static_cast<ShadowTask*>(mShadowCache.get(key));
     }
     LOG_ALWAYS_FATAL_IF(task == nullptr, "shadow not precached");
@@ -388,8 +376,8 @@ sp<TessellationCache::ShadowTask> TessellationCache::getShadowTask(
 // Tessellation precaching
 ///////////////////////////////////////////////////////////////////////////////
 
-TessellationCache::Buffer* TessellationCache::getOrCreateBuffer(
-        const Description& entry, Tessellator tessellator) {
+TessellationCache::Buffer* TessellationCache::getOrCreateBuffer(const Description& entry,
+                                                                Tessellator tessellator) {
     Buffer* buffer = mCache.get(entry);
     if (!buffer) {
         // not cached, enqueue a task to fill the buffer
@@ -408,7 +396,7 @@ TessellationCache::Buffer* TessellationCache::getOrCreateBuffer(
 }
 
 static VertexBuffer* tessellatePath(const TessellationCache::Description& description,
-        const SkPath& path) {
+                                    const SkPath& path) {
     Matrix4 matrix;
     SkPaint paint;
     description.setupMatrixAndPaint(&matrix, &paint);
@@ -422,8 +410,8 @@ static VertexBuffer* tessellatePath(const TessellationCache::Description& descri
 ///////////////////////////////////////////////////////////////////////////////
 
 static VertexBuffer* tessellateRoundRect(const TessellationCache::Description& description) {
-    SkRect rect = SkRect::MakeWH(description.shape.roundRect.width,
-            description.shape.roundRect.height);
+    SkRect rect =
+            SkRect::MakeWH(description.shape.roundRect.width, description.shape.roundRect.height);
     float rx = description.shape.roundRect.rx;
     float ry = description.shape.roundRect.ry;
     if (description.style == SkPaint::kStrokeAndFill_Style) {
@@ -437,9 +425,9 @@ static VertexBuffer* tessellateRoundRect(const TessellationCache::Description& d
     return tessellatePath(description, path);
 }
 
-TessellationCache::Buffer* TessellationCache::getRoundRectBuffer(
-        const Matrix4& transform, const SkPaint& paint,
-        float width, float height, float rx, float ry) {
+TessellationCache::Buffer* TessellationCache::getRoundRectBuffer(const Matrix4& transform,
+                                                                 const SkPaint& paint, float width,
+                                                                 float height, float rx, float ry) {
     Description entry(Description::Type::RoundRect, transform, paint);
     entry.shape.roundRect.width = width;
     entry.shape.roundRect.height = height;
@@ -448,9 +436,9 @@ TessellationCache::Buffer* TessellationCache::getRoundRectBuffer(
     return getOrCreateBuffer(entry, &tessellateRoundRect);
 }
 const VertexBuffer* TessellationCache::getRoundRect(const Matrix4& transform, const SkPaint& paint,
-        float width, float height, float rx, float ry) {
+                                                    float width, float height, float rx, float ry) {
     return getRoundRectBuffer(transform, paint, width, height, rx, ry)->getVertexBuffer();
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

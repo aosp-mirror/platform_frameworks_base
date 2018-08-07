@@ -25,6 +25,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.UserHandle;
@@ -69,6 +70,7 @@ public class TestableContext extends ContextWrapper implements TestRule {
     private LeakCheck.Tracker mService;
     private LeakCheck.Tracker mComponent;
     private TestableResources mTestableResources;
+    private TestablePermissions mTestablePermissions;
 
     public TestableContext(Context base) {
         this(base, null);
@@ -81,6 +83,7 @@ public class TestableContext extends ContextWrapper implements TestRule {
                 .acquireContentProviderClient(Settings.AUTHORITY);
         mSettingsProvider = TestableSettingsProvider.getFakeSettingsProvider(settings);
         mTestableContentResolver.addProvider(Settings.AUTHORITY, mSettingsProvider);
+        mSettingsProvider.clearValuesAndCheck(TestableContext.this);
         mReceiver = check != null ? check.getTracker("receiver") : null;
         mService = check != null ? check.getTracker("service") : null;
         mComponent = check != null ? check.getTracker("component") : null;
@@ -300,6 +303,159 @@ public class TestableContext extends ContextWrapper implements TestRule {
     public void unregisterComponentCallbacks(ComponentCallbacks callback) {
         if (mComponent != null) mComponent.getLeakInfo(callback).clearAllocations();
         super.unregisterComponentCallbacks(callback);
+    }
+
+    public TestablePermissions getTestablePermissions() {
+        if (mTestablePermissions == null) {
+            mTestablePermissions = new TestablePermissions();
+        }
+        return mTestablePermissions;
+    }
+
+    @Override
+    public int checkCallingOrSelfPermission(String permission) {
+        if (mTestablePermissions != null && mTestablePermissions.wantsCall(permission)) {
+            return mTestablePermissions.check(permission);
+        }
+        return super.checkCallingOrSelfPermission(permission);
+    }
+
+    @Override
+    public int checkCallingPermission(String permission) {
+        if (mTestablePermissions != null && mTestablePermissions.wantsCall(permission)) {
+            return mTestablePermissions.check(permission);
+        }
+        return super.checkCallingPermission(permission);
+    }
+
+    @Override
+    public int checkPermission(String permission, int pid, int uid) {
+        if (mTestablePermissions != null && mTestablePermissions.wantsCall(permission)) {
+            return mTestablePermissions.check(permission);
+        }
+        return super.checkPermission(permission, pid, uid);
+    }
+
+    @Override
+    public int checkPermission(String permission, int pid, int uid, IBinder callerToken) {
+        if (mTestablePermissions != null && mTestablePermissions.wantsCall(permission)) {
+            return mTestablePermissions.check(permission);
+        }
+        return super.checkPermission(permission, pid, uid, callerToken);
+    }
+
+    @Override
+    public int checkSelfPermission(String permission) {
+        if (mTestablePermissions != null && mTestablePermissions.wantsCall(permission)) {
+            return mTestablePermissions.check(permission);
+        }
+        return super.checkSelfPermission(permission);
+    }
+
+    @Override
+    public void enforceCallingOrSelfPermission(String permission, String message) {
+        if (mTestablePermissions != null && mTestablePermissions.wantsCall(permission)) {
+            mTestablePermissions.enforce(permission);
+        } else {
+            super.enforceCallingOrSelfPermission(permission, message);
+        }
+    }
+
+    @Override
+    public void enforceCallingPermission(String permission, String message) {
+        if (mTestablePermissions != null && mTestablePermissions.wantsCall(permission)) {
+            mTestablePermissions.enforce(permission);
+        } else {
+            super.enforceCallingPermission(permission, message);
+        }
+    }
+
+    @Override
+    public void enforcePermission(String permission, int pid, int uid, String message) {
+        if (mTestablePermissions != null && mTestablePermissions.wantsCall(permission)) {
+            mTestablePermissions.enforce(permission);
+        } else {
+            super.enforcePermission(permission, pid, uid, message);
+        }
+    }
+
+    @Override
+    public int checkCallingOrSelfUriPermission(Uri uri, int modeFlags) {
+        if (mTestablePermissions != null && mTestablePermissions.wantsCall(uri)) {
+            return mTestablePermissions.check(uri, modeFlags);
+        }
+        return super.checkCallingOrSelfUriPermission(uri, modeFlags);
+    }
+
+    @Override
+    public int checkCallingUriPermission(Uri uri, int modeFlags) {
+        if (mTestablePermissions != null && mTestablePermissions.wantsCall(uri)) {
+            return mTestablePermissions.check(uri, modeFlags);
+        }
+        return super.checkCallingUriPermission(uri, modeFlags);
+    }
+
+    @Override
+    public void enforceCallingOrSelfUriPermission(Uri uri, int modeFlags, String message) {
+        if (mTestablePermissions != null && mTestablePermissions.wantsCall(uri)) {
+            mTestablePermissions.enforce(uri, modeFlags);
+        } else {
+            super.enforceCallingOrSelfUriPermission(uri, modeFlags, message);
+        }
+    }
+
+    @Override
+    public int checkUriPermission(Uri uri, int pid, int uid, int modeFlags) {
+        if (mTestablePermissions != null && mTestablePermissions.wantsCall(uri)) {
+            return mTestablePermissions.check(uri, modeFlags);
+        }
+        return super.checkUriPermission(uri, pid, uid, modeFlags);
+    }
+
+    @Override
+    public int checkUriPermission(Uri uri, int pid, int uid, int modeFlags, IBinder callerToken) {
+        if (mTestablePermissions != null && mTestablePermissions.wantsCall(uri)) {
+            return mTestablePermissions.check(uri, modeFlags);
+        }
+        return super.checkUriPermission(uri, pid, uid, modeFlags, callerToken);
+    }
+
+    @Override
+    public int checkUriPermission(Uri uri, String readPermission, String writePermission, int pid,
+            int uid, int modeFlags) {
+        if (mTestablePermissions != null && mTestablePermissions.wantsCall(uri)) {
+            return mTestablePermissions.check(uri, modeFlags);
+        }
+        return super.checkUriPermission(uri, readPermission, writePermission, pid, uid, modeFlags);
+    }
+
+    @Override
+    public void enforceCallingUriPermission(Uri uri, int modeFlags, String message) {
+        if (mTestablePermissions != null && mTestablePermissions.wantsCall(uri)) {
+            mTestablePermissions.enforce(uri, modeFlags);
+        } else {
+            super.enforceCallingUriPermission(uri, modeFlags, message);
+        }
+    }
+
+    @Override
+    public void enforceUriPermission(Uri uri, int pid, int uid, int modeFlags, String message) {
+        if (mTestablePermissions != null && mTestablePermissions.wantsCall(uri)) {
+            mTestablePermissions.enforce(uri, modeFlags);
+        } else {
+            super.enforceUriPermission(uri, pid, uid, modeFlags, message);
+        }
+    }
+
+    @Override
+    public void enforceUriPermission(Uri uri, String readPermission, String writePermission,
+            int pid, int uid, int modeFlags, String message) {
+        if (mTestablePermissions != null && mTestablePermissions.wantsCall(uri)) {
+            mTestablePermissions.enforce(uri, modeFlags);
+        } else {
+            super.enforceUriPermission(uri, readPermission, writePermission, pid, uid, modeFlags,
+                    message);
+        }
     }
 
     @Override

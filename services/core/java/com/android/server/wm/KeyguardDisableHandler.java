@@ -29,7 +29,8 @@ import android.os.RemoteException;
 import android.os.TokenWatcher;
 import android.util.Log;
 import android.util.Pair;
-import android.view.WindowManagerPolicy;
+
+import com.android.server.policy.WindowManagerPolicy;
 
 public class KeyguardDisableHandler extends Handler {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "KeyguardDisableHandler" : TAG_WM;

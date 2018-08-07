@@ -44,6 +44,15 @@
          Displayed in one line in a large font.  -->
     <string name="keyguard_password_enter_pin_password_code">Type PIN to unlock</string>
 
+    <!-- Instructions telling the user to enter their PIN password to unlock the keyguard [CHAR LIMIT=30] -->
+    <string name="keyguard_enter_your_pin">Enter your PIN</string>
+
+    <!-- Instructions telling the user to enter their pattern to unlock the keyguard [CHAR LIMIT=30] -->
+    <string name="keyguard_enter_your_pattern">Enter your Pattern</string>
+
+    <!-- Instructions telling the user to enter their text password to unlock the keyguard [CHAR LIMIT=30] -->
+    <string name="keyguard_enter_your_password">Enter your Password</string>
+
     <!-- Instructions telling the user that they entered the wrong pin while trying
          to unlock the keyguard.  Displayed in one line in a large font.  -->
     <string name="keyguard_password_wrong_pin_code">Incorrect PIN code.</string>
@@ -57,15 +66,15 @@
 
     <!-- When the lock screen is showing and the phone plugged in, and the battery
          is not fully charged, say that it's charging.  -->
-    <string name="keyguard_plugged_in">Charging</string>
+    <string name="keyguard_plugged_in"><xliff:g id="percentage">%s</xliff:g> • Charging</string>
 
     <!-- When the lock screen is showing and the phone plugged in, and the battery
          is not fully charged, and it's plugged into a fast charger, say that it's charging fast.  -->
-    <string name="keyguard_plugged_in_charging_fast">Charging rapidly</string>
+    <string name="keyguard_plugged_in_charging_fast"><xliff:g id="percentage">%s</xliff:g> • Charging rapidly</string>
 
     <!-- When the lock screen is showing and the phone plugged in, and the battery
          is not fully charged, and it's plugged into a slow charger, say that it's charging slowly.  -->
-    <string name="keyguard_plugged_in_charging_slowly">Charging slowly</string>
+    <string name="keyguard_plugged_in_charging_slowly"><xliff:g id="percentage">%s</xliff:g> • Charging slowly</string>
 
     <!-- When the lock screen is showing and the battery is low, warn user to plug
          in the phone soon. -->
@@ -111,6 +120,9 @@
 
     <!-- Accessibility description of the PIN password view. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_pin_area">PIN area</string>
+    <!-- Accessibility description of the normal password view. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_password">Device password</string>
+
     <!-- Accessibility description of the SIM PIN password view. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_sim_pin_area">SIM PIN area</string>
     <!-- Accessibility description of the SIM PUK password view. [CHAR_LIMIT=none] -->
@@ -124,6 +136,10 @@
     <string name="keyboardview_keycode_delete">Delete</string>
     <!-- Description of the button used to disable current carrier when the device supported embedded SIM. [CHAR LIMIT=30] -->
     <string name="disable_carrier_button_text">Disable eSIM</string>
+    <!-- Title of Error message when disabling current carrier failed for the device supported embedded SIM. [CHAR LIMIT=80] -->
+    <string name="error_disable_esim_title">Can\u2019t disable eSIM</string>
+    <!-- Description of Error message when disabling current carrier failed for the device supported embedded SIM. [CHAR LIMIT=80] -->
+    <string name="error_disable_esim_msg">The eSIM can\u2019t be disabled due to an error.</string>
     <!-- Description of the Enter button in a KeyboardView. [CHAR LIMIT=NONE] -->
     <string name="keyboardview_keycode_enter">Enter</string>
 
@@ -136,15 +152,18 @@
     <!-- Message shown when user enters wrong PIN -->
     <string name="kg_wrong_pin">Wrong PIN</string>
     <!-- Countdown message shown after too many failed unlock attempts -->
-    <string name="kg_too_many_failed_attempts_countdown">Try again in <xliff:g id="number">%d</xliff:g> seconds.</string>
+    <plurals name="kg_too_many_failed_attempts_countdown">
+        <item quantity="one">Try again in 1 second.</item>
+        <item quantity="other">Try again in <xliff:g id="number">%d</xliff:g> seconds.</item>
+    </plurals>
     <!-- Instructions for using the pattern unlock screen -->
     <string name="kg_pattern_instructions">Draw your pattern</string>
     <!-- Instructions for using the SIM PIN unlock screen -->
     <string name="kg_sim_pin_instructions">Enter SIM PIN.</string>
     <!-- Instructions for using the SIM PIN unlock screen when there's more than one SIM -->
     <string name="kg_sim_pin_instructions_multi">Enter SIM PIN for \"<xliff:g id="carrier" example="CARD 1">%1$s</xliff:g>\".</string>
-    <!-- Instructions for disabling eSIM carrier to unlock the phone with embedded SIM -->
-    <string name="kg_sim_lock_instructions_esim">Disable eSIM to use device without mobile service.</string>
+    <!-- Instructions for disabling eSIM carrier to unlock the phone with embedded SIM. This message follows the original SIM PIN/PUK message of device without embedded SIM. -->
+    <string name="kg_sim_lock_esim_instructions"><xliff:g id="previous_msg" example="Enter SIM PIN.">%1$s</xliff:g> Disable eSIM to use device without mobile service.</string>
     <!-- Instructions for using the PIN unlock screen -->
     <string name="kg_pin_instructions">Enter PIN</string>
     <!-- Instructions for using the password unlock screen -->
@@ -366,9 +385,9 @@
 
     <!-- Instructions telling the user remaining times when enter SIM PIN view.  -->
     <plurals name="kg_password_default_pin_message">
-        <item quantity="one">Enter SIM PIN, you have <xliff:g id="number">%d</xliff:g> remaining
+        <item quantity="one">Enter SIM PIN. You have <xliff:g id="number">%d</xliff:g> remaining
 attempt before you must contact your carrier to unlock your device.</item>
-        <item quantity="other">Enter SIM PIN, you have <xliff:g id="number">%d</xliff:g> remaining
+        <item quantity="other">Enter SIM PIN. You have <xliff:g id="number">%d</xliff:g> remaining
 attempts.</item>
     </plurals>
 

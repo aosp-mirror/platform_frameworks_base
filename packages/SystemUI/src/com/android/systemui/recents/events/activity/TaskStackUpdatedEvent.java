@@ -17,7 +17,7 @@
 package com.android.systemui.recents.events.activity;
 
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.shared.recents.model.TaskStack;
 
 /**
  * This is sent by the activity whenever the task stach has changed.

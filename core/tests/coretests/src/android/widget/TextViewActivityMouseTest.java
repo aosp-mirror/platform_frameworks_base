@@ -44,6 +44,7 @@ import static android.widget.espresso.TextViewAssertions.hasSelection;
 
 import android.app.Activity;
 import android.support.test.filters.MediumTest;
+import android.support.test.filters.Suppress;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.MotionEvent;
@@ -62,6 +63,7 @@ import org.junit.runner.RunWith;
  */
 @RunWith(AndroidJUnit4.class)
 @MediumTest
+@Suppress // Consistently failing. b/29591177
 public class TextViewActivityMouseTest {
 
     @Rule

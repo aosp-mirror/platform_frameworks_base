@@ -28,6 +28,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityManager;
 
@@ -73,7 +74,9 @@ public class FalsingManager implements SensorEventListener {
 
     private boolean mEnforceBouncer = false;
     private boolean mBouncerOn = false;
+    private boolean mBouncerOffOnDown = false;
     private boolean mSessionActive = false;
+    private boolean mIsTouchScreen = true;
     private int mState = StatusBarState.SHADE;
     private boolean mScreenOn;
     private boolean mShowingAod;
@@ -167,6 +170,9 @@ public class FalsingManager implements SensorEventListener {
         if (mDataCollector.isEnabledFull()) {
             registerSensors(COLLECTOR_SENSORS);
         }
+        if (mDataCollector.isEnabled()) {
+            mDataCollector.onFalsingSessionStarted();
+        }
     }
 
     private void registerSensors(int [] sensors) {
@@ -231,6 +237,11 @@ public class FalsingManager implements SensorEventListener {
         if (mAccessibilityManager.isTouchExplorationEnabled()) {
             // Touch exploration triggers false positives in the classifier and
             // already sufficiently prevents false unlocks.
+            return false;
+        }
+        if (!mIsTouchScreen) {
+            // Unlocking with input devices besides the touchscreen should already be sufficiently
+            // anti-falsed.
             return false;
         }
         return mHumanInteractionClassifier.isFalseTouch();
@@ -353,11 +364,12 @@ public class FalsingManager implements SensorEventListener {
         mDataCollector.setQsExpanded(expanded);
     }
 
-    public void onTrackingStarted() {
+    public void onTrackingStarted(boolean secure) {
         if (FalsingLog.ENABLED) {
             FalsingLog.i("onTrackingStarted", "");
         }
-        mHumanInteractionClassifier.setType(Classifier.UNLOCK);
+        mHumanInteractionClassifier.setType(secure ?
+                Classifier.BOUNCER_UNLOCK : Classifier.UNLOCK);
         mDataCollector.onTrackingStarted();
     }
 
@@ -446,9 +458,21 @@ public class FalsingManager implements SensorEventListener {
     }
 
     public void onTouchEvent(MotionEvent event, int width, int height) {
-        if (mSessionActive && !mBouncerOn) {
-            mDataCollector.onTouchEvent(event, width, height);
-            mHumanInteractionClassifier.onTouchEvent(event);
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            mIsTouchScreen = event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN);
+            // If the bouncer was not shown during the down event,
+            // we want the entire gesture going to HumanInteractionClassifier
+            mBouncerOffOnDown = !mBouncerOn;
+        }
+        if (mSessionActive) {
+            if (!mBouncerOn) {
+                // In case bouncer is "visible", but onFullyShown has not yet been called,
+                // avoid adding the event to DataCollector
+                mDataCollector.onTouchEvent(event, width, height);
+            }
+            if (mBouncerOffOnDown) {
+                mHumanInteractionClassifier.onTouchEvent(event);
+            }
         }
     }
 

@@ -19,10 +19,8 @@
 class ReadbackFromHardware;
 
 static TestScene::Registrar _SaveLayer(TestScene::Info{
-    "readbackFromHBitmap",
-    "Allocates hardware bitmap and readback data from it.",
-    TestScene::simpleCreateScene<ReadbackFromHardware>
-});
+        "readbackFromHBitmap", "Allocates hardware bitmap and readback data from it.",
+        TestScene::simpleCreateScene<ReadbackFromHardware>});
 
 class ReadbackFromHardware : public TestScene {
 public:
@@ -41,7 +39,7 @@ public:
     }
 
     void createContent(int width, int height, Canvas& canvas) override {
-        canvas.drawColor(Color::White, SkBlendMode::kSrcOver); // background
+        canvas.drawColor(Color::White, SkBlendMode::kSrcOver);  // background
 
         sk_sp<Bitmap> hardwareBitmap(createHardwareBitmap());
 
@@ -50,7 +48,7 @@ public:
 
         SkBitmap canvasBitmap;
         sk_sp<Bitmap> heapBitmap(TestUtils::createBitmap(hardwareBitmap->width(),
-                hardwareBitmap->height(), &canvasBitmap));
+                                                         hardwareBitmap->height(), &canvasBitmap));
 
         SkCanvas skCanvas(canvasBitmap);
         skCanvas.drawBitmap(readback, 0, 0);
@@ -59,5 +57,5 @@ public:
         canvas.drawBitmap(*hardwareBitmap, 0, 500, nullptr);
     }
 
-    void doFrame(int frameNr) override { }
+    void doFrame(int frameNr) override {}
 };

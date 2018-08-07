@@ -18,7 +18,7 @@
 
 #include "benchmark/benchmark.h"
 
-#include "TestHelpers.h"
+#include "BenchmarkHelpers.h"
 
 int main(int argc, char** argv) {
   ::benchmark::Initialize(&argc, argv);

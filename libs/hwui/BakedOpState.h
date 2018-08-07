@@ -26,22 +26,22 @@ namespace android {
 namespace uirenderer {
 
 namespace OpClipSideFlags {
-    enum {
-        None = 0x0,
-        Left = 0x1,
-        Top = 0x2,
-        Right = 0x4,
-        Bottom = 0x8,
-        Full = 0xF,
-        // ConservativeFull = 0x1F  needed?
-    };
+enum {
+    None = 0x0,
+    Left = 0x1,
+    Top = 0x2,
+    Right = 0x4,
+    Bottom = 0x8,
+    Full = 0xF,
+    // ConservativeFull = 0x1F  needed?
+};
 }
 
 /**
  * Holds a list of BakedOpStates of ops that can be drawn together
  */
 struct MergedBakedOpList {
-    const BakedOpState*const* states;
+    const BakedOpState* const* states;
     size_t count;
     int clipSideFlags;
     Rect clip;
@@ -53,11 +53,12 @@ struct MergedBakedOpList {
 class ResolvedRenderState {
 public:
     ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot,
-            const RecordedOp& recordedOp, bool expandForStroke, bool expandForPathTexture);
+                        const RecordedOp& recordedOp, bool expandForStroke,
+                        bool expandForPathTexture);
 
     // Constructor for unbounded ops *with* transform/clip
     ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot,
-            const Matrix4& localTransform, const ClipBase* localClip);
+                        const Matrix4& localTransform, const ClipBase* localClip);
 
     // Constructor for unbounded ops without transform/clip (namely shadows)
     ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot);
@@ -74,19 +75,15 @@ public:
         return outClip;
     }
 
-    const Rect& clipRect() const {
-        return clipState->rect;
-    }
+    const Rect& clipRect() const { return clipState->rect; }
 
     bool requiresClip() const {
-        return clipSideFlags != OpClipSideFlags::None
-               || CC_UNLIKELY(clipState->mode != ClipMode::Rectangle);
+        return clipSideFlags != OpClipSideFlags::None ||
+               CC_UNLIKELY(clipState->mode != ClipMode::Rectangle);
     }
 
     // returns the clip if it's needed to draw the operation, otherwise nullptr
-    const ClipBase* getClipIfNeeded() const {
-        return requiresClip() ? clipState : nullptr;
-    }
+    const ClipBase* getClipIfNeeded() const { return requiresClip() ? clipState : nullptr; }
 
     Matrix4 transform;
     const ClipBase* clipState = nullptr;
@@ -103,11 +100,11 @@ public:
  */
 class BakedOpState {
 public:
-    static BakedOpState* tryConstruct(LinearAllocator& allocator,
-            Snapshot& snapshot, const RecordedOp& recordedOp);
+    static BakedOpState* tryConstruct(LinearAllocator& allocator, Snapshot& snapshot,
+                                      const RecordedOp& recordedOp);
 
-    static BakedOpState* tryConstructUnbounded(LinearAllocator& allocator,
-            Snapshot& snapshot, const RecordedOp& recordedOp);
+    static BakedOpState* tryConstructUnbounded(LinearAllocator& allocator, Snapshot& snapshot,
+                                               const RecordedOp& recordedOp);
 
     enum class StrokeBehavior {
         // stroking is forced, regardless of style on paint (such as for lines)
@@ -116,15 +113,16 @@ public:
         StyleDefined,
     };
 
-    static BakedOpState* tryStrokeableOpConstruct(LinearAllocator& allocator,
-            Snapshot& snapshot, const RecordedOp& recordedOp, StrokeBehavior strokeBehavior,
-            bool expandForPathTexture);
+    static BakedOpState* tryStrokeableOpConstruct(LinearAllocator& allocator, Snapshot& snapshot,
+                                                  const RecordedOp& recordedOp,
+                                                  StrokeBehavior strokeBehavior,
+                                                  bool expandForPathTexture);
 
-    static BakedOpState* tryShadowOpConstruct(LinearAllocator& allocator,
-            Snapshot& snapshot, const ShadowOp* shadowOpPtr);
+    static BakedOpState* tryShadowOpConstruct(LinearAllocator& allocator, Snapshot& snapshot,
+                                              const ShadowOp* shadowOpPtr);
 
-    static BakedOpState* directConstruct(LinearAllocator& allocator,
-            const ClipRect* clip, const Rect& dstRect, const RecordedOp& recordedOp);
+    static BakedOpState* directConstruct(LinearAllocator& allocator, const ClipRect* clip,
+                                         const Rect& dstRect, const RecordedOp& recordedOp);
 
     // Set opaqueOverClippedBounds. If this method isn't called, the op is assumed translucent.
     void setupOpacity(const SkPaint* paint);
@@ -140,8 +138,8 @@ public:
 private:
     friend class LinearAllocator;
 
-    BakedOpState(LinearAllocator& allocator, Snapshot& snapshot,
-            const RecordedOp& recordedOp, bool expandForStroke, bool expandForPathTexture)
+    BakedOpState(LinearAllocator& allocator, Snapshot& snapshot, const RecordedOp& recordedOp,
+                 bool expandForStroke, bool expandForPathTexture)
             : computedState(allocator, snapshot, recordedOp, expandForStroke, expandForPathTexture)
             , alpha(snapshot.alpha)
             , roundRectClipState(snapshot.roundRectClipState)
@@ -167,7 +165,7 @@ private:
             , op(&recordedOp) {}
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_BAKED_OP_STATE_H
+#endif  // ANDROID_HWUI_BAKED_OP_STATE_H

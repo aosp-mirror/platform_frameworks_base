@@ -58,8 +58,6 @@ public final class CompatModePackages {
     public static final int COMPAT_FLAG_DONT_ASK = 1<<0;
     // Compatibility state: compatibility mode is enabled.
     public static final int COMPAT_FLAG_ENABLED = 1<<1;
-    // Unsupported zoom state: don't warn the user about unsupported zoom mode.
-    public static final int UNSUPPORTED_ZOOM_FLAG_DONT_NOTIFY = 1<<2;
 
     private final HashMap<String, Integer> mPackages = new HashMap<String, Integer>();
 
@@ -84,7 +82,7 @@ public final class CompatModePackages {
 
     public CompatModePackages(ActivityManagerService service, File systemDir, Handler handler) {
         mService = service;
-        mFile = new AtomicFile(new File(systemDir, "packages-compat.xml"));
+        mFile = new AtomicFile(new File(systemDir, "packages-compat.xml"), "compat-mode");
         mHandler = new CompatHandler(handler.getLooper());
 
         FileInputStream fis = null;
@@ -233,10 +231,6 @@ public final class CompatModePackages {
         return (getPackageFlags(packageName)&COMPAT_FLAG_DONT_ASK) == 0;
     }
 
-    public boolean getPackageNotifyUnsupportedZoomLocked(String packageName) {
-        return (getPackageFlags(packageName)&UNSUPPORTED_ZOOM_FLAG_DONT_NOTIFY) == 0;
-    }
-
     public void setFrontActivityAskCompatModeLocked(boolean ask) {
         ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked();
         if (r != null) {
@@ -245,22 +239,12 @@ public final class CompatModePackages {
     }
 
     public void setPackageAskCompatModeLocked(String packageName, boolean ask) {
-        int curFlags = getPackageFlags(packageName);
-        int newFlags = ask ? (curFlags&~COMPAT_FLAG_DONT_ASK) : (curFlags|COMPAT_FLAG_DONT_ASK);
-        if (curFlags != newFlags) {
-            if (newFlags != 0) {
-                mPackages.put(packageName, newFlags);
-            } else {
-                mPackages.remove(packageName);
-            }
-            scheduleWrite();
-        }
+        setPackageFlagLocked(packageName, COMPAT_FLAG_DONT_ASK, ask);
     }
 
-    public void setPackageNotifyUnsupportedZoomLocked(String packageName, boolean notify) {
+    private void setPackageFlagLocked(String packageName, int flag, boolean set) {
         final int curFlags = getPackageFlags(packageName);
-        final int newFlags = notify ? (curFlags&~UNSUPPORTED_ZOOM_FLAG_DONT_NOTIFY) :
-                (curFlags|UNSUPPORTED_ZOOM_FLAG_DONT_NOTIFY);
+        final int newFlags = set ? (curFlags & ~flag) : (curFlags | flag);
         if (curFlags != newFlags) {
             if (newFlags != 0) {
                 mPackages.put(packageName, newFlags);
@@ -385,7 +369,7 @@ public final class CompatModePackages {
             }
 
             if (starting != null) {
-                starting.ensureActivityConfigurationLocked(0 /* globalChanges */,
+                starting.ensureActivityConfiguration(0 /* globalChanges */,
                         false /* preserveWindow */);
                 // And we need to make sure at this point that all other activities
                 // are made visible with the correct configuration.

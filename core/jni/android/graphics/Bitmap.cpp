@@ -682,6 +682,8 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
 
     sk_sp<Bitmap> nativeBitmap = Bitmap::allocateHeapBitmap(&bitmap);
     if (!nativeBitmap) {
+        ALOGE("OOM allocating Bitmap with dimensions %i x %i", width, height);
+        doThrowOOME(env);
         return NULL;
     }
 
@@ -919,6 +921,28 @@ static jboolean Bitmap_compress(JNIEnv* env, jobject clazz, jlong bitmapHandle,
 
     SkBitmap skbitmap;
     bitmap->getSkBitmap(&skbitmap);
+    if (skbitmap.colorType() == kRGBA_F16_SkColorType) {
+        // Convert to P3 before encoding. This matches SkAndroidCodec::computeOutputColorSpace
+        // for wide gamuts.
+        auto cs = SkColorSpace::MakeRGB(SkColorSpace::kSRGB_RenderTargetGamma,
+                                        SkColorSpace::kDCIP3_D65_Gamut);
+        auto info = skbitmap.info().makeColorType(kRGBA_8888_SkColorType)
+                                   .makeColorSpace(std::move(cs));
+        SkBitmap p3;
+        if (!p3.tryAllocPixels(info)) {
+            return JNI_FALSE;
+        }
+        auto xform = SkColorSpaceXform::New(skbitmap.colorSpace(), info.colorSpace());
+        if (!xform) {
+            return JNI_FALSE;
+        }
+        if (!xform->apply(SkColorSpaceXform::kRGBA_8888_ColorFormat, p3.getPixels(),
+                          SkColorSpaceXform::kRGBA_F16_ColorFormat, skbitmap.getPixels(),
+                          info.width() * info.height(), kUnpremul_SkAlphaType)) {
+            return JNI_FALSE;
+        }
+        skbitmap = p3;
+    }
     return SkEncodeImage(strm.get(), skbitmap, fm, quality) ? JNI_TRUE : JNI_FALSE;
 }
 
@@ -1051,7 +1075,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     }
 
     // Read the bitmap blob.
-    size_t size = bitmap->getSize();
+    size_t size = bitmap->computeByteSize();
     android::Parcel::ReadableBlob blob;
     android::status_t status = p->readBlob(size, &blob);
     if (status) {
@@ -1188,7 +1212,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
             p->allowFds() ? "allowed" : "forbidden");
 #endif
 
-    size_t size = bitmap.getSize();
+    size_t size = bitmap.computeByteSize();
     android::Parcel::WritableBlob blob;
     status = p->writeBlob(size, mutableCopy, &blob);
     if (status) {
@@ -1243,6 +1267,15 @@ static jboolean Bitmap_isSRGB(JNIEnv* env, jobject, jlong bitmapHandle) {
 
     SkColorSpace* colorSpace = bitmapHolder->info().colorSpace();
     return GraphicsJNI::isColorSpaceSRGB(colorSpace);
+}
+
+static jboolean Bitmap_isSRGBLinear(JNIEnv* env, jobject, jlong bitmapHandle) {
+    LocalScopedBitmap bitmapHolder(bitmapHandle);
+    if (!bitmapHolder.valid()) return JNI_FALSE;
+
+    SkColorSpace* colorSpace = bitmapHolder->info().colorSpace();
+    sk_sp<SkColorSpace> srgbLinear = SkColorSpace::MakeSRGBLinear();
+    return colorSpace == srgbLinear.get() ? JNI_TRUE : JNI_FALSE;
 }
 
 static jboolean Bitmap_getColorSpace(JNIEnv* env, jobject, jlong bitmapHandle,
@@ -1411,7 +1444,7 @@ static void Bitmap_copyPixelsToBuffer(JNIEnv* env, jobject,
         android::AutoBufferPointer abp(env, jbuffer, JNI_TRUE);
 
         // the java side has already checked that buffer is large enough
-        memcpy(abp.pointer(), src, bitmap.getSize());
+        memcpy(abp.pointer(), src, bitmap.computeByteSize());
     }
 }
 
@@ -1424,7 +1457,7 @@ static void Bitmap_copyPixelsFromBuffer(JNIEnv* env, jobject,
     if (NULL != dst) {
         android::AutoBufferPointer abp(env, jbuffer, JNI_FALSE);
         // the java side has already checked that buffer is large enough
-        memcpy(dst, abp.pointer(), bitmap.getSize());
+        memcpy(dst, abp.pointer(), bitmap.computeByteSize());
         bitmap.notifyPixelsChanged();
     }
 }
@@ -1590,6 +1623,7 @@ static const JNINativeMethod gBitmapMethods[] = {
         (void*) Bitmap_createGraphicBufferHandle },
     {   "nativeGetColorSpace",      "(J[F[F)Z", (void*)Bitmap_getColorSpace },
     {   "nativeIsSRGB",             "(J)Z", (void*)Bitmap_isSRGB },
+    {   "nativeIsSRGBLinear",       "(J)Z", (void*)Bitmap_isSRGBLinear},
     {   "nativeCopyColorSpace",     "(JJ)V",
         (void*)Bitmap_copyColorSpace },
 };

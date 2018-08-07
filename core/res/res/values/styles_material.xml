@@ -473,7 +473,7 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.Material.Notification.Reply" />
 
     <style name="TextAppearance.Material.Notification.Title">
-        <item name="textColor">@color/notification_primary_text_color_light</item>
+        <item name="fontFamily">sans-serif-medium</item>
         <item name="textSize">@dimen/notification_title_text_size</item>
     </style>
 
@@ -482,7 +482,6 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Material.Notification.Info">
-        <item name="textColor">@color/notification_secondary_text_color_light</item>
         <item name="textSize">@dimen/notification_subtext_size</item>
     </style>
 
@@ -501,12 +500,22 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.Notification.ProgressBar" parent="Widget.Material.Light.ProgressBar.Horizontal" />
 
-    <style name="Widget.Material.Notification.MessagingText" parent="Widget.Material.Light.TextView">
-        <item name="layout_width">match_parent</item>
+    <style name="Widget.Material.Notification.Text" parent="Widget.Material.Light.TextView">
+        <item name="lineHeight">20sp</item>
+        <item name="textAppearance">@style/TextAppearance.Material.Notification</item>
+    </style>
+
+    <style name="Widget.Material.Notification.MessagingText" parent="Widget.Material.Notification.Text">
+        <item name="layout_width">wrap_content</item>
+        <item name="layout_height">wrap_content</item>
+        <item name="ellipsize">end</item>z
+    </style>
+
+    <style name="Widget.Material.Notification.MessagingName" parent="Widget.Material.Light.TextView">
+        <item name="layout_width">wrap_content</item>
         <item name="layout_height">wrap_content</item>
         <item name="ellipsize">end</item>
-        <item name="visibility">gone</item>
-        <item name="textAppearance">@style/TextAppearance.Material.Notification</item>
+        <item name="textAppearance">@style/TextAppearance.Material.Notification.Title</item>
     </style>
 
     <!-- Widget Styles -->
@@ -552,7 +561,7 @@ please see styles_device_defaults.xml.
 
     <!-- Alert dialog button bar button -->
     <style name="Widget.Material.Button.ButtonBar.AlertDialog" parent="Widget.Material.Button.Borderless.Colored">
-        <item name="minWidth">64dp</item>
+        <item name="minWidth">@dimen/alert_dialog_button_bar_width</item>
         <item name="minHeight">@dimen/alert_dialog_button_bar_height</item>
     </style>
 
@@ -1295,7 +1304,13 @@ please see styles_device_defaults.xml.
         <item name="paddingBottom">@dimen/notification_header_padding_bottom</item>
         <item name="layout_marginBottom">@dimen/notification_header_margin_bottom</item>
         <item name="paddingStart">@dimen/notification_content_margin_start</item>
-        <item name="paddingEnd">16dp</item>
+        <item name="paddingEnd">@dimen/notification_content_margin_end</item>
+        <item name="gravity">top</item>
+    </style>
+
+    <style name="Notification.Header.Ambient">
+        <item name="layout_marginTop">@dimen/notification_header_margin_top_ambient</item>
+        <item name="gravity">top|center_horizontal</item>
     </style>
 
 </resources>

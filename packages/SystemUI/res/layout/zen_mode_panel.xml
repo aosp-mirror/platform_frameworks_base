@@ -93,7 +93,7 @@
 
         </RelativeLayout>
 
-        <com.android.systemui.volume.ZenRadioLayout
+        <com.android.settingslib.notification.ZenRadioLayout
             android:id="@+id/zen_conditions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -111,7 +111,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:orientation="vertical"/>
-        </com.android.systemui.volume.ZenRadioLayout>
+        </com.android.settingslib.notification.ZenRadioLayout>
 
         <TextView
             android:id="@+id/zen_alarm_warning"

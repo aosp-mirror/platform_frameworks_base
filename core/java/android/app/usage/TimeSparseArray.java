@@ -17,6 +17,7 @@
 package android.app.usage;
 
 import android.util.LongSparseArray;
+import android.util.Slog;
 
 /**
  * An array that indexes by a long timestamp, representing milliseconds since the epoch.
@@ -24,12 +25,12 @@ import android.util.LongSparseArray;
  * {@hide}
  */
 public class TimeSparseArray<E> extends LongSparseArray<E> {
+    private static final String TAG = TimeSparseArray.class.getSimpleName();
+
+    private boolean mWtfReported;
+
     public TimeSparseArray() {
         super();
-    }
-
-    public TimeSparseArray(int initialCapacity) {
-        super(initialCapacity);
     }
 
     /**
@@ -67,6 +68,24 @@ public class TimeSparseArray<E> extends LongSparseArray<E> {
         } else {
             return -1;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p> As this container is being used only to keep {@link android.util.AtomicFile files},
+     * there should not be any collisions. Reporting a {@link Slog#wtf(String, String)} in case that
+     * happens, as that will lead to one whole file being dropped.
+     */
+    @Override
+    public void put(long key, E value) {
+        if (indexOfKey(key) >= 0) {
+            if (!mWtfReported) {
+                Slog.wtf(TAG, "Overwriting value " + get(key) + " by " + value);
+                mWtfReported = true;
+            }
+        }
+        super.put(key, value);
     }
 
     /**

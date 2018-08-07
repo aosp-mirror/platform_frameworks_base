@@ -16,24 +16,25 @@
 
 package com.android.internal.inputmethod;
 
+import static org.junit.Assert.assertEquals;
+
 import android.os.LocaleList;
-import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class LocaleUtilsTest extends InstrumentationTestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class LocaleUtilsTest {
 
-    private static final LocaleUtils.LocaleExtractor<Locale> sIdentityMapper =
-            new LocaleUtils.LocaleExtractor<Locale>() {
-                @Override
-                public Locale get(Locale source) {
-                    return source;
-                }
-            };
+    private static final LocaleUtils.LocaleExtractor<Locale> sIdentityMapper = source -> source;
 
-    @SmallTest
+    @Test
     public void testFilterByLanguageEmptyLanguageList() throws Exception {
         final ArrayList<Locale> availableLocales = new ArrayList<>();
         availableLocales.add(Locale.forLanguageTag("en-US"));
@@ -49,7 +50,7 @@ public class LocaleUtilsTest extends InstrumentationTestCase {
         assertEquals(0, dest.size());
     }
 
-    @SmallTest
+    @Test
     public void testFilterDoesNotMatchAnything() throws Exception {
         final ArrayList<Locale> availableLocales = new ArrayList<>();
         availableLocales.add(Locale.forLanguageTag("en-US"));
@@ -65,7 +66,7 @@ public class LocaleUtilsTest extends InstrumentationTestCase {
         assertEquals(0, dest.size());
     }
 
-    @SmallTest
+    @Test
     public void testFilterByLanguageEmptySource() throws Exception {
         final ArrayList<Locale> availableLocales = new ArrayList<>();
 
@@ -76,7 +77,7 @@ public class LocaleUtilsTest extends InstrumentationTestCase {
         assertEquals(0, dest.size());
     }
 
-    @SmallTest
+    @Test
     public void testFilterByLanguageNullAvailableLocales() throws Exception {
         {
             final LocaleList preferredLocales =
@@ -138,7 +139,7 @@ public class LocaleUtilsTest extends InstrumentationTestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testFilterByLanguage() throws Exception {
         {
             final ArrayList<Locale> availableLocales = new ArrayList<>();
@@ -172,7 +173,7 @@ public class LocaleUtilsTest extends InstrumentationTestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testFilterByLanguageTheSameLanguage() throws Exception {
         {
             final LocaleList preferredLocales =
@@ -223,7 +224,7 @@ public class LocaleUtilsTest extends InstrumentationTestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testFilterByLanguageFallbackRules() throws Exception {
         {
             final LocaleList preferredLocales = LocaleList.forLanguageTags("sr-Latn-RS");
@@ -355,6 +356,7 @@ public class LocaleUtilsTest extends InstrumentationTestCase {
         }
     }
 
+    @Test
     public void testFilterKnownLimitation() throws Exception {
         // Following test cases are not for intentional behavior but checks for preventing the
         // behavior from becoming worse.

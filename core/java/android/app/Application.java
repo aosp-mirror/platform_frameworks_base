@@ -16,8 +16,6 @@
 
 package android.app;
 
-import java.util.ArrayList;
-
 import android.annotation.CallSuper;
 import android.content.ComponentCallbacks;
 import android.content.ComponentCallbacks2;
@@ -26,6 +24,10 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.autofill.AutofillManager;
+
+import java.util.ArrayList;
 
 /**
  * Base class for maintaining global application state. You can provide your own
@@ -45,6 +47,7 @@ import android.os.Bundle;
  * </p>
  */
 public class Application extends ContextWrapper implements ComponentCallbacks2 {
+    private static final String TAG = "Application";
     private ArrayList<ComponentCallbacks> mComponentCallbacks =
             new ArrayList<ComponentCallbacks>();
     private ArrayList<ActivityLifecycleCallbacks> mActivityLifecycleCallbacks =
@@ -86,11 +89,21 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     /**
      * Called when the application is starting, before any activity, service,
      * or receiver objects (excluding content providers) have been created.
-     * Implementations should be as quick as possible (for example using
+     *
+     * <p>Implementations should be as quick as possible (for example using
      * lazy initialization of state) since the time spent in this function
      * directly impacts the performance of starting the first activity,
-     * service, or receiver in a process.
-     * If you override this method, be sure to call super.onCreate().
+     * service, or receiver in a process.</p>
+     *
+     * <p>If you override this method, be sure to call {@code super.onCreate()}.</p>
+     *
+     * <p class="note">Be aware that direct boot may also affect callback order on
+     * Android {@link android.os.Build.VERSION_CODES#N} and later devices.
+     * Until the user unlocks the device, only direct boot aware components are
+     * allowed to run. You should consider that all direct boot unaware
+     * components, including such {@link android.content.ContentProvider}, are
+     * disabled until user unlock happens, especially when component callback
+     * order matters.</p>
      */
     @CallSuper
     public void onCreate() {
@@ -180,6 +193,16 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
+    /**
+     * Returns the name of the current process. A package's default process name
+     * is the same as its package name. Non-default processes will look like
+     * "$PACKAGE_NAME:$NAME", where $NAME corresponds to an android:process
+     * attribute within AndroidManifest.xml.
+     */
+    public static String getProcessName() {
+        return ActivityThread.currentProcessName();
+    }
+
     // ------------------ Internal API ------------------
 
     /**
@@ -187,7 +210,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
      */
     /* package */ final void attach(Context context) {
         attachBaseContext(context);
-        mLoadedApk = ContextImpl.getImpl(context).mLoadedApk;
+        mLoadedApk = ContextImpl.getImpl(context).mPackageInfo;
     }
 
     /* package */ void dispatchActivityCreated(Activity activity, Bundle savedInstanceState) {
@@ -288,5 +311,48 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
                 ((OnProvideAssistDataListener)callbacks[i]).onProvideAssistData(activity, data);
             }
         }
+    }
+
+    /** @hide */
+    @Override
+    public AutofillManager.AutofillClient getAutofillClient() {
+        final AutofillManager.AutofillClient client = super.getAutofillClient();
+        if (client != null) {
+            return client;
+        }
+        if (android.view.autofill.Helper.sVerbose) {
+            Log.v(TAG, "getAutofillClient(): null on super, trying to find activity thread");
+        }
+        // Okay, ppl use the application context when they should not. This breaks
+        // autofill among other things. We pick the focused activity since autofill
+        // interacts only with the currently focused activity and we need the fill
+        // client only if a call comes from the focused activity. Sigh...
+        final ActivityThread activityThread = ActivityThread.currentActivityThread();
+        if (activityThread == null) {
+            return null;
+        }
+        final int activityCount = activityThread.mActivities.size();
+        for (int i = 0; i < activityCount; i++) {
+            final ActivityThread.ActivityClientRecord record =
+                    activityThread.mActivities.valueAt(i);
+            if (record == null) {
+                continue;
+            }
+            final Activity activity = record.activity;
+            if (activity == null) {
+                continue;
+            }
+            if (activity.getWindow().getDecorView().hasFocus()) {
+                if (android.view.autofill.Helper.sVerbose) {
+                    Log.v(TAG, "getAutofillClient(): found activity for " + this + ": " + activity);
+                }
+                return activity;
+            }
+        }
+        if (android.view.autofill.Helper.sVerbose) {
+            Log.v(TAG, "getAutofillClient(): none of the " + activityCount + " activities on "
+                    + this + " have focus");
+        }
+        return null;
     }
 }

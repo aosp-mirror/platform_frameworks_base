@@ -18,13 +18,13 @@ package com.android.server.backup.internal;
 
 import android.content.pm.IPackageDataObserver;
 
-import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.BackupManagerService;
 
 public class ClearDataObserver extends IPackageDataObserver.Stub {
 
-    private RefactoredBackupManagerService backupManagerService;
+    private BackupManagerService backupManagerService;
 
-    public ClearDataObserver(RefactoredBackupManagerService backupManagerService) {
+    public ClearDataObserver(BackupManagerService backupManagerService) {
         this.backupManagerService = backupManagerService;
     }
 

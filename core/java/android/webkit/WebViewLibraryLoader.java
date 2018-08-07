@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -26,6 +28,7 @@ import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 
 import dalvik.system.VMRuntime;
@@ -36,7 +39,11 @@ import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-class WebViewLibraryLoader {
+/**
+ * @hide
+ */
+@VisibleForTesting
+public class WebViewLibraryLoader {
     private static final String LOGTAG = WebViewLibraryLoader.class.getSimpleName();
 
     private static final String CHROMIUM_WEBVIEW_NATIVE_RELRO_32 =
@@ -62,25 +69,23 @@ class WebViewLibraryLoader {
             boolean result = false;
             boolean is64Bit = VMRuntime.getRuntime().is64Bit();
             try {
-                if (args.length != 2 || args[0] == null || args[1] == null) {
+                if (args.length != 1 || args[0] == null) {
                     Log.e(LOGTAG, "Invalid RelroFileCreator args: " + Arrays.toString(args));
                     return;
                 }
-                Log.v(LOGTAG, "RelroFileCreator (64bit = " + is64Bit + "), "
-                        + " 32-bit lib: " + args[0] + ", 64-bit lib: " + args[1]);
+                Log.v(LOGTAG, "RelroFileCreator (64bit = " + is64Bit + "), lib: " + args[0]);
                 if (!sAddressSpaceReserved) {
                     Log.e(LOGTAG, "can't create relro file; address space not reserved");
                     return;
                 }
-                result = nativeCreateRelroFile(args[0] /* path32 */,
-                                               args[1] /* path64 */,
-                                               CHROMIUM_WEBVIEW_NATIVE_RELRO_32,
-                                               CHROMIUM_WEBVIEW_NATIVE_RELRO_64);
+                result = nativeCreateRelroFile(args[0] /* path */,
+                                               is64Bit ? CHROMIUM_WEBVIEW_NATIVE_RELRO_64 :
+                                                         CHROMIUM_WEBVIEW_NATIVE_RELRO_32);
                 if (result && DEBUG) Log.v(LOGTAG, "created relro file");
             } finally {
                 // We must do our best to always notify the update service, even if something fails.
                 try {
-                    WebViewFactory.getUpdateService().notifyRelroCreationCompleted();
+                    WebViewFactory.getUpdateServiceUnchecked().notifyRelroCreationCompleted();
                 } catch (RemoteException e) {
                     Log.e(LOGTAG, "error notifying update service", e);
                 }
@@ -96,7 +101,7 @@ class WebViewLibraryLoader {
     /**
      * Create a single relro file by invoking an isolated process that to do the actual work.
      */
-    static void createRelroFile(final boolean is64Bit, String[] nativeLibraryPaths) {
+    static void createRelroFile(final boolean is64Bit, @NonNull WebViewNativeLibrary nativeLib) {
         final String abi =
                 is64Bit ? Build.SUPPORTED_64_BIT_ABIS[0] : Build.SUPPORTED_32_BIT_ABIS[0];
 
@@ -114,15 +119,15 @@ class WebViewLibraryLoader {
         };
 
         try {
-            if (nativeLibraryPaths == null
-                    || nativeLibraryPaths[0] == null || nativeLibraryPaths[1] == null) {
+            if (nativeLib == null || nativeLib.path == null) {
                 throw new IllegalArgumentException(
                         "Native library paths to the WebView RelRo process must not be null!");
             }
-            int pid = LocalServices.getService(ActivityManagerInternal.class).startIsolatedProcess(
-                    RelroFileCreator.class.getName(), nativeLibraryPaths,
-                    "WebViewLoader-" + abi, abi, Process.SHARED_RELRO_UID, crashHandler);
-            if (pid <= 0) throw new Exception("Failed to start the relro file creator process");
+            boolean success = LocalServices.getService(ActivityManagerInternal.class)
+                    .startIsolatedProcess(
+                            RelroFileCreator.class.getName(), new String[] { nativeLib.path },
+                            "WebViewLoader-" + abi, abi, Process.SHARED_RELRO_UID, crashHandler);
+            if (!success) throw new Exception("Failed to start the relro file creator process");
         } catch (Throwable t) {
             // Log and discard errors as we must not crash the system server.
             Log.e(LOGTAG, "error starting relro file creator for abi " + abi, t);
@@ -131,56 +136,77 @@ class WebViewLibraryLoader {
     }
 
     /**
+     * Perform preparations needed to allow loading WebView from an application. This method should
+     * be called whenever we change WebView provider.
+     * @return the number of relro processes started.
+     */
+    static int prepareNativeLibraries(PackageInfo webviewPackageInfo)
+            throws WebViewFactory.MissingWebViewPackageException {
+        WebViewNativeLibrary nativeLib32bit =
+                getWebViewNativeLibrary(webviewPackageInfo, false /* is64bit */);
+        WebViewNativeLibrary nativeLib64bit =
+                getWebViewNativeLibrary(webviewPackageInfo, true /* is64bit */);
+        updateWebViewZygoteVmSize(nativeLib32bit, nativeLib64bit);
+
+        return createRelros(nativeLib32bit, nativeLib64bit);
+    }
+
+    /**
+     * @return the number of relro processes started.
+     */
+    private static int createRelros(@Nullable WebViewNativeLibrary nativeLib32bit,
+            @Nullable WebViewNativeLibrary nativeLib64bit) {
+        if (DEBUG) Log.v(LOGTAG, "creating relro files");
+        int numRelros = 0;
+
+        if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
+            if (nativeLib32bit == null) {
+                Log.e(LOGTAG, "No 32-bit WebView library path, skipping relro creation.");
+            } else {
+                if (DEBUG) Log.v(LOGTAG, "Create 32 bit relro");
+                createRelroFile(false /* is64Bit */, nativeLib32bit);
+                numRelros++;
+            }
+        }
+
+        if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
+            if (nativeLib64bit == null) {
+                Log.e(LOGTAG, "No 64-bit WebView library path, skipping relro creation.");
+            } else {
+                if (DEBUG) Log.v(LOGTAG, "Create 64 bit relro");
+                createRelroFile(true /* is64Bit */, nativeLib64bit);
+                numRelros++;
+            }
+        }
+        return numRelros;
+    }
+
+    /**
      *
      * @return the native WebView libraries in the new WebView APK.
      */
-    static String[] updateWebViewZygoteVmSize(PackageInfo packageInfo)
+    private static void updateWebViewZygoteVmSize(
+            @Nullable WebViewNativeLibrary nativeLib32bit,
+            @Nullable WebViewNativeLibrary nativeLib64bit)
             throws WebViewFactory.MissingWebViewPackageException {
         // Find the native libraries of the new WebView package, to change the size of the
         // memory region in the Zygote reserved for the library.
-        String[] nativeLibs = getWebViewNativeLibraryPaths(packageInfo);
-        if (nativeLibs != null) {
-            long newVmSize = 0L;
+        long newVmSize = 0L;
 
-            for (String path : nativeLibs) {
-                if (path == null || TextUtils.isEmpty(path)) continue;
-                if (DEBUG) Log.d(LOGTAG, "Checking file size of " + path);
-                File f = new File(path);
-                if (f.exists()) {
-                    newVmSize = Math.max(newVmSize, f.length());
-                    continue;
-                }
-                if (path.contains("!/")) {
-                    String[] split = TextUtils.split(path, "!/");
-                    if (split.length == 2) {
-                        try (ZipFile z = new ZipFile(split[0])) {
-                            ZipEntry e = z.getEntry(split[1]);
-                            if (e != null && e.getMethod() == ZipEntry.STORED) {
-                                newVmSize = Math.max(newVmSize, e.getSize());
-                                continue;
-                            }
-                        }
-                        catch (IOException e) {
-                            Log.e(LOGTAG, "error reading APK file " + split[0] + ", ", e);
-                        }
-                    }
-                }
-                Log.e(LOGTAG, "error sizing load for " + path);
-            }
+        if (nativeLib32bit != null) newVmSize = Math.max(newVmSize, nativeLib32bit.size);
+        if (nativeLib64bit != null) newVmSize = Math.max(newVmSize, nativeLib64bit.size);
 
-            if (DEBUG) {
-                Log.v(LOGTAG, "Based on library size, need " + newVmSize
-                        + " bytes of address space.");
-            }
-            // The required memory can be larger than the file on disk (due to .bss), and an
-            // upgraded version of the library will likely be larger, so always attempt to
-            // reserve twice as much as we think to allow for the library to grow during this
-            // boot cycle.
-            newVmSize = Math.max(2 * newVmSize, CHROMIUM_WEBVIEW_DEFAULT_VMSIZE_BYTES);
-            Log.d(LOGTAG, "Setting new address space to " + newVmSize);
-            setWebViewZygoteVmSize(newVmSize);
+        if (DEBUG) {
+            Log.v(LOGTAG, "Based on library size, need " + newVmSize
+                    + " bytes of address space.");
         }
-        return nativeLibs;
+        // The required memory can be larger than the file on disk (due to .bss), and an
+        // upgraded version of the library will likely be larger, so always attempt to
+        // reserve twice as much as we think to allow for the library to grow during this
+        // boot cycle.
+        newVmSize = Math.max(2 * newVmSize, CHROMIUM_WEBVIEW_DEFAULT_VMSIZE_BYTES);
+        Log.d(LOGTAG, "Setting new address space to " + newVmSize);
+        setWebViewZygoteVmSize(newVmSize);
     }
 
     /**
@@ -204,21 +230,21 @@ class WebViewLibraryLoader {
 
     /**
      * Load WebView's native library into the current process.
-     * Note: assumes that we have waited for relro creation.
+     *
+     * <p class="note"><b>Note:</b> Assumes that we have waited for relro creation.
+     *
      * @param clazzLoader class loader used to find the linker namespace to load the library into.
-     * @param packageInfo the package from which WebView is loaded.
+     * @param libraryFileName the filename of the library to load.
      */
-    static int loadNativeLibrary(ClassLoader clazzLoader, PackageInfo packageInfo)
-            throws WebViewFactory.MissingWebViewPackageException {
+    public static int loadNativeLibrary(ClassLoader clazzLoader, String libraryFileName) {
         if (!sAddressSpaceReserved) {
             Log.e(LOGTAG, "can't load with relro file; address space not reserved");
             return WebViewFactory.LIBLOAD_ADDRESS_SPACE_NOT_RESERVED;
         }
 
-        final String libraryFileName =
-                WebViewFactory.getWebViewLibrary(packageInfo.applicationInfo);
-        int result = nativeLoadWithRelroFile(libraryFileName, CHROMIUM_WEBVIEW_NATIVE_RELRO_32,
-                                             CHROMIUM_WEBVIEW_NATIVE_RELRO_64, clazzLoader);
+        String relroPath = VMRuntime.getRuntime().is64Bit() ? CHROMIUM_WEBVIEW_NATIVE_RELRO_64 :
+                                                              CHROMIUM_WEBVIEW_NATIVE_RELRO_32;
+        int result = nativeLoadWithRelroFile(libraryFileName, relroPath, clazzLoader);
         if (result != WebViewFactory.LIBLOAD_SUCCESS) {
             Log.w(LOGTAG, "failed to load with relro file, proceeding without");
         } else if (DEBUG) {
@@ -229,64 +255,78 @@ class WebViewLibraryLoader {
 
     /**
      * Fetch WebView's native library paths from {@param packageInfo}.
+     * @hide
      */
-    static String[] getWebViewNativeLibraryPaths(PackageInfo packageInfo)
-            throws WebViewFactory.MissingWebViewPackageException {
+    @Nullable
+    @VisibleForTesting
+    public static WebViewNativeLibrary getWebViewNativeLibrary(PackageInfo packageInfo,
+            boolean is64bit) throws WebViewFactory.MissingWebViewPackageException {
         ApplicationInfo ai = packageInfo.applicationInfo;
         final String nativeLibFileName = WebViewFactory.getWebViewLibrary(ai);
 
-        String path32;
-        String path64;
-        boolean primaryArchIs64bit = VMRuntime.is64BitAbi(ai.primaryCpuAbi);
-        if (!TextUtils.isEmpty(ai.secondaryCpuAbi)) {
-            // Multi-arch case.
-            if (primaryArchIs64bit) {
-                // Primary arch: 64-bit, secondary: 32-bit.
-                path64 = ai.nativeLibraryDir;
-                path32 = ai.secondaryNativeLibraryDir;
-            } else {
-                // Primary arch: 32-bit, secondary: 64-bit.
-                path64 = ai.secondaryNativeLibraryDir;
-                path32 = ai.nativeLibraryDir;
-            }
-        } else if (primaryArchIs64bit) {
-            // Single-arch 64-bit.
-            path64 = ai.nativeLibraryDir;
-            path32 = "";
-        } else {
-            // Single-arch 32-bit.
-            path32 = ai.nativeLibraryDir;
-            path64 = "";
-        }
+        String dir = getWebViewNativeLibraryDirectory(ai, is64bit /* 64bit */);
 
-        // Form the full paths to the extracted native libraries.
-        // If libraries were not extracted, try load from APK paths instead.
-        if (!TextUtils.isEmpty(path32)) {
-            path32 += "/" + nativeLibFileName;
-            File f = new File(path32);
-            if (!f.exists()) {
-                path32 = getLoadFromApkPath(ai.sourceDir,
-                                            Build.SUPPORTED_32_BIT_ABIS,
-                                            nativeLibFileName);
-            }
-        }
-        if (!TextUtils.isEmpty(path64)) {
-            path64 += "/" + nativeLibFileName;
-            File f = new File(path64);
-            if (!f.exists()) {
-                path64 = getLoadFromApkPath(ai.sourceDir,
-                                            Build.SUPPORTED_64_BIT_ABIS,
-                                            nativeLibFileName);
-            }
-        }
+        WebViewNativeLibrary lib = findNativeLibrary(ai, nativeLibFileName,
+                is64bit ? Build.SUPPORTED_64_BIT_ABIS : Build.SUPPORTED_32_BIT_ABIS, dir);
 
-        if (DEBUG) Log.v(LOGTAG, "Native 32-bit lib: " + path32 + ", 64-bit lib: " + path64);
-        return new String[] { path32, path64 };
+        if (DEBUG) {
+            Log.v(LOGTAG, String.format("Native %d-bit lib: %s", is64bit ? 64 : 32, lib.path));
+        }
+        return lib;
     }
 
-    private static String getLoadFromApkPath(String apkPath,
-                                             String[] abiList,
-                                             String nativeLibFileName)
+    /**
+     * @return the directory of the native WebView library with bitness {@param is64bit}.
+     * @hide
+     */
+    @VisibleForTesting
+    public static String getWebViewNativeLibraryDirectory(ApplicationInfo ai, boolean is64bit) {
+        // Primary arch has the same bitness as the library we are looking for.
+        if (is64bit == VMRuntime.is64BitAbi(ai.primaryCpuAbi)) return ai.nativeLibraryDir;
+
+        // Secondary arch has the same bitness as the library we are looking for.
+        if (!TextUtils.isEmpty(ai.secondaryCpuAbi)) {
+            return ai.secondaryNativeLibraryDir;
+        }
+
+        return "";
+    }
+
+    /**
+     * @return an object describing a native WebView library given the directory path of that
+     * library, or null if the library couldn't be found.
+     */
+    @Nullable
+    private static WebViewNativeLibrary findNativeLibrary(ApplicationInfo ai,
+            String nativeLibFileName, String[] abiList, String libDirectory)
+            throws WebViewFactory.MissingWebViewPackageException {
+        if (TextUtils.isEmpty(libDirectory)) return null;
+        String libPath = libDirectory + "/" + nativeLibFileName;
+        File f = new File(libPath);
+        if (f.exists()) {
+            return new WebViewNativeLibrary(libPath, f.length());
+        } else {
+            return getLoadFromApkPath(ai.sourceDir, abiList, nativeLibFileName);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public static class WebViewNativeLibrary {
+        public final String path;
+        public final long size;
+
+        WebViewNativeLibrary(String path, long size) {
+            this.path = path;
+            this.size = size;
+        }
+    }
+
+    private static WebViewNativeLibrary getLoadFromApkPath(String apkPath,
+                                                           String[] abiList,
+                                                           String nativeLibFileName)
             throws WebViewFactory.MissingWebViewPackageException {
         // Search the APK for a native library conforming to a listed ABI.
         try (ZipFile z = new ZipFile(apkPath)) {
@@ -295,13 +335,13 @@ class WebViewLibraryLoader {
                 ZipEntry e = z.getEntry(entry);
                 if (e != null && e.getMethod() == ZipEntry.STORED) {
                     // Return a path formatted for dlopen() load from APK.
-                    return apkPath + "!/" + entry;
+                    return new WebViewNativeLibrary(apkPath + "!/" + entry, e.getSize());
                 }
             }
         } catch (IOException e) {
             throw new WebViewFactory.MissingWebViewPackageException(e);
         }
-        return "";
+        return null;
     }
 
     /**
@@ -313,8 +353,6 @@ class WebViewLibraryLoader {
     }
 
     static native boolean nativeReserveAddressSpace(long addressSpaceToReserve);
-    static native boolean nativeCreateRelroFile(String lib32, String lib64,
-                                                        String relro32, String relro64);
-    static native int nativeLoadWithRelroFile(String lib, String relro32, String relro64,
-                                                      ClassLoader clazzLoader);
+    static native boolean nativeCreateRelroFile(String lib, String relro);
+    static native int nativeLoadWithRelroFile(String lib, String relro, ClassLoader clazzLoader);
 }

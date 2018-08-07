@@ -118,7 +118,7 @@ public final class NfcFCardEmulation {
             throw new NullPointerException("service is null");
         }
         try {
-            return sService.getSystemCodeForService(UserHandle.myUserId(), service);
+            return sService.getSystemCodeForService(mContext.getUserId(), service);
         } catch (RemoteException e) {
             // Try one more time
             recoverService();
@@ -127,7 +127,7 @@ public final class NfcFCardEmulation {
                 return null;
             }
             try {
-                return sService.getSystemCodeForService(UserHandle.myUserId(), service);
+                return sService.getSystemCodeForService(mContext.getUserId(), service);
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to reach CardEmulationService.");
                 ee.rethrowAsRuntimeException();
@@ -164,7 +164,7 @@ public final class NfcFCardEmulation {
             throw new NullPointerException("service or systemCode is null");
         }
         try {
-            return sService.registerSystemCodeForService(UserHandle.myUserId(),
+            return sService.registerSystemCodeForService(mContext.getUserId(),
                     service, systemCode);
         } catch (RemoteException e) {
             // Try one more time
@@ -174,7 +174,7 @@ public final class NfcFCardEmulation {
                 return false;
             }
             try {
-                return sService.registerSystemCodeForService(UserHandle.myUserId(),
+                return sService.registerSystemCodeForService(mContext.getUserId(),
                         service, systemCode);
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to reach CardEmulationService.");
@@ -195,7 +195,7 @@ public final class NfcFCardEmulation {
             throw new NullPointerException("service is null");
         }
         try {
-            return sService.removeSystemCodeForService(UserHandle.myUserId(), service);
+            return sService.removeSystemCodeForService(mContext.getUserId(), service);
         } catch (RemoteException e) {
             // Try one more time
             recoverService();
@@ -204,7 +204,7 @@ public final class NfcFCardEmulation {
                 return false;
             }
             try {
-                return sService.removeSystemCodeForService(UserHandle.myUserId(), service);
+                return sService.removeSystemCodeForService(mContext.getUserId(), service);
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to reach CardEmulationService.");
                 ee.rethrowAsRuntimeException();
@@ -230,7 +230,7 @@ public final class NfcFCardEmulation {
             throw new NullPointerException("service is null");
         }
         try {
-            return sService.getNfcid2ForService(UserHandle.myUserId(), service);
+            return sService.getNfcid2ForService(mContext.getUserId(), service);
         } catch (RemoteException e) {
             // Try one more time
             recoverService();
@@ -239,7 +239,7 @@ public final class NfcFCardEmulation {
                 return null;
             }
             try {
-                return sService.getNfcid2ForService(UserHandle.myUserId(), service);
+                return sService.getNfcid2ForService(mContext.getUserId(), service);
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to reach CardEmulationService.");
                 ee.rethrowAsRuntimeException();
@@ -273,7 +273,7 @@ public final class NfcFCardEmulation {
             throw new NullPointerException("service or nfcid2 is null");
         }
         try {
-            return sService.setNfcid2ForService(UserHandle.myUserId(),
+            return sService.setNfcid2ForService(mContext.getUserId(),
                     service, nfcid2);
         } catch (RemoteException e) {
             // Try one more time
@@ -283,7 +283,7 @@ public final class NfcFCardEmulation {
                 return false;
             }
             try {
-                return sService.setNfcid2ForService(UserHandle.myUserId(),
+                return sService.setNfcid2ForService(mContext.getUserId(),
                         service, nfcid2);
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to reach CardEmulationService.");
@@ -381,7 +381,7 @@ public final class NfcFCardEmulation {
      */
     public List<NfcFServiceInfo> getNfcFServices() {
         try {
-            return sService.getNfcFServices(UserHandle.myUserId());
+            return sService.getNfcFServices(mContext.getUserId());
         } catch (RemoteException e) {
             // Try one more time
             recoverService();
@@ -390,7 +390,7 @@ public final class NfcFCardEmulation {
                 return null;
             }
             try {
-                return sService.getNfcFServices(UserHandle.myUserId());
+                return sService.getNfcFServices(mContext.getUserId());
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to reach CardEmulationService.");
                 return null;

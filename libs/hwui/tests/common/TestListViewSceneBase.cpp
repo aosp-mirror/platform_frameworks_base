@@ -35,17 +35,17 @@ void TestListViewSceneBase::createContent(int width, int height, Canvas& canvas)
     for (int y = 0; y < height + (heightWithSpacing - 1); y += heightWithSpacing) {
         int id = mListItems.size();
         auto setup = std::bind(&TestListViewSceneBase::createListItem, this, std::placeholders::_1,
-                std::placeholders::_2, id, mItemWidth, mItemHeight);
-        auto node = TestUtils::createNode(mItemLeft, y, mItemLeft + mItemWidth,
-                y + mItemHeight, setup);
+                               std::placeholders::_2, id, mItemWidth, mItemHeight);
+        auto node =
+                TestUtils::createNode(mItemLeft, y, mItemLeft + mItemWidth, y + mItemHeight, setup);
         mListItems.push_back(node);
     }
     mListView = TestUtils::createNode(0, 0, width, height,
-            [this](RenderProperties& props, Canvas& canvas) {
-        for (size_t ci = 0; ci < mListItems.size(); ci++) {
-            canvas.drawRenderNode(mListItems[ci].get());
-        }
-    });
+                                      [this](RenderProperties& props, Canvas& canvas) {
+                                          for (size_t ci = 0; ci < mListItems.size(); ci++) {
+                                              canvas.drawRenderNode(mListItems[ci].get());
+                                          }
+                                      });
 
     canvas.drawColor(Color::Grey_500, SkBlendMode::kSrcOver);
     canvas.drawRenderNode(mListView.get());
@@ -56,8 +56,9 @@ void TestListViewSceneBase::doFrame(int frameNr) {
     int itemIndexOffset = scrollPx / (mItemSpacing + mItemHeight);
     int pxOffset = -(scrollPx % (mItemSpacing + mItemHeight));
 
-    std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(mListView->stagingProperties().getWidth(),
-            mListView->stagingProperties().getHeight()));
+    std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
+            mListView->stagingProperties().getWidth(), mListView->stagingProperties().getHeight(),
+            mListView.get()));
     for (size_t ci = 0; ci < mListItems.size(); ci++) {
         // update item position
         auto listItem = mListItems[(ci + itemIndexOffset) % mListItems.size()];
@@ -72,6 +73,6 @@ void TestListViewSceneBase::doFrame(int frameNr) {
     mListView->setStagingDisplayList(canvas->finishRecording());
 }
 
-} // namespace test
-} // namespace uirenderer
-} // namespace android
+}  // namespace test
+}  // namespace uirenderer
+}  // namespace android

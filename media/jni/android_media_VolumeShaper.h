@@ -21,6 +21,8 @@
 
 namespace android {
 
+using media::VolumeShaper;
+
 // This entire class is inline as it is used from both core and media
 struct VolumeShaperHelper {
     struct fields_t {

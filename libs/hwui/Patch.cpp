@@ -21,8 +21,8 @@
 #include "UvMapper.h"
 #include "utils/MathUtils.h"
 
-#include <algorithm>
 #include <utils/Log.h>
+#include <algorithm>
 
 namespace android {
 namespace uirenderer {
@@ -35,10 +35,9 @@ uint32_t Patch::getSize() const {
     return verticesCount * sizeof(TextureVertex);
 }
 
-Patch::Patch(const float bitmapWidth, const float bitmapHeight,
-        float width, float height, const UvMapper& mapper, const Res_png_9patch* patch)
+Patch::Patch(const float bitmapWidth, const float bitmapHeight, float width, float height,
+             const UvMapper& mapper, const Res_png_9patch* patch)
         : mColors(patch->getColors()) {
-
     int8_t emptyQuads = 0;
     const int8_t numColors = patch->numColors;
     if (uint8_t(numColors) < sizeof(uint32_t) * 4) {
@@ -121,8 +120,8 @@ Patch::Patch(const float bitmapWidth, const float bitmapHeight,
         v1 += vOffset / bitmapHeight;
 
         if (stepY > 0.0f) {
-            generateRow(xDivs, xCount, vertex, y1, y2, v1, v2, stretchX, rescaleX,
-                    width, bitmapWidth, quadCount);
+            generateRow(xDivs, xCount, vertex, y1, y2, v1, v2, stretchX, rescaleX, width,
+                        bitmapWidth, quadCount);
         }
 
         y1 = y2;
@@ -133,8 +132,8 @@ Patch::Patch(const float bitmapWidth, const float bitmapHeight,
 
     if (previousStepY != bitmapHeight) {
         y2 = height;
-        generateRow(xDivs, xCount, vertex, y1, y2, v1, 1.0f, stretchX, rescaleX,
-                width, bitmapWidth, quadCount);
+        generateRow(xDivs, xCount, vertex, y1, y2, v1, 1.0f, stretchX, rescaleX, width, bitmapWidth,
+                    quadCount);
     }
 
     if (verticesCount != maxVertices) {
@@ -144,9 +143,9 @@ Patch::Patch(const float bitmapWidth, const float bitmapHeight,
     }
 }
 
-void Patch::generateRow(const int32_t* xDivs, uint32_t xCount, TextureVertex*& vertex,
-        float y1, float y2, float v1, float v2, float stretchX, float rescaleX,
-        float width, float bitmapWidth, uint32_t& quadCount) {
+void Patch::generateRow(const int32_t* xDivs, uint32_t xCount, TextureVertex*& vertex, float y1,
+                        float y2, float v1, float v2, float stretchX, float rescaleX, float width,
+                        float bitmapWidth, uint32_t& quadCount) {
     float previousStepX = 0.0f;
 
     float x1 = 0.0f;
@@ -184,8 +183,8 @@ void Patch::generateRow(const int32_t* xDivs, uint32_t xCount, TextureVertex*& v
     }
 }
 
-void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, float y2,
-            float u1, float v1, float u2, float v2, uint32_t& quadCount) {
+void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, float y2, float u1,
+                         float v1, float u2, float v2, uint32_t& quadCount) {
     const uint32_t oldQuadCount = quadCount;
     quadCount++;
 
@@ -226,5 +225,5 @@ void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, f
 #endif
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

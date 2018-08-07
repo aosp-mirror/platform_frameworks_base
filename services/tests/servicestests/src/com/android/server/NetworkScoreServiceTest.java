@@ -24,12 +24,15 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -42,7 +45,9 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.net.INetworkRecommendationProvider;
 import android.net.INetworkScoreCache;
 import android.net.NetworkKey;
@@ -63,6 +68,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -128,7 +134,9 @@ public class NetworkScoreServiceTest {
     @Mock private UnaryOperator<List<ScoredNetwork>> mScanResultsFilter;
     @Mock private WifiInfo mWifiInfo;
     @Mock private NetworkScoreService.ScoringServiceConnection mServiceConnection;
+    @Mock private PackageManagerInternal mPackageManagerInternal;
     @Captor private ArgumentCaptor<List<ScoredNetwork>> mScoredNetworkCaptor;
+    @Captor private ArgumentCaptor<PackageManagerInternal.PackagesProvider> mPackagesProviderCaptor;
 
     private ContentResolver mContentResolver;
     private NetworkScoreService mNetworkScoreService;
@@ -156,6 +164,7 @@ public class NetworkScoreServiceTest {
         when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(NEW_SCORER);
         mHandlerThread = new HandlerThread("NetworkScoreServiceTest");
         mHandlerThread.start();
+        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
         mNetworkScoreService = new NetworkScoreService(mContext, mNetworkScorerAppManager,
                 networkScorerAppData -> mServiceConnection, mHandlerThread.getLooper());
         WifiConfiguration configuration = new WifiConfiguration();
@@ -181,6 +190,29 @@ public class NetworkScoreServiceTest {
     @After
     public void tearDown() throws Exception {
         mHandlerThread.quitSafely();
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+    }
+
+    @Test
+    public void testConstructor_setsUseOpenWifiPackagesProvider() {
+        Settings.Global.putString(mContentResolver,
+                Settings.Global.USE_OPEN_WIFI_PACKAGE, "com.some.app");
+
+        verify(mPackageManagerInternal)
+                .setUseOpenWifiAppPackagesProvider(mPackagesProviderCaptor.capture());
+
+        String[] packages = mPackagesProviderCaptor.getValue().getPackages(0);
+        assertEquals(1, packages.length);
+        assertEquals("com.some.app", packages[0]);
+    }
+
+    @Test
+    public void testConstructor_registersUseOpenWifiPackageContentObserver() {
+        Settings.Global.putString(mContentResolver,
+                Settings.Global.USE_OPEN_WIFI_PACKAGE, "com.some.other.app");
+
+        verify(mPackageManagerInternal, timeout(500))
+                .grantDefaultPermissionsToDefaultUseOpenWifiApp("com.some.other.app", 0);
     }
 
     @Test
@@ -367,6 +399,8 @@ public class NetworkScoreServiceTest {
 
     @Test
     public void testSetActiveScorer_noScoreNetworksPermission() {
+        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
         when(mContext.checkCallingOrSelfPermission(permission.SCORE_NETWORKS))
                 .thenReturn(PackageManager.PERMISSION_DENIED);
 
@@ -411,8 +445,8 @@ public class NetworkScoreServiceTest {
 
     @Test
     public void testGetAllValidScorer_noRequestNetworkScoresPermission() {
-        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        doThrow(new SecurityException()).when(mContext)
+                .enforceCallingOrSelfPermission(eq(permission.REQUEST_NETWORK_SCORES), anyString());
 
         try {
             mNetworkScoreService.getAllValidScorers();
@@ -805,8 +839,8 @@ public class NetworkScoreServiceTest {
 
     @Test
     public void testGetActiveScorer_notConnected_canNotRequestScores() throws Exception {
-        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        doThrow(new SecurityException()).when(mContext)
+                .enforceCallingOrSelfPermission(eq(permission.REQUEST_NETWORK_SCORES), anyString());
         try {
             mNetworkScoreService.getActiveScorer();
             fail("SecurityException expected.");
@@ -830,8 +864,8 @@ public class NetworkScoreServiceTest {
     @Test
     public void testGetActiveScorer_connected_canNotRequestScores()
             throws Exception {
-        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        doThrow(new SecurityException()).when(mContext)
+                .enforceCallingOrSelfPermission(eq(permission.REQUEST_NETWORK_SCORES), anyString());
         bindToScorer(false);
         try {
             mNetworkScoreService.getActiveScorer();
@@ -945,8 +979,8 @@ public class NetworkScoreServiceTest {
     }
 
     private static class CountDownHandler extends Handler {
-        CountDownLatch latch = new CountDownLatch(1);
-        int receivedWhat;
+        final CountDownLatch latch = new CountDownLatch(1);
+        volatile int receivedWhat;
 
         CountDownHandler(Looper looper) {
             super(looper);
@@ -954,8 +988,8 @@ public class NetworkScoreServiceTest {
 
         @Override
         public void handleMessage(Message msg) {
-            latch.countDown();
             receivedWhat = msg.what;
+            latch.countDown();
         }
     }
 }

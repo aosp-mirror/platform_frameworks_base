@@ -171,6 +171,48 @@ message MetricsEvent {
     TEXT_CLASSIFIER_TYPE_URL = 6;
   }
 
+  // Selection invocation methods. Used as sub-type for TEXT_SELECTION_SESSION events.
+  enum TextSelectionInvocationMethod {
+    TEXT_SELECTION_INVOCATION_UNKNOWN = 0;
+    TEXT_SELECTION_INVOCATION_MANUAL = 1;
+    TEXT_SELECTION_INVOCATION_LINK = 2;
+  }
+
+  // Access method for hidden API events. Type of data tagged with
+  // FIELD_HIDDEN_API_ACCESS_METHOD.
+  // This must be kept in sync with enum AccessMethod in art/runtime/hidden_api.h
+  enum HiddenApiAccessMethod {
+    ACCESS_METHOD_NONE = 0; // never logged, included for completeness
+    ACCESS_METHOD_REFLECTION = 1;
+    ACCESS_METHOD_JNI = 2;
+    ACCESS_METHOD_LINKING = 3; // never logged, included for completeness
+  }
+
+  enum HardwareType {
+        HARDWARE_UNKNOWN = 0;
+        HARDWARE_MICROPHONE = 1;
+        HARDWARE_CODEC = 2;
+        HARDWARE_SPEAKER = 3;
+        HARDWARE_FINGERPRINT = 4;
+    }
+
+    enum HardwareFailureCode {
+        HARDWARE_FAILURE_UNKNOWN = 0;
+        HARDWARE_FAILURE_COMPLETE = 1;
+        HARDWARE_FAILURE_SPEAKER_HIGH_Z = 2;
+        HARDWARE_FAILURE_SPEAKER_SHORT = 3;
+        HARDWARE_FAILURE_FINGERPRINT_SENSOR_BROKEN = 4;
+        HARDWARE_FAILURE_FINGERPRINT_TOO_MANY_DEAD_PIXELS = 5;
+    }
+
+    enum IoOperation {
+        IOOP_UNKNOWN = 0;
+        IOOP_READ = 1;
+        IOOP_WRITE = 2;
+        IOOP_UNMAP = 3;
+        IOOP_SYNC = 4;
+    }
+
   // Known visual elements: views or controls.
   enum View {
     // Unknown view
@@ -1529,7 +1571,7 @@ message MetricsEvent {
     // OS: N
     ACTION_ZEN_ALLOW_LIGHTS = 264;
 
-    // OPEN: Settings > Notifications > [App] > Topic Notifications
+    // OPEN: Settings > Notifications > [App] > Channel Notifications
     // CATEGORY: SETTINGS
     // OS: N
     NOTIFICATION_TOPIC_NOTIFICATION = 265;
@@ -2801,418 +2843,522 @@ message MetricsEvent {
 
     // ACTION: An app requested an unknown permission
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_UNKNOWN = 630;
 
     // ACTION: An app was granted an unknown permission
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_UNKNOWN = 631;
 
     // ACTION: An app requested an unknown permission and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_UNKNOWN = 632;
 
     // ACTION: An unknown permission was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_UNKNOWN = 633;
 
     // ACTION: An app requested the permission READ_CALENDAR
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_READ_CALENDAR = 634;
 
     // ACTION: An app was granted the permission READ_CALENDAR
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_READ_CALENDAR = 635;
 
     // ACTION: An app requested the permission READ_CALENDAR and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_READ_CALENDAR = 636;
 
     // ACTION: The permission READ_CALENDAR was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_READ_CALENDAR = 637;
 
     // ACTION: An app requested the permission WRITE_CALENDAR
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_WRITE_CALENDAR = 638;
 
     // ACTION: An app was granted the permission WRITE_CALENDAR
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_WRITE_CALENDAR = 639;
 
     // ACTION: An app requested the permission WRITE_CALENDAR and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_WRITE_CALENDAR = 640;
 
     // ACTION: The permission WRITE_CALENDAR was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_WRITE_CALENDAR = 641;
 
     // ACTION: An app requested the permission CAMERA
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_CAMERA = 642;
 
     // ACTION: An app was granted the permission CAMERA
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_CAMERA = 643;
 
     // ACTION: An app requested the permission CAMERA and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_CAMERA = 644;
 
     // ACTION: The permission CAMERA was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_CAMERA = 645;
 
     // ACTION: An app requested the permission READ_CONTACTS
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_READ_CONTACTS = 646;
 
     // ACTION: An app was granted the permission READ_CONTACTS
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_READ_CONTACTS = 647;
 
     // ACTION: An app requested the permission READ_CONTACTS and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_READ_CONTACTS = 648;
 
     // ACTION: The permission READ_CONTACTS was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_READ_CONTACTS = 649;
 
     // ACTION: An app requested the permission WRITE_CONTACTS
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_WRITE_CONTACTS = 650;
 
     // ACTION: An app was granted the permission WRITE_CONTACTS
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_WRITE_CONTACTS = 651;
 
     // ACTION: An app requested the permission WRITE_CONTACTS and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_WRITE_CONTACTS = 652;
 
     // ACTION: The permission WRITE_CONTACTS was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_WRITE_CONTACTS = 653;
 
     // ACTION: An app requested the permission GET_ACCOUNTS
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_GET_ACCOUNTS = 654;
 
     // ACTION: An app was granted the permission GET_ACCOUNTS
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_GET_ACCOUNTS = 655;
 
     // ACTION: An app requested the permission GET_ACCOUNTS and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_GET_ACCOUNTS = 656;
 
     // ACTION: The permission GET_ACCOUNTS was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_GET_ACCOUNTS = 657;
 
     // ACTION: An app requested the permission ACCESS_FINE_LOCATION
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 658;
 
     // ACTION: An app was granted the permission ACCESS_FINE_LOCATION
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_ACCESS_FINE_LOCATION = 659;
 
     // ACTION: An app requested the permission ACCESS_FINE_LOCATION and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_ACCESS_FINE_LOCATION = 660;
 
     // ACTION: The permission ACCESS_FINE_LOCATION was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_ACCESS_FINE_LOCATION = 661;
 
     // ACTION: An app requested the permission ACCESS_COARSE_LOCATION
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_ACCESS_COARSE_LOCATION = 662;
 
     // ACTION: An app was granted the permission ACCESS_COARSE_LOCATION
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_ACCESS_COARSE_LOCATION = 663;
 
     // ACTION: An app requested the permission ACCESS_COARSE_LOCATION and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_ACCESS_COARSE_LOCATION = 664;
 
     // ACTION: The permission ACCESS_COARSE_LOCATION was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_ACCESS_COARSE_LOCATION = 665;
 
     // ACTION: An app requested the permission RECORD_AUDIO
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_RECORD_AUDIO = 666;
 
     // ACTION: An app was granted the permission RECORD_AUDIO
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_RECORD_AUDIO = 667;
 
     // ACTION: An app requested the permission RECORD_AUDIO and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_RECORD_AUDIO = 668;
 
     // ACTION: The permission RECORD_AUDIO was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_RECORD_AUDIO = 669;
 
     // ACTION: An app requested the permission READ_PHONE_STATE
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_READ_PHONE_STATE = 670;
 
     // ACTION: An app was granted the permission READ_PHONE_STATE
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_READ_PHONE_STATE = 671;
 
     // ACTION: An app requested the permission READ_PHONE_STATE and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_READ_PHONE_STATE = 672;
 
     // ACTION: The permission READ_PHONE_STATE was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_READ_PHONE_STATE = 673;
 
     // ACTION: An app requested the permission CALL_PHONE
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_CALL_PHONE = 674;
 
     // ACTION: An app was granted the permission CALL_PHONE
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_CALL_PHONE = 675;
 
     // ACTION: An app requested the permission CALL_PHONE and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_CALL_PHONE = 676;
 
     // ACTION: The permission CALL_PHONE was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_CALL_PHONE = 677;
 
     // ACTION: An app requested the permission READ_CALL_LOG
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_READ_CALL_LOG = 678;
 
     // ACTION: An app was granted the permission READ_CALL_LOG
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_READ_CALL_LOG = 679;
 
     // ACTION: An app requested the permission READ_CALL_LOG and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_READ_CALL_LOG = 680;
 
     // ACTION: The permission READ_CALL_LOG was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_READ_CALL_LOG = 681;
 
     // ACTION: An app requested the permission WRITE_CALL_LOG
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_WRITE_CALL_LOG = 682;
 
     // ACTION: An app was granted the permission WRITE_CALL_LOG
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_WRITE_CALL_LOG = 683;
 
     // ACTION: An app requested the permission WRITE_CALL_LOG and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_WRITE_CALL_LOG = 684;
 
     // ACTION: The permission WRITE_CALL_LOG was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_WRITE_CALL_LOG = 685;
 
     // ACTION: An app requested the permission ADD_VOICEMAIL
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_ADD_VOICEMAIL = 686;
 
     // ACTION: An app was granted the permission ADD_VOICEMAIL
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_ADD_VOICEMAIL = 687;
 
     // ACTION: An app requested the permission ADD_VOICEMAIL and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_ADD_VOICEMAIL = 688;
 
     // ACTION: The permission ADD_VOICEMAIL was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_ADD_VOICEMAIL = 689;
 
     // ACTION: An app requested the permission USE_SIP
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_USE_SIP = 690;
 
     // ACTION: An app was granted the permission USE_SIP
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_USE_SIP = 691;
 
     // ACTION: An app requested the permission USE_SIP and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_USE_SIP = 692;
 
     // ACTION: The permission USE_SIP was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_USE_SIP = 693;
 
     // ACTION: An app requested the permission PROCESS_OUTGOING_CALLS
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_PROCESS_OUTGOING_CALLS = 694;
 
     // ACTION: An app was granted the permission PROCESS_OUTGOING_CALLS
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_PROCESS_OUTGOING_CALLS = 695;
 
     // ACTION: An app requested the permission PROCESS_OUTGOING_CALLS and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_PROCESS_OUTGOING_CALLS = 696;
 
     // ACTION: The permission PROCESS_OUTGOING_CALLS was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_PROCESS_OUTGOING_CALLS = 697;
 
     // ACTION: An app requested the permission READ_CELL_BROADCASTS
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_READ_CELL_BROADCASTS = 698;
 
     // ACTION: An app was granted the permission READ_CELL_BROADCASTS
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_READ_CELL_BROADCASTS = 699;
 
     // ACTION: An app requested the permission READ_CELL_BROADCASTS and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_READ_CELL_BROADCASTS = 700;
 
     // ACTION: The permission READ_CELL_BROADCASTS was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_READ_CELL_BROADCASTS = 701;
 
     // ACTION: An app requested the permission BODY_SENSORS
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_BODY_SENSORS = 702;
 
     // ACTION: An app was granted the permission BODY_SENSORS
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_BODY_SENSORS = 703;
 
     // ACTION: An app requested the permission BODY_SENSORS and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_BODY_SENSORS = 704;
 
     // ACTION: The permission BODY_SENSORS was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_BODY_SENSORS = 705;
 
     // ACTION: An app requested the permission SEND_SMS
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_SEND_SMS = 706;
 
     // ACTION: An app was granted the permission SEND_SMS
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_SEND_SMS = 707;
 
     // ACTION: An app requested the permission SEND_SMS and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_SEND_SMS = 708;
 
     // ACTION: The permission SEND_SMS was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_SEND_SMS = 709;
 
     // ACTION: An app requested the permission RECEIVE_SMS
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_RECEIVE_SMS = 710;
 
     // ACTION: An app was granted the permission RECEIVE_SMS
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_RECEIVE_SMS = 711;
 
     // ACTION: An app requested the permission RECEIVE_SMS and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_RECEIVE_SMS = 712;
 
     // ACTION: The permission RECEIVE_SMS was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_RECEIVE_SMS = 713;
 
     // ACTION: An app requested the permission READ_SMS
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_READ_SMS = 714;
 
     // ACTION: An app was granted the permission READ_SMS
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_READ_SMS = 715;
 
     // ACTION: An app requested the permission READ_SMS and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_READ_SMS = 716;
 
     // ACTION: The permission READ_SMS was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_READ_SMS = 717;
 
     // ACTION: An app requested the permission RECEIVE_WAP_PUSH
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_RECEIVE_WAP_PUSH = 718;
 
     // ACTION: An app was granted the permission RECEIVE_WAP_PUSH
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_RECEIVE_WAP_PUSH = 719;
 
     // ACTION: An app requested the permission RECEIVE_WAP_PUSH and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_RECEIVE_WAP_PUSH = 720;
 
     // ACTION: The permission RECEIVE_WAP_PUSH was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_RECEIVE_WAP_PUSH = 721;
 
     // ACTION: An app requested the permission RECEIVE_MMS
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_RECEIVE_MMS = 722;
 
     // ACTION: An app was granted the permission RECEIVE_MMS
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_RECEIVE_MMS = 723;
 
     // ACTION: An app requested the permission RECEIVE_MMS and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_RECEIVE_MMS = 724;
 
     // ACTION: The permission RECEIVE_MMS was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_RECEIVE_MMS = 725;
 
     // ACTION: An app requested the permission READ_EXTERNAL_STORAGE
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 726;
 
     // ACTION: An app was granted the permission READ_EXTERNAL_STORAGE
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_READ_EXTERNAL_STORAGE = 727;
 
     // ACTION: An app requested the permission READ_EXTERNAL_STORAGE and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_READ_EXTERNAL_STORAGE = 728;
 
     // ACTION: The permission READ_EXTERNAL_STORAGE was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_READ_EXTERNAL_STORAGE = 729;
 
     // ACTION: An app requested the permission WRITE_EXTERNAL_STORAGE
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 730;
 
     // ACTION: An app was granted the permission WRITE_EXTERNAL_STORAGE
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_WRITE_EXTERNAL_STORAGE = 731;
 
     // ACTION: An app requested the permission WRITE_EXTERNAL_STORAGE and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_WRITE_EXTERNAL_STORAGE = 732;
 
     // ACTION: The permission WRITE_EXTERNAL_STORAGE was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_WRITE_EXTERNAL_STORAGE = 733;
 
     // ACTION: Logged when a provisioning session has started
@@ -3223,18 +3369,22 @@ message MetricsEvent {
 
     // ACTION: An app requested the permission READ_PHONE_NUMBERS
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REQUEST_READ_PHONE_NUMBERS = 736;
 
     // ACTION: An app was granted the permission READ_PHONE_NUMBERS
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_GRANT_READ_PHONE_NUMBERS = 737;
 
     // ACTION: An app requested the permission READ_PHONE_NUMBERS and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_DENIED_READ_PHONE_NUMBERS = 738;
 
     // ACTION: The permission READ_PHONE_NUMBERS was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_PERMISSION_REVOKE_READ_PHONE_NUMBERS = 739;
 
     // ACTION: QS Brightness Slider (with auto brightness disabled, and VR enabled)
@@ -3728,66 +3878,82 @@ message MetricsEvent {
 
     // ACTION: An app requested the app-op permission ACCESS_NOTIFICATIONS
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_REQUEST_ACCESS_NOTIFICATIONS = 883;
 
     // ACTION: An app was granted the app-op permission ACCESS_NOTIFICATIONS
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_GRANT_ACCESS_NOTIFICATIONS = 884;
 
     // ACTION: An app requested the app-op permission ACCESS_NOTIFICATIONS and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_DENIED_ACCESS_NOTIFICATIONS = 885;
 
     // ACTION: The app-op permission ACCESS_NOTIFICATIONS was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_APPOP_REVOKE_ACCESS_NOTIFICATIONS = 886;
 
     // ACTION: An app requested the app-op permission SYSTEM_ALERT_WINDOW
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_REQUEST_SYSTEM_ALERT_WINDOW = 887;
 
     // ACTION: An app was granted the app-op permission SYSTEM_ALERT_WINDOW
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_GRANT_SYSTEM_ALERT_WINDOW = 888;
 
     // ACTION: An app requested the app-op permission SYSTEM_ALERT_WINDOW and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_DENIED_SYSTEM_ALERT_WINDOW = 889;
 
     // ACTION: The app-op permission SYSTEM_ALERT_WINDOW was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_APPOP_REVOKE_SYSTEM_ALERT_WINDOW = 890;
 
     // ACTION: An app requested the app-op permission REQUEST_WRITE_SETTINGS
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_REQUEST_WRITE_SETTINGS = 891;
 
     // ACTION: An app was granted the app-op permission REQUEST_WRITE_SETTINGS
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_GRANT_WRITE_SETTINGS = 892;
 
     // ACTION: An app requested the app-op permission REQUEST_WRITE_SETTINGS and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_DENIED_WRITE_SETTINGS = 893;
 
     // ACTION: The app-op permission REQUEST_WRITE_SETTINGS was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_APPOP_REVOKE_WRITE_SETTINGS = 894;
 
     // ACTION: An app requested the app-op permission REQUEST_INSTALL_PACKAGES
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_REQUEST_REQUEST_INSTALL_PACKAGES = 895;
 
     // ACTION: An app was granted the app-op permission REQUEST_INSTALL_PACKAGES
     // PACKAGE: The package name of the app that was granted the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_GRANT_REQUEST_INSTALL_PACKAGES = 896;
 
     // ACTION: An app requested the app-op permission REQUEST_INSTALL_PACKAGES and the request was denied
     // PACKAGE: The package name of the app requesting the permission
+    // OBSOLETE as of Android P
     ACTION_APPOP_DENIED_REQUEST_INSTALL_PACKAGES = 897;
 
     // ACTION: The app-op permission REQUEST_INSTALL_PACKAGES was revoked for an app
     // PACKAGE: The package name of the app the permission was revoked for
+    // OBSOLETE as of Android P
     ACTION_APPOP_REVOKE_REQUEST_INSTALL_PACKAGES = 898;
 
     // ACTION: Phase 1 of instant application resolution occurred
@@ -3820,16 +3986,44 @@ message MetricsEvent {
     // OS: O
     APP_TRANSITION_IS_EPHEMERAL = 905;
 
-    // An autofill session was started
+    // An autofill session was started.
+    // OS: O
     // Package: Package of app that is autofilled
+    // NOTE: starting on OS MR1, it also added the following field:
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // NOTE: starting on OS P, it also added the following field:
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFIL_FLAGS: flags used to start the session.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session started.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SESSION_STARTED = 906;
 
     // An autofill request was processed by a service
-    // Type TYPE_SUCCESS: The request succeeded
-    // Type TYPE_FAILURE: The request failed
+    // Type TYPE_SUCCESS: service called FillCalback.onSuccess()
+    // Type TYPE_FAILURE: service called FillCallback.onFailure()
     // Package: Package of app that is autofilled
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
-    // Tag FIELD_AUTOFILL_NUM_DATASET: The number of datasets returned (only in success case)
+    // Tag FIELD_AUTOFILL_NUM_DATASETS: The number of datasets returned in the response, or -1 if
+    // the service returned a null response
+    // NOTE: starting on OS P, it also added the following fields:
+    // TYPE_CLOSE: request timed out before service called a FillCallback method
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_REQUEST_ORDINAL: sequence number of the request inside a session; starts
+    //     with 1.
+    // Tag FIELD_AUTOFILL_FLAGS: flags used to request autofill
+    // Tag FIELD_AUTOFILL_DURATION: how long it took (in ms) to show the autofill UI after a field
+    //     was focused.
+    // Tag FIELD_AUTOFILL_AUTHENTICATION_STATUS: status of authenticated datasets or responses.
+    // Tag FIELD_AUTOFILL_NUM_FIELD_CLASSIFICATION_IDS: if service requested field classification,
+    //     number of entries field ids in the request.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // NOTE: Prior to P, some of the fields above were logged by 5 different metrics:
+    // - AUTOFILL_UI_LATENCY
+    // - AUTOFILL_AUTHENTICATED;
+    // - AUTOFILL_DATASET_AUTHENTICATED
+    // - AUTOFILL_INVALID_AUTHENTICATION
+    // - AUTOFILL_INVALID_DATASET_AUTHENTICATION
     AUTOFILL_REQUEST = 907;
 
     // Tag of a field for a package of an autofill service
@@ -3846,6 +4040,11 @@ message MetricsEvent {
     // Package: Package of app that was autofilled
     // Tag FIELD_AUTOFILL_FILTERTEXT_LEN: The length of the filter text
     // Tag FIELD_AUTOFILL_NUM_DATASETS: The number of datasets shown
+    // NOTE: starting on OS P, it also added the following fields:
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_FILL_UI = 910;
 
     // Tag of a field for the length of the filter text
@@ -3853,12 +4052,18 @@ message MetricsEvent {
 
     // An autofill authentication succeeded
     // Package: Package of app that was autofilled
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // NOTE: starting on OS P, this metric became a value for FIELD_AUTOFILL_AUTHENTICATION_STATUS
     AUTOFILL_AUTHENTICATED = 912;
 
     // An activity was autofilled and all values could be applied
     // Package: Package of app that is autofilled
     // Tag FIELD_AUTOFILL_NUM_VALUES: Number of values that were suggested to be autofilled
     // Tag FIELD_AUTOFILL_NUM_VIEWS_FILLED: Number of views that could be filled
+    // NOTE: starting on OS P, it also added the following fields:
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_DATASET_APPLIED = 913;
 
     // Tag of a field for the number values to be filled in
@@ -3872,21 +4077,38 @@ message MetricsEvent {
     // Type TYPE_CLOSE: UI was destroyed without influence of the user
     // Type TYPE_ACTION: data was saved
     // Package: Package of app that was autofilled
-    // Tag FIELD_AUTOFILL_NUM_ID: The number of ids that are saved
+    // Tag FIELD_AUTOFILL_NUM_IDS: The number of ids that are saved
+    // NOTE: starting on OS P, it also added the following fields:
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SAVE_UI = 916;
 
     // Tag of a field for the number of saveable ids
     FIELD_AUTOFILL_NUM_IDS = 917;
 
-    // ACTION: An autofill service was reqiested to save data
-    // Type TYPE_SUCCESS: The request succeeded
+    // ACTION: An autofill service was requested to save data
+    // Type TYPE_SUCCESS: The request succeeded right away
+    // Type TYPE_OPEN: The request succeeded but the service launched an IntentSender
     // Type TYPE_FAILURE: The request failed
     // Package: Package of app that was autofilled
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // NOTE: starting on OS P, it also added the following fields:
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_DATA_SAVE_REQUEST = 918;
 
     // An auto-fill session was finished
+    // OS: O
     // Package: Package of app that was autofilled
+    // NOTE: starting on OS P, it also added the following fields:
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_NUMBER_REQUESTS: number of requests made to the service (each request
+    //     is logged by a separate AUTOFILL_REQUEST metric)
     AUTOFILL_SESSION_FINISHED = 919;
 
     // meta-event: a reader has checkpointed the log here.
@@ -4005,6 +4227,21 @@ message MetricsEvent {
     // Type: int encoded boolean
     // OS: O
     FIELD_NOTIFICATION_GROUP_SUMMARY = 947;
+
+    // An app attempted to forge a different component name in the AssisStructure that would be
+    // passed to the autofill service.
+    // OS: O (security patch)
+    // Package: Real package of the app being autofilled
+    // Tag FIELD_AUTOFILL_SERVICE: Package of the autofill service that processed the request
+    // TAG FIELD_AUTOFILL_FORGED_COMPONENT_NAME: Component name being forged
+    // NOTE: starting on OS P, it also added the following field:
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    AUTOFILL_FORGED_COMPONENT_ATTEMPT = 948;
+
+    // FIELD - The component that an app tried tro forged.
+    // Type: string
+    // OS: O (security patch)
+    FIELD_AUTOFILL_FORGED_COMPONENT_NAME = 949;
 
     // ---- End O Constants, all O constants go above this line ----
 
@@ -4456,6 +4693,10 @@ message MetricsEvent {
     // OS: O MR
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_AUTOFILL_PREVIOUS_LENGTH: the previous length of the value
+    // NOTE: starting on OS P, it also added the following fields:
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_VALUE_RESET = 1124;
 
     // Tag of AUTOFILL_VALUE_RESET
@@ -4465,40 +4706,50 @@ message MetricsEvent {
     // An autofill dataset authentication succeeded
     // Package: Package of app that was autofilled
     // OS: O MR
-    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // NOTE: starting on OS P, this metric became a value for FIELD_AUTOFILL_AUTHENTICATION_STATUS
     AUTOFILL_DATASET_AUTHENTICATED = 1126;
 
     // An autofill service provided an invalid dataset authentication
     // Package: Package of app that was autofilled
     // OS: O MR
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // NOTE: starting on OS P, this metric became a value for FIELD_AUTOFILL_AUTHENTICATION_STATUS
     AUTOFILL_INVALID_DATASET_AUTHENTICATION = 1127;
 
     // An autofill service provided an invalid authentication extra
     // Package: Package of app that was autofilled
     // OS: O MR
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // NOTE: starting on OS P, this metric became a value for FIELD_AUTOFILL_AUTHENTICATION_STATUS
     AUTOFILL_INVALID_AUTHENTICATION = 1128;
 
-    // An autofill service used a custom description (using RemoteViews) in the Save affordance
+    // An autofill service used a custom description (using RemoteViews) in the autofill save UI
     // Package: Package of app that is autofilled
     // OS: O MR
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
+    // NOTE: starting on OS P, it also added the following fields:
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SAVE_CUSTOM_DESCRIPTION = 1129;
 
     // FIELD - Type of save object passed by the service when the Save UI is shown
     // OS: O MR
     FIELD_AUTOFILL_SAVE_TYPE = 1130;
 
-    // An autofill service used a custom subtitle (String) in the Save affordance
+    // An autofill service used a custom subtitle (String) in the autofill save UI
     // Package: Package of app that is autofilled
     // OS: O MR
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
+    // NOTE: starting on OS P, it also added the following fields:
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SAVE_CUSTOM_SUBTITLE = 1131;
 
-    // User tapped a link in the custom description of the Save affordance provided by an autofill service
+    // User tapped a link in the custom description of the autofill save UI provided by an autofill service
     // Package: Package of app that is autofilled
     // OS: O MR
     // Type TYPE_UNKNOWN: The link was not properly set by the service
@@ -4506,6 +4757,10 @@ message MetricsEvent {
     // Type TYPE_FAILURE: The link could not launc an activity
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
+    // NOTE: starting on OS P, it also added the following fields:
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SAVE_LINK_TAPPED = 1132;
 
     // Result of the validation on save when an autofill service provided a validator
@@ -4516,15 +4771,23 @@ message MetricsEvent {
     // Type TYPE_DISMISS: The validation failed
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
+    // NOTE: starting on OS P, it also added the following fields:
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SAVE_VALIDATION = 1133;
 
-    // Result of an operation in the autofill save affordance after the user tapped a link in the custom description
+    // Result of an operation in the autofill save UI after the user tapped a link in the custom description
     // provided by the autofill service
     // Package: Package of app that is autofilled
     // OS: O MR
-    // Type TYPE_OPEN: The save affordance was restored
-    // Type TYPE_DISMISS: The save affordcance was destroyed
+    // Type TYPE_OPEN: The autofill save UI was restored
+    // Type TYPE_DISMISS: The autofill save UI was destroyed
     // Type TYPE_FAILURE: An invalid opperation was reported by the app's AutofillManager
+    // NOTE: starting on OS P, it also added the following fields:
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_PENDING_SAVE_UI_OPERATION = 1134;
 
     // Autofill service called API that disables itself
@@ -4532,7 +4795,9 @@ message MetricsEvent {
     // OS: O MR
     AUTOFILL_SERVICE_DISABLED_SELF = 1135;
 
-    // Counter showing how long it took (in ms) to show the autofill UI after a field was focused
+    // DEPRECATED - on P it was merged with AUTOFILL_REQUEST
+    // Reports how long it took to show the autofill UI after a field was focused
+    // Tag FIELD_AUTOFILL_DURATION: Duration in ms
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Package: Package of the autofill service
     // OS: O MR
@@ -4561,6 +4826,18 @@ message MetricsEvent {
     // Action: user togged the visibility of the notification snooze options drop down
     // OS: O MR
     NOTIFICATION_SNOOZE_OPTIONS = 1142;
+
+    // OPEN: Settings > Display > Colors
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    COLOR_MODE_SETTINGS = 1143;
+
+    // Enclosing category for group of APP_TRANSITION_FOO events,
+    // logged when we cancel an app transition.
+    APP_TRANSITION_CANCELLED = 1144;
+
+    // Tag of a field representing a duration on autofill-related metrics.
+    FIELD_AUTOFILL_DURATION = 1145;
 
     // ---- End O-MR1 Constants, all O-MR1 constants go above this line ----
 
@@ -4608,7 +4885,7 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     ACTION_MOBILE_NETWORK_MANUAL_SELECT_NETWORK = 1210;
 
-    // FIELD - Manually selected mobile network
+    // Not used anymore.
     FIELD_MOBILE_NETWORK = 1211;
 
     // OPEN: Settings > Network & Internet > Mobile network > Access Point Names
@@ -4631,6 +4908,1215 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     ACTION_MOBILE_NETWORK_SET_UP_DATA_SERVICE = 1216;
 
+    // OPEN: Settings > Developer Options > Experiment dashboard
+    // CATEGORY: SETTINGS
+    SETTINGS_FEATURE_FLAGS_DASHBOARD = 1217;
+
+    // OPEN: Settings > Notifications > [App] > Topic Notifications
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_CHANNEL_GROUP = 1218;
+
+    // OPEN: Settings > Developer options > Enable > Info dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_ENABLE_DEVELOPMENT_OPTIONS = 1219;
+
+    // OPEN: Settings > Developer options > OEM unlocking > Info dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_ENABLE_OEM_UNLOCKING = 1220;
+
+    // OPEN: Settings > Security > Nexus Imprint > [Fingerprint]
+    // CATEGORY: SETTINGS
+    // OS: P
+    FINGERPRINT_AUTHENTICATE_SIDECAR = 1221;
+
+    // OPEN: Settings > Developer options > USB debugging > Info dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_ENABLE_ADB = 1222;
+
+    // OPEN: Settings > Developer options > Revoke USB debugging authorizations > Info dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_CLEAR_ADB_KEYS = 1223;
+
+    // Open: Settings > Developer options > Quick setting tile config
+    // CATEGORY: SETTINGS
+    // OS: P
+    DEVELOPMENT_QS_TILE_CONFIG = 1224;
+
+    // OPEN: Settings > Developer options > Store logger data persistently on device > Info dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_LOG_PERSIST = 1225;
+
+    // ACTION: DND Settings > Priority only allows > Alarms toggle
+    // SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ALLOW_ALARMS = 1226;
+
+    // ACTION: DND Settings > Priority only allows > Media toggle
+    // SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ALLOW_MEDIA = 1227;
+
+    // An autofill service explicitly defined which view should commit the autofill context
+    // Package: Package of app that is autofilled
+    // OS: P
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    AUTOFILL_EXPLICIT_SAVE_TRIGGER_DEFINITION = 1228;
+
+    // The autofill context was commited when the user clicked a view explicitly marked by the
+    // service as committing it
+    // Package: Package of app that is autofilled
+    // OS: P
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    AUTOFILL_SAVE_EXPLICITLY_TRIGGERED = 1229;
+
+    // OPEN: Settings > Network & Internet > Mobile network > Wi-Fi calling
+    // CATEGORY: SETTINGS
+    // OS: P
+    WIFI_CALLING_FOR_SUB = 1230;
+
+    // An autofill service asked to disable autofill for a given application.
+    // Package: Package of app that is being disabled for autofill
+    // OS: P
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_DURATION: duration (in ms) that autofill will be disabled
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    AUTOFILL_SERVICE_DISABLED_APP = 1231;
+
+    // An autofill service asked to disable autofill for a given activity.
+    // Package: Package of app whose activity is being disabled for autofill
+    // OS: P
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is being disabled for autofill
+    // Tag FIELD_AUTOFILL_DURATION: duration (in ms) that autofill will be disabled
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    AUTOFILL_SERVICE_DISABLED_ACTIVITY = 1232;
+
+    // ACTION: Stop an app and turn on background check
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_APP_STOP_AND_BACKGROUND_CHECK = 1233;
+
+    // FIELD: The action type for each anomaly
+    // CATEGORY: SETTINGS
+    // OS: P
+    FIELD_ANOMALY_ACTION_TYPE = 1234;
+
+    // OPEN: Settings -> Battery -> Wakelock anomaly
+    // CATEGORY: SETTINGS
+    // OS: P
+    ANOMALY_TYPE_WAKELOCK = 1235;
+
+    // OPEN: Settings -> Battery -> Wakeup alarm anomaly
+    // CATEGORY: SETTINGS
+    // OS: P
+    ANOMALY_TYPE_WAKEUP_ALARM = 1236;
+
+    // OPEN: Settings -> Battery -> Unoptimized bt anomaly
+    // CATEGORY: SETTINGS
+    // OS: P
+    ANOMALY_TYPE_UNOPTIMIZED_BT = 1237;
+
+    // Open: Settings > Dev options > Oem unlock > lock it > warning dialog.
+    // OS: P
+    DIALOG_OEM_LOCK_INFO = 1238;
+
+    // ACTION: Settings > Wi-Fi > Click one network > Auto sign in
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_WIFI_AUTO_SIGN_IN = 1239;
+
+    // Open: Settings > System > About phone > IMEI
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_IMEI_INFO = 1240;
+
+    // In permission action fields tagged like this reference the permission affected
+    FIELD_PERMISSION = 1241;
+
+    // ACTION: An app requested a permission and we asked to user to approve the request
+    // PACKAGE: The package name of the app requesting the permission
+    // Tag FIELD_PERMISSION: Name of the permission requested
+    ACTION_PERMISSION_REQUESTED = 1242;
+
+    // ACTION: An app was granted the a permission. This can happen after a user approved a request
+    //         or automatically. In the second case there will not be an
+    //         ACTION_PERMISSION_REQUESTED.
+    // PACKAGE: The package name of the app that was granted the permission
+    // Tag FIELD_PERMISSION: Name of the permission granted
+    ACTION_PERMISSION_GRANTED = 1243;
+
+    // ACTION: An app requested the a permission and the request was denied by the user or a device
+    //         policy
+    // PACKAGE: The package name of the app requesting the permission
+    // Tag FIELD_PERMISSION: Name of the permission denied
+    ACTION_PERMISSION_DENIED = 1244;
+
+    // ACTION: A permission was revoked
+    // PACKAGE: The package name of the app the permission was revoked for
+    // Tag FIELD_PERMISSION: Name of the permission revoked
+    ACTION_PERMISSION_REVOKED = 1245;
+
+    // OPEN: Settings > System > About Phone > Sim status
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_SIM_STATUS = 1246;
+
+    // OPEN: Settings > System > About Phone > Android Version
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_FIRMWARE_VERSION = 1247;
+
+    // OPEN: Settings > Network & internet > Menu > Private DNS
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_PRIVATE_DNS = 1248;
+
+    // ACTION: A private dns mode been selected by user
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_PRIVATE_DNS_MODE = 1249;
+
+    // FIELD: text select start offset in words (as defined by the ICU BreakIterator).
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: P
+    FIELD_SELECTION_RANGE_START = 1250;
+
+    // FIELD: text select end offset in words (as defined by the ICU BreakIterator).
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: P
+    FIELD_SELECTION_RANGE_END = 1251;
+
+    // FIELD: smart text selection start offset in words (as defined by the ICU BreakIterator),
+    //        stored as two packed 16bit integers. (start in MSBs, end in LSBs)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: P
+    FIELD_SELECTION_SMART_RANGE_START = 1252;
+
+    // FIELD: smart text selection end offset in words (as defined by the ICU BreakIterator),
+    //        stored as two packed 16bit integers. (start in MSBs, end in LSBs)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: P
+    FIELD_SELECTION_SMART_RANGE_END = 1253;
+
+    // FIELD: the entity type of the text currently selected.
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: P
+    FIELD_SELECTION_ENTITY_TYPE = 1254;
+
+    // FIELD: the type of widget the selection was made in.
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: P
+    FIELD_SELECTION_WIDGET_TYPE = 1255;
+
+    // FIELD: the name of the text classifier model used.
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: P
+    FIELD_TEXTCLASSIFIER_MODEL = 1256;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > Behavior > Messages
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_MESSAGES = 1257;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > Behavior > Calls
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_CALLS = 1258;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > TURN ON -> Until you turn off
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_TOGGLE_ON_FOREVER = 1259;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > TURN ON -> Time countdown manual rule (ie: for one hour)
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_TOGGLE_ON_COUNTDOWN = 1260;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > TURN ON -> Next Alarm (ie: Until Tue 7:20 AM)
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_TOGGLE_ON_ALARM = 1261;
+
+    // FIELD: the version of the widget the selection was made in.
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: P
+    FIELD_SELECTION_WIDGET_VERSION = 1262;
+
+    // OPEN: Settings > Battery(version 2)
+    // CATEGORY: SETTINGS
+    // OS: P
+    FUELGAUGE_POWER_USAGE_SUMMARY_V2 = 1263;
+
+    // OPEN: Settings > Connected devices > Connection preferences
+    // CATEGORY: SETTINGS
+    // OS: P
+    CONNECTION_DEVICE_ADVANCED = 1264;
+
+    // OPEN: Settings > Security > Screen lock gear icon
+    // CATEGORY: SETTINGS
+    // OS: P
+    SCREEN_LOCK_SETTINGS = 1265;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Turn on automatically > Delete rule (trash can icon)
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_DELETE_RULE_DIALOG = 1266;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Turn on automatically > Select rule ("Event") > Rule name > OK
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_MODE_RULE_NAME_CHANGE_OK = 1267;
+
+    // OPEN: Settings > Sound > Do Not Disturb > TURN ON NOW/TURN OFF NOW
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_TOGGLE_DND_BUTTON = 1268;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Turn on automatically > Add rule > Event/Time
+    // OPEN: Settings > Sound > Do Not Disturb > Turn on automatically > Select rule ("Event") > Rule name
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_RULE_NAME_DIALOG = 1269;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Turn on automatically > Add rule
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_RULE_SELECTION_DIALOG = 1270;
+
+    // Tag of a field for the number of ids in an autofill field classification request.
+    FIELD_AUTOFILL_NUM_FIELD_CLASSIFICATION_IDS = 1271;
+
+    // An autofill service updated its user data
+    // Package: Package of the autofill service that updated the user data
+    // Tag FIELD_AUTOFILL_NUM_VALUES: number of fields added (or 0 if reset)
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // OS: P
+    AUTOFILL_USERDATA_UPDATED = 1272;
+
+    // Some data entered by the user matched the field classification requested by the service.
+    // Package: Package of app that is autofilled
+    // Counter: number of matches found
+    // OS: P
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_MATCH_SCORE: Average score of the matches, in the range of 0 to 100
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    AUTOFILL_FIELD_CLASSIFICATION_MATCHES = 1273;
+
+    // Tag used to report autofill field classification scores
+    FIELD_AUTOFILL_MATCH_SCORE = 1274;
+
+    // ACTION: Usb config has been changed to charging
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_USB_CONFIG_CHARGING = 1275;
+
+    // ACTION: Usb config has been changed to mtp (file transfer)
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_USB_CONFIG_MTP = 1276;
+
+    // ACTION: Usb config has been changed to ptp (photo transfer)
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_USB_CONFIG_PTP = 1277;
+
+    // ACTION: Usb config has been changed to rndis (usb tethering)
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_USB_CONFIG_RNDIS = 1278;
+
+    // ACTION: Usb config has been changed to midi
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_USB_CONFIG_MIDI = 1279;
+
+    // ACTION: Usb config has been changed to accessory
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_USB_CONFIG_ACCESSORY = 1280;
+
+    // OPEN: Settings > Battery > Smart Battery
+    // CATEGORY: SETTINGS
+    // OS: P
+    FUELGAUGE_SMART_BATTERY = 1281;
+
+    // ACTION: User tapped Screenshot in the power menu.
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    ACTION_SCREENSHOT_POWER_MENU = 1282;
+
+    // OPEN: Settings > Apps & Notifications -> Special app access -> Directory Access
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIRECTORY_ACCESS = 1283;
+
+    // OPEN: Settings > Apps & Notifications -> Special app access -> Directory Access -> Package
+    // CATEGORY: SETTINGS
+    // OS: P
+    APPLICATIONS_DIRECTORY_ACCESS_DETAIL = 1284;
+
+    // OPEN: Settings > Battery > Smart Battery > Restricted apps
+    // CATEGORY: SETTINGS
+    // OS: P
+    FUELGAUGE_RESTRICTED_APP_DETAILS = 1285;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > Turn on now
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_ENABLE_DIALOG = 1286;
+
+    // ACTION: Rotate suggestion accepted in rotation locked mode
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    ACTION_ROTATION_SUGGESTION_ACCEPTED = 1287;
+
+    // OPEN: Rotation suggestion shown in rotation locked mode
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    ROTATION_SUGGESTION_SHOWN = 1288;
+
+    // An autofill service was bound using an unofficial(but still supported) permission.
+    // Package: Package of the autofill service
+    // OS: P
+    AUTOFILL_INVALID_PERMISSION = 1289;
+
+    // OPEN: QS Alarm tile shown
+    // ACTION: QS Alarm tile tapped
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: P
+    QS_ALARM = 1290;
+
+    // OPEN: Settings->Connected Devices->USB->(click on details link)
+    // CATEGORY: SETTINGS
+    // OS: P
+    USB_DEVICE_DETAILS = 1291;
+
+    // OPEN: Settings > Accessibility > Vibration
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACCESSIBILITY_VIBRATION = 1292;
+
+    // OPEN: Settings > Accessibility > Vibration > Ring & notification vibration
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACCESSIBILITY_VIBRATION_NOTIFICATION = 1293;
+
+    // OPEN: Settings > Accessibility > Vibration > Touch vibration
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACCESSIBILITY_VIBRATION_TOUCH = 1294;
+
+    // OPEN: Volume panel > output chooser dialog
+    // OS: P
+    OUTPUT_CHOOSER = 1295;
+
+    // Action: Volume panel > output chooser dialog > tap on device
+    // OS: P
+    ACTION_OUTPUT_CHOOSER_CONNECT = 1296;
+
+    // Action: Volume panel > output chooser dialog > tap on X next to connected device
+    // OS: P
+    ACTION_OUTPUT_CHOOSER_DISCONNECT = 1297;
+
+    // OPEN: TV Settings > Home theater control
+    // OS: P
+    SETTINGS_TV_HOME_THEATER_CONTROL_CATEGORY = 1298;
+
+    // OPEN: TV Settings > TV Inputs (Inputs & Devices)
+    // OS: P
+    SETTINGS_TV_INPUTS_CATEGORY = 1299;
+
+    // OPEN: TV Settings > Device
+    // OS: P
+    SETTINGS_TV_DEVICE_CATEGORY = 1300;
+
+    // OPEN: TV Settings > Network > Proxy settings
+    // OS: P
+    DIALOG_TV_NETWORK_PROXY = 1301;
+
+    // Events for battery saver turning on/off and/or the interactive state changes.
+    // OS: P
+    BATTERY_SAVER = 1302;
+
+    // Device interactive state -- i.e. the screen ON (=1) or OFF (=1)
+    // OS: P
+    FIELD_INTERACTIVE = 1303;
+
+    // Time spent in milliseconds in the current mode.
+    // OS: P
+    FIELD_DURATION_MILLIS = 1304;
+
+    // Battery level in uAh (0 - ~3,000,000 depending on device) when the current "mode" started.
+    // OS: P
+    FIELD_START_BATTERY_UA = 1305;
+
+    // Battery level in uAh (0 - ~3,000,000 depending on device) when this event was created.
+    // OS: P
+    FIELD_END_BATTERY_UA = 1306;
+
+    // Battery level in % (0-100) when the current "mode" started.
+    // OS: P
+    FIELD_START_BATTERY_PERCENT = 1307;
+
+    // Battery level in % (0-100) when this event was created.
+    // OS: P
+    FIELD_END_BATTERY_PERCENT = 1308;
+
+    // ACTION: Settings > Display > Night Light
+    // SUBTYPE: com.android.server.display.ColorDisplayService.AutoMode value
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_NIGHT_DISPLAY_AUTO_MODE_CHANGED = 1309;
+
+    // ACTION: Settings > Display > Night Light
+    // CATEGORY: SETTINGS
+    // SUBTYPE: 0 is starting time, 1 is ending time
+    // OS: P
+    ACTION_NIGHT_DISPLAY_AUTO_MODE_CUSTOM_TIME_CHANGED = 1310;
+
+    // FIELD: Current mode corresponding to a QS tile
+    // CATEGORY: QUICK SETTINGS
+    // OS: P
+    FIELD_QS_MODE = 1311;
+
+    // OPEN: Settings->Developer Options->Default USB
+    // CATEGORY: SETTINGS
+    // OS: P
+    USB_DEFAULT = 1312;
+
+    // CATEGORY: The category for all actions related to TextClassifier generateLinks.
+    // OS: P
+    TEXT_CLASSIFIER_GENERATE_LINKS = 1313;
+
+    // FIELD: milliseconds spent generating links.
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_LATENCY = 1314;
+
+    // FIELD: length of the input text in characters.
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_TEXT_LENGTH = 1315;
+
+    // FIELD: number of links detected.
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_NUM_LINKS = 1316;
+
+    // FIELD: length of all links in characters.
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_LINK_LENGTH = 1317;
+
+    // FIELD: the type of entity the stats are for.
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_ENTITY_TYPE = 1318;
+
+    // FIELD: a random uid for a single call to generateLinks
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_CALL_ID = 1319;
+
+    // FIELD: The compiler filter used when when optimizing the package.
+    //        Logged together with app transition events.
+    // OS: P
+    PACKAGE_OPTIMIZATION_COMPILATION_FILTER = 1320;
+
+    // FIELD: The reason for optimizing the package.
+    //        Logged together with app transition events.
+    // OS: P
+    PACKAGE_OPTIMIZATION_COMPILATION_REASON = 1321;
+
+    // FIELD: The camera API level used.
+    // CATEGORY: CAMERA
+    // OS: P
+    FIELD_CAMERA_API_LEVEL = 1322;
+
+    // OPEN: Settings > Battery > Battery tip > Battery tip Dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    FUELGAUGE_BATTERY_TIP_DIALOG = 1323;
+
+    // OPEN: Settings > Battery > Battery tip
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_BATTERY_TIP_SHOWN = 1324;
+
+    // OPEN: Settings > Security & Location > Location > See all
+    // CATEGORY: SETTINGS
+    // OS: P
+    RECENT_LOCATION_REQUESTS_ALL = 1325;
+
+    // FIELD: The x-location of a swipe gesture, conveyed as percent of total width
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    FIELD_GESTURE_X_PERCENT = 1326;
+
+    // FIELD: The y-location of a swipe gesture, conveyed as percent of total width
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    FIELD_GESTURE_Y_PERCENT = 1327;
+
+    // ACTION: Expand the notification panel while unlocked
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    ACTION_PANEL_VIEW_EXPAND = 1328;
+
+    // FIELD: Rotation of the device
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    FIELD_DEVICE_ROTATION = 1329;
+
+    // OPEN: TV Settings > Inputs > Input Options
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_TV_INPUT_OPTIONS_CATEGORY = 1330;
+
+    // OPEN: TV Settings > Network & Internet > Add known WIFI network
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_TV_WIFI_ADD_KNOWN_CATEGORY = 1331;
+
+    // ACTION: DND Settings > What to block > full screen intents
+    //   SUBTYPE: false is allowed, true is blocked
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_ZEN_BLOCK_FULL_SCREEN_INTENTS = 1332;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_LIGHT = 1333;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_PEEK = 1334;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_STATUS = 1335;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_BADGE = 1336;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_AMBIENT = 1337;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_NOTIFICATION_LIST = 1338;
+
+    // OPEN: DND Settings > What to block
+    // OS: P
+    ZEN_WHAT_TO_BLOCK = 1339;
+
+    // ACTION: DND Settings > Priority only allows > System toggle
+    // SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ALLOW_SYSTEM = 1340;
+
+    // OPEN: Settings > Sounds > Do Not Disturb > Duration
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_DURATION_DIALOG = 1341;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > Duration -> Time Option (ie: for one hour)
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_DURATION_TIME = 1342;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > Duration -> Until you turn off
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_DURATION_FOREVER = 1343;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > Duration -> Ask every time
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_DURATION_PROMPT = 1344;
+
+    // Notification Guts, active app ops variant
+    // OS: P
+    APP_OPS_GUTS = 1345;
+
+    // ACTION: Notification Guts, active app ops variant > Settings button
+    // OS: P
+    ACTION_OPS_GUTS_SETTINGS = 1346;
+
+    // ACTION: Settings > Battery settings > Battery tip > App restriction tip
+    // OS: P
+    ACTION_APP_RESTRICTION_TIP = 1347;
+
+    // ACTION: Settings > Battery settings > Battery tip > High usage tip
+    // OS: P
+    ACTION_HIGH_USAGE_TIP = 1348;
+
+    // ACTION: Settings > Battery settings > Battery tip > Summary tip
+    // OS: P
+    ACTION_SUMMARY_TIP = 1349;
+
+    // ACTION: Settings > Battery settings > Battery tip > Smart battery tip
+    // OS: P
+    ACTION_SMART_BATTERY_TIP = 1350;
+
+    // ACTION: Settings > Battery settings > Battery tip > Early warning tip
+    // OS: P
+    ACTION_EARLY_WARNING_TIP = 1351;
+
+    // ACTION: Settings > Battery settings > Battery tip > Low battery tip
+    // OS: P
+    ACTION_LOW_BATTERY_TIP = 1352;
+
+    // ACTION: Settings > Battery settings > Battery tip > App restriction list shown
+    // OS: P
+    ACTION_APP_RESTRICTION_TIP_LIST = 1353;
+
+    // ACTION: Settings > Battery settings > Battery tip > High usage list shown
+    // OS: P
+    ACTION_HIGH_USAGE_TIP_LIST = 1354;
+
+    // OPEN: Settings > Date & time > Select time zone -> Region
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_ZONE_PICKER_REGION = 1355;
+
+    // OPEN: Settings > Date & time > Select time zone -> Time Zone
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_ZONE_PICKER_TIME_ZONE = 1356;
+
+    // OPEN: Settings > Date & time > Select time zone -> Select UTC Offset
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_ZONE_PICKER_FIXED_OFFSET = 1357;
+
+    // Action: notification shade > manage notifications
+    // OS: P
+    ACTION_MANAGE_NOTIFICATIONS = 1358;
+
+    // This value should never appear in log outputs - it is reserved for
+    // internal platform metrics use.
+    RESERVED_FOR_LOGBUILDER_LATENCY_MILLIS = 1359;
+
+    // OPEN: Settings > Gestures > Prevent Ringing
+    // OS: P
+    SETTINGS_PREVENT_RINGING = 1360;
+
+    // ACTION: Settings > Battery settings > Battery tip > Open app restriction page
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_OPEN_APP_RESTRICTION_PAGE = 1361;
+
+    // ACTION: Settings > Battery settings > Battery tip > Restrict app
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_RESTRICT_APP = 1362;
+
+    // ACTION: Settings > Battery settings > Battery tip > Unrestrict app
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_UNRESTRICT_APP = 1363;
+
+    // ACTION: Settings > Battery settings > Battery tip > Open smart battery page
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_OPEN_SMART_BATTERY = 1364;
+
+    // ACTION: Settings > Battery settings > Battery tip > Turn on battery saver
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_TURN_ON_BATTERY_SAVER = 1365;
+
+    // FIELD: type of anomaly in settings app
+    // CATEGORY: SETTINGS
+    // OS: P
+    FIELD_ANOMALY_TYPE = 1366;
+
+    // ACTION: Settings > Anomaly receiver > Anomaly received
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ANOMALY_TRIGGERED = 1367;
+
+    // ACTION: Settings > Condition > Device muted
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_CONDITION_DEVICE_MUTED = 1368;
+
+    // ACTION: Settings > Condition > Device vibrate
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_CONDITION_DEVICE_VIBRATE = 1369;
+
+    // OPEN: Settings > Connected devices > previously connected devices
+    // CATEGORY: SETTINGS
+    // OS: P
+    PREVIOUSLY_CONNECTED_DEVICES = 1370;
+
+    // ACTION: A Settings Slice is requested
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_SETTINGS_SLICE_REQUESTED = 1371;
+
+    // ACTION: A Settings Slice is updated with new value
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_SETTINGS_SLICE_CHANGED = 1372;
+
+    // OPEN: Settings > Network & Internet > Wi-Fi > Wi-Fi Preferences > Turn on Wi-Fi automatically
+    //       note: Wifi Scanning must be off for this dialog to show
+    // CATEGORY: SETTINGS
+    // OS: P
+    WIFI_SCANNING_NEEDED_DIALOG = 1373;
+
+    // OPEN: Settings > System > Gestures > Swipe up gesture
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_GESTURE_SWIPE_UP = 1374;
+
+    // OPEN: Settings > Storage > Dialog to format a storage volume
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_VOLUME_FORMAT = 1375;
+
+    // OPEN: DND onboarding activity > screen on checkbox
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ONBOARDING_SCREEN_ON = 1376;
+
+    // OPEN: DND onboarding activity > screen off checkbox
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ONBOARDING_SCREEN_OFF = 1377;
+
+    // OPEN: DND onboarding activity > Ok button
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ONBOARDING_OK = 1378;
+
+    // OPEN: DND onboarding activity > Settings link
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ONBOARDING_SETTINGS = 1379;
+
+    // OPEN: DND onboarding activity
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_ZEN_ONBOARDING = 1380;
+
+    // OPEN: Settings > Display > Auto brightness
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_AUTO_BRIGHTNESS = 1381;
+
+    // OPEN: Smart replies in a notification seen at least once
+    // CATEGORY: NOTIFICATION
+    //   PACKAGE: App that posted the notification
+    //   SUBTYPE: Number of smart replies.
+    // OS: P
+    SMART_REPLY_VISIBLE = 1382;
+
+    // ACTION: Smart reply in a notification clicked.
+    // CATEGORY: NOTIFICATION
+    //   PACKAGE: App that posted the notification
+    //   SUBTYPE: Index of smart reply clicked.
+    // OS: P
+    SMART_REPLY_ACTION = 1383;
+
+    // Tagged data for SMART_REPLY_VISIBLE. Count of number of smart replies.
+    // OS: P
+    NOTIFICATION_SMART_REPLY_COUNT = 1384;
+
+    // Volume dialog > ringer toggle
+    // OS: P
+    ACTION_VOLUME_RINGER_TOGGLE = 1385;
+
+    // Volume dialog > settings button
+    // OS: P
+    ACTION_VOLUME_SETTINGS = 1386;
+
+    // ACTION: Settings > Anomaly receiver > Anomaly ignored, don't show up in battery settings
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ANOMALY_IGNORED = 1387;
+
+    // ACTION: Settings > Battery settings > Battery tip > Open battery saver page
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_OPEN_BATTERY_SAVER_PAGE = 1388;
+
+    // FIELD: the version code of an app
+    // CATEGORY: SETTINGS
+    // OS: P
+    FIELD_APP_VERSION_CODE = 1389;
+
+    // OPEN: Settings > Connected Devices > Bluetooth
+    // CATEGORY: SETTINGS
+    // OS: P
+    BLUETOOTH_FRAGMENT = 1390;
+
+    // Enclosing category for group of FIELD_HIDDEN_API_FOO events, logged when
+    // an app uses a hidden API.
+    ACTION_HIDDEN_API_ACCESSED = 1391;
+
+    // Tagged data for ACTION_HIDDEN_API_ACCESSED. The metod of the hidden API
+    // access; see enum HiddenApiAccessMethod
+    // OS: P
+    FIELD_HIDDEN_API_ACCESS_METHOD = 1392;
+
+    // Tagged data for ACTION_HIDDEN_API_ACCESSED. Indicates that access was
+    // denied to the API.
+    // OS: P
+    FIELD_HIDDEN_API_ACCESS_DENIED = 1393;
+
+    // Tagged data for ACTION_HIDDEN_API_ACCESSED. The signature of the hidden
+    // API that was accessed.
+    // OS: P
+    FIELD_HIDDEN_API_SIGNATURE = 1394;
+
+    // The number of items in the shade when this notification event was logged.
+    // OS: P
+    NOTIFICATION_SHADE_COUNT = 1395;
+
+    // ACTION: DND Settings > What to block
+    // OS: P
+    ACTION_ZEN_SOUND_ONLY = 1396;
+
+    // ACTION: DND Settings > Notifications
+    // OS: P
+    ACTION_ZEN_SOUND_AND_VIS_EFFECTS = 1397;
+
+    // ACTION: DND Settings > Notifications
+    // OS: P
+    ACTION_ZEN_SHOW_CUSTOM = 1398;
+
+    // ACTION: DND Settings > Notifications
+    // OS: P
+    ACTION_ZEN_CUSTOM = 1399;
+
+    // Screen: DND Settings > Notifications
+    // OS: P
+    SETTINGS_ZEN_NOTIFICATIONS = 1400;
+
+    // An event category for slices.
+    // OPEN: Slice became visible.
+    // CLOSE: Slice became invisible.
+    // ACTION: Slice was tapped.
+    SLICE = 1401;
+
+    // The authority part of the slice URI
+    FIELD_SLICE_AUTHORITY = 1402;
+
+    // The path part of the slice URI
+    FIELD_SLICE_PATH = 1403;
+
+    // The authority part of the subslice URI
+    FIELD_SUBSLICE_AUTHORITY = 1404;
+
+    // The path part of the subslice URI
+    FIELD_SUBSLICE_PATH = 1405;
+
+    // OPEN: DND onboarding activity > don't update button
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ONBOARDING_KEEP_CURRENT_SETTINGS = 1406;
+
+    // ACTION: Storage initialization wizard initialization choice of external/portable
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_INIT_EXTERNAL = 1407;
+
+    // ACTION: Storage initialization wizard initialization choice of internal/adoptable
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_INIT_INTERNAL = 1408;
+
+    // ACTION: Storage initialization wizard benchmark fast choice of continue
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_BENCHMARK_FAST_CONTINUE = 1409;
+
+    // ACTION: Storage initialization wizard benchmark slow choice of continue
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_BENCHMARK_SLOW_CONTINUE = 1410;
+
+    // ACTION: Storage initialization wizard benchmark slow choice of abort
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_BENCHMARK_SLOW_ABORT = 1411;
+
+    // ACTION: Storage initialization wizard migration choice of now
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_MIGRATE_NOW = 1412;
+
+    // ACTION: Storage initialization wizard migration choice of later
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_MIGRATE_LATER = 1413;
+
+    // Tag used to report whether an activity is being autofilled  on compatibility mode.
+    // OS: P
+    FIELD_AUTOFILL_COMPAT_MODE = 1414;
+
+    // OPEN: Settings > Sound > Switch a2dp devices dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_SWITCH_A2DP_DEVICES = 1415;
+
+    // OPEN: Settings > Sound > Switch hfp devices dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_SWITCH_HFP_DEVICES = 1416;
+
+    // ACTION: User has started or ended charging
+    // Type TYPE_DISMISS: Charging has ended
+    // Type TYPE_ACTION: Charging has started, contains fields: battery level
+    // Tag FIELD_BATTERY_LEVEL_START: Battery level at the start
+    // Tag FIELD_BATTERY_LEVEL_END: Battery level at the end
+    // Tag FIELD_CHARGING_DURATION: Time in ms phone was charging
+    // Tag FIELD_PLUG_TYPE: Charging plug type
+    ACTION_CHARGE = 1417;
+
+    // Tag used to determine battery level when device started charging
+    FIELD_BATTERY_LEVEL_START = 1418;
+
+    // Tag used to determine battery level when device ended charging
+    FIELD_BATTERY_LEVEL_END = 1419;
+
+    // Tag used to determine length of charging
+    FIELD_CHARGING_DURATION_MILLIS = 1420;
+
+    // Tag used to determine what type of charging was started/ended
+    // 1 = Plugged AC
+    // 2 = Plugged USB
+    // 3 = Wireless
+    FIELD_PLUG_TYPE = 1421;
+
+    // ACTION: USB-C Connector connected.
+    // CATEGORY: OTHER
+    // OS: P
+    ACTION_USB_CONNECTOR_CONNECTED = 1422;
+
+    // ACTION: USB-C Connector disconnected.
+    // CATEGORY: OTHER
+    // OS: P
+    // uses FIELD_DURATION_MILLIS for connected duration
+    ACTION_USB_CONNECTOR_DISCONNECTED = 1423;
+
+    // ACTION: USB-C Audio device connected
+    // CATEGORY: OTHER
+    // OS: P
+    ACTION_USB_AUDIO_CONNECTED = 1424;
+
+    // FIELD: VIDPID of connected USB Audio device
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_USB_AUDIO_VIDPID = 1425;
+
+    // ACTION: USB-C Audio device disconnected
+    // CATEGORY: OTHER
+    // OS: P
+    // use FIELD_DURATION_MILLIS for time
+    ACTION_USB_AUDIO_DISCONNECTED = 1426;
+
+    // ACTION: Hardware failure event
+    // CATEGORY: OTHER
+    // OS: P
+    ACTION_HARDWARE_FAILED = 1427;
+
+    // FIELD: Hardware failure category
+    // CATEGORY: OTHER
+    // OS: P
+    // Uses enum HardwareType
+    FIELD_HARDWARE_TYPE = 1428;
+
+    // FIELD: Hardware failure category
+    // CATEGORY: OTHER
+    // OS: P
+    // Uses enum HardwareFailureCode
+    FIELD_HARDWARE_FAILURE_CODE = 1429;
+
+    // ACTION: Physical drop event
+    // CATEGORY: OTHER
+    // OS: P
+    // use FIELD_DURATION_MILLIS for time
+    ACTION_PHYSICAL_DROP = 1430;
+
+    // FIELD: Confidence in detection of drop, in integer percentage.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_CONFIDENCE_PERCENT = 1431;
+
+    // FIELD: Detected bounce acceleration, in 1/1000th of a G.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_ACCEL_MILLI_G = 1432;
+
+    // ACTION: Battery health snapshot
+    // CATEGORY: OTHER
+    // OS: P
+    // uses FIELD_END_BATTERY_PERCENT for instantaneous batt %
+    ACTION_BATTERY_HEALTH = 1433;
+
+    // FIELD: Battery health snapshot type - min daily voltage, resistance, etc.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_BATTERY_HEALTH_SNAPSHOT_TYPE = 1434;
+
+    // FIELD: Battery temperature at snapshot, in 1/10 deg C.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_BATTERY_TEMPERATURE_DECI_C = 1435;
+
+    // FIELD: Battery voltage at snapshot, in microVolts.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_BATTERY_VOLTAGE_UV = 1436;
+
+    // FIELD: Battery open circuit voltage at snapshot, in microVolts.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_BATTERY_OPEN_CIRCUIT_VOLTAGE_UV = 1437;
+
+    // ACTION: Number of times the battery has charged beyond a
+    //         fractional threshold of full capacity.
+    // CATEGORY: OTHER
+    // OS: P
+    ACTION_BATTERY_CHARGE_CYCLES = 1438;
+
+    // FIELD: BATTERY_CHARGE_CYCLES - Number of times the battery has charged
+    //                                beyond a fractional threshold of full
+    //                                capacity.  A comma-separated string of
+    //                                buckets.  If there are eight buckets,
+    //                                each bucket represents charging to n/8
+    //                                percent full.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_BATTERY_CHARGE_CYCLES = 1439;
+
+    // ACTION: Hush gesture - volume up + power button
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    ACTION_HUSH_GESTURE = 1440;
+
+    // OPEN: Settings -> Developer Options -> Disable Bluetooth A2DP hardware
+    // offload
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_BLUETOOTH_DISABLE_A2DP_HW_OFFLOAD = 1441;
+
+    // ACTION: SLOW_IO - I/O operation took longer than threshold,
+    //                   reported aggregated per day when > 0.
+    // CATEGORY: OTHER
+    // OS: P
+    ACTION_SLOW_IO = 1442;
+
+    // FIELD: IO_OPERATION_TYPE - The IO Operation that caused the high latency.
+    //        The value is an integer from the enum IoOperation.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_IO_OPERATION_TYPE = 1443;
+
+    // FIELD: IO_OPERATION_COUNT - Count of how many times this slow IO operation happened
+    //                over the past 24hr (reported only if > 0).
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_IO_OPERATION_COUNT = 1444;
+
+    // ACTION: Speaker Imedance - last recorded speaker impedance.
+    //                            reported max once per 24hr.
+    // CATEGORY: OTHER
+    // OS: P
+    ACTION_SPEAKER_IMPEDANCE = 1445;
+
+    // FIELD: Speaker Impedance in milliohms.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_SPEAKER_IMPEDANCE_MILLIOHMS = 1446;
+
+    // FIELD: Speaker Location - identifies one of several speakers on a device.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_SPEAKER_LOCATION = 1447;
+
+    // FIELD: Instantaneous battery resistance in microohms.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_BATTERY_RESISTANCE_UOHMS = 1448;
+
+    // FIELD: Instantaneous battery current - in microamps.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_BATTERY_CURRENT_UA = 1449;
+
+    // FIELD: HARDWARE_LOCATION - Identifier for instance of a hardware type on a
+    //                            board.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_HARDWARE_LOCATION = 1450;
+
+    // ACTION: BATTERY_CAUSED_SHUTDOWN - shutdown due to low battery, the
+    //                  action is logged after the subsequent boot.
+    // CATEGORY: OTHER
+    // OS: P
+    ACTION_BATTERY_CAUSED_SHUTDOWN = 1451;
+
+    // FIELD: Flags used on autofill-related metrics
+    // OS: P
+    FIELD_AUTOFILL_FLAGS = 1452;
+
+    // Tag used when the service returned an authenticated dataset or response.
+    // Used to replace the following individual metrics, which now are logged as the value of this
+    // field in the AUTOFILL_REQUEST metric:
+    // - AUTOFILL_AUTHENTICATED;
+    // - AUTOFILL_DATASET_AUTHENTICATED
+    // - AUTOFILL_INVALID_AUTHENTICATION
+    // - AUTOFILL_INVALID_DATASET_AUTHENTICATION
+    // OS: P
+    FIELD_AUTOFILL_AUTHENTICATION_STATUS = 1453;
+
+    // FIELD: Index of the autofill request inside of a session.
+    // OS: P
+    FIELD_AUTOFILL_REQUEST_ORDINAL = 1454;
+
+    // FIELD: Number of requests made to an autofill service during a session.
+    // OS: P
+    FIELD_AUTOFILL_NUMBER_REQUESTS = 1455;
+
+    // FIELD: Id of the autofill session associated with this metric.
+    // OS: P
+    FIELD_AUTOFILL_SESSION_ID = 1456;
+
+    // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }

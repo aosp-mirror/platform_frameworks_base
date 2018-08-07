@@ -1,0 +1,44 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.view;
+
+option java_outer_classname = "ViewProtoEnums";
+option java_multiple_files = true;
+
+// Screen states, primarily used by android/view/Display.java.
+enum DisplayStateEnum {
+    // The display state is unknown.
+    DISPLAY_STATE_UNKNOWN = 0;
+    // The display state is off.
+    DISPLAY_STATE_OFF = 1;
+    // The display state is on.
+    DISPLAY_STATE_ON = 2;
+    // The display is dozing in a low power state; it is still on but is
+    // optimized for showing system-provided content while the device is
+    // non-interactive.
+    DISPLAY_STATE_DOZE = 3;
+    // The display is dozing in a suspended low power state; it is still on
+    // but is optimized for showing static system-provided content while the
+    // device is non-interactive.
+    DISPLAY_STATE_DOZE_SUSPEND = 4;
+    // The display is on and optimized for VR mode.
+    DISPLAY_STATE_VR = 5;
+    // The display is in a suspended full power state; it is still on but the
+    // CPU is not updating it.
+    DISPLAY_STATE_ON_SUSPEND = 6;
+}

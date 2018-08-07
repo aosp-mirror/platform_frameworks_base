@@ -1,0 +1,40 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package com.android.server;
+
+option java_multiple_files = true;
+
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+// Dump from StatLogger.
+message StatLoggerProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    message Event {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 eventId = 1;
+        // Labels are hard-coded in Android framework code.
+        optional string label = 2;
+        optional int32 count = 3;
+        optional int64 total_duration_micros = 4;
+    }
+
+    repeated Event events = 1;
+}

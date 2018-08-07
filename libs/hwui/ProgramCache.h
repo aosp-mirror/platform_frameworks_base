@@ -60,9 +60,9 @@ private:
 
     const bool mHasES3;
     const bool mHasLinearBlending;
-}; // class ProgramCache
+};  // class ProgramCache
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_PROGRAM_CACHE_H
+#endif  // ANDROID_HWUI_PROGRAM_CACHE_H

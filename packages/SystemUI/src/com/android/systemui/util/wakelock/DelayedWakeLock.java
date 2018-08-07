@@ -23,7 +23,7 @@ import android.os.Handler;
  */
 public class DelayedWakeLock implements WakeLock {
 
-    private static final long RELEASE_DELAY_MS = 120;
+    private static final long RELEASE_DELAY_MS = 140;
 
     private final Handler mHandler;
     private final WakeLock mInner;

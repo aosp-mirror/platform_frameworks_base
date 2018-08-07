@@ -27,22 +27,22 @@ class VertexBuffer;
 
 class SpotShadow {
 public:
-    static void createSpotShadow(bool isCasterOpaque, const Vector3& lightCenter,
-            float lightSize, const Vector3* poly, int polyLength,
-            const Vector3& polyCentroid, VertexBuffer& retstrips);
+    static void createSpotShadow(bool isCasterOpaque, const Vector3& lightCenter, float lightSize,
+                                 const Vector3* poly, int polyLength, const Vector3& polyCentroid,
+                                 VertexBuffer& retstrips);
 
 private:
     struct VertexAngleData;
 
-    static float projectCasterToOutline(Vector2& outline,
-            const Vector3& lightCenter, const Vector3& polyVertex);
+    static float projectCasterToOutline(Vector2& outline, const Vector3& lightCenter,
+                                        const Vector3& polyVertex);
 
-    static void computeLightPolygon(int points, const Vector3& lightCenter,
-            float size, Vector3* ret);
+    static void computeLightPolygon(int points, const Vector3& lightCenter, float size,
+                                    Vector3* ret);
 
     static void smoothPolygon(int level, int rays, float* rayDist);
-    static float rayIntersectPoly(const Vector2* poly, int polyLength,
-            const Vector2& point, float dx, float dy);
+    static float rayIntersectPoly(const Vector2* poly, int polyLength, const Vector2& point,
+                                  float dx, float dy);
 
     static void xsort(Vector2* points, int pointsLength);
     static int hull(Vector2* points, int pointsLength, Vector2* retPoly);
@@ -57,23 +57,23 @@ private:
     static void reverse(Vector2* polygon, int len);
 
     static void generateTriangleStrip(bool isCasterOpaque, float shadowStrengthScale,
-            Vector2* penumbra, int penumbraLength, Vector2* umbra, int umbraLength,
-            const Vector3* poly, int polyLength, VertexBuffer& retstrips, const Vector2& centroid);
+                                      Vector2* penumbra, int penumbraLength, Vector2* umbra,
+                                      int umbraLength, const Vector3* poly, int polyLength,
+                                      VertexBuffer& retstrips, const Vector2& centroid);
 
 #if DEBUG_SHADOW
-    static bool testConvex(const Vector2* polygon, int polygonLength,
-            const char* name);
-    static void testIntersection(const Vector2* poly1, int poly1Length,
-        const Vector2* poly2, int poly2Length,
-        const Vector2* intersection, int intersectionLength);
-    static void updateBound(const Vector2 inVector, Vector2& lowerBound, Vector2& upperBound );
+    static bool testConvex(const Vector2* polygon, int polygonLength, const char* name);
+    static void testIntersection(const Vector2* poly1, int poly1Length, const Vector2* poly2,
+                                 int poly2Length, const Vector2* intersection,
+                                 int intersectionLength);
+    static void updateBound(const Vector2 inVector, Vector2& lowerBound, Vector2& upperBound);
     static void dumpPolygon(const Vector2* poly, int polyLength, const char* polyName);
     static void dumpPolygon(const Vector3* poly, int polyLength, const char* polyName);
 #endif
 
-}; // SpotShadow
+};  // SpotShadow
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_SPOT_SHADOW_H
+#endif  // ANDROID_HWUI_SPOT_SHADOW_H

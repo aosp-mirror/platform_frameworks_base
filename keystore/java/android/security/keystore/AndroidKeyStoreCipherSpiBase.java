@@ -307,7 +307,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
      *
      * <p>This implementation returns {@code null}.
      *
-     * @returns stream or {@code null} if AAD is not supported by this cipher.
+     * @return stream or {@code null} if AAD is not supported by this cipher.
      */
     @Nullable
     protected KeyStoreCryptoOperationStreamer createAdditionalAuthenticationDataStreamer(

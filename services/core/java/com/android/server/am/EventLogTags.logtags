@@ -38,7 +38,7 @@ option java_package com.android.server.am
 # The Activity Manager failed to pause the given activity.
 30012 am_failed_to_pause (User|1|5),(Token|1|5),(Wanting to pause|3),(Currently pausing|3)
 # Attempting to pause the current activity
-30013 am_pause_activity (User|1|5),(Token|1|5),(Component Name|3)
+30013 am_pause_activity (User|1|5),(Token|1|5),(Component Name|3),(User Leaving|3)
 # Application process has been started
 30014 am_proc_start (User|1|5),(PID|1|5),(UID|1|5),(Process Name|3),(Type|3),(Component|3)
 # An application process has been marked as bad
@@ -102,7 +102,7 @@ option java_package com.android.server.am
 # Report collection of global memory state
 30046 am_meminfo (Cached|2|2),(Free|2|2),(Zram|2|2),(Kernel|2|2),(Native|2|2)
 # Report collection of memory used by a process
-30047 am_pss (Pid|1|5),(UID|1|5),(Process Name|3),(Pss|2|2),(Uss|2|2),(SwapPss|2|2)
+30047 am_pss (Pid|1|5),(UID|1|5),(Process Name|3),(Pss|2|2),(Uss|2|2),(SwapPss|2|2),(Rss|2|2),(StatType|1|5),(ProcState|1|5),(TimeToCollect|2|2)
 
 # Attempting to stop an activity
 30048 am_stop_activity (User|1|5),(Token|1|5),(Component Name|3)
@@ -125,3 +125,17 @@ option java_package com.android.server.am
 30055 am_uid_idle (UID|1|5)
 # Note when a service is being forcibly stopped because its app went idle.
 30056 am_stop_idle_service (UID|1|5),(Component Name|3)
+
+# The activity's onCreate has been called.
+30057 am_on_create_called (User|1|5),(Component Name|3),(Reason|3)
+# The activity's onRestart has been called.
+30058 am_on_restart_called (User|1|5),(Component Name|3),(Reason|3)
+# The activity's onStart has been called.
+30059 am_on_start_called (User|1|5),(Component Name|3),(Reason|3)
+# The activity's onDestroy has been called.
+30060 am_on_destroy_called (User|1|5),(Component Name|3),(Reason|3)
+# The activity's onActivityResult has been called.
+30062 am_on_activity_result_called (User|1|5),(Component Name|3),(Reason|3)
+
+# The task is being removed from its parent stack
+30061 am_remove_task (Task ID|1|5), (Stack ID|1|5)

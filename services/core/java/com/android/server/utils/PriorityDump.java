@@ -16,12 +16,19 @@
 
 package com.android.server.utils;
 
+import android.annotation.IntDef;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * Helper for {@link android.os.Binder#dump(java.io.FileDescriptor, String[])} that supports the
- * {@link #PRIORITY_ARG} argument.
+ * {@link #PRIORITY_ARG} and {@link #PROTO_ARG} arguments.
  * <p>
  * Typical usage:
  *
@@ -31,13 +38,25 @@ public class SpringfieldNuclearPowerPlant extends Binder {
  private final PriorityDump.PriorityDumper mPriorityDumper = new PriorityDump.PriorityDumper() {
 
      @Override
-     public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args) {
-       pw.println("Donuts in the box: 1");
+     public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
+       if (asProto) {
+         ProtoOutputStream proto = new ProtoOutputStream(fd);
+         proto.write(SpringfieldProto.DONUTS, 1);
+         proto.flush();
+       } else {
+         pw.println("Donuts in the box: 1");
+       }
      }
 
      @Override
      public void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args) {
-       pw.println("Nuclear reactor status: DANGER - MELTDOWN IMMINENT");
+        if (asProto) {
+          ProtoOutputStream proto = new ProtoOutputStream(fd);
+          proto.write(SpringfieldProto.REACTOR_STATUS, DANGER_MELTDOWN_IMMINENT);
+          proto.flush();
+        } else {
+          pw.println("Nuclear reactor status: DANGER - MELTDOWN IMMINENT");
+        }
      }
   };
 
@@ -59,11 +78,14 @@ public class SpringfieldNuclearPowerPlant extends Binder {
     Donuts in the box: 1
     Nuclear reactor status: DANGER - MELTDOWN IMMINENT
 
-    $ adb shell dumpsys snpp --dump_priority CRITICAL
+    $ adb shell dumpsys snpp --dump-priority CRITICAL
     Donuts in the box: 1
 
-    $ adb shell dumpsys snpp --dump_priority NORMAL
+    $ adb shell dumpsys snpp --dump-priority NORMAL
     Nuclear reactor status: DANGER - MELTDOWN IMMINENT
+
+    $ adb shell dumpsys snpp --dump-priority CRITICAL --proto
+    //binary output
 
  * </code></pre>
  *
@@ -72,11 +94,7 @@ public class SpringfieldNuclearPowerPlant extends Binder {
  * <p>To run the unit tests:
  * <pre><code>
  *
- mmm -j32 frameworks/base/services/tests/servicestests/ && \
- adb install -r -g ${ANDROID_PRODUCT_OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk && \
- adb shell am instrument -e class "com.android.server.utils.PriorityDumpTest" \
- -w "com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner"
-
+ atest FrameworksServicesTests:PriorityDumpTest
  * </code></pre>
  *
  *
@@ -84,96 +102,152 @@ public class SpringfieldNuclearPowerPlant extends Binder {
  */
 public final class PriorityDump {
 
-    public static final String PRIORITY_ARG = "--dump_priority";
+    public static final String PRIORITY_ARG = "--dump-priority";
+    public static final String PROTO_ARG = "--proto";
+    public static final String PRIORITY_ARG_CRITICAL = "CRITICAL";
+    public static final String PRIORITY_ARG_HIGH = "HIGH";
+    public static final String PRIORITY_ARG_NORMAL = "NORMAL";
 
     private PriorityDump() {
         throw new UnsupportedOperationException();
     }
 
+    /** Enum to switch through supported priority types */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({PRIORITY_TYPE_INVALID, PRIORITY_TYPE_CRITICAL, PRIORITY_TYPE_HIGH,
+            PRIORITY_TYPE_NORMAL})
+    private @interface PriorityType { }
+    private static final int PRIORITY_TYPE_INVALID = 0;
+    private static final int PRIORITY_TYPE_CRITICAL = 1;
+    private static final int PRIORITY_TYPE_HIGH = 2;
+    private static final int PRIORITY_TYPE_NORMAL = 3;
+
     /**
-     * Parses {@code} and call the proper {@link PriorityDumper} method when the first argument is
-     * {@code --dump_priority}, stripping the priority and its type.
+     * Parses {@code args} matching {@code --dump-priority} and/or {@code --proto}. The matching
+     * arguments are stripped.
      * <p>
-     * For example, if called as {@code --dump_priority HIGH arg1 arg2 arg3}, it will call
-     * <code>dumper.dumpHigh(fd, pw, {"arg1", "arg2", "arg3"}) </code>
+     * If priority args are passed as an argument, it will call the appropriate method and if proto
+     * args are passed then the {@code asProto} flag is set.
      * <p>
-     * If the {@code --dump_priority} is not set, it calls
-     * {@link PriorityDumper#dump(FileDescriptor, PrintWriter, String[])} passing the whole
+     * For example, if called as {@code --dump-priority HIGH arg1 arg2 arg3}, it will call
+     * <code>dumper.dumpHigh(fd, pw, {"arg1", "arg2", "arg3"}, false) </code>
+     * <p>
+     * If the {@code --dump-priority} is not set, it calls
+     * {@link PriorityDumper#dump(FileDescriptor, PrintWriter, String[], boolean)} passing the whole
      * {@code args} instead.
      */
     public static void dump(PriorityDumper dumper, FileDescriptor fd, PrintWriter pw,
             String[] args) {
-        if (args != null && args.length >= 2 && args[0].equals(PRIORITY_ARG)) {
-            final String priority = args[1];
-            switch (priority) {
-                case "CRITICAL": {
-                    dumper.dumpCritical(fd, pw, getStrippedArgs(args));
-                    return;
+        boolean asProto = false;
+        @PriorityType int priority = PRIORITY_TYPE_INVALID;
+
+        if (args == null) {
+            dumper.dump(fd, pw, args, asProto);
+            return;
+        }
+
+        String[] strippedArgs = new String[args.length];
+        int strippedCount = 0;
+        for (int argIndex = 0; argIndex < args.length; argIndex++) {
+            if (args[argIndex].equals(PROTO_ARG)) {
+                asProto = true;
+            } else if (args[argIndex].equals(PRIORITY_ARG)) {
+                if (argIndex + 1 < args.length) {
+                    argIndex++;
+                    priority = getPriorityType(args[argIndex]);
                 }
-                case "HIGH": {
-                    dumper.dumpHigh(fd, pw, getStrippedArgs(args));
-                    return;
-                }
-                case "NORMAL": {
-                    dumper.dumpNormal(fd, pw, getStrippedArgs(args));
-                    return;
-                }
+            } else {
+                strippedArgs[strippedCount++] = args[argIndex];
             }
         }
-        dumper.dump(fd, pw, args);
+
+        if (strippedCount < args.length) {
+            strippedArgs = Arrays.copyOf(strippedArgs, strippedCount);
+        }
+
+        switch (priority) {
+            case PRIORITY_TYPE_CRITICAL: {
+                dumper.dumpCritical(fd, pw, strippedArgs, asProto);
+                return;
+            }
+            case PRIORITY_TYPE_HIGH: {
+                dumper.dumpHigh(fd, pw, strippedArgs, asProto);
+                return;
+            }
+            case PRIORITY_TYPE_NORMAL: {
+                dumper.dumpNormal(fd, pw, strippedArgs, asProto);
+                return;
+            }
+            default: {
+                dumper.dump(fd, pw, strippedArgs, asProto);
+                return;
+            }
+        }
     }
 
     /**
-     * Gets an array without the {@code --dump_priority PRIORITY} prefix.
+     * Converts priority argument type to enum.
      */
-    private static String[] getStrippedArgs(String[] args) {
-        final String[] stripped = new String[args.length - 2];
-        System.arraycopy(args, 2, stripped, 0, stripped.length);
-        return stripped;
+    private static @PriorityType int getPriorityType(String arg) {
+        switch (arg) {
+            case PRIORITY_ARG_CRITICAL: {
+                return PRIORITY_TYPE_CRITICAL;
+            }
+            case PRIORITY_ARG_HIGH: {
+                return PRIORITY_TYPE_HIGH;
+            }
+            case PRIORITY_ARG_NORMAL: {
+                return PRIORITY_TYPE_NORMAL;
+            }
+            default: {
+                return PRIORITY_TYPE_INVALID;
+            }
+        }
     }
 
     /**
      * Helper for {@link android.os.Binder#dump(java.io.FileDescriptor, String[])} that supports the
-     * {@link #PRIORITY_ARG} argument.
+     * {@link #PRIORITY_ARG} and {@link #PROTO_ARG} arguments.
      *
      * @hide
      */
-    public static interface PriorityDumper {
+    public interface PriorityDumper {
 
         /**
          * Dumps only the critical section.
          */
         @SuppressWarnings("unused")
-        default void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args) {
+        default void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args,
+                boolean asProto) {
         }
 
         /**
          * Dumps only the high-priority section.
          */
         @SuppressWarnings("unused")
-        default void dumpHigh(FileDescriptor fd, PrintWriter pw, String[] args) {
+        default void dumpHigh(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
         }
 
         /**
          * Dumps only the normal section.
          */
         @SuppressWarnings("unused")
-        default void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args) {
+        default void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
         }
 
         /**
          * Dumps all sections.
          * <p>
          * This method is called when
-         * {@link PriorityDump#dump(PriorityDumper, FileDescriptor, PrintWriter, String[])} is
-         * called without priority arguments. By default, it calls the 3 {@code dumpTYPE} methods,
-         * so sub-classes just need to implement the priority types they support.
+         * {@link PriorityDump#dump(PriorityDumper, FileDescriptor, PrintWriter, String[])}
+         * is called without priority arguments. By default, it calls the 3 {@code dumpTYPE}
+         * methods, so sub-classes just need to implement the priority types they support.
          */
         @SuppressWarnings("unused")
-        default void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            dumpCritical(fd, pw, args);
-            dumpHigh(fd, pw, args);
-            dumpNormal(fd, pw, args);
+        default void dump(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
+            dumpCritical(fd, pw, args, asProto);
+            dumpHigh(fd, pw, args, asProto);
+            dumpNormal(fd, pw, args, asProto);
         }
     }
 }

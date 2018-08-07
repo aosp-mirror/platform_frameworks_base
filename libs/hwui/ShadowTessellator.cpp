@@ -16,8 +16,8 @@
 
 #include <math.h>
 #include <utils/Log.h>
-#include <utils/Trace.h>
 #include <utils/MathUtils.h>
+#include <utils/Trace.h>
 
 #include "AmbientShadow.h"
 #include "Properties.h"
@@ -28,10 +28,10 @@
 namespace android {
 namespace uirenderer {
 
-void ShadowTessellator::tessellateAmbientShadow(bool isCasterOpaque,
-        const Vector3* casterPolygon, int casterVertexCount,
-        const Vector3& centroid3d, const Rect& casterBounds,
-        const Rect& localClip, float maxZ, VertexBuffer& shadowVertexBuffer) {
+void ShadowTessellator::tessellateAmbientShadow(bool isCasterOpaque, const Vector3* casterPolygon,
+                                                int casterVertexCount, const Vector3& centroid3d,
+                                                const Rect& casterBounds, const Rect& localClip,
+                                                float maxZ, VertexBuffer& shadowVertexBuffer) {
     ATRACE_CALL();
 
     // A bunch of parameters to tweak the shadow.
@@ -53,32 +53,32 @@ void ShadowTessellator::tessellateAmbientShadow(bool isCasterOpaque,
         return;
     }
 
-    AmbientShadow::createAmbientShadow(isCasterOpaque, casterPolygon,
-            casterVertexCount, centroid3d, heightFactor, geomFactor,
-            shadowVertexBuffer);
+    AmbientShadow::createAmbientShadow(isCasterOpaque, casterPolygon, casterVertexCount, centroid3d,
+                                       heightFactor, geomFactor, shadowVertexBuffer);
 }
 
-void ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
-        const Vector3* casterPolygon, int casterVertexCount, const Vector3& casterCentroid,
-        const mat4& receiverTransform, const Vector3& lightCenter, int lightRadius,
-        const Rect& casterBounds, const Rect& localClip, VertexBuffer& shadowVertexBuffer) {
+void ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque, const Vector3* casterPolygon,
+                                             int casterVertexCount, const Vector3& casterCentroid,
+                                             const mat4& receiverTransform,
+                                             const Vector3& lightCenter, int lightRadius,
+                                             const Rect& casterBounds, const Rect& localClip,
+                                             VertexBuffer& shadowVertexBuffer) {
     ATRACE_CALL();
 
     Vector3 adjustedLightCenter(lightCenter);
     if (CC_UNLIKELY(Properties::overrideLightPosY > 0)) {
-        adjustedLightCenter.y = - Properties::overrideLightPosY; // negated since this shifts up
+        adjustedLightCenter.y = -Properties::overrideLightPosY;  // negated since this shifts up
     }
     if (CC_UNLIKELY(Properties::overrideLightPosZ > 0)) {
         adjustedLightCenter.z = Properties::overrideLightPosZ;
     }
 
 #if DEBUG_SHADOW
-    ALOGD("light center %f %f %f %d",
-            adjustedLightCenter.x, adjustedLightCenter.y, adjustedLightCenter.z, lightRadius);
+    ALOGD("light center %f %f %f %d", adjustedLightCenter.x, adjustedLightCenter.y,
+          adjustedLightCenter.z, lightRadius);
 #endif
-    if (isnan(adjustedLightCenter.x)
-            || isnan(adjustedLightCenter.y)
-            || isnan(adjustedLightCenter.z)) {
+    if (isnan(adjustedLightCenter.x) || isnan(adjustedLightCenter.y) ||
+        isnan(adjustedLightCenter.z)) {
         return;
     }
 
@@ -95,7 +95,7 @@ void ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
     // Now light and caster are both in local space, we will check whether
     // the shadow is within the clip area.
     Rect lightRect = Rect(adjustedLightCenter.x - lightRadius, adjustedLightCenter.y - lightRadius,
-            adjustedLightCenter.x + lightRadius, adjustedLightCenter.y + lightRadius);
+                          adjustedLightCenter.x + lightRadius, adjustedLightCenter.y + lightRadius);
     lightRect.unionWith(localClip);
     if (!lightRect.intersects(casterBounds)) {
 #if DEBUG_SHADOW
@@ -104,13 +104,13 @@ void ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
         return;
     }
 
-    SpotShadow::createSpotShadow(isCasterOpaque, adjustedLightCenter, lightRadius,
-            casterPolygon, casterVertexCount, casterCentroid, shadowVertexBuffer);
+    SpotShadow::createSpotShadow(isCasterOpaque, adjustedLightCenter, lightRadius, casterPolygon,
+                                 casterVertexCount, casterCentroid, shadowVertexBuffer);
 
 #if DEBUG_SHADOW
-     if(shadowVertexBuffer.getVertexCount() <= 0) {
+    if (shadowVertexBuffer.getVertexCount() <= 0) {
         ALOGD("Spot shadow generation failed %d", shadowVertexBuffer.getVertexCount());
-     }
+    }
 #endif
 }
 
@@ -141,7 +141,7 @@ Vector2 ShadowTessellator::centroid2d(const Vector2* poly, int polyLength) {
     Vector2 centroid = poly[0];
     if (area != 0) {
         centroid = (Vector2){static_cast<float>(sumx / (3 * area)),
-            static_cast<float>(sumy / (3 * area))};
+                             static_cast<float>(sumy / (3 * area))};
     } else {
         ALOGW("Area is 0 while computing centroid!");
     }
@@ -161,8 +161,8 @@ Vector2 ShadowTessellator::calculateNormal(const Vector2& p1, const Vector2& p2)
     return result;
 }
 
-int ShadowTessellator::getExtraVertexNumber(const Vector2& vector1,
-        const Vector2& vector2, float divisor) {
+int ShadowTessellator::getExtraVertexNumber(const Vector2& vector1, const Vector2& vector2,
+                                            float divisor) {
     // When there is no distance difference, there is no need for extra vertices.
     if (vector1.lengthSquared() == 0 || vector2.lengthSquared() == 0) {
         return 0;
@@ -179,13 +179,13 @@ int ShadowTessellator::getExtraVertexNumber(const Vector2& vector1,
     // TODO: Use look up table for the dotProduct to extraVerticesNumber
     // computation, if needed.
     float angle = acosf(dotProduct);
-    return (int) floor(angle / divisor);
+    return (int)floor(angle / divisor);
 }
 
 void ShadowTessellator::checkOverflow(int used, int total, const char* bufferName) {
-    LOG_ALWAYS_FATAL_IF(used > total, "Error: %s overflow!!! used %d, total %d",
-            bufferName, used, total);
+    LOG_ALWAYS_FATAL_IF(used > total, "Error: %s overflow!!! used %d, total %d", bufferName, used,
+                        total);
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

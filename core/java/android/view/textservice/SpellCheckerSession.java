@@ -445,9 +445,15 @@ public class SpellCheckerSession {
         private void processOrEnqueueTask(SpellCheckerParams scp) {
             ISpellCheckerSession session;
             synchronized (this) {
+                if (scp.mWhat == TASK_CLOSE && (mState == STATE_CLOSED_AFTER_CONNECTION
+                        || mState == STATE_CLOSED_BEFORE_CONNECTION)) {
+                    // It is OK to call SpellCheckerSession#close() multiple times.
+                    // Don't output confusing/misleading warning messages.
+                    return;
+                }
                 if (mState != STATE_WAIT_CONNECTION && mState != STATE_CONNECTED) {
                     Log.e(TAG, "ignoring processOrEnqueueTask due to unexpected mState="
-                            + taskToString(scp.mWhat)
+                            + stateToString(mState)
                             + " scp.mWhat=" + taskToString(scp.mWhat));
                     return;
                 }

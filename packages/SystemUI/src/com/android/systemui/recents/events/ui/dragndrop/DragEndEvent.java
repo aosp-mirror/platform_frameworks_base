@@ -17,7 +17,7 @@
 package com.android.systemui.recents.events.ui.dragndrop;
 
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.model.Task;
+import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.recents.views.DropTarget;
 import com.android.systemui.recents.views.TaskView;
 

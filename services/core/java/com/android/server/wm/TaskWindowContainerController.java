@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityManager.TaskSnapshot;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
@@ -30,6 +29,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.lang.ref.WeakReference;
 
 import static com.android.server.EventLogTags.WM_TASK_CREATED;
+import static com.android.server.wm.ConfigurationContainer.BOUNDS_CHANGE_NONE;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -49,19 +49,17 @@ public class TaskWindowContainerController
     private final H mHandler;
 
     public TaskWindowContainerController(int taskId, TaskWindowContainerListener listener,
-            StackWindowController stackController, int userId, Rect bounds,
-            Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-            boolean homeTask, boolean toTop, boolean showForAllUsers,
+            StackWindowController stackController, int userId, Rect bounds, int resizeMode,
+            boolean supportsPictureInPicture, boolean toTop, boolean showForAllUsers,
             TaskDescription taskDescription) {
-        this(taskId, listener, stackController, userId, bounds, overrideConfig, resizeMode,
-                supportsPictureInPicture, homeTask, toTop, showForAllUsers, taskDescription,
+        this(taskId, listener, stackController, userId, bounds, resizeMode,
+                supportsPictureInPicture, toTop, showForAllUsers, taskDescription,
                 WindowManagerService.getInstance());
     }
 
     public TaskWindowContainerController(int taskId, TaskWindowContainerListener listener,
-            StackWindowController stackController, int userId, Rect bounds,
-            Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-            boolean homeTask, boolean toTop, boolean showForAllUsers,
+            StackWindowController stackController, int userId, Rect bounds, int resizeMode,
+            boolean supportsPictureInPicture, boolean toTop, boolean showForAllUsers,
             TaskDescription taskDescription, WindowManagerService service) {
         super(listener, service);
         mTaskId = taskId;
@@ -77,8 +75,8 @@ public class TaskWindowContainerController
                         + stackController);
             }
             EventLog.writeEvent(WM_TASK_CREATED, taskId, stack.mStackId);
-            final Task task = createTask(taskId, stack, userId, bounds, overrideConfig, resizeMode,
-                    supportsPictureInPicture, homeTask, taskDescription);
+            final Task task = createTask(taskId, stack, userId, resizeMode,
+                    supportsPictureInPicture, taskDescription);
             final int position = toTop ? POSITION_TOP : POSITION_BOTTOM;
             // We only want to move the parents to the parents if we are creating this task at the
             // top of its stack.
@@ -87,11 +85,10 @@ public class TaskWindowContainerController
     }
 
     @VisibleForTesting
-    Task createTask(int taskId, TaskStack stack, int userId, Rect bounds,
-            Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-            boolean homeTask, TaskDescription taskDescription) {
-        return new Task(taskId, stack, userId, mService, bounds, overrideConfig, resizeMode,
-                supportsPictureInPicture, homeTask, taskDescription, this);
+    Task createTask(int taskId, TaskStack stack, int userId, int resizeMode,
+            boolean supportsPictureInPicture, TaskDescription taskDescription) {
+        return new Task(taskId, stack, userId, mService, resizeMode, supportsPictureInPicture,
+                taskDescription, this);
     }
 
     @Override
@@ -104,6 +101,10 @@ public class TaskWindowContainerController
             mContainer.removeIfPossible();
             super.removeContainer();
         }
+    }
+
+    public void positionChildAtTop(AppWindowContainerController childController) {
+        positionChildAt(childController, POSITION_TOP);
     }
 
     public void positionChildAt(AppWindowContainerController childController, int position) {
@@ -150,14 +151,14 @@ public class TaskWindowContainerController
         }
     }
 
-    public void resize(Rect bounds, Configuration overrideConfig, boolean relayout,
-            boolean forced) {
+    public void resize(boolean relayout, boolean forced) {
         synchronized (mWindowMap) {
             if (mContainer == null) {
                 throw new IllegalArgumentException("resizeTask: taskId " + mTaskId + " not found.");
             }
 
-            if (mContainer.resizeLocked(bounds, overrideConfig, forced) && relayout) {
+            if (mContainer.setBounds(mContainer.getOverrideBounds(), forced) != BOUNDS_CHANGE_NONE
+                    && relayout) {
                 mContainer.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
             }
         }
@@ -195,16 +196,6 @@ public class TaskWindowContainerController
                 return;
             }
             mContainer.cancelTaskWindowTransition();
-        }
-    }
-
-    public void cancelThumbnailTransition() {
-        synchronized (mWindowMap) {
-            if (mContainer == null) {
-                Slog.w(TAG_WM, "cancelThumbnailTransition: taskId " + mTaskId + " not found.");
-                return;
-            }
-            mContainer.cancelTaskThumbnailTransition();
         }
     }
 

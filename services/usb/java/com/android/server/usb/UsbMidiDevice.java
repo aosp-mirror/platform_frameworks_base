@@ -16,14 +16,15 @@
 
 package com.android.server.usb;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiDeviceServer;
 import android.media.midi.MidiDeviceStatus;
 import android.media.midi.MidiManager;
 import android.media.midi.MidiReceiver;
-import android.media.midi.MidiSender;
 import android.os.Bundle;
+import android.service.usb.UsbMidiDeviceProto;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -32,6 +33,7 @@ import android.util.Log;
 
 import com.android.internal.midi.MidiEventScheduler;
 import com.android.internal.midi.MidiEventScheduler.MidiEvent;
+import com.android.internal.util.dump.DualDumpOutputStream;
 
 import libcore.io.IoUtils;
 
@@ -336,6 +338,20 @@ public final class UsbMidiDevice implements Closeable {
         mFileDescriptors = null;
 
         mIsOpen = false;
+    }
+
+    /**
+     * Write a description of the device to a dump stream.
+     */
+    public void dump(String deviceAddr, @NonNull DualDumpOutputStream dump, @NonNull String idName,
+            long id) {
+        long token = dump.start(idName, id);
+
+        dump.write("device_address", UsbMidiDeviceProto.DEVICE_ADDRESS, deviceAddr);
+        dump.write("card", UsbMidiDeviceProto.CARD, mAlsaCard);
+        dump.write("device", UsbMidiDeviceProto.DEVICE, mAlsaDevice);
+
+        dump.end(token);
     }
 
     private static native int nativeGetSubdeviceCount(int card, int device);

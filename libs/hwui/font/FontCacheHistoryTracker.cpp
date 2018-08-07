@@ -16,15 +16,15 @@
 
 #include "FontCacheHistoryTracker.h"
 
-#include "CachedGlyphInfo.h"
 #include "CacheTexture.h"
+#include "CachedGlyphInfo.h"
 
 namespace android {
 namespace uirenderer {
 
 void FontCacheHistoryTracker::dumpCachedGlyph(String8& log, const CachedGlyph& glyph) {
     log.appendFormat("glyph (texture %p, position: (%d, %d), size: %dx%d, gen: %d)", glyph.texture,
-            glyph.startX, glyph.startY, glyph.bitmapW, glyph.bitmapH, glyph.generation);
+                     glyph.startX, glyph.startY, glyph.bitmapW, glyph.bitmapH, glyph.generation);
 }
 
 void FontCacheHistoryTracker::dumpRenderEntry(String8& log, const RenderEntry& entry) {
@@ -40,7 +40,7 @@ void FontCacheHistoryTracker::dumpRenderEntry(String8& log, const RenderEntry& e
 void FontCacheHistoryTracker::dumpUploadEntry(String8& log, const CachedGlyph& glyph) {
     if (glyph.bitmapW == 0 && glyph.bitmapH == 0) {
         log.appendFormat("      cleared cachetexture %p in gen %d\n", glyph.texture,
-                glyph.generation);
+                         glyph.generation);
     } else {
         log.appendFormat("      uploaded ");
         dumpCachedGlyph(log, glyph);
@@ -73,7 +73,7 @@ void FontCacheHistoryTracker::glyphRendered(CachedGlyphInfo* glyphInfo, int penX
 }
 
 void FontCacheHistoryTracker::glyphUploaded(CacheTexture* texture, uint32_t x, uint32_t y,
-        uint16_t glyphW, uint16_t glyphH) {
+                                            uint16_t glyphW, uint16_t glyphH) {
     CachedGlyph& glyph = mUploadHistory.next();
     glyph.generation = generation;
     glyph.texture = texture;
@@ -96,5 +96,5 @@ void FontCacheHistoryTracker::glyphsCleared(CacheTexture* texture) {
 void FontCacheHistoryTracker::frameCompleted() {
     generation++;
 }
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

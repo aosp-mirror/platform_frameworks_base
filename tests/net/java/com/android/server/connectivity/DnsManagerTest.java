@@ -19,6 +19,9 @@ package com.android.server.connectivity;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
+import static android.provider.Settings.Global.PRIVATE_DNS_DEFAULT_MODE;
+import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
+import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -40,6 +43,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
 
 import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.server.connectivity.DnsManager.PrivateDnsConfig;
 import com.android.server.connectivity.MockableSystemProperties;
 
 import java.net.InetAddress;
@@ -84,10 +88,9 @@ public class DnsManagerTest {
         mDnsManager = new DnsManager(mCtx, mNMService, mSystemProperties);
 
         // Clear the private DNS settings
-        Settings.Global.putString(mContentResolver,
-                Settings.Global.PRIVATE_DNS_MODE, "");
-        Settings.Global.putString(mContentResolver,
-                Settings.Global.PRIVATE_DNS_SPECIFIER, "");
+        Settings.Global.putString(mContentResolver, PRIVATE_DNS_DEFAULT_MODE, "");
+        Settings.Global.putString(mContentResolver, PRIVATE_DNS_MODE, "");
+        Settings.Global.putString(mContentResolver, PRIVATE_DNS_SPECIFIER, "");
     }
 
     @Test
@@ -127,9 +130,8 @@ public class DnsManagerTest {
                 TEST_IFACENAME));
 
         Settings.Global.putString(mContentResolver,
-                Settings.Global.PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_PROVIDER_HOSTNAME);
-        Settings.Global.putString(mContentResolver,
-                Settings.Global.PRIVATE_DNS_SPECIFIER, "strictmode.com");
+                PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_PROVIDER_HOSTNAME);
+        Settings.Global.putString(mContentResolver, PRIVATE_DNS_SPECIFIER, "strictmode.com");
         mDnsManager.updatePrivateDns(new Network(TEST_NETID),
                 new DnsManager.PrivateDnsConfig("strictmode.com", new InetAddress[] {
                     InetAddress.parseNumericAddress("6.6.6.6"),
@@ -222,8 +224,7 @@ public class DnsManagerTest {
         assertNull(lp.getPrivateDnsServerName());
 
         // Turn private DNS mode off
-        Settings.Global.putString(mContentResolver,
-                Settings.Global.PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_OFF);
+        Settings.Global.putString(mContentResolver, PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_OFF);
         mDnsManager.updatePrivateDns(new Network(TEST_NETID),
                 mDnsManager.getPrivateDnsConfig());
         mDnsManager.setDnsConfigurationForNetwork(TEST_NETID, lp, IS_DEFAULT);
@@ -233,5 +234,30 @@ public class DnsManagerTest {
         mDnsManager.updatePrivateDnsStatus(TEST_NETID, lp);
         assertFalse(lp.isPrivateDnsActive());
         assertNull(lp.getPrivateDnsServerName());
+    }
+
+    @Test
+    public void testOverrideDefaultMode() throws Exception {
+        // Hard-coded default is opportunistic mode.
+        final PrivateDnsConfig cfgAuto = DnsManager.getPrivateDnsConfig(mContentResolver);
+        assertTrue(cfgAuto.useTls);
+        assertEquals("", cfgAuto.hostname);
+        assertEquals(new InetAddress[0], cfgAuto.ips);
+
+        // Pretend a gservices push sets the default to "off".
+        Settings.Global.putString(mContentResolver, PRIVATE_DNS_DEFAULT_MODE, "off");
+        final PrivateDnsConfig cfgOff = DnsManager.getPrivateDnsConfig(mContentResolver);
+        assertFalse(cfgOff.useTls);
+        assertEquals("", cfgOff.hostname);
+        assertEquals(new InetAddress[0], cfgOff.ips);
+
+        // Strict mode still works.
+        Settings.Global.putString(
+                mContentResolver, PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_PROVIDER_HOSTNAME);
+        Settings.Global.putString(mContentResolver, PRIVATE_DNS_SPECIFIER, "strictmode.com");
+        final PrivateDnsConfig cfgStrict = DnsManager.getPrivateDnsConfig(mContentResolver);
+        assertTrue(cfgStrict.useTls);
+        assertEquals("strictmode.com", cfgStrict.hostname);
+        assertEquals(new InetAddress[0], cfgStrict.ips);
     }
 }

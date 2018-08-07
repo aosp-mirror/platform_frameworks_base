@@ -243,7 +243,7 @@ public class NetworkStats implements Parcelable {
     public NetworkStats(long elapsedRealtime, int initialSize) {
         this.elapsedRealtime = elapsedRealtime;
         this.size = 0;
-        if (initialSize >= 0) {
+        if (initialSize > 0) {
             this.capacity = initialSize;
             this.iface = new String[initialSize];
             this.uid = new int[initialSize];
@@ -259,19 +259,7 @@ public class NetworkStats implements Parcelable {
             this.operations = new long[initialSize];
         } else {
             // Special case for use by NetworkStatsFactory to start out *really* empty.
-            this.capacity = 0;
-            this.iface = EmptyArray.STRING;
-            this.uid = EmptyArray.INT;
-            this.set = EmptyArray.INT;
-            this.tag = EmptyArray.INT;
-            this.metered = EmptyArray.INT;
-            this.roaming = EmptyArray.INT;
-            this.defaultNetwork = EmptyArray.INT;
-            this.rxBytes = EmptyArray.LONG;
-            this.rxPackets = EmptyArray.LONG;
-            this.txBytes = EmptyArray.LONG;
-            this.txPackets = EmptyArray.LONG;
-            this.operations = EmptyArray.LONG;
+            clear();
         }
     }
 
@@ -321,6 +309,25 @@ public class NetworkStats implements Parcelable {
             clone.addValues(entry);
         }
         return clone;
+    }
+
+    /**
+     * Clear all data stored in this object.
+     */
+    public void clear() {
+        this.capacity = 0;
+        this.iface = EmptyArray.STRING;
+        this.uid = EmptyArray.INT;
+        this.set = EmptyArray.INT;
+        this.tag = EmptyArray.INT;
+        this.metered = EmptyArray.INT;
+        this.roaming = EmptyArray.INT;
+        this.defaultNetwork = EmptyArray.INT;
+        this.rxBytes = EmptyArray.LONG;
+        this.rxPackets = EmptyArray.LONG;
+        this.txBytes = EmptyArray.LONG;
+        this.txPackets = EmptyArray.LONG;
+        this.operations = EmptyArray.LONG;
     }
 
     @VisibleForTesting
@@ -1093,6 +1100,8 @@ public class NetworkStats implements Parcelable {
     public interface NonMonotonicObserver<C> {
         public void foundNonMonotonic(
                 NetworkStats left, int leftIndex, NetworkStats right, int rightIndex, C cookie);
+        public void foundNonMonotonic(
+                NetworkStats stats, int statsIndex, C cookie);
     }
 
     /**

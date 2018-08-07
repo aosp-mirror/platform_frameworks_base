@@ -22,8 +22,9 @@
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
     </style>
 
-    <style name="preference_icon_frame">
-        <item name="android:layout_marginStart">-4dp</item>
-        <item name="android:minWidth">60dp</item>
+    <style name="BorderlessButton">
+        <item name="android:padding">12dp</item>
+        <item name="android:background">@drawable/btn_borderless_rect</item>
+        <item name="android:gravity">center</item>
     </style>
 </resources>

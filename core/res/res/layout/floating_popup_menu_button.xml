@@ -53,7 +53,6 @@
         android:ellipsize="end"
         android:fontFamily="sans-serif-medium"
         android:textSize="@dimen/floating_toolbar_text_size"
-        android:textAllCaps="true"
         android:textColor="?attr/floatingToolbarForegroundColor"
         android:background="@null"
         android:focusable="false"

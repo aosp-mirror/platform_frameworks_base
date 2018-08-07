@@ -148,8 +148,9 @@ void SpriteController::doUpdateSprites() {
         }
     }
 
-    // Resize sprites if needed, inside a global transaction.
-    bool haveGlobalTransaction = false;
+    // Resize sprites if needed.
+    SurfaceComposerClient::Transaction t;
+    bool needApplyTransaction = false;
     for (size_t i = 0; i < numSprites; i++) {
         SpriteUpdate& update = updates.editItemAt(i);
 
@@ -158,36 +159,24 @@ void SpriteController::doUpdateSprites() {
             int32_t desiredHeight = update.state.icon.bitmap.height();
             if (update.state.surfaceWidth < desiredWidth
                     || update.state.surfaceHeight < desiredHeight) {
-                if (!haveGlobalTransaction) {
-                    SurfaceComposerClient::openGlobalTransaction();
-                    haveGlobalTransaction = true;
-                }
+                needApplyTransaction = true;
 
-                status_t status = update.state.surfaceControl->setSize(desiredWidth, desiredHeight);
-                if (status) {
-                    ALOGE("Error %d resizing sprite surface from %dx%d to %dx%d",
-                            status, update.state.surfaceWidth, update.state.surfaceHeight,
-                            desiredWidth, desiredHeight);
-                } else {
-                    update.state.surfaceWidth = desiredWidth;
-                    update.state.surfaceHeight = desiredHeight;
-                    update.state.surfaceDrawn = false;
-                    update.surfaceChanged = surfaceChanged = true;
+                t.setSize(update.state.surfaceControl,
+                        desiredWidth, desiredHeight);
+                update.state.surfaceWidth = desiredWidth;
+                update.state.surfaceHeight = desiredHeight;
+                update.state.surfaceDrawn = false;
+                update.surfaceChanged = surfaceChanged = true;
 
-                    if (update.state.surfaceVisible) {
-                        status = update.state.surfaceControl->hide();
-                        if (status) {
-                            ALOGE("Error %d hiding sprite surface after resize.", status);
-                        } else {
-                            update.state.surfaceVisible = false;
-                        }
-                    }
+                if (update.state.surfaceVisible) {
+                    t.hide(update.state.surfaceControl);
+                    update.state.surfaceVisible = false;
                 }
             }
         }
     }
-    if (haveGlobalTransaction) {
-        SurfaceComposerClient::closeGlobalTransaction();
+    if (needApplyTransaction) {
+        t.apply();
     }
 
     // Redraw sprites if needed.
@@ -240,8 +229,7 @@ void SpriteController::doUpdateSprites() {
         }
     }
 
-    // Set sprite surface properties and make them visible.
-    bool haveTransaction = false;
+    needApplyTransaction = false;
     for (size_t i = 0; i < numSprites; i++) {
         SpriteUpdate& update = updates.editItemAt(i);
 
@@ -253,75 +241,59 @@ void SpriteController::doUpdateSprites() {
                 || (wantSurfaceVisibleAndDrawn && (update.state.dirty & (DIRTY_ALPHA
                         | DIRTY_POSITION | DIRTY_TRANSFORMATION_MATRIX | DIRTY_LAYER
                         | DIRTY_VISIBILITY | DIRTY_HOTSPOT))))) {
-            status_t status;
-            if (!haveTransaction) {
-                SurfaceComposerClient::openGlobalTransaction();
-                haveTransaction = true;
-            }
+            needApplyTransaction = true;
 
             if (wantSurfaceVisibleAndDrawn
                     && (becomingVisible || (update.state.dirty & DIRTY_ALPHA))) {
-                status = update.state.surfaceControl->setAlpha(update.state.alpha);
-                if (status) {
-                    ALOGE("Error %d setting sprite surface alpha.", status);
-                }
+                t.setAlpha(update.state.surfaceControl,
+                        update.state.alpha);
             }
 
             if (wantSurfaceVisibleAndDrawn
                     && (becomingVisible || (update.state.dirty & (DIRTY_POSITION
                             | DIRTY_HOTSPOT)))) {
-                status = update.state.surfaceControl->setPosition(
+                t.setPosition(
+                        update.state.surfaceControl,
                         update.state.positionX - update.state.icon.hotSpotX,
                         update.state.positionY - update.state.icon.hotSpotY);
-                if (status) {
-                    ALOGE("Error %d setting sprite surface position.", status);
-                }
             }
 
             if (wantSurfaceVisibleAndDrawn
                     && (becomingVisible
                             || (update.state.dirty & DIRTY_TRANSFORMATION_MATRIX))) {
-                status = update.state.surfaceControl->setMatrix(
+                t.setMatrix(
+                        update.state.surfaceControl,
                         update.state.transformationMatrix.dsdx,
                         update.state.transformationMatrix.dtdx,
                         update.state.transformationMatrix.dsdy,
                         update.state.transformationMatrix.dtdy);
-                if (status) {
-                    ALOGE("Error %d setting sprite surface transformation matrix.", status);
-                }
             }
 
             int32_t surfaceLayer = mOverlayLayer + update.state.layer;
             if (wantSurfaceVisibleAndDrawn
                     && (becomingVisible || (update.state.dirty & DIRTY_LAYER))) {
-                status = update.state.surfaceControl->setLayer(surfaceLayer);
-                if (status) {
-                    ALOGE("Error %d setting sprite surface layer.", status);
-                }
+                t.setLayer(update.state.surfaceControl, surfaceLayer);
             }
 
             if (becomingVisible) {
-                status = update.state.surfaceControl->show();
-                if (status) {
-                    ALOGE("Error %d showing sprite surface.", status);
-                } else {
-                    update.state.surfaceVisible = true;
-                    update.surfaceChanged = surfaceChanged = true;
-                }
+                t.show(update.state.surfaceControl);
+
+                update.state.surfaceVisible = true;
+                update.surfaceChanged = surfaceChanged = true;
             } else if (becomingHidden) {
-                status = update.state.surfaceControl->hide();
-                if (status) {
-                    ALOGE("Error %d hiding sprite surface.", status);
-                } else {
-                    update.state.surfaceVisible = false;
-                    update.surfaceChanged = surfaceChanged = true;
-                }
+                t.hide(update.state.surfaceControl);
+
+                update.state.surfaceVisible = false;
+                update.surfaceChanged = surfaceChanged = true;
             }
         }
     }
 
-    if (haveTransaction) {
-        SurfaceComposerClient::closeGlobalTransaction();
+    if (needApplyTransaction) {
+        status_t status = t.apply();
+        if (status) {
+            ALOGE("Error applying Surface transaction");
+        }
     }
 
     // If any surfaces were changed, write back the new surface properties to the sprites.

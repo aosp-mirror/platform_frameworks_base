@@ -16,7 +16,7 @@
 
 package com.android.multidexlegacyandexception;
 
-import android.support.multidex.MultiDexApplication;
+import androidx.multidex.MultiDexApplication;
 
 public class TestApplication extends MultiDexApplication {
 

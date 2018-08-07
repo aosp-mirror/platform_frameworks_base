@@ -441,10 +441,11 @@ public class SmsCbHeader {
 
     @Override
     public String toString() {
-        return "SmsCbHeader{GS=" + mGeographicalScope + ", serialNumber=0x" +
-                Integer.toHexString(mSerialNumber) +
-                ", messageIdentifier=0x" + Integer.toHexString(mMessageIdentifier) +
-                ", DCS=0x" + Integer.toHexString(mDataCodingScheme) +
-                ", page " + mPageIndex + " of " + mNrOfPages + '}';
+        return "SmsCbHeader{GS=" + mGeographicalScope + ", serialNumber=0x"
+                + Integer.toHexString(mSerialNumber)
+                + ", messageIdentifier=0x" + Integer.toHexString(mMessageIdentifier)
+                + ", format=" + mFormat
+                + ", DCS=0x" + Integer.toHexString(mDataCodingScheme)
+                + ", page " + mPageIndex + " of " + mNrOfPages + '}';
     }
 }

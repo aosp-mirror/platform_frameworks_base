@@ -24,24 +24,23 @@ namespace test {
 
 static const int IDENT_DISPLAYEVENT = 1;
 
-static android::DisplayInfo DUMMY_DISPLAY {
-    1080, //w
-    1920, //h
-    320.0, // xdpi
-    320.0, // ydpi
-    60.0, // fps
-    2.0, // density
-    0, // orientation
-    false, // secure?
-    0, // appVsyncOffset
-    0, // presentationDeadline
+static android::DisplayInfo DUMMY_DISPLAY{
+        1080,   // w
+        1920,   // h
+        320.0,  // xdpi
+        320.0,  // ydpi
+        60.0,   // fps
+        2.0,    // density
+        0,      // orientation
+        false,  // secure?
+        0,      // appVsyncOffset
+        0,      // presentationDeadline
 };
 
 DisplayInfo getBuiltInDisplay() {
 #if !HWUI_NULL_GPU
     DisplayInfo display;
-    sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(
-            ISurfaceComposer::eDisplayIdMain));
+    sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(ISurfaceComposer::eDisplayIdMain));
     status_t status = SurfaceComposerClient::getDisplayInfo(dtoken, &display);
     LOG_ALWAYS_FATAL_IF(status, "Failed to get display info\n");
     return display;
@@ -56,8 +55,8 @@ android::DisplayInfo gDisplay = DUMMY_DISPLAY;
 TestContext::TestContext() {
     mLooper = new Looper(true);
     mSurfaceComposerClient = new SurfaceComposerClient();
-    mLooper->addFd(mDisplayEventReceiver.getFd(), IDENT_DISPLAYEVENT,
-            Looper::EVENT_INPUT, nullptr, nullptr);
+    mLooper->addFd(mDisplayEventReceiver.getFd(), IDENT_DISPLAYEVENT, Looper::EVENT_INPUT, nullptr,
+                   nullptr);
 }
 
 TestContext::~TestContext() {}
@@ -78,13 +77,11 @@ void TestContext::createSurface() {
 }
 
 void TestContext::createWindowSurface() {
-    mSurfaceControl = mSurfaceComposerClient->createSurface(String8("HwuiTest"),
-            gDisplay.w, gDisplay.h, PIXEL_FORMAT_RGBX_8888);
+    mSurfaceControl = mSurfaceComposerClient->createSurface(String8("HwuiTest"), gDisplay.w,
+                                                            gDisplay.h, PIXEL_FORMAT_RGBX_8888);
 
-    SurfaceComposerClient::openGlobalTransaction();
-    mSurfaceControl->setLayer(0x7FFFFFF);
-    mSurfaceControl->show();
-    SurfaceComposerClient::closeGlobalTransaction();
+    SurfaceComposerClient::Transaction t;
+    t.setLayer(mSurfaceControl, 0x7FFFFFF).show(mSurfaceControl).apply();
     mSurface = mSurfaceControl->getSurface();
 }
 
@@ -124,10 +121,11 @@ void TestContext::waitForVsync() {
 
     // Drain it
     DisplayEventReceiver::Event buf[100];
-    while (mDisplayEventReceiver.getEvents(buf, 100) > 0) { }
+    while (mDisplayEventReceiver.getEvents(buf, 100) > 0) {
+    }
 #endif
 }
 
-} // namespace test
-} // namespace uirenderer
-} // namespace android
+}  // namespace test
+}  // namespace uirenderer
+}  // namespace android

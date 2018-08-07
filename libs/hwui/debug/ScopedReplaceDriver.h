@@ -33,14 +33,13 @@ public:
 
     Driver& get() { return *mCurrentDriver; }
 
-    ~ScopedReplaceDriver() {
-        GlesDriver::replace(std::move(mOldDriver));
-    }
+    ~ScopedReplaceDriver() { GlesDriver::replace(std::move(mOldDriver)); }
+
 private:
     std::unique_ptr<GlesDriver> mOldDriver;
     Driver* mCurrentDriver;
 };
 
-} // namespace debug
-} // namespace uirenderer
-} // namespace android
+}  // namespace debug
+}  // namespace uirenderer
+}  // namespace android

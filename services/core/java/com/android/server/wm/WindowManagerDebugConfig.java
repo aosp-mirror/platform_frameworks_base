@@ -60,7 +60,6 @@ public class WindowManagerDebugConfig {
     static final boolean DEBUG_SCREENSHOT = false;
     static final boolean DEBUG_BOOT = false;
     static final boolean DEBUG_LAYOUT_REPEATS = false;
-    static final boolean DEBUG_SURFACE_TRACE = false;
     static final boolean DEBUG_WINDOW_TRACE = false;
     static final boolean DEBUG_TASK_MOVEMENT = false;
     static final boolean DEBUG_TASK_POSITIONING = false;
@@ -75,6 +74,8 @@ public class WindowManagerDebugConfig {
     static final boolean SHOW_STACK_CRAWLS = false;
     static final boolean DEBUG_WINDOW_CROP = false;
     static final boolean DEBUG_UNKNOWN_APP_VISIBILITY = false;
+    static final boolean DEBUG_RECENTS_ANIMATIONS = false;
+    static final boolean DEBUG_REMOTE_ANIMATIONS = DEBUG_APP_TRANSITIONS || false;
 
     static final String TAG_KEEP_SCREEN_ON = "DebugKeepScreenOn";
     static final boolean DEBUG_KEEP_SCREEN_ON = false;

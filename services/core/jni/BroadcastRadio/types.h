@@ -27,11 +27,6 @@ namespace BroadcastRadio {
  * frameworks/base/core/java/android/hardware/radio/RadioManager.java.
  */
 
-enum class HalRevision : jint {
-    V1_0,
-    V1_1,
-};
-
 // Keep in sync with STATUS_* constants from RadioManager.java.
 enum class Status : jint {
     OK = 0,
@@ -46,6 +41,7 @@ enum class Status : jint {
 
 // Keep in sync with REGION_* constants from RadioManager.java.
 enum class Region : jint {
+    INVALID = -1,
     ITU_1 = 0,
     ITU_2 = 1,
     OIRT = 2,

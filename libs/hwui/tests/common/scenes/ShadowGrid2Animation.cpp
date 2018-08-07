@@ -19,15 +19,14 @@
 class ShadowGrid2Animation;
 
 static TestScene::Registrar _ShadowGrid2(TestScene::Info{
-    "shadowgrid2",
-    "A dense grid of rounded rects that cast a shadow. This is a higher CPU load "
-    "variant of shadowgrid. Very high CPU load, high GPU load.",
-    TestScene::simpleCreateScene<ShadowGrid2Animation>
-});
+        "shadowgrid2",
+        "A dense grid of rounded rects that cast a shadow. This is a higher CPU load "
+        "variant of shadowgrid. Very high CPU load, high GPU load.",
+        TestScene::simpleCreateScene<ShadowGrid2Animation>});
 
 class ShadowGrid2Animation : public TestScene {
 public:
-    std::vector< sp<RenderNode> > cards;
+    std::vector<sp<RenderNode> > cards;
     void createContent(int width, int height, Canvas& canvas) override {
         canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver);
         canvas.insertReorderBarrier(true);
@@ -50,14 +49,16 @@ public:
             cards[ci]->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
         }
     }
+
 private:
     sp<RenderNode> createCard(int x, int y, int width, int height) {
         return TestUtils::createNode(x, y, x + width, y + height,
-                [width, height](RenderProperties& props, Canvas& canvas) {
-            props.setElevation(dp(16));
-            props.mutableOutline().setRoundRect(0, 0, width, height, dp(6), 1);
-            props.mutableOutline().setShouldClip(true);
-            canvas.drawColor(0xFFEEEEEE, SkBlendMode::kSrcOver);
-        });
+                                     [width, height](RenderProperties& props, Canvas& canvas) {
+                                         props.setElevation(dp(16));
+                                         props.mutableOutline().setRoundRect(0, 0, width, height,
+                                                                             dp(6), 1);
+                                         props.mutableOutline().setShouldClip(true);
+                                         canvas.drawColor(0xFFEEEEEE, SkBlendMode::kSrcOver);
+                                     });
     }
 };

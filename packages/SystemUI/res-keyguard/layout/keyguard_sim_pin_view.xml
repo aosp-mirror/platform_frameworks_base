@@ -32,6 +32,7 @@
             android:id="@+id/keyguard_sim"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:tint="@color/background_protected"
             android:src="@drawable/ic_lockscreen_sim"/>
 
     <include layout="@layout/keyguard_message_area"
@@ -80,7 +81,7 @@
                     android:paddingTop="8dip"
                     android:paddingBottom="8dip"
                     android:paddingRight="0dp"
-                    android:paddingLeft="24dp"
+                    android:paddingLeft="0dp"
                     android:background="@drawable/ripple_drawable"
                     android:contentDescription="@string/keyboardview_keycode_delete"
                     android:layout_alignEnd="@+id/pinEntry"

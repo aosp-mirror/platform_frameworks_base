@@ -19,9 +19,6 @@ package com.android.server.locksettings;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT;
 
-import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.widget.LockPatternUtils.StrongAuthTracker;
-
 import android.app.AlarmManager;
 import android.app.AlarmManager.OnAlarmListener;
 import android.app.admin.DevicePolicyManager;
@@ -29,10 +26,9 @@ import android.app.trust.IStrongAuthTracker;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.fingerprint.FingerprintManager;
-import android.os.Binder;
-import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -40,7 +36,7 @@ import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseIntArray;
 
-import java.util.ArrayList;
+import com.android.internal.widget.LockPatternUtils.StrongAuthTracker;
 
 /**
  * Keeps track of requests for strong authentication.
@@ -58,7 +54,7 @@ public class LockSettingsStrongAuth {
     private static final String STRONG_AUTH_TIMEOUT_ALARM_TAG =
             "LockSettingsStrongAuth.timeoutForUser";
 
-    private final ArrayList<IStrongAuthTracker> mStrongAuthTrackers = new ArrayList<>();
+    private final RemoteCallbackList<IStrongAuthTracker> mTrackers = new RemoteCallbackList<>();
     private final SparseIntArray mStrongAuthForUser = new SparseIntArray();
     private final ArrayMap<Integer, StrongAuthTimeoutAlarmListener>
             mStrongAuthTimeoutAlarmListenerForUser = new ArrayMap<>();
@@ -82,12 +78,7 @@ public class LockSettingsStrongAuth {
     }
 
     private void handleAddStrongAuthTracker(IStrongAuthTracker tracker) {
-        for (int i = 0; i < mStrongAuthTrackers.size(); i++) {
-            if (mStrongAuthTrackers.get(i).asBinder() == tracker.asBinder()) {
-                return;
-            }
-        }
-        mStrongAuthTrackers.add(tracker);
+        mTrackers.register(tracker);
 
         for (int i = 0; i < mStrongAuthForUser.size(); i++) {
             int key = mStrongAuthForUser.keyAt(i);
@@ -101,12 +92,7 @@ public class LockSettingsStrongAuth {
     }
 
     private void handleRemoveStrongAuthTracker(IStrongAuthTracker tracker) {
-        for (int i = 0; i < mStrongAuthTrackers.size(); i++) {
-            if (mStrongAuthTrackers.get(i).asBinder() == tracker.asBinder()) {
-                mStrongAuthTrackers.remove(i);
-                return;
-            }
-        }
+        mTrackers.unregister(tracker);
     }
 
     private void handleRequireStrongAuth(int strongAuthReason, int userId) {
@@ -157,16 +143,19 @@ public class LockSettingsStrongAuth {
     }
 
     private void notifyStrongAuthTrackers(int strongAuthReason, int userId) {
-        for (int i = 0; i < mStrongAuthTrackers.size(); i++) {
-            try {
-                mStrongAuthTrackers.get(i).onStrongAuthRequiredChanged(strongAuthReason, userId);
-            } catch (DeadObjectException e) {
-                Slog.d(TAG, "Removing dead StrongAuthTracker.");
-                mStrongAuthTrackers.remove(i);
+        int i = mTrackers.beginBroadcast();
+        try {
+            while (i > 0) {
                 i--;
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Exception while notifying StrongAuthTracker.", e);
+                try {
+                    mTrackers.getBroadcastItem(i).onStrongAuthRequiredChanged(
+                            strongAuthReason, userId);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Exception while notifying StrongAuthTracker.", e);
+                }
             }
+        } finally {
+            mTrackers.finishBroadcast();
         }
     }
 
@@ -243,4 +232,5 @@ public class LockSettingsStrongAuth {
             }
         }
     };
+
 }

@@ -27,6 +27,7 @@
 #include "androidfw/StringPiece.h"
 
 #include "ConfigDescription.h"
+#include "Diagnostics.h"
 #include "util/BigBuffer.h"
 
 namespace aapt {
@@ -49,6 +50,8 @@ struct StyleString {
 // Otherwise, the style data array would have to be sparse and take up more space.
 class StringPool {
  public:
+  using size_type = size_t;
+
   class Context {
    public:
     enum : uint32_t {
@@ -150,8 +153,8 @@ class StringPool {
     int ref_;
   };
 
-  static bool FlattenUtf8(BigBuffer* out, const StringPool& pool);
-  static bool FlattenUtf16(BigBuffer* out, const StringPool& pool);
+  static bool FlattenUtf8(BigBuffer* out, const StringPool& pool, IDiagnostics* diag);
+  static bool FlattenUtf16(BigBuffer* out, const StringPool& pool, IDiagnostics* diag);
 
   StringPool() = default;
   StringPool(StringPool&&) = default;
@@ -164,6 +167,9 @@ class StringPool {
   // Adds a string to the pool, unless it already exists, with a context object that can be used
   // when sorting the string pool. Returns a reference to the string in the pool.
   Ref MakeRef(const android::StringPiece& str, const Context& context);
+
+  // Adds a string from another string pool. Returns a reference to the string in the string pool.
+  Ref MakeRef(const Ref& ref);
 
   // Adds a style to the string pool and returns a reference to it.
   StyleRef MakeRef(const StyleString& str);
@@ -202,7 +208,7 @@ class StringPool {
  private:
   DISALLOW_COPY_AND_ASSIGN(StringPool);
 
-  static bool Flatten(BigBuffer* out, const StringPool& pool, bool utf8);
+  static bool Flatten(BigBuffer* out, const StringPool& pool, bool utf8, IDiagnostics* diag);
 
   Ref MakeRefImpl(const android::StringPiece& str, const Context& context, bool unique);
   void ReAssignIndices();

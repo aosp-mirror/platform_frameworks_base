@@ -155,12 +155,6 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
         env->SetObjectField(options, gOptions_outColorSpaceFieldID, 0);
     }
 
-    SkBitmapRegionDecoder* brd = reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
-
-    SkColorType decodeColorType = brd->computeOutputColorType(colorType);
-    sk_sp<SkColorSpace> decodeColorSpace = brd->computeOutputColorSpace(
-            decodeColorType, colorSpace);
-
     // Recycle a bitmap if possible.
     android::Bitmap* recycledBitmap = nullptr;
     size_t recycledBytes = 0;
@@ -171,6 +165,9 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
         }
         recycledBytes = bitmap::getBitmapAllocationByteCount(env, javaBitmap);
     }
+
+    SkBitmapRegionDecoder* brd = reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
+    SkColorType decodeColorType = brd->computeOutputColorType(colorType);
 
     // Set up the pixel allocator
     SkBRDAllocator* allocator = nullptr;
@@ -183,6 +180,9 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     } else {
         allocator = &heapAlloc;
     }
+
+    sk_sp<SkColorSpace> decodeColorSpace = brd->computeOutputColorSpace(
+            decodeColorType, colorSpace);
 
     // Decode the region.
     SkIRect subset = SkIRect::MakeXYWH(inputX, inputY, inputWidth, inputHeight);

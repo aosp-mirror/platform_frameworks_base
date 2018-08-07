@@ -20,7 +20,9 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.content.LocaleProto;
 import android.icu.util.ULocale;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -137,6 +139,25 @@ public final class LocaleList implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         dest.writeString(mStringRepresentation);
+    }
+
+    /**
+     * Helper to write LocaleList to a protocol buffer output stream.  Assumes the parent
+     * protobuf has declared the locale as repeated.
+     *
+     * @param protoOutputStream Stream to write the locale to.
+     * @param fieldId Field Id of the Locale as defined in the parent message.
+     * @hide
+     */
+    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
+        for (int i = 0; i < mList.length; i++) {
+            final Locale locale = mList[i];
+            final long token = protoOutputStream.start(fieldId);
+            protoOutputStream.write(LocaleProto.LANGUAGE, locale.getLanguage());
+            protoOutputStream.write(LocaleProto.COUNTRY, locale.getCountry());
+            protoOutputStream.write(LocaleProto.VARIANT, locale.getVariant());
+            protoOutputStream.end(token);
+        }
     }
 
     /**
@@ -295,7 +316,11 @@ public final class LocaleList implements Parcelable {
         return STRING_EN_XA.equals(locale) || STRING_AR_XB.equals(locale);
     }
 
-    private static boolean isPseudoLocale(Locale locale) {
+    /**
+     * Returns true if locale is a pseudo-locale, false otherwise.
+     * {@hide}
+     */
+    public static boolean isPseudoLocale(Locale locale) {
         return LOCALE_EN_XA.equals(locale) || LOCALE_AR_XB.equals(locale);
     }
 

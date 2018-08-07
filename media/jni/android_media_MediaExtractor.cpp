@@ -27,7 +27,7 @@
 #include "android_runtime/Log.h"
 #include "android_util_Binder.h"
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <android/hardware/cas/1.0/BpHwCas.h>
 #include <android/hardware/cas/1.0/BnHwCas.h>
@@ -37,7 +37,8 @@
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
-#include <media/stagefright/DataSource.h>
+#include <media/DataSource.h>
+#include <media/stagefright/InterfaceUtils.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/NuMediaExtractor.h>
@@ -51,6 +52,7 @@ struct fields_t {
     jfieldID context;
 
     jmethodID cryptoInfoSetID;
+    jmethodID cryptoInfoSetPatternID;
 };
 
 static fields_t gFields;
@@ -241,6 +243,10 @@ status_t JMediaExtractor::getSampleTrackIndex(size_t *trackIndex) {
 
 status_t JMediaExtractor::getSampleTime(int64_t *sampleTimeUs) {
     return mImpl->getSampleTime(sampleTimeUs);
+}
+
+status_t JMediaExtractor::getSampleSize(size_t *sampleSize) {
+    return mImpl->getSampleSize(sampleSize);
 }
 
 status_t JMediaExtractor::getSampleFlags(uint32_t *sampleFlags) {
@@ -504,6 +510,28 @@ static jlong android_media_MediaExtractor_getSampleTime(
     return (jlong) sampleTimeUs;
 }
 
+static jlong android_media_MediaExtractor_getSampleSize(
+        JNIEnv *env, jobject thiz) {
+    sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
+
+    if (extractor == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return -1ll;
+    }
+
+    size_t sampleSize;
+    status_t err = extractor->getSampleSize(&sampleSize);
+
+    if (err == ERROR_END_OF_STREAM) {
+        return -1ll;
+    } else if (err != OK) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return -1ll;
+    }
+
+    return (jlong) sampleSize;
+}
+
 static jint android_media_MediaExtractor_getSampleFlags(
         JNIEnv *env, jobject thiz) {
     sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
@@ -627,6 +655,16 @@ static jboolean android_media_MediaExtractor_getSampleCryptoInfo(
             ivObj,
             mode);
 
+    int32_t encryptedByteBlock = 0, skipByteBlock = 0;
+    meta->findInt32(kKeyEncryptedByteBlock, &encryptedByteBlock);
+    meta->findInt32(kKeySkipByteBlock, &skipByteBlock);
+
+    env->CallVoidMethod(
+            cryptoInfoObj,
+            gFields.cryptoInfoSetPatternID,
+            encryptedByteBlock,
+            skipByteBlock);
+
     return JNI_TRUE;
 }
 
@@ -642,6 +680,9 @@ static void android_media_MediaExtractor_native_init(JNIEnv *env) {
 
     gFields.cryptoInfoSetID =
         env->GetMethodID(clazz, "set", "(I[I[I[B[BI)V");
+
+    gFields.cryptoInfoSetPatternID =
+        env->GetMethodID(clazz, "setPattern", "(II)V");
 }
 
 static void android_media_MediaExtractor_native_setup(
@@ -744,7 +785,7 @@ static void android_media_MediaExtractor_setDataSourceCallback(
     }
 
     sp<DataSource> bridge =
-        DataSource::CreateFromIDataSource(new JMediaDataSource(env, callbackObj));
+        CreateDataSourceFromIDataSource(new JMediaDataSource(env, callbackObj));
     status_t err = extractor->setDataSource(bridge);
 
     if (err != OK) {
@@ -882,6 +923,9 @@ static const JNINativeMethod gMethods[] = {
 
     { "getSampleTime", "()J",
         (void *)android_media_MediaExtractor_getSampleTime },
+
+    { "getSampleSize", "()J",
+        (void *)android_media_MediaExtractor_getSampleSize },
 
     { "getSampleFlags", "()I",
         (void *)android_media_MediaExtractor_getSampleFlags },

@@ -87,7 +87,7 @@
     <string name="restart" msgid="2472034227037808749">"ಮರುಪ್ರಾರಂಭಿಸು"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"ಮುದ್ರಕಕ್ಕೆ ಸಂಪರ್ಕವಿಲ್ಲ"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"ಅಪರಿಚಿತ"</string>
-    <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> ಬಳಸುವುದೇ?"</string>
+    <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> ಅನ್ನು ಬಳಸುವುದೇ?"</string>
     <string name="print_service_security_warning_summary" msgid="1427434625361692006">"ನಿಮ್ಮ ಡಾಕ್ಯುಮೆಂಟ್‌ ಪ್ರಿಂಟರ್‌ಗೆ ಹೋಗುವ ಸಂದರ್ಭದಲ್ಲಿ ಒಂದು ಅಥವಾ ಅದಕ್ಕಿಂತ ಹೆಚ್ಚು ಸರ್ವರ್‌ಗಳ ಮೂಲಕ ಹಾದು ಹೋಗಬಹುದು."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"ಕಪ್ಪು &amp; ಬಿಳುಪು"</item>

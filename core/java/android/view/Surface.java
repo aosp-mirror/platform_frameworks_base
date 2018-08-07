@@ -121,8 +121,12 @@ public class Surface implements Parcelable {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({SCALING_MODE_FREEZE, SCALING_MODE_SCALE_TO_WINDOW,
-                    SCALING_MODE_SCALE_CROP, SCALING_MODE_NO_SCALE_CROP})
+    @IntDef(prefix = { "SCALING_MODE_" }, value = {
+            SCALING_MODE_FREEZE,
+            SCALING_MODE_SCALE_TO_WINDOW,
+            SCALING_MODE_SCALE_CROP,
+            SCALING_MODE_NO_SCALE_CROP
+    })
     public @interface ScalingMode {}
     // From system/window.h
     /** @hide */
@@ -135,7 +139,12 @@ public class Surface implements Parcelable {
     public static final int SCALING_MODE_NO_SCALE_CROP = 3;
 
     /** @hide */
-    @IntDef({ROTATION_0, ROTATION_90, ROTATION_180, ROTATION_270})
+    @IntDef(prefix = { "ROTATION_" }, value = {
+            ROTATION_0,
+            ROTATION_90,
+            ROTATION_180,
+            ROTATION_270
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Rotation {}
 
@@ -172,6 +181,11 @@ public class Surface implements Parcelable {
      * Images drawn to the Surface will be made available to the {@link
      * SurfaceTexture}, which can attach them to an OpenGL ES texture via {@link
      * SurfaceTexture#updateTexImage}.
+     *
+     * Please note that holding onto the Surface created here is not enough to
+     * keep the provided SurfaceTexture from being reclaimed.  In that sense,
+     * the Surface will act like a
+     * {@link java.lang.ref.WeakReference weak reference} to the SurfaceTexture.
      *
      * @param surfaceTexture The {@link SurfaceTexture} that is updated by this
      * Surface.
@@ -236,6 +250,18 @@ public class Surface implements Parcelable {
     }
 
     /**
+     * Destroys the HwuiContext without completely
+     * releasing the Surface.
+     * @hide
+     */
+    public void hwuiDestroy() {
+        if (mHwuiContext != null) {
+            mHwuiContext.destroy();
+            mHwuiContext = null;
+        }
+    }
+
+    /**
      * Returns true if this object holds a valid surface.
      *
      * @return True if it holds a physical surface, so lockCanvas() will succeed.
@@ -269,6 +295,7 @@ public class Surface implements Parcelable {
      */
     public long getNextFrameNumber() {
         synchronized (mLock) {
+            checkNotReleasedLocked();
             return nativeGetNextFrameNumber(mNativeObject);
         }
     }
@@ -381,7 +408,44 @@ public class Surface implements Parcelable {
         synchronized (mLock) {
             checkNotReleasedLocked();
             if (mHwuiContext == null) {
-                mHwuiContext = new HwuiContext();
+                mHwuiContext = new HwuiContext(false);
+            }
+            return mHwuiContext.lockCanvas(
+                    nativeGetWidth(mNativeObject),
+                    nativeGetHeight(mNativeObject));
+        }
+    }
+
+    /**
+     * Gets a {@link Canvas} for drawing into this surface that supports wide color gamut.
+     *
+     * After drawing into the provided {@link Canvas}, the caller must
+     * invoke {@link #unlockCanvasAndPost} to post the new contents to the surface.
+     *
+     * Unlike {@link #lockCanvas(Rect)} and {@link #lockHardwareCanvas()},
+     * this will return a hardware-accelerated canvas that supports wide color gamut.
+     * See the <a href="{@docRoot}guide/topics/graphics/hardware-accel.html#unsupported">
+     * unsupported drawing operations</a> for a list of what is and isn't
+     * supported in a hardware-accelerated canvas. It is also required to
+     * fully cover the surface every time {@link #lockHardwareCanvas()} is
+     * called as the buffer is not preserved between frames. Partial updates
+     * are not supported.
+     *
+     * @return A canvas for drawing into the surface.
+     *
+     * @throws IllegalStateException If the canvas cannot be locked.
+     *
+     * @hide
+     */
+    public Canvas lockHardwareWideColorGamutCanvas() {
+        synchronized (mLock) {
+            checkNotReleasedLocked();
+            if (mHwuiContext != null && !mHwuiContext.isWideColorGamut()) {
+                mHwuiContext.destroy();
+                mHwuiContext = null;
+            }
+            if (mHwuiContext == null) {
+                mHwuiContext = new HwuiContext(true);
             }
             return mHwuiContext.lockCanvas(
                     nativeGetWidth(mNativeObject),
@@ -762,7 +826,7 @@ public class Surface implements Parcelable {
                 return "ROTATION_270";
             }
             default: {
-                throw new IllegalArgumentException("Invalid rotation: " + rotation);
+                return Integer.toString(rotation);
             }
         }
     }
@@ -814,11 +878,14 @@ public class Surface implements Parcelable {
         private final RenderNode mRenderNode;
         private long mHwuiRenderer;
         private DisplayListCanvas mCanvas;
+        private final boolean mIsWideColorGamut;
 
-        HwuiContext() {
+        HwuiContext(boolean isWideColorGamut) {
             mRenderNode = RenderNode.create("HwuiCanvas", null);
             mRenderNode.setClipToBounds(false);
-            mHwuiRenderer = nHwuiCreate(mRenderNode.mNativeRenderNode, mNativeObject);
+            mIsWideColorGamut = isWideColorGamut;
+            mHwuiRenderer = nHwuiCreate(mRenderNode.mNativeRenderNode, mNativeObject,
+                    isWideColorGamut);
         }
 
         Canvas lockCanvas(int width, int height) {
@@ -849,9 +916,13 @@ public class Surface implements Parcelable {
                 mHwuiRenderer = 0;
             }
         }
+
+        boolean isWideColorGamut() {
+            return mIsWideColorGamut;
+        }
     }
 
-    private static native long nHwuiCreate(long rootNode, long surface);
+    private static native long nHwuiCreate(long rootNode, long surface, boolean isWideColorGamut);
     private static native void nHwuiSetSurface(long renderer, long surface);
     private static native void nHwuiDraw(long renderer);
     private static native void nHwuiDestroy(long renderer);

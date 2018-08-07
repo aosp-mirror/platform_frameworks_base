@@ -31,16 +31,60 @@ import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Collections;
-import java.util.ArrayList;
-
 import static com.android.internal.util.Preconditions.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A class for describing camera output, which contains a {@link Surface} and its specific
  * configuration for creating capture session.
+ *
+ * <p>There are several ways to instantiate, modify and use OutputConfigurations. The most common
+ * and recommended usage patterns are summarized in the following list:</p>
+ *<ul>
+ * <li>Passing a {@link Surface} to the constructor and using the OutputConfiguration instance as
+ * argument to {@link CameraDevice#createCaptureSessionByOutputConfigurations}. This is the most
+ * frequent usage and clients should consider it first before other more complicated alternatives.
+ * </li>
+ *
+ * <li>Passing only a surface source class as an argument to the constructor. This is usually
+ * followed by a call to create a capture session
+ * (see {@link CameraDevice#createCaptureSessionByOutputConfigurations} and a {@link Surface} add
+ * call {@link #addSurface} with a valid {@link Surface}. The sequence completes with
+ * {@link CameraCaptureSession#finalizeOutputConfigurations}. This is the deferred usage case which
+ * aims to enhance performance by allowing the resource-intensive capture session create call to
+ * execute in parallel with any {@link Surface} initialization, such as waiting for a
+ * {@link android.view.SurfaceView} to be ready as part of the UI initialization.</li>
+ *
+ * <li>The third and most complex usage pattern inlvolves surface sharing. Once instantiated an
+ * OutputConfiguration can be enabled for surface sharing via {@link #enableSurfaceSharing}. This
+ * must be done before creating a new capture session and enables calls to
+ * {@link CameraCaptureSession#updateOutputConfiguration}. An OutputConfiguration with enabled
+ * surface sharing can be modified via {@link #addSurface} or {@link #removeSurface}. The updates
+ * to this OutputConfiguration will only come into effect after
+ * {@link CameraCaptureSession#updateOutputConfiguration} returns without throwing exceptions.
+ * Such updates can be done as long as the session is active. Clients should always consider the
+ * additional requirements and limitations placed on the output surfaces (for more details see
+ * {@link #enableSurfaceSharing}, {@link #addSurface}, {@link #removeSurface},
+ * {@link CameraCaptureSession#updateOutputConfiguration}). A trade-off exists between additional
+ * complexity and flexibility. If exercised correctly surface sharing can switch between different
+ * output surfaces without interrupting any ongoing repeating capture requests. This saves time and
+ * can significantly improve the user experience.</li>
+ *
+ * <li>Surface sharing can be used in combination with deferred surfaces. The rules from both cases
+ * are combined and clients must call {@link #enableSurfaceSharing} before creating a capture
+ * session. Attach and/or remove output surfaces via  {@link #addSurface}/{@link #removeSurface} and
+ * finalize the configuration using {@link CameraCaptureSession#finalizeOutputConfigurations}.
+ * {@link CameraCaptureSession#updateOutputConfiguration} can be called after the configuration
+ * finalize method returns without exceptions.</li>
+ *
+ * </ul>
+ *
+ * <p> As of {@link android.os.Build.VERSION_CODES#P Android P}, all formats can be used for
+ * sharing, subject to device support. On prior API levels, only {@link ImageFormat#PRIVATE}
+ * format may be used.</p>
  *
  * @see CameraDevice#createCaptureSessionByOutputConfigurations
  *
@@ -123,7 +167,7 @@ public final class OutputConfiguration implements Parcelable {
      * {@link OutputConfiguration#addSurface} should not exceed this value.</p>
      *
      */
-    private static final int MAX_SURFACES_COUNT = 2;
+    private static final int MAX_SURFACES_COUNT = 4;
 
     /**
      * Create a new {@link OutputConfiguration} instance with a {@link Surface},
@@ -219,6 +263,7 @@ public final class OutputConfiguration implements Parcelable {
         mConfiguredGenerationId = surface.getGenerationId();
         mIsDeferredConfig = false;
         mIsShared = false;
+        mPhysicalCameraId = null;
     }
 
     /**
@@ -272,6 +317,7 @@ public final class OutputConfiguration implements Parcelable {
         mConfiguredGenerationId = 0;
         mIsDeferredConfig = true;
         mIsShared = false;
+        mPhysicalCameraId = null;
     }
 
     /**
@@ -280,7 +326,10 @@ public final class OutputConfiguration implements Parcelable {
      * <p>For advanced use cases, a camera application may require more streams than the combination
      * guaranteed by {@link CameraDevice#createCaptureSession}. In this case, more than one
      * compatible surface can be attached to an OutputConfiguration so that they map to one
-     * camera stream, and the outputs share memory buffers when possible. </p>
+     * camera stream, and the outputs share memory buffers when possible. Due to buffer sharing
+     * clients should be careful when adding surface outputs that modify their input data. If such
+     * case exists, camera clients should have an additional mechanism to synchronize read and write
+     * access between individual consumers.</p>
      *
      * <p>Two surfaces are compatible in the below cases:</p>
      *
@@ -298,15 +347,54 @@ public final class OutputConfiguration implements Parcelable {
      * </ol>
      *
      * <p>To enable surface sharing, this function must be called before {@link
-     * CameraDevice#createCaptureSessionByOutputConfigurations}. Calling this function after {@link
-     * CameraDevice#createCaptureSessionByOutputConfigurations} has no effect.</p>
+     * CameraDevice#createCaptureSessionByOutputConfigurations} or {@link
+     * CameraDevice#createReprocessableCaptureSessionByConfigurations}. Calling this function after
+     * {@link CameraDevice#createCaptureSessionByOutputConfigurations} has no effect.</p>
      *
-     * <p>Up to 2 surfaces can be shared for an OutputConfiguration. The supported surfaces for
-     * sharing must be of type SurfaceTexture, SurfaceView, MediaRecorder, MediaCodec, or
-     * implementation defined ImageReader.</p>
+     * <p>Up to {@link #getMaxSharedSurfaceCount} surfaces can be shared for an OutputConfiguration.
+     * The supported surfaces for sharing must be of type SurfaceTexture, SurfaceView,
+     * MediaRecorder, MediaCodec, or implementation defined ImageReader.</p>
      */
     public void enableSurfaceSharing() {
         mIsShared = true;
+    }
+
+    /**
+     * Set the id of the physical camera for this OutputConfiguration
+     *
+     * <p>In the case one logical camera is made up of multiple physical cameras, it could be
+     * desirable for the camera application to request streams from individual physical cameras.
+     * This call achieves it by mapping the OutputConfiguration to the physical camera id.</p>
+     *
+     * <p>The valid physical camera ids can be queried by {@link
+     * android.hardware.camera2.CameraCharacteristics#getPhysicalCameraIds}.
+     * </p>
+     *
+     * <p>Passing in a null physicalCameraId means that the OutputConfiguration is for a logical
+     * stream.</p>
+     *
+     * <p>This function must be called before {@link
+     * CameraDevice#createCaptureSessionByOutputConfigurations} or {@link
+     * CameraDevice#createReprocessableCaptureSessionByConfigurations}. Calling this function
+     * after {@link CameraDevice#createCaptureSessionByOutputConfigurations} or {@link
+     * CameraDevice#createReprocessableCaptureSessionByConfigurations} has no effect.</p>
+     *
+     * <p>The surface belonging to a physical camera OutputConfiguration must not be used as input
+     * or output of a reprocessing request. </p>
+     */
+    public void setPhysicalCameraId(@Nullable String physicalCameraId) {
+        mPhysicalCameraId = physicalCameraId;
+    }
+
+    /**
+     * Check if this configuration is for a physical camera.
+     *
+     * <p>This returns true if the output configuration was for a physical camera making up a
+     * logical multi camera via {@link OutputConfiguration#setPhysicalCameraId}.</p>
+     * @hide
+     */
+    public boolean isForPhysicalCamera() {
+        return (mPhysicalCameraId != null);
     }
 
     /**
@@ -329,8 +417,10 @@ public final class OutputConfiguration implements Parcelable {
      * <p> This function can be called before or after {@link
      * CameraDevice#createCaptureSessionByOutputConfigurations}. If it's called after,
      * the application must finalize the capture session with
-     * {@link CameraCaptureSession#finalizeOutputConfigurations}.
-     * </p>
+     * {@link CameraCaptureSession#finalizeOutputConfigurations}. It is possible to call this method
+     * after the output configurations have been finalized only in cases of enabled surface sharing
+     * see {@link #enableSurfaceSharing}. The modified output configuration must be updated with
+     * {@link CameraCaptureSession#updateOutputConfiguration}.</p>
      *
      * <p> If the OutputConfiguration was constructed with a deferred surface by {@link
      * OutputConfiguration#OutputConfiguration(Size, Class)}, the added surface must be obtained
@@ -388,6 +478,31 @@ public final class OutputConfiguration implements Parcelable {
     }
 
     /**
+     * Remove a surface from this OutputConfiguration.
+     *
+     * <p> Surfaces added via calls to {@link #addSurface} can also be removed from the
+     *  OutputConfiguration. The only notable exception is the surface associated with
+     *  the OutputConfigration see {@link #getSurface} which was passed as part of the constructor
+     *  or was added first in the deferred case
+     *  {@link OutputConfiguration#OutputConfiguration(Size, Class)}.</p>
+     *
+     * @param surface The surface to be removed.
+     *
+     * @throws IllegalArgumentException If the surface is associated with this OutputConfiguration
+     *                                  (see {@link #getSurface}) or the surface didn't get added
+     *                                  with {@link #addSurface}.
+     */
+    public void removeSurface(@NonNull Surface surface) {
+        if (getSurface() == surface) {
+            throw new IllegalArgumentException(
+                    "Cannot remove surface associated with this output configuration");
+        }
+        if (!mSurfaces.remove(surface)) {
+            throw new IllegalArgumentException("Surface is not part of this output configuration");
+        }
+    }
+
+    /**
      * Create a new {@link OutputConfiguration} instance with another {@link OutputConfiguration}
      * instance.
      *
@@ -409,6 +524,8 @@ public final class OutputConfiguration implements Parcelable {
         this.mConfiguredSize = other.mConfiguredSize;
         this.mConfiguredGenerationId = other.mConfiguredGenerationId;
         this.mIsDeferredConfig = other.mIsDeferredConfig;
+        this.mIsShared = other.mIsShared;
+        this.mPhysicalCameraId = other.mPhysicalCameraId;
     }
 
     /**
@@ -421,8 +538,10 @@ public final class OutputConfiguration implements Parcelable {
         int width = source.readInt();
         int height = source.readInt();
         boolean isDeferred = source.readInt() == 1;
+        boolean isShared = source.readInt() == 1;
         ArrayList<Surface> surfaces = new ArrayList<Surface>();
         source.readTypedList(surfaces, Surface.CREATOR);
+        String physicalCameraId = source.readString();
 
         checkArgumentInRange(rotation, ROTATION_0, ROTATION_270, "Rotation constant");
 
@@ -431,6 +550,7 @@ public final class OutputConfiguration implements Parcelable {
         mSurfaces = surfaces;
         mConfiguredSize = new Size(width, height);
         mIsDeferredConfig = isDeferred;
+        mIsShared = isShared;
         mSurfaces = surfaces;
         if (mSurfaces.size() > 0) {
             mSurfaceType = SURFACE_TYPE_UNKNOWN;
@@ -444,6 +564,18 @@ public final class OutputConfiguration implements Parcelable {
                     StreamConfigurationMap.imageFormatToDataspace(ImageFormat.PRIVATE);
             mConfiguredGenerationId = 0;
         }
+        mPhysicalCameraId = physicalCameraId;
+    }
+
+    /**
+     * Get the maximum supported shared {@link Surface} count.
+     *
+     * @return the maximum number of surfaces that can be added per each OutputConfiguration.
+     *
+     * @see #enableSurfaceSharing
+     */
+    public int getMaxSharedSurfaceCount() {
+        return MAX_SURFACES_COUNT;
     }
 
     /**
@@ -531,6 +663,7 @@ public final class OutputConfiguration implements Parcelable {
         dest.writeInt(mIsDeferredConfig ? 1 : 0);
         dest.writeInt(mIsShared ? 1 : 0);
         dest.writeTypedList(mSurfaces);
+        dest.writeString(mPhysicalCameraId);
     }
 
     /**
@@ -584,13 +717,15 @@ public final class OutputConfiguration implements Parcelable {
         if (mIsDeferredConfig) {
             return HashCodeHelpers.hashCode(
                     mRotation, mConfiguredSize.hashCode(), mConfiguredFormat, mConfiguredDataspace,
-                    mSurfaceGroupId, mSurfaceType, mIsShared ? 1 : 0);
+                    mSurfaceGroupId, mSurfaceType, mIsShared ? 1 : 0,
+                    mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode());
         }
 
         return HashCodeHelpers.hashCode(
                 mRotation, mSurfaces.hashCode(), mConfiguredGenerationId,
                 mConfiguredSize.hashCode(), mConfiguredFormat,
-                mConfiguredDataspace, mSurfaceGroupId, mIsShared ? 1 : 0);
+                mConfiguredDataspace, mSurfaceGroupId, mIsShared ? 1 : 0,
+                mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode());
     }
 
     private static final String TAG = "OutputConfiguration";
@@ -610,4 +745,6 @@ public final class OutputConfiguration implements Parcelable {
     private final boolean mIsDeferredConfig;
     // Flag indicating if this config has shared surfaces
     private boolean mIsShared;
+    // The physical camera id that this output configuration is for.
+    private String mPhysicalCameraId;
 }

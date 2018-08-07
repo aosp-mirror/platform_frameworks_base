@@ -28,7 +28,6 @@
     <!-- Overload default clock widget parameters -->
     <dimen name="widget_big_font_size">100dp</dimen>
     <dimen name="widget_label_font_size">16sp</dimen>
-    <dimen name="bottom_text_spacing_digital">-1dp</dimen>
 
     <!-- EmergencyCarrierArea overlap - amount to overlap the emergency button and carrier text.
          Should be 0 on devices with plenty of room (e.g. tablets) -->

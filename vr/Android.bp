@@ -26,6 +26,7 @@ cc_library_shared {
 // Java platform library for vr stuff.
 java_library {
     name: "com.google.vr.platform",
+    installable: true,
     owner: "google",
     required: [
         "libdvr_loader",

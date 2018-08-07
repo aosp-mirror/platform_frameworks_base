@@ -16,36 +16,50 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.DisplayCutout.fromBoundingRect;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
-
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
-import org.junit.Ignore;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.annotation.SuppressLint;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.DisplayMetrics;
 import android.util.SparseIntArray;
+import android.view.DisplayCutout;
 import android.view.MotionEvent;
+import android.view.Surface;
 
+import com.android.server.wm.utils.WmDisplayCutout;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -53,7 +67,7 @@ import java.util.List;
  * Tests for the {@link DisplayContent} class.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.DisplayContentTests
+ *  atest com.android.server.wm.DisplayContentTests
  */
 @SmallTest
 @Presubmit
@@ -61,6 +75,7 @@ import java.util.List;
 public class DisplayContentTests extends WindowTestsBase {
 
     @Test
+    @FlakyTest(bugId = 77772044)
     public void testForAllWindows() throws Exception {
         final WindowState exitingAppWindow = createWindow(null, TYPE_BASE_APPLICATION,
                 mDisplayContent, "exiting app");
@@ -161,6 +176,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(appWin.canBeImeTarget());
         WindowState imeTarget = mDisplayContent.computeImeTarget(false /* updateImeTarget */);
         assertEquals(appWin, imeTarget);
+        appWin.mHidden = false;
 
         // Verify that an child window can be an ime target.
         final WindowState childWin = createWindow(appWin,
@@ -187,7 +203,8 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(dc, stack.getDisplayContent());
 
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final WindowTestUtils.TestAppWindowToken token = new WindowTestUtils.TestAppWindowToken(dc);
+        final WindowTestUtils.TestAppWindowToken token = WindowTestUtils.createTestAppWindowToken(
+                dc);
         task.addChild(token, 0);
         assertEquals(dc, task.getDisplayContent());
         assertEquals(dc, token.getDisplayContent());
@@ -259,14 +276,14 @@ public class DisplayContentTests extends WindowTestsBase {
         final TaskStack stack0 = createTaskStackOnDisplay(dc0);
         final Task task0 = createTaskInStack(stack0, 0 /* userId */);
         final WindowTestUtils.TestAppWindowToken token =
-                new WindowTestUtils.TestAppWindowToken(dc0);
+                WindowTestUtils.createTestAppWindowToken(dc0);
         task0.addChild(token, 0);
         dc0.mTapDetector = new TaskTapPointerEventListener(sWm, dc0);
         sWm.registerPointerEventListener(dc0.mTapDetector);
         final TaskStack stack1 = createTaskStackOnDisplay(dc1);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
         final WindowTestUtils.TestAppWindowToken token1 =
-                new WindowTestUtils.TestAppWindowToken(dc0);
+                WindowTestUtils.createTestAppWindowToken(dc0);
         task1.addChild(token1, 0);
         dc1.mTapDetector = new TaskTapPointerEventListener(sWm, dc0);
         sWm.registerPointerEventListener(dc1.mTapDetector);
@@ -293,7 +310,6 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
-    @Ignore
     public void testFocusedWindowMultipleDisplays() throws Exception {
         // Create a focusable window and check that focus is calculated correctly
         final WindowState window1 =
@@ -311,6 +327,21 @@ public class DisplayContentTests extends WindowTestsBase {
         // Move the first window to the to including parents, and make sure focus is updated
         window1.getParent().positionChildAt(POSITION_TOP, window1, true);
         assertEquals(window1, sWm.mRoot.computeFocusedWindow());
+    }
+
+    @Test
+    public void testKeyguard_preventsSecondaryDisplayFocus() throws Exception {
+        final WindowState keyguard = createWindow(null, TYPE_STATUS_BAR,
+                sWm.getDefaultDisplayContentLocked(), "keyguard");
+        assertEquals(keyguard, sWm.mRoot.computeFocusedWindow());
+
+        // Add a window to a second display, and it should be focused
+        final DisplayContent dc = createNewDisplay();
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, dc, "win");
+        assertEquals(win, sWm.mRoot.computeFocusedWindow());
+
+        mWmRule.getWindowManagerPolicy().keyguardShowingAndNotOccluded = true;
+        assertEquals(keyguard, sWm.mRoot.computeFocusedWindow());
     }
 
     /**
@@ -353,17 +384,17 @@ public class DisplayContentTests extends WindowTestsBase {
      */
     @Test
     public void testPinnedStackLocation() {
-        createStackControllerOnStackOnDisplay(PINNED_STACK_ID, mDisplayContent);
-        final int initialStackCount = mDisplayContent.getStackCount();
-        // Ensure that the pinned stack was placed at the end
-        assertEquals(initialStackCount - 1, mDisplayContent.getStaskPosById(PINNED_STACK_ID));
+        final TaskStack pinnedStack = createStackControllerOnStackOnDisplay(
+                WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mDisplayContent).mContainer;
+        // Ensure that the pinned stack is the top stack
+        assertEquals(pinnedStack, mDisplayContent.getPinnedStack());
+        assertEquals(pinnedStack, mDisplayContent.getTopStack());
         // By default, this should try to create a new stack on top
-        createTaskStackOnDisplay(mDisplayContent);
-        final int afterStackCount = mDisplayContent.getStackCount();
-        // Make sure the stack count has increased
-        assertEquals(initialStackCount + 1, afterStackCount);
+        final TaskStack otherStack = createTaskStackOnDisplay(mDisplayContent);
+        // Ensure that the other stack is on the display.
+        assertEquals(mDisplayContent, otherStack.getDisplayContent());
         // Ensure that the pinned stack is still on top
-        assertEquals(afterStackCount - 1, mDisplayContent.getStaskPosById(PINNED_STACK_ID));
+        assertEquals(pinnedStack, mDisplayContent.getTopStack());
     }
 
     /**
@@ -382,6 +413,61 @@ public class DisplayContentTests extends WindowTestsBase {
         sWm.getDisplaysInFocusOrder(orderedDisplayIds);
         // Make sure that display that is marked for removal is not reported.
         assertEquals(-1, orderedDisplayIds.indexOfValue(dc.getDisplayId()));
+    }
+
+    @Test
+    public void testDisplayCutout_rot0() throws Exception {
+        synchronized (sWm.getWindowManagerLock()) {
+            final DisplayContent dc = createNewDisplay();
+            dc.mInitialDisplayWidth = 200;
+            dc.mInitialDisplayHeight = 400;
+            Rect r = new Rect(80, 0, 120, 10);
+            final DisplayCutout cutout = new WmDisplayCutout(
+                    fromBoundingRect(r.left, r.top, r.right, r.bottom), null)
+                    .computeSafeInsets(200, 400).getDisplayCutout();
+
+            dc.mInitialDisplayCutout = cutout;
+            dc.setRotation(Surface.ROTATION_0);
+            dc.computeScreenConfiguration(new Configuration()); // recomputes dc.mDisplayInfo.
+
+            assertEquals(cutout, dc.getDisplayInfo().displayCutout);
+        }
+    }
+
+    @Test
+    public void testDisplayCutout_rot90() throws Exception {
+        synchronized (sWm.getWindowManagerLock()) {
+            final DisplayContent dc = createNewDisplay();
+            dc.mInitialDisplayWidth = 200;
+            dc.mInitialDisplayHeight = 400;
+            Rect r1 = new Rect(80, 0, 120, 10);
+            final DisplayCutout cutout = new WmDisplayCutout(
+                    fromBoundingRect(r1.left, r1.top, r1.right, r1.bottom), null)
+                    .computeSafeInsets(200, 400).getDisplayCutout();
+
+            dc.mInitialDisplayCutout = cutout;
+            dc.setRotation(Surface.ROTATION_90);
+            dc.computeScreenConfiguration(new Configuration()); // recomputes dc.mDisplayInfo.
+
+            final Rect r = new Rect(0, 80, 10, 120);
+            assertEquals(new WmDisplayCutout(
+                    fromBoundingRect(r.left, r.top, r.right, r.bottom), null)
+                    .computeSafeInsets(400, 200).getDisplayCutout(), dc.getDisplayInfo().displayCutout);
+        }
+    }
+
+    @Test
+    public void testLayoutSeq_assignedDuringLayout() throws Exception {
+        synchronized (sWm.getWindowManagerLock()) {
+
+            final DisplayContent dc = createNewDisplay();
+            final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, dc, "w");
+
+            dc.setLayoutNeeded();
+            dc.performLayout(true /* initial */, false /* updateImeWindows */);
+
+            assertThat(win.mLayoutSeq, is(dc.mLayoutSeq));
+        }
     }
 
     @Test
@@ -409,6 +495,18 @@ public class DisplayContentTests extends WindowTestsBase {
                 SCREEN_ORIENTATION_LANDSCAPE, dc.getOrientation());
     }
 
+    @Test
+    public void testDisableDisplayInfoOverrideFromWindowManager() {
+        final DisplayContent dc = createNewDisplay();
+
+        assertTrue(dc.mShouldOverrideDisplayConfiguration);
+        sWm.dontOverrideDisplayInfo(dc.getDisplayId());
+
+        assertFalse(dc.mShouldOverrideDisplayConfiguration);
+        verify(sWm.mDisplayManagerInternal, times(1))
+                .setDisplayInfoOverrideFromWindowManager(dc.getDisplayId(), null);
+    }
+
     private static void verifySizes(DisplayContent displayContent, int expectedBaseWidth,
                              int expectedBaseHeight, int expectedBaseDensity) {
         assertEquals(displayContent.mBaseDisplayWidth, expectedBaseWidth);
@@ -416,24 +514,24 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(displayContent.mBaseDisplayDensity, expectedBaseDensity);
     }
 
-    private void assertForAllWindowsOrder(List<WindowState> expectedWindows) {
-        final LinkedList<WindowState> actualWindows = new LinkedList();
+    private void assertForAllWindowsOrder(List<WindowState> expectedWindowsBottomToTop) {
+        final LinkedList<WindowState> actualWindows = new LinkedList<>();
 
         // Test forward traversal.
         mDisplayContent.forAllWindows(actualWindows::addLast, false /* traverseTopToBottom */);
-        assertEquals(expectedWindows.size(), actualWindows.size());
-        for (WindowState w : expectedWindows) {
-            assertEquals(w, actualWindows.pollFirst());
-        }
-        assertTrue(actualWindows.isEmpty());
+        assertThat("bottomToTop", actualWindows, is(expectedWindowsBottomToTop));
+
+        actualWindows.clear();
 
         // Test backward traversal.
         mDisplayContent.forAllWindows(actualWindows::addLast, true /* traverseTopToBottom */);
-        assertEquals(expectedWindows.size(), actualWindows.size());
-        for (WindowState w : expectedWindows) {
-            assertEquals(w, actualWindows.pollLast());
-        }
-        assertTrue(actualWindows.isEmpty());
+        assertThat("topToBottom", actualWindows, is(reverseList(expectedWindowsBottomToTop)));
+    }
+
+    private static List<WindowState> reverseList(List<WindowState> list) {
+        final ArrayList<WindowState> result = new ArrayList<>(list);
+        Collections.reverse(result);
+        return result;
     }
 
     private MotionEvent createTapEvent(float x, float y, boolean isDownEvent) {

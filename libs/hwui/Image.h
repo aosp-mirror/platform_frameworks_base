@@ -45,23 +45,19 @@ public:
      * Returns the name of the GL texture that can be used to sample
      * from this image.
      */
-    GLuint getTexture() const {
-        return mTexture;
-    }
+    GLuint getTexture() const { return mTexture; }
 
     /**
      * Returns the name of the EGL image represented by this object.
      */
-    EGLImageKHR getImage() const {
-        return mImage;
-    }
+    EGLImageKHR getImage() const { return mImage; }
 
 private:
     GLuint mTexture;
     EGLImageKHR mImage;
-}; // class Image
+};  // class Image
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_IMAGE_H
+#endif  // ANDROID_HWUI_IMAGE_H

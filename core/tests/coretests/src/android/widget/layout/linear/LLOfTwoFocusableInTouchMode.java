@@ -16,11 +16,11 @@
 
 package android.widget.layout.linear;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+
+import com.android.frameworks.coretests.R;
 
 public class LLOfTwoFocusableInTouchMode extends Activity {
 
@@ -63,6 +63,7 @@ public class LLOfTwoFocusableInTouchMode extends Activity {
                 mB3Fired = true;
             }
         });
+        getWindow().getDecorView().restoreDefaultFocus();
     }
 
     public View getButton1() {

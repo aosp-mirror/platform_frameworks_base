@@ -16,12 +16,9 @@
 
 package android.service.notification;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -30,9 +27,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+
 import com.android.internal.os.SomeArgs;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -51,7 +48,10 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     public static final String SERVICE_INTERFACE
             = "android.service.notification.NotificationAssistantService";
 
-    private Handler mHandler;
+    /**
+     * @hide
+     */
+    protected Handler mHandler;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -79,12 +79,40 @@ public abstract class NotificationAssistantService extends NotificationListenerS
             String snoozeCriterionId);
 
     /**
-     * A notification was posted by an app. Called before alert.
+     * A notification was posted by an app. Called before post.
      *
      * @param sbn the new notification
      * @return an adjustment or null to take no action, within 100ms.
      */
     abstract public Adjustment onNotificationEnqueued(StatusBarNotification sbn);
+
+    /**
+     * Implement this method to learn when notifications are removed, how they were interacted with
+     * before removal, and why they were removed.
+     * <p>
+     * This might occur because the user has dismissed the notification using system UI (or another
+     * notification listener) or because the app has withdrawn the notification.
+     * <p>
+     * NOTE: The {@link StatusBarNotification} object you receive will be "light"; that is, the
+     * result from {@link StatusBarNotification#getNotification} may be missing some heavyweight
+     * fields such as {@link android.app.Notification#contentView} and
+     * {@link android.app.Notification#largeIcon}. However, all other fields on
+     * {@link StatusBarNotification}, sufficient to match this call with a prior call to
+     * {@link #onNotificationPosted(StatusBarNotification)}, will be intact.
+     *
+     ** @param sbn A data structure encapsulating at least the original information (tag and id)
+     *            and source (package name) used to post the {@link android.app.Notification} that
+     *            was just removed.
+     * @param rankingMap The current ranking map that can be used to retrieve ranking information
+     *                   for active notifications.
+     * @param stats Stats about how the user interacted with the notification before it was removed.
+     * @param reason see {@link #REASON_LISTENER_CANCEL}, etc.
+     */
+    @Override
+    public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap,
+            NotificationStats stats, int reason) {
+        onNotificationRemoved(sbn, rankingMap, reason);
+    }
 
     /**
      * Updates a notification.  N.B. this won’t cause

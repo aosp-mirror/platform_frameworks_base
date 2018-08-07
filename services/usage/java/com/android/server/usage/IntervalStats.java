@@ -16,6 +16,8 @@
 package com.android.server.usage;
 
 import android.app.usage.ConfigurationStats;
+import android.app.usage.EventList;
+import android.app.usage.EventStats;
 import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
@@ -23,20 +25,64 @@ import android.content.res.Configuration;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
+import java.util.List;
+
 class IntervalStats {
     public long beginTime;
     public long endTime;
     public long lastTimeSaved;
+    public final EventTracker interactiveTracker = new EventTracker();
+    public final EventTracker nonInteractiveTracker = new EventTracker();
+    public final EventTracker keyguardShownTracker = new EventTracker();
+    public final EventTracker keyguardHiddenTracker = new EventTracker();
     public final ArrayMap<String, UsageStats> packageStats = new ArrayMap<>();
     public final ArrayMap<Configuration, ConfigurationStats> configurations = new ArrayMap<>();
     public Configuration activeConfiguration;
-    public TimeSparseArray<UsageEvents.Event> events;
+    public EventList events;
 
     // A string cache. This is important as when we're parsing XML files, we don't want to
     // keep hundreds of strings that have the same contents. We will read the string
     // and only keep it if it's not in the cache. The GC will take care of the
     // strings that had identical copies in the cache.
     private final ArraySet<String> mStringCache = new ArraySet<>();
+
+    public static final class EventTracker {
+        public long curStartTime;
+        public long lastEventTime;
+        public long duration;
+        public int count;
+
+        public void commitTime(long timeStamp) {
+            if (curStartTime != 0) {
+                duration += timeStamp - duration;
+                curStartTime = 0;
+            }
+        }
+
+        public void update(long timeStamp) {
+            if (curStartTime == 0) {
+                // If we aren't already running, time to bump the count.
+                count++;
+            }
+            commitTime(timeStamp);
+            curStartTime = timeStamp;
+            lastEventTime = timeStamp;
+        }
+
+        void addToEventStats(List<EventStats> out, int event, long beginTime, long endTime) {
+            if (count != 0 || duration != 0) {
+                EventStats ev = new EventStats();
+                ev.mEventType = event;
+                ev.mCount = count;
+                ev.mTotalTime = duration;
+                ev.mLastEventTime = lastEventTime;
+                ev.mBeginTimeStamp = beginTime;
+                ev.mEndTimeStamp = endTime;
+                out.add(ev);
+            }
+        }
+
+    }
 
     /**
      * Gets the UsageStats object for the given package, or creates one and adds it internally.
@@ -92,6 +138,17 @@ class IntervalStats {
         return false;
     }
 
+    /**
+     * Returns whether the event type is one caused by user visible
+     * interaction. Excludes those that are internally generated.
+     * @param eventType
+     * @return
+     */
+    private boolean isUserVisibleEvent(int eventType) {
+        return eventType != UsageEvents.Event.SYSTEM_INTERACTION
+                && eventType != UsageEvents.Event.STANDBY_BUCKET_CHANGED;
+    }
+
     void update(String packageName, long timeStamp, int eventType) {
         UsageStats usageStats = getOrCreateUsageStats(packageName);
 
@@ -109,7 +166,7 @@ class IntervalStats {
             usageStats.mLastEvent = eventType;
         }
 
-        if (eventType != UsageEvents.Event.SYSTEM_INTERACTION) {
+        if (isUserVisibleEvent(eventType)) {
             usageStats.mLastTimeUsed = timeStamp;
         }
         usageStats.mEndTimeStamp = timeStamp;
@@ -153,6 +210,49 @@ class IntervalStats {
         }
 
         endTime = timeStamp;
+    }
+
+    void incrementAppLaunchCount(String packageName) {
+        UsageStats usageStats = getOrCreateUsageStats(packageName);
+        usageStats.mAppLaunchCount += 1;
+    }
+
+    void commitTime(long timeStamp) {
+        interactiveTracker.commitTime(timeStamp);
+        nonInteractiveTracker.commitTime(timeStamp);
+        keyguardShownTracker.commitTime(timeStamp);
+        keyguardHiddenTracker.commitTime(timeStamp);
+    }
+
+    void updateScreenInteractive(long timeStamp) {
+        interactiveTracker.update(timeStamp);
+        nonInteractiveTracker.commitTime(timeStamp);
+    }
+
+    void updateScreenNonInteractive(long timeStamp) {
+        nonInteractiveTracker.update(timeStamp);
+        interactiveTracker.commitTime(timeStamp);
+    }
+
+    void updateKeyguardShown(long timeStamp) {
+        keyguardShownTracker.update(timeStamp);
+        keyguardHiddenTracker.commitTime(timeStamp);
+    }
+
+    void updateKeyguardHidden(long timeStamp) {
+        keyguardHiddenTracker.update(timeStamp);
+        keyguardShownTracker.commitTime(timeStamp);
+    }
+
+    void addEventStatsTo(List<EventStats> out) {
+        interactiveTracker.addToEventStats(out, UsageEvents.Event.SCREEN_INTERACTIVE,
+                beginTime, endTime);
+        nonInteractiveTracker.addToEventStats(out, UsageEvents.Event.SCREEN_NON_INTERACTIVE,
+                beginTime, endTime);
+        keyguardShownTracker.addToEventStats(out, UsageEvents.Event.KEYGUARD_SHOWN,
+                beginTime, endTime);
+        keyguardHiddenTracker.addToEventStats(out, UsageEvents.Event.KEYGUARD_HIDDEN,
+                beginTime, endTime);
     }
 
     private String getCachedStringRef(String str) {

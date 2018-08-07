@@ -46,23 +46,20 @@ public:
      */
     struct LightInfo {
         LightInfo() : LightInfo(0, 0) {}
-        LightInfo(uint8_t ambientShadowAlpha,
-                uint8_t spotShadowAlpha)
-                : ambientShadowAlpha(ambientShadowAlpha)
-                , spotShadowAlpha(spotShadowAlpha) {}
+        LightInfo(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha)
+                : ambientShadowAlpha(ambientShadowAlpha), spotShadowAlpha(spotShadowAlpha) {}
         uint8_t ambientShadowAlpha;
         uint8_t spotShadowAlpha;
     };
 
     BakedOpRenderer(Caches& caches, RenderState& renderState, bool opaque, bool wideColorGamut,
-            const LightInfo& lightInfo)
+                    const LightInfo& lightInfo)
             : mGlopReceiver(DefaultGlopReceiver)
             , mRenderState(renderState)
             , mCaches(caches)
             , mOpaque(opaque)
             , mWideColorGamut(wideColorGamut)
-            , mLightInfo(lightInfo) {
-    }
+            , mLightInfo(lightInfo) {}
 
     RenderState& renderState() { return mRenderState; }
     Caches& caches() { return mCaches; }
@@ -79,9 +76,7 @@ public:
     const LightInfo& getLightInfo() const { return mLightInfo; }
 
     void renderGlop(const BakedOpState& state, const Glop& glop) {
-        renderGlop(&state.computedState.clippedBounds,
-                state.computedState.getClipIfNeeded(),
-                glop);
+        renderGlop(&state.computedState.clippedBounds, state.computedState.getClipIfNeeded(), glop);
     }
     void renderFunctor(const FunctorOp& op, const BakedOpState& state);
 
@@ -97,15 +92,17 @@ public:
 
     // simple draw methods, to be used for end frame decoration
     void drawRect(float left, float top, float right, float bottom, const SkPaint* paint) {
-        float ltrb[4] = { left, top, right, bottom };
+        float ltrb[4] = {left, top, right, bottom};
         drawRects(ltrb, 4, paint);
     }
     void drawRects(const float* rects, int count, const SkPaint* paint);
+
 protected:
     GlopReceiver mGlopReceiver;
+
 private:
     static void DefaultGlopReceiver(BakedOpRenderer& renderer, const Rect* dirtyBounds,
-            const ClipBase* clip, const Glop& glop) {
+                                    const ClipBase* clip, const Glop& glop) {
         renderer.renderGlopImpl(dirtyBounds, clip, glop);
     }
     void renderGlopImpl(const Rect* dirtyBounds, const ClipBase* clip, const Glop& glop);
@@ -148,5 +145,5 @@ private:
     const LightInfo mLightInfo;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

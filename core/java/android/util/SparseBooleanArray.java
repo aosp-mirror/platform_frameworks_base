@@ -117,7 +117,11 @@ public class SparseBooleanArray implements Cloneable {
         }
     }
 
-    /** @hide */
+    /**
+     * Removes the mapping at the specified index.
+     * <p>
+     * For indices outside of the range {@code 0...size()-1}, the behavior is undefined.
+     */
     public void removeAt(int index) {
         System.arraycopy(mKeys, index + 1, mKeys, index, mSize - (index + 1));
         System.arraycopy(mValues, index + 1, mValues, index, mSize - (index + 1));

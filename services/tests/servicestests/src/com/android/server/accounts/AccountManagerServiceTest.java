@@ -3246,6 +3246,11 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         }
 
         @Override
+        public File getDatabasePath(String name) {
+            return mTestContext.getDatabasePath(name);
+        }
+
+        @Override
         public void sendBroadcastAsUser(Intent intent, UserHandle user) {
             mMockContext.sendBroadcastAsUser(intent, user);
         }
