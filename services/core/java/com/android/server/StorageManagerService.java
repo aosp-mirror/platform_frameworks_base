@@ -81,6 +81,7 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -2254,6 +2255,9 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             }, DateUtils.SECOND_IN_MILLIS);
             return 0;
+        } catch (ServiceSpecificException e) {
+            Slog.e(TAG, "fdeCheckPassword failed", e);
+            return e.errorCode;
         } catch (Exception e) {
             Slog.wtf(TAG, e);
             return StorageManager.ENCRYPTION_STATE_ERROR_UNKNOWN;
