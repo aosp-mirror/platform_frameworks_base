@@ -4106,9 +4106,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * TextView is {@link Layout#BREAK_STRATEGY_HIGH_QUALITY}, and the default value for
      * EditText is {@link Layout#BREAK_STRATEGY_SIMPLE}, the latter to avoid the
      * text "dancing" when being edited.
+     * <p/>
+     * Enabling hyphenation with either using {@link Layout#HYPHENATION_FREQUENCY_NORMAL} or
+     * {@link Layout#HYPHENATION_FREQUENCY_FULL} while line breaking is set to one of
+     * {@link Layout#BREAK_STRATEGY_BALANCED}, {@link Layout#BREAK_STRATEGY_HIGH_QUALITY}
+     * improves the structure of text layout however has performance impact and requires more time
+     * to do the text layout.
      *
      * @attr ref android.R.styleable#TextView_breakStrategy
      * @see #getBreakStrategy()
+     * @see #setHyphenationFrequency(int)
      */
     public void setBreakStrategy(@Layout.BreakStrategy int breakStrategy) {
         mBreakStrategy = breakStrategy;
@@ -4134,12 +4141,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Sets the frequency of automatic hyphenation to use when determining word breaks.
      * The default value for both TextView and {@link EditText} is
-     * {@link Layout#HYPHENATION_FREQUENCY_NORMAL}.
-     * Note that the default hyphenation frequency value is set from the theme.
+     * {@link Layout#HYPHENATION_FREQUENCY_NONE}. Note that the default hyphenation frequency value
+     * is set from the theme.
+     * <p/>
+     * Enabling hyphenation with either using {@link Layout#HYPHENATION_FREQUENCY_NORMAL} or
+     * {@link Layout#HYPHENATION_FREQUENCY_FULL} while line breaking is set to one of
+     * {@link Layout#BREAK_STRATEGY_BALANCED}, {@link Layout#BREAK_STRATEGY_HIGH_QUALITY}
+     * improves the structure of text layout however has performance impact and requires more time
+     * to do the text layout.
+     * <p/>
+     * Note: Before Android Q, in the theme hyphenation frequency is set to
+     * {@link Layout#HYPHENATION_FREQUENCY_NORMAL}. The default value is changed into
+     * {@link Layout#HYPHENATION_FREQUENCY_NONE} on Q.
      *
-     * @param hyphenationFrequency The hyphenation frequency to use.
+     * @param hyphenationFrequency the hyphenation frequency to use, one of
+     *                             {@link Layout#HYPHENATION_FREQUENCY_NONE},
+     *                             {@link Layout#HYPHENATION_FREQUENCY_NORMAL},
+     *                             {@link Layout#HYPHENATION_FREQUENCY_FULL}
      * @attr ref android.R.styleable#TextView_hyphenationFrequency
      * @see #getHyphenationFrequency()
+     * @see #getBreakStrategy()
      */
     public void setHyphenationFrequency(@Layout.HyphenationFrequency int hyphenationFrequency) {
         mHyphenationFrequency = hyphenationFrequency;
