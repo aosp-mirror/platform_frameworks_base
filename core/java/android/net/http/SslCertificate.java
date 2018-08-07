@@ -16,14 +16,15 @@
 
 package android.net.http;
 
-import com.android.internal.util.HexDump;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
+
+import com.android.internal.util.HexDump;
+import com.android.org.bouncycastle.asn1.x509.X509Name;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
@@ -38,8 +39,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Vector;
-
-import com.android.org.bouncycastle.asn1.x509.X509Name;
 
 /**
  * SSL certificate info (certificate details) class
@@ -245,6 +244,14 @@ public class SslCertificate {
      */
     public DName getIssuedBy() {
         return mIssuedBy;
+    }
+
+    /**
+     * @return The {@code X509Certificate} used to create this {@code SslCertificate} or
+     * {@code null} if no certificate was provided.
+     */
+    public X509Certificate getX509Certificate() {
+        return mX509Certificate;
     }
 
     /**
