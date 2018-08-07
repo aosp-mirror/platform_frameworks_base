@@ -2809,10 +2809,11 @@ public class ConnectivityManager {
          * @param network The {@link Network} of the satisfying network.
          * @param networkCapabilities The {@link NetworkCapabilities} of the satisfying network.
          * @param linkProperties The {@link LinkProperties} of the satisfying network.
+         * @param blocked Whether access to the {@link Network} is blocked due to system policy.
          * @hide
          */
         public void onAvailable(Network network, NetworkCapabilities networkCapabilities,
-                LinkProperties linkProperties) {
+                LinkProperties linkProperties, boolean blocked) {
             // Internally only this method is called when a new network is available, and
             // it calls the callback in the same way and order that older versions used
             // to call so as not to change the behavior.
@@ -2823,6 +2824,7 @@ public class ConnectivityManager {
             }
             onCapabilitiesChanged(network, networkCapabilities);
             onLinkPropertiesChanged(network, linkProperties);
+            onBlockedStatusChanged(network, blocked);
         }
 
         /**
@@ -2830,7 +2832,8 @@ public class ConnectivityManager {
          * This callback may be called more than once if the {@link Network} that is
          * satisfying the request changes. This will always immediately be followed by a
          * call to {@link #onCapabilitiesChanged(Network, NetworkCapabilities)} then by a
-         * call to {@link #onLinkPropertiesChanged(Network, LinkProperties)}.
+         * call to {@link #onLinkPropertiesChanged(Network, LinkProperties)}, and a call to
+         * {@link #onBlockedStatusChanged(Network, boolean)}.
          *
          * @param network The {@link Network} of the satisfying network.
          */
@@ -2909,6 +2912,14 @@ public class ConnectivityManager {
          */
         public void onNetworkResumed(Network network) {}
 
+        /**
+         * Called when access to the specified network is blocked or unblocked.
+         *
+         * @param network The {@link Network} whose blocked status has changed.
+         * @param blocked The blocked status of this {@link Network}.
+         */
+        public void onBlockedStatusChanged(Network network, boolean blocked) {}
+
         private NetworkRequest networkRequest;
     }
 
@@ -2955,6 +2966,8 @@ public class ConnectivityManager {
     public static final int CALLBACK_SUSPENDED           = BASE + 9;
     /** @hide */
     public static final int CALLBACK_RESUMED             = BASE + 10;
+    /** @hide */
+    public static final int CALLBACK_BLK_CHANGED         = BASE + 11;
 
     /** @hide */
     public static String getCallbackName(int whichCallback) {
@@ -2969,6 +2982,7 @@ public class ConnectivityManager {
             case EXPIRE_LEGACY_REQUEST: return "EXPIRE_LEGACY_REQUEST";
             case CALLBACK_SUSPENDED:    return "CALLBACK_SUSPENDED";
             case CALLBACK_RESUMED:      return "CALLBACK_RESUMED";
+            case CALLBACK_BLK_CHANGED:  return "CALLBACK_BLK_CHANGED";
             default:
                 return Integer.toString(whichCallback);
         }
@@ -3015,7 +3029,7 @@ public class ConnectivityManager {
                 case CALLBACK_AVAILABLE: {
                     NetworkCapabilities cap = getObject(message, NetworkCapabilities.class);
                     LinkProperties lp = getObject(message, LinkProperties.class);
-                    callback.onAvailable(network, cap, lp);
+                    callback.onAvailable(network, cap, lp, message.arg1 != 0);
                     break;
                 }
                 case CALLBACK_LOSING: {
@@ -3047,6 +3061,10 @@ public class ConnectivityManager {
                 case CALLBACK_RESUMED: {
                     callback.onNetworkResumed(network);
                     break;
+                }
+                case CALLBACK_BLK_CHANGED: {
+                    boolean blocked = message.arg1 != 0;
+                    callback.onBlockedStatusChanged(network, blocked);
                 }
             }
         }
