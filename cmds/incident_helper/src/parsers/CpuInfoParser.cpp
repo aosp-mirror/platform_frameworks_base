@@ -109,7 +109,7 @@ CpuInfoParser::Parse(const int in, const int out) const
             nextToUsage = false;
 
             // NAME is not in the list since we need to modify the end of the CMD index.
-            const char* headerNames[] = { "PID", "TID", "USER", "PR", "NI", "CPU", "S", "VIRT", "RES", "PCY", "CMD", NULL };
+            const char* headerNames[] = { "PID", "TID", "USER", "PR", "NI", "CPU", "S", "VIRT", "RES", "PCY", "CMD", nullptr };
             if (!getColumnIndices(columnIndices, headerNames, line)) {
                 return -1;
             }
