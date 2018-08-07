@@ -1183,6 +1183,10 @@ public final class SQLiteConnectionPool implements Closeable {
         return "SQLiteConnectionPool: " + mConfiguration.path;
     }
 
+    public String getPath() {
+        return mConfiguration.path;
+    }
+
     private static final class ConnectionWaiter {
         public ConnectionWaiter mNext;
         public Thread mThread;
