@@ -22,11 +22,11 @@
 #include <Properties.h>
 #include <Rect.h>
 #include <RenderNode.h>
+#include <Snapshot.h>
 #include <hwui/Bitmap.h>
 #include <pipeline/skia/SkiaRecordingCanvas.h>
 #include <renderstate/RenderState.h>
 #include <renderthread/RenderThread.h>
-#include <Snapshot.h>
 
 #include <RecordedOp.h>
 #include <RecordingCanvas.h>
@@ -36,85 +36,88 @@
 namespace android {
 namespace uirenderer {
 
-#define EXPECT_MATRIX_APPROX_EQ(a, b) \
-    EXPECT_TRUE(TestUtils::matricesAreApproxEqual(a, b))
+#define EXPECT_MATRIX_APPROX_EQ(a, b) EXPECT_TRUE(TestUtils::matricesAreApproxEqual(a, b))
 
-#define EXPECT_RECT_APPROX_EQ(a, b) \
-    EXPECT_TRUE(MathUtils::areEqual((a).left, (b).left) \
-            && MathUtils::areEqual((a).top, (b).top) \
-            && MathUtils::areEqual((a).right, (b).right) \
-            && MathUtils::areEqual((a).bottom, (b).bottom));
+#define EXPECT_RECT_APPROX_EQ(a, b)                          \
+    EXPECT_TRUE(MathUtils::areEqual((a).left, (b).left) &&   \
+                MathUtils::areEqual((a).top, (b).top) &&     \
+                MathUtils::areEqual((a).right, (b).right) && \
+                MathUtils::areEqual((a).bottom, (b).bottom));
 
-#define EXPECT_CLIP_RECT(expRect, clipStatePtr) \
-        EXPECT_NE(nullptr, (clipStatePtr)) << "Op is unclipped"; \
-        if ((clipStatePtr)->mode == ClipMode::Rectangle) { \
-            EXPECT_EQ((expRect), reinterpret_cast<const ClipRect*>(clipStatePtr)->rect); \
-        } else { \
-            ADD_FAILURE() << "ClipState not a rect"; \
-        }
+#define EXPECT_CLIP_RECT(expRect, clipStatePtr)                                      \
+    EXPECT_NE(nullptr, (clipStatePtr)) << "Op is unclipped";                         \
+    if ((clipStatePtr)->mode == ClipMode::Rectangle) {                               \
+        EXPECT_EQ((expRect), reinterpret_cast<const ClipRect*>(clipStatePtr)->rect); \
+    } else {                                                                         \
+        ADD_FAILURE() << "ClipState not a rect";                                     \
+    }
 
 #define INNER_PIPELINE_TEST(test_case_name, test_name, pipeline, functionCall) \
-    TEST(test_case_name, test_name##_##pipeline) { \
-        RenderPipelineType oldType = Properties::getRenderPipelineType(); \
-        Properties::overrideRenderPipelineType(RenderPipelineType::pipeline); \
-        functionCall; \
-        Properties::overrideRenderPipelineType(oldType); \
+    TEST(test_case_name, test_name##_##pipeline) {                             \
+        RenderPipelineType oldType = Properties::getRenderPipelineType();      \
+        Properties::overrideRenderPipelineType(RenderPipelineType::pipeline);  \
+        functionCall;                                                          \
+        Properties::overrideRenderPipelineType(oldType);                       \
     };
 
 /**
  * Like gtests' TEST, but only runs with the OpenGL RenderPipelineType
  */
-#define OPENGL_PIPELINE_TEST(test_case_name, test_name) \
-    class test_case_name##_##test_name##_HwuiTest { \
-    public: \
-        static void doTheThing(); \
-    }; \
-    INNER_PIPELINE_TEST(test_case_name, test_name, OpenGL, \
-            test_case_name##_##test_name##_HwuiTest::doTheThing()) \
+#define OPENGL_PIPELINE_TEST(test_case_name, test_name)                        \
+    class test_case_name##_##test_name##_HwuiTest {                            \
+    public:                                                                    \
+        static void doTheThing();                                              \
+    };                                                                         \
+    INNER_PIPELINE_TEST(test_case_name, test_name, OpenGL,                     \
+                        test_case_name##_##test_name##_HwuiTest::doTheThing()) \
     void test_case_name##_##test_name##_HwuiTest::doTheThing()
 
 #define INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, pipeline) \
-    INNER_PIPELINE_TEST(test_case_name, test_name, pipeline, \
-            TestUtils::runOnRenderThread(test_case_name##_##test_name##_RenderThreadTest::doTheThing))
+    INNER_PIPELINE_TEST(test_case_name, test_name, pipeline,                  \
+                        TestUtils::runOnRenderThread(                         \
+                                test_case_name##_##test_name##_RenderThreadTest::doTheThing))
 
 /**
  * Like gtest's TEST, but runs on the RenderThread, and 'renderThread' is passed, in top level scope
  * (for e.g. accessing its RenderState)
  */
-#define RENDERTHREAD_TEST(test_case_name, test_name) \
-    class test_case_name##_##test_name##_RenderThreadTest { \
-    public: \
-        static void doTheThing(renderthread::RenderThread& renderThread); \
-    }; \
-    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, OpenGL); \
-    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaGL); \
+#define RENDERTHREAD_TEST(test_case_name, test_name)                                        \
+    class test_case_name##_##test_name##_RenderThreadTest {                                 \
+    public:                                                                                 \
+        static void doTheThing(renderthread::RenderThread& renderThread);                   \
+    };                                                                                      \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, OpenGL);                    \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaGL);                    \
     /* Temporarily disabling Vulkan until we can figure out a way to stub out the driver */ \
-    /* INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); */ \
-    void test_case_name##_##test_name##_RenderThreadTest::doTheThing(renderthread::RenderThread& renderThread)
+    /* INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); */          \
+    void test_case_name##_##test_name##_RenderThreadTest::doTheThing(                       \
+            renderthread::RenderThread& renderThread)
 
 /**
  * Like RENDERTHREAD_TEST, but only runs with the OpenGL RenderPipelineType
  */
-#define RENDERTHREAD_OPENGL_PIPELINE_TEST(test_case_name, test_name) \
-    class test_case_name##_##test_name##_RenderThreadTest { \
-    public: \
+#define RENDERTHREAD_OPENGL_PIPELINE_TEST(test_case_name, test_name)      \
+    class test_case_name##_##test_name##_RenderThreadTest {               \
+    public:                                                               \
         static void doTheThing(renderthread::RenderThread& renderThread); \
-    }; \
-    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, OpenGL); \
-    void test_case_name##_##test_name##_RenderThreadTest::doTheThing(renderthread::RenderThread& renderThread)
+    };                                                                    \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, OpenGL);  \
+    void test_case_name##_##test_name##_RenderThreadTest::doTheThing(     \
+            renderthread::RenderThread& renderThread)
 
 /**
  * Like RENDERTHREAD_TEST, but only runs with the Skia RenderPipelineTypes
  */
-#define RENDERTHREAD_SKIA_PIPELINE_TEST(test_case_name, test_name) \
-    class test_case_name##_##test_name##_RenderThreadTest { \
-    public: \
-        static void doTheThing(renderthread::RenderThread& renderThread); \
-    }; \
-    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaGL); \
+#define RENDERTHREAD_SKIA_PIPELINE_TEST(test_case_name, test_name)                          \
+    class test_case_name##_##test_name##_RenderThreadTest {                                 \
+    public:                                                                                 \
+        static void doTheThing(renderthread::RenderThread& renderThread);                   \
+    };                                                                                      \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaGL);                    \
     /* Temporarily disabling Vulkan until we can figure out a way to stub out the driver */ \
-    /* INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); */ \
-    void test_case_name##_##test_name##_RenderThreadTest::doTheThing(renderthread::RenderThread& renderThread)
+    /* INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); */          \
+    void test_case_name##_##test_name##_RenderThreadTest::doTheThing(                       \
+            renderthread::RenderThread& renderThread)
 
 /**
  * Sets a property value temporarily, generally for the duration of a test, restoring the previous
@@ -125,14 +128,11 @@ namespace uirenderer {
 template <typename T>
 class ScopedProperty {
 public:
-    ScopedProperty(T& property, T newValue)
-        : mPropertyPtr(&property)
-        , mOldValue(property) {
+    ScopedProperty(T& property, T newValue) : mPropertyPtr(&property), mOldValue(property) {
         property = newValue;
     }
-    ~ScopedProperty() {
-        *mPropertyPtr = mOldValue;
-    }
+    ~ScopedProperty() { *mPropertyPtr = mOldValue; }
+
 private:
     T* mPropertyPtr;
     T mOldValue;
@@ -142,18 +142,15 @@ class TestUtils {
 public:
     class SignalingDtor {
     public:
-        SignalingDtor()
-                : mSignal(nullptr) {}
-        explicit SignalingDtor(int* signal)
-                : mSignal(signal) {}
-        void setSignal(int* signal) {
-            mSignal = signal;
-        }
+        SignalingDtor() : mSignal(nullptr) {}
+        explicit SignalingDtor(int* signal) : mSignal(signal) {}
+        void setSignal(int* signal) { mSignal = signal; }
         ~SignalingDtor() {
             if (mSignal) {
                 (*mSignal)++;
             }
         }
+
     private:
         int* mSignal;
     };
@@ -181,7 +178,7 @@ public:
     }
 
     static sk_sp<Bitmap> createBitmap(int width, int height,
-            SkColorType colorType = kN32_SkColorType) {
+                                      SkColorType colorType = kN32_SkColorType) {
         SkImageInfo info = SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType);
         return Bitmap::allocateHeapBitmap(info);
     }
@@ -199,15 +196,16 @@ public:
             renderthread::RenderThread& renderThread, uint32_t width, uint32_t height,
             const SkMatrix& transform);
 
-    template<class CanvasType>
-    static std::unique_ptr<DisplayList> createDisplayList(int width, int height,
-            std::function<void(CanvasType& canvas)> canvasCallback) {
+    template <class CanvasType>
+    static std::unique_ptr<DisplayList> createDisplayList(
+            int width, int height, std::function<void(CanvasType& canvas)> canvasCallback) {
         CanvasType canvas(width, height);
         canvasCallback(canvas);
         return std::unique_ptr<DisplayList>(canvas.finishRecording());
     }
 
-    static sp<RenderNode> createNode(int left, int top, int right, int bottom,
+    static sp<RenderNode> createNode(
+            int left, int top, int right, int bottom,
             std::function<void(RenderProperties& props, Canvas& canvas)> setup) {
 #if HWUI_NULL_GPU
         // if RenderNodes are being sync'd/used, device info will be needed, since
@@ -219,8 +217,8 @@ public:
         RenderProperties& props = node->mutateStagingProperties();
         props.setLeftTopRightBottom(left, top, right, bottom);
         if (setup) {
-            std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(props.getWidth(),
-                    props.getHeight()));
+            std::unique_ptr<Canvas> canvas(
+                    Canvas::create_recording_canvas(props.getWidth(), props.getHeight()));
             setup(props, *canvas.get());
             node->setStagingDisplayList(canvas->finishRecording());
         }
@@ -228,8 +226,9 @@ public:
         return node;
     }
 
-    template<class RecordingCanvasType>
-    static sp<RenderNode> createNode(int left, int top, int right, int bottom,
+    template <class RecordingCanvasType>
+    static sp<RenderNode> createNode(
+            int left, int top, int right, int bottom,
             std::function<void(RenderProperties& props, RecordingCanvasType& canvas)> setup) {
 #if HWUI_NULL_GPU
         // if RenderNodes are being sync'd/used, device info will be needed, since
@@ -249,22 +248,24 @@ public:
         return node;
     }
 
-    static void recordNode(RenderNode& node,
-            std::function<void(Canvas&)> contentCallback) {
-       std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
-            node.stagingProperties().getWidth(), node.stagingProperties().getHeight()));
-       contentCallback(*canvas.get());
-       node.setStagingDisplayList(canvas->finishRecording());
+    static void recordNode(RenderNode& node, std::function<void(Canvas&)> contentCallback) {
+        std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
+                node.stagingProperties().getWidth(), node.stagingProperties().getHeight(),
+                &node));
+        contentCallback(*canvas.get());
+        node.setStagingDisplayList(canvas->finishRecording());
     }
 
-    static sp<RenderNode> createSkiaNode(int left, int top, int right, int bottom,
-            std::function<void(RenderProperties& props, skiapipeline::SkiaRecordingCanvas& canvas)> setup,
+    static sp<RenderNode> createSkiaNode(
+            int left, int top, int right, int bottom,
+            std::function<void(RenderProperties& props, skiapipeline::SkiaRecordingCanvas& canvas)>
+                    setup,
             const char* name = nullptr, skiapipeline::SkiaDisplayList* displayList = nullptr) {
-    #if HWUI_NULL_GPU
+#if HWUI_NULL_GPU
         // if RenderNodes are being sync'd/used, device info will be needed, since
         // DeviceInfo::maxTextureSize() affects layer property
         DeviceInfo::initialize();
-    #endif
+#endif
         sp<RenderNode> node = new RenderNode();
         if (name) {
             node->setName(name);
@@ -276,8 +277,8 @@ public:
         }
         if (setup) {
             std::unique_ptr<skiapipeline::SkiaRecordingCanvas> canvas(
-                new skiapipeline::SkiaRecordingCanvas(nullptr,
-                props.getWidth(), props.getHeight()));
+                    new skiapipeline::SkiaRecordingCanvas(nullptr, props.getWidth(),
+                                                          props.getHeight()));
             setup(props, *canvas.get());
             node->setStagingDisplayList(canvas->finishRecording());
         }
@@ -306,8 +307,7 @@ public:
 
     class TestTask : public renderthread::RenderTask {
     public:
-        explicit TestTask(RtCallback rtCallback)
-                : rtCallback(rtCallback) {}
+        explicit TestTask(RtCallback rtCallback) : rtCallback(rtCallback) {}
         virtual ~TestTask() {}
         virtual void run() override;
         RtCallback rtCallback;
@@ -318,37 +318,37 @@ public:
      */
     static void runOnRenderThread(RtCallback rtCallback) {
         TestTask task(rtCallback);
-        renderthread::RenderThread::getInstance().queueAndWait(&task);
+        renderthread::RenderThread::getInstance().queue().runSync([&]() { task.run(); });
     }
 
-    static bool isRenderThreadRunning() {
-        return renderthread::RenderThread::hasInstance();
-    }
+    static bool isRenderThreadRunning() { return renderthread::RenderThread::hasInstance(); }
 
     static SkColor interpolateColor(float fraction, SkColor start, SkColor end);
 
     static void layoutTextUnscaled(const SkPaint& paint, const char* text,
-            std::vector<glyph_t>* outGlyphs, std::vector<float>* outPositions,
-            float* outTotalAdvance, Rect* outBounds);
+                                   std::vector<glyph_t>* outGlyphs,
+                                   std::vector<float>* outPositions, float* outTotalAdvance,
+                                   Rect* outBounds);
 
-    static void drawUtf8ToCanvas(Canvas* canvas, const char* text,
-            const SkPaint& paint, float x, float y);
+    static void drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint, float x,
+                                 float y);
 
-    static void drawUtf8ToCanvas(Canvas* canvas, const char* text,
-            const SkPaint& paint, const SkPath& path);
+    static void drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint,
+                                 const SkPath& path);
 
     static std::unique_ptr<uint16_t[]> asciiToUtf16(const char* str);
 
     class MockFunctor : public Functor {
-     public:
-         virtual status_t operator ()(int what, void* data) {
-             mLastMode = what;
-             return DrawGlInfo::kStatusDone;
-         }
-         int getLastMode() const { return mLastMode; }
-     private:
-         int mLastMode = -1;
-     };
+    public:
+        virtual status_t operator()(int what, void* data) {
+            mLastMode = what;
+            return DrawGlInfo::kStatusDone;
+        }
+        int getLastMode() const { return mLastMode; }
+
+    private:
+        int mLastMode = -1;
+    };
 
     static SkColor getColor(const sk_sp<SkSurface>& surface, int x, int y);
 
@@ -367,7 +367,8 @@ private:
         if (displayList) {
             if (displayList->isSkiaDL()) {
                 for (auto&& childDr : static_cast<skiapipeline::SkiaDisplayList*>(
-                        const_cast<DisplayList*>(displayList))->mChildNodes) {
+                                              const_cast<DisplayList*>(displayList))
+                                              ->mChildNodes) {
                     syncHierarchyPropertiesAndDisplayListImpl(childDr.getRenderNode());
                 }
             } else {
@@ -378,7 +379,7 @@ private:
         }
     }
 
-}; // class TestUtils
+};  // class TestUtils
 
 } /* namespace uirenderer */
 } /* namespace android */

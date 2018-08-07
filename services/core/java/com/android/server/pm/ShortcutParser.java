@@ -337,6 +337,9 @@ public class ShortcutParser {
                 (enabled ? ShortcutInfo.FLAG_MANIFEST : ShortcutInfo.FLAG_DISABLED)
                 | ShortcutInfo.FLAG_IMMUTABLE
                 | ((iconResId != 0) ? ShortcutInfo.FLAG_HAS_ICON_RES : 0);
+        final int disabledReason =
+                enabled ? ShortcutInfo.DISABLED_REASON_NOT_DISABLED
+                        : ShortcutInfo.DISABLED_REASON_BY_APP;
 
         // Note we don't need to set resource names here yet.  They'll be set when they're about
         // to be published.
@@ -363,6 +366,7 @@ public class ShortcutParser {
                 flags,
                 iconResId,
                 null, // icon res name
-                null); // bitmap path
+                null, // bitmap path
+                disabledReason);
     }
 }

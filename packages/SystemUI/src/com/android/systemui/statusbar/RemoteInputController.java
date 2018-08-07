@@ -19,30 +19,82 @@ package com.android.systemui.statusbar;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.phone.StatusBarWindowManager;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 
+import android.app.Notification;
+import android.app.RemoteInput;
+import android.content.Context;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Keeps track of the currently active {@link RemoteInputView}s.
  */
 public class RemoteInputController {
+    private static final boolean ENABLE_REMOTE_INPUT =
+            SystemProperties.getBoolean("debug.enable_remote_input", true);
 
     private final ArrayList<Pair<WeakReference<NotificationData.Entry>, Object>> mOpen
             = new ArrayList<>();
     private final ArrayMap<String, Object> mSpinning = new ArrayMap<>();
     private final ArrayList<Callback> mCallbacks = new ArrayList<>(3);
-    private final HeadsUpManager mHeadsUpManager;
+    private final Delegate mDelegate;
 
-    public RemoteInputController(HeadsUpManager headsUpManager) {
-        addCallback(Dependency.get(StatusBarWindowManager.class));
-        mHeadsUpManager = headsUpManager;
+    public RemoteInputController(Delegate delegate) {
+        mDelegate = delegate;
+    }
+
+    /**
+     * Adds RemoteInput actions from the WearableExtender; to be removed once more apps support this
+     * via first-class API.
+     *
+     * TODO: Remove once enough apps specify remote inputs on their own.
+     */
+    public static void processForRemoteInput(Notification n, Context context) {
+        if (!ENABLE_REMOTE_INPUT) {
+            return;
+        }
+
+        if (n.extras != null && n.extras.containsKey("android.wearable.EXTENSIONS") &&
+                (n.actions == null || n.actions.length == 0)) {
+            Notification.Action viableAction = null;
+            Notification.WearableExtender we = new Notification.WearableExtender(n);
+
+            List<Notification.Action> actions = we.getActions();
+            final int numActions = actions.size();
+
+            for (int i = 0; i < numActions; i++) {
+                Notification.Action action = actions.get(i);
+                if (action == null) {
+                    continue;
+                }
+                RemoteInput[] remoteInputs = action.getRemoteInputs();
+                if (remoteInputs == null) {
+                    continue;
+                }
+                for (RemoteInput ri : remoteInputs) {
+                    if (ri.getAllowFreeFormInput()) {
+                        viableAction = action;
+                        break;
+                    }
+                }
+                if (viableAction != null) {
+                    break;
+                }
+            }
+
+            if (viableAction != null) {
+                Notification.Builder rebuilder = Notification.Builder.recoverBuilder(context, n);
+                rebuilder.setActions(viableAction);
+                rebuilder.build(); // will rewrite n
+            }
+        }
     }
 
     /**
@@ -113,8 +165,18 @@ public class RemoteInputController {
         return mSpinning.containsKey(key);
     }
 
+    /**
+     * Same as {@link #isSpinning}, but also verifies that the token is the same
+     * @param key the key that is spinning
+     * @param token the token that needs to be the same
+     * @return if this key with a given token is spinning
+     */
+    public boolean isSpinning(String key, Object token) {
+        return mSpinning.get(key) == token;
+    }
+
     private void apply(NotificationData.Entry entry) {
-        mHeadsUpManager.setRemoteInputActive(entry, isRemoteInputActive(entry));
+        mDelegate.setRemoteInputActive(entry, isRemoteInputActive(entry));
         boolean remoteInputActive = isRemoteInputActive();
         int N = mCallbacks.size();
         for (int i = 0; i < N; i++) {
@@ -204,9 +266,35 @@ public class RemoteInputController {
         }
     }
 
+    public void requestDisallowLongPressAndDismiss() {
+        mDelegate.requestDisallowLongPressAndDismiss();
+    }
+
+    public void lockScrollTo(NotificationData.Entry entry) {
+        mDelegate.lockScrollTo(entry);
+    }
+
     public interface Callback {
         default void onRemoteInputActive(boolean active) {}
 
         default void onRemoteInputSent(NotificationData.Entry entry) {}
+    }
+
+    public interface Delegate {
+        /**
+         * Activate remote input if necessary.
+         */
+        void setRemoteInputActive(NotificationData.Entry entry, boolean remoteInputActive);
+
+       /**
+        * Request that the view does not dismiss nor perform long press for the current touch.
+        */
+       void requestDisallowLongPressAndDismiss();
+
+      /**
+       * Request that the view is made visible by scrolling to it, and keep the scroll locked until
+       * the user scrolls, or {@param v} loses focus or is detached.
+       */
+       void lockScrollTo(NotificationData.Entry entry);
     }
 }

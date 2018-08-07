@@ -169,16 +169,23 @@ public class PluginFragment extends PreferenceFragment {
         protected boolean persistBoolean(boolean value) {
             final int desiredState = value ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                     : PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+            boolean shouldSendBroadcast = false;
             for (int i = 0; i < mInfo.services.length; i++) {
                 ComponentName componentName = new ComponentName(mInfo.packageName,
                         mInfo.services[i].name);
-                mPm.setComponentEnabledSetting(componentName, desiredState,
-                        PackageManager.DONT_KILL_APP);
+
+                if (mPm.getComponentEnabledSetting(componentName) != desiredState) {
+                    mPm.setComponentEnabledSetting(componentName, desiredState,
+                            PackageManager.DONT_KILL_APP);
+                    shouldSendBroadcast = true;
+                }
             }
-            final String pkg = mInfo.packageName;
-            final Intent intent = new Intent(PluginManager.PLUGIN_CHANGED,
-                    pkg != null ? Uri.fromParts("package", pkg, null) : null);
-            getContext().sendBroadcast(intent);
+            if (shouldSendBroadcast) {
+                final String pkg = mInfo.packageName;
+                final Intent intent = new Intent(PluginManager.PLUGIN_CHANGED,
+                        pkg != null ? Uri.fromParts("package", pkg, null) : null);
+                getContext().sendBroadcast(intent);
+            }
             return true;
         }
 

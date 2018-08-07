@@ -28,7 +28,7 @@ import android.net.wifi.WifiEnterpriseConfig.Eap;
 import android.net.wifi.WifiEnterpriseConfig.Phase2;
 import android.os.Parcel;
 import android.security.Credentials;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;

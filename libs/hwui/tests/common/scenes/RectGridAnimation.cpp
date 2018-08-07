@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-
 #include "TestSceneBase.h"
 
 class RectGridAnimation;
 
 static TestScene::Registrar _RectGrid(TestScene::Info{
-    "rectgrid",
-    "A dense grid of 1x1 rects that should visually look like a single rect. "
-    "Low CPU/GPU load.",
-    TestScene::simpleCreateScene<RectGridAnimation>
-});
+        "rectgrid",
+        "A dense grid of 1x1 rects that should visually look like a single rect. "
+        "Low CPU/GPU load.",
+        TestScene::simpleCreateScene<RectGridAnimation>});
 
 class RectGridAnimation : public TestScene {
 public:
@@ -33,13 +31,12 @@ public:
         canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver);
         canvas.insertReorderBarrier(true);
 
-        card = TestUtils::createNode(50, 50, 250, 250,
-                [](RenderProperties& props, Canvas& canvas) {
+        card = TestUtils::createNode(50, 50, 250, 250, [](RenderProperties& props, Canvas& canvas) {
             canvas.drawColor(0xFFFF00FF, SkBlendMode::kSrcOver);
 
             SkRegion region;
-            for (int xOffset = 0; xOffset < 200; xOffset+=2) {
-                for (int yOffset = 0; yOffset < 200; yOffset+=2) {
+            for (int xOffset = 0; xOffset < 200; xOffset += 2) {
+                for (int yOffset = 0; yOffset < 200; yOffset += 2) {
                     region.op(xOffset, yOffset, xOffset + 1, yOffset + 1, SkRegion::kUnion_Op);
                 }
             }

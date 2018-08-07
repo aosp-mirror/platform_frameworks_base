@@ -25,6 +25,7 @@
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadio.h>
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadioFactory.h>
 #include <android/hidl/manager/1.0/IServiceManager.h>
+#include <broadcastradio-utils-1x/Utils.h>
 #include <core_jni_helpers.h>
 #include <hidl/ServiceManagement.h>
 #include <nativehelper/JNIHelp.h>
@@ -44,14 +45,15 @@ using hardware::hidl_vec;
 
 namespace V1_0 = hardware::broadcastradio::V1_0;
 namespace V1_1 = hardware::broadcastradio::V1_1;
-
-using V1_0::Class;
-using V1_0::Result;
+namespace utils = hardware::broadcastradio::utils;
 
 using V1_0::BandConfig;
-using V1_0::ProgramInfo;
-using V1_0::MetaData;
+using V1_0::Class;
 using V1_0::ITuner;
+using V1_0::MetaData;
+using V1_0::ProgramInfo;
+using V1_0::Result;
+using utils::HalRevision;
 
 static mutex gContextMutex;
 
@@ -67,10 +69,16 @@ static struct {
     } Tuner;
 } gjni;
 
+struct Module {
+    sp<V1_0::IBroadcastRadio> radioModule;
+    HalRevision halRev;
+    std::vector<hardware::broadcastradio::V1_0::BandConfig> bands;
+};
+
 struct ServiceContext {
     ServiceContext() {}
 
-    std::vector<sp<V1_0::IBroadcastRadio>> mModules;
+    std::vector<Module> mModules;
 
 private:
     DISALLOW_COPY_AND_ASSIGN(ServiceContext);
@@ -139,6 +147,13 @@ static jobject nativeLoadModules(JNIEnv *env, jobject obj, jlong nativeContext) 
             continue;
         }
 
+        auto halRev = HalRevision::V1_0;
+        auto halMinor = 0;
+        if (V1_1::IBroadcastRadioFactory::castFrom(factory).withDefault(nullptr) != nullptr) {
+            halRev = HalRevision::V1_1;
+            halMinor = 1;
+        }
+
         // Second level of scanning - that's unfortunate.
         for (auto&& clazz : gAllClasses) {
             sp<V1_0::IBroadcastRadio> module10 = nullptr;
@@ -155,15 +170,17 @@ static jobject nativeLoadModules(JNIEnv *env, jobject obj, jlong nativeContext) 
             if (module10 == nullptr) continue;
 
             auto idx = ctx.mModules.size();
-            ctx.mModules.push_back(module10);
-            ALOGI("loaded broadcast radio module %zu: %s:%s",
-                    idx, serviceName.c_str(), V1_0::toString(clazz).c_str());
+            ctx.mModules.push_back({module10, halRev, {}});
+            auto& nModule = ctx.mModules[idx];
+            ALOGI("loaded broadcast radio module %zu: %s:%s (HAL 1.%d)",
+                    idx, serviceName.c_str(), V1_0::toString(clazz).c_str(), halMinor);
 
             JavaRef<jobject> jModule = nullptr;
             Result halResult = Result::OK;
             Return<void> hidlResult;
             if (module11 != nullptr) {
                 hidlResult = module11->getProperties_1_1([&](const V1_1::Properties& properties) {
+                    nModule.bands = properties.base.bands;
                     jModule = convert::ModulePropertiesFromHal(env, properties, idx, serviceName);
                 });
             } else {
@@ -171,6 +188,7 @@ static jobject nativeLoadModules(JNIEnv *env, jobject obj, jlong nativeContext) 
                         const V1_0::Properties& properties) {
                     halResult = result;
                     if (result != Result::OK) return;
+                    nModule.bands = properties.bands;
                     jModule = convert::ModulePropertiesFromHal(env, properties, idx, serviceName);
                 });
             }
@@ -198,22 +216,36 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
         ALOGE("Invalid module ID: %d", moduleId);
         return nullptr;
     }
+
+    ALOGI("Opening tuner %d", moduleId);
     auto module = ctx.mModules[moduleId];
 
-    HalRevision halRev;
-    if (V1_1::IBroadcastRadio::castFrom(module).withDefault(nullptr) != nullptr) {
-        ALOGI("Opening tuner %d with broadcast radio HAL 1.1", moduleId);
-        halRev = HalRevision::V1_1;
+    Region region;
+    BandConfig bandConfigHal;
+    if (bandConfig != nullptr) {
+        bandConfigHal = convert::BandConfigToHal(env, bandConfig, region);
     } else {
-        ALOGI("Opening tuner %d with broadcast radio HAL 1.0", moduleId);
-        halRev = HalRevision::V1_0;
+        region = Region::INVALID;
+        if (module.bands.size() == 0) {
+            ALOGE("No bands defined");
+            return nullptr;
+        }
+        bandConfigHal = module.bands[0];
+
+        /* Prefer FM to workaround possible program list fetching limitation
+         * (if tuner scans only configured band for programs). */
+        auto fmIt = std::find_if(module.bands.begin(), module.bands.end(),
+            [](const BandConfig & band) { return utils::isFm(band.type); });
+        if (fmIt != module.bands.end()) bandConfigHal = *fmIt;
+
+        if (bandConfigHal.spacings.size() > 1) {
+            bandConfigHal.spacings = hidl_vec<uint32_t>({ *std::min_element(
+                    bandConfigHal.spacings.begin(), bandConfigHal.spacings.end()) });
+        }
     }
 
-    Region region;
-    BandConfig bandConfigHal = convert::BandConfigToHal(env, bandConfig, region);
-
     auto tuner = make_javaref(env, env->NewObject(gjni.Tuner.clazz, gjni.Tuner.cstor,
-            callback, halRev, region, withAudio, bandConfigHal.type));
+            callback, module.halRev, region, withAudio, bandConfigHal.type));
     if (tuner == nullptr) {
         ALOGE("Unable to create new tuner object.");
         return nullptr;
@@ -223,7 +255,7 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
     Result halResult;
     sp<ITuner> halTuner = nullptr;
 
-    auto hidlResult = module->openTuner(bandConfigHal, withAudio, tunerCb,
+    auto hidlResult = module.radioModule->openTuner(bandConfigHal, withAudio, tunerCb,
             [&](Result result, const sp<ITuner>& tuner) {
                 halResult = result;
                 halTuner = tuner;
@@ -235,8 +267,17 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
         return nullptr;
     }
 
-    Tuner::assignHalInterfaces(env, tuner, module, halTuner);
+    Tuner::assignHalInterfaces(env, tuner, module.radioModule, halTuner);
     ALOGD("Opened tuner %p", halTuner.get());
+
+    bool isConnected = true;
+    halTuner->getConfiguration([&](Result result, const BandConfig& config) {
+        if (result == Result::OK) isConnected = config.antennaConnected;
+    });
+    if (!isConnected) {
+        tunerCb->antennaStateChange(false);
+    }
+
     return tuner.release();
 }
 
@@ -245,7 +286,7 @@ static const JNINativeMethod gRadioServiceMethods[] = {
     { "nativeFinalize", "(J)V", (void*)nativeFinalize },
     { "nativeLoadModules", "(J)Ljava/util/List;", (void*)nativeLoadModules },
     { "nativeOpenTuner", "(JILandroid/hardware/radio/RadioManager$BandConfig;Z"
-            "Landroid/hardware/radio/ITunerCallback;)Lcom/android/server/broadcastradio/Tuner;",
+            "Landroid/hardware/radio/ITunerCallback;)Lcom/android/server/broadcastradio/hal1/Tuner;",
             (void*)nativeOpenTuner },
 };
 
@@ -258,7 +299,7 @@ void register_android_server_broadcastradio_BroadcastRadioService(JNIEnv *env) {
 
     register_android_server_broadcastradio_convert(env);
 
-    auto tunerClass = FindClassOrDie(env, "com/android/server/broadcastradio/Tuner");
+    auto tunerClass = FindClassOrDie(env, "com/android/server/broadcastradio/hal1/Tuner");
     gjni.Tuner.clazz = MakeGlobalRefOrDie(env, tunerClass);
     gjni.Tuner.cstor = GetMethodIDOrDie(env, tunerClass, "<init>",
             "(Landroid/hardware/radio/ITunerCallback;IIZI)V");
@@ -269,7 +310,7 @@ void register_android_server_broadcastradio_BroadcastRadioService(JNIEnv *env) {
     gjni.ArrayList.add = GetMethodIDOrDie(env, arrayListClass, "add", "(Ljava/lang/Object;)Z");
 
     auto res = jniRegisterNativeMethods(env,
-            "com/android/server/broadcastradio/BroadcastRadioService",
+            "com/android/server/broadcastradio/hal1/BroadcastRadioService",
             gRadioServiceMethods, NELEM(gRadioServiceMethods));
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
 }

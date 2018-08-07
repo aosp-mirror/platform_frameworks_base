@@ -15,6 +15,7 @@
  */
 
 #include "RenderNodeDrawable.h"
+#include <SkPaintFilterCanvas.h>
 #include "RenderNode.h"
 #include "SkiaDisplayList.h"
 #include "SkiaPipeline.h"
@@ -24,23 +25,24 @@ namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
-void RenderNodeDrawable::drawBackwardsProjectedNodes(SkCanvas* canvas, const SkiaDisplayList& displayList,
-        int nestLevel) {
+void RenderNodeDrawable::drawBackwardsProjectedNodes(SkCanvas* canvas,
+                                                     const SkiaDisplayList& displayList,
+                                                     int nestLevel) {
     LOG_ALWAYS_FATAL_IF(0 == nestLevel && !displayList.mProjectionReceiver);
     for (auto& child : displayList.mChildNodes) {
         const RenderProperties& childProperties = child.getNodeProperties();
 
-        //immediate children cannot be projected on their parent
+        // immediate children cannot be projected on their parent
         if (childProperties.getProjectBackwards() && nestLevel > 0) {
             SkAutoCanvasRestore acr2(canvas, true);
-            //Apply recorded matrix, which is a total matrix saved at recording time to avoid
-            //replaying all DL commands.
+            // Apply recorded matrix, which is a total matrix saved at recording time to avoid
+            // replaying all DL commands.
             canvas->concat(child.getRecordedMatrix());
             child.drawContent(canvas);
         }
 
-        //skip walking sub-nodes if current display list contains a receiver with exception of
-        //level 0, which is a known receiver
+        // skip walking sub-nodes if current display list contains a receiver with exception of
+        // level 0, which is a known receiver
         if (0 == nestLevel || !displayList.containsProjectionReceiver()) {
             SkAutoCanvasRestore acr(canvas, true);
             SkMatrix nodeMatrix;
@@ -50,9 +52,9 @@ void RenderNodeDrawable::drawBackwardsProjectedNodes(SkCanvas* canvas, const Ski
             hwuiMatrix.copyTo(nodeMatrix);
             canvas->concat(nodeMatrix);
             SkiaDisplayList* childDisplayList = static_cast<SkiaDisplayList*>(
-                (const_cast<DisplayList*>(childNode->getDisplayList())));
+                    (const_cast<DisplayList*>(childNode->getDisplayList())));
             if (childDisplayList) {
-                drawBackwardsProjectedNodes(canvas, *childDisplayList, nestLevel+1);
+                drawBackwardsProjectedNodes(canvas, *childDisplayList, nestLevel + 1);
             }
         }
     }
@@ -91,8 +93,8 @@ const RenderProperties& RenderNodeDrawable::getNodeProperties() const {
 }
 
 void RenderNodeDrawable::onDraw(SkCanvas* canvas) {
-    //negative and positive Z order are drawn out of order, if this render node drawable is in
-    //a reordering section
+    // negative and positive Z order are drawn out of order, if this render node drawable is in
+    // a reordering section
     if ((!mInReorderingSection) || MathUtils::isZero(mRenderNode->properties().getZ())) {
         this->forceDraw(canvas);
     }
@@ -100,7 +102,7 @@ void RenderNodeDrawable::onDraw(SkCanvas* canvas) {
 
 void RenderNodeDrawable::forceDraw(SkCanvas* canvas) {
     RenderNode* renderNode = mRenderNode.get();
-    if (SkiaPipeline::skpCaptureEnabled()) {
+    if (CC_UNLIKELY(Properties::skpCaptureEnabled)) {
         SkRect dimensions = SkRect::MakeWH(renderNode->getWidth(), renderNode->getHeight());
         canvas->drawAnnotation(dimensions, renderNode->getName(), nullptr);
     }
@@ -108,7 +110,8 @@ void RenderNodeDrawable::forceDraw(SkCanvas* canvas) {
     // We only respect the nothingToDraw check when we are composing a layer. This
     // ensures that we paint the layer even if it is not currently visible in the
     // event that the properties change and it becomes visible.
-    if (!renderNode->isRenderable() || (renderNode->nothingToDraw() && mComposeLayer)) {
+    if ((mProjectedDisplayList == nullptr && !renderNode->isRenderable()) ||
+            (renderNode->nothingToDraw() && mComposeLayer)) {
         return;
     }
 
@@ -117,13 +120,13 @@ void RenderNodeDrawable::forceDraw(SkCanvas* canvas) {
 
     SkAutoCanvasRestore acr(canvas, true);
     const RenderProperties& properties = this->getNodeProperties();
-    //pass this outline to the children that may clip backward projected nodes
-    displayList->mProjectedOutline = displayList->containsProjectionReceiver()
-            ? &properties.getOutline() : nullptr;
+    // pass this outline to the children that may clip backward projected nodes
+    displayList->mProjectedOutline =
+            displayList->containsProjectionReceiver() ? &properties.getOutline() : nullptr;
     if (!properties.getProjectBackwards()) {
         drawContent(canvas);
         if (mProjectedDisplayList) {
-            acr.restore(); //draw projected children using parent matrix
+            acr.restore();  // draw projected children using parent matrix
             LOG_ALWAYS_FATAL_IF(!mProjectedDisplayList->mProjectedOutline);
             const bool shouldClip = mProjectedDisplayList->mProjectedOutline->getPath();
             SkAutoCanvasRestore acr2(canvas, shouldClip);
@@ -137,12 +140,11 @@ void RenderNodeDrawable::forceDraw(SkCanvas* canvas) {
     displayList->mProjectedOutline = nullptr;
 }
 
-static bool layerNeedsPaint(const LayerProperties& properties,
-                            float alphaMultiplier, SkPaint* paint) {
-    if (alphaMultiplier < 1.0f
-            || properties.alpha() < 255
-            || properties.xferMode() != SkBlendMode::kSrcOver
-            || properties.colorFilter() != nullptr) {
+static bool layerNeedsPaint(const LayerProperties& properties, float alphaMultiplier,
+                            SkPaint* paint) {
+    paint->setFilterQuality(kLow_SkFilterQuality);
+    if (alphaMultiplier < 1.0f || properties.alpha() < 255 ||
+        properties.xferMode() != SkBlendMode::kSrcOver || properties.colorFilter() != nullptr) {
         paint->setAlpha(properties.alpha() * alphaMultiplier);
         paint->setBlendMode(properties.xferMode());
         paint->setColorFilter(sk_ref_sp(properties.colorFilter()));
@@ -150,6 +152,29 @@ static bool layerNeedsPaint(const LayerProperties& properties,
     }
     return false;
 }
+
+class AlphaFilterCanvas : public SkPaintFilterCanvas {
+public:
+    AlphaFilterCanvas(SkCanvas* canvas, float alpha) : SkPaintFilterCanvas(canvas), mAlpha(alpha) {}
+
+protected:
+    bool onFilter(SkTCopyOnFirstWrite<SkPaint>* paint, Type t) const override {
+        SkTLazy<SkPaint> defaultPaint;
+        if (!*paint) {
+            paint->init(*defaultPaint.init());
+        }
+        paint->writable()->setAlpha((uint8_t)(*paint)->getAlpha() * mAlpha);
+        return true;
+    }
+    void onDrawDrawable(SkDrawable* drawable, const SkMatrix* matrix) override {
+        // We unroll the drawable using "this" canvas, so that draw calls contained inside will
+        // get their alpha applied. THe default SkPaintFilterCanvas::onDrawDrawable does not unroll.
+        drawable->draw(this, matrix);
+    }
+
+private:
+    float mAlpha;
+};
 
 void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
     RenderNode* renderNode = mRenderNode.get();
@@ -167,7 +192,7 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
         displayList->mProjectedReceiverParentMatrix = canvas->getTotalMatrix();
     }
 
-    //TODO should we let the bound of the drawable do this for us?
+    // TODO should we let the bound of the drawable do this for us?
     const SkRect bounds = SkRect::MakeWH(properties.getWidth(), properties.getHeight());
     bool quickRejected = properties.getClipToBounds() && canvas->quickReject(bounds);
     if (!quickRejected) {
@@ -176,12 +201,15 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
         // composing a hardware layer
         if (renderNode->getLayerSurface() && mComposeLayer) {
             SkASSERT(properties.effectiveLayerType() == LayerType::RenderLayer);
-            SkPaint* paint = nullptr;
-            SkPaint tmpPaint;
-            if (layerNeedsPaint(layerProperties, alphaMultiplier, &tmpPaint)) {
-                paint = &tmpPaint;
-            }
-            renderNode->getLayerSurface()->draw(canvas, 0, 0, paint);
+            SkPaint paint;
+            layerNeedsPaint(layerProperties, alphaMultiplier, &paint);
+
+            // surfaces for layers are created on LAYER_SIZE boundaries (which are >= layer size) so
+            // we need to restrict the portion of the surface drawn to the size of the renderNode.
+            SkASSERT(renderNode->getLayerSurface()->width() >= bounds.width());
+            SkASSERT(renderNode->getLayerSurface()->height() >= bounds.height());
+            canvas->drawImageRect(renderNode->getLayerSurface()->makeImageSnapshot().get(),
+                    bounds, bounds, &paint);
 
             if (!renderNode->getSkiaLayer()->hasRenderedSinceRepaint) {
                 renderNode->getSkiaLayer()->hasRenderedSinceRepaint = true;
@@ -198,26 +226,21 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
                     canvas->drawRect(bounds, transparentPaint);
                 }
             }
-
-        // composing a software layer with alpha
-        } else if (properties.effectiveLayerType() == LayerType::Software) {
-            SkPaint paint;
-            bool needsLayer = layerNeedsPaint(layerProperties, alphaMultiplier, &paint);
-            if (needsLayer) {
-                canvas->saveLayer(bounds, &paint);
-            }
-            displayList->draw(canvas);
-            if (needsLayer) {
-                canvas->restore();
-            }
         } else {
-            displayList->draw(canvas);
+            if (alphaMultiplier < 1.0f) {
+                // Non-layer draw for a view with getHasOverlappingRendering=false, will apply
+                // the alpha to the paint of each nested draw.
+                AlphaFilterCanvas alphaCanvas(canvas, alphaMultiplier);
+                displayList->draw(&alphaCanvas);
+            } else {
+                displayList->draw(canvas);
+            }
         }
     }
 }
 
 void RenderNodeDrawable::setViewProperties(const RenderProperties& properties, SkCanvas* canvas,
-        float* alphaMultiplier) {
+                                           float* alphaMultiplier) {
     if (properties.getLeft() != 0 || properties.getTop() != 0) {
         canvas->translate(properties.getLeft(), properties.getTop());
     }
@@ -237,7 +260,7 @@ void RenderNodeDrawable::setViewProperties(const RenderProperties& properties, S
     int clipFlags = properties.getClippingFlags();
     if (properties.getAlpha() < 1) {
         if (isLayer) {
-            clipFlags &= ~CLIP_TO_BOUNDS; // bounds clipping done by layer
+            clipFlags &= ~CLIP_TO_BOUNDS;  // bounds clipping done by layer
         }
         if (CC_LIKELY(isLayer || !properties.getHasOverlappingRendering())) {
             *alphaMultiplier = properties.getAlpha();
@@ -246,18 +269,18 @@ void RenderNodeDrawable::setViewProperties(const RenderProperties& properties, S
             Rect layerBounds(0, 0, properties.getWidth(), properties.getHeight());
             if (clipFlags) {
                 properties.getClippingRectForFlags(clipFlags, &layerBounds);
-                clipFlags = 0; // all clipping done by savelayer
+                clipFlags = 0;  // all clipping done by savelayer
             }
-            SkRect bounds = SkRect::MakeLTRB(layerBounds.left, layerBounds.top,
-                    layerBounds.right, layerBounds.bottom);
-            canvas->saveLayerAlpha(&bounds, (int) (properties.getAlpha() * 255));
+            SkRect bounds = SkRect::MakeLTRB(layerBounds.left, layerBounds.top, layerBounds.right,
+                                             layerBounds.bottom);
+            canvas->saveLayerAlpha(&bounds, (int)(properties.getAlpha() * 255));
         }
 
         if (CC_UNLIKELY(ATRACE_ENABLED() && properties.promotedToLayer())) {
             // pretend alpha always causes savelayer to warn about
             // performance problem affecting old versions
             ATRACE_FORMAT("alpha caused saveLayer %dx%d", properties.getWidth(),
-                    properties.getHeight());
+                          properties.getHeight());
         }
     }
 
@@ -283,6 +306,6 @@ void RenderNodeDrawable::setViewProperties(const RenderProperties& properties, S
     }
 }
 
-}; // namespace skiapipeline
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace skiapipeline
+};  // namespace uirenderer
+};  // namespace android

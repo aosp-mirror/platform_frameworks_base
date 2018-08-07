@@ -174,6 +174,27 @@ static jboolean android_view_RenderNode_hasShadow(jlong renderNodePtr) {
     return renderNode->stagingProperties().hasShadow();
 }
 
+static jboolean android_view_RenderNode_setSpotShadowColor(jlong renderNodePtr, jint shadowColor) {
+    return SET_AND_DIRTY(setSpotShadowColor,
+            static_cast<SkColor>(shadowColor), RenderNode::GENERIC);
+}
+
+static jint android_view_RenderNode_getSpotShadowColor(jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getSpotShadowColor();
+}
+
+static jboolean android_view_RenderNode_setAmbientShadowColor(jlong renderNodePtr,
+        jint shadowColor) {
+    return SET_AND_DIRTY(setAmbientShadowColor,
+            static_cast<SkColor>(shadowColor), RenderNode::GENERIC);
+}
+
+static jint android_view_RenderNode_getAmbientShadowColor(jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getAmbientShadowColor();
+}
+
 static jboolean android_view_RenderNode_setClipToOutline(jlong renderNodePtr,
         jboolean clipToOutline) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
@@ -243,6 +264,10 @@ static jboolean android_view_RenderNode_setPivotX(jlong renderNodePtr, float px)
 
 static jboolean android_view_RenderNode_setPivotY(jlong renderNodePtr, float py) {
     return SET_AND_DIRTY(setPivotY, py, RenderNode::GENERIC);
+}
+
+static jboolean android_view_RenderNode_resetPivot(jlong renderNodePtr) {
+    return SET_AND_DIRTY(resetPivot, /* void */, RenderNode::GENERIC);
 }
 
 static jboolean android_view_RenderNode_setCameraDistance(jlong renderNodePtr, float distance) {
@@ -571,6 +596,10 @@ static const JNINativeMethod gMethods[] = {
     { "nSetOutlineEmpty",      "(J)Z",   (void*) android_view_RenderNode_setOutlineEmpty },
     { "nSetOutlineNone",       "(J)Z",   (void*) android_view_RenderNode_setOutlineNone },
     { "nHasShadow",            "(J)Z",   (void*) android_view_RenderNode_hasShadow },
+    { "nSetSpotShadowColor",   "(JI)Z",  (void*) android_view_RenderNode_setSpotShadowColor },
+    { "nGetSpotShadowColor",   "(J)I",   (void*) android_view_RenderNode_getSpotShadowColor },
+    { "nSetAmbientShadowColor","(JI)Z",  (void*) android_view_RenderNode_setAmbientShadowColor },
+    { "nGetAmbientShadowColor","(J)I",   (void*) android_view_RenderNode_getAmbientShadowColor },
     { "nSetClipToOutline",     "(JZ)Z",  (void*) android_view_RenderNode_setClipToOutline },
     { "nSetRevealClip",        "(JZFFF)Z", (void*) android_view_RenderNode_setRevealClip },
 
@@ -588,6 +617,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSetScaleY",            "(JF)Z",  (void*) android_view_RenderNode_setScaleY },
     { "nSetPivotX",            "(JF)Z",  (void*) android_view_RenderNode_setPivotX },
     { "nSetPivotY",            "(JF)Z",  (void*) android_view_RenderNode_setPivotY },
+    { "nResetPivot",           "(J)Z",   (void*) android_view_RenderNode_resetPivot },
     { "nSetCameraDistance",    "(JF)Z",  (void*) android_view_RenderNode_setCameraDistance },
     { "nSetLeft",              "(JI)Z",  (void*) android_view_RenderNode_setLeft },
     { "nSetTop",               "(JI)Z",  (void*) android_view_RenderNode_setTop },

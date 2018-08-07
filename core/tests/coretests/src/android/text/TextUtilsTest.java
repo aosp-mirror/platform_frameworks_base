@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.os.Parcel;
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.LargeTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -46,6 +47,7 @@ import java.util.Locale;
 /**
  * TextUtilsTest tests {@link TextUtils}.
  */
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TextUtilsTest {
@@ -338,6 +340,66 @@ public class TextUtilsTest {
                 assertTrue("wid " + i + " pass " + j, p.measureText(keep1) == p.measureText(out1));
             }
         }
+    }
+
+    @Test
+    public void testEllipsize_multiCodepoint() {
+        final TextPaint paint = new TextPaint();
+        final float wordWidth = paint.measureText("MMMM");
+
+        // Establish the ground rules first, for single-codepoint cases.
+        final String ellipsis = "."; // one full stop character
+        assertEquals(
+                "MM.\uFEFF",
+                TextUtils.ellipsize("MMMM", paint, 0.7f * wordWidth,
+                        TextUtils.TruncateAt.END, true /* preserve length */,
+                        null /* no callback */, TextDirectionHeuristics.LTR,
+                        ellipsis));
+        assertEquals(
+                "MM.",
+                TextUtils.ellipsize("MMMM", paint, 0.7f * wordWidth,
+                        TextUtils.TruncateAt.END, false /* preserve length */,
+                        null /* no callback */, TextDirectionHeuristics.LTR,
+                        ellipsis));
+        assertEquals(
+                "M.",
+                TextUtils.ellipsize("MM", paint, 0.45f * wordWidth,
+                        TextUtils.TruncateAt.END, true /* preserve length */,
+                        null /* no callback */, TextDirectionHeuristics.LTR,
+                        ellipsis));
+        assertEquals(
+                "M.",
+                TextUtils.ellipsize("MM", paint, 0.45f * wordWidth,
+                        TextUtils.TruncateAt.END, false /* preserve length */,
+                        null /* no callback */, TextDirectionHeuristics.LTR,
+                        ellipsis));
+
+        // Now check the differences for multi-codepoint ellipsis.
+        final String longEllipsis = ".."; // two full stop characters
+        assertEquals(
+                "MM..",
+                TextUtils.ellipsize("MMMM", paint, 0.7f * wordWidth,
+                        TextUtils.TruncateAt.END, true /* preserve length */,
+                        null /* no callback */, TextDirectionHeuristics.LTR,
+                        longEllipsis));
+        assertEquals(
+                "MM..",
+                TextUtils.ellipsize("MMMM", paint, 0.7f * wordWidth,
+                        TextUtils.TruncateAt.END, false /* preserve length */,
+                        null /* no callback */, TextDirectionHeuristics.LTR,
+                        longEllipsis));
+        assertEquals(
+                "M\uFEFF",
+                TextUtils.ellipsize("MM", paint, 0.45f * wordWidth,
+                        TextUtils.TruncateAt.END, true /* preserve length */,
+                        null /* no callback */, TextDirectionHeuristics.LTR,
+                        longEllipsis));
+        assertEquals(
+                "M..",
+                TextUtils.ellipsize("MM", paint, 0.45f * wordWidth,
+                        TextUtils.TruncateAt.END, false /* preserve length */,
+                        null /* no callback */, TextDirectionHeuristics.LTR,
+                        longEllipsis));
     }
 
     @Test
@@ -682,5 +744,37 @@ public class TextUtilsTest {
             assertEquals(indexMap[source.getSpanEnd(span)], result.getSpanEnd(span));
             assertEquals(source.getSpanFlags(span), result.getSpanFlags(span));
         }
+    }
+
+    @Test
+    public void testTrimToSize() {
+        final String testString = "a\uD800\uDC00a";
+        assertEquals("Should return text as it is if size is longer than length",
+                testString, TextUtils.trimToSize(testString, 5));
+        assertEquals("Should return text as it is if size is equal to length",
+                testString, TextUtils.trimToSize(testString, 4));
+        assertEquals("Should trim text",
+                "a\uD800\uDC00", TextUtils.trimToSize(testString, 3));
+        assertEquals("Should trim surrogate pairs if size is in the middle of a pair",
+                "a", TextUtils.trimToSize(testString, 2));
+        assertEquals("Should trim text",
+                "a", TextUtils.trimToSize(testString, 1));
+        assertEquals("Should handle null",
+                null, TextUtils.trimToSize(null, 1));
+
+        assertEquals("Should trim high surrogate if invalid surrogate",
+                "a\uD800", TextUtils.trimToSize("a\uD800\uD800", 2));
+        assertEquals("Should trim low surrogate if invalid surrogate",
+                "a\uDC00", TextUtils.trimToSize("a\uDC00\uDC00", 2));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testTrimToSizeThrowsExceptionForNegativeSize() {
+        TextUtils.trimToSize("", -1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testTrimToSizeThrowsExceptionForZeroSize() {
+        TextUtils.trimToSize("abc", 0);
     }
 }

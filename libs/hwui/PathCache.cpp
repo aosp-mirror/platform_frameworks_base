@@ -46,13 +46,14 @@ static bool compareWidthHeight(const T& lhs, const T& rhs) {
 }
 
 static bool compareRoundRects(const PathDescription::Shape::RoundRect& lhs,
-        const PathDescription::Shape::RoundRect& rhs) {
+                              const PathDescription::Shape::RoundRect& rhs) {
     return compareWidthHeight(lhs, rhs) && lhs.mRx == rhs.mRx && lhs.mRy == rhs.mRy;
 }
 
-static bool compareArcs(const PathDescription::Shape::Arc& lhs, const PathDescription::Shape::Arc& rhs) {
+static bool compareArcs(const PathDescription::Shape::Arc& lhs,
+                        const PathDescription::Shape::Arc& rhs) {
     return compareWidthHeight(lhs, rhs) && lhs.mStartAngle == rhs.mStartAngle &&
-            lhs.mSweepAngle == rhs.mSweepAngle && lhs.mUseCenter == rhs.mUseCenter;
+           lhs.mSweepAngle == rhs.mSweepAngle && lhs.mUseCenter == rhs.mUseCenter;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -91,7 +92,7 @@ hash_t PathDescription::hash() const {
     hash = JenkinsHashMix(hash, android::hash_type(miter));
     hash = JenkinsHashMix(hash, android::hash_type(strokeWidth));
     hash = JenkinsHashMix(hash, android::hash_type(pathEffect));
-    hash = JenkinsHashMixBytes(hash, (uint8_t*) &shape, sizeof(Shape));
+    hash = JenkinsHashMixBytes(hash, (uint8_t*)&shape, sizeof(Shape));
     return JenkinsHashWhiten(hash);
 }
 
@@ -126,7 +127,7 @@ bool PathDescription::operator==(const PathDescription& rhs) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 static void computePathBounds(const SkPath* path, const SkPaint* paint, PathTexture* texture,
-        uint32_t& width, uint32_t& height) {
+                              uint32_t& width, uint32_t& height) {
     const SkRect& bounds = path->getBounds();
     const float pathWidth = std::max(bounds.width(), 1.0f);
     const float pathHeight = std::max(bounds.height(), 1.0f);
@@ -134,7 +135,7 @@ static void computePathBounds(const SkPath* path, const SkPaint* paint, PathText
     texture->left = floorf(bounds.fLeft);
     texture->top = floorf(bounds.fTop);
 
-    texture->offset = (int) floorf(std::max(paint->getStrokeWidth(), 1.0f) * 1.5f + 0.5f);
+    texture->offset = (int)floorf(std::max(paint->getStrokeWidth(), 1.0f) * 1.5f + 0.5f);
 
     width = uint32_t(pathWidth + texture->offset * 2.0 + 0.5);
     height = uint32_t(pathHeight + texture->offset * 2.0 + 0.5);
@@ -152,12 +153,12 @@ static void initPaint(SkPaint& paint) {
 }
 
 static sk_sp<Bitmap> drawPath(const SkPath* path, const SkPaint* paint, PathTexture* texture,
-        uint32_t maxTextureSize) {
+                              uint32_t maxTextureSize) {
     uint32_t width, height;
     computePathBounds(path, paint, texture, width, height);
     if (width > maxTextureSize || height > maxTextureSize) {
-        ALOGW("Shape too large to be rendered into a texture (%dx%d, max=%dx%d)",
-                width, height, maxTextureSize, maxTextureSize);
+        ALOGW("Shape too large to be rendered into a texture (%dx%d, max=%dx%d)", width, height,
+              maxTextureSize, maxTextureSize);
         return nullptr;
     }
 
@@ -230,13 +231,13 @@ void PathCache::removeTexture(PathTexture* texture) {
             // to the cache and the size wasn't increased
             if (size > mSize) {
                 ALOGE("Removing path texture of size %d will leave "
-                        "the cache in an inconsistent state", size);
+                      "the cache in an inconsistent state",
+                      size);
             }
             mSize -= size;
         }
 
-        PATH_LOGD("PathCache::delete name, size, mSize = %d, %d, %d",
-                texture->id, size, mSize);
+        PATH_LOGD("PathCache::delete name, size, mSize = %d, %d, %d", texture->id, size, mSize);
         if (mDebugEnabled) {
             ALOGD("Shape deleted, size = %d", size);
         }
@@ -258,14 +259,16 @@ void PathCache::purgeCache(uint32_t width, uint32_t height) {
 
 void PathCache::trim() {
     while (mSize > mMaxSize || mCache.size() > PATH_CACHE_COUNT_LIMIT) {
-        LOG_ALWAYS_FATAL_IF(!mCache.size(), "Inconsistent mSize! Ran out of items to remove!"
-                " mSize = %u, mMaxSize = %u", mSize, mMaxSize);
+        LOG_ALWAYS_FATAL_IF(!mCache.size(),
+                            "Inconsistent mSize! Ran out of items to remove!"
+                            " mSize = %u, mMaxSize = %u",
+                            mSize, mMaxSize);
         mCache.removeOldest();
     }
 }
 
-PathTexture* PathCache::addTexture(const PathDescription& entry, const SkPath *path,
-        const SkPaint* paint) {
+PathTexture* PathCache::addTexture(const PathDescription& entry, const SkPath* path,
+                                   const SkPaint* paint) {
     ATRACE_NAME("Generate Path Texture");
 
     PathTexture* texture = new PathTexture(Caches::getInstance(), path->getGenerationID());
@@ -280,8 +283,8 @@ PathTexture* PathCache::addTexture(const PathDescription& entry, const SkPath *p
     return texture;
 }
 
-void PathCache::generateTexture(const PathDescription& entry, Bitmap& bitmap,
-        PathTexture* texture, bool addToCache) {
+void PathCache::generateTexture(const PathDescription& entry, Bitmap& bitmap, PathTexture* texture,
+                                bool addToCache) {
     generateTexture(bitmap, texture);
 
     // Note here that we upload to a texture even if it's bigger than mMaxSize.
@@ -289,8 +292,7 @@ void PathCache::generateTexture(const PathDescription& entry, Bitmap& bitmap,
     // immediately on trim, or on any other Path entering the cache.
     uint32_t size = texture->width() * texture->height();
     mSize += size;
-    PATH_LOGD("PathCache::get/create: name, size, mSize = %d, %d, %d",
-            texture->id, size, mSize);
+    PATH_LOGD("PathCache::get/create: name, size, mSize = %d, %d, %d", texture->id, size, mSize);
     if (mDebugEnabled) {
         ALOGD("Shape created, size = %d", size);
     }
@@ -313,9 +315,8 @@ void PathCache::generateTexture(Bitmap& bitmap, Texture* texture) {
 // Path precaching
 ///////////////////////////////////////////////////////////////////////////////
 
-PathCache::PathProcessor::PathProcessor(Caches& caches):
-        TaskProcessor<sk_sp<Bitmap> >(&caches.tasks), mMaxTextureSize(caches.maxTextureSize) {
-}
+PathCache::PathProcessor::PathProcessor(Caches& caches)
+        : TaskProcessor<sk_sp<Bitmap> >(&caches.tasks), mMaxTextureSize(caches.maxTextureSize) {}
 
 void PathCache::PathProcessor::onProcess(const sp<Task<sk_sp<Bitmap> > >& task) {
     PathTask* t = static_cast<PathTask*>(task.get());
@@ -336,7 +337,7 @@ void PathCache::removeDeferred(const SkPath* path) {
 void PathCache::clearGarbage() {
     Vector<PathDescription> pathsToRemove;
 
-    { // scope for the mutex
+    {  // scope for the mutex
         Mutex::Autolock l(mLock);
         for (const uint32_t generationID : mGarbage) {
             LruCache<PathDescription, PathTexture*>::Iterator iter(mCache);
@@ -433,8 +434,8 @@ void PathCache::precache(const SkPath* path, const SkPaint* paint) {
 // Rounded rects
 ///////////////////////////////////////////////////////////////////////////////
 
-PathTexture* PathCache::getRoundRect(float width, float height,
-        float rx, float ry, const SkPaint* paint) {
+PathTexture* PathCache::getRoundRect(float width, float height, float rx, float ry,
+                                     const SkPaint* paint) {
     PathDescription entry(ShapeType::RoundRect, paint);
     entry.shape.roundRect.mWidth = width;
     entry.shape.roundRect.mHeight = height;
@@ -525,8 +526,8 @@ PathTexture* PathCache::getRect(float width, float height, const SkPaint* paint)
 // Arcs
 ///////////////////////////////////////////////////////////////////////////////
 
-PathTexture* PathCache::getArc(float width, float height,
-        float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint) {
+PathTexture* PathCache::getArc(float width, float height, float startAngle, float sweepAngle,
+                               bool useCenter, const SkPaint* paint) {
     PathDescription entry(ShapeType::Arc, paint);
     entry.shape.arc.mWidth = width;
     entry.shape.arc.mHeight = height;
@@ -554,5 +555,5 @@ PathTexture* PathCache::getArc(float width, float height,
     return texture;
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

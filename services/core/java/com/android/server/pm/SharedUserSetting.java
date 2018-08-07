@@ -16,12 +16,21 @@
 
 package com.android.server.pm;
 
+import android.annotation.Nullable;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageParser;
+import android.service.pm.PackageServiceDumpProto;
 import android.util.ArraySet;
+import android.util.proto.ProtoOutputStream;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Settings data for a particular shared user ID we know about.
  */
-final class SharedUserSetting extends SettingBase {
+public final class SharedUserSetting extends SettingBase {
     final String name;
 
     int userId;
@@ -29,6 +38,10 @@ final class SharedUserSetting extends SettingBase {
     // flags that are associated with this uid, regardless of any package flags
     int uidFlags;
     int uidPrivateFlags;
+
+    // The lowest targetSdkVersion of all apps in the sharedUserSetting, used to assign seinfo so
+    // that all apps within the sharedUser run in the same selinux context.
+    int seInfoTargetSdkVersion;
 
     final ArraySet<PackageSetting> packages = new ArraySet<PackageSetting>();
 
@@ -40,12 +53,20 @@ final class SharedUserSetting extends SettingBase {
         uidFlags =  _pkgFlags;
         uidPrivateFlags = _pkgPrivateFlags;
         name = _name;
+        seInfoTargetSdkVersion = android.os.Build.VERSION_CODES.CUR_DEVELOPMENT;
     }
 
     @Override
     public String toString() {
         return "SharedUserSetting{" + Integer.toHexString(System.identityHashCode(this)) + " "
                 + name + "/" + userId + "}";
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        long token = proto.start(fieldId);
+        proto.write(PackageServiceDumpProto.SharedUserProto.USER_ID, userId);
+        proto.write(PackageServiceDumpProto.SharedUserProto.NAME, name);
+        proto.end(token);
     }
 
     void removePackage(PackageSetting packageSetting) {
@@ -69,9 +90,57 @@ final class SharedUserSetting extends SettingBase {
     }
 
     void addPackage(PackageSetting packageSetting) {
+        // If this is the first package added to this shared user, temporarily (until next boot) use
+        // its targetSdkVersion when assigning seInfo for the shared user.
+        if ((packages.size() == 0) && (packageSetting.pkg != null)) {
+            seInfoTargetSdkVersion = packageSetting.pkg.applicationInfo.targetSdkVersion;
+        }
         if (packages.add(packageSetting)) {
             setFlags(this.pkgFlags | packageSetting.pkgFlags);
             setPrivateFlags(this.pkgPrivateFlags | packageSetting.pkgPrivateFlags);
         }
     }
+
+    public @Nullable List<PackageParser.Package> getPackages() {
+        if (packages == null || packages.size() == 0) {
+            return null;
+        }
+        final ArrayList<PackageParser.Package> pkgList = new ArrayList<>(packages.size());
+        for (PackageSetting ps : packages) {
+            if ((ps == null) || (ps.pkg == null)) {
+                continue;
+            }
+            pkgList.add(ps.pkg);
+        }
+        return pkgList;
+    }
+
+    public boolean isPrivileged() {
+        return (this.pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
+    }
+
+    /**
+     * Determine the targetSdkVersion for a sharedUser and update pkg.applicationInfo.seInfo
+     * to ensure that all apps within the sharedUser share an SELinux domain. Use the lowest
+     * targetSdkVersion of all apps within the shared user, which corresponds to the least
+     * restrictive selinux domain.
+     */
+    public void fixSeInfoLocked() {
+        final List<PackageParser.Package> pkgList = getPackages();
+        if (pkgList == null || pkgList.size() == 0) {
+            return;
+        }
+
+        for (PackageParser.Package pkg : pkgList) {
+            if (pkg.applicationInfo.targetSdkVersion < seInfoTargetSdkVersion) {
+                seInfoTargetSdkVersion = pkg.applicationInfo.targetSdkVersion;
+            }
+        }
+        for (PackageParser.Package pkg : pkgList) {
+            final boolean isPrivileged = isPrivileged() | pkg.isPrivileged();
+            pkg.applicationInfo.seInfo = SELinuxMMAC.getSeInfo(pkg, isPrivileged,
+                pkg.applicationInfo.targetSandboxVersion, seInfoTargetSdkVersion);
+        }
+    }
+
 }

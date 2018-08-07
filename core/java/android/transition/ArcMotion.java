@@ -216,7 +216,13 @@ public class ArcMotion extends PathMotion {
 
         boolean isMovingUpwards = startY > endY;
 
-        if ((Math.abs(deltaX) < Math.abs(deltaY))) {
+        if (deltaY == 0) {
+            ex = dx;
+            ey = dy + (Math.abs(deltaX) * 0.5f * mMinimumHorizontalTangent);
+        } else if (deltaX == 0) {
+            ex = dx + (Math.abs(deltaY) * 0.5f * mMinimumVerticalTangent);
+            ey = dy;
+        } else if ((Math.abs(deltaX) < Math.abs(deltaY))) {
             // Similar triangles bfa and bde mean that (ab/fb = eb/bd)
             // Therefore, eb = ab * bd / fb
             // ab = hypotenuse
@@ -254,7 +260,7 @@ public class ArcMotion extends PathMotion {
         float maximumArcDist2 = midDist2 * mMaximumTangent * mMaximumTangent;
 
         float newArcDistance2 = 0;
-        if (arcDist2 < minimumArcDist2) {
+        if (arcDist2 != 0 && arcDist2 < minimumArcDist2) {
             newArcDistance2 = minimumArcDist2;
         } else if (arcDist2 > maximumArcDist2) {
             newArcDistance2 = maximumArcDist2;

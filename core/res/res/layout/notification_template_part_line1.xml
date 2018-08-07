@@ -31,7 +31,7 @@
         android:textAlignment="viewStart"
         />
     <TextView android:id="@+id/text_line_1"
-        android:textAppearance="@style/TextAppearance.Material.Notification"
+        style="@style/Widget.Material.Notification.Text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="end|bottom"

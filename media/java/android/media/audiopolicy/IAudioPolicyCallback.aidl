@@ -31,4 +31,7 @@ oneway interface IAudioPolicyCallback {
 
     // callback for mix activity status update
     void notifyMixStateUpdate(in String regId, int state);
+
+    // callback for volume events
+    void notifyVolumeAdjust(int adjustment);
 }

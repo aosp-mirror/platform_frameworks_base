@@ -16,42 +16,51 @@
 
 syntax = "proto2";
 
-option java_package = "android";
+package android;
+
+option java_package = "com.android.incident";
 option java_multiple_files = true;
 
 import "google/protobuf/descriptor.proto";
 
-package android;
-
-// TODO: It's better to track this by semantic types and set policy for those.
-// Do this for now to bootstrap the tools.
 enum Destination {
     // Fields or messages annotated with DEST_LOCAL must never be
     // extracted from the device automatically. They can be accessed
-    // by tools on the developer's workstation, and if they are sent
-    // to another device that must be by the user, with a PII warning. (TBD)
+    // by tools on the developer's workstation or test lab devices.
     DEST_LOCAL = 0;
 
     // Fields or messages annotated with DEST_EXPLICIT can be sent
     // off the device with an explicit user action.
-    DEST_EXPLICIT = 1;
+    DEST_EXPLICIT = 100;
 
-    // Fields or messages annotated with DEST_LOCAL can be sent by
+    // Fields or messages annotated with DEST_AUTOMATIC can be sent by
     // automatic means, without per-sending user consent. The user
     // still must have previously accepted a consent to share this
     // information.
-    DEST_AUTOMATIC = 2;
+    DEST_AUTOMATIC = 200;
 
-    // There is no more permissive option than DEST_AUTOMATIC.
+    // This is the default value, which could be overridden by other values.
+    // The reason to pick 255 is it fits into one byte. UNSET fields are treated
+    // as EXPLICIT.
+    DEST_UNSET = 255;
+
+    // Currently use 0, 100, 200 and 255, values in between are reserved for futures.
 }
 
 message PrivacyFlags {
-  optional Destination dest = 1  [
-      default = DEST_LOCAL
-  ];
+    optional Destination dest = 1 [ default = DEST_UNSET ];
+
+    // regex to filter pii sensitive info from a string field type.
+    repeated string patterns = 2;
 }
 
 extend google.protobuf.FieldOptions {
-    // Flags for automatically filtering statistics
+    // Flags used to annotate a field with right privacy level.
     optional PrivacyFlags privacy = 102672883;
 }
+
+extend google.protobuf.MessageOptions {
+    // Flags used to annotate a message which all its unset primitive fields inhert this tag.
+    optional PrivacyFlags msg_privacy = 102672883;
+}
+

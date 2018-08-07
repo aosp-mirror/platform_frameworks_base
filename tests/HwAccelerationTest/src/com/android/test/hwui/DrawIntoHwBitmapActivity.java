@@ -27,6 +27,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.GraphicBuffer;
 import android.graphics.Paint;
+import android.graphics.Picture;
 import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
@@ -47,10 +48,8 @@ public class DrawIntoHwBitmapActivity extends Activity {
     }
 
     Bitmap createBitmap() {
-        RenderNode node = RenderNode.create("HwuiCanvas", null);
-        node.setLeftTopRightBottom(0, 0, 500, 500);
-        node.setClipToBounds(false);
-        DisplayListCanvas canvas = node.start(500, 500);
+        Picture picture = new Picture();
+        Canvas canvas = picture.beginRecording(500, 500);
         Paint p = new Paint();
         p.setColor(Color.BLACK);
         p.setTextSize(20 * getResources().getDisplayMetrics().density);
@@ -59,7 +58,7 @@ public class DrawIntoHwBitmapActivity extends Activity {
         canvas.drawRect(0, 0, 500, 100, p);
         p.setColor(Color.BLACK);
         canvas.drawText("Hello, World!", 0, 90, p);
-        node.end(canvas);
-        return ThreadedRenderer.createHardwareBitmap(node, 500, 500);
+        picture.endRecording();
+        return Bitmap.createBitmap(picture);
     }
 }

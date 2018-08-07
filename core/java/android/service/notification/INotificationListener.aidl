@@ -19,6 +19,7 @@ package android.service.notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.os.UserHandle;
+import android.service.notification.NotificationStats;
 import android.service.notification.IStatusBarNotificationHolder;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.NotificationRankingUpdate;
@@ -26,12 +27,13 @@ import android.service.notification.NotificationRankingUpdate;
 /** @hide */
 oneway interface INotificationListener
 {
-    // listeners and rankers
+    // listeners and assistant
     void onListenerConnected(in NotificationRankingUpdate update);
     void onNotificationPosted(in IStatusBarNotificationHolder notificationHolder,
             in NotificationRankingUpdate update);
+    // stats only for assistant
     void onNotificationRemoved(in IStatusBarNotificationHolder notificationHolder,
-            in NotificationRankingUpdate update, int reason);
+            in NotificationRankingUpdate update, in NotificationStats stats, int reason);
     void onNotificationRankingUpdate(in NotificationRankingUpdate update);
     void onListenerHintsChanged(int hints);
     void onInterruptionFilterChanged(int interruptionFilter);
@@ -40,7 +42,7 @@ oneway interface INotificationListener
     void onNotificationChannelModification(String pkgName, in UserHandle user, in NotificationChannel channel, int modificationType);
     void onNotificationChannelGroupModification(String pkgName, in UserHandle user, in NotificationChannelGroup group, int modificationType);
 
-    // rankers only
+    // assistants only
     void onNotificationEnqueued(in IStatusBarNotificationHolder notificationHolder);
     void onNotificationSnoozedUntilContext(in IStatusBarNotificationHolder notificationHolder, String snoozeCriterionId);
 }

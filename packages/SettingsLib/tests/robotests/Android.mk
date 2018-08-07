@@ -12,12 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 ############################################################
 # SettingsLib Shell app just for Robolectric test target.  #
 ############################################################
 LOCAL_PATH := $(call my-dir)
-
 include $(CLEAR_VARS)
 
 LOCAL_PACKAGE_NAME := SettingsLibShell
@@ -26,8 +24,7 @@ LOCAL_MODULE_TAGS := optional
 
 LOCAL_PRIVILEGED_MODULE := true
 
-LOCAL_RESOURCE_DIR := \
-    $(LOCAL_PATH)/res
+LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
 LOCAL_USE_AAPT2 := true
 
@@ -36,40 +33,44 @@ include frameworks/base/packages/SettingsLib/common.mk
 include $(BUILD_PACKAGE)
 
 #############################################
-# SettingsLib Robolectric test target. #
+# SettingsLib Robolectric test target.      #
 #############################################
 include $(CLEAR_VARS)
 
+LOCAL_MODULE := SettingsLibRoboTests
+
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
-# Include the testing libraries (JUnit4 + Robolectric libs).
-LOCAL_STATIC_JAVA_LIBRARIES := \
+LOCAL_JAVA_RESOURCE_DIRS := config
+
+LOCAL_JAVA_LIBRARIES := \
+    robolectric_android-all-stub \
+    Robolectric_all-target \
     mockito-robolectric-prebuilt \
     truth-prebuilt
 
-LOCAL_JAVA_LIBRARIES := \
-    junit \
-    platform-robolectric-prebuilt
-
 LOCAL_INSTRUMENTATION_FOR := SettingsLibShell
-LOCAL_MODULE := SettingsLibRoboTests
 
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
 #############################################################
-# SettingsLib runner target to run the previous target. #
+# SettingsLib runner target to run the previous target.     #
 #############################################################
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := RunSettingsLibRoboTests
 
-LOCAL_SDK_VERSION := current
-
-LOCAL_STATIC_JAVA_LIBRARIES := \
-    SettingsLibRoboTests
+LOCAL_JAVA_LIBRARIES := \
+    SettingsLibRoboTests \
+    robolectric_android-all-stub \
+    Robolectric_all-target \
+    mockito-robolectric-prebuilt \
+    truth-prebuilt
 
 LOCAL_TEST_PACKAGE := SettingsLibShell
 
-include prebuilts/misc/common/robolectric/run_robotests.mk
+LOCAL_ROBOTEST_TIMEOUT := 36000
+
+include external/robolectric-shadows/run_robotests.mk

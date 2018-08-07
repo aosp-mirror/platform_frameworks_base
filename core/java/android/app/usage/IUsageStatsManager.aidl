@@ -16,8 +16,11 @@
 
 package android.app.usage;
 
+import android.app.PendingIntent;
 import android.app.usage.UsageEvents;
 import android.content.pm.ParceledListSlice;
+
+import java.util.Map;
 
 /**
  * System private API for talking with the UsageStatsManagerService.
@@ -29,11 +32,23 @@ interface IUsageStatsManager {
             String callingPackage);
     ParceledListSlice queryConfigurationStats(int bucketType, long beginTime, long endTime,
             String callingPackage);
+    ParceledListSlice queryEventStats(int bucketType, long beginTime, long endTime,
+            String callingPackage);
     UsageEvents queryEvents(long beginTime, long endTime, String callingPackage);
+    UsageEvents queryEventsForPackage(long beginTime, long endTime, String callingPackage);
+    UsageEvents queryEventsForUser(long beginTime, long endTime, int userId, String callingPackage);
+    UsageEvents queryEventsForPackageForUser(long beginTime, long endTime, int userId, String pkg, String callingPackage);
     void setAppInactive(String packageName, boolean inactive, int userId);
     boolean isAppInactive(String packageName, int userId);
     void whitelistAppTemporarily(String packageName, long duration, int userId);
     void onCarrierPrivilegedAppsChanged();
     void reportChooserSelection(String packageName, int userId, String contentType,
             in String[] annotations, String action);
+    int getAppStandbyBucket(String packageName, String callingPackage, int userId);
+    void setAppStandbyBucket(String packageName, int bucket, int userId);
+    ParceledListSlice getAppStandbyBuckets(String callingPackage, int userId);
+    void setAppStandbyBuckets(in ParceledListSlice appBuckets, int userId);
+    void registerAppUsageObserver(int observerId, in String[] packages, long timeLimitMs,
+            in PendingIntent callback, String callingPackage);
+    void unregisterAppUsageObserver(int observerId, String callingPackage);
 }

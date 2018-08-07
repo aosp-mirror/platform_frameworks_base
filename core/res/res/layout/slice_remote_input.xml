@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Copyright (C) 2017 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<!-- LinearLayout -->
+<android.app.slice.widget.RemoteInputView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/remote_input"
+        android:background="@drawable/slice_remote_input_bg"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+
+    <view class="com.android.internal.app.slice.widget.RemoteInputView$RemoteEditText"
+            android:id="@+id/remote_input_text"
+            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:paddingTop="2dp"
+            android:paddingBottom="4dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="12dp"
+            android:gravity="start|center_vertical"
+            android:textAppearance="?android:attr/textAppearance"
+            android:textColor="#FFFFFFFF"
+            android:textColorHint="#99ffffff"
+            android:textSize="16sp"
+            android:background="@null"
+            android:singleLine="true"
+            android:ellipsize="start"
+            android:inputType="textShortMessage|textAutoCorrect|textCapSentences"
+            android:imeOptions="actionSend|flagNoExtractUi|flagNoFullscreen" />
+
+    <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical">
+
+        <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:paddingStart="12dp"
+                android:paddingEnd="24dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:id="@+id/remote_input_send"
+                android:src="@drawable/ic_slice_send"
+                android:tint="#FFFFFF"
+                android:tintMode="src_in"
+                android:background="@drawable/slice_ripple_drawable" />
+
+        <ProgressBar
+                android:id="@+id/remote_input_progress"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="6dp"
+                android:layout_gravity="center"
+                android:visibility="invisible"
+                android:indeterminate="true"
+                style="?android:attr/progressBarStyleSmall" />
+
+    </FrameLayout>
+
+</android.app.slice.widget.RemoteInputView>

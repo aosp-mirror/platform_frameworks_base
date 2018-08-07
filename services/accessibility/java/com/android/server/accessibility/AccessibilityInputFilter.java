@@ -19,6 +19,9 @@ package com.android.server.accessibility;
 import android.content.Context;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.util.DebugUtils;
+import android.util.ExceptionUtils;
+import android.util.Log;
 import android.util.Pools.SimplePool;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -28,10 +31,11 @@ import android.view.InputEvent;
 import android.view.InputFilter;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.android.internal.util.BitUtils;
 import com.android.server.LocalServices;
+import com.android.server.policy.WindowManagerPolicy;
 
 /**
  * This class is an input filter for implementing accessibility features such
@@ -188,6 +192,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
 
         if (mEventHandler == null) {
+            if (DEBUG) Slog.d(TAG, "mEventHandler == null for event " + event);
             super.onInputEvent(event, policyFlags);
             return;
         }
@@ -339,6 +344,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             MotionEvent transformedEvent = MotionEvent.obtain(event);
             mEventHandler.onMotionEvent(transformedEvent, event, policyFlags);
             transformedEvent.recycle();
+        } else {
+            if (DEBUG) Slog.d(TAG, "mEventHandler == null for " + event);
         }
     }
 
@@ -366,11 +373,20 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     }
 
     @Override
+    public EventStreamTransformation getNext() {
+        return null;
+    }
+
+    @Override
     public void clearEvents(int inputSource) {
         /* do nothing */
     }
 
     void setUserAndEnabledFeatures(int userId, int enabledFeatures) {
+        if (DEBUG) {
+            Slog.i(TAG, "setUserAndEnabledFeatures(userId = " + userId + ", enabledFeatures = 0x"
+                    + Integer.toHexString(enabledFeatures) + ")");
+        }
         if (mEnabledFeatures == enabledFeatures && mUserId == userId) {
             return;
         }
@@ -397,6 +413,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     }
 
     private void enableFeatures() {
+        if (DEBUG) Slog.i(TAG, "enableFeatures()");
+
         resetStreamState();
 
         if ((mEnabledFeatures & FLAG_FEATURE_AUTOCLICK) != 0) {
@@ -417,7 +435,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             final boolean triggerable = (mEnabledFeatures
                     & FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER) != 0;
             mMagnificationGestureHandler = new MagnificationGestureHandler(
-                    mContext, mAms, detectControlGestures, triggerable);
+                    mContext, mAms.getMagnificationController(),
+                    detectControlGestures, triggerable);
             addFirstEventHandler(mMagnificationGestureHandler);
         }
 
@@ -442,7 +461,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
      */
     private void addFirstEventHandler(EventStreamTransformation handler) {
         if (mEventHandler != null) {
-           handler.setNext(mEventHandler);
+            handler.setNext(mEventHandler);
         } else {
             handler.setNext(this);
         }

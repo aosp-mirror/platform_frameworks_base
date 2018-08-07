@@ -28,7 +28,7 @@ public abstract class RenderProcessGoneDetail {
      * If the render process was killed, this is most likely caused by the
      * system being low on memory.
      *
-     * @return True if render process crashed, otherwise it was killed by
+     * @return {@code true} if render process crashed, otherwise it was killed by
      *         system.
      **/
     public abstract boolean didCrash();

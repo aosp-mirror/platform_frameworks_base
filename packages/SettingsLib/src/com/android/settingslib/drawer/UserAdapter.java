@@ -57,14 +57,15 @@ public class UserAdapter implements SpinnerAdapter, ListAdapter {
             if (userInfo.isManagedProfile()) {
                 mName = context.getString(R.string.managed_user_title);
                 icon = context.getDrawable(
-                    com.android.internal.R.drawable.ic_corp_icon);
+                    com.android.internal.R.drawable.ic_corp_badge);
             } else {
                 mName = userInfo.name;
                 final int userId = userInfo.id;
                 if (um.getUserIcon(userId) != null) {
                     icon = new BitmapDrawable(context.getResources(), um.getUserIcon(userId));
                 } else {
-                    icon = UserIcons.getDefaultUserIcon(userId, /* light= */ false);
+                    icon = UserIcons.getDefaultUserIcon(
+                            context.getResources(), userId, /* light= */ false);
                 }
             }
             this.mIcon = encircle(context, icon);

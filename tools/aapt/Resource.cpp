@@ -918,6 +918,22 @@ status_t massageManifest(Bundle* bundle, ResourceTable* table, sp<XMLNode> root)
         }
     }
 
+
+    if (bundle->getCompileSdkVersion() != 0) {
+        if (!addTagAttribute(root, RESOURCES_ANDROID_NAMESPACE, "compileSdkVersion",
+                    String8::format("%d", bundle->getCompileSdkVersion()),
+                    errorOnFailedInsert, true)) {
+            return UNKNOWN_ERROR;
+        }
+    }
+
+    if (bundle->getCompileSdkVersionCodename() != "") {
+        if (!addTagAttribute(root, RESOURCES_ANDROID_NAMESPACE, "compileSdkVersionCodename",
+                    bundle->getCompileSdkVersionCodename(), errorOnFailedInsert, true)) {
+            return UNKNOWN_ERROR;
+        }
+    }
+
     if (bundle->getPlatformBuildVersionCode() != "") {
         if (!addTagAttribute(root, "", "platformBuildVersionCode",
                     bundle->getPlatformBuildVersionCode(), errorOnFailedInsert, true)) {
@@ -1052,7 +1068,12 @@ enum {
     VERSION_NAME_ATTR = 0x0101021c,
 };
 
-static ssize_t extractPlatformBuildVersion(ResXMLTree& tree, Bundle* bundle) {
+static ssize_t extractPlatformBuildVersion(const ResTable& table, ResXMLTree& tree, Bundle* bundle) {
+    // First check if we should be recording the compileSdkVersion* attributes.
+    static const String16 compileSdkVersionName("android:attr/compileSdkVersion");
+    const bool useCompileSdkVersion = table.identifierForName(compileSdkVersionName.string(),
+                                                              compileSdkVersionName.size()) != 0u;
+
     size_t len;
     ResXMLTree::event_code_t code;
     while ((code = tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
@@ -1082,6 +1103,10 @@ static ssize_t extractPlatformBuildVersion(ResXMLTree& tree, Bundle* bundle) {
             bundle->setPlatformBuildVersionCode(String8::format("%d", versionCode));
         }
 
+        if (useCompileSdkVersion && versionCode >= 0 && bundle->getCompileSdkVersion() == 0) {
+            bundle->setCompileSdkVersion(versionCode);
+        }
+
         String8 versionName = AaptXml::getAttribute(tree, VERSION_NAME_ATTR, &error);
         if (error != "") {
             fprintf(stderr, "ERROR: failed to get platform version name\n");
@@ -1090,6 +1115,11 @@ static ssize_t extractPlatformBuildVersion(ResXMLTree& tree, Bundle* bundle) {
 
         if (versionName != "" && bundle->getPlatformBuildVersionName() == "") {
             bundle->setPlatformBuildVersionName(versionName);
+        }
+
+        if (useCompileSdkVersion && versionName != ""
+                && bundle->getCompileSdkVersionCodename() == "") {
+            bundle->setCompileSdkVersionCodename(versionName);
         }
         return NO_ERROR;
     }
@@ -1121,7 +1151,7 @@ static ssize_t extractPlatformBuildVersion(AssetManager& assets, Bundle* bundle)
             fprintf(stderr, "ERROR: Platform AndroidManifest.xml is corrupt\n");
             result = UNKNOWN_ERROR;
         } else {
-            result = extractPlatformBuildVersion(tree, bundle);
+            result = extractPlatformBuildVersion(assets.getResources(true), tree, bundle);
         }
     }
 
@@ -1707,7 +1737,9 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     // extract them from the platform APK.
     if (packageType != ResourceTable::System &&
             (bundle->getPlatformBuildVersionCode() == "" ||
-            bundle->getPlatformBuildVersionName() == "")) {
+            bundle->getPlatformBuildVersionName() == "" ||
+            bundle->getCompileSdkVersion() == 0 ||
+            bundle->getCompileSdkVersionCodename() == "")) {
         err = extractPlatformBuildVersion(assets->getAssetManager(), bundle);
         if (err != NO_ERROR) {
             return UNKNOWN_ERROR;

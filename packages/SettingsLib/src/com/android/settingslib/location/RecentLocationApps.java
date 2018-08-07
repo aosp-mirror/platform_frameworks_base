@@ -16,21 +16,22 @@
 
 package com.android.settingslib.location;
 
-import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.Drawable;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.support.annotation.VisibleForTesting;
+import android.text.format.DateUtils;
 import android.util.IconDrawableFactory;
 import android.util.Log;
-
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -38,11 +39,14 @@ import java.util.List;
  */
 public class RecentLocationApps {
     private static final String TAG = RecentLocationApps.class.getSimpleName();
-    private static final String ANDROID_SYSTEM_PACKAGE_NAME = "android";
+    @VisibleForTesting
+    static final String ANDROID_SYSTEM_PACKAGE_NAME = "android";
 
-    private static final int RECENT_TIME_INTERVAL_MILLIS = 15 * 60 * 1000;
+    // Keep last 24 hours of location app information.
+    private static final long RECENT_TIME_INTERVAL_MILLIS = DateUtils.DAY_IN_MILLIS;
 
-    private static final int[] LOCATION_OPS = new int[] {
+    @VisibleForTesting
+    static final int[] LOCATION_OPS = new int[] {
             AppOpsManager.OP_MONITOR_LOCATION,
             AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION,
     };
@@ -59,6 +63,7 @@ public class RecentLocationApps {
 
     /**
      * Fills a list of applications which queried location recently within specified time.
+     * Apps are sorted by recency. Apps with more recent location requests are in the front.
      */
     public List<Request> getAppList() {
         // Retrieve a location usage list from AppOps
@@ -91,7 +96,18 @@ public class RecentLocationApps {
                 requests.add(request);
             }
         }
+        return requests;
+    }
 
+    public List<Request> getAppListSorted() {
+        List<Request> requests = getAppList();
+        // Sort the list of Requests by recency. Most recent request first.
+        Collections.sort(requests, Collections.reverseOrder(new Comparator<Request>() {
+            @Override
+            public int compare(Request request1, Request request2) {
+                return Long.compare(request1.requestFinishTime, request2.requestFinishTime);
+            }
+        }));
         return requests;
     }
 
@@ -108,10 +124,12 @@ public class RecentLocationApps {
         List<AppOpsManager.OpEntry> entries = ops.getOps();
         boolean highBattery = false;
         boolean normalBattery = false;
+        long locationRequestFinishTime = 0L;
         // Earliest time for a location request to end and still be shown in list.
         long recentLocationCutoffTime = now - RECENT_TIME_INTERVAL_MILLIS;
         for (AppOpsManager.OpEntry entry : entries) {
             if (entry.isRunning() || entry.getTime() >= recentLocationCutoffTime) {
+                locationRequestFinishTime = entry.getTime() + entry.getDuration();
                 switch (entry.getOp()) {
                     case AppOpsManager.OP_MONITOR_LOCATION:
                         normalBattery = true;
@@ -133,15 +151,13 @@ public class RecentLocationApps {
         }
 
         // The package is fresh enough, continue.
-
         int uid = ops.getUid();
         int userId = UserHandle.getUserId(uid);
 
         Request request = null;
         try {
-            IPackageManager ipm = AppGlobals.getPackageManager();
-            ApplicationInfo appInfo =
-                    ipm.getApplicationInfo(packageName, PackageManager.GET_META_DATA, userId);
+            ApplicationInfo appInfo = mPackageManager.getApplicationInfoAsUser(
+                    packageName, PackageManager.GET_META_DATA, userId);
             if (appInfo == null) {
                 Log.w(TAG, "Null application info retrieved for package " + packageName
                         + ", userId " + userId);
@@ -158,12 +174,10 @@ public class RecentLocationApps {
                 badgedAppLabel = null;
             }
             request = new Request(packageName, userHandle, icon, appLabel, highBattery,
-                    badgedAppLabel);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Error while retrieving application info for package " + packageName
-                    + ", userId " + userId, e);
+                    badgedAppLabel, locationRequestFinishTime);
+        } catch (NameNotFoundException e) {
+            Log.w(TAG, "package name not found for " + packageName + ", userId " + userId);
         }
-
         return request;
     }
 
@@ -174,15 +188,18 @@ public class RecentLocationApps {
         public final CharSequence label;
         public final boolean isHighBattery;
         public final CharSequence contentDescription;
+        public final long requestFinishTime;
 
         private Request(String packageName, UserHandle userHandle, Drawable icon,
-                CharSequence label, boolean isHighBattery, CharSequence contentDescription) {
+                CharSequence label, boolean isHighBattery, CharSequence contentDescription,
+                long requestFinishTime) {
             this.packageName = packageName;
             this.userHandle = userHandle;
             this.icon = icon;
             this.label = label;
             this.isHighBattery = isHighBattery;
             this.contentDescription = contentDescription;
+            this.requestFinishTime = requestFinishTime;
         }
     }
 }

@@ -339,6 +339,11 @@ public final class SmsManager {
     /**
      * Send a text based SMS without writing it into the SMS Provider.
      *
+     * <p>
+     * The message will be sent directly over the network and will not be visible in SMS
+     * applications. Intended for internal carrier use only.
+     * </p>
+     *
      * <p>Requires Permission: Both {@link android.Manifest.permission#SEND_SMS} and
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE}, or that the calling app has carrier
      * privileges (see {@link TelephonyManager#hasCarrierPrivileges}), or that the calling app is
@@ -346,7 +351,6 @@ public final class SmsManager {
      * {@link CarrierConfigManager#KEY_CONFIG_IMS_PACKAGE_OVERRIDE_STRING}).
      *
      * @see #sendTextMessage(String, String, String, PendingIntent, PendingIntent)
-     * @hide
      */
     @SystemApi
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
@@ -502,20 +506,23 @@ public final class SmsManager {
      * Inject an SMS PDU into the android application framework.
      *
      * <p>Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE} or carrier
-     * privileges. @see android.telephony.TelephonyManager#hasCarrierPrivileges
+     * privileges per {@link android.telephony.TelephonyManager#hasCarrierPrivileges}.
      *
      * @param pdu is the byte array of pdu to be injected into android application framework
-     * @param format is the format of SMS pdu (3gpp or 3gpp2)
+     * @param format is the format of SMS pdu ({@link SmsMessage#FORMAT_3GPP} or
+     *  {@link SmsMessage#FORMAT_3GPP2})
      * @param receivedIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully received by the
      *  android application framework, or failed. This intent is broadcasted at
      *  the same time an SMS received from radio is acknowledged back.
-     *  The result code will be <code>RESULT_SMS_HANDLED</code> for success, or
-     *  <code>RESULT_SMS_GENERIC_ERROR</code> for error.
+     *  The result code will be {@link android.provider.Telephony.Sms.Intents#RESULT_SMS_HANDLED}
+     *  for success, or {@link android.provider.Telephony.Sms.Intents#RESULT_SMS_GENERIC_ERROR} for
+     *  error.
      *
-     * @throws IllegalArgumentException if format is not one of 3gpp and 3gpp2.
+     * @throws IllegalArgumentException if the format is invalid.
      */
-    public void injectSmsPdu(byte[] pdu, String format, PendingIntent receivedIntent) {
+    public void injectSmsPdu(
+            byte[] pdu, @SmsMessage.Format String format, PendingIntent receivedIntent) {
         if (!format.equals(SmsMessage.FORMAT_3GPP) && !format.equals(SmsMessage.FORMAT_3GPP2)) {
             // Format must be either 3gpp or 3gpp2.
             throw new IllegalArgumentException(

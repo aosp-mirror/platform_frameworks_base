@@ -17,11 +17,16 @@
 #include "CacheManager.h"
 
 #include "Layer.h"
+#include "Properties.h"
 #include "RenderThread.h"
+#include "pipeline/skia/ShaderCache.h"
+#include "pipeline/skia/SkiaMemoryTracer.h"
 #include "renderstate/RenderState.h"
 
-#include <gui/Surface.h>
 #include <GrContextOptions.h>
+#include <SkExecutor.h>
+#include <SkGraphics.h>
+#include <gui/Surface.h>
 #include <math.h>
 #include <set>
 
@@ -41,19 +46,22 @@ namespace renderthread {
 #define FONT_CACHE_MIN_MB (0.5f)
 #define FONT_CACHE_MAX_MB (4.0f)
 
-CacheManager::CacheManager(const DisplayInfo& display)
-        : mMaxSurfaceArea(display.w * display.h) {
-    mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(mMaxSurfaceArea/2,
-            skiapipeline::VectorDrawableAtlas::StorageMode::allowSharedSurface);
+CacheManager::CacheManager(const DisplayInfo& display) : mMaxSurfaceArea(display.w * display.h) {
+    mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(
+            mMaxSurfaceArea / 2,
+            skiapipeline::VectorDrawableAtlas::StorageMode::disallowSharedSurface);
+    if (Properties::isSkiaEnabled()) {
+        skiapipeline::ShaderCache::get().initShaderDiskCache();
+    }
 }
 
-void CacheManager::reset(GrContext* context) {
-    if (context != mGrContext.get()) {
+void CacheManager::reset(sk_sp<GrContext> context) {
+    if (context != mGrContext) {
         destroy();
     }
 
     if (context) {
-        mGrContext = sk_ref_sp(context);
+        mGrContext = std::move(context);
         mGrContext->getResourceCacheLimits(&mMaxResources, nullptr);
         updateContextCacheSizes();
     }
@@ -62,7 +70,9 @@ void CacheManager::reset(GrContext* context) {
 void CacheManager::destroy() {
     // cleanup any caches here as the GrContext is about to go away...
     mGrContext.reset(nullptr);
-    mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(mMaxSurfaceArea/2);
+    mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(
+            mMaxSurfaceArea / 2,
+            skiapipeline::VectorDrawableAtlas::StorageMode::disallowSharedSurface);
 }
 
 void CacheManager::updateContextCacheSizes() {
@@ -71,6 +81,29 @@ void CacheManager::updateContextCacheSizes() {
 
     mGrContext->setResourceCacheLimits(mMaxResources, mMaxResourceBytes);
 }
+
+class CacheManager::SkiaTaskProcessor : public TaskProcessor<bool>, public SkExecutor {
+public:
+    explicit SkiaTaskProcessor(TaskManager* taskManager) : TaskProcessor<bool>(taskManager) {}
+
+    // This is really a Task<void> but that doesn't really work when Future<>
+    // expects to be able to get/set a value
+    struct SkiaTask : public Task<bool> {
+        std::function<void()> func;
+    };
+
+    virtual void add(std::function<void(void)> func) override {
+        sp<SkiaTask> task(new SkiaTask());
+        task->func = func;
+        TaskProcessor<bool>::add(task);
+    }
+
+    virtual void onProcess(const sp<Task<bool> >& task) override {
+        SkiaTask* t = static_cast<SkiaTask*>(task.get());
+        t->func();
+        task->setResult(true);
+    }
+};
 
 void CacheManager::configureContext(GrContextOptions* contextOptions) {
     contextOptions->fAllowPathMaskCaching = true;
@@ -94,6 +127,15 @@ void CacheManager::configureContext(GrContextOptions* contextOptions) {
     // Skia's implementation doesn't provide a mechanism to resize the font cache due to
     // the potential cost of recreating the glyphs.
     contextOptions->fGlyphCacheTextureMaximumBytes = fontCacheMB * 1024 * 1024;
+
+    if (mTaskManager.canRunTasks()) {
+        if (!mTaskProcessor.get()) {
+            mTaskProcessor = new SkiaTaskProcessor(&mTaskManager);
+        }
+        contextOptions->fExecutor = mTaskProcessor.get();
+    }
+
+    contextOptions->fPersistentCache = &skiapipeline::ShaderCache::get();
 }
 
 void CacheManager::trimMemory(TrimMemoryMode mode) {
@@ -105,11 +147,16 @@ void CacheManager::trimMemory(TrimMemoryMode mode) {
 
     switch (mode) {
         case TrimMemoryMode::Complete:
-            mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(mMaxSurfaceArea/2);
+            mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(mMaxSurfaceArea / 2);
             mGrContext->freeGpuResources();
             break;
         case TrimMemoryMode::UiHidden:
-            mGrContext->purgeUnlockedResources(mMaxResourceBytes - mBackgroundResourceBytes, true);
+            // Here we purge all the unlocked scratch resources and then toggle the resources cache
+            // limits between the background and max amounts. This causes the unlocked resources
+            // that have persistent data to be purged in LRU order.
+            mGrContext->purgeUnlockedResources(true);
+            mGrContext->setResourceCacheLimits(mMaxResources, mBackgroundResourceBytes);
+            mGrContext->setResourceCacheLimits(mMaxResources, mMaxResourceBytes);
             break;
     }
 }
@@ -138,13 +185,30 @@ void CacheManager::dumpMemoryUsage(String8& log, const RenderState* renderState)
         return;
     }
 
-    size_t bytesCached;
-    mGrContext->getResourceCacheUsage(nullptr, &bytesCached);
+    log.appendFormat("Font Cache (CPU):\n");
+    log.appendFormat("  Size: %.2f kB \n", SkGraphics::GetFontCacheUsed() / 1024.0f);
+    log.appendFormat("  Glyph Count: %d \n", SkGraphics::GetFontCacheCountUsed());
 
-    log.appendFormat("Caches:\n");
+    log.appendFormat("CPU Caches:\n");
+    std::vector<skiapipeline::ResourcePair> cpuResourceMap = {
+            {"skia/sk_resource_cache/bitmap_", "Bitmaps"},
+            {"skia/sk_resource_cache/rrect-blur_", "Masks"},
+            {"skia/sk_resource_cache/rects-blur_", "Masks"},
+            {"skia/sk_resource_cache/tessellated", "Shadows"},
+    };
+    skiapipeline::SkiaMemoryTracer cpuTracer(cpuResourceMap, false);
+    SkGraphics::DumpMemoryStatistics(&cpuTracer);
+    cpuTracer.logOutput(log);
+
+    log.appendFormat("GPU Caches:\n");
+    skiapipeline::SkiaMemoryTracer gpuTracer("category", true);
+    mGrContext->dumpMemoryStatistics(&gpuTracer);
+    gpuTracer.logOutput(log);
+
+    log.appendFormat("Other Caches:\n");
     log.appendFormat("                         Current / Maximum\n");
-    log.appendFormat("  VectorDrawableAtlas  %6.2f kB / %6.2f kB (entries = %zu)\n",
-            0.0f, 0.0f, (size_t)0);
+    log.appendFormat("  VectorDrawableAtlas  %6.2f kB / %6.2f KB (entries = %zu)\n", 0.0f, 0.0f,
+                     (size_t)0);
 
     if (renderState) {
         if (renderState->mActiveLayers.size() > 0) {
@@ -153,24 +217,19 @@ void CacheManager::dumpMemoryUsage(String8& log, const RenderState* renderState)
 
         size_t layerMemoryTotal = 0;
         for (std::set<Layer*>::iterator it = renderState->mActiveLayers.begin();
-                it != renderState->mActiveLayers.end(); it++) {
+             it != renderState->mActiveLayers.end(); it++) {
             const Layer* layer = *it;
             const char* layerType = layer->getApi() == Layer::Api::OpenGL ? "GlLayer" : "VkLayer";
-            log.appendFormat("    %s size %dx%d\n", layerType,
-                    layer->getWidth(), layer->getHeight());
+            log.appendFormat("    %s size %dx%d\n", layerType, layer->getWidth(),
+                             layer->getHeight());
             layerMemoryTotal += layer->getWidth() * layer->getHeight() * 4;
         }
-        log.appendFormat("  Layers Total         %6.2f kB (numLayers = %zu)\n",
+        log.appendFormat("  Layers Total         %6.2f KB (numLayers = %zu)\n",
                          layerMemoryTotal / 1024.0f, renderState->mActiveLayers.size());
     }
 
-
-    log.appendFormat("Total memory usage:\n");
-    log.appendFormat("  %zu bytes, %.2f MB (%.2f MB is purgeable)\n",
-                     bytesCached, bytesCached / 1024.0f / 1024.0f,
-                     mGrContext->getResourceCachePurgeableBytes() / 1024.0f / 1024.0f);
-
-
+    log.appendFormat("Total GPU memory usage:\n");
+    gpuTracer.logTotals(log);
 }
 
 } /* namespace renderthread */

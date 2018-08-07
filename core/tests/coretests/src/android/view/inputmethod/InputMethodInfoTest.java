@@ -26,6 +26,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.support.test.filters.LargeTest;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -34,6 +35,7 @@ import com.android.frameworks.coretests.R;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+@LargeTest
 @RunWith(AndroidJUnit4.class)
 public class InputMethodInfoTest {
 
@@ -66,6 +68,17 @@ public class InputMethodInfoTest {
         final InputMethodInfo clone = cloneViaParcel(imi);
 
         assertThat(clone.supportsSwitchingToNextInputMethod(), is(true));
+    }
+
+    @Test
+    public void testIsVrOnly() throws Exception {
+        final InputMethodInfo imi = buildInputMethodForTest(R.xml.ime_meta_vr_only);
+
+        assertThat(imi.isVrOnly(), is(true));
+
+        final InputMethodInfo clone = cloneViaParcel(imi);
+
+        assertThat(clone.isVrOnly(), is(true));
     }
 
     private InputMethodInfo buildInputMethodForTest(final @XmlRes int metaDataRes)

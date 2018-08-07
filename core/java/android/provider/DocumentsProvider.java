@@ -627,7 +627,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /** {@hide} */
-    public @Nullable Bundle getDocumentMetadata(String documentId, @Nullable String[] tags)
+    public @Nullable Bundle getDocumentMetadata(String documentId)
             throws FileNotFoundException {
         throw new UnsupportedOperationException("Metadata not supported");
     }
@@ -685,7 +685,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @see ParcelFileDescriptor#parseMode(String)
      */
     public abstract ParcelFileDescriptor openDocument(
-            String documentId, String mode, CancellationSignal signal) throws FileNotFoundException;
+            String documentId,
+            String mode,
+            @Nullable CancellationSignal signal) throws FileNotFoundException;
 
     /**
      * Open and return a thumbnail of the requested document.
@@ -1142,8 +1144,7 @@ public abstract class DocumentsProvider extends ContentProvider {
 
             out.putParcelable(DocumentsContract.EXTRA_RESULT, path);
         } else if (METHOD_GET_DOCUMENT_METADATA.equals(method)) {
-            return getDocumentMetadata(
-                    documentId, extras.getStringArray(DocumentsContract.EXTRA_METADATA_TAGS));
+            return getDocumentMetadata(documentId);
         } else {
             throw new UnsupportedOperationException("Method not supported " + method);
         }

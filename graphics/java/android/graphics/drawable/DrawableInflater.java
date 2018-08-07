@@ -187,6 +187,8 @@ public final class DrawableInflater {
                 return new BitmapDrawable();
             case "nine-patch":
                 return new NinePatchDrawable();
+            case "animated-image":
+                return new AnimatedImageDrawable();
             default:
                 return null;
         }

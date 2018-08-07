@@ -25,15 +25,17 @@
     android:minHeight="92dp"
     android:gravity="center"
     android:orientation="vertical"
-    android:paddingEnd="0dip"
-    android:paddingStart="0dip">
+    android:paddingEnd="4dip"
+    android:paddingStart="4dip">
 
     <ImageView
         android:id="@*android:id/icon"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_gravity="center"
-        android:scaleType="center"/>
+        android:scaleType="center"
+        android:alpha="?android:attr/primaryContentAlpha"
+    />
 
     <TextView
         android:id="@*android:id/message"

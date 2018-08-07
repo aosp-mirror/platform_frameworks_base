@@ -16,9 +16,9 @@
 
 package com.android.systemui.pip.phone;
 
-import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_NONE;
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_CLOSE;
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_FULL;
+import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_NONE;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -43,10 +43,10 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.policy.PipSnapAlgorithm;
 import com.android.systemui.R;
+import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
 import java.io.PrintWriter;
@@ -62,10 +62,6 @@ public class PipTouchHandler {
     private static final boolean ENABLE_MINIMIZE = false;
     // Allow the PIP to be flung from anywhere on the screen to the bottom to be dismissed.
     private static final boolean ENABLE_FLING_DISMISS = false;
-
-    // These values are used for metrics and should never change
-    private static final int METRIC_VALUE_DISMISSED_BY_TAP = 0;
-    private static final int METRIC_VALUE_DISMISSED_BY_DRAG = 1;
 
     private static final int SHOW_DISMISS_AFFORDANCE_DELAY = 225;
 
@@ -124,6 +120,8 @@ public class PipTouchHandler {
     private boolean mIsImeShowing;
     private int mImeHeight;
     private int mImeOffset;
+    private boolean mIsShelfShowing;
+    private int mShelfHeight;
     private float mSavedSnapFraction = -1f;
     private boolean mSendingHoverAccessibilityEvents;
     private boolean mMovementWithinMinimize;
@@ -162,9 +160,9 @@ public class PipTouchHandler {
 
         @Override
         public void onPipDismiss() {
+            MetricsLoggerWrapper.logPictureInPictureDismissByTap(mContext,
+                    PipUtils.getTopPinnedActivity(mContext, mActivityManager));
             mMotionHelper.dismissPip();
-            MetricsLogger.action(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
-                    METRIC_VALUE_DISMISSED_BY_TAP);
         }
 
         @Override
@@ -253,13 +251,20 @@ public class PipTouchHandler {
         mImeHeight = imeHeight;
     }
 
+    public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {
+        mIsShelfShowing = shelfVisible;
+        mShelfHeight = shelfHeight;
+    }
+
     public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds, Rect animatingBounds,
-            boolean fromImeAdjustement, int displayRotation) {
+            boolean fromImeAdjustment, boolean fromShelfAdjustment, int displayRotation) {
+        final int bottomOffset = mIsImeShowing ? mImeHeight : 0;
+
         // Re-calculate the expanded bounds
         mNormalBounds = normalBounds;
         Rect normalMovementBounds = new Rect();
         mSnapAlgorithm.getMovementBounds(mNormalBounds, insetBounds, normalMovementBounds,
-                mIsImeShowing ? mImeHeight : 0);
+                bottomOffset);
 
         // Calculate the expanded size
         float aspectRatio = (float) normalBounds.width() / normalBounds.height();
@@ -270,40 +275,48 @@ public class PipTouchHandler {
         mExpandedBounds.set(0, 0, expandedSize.getWidth(), expandedSize.getHeight());
         Rect expandedMovementBounds = new Rect();
         mSnapAlgorithm.getMovementBounds(mExpandedBounds, insetBounds, expandedMovementBounds,
-                mIsImeShowing ? mImeHeight : 0);
+                bottomOffset);
 
-        // If this is from an IME adjustment, then we should move the PiP so that it is not occluded
-        // by the IME
-        if (fromImeAdjustement) {
+        // If this is from an IME or shelf adjustment, then we should move the PiP so that it is not
+        // occluded by the IME or shelf.
+        if (fromImeAdjustment || fromShelfAdjustment) {
             if (mTouchState.isUserInteracting()) {
                 // Defer the update of the current movement bounds until after the user finishes
                 // touching the screen
             } else {
-                final Rect bounds = new Rect(animatingBounds);
+                final int adjustedOffset = Math.max(mIsImeShowing ? mImeHeight + mImeOffset : 0,
+                        mIsShelfShowing ? mShelfHeight : 0);
+                Rect normalAdjustedBounds = new Rect();
+                mSnapAlgorithm.getMovementBounds(mNormalBounds, insetBounds, normalAdjustedBounds,
+                        adjustedOffset);
+                Rect expandedAdjustedBounds = new Rect();
+                mSnapAlgorithm.getMovementBounds(mExpandedBounds, insetBounds,
+                        expandedAdjustedBounds, adjustedOffset);
+                final Rect toAdjustedBounds = mMenuState == MENU_STATE_FULL
+                        ? expandedAdjustedBounds
+                        : normalAdjustedBounds;
                 final Rect toMovementBounds = mMenuState == MENU_STATE_FULL
                         ? expandedMovementBounds
                         : normalMovementBounds;
-                if (mIsImeShowing) {
-                    // IME visible, apply the IME offset if the space allows for it
-                    final int imeOffset = toMovementBounds.bottom - Math.max(toMovementBounds.top,
-                            toMovementBounds.bottom - mImeOffset);
-                    if (bounds.top == mMovementBounds.bottom) {
-                        // If the PIP is currently resting on top of the IME, then adjust it with
-                        // the showing IME
-                        bounds.offsetTo(bounds.left, toMovementBounds.bottom - imeOffset);
-                    } else {
-                        bounds.offset(0, Math.min(0, toMovementBounds.bottom - imeOffset
-                                - bounds.top));
-                    }
-                } else {
-                    // IME hidden
-                    if (bounds.top >= (mMovementBounds.bottom - mImeOffset)) {
-                        // If the PIP is resting on top of the IME, then adjust it with the hiding
-                        // IME
-                        bounds.offsetTo(bounds.left, toMovementBounds.bottom);
-                    }
+
+                // If the PIP window needs to shift to right above shelf/IME and it's already above
+                // that, don't move the PIP window.
+                if (toAdjustedBounds.bottom < mMovementBounds.bottom
+                        && animatingBounds.top < toAdjustedBounds.bottom) {
+                    return;
                 }
-                mMotionHelper.animateToIMEOffset(bounds);
+
+                // If the PIP window needs to shift down due to dismissal of shelf/IME but it's way
+                // above the position as if shelf/IME shows, don't move the PIP window.
+                int movementBoundsAdjustment = toMovementBounds.bottom - mMovementBounds.bottom;
+                int offsetAdjustment = fromImeAdjustment ? mImeOffset : mShelfHeight;
+                if (toAdjustedBounds.bottom >= mMovementBounds.bottom
+                        && animatingBounds.top
+                        < toAdjustedBounds.bottom - movementBoundsAdjustment - offsetAdjustment) {
+                    return;
+                }
+
+                animateToOffset(animatingBounds, toAdjustedBounds);
             }
         }
 
@@ -323,6 +336,15 @@ public class PipTouchHandler {
             mSavedSnapFraction = -1f;
             mDeferResizeToNormalBoundsUntilRotation = -1;
         }
+    }
+
+    private void animateToOffset(Rect animatingBounds, Rect toAdjustedBounds) {
+        final Rect bounds = new Rect(animatingBounds);
+        bounds.offset(0, toAdjustedBounds.bottom - bounds.top);
+        // In landscape mode, PIP window can go offset while launching IME. We want to align the
+        // the top of the PIP window with the top of the movement bounds in that case.
+        bounds.offset(0, Math.max(0, mMovementBounds.top - bounds.top));
+        mMotionHelper.animateToOffset(bounds);
     }
 
     private void onRegistrationChanged(boolean isRegistered) {
@@ -463,8 +485,8 @@ public class PipTouchHandler {
             return;
         }
         if (mIsMinimized != isMinimized) {
-            MetricsLogger.action(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MINIMIZED,
-                    isMinimized);
+            MetricsLoggerWrapper.logPictureInPictureMinimize(mContext,
+                    isMinimized, PipUtils.getTopPinnedActivity(mContext, mActivityManager));
         }
         mIsMinimized = isMinimized;
         mSnapAlgorithm.setMinimized(isMinimized);
@@ -537,8 +559,7 @@ public class PipTouchHandler {
         mMenuState = menuState;
         updateMovementBounds(menuState);
         if (menuState != MENU_STATE_CLOSE) {
-            MetricsLogger.visibility(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MENU,
-                    menuState == MENU_STATE_FULL);
+            MetricsLoggerWrapper.logPictureInPictureMenuVisible(mContext, menuState == MENU_STATE_FULL);
         }
     }
 
@@ -668,11 +689,10 @@ public class PipTouchHandler {
             if (ENABLE_DISMISS_DRAG_TO_EDGE) {
                 // Check if the user dragged or flung the PiP offscreen to dismiss it
                 if (mMotionHelper.shouldDismissPip() || isFlingToBot) {
+                    MetricsLoggerWrapper.logPictureInPictureDismissByDrag(mContext,
+                            PipUtils.getTopPinnedActivity(mContext, mActivityManager));
                     mMotionHelper.animateDismiss(mMotionHelper.getBounds(), vel.x,
                         vel.y, mUpdateScrimListener);
-                    MetricsLogger.action(mContext,
-                            MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
-                            METRIC_VALUE_DISMISSED_BY_DRAG);
                     return true;
                 }
             }
@@ -807,6 +827,8 @@ public class PipTouchHandler {
         pw.println(innerPrefix + "mIsMinimized=" + mIsMinimized);
         pw.println(innerPrefix + "mIsImeShowing=" + mIsImeShowing);
         pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
+        pw.println(innerPrefix + "mIsShelfShowing=" + mIsShelfShowing);
+        pw.println(innerPrefix + "mShelfHeight=" + mShelfHeight);
         pw.println(innerPrefix + "mSavedSnapFraction=" + mSavedSnapFraction);
         pw.println(innerPrefix + "mEnableDragToEdgeDismiss=" + ENABLE_DISMISS_DRAG_TO_EDGE);
         pw.println(innerPrefix + "mEnableMinimize=" + ENABLE_MINIMIZE);

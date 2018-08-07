@@ -19,10 +19,10 @@
 #include "Caches.h"
 #include "Glop.h"
 #include "GlopBuilder.h"
+#include "VertexBuffer.h"
 #include "renderstate/OffscreenBufferPool.h"
 #include "renderstate/RenderState.h"
 #include "utils/GLUtils.h"
-#include "VertexBuffer.h"
 
 #include <algorithm>
 
@@ -32,8 +32,8 @@ namespace uirenderer {
 OffscreenBuffer* BakedOpRenderer::startTemporaryLayer(uint32_t width, uint32_t height) {
     LOG_ALWAYS_FATAL_IF(mRenderTarget.offscreenBuffer, "already has layer...");
 
-    OffscreenBuffer* buffer = mRenderState.layerPool().get(
-            mRenderState, width, height, mWideColorGamut);
+    OffscreenBuffer* buffer =
+            mRenderState.layerPool().get(mRenderState, width, height, mWideColorGamut);
     startRepaintLayer(buffer, Rect(width, height));
     return buffer;
 }
@@ -46,13 +46,13 @@ void BakedOpRenderer::startRepaintLayer(OffscreenBuffer* offscreenBuffer, const 
     LOG_ALWAYS_FATAL_IF(mRenderTarget.offscreenBuffer, "already has layer...");
 
     // subtract repaintRect from region, since it will be regenerated
-    if (repaintRect.contains(0, 0,
-                offscreenBuffer->viewportWidth, offscreenBuffer->viewportHeight)) {
+    if (repaintRect.contains(0, 0, offscreenBuffer->viewportWidth,
+                             offscreenBuffer->viewportHeight)) {
         // repaint full layer, so throw away entire region
         offscreenBuffer->region.clear();
     } else {
         offscreenBuffer->region.subtractSelf(android::Rect(repaintRect.left, repaintRect.top,
-                repaintRect.right, repaintRect.bottom));
+                                                           repaintRect.right, repaintRect.bottom));
     }
 
     mRenderTarget.offscreenBuffer = offscreenBuffer;
@@ -64,16 +64,14 @@ void BakedOpRenderer::startRepaintLayer(OffscreenBuffer* offscreenBuffer, const 
 
     // attach the texture to the FBO
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-            offscreenBuffer->texture.id(), 0);
+                           offscreenBuffer->texture.id(), 0);
     GL_CHECKPOINT(LOW);
 
     int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     LOG_ALWAYS_FATAL_IF(status != GL_FRAMEBUFFER_COMPLETE,
-            "framebuffer incomplete, status %d, textureId %d, size %dx%d",
-            status,
-            offscreenBuffer->texture.id(),
-            offscreenBuffer->texture.width(),
-            offscreenBuffer->texture.height());
+                        "framebuffer incomplete, status %d, textureId %d, size %dx%d", status,
+                        offscreenBuffer->texture.id(), offscreenBuffer->texture.width(),
+                        offscreenBuffer->texture.height());
 
     // Change the viewport & ortho projection
     setViewport(offscreenBuffer->viewportWidth, offscreenBuffer->viewportHeight);
@@ -92,7 +90,7 @@ void BakedOpRenderer::endLayer() {
     mRenderTarget.lastStencilClip = nullptr;
 
     mRenderTarget.offscreenBuffer->updateMeshFromRegion();
-    mRenderTarget.offscreenBuffer = nullptr; // It's in drawLayerOp's hands now.
+    mRenderTarget.offscreenBuffer = nullptr;  // It's in drawLayerOp's hands now.
 
     // Detach the texture from the FBO
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
@@ -104,14 +102,14 @@ void BakedOpRenderer::endLayer() {
 OffscreenBuffer* BakedOpRenderer::copyToLayer(const Rect& area) {
     const uint32_t width = area.getWidth();
     const uint32_t height = area.getHeight();
-    OffscreenBuffer* buffer = mRenderState.layerPool().get(
-            mRenderState, width, height, mWideColorGamut);
+    OffscreenBuffer* buffer =
+            mRenderState.layerPool().get(mRenderState, width, height, mWideColorGamut);
     if (!area.isEmpty() && width != 0 && height != 0) {
         mCaches.textureState().activateTexture(0);
         mCaches.textureState().bindTexture(buffer->texture.id());
 
-        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-                area.left, mRenderTarget.viewportHeight - area.bottom, width, height);
+        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, area.left,
+                            mRenderTarget.viewportHeight - area.bottom, width, height);
     }
     return buffer;
 }
@@ -177,7 +175,7 @@ void BakedOpRenderer::clearColorBuffer(const Rect& rect) {
         // Requested rect is subset of viewport - scissor to it to avoid over-clearing
         mRenderState.scissor().setEnabled(true);
         mRenderState.scissor().set(rect.left, mRenderTarget.viewportHeight - rect.bottom,
-                rect.getWidth(), rect.getHeight());
+                                   rect.getWidth(), rect.getHeight());
     }
     glClear(GL_COLOR_BUFFER_BIT);
     if (!mRenderTarget.frameBufferId) mHasDrawn = true;
@@ -222,8 +220,7 @@ void BakedOpRenderer::drawRects(const float* rects, int count, const SkPaint* pa
 
 // clears and re-fills stencil with provided rendertarget space quads,
 // and then put stencil into test mode
-void BakedOpRenderer::setupStencilQuads(std::vector<Vertex>& quadVertices,
-        int incrementThreshold) {
+void BakedOpRenderer::setupStencilQuads(std::vector<Vertex>& quadVertices, int incrementThreshold) {
     mRenderState.stencil().enableWrite(incrementThreshold);
     mRenderState.stencil().clear();
     Glop glop;
@@ -239,7 +236,8 @@ void BakedOpRenderer::setupStencilQuads(std::vector<Vertex>& quadVertices,
 }
 
 void BakedOpRenderer::setupStencilRectList(const ClipBase* clip) {
-    LOG_ALWAYS_FATAL_IF(clip->mode != ClipMode::RectangleList, "can't rectlist clip without rectlist");
+    LOG_ALWAYS_FATAL_IF(clip->mode != ClipMode::RectangleList,
+                        "can't rectlist clip without rectlist");
     auto&& rectList = reinterpret_cast<const ClipRectList*>(clip)->rectList;
     int quadCount = rectList.getTransformedRectanglesCount();
     std::vector<Vertex> rectangleVertices;
@@ -253,7 +251,7 @@ void BakedOpRenderer::setupStencilRectList(const ClipBase* clip) {
             transform.mapRect(bounds);
             bounds.doIntersect(clip->rect);
             if (bounds.isEmpty()) {
-                continue; // will be outside of scissor, skip
+                continue;  // will be outside of scissor, skip
             }
         }
 
@@ -309,11 +307,11 @@ void BakedOpRenderer::prepareRender(const Rect* dirtyBounds, const ClipBase* cli
                 if (mRenderTarget.frameBufferId != 0 && !mRenderTarget.stencil) {
                     OffscreenBuffer* layer = mRenderTarget.offscreenBuffer;
                     mRenderTarget.stencil = mCaches.renderBufferCache.get(
-                            Stencil::getLayerStencilFormat(),
-                            layer->texture.width(), layer->texture.height());
+                            Stencil::getLayerStencilFormat(), layer->texture.width(),
+                            layer->texture.height());
                     // stencil is bound + allocated - associate it with current FBO
                     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
-                            GL_RENDERBUFFER, mRenderTarget.stencil->getName());
+                                              GL_RENDERBUFFER, mRenderTarget.stencil->getName());
                 }
 
                 if (clip->mode == ClipMode::RectangleList) {
@@ -344,17 +342,15 @@ void BakedOpRenderer::prepareRender(const Rect* dirtyBounds, const ClipBase* cli
 }
 
 void BakedOpRenderer::renderGlopImpl(const Rect* dirtyBounds, const ClipBase* clip,
-        const Glop& glop) {
+                                     const Glop& glop) {
     prepareRender(dirtyBounds, clip);
     // Disable blending if this is the first draw to the main framebuffer, in case app has defined
     // transparency where it doesn't make sense - as first draw in opaque window. Note that we only
     // apply this improvement when the blend mode is SRC_OVER - other modes (e.g. CLEAR) can be
     // valid draws that affect other content (e.g. draw CLEAR, then draw DST_OVER)
-    bool overrideDisableBlending = !mHasDrawn
-        && mOpaque
-        && !mRenderTarget.frameBufferId
-        && glop.blend.src == GL_ONE
-        && glop.blend.dst == GL_ONE_MINUS_SRC_ALPHA;
+    bool overrideDisableBlending = !mHasDrawn && mOpaque && !mRenderTarget.frameBufferId &&
+                                   glop.blend.src == GL_ONE &&
+                                   glop.blend.dst == GL_ONE_MINUS_SRC_ALPHA;
     mRenderState.render(glop, mRenderTarget.orthoMatrix, overrideDisableBlending);
     if (!mRenderTarget.frameBufferId) mHasDrawn = true;
 }
@@ -383,5 +379,5 @@ void BakedOpRenderer::dirtyRenderTarget(const Rect& uiDirty) {
     }
 }
 
-} // namespace uirenderer
-} // namespace android
+}  // namespace uirenderer
+}  // namespace android

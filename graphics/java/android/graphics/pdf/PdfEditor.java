@@ -40,7 +40,7 @@ public final class PdfEditor {
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
-    private final long mNativeDocument;
+    private long mNativeDocument;
 
     private int mPageCount;
 
@@ -78,12 +78,17 @@ public final class PdfEditor {
         } catch (ErrnoException ee) {
             throw new IllegalArgumentException("file descriptor not seekable");
         }
-
         mInput = input;
 
         synchronized (PdfRenderer.sPdfiumLock) {
             mNativeDocument = nativeOpen(mInput.getFd(), size);
-            mPageCount = nativeGetPageCount(mNativeDocument);
+            try {
+                mPageCount = nativeGetPageCount(mNativeDocument);
+            } catch (Throwable t) {
+                nativeClose(mNativeDocument);
+                mNativeDocument = 0;
+                throw t;
+            }
         }
 
         mCloseGuard.open("close");
@@ -275,20 +280,24 @@ public final class PdfEditor {
                 mCloseGuard.warnIfOpen();
             }
 
-            if (mInput != null) {
-                doClose();
-            }
+            doClose();
         } finally {
             super.finalize();
         }
     }
 
     private void doClose() {
-        synchronized (PdfRenderer.sPdfiumLock) {
-            nativeClose(mNativeDocument);
+        if (mNativeDocument != 0) {
+            synchronized (PdfRenderer.sPdfiumLock) {
+                nativeClose(mNativeDocument);
+            }
+            mNativeDocument = 0;
         }
-        IoUtils.closeQuietly(mInput);
-        mInput = null;
+
+        if (mInput != null) {
+            IoUtils.closeQuietly(mInput);
+            mInput = null;
+        }
         mCloseGuard.close();
     }
 

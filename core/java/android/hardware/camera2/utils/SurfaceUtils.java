@@ -56,6 +56,20 @@ public class SurfaceUtils {
     }
 
     /**
+     * Get the native object id of a surface.
+     *
+     * @param surface The surface to be checked.
+     * @return the native object id of the surface, 0 if surface is not backed by a native object.
+     */
+    public static long getSurfaceId(Surface surface) {
+        try {
+            return LegacyCameraDevice.getSurfaceId(surface);
+        } catch (BufferQueueAbandonedException e) {
+            return 0;
+        }
+    }
+
+    /**
      * Get the Surface size.
      *
      * @param surface The surface to be queried for size.

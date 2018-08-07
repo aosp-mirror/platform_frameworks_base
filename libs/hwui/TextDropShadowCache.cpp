@@ -19,8 +19,8 @@
 #include "Caches.h"
 #include "Debug.h"
 #include "FontRenderer.h"
-#include "TextDropShadowCache.h"
 #include "Properties.h"
+#include "TextDropShadowCache.h"
 
 namespace android {
 namespace uirenderer {
@@ -38,8 +38,7 @@ hash_t ShadowText::hash() const {
     hash = JenkinsHashMix(hash, android::hash_type(italicStyle));
     hash = JenkinsHashMix(hash, android::hash_type(scaleX));
     if (glyphs) {
-        hash = JenkinsHashMixShorts(
-            hash, reinterpret_cast<const uint16_t*>(glyphs), glyphCount);
+        hash = JenkinsHashMixShorts(hash, reinterpret_cast<const uint16_t*>(glyphs), glyphCount);
     }
     if (positions) {
         for (uint32_t i = 0; i < glyphCount * 2; i++) {
@@ -146,15 +145,15 @@ void TextDropShadowCache::clear() {
 }
 
 ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const glyph_t* glyphs, int numGlyphs,
-        float radius, const float* positions) {
+                                        float radius, const float* positions) {
     ShadowText entry(paint, radius, numGlyphs, glyphs, positions);
     ShadowTexture* texture = mCache.get(entry);
 
     if (!texture) {
         SkPaint paintCopy(*paint);
         paintCopy.setTextAlign(SkPaint::kLeft_Align);
-        FontRenderer::DropShadow shadow = mRenderer->renderDropShadow(&paintCopy, glyphs, numGlyphs,
-                radius, positions);
+        FontRenderer::DropShadow shadow =
+                mRenderer->renderDropShadow(&paintCopy, glyphs, numGlyphs, radius, positions);
 
         if (!shadow.image) {
             return nullptr;
@@ -174,14 +173,15 @@ ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const glyph_t* gly
         if (size < mMaxSize) {
             while (mSize + size > mMaxSize) {
                 LOG_ALWAYS_FATAL_IF(!mCache.removeOldest(),
-                        "Failed to remove oldest from cache. mSize = %"
-                        PRIu32 ", mCache.size() = %zu", mSize, mCache.size());
+                                    "Failed to remove oldest from cache. mSize = %" PRIu32
+                                    ", mCache.size() = %zu",
+                                    mSize, mCache.size());
             }
         }
 
         // Textures are Alpha8
-        texture->upload(GL_ALPHA, shadow.width, shadow.height,
-                GL_ALPHA, GL_UNSIGNED_BYTE, shadow.image);
+        texture->upload(GL_ALPHA, shadow.width, shadow.height, GL_ALPHA, GL_UNSIGNED_BYTE,
+                        shadow.image);
         texture->setFilter(GL_LINEAR);
         texture->setWrap(GL_CLAMP_TO_EDGE);
 
@@ -205,5 +205,5 @@ ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const glyph_t* gly
     return texture;
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

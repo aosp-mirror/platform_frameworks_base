@@ -25,6 +25,7 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -33,6 +34,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 @SmallTest
 public class PackageStatusStorageTest {
@@ -48,11 +50,22 @@ public class PackageStatusStorageTest {
         // Using the instrumentation context means the database is created in a test app-specific
         // directory.
         mPackageStatusStorage = new PackageStatusStorage(dataDir);
+        mPackageStatusStorage.initialize();
     }
 
     @After
     public void tearDown() throws Exception {
         mPackageStatusStorage.deleteFileForTests();
+    }
+
+    @Test
+    public void initialize_fail() {
+        File readOnlyDir = new File("/system/does/not/exist");
+        PackageStatusStorage packageStatusStorage = new PackageStatusStorage(readOnlyDir);
+        try {
+            packageStatusStorage.initialize();
+            fail();
+        } catch (IOException expected) {}
     }
 
     @Test

@@ -300,10 +300,12 @@ class ShortcutRequestPinProcessor {
 
         final ShortcutInfo existing = ps.findShortcutById(inShortcut.getId());
         final boolean existsAlready = existing != null;
+        final boolean existingIsVisible = existsAlready && existing.isVisibleToPublisher();
 
         if (DEBUG) {
             Slog.d(TAG, "requestPinnedShortcut: package=" + inShortcut.getPackage()
                     + " existsAlready=" + existsAlready
+                    + " existingIsVisible=" + existingIsVisible
                     + " shortcut=" + inShortcut.toInsecureString());
         }
 
@@ -378,7 +380,6 @@ class ShortcutRequestPinProcessor {
         // manifest shortcut.)
         Preconditions.checkArgument(shortcutInfo.isEnabled(),
                 "Shortcut ID=" + shortcutInfo + " already exists but disabled.");
-
     }
 
     private boolean startRequestConfirmActivity(ComponentName activity, int launcherUserId,
@@ -463,7 +464,7 @@ class ShortcutRequestPinProcessor {
             launcher.attemptToRestoreIfNeededAndSave();
             if (launcher.hasPinned(original)) {
                 if (DEBUG) {
-                    Slog.d(TAG, "Shortcut " + original + " already pinned.");
+                    Slog.d(TAG, "Shortcut " + original + " already pinned.");                       // This too.
                 }
                 return true;
             }
@@ -497,7 +498,7 @@ class ShortcutRequestPinProcessor {
                 if (original.getActivity() == null) {
                     original.setActivity(mService.getDummyMainActivity(appPackageName));
                 }
-                ps.addOrUpdateDynamicShortcut(original);
+                ps.addOrReplaceDynamicShortcut(original);
             }
 
             // Pin the shortcut.
@@ -505,13 +506,14 @@ class ShortcutRequestPinProcessor {
                 Slog.d(TAG, "Pinning " + shortcutId);
             }
 
-            launcher.addPinnedShortcut(appPackageName, appUserId, shortcutId);
+            launcher.addPinnedShortcut(appPackageName, appUserId, shortcutId,
+                    /*forPinRequest=*/ true);
 
             if (current == null) {
                 if (DEBUG) {
                     Slog.d(TAG, "Removing " + shortcutId + " as dynamic");
                 }
-                ps.deleteDynamicWithId(shortcutId);
+                ps.deleteDynamicWithId(shortcutId, /*ignoreInvisible=*/ false);
             }
 
             ps.adjustRanks(); // Shouldn't be needed, but just in case.

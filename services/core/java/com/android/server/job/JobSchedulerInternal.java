@@ -16,6 +16,7 @@
 
 package com.android.server.job;
 
+import android.annotation.UserIdInt;
 import android.app.job.JobInfo;
 
 import java.util.List;
@@ -26,10 +27,40 @@ import java.util.List;
  */
 public interface JobSchedulerInternal {
 
+    // Bookkeeping about app standby bucket scheduling
+
+    /**
+     * The current bucket heartbeat ordinal
+     */
+    long currentHeartbeat();
+
+    /**
+     * Heartbeat ordinal at which the given standby bucket's jobs next become runnable
+     */
+    long nextHeartbeatForBucket(int bucket);
+
+    /**
+     * Heartbeat ordinal for the given app.  This is typically the heartbeat at which
+     * the app last ran jobs, so that a newly-scheduled job in an app that hasn't run
+     * jobs in a long time is immediately runnable even if the app is bucketed into
+     * an infrequent time allocation.
+     */
+    public long baseHeartbeatForApp(String packageName, @UserIdInt int userId, int appBucket);
+
+    /**
+     * Tell the scheduler when a JobServiceContext starts running a job in an app
+     */
+    void noteJobStart(String packageName, int userId);
+
     /**
      * Returns a list of pending jobs scheduled by the system service.
      */
     List<JobInfo> getSystemScheduledPendingJobs();
+
+    /**
+     * Cancel the jobs for a given uid (e.g. when app data is cleared)
+     */
+    void cancelJobsForUid(int uid, String reason);
 
     /**
      * These are for activity manager to communicate to use what is currently performing backups.
@@ -38,11 +69,18 @@ public interface JobSchedulerInternal {
     void removeBackingUpUid(int uid);
     void clearAllBackingUpUids();
 
+    /**
+     * The user has started interacting with the app.  Take any appropriate action.
+     */
+    void reportAppUsage(String packageName, int userId);
+
+    /**
+     * Report a snapshot of sync-related jobs back to the sync manager
+     */
     JobStorePersistStats getPersistStats();
 
     /**
      * Stats about the first load after boot and the most recent save.
-     * STOPSHIP Remove it and the relevant code once b/64536115 is fixed.
      */
     public class JobStorePersistStats {
         public int countAllJobsLoaded = -1;

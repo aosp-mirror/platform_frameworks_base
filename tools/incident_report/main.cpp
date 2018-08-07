@@ -45,8 +45,9 @@ static bool
 read_length_delimited(CodedInputStream* in, uint32 fieldId, Descriptor const* descriptor,
         GenericMessage* message)
 {
-    uint32 size;
+    uint32_t size;
     if (!in->ReadVarint32(&size)) {
+        fprintf(stderr, "Fail to read size of %s\n", descriptor->name().c_str());
         return false;
     }
 
@@ -68,6 +69,9 @@ read_length_delimited(CodedInputStream* in, uint32 fieldId, Descriptor const* de
                 message->addString(fieldId, str);
                 return true;
             } else {
+                fprintf(stderr, "Fail to read string of field %s, expect size %d, read %lu\n",
+                        field->full_name().c_str(), size, str.size());
+                fprintf(stderr, "String read \"%s\"\n", str.c_str());
                 return false;
             }
         } else if (type == FieldDescriptor::TYPE_BYTES) {
@@ -97,6 +101,8 @@ read_message(CodedInputStream* in, Descriptor const* descriptor, GenericMessage*
                     message->addInt64(fieldId, value64);
                     break;
                 } else {
+                    fprintf(stderr, "bad VARINT: 0x%x (%d) at index %d of field %s\n",
+                            tag, tag, in->CurrentPosition(), descriptor->name().c_str());
                     return false;
                 }
             case WireFormatLite::WIRETYPE_FIXED64:
@@ -104,10 +110,14 @@ read_message(CodedInputStream* in, Descriptor const* descriptor, GenericMessage*
                     message->addInt64(fieldId, value64);
                     break;
                 } else {
+                    fprintf(stderr, "bad VARINT: 0x%x (%d) at index %d of field %s\n",
+                            tag, tag, in->CurrentPosition(), descriptor->name().c_str());
                     return false;
                 }
             case WireFormatLite::WIRETYPE_LENGTH_DELIMITED:
                 if (!read_length_delimited(in, fieldId, descriptor, message)) {
+                    fprintf(stderr, "bad LENGTH_DELIMITED: 0x%x (%d) at index %d of field %s\n",
+                            tag, tag, in->CurrentPosition(), descriptor->name().c_str());
                     return false;
                 }
                 break;
@@ -116,11 +126,13 @@ read_message(CodedInputStream* in, Descriptor const* descriptor, GenericMessage*
                     message->addInt32(fieldId, value32);
                     break;
                 } else {
+                    fprintf(stderr, "bad FIXED32: 0x%x (%d) at index %d of field %s\n",
+                            tag, tag, in->CurrentPosition(), descriptor->name().c_str());
                     return false;
                 }
             default:
-                fprintf(stderr, "bad tag: 0x%x (%d) at index %d\n", tag, tag,
-                        in->CurrentPosition());
+                fprintf(stderr, "bad tag: 0x%x (%d) at index %d of field %s\n", tag, tag,
+                        in->CurrentPosition(), descriptor->name().c_str());
                 return false;
         }
     }
@@ -130,7 +142,6 @@ read_message(CodedInputStream* in, Descriptor const* descriptor, GenericMessage*
 static void
 print_value(Out* out, FieldDescriptor const* field, GenericMessage::Node const& node)
 {
-    uint32_t val32;
     FieldDescriptor::Type type = field->type();
 
     switch (node.type) {
@@ -146,29 +157,32 @@ print_value(Out* out, FieldDescriptor const* field, GenericMessage::Node const& 
                     out->printf("%f", *(float*)&node.value32);
                     break;
                 default:
-                    out->printf("(unexpected value %d (0x%x)", node.value32, node.value32);
+                    out->printf("(unexpected type %d: value32 %d (0x%x)",
+                                type, node.value32, node.value32);
                     break;
             }
             break;
         case GenericMessage::TYPE_VALUE64:
             switch (type) {
-                case FieldDescriptor::TYPE_FIXED64:
-                case FieldDescriptor::TYPE_SFIXED64:
                 case FieldDescriptor::TYPE_DOUBLE:
                     out->printf("%f", *(double*)&node.value64);
                     break;
+                // Int32s here were added with addInt64 from a WIRETYPE_VARINT,
+                // even if the definition is for a 32 bit int.
                 case FieldDescriptor::TYPE_SINT32:
                 case FieldDescriptor::TYPE_INT32:
-                    val32 = (uint32_t)node.value32;
-                    out->printf("%d", val32);
+                    out->printf("%d", node.value64);
                     break;
                 case FieldDescriptor::TYPE_INT64:
-                case FieldDescriptor::TYPE_UINT32:
-                    val32 = (uint32_t)node.value32;
-                    out->printf("%u", val32);
-                    break;
-                case FieldDescriptor::TYPE_UINT64:
                 case FieldDescriptor::TYPE_SINT64:
+                case FieldDescriptor::TYPE_SFIXED64:
+                    out->printf("%lld", node.value64);
+                    break;
+                case FieldDescriptor::TYPE_UINT32:
+                case FieldDescriptor::TYPE_UINT64:
+                case FieldDescriptor::TYPE_FIXED64:
+                    out->printf("%u", node.value64);
+                    break;
                 case FieldDescriptor::TYPE_BOOL:
                     if (node.value64) {
                         out->printf("true");
@@ -177,8 +191,16 @@ print_value(Out* out, FieldDescriptor const* field, GenericMessage::Node const& 
                     }
                     break;
                 case FieldDescriptor::TYPE_ENUM:
+                    if (field->enum_type()->FindValueByNumber((int)node.value64) == NULL) {
+                        out->printf("%lld", (int) node.value64);
+                    } else {
+                        out->printf("%s", field->enum_type()->FindValueByNumber((int)node.value64)
+                            ->name().c_str());
+                    }
+                    break;
                 default:
-                    out->printf("(unexpected value %ld (0x%x))", node.value64, node.value64);
+                    out->printf("(unexpected type %d: value64 %lld (0x%x))",
+                                type, node.value64, node.value64);
                     break;
             }
             break;
@@ -213,22 +235,13 @@ print_message(Out* out, Descriptor const* descriptor, GenericMessage const* mess
         out->printf("%s=", field->name().c_str());
         if (repeated) {
             if (it.first != it.second) {
-                out->printf("[");
-                if (type == FieldDescriptor::TYPE_MESSAGE
-                        || type == FieldDescriptor::TYPE_STRING
-                        || type == FieldDescriptor::TYPE_BYTES) {
-                    out->printf("\n");
-                }
+                out->printf("[\n");
                 out->indent();
 
                 for (GenericMessage::const_iterator_pair it = message->find(fieldId);
                         it.first != it.second; it.first++) {
                     print_value(out, field, it.first->second);
-                    if (type == FieldDescriptor::TYPE_MESSAGE
-                            || type == FieldDescriptor::TYPE_STRING
-                            || type == FieldDescriptor::TYPE_BYTES) {
-                        out->printf("\n");
-                    }
+                    out->printf("\n");
                 }
 
                 out->dedent();
@@ -297,7 +310,7 @@ static int
 adb_incident_workaround(const char* adbSerial, const vector<string>& sections)
 {
     const int maxAllowedSize = 20 * 1024 * 1024; // 20MB
-    uint8_t* buffer = (uint8_t*)malloc(maxAllowedSize);
+    unique_ptr<uint8_t[]> buffer(new uint8_t[maxAllowedSize]);
 
     for (vector<string>::const_iterator it=sections.begin(); it!=sections.end(); it++) {
         Descriptor const* descriptor = IncidentProto::descriptor();
@@ -324,7 +337,7 @@ adb_incident_workaround(const char* adbSerial, const vector<string>& sections)
             }
             id = field->number();
         }
-        
+
         int pfd[2];
         if (pipe(pfd) != 0) {
             fprintf(stderr, "pipe failed: %s\n", strerror(errno));
@@ -363,7 +376,7 @@ adb_incident_workaround(const char* adbSerial, const vector<string>& sections)
 
             size_t size = 0;
             while (size < maxAllowedSize) {
-                ssize_t amt = read(pfd[0], buffer + size, maxAllowedSize - size);
+                ssize_t amt = read(pfd[0], buffer.get() + size, maxAllowedSize - size);
                 if (amt == 0) {
                     break;
                 } else if (amt == -1) {
@@ -390,7 +403,7 @@ adb_incident_workaround(const char* adbSerial, const vector<string>& sections)
                     fprintf(stderr, "write error: %s\n", strerror(err));
                     return 1;
                 }
-                err = write_all(STDOUT_FILENO, buffer, size);
+                err = write_all(STDOUT_FILENO, buffer.get(), size);
                 if (err != 0) {
                     fprintf(stderr, "write error: %s\n", strerror(err));
                     return 1;
@@ -401,7 +414,6 @@ adb_incident_workaround(const char* adbSerial, const vector<string>& sections)
         }
     }
 
-    free(buffer);
     return 0;
 }
 
@@ -440,9 +452,10 @@ main(int argc, char** argv)
     bool adbIncidentWorkaround = true;
     pid_t childPid = -1;
     vector<string> sections;
+    const char* privacy = NULL;
 
     int opt;
-    while ((opt = getopt(argc, argv, "bhi:o:s:tw")) != -1) {
+    while ((opt = getopt(argc, argv, "bhi:o:s:twp:")) != -1) {
         switch (opt) {
             case 'b':
                 outputFormat = OUTPUT_PROTO;
@@ -464,6 +477,9 @@ main(int argc, char** argv)
                 return 0;
             case 'w':
                 adbIncidentWorkaround = false;
+                break;
+            case 'p':
+                privacy = optarg;
                 break;
             default:
                 usage(stderr);
@@ -514,7 +530,7 @@ main(int argc, char** argv)
             }
 
             // TODO: This is what the real implementation will be...
-            char const** args = (char const**)malloc(sizeof(char*) * (6 + sections.size()));
+            char const** args = (char const**)malloc(sizeof(char*) * (8 + sections.size()));
             int argpos = 0;
             args[argpos++] = "adb";
             if (adbSerial != NULL) {
@@ -523,6 +539,10 @@ main(int argc, char** argv)
             }
             args[argpos++] = "shell";
             args[argpos++] = "incident";
+            if (privacy != NULL) {
+                args[argpos++] = "-p";
+                args[argpos++] = privacy;
+            }
             for (vector<string>::const_iterator it=sections.begin(); it!=sections.end(); it++) {
                 args[argpos++] = it->c_str();
             }

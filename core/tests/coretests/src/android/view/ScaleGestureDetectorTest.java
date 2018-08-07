@@ -17,6 +17,7 @@
 package android.view;
 
 import android.content.Context;
+import android.support.test.filters.LargeTest;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.ActivityInstrumentationTestCase2;
@@ -36,6 +37,7 @@ import org.junit.runner.RunWith;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.Espresso.onView;
 
+@LargeTest
 public class ScaleGestureDetectorTest extends ActivityInstrumentationTestCase2<ScaleGesture> {
     private ScaleGesture mScaleGestureActivity;
 

@@ -48,7 +48,11 @@ import java.io.PrintWriter;
  * </div>
  *
  * @param <D> The result returned when the load is complete
+ *
+ * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
+ *      {@link android.support.v4.content.Loader}
  */
+@Deprecated
 public class Loader<D> {
     int mId;
     OnLoadCompleteListener<D> mListener;
@@ -66,7 +70,10 @@ public class Loader<D> {
      * is told it has changed.  You do not normally need to use this yourself;
      * it is used for you by {@link CursorLoader} to take care of executing
      * an update when the cursor's backing data changes.
+     *
+     * @deprecated Use {@link android.support.v4.content.Loader.ForceLoadContentObserver}
      */
+    @Deprecated
     public final class ForceLoadContentObserver extends ContentObserver {
         public ForceLoadContentObserver() {
             super(new Handler());
@@ -90,7 +97,10 @@ public class Loader<D> {
      * to find out when a Loader it is managing has completed so that this can
      * be reported to its client.  This interface should only be used if a
      * Loader is not being used in conjunction with LoaderManager.
+     *
+     * @deprecated Use {@link android.support.v4.content.Loader.OnLoadCompleteListener}
      */
+    @Deprecated
     public interface OnLoadCompleteListener<D> {
         /**
          * Called on the thread that created the Loader when the load is complete.
@@ -108,7 +118,10 @@ public class Loader<D> {
      * to find out when a Loader it is managing has been canceled so that it
      * can schedule the next Loader.  This interface should only be used if a
      * Loader is not being used in conjunction with LoaderManager.
+     *
+     * @deprecated Use {@link android.support.v4.content.Loader.OnLoadCanceledListener}
      */
+    @Deprecated
     public interface OnLoadCanceledListener<D> {
         /**
          * Called on the thread that created the Loader when the load is canceled.

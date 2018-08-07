@@ -36,6 +36,7 @@ class WindowManagerThreadPriorityBooster extends ThreadPriorityBooster {
     private final Object mLock = new Object();
 
     private final int mAnimationThreadId;
+    private final int mSurfaceAnimationThreadId;
 
     @GuardedBy("mLock")
     private boolean mAppTransitionRunning;
@@ -45,14 +46,16 @@ class WindowManagerThreadPriorityBooster extends ThreadPriorityBooster {
     WindowManagerThreadPriorityBooster() {
         super(THREAD_PRIORITY_DISPLAY, INDEX_WINDOW);
         mAnimationThreadId = AnimationThread.get().getThreadId();
+        mSurfaceAnimationThreadId = SurfaceAnimationThread.get().getThreadId();
     }
 
     @Override
     public void boost() {
 
-        // Do not boost the animation thread. As the animation thread is changing priorities,
+        // Do not boost the animation threads. As the animation threads are changing priorities,
         // boosting it might mess up the priority because we reset it the the previous priority.
-        if (myTid() == mAnimationThreadId) {
+        final int myTid = myTid();
+        if (myTid == mAnimationThreadId || myTid == mSurfaceAnimationThreadId) {
             return;
         }
         super.boost();
@@ -62,7 +65,8 @@ class WindowManagerThreadPriorityBooster extends ThreadPriorityBooster {
     public void reset() {
 
         // See comment in boost().
-        if (myTid() == mAnimationThreadId) {
+        final int myTid = myTid();
+        if (myTid == mAnimationThreadId || myTid == mSurfaceAnimationThreadId) {
             return;
         }
         super.reset();
@@ -92,5 +96,6 @@ class WindowManagerThreadPriorityBooster extends ThreadPriorityBooster {
                 ? TOP_APP_PRIORITY_BOOST : THREAD_PRIORITY_DISPLAY;
         setBoostToPriority(priority);
         setThreadPriority(mAnimationThreadId, priority);
+        setThreadPriority(mSurfaceAnimationThreadId, priority);
     }
 }

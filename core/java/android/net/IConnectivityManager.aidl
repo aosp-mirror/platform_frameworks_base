@@ -180,4 +180,6 @@ interface IConnectivityManager
     void stopKeepalive(in Network network, int slot);
 
     String getCaptivePortalServerUrl();
+
+    byte[] getNetworkWatchlistConfigHash();
 }

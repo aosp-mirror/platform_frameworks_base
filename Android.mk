@@ -72,17 +72,10 @@ non_base_dirs := \
   ../opt/net/voip/src/java/android/net/rtp \
   ../opt/net/voip/src/java/android/net/sip \
 
-framework_base_android_test_mock_src_files := \
-  $(call all-java-files-under, test-mock/src/android/test/mock)
-
-framework_base_android_test_runner_excluding_mock_src_files := \
-  $(filter-out $(framework_base_android_test_mock_src_files), $(call all-java-files-under, test-runner/src))
-
 # Find all files in specific directories (relative to frameworks/base)
 # to document and check apis
 files_to_check_apis := \
   $(call find-other-java-files, \
-    test-base/src \
     $(non_base_dirs) \
   )
 
@@ -106,7 +99,8 @@ files_to_check_apis_generated := \
 files_to_document := \
   $(files_to_check_apis) \
   $(call find-other-java-files,\
-    $(addprefix ../../, $(FRAMEWORKS_DATA_BINDING_JAVA_SRC_DIRS)) \
+    test-base/src \
+    test-mock/src \
     test-runner/src)
 
 # These are relative to frameworks/base
@@ -126,8 +120,6 @@ framework_docs_LOCAL_SRC_FILES := \
 
 # These are relative to frameworks/base
 framework_docs_LOCAL_API_CHECK_SRC_FILES := \
-  $(framework_base_android_test_mock_src_files) \
-  $(framework_base_android_test_runner_excluding_mock_src_files) \
   $(files_to_check_apis) \
   $(common_src_files) \
 
@@ -153,7 +145,6 @@ framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
 	ext \
 	framework \
 	voip-common \
-	android.test.mock \
 
 # Platform docs can refer to Support Library APIs, but we don't actually build
 # them as part of the docs target, so we need to include them on the classpath.
@@ -251,6 +242,72 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-federate SupportLib https://developer.android.com \
 		-federationapi SupportLib prebuilts/sdk/current/support-api.txt
 
+# Federate AndroidX references against local API file.
+framework_docs_LOCAL_DROIDDOC_OPTIONS += \
+		-federate AndroidX https://developer.android.com \
+		-federationapi AndroidX prebuilts/sdk/current/androidx-api.txt
+
+# Get the highest numbered api txt for the given api level.
+# $(1): the api level (e.g. public, system)
+define highest_sdk_txt
+$(HISTORICAL_SDK_VERSIONS_ROOT)/$(lastword $(call numerically_sort, \
+    $(patsubst \
+        $(HISTORICAL_SDK_VERSIONS_ROOT)/%,\
+        %,\
+        $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/*/$(1)/api/android.txt)\
+    ) \
+))
+endef
+
+# ====  Public API diff ===========================
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := $(framework_docs_LOCAL_API_CHECK_SRC_FILES)
+LOCAL_GENERATED_SOURCES := $(framework_docs_LOCAL_GENERATED_SOURCES)
+LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
+LOCAL_JAVA_LIBRARIES := $(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS := $(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_ADDITIONAL_JAVA_DIR := $(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES := \
+	$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES) \
+	$(INTERNAL_PLATFORM_API_FILE)
+
+LOCAL_MODULE := offline-sdk-referenceonly
+
+# Basename, because apidiff adds .txt internally.
+LOCAL_APIDIFF_OLDAPI := $(basename $(call highest_sdk_txt,public))
+LOCAL_APIDIFF_NEWAPI := $(LOCAL_PATH)/../../$(basename $(INTERNAL_PLATFORM_API_FILE))
+
+include $(BUILD_APIDIFF)
+
+# Hack to get diffs included in docs output
+out_zip := $(OUT_DOCS)/$(LOCAL_MODULE)-docs.zip
+$(out_zip): $(full_target)
+
+# ====  System API diff ===========================
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := $(framework_docs_LOCAL_API_CHECK_SRC_FILES)
+LOCAL_GENERATED_SOURCES := $(framework_docs_LOCAL_GENERATED_SOURCES)
+LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
+LOCAL_JAVA_LIBRARIES := $(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS := $(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_ADDITIONAL_JAVA_DIR := $(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES := \
+	$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES) \
+	$(INTERNAL_PLATFORM_SYSTEM_API_FILE)
+
+LOCAL_MODULE := offline-system-sdk-referenceonly
+
+# Basename, because apidiff adds .txt internally.
+LOCAL_APIDIFF_OLDAPI := $(basename $(call highest_sdk_txt,system))
+LOCAL_APIDIFF_NEWAPI := $(LOCAL_PATH)/../../$(basename $(INTERNAL_PLATFORM_SYSTEM_API_FILE))
+
+include $(BUILD_APIDIFF)
+
+# Hack to get diffs included in docs output
+out_zip := $(OUT_DOCS)/$(LOCAL_MODULE)-docs.zip
+$(out_zip): $(full_target)
 
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_SYSTEM_API_FILE))
@@ -264,20 +321,35 @@ $(OUT_DOCS)/offline-sdk-timestamp: $(OUT_DOCS)/offline-sdk-docs-docs.zip
 	$(hide) mkdir -p $(OUT_DOCS)/offline-sdk
 	( unzip -qo $< -d $(OUT_DOCS)/offline-sdk && touch -f $@ ) || exit 1
 
-# ====  java proto host library  ==============================
+# ====  java proto device library (for test only)  ==============================
 include $(CLEAR_VARS)
-LOCAL_MODULE := platformprotos
-LOCAL_PROTOC_OPTIMIZE_TYPE := full
+LOCAL_MODULE := platformprotosnano
+LOCAL_MODULE_TAGS := tests
+LOCAL_PROTOC_OPTIMIZE_TYPE := nano
 LOCAL_PROTOC_FLAGS := \
     -Iexternal/protobuf/src
-LOCAL_SOURCE_FILES_ALL_GENERATED := true
+LOCAL_PROTO_JAVA_OUTPUT_PARAMS := \
+    store_unknown_fields = true
+LOCAL_SDK_VERSION := current
 LOCAL_SRC_FILES := \
     $(call all-proto-files-under, core/proto) \
-    $(call all-proto-files-under, libs/incident/proto)
-# b/72714520
-LOCAL_ERROR_PRONE_FLAGS := -Xep:MissingOverride:OFF
-include $(BUILD_HOST_JAVA_LIBRARY)
+    $(call all-proto-files-under, libs/incident/proto/android/os)
+include $(BUILD_STATIC_JAVA_LIBRARY)
 
+
+# ====  java proto device library (for test only)  ==============================
+include $(CLEAR_VARS)
+LOCAL_MODULE := platformprotoslite
+LOCAL_MODULE_TAGS := tests
+LOCAL_PROTOC_OPTIMIZE_TYPE := lite
+LOCAL_PROTOC_FLAGS := \
+    -Iexternal/protobuf/src
+LOCAL_SRC_FILES := \
+    $(call all-proto-files-under, core/proto) \
+    $(call all-proto-files-under, libs/incident/proto/android/os)
+# Protos have lots of MissingOverride and similar.
+LOCAL_ERROR_PRONE_FLAGS := -XepDisableAllChecks
+include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # ==== hiddenapi lists =======================================
 include $(CLEAR_VARS)
@@ -393,20 +465,6 @@ $(LOCAL_BLACKLIST): $(LOCAL_SRC_ALL) $(LOCAL_LIGHT_GREYLIST) $(LOCAL_DARK_GREYLI
 	$(call assert-has-no-overlap,$@,$(LOCAL_LIGHT_GREYLIST))
 	$(call assert-has-no-overlap,$@,$(LOCAL_DARK_GREYLIST))
 	$(call assert-is-subset,$(LOCAL_SRC_FORCE_BLACKLIST),$@)
-
-# Build AOSP blacklist
-# ============================================================
-include $(CLEAR_VARS)
-
-LOCAL_LIGHT_GREYLIST_FILE := frameworks/base/config/hiddenapi-p-light-greylist.txt
-LOCAL_BLACKLIST_FILE := $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/hiddenapi-aosp-blacklist.txt
-
-.PHONY: hiddenapi-aosp-blacklist
-hiddenapi-aosp-blacklist: $(LOCAL_BLACKLIST_FILE)
-
-$(LOCAL_BLACKLIST_FILE): $(LOCAL_LIGHT_GREYLIST_FILE) $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
-	LC_COLLATE=C comm -13 <(sort $(LOCAL_LIGHT_GREYLIST_FILE)) \
-		   <(sort $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)) > $@
 
 # Include subdirectory makefiles
 # ============================================================

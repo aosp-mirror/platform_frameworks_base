@@ -16,20 +16,25 @@
 
 package android.hardware.display;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.graphics.Point;
 import android.media.projection.MediaProjection;
 import android.os.Handler;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.Surface;
-import android.view.WindowManagerPolicy;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Manages the properties of attached displays.
@@ -253,8 +258,8 @@ public final class DisplayManager {
      * </p>
      *
      * @see #createVirtualDisplay
-     * @see WindowManagerPolicy#isKeyguardSecure(int)
-     * @see WindowManagerPolicy#isKeyguardTrustedLw()
+     * @see KeyguardManager#isDeviceSecure()
+     * @see KeyguardManager#isDeviceLocked()
      * @hide
      */
     // TODO: Update name and documentation and un-hide the flag. Don't change the value before that.
@@ -531,6 +536,19 @@ public final class DisplayManager {
     }
 
     /**
+     * Set the level of color saturation to apply to the display.
+     * @param level The amount of saturation to apply, between 0 and 1 inclusive.
+     * 0 produces a grayscale image, 1 is normal.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_SATURATION)
+    public void setSaturationLevel(float level) {
+        mGlobal.setSaturationLevel(level);
+    }
+
+    /**
      * Creates a virtual display.
      *
      * @see #createVirtualDisplay(String, int, int, int, Surface, int,
@@ -610,8 +628,140 @@ public final class DisplayManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public Point getStableDisplaySize() {
         return mGlobal.getStableDisplaySize();
+    }
+
+    /**
+     * Fetch {@link BrightnessChangeEvent}s.
+     * @hide until we make it a system api.
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.BRIGHTNESS_SLIDER_USAGE)
+    public List<BrightnessChangeEvent> getBrightnessEvents() {
+        return mGlobal.getBrightnessEvents(mContext.getOpPackageName());
+    }
+
+    /**
+     * Fetch {@link AmbientBrightnessDayStats}s.
+     *
+     * @hide until we make it a system api
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.ACCESS_AMBIENT_LIGHT_STATS)
+    public List<AmbientBrightnessDayStats> getAmbientBrightnessStats() {
+        return mGlobal.getAmbientBrightnessStats();
+    }
+
+    /**
+     * Sets the global display brightness configuration.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
+    public void setBrightnessConfiguration(BrightnessConfiguration c) {
+        setBrightnessConfigurationForUser(c, mContext.getUserId(), mContext.getPackageName());
+    }
+
+    /**
+     * Sets the global display brightness configuration for a specific user.
+     *
+     * Note this requires the INTERACT_ACROSS_USERS permission if setting the configuration for a
+     * user other than the one you're currently running as.
+     *
+     * @hide
+     */
+    public void setBrightnessConfigurationForUser(BrightnessConfiguration c, int userId,
+            String packageName) {
+        mGlobal.setBrightnessConfigurationForUser(c, userId, packageName);
+    }
+
+    /**
+     * Gets the global display brightness configuration or the default curve if one hasn't been set.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
+    public BrightnessConfiguration getBrightnessConfiguration() {
+        return getBrightnessConfigurationForUser(mContext.getUserId());
+    }
+
+    /**
+     * Gets the global display brightness configuration or the default curve if one hasn't been set
+     * for a specific user.
+     *
+     * Note this requires the INTERACT_ACROSS_USERS permission if getting the configuration for a
+     * user other than the one you're currently running as.
+     *
+     * @hide
+     */
+    public BrightnessConfiguration getBrightnessConfigurationForUser(int userId) {
+        return mGlobal.getBrightnessConfigurationForUser(userId);
+    }
+
+    /**
+     * Gets the default global display brightness configuration or null one hasn't
+     * been configured.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
+    @Nullable
+    public BrightnessConfiguration getDefaultBrightnessConfiguration() {
+        return mGlobal.getDefaultBrightnessConfiguration();
+    }
+
+    /**
+     * Temporarily sets the brightness of the display.
+     * <p>
+     * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS} permission.
+     * </p>
+     *
+     * @param brightness The brightness value from 0 to 255.
+     *
+     * @hide Requires signature permission.
+     */
+    public void setTemporaryBrightness(int brightness) {
+        mGlobal.setTemporaryBrightness(brightness);
+    }
+
+    /**
+     * Temporarily sets the auto brightness adjustment factor.
+     * <p>
+     * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS} permission.
+     * </p>
+     *
+     * @param adjustment The adjustment factor from -1.0 to 1.0.
+     *
+     * @hide Requires signature permission.
+     */
+    public void setTemporaryAutoBrightnessAdjustment(float adjustment) {
+        mGlobal.setTemporaryAutoBrightnessAdjustment(adjustment);
+    }
+
+    /**
+     * Returns the minimum brightness curve, which guarantess that any brightness curve that dips
+     * below it is rejected by the system.
+     * This prevent auto-brightness from setting the screen so dark as to prevent the user from
+     * resetting or disabling it, and maps lux to the absolute minimum nits that are still readable
+     * in that ambient brightness.
+     *
+     * @return The minimum brightness curve (as lux values and their corresponding nits values).
+     *
+     * @hide
+     */
+    @SystemApi
+    public Pair<float[], float[]> getMinimumBrightnessCurve() {
+        return mGlobal.getMinimumBrightnessCurve();
     }
 
     /**

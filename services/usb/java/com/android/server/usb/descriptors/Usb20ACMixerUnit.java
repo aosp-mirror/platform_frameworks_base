@@ -33,7 +33,7 @@ public final class Usb20ACMixerUnit extends UsbACMixerUnit {
     private byte mNameID;       // 12+p+N:1 Index of a string descriptor, describing the
                                 // Mixer Unit.
 
-    public Usb20ACMixerUnit(int length, byte type, byte subtype, byte subClass) {
+    public Usb20ACMixerUnit(int length, byte type, byte subtype, int subClass) {
         super(length, type, subtype, subClass);
     }
 

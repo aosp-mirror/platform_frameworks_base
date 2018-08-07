@@ -600,7 +600,7 @@ public class MbmsDownloadSession implements AutoCloseable {
     }
 
     /**
-     * Registers a listener download status for a {@link DownloadRequest} previously requested via
+     * Registers a download status listener for a {@link DownloadRequest} previously requested via
      * {@link #download(DownloadRequest)}. This callback will only be called as long as both this
      * app and the middleware are both running -- if either one stops, no further calls on the
      * provided {@link DownloadStatusListener} will be enqueued.
@@ -664,9 +664,6 @@ public class MbmsDownloadSession implements AutoCloseable {
      * If the operation encountered an error, the error code will be delivered via
      * {@link MbmsDownloadSessionCallback#onError}.
      *
-     * Repeated calls to this method for the same {@link DownloadRequest} will replace the
-     * previously registered listener.
-     *
      * @param request The {@link DownloadRequest} provided during registration
      * @param listener The listener provided during registration.
      */
@@ -715,7 +712,7 @@ public class MbmsDownloadSession implements AutoCloseable {
     }
 
     /**
-     * Registers a listener for progress for a {@link DownloadRequest} previously requested via
+     * Registers a progress listener for a {@link DownloadRequest} previously requested via
      * {@link #download(DownloadRequest)}. This listener will only be called as long as both this
      * app and the middleware are both running -- if either one stops, no further calls on the
      * provided {@link DownloadProgressListener} will be enqueued.
@@ -725,6 +722,9 @@ public class MbmsDownloadSession implements AutoCloseable {
      *
      * If the operation encountered an error, the error code will be delivered via
      * {@link MbmsDownloadSessionCallback#onError}.
+     *
+     * Repeated calls to this method for the same {@link DownloadRequest} will replace the
+     * previously registered listener.
      *
      * @param request The {@link DownloadRequest} that you want updates on.
      * @param executor The {@link Executor} on which calls to {@code listener} should be executed.

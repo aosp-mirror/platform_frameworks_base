@@ -28,13 +28,20 @@ LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
-    mockito-target-minus-junit4 \
-    legacy-android-test \
+    mockito-target-inline-minus-junit4 \
 	testables
 
-LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_MULTILIB := both
+
+LOCAL_JNI_SHARED_LIBRARIES := \
+    libdexmakerjvmtiagent \
+    libmultiplejvmtiagentsinterferenceagent
+
+LOCAL_JAVA_LIBRARIES := android.test.runner android.test.base android.test.mock
 
 LOCAL_CERTIFICATE := platform
+
+LOCAL_COMPATIBILITY_SUITE := device-tests
 
 include $(BUILD_PACKAGE)
 

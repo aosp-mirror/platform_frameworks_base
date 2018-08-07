@@ -103,11 +103,11 @@ bool NativeInputWindowHandle::updateInfo() {
             gInputWindowHandleClassInfo.name));
     if (nameObj) {
         const char* nameStr = env->GetStringUTFChars(nameObj, NULL);
-        mInfo->name.setTo(nameStr);
+        mInfo->name = nameStr;
         env->ReleaseStringUTFChars(nameObj, nameStr);
         env->DeleteLocalRef(nameObj);
     } else {
-        mInfo->name.setTo("<null>");
+        mInfo->name = "<null>";
     }
 
     mInfo->layoutParamsFlags = env->GetIntField(obj,

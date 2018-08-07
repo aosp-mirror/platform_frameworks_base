@@ -25,9 +25,11 @@ namespace skiapipeline {
 class SkiaOpenGLReadback : public OpenGLReadback {
 public:
     SkiaOpenGLReadback(renderthread::RenderThread& thread) : OpenGLReadback(thread) {}
+
 protected:
     virtual CopyResult copyImageInto(EGLImageKHR eglImage, const Matrix4& imgTransform,
-            int imgWidth, int imgHeight, const Rect& srcRect, SkBitmap* bitmap) override;
+                                     int imgWidth, int imgHeight, const Rect& srcRect,
+                                     SkBitmap* bitmap) override;
 };
 
 } /* namespace skiapipeline */

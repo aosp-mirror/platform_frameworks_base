@@ -32,6 +32,7 @@ public class BroadcastOptions {
     private long mTemporaryAppWhitelistDuration;
     private int mMinManifestReceiverApiLevel = 0;
     private int mMaxManifestReceiverApiLevel = Build.VERSION_CODES.CUR_DEVELOPMENT;
+    private boolean mDontSendToRestrictedApps = false;
 
     /**
      * How long to temporarily put an app on the power whitelist when executing this broadcast
@@ -52,6 +53,12 @@ public class BroadcastOptions {
     static final String KEY_MAX_MANIFEST_RECEIVER_API_LEVEL
             = "android:broadcast.maxManifestReceiverApiLevel";
 
+    /**
+     * Corresponds to {@link #setMaxManifestReceiverApiLevel}.
+     */
+    static final String KEY_DONT_SEND_TO_RESTRICTED_APPS =
+            "android:broadcast.dontSendToRestrictedApps";
+
     public static BroadcastOptions makeBasic() {
         BroadcastOptions opts = new BroadcastOptions();
         return opts;
@@ -66,6 +73,7 @@ public class BroadcastOptions {
         mMinManifestReceiverApiLevel = opts.getInt(KEY_MIN_MANIFEST_RECEIVER_API_LEVEL, 0);
         mMaxManifestReceiverApiLevel = opts.getInt(KEY_MAX_MANIFEST_RECEIVER_API_LEVEL,
                 Build.VERSION_CODES.CUR_DEVELOPMENT);
+        mDontSendToRestrictedApps = opts.getBoolean(KEY_DONT_SEND_TO_RESTRICTED_APPS, false);
     }
 
     /**
@@ -123,6 +131,23 @@ public class BroadcastOptions {
     }
 
     /**
+     * Sets whether pending intent can be sent for an application with background restrictions
+     * @param dontSendToRestrictedApps if true, pending intent will not be sent for an application
+     * with background restrictions. Default value is {@code false}
+     */
+    public void setDontSendToRestrictedApps(boolean dontSendToRestrictedApps) {
+        mDontSendToRestrictedApps = dontSendToRestrictedApps;
+    }
+
+    /**
+     * @hide
+     * @return #setDontSendToRestrictedApps
+     */
+    public boolean isDontSendToRestrictedApps() {
+        return mDontSendToRestrictedApps;
+    }
+
+    /**
      * Returns the created options as a Bundle, which can be passed to
      * {@link android.content.Context#sendBroadcast(android.content.Intent)
      * Context.sendBroadcast(Intent)} and related methods.
@@ -140,6 +165,9 @@ public class BroadcastOptions {
         }
         if (mMaxManifestReceiverApiLevel != Build.VERSION_CODES.CUR_DEVELOPMENT) {
             b.putInt(KEY_MAX_MANIFEST_RECEIVER_API_LEVEL, mMaxManifestReceiverApiLevel);
+        }
+        if (mDontSendToRestrictedApps) {
+            b.putBoolean(KEY_DONT_SEND_TO_RESTRICTED_APPS, true);
         }
         return b.isEmpty() ? null : b;
     }

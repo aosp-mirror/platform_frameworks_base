@@ -19,22 +19,20 @@
 class HwLayerAnimation;
 
 static TestScene::Registrar _HwLayer(TestScene::Info{
-    "hwlayer",
-    "A nested pair of nodes with LAYER_TYPE_HARDWARE set on each. "
-    "Tests the hardware layer codepath.",
-    TestScene::simpleCreateScene<HwLayerAnimation>
-});
+        "hwlayer",
+        "A nested pair of nodes with LAYER_TYPE_HARDWARE set on each. "
+        "Tests the hardware layer codepath.",
+        TestScene::simpleCreateScene<HwLayerAnimation>});
 
 class HwLayerAnimation : public TestScene {
 public:
     sp<RenderNode> card;
     void createContent(int width, int height, Canvas& canvas) override {
-        card = TestUtils::createNode(0, 0, 200, 200,
-                [](RenderProperties& props, Canvas& canvas) {
+        card = TestUtils::createNode(0, 0, 200, 200, [](RenderProperties& props, Canvas& canvas) {
             props.mutateLayerProperties().setType(LayerType::RenderLayer);
             canvas.drawColor(0xFF0000FF, SkBlendMode::kSrcOver);
         });
-        canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver); // background
+        canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver);  // background
         canvas.drawRenderNode(card.get());
     }
     void doFrame(int frameNr) override {

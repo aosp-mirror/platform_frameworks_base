@@ -24,7 +24,7 @@ package android.text;
  * <h3>Examples</h3>
  *
  * <dl>
- * <dt>A password field with with the password visible to the user:
+ * <dt>A password field with the password visible to the user:
  * <dd>inputType = TYPE_CLASS_TEXT |
  *     TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
  *

@@ -50,7 +50,7 @@ struct CachedGlyphInfo {
     CacheTexture* mCacheTexture;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_CACHED_GLYPH_INFO_H
+#endif  // ANDROID_HWUI_CACHED_GLYPH_INFO_H

@@ -59,7 +59,10 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.WindowManagerInternal;
+
+import com.android.server.FgThread;
+import com.android.server.wm.WindowManagerInternal;
+import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.R;
 import com.android.internal.util.DumpUtils;
@@ -168,6 +171,8 @@ public class VrManagerService extends SystemService
     private boolean mUserUnlocked;
     private Vr2dDisplay mVr2dDisplay;
     private boolean mBootsToVr;
+    private boolean mStandby;
+    private boolean mUseStandbyToExitVrMode;
 
     // Handles events from the managed services (e.g. VrListenerService and any bound VR compositor
     // service).
@@ -180,6 +185,14 @@ public class VrManagerService extends SystemService
             ComponentName component = null;
             synchronized (mLock) {
                 component = ((mCurrentVrService == null) ? null : mCurrentVrService.getComponent());
+
+                // If the VrCore main service was disconnected or the binding died we'll rebind
+                // automatically. Call focusedActivityChanged() once we rebind.
+                if (component != null && component.equals(event.component) &&
+                        (event.event == LogEvent.EVENT_DISCONNECTED ||
+                         event.event == LogEvent.EVENT_BINDING_DIED)) {
+                    callFocusedActivityChangedLocked();
+                }
             }
 
             // If not on an AIO device and we permanently stopped trying to connect to the
@@ -205,7 +218,10 @@ public class VrManagerService extends SystemService
      *
      */
     private void updateVrModeAllowedLocked() {
-        boolean allowed = mSystemSleepFlags == FLAG_ALL && mUserUnlocked;
+        boolean ignoreSleepFlags = mBootsToVr && mUseStandbyToExitVrMode;
+        boolean disallowedByStandby = mStandby && mUseStandbyToExitVrMode;
+        boolean allowed = (mSystemSleepFlags == FLAG_ALL || ignoreSleepFlags) && mUserUnlocked
+                && !disallowedByStandby;
         if (mVrModeAllowed != allowed) {
             mVrModeAllowed = allowed;
             if (DBG) Slog.d(TAG, "VR mode is " + ((allowed) ? "allowed" : "disallowed"));
@@ -273,6 +289,17 @@ public class VrManagerService extends SystemService
     private void setUserUnlocked() {
         synchronized(mLock) {
             mUserUnlocked = true;
+            updateVrModeAllowedLocked();
+        }
+    }
+
+    private void setStandbyEnabled(boolean standby) {
+        synchronized(mLock) {
+            if (!mBootsToVr) {
+                Slog.e(TAG, "Attempting to set standby mode on a non-standalone device");
+                return;
+            }
+            mStandby = standby;
             updateVrModeAllowedLocked();
         }
     }
@@ -591,6 +618,20 @@ public class VrManagerService extends SystemService
         }
 
         @Override
+        public void setStandbyEnabled(boolean standby) {
+            enforceCallerPermissionAnyOf(Manifest.permission.ACCESS_VR_MANAGER);
+            VrManagerService.this.setStandbyEnabled(standby);
+        }
+
+        @Override
+        public void setVrInputMethod(ComponentName componentName) {
+            enforceCallerPermissionAnyOf(Manifest.permission.RESTRICTED_VR_ACCESS);
+            InputMethodManagerInternal imm =
+                    LocalServices.getService(InputMethodManagerInternal.class);
+            imm.startVrInputMethodNoCheck(componentName);
+        }
+
+        @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
@@ -599,8 +640,8 @@ public class VrManagerService extends SystemService
             pw.println("Persistent VR mode is currently: " +
                     ((mPersistentVrModeEnabled) ? "enabled" : "disabled"));
             pw.println("Currently bound VR listener service: "
-                    + ((mCurrentVrCompositorService == null)
-                    ? "None" : mCurrentVrCompositorService.getComponent().flattenToString()));
+                    + ((mCurrentVrService == null)
+                    ? "None" : mCurrentVrService.getComponent().flattenToString()));
             pw.println("Currently bound VR compositor service: "
                     + ((mCurrentVrCompositorService == null)
                     ? "None" : mCurrentVrCompositorService.getComponent().flattenToString()));
@@ -727,6 +768,8 @@ public class VrManagerService extends SystemService
         }
 
         mBootsToVr = SystemProperties.getBoolean("ro.boot.vr", false);
+        mUseStandbyToExitVrMode = mBootsToVr
+                && SystemProperties.getBoolean("persist.vr.use_standby_to_exit_vr_mode", true);
         publishLocalService(VrManagerInternal.class, new LocalService());
         publishBinderService(Context.VR_SERVICE, mVrManager.asBinder());
     }
@@ -792,9 +835,11 @@ public class VrManagerService extends SystemService
 
     @Override
     public void onSwitchUser(int userHandle) {
-        synchronized (mLock) {
-            mComponentObserver.onUsersChanged();
-        }
+        FgThread.getHandler().post(() -> {
+            synchronized (mLock) {
+                mComponentObserver.onUsersChanged();
+            }
+        });
 
     }
 
@@ -943,16 +988,7 @@ public class VrManagerService extends SystemService
                     oldVrServicePackage, oldUserId);
 
             if (mCurrentVrService != null && sendUpdatedCaller) {
-                final ComponentName c = mCurrentVrModeComponent;
-                final boolean b = running2dInVr;
-                final int pid = processId;
-                mCurrentVrService.sendEvent(new PendingEvent() {
-                    @Override
-                    public void runEvent(IInterface service) throws RemoteException {
-                        IVrListener l = (IVrListener) service;
-                        l.focusedActivityChanged(c, b, pid);
-                    }
-                });
+                callFocusedActivityChangedLocked();
             }
 
             if (!nothingChanged) {
@@ -963,6 +999,23 @@ public class VrManagerService extends SystemService
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    private void callFocusedActivityChangedLocked() {
+        final ComponentName c = mCurrentVrModeComponent;
+        final boolean b = mRunning2dInVr;
+        final int pid = mVrAppProcessId;
+        mCurrentVrService.sendEvent(new PendingEvent() {
+            @Override
+            public void runEvent(IInterface service) throws RemoteException {
+                // Under specific (and unlikely) timing scenarios, when VrCore
+                // crashes and is rebound, focusedActivityChanged() may be
+                // called a 2nd time with the same arguments. IVrListeners
+                // should make sure to handle that scenario gracefully.
+                IVrListener l = (IVrListener) service;
+                l.focusedActivityChanged(c, b, pid);
+            }
+        });
     }
 
     private boolean isDefaultAllowed(String packageName) {
@@ -1274,9 +1327,14 @@ public class VrManagerService extends SystemService
 
     public void setVr2dDisplayProperties(
         Vr2dDisplayProperties compatDisplayProp) {
-        if (mVr2dDisplay != null) {
-            mVr2dDisplay.setVirtualDisplayProperties(compatDisplayProp);
-            return;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (mVr2dDisplay != null) {
+                mVr2dDisplay.setVirtualDisplayProperties(compatDisplayProp);
+                return;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
         Slog.w(TAG, "Vr2dDisplay is null!");
     }
@@ -1292,10 +1350,13 @@ public class VrManagerService extends SystemService
     private void setAndBindCompositor(ComponentName componentName) {
         final int userId = UserHandle.getCallingUserId();
         final long token = Binder.clearCallingIdentity();
-        synchronized (mLock) {
-            updateCompositorServiceLocked(userId, componentName);
+        try {
+            synchronized (mLock) {
+                updateCompositorServiceLocked(userId, componentName);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
-        Binder.restoreCallingIdentity(token);
     }
 
     private void updateCompositorServiceLocked(int userId, ComponentName componentName) {

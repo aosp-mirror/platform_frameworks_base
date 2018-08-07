@@ -25,7 +25,7 @@
 
 // For the whole polygon, the sum of all the deltas b/t normals is 2 * M_PI,
 // therefore, the maximum number of extra vertices will be twice bigger.
-#define MAX_EXTRA_CORNER_VERTEX_NUMBER  (2 * EXTRA_CORNER_VERTEX_PER_PI)
+#define MAX_EXTRA_CORNER_VERTEX_NUMBER (2 * EXTRA_CORNER_VERTEX_PER_PI)
 
 // For each RADIANS_DIVISOR, we would allocate one more vertex b/t the normals.
 #define CORNER_RADIANS_DIVISOR (M_PI / EXTRA_CORNER_VERTEX_PER_PI)
@@ -36,9 +36,9 @@
  */
 #define EXTRA_EDGE_VERTEX_PER_PI 50
 
-#define MAX_EXTRA_EDGE_VERTEX_NUMBER  (2 * EXTRA_EDGE_VERTEX_PER_PI)
+#define MAX_EXTRA_EDGE_VERTEX_NUMBER (2 * EXTRA_EDGE_VERTEX_PER_PI)
 
-#define EDGE_RADIANS_DIVISOR  (M_PI / EXTRA_EDGE_VERTEX_PER_PI)
+#define EDGE_RADIANS_DIVISOR (M_PI / EXTRA_EDGE_VERTEX_PER_PI)
 
 /**
  * Other constants:
@@ -56,8 +56,8 @@
 #include "Vertex.h"
 #include "VertexBuffer.h"
 
-#include <algorithm>
 #include <utils/Log.h>
+#include <algorithm>
 
 namespace android {
 namespace uirenderer {
@@ -67,8 +67,8 @@ namespace uirenderer {
  */
 inline Vector2 getNormalFromVertices(const Vector3* vertices, int current, int next) {
     // Convert from Vector3 to Vector2 first.
-    Vector2 currentVertex = { vertices[current].x, vertices[current].y };
-    Vector2 nextVertex = { vertices[next].x, vertices[next].y };
+    Vector2 currentVertex = {vertices[current].x, vertices[current].y};
+    Vector2 nextVertex = {vertices[next].x, vertices[next].y};
 
     return ShadowTessellator::calculateNormal(currentVertex, nextVertex);
 }
@@ -79,24 +79,24 @@ inline float getAlphaFromFactoredZ(float factoredZ) {
     return 1.0 / (1 + std::max(factoredZ, 0.0f));
 }
 
-inline int getEdgeExtraAndUpdateSpike(Vector2* currentSpike,
-        const Vector3& secondVertex, const Vector3& centroid) {
-    Vector2 secondSpike  = {secondVertex.x - centroid.x, secondVertex.y - centroid.y};
+inline int getEdgeExtraAndUpdateSpike(Vector2* currentSpike, const Vector3& secondVertex,
+                                      const Vector3& centroid) {
+    Vector2 secondSpike = {secondVertex.x - centroid.x, secondVertex.y - centroid.y};
     secondSpike.normalize();
 
     int result = ShadowTessellator::getExtraVertexNumber(secondSpike, *currentSpike,
-            EDGE_RADIANS_DIVISOR);
+                                                         EDGE_RADIANS_DIVISOR);
     *currentSpike = secondSpike;
     return result;
 }
 
 // Given the caster's vertex count, compute all the buffers size depending on
 // whether or not the caster is opaque.
-inline void computeBufferSize(int* totalVertexCount, int* totalIndexCount,
-        int* totalUmbraCount, int casterVertexCount, bool isCasterOpaque) {
+inline void computeBufferSize(int* totalVertexCount, int* totalIndexCount, int* totalUmbraCount,
+                              int casterVertexCount, bool isCasterOpaque) {
     // Compute the size of the vertex buffer.
-    int outerVertexCount = casterVertexCount * 2 + MAX_EXTRA_CORNER_VERTEX_NUMBER +
-        MAX_EXTRA_EDGE_VERTEX_NUMBER;
+    int outerVertexCount =
+            casterVertexCount * 2 + MAX_EXTRA_CORNER_VERTEX_NUMBER + MAX_EXTRA_EDGE_VERTEX_NUMBER;
     int innerVertexCount = casterVertexCount + MAX_EXTRA_EDGE_VERTEX_NUMBER;
     *totalVertexCount = outerVertexCount + innerVertexCount;
 
@@ -163,44 +163,42 @@ inline bool needsExtraForEdge(float firstAlpha, float secondAlpha) {
  *           |                                 |
  *        (V3)-----------------------------------(V2)
  */
-void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
-        const Vector3* casterVertices, int casterVertexCount, const Vector3& centroid3d,
-        float heightFactor, float geomFactor, VertexBuffer& shadowVertexBuffer) {
+void AmbientShadow::createAmbientShadow(bool isCasterOpaque, const Vector3* casterVertices,
+                                        int casterVertexCount, const Vector3& centroid3d,
+                                        float heightFactor, float geomFactor,
+                                        VertexBuffer& shadowVertexBuffer) {
     shadowVertexBuffer.setMeshFeatureFlags(VertexBuffer::kAlpha | VertexBuffer::kIndices);
 
     // In order to computer the outer vertices in one loop, we need pre-compute
     // the normal by the vertex (n - 1) to vertex 0, and the spike and alpha value
     // for vertex 0.
-    Vector2 previousNormal = getNormalFromVertices(casterVertices,
-            casterVertexCount - 1 , 0);
-    Vector2 currentSpike = {casterVertices[0].x - centroid3d.x,
-        casterVertices[0].y - centroid3d.y};
+    Vector2 previousNormal = getNormalFromVertices(casterVertices, casterVertexCount - 1, 0);
+    Vector2 currentSpike = {casterVertices[0].x - centroid3d.x, casterVertices[0].y - centroid3d.y};
     currentSpike.normalize();
     float currentAlpha = getAlphaFromFactoredZ(casterVertices[0].z * heightFactor);
 
     // Preparing all the output data.
     int totalVertexCount, totalIndexCount, totalUmbraCount;
-    computeBufferSize(&totalVertexCount, &totalIndexCount, &totalUmbraCount,
-            casterVertexCount, isCasterOpaque);
-    AlphaVertex* shadowVertices =
-            shadowVertexBuffer.alloc<AlphaVertex>(totalVertexCount);
+    computeBufferSize(&totalVertexCount, &totalIndexCount, &totalUmbraCount, casterVertexCount,
+                      isCasterOpaque);
+    AlphaVertex* shadowVertices = shadowVertexBuffer.alloc<AlphaVertex>(totalVertexCount);
     int vertexBufferIndex = 0;
     uint16_t* indexBuffer = shadowVertexBuffer.allocIndices<uint16_t>(totalIndexCount);
     int indexBufferIndex = 0;
     uint16_t umbraVertices[totalUmbraCount];
     int umbraIndex = 0;
 
-    for (int i = 0; i < casterVertexCount; i++)  {
+    for (int i = 0; i < casterVertexCount; i++) {
         // Corner: first figure out the extra vertices we need for the corner.
         const Vector3& innerVertex = casterVertices[i];
-        Vector2 currentNormal = getNormalFromVertices(casterVertices, i,
-                (i + 1) % casterVertexCount);
+        Vector2 currentNormal =
+                getNormalFromVertices(casterVertices, i, (i + 1) % casterVertexCount);
 
-        int extraVerticesNumber = ShadowTessellator::getExtraVertexNumber(currentNormal,
-                previousNormal, CORNER_RADIANS_DIVISOR);
+        int extraVerticesNumber = ShadowTessellator::getExtraVertexNumber(
+                currentNormal, previousNormal, CORNER_RADIANS_DIVISOR);
 
         float expansionDist = innerVertex.z * heightFactor * geomFactor;
-        const int cornerSlicesNumber = extraVerticesNumber + 1; // Minimal as 1.
+        const int cornerSlicesNumber = extraVerticesNumber + 1;  // Minimal as 1.
 #if DEBUG_SHADOW
         ALOGD("cornerSlicesNumber is %d", cornerSlicesNumber);
 #endif
@@ -212,9 +210,8 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
         if (!isCasterOpaque) {
             umbraVertices[umbraIndex++] = vertexBufferIndex;
         }
-        AlphaVertex::set(&shadowVertices[vertexBufferIndex++],
-                casterVertices[i].x, casterVertices[i].y,
-                currentAlpha);
+        AlphaVertex::set(&shadowVertices[vertexBufferIndex++], casterVertices[i].x,
+                         casterVertices[i].y, currentAlpha);
 
         const Vector3& innerStart = casterVertices[i];
 
@@ -225,8 +222,7 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
         // This will create vertices from [0, cornerSlicesNumber] inclusively,
         // which means minimally 2 vertices even without the extra ones.
         for (int j = 0; j <= cornerSlicesNumber; j++) {
-            Vector2 averageNormal =
-                previousNormal * (cornerSlicesNumber - j) + currentNormal * j;
+            Vector2 averageNormal = previousNormal * (cornerSlicesNumber - j) + currentNormal * j;
             averageNormal /= cornerSlicesNumber;
             averageNormal.normalize();
             Vector2 outerVertex;
@@ -235,8 +231,8 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
 
             indexBuffer[indexBufferIndex++] = vertexBufferIndex;
             indexBuffer[indexBufferIndex++] = currentInnerVertexIndex;
-            AlphaVertex::set(&shadowVertices[vertexBufferIndex++], outerVertex.x,
-                    outerVertex.y, OUTER_ALPHA);
+            AlphaVertex::set(&shadowVertices[vertexBufferIndex++], outerVertex.x, outerVertex.y,
+                             OUTER_ALPHA);
 
             if (j == 0) {
                 outerStart = outerVertex;
@@ -257,8 +253,8 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
             outerNext.y = innerNext.y + currentNormal.y * expansionDist;
 
             // Compute the angle and see how many extra points we need.
-            int extraVerticesNumber = getEdgeExtraAndUpdateSpike(&currentSpike,
-                    innerNext, centroid3d);
+            int extraVerticesNumber =
+                    getEdgeExtraAndUpdateSpike(&currentSpike, innerNext, centroid3d);
 #if DEBUG_SHADOW
             ALOGD("extraVerticesNumber %d for edge %d", extraVerticesNumber, i);
 #endif
@@ -269,20 +265,20 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
             for (int k = 1; k < extraVerticesNumber; k++) {
                 int startWeight = extraVerticesNumber - k;
                 Vector2 currentOuter =
-                    (outerLast * startWeight + outerNext * k) / extraVerticesNumber;
+                        (outerLast * startWeight + outerNext * k) / extraVerticesNumber;
                 indexBuffer[indexBufferIndex++] = vertexBufferIndex;
                 AlphaVertex::set(&shadowVertices[vertexBufferIndex++], currentOuter.x,
-                        currentOuter.y, OUTER_ALPHA);
+                                 currentOuter.y, OUTER_ALPHA);
 
                 if (!isCasterOpaque) {
                     umbraVertices[umbraIndex++] = vertexBufferIndex;
                 }
                 Vector3 currentInner =
-                    (innerStart * startWeight + innerNext * k) / extraVerticesNumber;
+                        (innerStart * startWeight + innerNext * k) / extraVerticesNumber;
                 indexBuffer[indexBufferIndex++] = vertexBufferIndex;
                 AlphaVertex::set(&shadowVertices[vertexBufferIndex++], currentInner.x,
-                        currentInner.y,
-                        getAlphaFromFactoredZ(currentInner.z * heightFactor));
+                                 currentInner.y,
+                                 getAlphaFromFactoredZ(currentInner.z * heightFactor));
             }
         }
         currentAlpha = nextAlpha;
@@ -293,11 +289,10 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
 
     if (!isCasterOpaque) {
         // Add the centroid as the last one in the vertex buffer.
-        float centroidOpacity =
-            getAlphaFromFactoredZ(centroid3d.z * heightFactor);
+        float centroidOpacity = getAlphaFromFactoredZ(centroid3d.z * heightFactor);
         int centroidIndex = vertexBufferIndex;
-        AlphaVertex::set(&shadowVertices[vertexBufferIndex++], centroid3d.x,
-                centroid3d.y, centroidOpacity);
+        AlphaVertex::set(&shadowVertices[vertexBufferIndex++], centroid3d.x, centroid3d.y,
+                         centroidOpacity);
 
         for (int i = 0; i < umbraIndex; i++) {
             // Note that umbraVertices[0] is always 0.
@@ -322,7 +317,7 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
 #if DEBUG_SHADOW
     for (int i = 0; i < vertexBufferIndex; i++) {
         ALOGD("vertexBuffer i %d, (%f, %f %f)", i, shadowVertices[i].x, shadowVertices[i].y,
-                shadowVertices[i].alpha);
+              shadowVertices[i].alpha);
     }
     for (int i = 0; i < indexBufferIndex; i++) {
         ALOGD("indexBuffer i %d, indexBuffer[i] %d", i, indexBuffer[i]);
@@ -330,5 +325,5 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
 #endif
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

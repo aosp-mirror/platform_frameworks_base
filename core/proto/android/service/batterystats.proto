@@ -1,0 +1,56 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.service.batterystats;
+
+option java_multiple_files = true;
+option java_outer_classname = "BatteryStatsServiceProto";
+
+import "frameworks/base/core/proto/android/os/batterystats.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+// Dump of batterystats aggregate data (dumpsys batterystats --proto).
+message BatteryStatsServiceDumpProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional android.os.BatteryStatsProto batterystats = 1;
+}
+
+// Dump of batterystats history data (dumpsys batterystats --proto --history).
+message BatteryStatsServiceDumpHistoryProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 report_version = 1;
+    optional int64 parcel_version = 2;
+    optional string start_platform_version = 3;
+    optional string end_platform_version = 4;
+
+    // HistoryStringPool data
+    message Key {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 index = 1;
+        // Not valid for all keys.
+        optional int32 uid = 2;
+        optional string tag = 3;
+    }
+    repeated Key keys = 5;
+
+    // Dump of battery history in csv format (equivalent of
+    // 'batterystats -c --history', with the hsp lines extracted).
+    repeated string csv_lines = 6;
+}

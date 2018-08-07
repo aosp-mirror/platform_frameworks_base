@@ -17,6 +17,7 @@
 #pragma once
 
 #include "FrameInfoVisualizer.h"
+#include "SwapBehavior.h"
 
 #include <SkRect.h>
 #include <utils/RefBase.h>
@@ -30,19 +31,11 @@ class Surface;
 namespace uirenderer {
 
 class DeferredLayerUpdater;
+class ErrorHandler;
 
 namespace renderthread {
 
-enum class SwapBehavior {
-    kSwap_default,
-    kSwap_discardBuffer,
-};
-
-enum class MakeCurrentResult {
-    AlreadyCurrent,
-    Failed,
-    Succeeded
-};
+enum class MakeCurrentResult { AlreadyCurrent, Failed, Succeeded };
 
 enum class ColorMode {
     Srgb,
@@ -57,14 +50,13 @@ public:
     virtual MakeCurrentResult makeCurrent() = 0;
     virtual Frame getFrame() = 0;
     virtual bool draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
-            const FrameBuilder::LightGeometry& lightGeometry,
-            LayerUpdateQueue* layerUpdateQueue,
-            const Rect& contentDrawBounds, bool opaque, bool wideColorGamut,
-            const BakedOpRenderer::LightInfo& lightInfo,
-            const std::vector< sp<RenderNode> >& renderNodes,
-            FrameInfoVisualizer* profiler) = 0;
+                      const FrameBuilder::LightGeometry& lightGeometry,
+                      LayerUpdateQueue* layerUpdateQueue, const Rect& contentDrawBounds,
+                      bool opaque, bool wideColorGamut, const BakedOpRenderer::LightInfo& lightInfo,
+                      const std::vector<sp<RenderNode>>& renderNodes,
+                      FrameInfoVisualizer* profiler) = 0;
     virtual bool swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
-            FrameInfo* currentFrameInfo, bool* requireSwap) = 0;
+                             FrameInfo* currentFrameInfo, bool* requireSwap) = 0;
     virtual bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) = 0;
     virtual DeferredLayerUpdater* createTextureLayer() = 0;
     virtual bool setSurface(Surface* window, SwapBehavior swapBehavior, ColorMode colorMode) = 0;
@@ -73,14 +65,15 @@ public:
     virtual bool isContextReady() = 0;
     virtual void onDestroyHardwareResources() = 0;
     virtual void renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
-            LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
-            const BakedOpRenderer::LightInfo& lightInfo) = 0;
+                              LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
+                              const BakedOpRenderer::LightInfo& lightInfo) = 0;
     virtual TaskManager* getTaskManager() = 0;
-    virtual bool createOrUpdateLayer(RenderNode* node,
-            const DamageAccumulator& damageAccumulator, bool wideColorGamut) = 0;
+    virtual bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
+                                     bool wideColorGamut, ErrorHandler* errorHandler) = 0;
     virtual bool pinImages(std::vector<SkImage*>& mutableImages) = 0;
     virtual bool pinImages(LsaVector<sk_sp<Bitmap>>& images) = 0;
     virtual void unpinImages() = 0;
+    virtual void onPrepareTree() = 0;
 
     virtual ~IRenderPipeline() {}
 };

@@ -16,7 +16,8 @@
 package android.hardware.camera2.utils;
 
 import android.hardware.camera2.utils.TaskDrainer.DrainListener;
-import android.os.Handler;
+
+import java.util.concurrent.Executor;
 
 /**
  * Keep track of a single concurrent task starting and finishing;
@@ -38,25 +39,25 @@ public class TaskSingleDrainer {
 
     /**
      * Create a new task drainer; {@code onDrained} callbacks will be posted to the listener
-     * via the {@code handler}.
+     * via the {@code executor}.
      *
-     * @param handler a non-{@code null} handler to use to post runnables to
+     * @param executor a non-{@code null} executor to use for listener execution
      * @param listener a non-{@code null} listener where {@code onDrained} will be called
      */
-    public TaskSingleDrainer(Handler handler, DrainListener listener) {
-        mTaskDrainer = new TaskDrainer<>(handler, listener);
+    public TaskSingleDrainer(Executor executor, DrainListener listener) {
+        mTaskDrainer = new TaskDrainer<>(executor, listener);
     }
 
     /**
      * Create a new task drainer; {@code onDrained} callbacks will be posted to the listener
-     * via the {@code handler}.
+     * via the {@code executor}.
      *
-     * @param handler a non-{@code null} handler to use to post runnables to
+     * @param executor a non-{@code null} executor to use for listener execution
      * @param listener a non-{@code null} listener where {@code onDrained} will be called
      * @param name an optional name used for debug logging
      */
-    public TaskSingleDrainer(Handler handler, DrainListener listener, String name) {
-        mTaskDrainer = new TaskDrainer<>(handler, listener, name);
+    public TaskSingleDrainer(Executor executor, DrainListener listener, String name) {
+        mTaskDrainer = new TaskDrainer<>(executor, listener, name);
     }
 
     /**

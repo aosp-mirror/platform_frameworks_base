@@ -25,7 +25,7 @@ public interface PlayerFocusEnforcer {
      * @param loser
      * @return
      */
-    public boolean duckPlayers(FocusRequester winner, FocusRequester loser);
+    public boolean duckPlayers(FocusRequester winner, FocusRequester loser, boolean forceDuck);
 
     public void unduckPlayers(FocusRequester winner);
 

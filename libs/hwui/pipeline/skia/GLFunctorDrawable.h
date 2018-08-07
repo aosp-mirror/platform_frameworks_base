@@ -19,8 +19,8 @@
 #include <SkCanvas.h>
 #include <SkDrawable.h>
 
-#include <utils/RefBase.h>
 #include <utils/Functor.h>
+#include <utils/RefBase.h>
 
 namespace android {
 namespace uirenderer {
@@ -36,24 +36,21 @@ namespace skiapipeline {
 class GLFunctorDrawable : public SkDrawable {
 public:
     GLFunctorDrawable(Functor* functor, GlFunctorLifecycleListener* listener, SkCanvas* canvas)
-            : mFunctor(functor)
-            , mListener(listener)
-            , mBounds(canvas->getLocalClipBounds())
-    {}
+            : mFunctor(functor), mListener(listener), mBounds(canvas->getLocalClipBounds()) {}
     virtual ~GLFunctorDrawable();
 
     void syncFunctor() const;
 
- protected:
+protected:
     virtual SkRect onGetBounds() override { return mBounds; }
     virtual void onDraw(SkCanvas* canvas) override;
 
- private:
-     Functor* mFunctor;
-     sp<GlFunctorLifecycleListener> mListener;
-     const SkRect mBounds;
+private:
+    Functor* mFunctor;
+    sp<GlFunctorLifecycleListener> mListener;
+    const SkRect mBounds;
 };
 
-}; // namespace skiapipeline
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace skiapipeline
+};  // namespace uirenderer
+};  // namespace android

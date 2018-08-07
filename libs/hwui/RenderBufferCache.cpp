@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include "Debug.h"
-#include "Properties.h"
 #include "RenderBufferCache.h"
+#include "Debug.h"
 #include "DeviceInfo.h"
+#include "Properties.h"
 
 #include <utils/Log.h>
 
@@ -32,9 +32,9 @@ namespace uirenderer {
 
 // Debug
 #if DEBUG_RENDER_BUFFERS
-    #define RENDER_BUFFER_LOGD(...) ALOGD(__VA_ARGS__)
+#define RENDER_BUFFER_LOGD(...) ALOGD(__VA_ARGS__)
 #else
-    #define RENDER_BUFFER_LOGD(...)
+#define RENDER_BUFFER_LOGD(...)
 #endif
 
 static uint32_t calculateRboCacheSize() {
@@ -48,9 +48,7 @@ static uint32_t calculateRboCacheSize() {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-RenderBufferCache::RenderBufferCache()
-        : mSize(0)
-        , mMaxSize(calculateRboCacheSize()) {}
+RenderBufferCache::RenderBufferCache() : mSize(0), mMaxSize(calculateRboCacheSize()) {}
 
 RenderBufferCache::~RenderBufferCache() {
     clear();
@@ -72,9 +70,8 @@ uint32_t RenderBufferCache::getMaxSize() {
 // Caching
 ///////////////////////////////////////////////////////////////////////////////
 
-int RenderBufferCache::RenderBufferEntry::compare(
-        const RenderBufferCache::RenderBufferEntry& lhs,
-        const RenderBufferCache::RenderBufferEntry& rhs) {
+int RenderBufferCache::RenderBufferEntry::compare(const RenderBufferCache::RenderBufferEntry& lhs,
+                                                  const RenderBufferCache::RenderBufferEntry& rhs) {
     int deltaInt = int(lhs.mWidth) - int(rhs.mWidth);
     if (deltaInt != 0) return deltaInt;
 
@@ -87,8 +84,8 @@ int RenderBufferCache::RenderBufferEntry::compare(
 void RenderBufferCache::deleteBuffer(RenderBuffer* buffer) {
     if (buffer) {
         RENDER_BUFFER_LOGD("Deleted %s render buffer (%dx%d)",
-                RenderBuffer::formatName(buffer->getFormat()),
-                buffer->getWidth(), buffer->getHeight());
+                           RenderBuffer::formatName(buffer->getFormat()), buffer->getWidth(),
+                           buffer->getHeight());
 
         mSize -= buffer->getSize();
         delete buffer;
@@ -115,13 +112,13 @@ RenderBuffer* RenderBufferCache::get(GLenum format, const uint32_t width, const 
         buffer = entry.mBuffer;
         mSize -= buffer->getSize();
 
-        RENDER_BUFFER_LOGD("Found %s render buffer (%dx%d)",
-                RenderBuffer::formatName(format), width, height);
+        RENDER_BUFFER_LOGD("Found %s render buffer (%dx%d)", RenderBuffer::formatName(format),
+                           width, height);
     } else {
         buffer = new RenderBuffer(format, width, height);
 
-        RENDER_BUFFER_LOGD("Created new %s render buffer (%dx%d)",
-                RenderBuffer::formatName(format), width, height);
+        RENDER_BUFFER_LOGD("Created new %s render buffer (%dx%d)", RenderBuffer::formatName(format),
+                           width, height);
     }
 
     buffer->bind();
@@ -147,18 +144,18 @@ bool RenderBufferCache::put(RenderBuffer* buffer) {
         mSize += size;
 
         RENDER_BUFFER_LOGD("Added %s render buffer (%dx%d)",
-                RenderBuffer::formatName(buffer->getFormat()),
-                buffer->getWidth(), buffer->getHeight());
+                           RenderBuffer::formatName(buffer->getFormat()), buffer->getWidth(),
+                           buffer->getHeight());
 
         return true;
     } else {
         RENDER_BUFFER_LOGD("Deleted %s render buffer (%dx%d) Size=%d, MaxSize=%d",
-        RenderBuffer::formatName(buffer->getFormat()),
-                 buffer->getWidth(), buffer->getHeight(), size, mMaxSize);
+                           RenderBuffer::formatName(buffer->getFormat()), buffer->getWidth(),
+                           buffer->getHeight(), size, mMaxSize);
         delete buffer;
     }
     return false;
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

@@ -264,7 +264,7 @@ android_media_MediaScanner_processDirectory(
     env->ReleaseStringUTFChars(path, pathStr);
 }
 
-static void
+static jboolean
 android_media_MediaScanner_processFile(
         JNIEnv *env, jobject thiz, jstring path,
         jstring mimeType, jobject client)
@@ -275,17 +275,17 @@ android_media_MediaScanner_processFile(
     MediaScanner *mp = getNativeScanner_l(env, thiz);
     if (mp == NULL) {
         jniThrowException(env, kRunTimeException, "No scanner available");
-        return;
+        return false;
     }
 
     if (path == NULL) {
         jniThrowException(env, kIllegalArgumentException, NULL);
-        return;
+        return false;
     }
 
     const char *pathStr = env->GetStringUTFChars(path, NULL);
     if (pathStr == NULL) {  // Out of memory
-        return;
+        return false;
     }
 
     const char *mimeTypeStr =
@@ -293,7 +293,7 @@ android_media_MediaScanner_processFile(
     if (mimeType && mimeTypeStr == NULL) {  // Out of memory
         // ReleaseStringUTFChars can be called with an exception pending.
         env->ReleaseStringUTFChars(path, pathStr);
-        return;
+        return false;
     }
 
     MyMediaScannerClient myClient(env, client);
@@ -305,6 +305,7 @@ android_media_MediaScanner_processFile(
     if (mimeType) {
         env->ReleaseStringUTFChars(mimeType, mimeTypeStr);
     }
+    return result != MEDIA_SCAN_RESULT_ERROR;
 }
 
 static void
@@ -421,7 +422,7 @@ static const JNINativeMethod gMethods[] = {
 
     {
         "processFile",
-        "(Ljava/lang/String;Ljava/lang/String;Landroid/media/MediaScannerClient;)V",
+        "(Ljava/lang/String;Ljava/lang/String;Landroid/media/MediaScannerClient;)Z",
         (void *)android_media_MediaScanner_processFile
     },
 

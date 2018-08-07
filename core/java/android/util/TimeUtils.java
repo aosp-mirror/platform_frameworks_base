@@ -18,30 +18,18 @@ package android.util;
 
 import android.os.SystemClock;
 
-import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 import libcore.util.TimeZoneFinder;
 import libcore.util.ZoneInfoDB;
 
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 /**
  * A class containing utility methods related to time zones.
  */
 public class TimeUtils {
     /** @hide */ public TimeUtils() {}
-    private static final boolean DBG = false;
-    private static final String TAG = "TimeUtils";
-
-    /** Cached results of getTimeZonesWithUniqueOffsets */
-    private static final Object sLastUniqueLockObj = new Object();
-    private static List<String> sLastUniqueZoneOffsets = null;
-    private static String sLastUniqueCountry = null;
-
     /** {@hide} */
     private static SimpleDateFormat sLoggingFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -73,86 +61,6 @@ public class TimeUtils {
         android.icu.util.TimeZone bias = android.icu.util.TimeZone.getDefault();
         return TimeZoneFinder.getInstance()
                 .lookupTimeZoneByCountryAndOffset(country, offset, dst, when, bias);
-    }
-
-    /**
-     * Returns an immutable list of unique time zone IDs for the country.
-     *
-     * @param country to find
-     * @return unmodifiable list of unique time zones, maybe empty but never null.
-     * @hide
-     */
-    public static List<String> getTimeZoneIdsWithUniqueOffsets(String country) {
-        synchronized(sLastUniqueLockObj) {
-            if ((country != null) && country.equals(sLastUniqueCountry)) {
-                if (DBG) {
-                    Log.d(TAG, "getTimeZonesWithUniqueOffsets(" +
-                            country + "): return cached version");
-                }
-                return sLastUniqueZoneOffsets;
-            }
-        }
-
-        Collection<android.icu.util.TimeZone> zones = getIcuTimeZones(country);
-        ArrayList<android.icu.util.TimeZone> uniqueTimeZones = new ArrayList<>();
-        for (android.icu.util.TimeZone zone : zones) {
-            // See if we already have this offset,
-            // Using slow but space efficient and these are small.
-            boolean found = false;
-            for (int i = 0; i < uniqueTimeZones.size(); i++) {
-                if (uniqueTimeZones.get(i).getRawOffset() == zone.getRawOffset()) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                if (DBG) {
-                    Log.d(TAG, "getTimeZonesWithUniqueOffsets: add unique offset=" +
-                            zone.getRawOffset() + " zone.getID=" + zone.getID());
-                }
-                uniqueTimeZones.add(zone);
-            }
-        }
-
-        synchronized(sLastUniqueLockObj) {
-            // Cache the last result
-            sLastUniqueZoneOffsets = extractZoneIds(uniqueTimeZones);
-            sLastUniqueCountry = country;
-
-            return sLastUniqueZoneOffsets;
-        }
-    }
-
-    private static List<String> extractZoneIds(List<android.icu.util.TimeZone> timeZones) {
-        List<String> ids = new ArrayList<>(timeZones.size());
-        for (android.icu.util.TimeZone timeZone : timeZones) {
-            ids.add(timeZone.getID());
-        }
-        return Collections.unmodifiableList(ids);
-    }
-
-    /**
-     * Returns an immutable list of frozen ICU time zones for the country.
-     *
-     * @param countryIso is a two character country code.
-     * @return TimeZone list, maybe empty but never null.
-     * @hide
-     */
-    private static List<android.icu.util.TimeZone> getIcuTimeZones(String countryIso) {
-        if (countryIso == null) {
-            if (DBG) Log.d(TAG, "getIcuTimeZones(null): return empty list");
-            return Collections.emptyList();
-        }
-        List<android.icu.util.TimeZone> timeZones =
-                TimeZoneFinder.getInstance().lookupTimeZonesByCountry(countryIso);
-        if (timeZones == null) {
-            if (DBG) {
-                Log.d(TAG, "getIcuTimeZones(" + countryIso
-                        + "): returned null, converting to empty list");
-            }
-            return Collections.emptyList();
-        }
-        return timeZones;
     }
 
     /**
@@ -332,10 +240,26 @@ public class TimeUtils {
     }
 
     /** @hide Just for debugging; not internationalized. */
+    public static void formatDuration(long duration, StringBuilder builder, int fieldLen) {
+        synchronized (sFormatSync) {
+            int len = formatDurationLocked(duration, fieldLen);
+            builder.append(sFormatStr, 0, len);
+        }
+    }
+
+    /** @hide Just for debugging; not internationalized. */
     public static void formatDuration(long duration, PrintWriter pw, int fieldLen) {
         synchronized (sFormatSync) {
             int len = formatDurationLocked(duration, fieldLen);
             pw.print(new String(sFormatStr, 0, len));
+        }
+    }
+
+    /** @hide Just for debugging; not internationalized. */
+    public static String formatDuration(long duration) {
+        synchronized (sFormatSync) {
+            int len = formatDurationLocked(duration, 0);
+            return new String(sFormatStr, 0, len);
         }
     }
 

@@ -24,17 +24,18 @@
 namespace aapt {
 namespace io {
 
-/**
- * A regular file from the file system. Uses mmap to open the data.
- */
+// A regular file from the file system. Uses mmap to open the data.
 class RegularFile : public IFile {
  public:
   explicit RegularFile(const Source& source);
 
   std::unique_ptr<IData> OpenAsData() override;
+  std::unique_ptr<io::InputStream> OpenInputStream() override;
   const Source& GetSource() const override;
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(RegularFile);
+
   Source source_;
 };
 
@@ -48,23 +49,26 @@ class FileCollectionIterator : public IFileCollectionIterator {
   io::IFile* Next() override;
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(FileCollectionIterator);
+
   std::map<std::string, std::unique_ptr<IFile>>::const_iterator current_, end_;
 };
 
-/**
- * An IFileCollection representing the file system.
- */
+// An IFileCollection representing the file system.
 class FileCollection : public IFileCollection {
  public:
-  /**
-   * Adds a file located at path. Returns the IFile representation of that file.
-   */
+  FileCollection() = default;
+
+  // Adds a file located at path. Returns the IFile representation of that file.
   IFile* InsertFile(const android::StringPiece& path);
   IFile* FindFile(const android::StringPiece& path) override;
   std::unique_ptr<IFileCollectionIterator> Iterator() override;
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(FileCollection);
+
   friend class FileCollectionIterator;
+
   std::map<std::string, std::unique_ptr<IFile>> files_;
 };
 

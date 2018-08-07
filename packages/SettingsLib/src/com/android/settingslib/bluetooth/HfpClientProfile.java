@@ -92,6 +92,11 @@ final class HfpClientProfile implements LocalBluetoothProfile {
         return mIsProfileReady;
     }
 
+    @Override
+    public int getProfileId() {
+        return BluetoothProfile.HEADSET_CLIENT;
+    }
+
     HfpClientProfile(Context context, LocalBluetoothAdapter adapter,
             CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {

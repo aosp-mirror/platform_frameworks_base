@@ -39,11 +39,10 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ArrayList;
-
-import libcore.util.Objects;
+import java.util.Objects;
 
 /**
  * Connects to Wifi displays that implement the Miracast protocol.
@@ -248,7 +247,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         }
 
         WifiDisplay display = mPersistentDataStore.getRememberedWifiDisplay(address);
-        if (display != null && !Objects.equal(display.getDeviceAlias(), alias)) {
+        if (display != null && !Objects.equals(display.getDeviceAlias(), alias)) {
             display = new WifiDisplay(address, display.getDeviceName(), alias,
                     false, false, false);
             if (mPersistentDataStore.rememberWifiDisplay(display)) {
@@ -621,9 +620,9 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void performTraversalInTransactionLocked() {
+        public void performTraversalLocked(SurfaceControl.Transaction t) {
             if (mSurface != null) {
-                setSurfaceInTransactionLocked(mSurface);
+                setSurfaceLocked(t, mSurface);
             }
         }
 

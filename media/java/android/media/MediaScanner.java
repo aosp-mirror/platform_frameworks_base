@@ -158,6 +158,7 @@ public class MediaScanner implements AutoCloseable {
     public static final String SCANNED_BUILD_PREFS_NAME = "MediaScanBuild";
     public static final String LAST_INTERNAL_SCAN_FINGERPRINT = "lastScanFingerprint";
     private static final String SYSTEM_SOUNDS_DIR = "/system/media/audio";
+    private static final String PRODUCT_SOUNDS_DIR = "/product/media/audio";
     private static String sLastInternalScanFingerprint;
 
     private static final String[] ID3_GENRES = {
@@ -323,7 +324,6 @@ public class MediaScanner implements AutoCloseable {
     private final Uri mAudioUri;
     private final Uri mVideoUri;
     private final Uri mImagesUri;
-    private final Uri mThumbsUri;
     private final Uri mPlaylistsUri;
     private final Uri mFilesUri;
     private final Uri mFilesUriNoNotify;
@@ -419,7 +419,6 @@ public class MediaScanner implements AutoCloseable {
         mAudioUri = Audio.Media.getContentUri(volumeName);
         mVideoUri = Video.Media.getContentUri(volumeName);
         mImagesUri = Images.Media.getContentUri(volumeName);
-        mThumbsUri = Images.Thumbnails.getContentUri(volumeName);
         mFilesUri = Files.getContentUri(volumeName);
         mFilesUriNoNotify = mFilesUri.buildUpon().appendQueryParameter("nonotify", "1").build();
 
@@ -489,6 +488,7 @@ public class MediaScanner implements AutoCloseable {
         private int mCompilation;
         private boolean mIsDrm;
         private boolean mNoMedia;   // flag to suppress file from appearing in media tables
+        private boolean mScanSuccess;
         private int mWidth;
         private int mHeight;
 
@@ -503,6 +503,7 @@ public class MediaScanner implements AutoCloseable {
             mFileType = 0;
             mFileSize = fileSize;
             mIsDrm = false;
+            mScanSuccess = true;
 
             if (!isDirectory) {
                 if (!noMedia && isNoMediaFile(path)) {
@@ -624,14 +625,6 @@ public class MediaScanner implements AutoCloseable {
                     if (noMedia) {
                         result = endFile(entry, false, false, false, false, false);
                     } else {
-                        String lowpath = path.toLowerCase(Locale.ROOT);
-                        boolean ringtones = (lowpath.indexOf(RINGTONES_DIR) > 0);
-                        boolean notifications = (lowpath.indexOf(NOTIFICATIONS_DIR) > 0);
-                        boolean alarms = (lowpath.indexOf(ALARMS_DIR) > 0);
-                        boolean podcasts = (lowpath.indexOf(PODCAST_DIR) > 0);
-                        boolean music = (lowpath.indexOf(MUSIC_DIR) > 0) ||
-                            (!ringtones && !notifications && !alarms && !podcasts);
-
                         boolean isaudio = MediaFile.isAudioFileType(mFileType);
                         boolean isvideo = MediaFile.isVideoFileType(mFileType);
                         boolean isimage = MediaFile.isImageFileType(mFileType);
@@ -643,12 +636,21 @@ public class MediaScanner implements AutoCloseable {
 
                         // we only extract metadata for audio and video files
                         if (isaudio || isvideo) {
-                            processFile(path, mimeType, this);
+                            mScanSuccess = processFile(path, mimeType, this);
                         }
 
                         if (isimage) {
-                            processImageFile(path);
+                            mScanSuccess = processImageFile(path);
                         }
+
+                        String lowpath = path.toLowerCase(Locale.ROOT);
+                        boolean ringtones = mScanSuccess && (lowpath.indexOf(RINGTONES_DIR) > 0);
+                        boolean notifications = mScanSuccess &&
+                                (lowpath.indexOf(NOTIFICATIONS_DIR) > 0);
+                        boolean alarms = mScanSuccess && (lowpath.indexOf(ALARMS_DIR) > 0);
+                        boolean podcasts = mScanSuccess && (lowpath.indexOf(PODCAST_DIR) > 0);
+                        boolean music = mScanSuccess && ((lowpath.indexOf(MUSIC_DIR) > 0) ||
+                            (!ringtones && !notifications && !alarms && !podcasts));
 
                         result = endFile(entry, ringtones, notifications, alarms, music, podcasts);
                     }
@@ -817,16 +819,18 @@ public class MediaScanner implements AutoCloseable {
             return genreTagValue;
         }
 
-        private void processImageFile(String path) {
+        private boolean processImageFile(String path) {
             try {
                 mBitmapOptions.outWidth = 0;
                 mBitmapOptions.outHeight = 0;
                 BitmapFactory.decodeFile(path, mBitmapOptions);
                 mWidth = mBitmapOptions.outWidth;
                 mHeight = mBitmapOptions.outHeight;
+                return mWidth > 0 && mHeight > 0;
             } catch (Throwable th) {
                 // ignore;
             }
+            return false;
         }
 
         public void setMimeType(String mimeType) {
@@ -879,7 +883,7 @@ public class MediaScanner implements AutoCloseable {
                     }
                 } else if (MediaFile.isImageFileType(mFileType)) {
                     // FIXME - add DESCRIPTION
-                } else if (MediaFile.isAudioFileType(mFileType)) {
+                } else if (mScanSuccess && MediaFile.isAudioFileType(mFileType)) {
                     map.put(Audio.Media.ARTIST, (mArtist != null && mArtist.length() > 0) ?
                             mArtist : MediaStore.UNKNOWN_STRING);
                     map.put(Audio.Media.ALBUM_ARTIST, (mAlbumArtist != null &&
@@ -894,6 +898,10 @@ public class MediaScanner implements AutoCloseable {
                     map.put(Audio.Media.TRACK, mTrack);
                     map.put(Audio.Media.DURATION, mDuration);
                     map.put(Audio.Media.COMPILATION, mCompilation);
+                }
+                if (!mScanSuccess) {
+                    // force mediaprovider to not determine the media type from the mime type
+                    map.put(Files.FileColumns.MEDIA_TYPE, 0);
                 }
             }
             return map;
@@ -947,6 +955,7 @@ public class MediaScanner implements AutoCloseable {
                 values.put(Audio.Media.IS_MUSIC, music);
                 values.put(Audio.Media.IS_PODCAST, podcasts);
             } else if ((mFileType == MediaFile.FILE_TYPE_JPEG
+                    || mFileType == MediaFile.FILE_TYPE_HEIF
                     || MediaFile.isRawImageFileType(mFileType)) && !mNoMedia) {
                 ExifInterface exif = null;
                 try {
@@ -1001,7 +1010,7 @@ public class MediaScanner implements AutoCloseable {
 
             Uri tableUri = mFilesUri;
             MediaInserter inserter = mMediaInserter;
-            if (!mNoMedia) {
+            if (mScanSuccess && !mNoMedia) {
                 if (MediaFile.isVideoFileType(mFileType)) {
                     tableUri = mVideoUri;
                 } else if (MediaFile.isImageFileType(mFileType)) {
@@ -1071,7 +1080,7 @@ public class MediaScanner implements AutoCloseable {
                 values.remove(MediaStore.MediaColumns.DATA);
 
                 int mediaType = 0;
-                if (!MediaScanner.isNoMediaPath(entry.mPath)) {
+                if (mScanSuccess && !MediaScanner.isNoMediaPath(entry.mPath)) {
                     int fileType = MediaFile.getFileTypeForMimeType(mMimeType);
                     if (MediaFile.isAudioFileType(fileType)) {
                         mediaType = FileColumns.MEDIA_TYPE_AUDIO;
@@ -1153,7 +1162,10 @@ public class MediaScanner implements AutoCloseable {
     private static boolean isSystemSoundWithMetadata(String path) {
         if (path.startsWith(SYSTEM_SOUNDS_DIR + ALARMS_DIR)
                 || path.startsWith(SYSTEM_SOUNDS_DIR + RINGTONES_DIR)
-                || path.startsWith(SYSTEM_SOUNDS_DIR + NOTIFICATIONS_DIR)) {
+                || path.startsWith(SYSTEM_SOUNDS_DIR + NOTIFICATIONS_DIR)
+                || path.startsWith(PRODUCT_SOUNDS_DIR + ALARMS_DIR)
+                || path.startsWith(PRODUCT_SOUNDS_DIR + RINGTONES_DIR)
+                || path.startsWith(PRODUCT_SOUNDS_DIR + NOTIFICATIONS_DIR)) {
             return true;
         }
         return false;
@@ -1283,53 +1295,6 @@ public class MediaScanner implements AutoCloseable {
         }
     }
 
-    private void pruneDeadThumbnailFiles() {
-        HashSet<String> existingFiles = new HashSet<String>();
-        String directory = "/sdcard/DCIM/.thumbnails";
-        String [] files = (new File(directory)).list();
-        Cursor c = null;
-        if (files == null)
-            files = new String[0];
-
-        for (int i = 0; i < files.length; i++) {
-            String fullPathString = directory + "/" + files[i];
-            existingFiles.add(fullPathString);
-        }
-
-        try {
-            c = mMediaProvider.query(
-                    mThumbsUri,
-                    new String [] { "_data" },
-                    null,
-                    null,
-                    null, null);
-            Log.v(TAG, "pruneDeadThumbnailFiles... " + c);
-            if (c != null && c.moveToFirst()) {
-                do {
-                    String fullPathString = c.getString(0);
-                    existingFiles.remove(fullPathString);
-                } while (c.moveToNext());
-            }
-
-            for (String fileToDelete : existingFiles) {
-                if (false)
-                    Log.v(TAG, "fileToDelete is " + fileToDelete);
-                try {
-                    (new File(fileToDelete)).delete();
-                } catch (SecurityException ex) {
-                }
-            }
-
-            Log.v(TAG, "/pruneDeadThumbnailFiles... " + c);
-        } catch (RemoteException e) {
-            // We will soon be killed...
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
-    }
-
     static class MediaBulkDeleter {
         StringBuilder whereClause = new StringBuilder();
         ArrayList<String> whereArgs = new ArrayList<String>(100);
@@ -1372,9 +1337,6 @@ public class MediaScanner implements AutoCloseable {
         if (mProcessPlaylists) {
             processPlayLists();
         }
-
-        if (mOriginalCount == 0 && mImagesUri.equals(Images.Media.getContentUri("external")))
-            pruneDeadThumbnailFiles();
 
         // allow GC to clean up
         mPlayLists.clear();
@@ -1937,7 +1899,7 @@ public class MediaScanner implements AutoCloseable {
     }
 
     private native void processDirectory(String path, MediaScannerClient client);
-    private native void processFile(String path, String mimeType, MediaScannerClient client);
+    private native boolean processFile(String path, String mimeType, MediaScannerClient client);
     private native void setLocale(String locale);
 
     public native byte[] extractAlbumArt(FileDescriptor fd);

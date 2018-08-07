@@ -47,11 +47,11 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -68,6 +68,7 @@ import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Class for retrieving various kinds of information related to the application
@@ -134,6 +135,7 @@ public abstract class PackageManager {
             GET_SERVICES,
             GET_SHARED_LIBRARY_FILES,
             GET_SIGNATURES,
+            GET_SIGNING_CERTIFICATES,
             GET_URI_PERMISSION_PATTERNS,
             MATCH_UNINSTALLED_PACKAGES,
             MATCH_DISABLED_COMPONENTS,
@@ -273,7 +275,10 @@ public abstract class PackageManager {
     /**
      * {@link PackageInfo} flag: return information about the
      * signatures included in the package.
+     *
+     * @deprecated use {@code GET_SIGNING_CERTIFICATES} instead
      */
+    @Deprecated
     public static final int GET_SIGNATURES          = 0x00000040;
 
     /**
@@ -438,6 +443,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int MATCH_FACTORY_ONLY = 0x00200000;
 
     /**
@@ -453,6 +459,7 @@ public abstract class PackageManager {
      * package.
      * @hide
      */
+    @TestApi
     public static final int MATCH_KNOWN_PACKAGES = MATCH_UNINSTALLED_PACKAGES | MATCH_ANY_USER;
 
     /**
@@ -487,6 +494,14 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int MATCH_STATIC_SHARED_LIBRARIES = 0x04000000;
+
+    /**
+     * {@link PackageInfo} flag: return the signing certificates associated with
+     * this package.  Each entry is a signing certificate that the package
+     * has proven it is authorized to use, usually a past signing certificate from
+     * which it has rotated.
+     */
+    public static final int GET_SIGNING_CERTIFICATES = 0x08000000;
 
     /**
      * Internal flag used to indicate that a system component has done their
@@ -788,7 +803,8 @@ public abstract class PackageManager {
 
     /**
      * Flag parameter for {@link #installPackage} to indicate that this package is an
-     * upgrade to a package that refers to the SDK via release letter.
+     * upgrade to a package that refers to the SDK via release letter or is targeting an SDK via
+     * release letter that the current build does not support.
      *
      * @hide
      */
@@ -872,8 +888,8 @@ public abstract class PackageManager {
     public static final int INSTALL_REASON_USER = 4;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} on success.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * on success.
      *
      * @hide
      */
@@ -881,8 +897,8 @@ public abstract class PackageManager {
     public static final int INSTALL_SUCCEEDED = 1;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the package is already installed.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the package is already installed.
      *
      * @hide
      */
@@ -890,8 +906,8 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_ALREADY_EXISTS = -1;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the package archive file is invalid.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the package archive file is invalid.
      *
      * @hide
      */
@@ -899,8 +915,8 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_INVALID_APK = -2;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the URI passed in is invalid.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the URI passed in is invalid.
      *
      * @hide
      */
@@ -908,9 +924,9 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_INVALID_URI = -3;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the package manager service found that
-     * the device didn't have enough storage space to install the app.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the package manager service found that the device didn't have enough storage space to
+     * install the app.
      *
      * @hide
      */
@@ -918,9 +934,8 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_INSUFFICIENT_STORAGE = -4;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if a package is already installed with
-     * the same name.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if a package is already installed with the same name.
      *
      * @hide
      */
@@ -928,9 +943,8 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_DUPLICATE_PACKAGE = -5;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the requested shared user does not
-     * exist.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the requested shared user does not exist.
      *
      * @hide
      */
@@ -938,10 +952,9 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_NO_SHARED_USER = -6;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if a previously installed package of the
-     * same name has a different signature than the new package (and the old
-     * package's data was not removed).
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if a previously installed package of the same name has a different signature than the new
+     * package (and the old package's data was not removed).
      *
      * @hide
      */
@@ -949,10 +962,9 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_UPDATE_INCOMPATIBLE = -7;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the new package is requested a shared
-     * user which is already installed on the device and does not have matching
-     * signature.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package is requested a shared user which is already installed on the device and
+     * does not have matching signature.
      *
      * @hide
      */
@@ -960,9 +972,8 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_SHARED_USER_INCOMPATIBLE = -8;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the new package uses a shared library
-     * that is not available.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package uses a shared library that is not available.
      *
      * @hide
      */
@@ -970,9 +981,8 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_MISSING_SHARED_LIBRARY = -9;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the new package uses a shared library
-     * that is not available.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package uses a shared library that is not available.
      *
      * @hide
      */
@@ -980,10 +990,9 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_REPLACE_COULDNT_DELETE = -10;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the new package failed while
-     * optimizing and validating its dex files, either because there was not
-     * enough storage or the validation failed.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package failed while optimizing and validating its dex files, either because there
+     * was not enough storage or the validation failed.
      *
      * @hide
      */
@@ -991,9 +1000,9 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_DEXOPT = -11;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the new package failed because the
-     * current SDK version is older than that required by the package.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package failed because the current SDK version is older than that required by the
+     * package.
      *
      * @hide
      */
@@ -1001,10 +1010,9 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_OLDER_SDK = -12;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the new package failed because it
-     * contains a content provider with the same authority as a provider already
-     * installed in the system.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package failed because it contains a content provider with the same authority as a
+     * provider already installed in the system.
      *
      * @hide
      */
@@ -1012,9 +1020,9 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_CONFLICTING_PROVIDER = -13;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the new package failed because the
-     * current SDK version is newer than that required by the package.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package failed because the current SDK version is newer than that required by the
+     * package.
      *
      * @hide
      */
@@ -1022,10 +1030,9 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_NEWER_SDK = -14;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the new package failed because it has
-     * specified that it is a test-only package and the caller has not supplied
-     * the {@link #INSTALL_ALLOW_TEST} flag.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package failed because it has specified that it is a test-only package and the
+     * caller has not supplied the {@link #INSTALL_ALLOW_TEST} flag.
      *
      * @hide
      */
@@ -1033,9 +1040,9 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_TEST_ONLY = -15;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the package being installed contains
-     * native code, but none that is compatible with the device's CPU_ABI.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the package being installed contains native code, but none that is compatible with the
+     * device's CPU_ABI.
      *
      * @hide
      */
@@ -1043,9 +1050,8 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_CPU_ABI_INCOMPATIBLE = -16;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the new package uses a feature that is
-     * not available.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package uses a feature that is not available.
      *
      * @hide
      */
@@ -1054,9 +1060,9 @@ public abstract class PackageManager {
 
     // ------ Errors related to sdcard
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if a secure container mount point
-     * couldn't be accessed on external media.
+     * Installation return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if a secure container mount point couldn't be
+     * accessed on external media.
      *
      * @hide
      */
@@ -1064,9 +1070,8 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_CONTAINER_ERROR = -18;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the new package couldn't be installed
-     * in the specified install location.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package couldn't be installed in the specified install location.
      *
      * @hide
      */
@@ -1074,9 +1079,9 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_INVALID_INSTALL_LOCATION = -19;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the new package couldn't be installed
-     * in the specified install location because the media is not available.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package couldn't be installed in the specified install location because the media
+     * is not available.
      *
      * @hide
      */
@@ -1084,9 +1089,8 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_MEDIA_UNAVAILABLE = -20;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the new package couldn't be installed
-     * because the verification timed out.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package couldn't be installed because the verification timed out.
      *
      * @hide
      */
@@ -1094,9 +1098,8 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_VERIFICATION_TIMEOUT = -21;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the new package couldn't be installed
-     * because the verification did not succeed.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package couldn't be installed because the verification did not succeed.
      *
      * @hide
      */
@@ -1104,9 +1107,8 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_VERIFICATION_FAILURE = -22;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the package changed from what the
-     * calling program expected.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the package changed from what the calling program expected.
      *
      * @hide
      */
@@ -1114,28 +1116,25 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_PACKAGE_CHANGED = -23;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the new package is assigned a
-     * different UID than it previously held.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package is assigned a different UID than it previously held.
      *
      * @hide
      */
     public static final int INSTALL_FAILED_UID_CHANGED = -24;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the new package has an older version
-     * code than the currently installed package.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package has an older version code than the currently installed package.
      *
      * @hide
      */
     public static final int INSTALL_FAILED_VERSION_DOWNGRADE = -25;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the old package has target SDK high
-     * enough to support runtime permission and the new package has target SDK
-     * low enough to not support runtime permissions.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the old package has target SDK high enough to support runtime permission and the new
+     * package has target SDK low enough to not support runtime permissions.
      *
      * @hide
      */
@@ -1143,9 +1142,8 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_PERMISSION_MODEL_DOWNGRADE = -26;
 
     /**
-     * Installation return code: this is passed to the
-     * {@link IPackageInstallObserver} if the new package attempts to downgrade the
-     * target sandbox version of the app.
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package attempts to downgrade the target sandbox version of the app.
      *
      * @hide
      */
@@ -1153,9 +1151,9 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_SANDBOX_VERSION_DOWNGRADE = -27;
 
     /**
-     * Installation parse return code: this is passed to the
-     * {@link IPackageInstallObserver} if the parser was given a path that is
-     * not a file, or does not end with the expected '.apk' extension.
+     * Installation parse return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the parser was given a path that is not a
+     * file, or does not end with the expected '.apk' extension.
      *
      * @hide
      */
@@ -1163,8 +1161,8 @@ public abstract class PackageManager {
     public static final int INSTALL_PARSE_FAILED_NOT_APK = -100;
 
     /**
-     * Installation parse return code: this is passed to the
-     * {@link IPackageInstallObserver} if the parser was unable to retrieve the
+     * Installation parse return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the parser was unable to retrieve the
      * AndroidManifest.xml file.
      *
      * @hide
@@ -1173,8 +1171,8 @@ public abstract class PackageManager {
     public static final int INSTALL_PARSE_FAILED_BAD_MANIFEST = -101;
 
     /**
-     * Installation parse return code: this is passed to the
-     * {@link IPackageInstallObserver} if the parser encountered an unexpected
+     * Installation parse return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the parser encountered an unexpected
      * exception.
      *
      * @hide
@@ -1183,9 +1181,9 @@ public abstract class PackageManager {
     public static final int INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION = -102;
 
     /**
-     * Installation parse return code: this is passed to the
-     * {@link IPackageInstallObserver} if the parser did not find any
-     * certificates in the .apk.
+     * Installation parse return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the parser did not find any certificates in
+     * the .apk.
      *
      * @hide
      */
@@ -1193,9 +1191,9 @@ public abstract class PackageManager {
     public static final int INSTALL_PARSE_FAILED_NO_CERTIFICATES = -103;
 
     /**
-     * Installation parse return code: this is passed to the
-     * {@link IPackageInstallObserver} if the parser found inconsistent
-     * certificates on the files in the .apk.
+     * Installation parse return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the parser found inconsistent certificates on
+     * the files in the .apk.
      *
      * @hide
      */
@@ -1203,8 +1201,8 @@ public abstract class PackageManager {
     public static final int INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES = -104;
 
     /**
-     * Installation parse return code: this is passed to the
-     * {@link IPackageInstallObserver} if the parser encountered a
+     * Installation parse return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the parser encountered a
      * CertificateEncodingException in one of the files in the .apk.
      *
      * @hide
@@ -1213,9 +1211,9 @@ public abstract class PackageManager {
     public static final int INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING = -105;
 
     /**
-     * Installation parse return code: this is passed to the
-     * {@link IPackageInstallObserver} if the parser encountered a bad or
-     * missing package name in the manifest.
+     * Installation parse return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the parser encountered a bad or missing
+     * package name in the manifest.
      *
      * @hide
      */
@@ -1223,9 +1221,9 @@ public abstract class PackageManager {
     public static final int INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME = -106;
 
     /**
-     * Installation parse return code: this is passed to the
-     * {@link IPackageInstallObserver} if the parser encountered a bad shared
-     * user id name in the manifest.
+     * Installation parse return code: tthis is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the parser encountered a bad shared user id
+     * name in the manifest.
      *
      * @hide
      */
@@ -1233,8 +1231,8 @@ public abstract class PackageManager {
     public static final int INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID = -107;
 
     /**
-     * Installation parse return code: this is passed to the
-     * {@link IPackageInstallObserver} if the parser encountered some structural
+     * Installation parse return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the parser encountered some structural
      * problem in the manifest.
      *
      * @hide
@@ -1243,9 +1241,9 @@ public abstract class PackageManager {
     public static final int INSTALL_PARSE_FAILED_MANIFEST_MALFORMED = -108;
 
     /**
-     * Installation parse return code: this is passed to the
-     * {@link IPackageInstallObserver} if the parser did not find any actionable
-     * tags (instrumentation or application) in the manifest.
+     * Installation parse return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the parser did not find any actionable tags
+     * (instrumentation or application) in the manifest.
      *
      * @hide
      */
@@ -1253,9 +1251,9 @@ public abstract class PackageManager {
     public static final int INSTALL_PARSE_FAILED_MANIFEST_EMPTY = -109;
 
     /**
-     * Installation failed return code: this is passed to the
-     * {@link IPackageInstallObserver} if the system failed to install the
-     * package because of system issues.
+     * Installation failed return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the system failed to install the package
+     * because of system issues.
      *
      * @hide
      */
@@ -1263,24 +1261,23 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_INTERNAL_ERROR = -110;
 
     /**
-     * Installation failed return code: this is passed to the
-     * {@link IPackageInstallObserver} if the system failed to install the
-     * package because the user is restricted from installing apps.
+     * Installation failed return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the system failed to install the package
+     * because the user is restricted from installing apps.
      *
      * @hide
      */
     public static final int INSTALL_FAILED_USER_RESTRICTED = -111;
 
     /**
-     * Installation failed return code: this is passed to the
-     * {@link IPackageInstallObserver} if the system failed to install the
-     * package because it is attempting to define a permission that is already
-     * defined by some existing package.
+     * Installation failed return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the system failed to install the package
+     * because it is attempting to define a permission that is already defined by some existing
+     * package.
      * <p>
-     * The package name of the app which has already defined the permission is
-     * passed to a {@link PackageInstallObserver}, if any, as the
-     * {@link #EXTRA_FAILURE_EXISTING_PACKAGE} string extra; and the name of the
-     * permission being redefined is passed in the
+     * The package name of the app which has already defined the permission is passed to a
+     * {@link PackageInstallObserver}, if any, as the {@link #EXTRA_FAILURE_EXISTING_PACKAGE} string
+     * extra; and the name of the permission being redefined is passed in the
      * {@link #EXTRA_FAILURE_EXISTING_PERMISSION} string extra.
      *
      * @hide
@@ -1288,10 +1285,9 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_DUPLICATE_PERMISSION = -112;
 
     /**
-     * Installation failed return code: this is passed to the
-     * {@link IPackageInstallObserver} if the system failed to install the
-     * package because its packaged native code did not match any of the ABIs
-     * supported by the system.
+     * Installation failed return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the system failed to install the package
+     * because its packaged native code did not match any of the ABIs supported by the system.
      *
      * @hide
      */
@@ -1332,6 +1328,7 @@ public abstract class PackageManager {
             DELETE_ALL_USERS,
             DELETE_SYSTEM_APP,
             DELETE_DONT_KILL_APP,
+            DELETE_CHATTY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeleteFlags {}
@@ -1371,6 +1368,14 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int DELETE_DONT_KILL_APP = 0x00000008;
+
+    /**
+     * Flag parameter for {@link #deletePackage} to indicate that package deletion
+     * should be chatty.
+     *
+     * @hide
+     */
+    public static final int DELETE_CHATTY = 0x80000000;
 
     /**
      * Return code for when package deletion succeeds. This is passed to the
@@ -1652,7 +1657,8 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device includes at least one form of audio
-     * output, such as speakers, audio jack or streaming over bluetooth
+     * output, as defined in the Android Compatibility Definition Document (CDD)
+     * <a href="https://source.android.com/compatibility/android-cdd#7_8_audio">section 7.8 Audio</a>.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_AUDIO_OUTPUT = "android.hardware.audio.output";
@@ -1763,6 +1769,16 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CAMERA_CAPABILITY_RAW =
             "android.hardware.camera.capability.raw";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: At least one
+     * of the cameras on the device supports the
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MOTION_TRACKING
+     * MOTION_TRACKING} capability level.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CAMERA_AR =
+            "android.hardware.camera.ar";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
@@ -1939,6 +1955,12 @@ public abstract class PackageManager {
      * <li>Minor version number in bits 21-12</li>
      * <li>Patch version number in bits 11-0</li>
      * </ul>
+     * A version of 1.1.0 or higher also indicates:
+     * <ul>
+     * <li>{@code SYNC_FD} external semaphore and fence handles are supported.</li>
+     * <li>{@code VkPhysicalDeviceSamplerYcbcrConversionFeatures::samplerYcbcrConversion} is
+     *     supported.</li>
+     * </ul>
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_VULKAN_HARDWARE_VERSION = "android.hardware.vulkan.version";
@@ -2048,6 +2070,15 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_HIFI_SENSORS =
             "android.hardware.sensor.hifi_sensors";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports a hardware mechanism for invoking an assist gesture.
+     * @see android.provider.Settings.Secure#ASSIST_GESTURE_ENABLED
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_ASSIST_GESTURE = "android.hardware.sensor.assist";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
@@ -2250,6 +2281,13 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_APP_WIDGETS = "android.software.app_widgets";
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports the
+     * {@link android.R.attr#cantSaveState} API.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CANT_SAVE_STATE = "android.software.cant_save_state";
 
     /**
      * @hide
@@ -2342,6 +2380,14 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_WIFI_PASSPOINT = "android.hardware.wifi.passpoint";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports Wi-Fi RTT (IEEE 802.11mc).
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_WIFI_RTT = "android.hardware.wifi.rtt";
+
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
@@ -2488,9 +2534,16 @@ public abstract class PackageManager {
             = "android.software.securely_removes_users";
 
     /** {@hide} */
+    @TestApi
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_FILE_BASED_ENCRYPTION
             = "android.software.file_based_encryption";
+
+    /** {@hide} */
+    @TestApi
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_ADOPTABLE_STORAGE
+            = "android.software.adoptable_storage";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
@@ -2538,31 +2591,22 @@ public abstract class PackageManager {
      * Devices declaring this feature must include an application implementing a
      * {@link android.service.vr.VrListenerService} that can be targeted by VR applications via
      * {@link android.app.Activity#setVrModeEnabled}.
+     * @deprecated use {@link #FEATURE_VR_MODE_HIGH_PERFORMANCE} instead.
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_VR_MODE = "android.software.vr.mode";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
-     * The device implements {@link #FEATURE_VR_MODE} but additionally meets extra CDD requirements
-     * to provide a high-quality VR experience.  In general, devices declaring this feature will
-     * additionally:
-     * <ul>
-     *   <li>Deliver consistent performance at a high framerate over an extended period of time
-     *   for typical VR application CPU/GPU workloads with a minimal number of frame drops for VR
-     *   applications that have called
-     *   {@link android.view.Window#setSustainedPerformanceMode}.</li>
-     *   <li>Implement {@link #FEATURE_HIFI_SENSORS} and have a low sensor latency.</li>
-     *   <li>Include optimizations to lower display persistence while running VR applications.</li>
-     *   <li>Implement an optimized render path to minimize latency to draw to the device's main
-     *   display.</li>
-     *   <li>Include the following EGL extensions: EGL_ANDROID_create_native_client_buffer,
-     *   EGL_ANDROID_front_buffer_auto_refresh, EGL_EXT_protected_content,
-     *   EGL_KHR_mutable_render_buffer, EGL_KHR_reusable_sync, and EGL_KHR_wait_sync.</li>
-     *   <li>Provide at least one CPU core that is reserved for use solely by the top, foreground
-     *   VR application process for critical render threads while such an application is
-     *   running.</li>
-     * </ul>
+     * The device implements an optimized mode for virtual reality (VR) applications that handles
+     * stereoscopic rendering of notifications, disables most monocular system UI components
+     * while a VR application has user focus and meets extra CDD requirements to provide a
+     * high-quality VR experience.
+     * Devices declaring this feature must include an application implementing a
+     * {@link android.service.vr.VrListenerService} that can be targeted by VR applications via
+     * {@link android.app.Activity#setVrModeEnabled}.
+     * and must meet CDD requirements to provide a high-quality VR experience.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_VR_MODE_HIGH_PERFORMANCE
@@ -2583,6 +2627,25 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_VR_HEADTRACKING = "android.hardware.vr.headtracking";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device has a StrongBox hardware-backed Keystore.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_STRONGBOX_KEYSTORE =
+            "android.hardware.strongbox_keystore";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device has a Keymaster implementation that supports Device ID attestation.
+     *
+     * @see DevicePolicyManager#isDeviceIdAttestationSupported
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_DEVICE_ID_ATTESTATION =
+            "android.software.device_id_attestation";
 
     /**
      * Action to external storage service to clean out removed apps.
@@ -2650,11 +2713,20 @@ public abstract class PackageManager {
 
     /**
      * Extra field name for the version code of a package pending verification.
+     * @deprecated Use {@link #EXTRA_VERIFICATION_LONG_VERSION_CODE} instead.
+     * @hide
+     */
+    @Deprecated
+    public static final String EXTRA_VERIFICATION_VERSION_CODE
+            = "android.content.pm.extra.VERIFICATION_VERSION_CODE";
+
+    /**
+     * Extra field name for the long version code of a package pending verification.
      *
      * @hide
      */
-    public static final String EXTRA_VERIFICATION_VERSION_CODE
-            = "android.content.pm.extra.VERIFICATION_VERSION_CODE";
+    public static final String EXTRA_VERIFICATION_LONG_VERSION_CODE =
+            "android.content.pm.extra.VERIFICATION_LONG_VERSION_CODE";
 
     /**
      * Extra field name for the ID of a intent filter pending verification.
@@ -2921,6 +2993,11 @@ public abstract class PackageManager {
      */
     public static final int VERSION_CODE_HIGHEST = -1;
 
+    /** {@hide} */
+    public int getUserId() {
+        return UserHandle.myUserId();
+    }
+
     /**
      * Retrieve overall information about an application package that is
      * installed on the system.
@@ -3036,6 +3113,21 @@ public abstract class PackageManager {
      *         does not contain such an activity.
      */
     public abstract @Nullable Intent getLeanbackLaunchIntentForPackage(@NonNull String packageName);
+
+    /**
+     * Return a "good" intent to launch a front-door Car activity in a
+     * package, for use for example to implement an "open" button when browsing
+     * through packages. The current implementation will look for a main
+     * activity in the category {@link Intent#CATEGORY_CAR_LAUNCHER}, or
+     * return null if no main car activities are found.
+     *
+     * @param packageName The name of the package to inspect.
+     * @return Returns either a fully-qualified Intent that can be used to launch
+     *         the main Car activity in the package, or null if the package
+     *         does not contain such an activity.
+     * @hide
+     */
+    public abstract @Nullable Intent getCarLaunchIntentForPackage(@NonNull String packageName);
 
     /**
      * Return an array of all of the POSIX secondary group IDs that have been
@@ -3271,7 +3363,7 @@ public abstract class PackageManager {
             @ComponentInfoFlags int flags) throws NameNotFoundException;
 
     /**
-     * Return a List of all packages that are installed on the device.
+     * Return a List of all packages that are installed for the current user.
      *
      * @param flags Additional option flags to modify the data returned.
      * @return A List of PackageInfo objects, one for each installed package,
@@ -3319,6 +3411,7 @@ public abstract class PackageManager {
      *         deleted with {@code DONT_DELETE_DATA} flag set).
      * @hide
      */
+    @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     public abstract List<PackageInfo> getInstalledPackagesAsUser(@PackageInfoFlags int flags,
@@ -3638,6 +3731,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @TestApi
     public abstract @Nullable String[] getNamesForUids(int[] uids);
 
     /**
@@ -3657,8 +3751,8 @@ public abstract class PackageManager {
             throws NameNotFoundException;
 
     /**
-     * Return a List of all application packages that are installed on the
-     * device. If flag GET_UNINSTALLED_PACKAGES has been set, a list of all
+     * Return a List of all application packages that are installed for the
+     * current user. If flag GET_UNINSTALLED_PACKAGES has been set, a list of all
      * applications including those deleted with {@code DONT_DELETE_DATA}
      * (partially installed apps with data directory) will be returned.
      *
@@ -3694,6 +3788,7 @@ public abstract class PackageManager {
      *         deleted with {@code DONT_DELETE_DATA} flag set).
      * @hide
      */
+    @TestApi
     public abstract List<ApplicationInfo> getInstalledApplicationsAsUser(
             @ApplicationInfoFlags int flags, @UserIdInt int userId);
 
@@ -3760,7 +3855,7 @@ public abstract class PackageManager {
     public abstract int getInstantAppCookieMaxBytes();
 
     /**
-     * @deprecated
+     * deprecated
      * @hide
      */
     public abstract int getInstantAppCookieMaxSize();
@@ -3867,6 +3962,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @TestApi
     public abstract @NonNull String getServicesSystemSharedLibraryPackageName();
 
     /**
@@ -3876,6 +3972,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @TestApi
     public abstract @NonNull String getSharedSystemSharedLibraryPackageName();
 
     /**
@@ -4109,6 +4206,12 @@ public abstract class PackageManager {
      *         matching service was found.
      */
     public abstract ResolveInfo resolveService(Intent intent, @ResolveInfoFlags int flags);
+
+    /**
+     * @hide
+     */
+    public abstract ResolveInfo resolveServiceAsUser(Intent intent, @ResolveInfoFlags int flags,
+            @UserIdInt int userId);
 
     /**
      * Retrieve all services that can match the given intent.
@@ -4707,7 +4810,7 @@ public abstract class PackageManager {
 
             PackageParser.Package pkg = parser.parseMonolithicPackage(apkFile, 0);
             if ((flags & GET_SIGNATURES) != 0) {
-                PackageParser.collectCertificates(pkg, 0);
+                PackageParser.collectCertificates(pkg, false /* skipVerify */);
             }
             PackageUserState state = new PackageUserState();
             return PackageParser.generatePackageInfo(pkg, null, flags, 0, 0, null, state);
@@ -4715,27 +4818,6 @@ public abstract class PackageManager {
             return null;
         }
     }
-
-    /**
-     * @deprecated replaced by {@link PackageInstaller}
-     * @hide
-     */
-    @Deprecated
-    public abstract void installPackage(
-            Uri packageURI,
-            IPackageInstallObserver observer,
-            @InstallFlags int flags,
-            String installerPackageName);
-    /**
-     * @deprecated replaced by {@link PackageInstaller}
-     * @hide
-     */
-    @Deprecated
-    public abstract void installPackage(
-            Uri packageURI,
-            PackageInstallObserver observer,
-            @InstallFlags int flags,
-            String installerPackageName);
 
     /**
      * If there is already an application with the given package name installed
@@ -5023,6 +5105,7 @@ public abstract class PackageManager {
      * which market the package came from.
      *
      * @param packageName The name of the package to query
+     * @throws IllegalArgumentException if the given package name is not installed
      */
     public abstract String getInstallerPackageName(String packageName);
 
@@ -5174,7 +5257,7 @@ public abstract class PackageManager {
      */
     @Deprecated
     public void getPackageSizeInfo(String packageName, IPackageStatsObserver observer) {
-        getPackageSizeInfoAsUser(packageName, UserHandle.myUserId(), observer);
+        getPackageSizeInfoAsUser(packageName, getUserId(), observer);
     }
 
     /**
@@ -5452,35 +5535,128 @@ public abstract class PackageManager {
     /**
      * Puts the package in a suspended state, where attempts at starting activities are denied.
      *
-     * <p>It doesn't remove the data or the actual package file. The application notifications
-     * will be hidden, the application will not show up in recents, will not be able to show
-     * toasts or dialogs or ring the device.
+     * <p>It doesn't remove the data or the actual package file. The application's notifications
+     * will be hidden, any of its started activities will be stopped and it will not be able to
+     * show toasts or system alert windows or ring the device.
+     *
+     * <p>When the user tries to launch a suspended app, a system dialog with the given
+     * {@code dialogMessage} will be shown instead. Since the message is supplied to the system as
+     * a {@link String}, the caller needs to take care of localization as needed.
+     * The dialog message can optionally contain a placeholder for the name of the suspended app.
+     * The system uses {@link String#format(Locale, String, Object...) String.format} to insert the
+     * app name into the message, so an example format string could be {@code "The app %1$s is
+     * currently suspended"}. This makes it easier for callers to provide a single message which
+     * works for all the packages being suspended in a single call.
      *
      * <p>The package must already be installed. If the package is uninstalled while suspended
-     * the package will no longer be suspended.
+     * the package will no longer be suspended. </p>
+     *
+     * <p>Optionally, the suspending app can provide extra information in the form of
+     * {@link PersistableBundle} objects to be shared with the apps being suspended and the
+     * launcher to support customization that they might need to handle the suspended state.
+     *
+     * <p>The caller must hold {@link Manifest.permission#SUSPEND_APPS} or
+     * {@link Manifest.permission#MANAGE_USERS} to use this api.</p>
      *
      * @param packageNames The names of the packages to set the suspended status.
      * @param suspended If set to {@code true} than the packages will be suspended, if set to
-     * {@code false} the packages will be unsuspended.
-     * @param userId The user id.
+     * {@code false}, the packages will be unsuspended.
+     * @param appExtras An optional {@link PersistableBundle} that the suspending app can provide
+     *                  which will be shared with the apps being suspended. Ignored if
+     *                  {@code suspended} is false.
+     * @param launcherExtras An optional {@link PersistableBundle} that the suspending app can
+     *                       provide which will be shared with the launcher. Ignored if
+     *                       {@code suspended} is false.
+     * @param dialogMessage The message to be displayed to the user, when they try to launch a
+     *                      suspended app.
      *
-     * @return an array of package names for which the suspended status is not set as requested in
-     * this method.
+     * @return an array of package names for which the suspended status could not be set as
+     * requested in this method.
      *
      * @hide
      */
-    public abstract String[] setPackagesSuspendedAsUser(
-            String[] packageNames, boolean suspended, @UserIdInt int userId);
+    @SystemApi
+    @RequiresPermission(Manifest.permission.SUSPEND_APPS)
+    public String[] setPackagesSuspended(String[] packageNames, boolean suspended,
+            @Nullable PersistableBundle appExtras, @Nullable PersistableBundle launcherExtras,
+            String dialogMessage) {
+        throw new UnsupportedOperationException("setPackagesSuspended not implemented");
+    }
 
     /**
-     * @see #setPackageSuspendedAsUser(String, boolean, int)
+     * @see #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle, String)
      * @param packageName The name of the package to get the suspended status of.
      * @param userId The user id.
      * @return {@code true} if the package is suspended or {@code false} if the package is not
-     * suspended or could not be found.
+     * suspended.
+     * @throws IllegalArgumentException if the package was not found.
      * @hide
      */
     public abstract boolean isPackageSuspendedForUser(String packageName, int userId);
+
+    /**
+     * Query if an app is currently suspended.
+     *
+     * @return {@code true} if the given package is suspended, {@code false} otherwise
+     * @throws NameNotFoundException if the package could not be found.
+     *
+     * @see #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle, String)
+     * @hide
+     */
+    @SystemApi
+    public boolean isPackageSuspended(String packageName) throws NameNotFoundException {
+        throw new UnsupportedOperationException("isPackageSuspended not implemented");
+    }
+
+    /**
+     * Apps can query this to know if they have been suspended. A system app with the permission
+     * {@code android.permission.SUSPEND_APPS} can put any app on the device into a suspended state.
+     *
+     * <p>While in this state, the application's notifications will be hidden, any of its started
+     * activities will be stopped and it will not be able to show toasts or dialogs or ring the
+     * device. When the user tries to launch a suspended app, the system will, instead, show a
+     * dialog to the user informing them that they cannot use this app while it is suspended.
+     *
+     * <p>When an app is put into this state, the broadcast action
+     * {@link Intent#ACTION_MY_PACKAGE_SUSPENDED} will be delivered to any of its broadcast
+     * receivers that included this action in their intent-filters, <em>including manifest
+     * receivers.</em> Similarly, a broadcast action {@link Intent#ACTION_MY_PACKAGE_UNSUSPENDED}
+     * is delivered when a previously suspended app is taken out of this state.
+     * </p>
+     *
+     * @return {@code true} if the calling package has been suspended, {@code false} otherwise.
+     *
+     * @see #getSuspendedPackageAppExtras()
+     * @see Intent#ACTION_MY_PACKAGE_SUSPENDED
+     * @see Intent#ACTION_MY_PACKAGE_UNSUSPENDED
+     */
+    public boolean isPackageSuspended() {
+        throw new UnsupportedOperationException("isPackageSuspended not implemented");
+    }
+
+    /**
+     * Returns a {@link Bundle} of extras that was meant to be sent to the calling app when it was
+     * suspended. An app with the permission {@code android.permission.SUSPEND_APPS} can supply this
+     * to the system at the time of suspending an app.
+     *
+     * <p>This is the same {@link Bundle} that is sent along with the broadcast
+     * {@link Intent#ACTION_MY_PACKAGE_SUSPENDED}, whenever the app is suspended. The contents of
+     * this {@link Bundle} are a contract between the suspended app and the suspending app.
+     *
+     * <p>Note: These extras are optional, so if no extras were supplied to the system, this method
+     * will return {@code null}, even when the calling app has been suspended.
+     *
+     * @return A {@link Bundle} containing the extras for the app, or {@code null} if the
+     * package is not currently suspended.
+     *
+     * @see #isPackageSuspended()
+     * @see Intent#ACTION_MY_PACKAGE_UNSUSPENDED
+     * @see Intent#ACTION_MY_PACKAGE_SUSPENDED
+     * @see Intent#EXTRA_SUSPENDED_PACKAGE_EXTRAS
+     */
+    public @Nullable Bundle getSuspendedPackageAppExtras() {
+        throw new UnsupportedOperationException("getSuspendedPackageAppExtras not implemented");
+    }
 
     /**
      * Provide a hint of what the {@link ApplicationInfo#category} value should
@@ -5751,25 +5927,6 @@ public abstract class PackageManager {
     }
 
     /** {@hide} */
-    public static class LegacyPackageInstallObserver extends PackageInstallObserver {
-        private final IPackageInstallObserver mLegacy;
-
-        public LegacyPackageInstallObserver(IPackageInstallObserver legacy) {
-            mLegacy = legacy;
-        }
-
-        @Override
-        public void onPackageInstalled(String basePackageName, int returnCode, String msg,
-                Bundle extras) {
-            if (mLegacy == null) return;
-            try {
-                mLegacy.packageInstalled(basePackageName, returnCode);
-            } catch (RemoteException ignored) {
-            }
-        }
-    }
-
-    /** {@hide} */
     public static class LegacyPackageDeleteObserver extends PackageDeleteObserver {
         private final IPackageDeleteObserver mLegacy;
 
@@ -5900,4 +6057,123 @@ public abstract class PackageManager {
     public @NonNull ArtManager getArtManager() {
         throw new UnsupportedOperationException("getArtManager not implemented in subclass");
     }
+
+    /**
+     * Sets or clears the harmful app warning details for the given app.
+     *
+     * When set, any attempt to launch an activity in this package will be intercepted and a
+     * warning dialog will be shown to the user instead, with the given warning. The user
+     * will have the option to proceed with the activity launch, or to uninstall the application.
+     *
+     * @param packageName The full name of the package to warn on.
+     * @param warning A warning string to display to the user describing the threat posed by the
+     *                application, or null to clear the warning.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SET_HARMFUL_APP_WARNINGS)
+    @SystemApi
+    public void setHarmfulAppWarning(@NonNull String packageName, @Nullable CharSequence warning) {
+        throw new UnsupportedOperationException("setHarmfulAppWarning not implemented in subclass");
+    }
+
+    /**
+     * Returns the harmful app warning string for the given app, or null if there is none set.
+     *
+     * @param packageName The full name of the desired package.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SET_HARMFUL_APP_WARNINGS)
+    @Nullable
+    @SystemApi
+    public CharSequence getHarmfulAppWarning(@NonNull String packageName) {
+        throw new UnsupportedOperationException("getHarmfulAppWarning not implemented in subclass");
+    }
+
+    /** @hide */
+    @IntDef(prefix = { "CERT_INPUT_" }, value = {
+            CERT_INPUT_RAW_X509,
+            CERT_INPUT_SHA256
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CertificateInputType {}
+
+    /**
+     * Certificate input bytes: the input bytes represent an encoded X.509 Certificate which could
+     * be generated using an {@code CertificateFactory}
+     */
+    public static final int CERT_INPUT_RAW_X509 = 0;
+
+    /**
+     * Certificate input bytes: the input bytes represent the SHA256 output of an encoded X.509
+     * Certificate.
+     */
+    public static final int CERT_INPUT_SHA256 = 1;
+
+    /**
+     * Searches the set of signing certificates by which the given package has proven to have been
+     * signed.  This should be used instead of {@code getPackageInfo} with {@code GET_SIGNATURES}
+     * since it takes into account the possibility of signing certificate rotation, except in the
+     * case of packages that are signed by multiple certificates, for which signing certificate
+     * rotation is not supported.  This method is analogous to using {@code getPackageInfo} with
+     * {@code GET_SIGNING_CERTIFICATES} and then searching through the resulting {@code
+     * signingInfo} field to see if the desired certificate is present.
+     *
+     * @param packageName package whose signing certificates to check
+     * @param certificate signing certificate for which to search
+     * @param type representation of the {@code certificate}
+     * @return true if this package was or is signed by exactly the certificate {@code certificate}
+     */
+    public boolean hasSigningCertificate(
+            String packageName, byte[] certificate, @CertificateInputType int type) {
+        throw new UnsupportedOperationException(
+                "hasSigningCertificate not implemented in subclass");
+    }
+
+    /**
+     * Searches the set of signing certificates by which the package(s) for the given uid has proven
+     * to have been signed.  For multiple packages sharing the same uid, this will return the
+     * signing certificates found in the signing history of the "newest" package, where "newest"
+     * indicates the package with the newest signing certificate in the shared uid group.  This
+     * method should be used instead of {@code getPackageInfo} with {@code GET_SIGNATURES}
+     * since it takes into account the possibility of signing certificate rotation, except in the
+     * case of packages that are signed by multiple certificates, for which signing certificate
+     * rotation is not supported. This method is analogous to using {@code getPackagesForUid}
+     * followed by {@code getPackageInfo} with {@code GET_SIGNING_CERTIFICATES}, selecting the
+     * {@code PackageInfo} of the newest-signed bpackage , and finally searching through the
+     * resulting {@code signingInfo} field to see if the desired certificate is there.
+     *
+     * @param uid uid whose signing certificates to check
+     * @param certificate signing certificate for which to search
+     * @param type representation of the {@code certificate}
+     * @return true if this package was or is signed by exactly the certificate {@code certificate}
+     */
+    public boolean hasSigningCertificate(
+            int uid, byte[] certificate, @CertificateInputType int type) {
+        throw new UnsupportedOperationException(
+                "hasSigningCertificate not implemented in subclass");
+    }
+
+    /**
+     * @return the system defined text classifier package name, or null if there's none.
+     *
+     * @hide
+     */
+    public String getSystemTextClassifierPackageName() {
+        throw new UnsupportedOperationException(
+                "getSystemTextClassifierPackageName not implemented in subclass");
+    }
+
+    /**
+     * @return whether a given package's state is protected, e.g. package cannot be disabled,
+     *         suspended, hidden or force stopped.
+     *
+     * @hide
+     */
+    public boolean isPackageStateProtected(String packageName, int userId) {
+        throw new UnsupportedOperationException(
+            "isPackageStateProtected not implemented in subclass");
+    }
+
 }

@@ -18,7 +18,8 @@ package com.android.printservice.recommendation.plugin.samsung;
 
 import android.content.Context;
 import android.net.nsd.NsdServiceInfo;
-import android.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.android.printservice.recommendation.PrintServicePlugin;
 import com.android.printservice.recommendation.R;

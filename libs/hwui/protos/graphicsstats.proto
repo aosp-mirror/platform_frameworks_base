@@ -1,0 +1,83 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.uirenderer.protos;
+
+option optimize_for = LITE_RUNTIME;
+
+// frameworks/base/core/proto/android/service/graphicsstats.proto is based on
+// this proto. Please only make valid protobuf changes to these messages, and
+// keep the other file in sync with this one.
+
+message GraphicsStatsServiceDumpProto {
+    repeated GraphicsStatsProto stats = 1;
+}
+
+message GraphicsStatsProto {
+    // The package name of the app
+    optional string package_name = 1;
+
+    // The version code of the app
+    optional int64 version_code = 2;
+
+    // The start & end timestamps in UTC as
+    // milliseconds since January 1, 1970
+    // Compatible with java.util.Date#setTime()
+    optional int64 stats_start = 3;
+    optional int64 stats_end = 4;
+
+    // The aggregated statistics for the package
+    optional GraphicsStatsJankSummaryProto summary = 5;
+
+    // The frame time histogram for the package
+    repeated GraphicsStatsHistogramBucketProto histogram = 6;
+}
+
+message GraphicsStatsJankSummaryProto {
+    // Distinct frame count.
+    optional int32 total_frames = 1;
+
+    // Number of frames with slow render time. Frames are considered janky if
+    // they took more than a vsync interval (typically 16.667ms) to be rendered.
+    optional int32 janky_frames = 2;
+
+    // Number of "missed vsync" events.
+    optional int32 missed_vsync_count = 3;
+
+    // Number of frames in triple-buffering scenario (high input latency)
+    optional int32 high_input_latency_count = 4;
+
+    // Number of "slow UI thread" events.
+    optional int32 slow_ui_thread_count = 5;
+
+    // Number of "slow bitmap upload" events.
+    optional int32 slow_bitmap_upload_count = 6;
+
+    // Number of "slow draw" events.
+    optional int32 slow_draw_count = 7;
+
+    // Number of frames that missed their deadline (aka, visibly janked)
+    optional int32 missed_deadline_count = 8;
+}
+
+message GraphicsStatsHistogramBucketProto {
+    // Lower bound of render time in milliseconds.
+    optional int32 render_millis = 1;
+    // Number of frames in the bucket.
+    optional int32 frame_count = 2;
+}

@@ -33,6 +33,7 @@ import android.os.WorkSource;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 
 import libcore.util.ZoneInfoDB;
 
@@ -48,7 +49,7 @@ import java.lang.annotation.RetentionPolicy;
  * if it is not already running.  Registered alarms are retained while the
  * device is asleep (and can optionally wake the device up if they go off
  * during that time), but will be cleared if it is turned off and rebooted.
- * 
+ *
  * <p>The Alarm Manager holds a CPU wake lock as long as the alarm receiver's
  * onReceive() method is executing. This guarantees that the phone will not sleep
  * until you have finished handling the broadcast. Once onReceive() returns, the
@@ -177,6 +178,7 @@ public class AlarmManager {
     public static final int FLAG_IDLE_UNTIL = 1<<4;
 
     private final IAlarmManager mService;
+    private final Context mContext;
     private final String mPackageName;
     private final boolean mAlwaysExact;
     private final int mTargetSdkVersion;
@@ -264,6 +266,7 @@ public class AlarmManager {
     AlarmManager(IAlarmManager service, Context ctx) {
         mService = service;
 
+        mContext = ctx;
         mPackageName = ctx.getPackageName();
         mTargetSdkVersion = ctx.getApplicationInfo().targetSdkVersion;
         mAlwaysExact = (mTargetSdkVersion < Build.VERSION_CODES.KITKAT);
@@ -296,7 +299,7 @@ public class AlarmManager {
      * {@link Intent#EXTRA_ALARM_COUNT Intent.EXTRA_ALARM_COUNT} that indicates
      * how many past alarm events have been accumulated into this intent
      * broadcast.  Recurring alarms that have gone undelivered because the
-     * phone was asleep may have a count greater than one when delivered.  
+     * phone was asleep may have a count greater than one when delivered.
      *
      * <div class="note">
      * <p>
@@ -396,10 +399,10 @@ public class AlarmManager {
      * set a recurring alarm for the top of every hour but the phone was asleep
      * from 7:45 until 8:45, an alarm will be sent as soon as the phone awakens,
      * then the next alarm will be sent at 9:00.
-     * 
-     * <p>If your application wants to allow the delivery times to drift in 
+     *
+     * <p>If your application wants to allow the delivery times to drift in
      * order to guarantee that at least a certain time interval always elapses
-     * between alarms, then the approach to take is to use one-time alarms, 
+     * between alarms, then the approach to take is to use one-time alarms,
      * scheduling the next one yourself when handling each alarm delivery.
      *
      * <p class="note">
@@ -567,9 +570,21 @@ public class AlarmManager {
     }
 
     /**
-     * Schedule an alarm that represents an alarm clock.
+     * Schedule an alarm that represents an alarm clock, which will be used to notify the user
+     * when it goes off.  The expectation is that when this alarm triggers, the application will
+     * further wake up the device to tell the user about the alarm -- turning on the screen,
+     * playing a sound, vibrating, etc.  As such, the system will typically also use the
+     * information supplied here to tell the user about this upcoming alarm if appropriate.
      *
-     * The system may choose to display information about this alarm to the user.
+     * <p>Due to the nature of this kind of alarm, similar to {@link #setExactAndAllowWhileIdle},
+     * these alarms will be allowed to trigger even if the system is in a low-power idle
+     * (a.k.a. doze) mode.  The system may also do some prep-work when it sees that such an
+     * alarm coming up, to reduce the amount of background work that could happen if this
+     * causes the device to fully wake up -- this is to avoid situations such as a large number
+     * of devices having an alarm set at the same time in the morning, all waking up at that
+     * time and suddenly swamping the network with pending background work.  As such, these
+     * types of alarms can be extremely expensive on battery use and should only be used for
+     * their intended purpose.</p>
      *
      * <p>
      * This method is like {@link #setExact(int, long, PendingIntent)}, but implies
@@ -782,9 +797,9 @@ public class AlarmManager {
 
     /**
      * Like {@link #set(int, long, PendingIntent)}, but this alarm will be allowed to execute
-     * even when the system is in low-power idle modes.  This type of alarm must <b>only</b>
-     * be used for situations where it is actually required that the alarm go off while in
-     * idle -- a reasonable example would be for a calendar notification that should make a
+     * even when the system is in low-power idle (a.k.a. doze) modes.  This type of alarm must
+     * <b>only</b> be used for situations where it is actually required that the alarm go off while
+     * in idle -- a reasonable example would be for a calendar notification that should make a
      * sound so the user is aware of it.  When the alarm is dispatched, the app will also be
      * added to the system's temporary whitelist for approximately 10 seconds to allow that
      * application to acquire further wake locks in which to complete its work.</p>
@@ -1015,7 +1030,7 @@ public class AlarmManager {
      * @see #ACTION_NEXT_ALARM_CLOCK_CHANGED
      */
     public AlarmClockInfo getNextAlarmClock() {
-        return getNextAlarmClock(UserHandle.myUserId());
+        return getNextAlarmClock(mContext.getUserId());
     }
 
     /**
@@ -1056,7 +1071,7 @@ public class AlarmManager {
         /**
          * Creates a new alarm clock description.
          *
-         * @param triggerTime time at which the underlying alarm is triggered in wall time 
+         * @param triggerTime time at which the underlying alarm is triggered in wall time
          *                    milliseconds since the epoch
          * @param showIntent an intent that can be used to show or edit details of
          *                        the alarm clock.
@@ -1089,7 +1104,7 @@ public class AlarmManager {
          * Returns an intent that can be used to show or edit details of the alarm clock in
          * the application that scheduled it.
          *
-         * <p class="note">Beware that any application can retrieve and send this intent, 
+         * <p class="note">Beware that any application can retrieve and send this intent,
          * potentially with additional fields filled in. See
          * {@link PendingIntent#send(android.content.Context, int, android.content.Intent)
          * PendingIntent.send()} and {@link android.content.Intent#fillIn Intent.fillIn()}
@@ -1121,5 +1136,13 @@ public class AlarmManager {
                 return new AlarmClockInfo[size];
             }
         };
+
+        /** @hide */
+        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+            final long token = proto.start(fieldId);
+            proto.write(AlarmClockInfoProto.TRIGGER_TIME_MS, mTriggerTime);
+            mShowIntent.writeToProto(proto, AlarmClockInfoProto.SHOW_INTENT);
+            proto.end(token);
+        }
     }
 }

@@ -27,17 +27,17 @@ namespace test {
 
 class BitmapAllocationTestUtils {
 public:
-    static sk_sp<Bitmap> allocateHeapBitmap(int width, int height,
-            SkColorType colorType, std::function<void(SkBitmap& bitmap)> setup) {
-         sk_sp<Bitmap> bitmap = TestUtils::createBitmap(width, height, colorType);
-         SkBitmap skBitmap;
-         bitmap->getSkBitmap(&skBitmap);
-         setup(skBitmap);
-         return bitmap;
+    static sk_sp<Bitmap> allocateHeapBitmap(int width, int height, SkColorType colorType,
+                                            std::function<void(SkBitmap& bitmap)> setup) {
+        sk_sp<Bitmap> bitmap = TestUtils::createBitmap(width, height, colorType);
+        SkBitmap skBitmap;
+        bitmap->getSkBitmap(&skBitmap);
+        setup(skBitmap);
+        return bitmap;
     }
 
-    static sk_sp<Bitmap> allocateHardwareBitmap(int width, int height,
-            SkColorType colorType, std::function<void(SkBitmap& bitmap)> setup) {
+    static sk_sp<Bitmap> allocateHardwareBitmap(int width, int height, SkColorType colorType,
+                                                std::function<void(SkBitmap& bitmap)> setup) {
         SkBitmap skBitmap;
         SkImageInfo info = SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType);
         skBitmap.setInfo(info);
@@ -46,8 +46,8 @@ public:
         return Bitmap::allocateHardwareBitmap(skBitmap);
     }
 
-    typedef sk_sp<Bitmap> (*BitmapAllocator) (int, int, SkColorType,
-            std::function<void(SkBitmap& bitmap)> setup);
+    typedef sk_sp<Bitmap> (*BitmapAllocator)(int, int, SkColorType,
+                                             std::function<void(SkBitmap& bitmap)> setup);
 
     template <class T, BitmapAllocator allocator>
     static test::TestScene* createBitmapAllocationScene(const TestScene::Options&) {
@@ -55,22 +55,16 @@ public:
     }
 
     template <class BaseScene>
-    static bool registerBitmapAllocationScene(std::string name, std::string  description) {
-        TestScene::registerScene({
-            name + "GlTex",
-            description + " (GlTex version).",
-            createBitmapAllocationScene<BaseScene, &allocateHeapBitmap>
-        });
+    static bool registerBitmapAllocationScene(std::string name, std::string description) {
+        TestScene::registerScene({name + "GlTex", description + " (GlTex version).",
+                                  createBitmapAllocationScene<BaseScene, &allocateHeapBitmap>});
 
-        TestScene::registerScene({
-            name + "EglImage",
-            description + " (EglImage version).",
-            createBitmapAllocationScene<BaseScene, &allocateHardwareBitmap>
-        });
+        TestScene::registerScene({name + "EglImage", description + " (EglImage version).",
+                                  createBitmapAllocationScene<BaseScene, &allocateHardwareBitmap>});
         return true;
     }
 };
 
-} // namespace test
-} // namespace uirenderer
-} // namespace android
+}  // namespace test
+}  // namespace uirenderer
+}  // namespace android

@@ -24,30 +24,40 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
+import java.util.Set;
 
 public final class Prefs {
     private Prefs() {} // no instantation
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-        Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,
-        Key.DEBUG_MODE_ENABLED,
-        Key.HOTSPOT_TILE_LAST_USED,
-        Key.COLOR_INVERSION_TILE_LAST_USED,
-        Key.DND_TILE_VISIBLE,
-        Key.DND_TILE_COMBINED_ICON,
-        Key.DND_CONFIRMED_PRIORITY_INTRODUCTION,
-        Key.DND_CONFIRMED_SILENCE_INTRODUCTION,
-        Key.DND_FAVORITE_BUCKET_INDEX,
-        Key.DND_NONE_SELECTED,
-        Key.DND_FAVORITE_ZEN,
-        Key.QS_HOTSPOT_ADDED,
-        Key.QS_DATA_SAVER_ADDED,
-        Key.QS_DATA_SAVER_DIALOG_SHOWN,
-        Key.QS_INVERT_COLORS_ADDED,
-        Key.QS_WORK_ADDED,
-        Key.QS_NIGHTDISPLAY_ADDED,
-        Key.SEEN_MULTI_USER,
+            Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,
+            Key.DEBUG_MODE_ENABLED,
+            Key.HOTSPOT_TILE_LAST_USED,
+            Key.COLOR_INVERSION_TILE_LAST_USED,
+            Key.DND_TILE_VISIBLE,
+            Key.DND_TILE_COMBINED_ICON,
+            Key.DND_CONFIRMED_PRIORITY_INTRODUCTION,
+            Key.DND_CONFIRMED_SILENCE_INTRODUCTION,
+            Key.DND_FAVORITE_BUCKET_INDEX,
+            Key.DND_NONE_SELECTED,
+            Key.DND_FAVORITE_ZEN,
+            Key.QS_HOTSPOT_ADDED,
+            Key.QS_DATA_SAVER_ADDED,
+            Key.QS_DATA_SAVER_DIALOG_SHOWN,
+            Key.QS_INVERT_COLORS_ADDED,
+            Key.QS_WORK_ADDED,
+            Key.QS_NIGHTDISPLAY_ADDED,
+            Key.QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT,
+            Key.SEEN_MULTI_USER,
+            Key.HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDING,
+            Key.HAS_SEEN_RECENTS_QUICK_SCRUB_ONBOARDING,
+            Key.OVERVIEW_OPENED_COUNT,
+            Key.OVERVIEW_OPENED_FROM_HOME_COUNT,
+            Key.SEEN_RINGER_GUIDANCE_COUNT,
+            Key.QS_HAS_TURNED_OFF_MOBILE_DATA,
+            Key.TOUCHED_RINGER_TOGGLE,
+            Key.QUICK_STEP_INTERACTION_FLAGS
     })
     public @interface Key {
         @Deprecated
@@ -74,7 +84,25 @@ public final class Prefs {
         String QS_WORK_ADDED = "QsWorkAdded";
         @Deprecated
         String QS_NIGHTDISPLAY_ADDED = "QsNightDisplayAdded";
+        /**
+         * Used for tracking how many times the user has seen the long press tooltip in the Quick
+         * Settings panel.
+         */
+        String QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT = "QsLongPressTooltipShownCount";
         String SEEN_MULTI_USER = "HasSeenMultiUser";
+        String OVERVIEW_OPENED_COUNT = "OverviewOpenedCount";
+        String OVERVIEW_OPENED_FROM_HOME_COUNT = "OverviewOpenedFromHomeCount";
+        String HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDING = "HasSeenRecentsSwipeUpOnboarding";
+        String HAS_SEEN_RECENTS_QUICK_SCRUB_ONBOARDING = "HasSeenRecentsQuickScrubOnboarding";
+        String DISMISSED_RECENTS_SWIPE_UP_ONBOARDING_COUNT =
+                "DismissedRecentsSwipeUpOnboardingCount";
+        String HAS_DISMISSED_RECENTS_QUICK_SCRUB_ONBOARDING_ONCE =
+                "HasDismissedRecentsQuickScrubOnboardingOnce";
+        String SEEN_RINGER_GUIDANCE_COUNT = "RingerGuidanceCount";
+        String QS_TILE_SPECS_REVEALED = "QsTileSpecsRevealed";
+        String QS_HAS_TURNED_OFF_MOBILE_DATA = "QsHasTurnedOffMobileData";
+        String TOUCHED_RINGER_TOGGLE = "TouchedRingerToggle";
+        String QUICK_STEP_INTERACTION_FLAGS = "QuickStepInteractionFlags";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {
@@ -107,6 +135,15 @@ public final class Prefs {
 
     public static void putString(Context context, @Key String key, String value) {
         get(context).edit().putString(key, value).apply();
+    }
+
+    public static void putStringSet(Context context, @Key String key, Set<String> value) {
+        get(context).edit().putStringSet(key, value).apply();
+    }
+
+    public static Set<String> getStringSet(
+            Context context, @Key String key, Set<String> defaultValue) {
+        return get(context).getStringSet(key, defaultValue);
     }
 
     public static Map<String, ?> getAll(Context context) {

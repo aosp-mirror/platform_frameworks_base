@@ -274,6 +274,7 @@ public final class RuntimePermissionPresenter {
             }
         }
 
+        @GuardedBy("mLock")
         private void scheduleNextMessageIfNeededLocked() {
             if (mBound && mRemoteInstance != null && !mPendingWork.isEmpty()) {
                 Message nextMessage = mPendingWork.remove(0);

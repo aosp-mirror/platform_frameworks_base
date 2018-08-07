@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import android.annotation.Nullable;
+
 /**
  * The Java representation of the HTML5 PostMessage event. See
  * https://html.spec.whatwg.org/multipage/comms.html#the-messageevent-interfaces
@@ -53,9 +55,10 @@ public class WebMessage {
     }
 
     /**
-     * Returns the ports that are sent with the message, or null if no port
+     * Returns the ports that are sent with the message, or {@code null} if no port
      * is sent.
      */
+    @Nullable
     public WebMessagePort[] getPorts() {
         return mPorts;
     }

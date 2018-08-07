@@ -1,0 +1,6 @@
+42 answer (to life the universe etc|3)
+314 pi
+1004 chatty (dropped|3)
+1005 tag_def (tag|1),(name|3),(format|3)
+2747 contacts_aggregation (aggregation time|2|3), (count|1|1)
+1397638484 snet_event_log (subtag|3) (uid|1) (message|3|s)

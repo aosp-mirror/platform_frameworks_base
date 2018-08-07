@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.os.SystemProperties;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.quicksettings.Tile;
@@ -28,7 +30,11 @@ import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.telephony.TelephonyProperties;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.GlobalSetting;
 import com.android.systemui.qs.QSHost;
@@ -60,8 +66,15 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
 
     @Override
     public void handleClick() {
-        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
-        setEnabled(!mState.value);
+        boolean airplaneModeEnabled = mState.value;
+        MetricsLogger.action(mContext, getMetricsCategory(), !airplaneModeEnabled);
+        if (!airplaneModeEnabled && Boolean.parseBoolean(
+                SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE))) {
+            Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
+                    new Intent(TelephonyIntents.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS), 0);
+            return;
+        }
+        setEnabled(!airplaneModeEnabled);
     }
 
     private void setEnabled(boolean enabled) {
@@ -82,6 +95,7 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
+        checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_AIRPLANE_MODE);
         final int value = arg instanceof Integer ? (Integer)arg : mSetting.getValue();
         final boolean airplaneMode = value != 0;
         state.value = airplaneMode;

@@ -18,7 +18,7 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
-import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
+import static android.view.WindowManager.TRANSIT_UNSET;
 import static com.android.server.wm.TaskSnapshotController.*;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -29,6 +29,7 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.ArraySet;
 
+import com.google.android.collect.Sets;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -69,6 +70,21 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final ArraySet<AppWindowToken> closingApps = new ArraySet<>();
         closingApps.add(closingWindow.mAppToken);
         final ArraySet<Task> closingTasks = new ArraySet<>();
+        sWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
+        assertEquals(0, closingTasks.size());
+    }
+
+    @Test
+    public void testGetClosingApps_skipClosingAppsSnapshotTasks() throws Exception {
+        final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
+                "closingWindow");
+        closingWindow.mAppToken.setVisibility(null, false /* visible */, TRANSIT_UNSET,
+                true /* performLayout */, false /* isVoiceInteraction */);
+        final ArraySet<AppWindowToken> closingApps = new ArraySet<>();
+        closingApps.add(closingWindow.mAppToken);
+        final ArraySet<Task> closingTasks = new ArraySet<>();
+        sWm.mTaskSnapshotController.addSkipClosingAppSnapshotTasks(
+                Sets.newArraySet(closingWindow.mAppToken.getTask()));
         sWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
         assertEquals(0, closingTasks.size());
     }

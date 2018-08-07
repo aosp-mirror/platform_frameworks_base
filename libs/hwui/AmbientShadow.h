@@ -31,12 +31,12 @@ class VertexBuffer;
  */
 class AmbientShadow {
 public:
-    static void createAmbientShadow(bool isCasterOpaque, const Vector3* poly,
-            int polyLength, const Vector3& centroid3d, float heightFactor,
-            float geomFactor, VertexBuffer& shadowVertexBuffer);
-}; // AmbientShadow
+    static void createAmbientShadow(bool isCasterOpaque, const Vector3* poly, int polyLength,
+                                    const Vector3& centroid3d, float heightFactor, float geomFactor,
+                                    VertexBuffer& shadowVertexBuffer);
+};  // AmbientShadow
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_AMBIENT_SHADOW_H
+#endif  // ANDROID_HWUI_AMBIENT_SHADOW_H

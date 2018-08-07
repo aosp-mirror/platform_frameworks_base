@@ -16,9 +16,12 @@
 
 package android.webkit;
 
+import android.annotation.Nullable;
 import android.text.TextUtils;
-import java.util.regex.Pattern;
+
 import libcore.net.MimeUtils;
+
+import java.util.regex.Pattern;
 
 /**
  * Two-way map that maps MIME-types to file extensions and vice versa.
@@ -34,7 +37,7 @@ public class MimeTypeMap {
     }
 
     /**
-     * Returns the file extension or an empty string iff there is no
+     * Returns the file extension or an empty string if there is no
      * extension. This method is a convenience method for obtaining the
      * extension of a url and has undefined results for other Strings.
      * @param url
@@ -71,9 +74,9 @@ public class MimeTypeMap {
     }
 
     /**
-     * Return true if the given MIME type has an entry in the map.
+     * Return {@code true} if the given MIME type has an entry in the map.
      * @param mimeType A MIME type (i.e. text/plain)
-     * @return True iff there is a mimeType entry in the map.
+     * @return {@code true} if there is a mimeType entry in the map.
      */
     public boolean hasMimeType(String mimeType) {
         return MimeUtils.hasMimeType(mimeType);
@@ -82,8 +85,9 @@ public class MimeTypeMap {
     /**
      * Return the MIME type for the given extension.
      * @param extension A file extension without the leading '.'
-     * @return The MIME type for the given extension or null iff there is none.
+     * @return The MIME type for the given extension or {@code null} if there is none.
      */
+    @Nullable
     public String getMimeTypeFromExtension(String extension) {
         return MimeUtils.guessMimeTypeFromExtension(extension);
     }
@@ -94,9 +98,9 @@ public class MimeTypeMap {
     }
 
     /**
-     * Return true if the given extension has a registered MIME type.
+     * Return {@code true} if the given extension has a registered MIME type.
      * @param extension A file extension without the leading '.'
-     * @return True iff there is an extension entry in the map.
+     * @return {@code true} if there is an extension entry in the map.
      */
     public boolean hasExtension(String extension) {
         return MimeUtils.hasExtension(extension);
@@ -107,14 +111,15 @@ public class MimeTypeMap {
      * MIME types map to multiple extensions. This call will return the most
      * common extension for the given MIME type.
      * @param mimeType A MIME type (i.e. text/plain)
-     * @return The extension for the given MIME type or null iff there is none.
+     * @return The extension for the given MIME type or {@code null} if there is none.
      */
+    @Nullable
     public String getExtensionFromMimeType(String mimeType) {
         return MimeUtils.guessExtensionFromMimeType(mimeType);
     }
 
     /**
-     * If the given MIME type is null, or one of the "generic" types (text/plain
+     * If the given MIME type is {@code null}, or one of the "generic" types (text/plain
      * or application/octet-stream) map it to a type that Android can deal with.
      * If the given type is not generic, return it unchanged.
      *
@@ -123,7 +128,7 @@ public class MimeTypeMap {
      * @param contentDisposition Content-disposition header given by the server.
      * @return The MIME type that should be used for this data.
      */
-    /* package */ String remapGenericMimeType(String mimeType, String url,
+    /* package */ String remapGenericMimeType(@Nullable String mimeType, String url,
             String contentDisposition) {
         // If we have one of "generic" MIME types, try to deduce
         // the right MIME type from the file extension (if any):

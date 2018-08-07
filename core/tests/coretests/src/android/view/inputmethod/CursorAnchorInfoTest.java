@@ -16,21 +16,33 @@
 
 package android.view.inputmethod;
 
-import android.graphics.Matrix;
-import android.graphics.RectF;
-import android.os.Parcel;
-import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.text.TextUtils;
-import android.view.inputmethod.CursorAnchorInfo.Builder;
-
-import java.util.Objects;
-
 import static android.view.inputmethod.CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION;
 import static android.view.inputmethod.CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
 import static android.view.inputmethod.CursorAnchorInfo.FLAG_IS_RTL;
 
-public class CursorAnchorInfoTest extends InstrumentationTestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import android.graphics.Matrix;
+import android.graphics.RectF;
+import android.os.Parcel;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+import android.text.TextUtils;
+import android.view.inputmethod.CursorAnchorInfo.Builder;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.util.Objects;
+
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class CursorAnchorInfoTest {
+    private static final float EPSILON = 0.0000001f;
+
     private static final RectF[] MANY_BOUNDS = new RectF[] {
             new RectF(101.0f, 201.0f, 301.0f, 401.0f),
             new RectF(102.0f, 202.0f, 302.0f, 402.0f),
@@ -74,7 +86,7 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         FLAG_HAS_INVISIBLE_REGION | FLAG_IS_RTL,
     };
 
-    @SmallTest
+    @Test
     public void testBuilder() throws Exception {
         final int SELECTION_START = 30;
         final int SELECTION_END = 40;
@@ -109,10 +121,10 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(COMPOSING_TEXT_START, info.getComposingTextStart());
         assertTrue(TextUtils.equals(COMPOSING_TEXT, info.getComposingText()));
         assertEquals(INSERTION_MARKER_FLAGS, info.getInsertionMarkerFlags());
-        assertEquals(INSERTION_MARKER_HORIZONTAL, info.getInsertionMarkerHorizontal());
-        assertEquals(INSERTION_MARKER_TOP, info.getInsertionMarkerTop());
-        assertEquals(INSERTION_MARKER_BASELINE, info.getInsertionMarkerBaseline());
-        assertEquals(INSERTION_MARKER_BOTOM, info.getInsertionMarkerBottom());
+        assertEquals(INSERTION_MARKER_HORIZONTAL, info.getInsertionMarkerHorizontal(), EPSILON);
+        assertEquals(INSERTION_MARKER_TOP, info.getInsertionMarkerTop(), EPSILON);
+        assertEquals(INSERTION_MARKER_BASELINE, info.getInsertionMarkerBaseline(), EPSILON);
+        assertEquals(INSERTION_MARKER_BOTOM, info.getInsertionMarkerBottom(), EPSILON);
         assertEquals(TRANSFORM_MATRIX, info.getMatrix());
         for (int i = 0; i < MANY_BOUNDS.length; i++) {
             final RectF expectedBounds = MANY_BOUNDS[i];
@@ -134,10 +146,10 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(COMPOSING_TEXT_START, info2.getComposingTextStart());
         assertTrue(TextUtils.equals(COMPOSING_TEXT, info2.getComposingText()));
         assertEquals(INSERTION_MARKER_FLAGS, info2.getInsertionMarkerFlags());
-        assertEquals(INSERTION_MARKER_HORIZONTAL, info2.getInsertionMarkerHorizontal());
-        assertEquals(INSERTION_MARKER_TOP, info2.getInsertionMarkerTop());
-        assertEquals(INSERTION_MARKER_BASELINE, info2.getInsertionMarkerBaseline());
-        assertEquals(INSERTION_MARKER_BOTOM, info2.getInsertionMarkerBottom());
+        assertEquals(INSERTION_MARKER_HORIZONTAL, info2.getInsertionMarkerHorizontal(), EPSILON);
+        assertEquals(INSERTION_MARKER_TOP, info2.getInsertionMarkerTop(), EPSILON);
+        assertEquals(INSERTION_MARKER_BASELINE, info2.getInsertionMarkerBaseline(), EPSILON);
+        assertEquals(INSERTION_MARKER_BOTOM, info2.getInsertionMarkerBottom(), EPSILON);
         assertEquals(TRANSFORM_MATRIX, info2.getMatrix());
         for (int i = 0; i < MANY_BOUNDS.length; i++) {
             final RectF expectedBounds = MANY_BOUNDS[i];
@@ -161,10 +173,10 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(COMPOSING_TEXT_START, info3.getComposingTextStart());
         assertTrue(TextUtils.equals(COMPOSING_TEXT, info3.getComposingText()));
         assertEquals(INSERTION_MARKER_FLAGS, info3.getInsertionMarkerFlags());
-        assertEquals(INSERTION_MARKER_HORIZONTAL, info3.getInsertionMarkerHorizontal());
-        assertEquals(INSERTION_MARKER_TOP, info3.getInsertionMarkerTop());
-        assertEquals(INSERTION_MARKER_BASELINE, info3.getInsertionMarkerBaseline());
-        assertEquals(INSERTION_MARKER_BOTOM, info3.getInsertionMarkerBottom());
+        assertEquals(INSERTION_MARKER_HORIZONTAL, info3.getInsertionMarkerHorizontal(), EPSILON);
+        assertEquals(INSERTION_MARKER_TOP, info3.getInsertionMarkerTop(), EPSILON);
+        assertEquals(INSERTION_MARKER_BASELINE, info3.getInsertionMarkerBaseline(), EPSILON);
+        assertEquals(INSERTION_MARKER_BOTOM, info3.getInsertionMarkerBottom(), EPSILON);
         assertEquals(TRANSFORM_MATRIX, info3.getMatrix());
         for (int i = 0; i < MANY_BOUNDS.length; i++) {
             final RectF expectedBounds = MANY_BOUNDS[i];
@@ -187,10 +199,10 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(-1, uninitializedInfo.getComposingTextStart());
         assertNull(uninitializedInfo.getComposingText());
         assertEquals(0, uninitializedInfo.getInsertionMarkerFlags());
-        assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerHorizontal());
-        assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerTop());
-        assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerBaseline());
-        assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerBottom());
+        assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerHorizontal(), EPSILON);
+        assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerTop(), EPSILON);
+        assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerBaseline(), EPSILON);
+        assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerBottom(), EPSILON);
         assertEquals(Matrix.IDENTITY_MATRIX, uninitializedInfo.getMatrix());
     }
 
@@ -199,7 +211,7 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertFalse(Objects.equals(reference, actual));
     }
 
-    @SmallTest
+    @Test
     public void testEquality() throws Exception {
         final Matrix MATRIX1 = new Matrix();
         MATRIX1.setTranslate(10.0f, 20.0f);
@@ -357,7 +369,7 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
                         INSERTION_MARKER_FLAGS2).build());
     }
 
-    @SmallTest
+    @Test
     public void testMatrixIsCopied() throws Exception {
         final Matrix MATRIX1 = new Matrix();
         MATRIX1.setTranslate(10.0f, 20.0f);
@@ -385,7 +397,7 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(MATRIX2, secondInstance.getMatrix());
     }
 
-    @SmallTest
+    @Test
     public void testMatrixIsRequired() throws Exception {
         final int SELECTION_START = 30;
         final int SELECTION_END = 40;
@@ -434,7 +446,7 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testBuilderAddCharacterBounds() throws Exception {
         // A negative index should be rejected.
         try {

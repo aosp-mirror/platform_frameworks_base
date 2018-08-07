@@ -68,22 +68,22 @@ public final class WebViewDelegate {
     }
 
     /**
-     * Returns true if the WebView trace tag is enabled and false otherwise.
+     * Returns {@code true} if the WebView trace tag is enabled and {@code false} otherwise.
      */
     public boolean isTraceTagEnabled() {
         return Trace.isTagEnabled(Trace.TRACE_TAG_WEBVIEW);
     }
 
     /**
-     * Returns true if the draw GL functor can be invoked (see {@link #invokeDrawGlFunctor})
-     * and false otherwise.
+     * Returns {@code true} if the draw GL functor can be invoked (see {@link #invokeDrawGlFunctor})
+     * and {@code false} otherwise.
      */
     public boolean canInvokeDrawGlFunctor(View containerView) {
         return true;
     }
 
     /**
-     * Invokes the draw GL functor. If waitForCompletion is false the functor
+     * Invokes the draw GL functor. If waitForCompletion is {@code false} the functor
      * may be invoked asynchronously.
      *
      * @param nativeDrawGLFunctor the pointer to the native functor that implements
@@ -217,5 +217,12 @@ public final class WebViewDelegate {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns the data directory suffix to use, or null for none.
+     */
+    public String getDataDirectorySuffix() {
+        return WebViewFactory.getDataDirectorySuffix();
     }
 }

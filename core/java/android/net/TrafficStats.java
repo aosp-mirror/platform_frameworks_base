@@ -16,7 +16,6 @@
 
 package android.net;
 
-import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -27,6 +26,7 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.DataUnit;
 
 import com.android.server.NetworkManagementSocketTagger;
 
@@ -56,15 +56,20 @@ public class TrafficStats {
      */
     public final static int UNSUPPORTED = -1;
 
-    /** @hide */
+    /** @hide @deprecated use {@link DataUnit} instead to clarify SI-vs-IEC */
+    @Deprecated
     public static final long KB_IN_BYTES = 1024;
-    /** @hide */
+    /** @hide @deprecated use {@link DataUnit} instead to clarify SI-vs-IEC */
+    @Deprecated
     public static final long MB_IN_BYTES = KB_IN_BYTES * 1024;
-    /** @hide */
+    /** @hide @deprecated use {@link DataUnit} instead to clarify SI-vs-IEC */
+    @Deprecated
     public static final long GB_IN_BYTES = MB_IN_BYTES * 1024;
-    /** @hide */
+    /** @hide @deprecated use {@link DataUnit} instead to clarify SI-vs-IEC */
+    @Deprecated
     public static final long TB_IN_BYTES = GB_IN_BYTES * 1024;
-    /** @hide */
+    /** @hide @deprecated use {@link DataUnit} instead to clarify SI-vs-IEC */
+    @Deprecated
     public static final long PB_IN_BYTES = TB_IN_BYTES * 1024;
 
     /**
@@ -253,20 +258,33 @@ public class TrafficStats {
     /**
      * Set specific UID to use when accounting {@link Socket} traffic
      * originating from the current thread. Designed for use when performing an
-     * operation on behalf of another application.
+     * operation on behalf of another application, or when another application
+     * is performing operations on your behalf.
+     * <p>
+     * Any app can <em>accept</em> blame for traffic performed on a socket
+     * originally created by another app by calling this method with the
+     * {@link android.system.Os#getuid()} value. However, only apps holding the
+     * {@code android.Manifest.permission#UPDATE_DEVICE_STATS} permission may
+     * <em>assign</em> blame to another UIDs.
      * <p>
      * Changes only take effect during subsequent calls to
      * {@link #tagSocket(Socket)}.
-     * <p>
-     * To take effect, caller must hold
-     * {@link android.Manifest.permission#UPDATE_DEVICE_STATS} permission.
-     *
-     * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
+    @SuppressLint("Doclava125")
     public static void setThreadStatsUid(int uid) {
         NetworkManagementSocketTagger.setThreadSocketStatsUid(uid);
+    }
+
+    /**
+     * Get the active UID used when accounting {@link Socket} traffic originating
+     * from the current thread. Only one active tag per thread is supported.
+     * {@link #tagSocket(Socket)}.
+     *
+     * @see #setThreadStatsUid(int)
+     */
+    public static int getThreadStatsUid() {
+        return NetworkManagementSocketTagger.getThreadSocketStatsUid();
     }
 
     /**
@@ -276,7 +294,11 @@ public class TrafficStats {
      * <p>
      * Changes only take effect during subsequent calls to
      * {@link #tagSocket(Socket)}.
+     *
+     * @removed
+     * @deprecated use {@link #setThreadStatsUid(int)} instead.
      */
+    @Deprecated
     public static void setThreadStatsUidSelf() {
         setThreadStatsUid(android.os.Process.myUid());
     }

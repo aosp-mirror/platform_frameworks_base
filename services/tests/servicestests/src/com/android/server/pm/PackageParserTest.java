@@ -27,14 +27,15 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.MediumTest;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.MediumTest;
 
 import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
-import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -127,6 +128,8 @@ public class PackageParserTest {
     }
 
     @Test
+    @SmallTest
+    @Presubmit
     public void test_roundTripKnownFields() throws Exception {
         PackageParser.Package pkg = new PackageParser.Package("foo");
         setKnownFields(pkg);
@@ -196,7 +199,8 @@ public class PackageParserTest {
         assertEquals(a.installLocation, b.installLocation);
         assertEquals(a.coreApp, b.coreApp);
         assertEquals(a.mRequiredForAllUsers, b.mRequiredForAllUsers);
-        assertEquals(a.mTrustedOverlay, b.mTrustedOverlay);
+        assertEquals(a.mCompileSdkVersion, b.mCompileSdkVersion);
+        assertEquals(a.mCompileSdkVersionCodename, b.mCompileSdkVersionCodename);
         assertEquals(a.use32bitAbi, b.use32bitAbi);
         assertEquals(a.packageName, b.packageName);
         assertTrue(Arrays.equals(a.splitNames, b.splitNames));
@@ -260,14 +264,16 @@ public class PackageParserTest {
         assertBundleApproximateEquals(a.mAppMetaData, b.mAppMetaData);
         assertEquals(a.mVersionName, b.mVersionName);
         assertEquals(a.mSharedUserId, b.mSharedUserId);
-        assertTrue(Arrays.equals(a.mSignatures, b.mSignatures));
-        assertTrue(Arrays.equals(a.mCertificates, b.mCertificates));
+        assertTrue(Arrays.equals(a.mSigningDetails.signatures, b.mSigningDetails.signatures));
         assertTrue(Arrays.equals(a.mLastPackageUsageTimeInMills, b.mLastPackageUsageTimeInMills));
         assertEquals(a.mExtras, b.mExtras);
         assertEquals(a.mRestrictedAccountType, b.mRestrictedAccountType);
         assertEquals(a.mRequiredAccountType, b.mRequiredAccountType);
         assertEquals(a.mOverlayTarget, b.mOverlayTarget);
-        assertEquals(a.mSigningKeys, b.mSigningKeys);
+        assertEquals(a.mOverlayCategory, b.mOverlayCategory);
+        assertEquals(a.mOverlayPriority, b.mOverlayPriority);
+        assertEquals(a.mOverlayIsStatic, b.mOverlayIsStatic);
+        assertEquals(a.mSigningDetails.publicKeys, b.mSigningDetails.publicKeys);
         assertEquals(a.mUpgradeKeySets, b.mUpgradeKeySets);
         assertEquals(a.mKeySetMapping, b.mKeySetMapping);
         assertEquals(a.cpuAbiOverride, b.cpuAbiOverride);
@@ -429,7 +435,6 @@ public class PackageParserTest {
         pkg.installLocation = 100;
         pkg.coreApp = true;
         pkg.mRequiredForAllUsers = true;
-        pkg.mTrustedOverlay = true;
         pkg.use32bitAbi = true;
         pkg.packageName = "foo";
         pkg.splitNames = new String[] { "foo2" };
@@ -469,7 +474,7 @@ public class PackageParserTest {
         pkg.usesStaticLibraries.add("foo23");
         pkg.usesStaticLibrariesCertDigests = new String[1][];
         pkg.usesStaticLibrariesCertDigests[0] = new String[] { "digest" };
-        pkg.usesStaticLibrariesVersions = new int[] { 100 };
+        pkg.usesStaticLibrariesVersions = new long[] { 100 };
 
         pkg.libraryNames = new ArrayList<>();
         pkg.libraryNames.add("foo10");
@@ -493,14 +498,18 @@ public class PackageParserTest {
         pkg.mAppMetaData = new Bundle();
         pkg.mVersionName = "foo17";
         pkg.mSharedUserId = "foo18";
-        pkg.mSignatures = new Signature[] { new Signature(new byte[16]) };
-        pkg.mCertificates = new Certificate[][] { new Certificate[] { null }};
+        pkg.mSigningDetails =
+                new PackageParser.SigningDetails(
+                        new Signature[] { new Signature(new byte[16]) },
+                        2,
+                        new ArraySet<>(),
+                        null,
+                        null);
         pkg.mExtras = new Bundle();
         pkg.mRestrictedAccountType = "foo19";
         pkg.mRequiredAccountType = "foo20";
         pkg.mOverlayTarget = "foo21";
         pkg.mOverlayPriority = 100;
-        pkg.mSigningKeys = new ArraySet<>();
         pkg.mUpgradeKeySets = new ArraySet<>();
         pkg.mKeySetMapping = new ArrayMap<>();
         pkg.cpuAbiOverride = "foo22";
@@ -518,6 +527,19 @@ public class PackageParserTest {
 
         pkg.featureGroups = new ArrayList<>();
         pkg.featureGroups.add(new FeatureGroupInfo());
+
+        pkg.mCompileSdkVersionCodename = "foo23";
+        pkg.mCompileSdkVersion = 100;
+        pkg.mVersionCodeMajor = 100;
+
+        pkg.mOverlayCategory = "foo24";
+        pkg.mOverlayIsStatic = true;
+
+        pkg.baseHardwareAccelerated = true;
+        pkg.coreApp = true;
+        pkg.mRequiredForAllUsers = true;
+        pkg.visibleToInstantApps = true;
+        pkg.use32bitAbi = true;
     }
 
     private static void assertAllFieldsExist(PackageParser.Package pkg) throws Exception {
@@ -526,6 +548,7 @@ public class PackageParserTest {
         Set<String> nonSerializedFields = new HashSet<>();
         nonSerializedFields.add("mExtras");
         nonSerializedFields.add("packageUsageTimeMillis");
+        nonSerializedFields.add("isStub");
 
         for (Field f : fields) {
             final Class<?> fieldType = f.getType();
@@ -554,6 +577,10 @@ public class PackageParserTest {
                 // int fields: Check that they're set to 100.
                 int value = (int) f.get(pkg);
                 assertEquals("Bad value for field: " + f, 100, value);
+            } else if (fieldType == boolean.class) {
+                // boolean fields: Check that they're set to true.
+                boolean value = (boolean) f.get(pkg);
+                assertEquals("Bad value for field: " + f, true, value);
             } else {
                 // All other fields: Check that they're set.
                 Object o = f.get(pkg);

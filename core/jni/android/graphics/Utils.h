@@ -34,9 +34,15 @@ public:
     virtual size_t read(void* buffer, size_t size);
     virtual bool hasLength() const { return true; }
     virtual size_t getLength() const;
+    virtual bool hasPosition() const;
+    virtual size_t getPosition() const;
+    virtual bool seek(size_t position);
+    virtual bool move(long offset);
     virtual bool isAtEnd() const;
 
-    virtual SkStreamRewindable* duplicate() const;
+protected:
+    SkStreamRewindable* onDuplicate() const override;
+
 private:
     Asset* fAsset;
 };
@@ -71,6 +77,8 @@ jobject nullObjectReturn(const char msg[]);
 /** Check if the file descriptor is seekable.
  */
 bool isSeekable(int descriptor);
+
+JNIEnv* get_env_or_die(JavaVM* jvm);
 
 }; // namespace android
 

@@ -18,14 +18,15 @@
 
 #include <ui/DisplayInfo.h>
 
-#include "utils/Macros.h"
 #include "Extensions.h"
+#include "utils/Macros.h"
 
 namespace android {
 namespace uirenderer {
 
 class DeviceInfo {
     PREVENT_COPY_AND_ASSIGN(DeviceInfo);
+
 public:
     // returns nullptr if DeviceInfo is not initialized yet
     // Note this does not have a memory fence so it's up to the caller
@@ -46,12 +47,13 @@ public:
         return di.w * di.h * in;
     }
 
+    static DisplayInfo queryDisplayInfo();
+
 private:
     DeviceInfo() {}
     ~DeviceInfo() {}
 
     void load();
-    void loadDisplayInfo();
 
     int mMaxTextureSize;
     DisplayInfo mDisplayInfo;

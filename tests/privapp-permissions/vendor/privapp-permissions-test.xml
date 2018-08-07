@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<permissions>
+    <privapp-permissions package="com.android.framework.permission.privapp.tests.vendor">
+        <permission name="android.permission.BIND_IMS_SERVICE"/>
+        <permission name="android.permission.MANAGE_USB"/>
+    </privapp-permissions>
+</permissions>

@@ -16,16 +16,17 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
+import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static android.view.WindowManager.INPUT_CONSUMER_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
@@ -35,8 +36,11 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.os.Debug;
+import android.os.IBinder;
 import android.os.Looper;
+import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -45,11 +49,10 @@ import android.view.InputEventReceiver;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
-import android.view.WindowManagerPolicy;
-
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.input.InputManagerService;
 import com.android.server.input.InputWindowHandle;
+import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -84,6 +87,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     private boolean mAddInputConsumerHandle;
     private boolean mAddPipInputConsumerHandle;
     private boolean mAddWallpaperInputConsumerHandle;
+    private boolean mAddRecentsAnimationInputConsumerHandle;
     private boolean mDisableWallpaperTouchEvents;
     private final Rect mTmpRect = new Rect();
     private final UpdateInputForAllWindowsConsumer mUpdateInputForAllWindowsConsumer =
@@ -107,8 +111,9 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
         EventReceiverInputConsumer(WindowManagerService service, InputMonitor monitor,
                                    Looper looper, String name,
-                                   InputEventReceiver.Factory inputEventReceiverFactory) {
-            super(service, name, null);
+                                   InputEventReceiver.Factory inputEventReceiverFactory,
+                                   int clientPid, UserHandle clientUser) {
+            super(service, null /* token */, name, null /* inputChannel */, clientPid, clientUser);
             mInputMonitor = monitor;
             mInputEventReceiver = inputEventReceiverFactory.createInputEventReceiver(
                     mClientChannel, looper);
@@ -130,6 +135,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
     private void addInputConsumer(String name, InputConsumerImpl consumer) {
         mInputConsumers.put(name, consumer);
+        consumer.linkToDeathRecipient();
         updateInputWindowsLw(true /* force */);
     }
 
@@ -167,17 +173,20 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         }
 
         final EventReceiverInputConsumer consumer = new EventReceiverInputConsumer(mService,
-                this, looper, name, inputEventReceiverFactory);
+                this, looper, name, inputEventReceiverFactory, Process.myPid(),
+                UserHandle.SYSTEM);
         addInputConsumer(name, consumer);
         return consumer;
     }
 
-    void createInputConsumer(String name, InputChannel inputChannel) {
+    void createInputConsumer(IBinder token, String name, InputChannel inputChannel, int clientPid,
+            UserHandle clientUser) {
         if (mInputConsumers.containsKey(name)) {
             throw new IllegalStateException("Existing input consumer found with name: " + name);
         }
 
-        final InputConsumerImpl consumer = new InputConsumerImpl(mService, name, inputChannel);
+        final InputConsumerImpl consumer = new InputConsumerImpl(mService, token, name,
+                inputChannel, clientPid, clientUser);
         switch (name) {
             case INPUT_CONSUMER_WALLPAPER:
                 consumer.mWindowHandle.hasWallpaper = true;
@@ -368,12 +377,13 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         // currently has touch focus.
 
         // If there's a drag in flight, provide a pseudo-window to catch drag input
-        final boolean inDrag = (mService.mDragState != null);
+        final boolean inDrag = mService.mDragDropController.dragDropActiveLocked();
         if (inDrag) {
             if (DEBUG_DRAG) {
                 Log.d(TAG_WM, "Inserting drag window");
             }
-            final InputWindowHandle dragWindowHandle = mService.mDragState.getInputWindowHandle();
+            final InputWindowHandle dragWindowHandle =
+                    mService.mDragDropController.getInputWindowHandleLocked();
             if (dragWindowHandle != null) {
                 addInputWindowHandle(dragWindowHandle);
             } else {
@@ -382,12 +392,13 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             }
         }
 
-        final boolean inPositioning = (mService.mTaskPositioner != null);
+        final boolean inPositioning = mService.mTaskPositioningController.isPositioningLocked();
         if (inPositioning) {
             if (DEBUG_TASK_POSITIONING) {
                 Log.d(TAG_WM, "Inserting window handle for repositioning");
             }
-            final InputWindowHandle dragWindowHandle = mService.mTaskPositioner.mDragWindowHandle;
+            final InputWindowHandle dragWindowHandle =
+                    mService.mTaskPositioningController.getDragWindowHandleLocked();
             if (dragWindowHandle != null) {
                 addInputWindowHandle(dragWindowHandle);
             } else {
@@ -593,7 +604,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         if (!inputConsumerKeys.isEmpty()) {
             pw.println(prefix + "InputConsumers:");
             for (String key : inputConsumerKeys) {
-                pw.println(prefix + "  name=" + key);
+                mInputConsumers.get(key).dump(pw, key, prefix);
             }
         }
     }
@@ -603,7 +614,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         InputConsumerImpl navInputConsumer;
         InputConsumerImpl pipInputConsumer;
         InputConsumerImpl wallpaperInputConsumer;
-        Rect pipTouchableBounds;
+        InputConsumerImpl recentsAnimationInputConsumer;
         boolean inDrag;
         WallpaperController wallpaperController;
 
@@ -613,11 +624,13 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             navInputConsumer = getInputConsumer(INPUT_CONSUMER_NAVIGATION, DEFAULT_DISPLAY);
             pipInputConsumer = getInputConsumer(INPUT_CONSUMER_PIP, DEFAULT_DISPLAY);
             wallpaperInputConsumer = getInputConsumer(INPUT_CONSUMER_WALLPAPER, DEFAULT_DISPLAY);
+            recentsAnimationInputConsumer = getInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION,
+                    DEFAULT_DISPLAY);
             mAddInputConsumerHandle = navInputConsumer != null;
             mAddPipInputConsumerHandle = pipInputConsumer != null;
             mAddWallpaperInputConsumerHandle = wallpaperInputConsumer != null;
+            mAddRecentsAnimationInputConsumerHandle = recentsAnimationInputConsumer != null;
             mTmpRect.setEmpty();
-            pipTouchableBounds = mAddPipInputConsumerHandle ? mTmpRect : null;
             mDisableWallpaperTouchEvents = false;
             this.inDrag = inDrag;
             wallpaperController = mService.mRoot.mWallpaperController;
@@ -650,12 +663,28 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             final boolean hasFocus = w == mInputFocus;
             final boolean isVisible = w.isVisibleLw();
 
-            if (w.getStackId() == PINNED_STACK_ID) {
+            if (mAddRecentsAnimationInputConsumerHandle) {
+                final RecentsAnimationController recentsAnimationController =
+                        mService.getRecentsAnimationController();
+                if (recentsAnimationController != null
+                        && recentsAnimationController.hasInputConsumerForApp(w.mAppToken)) {
+                    if (recentsAnimationController.updateInputConsumerForApp(
+                            recentsAnimationInputConsumer, hasFocus)) {
+                        addInputWindowHandle(recentsAnimationInputConsumer.mWindowHandle);
+                        mAddRecentsAnimationInputConsumerHandle = false;
+                    }
+                    // Skip adding the window below regardless of whether there is an input consumer
+                    // to handle it
+                    return;
+                }
+            }
+
+            if (w.inPinnedWindowingMode()) {
                 if (mAddPipInputConsumerHandle
                         && (inputWindowHandle.layer <= pipInputConsumer.mWindowHandle.layer)) {
-                    // Update the bounds of the Pip input consumer to match the Pinned stack
-                    w.getStack().getBounds(pipTouchableBounds);
-                    pipInputConsumer.mWindowHandle.touchableRegion.set(pipTouchableBounds);
+                    // Update the bounds of the Pip input consumer to match the window bounds.
+                    w.getBounds(mTmpRect);
+                    pipInputConsumer.mWindowHandle.touchableRegion.set(mTmpRect);
                     addInputWindowHandle(pipInputConsumer.mWindowHandle);
                     mAddPipInputConsumerHandle = false;
                 }
@@ -690,7 +719,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             // If there's a drag in progress and 'child' is a potential drop target,
             // make sure it's been told about the drag
             if (inDrag && isVisible && w.getDisplayContent().isDefaultDisplay) {
-                mService.mDragState.sendDragStartedIfNeededLw(w);
+                mService.mDragDropController.sendDragStartedIfNeededLocked(w);
             }
 
             addInputWindowHandle(

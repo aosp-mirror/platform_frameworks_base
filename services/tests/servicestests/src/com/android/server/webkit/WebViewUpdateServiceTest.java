@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.Signature;
@@ -31,6 +30,7 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Base64;
+import android.webkit.UserPackage;
 import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
@@ -201,11 +201,11 @@ public class WebViewUpdateServiceTest {
 
     private static PackageInfo createPackageInfo(String packageName, boolean enabled, boolean valid,
             boolean installed, Signature[] signatures, long updateTime, boolean hidden,
-            int versionCode, boolean isSystemApp) {
+            long versionCode, boolean isSystemApp) {
         PackageInfo p = createPackageInfo(packageName, enabled, valid, installed, signatures,
                 updateTime, hidden);
-        p.versionCode = versionCode;
-        p.applicationInfo.versionCode = versionCode;
+        p.setLongVersionCode(versionCode);
+        p.applicationInfo.setVersionCode(versionCode);
         if (isSystemApp) p.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
         return p;
     }
@@ -1494,7 +1494,7 @@ public class WebViewUpdateServiceTest {
     public void testGetCurrentWebViewPackage() {
         PackageInfo firstPackage = createPackageInfo("first", true /* enabled */,
                         true /* valid */, true /* installed */);
-        firstPackage.versionCode = 100;
+        firstPackage.setLongVersionCode(100);
         firstPackage.versionName = "first package version";
         WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
             new WebViewProviderInfo(firstPackage.packageName, "", true, false, null)};
@@ -1511,8 +1511,8 @@ public class WebViewUpdateServiceTest {
         // Ensure the API is correct before running waitForAndGetProvider
         assertEquals(firstPackage.packageName,
                 mWebViewUpdateServiceImpl.getCurrentWebViewPackage().packageName);
-        assertEquals(firstPackage.versionCode,
-                mWebViewUpdateServiceImpl.getCurrentWebViewPackage().versionCode);
+        assertEquals(firstPackage.getLongVersionCode(),
+                mWebViewUpdateServiceImpl.getCurrentWebViewPackage().getLongVersionCode());
         assertEquals(firstPackage.versionName,
                 mWebViewUpdateServiceImpl.getCurrentWebViewPackage().versionName);
 
@@ -1523,8 +1523,8 @@ public class WebViewUpdateServiceTest {
         // Ensure the API is still correct after running waitForAndGetProvider
         assertEquals(firstPackage.packageName,
                 mWebViewUpdateServiceImpl.getCurrentWebViewPackage().packageName);
-        assertEquals(firstPackage.versionCode,
-                mWebViewUpdateServiceImpl.getCurrentWebViewPackage().versionCode);
+        assertEquals(firstPackage.getLongVersionCode(),
+                mWebViewUpdateServiceImpl.getCurrentWebViewPackage().getLongVersionCode());
         assertEquals(firstPackage.versionName,
                 mWebViewUpdateServiceImpl.getCurrentWebViewPackage().versionName);
     }
@@ -1628,10 +1628,10 @@ public class WebViewUpdateServiceTest {
         newSdkPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
         PackageInfo currentSdkPackage = createPackageInfo("currentTargetSdkPackage",
             true /* enabled */, true /* valid */, true /* installed */);
-        currentSdkPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.N_MR1+1;
+        currentSdkPackage.applicationInfo.targetSdkVersion = UserPackage.MINIMUM_SUPPORTED_SDK;
         PackageInfo oldSdkPackage = createPackageInfo("oldTargetSdkPackage",
             true /* enabled */, true /* valid */, true /* installed */);
-        oldSdkPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.N_MR1;
+        oldSdkPackage.applicationInfo.targetSdkVersion = UserPackage.MINIMUM_SUPPORTED_SDK - 1;
 
         WebViewProviderInfo newSdkProviderInfo =
                 new WebViewProviderInfo(newSdkPackage.packageName, "", true, false, null);

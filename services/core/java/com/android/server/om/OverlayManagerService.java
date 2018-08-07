@@ -64,6 +64,8 @@ import com.android.server.SystemService;
 import com.android.server.pm.Installer;
 import com.android.server.pm.UserManagerService;
 
+import libcore.util.EmptyArray;
+
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
@@ -228,7 +230,7 @@ public final class OverlayManagerService extends SystemService {
             @NonNull final Installer installer) {
         super(context);
         mSettingsFile =
-            new AtomicFile(new File(Environment.getDataSystemDirectory(), "overlays.xml"));
+            new AtomicFile(new File(Environment.getDataSystemDirectory(), "overlays.xml"), "overlays");
         mPackageManager = new PackageManagerHelper();
         mUserManager = UserManagerService.getInstance();
         IdmapManager im = new IdmapManager(installer);
@@ -303,10 +305,10 @@ public final class OverlayManagerService extends SystemService {
         schedulePersistSettings();
     }
 
-    private static Set<String> getDefaultOverlayPackages() {
+    private static String[] getDefaultOverlayPackages() {
         final String str = SystemProperties.get(DEFAULT_OVERLAYS_PROP);
         if (TextUtils.isEmpty(str)) {
-            return Collections.emptySet();
+            return EmptyArray.STRING;
         }
 
         final ArraySet<String> defaultPackages = new ArraySet<>();
@@ -315,7 +317,7 @@ public final class OverlayManagerService extends SystemService {
                 defaultPackages.add(packageName);
             }
         }
-        return defaultPackages;
+        return defaultPackages.toArray(new String[defaultPackages.size()]);
     }
 
     private final class PackageReceiver extends BroadcastReceiver {
@@ -370,10 +372,10 @@ public final class OverlayManagerService extends SystemService {
                             false);
                     if (pi != null) {
                         mPackageManager.cachePackageInfo(packageName, userId, pi);
-                        if (!isOverlayPackage(pi)) {
-                            mImpl.onTargetPackageAdded(packageName, userId);
-                        } else {
+                        if (pi.isOverlayPackage()) {
                             mImpl.onOverlayPackageAdded(packageName, userId);
+                        } else {
+                            mImpl.onTargetPackageAdded(packageName, userId);
                         }
                     }
                 }
@@ -388,10 +390,10 @@ public final class OverlayManagerService extends SystemService {
                             false);
                     if (pi != null) {
                         mPackageManager.cachePackageInfo(packageName, userId, pi);
-                        if (!isOverlayPackage(pi)) {
-                            mImpl.onTargetPackageChanged(packageName, userId);
-                        } else {
+                        if (pi.isOverlayPackage()) {
                             mImpl.onOverlayPackageChanged(packageName, userId);
+                        }  else {
+                            mImpl.onTargetPackageChanged(packageName, userId);
                         }
                     }
                 }
@@ -404,10 +406,10 @@ public final class OverlayManagerService extends SystemService {
                 synchronized (mLock) {
                     mPackageManager.forgetPackageInfo(packageName, userId);
                     final OverlayInfo oi = mImpl.getOverlayInfo(packageName, userId);
-                    if (oi == null) {
-                        mImpl.onTargetPackageUpgrading(packageName, userId);
-                    } else {
+                    if (oi != null) {
                         mImpl.onOverlayPackageUpgrading(packageName, userId);
+                    } else {
+                        mImpl.onTargetPackageUpgrading(packageName, userId);
                     }
                 }
             }
@@ -421,10 +423,10 @@ public final class OverlayManagerService extends SystemService {
                             false);
                     if (pi != null) {
                         mPackageManager.cachePackageInfo(packageName, userId, pi);
-                        if (!isOverlayPackage(pi)) {
-                            mImpl.onTargetPackageUpgraded(packageName, userId);
-                        } else {
+                        if (pi.isOverlayPackage()) {
                             mImpl.onOverlayPackageUpgraded(packageName, userId);
+                        } else {
+                            mImpl.onTargetPackageUpgraded(packageName, userId);
                         }
                     }
                 }
@@ -437,10 +439,10 @@ public final class OverlayManagerService extends SystemService {
                 synchronized (mLock) {
                     mPackageManager.forgetPackageInfo(packageName, userId);
                     final OverlayInfo oi = mImpl.getOverlayInfo(packageName, userId);
-                    if (oi == null) {
-                        mImpl.onTargetPackageRemoved(packageName, userId);
-                    } else {
+                    if (oi != null) {
                         mImpl.onOverlayPackageRemoved(packageName, userId);
+                    } else {
+                        mImpl.onTargetPackageRemoved(packageName, userId);
                     }
                 }
             }
@@ -544,7 +546,28 @@ public final class OverlayManagerService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    return mImpl.setEnabledExclusive(packageName, userId);
+                    return mImpl.setEnabledExclusive(packageName, false /* withinCategory */,
+                            userId);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
+        public boolean setEnabledExclusiveInCategory(@Nullable String packageName, int userId)
+                throws RemoteException {
+            enforceChangeOverlayPackagesPermission("setEnabled");
+            userId = handleIncomingUser(userId, "setEnabled");
+            if (packageName == null) {
+                return false;
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    return mImpl.setEnabledExclusive(packageName, true /* withinCategory */,
+                            userId);
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -652,7 +675,7 @@ public final class OverlayManagerService extends SystemService {
          * @throws SecurityException if the permission check fails
          */
         private void enforceChangeOverlayPackagesPermission(@NonNull final String message) {
-            getContext().enforceCallingOrSelfPermission(
+            getContext().enforceCallingPermission(
                     android.Manifest.permission.CHANGE_OVERLAY_PACKAGES, message);
         }
 
@@ -663,14 +686,9 @@ public final class OverlayManagerService extends SystemService {
          * @throws SecurityException if the permission check fails
          */
         private void enforceDumpPermission(@NonNull final String message) {
-            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DUMP,
-                    message);
+            getContext().enforceCallingPermission(android.Manifest.permission.DUMP, message);
         }
     };
-
-    private boolean isOverlayPackage(@NonNull final PackageInfo pi) {
-        return pi != null && pi.overlayTarget != null;
-    }
 
     private final class OverlayChangeListener
             implements OverlayManagerServiceImpl.OverlayChangeListener {

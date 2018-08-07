@@ -32,8 +32,7 @@ TEST(Matrix, mapRect_emptyScaleSkew) {
     ASSERT_TRUE(empty.isEmpty());
     scaleMatrix.mapRect(empty);
     EXPECT_EQ(Rect(170, 215, 250, 1015), empty);
-    EXPECT_FALSE(empty.isEmpty())
-        << "Empty 'line' rect doesn't remain empty when skewed.";
+    EXPECT_FALSE(empty.isEmpty()) << "Empty 'line' rect doesn't remain empty when skewed.";
 }
 
 TEST(Matrix, mapRect_emptyRotate) {
@@ -45,6 +44,5 @@ TEST(Matrix, mapRect_emptyRotate) {
     Rect lineRect(0, 100);
     ASSERT_TRUE(lineRect.isEmpty());
     skewMatrix.mapRect(lineRect);
-    EXPECT_FALSE(lineRect.isEmpty())
-        << "Empty 'line' rect doesn't remain empty when rotated.";
+    EXPECT_FALSE(lineRect.isEmpty()) << "Empty 'line' rect doesn't remain empty when rotated.";
 }

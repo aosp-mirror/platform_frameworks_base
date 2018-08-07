@@ -26,6 +26,8 @@ import android.util.SparseArray;
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
+import java.util.Objects;
+
 /**
  * Object used to report movement (mouse, pen, finger, trackball) events.
  * Motion events may hold either absolute or relative movements and other data,
@@ -172,6 +174,8 @@ import dalvik.annotation.optimization.FastNative;
 public final class MotionEvent extends InputEvent implements Parcelable {
     private static final long NS_PER_MS = 1000000;
     private static final String LABEL_PREFIX = "AXIS_";
+
+    private static final boolean DEBUG_CONCISE_TOSTRING = false;
 
     /**
      * An invalid pointer id.
@@ -3236,29 +3240,40 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public String toString() {
         StringBuilder msg = new StringBuilder();
         msg.append("MotionEvent { action=").append(actionToString(getAction()));
-        msg.append(", actionButton=").append(buttonStateToString(getActionButton()));
+        appendUnless("0", msg, ", actionButton=", buttonStateToString(getActionButton()));
 
         final int pointerCount = getPointerCount();
         for (int i = 0; i < pointerCount; i++) {
-            msg.append(", id[").append(i).append("]=").append(getPointerId(i));
-            msg.append(", x[").append(i).append("]=").append(getX(i));
-            msg.append(", y[").append(i).append("]=").append(getY(i));
-            msg.append(", toolType[").append(i).append("]=").append(
-                    toolTypeToString(getToolType(i)));
+            appendUnless(i, msg, ", id[" + i + "]=", getPointerId(i));
+            float x = getX(i);
+            float y = getY(i);
+            if (!DEBUG_CONCISE_TOSTRING || x != 0f || y != 0f) {
+                msg.append(", x[").append(i).append("]=").append(x);
+                msg.append(", y[").append(i).append("]=").append(y);
+            }
+            appendUnless(TOOL_TYPE_SYMBOLIC_NAMES.get(TOOL_TYPE_FINGER),
+                    msg, ", toolType[" + i + "]=", toolTypeToString(getToolType(i)));
         }
 
-        msg.append(", buttonState=").append(MotionEvent.buttonStateToString(getButtonState()));
-        msg.append(", metaState=").append(KeyEvent.metaStateToString(getMetaState()));
-        msg.append(", flags=0x").append(Integer.toHexString(getFlags()));
-        msg.append(", edgeFlags=0x").append(Integer.toHexString(getEdgeFlags()));
-        msg.append(", pointerCount=").append(pointerCount);
-        msg.append(", historySize=").append(getHistorySize());
+        appendUnless("0", msg, ", buttonState=", MotionEvent.buttonStateToString(getButtonState()));
+        appendUnless("0", msg, ", metaState=", KeyEvent.metaStateToString(getMetaState()));
+        appendUnless("0", msg, ", flags=0x", Integer.toHexString(getFlags()));
+        appendUnless("0", msg, ", edgeFlags=0x", Integer.toHexString(getEdgeFlags()));
+        appendUnless(1, msg, ", pointerCount=", pointerCount);
+        appendUnless(0, msg, ", historySize=", getHistorySize());
         msg.append(", eventTime=").append(getEventTime());
-        msg.append(", downTime=").append(getDownTime());
-        msg.append(", deviceId=").append(getDeviceId());
-        msg.append(", source=0x").append(Integer.toHexString(getSource()));
+        if (!DEBUG_CONCISE_TOSTRING) {
+            msg.append(", downTime=").append(getDownTime());
+            msg.append(", deviceId=").append(getDeviceId());
+            msg.append(", source=0x").append(Integer.toHexString(getSource()));
+        }
         msg.append(" }");
         return msg.toString();
+    }
+
+    private static <T> void appendUnless(T defValue, StringBuilder sb, String key, T value) {
+        if (DEBUG_CONCISE_TOSTRING && Objects.equals(defValue, value)) return;
+        sb.append(key).append(value);
     }
 
     /**

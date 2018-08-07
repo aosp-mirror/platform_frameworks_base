@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,157 +16,214 @@
 
 package com.android.internal.app;
 
-import android.animation.Animator;
-import android.animation.ObjectAnimator;
-import android.annotation.Nullable;
+import android.animation.TimeAnimator;
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
-import android.content.ContentResolver;
-import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
-import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.RippleDrawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.OvalShape;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.MathUtils;
-import android.view.Gravity;
-import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.MotionEvent.PointerCoords;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewOutlineProvider;
-import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 
 public class PlatLogoActivity extends Activity {
-    public static final boolean FINISH = true;
+    FrameLayout layout;
+    TimeAnimator anim;
+    PBackground bg;
 
-    FrameLayout mLayout;
-    int mTapCount;
-    int mKeyCount;
-    PathInterpolator mInterpolator = new PathInterpolator(0f, 0f, 0.5f, 1f);
+    private class PBackground extends Drawable {
+        private float maxRadius, radius, x, y, dp;
+        private int[] palette;
+        private int darkest;
+        private float offset;
+
+        public PBackground() {
+            randomizePalette();
+        }
+
+        /**
+         * set inner radius of "p" logo
+         */
+        public void setRadius(float r) {
+            this.radius = Math.max(48*dp, r);
+        }
+
+        /**
+         * move the "p"
+         */
+        public void setPosition(float x, float y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        /**
+         * for animating the "p"
+         */
+        public void setOffset(float o) {
+            this.offset = o;
+        }
+
+        /**
+         * rough luminance calculation
+         * https://www.w3.org/TR/AERT/#color-contrast
+         */
+        public float lum(int rgb) {
+            return ((Color.red(rgb) * 299f) + (Color.green(rgb) * 587f) + (Color.blue(rgb) * 114f)) / 1000f;
+        }
+
+        /**
+         * create a random evenly-spaced color palette
+         * guaranteed to contrast!
+         */
+        public void randomizePalette() {
+            final int slots = 2 + (int)(Math.random() * 2);
+            float[] color = new float[] { (float) Math.random() * 360f, 1f, 1f };
+            palette = new int[slots];
+            darkest = 0;
+            for (int i=0; i<slots; i++) {
+                palette[i] = Color.HSVToColor(color);
+                color[0] += 360f/slots;
+                if (lum(palette[i]) < lum(palette[darkest])) darkest = i;
+            }
+
+            final StringBuilder str = new StringBuilder();
+            for (int c : palette) {
+                str.append(String.format("#%08x ", c));
+            }
+            Log.v("PlatLogoActivity", "color palette: " + str);
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            if (dp == 0) dp = getResources().getDisplayMetrics().density;
+            final float width = canvas.getWidth();
+            final float height = canvas.getHeight();
+            if (radius == 0) {
+                setPosition(width / 2, height / 2);
+                setRadius(width / 6);
+            }
+            final float inner_w = radius * 0.667f;
+
+            final Paint paint = new Paint();
+            paint.setStrokeCap(Paint.Cap.BUTT);
+            canvas.translate(x, y);
+
+            Path p = new Path();
+            p.moveTo(-radius, height);
+            p.lineTo(-radius, 0);
+            p.arcTo(-radius, -radius, radius, radius, -180, 270, false);
+            p.lineTo(-radius, radius);
+
+            float w = Math.max(canvas.getWidth(), canvas.getHeight())  * 1.414f;
+            paint.setStyle(Paint.Style.FILL);
+
+            int i=0;
+            while (w > radius*2 + inner_w*2) {
+                paint.setColor(0xFF000000 | palette[i % palette.length]);
+                // for a slower but more complete version:
+                // paint.setStrokeWidth(w);
+                // canvas.drawPath(p, paint);
+                canvas.drawOval(-w/2, -w/2, w/2, w/2, paint);
+                w -= inner_w * (1.1f + Math.sin((i/20f + offset) * 3.14159f));
+                i++;
+            }
+
+            // the innermost circle needs to be a constant color to avoid rapid flashing
+            paint.setColor(0xFF000000 | palette[(darkest+1) % palette.length]);
+            canvas.drawOval(-radius, -radius, radius, radius, paint);
+
+            p.reset();
+            p.moveTo(-radius, height);
+            p.lineTo(-radius, 0);
+            p.arcTo(-radius, -radius, radius, radius, -180, 270, false);
+            p.lineTo(-radius + inner_w, radius);
+
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(inner_w*2);
+            paint.setColor(palette[darkest]);
+            canvas.drawPath(p, paint);
+            paint.setStrokeWidth(inner_w);
+            paint.setColor(0xFFFFFFFF);
+            canvas.drawPath(p, paint);
+        }
+
+        @Override
+        public void setAlpha(int alpha) {
+
+        }
+
+        @Override
+        public void setColorFilter(ColorFilter colorFilter) {
+
+        }
+
+        @Override
+        public int getOpacity() {
+            return 0;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mLayout = new FrameLayout(this);
-        setContentView(mLayout);
+        layout = new FrameLayout(this);
+        setContentView(layout);
+
+        bg = new PBackground();
+        layout.setBackground(bg);
+
+        layout.setOnTouchListener(new View.OnTouchListener() {
+            final PointerCoords pc0 = new PointerCoords();
+            final PointerCoords pc1 = new PointerCoords();
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN:
+                    case MotionEvent.ACTION_MOVE:
+                        if (event.getPointerCount() > 1) {
+                            event.getPointerCoords(0, pc0);
+                            event.getPointerCoords(1, pc1);
+                            bg.setRadius((float) Math.hypot(pc0.x - pc1.x, pc0.y - pc1.y) / 2f);
+                        }
+                        break;
+                }
+                return true;
+            }
+        });
     }
 
     @Override
-    public void onAttachedToWindow() {
-        final DisplayMetrics dm = getResources().getDisplayMetrics();
-        final float dp = dm.density;
-        final int size = (int)
-                (Math.min(Math.min(dm.widthPixels, dm.heightPixels), 600*dp) - 100*dp);
+    public void onStart() {
+        super.onStart();
 
-        final ImageView im = new ImageView(this);
-        final int pad = (int)(40*dp);
-        im.setPadding(pad, pad, pad, pad);
-        im.setTranslationZ(20);
-        im.setScaleX(0.5f);
-        im.setScaleY(0.5f);
-        im.setAlpha(0f);
+        bg.randomizePalette();
 
-        im.setBackground(new RippleDrawable(
-                ColorStateList.valueOf(0xFF776677),
-                getDrawable(com.android.internal.R.drawable.platlogo),
-                null));
-        im.setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                final int w = view.getWidth();
-                final int h = view.getHeight();
-                outline.setOval((int)(w*.125), (int)(h*.125), (int)(w*.96), (int)(h*.96));
-            }
-        });
-        im.setElevation(12f*dp);
-        im.setClickable(true);
-        im.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                im.setOnLongClickListener(new View.OnLongClickListener() {
+        anim = new TimeAnimator();
+        anim.setTimeListener(
+                new TimeAnimator.TimeListener() {
                     @Override
-                    public boolean onLongClick(View v) {
-                        if (mTapCount < 5) return false;
-
-                        final ContentResolver cr = getContentResolver();
-                        if (Settings.System.getLong(cr, Settings.System.EGG_MODE, 0)
-                                == 0) {
-                            // For posterity: the moment this user unlocked the easter egg
-                            try {
-                                Settings.System.putLong(cr,
-                                        Settings.System.EGG_MODE,
-                                        System.currentTimeMillis());
-                            } catch (RuntimeException e) {
-                                Log.e("PlatLogoActivity", "Can't write settings", e);
-                            }
-                        }
-                        im.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    startActivity(new Intent(Intent.ACTION_MAIN)
-                                            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                                                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                                            .addCategory("com.android.internal.category.PLATLOGO"));
-                                } catch (ActivityNotFoundException ex) {
-                                    Log.e("PlatLogoActivity", "No more eggs.");
-                                }
-                                if (FINISH) finish();
-                            }
-                        });
-                        return true;
+                    public void onTimeUpdate(TimeAnimator animation, long totalTime, long deltaTime) {
+                        bg.setOffset((float) totalTime / 60000f);
+                        bg.invalidateSelf();
                     }
                 });
-                mTapCount++;
-            }
-        });
 
-        // Enable hardware keyboard input for TV compatibility.
-        im.setFocusable(true);
-        im.requestFocus();
-        im.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (keyCode != KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    ++mKeyCount;
-                    if (mKeyCount > 2) {
-                        if (mTapCount > 5) {
-                            im.performLongClick();
-                        } else {
-                            im.performClick();
-                        }
-                    }
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        });
+        anim.start();
+    }
 
-        mLayout.addView(im, new FrameLayout.LayoutParams(size, size, Gravity.CENTER));
-
-        im.animate().scaleX(1f).scaleY(1f).alpha(1f)
-                .setInterpolator(mInterpolator)
-                .setDuration(500)
-                .setStartDelay(800)
-                .start();
+    @Override
+    public void onStop() {
+        if (anim != null) {
+            anim.cancel();
+            anim = null;
+        }
+        super.onStop();
     }
 }

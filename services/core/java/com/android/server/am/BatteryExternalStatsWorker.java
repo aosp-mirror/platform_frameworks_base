@@ -35,6 +35,7 @@ import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import libcore.util.EmptyArray;
 
@@ -42,7 +43,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -64,12 +68,13 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     // There is some accuracy error in wifi reports so allow some slop in the results.
     private static final long MAX_WIFI_STATS_SAMPLE_ERROR_MILLIS = 750;
 
-    private final ExecutorService mExecutorService = Executors.newSingleThreadExecutor(
-            (ThreadFactory) r -> {
-                Thread t = new Thread(r, "batterystats-worker");
-                t.setPriority(Thread.NORM_PRIORITY);
-                return t;
-            });
+    private final ScheduledExecutorService mExecutorService =
+            Executors.newSingleThreadScheduledExecutor(
+                    (ThreadFactory) r -> {
+                        Thread t = new Thread(r, "batterystats-worker");
+                        t.setPriority(Thread.NORM_PRIORITY);
+                        return t;
+                    });
 
     private final Context mContext;
     private final BatteryStatsImpl mStats;
@@ -84,7 +89,22 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     private String mCurrentReason = null;
 
     @GuardedBy("this")
+    private boolean mOnBattery;
+
+    @GuardedBy("this")
+    private boolean mOnBatteryScreenOff;
+
+    @GuardedBy("this")
+    private boolean mUseLatestStates = true;
+
+    @GuardedBy("this")
     private final IntArray mUidsToRemove = new IntArray();
+
+    @GuardedBy("this")
+    private Future<?> mWakelockChangesUpdate;
+
+    @GuardedBy("this")
+    private Future<?> mBatteryLevelSync;
 
     private final Object mWorkerLock = new Object();
 
@@ -98,7 +118,14 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     // Keep the last WiFi stats so we can compute a delta.
     @GuardedBy("mWorkerLock")
     private WifiActivityEnergyInfo mLastInfo =
-            new WifiActivityEnergyInfo(0, 0, 0, new long[]{0}, 0, 0, 0);
+            new WifiActivityEnergyInfo(0, 0, 0, new long[]{0}, 0, 0, 0, 0);
+
+    /**
+     * Timestamp at which all external stats were last collected in
+     * {@link SystemClock#elapsedRealtime()} time base.
+     */
+    @GuardedBy("this")
+    private long mLastCollectionTimeStamp;
 
     BatteryExternalStatsWorker(Context context, BatteryStatsImpl stats) {
         mContext = context;
@@ -114,6 +141,132 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     public synchronized Future<?> scheduleCpuSyncDueToRemovedUid(int uid) {
         mUidsToRemove.add(uid);
         return scheduleSyncLocked("remove-uid", UPDATE_CPU);
+    }
+
+    @Override
+    public synchronized Future<?> scheduleCpuSyncDueToSettingChange() {
+        return scheduleSyncLocked("setting-change", UPDATE_CPU);
+    }
+
+    @Override
+    public Future<?> scheduleReadProcStateCpuTimes(
+            boolean onBattery, boolean onBatteryScreenOff, long delayMillis) {
+        synchronized (mStats) {
+            if (!mStats.trackPerProcStateCpuTimes()) {
+                return null;
+            }
+        }
+        synchronized (BatteryExternalStatsWorker.this) {
+            if (!mExecutorService.isShutdown()) {
+                return mExecutorService.schedule(PooledLambda.obtainRunnable(
+                        BatteryStatsImpl::updateProcStateCpuTimes,
+                        mStats, onBattery, onBatteryScreenOff).recycleOnUse(),
+                        delayMillis, TimeUnit.MILLISECONDS);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Future<?> scheduleCopyFromAllUidsCpuTimes(
+            boolean onBattery, boolean onBatteryScreenOff) {
+        synchronized (mStats) {
+            if (!mStats.trackPerProcStateCpuTimes()) {
+                return null;
+            }
+        }
+        synchronized (BatteryExternalStatsWorker.this) {
+            if (!mExecutorService.isShutdown()) {
+                return mExecutorService.submit(PooledLambda.obtainRunnable(
+                        BatteryStatsImpl::copyFromAllUidsCpuTimes,
+                        mStats, onBattery, onBatteryScreenOff).recycleOnUse());
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Future<?> scheduleCpuSyncDueToScreenStateChange(
+            boolean onBattery, boolean onBatteryScreenOff) {
+        synchronized (BatteryExternalStatsWorker.this) {
+            if (mCurrentFuture == null || (mUpdateFlags & UPDATE_CPU) == 0) {
+                mOnBattery = onBattery;
+                mOnBatteryScreenOff = onBatteryScreenOff;
+                mUseLatestStates = false;
+            }
+            return scheduleSyncLocked("screen-state", UPDATE_CPU);
+        }
+    }
+
+    @Override
+    public Future<?> scheduleCpuSyncDueToWakelockChange(long delayMillis) {
+        synchronized (BatteryExternalStatsWorker.this) {
+            mWakelockChangesUpdate = scheduleDelayedSyncLocked(mWakelockChangesUpdate,
+                    () -> {
+                        scheduleSync("wakelock-change", UPDATE_CPU);
+                        scheduleRunnable(() -> mStats.postBatteryNeedsCpuUpdateMsg());
+                    },
+                    delayMillis);
+            return mWakelockChangesUpdate;
+        }
+    }
+
+    @Override
+    public void cancelCpuSyncDueToWakelockChange() {
+        synchronized (BatteryExternalStatsWorker.this) {
+            if (mWakelockChangesUpdate != null) {
+                mWakelockChangesUpdate.cancel(false);
+                mWakelockChangesUpdate = null;
+            }
+        }
+    }
+
+    @Override
+    public Future<?> scheduleSyncDueToBatteryLevelChange(long delayMillis) {
+        synchronized (BatteryExternalStatsWorker.this) {
+            mBatteryLevelSync = scheduleDelayedSyncLocked(mBatteryLevelSync,
+                    () -> scheduleSync("battery-level", UPDATE_ALL),
+                    delayMillis);
+            return mBatteryLevelSync;
+        }
+    }
+
+    @GuardedBy("this")
+    private void cancelSyncDueToBatteryLevelChangeLocked() {
+        if (mBatteryLevelSync != null) {
+            mBatteryLevelSync.cancel(false);
+            mBatteryLevelSync = null;
+        }
+    }
+
+    /**
+     * Schedule a sync {@param syncRunnable} with a delay. If there's already a scheduled sync, a
+     * new sync won't be scheduled unless it is being scheduled to run immediately (delayMillis=0).
+     *
+     * @param lastScheduledSync the task which was earlier scheduled to run
+     * @param syncRunnable the task that needs to be scheduled to run
+     * @param delayMillis time after which {@param syncRunnable} needs to be scheduled
+     * @return scheduled {@link Future} which can be used to check if task is completed or to
+     *         cancel it if needed
+     */
+    @GuardedBy("this")
+    private Future<?> scheduleDelayedSyncLocked(Future<?> lastScheduledSync, Runnable syncRunnable,
+            long delayMillis) {
+        if (mExecutorService.isShutdown()) {
+            return CompletableFuture.failedFuture(new IllegalStateException("worker shutdown"));
+        }
+
+        if (lastScheduledSync != null) {
+            // If there's already a scheduled task, leave it as is if we're trying to
+            // re-schedule it again with a delay, otherwise cancel and re-schedule it.
+            if (delayMillis == 0) {
+                lastScheduledSync.cancel(false);
+            } else {
+                return lastScheduledSync;
+            }
+        }
+
+        return mExecutorService.schedule(syncRunnable, delayMillis, TimeUnit.MILLISECONDS);
     }
 
     public synchronized Future<?> scheduleWrite() {
@@ -141,6 +294,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         mExecutorService.shutdownNow();
     }
 
+    @GuardedBy("this")
     private Future<?> scheduleSyncLocked(String reason, int flags) {
         if (mExecutorService.isShutdown()) {
             return CompletableFuture.failedFuture(new IllegalStateException("worker shutdown"));
@@ -155,6 +309,12 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         return mCurrentFuture;
     }
 
+    long getLastCollectionTimeStamp() {
+        synchronized (this) {
+            return mLastCollectionTimeStamp;
+        }
+    }
+
     private final Runnable mSyncTask = new Runnable() {
         @Override
         public void run() {
@@ -162,34 +322,61 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             final int updateFlags;
             final String reason;
             final int[] uidsToRemove;
+            final boolean onBattery;
+            final boolean onBatteryScreenOff;
+            final boolean useLatestStates;
             synchronized (BatteryExternalStatsWorker.this) {
                 updateFlags = mUpdateFlags;
                 reason = mCurrentReason;
                 uidsToRemove = mUidsToRemove.size() > 0 ? mUidsToRemove.toArray() : EmptyArray.INT;
+                onBattery = mOnBattery;
+                onBatteryScreenOff = mOnBatteryScreenOff;
+                useLatestStates = mUseLatestStates;
                 mUpdateFlags = 0;
                 mCurrentReason = null;
                 mUidsToRemove.clear();
                 mCurrentFuture = null;
+                mUseLatestStates = true;
+                if ((updateFlags & UPDATE_ALL) != 0) {
+                    cancelSyncDueToBatteryLevelChangeLocked();
+                }
+                if ((updateFlags & UPDATE_CPU) != 0) {
+                    cancelCpuSyncDueToWakelockChange();
+                }
             }
 
-            synchronized (mWorkerLock) {
-                if (DEBUG) {
-                    Slog.d(TAG, "begin updateExternalStatsSync reason=" + reason);
-                }
-                try {
-                    updateExternalStatsLocked(reason, updateFlags);
-                } finally {
+            try {
+                synchronized (mWorkerLock) {
                     if (DEBUG) {
-                        Slog.d(TAG, "end updateExternalStatsSync");
+                        Slog.d(TAG, "begin updateExternalStatsSync reason=" + reason);
+                    }
+                    try {
+                        updateExternalStatsLocked(reason, updateFlags, onBattery,
+                                onBatteryScreenOff, useLatestStates);
+                    } finally {
+                        if (DEBUG) {
+                            Slog.d(TAG, "end updateExternalStatsSync");
+                        }
                     }
                 }
+
+                if ((updateFlags & UPDATE_CPU) != 0) {
+                    mStats.copyFromAllUidsCpuTimes();
+                }
+
+                // Clean up any UIDs if necessary.
+                synchronized (mStats) {
+                    for (int uid : uidsToRemove) {
+                        mStats.removeIsolatedUidLocked(uid);
+                    }
+                    mStats.clearPendingRemovedUids();
+                }
+            } catch (Exception e) {
+                Slog.wtf(TAG, "Error updating external stats: ", e);
             }
 
-            // Clean up any UIDs if necessary.
-            synchronized (mStats) {
-                for (int uid : uidsToRemove) {
-                    mStats.removeIsolatedUidLocked(uid);
-                }
+            synchronized (BatteryExternalStatsWorker.this) {
+                mLastCollectionTimeStamp = SystemClock.elapsedRealtime();
             }
         }
     };
@@ -203,7 +390,9 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         }
     };
 
-    private void updateExternalStatsLocked(final String reason, int updateFlags) {
+    @GuardedBy("mWorkerLock")
+    private void updateExternalStatsLocked(final String reason, int updateFlags,
+            boolean onBattery, boolean onBatteryScreenOff, boolean useLatestStates) {
         // We will request data from external processes asynchronously, and wait on a timeout.
         SynchronousResultReceiver wifiReceiver = null;
         SynchronousResultReceiver bluetoothReceiver = null;
@@ -259,7 +448,14 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                     reason, 0);
 
             if ((updateFlags & UPDATE_CPU) != 0) {
-                mStats.updateCpuTimeLocked(true /* updateCpuFreqData */);
+                if (useLatestStates) {
+                    onBattery = mStats.isOnBatteryLocked();
+                    onBatteryScreenOff = mStats.isOnBatteryScreenOffLocked();
+                }
+                mStats.updateCpuTimeLocked(onBattery, onBatteryScreenOff);
+            }
+
+            if ((updateFlags & UPDATE_ALL) != 0) {
                 mStats.updateKernelWakelocksLocked();
                 mStats.updateKernelMemoryBandwidthLocked();
             }
@@ -272,7 +468,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 if (bluetoothInfo.isValid()) {
                     mStats.updateBluetoothStateLocked(bluetoothInfo);
                 } else {
-                    Slog.e(TAG, "bluetooth info is invalid: " + bluetoothInfo);
+                    Slog.w(TAG, "bluetooth info is invalid: " + bluetoothInfo);
                 }
             }
         }
@@ -284,7 +480,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             if (wifiInfo.isValid()) {
                 mStats.updateWifiState(extractDeltaLocked(wifiInfo));
             } else {
-                Slog.e(TAG, "wifi info is invalid: " + wifiInfo);
+                Slog.w(TAG, "wifi info is invalid: " + wifiInfo);
             }
         }
 
@@ -292,7 +488,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             if (modemInfo.isValid()) {
                 mStats.updateMobileRadioState(modemInfo);
             } else {
-                Slog.e(TAG, "modem info is invalid: " + modemInfo);
+                Slog.w(TAG, "modem info is invalid: " + modemInfo);
             }
         }
     }
@@ -327,8 +523,10 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         return null;
     }
 
+    @GuardedBy("mWorkerLock")
     private WifiActivityEnergyInfo extractDeltaLocked(WifiActivityEnergyInfo latest) {
         final long timePeriodMs = latest.mTimestamp - mLastInfo.mTimestamp;
+        final long lastScanMs = mLastInfo.mControllerScanTimeMs;
         final long lastIdleMs = mLastInfo.mControllerIdleTimeMs;
         final long lastTxMs = mLastInfo.mControllerTxTimeMs;
         final long lastRxMs = mLastInfo.mControllerRxTimeMs;
@@ -343,14 +541,16 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         final long txTimeMs = latest.mControllerTxTimeMs - lastTxMs;
         final long rxTimeMs = latest.mControllerRxTimeMs - lastRxMs;
         final long idleTimeMs = latest.mControllerIdleTimeMs - lastIdleMs;
+        final long scanTimeMs = latest.mControllerScanTimeMs - lastScanMs;
 
-        if (txTimeMs < 0 || rxTimeMs < 0) {
+        if (txTimeMs < 0 || rxTimeMs < 0 || scanTimeMs < 0) {
             // The stats were reset by the WiFi system (which is why our delta is negative).
             // Returns the unaltered stats.
             delta.mControllerEnergyUsed = latest.mControllerEnergyUsed;
             delta.mControllerRxTimeMs = latest.mControllerRxTimeMs;
             delta.mControllerTxTimeMs = latest.mControllerTxTimeMs;
             delta.mControllerIdleTimeMs = latest.mControllerIdleTimeMs;
+            delta.mControllerScanTimeMs = latest.mControllerScanTimeMs;
             Slog.v(TAG, "WiFi energy data was reset, new WiFi energy data is " + delta);
         } else {
             final long totalActiveTimeMs = txTimeMs + rxTimeMs;
@@ -388,6 +588,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             // These times seem to be the most reliable.
             delta.mControllerTxTimeMs = txTimeMs;
             delta.mControllerRxTimeMs = rxTimeMs;
+            delta.mControllerScanTimeMs = scanTimeMs;
             // WiFi calculates the idle time as a difference from the on time and the various
             // Rx + Tx times. There seems to be some missing time there because this sometimes
             // becomes negative. Just cap it at 0 and ensure that it is less than the expected idle

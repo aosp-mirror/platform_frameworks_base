@@ -22,14 +22,27 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 /**
  * Implements the ITunerCallback interface by forwarding calls to RadioTuner.Callback.
  */
 class TunerCallbackAdapter extends ITunerCallback.Stub {
     private static final String TAG = "BroadcastRadio.TunerCallbackAdapter";
 
+    private final Object mLock = new Object();
     @NonNull private final RadioTuner.Callback mCallback;
     @NonNull private final Handler mHandler;
+
+    @Nullable ProgramList mProgramList;
+
+    // cache for deprecated methods
+    boolean mIsAntennaConnected = true;
+    @Nullable List<RadioManager.ProgramInfo> mLastCompleteList;
+    private boolean mDelayedCompleteCallback = false;
+    @Nullable RadioManager.ProgramInfo mCurrentProgramInfo;
 
     TunerCallbackAdapter(@NonNull RadioTuner.Callback callback, @Nullable Handler handler) {
         mCallback = callback;
@@ -40,9 +53,92 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
         }
     }
 
+    void close() {
+        synchronized (mLock) {
+            if (mProgramList != null) mProgramList.close();
+        }
+    }
+
+    void setProgramListObserver(@Nullable ProgramList programList,
+            @NonNull ProgramList.OnCloseListener closeListener) {
+        Objects.requireNonNull(closeListener);
+        synchronized (mLock) {
+            if (mProgramList != null) {
+                Log.w(TAG, "Previous program list observer wasn't properly closed, closing it...");
+                mProgramList.close();
+            }
+            mProgramList = programList;
+            if (programList == null) return;
+            programList.setOnCloseListener(() -> {
+                synchronized (mLock) {
+                    if (mProgramList != programList) return;
+                    mProgramList = null;
+                    mLastCompleteList = null;
+                    closeListener.onClose();
+                }
+            });
+            programList.addOnCompleteListener(() -> {
+                synchronized (mLock) {
+                    if (mProgramList != programList) return;
+                    mLastCompleteList = programList.toList();
+                    if (mDelayedCompleteCallback) {
+                        Log.d(TAG, "Sending delayed onBackgroundScanComplete callback");
+                        sendBackgroundScanCompleteLocked();
+                    }
+                }
+            });
+        }
+    }
+
+    @Nullable List<RadioManager.ProgramInfo> getLastCompleteList() {
+        synchronized (mLock) {
+            return mLastCompleteList;
+        }
+    }
+
+    void clearLastCompleteList() {
+        synchronized (mLock) {
+            mLastCompleteList = null;
+        }
+    }
+
+    @Nullable RadioManager.ProgramInfo getCurrentProgramInformation() {
+        synchronized (mLock) {
+            return mCurrentProgramInfo;
+        }
+    }
+
+    boolean isAntennaConnected() {
+        return mIsAntennaConnected;
+    }
+
     @Override
     public void onError(int status) {
         mHandler.post(() -> mCallback.onError(status));
+    }
+
+    @Override
+    public void onTuneFailed(int status, @Nullable ProgramSelector selector) {
+        mHandler.post(() -> mCallback.onTuneFailed(status, selector));
+
+        int errorCode;
+        switch (status) {
+            case RadioManager.STATUS_PERMISSION_DENIED:
+            case RadioManager.STATUS_DEAD_OBJECT:
+                errorCode = RadioTuner.ERROR_SERVER_DIED;
+                break;
+            case RadioManager.STATUS_ERROR:
+            case RadioManager.STATUS_NO_INIT:
+            case RadioManager.STATUS_BAD_VALUE:
+            case RadioManager.STATUS_INVALID_OPERATION:
+                Log.i(TAG, "Got an error with no mapping to the legacy API (" + status
+                        + "), doing a best-effort conversion to ERROR_SCAN_TIMEOUT");
+            // fall through
+            case RadioManager.STATUS_TIMED_OUT:
+            default:
+                errorCode = RadioTuner.ERROR_SCAN_TIMEOUT;
+        }
+        mHandler.post(() -> mCallback.onError(errorCode));
     }
 
     @Override
@@ -55,6 +151,10 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
         if (info == null) {
             Log.e(TAG, "ProgramInfo must not be null");
             return;
+        }
+
+        synchronized (mLock) {
+            mCurrentProgramInfo = info;
         }
 
         mHandler.post(() -> {
@@ -77,6 +177,7 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
 
     @Override
     public void onAntennaState(boolean connected) {
+        mIsAntennaConnected = connected;
         mHandler.post(() -> mCallback.onAntennaState(connected));
     }
 
@@ -85,13 +186,39 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
         mHandler.post(() -> mCallback.onBackgroundScanAvailabilityChange(isAvailable));
     }
 
+    private void sendBackgroundScanCompleteLocked() {
+        mDelayedCompleteCallback = false;
+        mHandler.post(() -> mCallback.onBackgroundScanComplete());
+    }
+
     @Override
     public void onBackgroundScanComplete() {
-        mHandler.post(() -> mCallback.onBackgroundScanComplete());
+        synchronized (mLock) {
+            if (mLastCompleteList == null) {
+                Log.i(TAG, "Got onBackgroundScanComplete callback, but the "
+                        + "program list didn't get through yet. Delaying it...");
+                mDelayedCompleteCallback = true;
+                return;
+            }
+            sendBackgroundScanCompleteLocked();
+        }
     }
 
     @Override
     public void onProgramListChanged() {
         mHandler.post(() -> mCallback.onProgramListChanged());
+    }
+
+    @Override
+    public void onProgramListUpdated(ProgramList.Chunk chunk) {
+        synchronized (mLock) {
+            if (mProgramList == null) return;
+            mProgramList.apply(Objects.requireNonNull(chunk));
+        }
+    }
+
+    @Override
+    public void onParametersUpdated(Map parameters) {
+        mHandler.post(() -> mCallback.onParametersUpdated(parameters));
     }
 }

@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-
+<!-- extends ViewGroup -->
 <NotificationHeaderView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:theme="@style/Theme.Material.Notification"
@@ -37,8 +37,27 @@
         android:textAppearance="?attr/notificationHeaderTextAppearance"
         android:layout_marginStart="@dimen/notification_header_app_name_margin_start"
         android:layout_marginEnd="@dimen/notification_header_separating_margin"
+        android:visibility="?attr/notificationHeaderAppNameVisibility"
         android:singleLine="true"
         />
+    <TextView
+        android:id="@+id/header_text_secondary_divider"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/notificationHeaderTextAppearance"
+        android:layout_marginStart="@dimen/notification_header_separating_margin"
+        android:layout_marginEnd="@dimen/notification_header_separating_margin"
+        android:text="@string/notification_header_divider_symbol"
+        android:visibility="gone"/>
+    <TextView
+        android:id="@+id/header_text_secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/notificationHeaderTextAppearance"
+        android:layout_marginStart="@dimen/notification_header_separating_margin"
+        android:layout_marginEnd="@dimen/notification_header_separating_margin"
+        android:visibility="gone"
+        android:singleLine="true"/>
     <TextView
         android:id="@+id/header_text_divider"
         android:layout_width="wrap_content"
@@ -107,5 +126,41 @@
         android:visibility="gone"
         android:contentDescription="@string/notification_work_profile_content_description"
         />
+    <LinearLayout
+        android:id="@+id/app_ops"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_marginStart="6dp"
+        android:orientation="horizontal" >
+        <ImageButton
+            android:id="@+id/camera"
+            android:layout_width="?attr/notificationHeaderIconSize"
+            android:layout_height="?attr/notificationHeaderIconSize"
+            android:src="@drawable/ic_camera"
+            android:background="?android:selectableItemBackgroundBorderless"
+            android:visibility="gone"
+            android:contentDescription="@string/notification_appops_camera_active"
+            />
+        <ImageButton
+            android:id="@+id/mic"
+            android:layout_width="?attr/notificationHeaderIconSize"
+            android:layout_height="?attr/notificationHeaderIconSize"
+            android:src="@drawable/ic_mic"
+            android:background="?android:selectableItemBackgroundBorderless"
+            android:layout_marginStart="4dp"
+            android:visibility="gone"
+            android:contentDescription="@string/notification_appops_microphone_active"
+            />
+        <ImageButton
+            android:id="@+id/overlay"
+            android:layout_width="?attr/notificationHeaderIconSize"
+            android:layout_height="?attr/notificationHeaderIconSize"
+            android:src="@drawable/ic_alert_window_layer"
+            android:background="?android:selectableItemBackgroundBorderless"
+            android:layout_marginStart="4dp"
+            android:visibility="gone"
+            android:contentDescription="@string/notification_appops_overlay_active"
+            />
+    </LinearLayout>
 </NotificationHeaderView>
 

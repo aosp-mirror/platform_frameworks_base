@@ -31,11 +31,13 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_SRC_FILES := \
         ../../core/java/android/os/IIncidentManager.aidl \
-        ../../core/java/android/os/IIncidentReportCompletedListener.aidl \
         ../../core/java/android/os/IIncidentReportStatusListener.aidl \
+        proto/android/os/header.proto \
+        proto/android/os/metadata.proto \
         src/IncidentReportArgs.cpp
 
 LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
+LOCAL_PROTO_OPTIMIZE_TYPE := lite
 
 include $(BUILD_SHARED_LIBRARY)
 

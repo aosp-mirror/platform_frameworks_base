@@ -23,6 +23,7 @@ using ::aapt::test::ValueEq;
 using ::testing::Eq;
 using ::testing::IsNull;
 using ::testing::NotNull;
+using ::testing::Pointee;
 using ::testing::SizeIs;
 
 namespace aapt {
@@ -54,17 +55,17 @@ class XmlCompatVersionerTest : public ::testing::Test {
             .AddSymbolSource(
                 test::StaticSymbolSourceBuilder()
                     .AddPublicSymbol("android:attr/paddingLeft", R::attr::paddingLeft,
-                                     util::make_unique<Attribute>(false, TYPE_DIMENSION))
+                                     util::make_unique<Attribute>(TYPE_DIMENSION))
                     .AddPublicSymbol("android:attr/paddingRight", R::attr::paddingRight,
-                                     util::make_unique<Attribute>(false, TYPE_DIMENSION))
+                                     util::make_unique<Attribute>(TYPE_DIMENSION))
                     .AddPublicSymbol("android:attr/progressBarPadding", R::attr::progressBarPadding,
-                                     util::make_unique<Attribute>(false, TYPE_DIMENSION))
+                                     util::make_unique<Attribute>(TYPE_DIMENSION))
                     .AddPublicSymbol("android:attr/paddingStart", R::attr::paddingStart,
-                                     util::make_unique<Attribute>(false, TYPE_DIMENSION))
+                                     util::make_unique<Attribute>(TYPE_DIMENSION))
                     .AddPublicSymbol("android:attr/paddingHorizontal", R::attr::paddingHorizontal,
-                                     util::make_unique<Attribute>(false, TYPE_DIMENSION))
+                                     util::make_unique<Attribute>(TYPE_DIMENSION))
                     .AddSymbol("com.app:attr/foo", ResourceId(0x7f010000),
-                               util::make_unique<Attribute>(false, TYPE_STRING))
+                               util::make_unique<Attribute>(TYPE_STRING))
                     .Build())
             .Build();
   }
@@ -126,9 +127,8 @@ TEST_F(XmlCompatVersionerTest, SingleRule) {
   XmlCompatVersioner::Rules rules;
   rules[R::attr::paddingHorizontal] =
       util::make_unique<DegradeToManyRule>(std::vector<ReplacementAttr>(
-          {ReplacementAttr{"paddingLeft", R::attr::paddingLeft, Attribute(false, TYPE_DIMENSION)},
-           ReplacementAttr{"paddingRight", R::attr::paddingRight,
-                           Attribute(false, TYPE_DIMENSION)}}));
+          {ReplacementAttr{"paddingLeft", R::attr::paddingLeft, Attribute(TYPE_DIMENSION)},
+           ReplacementAttr{"paddingRight", R::attr::paddingRight, Attribute(TYPE_DIMENSION)}}));
 
   const util::Range<ApiVersion> api_range{SDK_GINGERBREAD, SDK_O + 1};
 
@@ -187,12 +187,11 @@ TEST_F(XmlCompatVersionerTest, ChainedRule) {
   XmlCompatVersioner::Rules rules;
   rules[R::attr::progressBarPadding] =
       util::make_unique<DegradeToManyRule>(std::vector<ReplacementAttr>(
-          {ReplacementAttr{"paddingLeft", R::attr::paddingLeft, Attribute(false, TYPE_DIMENSION)},
-           ReplacementAttr{"paddingRight", R::attr::paddingRight,
-                           Attribute(false, TYPE_DIMENSION)}}));
+          {ReplacementAttr{"paddingLeft", R::attr::paddingLeft, Attribute(TYPE_DIMENSION)},
+           ReplacementAttr{"paddingRight", R::attr::paddingRight, Attribute(TYPE_DIMENSION)}}));
   rules[R::attr::paddingHorizontal] =
       util::make_unique<DegradeToManyRule>(std::vector<ReplacementAttr>({ReplacementAttr{
-          "progressBarPadding", R::attr::progressBarPadding, Attribute(false, TYPE_DIMENSION)}}));
+          "progressBarPadding", R::attr::progressBarPadding, Attribute(TYPE_DIMENSION)}}));
 
   const util::Range<ApiVersion> api_range{SDK_GINGERBREAD, SDK_O + 1};
 
@@ -267,9 +266,8 @@ TEST_F(XmlCompatVersionerTest, DegradeRuleOverridesExistingAttribute) {
   XmlCompatVersioner::Rules rules;
   rules[R::attr::paddingHorizontal] =
       util::make_unique<DegradeToManyRule>(std::vector<ReplacementAttr>(
-          {ReplacementAttr{"paddingLeft", R::attr::paddingLeft, Attribute(false, TYPE_DIMENSION)},
-           ReplacementAttr{"paddingRight", R::attr::paddingRight,
-                           Attribute(false, TYPE_DIMENSION)}}));
+          {ReplacementAttr{"paddingLeft", R::attr::paddingLeft, Attribute(TYPE_DIMENSION)},
+           ReplacementAttr{"paddingRight", R::attr::paddingRight, Attribute(TYPE_DIMENSION)}}));
 
   const util::Range<ApiVersion> api_range{SDK_GINGERBREAD, SDK_O + 1};
 
@@ -290,13 +288,13 @@ TEST_F(XmlCompatVersionerTest, DegradeRuleOverridesExistingAttribute) {
   ASSERT_THAT(attr, NotNull());
   ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
-  ASSERT_THAT(*attr->compiled_value, ValueEq(padding_horizontal_value));
+  ASSERT_THAT(attr->compiled_value, Pointee(ValueEq(padding_horizontal_value)));
 
   attr = el->FindAttribute(xml::kSchemaAndroid, "paddingRight");
   ASSERT_THAT(attr, NotNull());
   ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
-  ASSERT_THAT(*attr->compiled_value, ValueEq(padding_horizontal_value));
+  ASSERT_THAT(attr->compiled_value, Pointee(ValueEq(padding_horizontal_value)));
 
   EXPECT_THAT(versioned_docs[1]->file.config.sdkVersion, Eq(SDK_LOLLIPOP_MR1));
   el = versioned_docs[1]->root.get();
@@ -305,21 +303,20 @@ TEST_F(XmlCompatVersionerTest, DegradeRuleOverridesExistingAttribute) {
 
   attr = el->FindAttribute(xml::kSchemaAndroid, "paddingHorizontal");
   ASSERT_THAT(attr, NotNull());
-  ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
-  ASSERT_THAT(*attr->compiled_value, ValueEq(padding_horizontal_value));
+  ASSERT_THAT(attr->compiled_value, Pointee(ValueEq(padding_horizontal_value)));
 
   attr = el->FindAttribute(xml::kSchemaAndroid, "paddingLeft");
   ASSERT_THAT(attr, NotNull());
   ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
-  ASSERT_THAT(*attr->compiled_value, ValueEq(padding_horizontal_value));
+  ASSERT_THAT(attr->compiled_value, Pointee(ValueEq(padding_horizontal_value)));
 
   attr = el->FindAttribute(xml::kSchemaAndroid, "paddingRight");
   ASSERT_THAT(attr, NotNull());
   ASSERT_THAT(attr->compiled_value, NotNull());
   ASSERT_TRUE(attr->compiled_attribute);
-  ASSERT_THAT(*attr->compiled_value, ValueEq(padding_horizontal_value));
+  ASSERT_THAT(attr->compiled_value, Pointee(ValueEq(padding_horizontal_value)));
 }
 
 }  // namespace aapt

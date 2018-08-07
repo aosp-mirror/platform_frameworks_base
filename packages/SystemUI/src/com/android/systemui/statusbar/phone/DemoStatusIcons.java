@@ -16,36 +16,77 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.DemoMode;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.StatusBarIconView;
-import com.android.systemui.statusbar.policy.LocationControllerImpl;
+import com.android.systemui.statusbar.StatusBarMobileView;
+import com.android.systemui.statusbar.StatusBarWifiView;
+import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
+import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
+import java.util.ArrayList;
 
-public class DemoStatusIcons extends LinearLayout implements DemoMode {
+public class DemoStatusIcons extends StatusIconContainer implements DemoMode, DarkReceiver {
+    private static final String TAG = "DemoStatusIcons";
+
     private final LinearLayout mStatusIcons;
+    private final ArrayList<StatusBarMobileView> mMobileViews = new ArrayList<>();
     private final int mIconSize;
 
+    private StatusBarWifiView mWifiView;
     private boolean mDemoMode;
+    private int mColor;
 
     public DemoStatusIcons(LinearLayout statusIcons, int iconSize) {
         super(statusIcons.getContext());
         mStatusIcons = statusIcons;
         mIconSize = iconSize;
+        mColor = DarkIconDispatcher.DEFAULT_ICON_TINT;
 
+        if (statusIcons instanceof StatusIconContainer) {
+            setShouldRestrictIcons(((StatusIconContainer) statusIcons).isRestrictingIcons());
+        } else {
+            setShouldRestrictIcons(false);
+        }
         setLayoutParams(mStatusIcons.getLayoutParams());
+        setPadding(mStatusIcons.getPaddingLeft(),mStatusIcons.getPaddingTop(),
+                mStatusIcons.getPaddingRight(), mStatusIcons.getPaddingBottom());
         setOrientation(mStatusIcons.getOrientation());
         setGravity(Gravity.CENTER_VERTICAL); // no LL.getGravity()
         ViewGroup p = (ViewGroup) mStatusIcons.getParent();
         p.addView(this, p.indexOfChild(mStatusIcons));
+    }
+
+    public void remove() {
+        mMobileViews.clear();
+        ((ViewGroup) getParent()).removeView(this);
+    }
+
+    public void setColor(int color) {
+        mColor = color;
+        updateColors();
+    }
+
+    private void updateColors() {
+        for (int i = 0; i < getChildCount(); i++) {
+            StatusIconDisplayable child = (StatusIconDisplayable) getChildAt(i);
+            child.setStaticDrawableColor(mColor);
+            child.setDecorColor(mColor);
+        }
     }
 
     @Override
@@ -122,6 +163,7 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
         }
     }
 
+    /// Can only be used to update non-signal related slots
     private void updateSlot(String slot, String iconPkg, int iconId) {
         if (!mDemoMode) return;
         if (iconPkg == null) {
@@ -129,13 +171,18 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
         }
         int removeIndex = -1;
         for (int i = 0; i < getChildCount(); i++) {
-            StatusBarIconView v = (StatusBarIconView) getChildAt(i);
+            View child = getChildAt(i);
+            if (!(child instanceof StatusBarIconView)) {
+                continue;
+            }
+            StatusBarIconView v = (StatusBarIconView) child;
             if (slot.equals(v.getTag())) {
                 if (iconId == 0) {
                     removeIndex = i;
                     break;
                 } else {
                     StatusBarIcon icon = v.getStatusBarIcon();
+                    icon.visible = true;
                     icon.icon = Icon.createWithResource(icon.icon.getResPackage(), iconId);
                     v.set(icon);
                     v.updateDrawable();
@@ -150,9 +197,108 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
             return;
         }
         StatusBarIcon icon = new StatusBarIcon(iconPkg, UserHandle.SYSTEM, iconId, 0, 0, "Demo");
-        StatusBarIconView v = new StatusBarIconView(getContext(), null, null);
+        icon.visible = true;
+        StatusBarIconView v = new StatusBarIconView(getContext(), slot, null, false);
         v.setTag(slot);
         v.set(icon);
-        addView(v, 0, new LinearLayout.LayoutParams(mIconSize, mIconSize));
+        v.setStaticDrawableColor(mColor);
+        v.setDecorColor(mColor);
+        addView(v, 0, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize));
+    }
+
+    public void addDemoWifiView(WifiIconState state) {
+        Log.d(TAG, "addDemoWifiView: ");
+        StatusBarWifiView view = StatusBarWifiView.fromContext(mContext, state.slot);
+
+        int viewIndex = getChildCount();
+        // If we have mobile views, put wifi before them
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (child instanceof StatusBarMobileView) {
+                viewIndex = i;
+                break;
+            }
+        }
+
+        mWifiView = view;
+        mWifiView.applyWifiState(state);
+        mWifiView.setStaticDrawableColor(mColor);
+        addView(view, viewIndex);
+    }
+
+    public void updateWifiState(WifiIconState state) {
+        Log.d(TAG, "updateWifiState: ");
+        if (mWifiView == null) {
+            addDemoWifiView(state);
+        } else {
+            mWifiView.applyWifiState(state);
+        }
+    }
+
+    public void addMobileView(MobileIconState state) {
+        Log.d(TAG, "addMobileView: ");
+        StatusBarMobileView view = StatusBarMobileView.fromContext(mContext, state.slot);
+
+        view.applyMobileState(state);
+        view.setStaticDrawableColor(mColor);
+
+        // mobile always goes at the end
+        mMobileViews.add(view);
+        addView(view, getChildCount());
+    }
+
+    public void updateMobileState(MobileIconState state) {
+        Log.d(TAG, "updateMobileState: ");
+        // If the view for this subId exists already, use it
+        for (int i = 0; i < mMobileViews.size(); i++) {
+            StatusBarMobileView view = mMobileViews.get(i);
+            if (view.getState().subId == state.subId) {
+                view.applyMobileState(state);
+                return;
+            }
+        }
+
+        // Else we have to add it
+        addMobileView(state);
+    }
+
+    public void onRemoveIcon(StatusIconDisplayable view) {
+        if (view.getSlot().equals("wifi")) {
+            removeView(mWifiView);
+            mWifiView = null;
+        } else {
+            StatusBarMobileView mobileView = matchingMobileView(view);
+            if (mobileView != null) {
+                removeView(mobileView);
+                mMobileViews.remove(mobileView);
+            }
+        }
+    }
+
+    private StatusBarMobileView matchingMobileView(StatusIconDisplayable otherView) {
+        if (!(otherView instanceof StatusBarMobileView)) {
+            return null;
+        }
+
+        StatusBarMobileView v = (StatusBarMobileView) otherView;
+        for (StatusBarMobileView view : mMobileViews) {
+            if (view.getState().subId == v.getState().subId) {
+                return view;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
+        setColor(DarkIconDispatcher.getTint(area, mStatusIcons, tint));
+
+        if (mWifiView != null) {
+            mWifiView.onDarkChanged(area, darkIntensity, tint);
+        }
+        for (StatusBarMobileView view : mMobileViews) {
+            view.onDarkChanged(area, darkIntensity, tint);
+        }
     }
 }

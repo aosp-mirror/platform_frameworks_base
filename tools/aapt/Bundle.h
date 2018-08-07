@@ -68,6 +68,7 @@ public:
           mSingleCrunchInputFile(NULL), mSingleCrunchOutputFile(NULL),
           mBuildSharedLibrary(false),
           mBuildAppAsSharedLibrary(false),
+          mCompileSdkVersion(0),
           mArgc(0), mArgv(NULL)
         {}
     ~Bundle(void) {}
@@ -123,6 +124,10 @@ public:
     void setErrorOnFailedInsert(bool val) { mErrorOnFailedInsert = val; }
     bool getErrorOnMissingConfigEntry() { return mErrorOnMissingConfigEntry; }
     void setErrorOnMissingConfigEntry(bool val) { mErrorOnMissingConfigEntry = val; }
+    const android::String8& getCompileSdkVersionCodename() { return mCompileSdkVersionCodename; }
+    void setCompileSdkVersionCodename(const android::String8& codename) { mCompileSdkVersionCodename = codename; }
+    int getCompileSdkVersion() { return mCompileSdkVersion; }
+    void setCompileSdkVersion(int version) { mCompileSdkVersion = version; }
     const android::String8& getPlatformBuildVersionCode() { return mPlatformVersionCode; }
     void setPlatformBuildVersionCode(const android::String8& code) { mPlatformVersionCode = code; }
     const android::String8& getPlatformBuildVersionName() { return mPlatformVersionName; }
@@ -344,6 +349,8 @@ private:
     const char* mSingleCrunchOutputFile;
     bool        mBuildSharedLibrary;
     bool        mBuildAppAsSharedLibrary;
+    int         mCompileSdkVersion;
+    android::String8 mCompileSdkVersionCodename;
     android::String8 mPlatformVersionCode;
     android::String8 mPlatformVersionName;
     android::String8 mPrivateSymbolsPackage;

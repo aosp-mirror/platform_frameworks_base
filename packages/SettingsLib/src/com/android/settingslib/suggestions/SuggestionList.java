@@ -17,7 +17,6 @@
 package com.android.settingslib.suggestions;
 
 import android.content.Intent;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -66,15 +65,6 @@ public class SuggestionList {
             }
         }
         return false;
-    }
-
-    public List<Tile> getSuggestionForCategory(String category) {
-        for (Map.Entry<SuggestionCategory, List<Tile>> entry : mSuggestions.entrySet()) {
-            if (TextUtils.equals(entry.getKey().category, category)) {
-                return entry.getValue();
-            }
-        }
-        return null;
     }
 
     /**

@@ -51,9 +51,11 @@ import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
@@ -166,6 +168,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private String mLeftButtonStr;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mDozing;
+    private int mIndicationBottomMargin;
+    private int mIndicationBottomMarginAmbient;
+    private float mDarkAmount;
+    private int mBurnInXOffset;
 
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
@@ -235,6 +241,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mEnterpriseDisclosure = findViewById(
                 R.id.keyguard_indication_enterprise_disclosure);
         mIndicationText = findViewById(R.id.keyguard_indication_text);
+        mIndicationBottomMargin = getResources().getDimensionPixelSize(
+                R.dimen.keyguard_indication_margin_bottom);
+        mIndicationBottomMarginAmbient = getResources().getDimensionPixelSize(
+                R.dimen.keyguard_indication_margin_bottom_ambient);
         updateCameraVisibility();
         mUnlockMethodCache = UnlockMethodCache.getInstance(getContext());
         mUnlockMethodCache.addListener(this);
@@ -303,11 +313,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        int indicationBottomMargin = getResources().getDimensionPixelSize(
+        mIndicationBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_margin_bottom);
+        mIndicationBottomMarginAmbient = getResources().getDimensionPixelSize(
+                R.dimen.keyguard_indication_margin_bottom_ambient);
         MarginLayoutParams mlp = (MarginLayoutParams) mIndicationArea.getLayoutParams();
-        if (mlp.bottomMargin != indicationBottomMargin) {
-            mlp.bottomMargin = indicationBottomMargin;
+        if (mlp.bottomMargin != mIndicationBottomMargin) {
+            mlp.bottomMargin = mIndicationBottomMargin;
             mIndicationArea.setLayoutParams(mlp);
         }
 
@@ -543,6 +555,22 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
     }
 
+    public void setDarkAmount(float darkAmount) {
+        if (darkAmount == mDarkAmount) {
+            return;
+        }
+        mDarkAmount = darkAmount;
+        // Let's randomize the bottom margin every time we wake up to avoid burn-in.
+        if (darkAmount == 0) {
+            mIndicationBottomMarginAmbient = getResources().getDimensionPixelSize(
+                    R.dimen.keyguard_indication_margin_bottom_ambient)
+                    + (int) (Math.random() * mIndicationText.getTextSize());
+        }
+        mIndicationArea.setAlpha(MathUtils.lerp(1f, 0.7f, darkAmount));
+        mIndicationArea.setTranslationY(MathUtils.lerp(0,
+                mIndicationBottomMargin - mIndicationBottomMarginAmbient, darkAmount));
+    }
+
     private static boolean isSuccessfulLaunch(int result) {
         return result == ActivityManager.START_SUCCESS
                 || result == ActivityManager.START_DELIVERED_TO_TOP
@@ -687,11 +715,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         if (mRightAffordanceView.getVisibility() == View.VISIBLE) {
             startFinishDozeAnimationElement(mRightAffordanceView, delay);
         }
-        mIndicationArea.setAlpha(0f);
-        mIndicationArea.animate()
-                .alpha(1f)
-                .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
-                .setDuration(NotificationPanelView.DOZE_ANIMATION_DURATION);
     }
 
     private void startFinishDozeAnimationElement(View element, long delay) {
@@ -815,6 +838,22 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
     }
 
+    public void dozeTimeTick() {
+        if (mDarkAmount == 1) {
+            // Move indication every minute to avoid burn-in
+            final int dozeTranslation = mIndicationBottomMargin - mIndicationBottomMarginAmbient;
+            mIndicationArea.setTranslationY(dozeTranslation + (float) Math.random() * 5);
+        }
+    }
+
+    public void setBurnInXOffset(int burnInXOffset) {
+        if (mBurnInXOffset == burnInXOffset) {
+            return;
+        }
+        mBurnInXOffset = burnInXOffset;
+        mIndicationArea.setTranslationX(burnInXOffset);
+    }
+
     private class DefaultLeftButton implements IntentButton {
 
         private IconState mIconState = new IconState();
@@ -822,8 +861,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         @Override
         public IconState getIcon() {
             mLeftIsVoiceAssist = canLaunchVoiceAssist();
+            final boolean showAffordance =
+                    getResources().getBoolean(R.bool.config_keyguardShowLeftAffordance);
             if (mLeftIsVoiceAssist) {
-                mIconState.isVisible = mUserSetupComplete;
+                mIconState.isVisible = mUserSetupComplete && showAffordance;
                 if (mLeftAssistIcon == null) {
                     mIconState.drawable = mContext.getDrawable(R.drawable.ic_mic_26dp);
                 } else {
@@ -832,7 +873,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 mIconState.contentDescription = mContext.getString(
                         R.string.accessibility_voice_assist_button);
             } else {
-                mIconState.isVisible = mUserSetupComplete && isPhoneVisible();
+                mIconState.isVisible = mUserSetupComplete && showAffordance && isPhoneVisible();
                 mIconState.drawable = mContext.getDrawable(R.drawable.ic_phone_24dp);
                 mIconState.contentDescription = mContext.getString(
                         R.string.accessibility_phone_button);
@@ -871,5 +912,17 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             boolean secure = mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser());
             return (secure && !canSkipBouncer) ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
         }
+    }
+
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        int bottom = insets.getDisplayCutout() != null
+                ? insets.getDisplayCutout().getSafeInsetBottom() : 0;
+        if (isPaddingRelative()) {
+            setPaddingRelative(getPaddingStart(), getPaddingTop(), getPaddingEnd(), bottom);
+        } else {
+            setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), bottom);
+        }
+        return insets;
     }
 }

@@ -19,7 +19,7 @@
 #include <stdint.h>
 
 struct SkRect;
-typedef void *EGLSurface;
+typedef void* EGLSurface;
 
 namespace android {
 namespace uirenderer {
@@ -28,9 +28,7 @@ namespace renderthread {
 class Frame {
 public:
     Frame(int32_t width, int32_t height, int32_t bufferAge)
-            : mWidth(width)
-            , mHeight(height)
-            , mBufferAge(bufferAge) { }
+            : mWidth(width), mHeight(height), mBufferAge(bufferAge) {}
 
     int32_t width() const { return mWidth; }
     int32_t height() const { return mHeight; }
@@ -57,4 +55,3 @@ private:
 } /* namespace renderthread */
 } /* namespace uirenderer */
 } /* namespace android */
-

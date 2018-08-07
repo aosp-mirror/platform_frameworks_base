@@ -34,7 +34,7 @@ public final class Usb20ASFormatII extends UsbASFormat {
     /**
      * TBD
      */
-    public Usb20ASFormatII(int length, byte type, byte subtype, byte formatType, byte subclass) {
+    public Usb20ASFormatII(int length, byte type, byte subtype, byte formatType, int subclass) {
         super(length, type, subtype, formatType, subclass);
     }
 

@@ -58,6 +58,7 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
     private boolean mRoundedDivider;
     private int mRotation = ROTATION_NONE;
     private boolean mRotatedBackground;
+    private boolean mSwapOrientation = true;
 
     public HardwareUiLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -88,7 +89,7 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
         mEdgeBleed = Settings.Secure.getInt(getContext().getContentResolver(),
                 EDGE_BLEED, 0) != 0;
         mRoundedDivider = Settings.Secure.getInt(getContext().getContentResolver(),
-                ROUNDED_DIVIDER, 1) != 0;
+                ROUNDED_DIVIDER, 0) != 0;
         updateEdgeMargin(mEdgeBleed ? 0 : getEdgePadding());
         mBackground = new HardwareBgDrawable(mRoundedDivider, !mEdgeBleed, getContext());
         if (mChild != null) {
@@ -145,6 +146,10 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
         updateRotation();
     }
 
+    public void setSwapOrientation(boolean swapOrientation) {
+        mSwapOrientation = swapOrientation;
+    }
+
     private void updateRotation() {
         int rotation = RotationUtils.getRotation(getContext());
         if (rotation != mRotation) {
@@ -170,10 +175,9 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
                 mRotatedBackground = true;
                 mBackground.setRotatedBackground(true);
                 LinearLayout linearLayout = (LinearLayout) mChild;
-                if (to == ROTATION_SEASCAPE) {
-                    swapOrder(linearLayout);
+                if (mSwapOrientation) {
+                    linearLayout.setOrientation(LinearLayout.HORIZONTAL);
                 }
-                linearLayout.setOrientation(LinearLayout.HORIZONTAL);
                 swapDimens(this.mChild);
             }
         } else {
@@ -181,22 +185,12 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
                 mRotatedBackground = false;
                 mBackground.setRotatedBackground(false);
                 LinearLayout linearLayout = (LinearLayout) mChild;
-                if (from == ROTATION_SEASCAPE) {
-                    swapOrder(linearLayout);
+                if (mSwapOrientation) {
+                    linearLayout.setOrientation(LinearLayout.VERTICAL);
                 }
-                linearLayout.setOrientation(LinearLayout.VERTICAL);
                 swapDimens(mChild);
             }
         }
-    }
-
-    private void swapOrder(LinearLayout linearLayout) {
-        ArrayList<View> children = new ArrayList<>();
-        for (int i = 0; i < linearLayout.getChildCount(); i++) {
-            children.add(0, linearLayout.getChildAt(0));
-            linearLayout.removeViewAt(0);
-        }
-        children.forEach(v -> linearLayout.addView(v));
     }
 
     private void rotateRight() {

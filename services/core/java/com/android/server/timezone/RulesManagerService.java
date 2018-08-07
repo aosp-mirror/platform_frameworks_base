@@ -92,6 +92,9 @@ public final class RulesManagerService extends IRulesManager.Stub {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     static final String REQUIRED_UPDATER_PERMISSION =
             android.Manifest.permission.UPDATE_TIME_ZONE_RULES;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    static final String REQUIRED_QUERY_PERMISSION =
+            android.Manifest.permission.QUERY_TIME_ZONE_RULES;
     private static final File SYSTEM_TZ_DATA_FILE = new File("/system/usr/share/zoneinfo/tzdata");
     private static final File TZ_DATA_DIR = new File("/data/misc/zoneinfo");
 
@@ -99,6 +102,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
     private final PermissionHelper mPermissionHelper;
     private final PackageTracker mPackageTracker;
     private final Executor mExecutor;
+    private final RulesManagerIntentHelper mIntentHelper;
     private final TimeZoneDistroInstaller mInstaller;
 
     private static RulesManagerService create(Context context) {
@@ -106,27 +110,31 @@ public final class RulesManagerService extends IRulesManager.Stub {
         return new RulesManagerService(
                 helper /* permissionHelper */,
                 helper /* executor */,
+                helper /* intentHelper */,
                 PackageTracker.create(context),
                 new TimeZoneDistroInstaller(TAG, SYSTEM_TZ_DATA_FILE, TZ_DATA_DIR));
     }
 
     // A constructor that can be used by tests to supply mocked / faked dependencies.
-    RulesManagerService(PermissionHelper permissionHelper,
-            Executor executor, PackageTracker packageTracker,
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    RulesManagerService(PermissionHelper permissionHelper, Executor executor,
+            RulesManagerIntentHelper intentHelper, PackageTracker packageTracker,
             TimeZoneDistroInstaller timeZoneDistroInstaller) {
         mPermissionHelper = permissionHelper;
         mExecutor = executor;
+        mIntentHelper = intentHelper;
         mPackageTracker = packageTracker;
         mInstaller = timeZoneDistroInstaller;
     }
 
     public void start() {
+        // Return value deliberately ignored: no action required on failure to start.
         mPackageTracker.start();
     }
 
     @Override // Binder call
     public RulesState getRulesState() {
-        mPermissionHelper.enforceCallerHasPermission(REQUIRED_UPDATER_PERMISSION);
+        mPermissionHelper.enforceCallerHasPermission(REQUIRED_QUERY_PERMISSION);
 
         return getRulesStateInternal();
     }
@@ -140,6 +148,26 @@ public final class RulesManagerService extends IRulesManager.Stub {
             } catch (IOException e) {
                 Slog.w(TAG, "Failed to read system rules", e);
                 return null;
+            }
+
+            // Determine the installed distro state. This should be possible regardless of whether
+            // there's an operation in progress.
+            DistroVersion installedDistroVersion;
+            int distroStatus = DISTRO_STATUS_UNKNOWN;
+            DistroRulesVersion installedDistroRulesVersion = null;
+            try {
+                installedDistroVersion = mInstaller.getInstalledDistroVersion();
+                if (installedDistroVersion == null) {
+                    distroStatus = DISTRO_STATUS_NONE;
+                    installedDistroRulesVersion = null;
+                } else {
+                    distroStatus = DISTRO_STATUS_INSTALLED;
+                    installedDistroRulesVersion = new DistroRulesVersion(
+                            installedDistroVersion.rulesVersion,
+                            installedDistroVersion.revision);
+                }
+            } catch (DistroException | IOException e) {
+                Slog.w(TAG, "Failed to read installed distro.", e);
             }
 
             boolean operationInProgress = this.mOperationInProgress.get();
@@ -165,27 +193,6 @@ public final class RulesManagerService extends IRulesManager.Stub {
                     }
                 } catch (DistroException | IOException e) {
                     Slog.w(TAG, "Failed to read staged distro.", e);
-                }
-            }
-
-            // Determine the installed distro state, if possible.
-            DistroVersion installedDistroVersion;
-            int distroStatus = DISTRO_STATUS_UNKNOWN;
-            DistroRulesVersion installedDistroRulesVersion = null;
-            if (!operationInProgress) {
-                try {
-                    installedDistroVersion = mInstaller.getInstalledDistroVersion();
-                    if (installedDistroVersion == null) {
-                        distroStatus = DISTRO_STATUS_NONE;
-                        installedDistroRulesVersion = null;
-                    } else {
-                        distroStatus = DISTRO_STATUS_INSTALLED;
-                        installedDistroRulesVersion = new DistroRulesVersion(
-                                installedDistroVersion.rulesVersion,
-                                installedDistroVersion.revision);
-                    }
-                } catch (DistroException | IOException e) {
-                    Slog.w(TAG, "Failed to read installed distro.", e);
                 }
             }
             return new RulesState(systemRulesVersion, DISTRO_FORMAT_VERSION_SUPPORTED,
@@ -271,6 +278,10 @@ public final class RulesManagerService extends IRulesManager.Stub {
 
                 TimeZoneDistro distro = new TimeZoneDistro(is);
                 int installerResult = mInstaller.stageInstallWithErrorCode(distro);
+
+                // Notify interested parties that something is staged.
+                sendInstallNotificationIntentIfRequired(installerResult);
+
                 int resultCode = mapInstallerResultToApiCode(installerResult);
                 EventLogTags.writeTimezoneInstallComplete(toStringOrNull(mCheckToken), resultCode);
                 sendFinishedStatus(mCallback, resultCode);
@@ -288,6 +299,12 @@ public final class RulesManagerService extends IRulesManager.Stub {
                 mPackageTracker.recordCheckResult(mCheckToken, success);
 
                 mOperationInProgress.set(false);
+            }
+        }
+
+        private void sendInstallNotificationIntentIfRequired(int installerResult) {
+            if (installerResult == TimeZoneDistroInstaller.INSTALL_SUCCESS) {
+                mIntentHelper.sendTimeZoneOperationStaged();
             }
         }
 
@@ -351,6 +368,10 @@ public final class RulesManagerService extends IRulesManager.Stub {
             boolean packageTrackerStatus = false;
             try {
                 int uninstallResult = mInstaller.stageUninstall();
+
+                // Notify interested parties that something is staged.
+                sendUninstallNotificationIntentIfRequired(uninstallResult);
+
                 packageTrackerStatus = (uninstallResult == TimeZoneDistroInstaller.UNINSTALL_SUCCESS
                         || uninstallResult == TimeZoneDistroInstaller.UNINSTALL_NOTHING_INSTALLED);
 
@@ -372,6 +393,20 @@ public final class RulesManagerService extends IRulesManager.Stub {
                 mPackageTracker.recordCheckResult(mCheckToken, packageTrackerStatus);
 
                 mOperationInProgress.set(false);
+            }
+        }
+
+        private void sendUninstallNotificationIntentIfRequired(int uninstallResult) {
+            switch (uninstallResult) {
+                case TimeZoneDistroInstaller.UNINSTALL_SUCCESS:
+                    mIntentHelper.sendTimeZoneOperationStaged();
+                    break;
+                case TimeZoneDistroInstaller.UNINSTALL_NOTHING_INSTALLED:
+                    mIntentHelper.sendTimeZoneOperationUnstaged();
+                    break;
+                case TimeZoneDistroInstaller.UNINSTALL_FAIL:
+                default:
+                    // No-op - unknown or nothing to notify about.
             }
         }
     }

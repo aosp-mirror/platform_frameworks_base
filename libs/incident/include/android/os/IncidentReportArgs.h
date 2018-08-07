@@ -24,10 +24,18 @@
 #include <set>
 #include <vector>
 
+#include "frameworks/base/libs/incident/proto/android/os/header.pb.h"
+
 namespace android {
 namespace os {
 
 using namespace std;
+
+// DESTINATION enum value, sync with proto/android/privacy.proto
+const uint8_t DEST_LOCAL = 0;
+const uint8_t DEST_EXPLICIT = 100;
+const uint8_t DEST_AUTOMATIC = 200;
+
 
 class IncidentReportArgs : public Parcelable {
 public:
@@ -39,21 +47,23 @@ public:
     virtual status_t readFromParcel(const Parcel* in);
 
     void setAll(bool all);
+    void setDest(int dest);
     void addSection(int section);
-    void addHeader(const vector<int8_t>& header);
+    void addHeader(const IncidentHeaderProto& headerProto);
 
-    inline bool all() const { return mAll; };
+    inline bool all() const { return mAll; }
     bool containsSection(int section) const;
-
+    inline int dest() const { return mDest; }
     inline const set<int>& sections() const { return mSections; }
-    inline const vector<vector<int8_t>>& headers() const { return mHeaders; }
+    inline const vector<vector<uint8_t>>& headers() const { return mHeaders; }
 
     void merge(const IncidentReportArgs& that);
 
 private:
     set<int> mSections;
-    vector<vector<int8_t>> mHeaders;
+    vector<vector<uint8_t>> mHeaders;
     bool mAll;
+    int mDest;
 };
 
 }

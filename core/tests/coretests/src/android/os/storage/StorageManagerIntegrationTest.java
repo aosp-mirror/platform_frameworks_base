@@ -16,61 +16,27 @@
 
 package android.os.storage;
 
-import android.content.Context;
-import android.os.Environment;
-import android.os.ProxyFileDescriptorCallback;
 import android.os.ParcelFileDescriptor;
+import android.os.ProxyFileDescriptorCallback;
 import android.system.ErrnoException;
-import android.system.Os;
-import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
 import com.android.frameworks.coretests.R;
-import com.android.internal.os.FuseAppLoop;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.util.concurrent.ThreadFactory;
-import java.io.File;
-import java.io.FileInputStream;
 
-import junit.framework.AssertionFailedError;
+import java.io.File;
+import java.util.concurrent.ThreadFactory;
 
 public class StorageManagerIntegrationTest extends StorageManagerBaseTest {
-
-    private static String LOG_TAG = "StorageManagerBaseTest.StorageManagerIntegrationTest";
-    protected File mFile = null;
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        mContext = getInstrumentation().getContext();
-        mFile = null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        if (mFile != null) {
-            mFile.delete();
-            mFile = null;
-        }
-        super.tearDown();
-    }
+    private static String LOG_TAG = "StorageManagerIntegrationTest";
 
     /**
      * Tests mounting a single OBB file and verifies its contents.
      */
     @LargeTest
-    public void testMountSingleObb() {
-        mFile = createObbFile(OBB_FILE_1, R.raw.obb_file1);
-        String filePath = mFile.getAbsolutePath();
+    public void testMountSingleObb() throws Exception {
+        final File file = createObbFile(OBB_FILE_1, R.raw.obb_file1);
+        String filePath = file.getAbsolutePath();
         mountObb(filePath);
         verifyObb1Contents(filePath);
         unmountObb(filePath, DONT_FORCE);
@@ -80,7 +46,7 @@ public class StorageManagerIntegrationTest extends StorageManagerBaseTest {
      * Tests mounting several OBB files and verifies its contents.
      */
     @LargeTest
-    public void testMountMultipleObb() {
+    public void testMountMultipleObb() throws Exception {
         File file1 = null;
         File file2 = null;
         File file3 = null;
@@ -120,9 +86,9 @@ public class StorageManagerIntegrationTest extends StorageManagerBaseTest {
      * Tests mounting a single encrypted OBB file and verifies its contents.
      */
     @LargeTest
-    public void testMountSingleEncryptedObb() {
-        mFile = createObbFile(OBB_FILE_3_ENCRYPTED, R.raw.obb_enc_file100_orig3);
-        String filePath = mFile.getAbsolutePath();
+    public void testMountSingleEncryptedObb() throws Exception {
+        final File file = createObbFile(OBB_FILE_3_ENCRYPTED, R.raw.obb_enc_file100_orig3);
+        String filePath = file.getAbsolutePath();
         mountObb(filePath, OBB_FILE_3_PASSWORD, OnObbStateChangeListener.MOUNTED);
         verifyObb3Contents(filePath);
         unmountObb(filePath, DONT_FORCE);
@@ -132,19 +98,17 @@ public class StorageManagerIntegrationTest extends StorageManagerBaseTest {
      * Tests mounting a single encrypted OBB file using an invalid password.
      */
     @LargeTest
-    @Suppress  // Failing.
-    public void testMountSingleEncryptedObbInvalidPassword() {
-        mFile = createObbFile("bad password@$%#@^*(!&)", R.raw.obb_enc_file100_orig3);
-        String filePath = mFile.getAbsolutePath();
-        mountObb(filePath, OBB_FILE_3_PASSWORD, OnObbStateChangeListener.ERROR_COULD_NOT_MOUNT);
-        unmountObb(filePath, DONT_FORCE);
+    public void testMountSingleEncryptedObbInvalidPassword() throws Exception {
+        final File file = createObbFile("bad password@$%#@^*(!&)", R.raw.obb_enc_file100_orig3);
+        String filePath = file.getAbsolutePath();
+        mountObb(filePath, OBB_FILE_1_PASSWORD, OnObbStateChangeListener.ERROR_COULD_NOT_MOUNT);
     }
 
     /**
      * Tests simultaneously mounting 2 encrypted OBBs with different keys and verifies contents.
      */
     @LargeTest
-    public void testMountTwoEncryptedObb() {
+    public void testMountTwoEncryptedObb() throws Exception {
         File file3 = null;
         File file1 = null;
         try {
@@ -174,9 +138,9 @@ public class StorageManagerIntegrationTest extends StorageManagerBaseTest {
      * Tests that we can not force unmount when a file is currently open on the OBB.
      */
     @LargeTest
-    public void testUnmount_DontForce() {
-        mFile = createObbFile(OBB_FILE_1, R.raw.obb_file1);
-        String obbFilePath = mFile.getAbsolutePath();
+    public void testUnmount_DontForce() throws Exception {
+        final File file = createObbFile(OBB_FILE_1, R.raw.obb_file1);
+        String obbFilePath = file.getAbsolutePath();
 
         MountingObbThread mountingThread = new MountingObbThread(obbFilePath,
                 OBB_FILE_1_CONTENTS_1);
@@ -218,9 +182,9 @@ public class StorageManagerIntegrationTest extends StorageManagerBaseTest {
      * Tests mounting a single OBB that isn't signed.
      */
     @LargeTest
-    public void testMountUnsignedObb() {
-        mFile = createObbFile(OBB_FILE_2_UNSIGNED, R.raw.obb_file2_nosign);
-        String filePath = mFile.getAbsolutePath();
+    public void testMountUnsignedObb() throws Exception {
+        final File file = createObbFile(OBB_FILE_2_UNSIGNED, R.raw.obb_file2_nosign);
+        String filePath = file.getAbsolutePath();
         mountObb(filePath, OBB_FILE_2_UNSIGNED, OnObbStateChangeListener.ERROR_INTERNAL);
     }
 
@@ -228,9 +192,9 @@ public class StorageManagerIntegrationTest extends StorageManagerBaseTest {
      * Tests mounting a single OBB that is signed with a different package.
      */
     @LargeTest
-    public void testMountBadPackageNameObb() {
-        mFile = createObbFile(OBB_FILE_3_BAD_PACKAGENAME, R.raw.obb_file3_bad_packagename);
-        String filePath = mFile.getAbsolutePath();
+    public void testMountBadPackageNameObb() throws Exception {
+        final File file = createObbFile(OBB_FILE_3_BAD_PACKAGENAME, R.raw.obb_file3_bad_packagename);
+        String filePath = file.getAbsolutePath();
         mountObb(filePath, OBB_FILE_3_BAD_PACKAGENAME,
                 OnObbStateChangeListener.ERROR_PERMISSION_DENIED);
     }
@@ -239,9 +203,9 @@ public class StorageManagerIntegrationTest extends StorageManagerBaseTest {
      * Tests remounting a single OBB that has already been mounted.
      */
     @LargeTest
-    public void testRemountObb() {
-        mFile = createObbFile(OBB_FILE_1, R.raw.obb_file1);
-        String filePath = mFile.getAbsolutePath();
+    public void testRemountObb() throws Exception {
+        final File file = createObbFile(OBB_FILE_1, R.raw.obb_file1);
+        String filePath = file.getAbsolutePath();
         mountObb(filePath);
         verifyObb1Contents(filePath);
         mountObb(filePath, null, OnObbStateChangeListener.ERROR_ALREADY_MOUNTED);

@@ -68,27 +68,27 @@ class VertexBuffer;
 
 class ShadowTessellator {
 public:
-    static void tessellateAmbientShadow(bool isCasterOpaque,
-            const Vector3* casterPolygon, int casterVertexCount,
-            const Vector3& centroid3d,  const Rect& casterBounds,
-            const Rect& localClip, float maxZ, VertexBuffer& shadowVertexBuffer);
+    static void tessellateAmbientShadow(bool isCasterOpaque, const Vector3* casterPolygon,
+                                        int casterVertexCount, const Vector3& centroid3d,
+                                        const Rect& casterBounds, const Rect& localClip, float maxZ,
+                                        VertexBuffer& shadowVertexBuffer);
 
-    static void tessellateSpotShadow(bool isCasterOpaque,
-            const Vector3* casterPolygon, int casterVertexCount, const Vector3& casterCentroid,
-            const mat4& receiverTransform, const Vector3& lightCenter, int lightRadius,
-            const Rect& casterBounds, const Rect& localClip, VertexBuffer& shadowVertexBuffer);
+    static void tessellateSpotShadow(bool isCasterOpaque, const Vector3* casterPolygon,
+                                     int casterVertexCount, const Vector3& casterCentroid,
+                                     const mat4& receiverTransform, const Vector3& lightCenter,
+                                     int lightRadius, const Rect& casterBounds,
+                                     const Rect& localClip, VertexBuffer& shadowVertexBuffer);
 
     static Vector2 centroid2d(const Vector2* poly, int polyLength);
 
     static Vector2 calculateNormal(const Vector2& p1, const Vector2& p2);
 
-    static int getExtraVertexNumber(const Vector2& vector1, const Vector2& vector2,
-            float divisor);
+    static int getExtraVertexNumber(const Vector2& vector1, const Vector2& vector2, float divisor);
 
     static void checkOverflow(int used, int total, const char* bufferName);
-}; // ShadowTessellator
+};  // ShadowTessellator
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_SHADOW_TESSELLATOR_H
+#endif  // ANDROID_HWUI_SHADOW_TESSELLATOR_H

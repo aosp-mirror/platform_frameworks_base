@@ -37,7 +37,11 @@ import java.io.PrintWriter;
  * Fragments may be hosted by any object; such as an {@link Activity}. In order to
  * host fragments, implement {@link FragmentHostCallback}, overriding the methods
  * applicable to the host.
+ *
+ * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
+ *      {@link android.support.v4.app.FragmentHostCallback}
  */
+@Deprecated
 public abstract class FragmentHostCallback<E> extends FragmentContainer {
     private final Activity mActivity;
     final Context mContext;

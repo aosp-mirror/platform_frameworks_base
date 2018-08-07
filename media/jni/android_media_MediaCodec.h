@@ -120,6 +120,8 @@ struct JMediaCodec : public AHandler {
 
     status_t getName(JNIEnv *env, jstring *name) const;
 
+    status_t getCodecInfo(JNIEnv *env, jobject *codecInfo) const;
+
     status_t getMetrics(JNIEnv *env, MediaAnalyticsItem * &reply) const;
 
     status_t setParameters(const sp<AMessage> &params);

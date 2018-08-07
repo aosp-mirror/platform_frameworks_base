@@ -16,8 +16,6 @@
 
 package com.android.server.location;
 
-import com.android.internal.util.Preconditions;
-
 import android.annotation.NonNull;
 import android.os.Handler;
 import android.os.IBinder;
@@ -25,7 +23,8 @@ import android.os.IInterface;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.lang.Runnable;
+import com.android.internal.util.Preconditions;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,13 +39,15 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
     protected static final int RESULT_GPS_LOCATION_DISABLED = 3;
     protected static final int RESULT_INTERNAL_ERROR = 4;
     protected static final int RESULT_UNKNOWN = 5;
+    protected static final int RESULT_NOT_ALLOWED = 6;
 
     private final Handler mHandler;
     private final String mTag;
 
     private final Map<IBinder, LinkedListener> mListenerMap = new HashMap<>();
 
-    private boolean mIsRegistered;  // must access only on handler thread
+    private volatile boolean mIsRegistered;  // must access only on handler thread, or read-only
+
     private boolean mHasIsSupported;
     private boolean mIsSupported;
 
@@ -56,6 +57,11 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
         Preconditions.checkNotNull(name);
         mHandler = handler;
         mTag = name;
+    }
+
+    // read-only access for a dump() thread assured via volatile
+    public boolean isRegistered() {
+        return mIsRegistered;
     }
 
     public boolean addListener(@NonNull TListener listener) {
@@ -118,7 +124,8 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
 
     protected abstract boolean isAvailableInPlatform();
     protected abstract boolean isGpsEnabled();
-    protected abstract boolean registerWithService(); // must access only on handler thread
+    // must access only on handler thread
+    protected abstract int registerWithService();
     protected abstract void unregisterFromService(); // must access only on handler thread
     protected abstract ListenerOperation<TListener> getHandlerOperation(int result);
 
@@ -177,10 +184,12 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
 
     private void tryRegister() {
         mHandler.post(new Runnable() {
+            int registrationState = RESULT_INTERNAL_ERROR;
             @Override
             public void run() {
                 if (!mIsRegistered) {
-                    mIsRegistered = registerWithService();
+                    registrationState = registerWithService();
+                    mIsRegistered = registrationState == RESULT_SUCCESS;
                 }
                 if (!mIsRegistered) {
                     // post back a failure
@@ -188,7 +197,7 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
                         @Override
                         public void run() {
                             synchronized (mListenerMap) {
-                                ListenerOperation<TListener> operation = getHandlerOperation(RESULT_INTERNAL_ERROR);
+                                ListenerOperation<TListener> operation = getHandlerOperation(registrationState);
                                 foreachUnsafe(operation);
                             }
                         }

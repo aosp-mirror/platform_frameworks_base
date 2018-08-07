@@ -250,17 +250,16 @@
         <item>Best Effort (Adaptive Bit Rate)</item>
     </string-array>
 
-    <!-- TODO: Enable for translation per b/73007419 -->
-    <!-- Summaries for Bluetooth Audio Active Device status. [CHAR LIMIT=50]-->
-    <string-array name="bluetooth_audio_active_device_summaries" translatable="false" >
+    <!-- Summaries for Android Auto Bluetooth Audio Active Device status. [CHAR LIMIT=50]-->
+    <string-array name="bluetooth_audio_active_device_summaries" >
         <!-- Status message when the device is not Active. -->
         <item></item>
         <!-- Status message when the device is Active for Media and Phone. -->
         <item>, active</item>
         <!-- Status message when the device is Active for Media only. -->
-        <item>, active(media)</item>
+        <item>, active (media)</item>
         <!-- Status message when the device is Active for Phone only. -->
-        <item>, active(phone)</item>
+        <item>, active (phone)</item>
     </string-array>
 
     <!-- Titles for logd limit size selection preference. [CHAR LIMIT=14] -->
@@ -479,18 +478,6 @@
         <item>false</item>
         <item>show</item>
         <item>show_deuteranomaly</item>
-    </string-array>
-
-    <!-- Titles for debug renderer preference. [CHAR LIMIT=50] -->
-    <string-array name="debug_hw_renderer_entries">
-        <item>OpenGL (Default)</item>
-        <item>OpenGL (Skia)</item>
-    </string-array>
-
-    <!-- Values for debug renderer preference. -->
-    <string-array name="debug_hw_renderer_values" translatable="false" >
-        <item>opengl</item>
-        <item>skiagl</item>
     </string-array>
 
     <!-- Titles for app process limit preference. [CHAR LIMIT=35] -->

@@ -222,7 +222,10 @@ public class UsbDeviceConnection {
      * @param endpoint the endpoint for this transaction
      * @param buffer buffer for data to send or receive; can be {@code null} to wait for next
      *               transaction without reading data
-     * @param length the length of the data to send or receive
+     * @param length the length of the data to send or receive. Before
+     *               {@value Build.VERSION_CODES#P}, a value larger than 16384 bytes
+     *               would be truncated down to 16384. In API {@value Build.VERSION_CODES#P}
+     *               and after, any value of length is valid.
      * @param timeout in milliseconds, 0 is infinite
      * @return length of data transferred (or zero) for success,
      * or negative value for failure
@@ -239,7 +242,10 @@ public class UsbDeviceConnection {
      * @param endpoint the endpoint for this transaction
      * @param buffer buffer for data to send or receive
      * @param offset the index of the first byte in the buffer to send or receive
-     * @param length the length of the data to send or receive
+     * @param length the length of the data to send or receive. Before
+     *               {@value Build.VERSION_CODES#P}, a value larger than 16384 bytes
+     *               would be truncated down to 16384. In API {@value Build.VERSION_CODES#P}
+     *               and after, any value of length is valid.
      * @param timeout in milliseconds, 0 is infinite
      * @return length of data transferred (or zero) for success,
      * or negative value for failure
@@ -247,6 +253,10 @@ public class UsbDeviceConnection {
     public int bulkTransfer(UsbEndpoint endpoint,
             byte[] buffer, int offset, int length, int timeout) {
         checkBounds(buffer, offset, length);
+        if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.P
+                && length > UsbRequest.MAX_USBFS_BUFFER_SIZE) {
+            length = UsbRequest.MAX_USBFS_BUFFER_SIZE;
+        }
         return native_bulk_request(endpoint.getAddress(), buffer, offset, length, timeout);
     }
 

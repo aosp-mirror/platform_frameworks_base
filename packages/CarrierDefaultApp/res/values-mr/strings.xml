@@ -11,7 +11,7 @@
     <string name="no_mobile_data_connection" msgid="544980465184147010">"%sने डेटा किंवा रोमिंग प्‍लॅन जोडा"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"मोबाइल डेटा स्थिती"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"मोबाइल नेटवर्कमध्ये साइन इन करा"</string>
-    <string name="ssl_error_warning" msgid="3127935140338254180">"आपण ज्या नेटवर्कमध्‍ये सामील होण्याचा प्रयत्न करत आहात त्यात सुरक्षितता समस्या आहेत."</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"तुम्ही ज्या नेटवर्कमध्‍ये सामील होण्याचा प्रयत्न करत आहात त्यात सुरक्षितता समस्या आहेत."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"उदाहरणार्थ, लॉग इन पृष्‍ठ दर्शवलेल्या संस्थेच्या मालकीचे नसू शकते."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"तरीही ब्राउझरद्वारे सुरू ठेवा"</string>
 </resources>

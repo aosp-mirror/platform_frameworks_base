@@ -16,25 +16,28 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.View.VISIBLE;
 
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
+import android.testing.DexmakerShareClassLoaderRule;
+import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
 import org.junit.Assert;
 import org.junit.After;
 import org.junit.Before;
-import org.mockito.MockitoAnnotations;
+import org.junit.Rule;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.view.IWindow;
 import android.view.WindowManager;
 
-import static android.app.ActivityManager.StackId.FIRST_DYNAMIC_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
@@ -58,21 +61,22 @@ import java.util.LinkedList;
 
 /**
  * Common base class for window manager unit test classes.
+ *
+ * Make sure any requests to WM hold the WM lock if needed b/73966377
  */
 class WindowTestsBase {
-    static WindowManagerService sWm = null;
-    private static final IWindow sIWindow = new TestIWindow();
-    private static final Session sMockSession = mock(Session.class);
+    private static final String TAG = WindowTestsBase.class.getSimpleName();
+    WindowManagerService sWm = null;  // TODO(roosa): rename to mWm in follow-up CL
+    private final IWindow mIWindow = new TestIWindow();
+    private Session mMockSession;
     // The default display is removed in {@link #setUp} and then we iterate over all displays to
     // make sure we don't collide with any existing display. If we run into no other display, the
     // added display should be treated as default. This cannot be the default display
     private static int sNextDisplayId = DEFAULT_DISPLAY + 1;
-    private static int sNextStackId = FIRST_DYNAMIC_STACK_ID;
+    static int sNextStackId = 1000;
 
-    private static boolean sOneTimeSetupDone = false;
     DisplayContent mDisplayContent;
     DisplayInfo mDisplayInfo = new DisplayInfo();
-    WindowLayersController mLayersController;
     WindowState mWallpaperWindow;
     WindowState mImeWindow;
     WindowState mImeDialogWindow;
@@ -83,73 +87,119 @@ class WindowTestsBase {
     WindowState mChildAppWindowAbove;
     WindowState mChildAppWindowBelow;
     HashSet<WindowState> mCommonWindows;
+    WallpaperController mWallpaperController;
+
+    @Rule
+    public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
+            new DexmakerShareClassLoaderRule();
+
+    @Rule
+    public final WindowManagerServiceRule mWmRule = new WindowManagerServiceRule();
+
+    static WindowState.PowerManagerWrapper mPowerManagerWrapper;  // TODO(roosa): make non-static.
 
     @Before
     public void setUp() throws Exception {
-        if (!sOneTimeSetupDone) {
-            sOneTimeSetupDone = true;
-            MockitoAnnotations.initMocks(this);
+        // If @Before throws an exception, the error isn't logged. This will make sure any failures
+        // in the set up are clear. This can be removed when b/37850063 is fixed.
+        try {
+            mMockSession = mock(Session.class);
+            mPowerManagerWrapper = mock(WindowState.PowerManagerWrapper.class);
+
+            final Context context = InstrumentationRegistry.getTargetContext();
+            AttributeCache.init(context);
+
+            sWm = mWmRule.getWindowManagerService();
+            beforeCreateDisplay();
+
+            mWallpaperController = new WallpaperController(sWm);
+
+            context.getDisplay().getDisplayInfo(mDisplayInfo);
+            mDisplayContent = createNewDisplay();
+            sWm.mDisplayEnabled = true;
+            sWm.mDisplayReady = true;
+
+            // Set-up some common windows.
+            mCommonWindows = new HashSet();
+            synchronized (sWm.mWindowMap) {
+                mWallpaperWindow = createCommonWindow(null, TYPE_WALLPAPER, "wallpaperWindow");
+                mImeWindow = createCommonWindow(null, TYPE_INPUT_METHOD, "mImeWindow");
+                sWm.mInputMethodWindow = mImeWindow;
+                mImeDialogWindow = createCommonWindow(null, TYPE_INPUT_METHOD_DIALOG,
+                        "mImeDialogWindow");
+                mStatusBarWindow = createCommonWindow(null, TYPE_STATUS_BAR, "mStatusBarWindow");
+                mNavBarWindow = createCommonWindow(null, TYPE_NAVIGATION_BAR, "mNavBarWindow");
+                mDockedDividerWindow = createCommonWindow(null, TYPE_DOCK_DIVIDER,
+                        "mDockedDividerWindow");
+                mAppWindow = createCommonWindow(null, TYPE_BASE_APPLICATION, "mAppWindow");
+                mChildAppWindowAbove = createCommonWindow(mAppWindow,
+                        TYPE_APPLICATION_ATTACHED_DIALOG,
+                        "mChildAppWindowAbove");
+                mChildAppWindowBelow = createCommonWindow(mAppWindow,
+                        TYPE_APPLICATION_MEDIA_OVERLAY,
+                        "mChildAppWindowBelow");
+            }
+            // Adding a display will cause freezing the display. Make sure to wait until it's
+            // unfrozen to not run into race conditions with the tests.
+            waitUntilHandlersIdle();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to set up test", e);
+            throw e;
         }
+    }
 
-        final Context context = InstrumentationRegistry.getTargetContext();
-        AttributeCache.init(context);
-        sWm = TestWindowManagerPolicy.getWindowManagerService(context);
-        mLayersController = new WindowLayersController(sWm);
-
-        context.getDisplay().getDisplayInfo(mDisplayInfo);
-        mDisplayContent = createNewDisplay();
-        sWm.mDisplayEnabled = true;
-        sWm.mDisplayReady = true;
-
-        // Set-up some common windows.
-        mCommonWindows = new HashSet();
-        mWallpaperWindow = createCommonWindow(null, TYPE_WALLPAPER, "wallpaperWindow");
-        mImeWindow = createCommonWindow(null, TYPE_INPUT_METHOD, "mImeWindow");
-        sWm.mInputMethodWindow = mImeWindow;
-        mImeDialogWindow = createCommonWindow(null, TYPE_INPUT_METHOD_DIALOG, "mImeDialogWindow");
-        mStatusBarWindow = createCommonWindow(null, TYPE_STATUS_BAR, "mStatusBarWindow");
-        mNavBarWindow = createCommonWindow(null, TYPE_NAVIGATION_BAR, "mNavBarWindow");
-        mDockedDividerWindow = createCommonWindow(null, TYPE_DOCK_DIVIDER, "mDockedDividerWindow");
-        mAppWindow = createCommonWindow(null, TYPE_BASE_APPLICATION, "mAppWindow");
-        mChildAppWindowAbove = createCommonWindow(mAppWindow, TYPE_APPLICATION_ATTACHED_DIALOG,
-                "mChildAppWindowAbove");
-        mChildAppWindowBelow = createCommonWindow(mAppWindow, TYPE_APPLICATION_MEDIA_OVERLAY,
-                "mChildAppWindowBelow");
-
-        // Adding a display will cause freezing the display. Make sure to wait until it's unfrozen
-        // to not run into race conditions with the tests.
-        waitUntilHandlersIdle();
+    void beforeCreateDisplay() {
+        // Called before display is created.
     }
 
     @After
     public void tearDown() throws Exception {
-        final LinkedList<WindowState> nonCommonWindows = new LinkedList();
+        // If @After throws an exception, the error isn't logged. This will make sure any failures
+        // in the tear down are clear. This can be removed when b/37850063 is fixed.
+        try {
+            final LinkedList<WindowState> nonCommonWindows = new LinkedList();
 
-        synchronized (sWm.mWindowMap) {
-            sWm.mRoot.forAllWindows(w -> {
-                if (!mCommonWindows.contains(w)) {
-                    nonCommonWindows.addLast(w);
+            synchronized (sWm.mWindowMap) {
+                sWm.mRoot.forAllWindows(w -> {
+                    if (!mCommonWindows.contains(w)) {
+                        nonCommonWindows.addLast(w);
+                    }
+                }, true /* traverseTopToBottom */);
+
+                while (!nonCommonWindows.isEmpty()) {
+                    nonCommonWindows.pollLast().removeImmediately();
                 }
-            }, true /* traverseTopToBottom */);
 
-            while (!nonCommonWindows.isEmpty()) {
-                nonCommonWindows.pollLast().removeImmediately();
+                mDisplayContent.removeImmediately();
+                sWm.mInputMethodTarget = null;
+                sWm.mClosingApps.clear();
+                sWm.mOpeningApps.clear();
             }
 
-            mDisplayContent.removeImmediately();
-            sWm.mInputMethodTarget = null;
+            // Wait until everything is really cleaned up.
+            waitUntilHandlersIdle();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to tear down test", e);
+            throw e;
         }
+    }
 
-        // Wait until everything is really cleaned up.
-        waitUntilHandlersIdle();
+    /**
+     * @return A SurfaceBuilderFactory to inject in to the WindowManagerService during
+     *         set-up (or null).
+     */
+    SurfaceBuilderFactory getSurfaceBuilderFactory() {
+        return null;
     }
 
     private WindowState createCommonWindow(WindowState parent, int type, String name) {
-        final WindowState win = createWindow(parent, type, name);
-        mCommonWindows.add(win);
-        // Prevent common windows from been IMe targets
-        win.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
-        return win;
+        synchronized (sWm.mWindowMap) {
+            final WindowState win = createWindow(parent, type, name);
+            mCommonWindows.add(win);
+            // Prevent common windows from been IMe targets
+            win.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
+            return win;
+        }
     }
 
     /** Asserts that the first entry is greater than the second entry. */
@@ -157,88 +207,138 @@ class WindowTestsBase {
         Assert.assertTrue("Excepted " + first + " to be greater than " + second, first > second);
     }
 
+    /** Asserts that the first entry is greater than the second entry. */
+    void assertLessThan(int first, int second) throws Exception {
+        Assert.assertTrue("Excepted " + first + " to be less than " + second, first < second);
+    }
+
     /**
      * Waits until the main handler for WM has processed all messages.
      */
     void waitUntilHandlersIdle() {
-        sWm.mH.runWithScissors(() -> { }, 0);
-        sWm.mAnimationHandler.runWithScissors(() -> { }, 0);
+        mWmRule.waitUntilWindowManagerHandlersIdle();
     }
 
-    private WindowToken createWindowToken(DisplayContent dc, int stackId, int type) {
-        if (type < FIRST_APPLICATION_WINDOW || type > LAST_APPLICATION_WINDOW) {
-            return new WindowTestUtils.TestWindowToken(type, dc);
-        }
+    private WindowToken createWindowToken(
+            DisplayContent dc, int windowingMode, int activityType, int type) {
+        synchronized (sWm.mWindowMap) {
+            if (type < FIRST_APPLICATION_WINDOW || type > LAST_APPLICATION_WINDOW) {
+                return WindowTestUtils.createTestWindowToken(type, dc);
+            }
 
-        final TaskStack stack = stackId == INVALID_STACK_ID
-                ? createTaskStackOnDisplay(dc)
-                : createStackControllerOnStackOnDisplay(stackId, dc).mContainer;
+            return createAppWindowToken(dc, windowingMode, activityType);
+        }
+    }
+
+    AppWindowToken createAppWindowToken(DisplayContent dc, int windowingMode, int activityType) {
+        final TaskStack stack = createStackControllerOnStackOnDisplay(windowingMode, activityType,
+                dc).mContainer;
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final WindowTestUtils.TestAppWindowToken token = new WindowTestUtils.TestAppWindowToken(dc);
-        task.addChild(token, 0);
-        return token;
+        final WindowTestUtils.TestAppWindowToken appWindowToken =
+                WindowTestUtils.createTestAppWindowToken(dc);
+        task.addChild(appWindowToken, 0);
+        return appWindowToken;
     }
 
     WindowState createWindow(WindowState parent, int type, String name) {
-        return (parent == null)
-                ? createWindow(parent, type, mDisplayContent, name)
-                : createWindow(parent, type, parent.mToken, name);
+        synchronized (sWm.mWindowMap) {
+            return (parent == null)
+                    ? createWindow(parent, type, mDisplayContent, name)
+                    : createWindow(parent, type, parent.mToken, name);
+        }
     }
 
-    WindowState createWindowOnStack(WindowState parent, int stackId, int type,
-            DisplayContent dc, String name) {
-        final WindowToken token = createWindowToken(dc, stackId, type);
-        return createWindow(parent, type, token, name);
+    WindowState createWindowOnStack(WindowState parent, int windowingMode, int activityType,
+            int type, DisplayContent dc, String name) {
+        synchronized (sWm.mWindowMap) {
+            final WindowToken token = createWindowToken(dc, windowingMode, activityType, type);
+            return createWindow(parent, type, token, name);
+        }
     }
 
     WindowState createAppWindow(Task task, int type, String name) {
-        final AppWindowToken token = new WindowTestUtils.TestAppWindowToken(mDisplayContent);
-        task.addChild(token, 0);
-        return createWindow(null, type, token, name);
+        synchronized (sWm.mWindowMap) {
+            final AppWindowToken token = WindowTestUtils.createTestAppWindowToken(mDisplayContent);
+            task.addChild(token, 0);
+            return createWindow(null, type, token, name);
+        }
     }
 
     WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name) {
-        final WindowToken token = createWindowToken(dc, INVALID_STACK_ID, type);
-        return createWindow(parent, type, token, name);
+        synchronized (sWm.mWindowMap) {
+            final WindowToken token = createWindowToken(
+                    dc, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, type);
+            return createWindow(parent, type, token, name);
+        }
     }
 
     WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name,
             boolean ownerCanAddInternalSystemWindow) {
-        final WindowToken token = createWindowToken(dc, INVALID_STACK_ID, type);
-        return createWindow(parent, type, token, name, ownerCanAddInternalSystemWindow);
+        synchronized (sWm.mWindowMap) {
+            final WindowToken token = createWindowToken(
+                    dc, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, type);
+            return createWindow(parent, type, token, name, 0 /* ownerId */,
+                    ownerCanAddInternalSystemWindow);
+        }
     }
 
-    static WindowState createWindow(WindowState parent, int type, WindowToken token, String name) {
-        return createWindow(parent, type, token, name, false /* ownerCanAddInternalSystemWindow */);
+    WindowState createWindow(WindowState parent, int type, WindowToken token, String name) {
+        synchronized (sWm.mWindowMap) {
+            return createWindow(parent, type, token, name, 0 /* ownerId */,
+                    false /* ownerCanAddInternalSystemWindow */);
+        }
     }
 
-    static WindowState createWindow(WindowState parent, int type, WindowToken token, String name,
-            boolean ownerCanAddInternalSystemWindow) {
-        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(type);
-        attrs.setTitle(name);
+    WindowState createWindow(WindowState parent, int type, WindowToken token, String name,
+            int ownerId, boolean ownerCanAddInternalSystemWindow) {
+        return createWindow(parent, type, token, name, ownerId, ownerCanAddInternalSystemWindow,
+                sWm, mMockSession, mIWindow);
+    }
 
-        final WindowState w = new WindowState(sWm, sMockSession, sIWindow, token, parent, OP_NONE,
-                0, attrs, VISIBLE, 0, ownerCanAddInternalSystemWindow);
-        // TODO: Probably better to make this call in the WindowState ctor to avoid errors with
-        // adding it to the token...
-        token.addWindow(w);
-        return w;
+    static WindowState createWindow(WindowState parent, int type, WindowToken token,
+            String name, int ownerId, boolean ownerCanAddInternalSystemWindow,
+            WindowManagerService service, Session session, IWindow iWindow) {
+        synchronized (service.mWindowMap) {
+            final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(type);
+            attrs.setTitle(name);
+
+            final WindowState w = new WindowState(service, session, iWindow, token, parent,
+                    OP_NONE,
+                    0, attrs, VISIBLE, ownerId, ownerCanAddInternalSystemWindow,
+                    mPowerManagerWrapper);
+            // TODO: Probably better to make this call in the WindowState ctor to avoid errors with
+            // adding it to the token...
+            token.addWindow(w);
+            return w;
+        }
     }
 
     /** Creates a {@link TaskStack} and adds it to the specified {@link DisplayContent}. */
     TaskStack createTaskStackOnDisplay(DisplayContent dc) {
-        return createStackControllerOnDisplay(dc).mContainer;
+        synchronized (sWm.mWindowMap) {
+            return createStackControllerOnDisplay(dc).mContainer;
+        }
     }
 
     StackWindowController createStackControllerOnDisplay(DisplayContent dc) {
-        final int stackId = ++sNextStackId;
-        return createStackControllerOnStackOnDisplay(stackId, dc);
+        synchronized (sWm.mWindowMap) {
+            return createStackControllerOnStackOnDisplay(
+                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, dc);
+        }
     }
 
-    StackWindowController createStackControllerOnStackOnDisplay(int stackId,
-            DisplayContent dc) {
-        return new StackWindowController(stackId, null, dc.getDisplayId(),
-                true /* onTop */, new Rect(), sWm);
+    StackWindowController createStackControllerOnStackOnDisplay(
+            int windowingMode, int activityType, DisplayContent dc) {
+        synchronized (sWm.mWindowMap) {
+            final Configuration overrideConfig = new Configuration();
+            overrideConfig.windowConfiguration.setWindowingMode(windowingMode);
+            overrideConfig.windowConfiguration.setActivityType(activityType);
+            final int stackId = ++sNextStackId;
+            final StackWindowController controller = new StackWindowController(stackId, null,
+                    dc.getDisplayId(), true /* onTop */, new Rect(), sWm);
+            controller.onOverrideConfigurationChanged(overrideConfig);
+            return controller;
+        }
     }
 
     /** Creates a {@link Task} and adds it to the specified {@link TaskStack}. */
@@ -251,13 +351,18 @@ class WindowTestsBase {
         final int displayId = sNextDisplayId++;
         final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
                 mDisplayInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
-        return new DisplayContent(display, sWm, mLayersController, new WallpaperController(sWm));
+        synchronized (sWm.mWindowMap) {
+            return new DisplayContent(display, sWm, mWallpaperController,
+                    mock(DisplayWindowController.class));
+        }
     }
 
     /** Creates a {@link com.android.server.wm.WindowTestUtils.TestWindowState} */
     WindowTestUtils.TestWindowState createWindowState(WindowManager.LayoutParams attrs,
             WindowToken token) {
-        return new WindowTestUtils.TestWindowState(sWm, sMockSession, sIWindow, attrs, token);
+        synchronized (sWm.mWindowMap) {
+            return new WindowTestUtils.TestWindowState(sWm, mMockSession, mIWindow, attrs, token);
+        }
     }
 
 }
