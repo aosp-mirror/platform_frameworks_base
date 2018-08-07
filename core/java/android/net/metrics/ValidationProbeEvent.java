@@ -37,6 +37,7 @@ public final class ValidationProbeEvent implements Parcelable {
     public static final int PROBE_HTTPS     = 2;
     public static final int PROBE_PAC       = 3;
     public static final int PROBE_FALLBACK  = 4;
+    public static final int PROBE_PRIVDNS   = 5;
 
     public static final int DNS_FAILURE = 0;
     public static final int DNS_SUCCESS = 1;
