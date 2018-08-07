@@ -107,9 +107,8 @@ public class CachedBluetoothDeviceManager {
      * @param device the address of the new Bluetooth device
      * @return the newly created CachedBluetoothDevice object
      */
-    public CachedBluetoothDevice addDevice(LocalBluetoothAdapter adapter,
-            LocalBluetoothProfileManager profileManager,
-            BluetoothDevice device) {
+    public CachedBluetoothDevice addDevice(LocalBluetoothAdapter adapter, BluetoothDevice device) {
+        LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
         CachedBluetoothDevice newDevice = new CachedBluetoothDevice(mContext, adapter,
             profileManager, device);
         if (profileManager.getHearingAidProfile() != null

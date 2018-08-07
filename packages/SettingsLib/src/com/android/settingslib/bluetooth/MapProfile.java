@@ -70,7 +70,7 @@ public class MapProfile implements LocalBluetoothProfile {
                 // we may add a new device here, but generally this should not happen
                 if (device == null) {
                     Log.w(TAG, "MapProfile found new device: " + nextDevice);
-                    device = mDeviceManager.addDevice(mLocalAdapter, mProfileManager, nextDevice);
+                    device = mDeviceManager.addDevice(mLocalAdapter, nextDevice);
                 }
                 device.onProfileStateChanged(MapProfile.this,
                         BluetoothProfile.STATE_CONNECTED);

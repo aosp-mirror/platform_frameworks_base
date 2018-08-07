@@ -1727,6 +1727,17 @@ message AppDied {
     optional uint64 timestamp_millis = 1 [(stateFieldOption).option = EXCLUSIVE];
 }
 
+/**
+ * An atom for generic metrics logging. Available from Android Q.
+ */
+message GenericAtom {
+    // The uid of the application that sent this custom atom.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // An event_id indicates the type of event.
+    optional int32 event_id = 2;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Pulled atoms below this line //
 //////////////////////////////////////////////////////////////////////
@@ -2155,15 +2166,4 @@ message BinderCallsExceptions {
     optional string exception_class_name = 1;
     // Total number of exceptions.
     optional int64 exception_count = 2;
-}
-
-/**
- * An atom for generic metrics logging. Available from Android Q.
- */
-message GenericAtom {
-    // The uid of the application that sent this custom atom.
-    optional int32 uid = 1 [(is_uid) = true];
-
-    // An event_id indicates the type of event.
-    optional int32 event_id = 2;
 }

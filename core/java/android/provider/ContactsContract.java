@@ -187,8 +187,7 @@ public final class ContactsContract {
     /**
      * A boolean parameter for {@link Contacts#CONTENT_STREQUENT_URI} and
      * {@link Contacts#CONTENT_STREQUENT_FILTER_URI}, which requires the ContactsProvider to
-     * return only phone-related results. For example, frequently contacted person list should
-     * include persons contacted via phone (not email, sms, etc.)
+     * return only phone-related results.
      */
     public static final String STREQUENT_PHONE_ONLY = "strequent_phone_only";
 
@@ -870,13 +869,23 @@ public final class ContactsContract {
         /**
          * The number of times a contact has been contacted
          * <P>Type: INTEGER</P>
+         *
+         * @deprecated Contacts affinity information is no longer supported as of
+         * Android version {@link android.os.Build.VERSION_CODES#Q}. This column
+         * always contains 0.
          */
+        @Deprecated
         public static final String TIMES_CONTACTED = "times_contacted";
 
         /**
          * The last time a contact was contacted.
          * <P>Type: INTEGER</P>
+         *
+         * @deprecated Contacts affinity information is no longer supported as of
+         * Android version {@link android.os.Build.VERSION_CODES#Q}. This column
+         * always contains 0.
          */
+        @Deprecated
         public static final String LAST_TIME_CONTACTED = "last_time_contacted";
 
         /** @hide Raw value. */
@@ -1313,8 +1322,7 @@ public final class ContactsContract {
      * of the newly inserted raw contact.</dd>
      * <dt><b>Update</b></dt>
      * <dd>Only certain columns of Contact are modifiable:
-     * {@link #TIMES_CONTACTED}, {@link #LAST_TIME_CONTACTED}, {@link #STARRED},
-     * {@link #CUSTOM_RINGTONE}, {@link #SEND_TO_VOICEMAIL}. Changing any of
+     * {@link #STARRED}, {@link #CUSTOM_RINGTONE}, {@link #SEND_TO_VOICEMAIL}. Changing any of
      * these columns on the Contact also changes them on all constituent raw
      * contacts.</dd>
      * <dt><b>Delete</b></dt>
@@ -1412,27 +1420,6 @@ public final class ContactsContract {
      * <td>read-only</td>
      * <td>An indicator of whether this contact has at least one phone number.
      * "1" if there is at least one phone number, "0" otherwise.</td>
-     * </tr>
-     * <tr>
-     * <td>int</td>
-     * <td>{@link #TIMES_CONTACTED}</td>
-     * <td>read/write</td>
-     * <td>The number of times the contact has been contacted. See
-     * {@link #markAsContacted}. When raw contacts are aggregated, this field is
-     * computed automatically as the maximum number of times contacted among all
-     * constituent raw contacts. Setting this field automatically changes the
-     * corresponding field on all constituent raw contacts.</td>
-     * </tr>
-     * <tr>
-     * <td>long</td>
-     * <td>{@link #LAST_TIME_CONTACTED}</td>
-     * <td>read/write</td>
-     * <td>The timestamp of the last time the contact was contacted. See
-     * {@link #markAsContacted}. Setting this field also automatically
-     * increments {@link #TIMES_CONTACTED}. When raw contacts are aggregated,
-     * this field is computed automatically as the latest time contacted of all
-     * constituent raw contacts. Setting this field automatically changes the
-     * corresponding field on all constituent raw contacts.</td>
      * </tr>
      * <tr>
      * <td>int</td>
@@ -1696,16 +1683,12 @@ public final class ContactsContract {
          * @param resolver the ContentResolver to use
          * @param contactId the person who was contacted
          *
-         * @deprecated The class DataUsageStatUpdater of the Android support library should
-         *     be used instead.
+         * @deprecated Contacts affinity information is no longer supported as of
+         * Android version {@link android.os.Build.VERSION_CODES#Q}. This method
+         * is no-op.
          */
         @Deprecated
         public static void markAsContacted(ContentResolver resolver, long contactId) {
-            Uri uri = ContentUris.withAppendedId(CONTENT_URI, contactId);
-            ContentValues values = new ContentValues();
-            // TIMES_CONTACTED will be incremented when LAST_TIME_CONTACTED is modified.
-            values.put(LR_LAST_TIME_CONTACTED, System.currentTimeMillis());
-            resolver.update(uri, values, null, null);
         }
 
         /**
@@ -1727,15 +1710,21 @@ public final class ContactsContract {
 
         /**
          * The content:// style URI for this table joined with useful data from
-         * {@link ContactsContract.Data}, filtered to include only starred contacts
-         * and the most frequently contacted contacts.
+         * {@link ContactsContract.Data}, filtered to include only starred contacts.
+         * Frequent contacts are no longer included in the result as of
+         * Android version {@link android.os.Build.VERSION_CODES#Q}.
          */
         public static final Uri CONTENT_STREQUENT_URI = Uri.withAppendedPath(
                 CONTENT_URI, "strequent");
 
         /**
          * The content:// style URI for showing a list of frequently contacted people.
+         *
+         * @deprecated Frequent contacts are no longer supported as of
+         * Android version {@link android.os.Build.VERSION_CODES#Q}.
+         * This URI always returns an empty cursor.
          */
+        @Deprecated
         public static final Uri CONTENT_FREQUENT_URI = Uri.withAppendedPath(
                 CONTENT_URI, "frequent");
 
@@ -2628,27 +2617,6 @@ public final class ContactsContract {
      * then calls ContactResolver.delete once more, this time passing the
      * {@link ContactsContract#CALLER_IS_SYNCADAPTER} query parameter to finalize
      * the data removal.</td>
-     * </tr>
-     * <tr>
-     * <td>int</td>
-     * <td>{@link #TIMES_CONTACTED}</td>
-     * <td>read/write</td>
-     * <td>The number of times the contact has been contacted. To have an effect
-     * on the corresponding value of the aggregate contact, this field
-     * should be set at the time the raw contact is inserted.
-     * After that, this value is typically updated via
-     * {@link ContactsContract.Contacts#markAsContacted}.</td>
-     * </tr>
-     * <tr>
-     * <td>long</td>
-     * <td>{@link #LAST_TIME_CONTACTED}</td>
-     * <td>read/write</td>
-     * <td>The timestamp of the last time the contact was contacted. To have an effect
-     * on the corresponding value of the aggregate contact, this field
-     * should be set at the time the raw contact is inserted.
-     * After that, this value is typically updated via
-     * {@link ContactsContract.Contacts#markAsContacted}.
-     * </td>
      * </tr>
      * <tr>
      * <td>int</td>
@@ -4286,10 +4254,22 @@ public final class ContactsContract {
      * Columns in the Data_Usage_Stat table
      */
     protected interface DataUsageStatColumns {
-        /** The last time (in milliseconds) this {@link Data} was used. */
+        /**
+         * The last time (in milliseconds) this {@link Data} was used.
+         * @deprecated Contacts affinity information is no longer supported as of
+         * Android version {@link android.os.Build.VERSION_CODES#Q}.
+         * This column always contains 0.
+         */
+        @Deprecated
         public static final String LAST_TIME_USED = "last_time_used";
 
-        /** The number of times the referenced {@link Data} has been used. */
+        /**
+         * The number of times the referenced {@link Data} has been used.
+         * @deprecated Contacts affinity information is no longer supported as of
+         * Android version {@link android.os.Build.VERSION_CODES#Q}.
+         * This column always contains 0.
+         */
+        @Deprecated
         public static final String TIMES_USED = "times_used";
 
         /** @hide Raw value. */
@@ -4765,18 +4745,6 @@ public final class ContactsContract {
      * </tr>
      * <tr>
      * <td>int</td>
-     * <td>{@link #TIMES_CONTACTED}</td>
-     * <td>read-only</td>
-     * <td>See {@link ContactsContract.Contacts}.</td>
-     * </tr>
-     * <tr>
-     * <td>long</td>
-     * <td>{@link #LAST_TIME_CONTACTED}</td>
-     * <td>read-only</td>
-     * <td>See {@link ContactsContract.Contacts}.</td>
-     * </tr>
-     * <tr>
-     * <td>int</td>
      * <td>{@link #STARRED}</td>
      * <td>read-only</td>
      * <td>See {@link ContactsContract.Contacts}.</td>
@@ -5216,18 +5184,6 @@ public final class ContactsContract {
      * <tr>
      * <td>int</td>
      * <td>{@link #HAS_PHONE_NUMBER}</td>
-     * <td>read-only</td>
-     * <td>See {@link ContactsContract.Contacts}.</td>
-     * </tr>
-     * <tr>
-     * <td>int</td>
-     * <td>{@link #TIMES_CONTACTED}</td>
-     * <td>read-only</td>
-     * <td>See {@link ContactsContract.Contacts}.</td>
-     * </tr>
-     * <tr>
-     * <td>long</td>
-     * <td>{@link #LAST_TIME_CONTACTED}</td>
      * <td>read-only</td>
      * <td>See {@link ContactsContract.Contacts}.</td>
      * </tr>
@@ -8305,7 +8261,12 @@ public final class ContactsContract {
      * boolean successful = resolver.delete(DataUsageFeedback.DELETE_USAGE_URI, null, null) > 0;
      * </pre>
      * </p>
+     *
+     * @deprecated Contacts affinity information is no longer supported as of
+     * Android version {@link android.os.Build.VERSION_CODES#Q}.
+     * Both update and delete calls are always ignored.
      */
+    @Deprecated
     public static final class DataUsageFeedback {
 
         /**
@@ -8925,10 +8886,6 @@ public final class ContactsContract {
          * +<phone>", etc. If you must show the prefix text in the Contacts App, please use a
          * different DATA# column, and update your contacts.xml to point to this new column. </em>
          * </li>
-         * <li>Everytime the user sends a message to a contact, your app may choose to update the
-         * {@link ContactOptionsColumns#TIMES_CONTACTED} entry through DataUsageFeedback class.
-         * Doing this will allow Voice Assistant to bias speech recognition to contacts frequently
-         * contacted, this is particularly useful for contact names that are hard to pronounce.</li>
          * </ul>
          * If the app chooses not to integrate with the Contacts Provider (in particular, when
          * either METADATA_ACCOUNT_TYPE or METADATA_MIMETYPE field is missing), Voice Assistant

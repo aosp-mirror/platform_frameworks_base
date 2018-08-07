@@ -166,4 +166,16 @@ public class WindowManagerWrapper {
         }
         return NAV_BAR_POS_INVALID;
     }
+
+    /**
+     * Registers a docked stack listener with the system.
+     */
+    public void registerDockedStackListener(DockedStackListenerCompat listener) {
+        try {
+            WindowManagerGlobal.getWindowManagerService().registerDockedStackListener(
+                    listener.mListener);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to register docked stack listener");
+        }
+    }
 }

@@ -37,7 +37,6 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BinderInternal.CallSession;
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
@@ -45,15 +44,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 
 /**
@@ -63,7 +59,7 @@ import java.util.function.ToDoubleFunction;
 public class BinderCallsStats implements BinderInternal.Observer {
     public static final boolean ENABLED_DEFAULT = false;
     public static final boolean DETAILED_TRACKING_DEFAULT = true;
-    public static final int PERIODIC_SAMPLING_INTERVAL_DEFAULT = 10;
+    public static final int PERIODIC_SAMPLING_INTERVAL_DEFAULT = 100;
 
     private static final String TAG = "BinderCallsStats";
     private static final int CALL_SESSIONS_POOL_SIZE = 100;
@@ -71,7 +67,10 @@ public class BinderCallsStats implements BinderInternal.Observer {
     private static final int MAX_EXCEPTION_COUNT_SIZE = 50;
     private static final String EXCEPTION_COUNT_OVERFLOW_NAME = "overflow";
 
+    // Whether to collect all the data: cpu + exceptions + reply/request sizes.
     private boolean mDetailedTracking = DETAILED_TRACKING_DEFAULT;
+    // Sampling period to control how often to track CPU usage. 1 means all calls, 100 means ~1 out
+    // of 100 requests.
     private int mPeriodicSamplingInterval = PERIODIC_SAMPLING_INTERVAL_DEFAULT;
     @GuardedBy("mLock")
     private final SparseArray<UidEntry> mUidEntries = new SparseArray<>();
@@ -181,7 +180,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
         s.exceptionThrown = false;
         s.cpuTimeStarted = -1;
         s.timeStarted = -1;
-        if (mDetailedTracking || shouldRecordDetailedData()) {
+        if (shouldRecordDetailedData()) {
             s.cpuTimeStarted = getThreadTimeMicro();
             s.timeStarted = getElapsedRealtimeMicro();
         }
@@ -228,14 +227,14 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
             final UidEntry uidEntry = getUidEntry(callingUid);
             uidEntry.callCount++;
-            final CallStat callStat = uidEntry.getOrCreate(
-                    s.binderClass, s.transactionCode, mScreenInteractive);
-            callStat.callCount++;
 
             if (recordCall) {
                 uidEntry.cpuTimeMicros += duration;
                 uidEntry.recordedCallCount++;
 
+                final CallStat callStat = uidEntry.getOrCreate(
+                        s.binderClass, s.transactionCode, mScreenInteractive);
+                callStat.callCount++;
                 callStat.recordedCallCount++;
                 callStat.cpuTimeMicros += duration;
                 callStat.maxCpuTimeMicros = Math.max(callStat.maxCpuTimeMicros, duration);
@@ -248,6 +247,14 @@ public class BinderCallsStats implements BinderInternal.Observer {
                             Math.max(callStat.maxRequestSizeBytes, parcelRequestSize);
                     callStat.maxReplySizeBytes =
                             Math.max(callStat.maxReplySizeBytes, parcelReplySize);
+                }
+            } else {
+                // Only record the total call count if we already track data for this key.
+                // It helps to keep the memory usage down when sampling is enabled.
+                final CallStat callStat = uidEntry.get(
+                        s.binderClass, s.transactionCode, mScreenInteractive);
+                if (callStat != null) {
+                    callStat.callCount++;
                 }
             }
         }
@@ -463,7 +470,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
             pw.println(String.format("  %6d %s", entry.second, entry.first));
         }
 
-        if (!mDetailedTracking && mPeriodicSamplingInterval != 1) {
+        if (mPeriodicSamplingInterval != 1) {
             pw.println("");
             pw.println("/!\\ Displayed data is sampled. See sampling interval at the top.");
         }
@@ -492,6 +499,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
         return mRandom.nextInt() % mPeriodicSamplingInterval == 0;
     }
 
+    /**
+     * Sets to true to collect all the data.
+     */
     public void setDetailedTracking(boolean enabled) {
         synchronized (mLock) {
             if (enabled != mDetailedTracking) {
@@ -550,7 +560,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
         // Number of calls for which we collected data for. We do not record data for all the calls
         // when sampling is on.
         public long recordedCallCount;
-        // Real number of total calls.
+        // Roughly the real number of total calls. We only track only track the API call count once
+        // at least one non-sampled count happened.
         public long callCount;
         // Total CPU of all for all the recorded calls.
         // Approximate total CPU usage can be computed by
@@ -624,13 +635,19 @@ public class BinderCallsStats implements BinderInternal.Observer {
         private Map<CallStatKey, CallStat> mCallStats = new ArrayMap<>();
         private CallStatKey mTempKey = new CallStatKey();
 
-        CallStat getOrCreate(Class<? extends Binder> binderClass, int transactionCode,
+        @Nullable
+        CallStat get(Class<? extends Binder> binderClass, int transactionCode,
                 boolean screenInteractive) {
             // Use a global temporary key to avoid creating new objects for every lookup.
             mTempKey.binderClass = binderClass;
             mTempKey.transactionCode = transactionCode;
             mTempKey.screenInteractive = screenInteractive;
-            CallStat mapCallStat = mCallStats.get(mTempKey);
+            return mCallStats.get(mTempKey);
+        }
+
+        CallStat getOrCreate(Class<? extends Binder> binderClass, int transactionCode,
+                boolean screenInteractive) {
+            CallStat mapCallStat = get(binderClass, transactionCode, screenInteractive);
             // Only create CallStat if it's a new entry, otherwise update existing instance
             if (mapCallStat == null) {
                 mapCallStat = new CallStat(binderClass, transactionCode, screenInteractive);

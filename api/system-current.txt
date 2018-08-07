@@ -4371,7 +4371,10 @@ package android.provider {
     field public static final java.lang.String AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE = "autofill_user_data_max_user_data_size";
     field public static final java.lang.String AUTOFILL_USER_DATA_MAX_VALUE_LENGTH = "autofill_user_data_max_value_length";
     field public static final java.lang.String AUTOFILL_USER_DATA_MIN_VALUE_LENGTH = "autofill_user_data_min_value_length";
+    field public static final java.lang.String HUSH_GESTURE_USED = "hush_gesture_used";
     field public static final java.lang.String INSTANT_APPS_ENABLED = "instant_apps_enabled";
+    field public static final java.lang.String MANUAL_RINGER_TOGGLE_COUNT = "manual_ringer_toggle_count";
+    field public static final java.lang.String VOLUME_HUSH_GESTURE = "volume_hush_gesture";
   }
 
   public final class TimeZoneRulesDataContract {

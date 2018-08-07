@@ -212,7 +212,8 @@ public class InputManagerService extends IInputManager.Stub
             int injectorPid, int injectorUid, int syncMode, int timeoutMillis,
             int policyFlags);
     private static native void nativeToggleCapsLock(long ptr, int deviceId);
-    private static native void nativeSetInputWindows(long ptr, InputWindowHandle[] windowHandles);
+    private static native void nativeSetInputWindows(long ptr, InputWindowHandle[] windowHandles,
+            int displayId);
     private static native void nativeSetInputDispatchMode(long ptr, boolean enabled, boolean frozen);
     private static native void nativeSetSystemUiVisibility(long ptr, int visibility);
     private static native void nativeSetFocusedApplication(long ptr,
@@ -1467,7 +1468,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     public void setInputWindows(InputWindowHandle[] windowHandles,
-            InputWindowHandle focusedWindowHandle) {
+            InputWindowHandle focusedWindowHandle, int displayId) {
         final IWindow newFocusedWindow =
             focusedWindowHandle != null ? focusedWindowHandle.clientWindow : null;
         if (mFocusedWindow != newFocusedWindow) {
@@ -1476,7 +1477,7 @@ public class InputManagerService extends IInputManager.Stub
                 setPointerCapture(false);
             }
         }
-        nativeSetInputWindows(mPtr, windowHandles);
+        nativeSetInputWindows(mPtr, windowHandles, displayId);
     }
 
     public void setFocusedApplication(InputApplicationHandle application) {
