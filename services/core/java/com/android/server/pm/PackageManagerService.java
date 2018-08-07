@@ -21060,7 +21060,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public int getComponentEnabledSetting(ComponentName component, int userId) {
+    public int getComponentEnabledSetting(@NonNull ComponentName component, int userId) {
+        if (component == null) return COMPONENT_ENABLED_STATE_DEFAULT;
         if (!sUserManager.exists(userId)) return COMPONENT_ENABLED_STATE_DISABLED;
         int callingUid = Binder.getCallingUid();
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
