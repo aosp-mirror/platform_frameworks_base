@@ -248,17 +248,17 @@ public abstract class Vibrator {
 
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     public void vibrate(VibrationEffect vibe, AudioAttributes attributes) {
-        vibrate(Process.myUid(), mPackageName, vibe, attributes);
+        vibrate(Process.myUid(), mPackageName, vibe, null, attributes);
     }
 
     /**
-     * Like {@link #vibrate(VibrationEffect, AudioAttributes)}, but allowing the caller to specify
-     * that the vibration is owned by someone else.
+     * Like {@link #vibrate(int, String, VibrationEffect, AudioAttributes)}, but allows the
+     * caller to specify the vibration is owned by someone else and set reason for vibration.
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
-    public abstract void vibrate(int uid, String opPkg,
-            VibrationEffect vibe, AudioAttributes attributes);
+    public abstract void vibrate(int uid, String opPkg, VibrationEffect vibe,
+            String reason, AudioAttributes attributes);
 
     /**
      * Turn the vibrator off.

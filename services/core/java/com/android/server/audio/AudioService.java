@@ -2580,12 +2580,12 @@ public class AudioService extends IAudioService.Stub
                 toastText = com.android.internal.R.string.volume_dialog_ringer_guidance_vibrate;
                 break;
         }
-        maybeVibrate(effect);
+        maybeVibrate(effect, reason);
         setRingerModeInternal(ringerMode, reason);
         Toast.makeText(mContext, toastText, Toast.LENGTH_SHORT).show();
     }
 
-    private boolean maybeVibrate(VibrationEffect effect) {
+    private boolean maybeVibrate(VibrationEffect effect, String reason) {
         if (!mHasVibrator) {
             return false;
         }
@@ -2598,8 +2598,8 @@ public class AudioService extends IAudioService.Stub
         if (effect == null) {
             return false;
         }
-        mVibrator.vibrate(
-                Binder.getCallingUid(), mContext.getOpPackageName(), effect, VIBRATION_ATTRIBUTES);
+        mVibrator.vibrate(Binder.getCallingUid(), mContext.getOpPackageName(), effect,
+                reason, VIBRATION_ATTRIBUTES);
         return true;
     }
 

@@ -990,7 +990,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         public void onWakeUp() {
             synchronized (mLock) {
                 if (shouldEnableWakeGestureLp()) {
-                    performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
+                    performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false,
+                            "Wake Up");
                     wakeUp(SystemClock.uptimeMillis(), mAllowTheaterModeWakeFromWakeGesture,
                             "android.policy:GESTURE");
                 }
@@ -1427,19 +1428,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             break;
         case LONG_PRESS_POWER_GLOBAL_ACTIONS:
             mPowerKeyHandled = true;
-            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false,
+                    "Power - Long Press - Global Actions");
             showGlobalActionsInternal();
             break;
         case LONG_PRESS_POWER_SHUT_OFF:
         case LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM:
             mPowerKeyHandled = true;
-            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false,
+                    "Power - Long Press - Shut Off");
             sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
             mWindowManagerFuncs.shutdown(behavior == LONG_PRESS_POWER_SHUT_OFF);
             break;
         case LONG_PRESS_POWER_GO_TO_VOICE_ASSIST:
             mPowerKeyHandled = true;
-            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false,
+                    "Power - Long Press - Go To Voice Assist");
             final boolean keyguardActive = mKeyguardDelegate == null
                     ? false
                     : mKeyguardDelegate.isShowing();
@@ -1461,7 +1465,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             break;
         case VERY_LONG_PRESS_POWER_GLOBAL_ACTIONS:
             mPowerKeyHandled = true;
-            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false,
+                    "Power - Very Long Press - Show Global Actions");
             showGlobalActionsInternal();
             break;
         }
@@ -1616,7 +1621,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override
         public void run() {
             mEndCallKeyHandled = true;
-            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false,
+                    "End Call - Long Press - Show Global Actions");
             showGlobalActionsInternal();
         }
     };
@@ -1743,7 +1749,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return;
         }
         mHomeConsumed = true;
-        performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+        performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false,
+                "Home - Long Press");
         switch (mLongPressOnHomeBehavior) {
             case LONG_PRESS_HOME_ALL_APPS:
                 launchAllAppsAction();
@@ -3923,7 +3930,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void launchAssistLongPressAction() {
-        performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+        performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false,
+                "Assist - Long Press");
         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
 
         // launch the search activity
@@ -6023,7 +6031,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if (useHapticFeedback) {
-            performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
+            performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false,
+                    "Virtual Key - Press");
         }
 
         if (isWakeKey) {
@@ -6856,7 +6865,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void setSafeMode(boolean safeMode) {
         mSafeMode = safeMode;
         if (safeMode) {
-            performHapticFeedbackLw(null, HapticFeedbackConstants.SAFE_MODE_ENABLED, true);
+            performHapticFeedbackLw(null, HapticFeedbackConstants.SAFE_MODE_ENABLED, true,
+                    "Safe Mode Enabled");
         }
     }
 
@@ -7318,7 +7328,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always) {
+    public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always,
+            String reason) {
         if (!mVibrator.hasVibrator()) {
             return false;
         }
@@ -7342,7 +7353,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             owningUid = android.os.Process.myUid();
             owningPackage = mContext.getOpPackageName();
         }
-        mVibrator.vibrate(owningUid, owningPackage, effect, VIBRATION_ATTRIBUTES);
+        mVibrator.vibrate(owningUid, owningPackage, effect, reason, VIBRATION_ATTRIBUTES);
         return true;
     }
 
