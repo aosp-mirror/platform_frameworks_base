@@ -524,8 +524,7 @@ public class NotificationPanelView extends PanelView implements
                     totalHeight,
                     mKeyguardStatusView.getHeight(),
                     mInterpolatedDarkAmount,
-                    !mStatusBar.isKeyguardCurrentlySecure()
-                            || mStatusBar.isKeyguardOccludeAnimationRunning(),
+                    mStatusBar.isKeyguardCurrentlySecure(),
                     mPulsing,
                     mBouncerTop);
             mClockPositionAlgorithm.run(mClockPositionResult);
