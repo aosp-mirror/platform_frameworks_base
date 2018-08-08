@@ -44,6 +44,7 @@ import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.view.InputEventReceiver;
 import android.view.InputWindowHandle;
+import android.view.SurfaceControl;
 
 import com.android.server.policy.WindowManagerPolicy;
 
@@ -71,6 +72,8 @@ final class InputMonitor {
             new UpdateInputForAllWindowsConsumer();
 
     private int mDisplayId;
+
+    SurfaceControl.Transaction mInputTransaction = new SurfaceControl.Transaction();
 
     /**
      * The set of input consumer added to the window manager by name, which consumes input events
@@ -362,12 +365,6 @@ final class InputMonitor {
         }
     }
 
-    void onRemoved() {
-        // If DisplayContent removed, we need find a way to remove window handles of this display
-        // from InputDispatcher, so pass an empty InputWindowHandles to remove them.
-        mService.mInputManager.setInputWindows(mInputWindowHandles, mDisplayId);
-    }
-
     private final class UpdateInputForAllWindowsConsumer implements Consumer<WindowState> {
         InputConsumerImpl navInputConsumer;
         InputConsumerImpl pipInputConsumer;
@@ -407,8 +404,7 @@ final class InputMonitor {
                 addInputWindowHandle(wallpaperInputConsumer.mWindowHandle);
             }
 
-            // Send windows to native code.
-            mService.mInputManager.setInputWindows(mInputWindowHandles, mDisplayId);
+            mInputTransaction.apply();
 
             clearInputWindowHandlesLw();
 
@@ -492,6 +488,11 @@ final class InputMonitor {
 
             addInputWindowHandle(
                     inputWindowHandle, w, flags, type, isVisible, hasFocus, hasWallpaper);
+
+            if (w.mWinAnimator.hasSurface()) {
+                mInputTransaction.setInputWindowInfo(
+                        w.mWinAnimator.mSurfaceController.mSurfaceControl, inputWindowHandle);
+            }
         }
     }
 }

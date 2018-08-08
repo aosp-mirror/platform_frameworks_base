@@ -147,15 +147,6 @@ static inline const char* toString(bool value) {
     return value ? "true" : "false";
 }
 
-static jobject getInputApplicationHandleObjLocalRef(JNIEnv* env,
-        const sp<InputApplicationHandle>& inputApplicationHandle) {
-    if (inputApplicationHandle == nullptr) {
-        return nullptr;
-    }
-    return static_cast<NativeInputApplicationHandle*>(inputApplicationHandle.get())->
-            getInputApplicationHandleObjLocalRef(env);
-}
-
 static void loadSystemIconAsSpriteWithPointerIcon(JNIEnv* env, jobject contextObj, int32_t style,
         PointerIcon* outPointerIcon, SpriteIcon* outSpriteIcon) {
     status_t status = android_view_PointerIcon_loadSystemIcon(env,
@@ -342,6 +333,8 @@ NativeInputManager::NativeInputManager(jobject contextObj,
     mInteractive = true;
 
     mInputManager = new InputManager(this, this);
+    defaultServiceManager()->addService(String16("inputflinger"),
+            mInputManager, false);
 }
 
 NativeInputManager::~NativeInputManager() {
@@ -656,13 +649,11 @@ nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApp
 
     JNIEnv* env = jniEnv();
 
-    jobject inputApplicationHandleObj =
-            getInputApplicationHandleObjLocalRef(env, inputApplicationHandle);
     jobject tokenObj = javaObjectForIBinder(env, token);
     jstring reasonObj = env->NewStringUTF(reason.c_str());
 
     jlong newTimeout = env->CallLongMethod(mServiceObj,
-                gServiceClassInfo.notifyANR, inputApplicationHandleObj, tokenObj,
+                gServiceClassInfo.notifyANR, tokenObj,
                 reasonObj);
     if (checkAndClearExceptionFromCallback(env, "notifyANR")) {
         newTimeout = 0; // abort dispatch
@@ -671,7 +662,6 @@ nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApp
     }
 
     env->DeleteLocalRef(reasonObj);
-    env->DeleteLocalRef(inputApplicationHandleObj);
     return newTimeout;
 }
 
@@ -1718,7 +1708,7 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.notifyANR, clazz,
             "notifyANR",
-            "(Landroid/view/InputApplicationHandle;Landroid/os/IBinder;Ljava/lang/String;)J");
+            "(Landroid/os/IBinder;Ljava/lang/String;)J");
 
     GET_METHOD_ID(gServiceClassInfo.filterInputEvent, clazz,
             "filterInputEvent", "(Landroid/view/InputEvent;I)Z");

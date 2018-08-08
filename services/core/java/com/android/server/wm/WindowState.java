@@ -2167,7 +2167,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mTmpRect.inset(-delta, -delta);
             }
             region.set(mTmpRect);
-            cropRegionToStackBoundsIfNeeded(region);
+            region.translate(-mWindowFrames.mFrame.left, -mWindowFrames.mFrame.top);
         } else {
             // Not modal or full screen modal
             getTouchableRegion(region);

@@ -1800,10 +1800,9 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
-    private long notifyANR(InputApplicationHandle inputApplicationHandle,
-            IBinder token, String reason) {
+    private long notifyANR(IBinder token, String reason) {
         return mWindowManagerCallbacks.notifyANR(
-                inputApplicationHandle, token, reason);
+                token, reason);
     }
 
     // Native callback.
@@ -1834,14 +1833,12 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
-    private long interceptKeyBeforeDispatching(IBinder focus,
-            KeyEvent event, int policyFlags) {
+    private long interceptKeyBeforeDispatching(IBinder focus, KeyEvent event, int policyFlags) {
         return mWindowManagerCallbacks.interceptKeyBeforeDispatching(focus, event, policyFlags);
     }
 
     // Native callback.
-    private KeyEvent dispatchUnhandledKey(IBinder focus,
-            KeyEvent event, int policyFlags) {
+    private KeyEvent dispatchUnhandledKey(IBinder focus, KeyEvent event, int policyFlags) {
         return mWindowManagerCallbacks.dispatchUnhandledKey(focus, event, policyFlags);
     }
 
@@ -1993,8 +1990,7 @@ public class InputManagerService extends IInputManager.Stub
 
         public void notifyInputChannelBroken(IBinder token);
 
-        public long notifyANR(InputApplicationHandle inputApplicationHandle,
-                IBinder token, String reason);
+        public long notifyANR(IBinder token, String reason);
 
         public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags);
 
