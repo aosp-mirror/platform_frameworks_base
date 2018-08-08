@@ -34,6 +34,7 @@ import static android.net.NetworkStats.ROAMING_NO;
 import static android.net.NetworkStats.ROAMING_YES;
 import static android.net.wifi.WifiInfo.removeDoubleQuotes;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.BackupUtils;
@@ -96,6 +97,7 @@ public class NetworkTemplate implements Parcelable {
      * Template to match {@link ConnectivityManager#TYPE_MOBILE} networks with
      * the given IMSI.
      */
+    @UnsupportedAppUsage
     public static NetworkTemplate buildTemplateMobileAll(String subscriberId) {
         return new NetworkTemplate(MATCH_MOBILE, subscriberId, null);
     }
@@ -104,6 +106,7 @@ public class NetworkTemplate implements Parcelable {
      * Template to match {@link ConnectivityManager#TYPE_MOBILE} networks,
      * regardless of IMSI.
      */
+    @UnsupportedAppUsage
     public static NetworkTemplate buildTemplateMobileWildcard() {
         return new NetworkTemplate(MATCH_MOBILE_WILDCARD, null, null);
     }
@@ -112,11 +115,13 @@ public class NetworkTemplate implements Parcelable {
      * Template to match all {@link ConnectivityManager#TYPE_WIFI} networks,
      * regardless of SSID.
      */
+    @UnsupportedAppUsage
     public static NetworkTemplate buildTemplateWifiWildcard() {
         return new NetworkTemplate(MATCH_WIFI_WILDCARD, null, null);
     }
 
     @Deprecated
+    @UnsupportedAppUsage
     public static NetworkTemplate buildTemplateWifi() {
         return buildTemplateWifiWildcard();
     }
@@ -133,6 +138,7 @@ public class NetworkTemplate implements Parcelable {
      * Template to combine all {@link ConnectivityManager#TYPE_ETHERNET} style
      * networks together.
      */
+    @UnsupportedAppUsage
     public static NetworkTemplate buildTemplateEthernet() {
         return new NetworkTemplate(MATCH_ETHERNET, null, null);
     }
@@ -173,6 +179,7 @@ public class NetworkTemplate implements Parcelable {
     private final int mRoaming;
     private final int mDefaultNetwork;
 
+    @UnsupportedAppUsage
     public NetworkTemplate(int matchRule, String subscriberId, String networkId) {
         this(matchRule, subscriberId, new String[] { subscriberId }, networkId);
     }
@@ -293,10 +300,12 @@ public class NetworkTemplate implements Parcelable {
         }
     }
 
+    @UnsupportedAppUsage
     public int getMatchRule() {
         return mMatchRule;
     }
 
+    @UnsupportedAppUsage
     public String getSubscriberId() {
         return mSubscriberId;
     }
@@ -460,6 +469,7 @@ public class NetworkTemplate implements Parcelable {
      * active merge set [A,B], we'd return a new template that primarily matches
      * A, but also matches B.
      */
+    @UnsupportedAppUsage
     public static NetworkTemplate normalize(NetworkTemplate template, String[] merged) {
         if (template.isMatchRuleMobile() && ArrayUtils.contains(merged, template.mSubscriberId)) {
             // Requested template subscriber is part of the merge group; return
@@ -471,6 +481,7 @@ public class NetworkTemplate implements Parcelable {
         }
     }
 
+    @UnsupportedAppUsage
     public static final Creator<NetworkTemplate> CREATOR = new Creator<NetworkTemplate>() {
         @Override
         public NetworkTemplate createFromParcel(Parcel in) {

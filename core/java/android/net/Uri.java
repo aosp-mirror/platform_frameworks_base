@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.Parcel;
@@ -133,6 +134,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     /**
      * Prevents external subclassing.
      */
+    @UnsupportedAppUsage
     private Uri() {}
 
     /**
@@ -376,6 +378,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      * to logs and other places where PII should be avoided.
      * @hide
      */
+    @UnsupportedAppUsage
     public String toSafeString() {
         String scheme = getScheme();
         String ssp = getSchemeSpecificPart();
@@ -2331,6 +2334,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public Uri getCanonicalUri() {
         if ("file".equals(getScheme())) {
             final String canonicalPath;

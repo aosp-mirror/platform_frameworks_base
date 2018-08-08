@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
@@ -66,6 +67,7 @@ public class EthernetManager {
          * @param iface Ethernet interface name
          * @param isAvailable {@code true} if Ethernet port exists.
          */
+        @UnsupportedAppUsage
         void onAvailabilityChanged(String iface, boolean isAvailable);
     }
 
@@ -84,6 +86,7 @@ public class EthernetManager {
      * Get Ethernet configuration.
      * @return the Ethernet Configuration, contained in {@link IpConfiguration}.
      */
+    @UnsupportedAppUsage
     public IpConfiguration getConfiguration(String iface) {
         try {
             return mService.getConfiguration(iface);
@@ -95,6 +98,7 @@ public class EthernetManager {
     /**
      * Set Ethernet configuration.
      */
+    @UnsupportedAppUsage
     public void setConfiguration(String iface, IpConfiguration config) {
         try {
             mService.setConfiguration(iface, config);
@@ -106,6 +110,7 @@ public class EthernetManager {
     /**
      * Indicates whether the system currently has one or more Ethernet interfaces.
      */
+    @UnsupportedAppUsage
     public boolean isAvailable() {
         return getAvailableInterfaces().length > 0;
     }
@@ -115,6 +120,7 @@ public class EthernetManager {
      *
      * @param iface Ethernet interface name
      */
+    @UnsupportedAppUsage
     public boolean isAvailable(String iface) {
         try {
             return mService.isAvailable(iface);
@@ -128,6 +134,7 @@ public class EthernetManager {
      * @param listener A {@link Listener} to add.
      * @throws IllegalArgumentException If the listener is null.
      */
+    @UnsupportedAppUsage
     public void addListener(Listener listener) {
         if (listener == null) {
             throw new IllegalArgumentException("listener must not be null");
@@ -145,6 +152,7 @@ public class EthernetManager {
     /**
      * Returns an array of available Ethernet interface names.
      */
+    @UnsupportedAppUsage
     public String[] getAvailableInterfaces() {
         try {
             return mService.getAvailableInterfaces();
@@ -158,6 +166,7 @@ public class EthernetManager {
      * @param listener A {@link Listener} to remove.
      * @throws IllegalArgumentException If the listener is null.
      */
+    @UnsupportedAppUsage
     public void removeListener(Listener listener) {
         if (listener == null) {
             throw new IllegalArgumentException("listener must not be null");

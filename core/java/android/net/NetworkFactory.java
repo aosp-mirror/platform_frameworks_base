@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -106,6 +107,7 @@ public class NetworkFactory extends Handler {
     private int mRefCount = 0;
     private Messenger mMessenger = null;
 
+    @UnsupportedAppUsage
     public NetworkFactory(Looper looper, Context context, String logTag,
             NetworkCapabilities filter) {
         super(looper);
@@ -287,6 +289,7 @@ public class NetworkFactory extends Handler {
         sendMessage(obtainMessage(CMD_CANCEL_REQUEST, networkRequest));
     }
 
+    @UnsupportedAppUsage
     public void setScoreFilter(int score) {
         sendMessage(obtainMessage(CMD_SET_SCORE, score, 0));
     }
@@ -304,6 +307,7 @@ public class NetworkFactory extends Handler {
         Log.d(LOG_TAG, s);
     }
 
+    @UnsupportedAppUsage
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         pw.println(toString());

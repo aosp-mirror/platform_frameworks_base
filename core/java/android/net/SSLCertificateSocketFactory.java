@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.SystemProperties;
 import android.util.Log;
 
@@ -86,8 +87,10 @@ import javax.net.ssl.X509TrustManager;
  * requires root access.
  */
 public class SSLCertificateSocketFactory extends SSLSocketFactory {
+    @UnsupportedAppUsage
     private static final String TAG = "SSLCertificateSocketFactory";
 
+    @UnsupportedAppUsage
     private static final TrustManager[] INSECURE_TRUST_MANAGER = new TrustManager[] {
         new X509TrustManager() {
             public X509Certificate[] getAcceptedIssuers() { return null; }
@@ -96,16 +99,26 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         }
     };
 
+    @UnsupportedAppUsage
     private SSLSocketFactory mInsecureFactory = null;
+    @UnsupportedAppUsage
     private SSLSocketFactory mSecureFactory = null;
+    @UnsupportedAppUsage
     private TrustManager[] mTrustManagers = null;
+    @UnsupportedAppUsage
     private KeyManager[] mKeyManagers = null;
+    @UnsupportedAppUsage
     private byte[] mNpnProtocols = null;
+    @UnsupportedAppUsage
     private byte[] mAlpnProtocols = null;
+    @UnsupportedAppUsage
     private PrivateKey mChannelIdPrivateKey = null;
 
+    @UnsupportedAppUsage
     private final int mHandshakeTimeoutMillis;
+    @UnsupportedAppUsage
     private final SSLClientSessionCache mSessionCache;
+    @UnsupportedAppUsage
     private final boolean mSecure;
 
     /** @deprecated Use {@link #getDefault(int)} instead. */
@@ -114,6 +127,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         this(handshakeTimeoutMillis, null, true);
     }
 
+    @UnsupportedAppUsage
     private SSLCertificateSocketFactory(
             int handshakeTimeoutMillis, SSLSessionCache cache, boolean secure) {
         mHandshakeTimeoutMillis = handshakeTimeoutMillis;
@@ -201,6 +215,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static void verifyHostname(Socket socket, String hostname) throws IOException {
         if (!(socket instanceof SSLSocket)) {
             throw new IllegalArgumentException("Attempt to verify non-SSL socket");
@@ -222,6 +237,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         }
     }
 
+    @UnsupportedAppUsage
     private SSLSocketFactory makeSocketFactory(
             KeyManager[] keyManagers, TrustManager[] trustManagers) {
         try {
@@ -235,11 +251,13 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         }
     }
 
+    @UnsupportedAppUsage
     private static boolean isSslCheckRelaxed() {
         return RoSystemProperties.DEBUGGABLE &&
             SystemProperties.getBoolean("socket.relaxsslcheck", false);
     }
 
+    @UnsupportedAppUsage
     private synchronized SSLSocketFactory getDelegate() {
         // Relax the SSL check if instructed (for this factory, or systemwide)
         if (!mSecure || isSslCheckRelaxed()) {
@@ -311,6 +329,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *     must be non-empty and of length less than 256.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setAlpnProtocols(byte[][] protocols) {
         this.mAlpnProtocols = toLengthPrefixedList(protocols);
     }
@@ -365,6 +384,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      * @throws IllegalArgumentException if the socket was not created by this factory.
      * @hide
      */
+    @UnsupportedAppUsage
     public byte[] getAlpnSelectedProtocol(Socket socket) {
         return castToOpenSSLSocket(socket).getAlpnSelectedProtocol();
     }
@@ -390,6 +410,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setChannelIdPrivateKey(PrivateKey privateKey) {
         mChannelIdPrivateKey = privateKey;
     }
@@ -429,11 +450,13 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setSoWriteTimeout(Socket socket, int writeTimeoutMilliseconds)
             throws SocketException {
         castToOpenSSLSocket(socket).setSoWriteTimeout(writeTimeoutMilliseconds);
     }
 
+    @UnsupportedAppUsage
     private static OpenSSLSocketImpl castToOpenSSLSocket(Socket socket) {
         if (!(socket instanceof OpenSSLSocketImpl)) {
             throw new IllegalArgumentException("Socket not created by this factory: "
