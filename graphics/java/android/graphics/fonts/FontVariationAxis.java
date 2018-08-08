@@ -22,6 +22,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -185,6 +186,23 @@ public final class FontVariationAxis {
             return "";
         }
         return TextUtils.join(",", axes);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (o == null || !(o instanceof FontVariationAxis)) {
+            return false;
+        }
+        FontVariationAxis axis = (FontVariationAxis) o;
+        return axis.mTag == mTag && axis.mStyleValue == mStyleValue;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mTag, mStyleValue);
     }
 }
 

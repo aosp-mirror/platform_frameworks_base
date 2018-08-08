@@ -36,11 +36,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A font class can be used for creating FontFamily.
  */
-public class Font {
+public final class Font {
     private static final String TAG = "Font";
 
     private static final int NOT_SPECIFIED = -1;
@@ -109,6 +111,7 @@ public class Font {
         private @IntRange(from = -1, to = 1) int mItalic = NOT_SPECIFIED;
         private @IntRange(from = 0) int mTtcIndex = 0;
         private @Nullable FontVariationAxis[] mAxes = null;
+        private @Nullable IOException mException;
 
         /**
          * Constructs a builder with a byte buffer.
@@ -132,11 +135,13 @@ public class Font {
          *
          * @param path a file path to the font file
          */
-        public Builder(@NonNull File path) throws IOException {
+        public Builder(@NonNull File path) {
             Preconditions.checkNotNull(path, "path can not be null");
             try (FileInputStream fis = new FileInputStream(path)) {
                 final FileChannel fc = fis.getChannel();
                 mBuffer = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            } catch (IOException e) {
+                mException = e;
             }
         }
 
@@ -145,7 +150,7 @@ public class Font {
          *
          * @param fd a file descriptor
          */
-        public Builder(@NonNull FileDescriptor fd) throws IOException {
+        public Builder(@NonNull FileDescriptor fd) {
             this(fd, 0, -1);
         }
 
@@ -157,11 +162,13 @@ public class Font {
          * @param size a size of the font data. If -1 is passed, use until end of the file.
          */
         public Builder(@NonNull FileDescriptor fd, @IntRange(from = 0) long offset,
-                @IntRange(from = -1) long size) throws IOException {
+                @IntRange(from = -1) long size) {
             try (FileInputStream fis = new FileInputStream(fd)) {
                 final FileChannel fc = fis.getChannel();
                 size = (size == -1) ? fc.size() - offset : size;
                 mBuffer = fc.map(FileChannel.MapMode.READ_ONLY, offset, size);
+            } catch (IOException e) {
+                mException = e;
             }
         }
 
@@ -171,15 +178,17 @@ public class Font {
          * @param am the application's asset manager
          * @param path the file name of the font data in the asset directory
          */
-        public Builder(@NonNull AssetManager am, @NonNull String path) throws IOException {
+        public Builder(@NonNull AssetManager am, @NonNull String path) {
             final long nativeAsset = nGetNativeAsset(am, path, true /* is asset */, 0 /* cookie */);
             if (nativeAsset == 0) {
-                throw new FileNotFoundException("Unable to open " + path);
+                mException = new FileNotFoundException("Unable to open " + path);
+                return;
             }
             final ByteBuffer b = nGetAssetBuffer(nativeAsset);
             sAssetByteBufferRegistroy.registerNativeAllocation(b, nativeAsset);
             if (b == null) {
-                throw new FileNotFoundException(path + " not found");
+                mException = new FileNotFoundException(path + " not found");
+                return;
             }
             mBuffer = b;
         }
@@ -192,25 +201,29 @@ public class Font {
          * @param res the resource of this application.
          * @param resId the resource ID of font file.
          */
-        public Builder(@NonNull Resources res, int resId) throws IOException {
+        public Builder(@NonNull Resources res, int resId) {
             final TypedValue value = new TypedValue();
             res.getValue(resId, value, true);
             if (value.string == null) {
-                throw new FileNotFoundException(resId + " not found");
+                mException = new FileNotFoundException(resId + " not found");
+                return;
             }
             final String str = value.string.toString();
             if (str.toLowerCase().endsWith(".xml")) {
-                throw new FileNotFoundException(resId + " must be font file.");
+                mException = new FileNotFoundException(resId + " must be font file.");
+                return;
             }
             final long nativeAsset = nGetNativeAsset(res.getAssets(), str, false /* is asset */,
                     value.assetCookie);
             if (nativeAsset == 0) {
-                throw new FileNotFoundException("Unable to open " + str);
+                mException = new FileNotFoundException("Unable to open " + str);
+                return;
             }
             final ByteBuffer b = nGetAssetBuffer(nativeAsset);
             sAssetByteBufferRegistroy.registerNativeAllocation(b, nativeAsset);
             if (b == null) {
-                throw new FileNotFoundException(str + " not found");
+                mException = new FileNotFoundException(str + " not found");
+                return;
             }
             mBuffer = b;
         }
@@ -347,7 +360,7 @@ public class Font {
          * @return this builder
          */
         public @NonNull Builder setFontVariationSettings(@Nullable FontVariationAxis[] axes) {
-            mAxes = axes;
+            mAxes = axes == null ? null : axes.clone();
             return this;
         }
 
@@ -355,7 +368,10 @@ public class Font {
          * Creates the font based on the configured values.
          * @return the Font object
          */
-        public @Nullable Font build() {
+        public @Nullable Font build() throws IOException {
+            if (mException != null) {
+                throw new IOException("Failed to read font contents", mException);
+            }
             if (mWeight == NOT_SPECIFIED || mItalic == NOT_SPECIFIED) {
                 final int packed = FontFileUtil.analyzeStyle(mBuffer, mTtcIndex, mAxes);
                 if (FontFileUtil.isSuccess(packed)) {
@@ -378,7 +394,7 @@ public class Font {
                 }
             }
             final long ptr = nBuild(builderPtr, mBuffer, mWeight, italic, mTtcIndex);
-            final Font font = new Font(ptr, mWeight, italic, mTtcIndex, mAxes);
+            final Font font = new Font(ptr, mBuffer, mWeight, italic, mTtcIndex, mAxes);
             sFontRegistory.registerNativeAllocation(font, ptr);
             return font;
         }
@@ -405,6 +421,7 @@ public class Font {
     }
 
     private final long mNativePtr;  // address of the shared ptr of minikin::Font
+    private final @NonNull ByteBuffer mBuffer;
     private final @IntRange(from = 0, to = 1000) int mWeight;
     private final boolean mItalic;
     private final @IntRange(from = 0) int mTtcIndex;
@@ -413,8 +430,10 @@ public class Font {
     /**
      * Use Builder instead
      */
-    private Font(long nativePtr, @IntRange(from = 0, to = 1000) int weight, boolean italic,
+    private Font(long nativePtr, @NonNull ByteBuffer buffer,
+            @IntRange(from = 0, to = 1000) int weight, boolean italic,
             @IntRange(from = 0) int ttcIndex, @Nullable FontVariationAxis[] axes) {
+        mBuffer = buffer;
         mWeight = weight;
         mItalic = italic;
         mNativePtr = nativePtr;
@@ -462,12 +481,30 @@ public class Font {
      * @return font variation settings
      */
     public @Nullable FontVariationAxis[] getAxes() {
-        return mAxes;
+        return mAxes == null ? null : mAxes.clone();
     }
 
     /** @hide */
     public long getNativePtr() {
         return mNativePtr;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (o == null || !(o instanceof Font)) {
+            return false;
+        }
+        Font f = (Font) o;
+        return f.mWeight == mWeight && f.mItalic == mItalic && f.mTtcIndex == mTtcIndex
+                && Arrays.equals(f.mAxes, mAxes) && f.mBuffer.equals(mBuffer);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mWeight, mItalic, mTtcIndex, mAxes, mBuffer);
     }
 
     @Override
