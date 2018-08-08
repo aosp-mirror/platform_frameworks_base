@@ -32,7 +32,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.SurfaceControl;
 
 import com.android.systemui.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.recents.events.EventBus;
@@ -41,7 +40,6 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.shared.system.GraphicBufferCompat;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -93,20 +91,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private int mCurrentBoundedUserId = -1;
 
     private ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
-
-        public GraphicBufferCompat screenshot(Rect sourceCrop, int width, int height, int minLayer,
-                int maxLayer, boolean useIdentityTransform, int rotation) {
-            if (!verifyCaller("screenshot")) {
-                return null;
-            }
-            long token = Binder.clearCallingIdentity();
-            try {
-                return new GraphicBufferCompat(SurfaceControl.screenshotToBuffer(sourceCrop, width,
-                        height, minLayer, maxLayer, useIdentityTransform, rotation));
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
 
         public void startScreenPinning(int taskId) {
             if (!verifyCaller("startScreenPinning")) {
