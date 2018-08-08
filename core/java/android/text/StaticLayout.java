@@ -313,10 +313,17 @@ public class StaticLayout extends Layout {
         /**
          * Set break strategy, useful for selecting high quality or balanced paragraph
          * layout options. The default is {@link Layout#BREAK_STRATEGY_SIMPLE}.
+         * <p/>
+         * Enabling hyphenation with either using {@link Layout#HYPHENATION_FREQUENCY_NORMAL} or
+         * {@link Layout#HYPHENATION_FREQUENCY_FULL} while line breaking is set to one of
+         * {@link Layout#BREAK_STRATEGY_BALANCED}, {@link Layout#BREAK_STRATEGY_HIGH_QUALITY}
+         * improves the structure of text layout however has performance impact and requires more
+         * time to do the text layout.
          *
          * @param breakStrategy break strategy for paragraph layout
          * @return this builder, useful for chaining
          * @see android.widget.TextView#setBreakStrategy
+         * @see #setHyphenationFrequency(int)
          */
         @NonNull
         public Builder setBreakStrategy(@BreakStrategy int breakStrategy) {
@@ -329,10 +336,17 @@ public class StaticLayout extends Layout {
          * possible values are defined in {@link Layout}, by constants named with the pattern
          * {@code HYPHENATION_FREQUENCY_*}. The default is
          * {@link Layout#HYPHENATION_FREQUENCY_NONE}.
+         * <p/>
+         * Enabling hyphenation with either using {@link Layout#HYPHENATION_FREQUENCY_NORMAL} or
+         * {@link Layout#HYPHENATION_FREQUENCY_FULL} while line breaking is set to one of
+         * {@link Layout#BREAK_STRATEGY_BALANCED}, {@link Layout#BREAK_STRATEGY_HIGH_QUALITY}
+         * improves the structure of text layout however has performance impact and requires more
+         * time to do the text layout.
          *
          * @param hyphenationFrequency hyphenation frequency for the paragraph
          * @return this builder, useful for chaining
          * @see android.widget.TextView#setHyphenationFrequency
+         * @see #setBreakStrategy(int)
          */
         @NonNull
         public Builder setHyphenationFrequency(@HyphenationFrequency int hyphenationFrequency) {

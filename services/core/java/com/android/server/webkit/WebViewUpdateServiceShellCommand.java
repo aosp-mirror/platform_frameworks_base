@@ -66,6 +66,12 @@ class WebViewUpdateServiceShellCommand extends ShellCommand {
     private int setWebViewImplementation() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         String shellChosenPackage = getNextArg();
+        if (shellChosenPackage == null) {
+            pw.println("Failed to switch, no PACKAGE provided.");
+            pw.println("");
+            helpSetWebViewImplementation();
+            return 1;
+        }
         String newPackage = mInterface.changeProviderAndSetting(shellChosenPackage);
         if (shellChosenPackage.equals(newPackage)) {
             pw.println("Success");
@@ -85,6 +91,12 @@ class WebViewUpdateServiceShellCommand extends ShellCommand {
         return 0;
     }
 
+    public void helpSetWebViewImplementation() {
+        PrintWriter pw = getOutPrintWriter();
+        pw.println("  set-webview-implementation PACKAGE");
+        pw.println("    Set the WebView implementation to the specified package.");
+    }
+
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
@@ -99,8 +111,7 @@ class WebViewUpdateServiceShellCommand extends ShellCommand {
         pw.println("  disable-redundant-packages");
         pw.println("    Disallow installing and enabling fallback packages when a more-preferred");
         pw.println("    package is available.");
-        pw.println("  set-webview-implementation PACKAGE");
-        pw.println("    Set the WebView implementation to the specified package.");
+        helpSetWebViewImplementation();
         pw.println("  enable-multiprocess");
         pw.println("    Enable multi-process mode for WebView");
         pw.println("  disable-multiprocess");

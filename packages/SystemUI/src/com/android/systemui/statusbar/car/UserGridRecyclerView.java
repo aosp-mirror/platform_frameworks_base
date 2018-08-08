@@ -109,14 +109,12 @@ public class UserGridRecyclerView extends PagedListView implements
             userRecords.add(record);
         }
 
-        // Add guest user record if the foreground user is not a guest
-        if (!mUserManagerHelper.foregroundUserIsGuestUser()) {
-            userRecords.add(addGuestUserRecord());
-        }
+        // Add button for starting guest session.
+        userRecords.add(createStartGuestUserRecord());
 
         // Add add user record if the foreground user can add users
         if (mUserManagerHelper.foregroundUserCanAddUsers()) {
-            userRecords.add(addUserRecord());
+            userRecords.add(createAddUserRecord());
         }
 
         return userRecords;
@@ -125,17 +123,17 @@ public class UserGridRecyclerView extends PagedListView implements
     /**
      * Create guest user record
      */
-    private UserRecord addGuestUserRecord() {
+    private UserRecord createStartGuestUserRecord() {
         UserInfo userInfo = new UserInfo();
-        userInfo.name = mContext.getString(R.string.car_guest);
-        return new UserRecord(userInfo, true /* isStartGuestSession */,
-                false /* isAddUser */, false /* isForeground */);
+        userInfo.name = mContext.getString(R.string.start_guest_session);
+        return new UserRecord(userInfo, true /* isStartGuestSession */, false /* isAddUser */,
+                false /* isForeground */);
     }
 
     /**
      * Create add user record
      */
-    private UserRecord addUserRecord() {
+    private UserRecord createAddUserRecord() {
         UserInfo userInfo = new UserInfo();
         userInfo.name = mContext.getString(R.string.car_add_user);
         return new UserRecord(userInfo, false /* isStartGuestSession */,
@@ -210,8 +208,6 @@ public class UserGridRecyclerView extends PagedListView implements
                     return;
                 }
 
-
-                // If the user selects Guest, start the guest session.
                 if (userRecord.mIsStartGuestSession) {
                     notifyUserSelected(userRecord);
                     mUserManagerHelper.startNewGuestSession(mGuestName);

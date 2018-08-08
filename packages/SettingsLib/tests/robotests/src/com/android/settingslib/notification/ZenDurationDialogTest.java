@@ -26,7 +26,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import android.app.AlertDialog;
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -40,6 +40,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 
+import androidx.appcompat.app.AlertDialog;
+
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Before;
@@ -47,6 +49,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
@@ -58,6 +61,7 @@ public class ZenDurationDialogTest {
     private Condition mCountdownCondition;
     private Condition mAlarmCondition;
     private ContentResolver mContentResolver;
+    private AlertDialog.Builder mBuilder;
 
     @Before
     public void setup() {
@@ -68,13 +72,14 @@ public class ZenDurationDialogTest {
         mController = spy(new ZenDurationDialog(mContext));
         mController.mLayoutInflater = mLayoutInflater;
         mController.getContentView();
+        mBuilder = new AlertDialog.Builder(mContext);
     }
 
     @Test
     public void testAlwaysPrompt() {
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_DURATION,
                 Settings.Global.ZEN_DURATION_PROMPT);
-        mController.createDialog();
+        mController.setupDialog(mBuilder);
 
         assertFalse(mController.getConditionTagAt(ZenDurationDialog.FOREVER_CONDITION_INDEX).rb
                 .isChecked());
@@ -88,7 +93,7 @@ public class ZenDurationDialogTest {
     public void testForever() {
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_DURATION,
                 Settings.Secure.ZEN_DURATION_FOREVER);
-        mController.createDialog();
+        mController.setupDialog(mBuilder);
 
         assertTrue(mController.getConditionTagAt(ZenDurationDialog.FOREVER_CONDITION_INDEX).rb
                 .isChecked());
@@ -101,7 +106,7 @@ public class ZenDurationDialogTest {
     @Test
     public void testSpecificDuration() {
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_DURATION, 45);
-        mController.createDialog();
+        mController.setupDialog(mBuilder);
 
         assertFalse(mController.getConditionTagAt(ZenDurationDialog.FOREVER_CONDITION_INDEX).rb
                 .isChecked());
@@ -117,7 +122,7 @@ public class ZenDurationDialogTest {
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_DURATION,
                 Settings.Secure.ZEN_DURATION_FOREVER);
 
-        AlertDialog dialog = (AlertDialog) mController.createDialog();
+        mController.setupDialog(mBuilder);
         mController.getConditionTagAt(ZenDurationDialog.ALWAYS_ASK_CONDITION_INDEX).rb.setChecked(
                 true);
         mController.updateZenDuration(Settings.Secure.ZEN_DURATION_FOREVER);
@@ -131,7 +136,7 @@ public class ZenDurationDialogTest {
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_DURATION,
                 Settings.Secure.ZEN_DURATION_PROMPT);
 
-        AlertDialog dialog = (AlertDialog) mController.createDialog();
+        mController.setupDialog(mBuilder);
         mController.getConditionTagAt(ZenDurationDialog.FOREVER_CONDITION_INDEX).rb.setChecked(
                 true);
         mController.updateZenDuration(Settings.Secure.ZEN_DURATION_PROMPT);
@@ -145,7 +150,7 @@ public class ZenDurationDialogTest {
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_DURATION,
                 Settings.Secure.ZEN_DURATION_PROMPT);
 
-        AlertDialog dialog = (AlertDialog) mController.createDialog();
+        mController.setupDialog(mBuilder);
         mController.getConditionTagAt(ZenDurationDialog.COUNTDOWN_CONDITION_INDEX).rb.setChecked(
                 true);
         mController.updateZenDuration(Settings.Secure.ZEN_DURATION_PROMPT);
@@ -160,7 +165,7 @@ public class ZenDurationDialogTest {
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_DURATION,
                 Settings.Secure.ZEN_DURATION_PROMPT);
 
-        AlertDialog dialog = (AlertDialog) mController.createDialog();
+        mController.setupDialog(mBuilder);
         // click time button starts at 60 minutes
         // - 1 hour to MAX_BUCKET_MINUTES (12 hours), increments by 1 hour
         // - 0-60 minutes increments by 15 minutes

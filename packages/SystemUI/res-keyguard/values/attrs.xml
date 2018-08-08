@@ -38,9 +38,5 @@
         <attr name="android:textColor" format="color" />
     </declare-styleable>
 
-    <declare-styleable name="CarrierText">
-        <attr name="allCaps" format="boolean" />
-    </declare-styleable>
-
     <attr name="passwordStyle" format="reference" />
 </resources>

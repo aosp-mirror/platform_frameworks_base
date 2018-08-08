@@ -94,8 +94,7 @@ static inline SkImageInfo convertPixelFormat(const ANativeWindow_Buffer& buffer)
         default:
             break;
     }
-    return SkImageInfo::Make(buffer.width, buffer.height, colorType, alphaType,
-            GraphicsJNI::defaultColorSpace());
+    return SkImageInfo::Make(buffer.width, buffer.height, colorType, alphaType);
 }
 
 /**

@@ -287,7 +287,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             try {
                 return mService.mPolicy.performHapticFeedbackLw(
                         mService.windowForClientLocked(this, window, true),
-                        effectId, always);
+                        effectId, always, null);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

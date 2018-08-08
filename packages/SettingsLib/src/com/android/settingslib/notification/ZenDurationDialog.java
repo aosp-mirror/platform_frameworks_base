@@ -17,7 +17,6 @@
 package com.android.settingslib.notification;
 
 import android.app.ActivityManager;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -42,6 +41,7 @@ import com.android.settingslib.R;
 import java.util.Arrays;
 
 import androidx.annotation.VisibleForTesting;
+import androidx.appcompat.app.AlertDialog;
 
 public class ZenDurationDialog {
     private static final int[] MINUTE_BUCKETS = ZenModeConfig.MINUTE_BUCKETS;
@@ -67,12 +67,17 @@ public class ZenDurationDialog {
     }
 
     public Dialog createDialog() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        setupDialog(builder);
+        return builder.create();
+    }
+
+    public void setupDialog(AlertDialog.Builder builder) {
         int zenDuration = Settings.Secure.getInt(
                 mContext.getContentResolver(), Settings.Secure.ZEN_DURATION,
                 Settings.Secure.ZEN_DURATION_FOREVER);
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext)
-                .setTitle(R.string.zen_mode_duration_settings_title)
+        builder.setTitle(R.string.zen_mode_duration_settings_title)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.okay,
                         new DialogInterface.OnClickListener() {
@@ -85,7 +90,6 @@ public class ZenDurationDialog {
         View contentView = getContentView();
         setupRadioButtons(zenDuration);
         builder.setView(contentView);
-        return builder.create();
     }
 
     @VisibleForTesting
@@ -270,8 +274,7 @@ public class ZenDurationDialog {
         String radioContentText = "";
         switch (rowIndex) {
             case FOREVER_CONDITION_INDEX:
-                radioContentText = mContext.getString(
-                        com.android.internal.R.string.zen_mode_forever);
+                radioContentText = mContext.getString(R.string.zen_mode_forever);
                 break;
             case COUNTDOWN_CONDITION_INDEX:
                 Condition condition = ZenModeConfig.toTimeCondition(mContext,

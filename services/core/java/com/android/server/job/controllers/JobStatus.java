@@ -694,6 +694,10 @@ public final class JobStatus {
         mInternalFlags |= flags;
     }
 
+    public int getSatisfiedConstraintFlags() {
+        return satisfiedConstraints;
+    }
+
     public void maybeAddForegroundExemption(Predicate<Integer> uidForegroundChecker) {
         // Jobs with time constraints shouldn't be exempted.
         if (job.hasEarlyConstraint() || job.hasLateConstraint()) {

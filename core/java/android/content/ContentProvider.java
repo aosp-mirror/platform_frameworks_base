@@ -21,6 +21,7 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Trace.TRACE_TAG_DATABASE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -42,6 +43,7 @@ import android.os.ICancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
@@ -235,6 +237,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 // Return an empty cursor for all columns.
                 return new MatrixCursor(cursor.getColumnNames(), 0);
             }
+            Trace.traceBegin(TRACE_TAG_DATABASE, "query");
             final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.query(
@@ -242,6 +245,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                         CancellationSignal.fromTransport(cancellationSignal));
             } finally {
                 setCallingPackage(original);
+                Trace.traceEnd(TRACE_TAG_DATABASE);
             }
         }
 
@@ -249,7 +253,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         public String getType(Uri uri) {
             validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            return ContentProvider.this.getType(uri);
+            Trace.traceBegin(TRACE_TAG_DATABASE, "getType");
+            try {
+                return ContentProvider.this.getType(uri);
+            } finally {
+                Trace.traceEnd(TRACE_TAG_DATABASE);
+            }
         }
 
         @Override
@@ -260,11 +269,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return rejectInsert(uri, initialValues);
             }
+            Trace.traceBegin(TRACE_TAG_DATABASE, "insert");
             final String original = setCallingPackage(callingPkg);
             try {
                 return maybeAddUserId(ContentProvider.this.insert(uri, initialValues), userId);
             } finally {
                 setCallingPackage(original);
+                Trace.traceEnd(TRACE_TAG_DATABASE);
             }
         }
 
@@ -275,11 +286,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
+            Trace.traceBegin(TRACE_TAG_DATABASE, "bulkInsert");
             final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.bulkInsert(uri, initialValues);
             } finally {
                 setCallingPackage(original);
+                Trace.traceEnd(TRACE_TAG_DATABASE);
             }
         }
 
@@ -312,6 +325,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                     }
                 }
             }
+            Trace.traceBegin(TRACE_TAG_DATABASE, "applyBatch");
             final String original = setCallingPackage(callingPkg);
             try {
                 ContentProviderResult[] results = ContentProvider.this.applyBatch(operations);
@@ -326,6 +340,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 return results;
             } finally {
                 setCallingPackage(original);
+                Trace.traceEnd(TRACE_TAG_DATABASE);
             }
         }
 
@@ -336,11 +351,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
+            Trace.traceBegin(TRACE_TAG_DATABASE, "delete");
             final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.delete(uri, selection, selectionArgs);
             } finally {
                 setCallingPackage(original);
+                Trace.traceEnd(TRACE_TAG_DATABASE);
             }
         }
 
@@ -352,11 +369,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
+            Trace.traceBegin(TRACE_TAG_DATABASE, "update");
             final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.update(uri, values, selection, selectionArgs);
             } finally {
                 setCallingPackage(original);
+                Trace.traceEnd(TRACE_TAG_DATABASE);
             }
         }
 
@@ -367,12 +386,14 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             enforceFilePermission(callingPkg, uri, mode, callerToken);
+            Trace.traceBegin(TRACE_TAG_DATABASE, "openFile");
             final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.openFile(
                         uri, mode, CancellationSignal.fromTransport(cancellationSignal));
             } finally {
                 setCallingPackage(original);
+                Trace.traceEnd(TRACE_TAG_DATABASE);
             }
         }
 
@@ -383,12 +404,14 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             enforceFilePermission(callingPkg, uri, mode, null);
+            Trace.traceBegin(TRACE_TAG_DATABASE, "openAssetFile");
             final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.openAssetFile(
                         uri, mode, CancellationSignal.fromTransport(cancellationSignal));
             } finally {
                 setCallingPackage(original);
+                Trace.traceEnd(TRACE_TAG_DATABASE);
             }
         }
 
@@ -396,11 +419,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         public Bundle call(
                 String callingPkg, String method, @Nullable String arg, @Nullable Bundle extras) {
             Bundle.setDefusable(extras, true);
+            Trace.traceBegin(TRACE_TAG_DATABASE, "call");
             final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.call(method, arg, extras);
             } finally {
                 setCallingPackage(original);
+                Trace.traceEnd(TRACE_TAG_DATABASE);
             }
         }
 
@@ -408,7 +433,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         public String[] getStreamTypes(Uri uri, String mimeTypeFilter) {
             validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            return ContentProvider.this.getStreamTypes(uri, mimeTypeFilter);
+            Trace.traceBegin(TRACE_TAG_DATABASE, "getStreamTypes");
+            try {
+                return ContentProvider.this.getStreamTypes(uri, mimeTypeFilter);
+            } finally {
+                Trace.traceEnd(TRACE_TAG_DATABASE);
+            }
         }
 
         @Override
@@ -418,12 +448,14 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             enforceFilePermission(callingPkg, uri, "r", null);
+            Trace.traceBegin(TRACE_TAG_DATABASE, "openTypedAssetFile");
             final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.openTypedAssetFile(
                         uri, mimeType, opts, CancellationSignal.fromTransport(cancellationSignal));
             } finally {
                 setCallingPackage(original);
+                Trace.traceEnd(TRACE_TAG_DATABASE);
             }
         }
 
@@ -440,11 +472,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return null;
             }
+            Trace.traceBegin(TRACE_TAG_DATABASE, "canonicalize");
             final String original = setCallingPackage(callingPkg);
             try {
                 return maybeAddUserId(ContentProvider.this.canonicalize(uri), userId);
             } finally {
                 setCallingPackage(original);
+                Trace.traceEnd(TRACE_TAG_DATABASE);
             }
         }
 
@@ -456,11 +490,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return null;
             }
+            Trace.traceBegin(TRACE_TAG_DATABASE, "uncanonicalize");
             final String original = setCallingPackage(callingPkg);
             try {
                 return maybeAddUserId(ContentProvider.this.uncanonicalize(uri), userId);
             } finally {
                 setCallingPackage(original);
+                Trace.traceEnd(TRACE_TAG_DATABASE);
             }
         }
 
@@ -472,12 +508,14 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return false;
             }
+            Trace.traceBegin(TRACE_TAG_DATABASE, "refresh");
             final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.refresh(uri, args,
                         CancellationSignal.fromTransport(cancellationSignal));
             } finally {
                 setCallingPackage(original);
+                Trace.traceEnd(TRACE_TAG_DATABASE);
             }
         }
 

@@ -21220,7 +21220,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public int getComponentEnabledSetting(ComponentName component, int userId) {
+    public int getComponentEnabledSetting(@NonNull ComponentName component, int userId) {
+        if (component == null) return COMPONENT_ENABLED_STATE_DEFAULT;
         if (!sUserManager.exists(userId)) return COMPONENT_ENABLED_STATE_DISABLED;
         int callingUid = Binder.getCallingUid();
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
@@ -22063,9 +22064,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     //TODO: b/111402650
     private void disableSkuSpecificApps() {
-        if (!mIsUpgrade && !mFirstBoot) {
-            return;
-        }
         String apkList[] = mContext.getResources().getStringArray(
                 R.array.config_disableApksUnlessMatchedSku_apk_list);
         String skuArray[] = mContext.getResources().getStringArray(
@@ -22079,7 +22077,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         for (String packageName : apkList) {
             setSystemAppHiddenUntilInstalled(packageName, true);
-            setSystemAppInstallState(packageName, false, ActivityManager.getCurrentUser());
+            for (UserInfo user : sUserManager.getUsers(false)) {
+                setSystemAppInstallState(packageName, false, user.id);
+            }
         }
     }
 

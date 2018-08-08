@@ -236,6 +236,9 @@
     <!-- Height of search panel including navigation bar height -->
     <dimen name="navbar_search_panel_height">230dip</dimen>
 
+    <!-- Move the back button drawable for 3 button layout upwards in ime mode and in portrait -->
+    <dimen name="navbar_back_button_ime_offset">2dp</dimen>
+
     <!-- Height of the draggable handle at the bottom of the phone notification panel -->
     <dimen name="close_handle_height">36dp</dimen>
 

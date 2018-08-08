@@ -1173,6 +1173,8 @@ doc_defaults {
     srcs_lib_whitelist_dirs: frameworks_base_subdirs,
     srcs_lib_whitelist_pkgs: packages_to_document,
     libs: [
+        "conscrypt",
+        "bouncycastle",
         "voip-common",
         "android.test.mock",
         "android-support-annotations",
@@ -1569,7 +1571,7 @@ doc_defaults {
     metalava_annotations_enabled: true,
     metalava_previous_api: ":public-api-for-metalava-annotations",
     metalava_merge_annotations_dirs: [
-        "tools/metalava/manual",
+        "metalava-manual",
     ],
 }
 
