@@ -33,6 +33,7 @@
 #include <hidl/ServiceManagement.h>
 #include <hidl/Status.h>
 #include <hidl/HidlTransportSupport.h>
+#include <hwbinder/IPCThreadState.h>
 #include <hwbinder/ProcessState.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <nativehelper/ScopedUtfChars.h>
