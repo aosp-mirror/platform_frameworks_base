@@ -16,9 +16,11 @@
 
 package com.android.settingslib.drawer;
 
+import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_ORDER;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON_URI;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
 
@@ -65,16 +67,6 @@ public class Tile implements Parcelable {
     public ArrayList<UserHandle> userHandle = new ArrayList<>();
 
     /**
-     * Priority of the intent filter that created this tile, used for display ordering.
-     */
-    public int priority;
-
-    /**
-     * Optional key to use for this tile.
-     */
-    public String key;
-
-    /**
      * The metaData from the activity that defines this tile.
      */
     private final Bundle mMetaData;
@@ -105,9 +97,7 @@ public class Tile implements Parcelable {
             userHandle.add(UserHandle.CREATOR.createFromParcel(in));
         }
         mCategory = in.readString();
-        priority = in.readInt();
         mMetaData = in.readBundle();
-        key = in.readString();
     }
 
     @Override
@@ -127,9 +117,7 @@ public class Tile implements Parcelable {
             userHandle.get(i).writeToParcel(dest, flags);
         }
         dest.writeString(mCategory);
-        dest.writeInt(priority);
         dest.writeBundle(mMetaData);
-        dest.writeString(key);
     }
 
     public String getPackageName() {
@@ -155,14 +143,41 @@ public class Tile implements Parcelable {
     }
 
     /**
-     * Priority of the intent filter that created this tile, used for display ordering.
+     * Priority of this tile, used for display ordering.
      */
-    public int getPriority() {
-        return 0;
+    public int getOrder() {
+        if (hasOrder()) {
+            return mMetaData.getInt(META_DATA_KEY_ORDER);
+        } else {
+            return 0;
+        }
+    }
+
+    public boolean hasOrder() {
+        return mMetaData.containsKey(META_DATA_KEY_ORDER)
+                && mMetaData.get(META_DATA_KEY_ORDER) instanceof Integer;
     }
 
     public Bundle getMetaData() {
         return mMetaData;
+    }
+
+    /**
+     * Optional key to use for this tile.
+     */
+    public String getKey(Context context) {
+        if (!hasKey()) {
+            return null;
+        }
+        if (mMetaData.get(META_DATA_PREFERENCE_KEYHINT) instanceof Integer) {
+            return context.getResources().getString(mMetaData.getInt(META_DATA_PREFERENCE_KEYHINT));
+        } else {
+            return mMetaData.getString(META_DATA_PREFERENCE_KEYHINT);
+        }
+    }
+
+    public boolean hasKey() {
+        return mMetaData != null && mMetaData.containsKey(META_DATA_PREFERENCE_KEYHINT);
     }
 
     /**
@@ -238,5 +253,5 @@ public class Tile implements Parcelable {
     }
 
     public static final Comparator<Tile> TILE_COMPARATOR =
-            (lhs, rhs) -> rhs.priority - lhs.priority;
+            (lhs, rhs) -> rhs.getOrder() - lhs.getOrder();
 }

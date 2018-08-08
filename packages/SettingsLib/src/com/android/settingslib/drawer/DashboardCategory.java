@@ -94,17 +94,18 @@ public class DashboardCategory implements Parcelable {
      * Sort priority value and package name for tiles in this category.
      */
     public synchronized void sortTiles(String skipPackageName) {
-        // Sort mTiles based on [priority, package within priority]
+        // Sort mTiles based on [order, package within order]
         Collections.sort(mTiles, (tile1, tile2) -> {
+            // First sort by order
+            final int orderCompare = tile2.getOrder() - tile1.getOrder();
+            if (orderCompare != 0) {
+                return orderCompare;
+            }
+
+            // Then sort by package name, skip package take precedence
             final String package1 = tile1.getPackageName();
             final String package2 = tile2.getPackageName();
             final int packageCompare = CASE_INSENSITIVE_ORDER.compare(package1, package2);
-            // First sort by priority
-            final int priorityCompare = tile2.priority - tile1.priority;
-            if (priorityCompare != 0) {
-                return priorityCompare;
-            }
-            // Then sort by package name, skip package take precedence
             if (packageCompare != 0) {
                 if (TextUtils.equals(package1, skipPackageName)) {
                     return -1;
