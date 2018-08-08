@@ -20,9 +20,9 @@ import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
@@ -290,6 +290,13 @@ public final class PermissionsState {
         return false;
     }
 
+    /**
+     * Returns whether the state has any known request for the given permission name,
+     * whether or not it has been granted.
+     */
+    public boolean hasRequestedPermission(String name) {
+        return mPermissions != null && (mPermissions.get(name) != null);
+    }
     /**
      * Gets all permissions for a given device user id regardless if they
      * are install time or runtime permissions.
