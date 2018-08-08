@@ -159,8 +159,10 @@ class LinkCommand : public Command {
         &options_.manifest_fixer_options.target_sdk_version_default);
     AddOptionalFlag("--version-code",
         "Version code (integer) to inject into the AndroidManifest.xml if none is\n"
-            "present.",
-        &options_.manifest_fixer_options.version_code_default);
+            "present.", &options_.manifest_fixer_options.version_code_default);
+    AddOptionalFlag("--version-code-major",
+        "Version code major (integer) to inject into the AndroidManifest.xml if none is\n"
+            "present.", &options_.manifest_fixer_options.version_code_major_default);
     AddOptionalFlag("--version-name",
         "Version name to inject into the AndroidManifest.xml if none is present.",
         &options_.manifest_fixer_options.version_name_default);

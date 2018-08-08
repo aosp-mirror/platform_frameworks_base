@@ -282,6 +282,17 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
       }
     }
 
+    if (options_.version_code_major_default) {
+      if (options_.replace_version) {
+        el->RemoveAttribute(xml::kSchemaAndroid, "versionCodeMajor");
+      }
+      if (el->FindAttribute(xml::kSchemaAndroid, "versionCodeMajor") == nullptr) {
+        el->attributes.push_back(
+            xml::Attribute{xml::kSchemaAndroid, "versionCodeMajor",
+                           options_.version_code_major_default.value()});
+      }
+    }
+
     if (el->FindAttribute("", "platformBuildVersionCode") == nullptr) {
       auto versionCode = el->FindAttribute(xml::kSchemaAndroid, "versionCode");
       if (versionCode != nullptr) {

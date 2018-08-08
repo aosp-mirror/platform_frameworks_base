@@ -329,6 +329,7 @@ TEST_F(ManifestFixerTest, UseDefaultVersionNameAndCode) {
   ManifestFixerOptions options;
   options.version_name_default = std::string("Beta");
   options.version_code_default = std::string("0x10000000");
+  options.version_code_major_default = std::string("0x20000000");
 
   std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
       <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -347,136 +348,199 @@ TEST_F(ManifestFixerTest, UseDefaultVersionNameAndCode) {
   attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode");
   ASSERT_THAT(attr, NotNull());
   EXPECT_THAT(attr->value, StrEq("0x10000000"));
+
+  attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCodeMajor");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("0x20000000"));
 }
 
 TEST_F(ManifestFixerTest, DontUseDefaultVersionNameAndCode) {
-ManifestFixerOptions options;
-options.version_name_default = std::string("Beta");
-options.version_code_default = std::string("0x10000000");
+  ManifestFixerOptions options;
+  options.version_name_default = std::string("Beta");
+  options.version_code_default = std::string("0x10000000");
+  options.version_code_major_default = std::string("0x20000000");
 
-std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
-      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                package="android"
-                android:versionCode="0x20000000"
-                android:versionName="Alpha" />)EOF",
-                                                          options);
-ASSERT_THAT(doc, NotNull());
+  std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                  package="android"
+                  android:versionCode="0x00000001"
+                  android:versionCodeMajor="0x00000002"
+                  android:versionName="Alpha" />)EOF",
+                                                            options);
+  ASSERT_THAT(doc, NotNull());
 
-xml::Element* manifest_el = doc->root.get();
-ASSERT_THAT(manifest_el, NotNull());
+  xml::Element* manifest_el = doc->root.get();
+  ASSERT_THAT(manifest_el, NotNull());
 
-xml::Attribute* attr =
-    manifest_el->FindAttribute(xml::kSchemaAndroid, "versionName");
-ASSERT_THAT(attr, NotNull());
-EXPECT_THAT(attr->value, StrEq("Alpha"));
+  xml::Attribute* attr =
+      manifest_el->FindAttribute(xml::kSchemaAndroid, "versionName");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("Alpha"));
 
-attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode");
-ASSERT_THAT(attr, NotNull());
-EXPECT_THAT(attr->value, StrEq("0x20000000"));
+  attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("0x00000001"));
+
+  attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCodeMajor");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("0x00000002"));
 }
 
 TEST_F(ManifestFixerTest, ReplaceVersionNameAndCode) {
-ManifestFixerOptions options;
-options.replace_version = true;
-options.version_name_default = std::string("Beta");
-options.version_code_default = std::string("0x10000000");
+  ManifestFixerOptions options;
+  options.replace_version = true;
+  options.version_name_default = std::string("Beta");
+  options.version_code_default = std::string("0x10000000");
+  options.version_code_major_default = std::string("0x20000000");
 
-std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
-    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-              package="android"
-              android:versionCode="0x20000000"
-              android:versionName="Alpha" />)EOF",
-                                                          options);
-ASSERT_THAT(doc, NotNull());
+  std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                package="android"
+                android:versionCode="0x00000001"
+                android:versionCodeMajor="0x00000002"
+                android:versionName="Alpha" />)EOF",
+                                                            options);
+  ASSERT_THAT(doc, NotNull());
 
-xml::Element* manifest_el = doc->root.get();
-ASSERT_THAT(manifest_el, NotNull());
+  xml::Element* manifest_el = doc->root.get();
+  ASSERT_THAT(manifest_el, NotNull());
 
-xml::Attribute* attr =
-    manifest_el->FindAttribute(xml::kSchemaAndroid, "versionName");
-ASSERT_THAT(attr, NotNull());
-EXPECT_THAT(attr->value, StrEq("Beta"));
+  xml::Attribute* attr =
+      manifest_el->FindAttribute(xml::kSchemaAndroid, "versionName");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("Beta"));
 
-attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode");
-ASSERT_THAT(attr, NotNull());
-EXPECT_THAT(attr->value, StrEq("0x10000000"));
+  attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("0x10000000"));
+
+  attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCodeMajor");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("0x20000000"));
 }
 
 TEST_F(ManifestFixerTest, ReplaceVersionName) {
-ManifestFixerOptions options;
-options.replace_version = true;
-options.version_name_default = std::string("Beta");
+  ManifestFixerOptions options;
+  options.replace_version = true;
+  options.version_name_default = std::string("Beta");
 
-std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
-  <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-            package="android"
-            android:versionCode="0x20000000"
-            android:versionName="Alpha" />)EOF",
-                                                          options);
-ASSERT_THAT(doc, NotNull());
 
-xml::Element* manifest_el = doc->root.get();
-ASSERT_THAT(manifest_el, NotNull());
+  std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+              package="android"
+              android:versionCode="0x00000001"
+              android:versionCodeMajor="0x00000002"
+              android:versionName="Alpha" />)EOF",
+                                                            options);
+  ASSERT_THAT(doc, NotNull());
 
-xml::Attribute* attr =
-    manifest_el->FindAttribute(xml::kSchemaAndroid, "versionName");
-ASSERT_THAT(attr, NotNull());
-EXPECT_THAT(attr->value, StrEq("Beta"));
+  xml::Element* manifest_el = doc->root.get();
+  ASSERT_THAT(manifest_el, NotNull());
 
-attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode");
-ASSERT_THAT(attr, NotNull());
-EXPECT_THAT(attr->value, StrEq("0x20000000"));
+  xml::Attribute* attr =
+      manifest_el->FindAttribute(xml::kSchemaAndroid, "versionName");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("Beta"));
+
+  attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("0x00000001"));
+
+  attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCodeMajor");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("0x00000002"));
 }
 
 TEST_F(ManifestFixerTest, ReplaceVersionCode) {
-ManifestFixerOptions options;
-options.replace_version = true;
-options.version_code_default = std::string("0x10000000");
+  ManifestFixerOptions options;
+  options.replace_version = true;
+  options.version_code_default = std::string("0x10000000");
 
-std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
+  std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+              package="android"
+              android:versionCode="0x00000001"
+              android:versionCodeMajor="0x00000002"
+              android:versionName="Alpha" />)EOF",
+                                                            options);
+  ASSERT_THAT(doc, NotNull());
+
+  xml::Element* manifest_el = doc->root.get();
+  ASSERT_THAT(manifest_el, NotNull());
+
+  xml::Attribute* attr =
+      manifest_el->FindAttribute(xml::kSchemaAndroid, "versionName");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("Alpha"));
+
+  attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("0x10000000"));
+
+  attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCodeMajor");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("0x00000002"));
+}
+
+TEST_F(ManifestFixerTest, ReplaceVersionCodeMajor) {
+  ManifestFixerOptions options;
+  options.replace_version = true;
+  options.version_code_major_default = std::string("0x20000000");
+
+  std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
   <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-            package="android"
-            android:versionCode="0x20000000"
-            android:versionName="Alpha" />)EOF",
-                                                          options);
-ASSERT_THAT(doc, NotNull());
+          package="android"
+          android:versionCode="0x00000001"
+          android:versionCodeMajor="0x00000002"
+          android:versionName="Alpha" />)EOF",
+                                                            options);
+  ASSERT_THAT(doc, NotNull());
 
-xml::Element* manifest_el = doc->root.get();
-ASSERT_THAT(manifest_el, NotNull());
+  xml::Element* manifest_el = doc->root.get();
+  ASSERT_THAT(manifest_el, NotNull());
 
-xml::Attribute* attr =
-    manifest_el->FindAttribute(xml::kSchemaAndroid, "versionName");
-ASSERT_THAT(attr, NotNull());
-EXPECT_THAT(attr->value, StrEq("Alpha"));
+  xml::Attribute* attr =
+      manifest_el->FindAttribute(xml::kSchemaAndroid, "versionName");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("Alpha"));
 
-attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode");
-ASSERT_THAT(attr, NotNull());
-EXPECT_THAT(attr->value, StrEq("0x10000000"));
+  attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("0x00000001"));
+
+  attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCodeMajor");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("0x20000000"));
 }
 
 TEST_F(ManifestFixerTest, DontReplaceVersionNameOrCode) {
-ManifestFixerOptions options;
-options.replace_version = true;
+  ManifestFixerOptions options;
+  options.replace_version = true;
 
-std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="android"
-          android:versionCode="0x20000000"
-          android:versionName="Alpha" />)EOF",
-                                                          options);
-ASSERT_THAT(doc, NotNull());
+  std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
+  <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+            package="android"
+            android:versionCode="0x00000001"
+            android:versionCodeMajor="0x00000002"
+            android:versionName="Alpha" />)EOF",
+                                                            options);
+  ASSERT_THAT(doc, NotNull());
 
-xml::Element* manifest_el = doc->root.get();
-ASSERT_THAT(manifest_el, NotNull());
+  xml::Element* manifest_el = doc->root.get();
+  ASSERT_THAT(manifest_el, NotNull());
 
-xml::Attribute* attr =
-    manifest_el->FindAttribute(xml::kSchemaAndroid, "versionName");
-ASSERT_THAT(attr, NotNull());
-EXPECT_THAT(attr->value, StrEq("Alpha"));
+  xml::Attribute* attr =
+      manifest_el->FindAttribute(xml::kSchemaAndroid, "versionName");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("Alpha"));
 
-attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode");
-ASSERT_THAT(attr, NotNull());
-EXPECT_THAT(attr->value, StrEq("0x20000000"));
+  attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("0x00000001"));
+
+  attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCodeMajor");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("0x00000002"));
 }
 
 TEST_F(ManifestFixerTest, EnsureManifestAttributesAreTyped) {
