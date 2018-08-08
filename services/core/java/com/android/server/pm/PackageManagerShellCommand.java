@@ -2418,30 +2418,30 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int doWriteSplit(int sessionId, String inPath, long sizeBytes, String splitName,
             boolean logSuccess) throws RemoteException {
-        final PrintWriter pw = getOutPrintWriter();
-        final ParcelFileDescriptor fd;
-        if (STDIN_PATH.equals(inPath)) {
-            fd = new ParcelFileDescriptor(getInFileDescriptor());
-        } else if (inPath != null) {
-            fd = openFileForSystem(inPath, "r");
-            if (fd == null) {
-                return -1;
-            }
-            sizeBytes = fd.getStatSize();
-            if (sizeBytes < 0) {
-                getErrPrintWriter().println("Unable to get size of: " + inPath);
-                return -1;
-            }
-        } else {
-            fd = new ParcelFileDescriptor(getInFileDescriptor());
-        }
-        if (sizeBytes <= 0) {
-            getErrPrintWriter().println("Error: must specify a APK size");
-            return 1;
-        }
-
         PackageInstaller.Session session = null;
         try {
+            final PrintWriter pw = getOutPrintWriter();
+            final ParcelFileDescriptor fd;
+            if (STDIN_PATH.equals(inPath)) {
+                fd = ParcelFileDescriptor.dup(getInFileDescriptor());
+            } else if (inPath != null) {
+                fd = openFileForSystem(inPath, "r");
+                if (fd == null) {
+                    return -1;
+                }
+                sizeBytes = fd.getStatSize();
+                if (sizeBytes < 0) {
+                    getErrPrintWriter().println("Unable to get size of: " + inPath);
+                    return -1;
+                }
+            } else {
+                fd = ParcelFileDescriptor.dup(getInFileDescriptor());
+            }
+            if (sizeBytes <= 0) {
+                getErrPrintWriter().println("Error: must specify a APK size");
+                return 1;
+            }
+
             session = new PackageInstaller.Session(
                     mInterface.getPackageInstaller().openSession(sessionId));
             session.write(splitName, 0, sizeBytes, fd);
