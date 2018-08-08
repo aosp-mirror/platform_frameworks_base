@@ -16,6 +16,7 @@
 
 package android.net.metrics;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -34,6 +35,7 @@ public final class DhcpClientEvent implements Parcelable {
     public final String msg;
     public final int durationMs;
 
+    @UnsupportedAppUsage
     public DhcpClientEvent(String msg, int durationMs) {
         this.msg = msg;
         this.durationMs = durationMs;

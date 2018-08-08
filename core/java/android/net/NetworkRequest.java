@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.net.NetworkCapabilities.NetCapability;
 import android.net.NetworkCapabilities.Transport;
 import android.os.Parcel;
@@ -38,6 +39,7 @@ public class NetworkRequest implements Parcelable {
      * The {@link NetworkCapabilities} that define this request.
      * @hide
      */
+    @UnsupportedAppUsage
     public final @NonNull NetworkCapabilities networkCapabilities;
 
     /**
@@ -46,6 +48,7 @@ public class NetworkRequest implements Parcelable {
      * the request.
      * @hide
      */
+    @UnsupportedAppUsage
     public final int requestId;
 
     /**
@@ -53,6 +56,7 @@ public class NetworkRequest implements Parcelable {
      * Causes CONNECTIVITY_ACTION broadcasts to be sent.
      * @hide
      */
+    @UnsupportedAppUsage
     public final int legacyType;
 
     /**
@@ -241,6 +245,7 @@ public class NetworkRequest implements Parcelable {
          * @return The builder to facilitate chaining.
          * @hide
          */
+        @UnsupportedAppUsage
         public Builder clearCapabilities() {
             mNetworkCapabilities.clearAll();
             return this;
@@ -339,6 +344,7 @@ public class NetworkRequest implements Parcelable {
          * @param signalStrength the bearer-specific signal strength.
          * @hide
          */
+        @UnsupportedAppUsage
         public Builder setSignalStrength(int signalStrength) {
             mNetworkCapabilities.setSignalStrength(signalStrength);
             return this;

@@ -16,6 +16,7 @@
 
 package android.net.wifi.p2p;
 
+import android.annotation.UnsupportedAppUsage;
 import android.net.wifi.WpsInfo;
 import android.os.Parcelable;
 import android.os.Parcel;
@@ -40,6 +41,7 @@ public class WifiP2pConfig implements Parcelable {
     /** @hide */
     public static final int MAX_GROUP_OWNER_INTENT   =   15;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int MIN_GROUP_OWNER_INTENT   =   0;
 
     /**
@@ -52,6 +54,7 @@ public class WifiP2pConfig implements Parcelable {
     public int groupOwnerIntent = -1;
 
     /** @hide */
+    @UnsupportedAppUsage
     public int netId = WifiP2pGroup.PERSISTENT_NET_ID;
 
     public WifiP2pConfig() {
@@ -66,6 +69,7 @@ public class WifiP2pConfig implements Parcelable {
     }
 
     /** P2P-GO-NEG-REQUEST 42:fc:89:a8:96:09 dev_passwd_id=4 {@hide}*/
+    @UnsupportedAppUsage
     public WifiP2pConfig(String supplicantEvent) throws IllegalArgumentException {
         String[] tokens = supplicantEvent.split(" ");
 

@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -129,6 +130,7 @@ public class NetworkInfo implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public NetworkInfo(int type, int subtype, String typeName, String subtypeName) {
         if (!ConnectivityManager.isNetworkTypeValid(type)
                 && type != ConnectivityManager.TYPE_NONE) {
@@ -143,6 +145,7 @@ public class NetworkInfo implements Parcelable {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public NetworkInfo(NetworkInfo source) {
         if (source != null) {
             synchronized (source) {
@@ -209,6 +212,7 @@ public class NetworkInfo implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setSubtype(int subtype, String subtypeName) {
         synchronized (this) {
             mSubtype = subtype;
@@ -317,6 +321,7 @@ public class NetworkInfo implements Parcelable {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void setIsAvailable(boolean isAvailable) {
         synchronized (this) {
             mIsAvailable = isAvailable;
@@ -347,6 +352,7 @@ public class NetworkInfo implements Parcelable {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void setFailover(boolean isFailover) {
         synchronized (this) {
             mIsFailover = isFailover;
@@ -377,6 +383,7 @@ public class NetworkInfo implements Parcelable {
      */
     @VisibleForTesting
     @Deprecated
+    @UnsupportedAppUsage
     public void setRoaming(boolean isRoaming) {
         synchronized (this) {
             mIsRoaming = isRoaming;
@@ -422,6 +429,7 @@ public class NetworkInfo implements Parcelable {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void setDetailedState(DetailedState detailedState, String reason, String extraInfo) {
         synchronized (this) {
             this.mDetailedState = detailedState;

@@ -16,6 +16,7 @@
 
 package android.net.http;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.format.DateFormat;
@@ -77,6 +78,7 @@ public class SslCertificate {
      * be available, and saveState and restoreState can be simplified
      * to be unconditional.
      */
+    @UnsupportedAppUsage
     private final X509Certificate mX509Certificate;
 
     /**
@@ -257,6 +259,7 @@ public class SslCertificate {
     /**
      * Convenience for UI presentation, not intended as public API.
      */
+    @UnsupportedAppUsage
     private static String getSerialNumber(X509Certificate x509Certificate) {
         if (x509Certificate == null) {
             return "";
@@ -271,6 +274,7 @@ public class SslCertificate {
     /**
      * Convenience for UI presentation, not intended as public API.
      */
+    @UnsupportedAppUsage
     private static String getDigest(X509Certificate x509Certificate, String algorithm) {
         if (x509Certificate == null) {
             return "";
@@ -454,6 +458,7 @@ public class SslCertificate {
      *
      * @hide Used by Browser and Settings
      */
+    @UnsupportedAppUsage
     public View inflateCertificateView(Context context) {
         LayoutInflater factory = LayoutInflater.from(context);
 

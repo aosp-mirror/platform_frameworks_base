@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -55,6 +56,7 @@ public final class RouteInfo implements Parcelable {
     /**
      * The gateway address for this route.
      */
+    @UnsupportedAppUsage
     private final InetAddress mGateway;
 
     /**
@@ -79,6 +81,7 @@ public final class RouteInfo implements Parcelable {
 
     // Derived data members.
     // TODO: remove these.
+    @UnsupportedAppUsage
     private final boolean mIsHost;
     private final boolean mHasGateway;
 
@@ -160,6 +163,7 @@ public final class RouteInfo implements Parcelable {
     /**
      *  @hide
      */
+    @UnsupportedAppUsage
     public RouteInfo(IpPrefix destination, InetAddress gateway, String iface) {
         this(destination, gateway, iface, RTN_UNICAST);
     }
@@ -167,6 +171,7 @@ public final class RouteInfo implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public RouteInfo(LinkAddress destination, InetAddress gateway, String iface) {
         this(destination == null ? null :
                 new IpPrefix(destination.getAddress(), destination.getPrefixLength()),
@@ -197,6 +202,7 @@ public final class RouteInfo implements Parcelable {
      *
      * TODO: Remove this.
      */
+    @UnsupportedAppUsage
     public RouteInfo(LinkAddress destination, InetAddress gateway) {
         this(destination, gateway, null);
     }
@@ -208,6 +214,7 @@ public final class RouteInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public RouteInfo(InetAddress gateway) {
         this((IpPrefix) null, gateway, null);
     }
@@ -258,6 +265,7 @@ public final class RouteInfo implements Parcelable {
         }
     }
 
+    @UnsupportedAppUsage
     private boolean isHost() {
         return (mDestination.getAddress() instanceof Inet4Address &&
                 mDestination.getPrefixLength() == 32) ||
@@ -355,6 +363,7 @@ public final class RouteInfo implements Parcelable {
      * @return {@code true} if a gateway is specified
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean hasGateway() {
         return mHasGateway;
     }
@@ -379,6 +388,7 @@ public final class RouteInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static RouteInfo selectBestRoute(Collection<RouteInfo> routes, InetAddress dest) {
         if ((routes == null) || (dest == null)) return null;
 

@@ -18,6 +18,7 @@ package android.net;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
@@ -106,6 +107,7 @@ public final class Proxy {
      *         A null value means that no host is to be used.
      * {@hide}
      */
+    @UnsupportedAppUsage
     public static final java.net.Proxy getProxy(Context ctx, String url) {
         String host = "";
         if ((url != null) && !isLocalHost(host)) {
@@ -239,6 +241,7 @@ public final class Proxy {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static final void setHttpProxySystemProperty(ProxyInfo p) {
         String host = null;
         String port = null;

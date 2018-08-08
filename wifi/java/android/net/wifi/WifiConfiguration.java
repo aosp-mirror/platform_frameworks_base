@@ -18,6 +18,7 @@ package android.net.wifi;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.PackageManager;
 import android.net.IpConfiguration;
 import android.net.IpConfiguration.ProxySettings;
@@ -61,6 +62,7 @@ public class WifiConfiguration implements Parcelable {
     public static final String pskVarName = "psk";
     /** {@hide} */
     @Deprecated
+    @UnsupportedAppUsage
     public static final String[] wepKeyVarNames = { "wep_key0", "wep_key1", "wep_key2", "wep_key3" };
     /** {@hide} */
     @Deprecated
@@ -305,6 +307,7 @@ public class WifiConfiguration implements Parcelable {
      * By default, 2G is chosen
      * @hide
      */
+    @UnsupportedAppUsage
     public int apBand = AP_BAND_2GHZ;
 
     /**
@@ -314,6 +317,7 @@ public class WifiConfiguration implements Parcelable {
      * 0 - find a random available channel according to the apBand
      * @hide
      */
+    @UnsupportedAppUsage
     public int apChannel = 0;
 
     /**
@@ -438,12 +442,14 @@ public class WifiConfiguration implements Parcelable {
      * This network configuration is visible to and usable by other users on the
      * same device.
      */
+    @UnsupportedAppUsage
     public boolean shared;
 
     /**
      * @hide
      */
     @NonNull
+    @UnsupportedAppUsage
     private IpConfiguration mIpConfiguration;
 
     /**
@@ -456,12 +462,14 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      * default Gateway MAC address if known
      */
+    @UnsupportedAppUsage
     public String defaultGwMacAddress;
 
     /**
      * @hide
      * last time we connected, this configuration had validated internet access
      */
+    @UnsupportedAppUsage
     public boolean validatedInternetAccess;
 
     /**
@@ -491,6 +499,7 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      * Uid of last app issuing a connection related command
      */
+    @UnsupportedAppUsage
     public int lastConnectUid;
 
     /**
@@ -533,6 +542,7 @@ public class WifiConfiguration implements Parcelable {
      *  the network we need to be before autojoin kicks in
      */
     /** @hide **/
+    @UnsupportedAppUsage
     public static int INVALID_RSSI = -127;
 
     // States for the userApproved field
@@ -561,6 +571,7 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      * Number of reports indicating no Internet Access
      */
+    @UnsupportedAppUsage
     public int numNoInternetAccessReports;
 
     /**
@@ -592,6 +603,7 @@ public class WifiConfiguration implements Parcelable {
      * this configuration and selects "don't ask again".
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean noInternetAccessExpected;
 
     /**
@@ -624,6 +636,7 @@ public class WifiConfiguration implements Parcelable {
      * since we will now consider that the configuration belong to him.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean selfAdded;
 
     /**
@@ -1557,6 +1570,7 @@ public class WifiConfiguration implements Parcelable {
      * Helper function, idenfity if a configuration should be treated as an enterprise network
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isEnterprise() {
         return (allowedKeyManagement.get(KeyMgmt.WPA_EAP)
                 || allowedKeyManagement.get(KeyMgmt.IEEE8021X))
@@ -1740,6 +1754,7 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public String getPrintableSsid() {
         if (SSID == null) return "";
         final int length = SSID.length();
@@ -1840,6 +1855,7 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getAuthType() {
         if (allowedKeyManagement.cardinality() > 1) {
             throw new IllegalStateException("More than one auth type set");
@@ -1902,42 +1918,50 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public IpConfiguration getIpConfiguration() {
         return mIpConfiguration;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setIpConfiguration(IpConfiguration ipConfiguration) {
         if (ipConfiguration == null) ipConfiguration = new IpConfiguration();
         mIpConfiguration = ipConfiguration;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public StaticIpConfiguration getStaticIpConfiguration() {
         return mIpConfiguration.getStaticIpConfiguration();
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setStaticIpConfiguration(StaticIpConfiguration staticIpConfiguration) {
         mIpConfiguration.setStaticIpConfiguration(staticIpConfiguration);
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public IpConfiguration.IpAssignment getIpAssignment() {
         return mIpConfiguration.ipAssignment;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setIpAssignment(IpConfiguration.IpAssignment ipAssignment) {
         mIpConfiguration.ipAssignment = ipAssignment;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public IpConfiguration.ProxySettings getProxySettings() {
         return mIpConfiguration.proxySettings;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setProxySettings(IpConfiguration.ProxySettings proxySettings) {
         mIpConfiguration.proxySettings = proxySettings;
     }
@@ -1991,6 +2015,7 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setProxy(ProxySettings settings, ProxyInfo proxy) {
         mIpConfiguration.proxySettings = settings;
         mIpConfiguration.httpProxy = proxy;
@@ -2012,6 +2037,7 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /** copy constructor {@hide} */
+    @UnsupportedAppUsage
     public WifiConfiguration(WifiConfiguration source) {
         if (source != null) {
             networkId = source.networkId;
@@ -2149,6 +2175,7 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /** Implement the Parcelable interface {@hide} */
+    @UnsupportedAppUsage
     public static final Creator<WifiConfiguration> CREATOR =
         new Creator<WifiConfiguration>() {
             public WifiConfiguration createFromParcel(Parcel in) {
