@@ -202,17 +202,9 @@ static void android_view_InputChannel_nativeReadFromParcel(JNIEnv* env, jobject 
     if (parcel) {
         bool isInitialized = parcel->readInt32();
         if (isInitialized) {
-            String8 name = parcel->readString8();
-            int rawFd = parcel->readFileDescriptor();
-            int dupFd = dup(rawFd);
-            if (dupFd < 0) {
-                ALOGE("Error %d dup channel fd %d.", errno, rawFd);
-                jniThrowRuntimeException(env,
-                        "Could not read input channel file descriptors from parcel.");
-                return;
-            }
+            InputChannel* inputChannel = new InputChannel();
+            inputChannel->read(*parcel);
 
-            InputChannel* inputChannel = new InputChannel(name.string(), dupFd);
             NativeInputChannel* nativeInputChannel = new NativeInputChannel(inputChannel);
 
             android_view_InputChannel_setNativeInputChannel(env, obj, nativeInputChannel);
@@ -230,8 +222,7 @@ static void android_view_InputChannel_nativeWriteToParcel(JNIEnv* env, jobject o
             sp<InputChannel> inputChannel = nativeInputChannel->getInputChannel();
 
             parcel->writeInt32(1);
-            parcel->writeString8(String8(inputChannel->getName().c_str()));
-            parcel->writeDupFileDescriptor(inputChannel->getFd());
+            inputChannel->write(*parcel);
         } else {
             parcel->writeInt32(0);
         }
