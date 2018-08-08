@@ -781,6 +781,12 @@ message StaEvent {
 
     // Framework changed Sta interface MAC address
     TYPE_MAC_CHANGE = 17;
+
+    // Wifi is turned on
+    TYPE_WIFI_ENABLED = 18;
+
+    // Wifi is turned off
+    TYPE_WIFI_DISABLED = 19;
   }
 
   enum FrameworkDisconnectReason {
