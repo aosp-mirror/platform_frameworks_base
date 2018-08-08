@@ -7722,6 +7722,9 @@ public class DevicePolicyManager {
      * LockTask mode will be registered, but will only take effect when the device leaves LockTask
      * mode.
      *
+     * <p>This policy does not have any effect while on the lock screen, where the status bar will
+     * not be disabled. Using LockTask instead of this method is recommended.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param disabled {@code true} disables the status bar, {@code false} reenables it.
      * @return {@code false} if attempting to disable the status bar failed. {@code true} otherwise.
