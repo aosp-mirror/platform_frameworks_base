@@ -145,7 +145,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
 
     private final Listener mListener;
     private final Context mContext;  // Retained for on-demand construction of GestureDetector.
-    protected GestureDetector mGestureDetector;  // Double-tap detector. Visible for test.
+    private final GestureDetector mGestureDetector;  // Double-tap detector.
 
     // Indicates that a single tap has occurred.
     private boolean mFirstTapDetected;
@@ -216,10 +216,34 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
     // cancelled.
     private static final long CANCEL_ON_PAUSE_THRESHOLD_STARTED_MS = 300;
 
+    /**
+     * Construct the gesture detector for {@link TouchExplorer}.
+     *
+     * @see #AccessibilityGestureDetector(Context, Listener, GestureDetector)
+     */
     AccessibilityGestureDetector(Context context, Listener listener) {
+        this(context, listener, null);
+    }
+
+    /**
+     * Construct the gesture detector for {@link TouchExplorer}.
+     *
+     * @param context A context handle for accessing resources.
+     * @param listener A listener to callback with gesture state or information.
+     * @param detector The gesture detector to handle touch event. If null the default one created
+     *                 in place, or for testing purpose.
+     */
+    AccessibilityGestureDetector(Context context, Listener listener, GestureDetector detector) {
         mListener = listener;
         mContext = context;
 
+        // Break the circular dependency between constructors and let the class to be testable
+        if (detector == null) {
+            mGestureDetector = new GestureDetector(context, this);
+        } else {
+            mGestureDetector = detector;
+        }
+        mGestureDetector.setOnDoubleTapListener(this);
         mGestureDetectionThreshold = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 1,
                 context.getResources().getDisplayMetrics()) * GESTURE_CONFIRM_MM;
 
@@ -244,18 +268,6 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
      * @return true if the event is consumed, else false
      */
     public boolean onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-
-        // Construct GestureDetector double-tap detector on demand, so that testable sub-class
-        // can use mock GestureDetector.
-        // TODO: Break the circular dependency between GestureDetector's constructor and
-        // AccessibilityGestureDetector's constructor. Construct GestureDetector in TouchExplorer,
-        // using a GestureDetector listener owned by TouchExplorer, which passes double-tap state
-        // information to AccessibilityGestureDetector.
-        if (mGestureDetector == null) {
-            mGestureDetector = new GestureDetector(mContext, this);
-            mGestureDetector.setOnDoubleTapListener(this);
-        }
-
         // The accessibility gesture detector is interested in the movements in physical space,
         // so it uses the rawEvent to ignore magnification and other transformations.
         final float x = rawEvent.getX();

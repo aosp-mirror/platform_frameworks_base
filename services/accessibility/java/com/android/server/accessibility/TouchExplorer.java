@@ -165,8 +165,9 @@ class TouchExplorer extends BaseEventStreamTransformation
     /**
      * Creates a new instance.
      *
-     * @param inputFilter The input filter associated with this explorer.
      * @param context A context handle for accessing resources.
+     * @param service The service to notify touch interaction and gesture completed and to perform
+     *                action.
      */
     public TouchExplorer(Context context, AccessibilityManagerService service) {
         mContext = context;
@@ -1311,7 +1312,20 @@ class TouchExplorer extends BaseEventStreamTransformation
 
     @Override
     public String toString() {
-        return LOG_TAG;
+        return "TouchExplorer { " +
+                "mCurrentState: " + getStateSymbolicName(mCurrentState) +
+                ", mDetermineUserIntentTimeout: " + mDetermineUserIntentTimeout +
+                ", mDoubleTapSlop: " + mDoubleTapSlop +
+                ", mDraggingPointerId: " + mDraggingPointerId +
+                ", mLongPressingPointerId: " + mLongPressingPointerId +
+                ", mLongPressingPointerDeltaX: " + mLongPressingPointerDeltaX +
+                ", mLongPressingPointerDeltaY: " + mLongPressingPointerDeltaY +
+                ", mLastTouchedWindowId: " + mLastTouchedWindowId +
+                ", mScaledMinPointerDistanceToUseMiddleLocation: "
+                + mScaledMinPointerDistanceToUseMiddleLocation +
+                ", mTempPoint: " + mTempPoint +
+                ", mTouchExplorationInProgress: " + mTouchExplorationInProgress +
+                " }";
     }
 
     class InjectedPointerTracker {
