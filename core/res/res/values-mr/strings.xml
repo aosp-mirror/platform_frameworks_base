@@ -1842,7 +1842,7 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"डेमो प्रारंभ करत आहे..."</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"डिव्हाइस रीसेट करत आहे..."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> अक्षम केले"</string>
-    <string name="conference_call" msgid="3751093130790472426">"परिषद कॉल"</string>
+    <string name="conference_call" msgid="3751093130790472426">"कॉन्फरन्स कॉल"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"टूलटिप"</string>
     <string name="app_category_game" msgid="5431836943981492993">"गेम"</string>
     <string name="app_category_audio" msgid="1659853108734301647">"संगीत आणि ऑडिओ"</string>

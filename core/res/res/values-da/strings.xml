@@ -267,7 +267,7 @@
     <string name="android_system_label" msgid="6577375335728551336">"Android-system"</string>
     <string name="user_owner_label" msgid="8836124313744349203">"Skift til personlig profil"</string>
     <string name="managed_profile_label" msgid="8947929265267690522">"Skift til arbejdsprofil"</string>
-    <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktpersoner"</string>
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"have adgang til dine kontaktpersoner"</string>
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Vil du give &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; adgang til dine kontaktpersoner?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Placering"</string>
