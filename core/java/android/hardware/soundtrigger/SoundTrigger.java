@@ -24,6 +24,7 @@ import static android.system.OsConstants.EPIPE;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.media.AudioFormat;
 import android.os.Handler;
 import android.os.Parcel;
@@ -72,6 +73,7 @@ public class SoundTrigger {
      ****************************************************************************/
     public static class ModuleProperties implements Parcelable {
         /** Unique module ID provided by the native service */
+        @UnsupportedAppUsage
         public final int id;
 
         /** human readable voice detection engine implementor */
@@ -81,12 +83,14 @@ public class SoundTrigger {
         public final String description;
 
         /** Unique voice engine Id (changes with each version) */
+        @UnsupportedAppUsage
         public final UUID uuid;
 
         /** Voice detection engine version */
         public final int version;
 
         /** Maximum number of active sound models */
+        @UnsupportedAppUsage
         public final int maxSoundModels;
 
         /** Maximum number of key phrases */
@@ -114,6 +118,7 @@ public class SoundTrigger {
          * recognition callback event */
         public final boolean returnsTriggerInEvent;
 
+        @UnsupportedAppUsage
         ModuleProperties(int id, String implementor, String description,
                 String uuid, int version, int maxSoundModels, int maxKeyphrases,
                 int maxUsers, int recognitionModes, boolean supportsCaptureTransition,
@@ -225,15 +230,18 @@ public class SoundTrigger {
         public static final int TYPE_GENERIC_SOUND = 1;
 
         /** Unique sound model identifier */
+        @UnsupportedAppUsage
         public final UUID uuid;
 
         /** Sound model type (e.g. TYPE_KEYPHRASE); */
         public final int type;
 
         /** Unique sound model vendor identifier */
+        @UnsupportedAppUsage
         public final UUID vendorUuid;
 
         /** Opaque data. For use by vendor implementation and enrollment application */
+        @UnsupportedAppUsage
         public final byte[] data;
 
         public SoundModel(UUID uuid, UUID vendorUuid, int type, byte[] data) {
@@ -289,21 +297,27 @@ public class SoundTrigger {
      ****************************************************************************/
     public static class Keyphrase implements Parcelable {
         /** Unique identifier for this keyphrase */
+        @UnsupportedAppUsage
         public final int id;
 
         /** Recognition modes supported for this key phrase in the model */
+        @UnsupportedAppUsage
         public final int recognitionModes;
 
         /** Locale of the keyphrase. JAVA Locale string e.g en_US */
+        @UnsupportedAppUsage
         public final String locale;
 
         /** Key phrase text */
+        @UnsupportedAppUsage
         public final String text;
 
         /** Users this key phrase has been trained for. countains sound trigger specific user IDs
          * derived from system user IDs {@link android.os.UserHandle#getIdentifier()}. */
+        @UnsupportedAppUsage
         public final int[] users;
 
+        @UnsupportedAppUsage
         public Keyphrase(int id, int recognitionModes, String locale, String text, int[] users) {
             this.id = id;
             this.recognitionModes = recognitionModes;
@@ -412,8 +426,10 @@ public class SoundTrigger {
      ****************************************************************************/
     public static class KeyphraseSoundModel extends SoundModel implements Parcelable {
         /** Key phrases in this sound model */
+        @UnsupportedAppUsage
         public final Keyphrase[] keyphrases; // keyword phrases in model
 
+        @UnsupportedAppUsage
         public KeyphraseSoundModel(
                 UUID uuid, UUID vendorUuid, byte[] data, Keyphrase[] keyphrases) {
             super(uuid, vendorUuid, TYPE_KEYPHRASE, data);
@@ -511,6 +527,7 @@ public class SoundTrigger {
             }
         };
 
+        @UnsupportedAppUsage
         public GenericSoundModel(UUID uuid, UUID vendorUuid, byte[] data) {
             super(uuid, vendorUuid, TYPE_GENERIC_SOUND, data);
         }
@@ -606,6 +623,7 @@ public class SoundTrigger {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public final int status;
         /**
          *
@@ -613,12 +631,14 @@ public class SoundTrigger {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public final int soundModelHandle;
         /**
          * True if it is possible to capture audio from this utterance buffered by the hardware
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public final boolean captureAvailable;
         /**
          * Audio session ID to be used when capturing the utterance with an AudioRecord
@@ -626,6 +646,7 @@ public class SoundTrigger {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public final int captureSession;
         /**
          * Delay in ms between end of model detection and start of audio available for capture.
@@ -659,9 +680,11 @@ public class SoundTrigger {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public final byte[] data;
 
         /** @hide */
+        @UnsupportedAppUsage
         public RecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
                 int captureSession, int captureDelayMs, int capturePreambleMs,
                 boolean triggerInData, AudioFormat captureFormat, byte[] data) {
@@ -865,6 +888,7 @@ public class SoundTrigger {
     public static class RecognitionConfig implements Parcelable {
         /** True if the DSP should capture the trigger sound and make it available for further
          * capture. */
+        @UnsupportedAppUsage
         public final boolean captureRequested;
         /**
          * True if the service should restart listening after the DSP triggers.
@@ -873,11 +897,14 @@ public class SoundTrigger {
         public final boolean allowMultipleTriggers;
         /** List of all keyphrases in the sound model for which recognition should be performed with
          * options for each keyphrase. */
+        @UnsupportedAppUsage
         public final KeyphraseRecognitionExtra keyphrases[];
         /** Opaque data for use by system applications who know about voice engine internals,
          * typically during enrollment. */
+        @UnsupportedAppUsage
         public final byte[] data;
 
+        @UnsupportedAppUsage
         public RecognitionConfig(boolean captureRequested, boolean allowMultipleTriggers,
                 KeyphraseRecognitionExtra[] keyphrases, byte[] data) {
             this.captureRequested = captureRequested;
@@ -938,9 +965,12 @@ public class SoundTrigger {
      * @hide
      */
     public static class ConfidenceLevel implements Parcelable {
+        @UnsupportedAppUsage
         public final int userId;
+        @UnsupportedAppUsage
         public final int confidenceLevel;
 
+        @UnsupportedAppUsage
         public ConfidenceLevel(int userId, int confidenceLevel) {
             this.userId = userId;
             this.confidenceLevel = confidenceLevel;
@@ -1014,19 +1044,24 @@ public class SoundTrigger {
      */
     public static class KeyphraseRecognitionExtra implements Parcelable {
         /** The keyphrase ID */
+        @UnsupportedAppUsage
         public final int id;
 
         /** Recognition modes matched for this event */
+        @UnsupportedAppUsage
         public final int recognitionModes;
 
         /** Confidence level for mode RECOGNITION_MODE_VOICE_TRIGGER when user identification
          * is not performed */
+        @UnsupportedAppUsage
         public final int coarseConfidenceLevel;
 
         /** Confidence levels for all users recognized (KeyphraseRecognitionEvent) or to
          * be recognized (RecognitionConfig) */
+        @UnsupportedAppUsage
         public final ConfidenceLevel[] confidenceLevels;
 
+        @UnsupportedAppUsage
         public KeyphraseRecognitionExtra(int id, int recognitionModes, int coarseConfidenceLevel,
                 ConfidenceLevel[] confidenceLevels) {
             this.id = id;
@@ -1114,8 +1149,10 @@ public class SoundTrigger {
      */
     public static class KeyphraseRecognitionEvent extends RecognitionEvent implements Parcelable {
         /** Indicates if the key phrase is present in the buffered audio available for capture */
+        @UnsupportedAppUsage
         public final KeyphraseRecognitionExtra[] keyphraseExtras;
 
+        @UnsupportedAppUsage
         public KeyphraseRecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
                int captureSession, int captureDelayMs, int capturePreambleMs,
                boolean triggerInData, AudioFormat captureFormat, byte[] data,
@@ -1236,6 +1273,7 @@ public class SoundTrigger {
      * @hide
      */
     public static class GenericRecognitionEvent extends RecognitionEvent implements Parcelable {
+        @UnsupportedAppUsage
         public GenericRecognitionEvent(int status, int soundModelHandle,
                 boolean captureAvailable, int captureSession, int captureDelayMs,
                 int capturePreambleMs, boolean triggerInData, AudioFormat captureFormat,
@@ -1305,6 +1343,7 @@ public class SoundTrigger {
         /** New sound model data */
         public final byte[] data;
 
+        @UnsupportedAppUsage
         SoundModelEvent(int status, int soundModelHandle, byte[] data) {
             this.status = status;
             this.soundModelHandle = soundModelHandle;
@@ -1405,6 +1444,7 @@ public class SoundTrigger {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static native int listModules(ArrayList <ModuleProperties> modules);
 
     /**
@@ -1418,6 +1458,7 @@ public class SoundTrigger {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static SoundTriggerModule attachModule(int moduleId,
                                                   StatusListener listener,
                                                   Handler handler) {

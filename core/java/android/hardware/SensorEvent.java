@@ -16,6 +16,8 @@
 
 package android.hardware;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * This class represents a {@link android.hardware.Sensor Sensor} event and
  * holds information such as the sensor's type, the time-stamp, accuracy and of
@@ -649,6 +651,7 @@ public class SensorEvent {
      */
     public long timestamp;
 
+    @UnsupportedAppUsage
     SensorEvent(int valueSize) {
         values = new float[valueSize];
     }

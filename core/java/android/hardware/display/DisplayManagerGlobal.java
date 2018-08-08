@@ -16,6 +16,7 @@
 
 package android.hardware.display;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
@@ -66,10 +67,12 @@ public final class DisplayManagerGlobal {
     public static final int EVENT_DISPLAY_CHANGED = 2;
     public static final int EVENT_DISPLAY_REMOVED = 3;
 
+    @UnsupportedAppUsage
     private static DisplayManagerGlobal sInstance;
 
     private final Object mLock = new Object();
 
+    @UnsupportedAppUsage
     private final IDisplayManager mDm;
 
     private DisplayManagerCallback mCallback;
@@ -91,6 +94,7 @@ public final class DisplayManagerGlobal {
      * @return The display manager instance, may be null early in system startup
      * before the display manager has been fully initialized.
      */
+    @UnsupportedAppUsage
     public static DisplayManagerGlobal getInstance() {
         synchronized (DisplayManagerGlobal.class) {
             if (sInstance == null) {
@@ -110,6 +114,7 @@ public final class DisplayManagerGlobal {
      * @return Information about the specified display, or null if it does not exist.
      * This object belongs to an internal cache and should be treated as if it were immutable.
      */
+    @UnsupportedAppUsage
     public DisplayInfo getDisplayInfo(int displayId) {
         try {
             synchronized (mLock) {
@@ -146,6 +151,7 @@ public final class DisplayManagerGlobal {
      *
      * @return An array containing all display ids.
      */
+    @UnsupportedAppUsage
     public int[] getDisplayIds() {
         try {
             synchronized (mLock) {
@@ -209,6 +215,7 @@ public final class DisplayManagerGlobal {
      * @param displayId The logical display id.
      * @return The display object, or null if there is no display with the given id.
      */
+    @UnsupportedAppUsage
     public Display getRealDisplay(int displayId) {
         return getCompatibleDisplay(displayId, DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
     }
@@ -337,6 +344,7 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    @UnsupportedAppUsage
     public void disconnectWifiDisplay() {
         try {
             mDm.disconnectWifiDisplay();
@@ -369,6 +377,7 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    @UnsupportedAppUsage
     public WifiDisplayStatus getWifiDisplayStatus() {
         try {
             return mDm.getWifiDisplayStatus();

@@ -18,6 +18,7 @@
 package android.hardware;
 
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 
 /**
@@ -504,6 +505,7 @@ public final class Sensor {
      *
      * @hide Expected to be used internally for always on display.
      */
+    @UnsupportedAppUsage
     public static final int TYPE_PICK_UP_GESTURE = 25;
 
     /**
@@ -543,6 +545,7 @@ public final class Sensor {
      * @hide Expected to be used internally for auto-rotate and speaker rotation.
      *
      */
+    @UnsupportedAppUsage
     public static final int TYPE_DEVICE_ORIENTATION = 27;
 
     /**
@@ -891,6 +894,7 @@ public final class Sensor {
     private String  mStringType;
     private String  mRequiredPermission;
     private int     mMaxDelay;
+    @UnsupportedAppUsage
     private int     mFlags;
     private int     mId;
 
@@ -1014,6 +1018,7 @@ public final class Sensor {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getHandle() {
         return mHandle;
     }
