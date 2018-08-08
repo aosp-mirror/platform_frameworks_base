@@ -33,7 +33,7 @@ public interface BluetoothCallback {
      * {@link android.bluetooth.BluetoothAdapter#STATE_ON},
      * {@link android.bluetooth.BluetoothAdapter#STATE_TURNING_OFF}.
      */
-    void onBluetoothStateChanged(int bluetoothState);
+    default void onBluetoothStateChanged(int bluetoothState) {}
 
     /**
      * It will be called when the local Bluetooth adapter has started
@@ -43,7 +43,7 @@ public interface BluetoothCallback {
      *
      * @param started indicate the current process is started or finished.
      */
-    void onScanningStateChanged(boolean started);
+    default void onScanningStateChanged(boolean started) {}
 
     /**
      * It will be called in following situations:
@@ -54,7 +54,7 @@ public interface BluetoothCallback {
      *
      * @param cachedDevice the Bluetooth device.
      */
-    void onDeviceAdded(CachedBluetoothDevice cachedDevice);
+    default void onDeviceAdded(CachedBluetoothDevice cachedDevice) {}
 
     /**
      * It will be called when a remote device that was
@@ -63,7 +63,7 @@ public interface BluetoothCallback {
      *
      * @param cachedDevice the Bluetooth device.
      */
-    void onDeviceDeleted(CachedBluetoothDevice cachedDevice);
+    default void onDeviceDeleted(CachedBluetoothDevice cachedDevice) {}
 
     /**
      * It will be called when bond state of a remote device is changed.
@@ -75,7 +75,7 @@ public interface BluetoothCallback {
      * {@link android.bluetooth.BluetoothDevice#BOND_BONDING},
      * {@link android.bluetooth.BluetoothDevice#BOND_BONDED}.
      */
-    void onDeviceBondStateChanged(CachedBluetoothDevice cachedDevice, int bondState);
+    default void onDeviceBondStateChanged(CachedBluetoothDevice cachedDevice, int bondState) {}
 
     /**
      * It will be called in following situations:
@@ -91,7 +91,7 @@ public interface BluetoothCallback {
      * {@link android.bluetooth.BluetoothAdapter#STATE_CONNECTED},
      * {@link android.bluetooth.BluetoothAdapter#STATE_DISCONNECTING}.
      */
-    void onConnectionStateChanged(CachedBluetoothDevice cachedDevice, int state);
+    default void onConnectionStateChanged(CachedBluetoothDevice cachedDevice, int state) {}
 
     /**
      * It will be called when device been set as active for {@code bluetoothProfile}
@@ -103,7 +103,7 @@ public interface BluetoothCallback {
      * @param activeDevice the active Bluetooth device.
      * @param bluetoothProfile the profile of active Bluetooth device.
      */
-    void onActiveDeviceChanged(CachedBluetoothDevice activeDevice, int bluetoothProfile);
+    default void onActiveDeviceChanged(CachedBluetoothDevice activeDevice, int bluetoothProfile) {}
 
     /**
      * It will be called in following situations:
@@ -113,7 +113,7 @@ public interface BluetoothCallback {
      * {@link android.bluetooth.BluetoothHeadset#ACTION_AUDIO_STATE_CHANGED}
      * {@link android.telephony.TelephonyManager#ACTION_PHONE_STATE_CHANGED}
      */
-    void onAudioModeChanged();
+    default void onAudioModeChanged() {}
 
     /**
      * It will be called when one of the bluetooth device profile connection state is changed.

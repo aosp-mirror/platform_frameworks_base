@@ -239,11 +239,6 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     }
 
     @Override
-    public void onScanningStateChanged(boolean started) {
-        // Don't care.
-    }
-
-    @Override
     public void onDeviceAdded(CachedBluetoothDevice cachedDevice) {
         cachedDevice.registerCallback(this);
         updateConnected();
@@ -276,12 +271,6 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         updateConnected();
         mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
     }
-
-    @Override
-    public void onActiveDeviceChanged(CachedBluetoothDevice activeDevice, int bluetoothProfile) {}
-
-    @Override
-    public void onAudioModeChanged() {}
 
     private ActuallyCachedState getCachedState(CachedBluetoothDevice device) {
         ActuallyCachedState state = mCachedState.get(device);
