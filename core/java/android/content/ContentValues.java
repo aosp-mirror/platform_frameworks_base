@@ -21,9 +21,12 @@ import android.os.Parcelable;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -55,6 +58,7 @@ public final class ContentValues implements Parcelable {
      * @param size the initial size of the set of values
      */
     public ContentValues(int size) {
+        Preconditions.checkArgumentNonnegative(size);
         mMap = new ArrayMap<>(size);
     }
 
@@ -64,6 +68,7 @@ public final class ContentValues implements Parcelable {
      * @param from the values to copy
      */
     public ContentValues(ContentValues from) {
+        Objects.requireNonNull(from);
         mMap = new ArrayMap<>(from.mMap);
     }
 
