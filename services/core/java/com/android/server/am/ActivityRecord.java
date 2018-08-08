@@ -694,9 +694,13 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         final boolean inPictureInPictureMode = inPinnedWindowingMode() && targetStackBounds != null;
         if (inPictureInPictureMode != mLastReportedPictureInPictureMode || forceUpdate) {
             // Picture-in-picture mode changes also trigger a multi-window mode change as well, so
-            // update that here in order
+            // update that here in order. Set the last reported MW state to the same as the PiP
+            // state since we haven't yet actually resized the task (these callbacks need to
+            // preceed the configuration change from the resiez.
+            // TODO(110009072): Once we move these callbacks to the client, remove all logic related
+            // to forcing the update of the picture-in-picture mode as a part of the PiP animation.
             mLastReportedPictureInPictureMode = inPictureInPictureMode;
-            mLastReportedMultiWindowMode = inMultiWindowMode();
+            mLastReportedMultiWindowMode = inPictureInPictureMode;
             final Configuration newConfig = task.computeNewOverrideConfigurationForBounds(
                     targetStackBounds, null);
             schedulePictureInPictureModeChanged(newConfig);
