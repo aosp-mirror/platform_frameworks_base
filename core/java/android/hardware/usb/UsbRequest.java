@@ -17,6 +17,7 @@
 package android.hardware.usb;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.util.Log;
 
@@ -47,14 +48,17 @@ public class UsbRequest {
     static final int MAX_USBFS_BUFFER_SIZE = 16384;
 
     // used by the JNI code
+    @UnsupportedAppUsage
     private long mNativeContext;
 
     private UsbEndpoint mEndpoint;
 
     /** The buffer that is currently being read / written */
+    @UnsupportedAppUsage
     private ByteBuffer mBuffer;
 
     /** The amount of data to read / write when using {@link #queue} */
+    @UnsupportedAppUsage
     private int mLength;
 
     // for client use

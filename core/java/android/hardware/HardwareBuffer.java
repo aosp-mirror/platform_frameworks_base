@@ -19,6 +19,7 @@ package android.hardware;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -89,6 +90,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     public static final int S_UI8        = 0x35;
 
     // Note: do not rename, this field is used by native code
+    @UnsupportedAppUsage
     private long mNativeObject;
 
     // Invoked on destruction
@@ -182,6 +184,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      * Private use only. See {@link #create(int, int, int, int, long)}. May also be
      * called from JNI using an already allocated native <code>HardwareBuffer</code>.
      */
+    @UnsupportedAppUsage
     private HardwareBuffer(long nativeObject) {
         mNativeObject = nativeObject;
 

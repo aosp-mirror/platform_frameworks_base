@@ -16,6 +16,7 @@
 
 package android.hardware.soundtrigger;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -28,8 +29,10 @@ import java.lang.ref.WeakReference;
  * @hide
  */
 public class SoundTriggerModule {
+    @UnsupportedAppUsage
     private long mNativeContext;
 
+    @UnsupportedAppUsage
     private int mId;
     private NativeEventHandlerDelegate mEventHandlerDelegate;
 
@@ -56,6 +59,7 @@ public class SoundTriggerModule {
      * Detach from this module. The {@link SoundTrigger.StatusListener} callback will not be called
      * anymore and associated resources will be released.
      * */
+    @UnsupportedAppUsage
     public native void detach();
 
     /**
@@ -73,6 +77,7 @@ public class SoundTriggerModule {
      *         service fails
      *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence
      */
+    @UnsupportedAppUsage
     public native int loadSoundModel(SoundTrigger.SoundModel model, int[] soundModelHandle);
 
     /**
@@ -87,6 +92,7 @@ public class SoundTriggerModule {
      *         - {@link SoundTrigger#STATUS_DEAD_OBJECT} if the binder transaction to the native
      *         service fails
      */
+    @UnsupportedAppUsage
     public native int unloadSoundModel(int soundModelHandle);
 
     /**
@@ -106,6 +112,7 @@ public class SoundTriggerModule {
      *         service fails
      *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence
      */
+    @UnsupportedAppUsage
     public native int startRecognition(int soundModelHandle, SoundTrigger.RecognitionConfig config);
 
     /**
@@ -121,6 +128,7 @@ public class SoundTriggerModule {
      *         service fails
      *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence
      */
+    @UnsupportedAppUsage
     public native int stopRecognition(int soundModelHandle);
 
     private class NativeEventHandlerDelegate {
@@ -181,6 +189,7 @@ public class SoundTriggerModule {
     }
 
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private static void postEventFromNative(Object module_ref,
                                             int what, int arg1, int arg2, Object obj) {
         SoundTriggerModule module = (SoundTriggerModule)((WeakReference)module_ref).get();

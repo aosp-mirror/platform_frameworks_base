@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.app.IInputForwarder;
 import android.content.Context;
 import android.media.AudioAttributes;
@@ -64,6 +65,7 @@ public final class InputManager {
 
     private static InputManager sInstance;
 
+    @UnsupportedAppUsage
     private final IInputManager mIm;
 
     // Guarded by mInputDevicesLock
@@ -181,6 +183,7 @@ public final class InputManager {
      * Waits for the event to be delivered to the application and handled.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH = 2;  // see InputDispatcher.h
 
     /** @hide */
@@ -223,6 +226,7 @@ public final class InputManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static InputManager getInstance() {
         synchronized (InputManager.class) {
             if (sInstance == null) {
@@ -866,6 +870,7 @@ public final class InputManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean injectInputEvent(InputEvent event, int mode) {
         if (event == null) {
             throw new IllegalArgumentException("event must not be null");
@@ -891,6 +896,7 @@ public final class InputManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setPointerIconType(int iconId) {
         try {
             mIm.setPointerIconType(iconId);
@@ -938,6 +944,7 @@ public final class InputManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public IInputForwarder createInputForwarder(int displayId) {
         try {
             return mIm.createInputForwarder(displayId);
