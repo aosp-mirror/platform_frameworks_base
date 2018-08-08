@@ -29,6 +29,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -42,7 +43,6 @@ import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -963,12 +963,20 @@ public final class AutofillManagerService extends SystemService {
                 throw new IllegalArgumentException(packageName + " is not a valid package", e);
             }
 
+            // TODO(b/112051762): rather than always call AM here, call it on demand on
+            // getPreviousSessionsLocked()? That way we save space / time here, and don't set
+            // a callback on AM unnecessarily (see TODO below :-)
+            final ActivityManagerInternal am = LocalServices
+                    .getService(ActivityManagerInternal.class);
+            // TODO(b/112051762): add a callback method on AM to be notified when a task is finished
+            // so we can clean up sessions kept alive
+            final int taskId = am.getTaskIdForActivity(activityToken, false);
             final int sessionId;
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
-                sessionId = service.startSessionLocked(activityToken, getCallingUid(), appCallback,
-                        autofillId, bounds, value, hasCallback, componentName, compatMode,
-                        mAllowInstantService, flags);
+                sessionId = service.startSessionLocked(activityToken, taskId, getCallingUid(),
+                        appCallback, autofillId, bounds, value, hasCallback, componentName,
+                        compatMode, mAllowInstantService, flags);
             }
             send(receiver, sessionId);
         }
