@@ -261,7 +261,7 @@ public class NetworkMonitor extends StateMachine {
     private final WifiManager mWifiManager;
     private final NetworkRequest mDefaultRequest;
     private final IpConnectivityLog mMetricsLog;
-    private final NetworkMonitorSettings mSettings;
+    private final Dependencies mDependencies;
 
     // Configuration values for captive portal detection probes.
     private final String mCaptivePortalUserAgent;
@@ -301,18 +301,19 @@ public class NetworkMonitor extends StateMachine {
     // This variable is set before transitioning to the mCaptivePortalState.
     private CaptivePortalProbeResult mLastPortalProbeResult = CaptivePortalProbeResult.FAILED;
 
+    // Random generator to select fallback URL index
+    private final Random mRandom;
     private int mNextFallbackUrlIndex = 0;
 
     public NetworkMonitor(Context context, Handler handler, NetworkAgentInfo networkAgentInfo,
             NetworkRequest defaultRequest) {
         this(context, handler, networkAgentInfo, defaultRequest, new IpConnectivityLog(),
-                NetworkMonitorSettings.DEFAULT);
+                Dependencies.DEFAULT);
     }
 
     @VisibleForTesting
     protected NetworkMonitor(Context context, Handler handler, NetworkAgentInfo networkAgentInfo,
-            NetworkRequest defaultRequest, IpConnectivityLog logger,
-            NetworkMonitorSettings settings) {
+            NetworkRequest defaultRequest, IpConnectivityLog logger, Dependencies deps) {
         // Add suffix indicating which NetworkMonitor we're talking about.
         super(TAG + networkAgentInfo.name());
 
@@ -323,9 +324,9 @@ public class NetworkMonitor extends StateMachine {
         mContext = context;
         mMetricsLog = logger;
         mConnectivityServiceHandler = handler;
-        mSettings = settings;
+        mDependencies = deps;
         mNetworkAgentInfo = networkAgentInfo;
-        mNetwork = new OneAddressPerFamilyNetwork(networkAgentInfo.network());
+        mNetwork = deps.getNetwork(networkAgentInfo);
         mNetId = mNetwork.netId;
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -343,9 +344,10 @@ public class NetworkMonitor extends StateMachine {
         mUseHttps = getUseHttpsValidation();
         mCaptivePortalUserAgent = getCaptivePortalUserAgent();
         mCaptivePortalHttpsUrl = makeURL(getCaptivePortalServerHttpsUrl());
-        mCaptivePortalHttpUrl = makeURL(getCaptivePortalServerHttpUrl(settings, context));
+        mCaptivePortalHttpUrl = makeURL(getCaptivePortalServerHttpUrl(deps, context));
         mCaptivePortalFallbackUrls = makeCaptivePortalFallbackUrls();
         mCaptivePortalFallbackSpecs = makeCaptivePortalFallbackProbeSpecs();
+        mRandom = deps.getRandom();
 
         start();
     }
@@ -883,40 +885,38 @@ public class NetworkMonitor extends StateMachine {
     public boolean getIsCaptivePortalCheckEnabled() {
         String symbol = Settings.Global.CAPTIVE_PORTAL_MODE;
         int defaultValue = Settings.Global.CAPTIVE_PORTAL_MODE_PROMPT;
-        int mode = mSettings.getSetting(mContext, symbol, defaultValue);
+        int mode = mDependencies.getSetting(mContext, symbol, defaultValue);
         return mode != Settings.Global.CAPTIVE_PORTAL_MODE_IGNORE;
     }
 
     public boolean getUseHttpsValidation() {
-        return mSettings.getSetting(mContext, Settings.Global.CAPTIVE_PORTAL_USE_HTTPS, 1) == 1;
+        return mDependencies.getSetting(mContext, Settings.Global.CAPTIVE_PORTAL_USE_HTTPS, 1) == 1;
     }
 
     public boolean getWifiScansAlwaysAvailableDisabled() {
-        return mSettings.getSetting(mContext, Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0) == 0;
+        return mDependencies.getSetting(mContext, Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0) == 0;
     }
 
     private String getCaptivePortalServerHttpsUrl() {
-        return mSettings.getSetting(mContext,
+        return mDependencies.getSetting(mContext,
                 Settings.Global.CAPTIVE_PORTAL_HTTPS_URL, DEFAULT_HTTPS_URL);
     }
 
     // Static for direct access by ConnectivityService
     public static String getCaptivePortalServerHttpUrl(Context context) {
-        return getCaptivePortalServerHttpUrl(NetworkMonitorSettings.DEFAULT, context);
+        return getCaptivePortalServerHttpUrl(Dependencies.DEFAULT, context);
     }
 
-    public static String getCaptivePortalServerHttpUrl(
-            NetworkMonitorSettings settings, Context context) {
-        return settings.getSetting(
-                context, Settings.Global.CAPTIVE_PORTAL_HTTP_URL, DEFAULT_HTTP_URL);
+    public static String getCaptivePortalServerHttpUrl(Dependencies deps, Context context) {
+        return deps.getSetting(context, Settings.Global.CAPTIVE_PORTAL_HTTP_URL, DEFAULT_HTTP_URL);
     }
 
     private URL[] makeCaptivePortalFallbackUrls() {
         try {
             String separator = ",";
-            String firstUrl = mSettings.getSetting(mContext,
+            String firstUrl = mDependencies.getSetting(mContext,
                     Settings.Global.CAPTIVE_PORTAL_FALLBACK_URL, DEFAULT_FALLBACK_URL);
-            String joinedUrls = firstUrl + separator + mSettings.getSetting(mContext,
+            String joinedUrls = firstUrl + separator + mDependencies.getSetting(mContext,
                     Settings.Global.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS,
                     DEFAULT_OTHER_FALLBACK_URLS);
             List<URL> urls = new ArrayList<>();
@@ -940,7 +940,7 @@ public class NetworkMonitor extends StateMachine {
 
     private CaptivePortalProbeSpec[] makeCaptivePortalFallbackProbeSpecs() {
         try {
-            final String settingsValue = mSettings.getSetting(
+            final String settingsValue = mDependencies.getSetting(
                     mContext, Settings.Global.CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS, null);
             // Probe specs only used if configured in settings
             if (TextUtils.isEmpty(settingsValue)) {
@@ -956,7 +956,7 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private String getCaptivePortalUserAgent() {
-        return mSettings.getSetting(mContext,
+        return mDependencies.getSetting(mContext,
                 Settings.Global.CAPTIVE_PORTAL_USER_AGENT, DEFAULT_USER_AGENT);
     }
 
@@ -965,7 +965,7 @@ public class NetworkMonitor extends StateMachine {
             return null;
         }
         int idx = Math.abs(mNextFallbackUrlIndex) % mCaptivePortalFallbackUrls.length;
-        mNextFallbackUrlIndex += new Random().nextInt(); // randomely change url without memory.
+        mNextFallbackUrlIndex += mRandom.nextInt(); // randomly change url without memory.
         return mCaptivePortalFallbackUrls[idx];
     }
 
@@ -974,7 +974,7 @@ public class NetworkMonitor extends StateMachine {
             return null;
         }
         // Randomly change spec without memory. Also randomize the first attempt.
-        final int idx = Math.abs(new Random().nextInt()) % mCaptivePortalFallbackSpecs.length;
+        final int idx = Math.abs(mRandom.nextInt()) % mCaptivePortalFallbackSpecs.length;
         return mCaptivePortalFallbackSpecs[idx];
     }
 
@@ -1392,15 +1392,15 @@ public class NetworkMonitor extends StateMachine {
     }
 
     @VisibleForTesting
-    public interface NetworkMonitorSettings {
-        int getSetting(Context context, String symbol, int defaultValue);
-        String getSetting(Context context, String symbol, String defaultValue);
+    public static class Dependencies {
+        public Network getNetwork(NetworkAgentInfo networkAgentInfo) {
+            return new OneAddressPerFamilyNetwork(networkAgentInfo.network());
+        }
 
-        static NetworkMonitorSettings DEFAULT = new DefaultNetworkMonitorSettings();
-    }
+        public Random getRandom() {
+            return new Random();
+        }
 
-    @VisibleForTesting
-    public static class DefaultNetworkMonitorSettings implements NetworkMonitorSettings {
         public int getSetting(Context context, String symbol, int defaultValue) {
             return Settings.Global.getInt(context.getContentResolver(), symbol, defaultValue);
         }
@@ -1409,5 +1409,7 @@ public class NetworkMonitor extends StateMachine {
             final String value = Settings.Global.getString(context.getContentResolver(), symbol);
             return value != null ? value : defaultValue;
         }
+
+        public static final Dependencies DEFAULT = new Dependencies();
     }
 }
