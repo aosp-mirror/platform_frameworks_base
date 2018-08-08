@@ -334,9 +334,6 @@ public final class PowerManagerService extends SystemService
     // True if boot completed occurred.  We keep the screen on until this happens.
     private boolean mBootCompleted;
 
-    // Runnables that should be triggered on boot completed
-    private Runnable[] mBootCompletedRunnables;
-
     // True if auto-suspend mode is enabled.
     // Refer to autosuspend.h.
     private boolean mHalAutoSuspendModeEnabled;
@@ -732,14 +729,6 @@ public final class PowerManagerService extends SystemService
                 userActivityNoUpdateLocked(
                         now, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
                 updatePowerStateLocked();
-
-                if (!ArrayUtils.isEmpty(mBootCompletedRunnables)) {
-                    Slog.d(TAG, "Posting " + mBootCompletedRunnables.length + " delayed runnables");
-                    for (Runnable r : mBootCompletedRunnables) {
-                        BackgroundThread.getHandler().post(r);
-                    }
-                }
-                mBootCompletedRunnables = null;
             }
         }
     }
@@ -952,16 +941,6 @@ public final class PowerManagerService extends SystemService
                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, UserHandle.USER_CURRENT);
 
         mDirty |= DIRTY_SETTINGS;
-    }
-
-    private void postAfterBootCompleted(Runnable r) {
-        if (mBootCompleted) {
-            BackgroundThread.getHandler().post(r);
-        } else {
-            Slog.d(TAG, "Delaying runnable until system is booted");
-            mBootCompletedRunnables = ArrayUtils.appendElement(Runnable.class,
-                    mBootCompletedRunnables, r);
-        }
     }
 
     private void handleSettingsChangedLocked() {
