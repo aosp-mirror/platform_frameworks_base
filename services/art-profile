@@ -13303,7 +13303,7 @@ PLcom/android/server/notification/NotificationManagerService$10;->createNotifica
 PLcom/android/server/notification/NotificationManagerService$10;->deleteNotificationChannel(Ljava/lang/String;Ljava/lang/String;)V
 PLcom/android/server/notification/NotificationManagerService$10;->enforcePolicyAccess(ILjava/lang/String;)V
 PLcom/android/server/notification/NotificationManagerService$10;->enforceSystemOrSystemUI(Ljava/lang/String;)V
-PLcom/android/server/notification/NotificationManagerService$10;->enqueueToast(Ljava/lang/String;Landroid/app/ITransientNotification;I)V
+PLcom/android/server/notification/NotificationManagerService$10;->enqueueToast(Ljava/lang/String;Landroid/app/ITransientNotification;II)V
 PLcom/android/server/notification/NotificationManagerService$10;->finishToken(Ljava/lang/String;Landroid/app/ITransientNotification;)V
 PLcom/android/server/notification/NotificationManagerService$10;->getAppActiveNotifications(Ljava/lang/String;I)Landroid/content/pm/ParceledListSlice;
 PLcom/android/server/notification/NotificationManagerService$10;->getBackupPayload(I)[B

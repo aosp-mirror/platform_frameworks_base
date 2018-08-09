@@ -628,15 +628,17 @@ public class NotificationManagerService extends SystemService {
         final String pkg;
         final ITransientNotification callback;
         int duration;
+        int displayId;
         Binder token;
 
         ToastRecord(int pid, String pkg, ITransientNotification callback, int duration,
-                    Binder token) {
+                Binder token, int displayId) {
             this.pid = pid;
             this.pkg = pkg;
             this.callback = callback;
             this.duration = duration;
             this.token = token;
+            this.displayId = displayId;
         }
 
         void update(int duration) {
@@ -1986,11 +1988,12 @@ public class NotificationManagerService extends SystemService {
         // ============================================================================
 
         @Override
-        public void enqueueToast(String pkg, ITransientNotification callback, int duration)
+        public void enqueueToast(String pkg, ITransientNotification callback, int duration,
+                int displayId)
         {
             if (DBG) {
                 Slog.i(TAG, "enqueueToast pkg=" + pkg + " callback=" + callback
-                        + " duration=" + duration);
+                        + " duration=" + duration + " displayId=" + displayId);
             }
 
             if (pkg == null || callback == null) {
@@ -2042,8 +2045,9 @@ public class NotificationManagerService extends SystemService {
                         }
 
                         Binder token = new Binder();
-                        mWindowManagerInternal.addWindowToken(token, TYPE_TOAST, DEFAULT_DISPLAY);
-                        record = new ToastRecord(callingPid, pkg, callback, duration, token);
+                        mWindowManagerInternal.addWindowToken(token, TYPE_TOAST, displayId);
+                        record = new ToastRecord(callingPid, pkg, callback, duration, token,
+                                displayId);
                         mToastQueue.add(record);
                         index = mToastQueue.size() - 1;
                         keepProcessAliveIfNeededLocked(callingPid);
@@ -2094,7 +2098,7 @@ public class NotificationManagerService extends SystemService {
                     int index = indexOfToastLocked(pkg, callback);
                     if (index >= 0) {
                         ToastRecord record = mToastQueue.get(index);
-                        finishTokenLocked(record.token);
+                        finishTokenLocked(record.token, record.displayId);
                     } else {
                         Slog.w(TAG, "Toast already killed. pkg=" + pkg
                                 + " callback=" + callback);
@@ -5128,13 +5132,13 @@ public class NotificationManagerService extends SystemService {
         ToastRecord lastToast = mToastQueue.remove(index);
 
         mWindowManagerInternal.removeWindowToken(lastToast.token, false /* removeWindows */,
-                DEFAULT_DISPLAY);
+                lastToast.displayId);
         // We passed 'false' for 'removeWindows' so that the client has time to stop
         // rendering (as hide above is a one-way message), otherwise we could crash
         // a client which was actively using a surface made from the token. However
         // we need to schedule a timeout to make sure the token is eventually killed
         // one way or another.
-        scheduleKillTokenTimeout(lastToast.token);
+        scheduleKillTokenTimeout(lastToast);
 
         keepProcessAliveIfNeededLocked(record.pid);
         if (mToastQueue.size() > 0) {
@@ -5145,14 +5149,13 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    void finishTokenLocked(IBinder t) {
+    void finishTokenLocked(IBinder t, int displayId) {
         mHandler.removeCallbacksAndMessages(t);
         // We pass 'true' for 'removeWindows' to let the WindowManager destroy any
         // remaining surfaces as either the client has called finishToken indicating
         // it has successfully removed the views, or the client has timed out
         // at which point anything goes.
-        mWindowManagerInternal.removeWindowToken(t, true /* removeWindows */,
-                DEFAULT_DISPLAY);
+        mWindowManagerInternal.removeWindowToken(t, true /* removeWindows */, displayId);
     }
 
     @GuardedBy("mToastQueue")
@@ -5176,18 +5179,18 @@ public class NotificationManagerService extends SystemService {
     }
 
     @GuardedBy("mToastQueue")
-    private void scheduleKillTokenTimeout(IBinder token)
+    private void scheduleKillTokenTimeout(ToastRecord r)
     {
-        mHandler.removeCallbacksAndMessages(token);
-        Message m = Message.obtain(mHandler, MESSAGE_FINISH_TOKEN_TIMEOUT, token);
+        mHandler.removeCallbacksAndMessages(r);
+        Message m = Message.obtain(mHandler, MESSAGE_FINISH_TOKEN_TIMEOUT, r);
         mHandler.sendMessageDelayed(m, FINISH_TOKEN_TIMEOUT);
     }
 
-    private void handleKillTokenTimeout(IBinder token)
+    private void handleKillTokenTimeout(ToastRecord record)
     {
-        if (DBG) Slog.d(TAG, "Kill Token Timeout token=" + token);
+        if (DBG) Slog.d(TAG, "Kill Token Timeout token=" + record.token);
         synchronized (mToastQueue) {
-            finishTokenLocked(token);
+            finishTokenLocked(record.token, record.displayId);
         }
     }
 
@@ -5381,7 +5384,7 @@ public class NotificationManagerService extends SystemService {
                     handleDurationReached((ToastRecord)msg.obj);
                     break;
                 case MESSAGE_FINISH_TOKEN_TIMEOUT:
-                    handleKillTokenTimeout((IBinder)msg.obj);
+                    handleKillTokenTimeout((ToastRecord)msg.obj);
                     break;
                 case MESSAGE_SAVE_POLICY_FILE:
                     handleSavePolicyFile();
