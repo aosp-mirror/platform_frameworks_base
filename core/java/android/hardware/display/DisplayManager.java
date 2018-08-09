@@ -23,6 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.graphics.Point;
@@ -62,6 +63,7 @@ public final class DisplayManager {
      * </p>
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String ACTION_WIFI_DISPLAY_STATUS_CHANGED =
             "android.hardware.display.action.WIFI_DISPLAY_STATUS_CHANGED";
 
@@ -69,6 +71,7 @@ public final class DisplayManager {
      * Contains a {@link WifiDisplayStatus} object.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String EXTRA_WIFI_DISPLAY_STATUS =
             "android.hardware.display.extra.WIFI_DISPLAY_STATUS";
 
@@ -437,6 +440,7 @@ public final class DisplayManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void startWifiDisplayScan() {
         mGlobal.startWifiDisplayScan();
     }
@@ -449,6 +453,7 @@ public final class DisplayManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void stopWifiDisplayScan() {
         mGlobal.stopWifiDisplayScan();
     }
@@ -466,16 +471,19 @@ public final class DisplayManager {
      * @param deviceAddress The MAC address of the device to which we should connect.
      * @hide
      */
+    @UnsupportedAppUsage
     public void connectWifiDisplay(String deviceAddress) {
         mGlobal.connectWifiDisplay(deviceAddress);
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void pauseWifiDisplay() {
         mGlobal.pauseWifiDisplay();
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void resumeWifiDisplay() {
         mGlobal.resumeWifiDisplay();
     }
@@ -485,6 +493,7 @@ public final class DisplayManager {
      * The results are sent as a {@link #ACTION_WIFI_DISPLAY_STATUS_CHANGED} broadcast.
      * @hide
      */
+    @UnsupportedAppUsage
     public void disconnectWifiDisplay() {
         mGlobal.disconnectWifiDisplay();
     }
@@ -504,6 +513,7 @@ public final class DisplayManager {
      * or empty if no alias should be used.
      * @hide
      */
+    @UnsupportedAppUsage
     public void renameWifiDisplay(String deviceAddress, String alias) {
         mGlobal.renameWifiDisplay(deviceAddress, alias);
     }
@@ -519,6 +529,7 @@ public final class DisplayManager {
      * @param deviceAddress The MAC address of the device to forget.
      * @hide
      */
+    @UnsupportedAppUsage
     public void forgetWifiDisplay(String deviceAddress) {
         mGlobal.forgetWifiDisplay(deviceAddress);
     }
@@ -531,6 +542,7 @@ public final class DisplayManager {
      * @return The current Wifi display status.
      * @hide
      */
+    @UnsupportedAppUsage
     public WifiDisplayStatus getWifiDisplayStatus() {
         return mGlobal.getWifiDisplayStatus();
     }

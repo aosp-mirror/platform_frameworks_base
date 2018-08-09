@@ -16,6 +16,7 @@
 
 package android.hardware.camera2.utils;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.legacy.LegacyCameraDevice;
 import android.hardware.camera2.legacy.LegacyExceptionUtils.BufferQueueAbandonedException;
@@ -77,6 +78,7 @@ public class SurfaceUtils {
      *
      * @throws IllegalArgumentException if the surface is already abandoned.
      */
+    @UnsupportedAppUsage
     public static Size getSurfaceSize(Surface surface) {
         try {
             return LegacyCameraDevice.getSurfaceSize(surface);
