@@ -1183,14 +1183,6 @@ public class DevicePolicyManager {
     public static final String POLICY_DISABLE_SCREEN_CAPTURE = "policy_disable_screen_capture";
 
     /**
-     * Constant to indicate the feature of mandatory backups. Used as argument to
-     * {@link #createAdminSupportIntent(String)}.
-     * @see #setMandatoryBackupTransport(ComponentName, ComponentName)
-     * @hide
-     */
-    public static final String POLICY_MANDATORY_BACKUPS = "policy_mandatory_backups";
-
-    /**
      * Constant to indicate the feature of suspending app. Use it as the value of
      * {@link #EXTRA_RESTRICTION}.
      * @hide
@@ -1200,8 +1192,7 @@ public class DevicePolicyManager {
     /**
      * A String indicating a specific restricted feature. Can be a user restriction from the
      * {@link UserManager}, e.g. {@link UserManager#DISALLOW_ADJUST_VOLUME}, or one of the values
-     * {@link #POLICY_DISABLE_CAMERA}, {@link #POLICY_DISABLE_SCREEN_CAPTURE} or
-     * {@link #POLICY_MANDATORY_BACKUPS}.
+     * {@link #POLICY_DISABLE_CAMERA} or {@link #POLICY_DISABLE_SCREEN_CAPTURE}.
      * @see #createAdminSupportIntent(String)
      * @hide
      */
@@ -6919,7 +6910,7 @@ public class DevicePolicyManager {
      * @param restriction Indicates for which feature the dialog should be displayed. Can be a
      *            user restriction from {@link UserManager}, e.g.
      *            {@link UserManager#DISALLOW_ADJUST_VOLUME}, or one of the constants
-     *            {@link #POLICY_DISABLE_CAMERA}, {@link #POLICY_DISABLE_SCREEN_CAPTURE}.
+     *            {@link #POLICY_DISABLE_CAMERA} or {@link #POLICY_DISABLE_SCREEN_CAPTURE}.
      * @return Intent An intent to be used to start the dialog-activity if the restriction is
      *            set by an admin, or null if the restriction does not exist or no admin set it.
      */
@@ -8915,55 +8906,6 @@ public class DevicePolicyManager {
             throw re.rethrowFromSystemServer();
         }
     }
-
-    /**
-     * Makes backups mandatory and enforces the usage of the specified backup transport.
-     *
-     * <p>When a {@code null} backup transport is specified, backups are made optional again.
-     * <p>Only device owner can call this method.
-     * <p>If backups were disabled and a non-null backup transport {@link ComponentName} is
-     * specified, backups will be enabled.
-     * <p> If the backup service is disabled after the mandatory backup transport has been set, the
-     * mandatory backup transport is cleared.
-     *
-     * <p>NOTE: The method shouldn't be called on the main thread.
-     *
-     * @param admin admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param backupTransportComponent The backup transport layer to be used for mandatory backups.
-     * @return {@code true} if the backup transport was successfully set; {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner.
-     * @hide
-     */
-    @WorkerThread
-    public boolean setMandatoryBackupTransport(
-            @NonNull ComponentName admin,
-            @Nullable ComponentName backupTransportComponent) {
-        throwIfParentInstance("setMandatoryBackupTransport");
-        try {
-            return mService.setMandatoryBackupTransport(admin, backupTransportComponent);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Returns the backup transport which has to be used for backups if backups are mandatory or
-     * {@code null} if backups are not mandatory.
-     *
-     * @return a {@link ComponentName} of the backup transport layer to be used if backups are
-     *         mandatory or {@code null} if backups are not mandatory.
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public ComponentName getMandatoryBackupTransport() {
-        throwIfParentInstance("getMandatoryBackupTransport");
-        try {
-            return mService.getMandatoryBackupTransport();
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
 
     /**
      * Called by a device owner to control the network logging feature.

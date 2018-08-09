@@ -114,7 +114,6 @@ import android.app.admin.SecurityLog.SecurityEvent;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
-import android.app.backup.ISelectBackupTransportCallback;
 import android.app.trust.TrustManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
@@ -262,7 +261,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -895,7 +893,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
         private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
         private static final String TAG_IS_LOGOUT_ENABLED = "is_logout_enabled";
-        private static final String TAG_MANDATORY_BACKUP_TRANSPORT = "mandatory_backup_transport";
         private static final String TAG_START_USER_SESSION_MESSAGE = "start_user_session_message";
         private static final String TAG_END_USER_SESSION_MESSAGE = "end_user_session_message";
         private static final String TAG_METERED_DATA_DISABLED_PACKAGES
@@ -1015,10 +1012,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         // Default title of confirm credentials screen
         String organizationName = null;
-
-        // The component name of the backup transport which has to be used if backups are mandatory
-        // or null if backups are not mandatory.
-        ComponentName mandatoryBackupTransport = null;
 
         // Message for user switcher
         String startUserSessionMessage = null;
@@ -1283,11 +1276,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 out.attribute(null, ATTR_VALUE, Boolean.toString(isLogoutEnabled));
                 out.endTag(null, TAG_IS_LOGOUT_ENABLED);
             }
-            if (mandatoryBackupTransport != null) {
-                out.startTag(null, TAG_MANDATORY_BACKUP_TRANSPORT);
-                out.attribute(null, ATTR_VALUE, mandatoryBackupTransport.flattenToString());
-                out.endTag(null, TAG_MANDATORY_BACKUP_TRANSPORT);
-            }
             if (startUserSessionMessage != null) {
                 out.startTag(null, TAG_START_USER_SESSION_MESSAGE);
                 out.text(startUserSessionMessage);
@@ -1475,9 +1463,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     }
                 } else if (TAG_IS_LOGOUT_ENABLED.equals(tag)) {
                     isLogoutEnabled = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_MANDATORY_BACKUP_TRANSPORT.equals(tag)) {
-                    mandatoryBackupTransport = ComponentName.unflattenFromString(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_START_USER_SESSION_MESSAGE.equals(tag)) {
                     type = parser.next();
@@ -10538,8 +10523,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int userId = UserHandle.getUserId(uid);
         Intent intent = null;
         if (DevicePolicyManager.POLICY_DISABLE_CAMERA.equals(restriction) ||
-                DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE.equals(restriction) ||
-                DevicePolicyManager.POLICY_MANDATORY_BACKUPS.equals(restriction)) {
+                DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE.equals(restriction)) {
             synchronized (getLockObject()) {
                 final DevicePolicyData policy = getUserData(userId);
                 final int N = policy.mAdminList.size();
@@ -10548,9 +10532,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     if ((admin.disableCamera &&
                                 DevicePolicyManager.POLICY_DISABLE_CAMERA.equals(restriction)) ||
                         (admin.disableScreenCapture && DevicePolicyManager
-                                .POLICY_DISABLE_SCREEN_CAPTURE.equals(restriction)) ||
-                        (admin.mandatoryBackupTransport != null && DevicePolicyManager
-                                .POLICY_MANDATORY_BACKUPS.equals(restriction))) {
+                                .POLICY_DISABLE_SCREEN_CAPTURE.equals(restriction))) {
                         intent = createShowAdminSupportIntent(admin.info.getComponent(), userId);
                         break;
                     }
@@ -11960,12 +11942,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkNotNull(admin);
         synchronized (getLockObject()) {
-            ActiveAdmin activeAdmin = getActiveAdminForCallerLocked(
-                    admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-            if (!enabled) {
-                activeAdmin.mandatoryBackupTransport = null;
-                saveSettingsLocked(UserHandle.USER_SYSTEM);
-            }
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
         }
 
         final long ident = mInjector.binderClearCallingIdentity();
@@ -11998,87 +11975,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
     }
-
-    @Override
-    public boolean setMandatoryBackupTransport(
-            ComponentName admin,
-            ComponentName backupTransportComponent) {
-        if (!mHasFeature) {
-            return false;
-        }
-        Preconditions.checkNotNull(admin);
-        enforceDeviceOwner(admin);
-
-        final int callingUid = mInjector.binderGetCallingUid();
-        final AtomicBoolean success = new AtomicBoolean(false);
-        final CountDownLatch countDownLatch = new CountDownLatch(1);
-        final ISelectBackupTransportCallback selectBackupTransportCallbackInternal =
-                new ISelectBackupTransportCallback.Stub() {
-                    public void onSuccess(String transportName) {
-                        saveMandatoryBackupTransport(admin, callingUid, backupTransportComponent);
-                        success.set(true);
-                        countDownLatch.countDown();
-                    }
-
-                    public void onFailure(int reason) {
-                        countDownLatch.countDown();
-                    }
-                };
-        final long identity = mInjector.binderClearCallingIdentity();
-        try {
-            IBackupManager ibm = mInjector.getIBackupManager();
-            if (ibm != null && backupTransportComponent != null) {
-                if (!ibm.isBackupServiceActive(UserHandle.USER_SYSTEM)) {
-                    ibm.setBackupServiceActive(UserHandle.USER_SYSTEM, true);
-                }
-                ibm.selectBackupTransportAsync(
-                        backupTransportComponent, selectBackupTransportCallbackInternal);
-                countDownLatch.await();
-                if (success.get()) {
-                    ibm.setBackupEnabled(true);
-                }
-            } else if (backupTransportComponent == null) {
-                saveMandatoryBackupTransport(admin, callingUid, backupTransportComponent);
-                success.set(true);
-            }
-        } catch (RemoteException e) {
-            throw new IllegalStateException("Failed to set mandatory backup transport.", e);
-        } catch (InterruptedException e) {
-            throw new IllegalStateException("Failed to set mandatory backup transport.", e);
-        } finally {
-            mInjector.binderRestoreCallingIdentity(identity);
-        }
-        return success.get();
-    }
-
-    private void saveMandatoryBackupTransport(
-            ComponentName admin, int callingUid, ComponentName backupTransportComponent) {
-        synchronized (getLockObject()) {
-            ActiveAdmin activeAdmin =
-                    getActiveAdminWithPolicyForUidLocked(
-                            admin,
-                            DeviceAdminInfo.USES_POLICY_DEVICE_OWNER,
-                            callingUid);
-            if (!Objects.equals(backupTransportComponent,
-                    activeAdmin.mandatoryBackupTransport)) {
-                activeAdmin.mandatoryBackupTransport =
-                        backupTransportComponent;
-                saveSettingsLocked(UserHandle.USER_SYSTEM);
-            }
-        }
-    }
-
-    @Override
-    public ComponentName getMandatoryBackupTransport() {
-        if (!mHasFeature) {
-            return null;
-        }
-        synchronized (getLockObject()) {
-            ActiveAdmin activeAdmin = getDeviceOwnerAdminLocked();
-            return activeAdmin == null ? null : activeAdmin.mandatoryBackupTransport;
-        }
-    }
-
 
     @Override
     public boolean bindDeviceAdminServiceAsUser(
