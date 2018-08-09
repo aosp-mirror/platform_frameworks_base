@@ -1,5 +1,6 @@
 package com.android.settingslib.drawer;
 
+import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_ORDER;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON_URI;
@@ -30,6 +31,7 @@ public class TileTest {
     public void setUp() {
         mActivityInfo = new ActivityInfo();
         mActivityInfo.packageName = RuntimeEnvironment.application.getPackageName();
+        mActivityInfo.name = "abc";
         mActivityInfo.icon = R.drawable.ic_plus;
         mActivityInfo.metaData = new Bundle();
         mTile = new Tile(mActivityInfo, "category");
@@ -60,7 +62,8 @@ public class TileTest {
 
     @Test
     public void getIcon_noContextOrMetadata_returnNull() {
-        final Tile tile = new Tile(new ActivityInfo(), "category");
+        mActivityInfo.metaData = null;
+        final Tile tile = new Tile(mActivityInfo, "category");
         assertThat(tile.getIcon(null)).isNull();
         assertThat(tile.getIcon(RuntimeEnvironment.application)).isNull();
     }
@@ -113,8 +116,34 @@ public class TileTest {
 
         final ActivityInfo activityInfo = new ActivityInfo();
         activityInfo.packageName = "blah";
+        activityInfo.name = "abc";
 
         final Tile tile2 = new Tile(activityInfo, "category");
         assertThat(tile2.isIconTintable(RuntimeEnvironment.application)).isTrue();
+    }
+
+    @Test
+    public void getPriority_noMetadata_return0() {
+        final Tile tile = new Tile(mActivityInfo, "category");
+
+        assertThat(tile.getOrder()).isEqualTo(0);
+    }
+
+    @Test
+    public void getPriority_badMetadata_return0() {
+        mActivityInfo.metaData.putString(META_DATA_KEY_ORDER, "1");
+
+        final Tile tile = new Tile(mActivityInfo, "category");
+
+        assertThat(tile.getOrder()).isEqualTo(0);
+    }
+
+    @Test
+    public void getPriority_validMetadata_returnMetadataValue() {
+        mActivityInfo.metaData.putInt(META_DATA_KEY_ORDER, 1);
+
+        final Tile tile = new Tile(mActivityInfo, "category");
+
+        assertThat(tile.getOrder()).isEqualTo(1);
     }
 }

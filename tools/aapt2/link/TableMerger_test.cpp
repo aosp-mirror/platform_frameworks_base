@@ -178,6 +178,49 @@ TEST_F(TableMergerTest, OverrideResourceWithOverlay) {
               Pointee(Field(&BinaryPrimitive::value, Field(&android::Res_value::data, Eq(0u)))));
 }
 
+TEST_F(TableMergerTest, DoNotOverrideResourceComment) {
+  std::unique_ptr<Value> foo_original = ResourceUtils::TryParseBool("true");
+  foo_original->SetComment(android::StringPiece("Original foo comment"));
+  std::unique_ptr<Value> bar_original = ResourceUtils::TryParseBool("true");
+
+  std::unique_ptr<Value> foo_overlay =  ResourceUtils::TryParseBool("false");
+  foo_overlay->SetComment(android::StringPiece("Overlay foo comment"));
+  std::unique_ptr<Value> bar_overlay =  ResourceUtils::TryParseBool("false");
+  bar_overlay->SetComment(android::StringPiece("Overlay bar comment"));
+  std::unique_ptr<Value> baz_overlay =  ResourceUtils::TryParseBool("false");
+  baz_overlay->SetComment(android::StringPiece("Overlay baz comment"));
+
+  std::unique_ptr<ResourceTable> base =
+      test::ResourceTableBuilder()
+          .SetPackageId("", 0x00)
+          .AddValue("bool/foo", std::move(foo_original))
+          .AddValue("bool/bar", std::move(bar_original))
+          .Build();
+
+  std::unique_ptr<ResourceTable> overlay =
+      test::ResourceTableBuilder()
+          .SetPackageId("", 0x00)
+          .AddValue("bool/foo", std::move(foo_overlay))
+          .AddValue("bool/bar", std::move(bar_overlay))
+          .AddValue("bool/baz", std::move(baz_overlay))
+          .Build();
+
+  ResourceTable final_table;
+  TableMergerOptions options;
+  options.auto_add_overlay = true;
+  TableMerger merger(context_.get(), &final_table, options);
+
+  ASSERT_TRUE(merger.Merge({}, base.get(), false /*overlay*/));
+  ASSERT_TRUE(merger.Merge({}, overlay.get(), true /*overlay*/));
+
+  BinaryPrimitive* foo = test::GetValue<BinaryPrimitive>(&final_table, "com.app.a:bool/foo");
+  EXPECT_THAT(foo, Pointee(Property(&BinaryPrimitive::GetComment, StrEq("Original foo comment"))));
+  BinaryPrimitive* bar = test::GetValue<BinaryPrimitive>(&final_table, "com.app.a:bool/bar");
+  EXPECT_THAT(bar, Pointee(Property(&BinaryPrimitive::GetComment, StrEq(""))));
+  BinaryPrimitive* baz = test::GetValue<BinaryPrimitive>(&final_table, "com.app.a:bool/baz");
+  EXPECT_THAT(baz, Pointee(Property(&BinaryPrimitive::GetComment, StrEq("Overlay baz comment"))));
+}
+
 TEST_F(TableMergerTest, OverrideSameResourceIdsWithOverlay) {
   std::unique_ptr<ResourceTable> base =
       test::ResourceTableBuilder()

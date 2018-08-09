@@ -18,9 +18,9 @@ package android.os;
 
 import android.util.Slog;
 
-import java.io.IOException;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.IOException;
 
 /**
  * This class provides access to the centralized jni bindings for
@@ -77,6 +77,13 @@ public class SELinux {
      * @return a String representing the peer socket security context.
      */
     public static final native String getPeerContext(FileDescriptor fd);
+
+    /**
+     * Get the security context of a file descriptor of a file.
+     * @param fd FileDescriptor of a file.
+     * @return a String representing the file descriptor security context.
+     */
+    public static final native String getFileContext(FileDescriptor fd);
 
     /**
      * Gets the security context of the current process.

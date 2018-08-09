@@ -536,7 +536,7 @@
     <string name="ring_toggle_title" msgid="3281244519428819576">"Appels"</string>
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Sonnerie"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Vibreur"</string>
-    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Silencieux"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Couper le son"</string>
     <string name="qs_status_phone_vibrate" msgid="204362991135761679">"Mode Vibreur activé"</string>
     <string name="qs_status_phone_muted" msgid="5437668875879171548">"Sons du téléphone désactivés"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Appuyez pour ne plus ignorer."</string>

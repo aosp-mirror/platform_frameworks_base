@@ -1894,7 +1894,7 @@
     <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"Carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> non autorisée"</string>
     <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"Carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> non autorisée"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Fenêtre pop-up"</string>
-    <string name="slice_more_content" msgid="8504342889413274608">"<xliff:g id="NUMBER">%1$d</xliff:g> autres"</string>
+    <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"La version de l\'application est revenue à une version antérieure ou n\'est pas compatible avec cet raccourci"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Le raccourci ne peut pas être restauré car l\'application n\'accepte pas la sauvegarde et la restauration"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Le raccourci ne peut pas être restauré car la signature de l\'application est différente"</string>

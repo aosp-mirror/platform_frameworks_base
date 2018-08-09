@@ -609,7 +609,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 applyBlockGuardPolicy(statement);
                 attachCancellationSignal(cancellationSignal);
                 try {
-                    return nativeExecuteForLong(mConnectionPtr, statement.mStatementPtr);
+                    long ret = nativeExecuteForLong(mConnectionPtr, statement.mStatementPtr);
+                    mRecentOperations.setResult(ret);
+                    return ret;
                 } finally {
                     detachCancellationSignal(cancellationSignal);
                 }
@@ -652,7 +654,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 applyBlockGuardPolicy(statement);
                 attachCancellationSignal(cancellationSignal);
                 try {
-                    return nativeExecuteForString(mConnectionPtr, statement.mStatementPtr);
+                    String ret = nativeExecuteForString(mConnectionPtr, statement.mStatementPtr);
+                    mRecentOperations.setResult(ret);
+                    return ret;
                 } finally {
                     detachCancellationSignal(cancellationSignal);
                 }
@@ -1312,12 +1316,17 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         private int mIndex;
         private int mGeneration;
         private final SQLiteConnectionPool mPool;
+        private long mResultLong = Long.MIN_VALUE;
+        private String mResultString;
 
         OperationLog(SQLiteConnectionPool pool) {
             mPool = pool;
         }
 
         public int beginOperation(String kind, String sql, Object[] bindArgs) {
+            mResultLong = Long.MIN_VALUE;
+            mResultString = null;
+
             synchronized (mOperations) {
                 final int index = (mIndex + 1) % MAX_RECENT_OPERATIONS;
                 Operation operation = mOperations[index];
@@ -1335,6 +1344,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 operation.mStartTime = SystemClock.uptimeMillis();
                 operation.mKind = kind;
                 operation.mSql = sql;
+                operation.mPath = mPool.getPath();
+                operation.mResultLong = Long.MIN_VALUE;
+                operation.mResultString = null;
                 if (bindArgs != null) {
                     if (operation.mBindArgs == null) {
                         operation.mBindArgs = new ArrayList<Object>();
@@ -1390,6 +1402,14 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             }
         }
 
+        public void setResult(long longResult) {
+            mResultLong = longResult;
+        }
+
+        public void setResult(String stringResult) {
+            mResultString = stringResult;
+        }
+
         private boolean endOperationDeferLogLocked(int cookie) {
             final Operation operation = getOperationLocked(cookie);
             if (operation != null) {
@@ -1409,6 +1429,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
 
         private void logOperationLocked(int cookie, String detail) {
             final Operation operation = getOperationLocked(cookie);
+            operation.mResultLong = mResultLong;
+            operation.mResultString = mResultString;
             StringBuilder msg = new StringBuilder();
             operation.describe(msg, true);
             if (detail != null) {
@@ -1491,8 +1513,11 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         public boolean mFinished;
         public Exception mException;
         public int mCookie;
+        public String mPath;
+        public long mResultLong; // MIN_VALUE means "value not set".
+        public String mResultString;
 
-        public void describe(StringBuilder msg, boolean allowBindArgsLog) {
+        public void describe(StringBuilder msg, boolean allowDetailedLog) {
             msg.append(mKind);
             if (mFinished) {
                 msg.append(" took ").append(mEndTime - mStartTime).append("ms");
@@ -1504,8 +1529,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             if (mSql != null) {
                 msg.append(", sql=\"").append(trimSqlForDisplay(mSql)).append("\"");
             }
-            if (allowBindArgsLog && Consts.DEBUG_LOG_BIND_ARGS
-                    && mBindArgs != null && mBindArgs.size() != 0) {
+            final boolean dumpDetails = allowDetailedLog && Consts.DEBUG_LOG_DETAILED
+                    && mBindArgs != null && mBindArgs.size() != 0;
+            if (dumpDetails) {
                 msg.append(", bindArgs=[");
                 final int count = mBindArgs.size();
                 for (int i = 0; i < count; i++) {
@@ -1525,8 +1551,15 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 }
                 msg.append("]");
             }
+            msg.append(", path=").append(mPath);
             if (mException != null) {
                 msg.append(", exception=\"").append(mException.getMessage()).append("\"");
+            }
+            if (mResultLong != Long.MIN_VALUE) {
+                msg.append(", result=").append(mResultLong);
+            }
+            if (mResultString != null) {
+                msg.append(", result=\"").append(mResultString).append("\"");
             }
         }
 

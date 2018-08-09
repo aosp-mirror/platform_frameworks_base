@@ -77,10 +77,10 @@ public final class SQLiteDebug {
                 SLOW_QUERY_THRESHOLD_PROP + "." + Process.myUid();
 
         /**
-         * Whether to log bind args in slow query log or not.
+         * Whether to add detailed information to slow query log.
          */
-        public static final boolean DEBUG_LOG_BIND_ARGS = Build.IS_DEBUGGABLE
-                && SystemProperties.getBoolean("db.log.bindargs", false);
+        public static final boolean DEBUG_LOG_DETAILED = Build.IS_DEBUGGABLE
+                && SystemProperties.getBoolean("db.log.detailed", false);
     }
 
     private SQLiteDebug() {

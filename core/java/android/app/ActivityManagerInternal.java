@@ -18,20 +18,12 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ComponentName;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.UserInfo;
-import android.content.res.Configuration;
-import android.os.Bundle;
 import android.os.IBinder;
-import android.os.SystemClock;
-import android.service.voice.IVoiceInteractionSession;
-import android.util.SparseIntArray;
 import android.view.RemoteAnimationAdapter;
-
-import com.android.internal.app.IVoiceInteractor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -231,4 +223,7 @@ public abstract class ActivityManagerInternal {
 
     /** Schedule the execution of all pending app GCs. */
     public abstract void scheduleAppGcs();
+
+    /** Gets the task id for a given activity. */
+    public abstract int getTaskIdForActivity(@NonNull IBinder token, boolean onlyRoot);
 }

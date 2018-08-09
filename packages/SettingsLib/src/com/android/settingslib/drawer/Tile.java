@@ -16,9 +16,11 @@
 
 package com.android.settingslib.drawer;
 
+import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_ORDER;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON_URI;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
 
@@ -60,35 +62,20 @@ public class Tile implements Parcelable {
     public CharSequence summary;
 
     /**
-     * Intent to launch when the preference is selected.
-     */
-    public Intent intent;
-
-    /**
      * Optional list of user handles which the intent should be launched on.
      */
     public ArrayList<UserHandle> userHandle = new ArrayList<>();
 
-    private String mCategory;
-
-    /**
-     * Priority of the intent filter that created this tile, used for display ordering.
-     */
-    public int priority;
-
     /**
      * The metaData from the activity that defines this tile.
      */
-    private Bundle mMetaData;
-
-    /**
-     * Optional key to use for this tile.
-     */
-    public String key;
-
+    private final Bundle mMetaData;
     private final String mActivityPackage;
     private final String mActivityName;
+    private final Intent mIntent;
+
     private ActivityInfo mActivityInfo;
+    private String mCategory;
 
     public Tile(ActivityInfo activityInfo, String category) {
         mActivityInfo = activityInfo;
@@ -96,6 +83,21 @@ public class Tile implements Parcelable {
         mActivityName = mActivityInfo.name;
         mMetaData = activityInfo.metaData;
         mCategory = category;
+        mIntent = new Intent().setClassName(mActivityPackage, mActivityName);
+    }
+
+    Tile(Parcel in) {
+        mActivityPackage = in.readString();
+        mActivityName = in.readString();
+        mIntent = new Intent().setClassName(mActivityPackage, mActivityName);
+        title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        summary = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        final int N = in.readInt();
+        for (int i = 0; i < N; i++) {
+            userHandle.add(UserHandle.CREATOR.createFromParcel(in));
+        }
+        mCategory = in.readString();
+        mMetaData = in.readBundle();
     }
 
     @Override
@@ -109,21 +111,24 @@ public class Tile implements Parcelable {
         dest.writeString(mActivityName);
         TextUtils.writeToParcel(title, dest, flags);
         TextUtils.writeToParcel(summary, dest, flags);
-        if (intent != null) {
-            dest.writeByte((byte) 1);
-            intent.writeToParcel(dest, flags);
-        } else {
-            dest.writeByte((byte) 0);
-        }
         final int N = userHandle.size();
         dest.writeInt(N);
         for (int i = 0; i < N; i++) {
             userHandle.get(i).writeToParcel(dest, flags);
         }
         dest.writeString(mCategory);
-        dest.writeInt(priority);
         dest.writeBundle(mMetaData);
-        dest.writeString(key);
+    }
+
+    public String getPackageName() {
+        return mActivityPackage;
+    }
+
+    /**
+     * Intent to launch when the preference is selected.
+     */
+    public Intent getIntent() {
+        return mIntent;
     }
 
     /**
@@ -138,14 +143,41 @@ public class Tile implements Parcelable {
     }
 
     /**
-     * Priority of the intent filter that created this tile, used for display ordering.
+     * Priority of this tile, used for display ordering.
      */
-    public int getPriority() {
-        return 0;
+    public int getOrder() {
+        if (hasOrder()) {
+            return mMetaData.getInt(META_DATA_KEY_ORDER);
+        } else {
+            return 0;
+        }
+    }
+
+    public boolean hasOrder() {
+        return mMetaData.containsKey(META_DATA_KEY_ORDER)
+                && mMetaData.get(META_DATA_KEY_ORDER) instanceof Integer;
     }
 
     public Bundle getMetaData() {
         return mMetaData;
+    }
+
+    /**
+     * Optional key to use for this tile.
+     */
+    public String getKey(Context context) {
+        if (!hasKey()) {
+            return null;
+        }
+        if (mMetaData.get(META_DATA_PREFERENCE_KEYHINT) instanceof Integer) {
+            return context.getResources().getString(mMetaData.getInt(META_DATA_PREFERENCE_KEYHINT));
+        } else {
+            return mMetaData.getString(META_DATA_PREFERENCE_KEYHINT);
+        }
+    }
+
+    public boolean hasKey() {
+        return mMetaData != null && mMetaData.containsKey(META_DATA_PREFERENCE_KEYHINT);
     }
 
     /**
@@ -190,24 +222,6 @@ public class Tile implements Parcelable {
                 && !TextUtils.equals(pkgName, activityInfo.packageName);
     }
 
-    Tile(Parcel in) {
-        mActivityPackage = in.readString();
-        mActivityName = in.readString();
-        title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-        summary = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-        if (in.readByte() != 0) {
-            intent = Intent.CREATOR.createFromParcel(in);
-        }
-        final int N = in.readInt();
-        for (int i = 0; i < N; i++) {
-            userHandle.add(UserHandle.CREATOR.createFromParcel(in));
-        }
-        mCategory = in.readString();
-        priority = in.readInt();
-        mMetaData = in.readBundle();
-        key = in.readString();
-    }
-
     private ActivityInfo getActivityInfo(Context context) {
         if (mActivityInfo == null) {
             final PackageManager pm = context.getApplicationContext().getPackageManager();
@@ -239,5 +253,5 @@ public class Tile implements Parcelable {
     }
 
     public static final Comparator<Tile> TILE_COMPARATOR =
-            (lhs, rhs) -> rhs.priority - lhs.priority;
+            (lhs, rhs) -> rhs.getOrder() - lhs.getOrder();
 }

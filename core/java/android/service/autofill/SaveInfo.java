@@ -119,7 +119,8 @@ import java.util.Arrays;
  *
  * <p>But it is only triggered when all conditions below are met:
  * <ul>
- *   <li>The {@link SaveInfo} associated with the {@link FillResponse} is not {@code null}.
+ *   <li>The {@link SaveInfo} associated with the {@link FillResponse} is not {@code null} neither
+ *       has the {@link #FLAG_DELAY_SAVE} flag.
  *   <li>The {@link AutofillValue}s of all required views (as set by the {@code requiredIds} passed
  *       to the {@link SaveInfo.Builder} constructor are not empty.
  *   <li>The {@link AutofillValue} of at least one view (be it required or optional) has changed
@@ -234,10 +235,26 @@ public final class SaveInfo implements Parcelable {
      */
     public static final int FLAG_DONT_SAVE_ON_FINISH = 0x2;
 
+    /**
+     * Don't trigger the autofill save UI when the autofill context associated with the response
+     * associated with this {@link SaveInfo} is {@link AutofillManager#commit() committed},
+     * but keep its {@link FillContext} so it's delivered in a future
+     * {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback) save request} of an
+     * activity belonging to the same task.
+     *
+     * <p>This flag should be used when the service detects that the application uses
+     * multiple screens to implement an autofillable workflow (for example, one screen for the
+     * username field, another for password).
+     */
+    // TODO(b/112051762): improve documentation: add example, document relationship with other
+    // flagss, etc...
+    public static final int FLAG_DELAY_SAVE = 0x4;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE,
-            FLAG_DONT_SAVE_ON_FINISH
+            FLAG_DONT_SAVE_ON_FINISH,
+            FLAG_DELAY_SAVE
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface SaveInfoFlags{}
@@ -410,14 +427,15 @@ public final class SaveInfo implements Parcelable {
          * Sets flags changing the save behavior.
          *
          * @param flags {@link #FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE},
-         * {@link #FLAG_DONT_SAVE_ON_FINISH}, or {@code 0}.
+         * {@link #FLAG_DONT_SAVE_ON_FINISH}, {@link #FLAG_DELAY_SAVE}, or {@code 0}.
          * @return This builder.
          */
         public @NonNull Builder setFlags(@SaveInfoFlags int flags) {
             throwIfDestroyed();
 
             mFlags = Preconditions.checkFlagsArgument(flags,
-                    FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE | FLAG_DONT_SAVE_ON_FINISH);
+                    FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE | FLAG_DONT_SAVE_ON_FINISH
+                            | FLAG_DELAY_SAVE);
             return this;
         }
 
@@ -663,14 +681,16 @@ public final class SaveInfo implements Parcelable {
          * Builds a new {@link SaveInfo} instance.
          *
          * @throws IllegalStateException if no
-         * {@link #SaveInfo.Builder(int, AutofillId[]) required ids}
-         * or {@link #setOptionalIds(AutofillId[]) optional ids} were set
+         * {@link #SaveInfo.Builder(int, AutofillId[]) required ids},
+         * or {@link #setOptionalIds(AutofillId[]) optional ids}, or {@link #FLAG_DELAY_SAVE}
+         * were set
          */
         public SaveInfo build() {
             throwIfDestroyed();
             Preconditions.checkState(
-                    !ArrayUtils.isEmpty(mRequiredIds) || !ArrayUtils.isEmpty(mOptionalIds),
-                    "must have at least one required or optional id");
+                    !ArrayUtils.isEmpty(mRequiredIds) || !ArrayUtils.isEmpty(mOptionalIds)
+                            || (mFlags & FLAG_DELAY_SAVE) != 0,
+                    "must have at least one required or optional id or FLAG_DELAYED_SAVE");
             mDestroyed = true;
             return new SaveInfo(this);
         }
