@@ -16,10 +16,13 @@
 
 package com.android.commands.bmgr;
 
+import android.annotation.IntDef;
 import android.app.backup.BackupManager;
+import android.app.backup.BackupManagerMonitor;
 import android.app.backup.BackupProgress;
 import android.app.backup.BackupTransport;
 import android.app.backup.IBackupManager;
+import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
 import android.app.backup.IRestoreObserver;
 import android.app.backup.IRestoreSession;
@@ -28,6 +31,7 @@ import android.app.backup.RestoreSet;
 import android.content.ComponentName;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -36,10 +40,13 @@ import android.util.ArraySet;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 public final class Bmgr {
@@ -247,7 +254,7 @@ public final class Bmgr {
     }
 
     // IBackupObserver generically usable for any backup/init operation
-    abstract class Observer extends IBackupObserver.Stub {
+    private static abstract class Observer extends IBackupObserver.Stub {
         private final Object trigger = new Object();
 
         @GuardedBy("trigger")
@@ -295,7 +302,7 @@ public final class Bmgr {
         }
     }
 
-    class BackupObserver extends Observer {
+    private static class BackupObserver extends Observer {
         @Override
         public void onUpdate(String currentPackage, BackupProgress backupProgress) {
             super.onUpdate(currentPackage, backupProgress);
@@ -347,7 +354,7 @@ public final class Bmgr {
         }
     }
 
-    private void backupNowAllPackages(boolean nonIncrementalBackup) {
+    private void backupNowAllPackages(boolean nonIncrementalBackup, @Monitor int monitorState) {
         int userId = UserHandle.USER_SYSTEM;
         IPackageManager mPm =
                 IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
@@ -372,20 +379,27 @@ public final class Bmgr {
                 System.err.println(e.toString());
                 System.err.println(BMGR_NOT_RUNNING_ERR);
             }
-            backupNowPackages(Arrays.asList(filteredPackages), nonIncrementalBackup);
+            backupNowPackages(Arrays.asList(filteredPackages), nonIncrementalBackup, monitorState);
         }
     }
 
-    private void backupNowPackages(List<String> packages, boolean nonIncrementalBackup) {
+    private void backupNowPackages(
+            List<String> packages, boolean nonIncrementalBackup, @Monitor int monitorState) {
         int flags = 0;
         if (nonIncrementalBackup) {
             flags |= BackupManager.FLAG_NON_INCREMENTAL_BACKUP;
         }
         try {
             BackupObserver observer = new BackupObserver();
-            // TODO: implement monitor here?
-            int err = mBmgr.requestBackup(packages.toArray(new String[packages.size()]), observer,
-                    null, flags);
+            BackupMonitor monitor =
+                    (monitorState != Monitor.OFF)
+                            ? new BackupMonitor(monitorState == Monitor.VERBOSE)
+                            : null;
+            int err = mBmgr.requestBackup(
+                    packages.toArray(new String[packages.size()]),
+                    observer,
+                    monitor,
+                    flags);
             if (err == 0) {
                 // Off and running -- wait for the backup to complete
                 observer.waitForCompletion();
@@ -402,6 +416,7 @@ public final class Bmgr {
         String pkg;
         boolean backupAll = false;
         boolean nonIncrementalBackup = false;
+        @Monitor int monitor = Monitor.OFF;
         ArrayList<String> allPkgs = new ArrayList<String>();
         while ((pkg = nextArg()) != null) {
             if (pkg.equals("--all")) {
@@ -410,6 +425,10 @@ public final class Bmgr {
                 nonIncrementalBackup = true;
             } else if (pkg.equals("--incremental")) {
                 nonIncrementalBackup = false;
+            } else if (pkg.equals("--monitor")) {
+                monitor = Monitor.NORMAL;
+            } else if (pkg.equals("--monitor-verbose")) {
+                monitor = Monitor.VERBOSE;
             } else {
                 if (!allPkgs.contains(pkg)) {
                     allPkgs.add(pkg);
@@ -420,14 +439,14 @@ public final class Bmgr {
             if (allPkgs.size() == 0) {
                 System.out.println("Running " + (nonIncrementalBackup ? "non-" : "") +
                         "incremental backup for all packages.");
-                backupNowAllPackages(nonIncrementalBackup);
+                backupNowAllPackages(nonIncrementalBackup, monitor);
             } else {
                 System.err.println("Provide only '--all' flag or list of packages.");
             }
         } else if (allPkgs.size() > 0) {
             System.out.println("Running " + (nonIncrementalBackup ? "non-" : "") +
                     "incremental backup for " + allPkgs.size() +" requested packages.");
-            backupNowPackages(allPkgs, nonIncrementalBackup);
+            backupNowPackages(allPkgs, nonIncrementalBackup, monitor);
         } else {
             System.err.println("Provide '--all' flag or list of packages.");
         }
@@ -824,7 +843,7 @@ public final class Bmgr {
         System.err.println("       bmgr run");
         System.err.println("       bmgr wipe TRANSPORT PACKAGE");
         System.err.println("       bmgr fullbackup PACKAGE...");
-        System.err.println("       bmgr backupnow --all|PACKAGE...");
+        System.err.println("       bmgr backupnow [--monitor|--monitor-verbose] --all|PACKAGE...");
         System.err.println("       bmgr cancel backups");
         System.err.println("");
         System.err.println("The 'backup' command schedules a backup pass for the named package.");
@@ -878,9 +897,164 @@ public final class Bmgr {
         System.err.println("");
         System.err.println("The 'backupnow' command runs an immediate backup for one or more packages.");
         System.err.println("    --all flag runs backup for all eligible packages.");
+        System.err.println("    --monitor flag prints monitor events.");
+        System.err.println("    --monitor-verbose flag prints monitor events with all keys.");
         System.err.println("For each package it will run key/value or full data backup ");
         System.err.println("depending on the package's manifest declarations.");
         System.err.println("The data is sent via the currently active transport.");
         System.err.println("The 'cancel backups' command cancels all running backups.");
+    }
+
+    private static class BackupMonitor extends IBackupManagerMonitor.Stub {
+        private final boolean mVerbose;
+
+        private BackupMonitor(boolean verbose) {
+            mVerbose = verbose;
+        }
+
+        @Override
+        public void onEvent(Bundle event) throws RemoteException {
+            StringBuilder out = new StringBuilder();
+            int id = event.getInt(BackupManagerMonitor.EXTRA_LOG_EVENT_ID);
+            int category = event.getInt(BackupManagerMonitor.EXTRA_LOG_EVENT_CATEGORY);
+            out.append("=> Event{").append(eventCategoryToString(category));
+            out.append(" / ").append(eventIdToString(id));
+            String packageName = event.getString(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME);
+            if (packageName != null) {
+                out.append(" : package = ").append(packageName);
+                if (event.containsKey(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION)) {
+                    long version =
+                            event.getLong(
+                                    BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION);
+                    out.append("(v").append(version).append(")");
+                }
+            }
+            if (mVerbose) {
+                Set<String> remainingKeys = new ArraySet<>(event.keySet());
+                remainingKeys.remove(BackupManagerMonitor.EXTRA_LOG_EVENT_ID);
+                remainingKeys.remove(BackupManagerMonitor.EXTRA_LOG_EVENT_CATEGORY);
+                remainingKeys.remove(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME);
+                remainingKeys.remove(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION);
+                remainingKeys.remove(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_VERSION);
+                if (!remainingKeys.isEmpty()) {
+                    out.append(", other keys =");
+                    for (String key : remainingKeys) {
+                        out.append(" ").append(key);
+                    }
+                }
+            }
+            out.append("}");
+            System.out.println(out.toString());
+        }
+    }
+
+    private static String eventCategoryToString(int eventCategory) {
+        switch (eventCategory) {
+            case BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT:
+                return "TRANSPORT";
+            case BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT:
+                return "AGENT";
+            case BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY:
+                return "BACKUP_MANAGER_POLICY";
+            default:
+                return "UNKNOWN_CATEGORY";
+        }
+    }
+
+    private static String eventIdToString(int eventId) {
+        switch (eventId) {
+            case BackupManagerMonitor.LOG_EVENT_ID_FULL_BACKUP_CANCEL:
+                return "FULL_BACKUP_CANCEL";
+            case BackupManagerMonitor.LOG_EVENT_ID_ILLEGAL_KEY:
+                return "ILLEGAL_KEY";
+            case BackupManagerMonitor.LOG_EVENT_ID_NO_DATA_TO_SEND:
+                return "NO_DATA_TO_SEND";
+            case BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_INELIGIBLE:
+                return "PACKAGE_INELIGIBLE";
+            case BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_KEY_VALUE_PARTICIPANT:
+                return "PACKAGE_KEY_VALUE_PARTICIPANT";
+            case BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_STOPPED:
+                return "PACKAGE_STOPPED";
+            case BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_NOT_FOUND:
+                return "PACKAGE_NOT_FOUND";
+            case BackupManagerMonitor.LOG_EVENT_ID_BACKUP_DISABLED:
+                return "BACKUP_DISABLED";
+            case BackupManagerMonitor.LOG_EVENT_ID_DEVICE_NOT_PROVISIONED:
+                return "DEVICE_NOT_PROVISIONED";
+            case BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_TRANSPORT_NOT_PRESENT:
+                return "PACKAGE_TRANSPORT_NOT_PRESENT";
+            case BackupManagerMonitor.LOG_EVENT_ID_ERROR_PREFLIGHT:
+                return "ERROR_PREFLIGHT";
+            case BackupManagerMonitor.LOG_EVENT_ID_QUOTA_HIT_PREFLIGHT:
+                return "QUOTA_HIT_PREFLIGHT";
+            case BackupManagerMonitor.LOG_EVENT_ID_EXCEPTION_FULL_BACKUP:
+                return "EXCEPTION_FULL_BACKUP";
+            case BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_BACKUP_CANCEL:
+                return "KEY_VALUE_BACKUP_CANCEL";
+            case BackupManagerMonitor.LOG_EVENT_ID_NO_RESTORE_METADATA_AVAILABLE:
+                return "NO_RESTORE_METADATA_AVAILABLE";
+            case BackupManagerMonitor.LOG_EVENT_ID_NO_PM_METADATA_RECEIVED:
+                return "NO_PM_METADATA_RECEIVED";
+            case BackupManagerMonitor.LOG_EVENT_ID_PM_AGENT_HAS_NO_METADATA:
+                return "PM_AGENT_HAS_NO_METADATA";
+            case BackupManagerMonitor.LOG_EVENT_ID_LOST_TRANSPORT:
+                return "LOST_TRANSPORT";
+            case BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_NOT_PRESENT:
+                return "PACKAGE_NOT_PRESENT";
+            case BackupManagerMonitor.LOG_EVENT_ID_RESTORE_VERSION_HIGHER:
+                return "RESTORE_VERSION_HIGHER";
+            case BackupManagerMonitor.LOG_EVENT_ID_APP_HAS_NO_AGENT:
+                return "APP_HAS_NO_AGENT";
+            case BackupManagerMonitor.LOG_EVENT_ID_SIGNATURE_MISMATCH:
+                return "SIGNATURE_MISMATCH";
+            case BackupManagerMonitor.LOG_EVENT_ID_CANT_FIND_AGENT:
+                return "CANT_FIND_AGENT";
+            case BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_RESTORE_TIMEOUT:
+                return "KEY_VALUE_RESTORE_TIMEOUT";
+            case BackupManagerMonitor.LOG_EVENT_ID_RESTORE_ANY_VERSION:
+                return "RESTORE_ANY_VERSION";
+            case BackupManagerMonitor.LOG_EVENT_ID_VERSIONS_MATCH:
+                return "VERSIONS_MATCH";
+            case BackupManagerMonitor.LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER:
+                return "VERSION_OF_BACKUP_OLDER";
+            case BackupManagerMonitor.LOG_EVENT_ID_FULL_RESTORE_SIGNATURE_MISMATCH:
+                return "FULL_RESTORE_SIGNATURE_MISMATCH";
+            case BackupManagerMonitor.LOG_EVENT_ID_SYSTEM_APP_NO_AGENT:
+                return "SYSTEM_APP_NO_AGENT";
+            case BackupManagerMonitor.LOG_EVENT_ID_FULL_RESTORE_ALLOW_BACKUP_FALSE:
+                return "FULL_RESTORE_ALLOW_BACKUP_FALSE";
+            case BackupManagerMonitor.LOG_EVENT_ID_APK_NOT_INSTALLED:
+                return "APK_NOT_INSTALLED";
+            case BackupManagerMonitor.LOG_EVENT_ID_CANNOT_RESTORE_WITHOUT_APK:
+                return "CANNOT_RESTORE_WITHOUT_APK";
+            case BackupManagerMonitor.LOG_EVENT_ID_MISSING_SIGNATURE:
+                return "MISSING_SIGNATURE";
+            case BackupManagerMonitor.LOG_EVENT_ID_EXPECTED_DIFFERENT_PACKAGE:
+                return "EXPECTED_DIFFERENT_PACKAGE";
+            case BackupManagerMonitor.LOG_EVENT_ID_UNKNOWN_VERSION:
+                return "UNKNOWN_VERSION";
+            case BackupManagerMonitor.LOG_EVENT_ID_FULL_RESTORE_TIMEOUT:
+                return "FULL_RESTORE_TIMEOUT";
+            case BackupManagerMonitor.LOG_EVENT_ID_CORRUPT_MANIFEST:
+                return "CORRUPT_MANIFEST";
+            case BackupManagerMonitor.LOG_EVENT_ID_WIDGET_METADATA_MISMATCH:
+                return "WIDGET_METADATA_MISMATCH";
+            case BackupManagerMonitor.LOG_EVENT_ID_WIDGET_UNKNOWN_VERSION:
+                return "WIDGET_UNKNOWN_VERSION";
+            case BackupManagerMonitor.LOG_EVENT_ID_NO_PACKAGES:
+                return "NO_PACKAGES";
+            case BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_IS_NULL:
+                return "TRANSPORT_IS_NULL";
+            default:
+                return "UNKNOWN_ID";
+        }
+    }
+
+    @IntDef({Monitor.OFF, Monitor.NORMAL, Monitor.VERBOSE})
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface Monitor {
+        int OFF = 0;
+        int NORMAL = 1;
+        int VERBOSE = 2;
     }
 }
