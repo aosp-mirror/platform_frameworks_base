@@ -1537,4 +1537,10 @@ interface ITelephony {
      * @hide
      */
     void refreshUiccProfile(int subId);
+
+    /**
+     * How many modems can have simultaneous data connections.
+     * @hide
+     */
+    int getNumberOfModemsWithSimultaneousDataConnections(int subId, String callingPackage);
 }

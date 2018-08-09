@@ -21,6 +21,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.CellInfo;
 import android.telephony.DataConnectionRealTimeInfo;
+import android.telephony.PhoneCapability;
 import android.telephony.PhysicalChannelConfig;
 import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
@@ -50,5 +51,6 @@ oneway interface IPhoneStateListener {
     void onOemHookRawEvent(in byte[] rawData);
     void onCarrierNetworkChange(in boolean active);
     void onUserMobileDataStateChanged(in boolean enabled);
+    void onPhoneCapabilityChanged(in PhoneCapability capability);
 }
 
