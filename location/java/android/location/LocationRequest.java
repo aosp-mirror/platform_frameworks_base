@@ -17,6 +17,7 @@
 package android.location;
 
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -141,16 +142,26 @@ public final class LocationRequest implements Parcelable {
      */
     private static final double FASTEST_INTERVAL_FACTOR = 6.0;  // 6x
 
+    @UnsupportedAppUsage
     private int mQuality = POWER_LOW;
+    @UnsupportedAppUsage
     private long mInterval = 60 * 60 * 1000;   // 60 minutes
+    @UnsupportedAppUsage
     private long mFastestInterval = (long) (mInterval / FASTEST_INTERVAL_FACTOR);  // 10 minutes
+    @UnsupportedAppUsage
     private boolean mExplicitFastestInterval = false;
+    @UnsupportedAppUsage
     private long mExpireAt = Long.MAX_VALUE;  // no expiry
+    @UnsupportedAppUsage
     private int mNumUpdates = Integer.MAX_VALUE;  // no expiry
+    @UnsupportedAppUsage
     private float mSmallestDisplacement = 0.0f;    // meters
+    @UnsupportedAppUsage
     private WorkSource mWorkSource = null;
+    @UnsupportedAppUsage
     private boolean mHideFromAppOps = false; // True if this request shouldn't be counted by AppOps
 
+    @UnsupportedAppUsage
     private String mProvider = LocationManager.FUSED_PROVIDER;
             // for deprecated APIs that explicitly request a provider
 
@@ -592,12 +603,14 @@ public final class LocationRequest implements Parcelable {
         return mHideFromAppOps;
     }
 
+    @UnsupportedAppUsage
     private static void checkInterval(long millis) {
         if (millis < 0) {
             throw new IllegalArgumentException("invalid interval: " + millis);
         }
     }
 
+    @UnsupportedAppUsage
     private static void checkQuality(int quality) {
         switch (quality) {
             case ACCURACY_FINE:
@@ -612,12 +625,14 @@ public final class LocationRequest implements Parcelable {
         }
     }
 
+    @UnsupportedAppUsage
     private static void checkDisplacement(float meters) {
         if (meters < 0.0f) {
             throw new IllegalArgumentException("invalid displacement: " + meters);
         }
     }
 
+    @UnsupportedAppUsage
     private static void checkProvider(String name) {
         if (name == null) {
             throw new IllegalArgumentException("invalid provider: " + name);
