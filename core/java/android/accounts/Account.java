@@ -18,6 +18,7 @@ package android.accounts;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Parcelable;
 import android.os.Parcel;
@@ -36,6 +37,7 @@ import java.util.Set;
  * suitable for use as the key of a {@link java.util.Map}
  */
 public class Account implements Parcelable {
+    @UnsupportedAppUsage
     private static final String TAG = "Account";
 
     @GuardedBy("sAccessedAccounts")
@@ -43,6 +45,7 @@ public class Account implements Parcelable {
 
     public final String name;
     public final String type;
+    @UnsupportedAppUsage
     private final @Nullable String accessId;
 
     public boolean equals(Object o) {

@@ -16,6 +16,7 @@
 
 package android.accounts;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.Parcel;
@@ -33,6 +34,7 @@ public class AccountAuthenticatorResponse implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public AccountAuthenticatorResponse(IAccountAuthenticatorResponse response) {
         mAccountAuthenticatorResponse = response;
     }
