@@ -1038,6 +1038,15 @@
     <!-- Message for add user confirmation dialog - short version. [CHAR LIMIT=none] -->
     <string name="user_add_user_message_short" msgid="1511354412249044381">When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. </string>
 
+    <!-- Title for the dialog that lets users know that the maximum allowed number of users on the device has been reached. [CHAR LIMIT=35]-->
+    <string name="user_limit_reached_title">User limit reached</string>
+
+    <!-- Message that tells people what's the maximum number of uses allowed on the device. [CHAR_LIMIT=NONE]-->
+    <plurals name="user_limit_reached_message">
+        <item quantity="one">Only one user can be created.</item>
+        <item quantity="other">You can add up to <xliff:g id="count" example="3">%d</xliff:g> users.</item>
+    </plurals>
+
     <!-- Title of the confirmation dialog for deleting a user [CHAR LIMIT=NONE] -->
     <string name="user_remove_user_title">Remove user?</string>
 
