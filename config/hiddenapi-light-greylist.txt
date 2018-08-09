@@ -5233,7 +5233,6 @@ Landroid/view/View;->ensureTransformationInfo()V
 Landroid/view/View;->findViewByAccessibilityId(I)Landroid/view/View;
 Landroid/view/View;->fitsSystemWindows()Z
 Landroid/view/View;->gatherTransparentRegion(Landroid/graphics/Region;)Z
-Landroid/view/View;->getAccessibilityDelegate()Landroid/view/View$AccessibilityDelegate;
 Landroid/view/View;->getAccessibilityViewId()I
 Landroid/view/View;->getBoundsOnScreen(Landroid/graphics/Rect;)V
 Landroid/view/View;->getBoundsOnScreen(Landroid/graphics/Rect;Z)V

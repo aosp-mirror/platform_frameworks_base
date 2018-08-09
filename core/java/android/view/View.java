@@ -9008,8 +9008,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * composition. For more details see {@link AccessibilityDelegate}.
      *
      * @return The delegate, or null if none set.
-     *
-     * @hide
      */
     public AccessibilityDelegate getAccessibilityDelegate() {
         return mAccessibilityDelegate;
