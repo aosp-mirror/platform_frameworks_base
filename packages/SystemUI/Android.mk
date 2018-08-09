@@ -7,7 +7,6 @@ LOCAL_MODULE := SystemUI-proto
 LOCAL_SRC_FILES := $(call all-proto-files-under,src)
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := nano
-LOCAL_PROTO_JAVA_OUTPUT_PARAMS := optional_field_style=accessors
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
