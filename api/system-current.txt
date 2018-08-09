@@ -4668,6 +4668,7 @@ package android.service.notification {
     method public int getUser();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.service.notification.Adjustment> CREATOR;
+    field public static final java.lang.String KEY_IMPORTANCE = "key_importance";
     field public static final java.lang.String KEY_PEOPLE = "key_people";
     field public static final java.lang.String KEY_SMART_ACTIONS = "key_smart_actions";
     field public static final java.lang.String KEY_SMART_REPLIES = "key_smart_replies";

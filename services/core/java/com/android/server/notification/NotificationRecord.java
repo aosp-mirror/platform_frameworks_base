@@ -49,7 +49,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
@@ -142,7 +141,8 @@ public final class NotificationRecord {
     private int mAuthoritativeRank;
     private String mGlobalSortKey;
     private int mPackageVisibility;
-    private int mUserImportance = IMPORTANCE_UNSPECIFIED;
+    private int mSystemImportance = IMPORTANCE_UNSPECIFIED;
+    private int mAssistantImportance = IMPORTANCE_UNSPECIFIED;
     private int mImportance = IMPORTANCE_UNSPECIFIED;
     private CharSequence mImportanceExplanation = null;
 
@@ -198,7 +198,7 @@ public final class NotificationRecord {
         mSound = calculateSound();
         mVibration = calculateVibration();
         mAttributes = calculateAttributes();
-        mImportance = calculateImportance();
+        mImportance = calculateInitialImportance();
         mLight = calculateLights();
         mAdjustments = new ArrayList<>();
         mStats = new NotificationStats();
@@ -321,7 +321,7 @@ public final class NotificationRecord {
         return attributes;
     }
 
-    private int calculateImportance() {
+    private int calculateInitialImportance() {
         final Notification n = sbn.getNotification();
         int importance = getChannel().getImportance();
         int requestedImportance = IMPORTANCE_DEFAULT;
@@ -525,8 +525,10 @@ public final class NotificationRecord {
         pw.println(prefix + "mRecentlyIntrusive=" + mRecentlyIntrusive);
         pw.println(prefix + "mPackagePriority=" + mPackagePriority);
         pw.println(prefix + "mPackageVisibility=" + mPackageVisibility);
-        pw.println(prefix + "mUserImportance="
-                + NotificationListenerService.Ranking.importanceToString(mUserImportance));
+        pw.println(prefix + "mSystemImportance="
+                + NotificationListenerService.Ranking.importanceToString(mSystemImportance));
+        pw.println(prefix + "mAsstImportance="
+                + NotificationListenerService.Ranking.importanceToString(mAssistantImportance));
         pw.println(prefix + "mImportance="
                 + NotificationListenerService.Ranking.importanceToString(mImportance));
         pw.println(prefix + "mImportanceExplanation=" + mImportanceExplanation);
@@ -641,6 +643,12 @@ public final class NotificationRecord {
                 if (signals.containsKey(Adjustment.KEY_SMART_REPLIES)) {
                     setSmartReplies(signals.getCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES));
                 }
+                if (signals.containsKey(Adjustment.KEY_IMPORTANCE)) {
+                    int importance = signals.getInt(Adjustment.KEY_IMPORTANCE);
+                    importance = Math.max(IMPORTANCE_UNSPECIFIED, importance);
+                    importance = Math.min(IMPORTANCE_HIGH, importance);
+                    setAssistantImportance(importance);
+                }
             }
         }
     }
@@ -654,7 +662,7 @@ public final class NotificationRecord {
         mContactAffinity = contactAffinity;
         if (mImportance < IMPORTANCE_DEFAULT &&
                 mContactAffinity > ValidateNotificationPeople.VALID_CONTACT) {
-            setImportance(IMPORTANCE_DEFAULT, getPeopleExplanation());
+            setSystemImportance(IMPORTANCE_DEFAULT);
         }
     }
 
@@ -693,11 +701,6 @@ public final class NotificationRecord {
         return mPackageVisibility;
     }
 
-    public void setUserImportance(int importance) {
-        mUserImportance = importance;
-        applyUserImportance();
-    }
-
     private String getUserExplanation() {
         if (mUserExplanation == null) {
             mUserExplanation = mContext.getResources().getString(
@@ -706,31 +709,42 @@ public final class NotificationRecord {
         return mUserExplanation;
     }
 
-    private String getPeopleExplanation() {
-        if (mPeopleExplanation == null) {
-            mPeopleExplanation = mContext.getResources().getString(
-                    com.android.internal.R.string.importance_from_person);
-        }
-        return mPeopleExplanation;
+    /**
+     * Sets the importance value the system thinks the record should have.
+     * e.g. bumping up foreground service notifications or people to people notifications.
+     */
+    public void setSystemImportance(int importance) {
+        mSystemImportance = importance;
+        calculateImportance();
     }
 
-    private void applyUserImportance() {
-        if (mUserImportance != IMPORTANCE_UNSPECIFIED) {
-            mImportance = mUserImportance;
-            mImportanceExplanation = getUserExplanation();
-        }
+    /**
+     * Sets the importance value the
+     * {@link android.service.notification.NotificationAssistantService} thinks the record should
+     * have.
+     */
+    public void setAssistantImportance(int importance) {
+        mAssistantImportance = importance;
+        calculateImportance();
     }
 
-    public int getUserImportance() {
-        return mUserImportance;
-    }
-
-    public void setImportance(int importance, CharSequence explanation) {
-        if (importance != IMPORTANCE_UNSPECIFIED) {
-            mImportance = importance;
-            mImportanceExplanation = explanation;
+    /**
+     * Recalculates the importance of the record after fields affecting importance have changed
+     */
+    protected void calculateImportance() {
+        mImportance = calculateInitialImportance();
+        mImportanceExplanation = "app";
+        if (getChannel().isImportanceLocked()) {
+            mImportanceExplanation = "user";
         }
-        applyUserImportance();
+        if (!getChannel().isImportanceLocked() && mAssistantImportance != IMPORTANCE_UNSPECIFIED) {
+            mImportance = mAssistantImportance;
+            mImportanceExplanation = "asst";
+        }
+        if (mSystemImportance != IMPORTANCE_UNSPECIFIED) {
+            mImportance = mSystemImportance;
+            mImportanceExplanation = "system";
+        }
     }
 
     public int getImportance() {
@@ -920,7 +934,7 @@ public final class NotificationRecord {
     }
 
     /**
-     * @see RankingHelper#getIsAppImportanceLocked(String, int)
+     * @see PreferencesHelper#getIsAppImportanceLocked(String, int)
      */
     public boolean getIsAppImportanceLocked() {
         return mIsAppImportanceLocked;
