@@ -1584,6 +1584,17 @@ public class KeyValueBackupTaskTest {
                 new RuntimeException().toString());
     }
 
+    @Test
+    public void testRunTask_whenBackupRunning_doesNotThrow() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        when(mBackupManagerService.isBackupOperationInProgress()).thenReturn(true);
+        KeyValueBackupTask task =
+                createKeyValueBackupTask(
+                        transportMock.transportClient, mTransport.transportDirName);
+
+        runTask(task);
+    }
+
     private void runTask(KeyValueBackupTask task) {
         // Pretend we are not on the main-thread to prevent RemoteCall from complaining
         mShadowMainLooper.setCurrentThread(false);
