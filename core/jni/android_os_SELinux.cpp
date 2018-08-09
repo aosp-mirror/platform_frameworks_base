@@ -60,6 +60,41 @@ static jboolean isSELinuxEnforced(JNIEnv *env, jobject) {
     return (security_getenforce() == 1) ? true : false;
 }
 
+static jstring getFdConInner(JNIEnv *env, jobject fileDescriptor, bool isSocket) {
+    if (isSELinuxDisabled) {
+        return NULL;
+    }
+
+    if (fileDescriptor == NULL) {
+        jniThrowNullPointerException(env,
+                "Trying to check security context of a null FileDescriptor.");
+        return NULL;
+    }
+
+    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
+    if (env->ExceptionCheck()) {
+        ALOGE("getFdCon => getFD for %p failed", fileDescriptor);
+        return NULL;
+    }
+
+    security_context_t tmp = NULL;
+    int ret;
+    if (isSocket) {
+        ret = getpeercon(fd, &tmp);
+    } else{
+        ret = fgetfilecon(fd, &tmp);
+    }
+    Unique_SecurityContext context(tmp);
+
+    ScopedLocalRef<jstring> contextStr(env, NULL);
+    if (ret != -1) {
+        contextStr.reset(env->NewStringUTF(context.get()));
+    }
+
+    ALOGV("getFdCon(%d) => %s", fd, context.get());
+    return contextStr.release();
+}
+
 /*
  * Function: getPeerCon
  * Purpose: retrieves security context of peer socket
@@ -69,33 +104,19 @@ static jboolean isSELinuxEnforced(JNIEnv *env, jobject) {
  * Exceptions: NullPointerException if fileDescriptor object is NULL
  */
 static jstring getPeerCon(JNIEnv *env, jobject, jobject fileDescriptor) {
-    if (isSELinuxDisabled) {
-        return NULL;
-    }
+    return getFdConInner(env, fileDescriptor, true);
+}
 
-    if (fileDescriptor == NULL) {
-        jniThrowNullPointerException(env,
-                "Trying to check security context of a null peer socket.");
-        return NULL;
-    }
-
-    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-    if (env->ExceptionCheck()) {
-        ALOGE("getPeerCon => getFD for %p failed", fileDescriptor);
-        return NULL;
-    }
-
-    security_context_t tmp = NULL;
-    int ret = getpeercon(fd, &tmp);
-    Unique_SecurityContext context(tmp);
-
-    ScopedLocalRef<jstring> contextStr(env, NULL);
-    if (ret != -1) {
-        contextStr.reset(env->NewStringUTF(context.get()));
-    }
-
-    ALOGV("getPeerCon(%d) => %s", fd, context.get());
-    return contextStr.release();
+/*
+ * Function: getFdCon
+ * Purpose: retrieves security context of a file descriptor.
+ * Parameters:
+ *        fileDescriptor: a FileDescriptor object
+ * Returns: jstring representing the security_context of socket or NULL if error
+ * Exceptions: NullPointerException if fileDescriptor object is NULL
+ */
+static jstring getFdCon(JNIEnv *env, jobject, jobject fileDescriptor) {
+    return getFdConInner(env, fileDescriptor, false);
 }
 
 /*
@@ -326,6 +347,7 @@ static const JNINativeMethod method_table[] = {
     { "getContext"               , "()Ljava/lang/String;"                         , (void*)getCon           },
     { "getFileContext"           , "(Ljava/lang/String;)Ljava/lang/String;"       , (void*)getFileCon       },
     { "getPeerContext"           , "(Ljava/io/FileDescriptor;)Ljava/lang/String;" , (void*)getPeerCon       },
+    { "getFileContext"           , "(Ljava/io/FileDescriptor;)Ljava/lang/String;" , (void*)getFdCon         },
     { "getPidContext"            , "(I)Ljava/lang/String;"                        , (void*)getPidCon        },
     { "isSELinuxEnforced"        , "()Z"                                          , (void*)isSELinuxEnforced},
     { "isSELinuxEnabled"         , "()Z"                                          , (void*)isSELinuxEnabled },
