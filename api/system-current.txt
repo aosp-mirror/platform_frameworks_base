@@ -6042,12 +6042,16 @@ package android.telephony.ims {
     ctor public ImsSsInfo(int, java.lang.String);
     method public int describeContents();
     method public java.lang.String getIcbNum();
+    method public int getProvisionStatus();
     method public int getStatus();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsSsInfo> CREATOR;
     field public static final int DISABLED = 0; // 0x0
     field public static final int ENABLED = 1; // 0x1
     field public static final int NOT_REGISTERED = -1; // 0xffffffff
+    field public static final int SERVICE_NOT_PROVISIONED = 0; // 0x0
+    field public static final int SERVICE_PROVISIONED = 1; // 0x1
+    field public static final int SERVICE_PROVISIONING_UNKNOWN = -1; // 0xffffffff
   }
 
   public final class ImsStreamMediaProfile implements android.os.Parcelable {
