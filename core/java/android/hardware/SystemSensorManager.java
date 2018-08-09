@@ -16,6 +16,7 @@
 
 package android.hardware;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -758,10 +759,13 @@ public class SystemSensorManager extends SensorManager {
             if (sensor == null) throw new NullPointerException();
             return nativeDisableSensor(mNativeSensorEventQueue, sensor.getHandle());
         }
+        @UnsupportedAppUsage
         protected abstract void dispatchSensorEvent(int handle, float[] values, int accuracy,
                 long timestamp);
+        @UnsupportedAppUsage
         protected abstract void dispatchFlushCompleteEvent(int handle);
 
+        @UnsupportedAppUsage
         protected void dispatchAdditionalInfoEvent(
                 int handle, int type, int serial, float[] floatValues, int[] intValues) {
             // default implementation is do nothing

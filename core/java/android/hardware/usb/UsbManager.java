@@ -25,6 +25,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -87,6 +88,7 @@ public class UsbManager {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public static final String ACTION_USB_STATE =
             "android.hardware.usb.action.USB_STATE";
 
@@ -163,6 +165,7 @@ public class UsbManager {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public static final String USB_CONNECTED = "connected";
 
     /**
@@ -189,6 +192,7 @@ public class UsbManager {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public static final String USB_DATA_UNLOCKED = "unlocked";
 
     /**
@@ -197,6 +201,7 @@ public class UsbManager {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public static final String USB_FUNCTION_NONE = "none";
 
     /**
@@ -363,6 +368,7 @@ public class UsbManager {
     /**
      * {@hide}
      */
+    @UnsupportedAppUsage
     public UsbManager(Context context, IUsbManager service) {
         mContext = context;
         mService = service;
@@ -645,6 +651,7 @@ public class UsbManager {
      * {@hide}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public boolean isFunctionEnabled(String function) {
         try {
             return mService.isFunctionEnabled(function);
@@ -693,6 +700,7 @@ public class UsbManager {
      * {@hide}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void setCurrentFunction(String functions, boolean usbDataUnlocked) {
         try {
             mService.setCurrentFunction(functions, usbDataUnlocked);
@@ -774,6 +782,7 @@ public class UsbManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public UsbPort[] getPorts() {
         if (mService == null) {
             return null;
@@ -793,6 +802,7 @@ public class UsbManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public UsbPortStatus getPortStatus(UsbPort port) {
         Preconditions.checkNotNull(port, "port must not be null");
 
@@ -822,6 +832,7 @@ public class UsbManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setPortRoles(UsbPort port, int powerRole, int dataRole) {
         Preconditions.checkNotNull(port, "port must not be null");
         UsbPort.checkRoles(powerRole, dataRole);
