@@ -322,8 +322,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     public static final int FADE_KEYGUARD_START_DELAY = 100;
     public static final int FADE_KEYGUARD_DURATION = 300;
     public static final int FADE_KEYGUARD_DURATION_PULSING = 96;
-    public static final int FADE_BACKDROP_DURATION = 300;
-    public static final int FADE_BACKDROP_DURATION_FAST = 240;
 
     /** If true, the system is in the half-boot-to-decryption-screen state.
      * Prudently disable QS and notifications.  */
@@ -545,7 +543,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mIsOccluded;
     private boolean mWereIconsJustHidden;
     private boolean mBouncerWasShowingWhenHidden;
-    private boolean mKeyguardOccludeAnimationRunning;
 
     // Notifies StatusBarKeyguardViewManager every time the keyguard transition is over,
     // this animation is tied to the scrim for historic reasons.
@@ -1644,7 +1641,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         boolean wakeAndUnlock = mBiometricUnlockController != null
             && mBiometricUnlockController.isWakeAndUnlock();
-        if (mLaunchTransitionFadingAway && !mIsOccluded || wakeAndUnlock) {
+        if (mLaunchTransitionFadingAway || wakeAndUnlock) {
             mBackdrop.setVisibility(View.INVISIBLE);
             Trace.endSection();
             return;
@@ -1763,8 +1760,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 boolean cannotAnimateDoze = mDozing && !ScrimState.AOD.getAnimateChange();
                 if (mBiometricUnlockController.getMode()
                         == BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
-                        || hideBecauseOccluded  && !mKeyguardOccludeAnimationRunning
-                        || cannotAnimateDoze) {
+                        || hideBecauseOccluded || cannotAnimateDoze) {
 
                     // We are unlocking directly - no animation!
                     mBackdrop.setVisibility(View.GONE);
@@ -1775,9 +1771,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mBackdrop.animate()
                             .alpha(SRC_MIN_ALPHA)
                             .setInterpolator(Interpolators.ACCELERATE_DECELERATE)
-                            .setDuration(
-                                    mKeyguardOccludeAnimationRunning
-                                            ? FADE_BACKDROP_DURATION_FAST : FADE_BACKDROP_DURATION)
+                            .setDuration(300)
                             .setStartDelay(0)
                             .withEndAction(() -> {
                                 mBackdrop.setVisibility(View.GONE);
@@ -3674,27 +3668,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     /**
-    * Is keyguard being occluded by a newly launched activity.
-    */
-    public boolean isKeyguardOccludeAnimationRunning() {
-        return mKeyguardOccludeAnimationRunning;
-    }
-
-    /**
-     * Plays the animation when new activity is launched over keyguard.
-     */
-    public void animateKeyguardOccluding() {
-        mKeyguardOccludeAnimationRunning = true;
-        addPostCollapseAction(() -> {
-            mStatusBarKeyguardViewManager.reset(true /* hideBouncerWhenShowing */);
-            mKeyguardOccludeAnimationRunning = false;
-        });
-        mStatusBarKeyguardViewManager.animateCollapsePanels(1.0f /* speedfactor */);
-        updateScrimController();
-        updateMediaMetaData(false /* metaDataChanged */, true /* allowEnterAnimation */);
-    }
-
-    /**
      * Plays the animation when an activity that was occluding Keyguard goes away.
      */
     public void animateKeyguardUnoccluding() {
@@ -4039,7 +4012,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void showBouncerIfKeyguard() {
         if ((mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)
-                && !mKeyguardViewMediator.isHiding() && !mKeyguardOccludeAnimationRunning) {
+                && !mKeyguardViewMediator.isHiding()) {
             showBouncer(true /* scrimmed */);
         }
     }
@@ -4539,11 +4512,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void onStartedGoingToSleep() {
-            // in case we start going to sleep while new animation is launching over keyguard, make
-            // sure to finish it
-            if (mKeyguardOccludeAnimationRunning) {
-                runPostCollapseRunnables();
-            }
             notifyHeadsUpGoingToSleep();
             dismissVolumeDialog();
         }
@@ -4785,7 +4753,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     ? ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER;
             mScrimController.transitionTo(state);
         } else if (isInLaunchTransition() || mLaunchCameraOnScreenTurningOn
-                || launchingAffordanceWithPreview || mKeyguardOccludeAnimationRunning) {
+                || launchingAffordanceWithPreview) {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         } else if (mBrightnessMirrorVisible) {
             mScrimController.transitionTo(ScrimState.BRIGHTNESS_MIRROR);

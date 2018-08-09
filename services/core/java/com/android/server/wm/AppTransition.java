@@ -1557,7 +1557,7 @@ public class AppTransition implements Dump {
         if (isKeyguardGoingAwayTransit(transit) && enter) {
             a = loadKeyguardExitAnimation(transit);
         } else if (transit == TRANSIT_KEYGUARD_OCCLUDE) {
-            a = loadAnimationRes(lp, com.android.internal.R.anim.keyguard_occlude_open_enter);
+            a = null;
         } else if (transit == TRANSIT_KEYGUARD_UNOCCLUDE && !enter) {
             a = loadAnimationRes(lp, com.android.internal.R.anim.wallpaper_open_exit);
         } else if (transit == TRANSIT_CRASHING_ACTIVITY_CLOSE) {

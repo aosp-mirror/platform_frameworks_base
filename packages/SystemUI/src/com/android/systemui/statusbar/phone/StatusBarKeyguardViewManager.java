@@ -365,11 +365,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                             }
                         });
                 return;
-            } else if (animate) {
-                mOccluded = true;
-                mStatusBar.animateKeyguardOccluding();
-                mStatusBarWindowManager.setKeyguardOccluded(mOccluded);
-                return;
             }
         } else if (!occluded && mOccluded && mShowing) {
             StatsLog.write(StatsLog.KEYGUARD_STATE_CHANGED,
