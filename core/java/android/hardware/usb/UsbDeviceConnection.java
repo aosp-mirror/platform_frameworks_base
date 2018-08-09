@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
@@ -46,6 +47,7 @@ public class UsbDeviceConnection {
     private Context mContext;
 
     // used by the JNI code
+    @UnsupportedAppUsage
     private long mNativeContext;
 
     private final CloseGuard mCloseGuard = CloseGuard.get();

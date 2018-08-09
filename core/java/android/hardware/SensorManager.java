@@ -18,6 +18,7 @@ package android.hardware;
 
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
@@ -368,6 +369,7 @@ public abstract class SensorManager {
     /**
      * {@hide}
      */
+    @UnsupportedAppUsage
     public SensorManager() {
     }
 

@@ -27,6 +27,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -189,6 +190,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public Fingerprint getFingerprint() { return mFingerprint; }
 
         /**
@@ -718,6 +720,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
      * @hide
      */
     @RequiresPermission(USE_FINGERPRINT)
+    @UnsupportedAppUsage
     public List<Fingerprint> getEnrolledFingerprints(int userId) {
         if (mService != null) try {
             return mService.getEnrolledFingerprints(userId, mContext.getOpPackageName());
@@ -734,6 +737,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
      * @hide
      */
     @RequiresPermission(USE_FINGERPRINT)
+    @UnsupportedAppUsage
     public List<Fingerprint> getEnrolledFingerprints() {
         return getEnrolledFingerprints(mContext.getUserId());
     }
@@ -801,6 +805,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public long getAuthenticatorId() {
         if (mService != null) {
             try {
