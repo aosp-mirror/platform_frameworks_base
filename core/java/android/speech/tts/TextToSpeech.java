@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.annotation.RawRes;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -668,8 +669,10 @@ public class TextToSpeech {
     }
 
     private final Context mContext;
+    @UnsupportedAppUsage
     private Connection mConnectingServiceConnection;
     private Connection mServiceConnection;
+    @UnsupportedAppUsage
     private OnInitListener mInitListener;
     // Written from an unspecified application thread, read from
     // a binder thread.
@@ -686,6 +689,7 @@ public class TextToSpeech {
     private final Map<CharSequence, Uri> mUtterances;
     private final Bundle mParams = new Bundle();
     private final TtsEngines mEnginesHelper;
+    @UnsupportedAppUsage
     private volatile String mCurrentEngine = null;
 
     /**
@@ -1425,6 +1429,7 @@ public class TextToSpeech {
      * @return the engine currently in use by this TextToSpeech instance.
      * @hide
      */
+    @UnsupportedAppUsage
     public String getCurrentEngine() {
         return mCurrentEngine;
     }

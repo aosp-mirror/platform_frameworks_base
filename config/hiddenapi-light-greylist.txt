@@ -4417,17 +4417,6 @@ Landroid/service/wallpaper/WallpaperService$Engine;->mPendingXOffset:F
 Landroid/service/wallpaper/WallpaperService$Engine;->setFixedSizeAllowed(Z)V
 Landroid/service/wallpaper/WallpaperService;->MSG_WINDOW_RESIZED:I
 Landroid/speech/IRecognitionListener;->onEvent(ILandroid/os/Bundle;)V
-Landroid/speech/tts/TextToSpeech;->getCurrentEngine()Ljava/lang/String;
-Landroid/speech/tts/TextToSpeech;->mConnectingServiceConnection:Landroid/speech/tts/TextToSpeech$Connection;
-Landroid/speech/tts/TextToSpeech;->mCurrentEngine:Ljava/lang/String;
-Landroid/speech/tts/TextToSpeech;->mInitListener:Landroid/speech/tts/TextToSpeech$OnInitListener;
-Landroid/speech/tts/TtsEngines;-><init>(Landroid/content/Context;)V
-Landroid/speech/tts/TtsEngines;->getEngines()Ljava/util/List;
-Landroid/speech/tts/TtsEngines;->getLocalePrefForEngine(Ljava/lang/String;)Ljava/util/Locale;
-Landroid/speech/tts/TtsEngines;->getSettingsIntent(Ljava/lang/String;)Landroid/content/Intent;
-Landroid/speech/tts/TtsEngines;->normalizeTTSLocale(Ljava/util/Locale;)Ljava/util/Locale;
-Landroid/speech/tts/TtsEngines;->parseLocaleString(Ljava/lang/String;)Ljava/util/Locale;
-Landroid/speech/tts/TtsEngines;->updateLocalePrefForEngine(Ljava/lang/String;Ljava/util/Locale;)V
 Landroid/system/Int32Ref;->value:I
 Landroid/system/OsConstants;-><init>()V
 Landroid/system/OsConstants;->AF_NETLINK:I
