@@ -16,9 +16,13 @@
 
 package android.telephony.ims;
 
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Provides the result to the update operation for the supplementary service configuration.
@@ -34,6 +38,30 @@ public final class ImsSsInfo implements Parcelable {
     public static final int DISABLED = 0;
     public static final int ENABLED = 1;
 
+    /**
+     * Provision status of service
+     */
+    /** @hide */
+    @IntDef({
+            SERVICE_PROVISIONING_UNKNOWN,
+            SERVICE_NOT_PROVISIONED,
+            SERVICE_PROVISIONED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ServiceProvisionStatus {}
+    /**
+     * Unknown provision status for the service.
+     */
+    public static final int SERVICE_PROVISIONING_UNKNOWN = (-1);
+    /**
+     * Service is not provisioned.
+     */
+    public static final int SERVICE_NOT_PROVISIONED = 0;
+    /**
+     * Service is provisioned.
+     */
+    public static final int SERVICE_PROVISIONED = 1;
+
     // 0: disabled, 1: enabled
     /** @hide */
     // TODO: Make private, do not modify this field directly, use getter!
@@ -41,6 +69,8 @@ public final class ImsSsInfo implements Parcelable {
     /** @hide */
     // TODO: Make private, do not modify this field directly, use getter!
     public String mIcbNum;
+    /** @hide */
+    public int mProvisionStatus = SERVICE_PROVISIONING_UNKNOWN;
 
     /**@hide*/
     // TODO: Remove! Do not use this constructor, instead use public version.
@@ -74,16 +104,30 @@ public final class ImsSsInfo implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mStatus);
         out.writeString(mIcbNum);
+        out.writeInt(mProvisionStatus);
     }
 
     @Override
     public String toString() {
-        return super.toString() + ", Status: " + ((mStatus == 0) ? "disabled" : "enabled");
+        return super.toString() + ", Status: " + ((mStatus == 0) ? "disabled" : "enabled")
+                + ", ProvisionStatus: " + provisionStatusToString(mProvisionStatus);
+    }
+
+    private static String provisionStatusToString(int pStatus) {
+        switch (pStatus) {
+            case SERVICE_NOT_PROVISIONED:
+                return "Service not provisioned";
+             case SERVICE_PROVISIONED:
+                return "Service provisioned";
+             default:
+                return "Service provisioning unknown";
+        }
     }
 
     private void readFromParcel(Parcel in) {
         mStatus = in.readInt();
         mIcbNum = in.readString();
+        mProvisionStatus = in.readInt();
     }
 
     public static final Creator<ImsSsInfo> CREATOR =
@@ -111,5 +155,16 @@ public final class ImsSsInfo implements Parcelable {
 
     public String getIcbNum() {
         return mIcbNum;
+    }
+
+    /**
+     * @return Supplementary Service Provision status. Valid Values are:
+     *     {@link #SERVICE_PROVISIONING_UNKNOWN},
+     *     {@link #SERVICE_NOT_PROVISIONED},
+     *     {@link #SERVICE_PROVISIONED}
+     */
+    @ServiceProvisionStatus
+    public int getProvisionStatus() {
+        return mProvisionStatus;
     }
 }
