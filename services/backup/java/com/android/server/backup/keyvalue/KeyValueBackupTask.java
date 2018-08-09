@@ -756,7 +756,9 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             BackupObserverUtils.sendBackupFinished(mObserver, BackupManager.ERROR_BACKUP_CANCELLED);
         } else {
             mListener.onFinished(callerLogString);
-            mFullBackupTask.unregisterTask();
+            if (mFullBackupTask != null) {
+                mFullBackupTask.unregisterTask();
+            }
             switch (mStatus) {
                 case BackupTransport.TRANSPORT_OK:
                 case BackupTransport.TRANSPORT_QUOTA_EXCEEDED:
