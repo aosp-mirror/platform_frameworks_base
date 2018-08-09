@@ -24,6 +24,7 @@ import "frameworks/base/core/proto/android/server/appwindowthumbnail.proto";
 import "frameworks/base/core/proto/android/server/surfaceanimator.proto";
 import "frameworks/base/core/proto/android/view/displaycutout.proto";
 import "frameworks/base/core/proto/android/view/displayinfo.proto";
+import "frameworks/base/core/proto/android/view/enums.proto";
 import "frameworks/base/core/proto/android/view/surface.proto";
 import "frameworks/base/core/proto/android/view/windowlayoutparams.proto";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
@@ -134,32 +135,8 @@ message AppTransitionProto {
         APP_STATE_TIMEOUT = 3;
     }
     optional AppState app_transition_state = 1;
-    /* definitions for constants found in {@link com.android.server.wm.AppTransition} */
-    enum TransitionType {
-        TRANSIT_NONE = 0;
-        TRANSIT_UNSET = -1;
-        TRANSIT_ACTIVITY_OPEN = 6;
-        TRANSIT_ACTIVITY_CLOSE = 7;
-        TRANSIT_TASK_OPEN = 8;
-        TRANSIT_TASK_CLOSE = 9;
-        TRANSIT_TASK_TO_FRONT = 10;
-        TRANSIT_TASK_TO_BACK = 11;
-        TRANSIT_WALLPAPER_CLOSE = 12;
-        TRANSIT_WALLPAPER_OPEN = 13;
-        TRANSIT_WALLPAPER_INTRA_OPEN = 14;
-        TRANSIT_WALLPAPER_INTRA_CLOSE = 15;
-        TRANSIT_TASK_OPEN_BEHIND = 16;
-        TRANSIT_TASK_IN_PLACE = 17;
-        TRANSIT_ACTIVITY_RELAUNCH = 18;
-        TRANSIT_DOCK_TASK_FROM_RECENTS = 19;
-        TRANSIT_KEYGUARD_GOING_AWAY = 20;
-        TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER = 21;
-        TRANSIT_KEYGUARD_OCCLUDE = 22;
-        TRANSIT_KEYGUARD_UNOCCLUDE = 23;
-        TRANSIT_TRANSLUCENT_ACTIVITY_OPEN = 24;
-        TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE = 25;
-    }
-    optional TransitionType last_used_app_transition = 2;
+
+    optional .android.view.TransitionTypeEnum last_used_app_transition = 2;
 }
 
 /* represents DisplayContent */
