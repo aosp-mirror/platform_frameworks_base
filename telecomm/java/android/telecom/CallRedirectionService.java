@@ -63,6 +63,10 @@ public abstract class CallRedirectionService extends Service {
     /**
      * Telecom calls this method to inform the implemented {@link CallRedirectionService} of
      * a new outgoing call which is being placed.
+     *
+     * The implemented {@link CallRedirectionService} can call {@link #placeCallUnmodified()},
+     * {@link #redirectCall(Uri, PhoneAccountHandle)}, and {@link #cancelCall()} only from here.
+     *
      * @param handle the phone number dialed by the user
      * @param targetPhoneAccount the {@link PhoneAccountHandle} on which the call will be placed.
      */
@@ -72,6 +76,9 @@ public abstract class CallRedirectionService extends Service {
      * The implemented {@link CallRedirectionService} calls this method to response a request
      * received via {@link #onPlaceCall(Uri, PhoneAccountHandle)} to inform Telecom that no changes
      * are required to the outgoing call, and that the call should be placed as-is.
+     *
+     * This can only be called from implemented {@link #onPlaceCall(Uri, PhoneAccountHandle)}.
+     *
      */
     public final void placeCallUnmodified() {
         try {
@@ -84,6 +91,9 @@ public abstract class CallRedirectionService extends Service {
      * The implemented {@link CallRedirectionService} calls this method to response a request
      * received via {@link #onPlaceCall(Uri, PhoneAccountHandle)} to inform Telecom that changes
      * are required to the phone number or/and {@link PhoneAccountHandle} for the outgoing call.
+     *
+     * This can only be called from implemented {@link #onPlaceCall(Uri, PhoneAccountHandle)}.
+     *
      * @param handle the new phone number to dial
      * @param targetPhoneAccount the {@link PhoneAccountHandle} to use when placing the call.
      *                           If {@code null}, no change will be made to the
@@ -100,6 +110,9 @@ public abstract class CallRedirectionService extends Service {
      * The implemented {@link CallRedirectionService} calls this method to response a request
      * received via {@link #onPlaceCall(Uri, PhoneAccountHandle)} to inform Telecom that an outgoing
      * call should be canceled entirely.
+     *
+     * This can only be called from implemented {@link #onPlaceCall(Uri, PhoneAccountHandle)}.
+     *
      */
     public final void cancelCall() {
         try {
@@ -144,7 +157,6 @@ public abstract class CallRedirectionService extends Service {
         @Override
         public void placeCall(ICallRedirectionAdapter adapter, Uri handle,
                               PhoneAccountHandle targetPhoneAccount) {
-            Log.v(this, "placeCall");
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = adapter;
             args.arg2 = handle;
@@ -154,14 +166,12 @@ public abstract class CallRedirectionService extends Service {
     }
 
     @Override
-    public IBinder onBind(Intent intent) {
-        Log.v(this, "onBind");
+    public final IBinder onBind(Intent intent) {
         return new CallRedirectionBinder();
     }
 
     @Override
-    public boolean onUnbind(Intent intent) {
-        Log.v(this, "onUnbind");
+    public final boolean onUnbind(Intent intent) {
         return false;
     }
 }
