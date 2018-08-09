@@ -25,8 +25,8 @@ using android::StringPiece;
 
 namespace aapt {
 
-static const char* sDevelopmentSdkCodeName = "P";
-static ApiVersion sDevelopmentSdkLevel = 28;
+static const char* sDevelopmentSdkCodeName = "Q";
+static ApiVersion sDevelopmentSdkLevel = 10000;
 
 static const std::vector<std::pair<uint16_t, ApiVersion>> sAttrIdMap = {
     {0x021c, 1},
@@ -54,6 +54,7 @@ static const std::vector<std::pair<uint16_t, ApiVersion>> sAttrIdMap = {
     {0x0530, SDK_NOUGAT_MR1},
     {0x0568, SDK_O},
     {0x056d, SDK_O_MR1},
+    {0x0586, SDK_P},
 };
 
 static bool less_entry_id(const std::pair<uint16_t, ApiVersion>& p, uint16_t entryId) {
