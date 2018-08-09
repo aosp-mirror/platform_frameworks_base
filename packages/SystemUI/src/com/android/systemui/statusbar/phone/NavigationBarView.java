@@ -256,13 +256,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         @Override
         public boolean performAccessibilityAction(View host, int action, Bundle args) {
-            switch (action) {
-                case R.id.action_toggle_overview:
-                    SysUiServiceProvider.getComponent(getContext(), Recents.class)
-                            .toggleRecentApps();
-                    break;
-                default:
-                    return super.performAccessibilityAction(host, action, args);
+            if (action == R.id.action_toggle_overview) {
+                SysUiServiceProvider.getComponent(getContext(), Recents.class)
+                        .toggleRecentApps();
+            } else {
+                return super.performAccessibilityAction(host, action, args);
             }
             return true;
         }

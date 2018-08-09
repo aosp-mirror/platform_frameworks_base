@@ -69,13 +69,10 @@ public class UserDetailItemView extends LinearLayout {
         final int N = a.getIndexCount();
         for (int i = 0; i < N; i++) {
             int attr = a.getIndex(i);
-            switch (attr) {
-                case R.styleable.UserDetailItemView_regularFontFamily:
-                    mRegularTypeface = Typeface.create(a.getString(attr), 0 /* style */);
-                    break;
-                case R.styleable.UserDetailItemView_activatedFontFamily:
-                    mActivatedTypeface = Typeface.create(a.getString(attr), 0 /* style */);
-                    break;
+            if (attr == R.styleable.UserDetailItemView_regularFontFamily) {
+                mRegularTypeface = Typeface.create(a.getString(attr), 0 /* style */);
+            } else if (attr == R.styleable.UserDetailItemView_activatedFontFamily) {
+                mActivatedTypeface = Typeface.create(a.getString(attr), 0 /* style */);
             }
         }
         a.recycle();
