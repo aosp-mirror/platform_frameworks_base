@@ -7214,6 +7214,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                 || mPendingTempWhitelist.indexOfKey(uid) >= 0;
     }
 
+    /**
+     * @return whitelist tag for a uid from mPendingTempWhitelist, null if not currently on
+     * the whitelist
+     */
+    String getPendingTempWhitelistTagForUidLocked(int uid) {
+        final PendingTempWhitelist ptw = mPendingTempWhitelist.get(uid);
+        return ptw != null ? ptw.tag : null;
+    }
+
+    @VisibleForTesting
+    boolean isActivityStartsLoggingEnabled() {
+        return mConstants.mFlagActivityStartsLoggingEnabled;
+    }
+
     private ProviderInfo getProviderInfoLocked(String authority, int userHandle, int pmFlags) {
         ProviderInfo pi = null;
         ContentProviderRecord cpr = mProviderMap.getProviderByName(authority, userHandle);
