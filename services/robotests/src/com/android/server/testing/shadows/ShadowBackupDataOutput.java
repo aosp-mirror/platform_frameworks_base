@@ -55,6 +55,11 @@ public class ShadowBackupDataOutput {
         return mTransportFlags;
     }
 
+    public ObjectOutputStream getOutputStream() {
+        ensureOutput();
+        return mOutput;
+    }
+
     @Implementation
     public int writeEntityHeader(String key, int dataSize) throws IOException {
         ensureOutput();

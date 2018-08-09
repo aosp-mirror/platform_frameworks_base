@@ -9,9 +9,9 @@ import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP_WAIT
 
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
-import android.app.backup.IBackupCallback;
 import android.app.backup.FullBackup;
 import android.app.backup.FullBackupDataOutput;
+import android.app.backup.IBackupCallback;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -21,6 +21,7 @@ import android.os.SELinux;
 import android.util.Slog;
 
 import com.android.internal.util.Preconditions;
+import com.android.server.backup.fullbackup.AppMetadataBackupWriter;
 import com.android.server.backup.remote.ServiceBackupCallback;
 import com.android.server.backup.utils.FullBackupUtils;
 
@@ -202,16 +203,20 @@ public class KeyValueAdbBackupEngine {
         public void run() {
             try {
                 FullBackupDataOutput output = new FullBackupDataOutput(mPipe);
+                AppMetadataBackupWriter writer =
+                        new AppMetadataBackupWriter(output, mPackageManager);
 
                 if (DEBUG) {
                     Slog.d(TAG, "Writing manifest for " + mPackage.packageName);
                 }
-                FullBackupUtils.writeAppManifest(
-                        mPackage, mPackageManager, mManifestFile, false, false);
-                FullBackup.backupToTar(mPackage.packageName, FullBackup.KEY_VALUE_DATA_TOKEN, null,
-                        mDataDir.getAbsolutePath(),
-                        mManifestFile.getAbsolutePath(),
-                        output);
+
+                writer.backupManifest(
+                        mPackage,
+                        mManifestFile,
+                        mDataDir,
+                        FullBackup.KEY_VALUE_DATA_TOKEN,
+                        /* linkDomain */ null,
+                        /* withApk */ false);
                 mManifestFile.delete();
 
                 if (DEBUG) {
