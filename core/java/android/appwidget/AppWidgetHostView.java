@@ -16,6 +16,7 @@
 
 package android.appwidget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -70,7 +71,9 @@ public class AppWidgetHostView extends FrameLayout {
     Context mContext;
     Context mRemoteContext;
 
+    @UnsupportedAppUsage
     int mAppWidgetId;
+    @UnsupportedAppUsage
     AppWidgetProviderInfo mInfo;
     View mView;
     int mViewMode = VIEW_MODE_NOINIT;
@@ -174,6 +177,7 @@ public class AppWidgetHostView extends FrameLayout {
         return getDefaultPaddingForWidget(context, appInfo, padding);
     }
 
+    @UnsupportedAppUsage
     private static Rect getDefaultPaddingForWidget(Context context, ApplicationInfo appInfo,
             Rect padding) {
         if (padding == null) {
@@ -284,6 +288,7 @@ public class AppWidgetHostView extends FrameLayout {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void updateAppWidgetSize(Bundle newOptions, int minWidth, int minHeight, int maxWidth,
             int maxHeight, boolean ignorePadding) {
         if (newOptions == null) {
