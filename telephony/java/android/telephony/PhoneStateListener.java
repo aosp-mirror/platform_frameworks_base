@@ -21,12 +21,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.telecom.TelecomManager;
 
 import com.android.internal.telephony.IPhoneStateListener;
 
-import java.util.List;
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 /**
  * A listener class for monitoring changes in specific telephony states
@@ -271,6 +270,14 @@ public class PhoneStateListener {
      */
     public static final int LISTEN_PHYSICAL_CHANNEL_CONFIGURATION          = 0x00100000;
 
+    /**
+     *  Listen for changes to the phone capability.
+     *
+     *  @see #onPhoneCapabilityChanged
+     *  @hide
+     */
+    public static final int LISTEN_PHONE_CAPABILITY_CHANGE                 = 0x00200000;
+
     /*
      * Subscription used to listen to the phone state changes
      * @hide
@@ -388,6 +395,10 @@ public class PhoneStateListener {
                     case LISTEN_PHYSICAL_CHANNEL_CONFIGURATION:
                         PhoneStateListener.this.onPhysicalChannelConfigurationChanged(
                                 (List<PhysicalChannelConfig>)msg.obj);
+                        break;
+                    case LISTEN_PHONE_CAPABILITY_CHANGE:
+                        PhoneStateListener.this.onPhoneCapabilityChanged(
+                                (PhoneCapability) msg.obj);
                         break;
                 }
             }
@@ -613,6 +624,16 @@ public class PhoneStateListener {
     }
 
     /**
+     * Callback invoked when phone capability changes. Requires
+     * the READ_PRIVILEGED_PHONE_STATE permission.
+     * @param capability the new phone capability
+     * @hide
+     */
+    public void onPhoneCapabilityChanged(PhoneCapability capability) {
+        // default implementation empty
+    }
+
+    /**
      * Callback invoked when telephony has received notice from a carrier
      * app that a network action that could result in connectivity loss
      * has been requested by an app using
@@ -738,6 +759,10 @@ public class PhoneStateListener {
 
         public void onPhysicalChannelConfigurationChanged(List<PhysicalChannelConfig> configs) {
             send(LISTEN_PHYSICAL_CHANNEL_CONFIGURATION, 0, 0, configs);
+        }
+
+        public void onPhoneCapabilityChanged(PhoneCapability capability) {
+            send(LISTEN_PHONE_CAPABILITY_CHANGE, 0, 0, capability);
         }
     }
 

@@ -36,6 +36,7 @@ import android.telephony.CellInfo;
 import android.telephony.CellLocation;
 import android.telephony.DisconnectCause;
 import android.telephony.LocationAccessPolicy;
+import android.telephony.PhoneCapability;
 import android.telephony.PhoneStateListener;
 import android.telephony.PhysicalChannelConfig;
 import android.telephony.PreciseCallState;
@@ -47,7 +48,6 @@ import android.telephony.SignalStrength;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.VoLteServiceState;
-import android.text.TextUtils;
 import android.util.LocalLog;
 
 import com.android.internal.app.IBatteryStats;
@@ -199,6 +199,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private PreciseCallState mPreciseCallState = new PreciseCallState();
 
     private boolean mCarrierNetworkChangeState = false;
+
+    private PhoneCapability mPhoneCapability = null;
 
     private final LocalLog mLocalLog = new LocalLog(100);
 
@@ -654,6 +656,13 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         try {
                             r.callback.onPhysicalChannelConfigurationChanged(
                                     mPhysicalChannelConfigs.get(phoneId));
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
+                    }
+                    if ((events & PhoneStateListener.LISTEN_PHONE_CAPABILITY_CHANGE) != 0) {
+                        try {
+                            r.callback.onPhoneCapabilityChanged(mPhoneCapability);
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -1453,6 +1462,33 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    public void notifyPhoneCapabilityChanged(PhoneCapability capability) {
+        if (!checkNotifyPermission("notifyPhoneCapabilityChanged()")) {
+            return;
+        }
+
+        if (VDBG) {
+            log("notifyPhoneCapabilityChanged: capability=" + capability);
+        }
+
+        synchronized (mRecords) {
+            mPhoneCapability = capability;
+
+            for (Record r : mRecords) {
+                if (r.matchPhoneStateListenerEvent(
+                        PhoneStateListener.LISTEN_PHONE_CAPABILITY_CHANGE)) {
+                    try {
+                        r.callback.onPhoneCapabilityChanged(capability);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
@@ -1488,6 +1524,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("mForegroundCallState=" + mForegroundCallState);
             pw.println("mBackgroundCallState=" + mBackgroundCallState);
             pw.println("mVoLteServiceState=" + mVoLteServiceState);
+            pw.println("mPhoneCapability=" + mPhoneCapability);
 
             pw.decreaseIndent();
 
