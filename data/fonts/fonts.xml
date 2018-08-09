@@ -137,7 +137,7 @@
         <font weight="400" style="normal" fallbackFor="serif">NotoSerifArmenian-Regular.otf</font>
         <font weight="700" style="normal" fallbackFor="serif">NotoSerifArmenian-Bold.otf</font>
     </family>
-    <family lang="und-Geor und-Geok">
+    <family lang="und-Geor,und-Geok">
         <font weight="400" style="normal">NotoSansGeorgian-Regular.otf</font>
         <font weight="500" style="normal">NotoSansGeorgian-Medium.otf</font>
         <font weight="700" style="normal">NotoSansGeorgian-Bold.otf</font>
@@ -538,7 +538,7 @@
         <font weight="400" style="normal" index="2">NotoSansCJK-Regular.ttc</font>
         <font weight="400" style="normal" index="2" fallbackFor="serif">NotoSerifCJK-Regular.ttc</font>
     </family>
-    <family lang="zh-Hant zh-Bopo">
+    <family lang="zh-Hant,zh-Bopo">
         <font weight="400" style="normal" index="3">NotoSansCJK-Regular.ttc</font>
         <font weight="400" style="normal" index="3" fallbackFor="serif">NotoSerifCJK-Regular.ttc</font>
     </family>
