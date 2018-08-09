@@ -35,7 +35,7 @@ public class DozeLog {
     private static final int SIZE = Build.IS_DEBUGGABLE ? 400 : 50;
     static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
-    private static final int PULSE_REASONS = 6;
+    private static final int PULSE_REASONS = 7;
 
     public static final int PULSE_REASON_NONE = -1;
     public static final int PULSE_REASON_INTENT = 0;
@@ -44,6 +44,7 @@ public class DozeLog {
     public static final int PULSE_REASON_SENSOR_PICKUP = 3;
     public static final int PULSE_REASON_SENSOR_DOUBLE_TAP = 4;
     public static final int PULSE_REASON_SENSOR_LONG_PRESS = 5;
+    public static final int PULSE_REASON_SENSOR_REACH = 6;
 
     private static boolean sRegisterKeyguardCallback = true;
 
@@ -169,6 +170,11 @@ public class DozeLog {
         log("state " + state);
     }
 
+    public static void traceReachWakeUp() {
+        if (!ENABLED) return;
+        log("reachWakeUp");
+    }
+
     public static void traceProximityResult(Context context, boolean near, long millis,
             int pulseReason) {
         if (!ENABLED) return;
@@ -186,6 +192,7 @@ public class DozeLog {
             case PULSE_REASON_SENSOR_PICKUP: return "pickup";
             case PULSE_REASON_SENSOR_DOUBLE_TAP: return "doubletap";
             case PULSE_REASON_SENSOR_LONG_PRESS: return "longpress";
+            case PULSE_REASON_SENSOR_REACH: return "reach";
             default: throw new IllegalArgumentException("bad reason: " + pulseReason);
         }
     }

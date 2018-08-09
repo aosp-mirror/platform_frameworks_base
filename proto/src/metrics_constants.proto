@@ -2219,6 +2219,7 @@ message MetricsEvent {
     // 1: Gesture performed is Nudge
     // 2: Gesture performed is Pickup
     // 4: Gesture performed is Double Tap
+    // 6: Gesture performed is Reach
     ACTION_AMBIENT_GESTURE = 411;
 
     // ---- End N Constants, all N constants go above this line ----
@@ -6439,6 +6440,10 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: Q
     SETTINGS_WIFI_ADD_NETWORK = 1556;
+
+    // OPEN: Settings > System > Input & Gesture > Reach up gesture
+    // OS: Q
+    SETTINGS_GESTURE_REACH = 1557;
 
     // ---- End Q Constants, all Q constants go above this line ----
 
