@@ -119,7 +119,9 @@ public class TunerServiceImpl extends TunerService {
         // 3 Removed because of a revert.
         if (oldVersion < 4) {
             // Delay this so that we can wait for everything to be registered first.
-            new Handler(Dependency.get(Dependency.BG_LOOPER)).postDelayed(() -> clearAll(), 5000);
+            final int user = mCurrentUser;
+            new Handler(Dependency.get(Dependency.BG_LOOPER)).postDelayed(
+                    () -> clearAllFromUser(user), 5000);
         }
         setValue(TUNER_VERSION, newVersion);
     }
@@ -221,6 +223,10 @@ public class TunerServiceImpl extends TunerService {
 
     @Override
     public void clearAll() {
+        clearAllFromUser(mCurrentUser);
+    }
+
+    public void clearAllFromUser(int user) {
         // A couple special cases.
         Settings.Global.putString(mContentResolver, DemoMode.DEMO_MODE_ALLOWED, null);
         Intent intent = new Intent(DemoMode.ACTION_DEMO);
@@ -231,7 +237,7 @@ public class TunerServiceImpl extends TunerService {
             if (ArrayUtils.contains(RESET_BLACKLIST, key)) {
                 continue;
             }
-            Settings.Secure.putString(mContentResolver, key, null);
+            Settings.Secure.putStringForUser(mContentResolver, key, null, user);
         }
     }
 
