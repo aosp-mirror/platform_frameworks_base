@@ -19,9 +19,16 @@ package com.android.internal.app.procstats;
 
 import android.os.Parcel;
 import android.os.SystemClock;
+import android.service.procstats.ProcessStatsProto;
+import android.service.procstats.ProcessStatsServiceStateProto;
+import android.service.procstats.ProcessStatsStateProto;
 import android.util.Slog;
+import android.util.SparseLongArray;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoUtils;
 
+import static com.android.internal.app.procstats.ProcessStats.PSS_SAMPLE_COUNT;
 import static com.android.internal.app.procstats.ProcessStats.STATE_NOTHING;
 
 import java.io.PrintWriter;
@@ -550,6 +557,66 @@ public final class ServiceState {
         pw.println();
     }
 
+    public void writeToProto(ProtoOutputStream proto, long fieldId, long now) {
+        final long token = proto.start(fieldId);
+        proto.write(ProcessStatsServiceStateProto.SERVICE_NAME, mName);
+        writeTypeToProto(proto, ProcessStatsServiceStateProto.RUNNING_OP,
+                ServiceState.SERVICE_RUN, mRunCount, mRunState, mRunStartTime, now);
+        writeTypeToProto(proto, ProcessStatsServiceStateProto.STARTED_OP,
+                ServiceState.SERVICE_STARTED, mStartedCount, mStartedState, mStartedStartTime, now);
+        writeTypeToProto(proto, ProcessStatsServiceStateProto.FOREGROUND_OP,
+                ServiceState.SERVICE_FOREGROUND, mForegroundCount, mForegroundState,
+                mForegroundStartTime, now);
+        writeTypeToProto(proto, ProcessStatsServiceStateProto.BOUND_OP,
+                ServiceState.SERVICE_BOUND, mBoundCount, mBoundState, mBoundStartTime, now);
+        writeTypeToProto(proto, ProcessStatsServiceStateProto.EXECUTING_OP,
+                ServiceState.SERVICE_EXEC, mExecCount, mExecState, mExecStartTime, now);
+        proto.end(token);
+    }
+
+    public void writeTypeToProto(ProtoOutputStream proto, long fieldId, int serviceType,
+            int opCount, int curState, long curStartTime, long now) {
+        if (opCount <= 0) {
+            return;
+        }
+        final long token = proto.start(fieldId);
+
+        proto.write(ProcessStatsServiceStateProto.OperationInfo.COUNT, opCount);
+        boolean didCurState = false;
+        final int N = mDurations.getKeyCount();
+        for (int i=0; i<N; i++) {
+            final int key = mDurations.getKeyAt(i);
+            long time = mDurations.getValue(key);
+            int type = SparseMappingTable.getIdFromKey(key);
+            int memFactor = type / ServiceState.SERVICE_COUNT;
+            type %= ServiceState.SERVICE_COUNT;
+            if (type != serviceType) {
+                continue;
+            }
+            if (curState == memFactor) {
+                didCurState = true;
+                time += now - curStartTime;
+            }
+            final long stateToken = proto.start(ProcessStatsServiceStateProto.OperationInfo.STATES);
+            DumpUtils.printProcStateAdjTagProto(proto,
+                    ProcessStatsStateProto.SCREEN_STATE,
+                    ProcessStatsStateProto.MEMORY_STATE,
+                    type);
+            proto.write(ProcessStatsStateProto.DURATION_MS, time);
+            proto.end(stateToken);
+        }
+        if (!didCurState && curState != STATE_NOTHING) {
+            final long stateToken = proto.start(ProcessStatsServiceStateProto.OperationInfo.STATES);
+            DumpUtils.printProcStateAdjTagProto(proto,
+                    ProcessStatsStateProto.SCREEN_STATE,
+                    ProcessStatsStateProto.MEMORY_STATE,
+                    curState);
+            proto.write(ProcessStatsStateProto.DURATION_MS, now - curStartTime);
+            proto.end(stateToken);
+        }
+
+        proto.end(token);
+    }
 
     public String toString() {
         return "ServiceState{" + Integer.toHexString(System.identityHashCode(this))
