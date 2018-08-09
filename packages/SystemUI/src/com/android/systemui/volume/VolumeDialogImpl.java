@@ -149,6 +149,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     private boolean mHovering = false;
     private boolean mShowActiveStreamOnly;
     private boolean mConfigChanged = false;
+    private boolean mIsAnimatingDismiss = false;
 
     public VolumeDialogImpl(Context context) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
@@ -582,18 +583,24 @@ public class VolumeDialogImpl implements VolumeDialog {
     protected void dismissH(int reason) {
         mHandler.removeMessages(H.DISMISS);
         mHandler.removeMessages(H.SHOW);
+        if (mIsAnimatingDismiss) {
+            return;
+        }
         mDialogView.animate().cancel();
+        mIsAnimatingDismiss = false;
         mShowing = false;
 
         mDialogView.setTranslationX(0);
         mDialogView.setAlpha(1);
         ViewPropertyAnimator animator = mDialogView.animate()
+                .withStartAction(() -> mIsAnimatingDismiss = true)
                 .alpha(0)
                 .setDuration(250)
                 .setInterpolator(new SystemUIInterpolators.LogAccelerateInterpolator())
                 .withEndAction(() -> mHandler.postDelayed(() -> {
                     if (D.BUG) Log.d(TAG, "mDialog.dismiss()");
                     mDialog.dismiss();
+                    mIsAnimatingDismiss = false;
                 }, 50));
         if (!isLandscape()) animator.translationX(mDialogView.getWidth() / 2);
         animator.start();
