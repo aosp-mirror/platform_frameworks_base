@@ -6426,6 +6426,10 @@ message MetricsEvent {
     // OS: Q (will also ship in PQ1A)
     FIELD_ACTIVITY_RECORD_MILLIS_SINCE_LAST_LAUNCH = 1553;
 
+    // OPEN: Settings > Add face
+    // OS: Q
+    FACE_ENROLL_PREVIEW = 1554;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.
