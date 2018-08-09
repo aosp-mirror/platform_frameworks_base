@@ -1062,10 +1062,17 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
             }
         }
 
-        // If we're extending a persistable grant, then we always need to create
-        // the grant data structure so that take/release APIs work
+        // Figure out the value returned when access is allowed
+        final int allowedResult;
         if ((modeFlags & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) != 0) {
-            return targetUid;
+            // If we're extending a persistable grant, then we need to return
+            // "targetUid" so that we always create a grant data structure to
+            // support take/release APIs
+            allowedResult = targetUid;
+        } else {
+            // Otherwise, we can return "-1" to indicate that no grant data
+            // structures need to be created
+            allowedResult = -1;
         }
 
         if (targetUid >= 0) {
@@ -1074,7 +1081,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                 // No need to grant the target this permission.
                 if (DEBUG) Slog.v(TAG,
                         "Target " + targetPkg + " already has full permission to " + grantUri);
-                return -1;
+                return allowedResult;
             }
         } else {
             // First...  there is no target package, so can anyone access it?
@@ -1109,7 +1116,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                 }
             }
             if (allowed) {
-                return -1;
+                return allowedResult;
             }
         }
 
