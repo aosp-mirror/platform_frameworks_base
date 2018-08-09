@@ -16,6 +16,7 @@
 
 package android.opengl;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Trace;
 import android.util.AttributeSet;
@@ -1235,6 +1236,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         EGLDisplay mEglDisplay;
         EGLSurface mEglSurface;
         EGLConfig mEglConfig;
+        @UnsupportedAppUsage
         EGLContext mEglContext;
 
     }
@@ -1844,6 +1846,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
         // End of member variables protected by the sGLThreadManager monitor.
 
+        @UnsupportedAppUsage
         private EglHelper mEglHelper;
 
         /**
@@ -1919,7 +1922,9 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
     private final WeakReference<GLSurfaceView> mThisWeakRef =
             new WeakReference<GLSurfaceView>(this);
+    @UnsupportedAppUsage
     private GLThread mGLThread;
+    @UnsupportedAppUsage
     private Renderer mRenderer;
     private boolean mDetached;
     private EGLConfigChooser mEGLConfigChooser;
