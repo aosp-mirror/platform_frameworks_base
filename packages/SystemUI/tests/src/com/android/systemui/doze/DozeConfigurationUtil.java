@@ -45,12 +45,12 @@ public class DozeConfigurationUtil {
         boolean[] doneHolder = new boolean[1];
         AmbientDisplayConfiguration config = mock(AmbientDisplayConfiguration.class,
                 noDefaultAnswer(doneHolder));
-        when(config.pulseOnDoubleTapEnabled(anyInt())).thenReturn(false);
-        when(config.pulseOnPickupEnabled(anyInt())).thenReturn(false);
+        when(config.doubleTapGestureEnabled(anyInt())).thenReturn(false);
+        when(config.pickupGestureEnabled(anyInt())).thenReturn(false);
         when(config.pulseOnNotificationEnabled(anyInt())).thenReturn(true);
 
         when(config.doubleTapSensorType()).thenReturn(null);
-        when(config.pulseOnPickupAvailable()).thenReturn(false);
+        when(config.dozePickupSensorAvailable()).thenReturn(false);
 
         doneHolder[0] = true;
         return config;

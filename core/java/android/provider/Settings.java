@@ -7154,9 +7154,9 @@ public final class Settings {
          * Whether the device should pulse on pick up gesture.
          * @hide
          */
-        public static final String DOZE_PULSE_ON_PICK_UP = "doze_pulse_on_pick_up";
+        public static final String DOZE_PICK_UP_GESTURE = "doze_pulse_on_pick_up";
 
-        private static final Validator DOZE_PULSE_ON_PICK_UP_VALIDATOR = BOOLEAN_VALIDATOR;
+        private static final Validator DOZE_PICK_UP_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether the device should pulse on long press gesture.
@@ -7168,9 +7168,9 @@ public final class Settings {
          * Whether the device should pulse on double tap gesture.
          * @hide
          */
-        public static final String DOZE_PULSE_ON_DOUBLE_TAP = "doze_pulse_on_double_tap";
+        public static final String DOZE_DOUBLE_TAP_GESTURE = "doze_pulse_on_double_tap";
 
-        private static final Validator DOZE_PULSE_ON_DOUBLE_TAP_VALIDATOR = BOOLEAN_VALIDATOR;
+        private static final Validator DOZE_DOUBLE_TAP_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * The current night mode that has been selected by the user.  Owned
@@ -8064,8 +8064,8 @@ public final class Settings {
             QS_TILES,
             DOZE_ENABLED,
             DOZE_ALWAYS_ON,
-            DOZE_PULSE_ON_PICK_UP,
-            DOZE_PULSE_ON_DOUBLE_TAP,
+            DOZE_PICK_UP_GESTURE,
+            DOZE_DOUBLE_TAP_GESTURE,
             NFC_PAYMENT_DEFAULT_COMPONENT,
             AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
             FACE_UNLOCK_KEYGUARD_ENABLED,
@@ -8207,8 +8207,8 @@ public final class Settings {
             VALIDATORS.put(QS_TILES, QS_TILES_VALIDATOR);
             VALIDATORS.put(DOZE_ENABLED, DOZE_ENABLED_VALIDATOR);
             VALIDATORS.put(DOZE_ALWAYS_ON, DOZE_ALWAYS_ON_VALIDATOR);
-            VALIDATORS.put(DOZE_PULSE_ON_PICK_UP, DOZE_PULSE_ON_PICK_UP_VALIDATOR);
-            VALIDATORS.put(DOZE_PULSE_ON_DOUBLE_TAP, DOZE_PULSE_ON_DOUBLE_TAP_VALIDATOR);
+            VALIDATORS.put(DOZE_PICK_UP_GESTURE, DOZE_PICK_UP_GESTURE_VALIDATOR);
+            VALIDATORS.put(DOZE_DOUBLE_TAP_GESTURE, DOZE_DOUBLE_TAP_GESTURE_VALIDATOR);
             VALIDATORS.put(NFC_PAYMENT_DEFAULT_COMPONENT, NFC_PAYMENT_DEFAULT_COMPONENT_VALIDATOR);
             VALIDATORS.put(AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
                     AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN_VALIDATOR);

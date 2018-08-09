@@ -62,10 +62,10 @@ public class DozeLog {
     private static SummaryStats sEmergencyCallStats;
     private static SummaryStats[][] sProxStats; // [reason][near/far]
 
-    public static void tracePickupPulse(Context context, boolean withinVibrationThreshold) {
+    public static void tracePickupWakeUp(Context context, boolean withinVibrationThreshold) {
         if (!ENABLED) return;
         init(context);
-        log("pickupPulse withinVibrationThreshold=" + withinVibrationThreshold);
+        log("pickupWakeUp withinVibrationThreshold=" + withinVibrationThreshold);
         (withinVibrationThreshold ? sPickupPulseNearVibrationStats
                 : sPickupPulseNotNearVibrationStats).append();
     }
