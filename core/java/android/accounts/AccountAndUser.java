@@ -16,15 +16,20 @@
 
 package android.accounts;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * Used to store the Account and the UserId this account is associated with.
  *
  * @hide
  */
 public class AccountAndUser {
+    @UnsupportedAppUsage
     public Account account;
+    @UnsupportedAppUsage
     public int userId;
 
+    @UnsupportedAppUsage
     public AccountAndUser(Account account, int userId) {
         this.account = account;
         this.userId = userId;
