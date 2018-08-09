@@ -917,6 +917,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                             android.Manifest.permission.USER_ACTIVITY);
+                    break;
                 case MSG_RINGER_TOGGLE_CHORD:
                     handleRingerChordGesture();
                     break;
