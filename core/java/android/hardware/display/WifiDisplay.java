@@ -16,6 +16,7 @@
 
 package android.hardware.display;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -76,6 +77,7 @@ public final class WifiDisplay implements Parcelable {
     /**
      * Gets the MAC address of the Wifi display device.
      */
+    @UnsupportedAppUsage
     public String getDeviceAddress() {
         return mDeviceAddress;
     }
@@ -83,6 +85,7 @@ public final class WifiDisplay implements Parcelable {
     /**
      * Gets the name of the Wifi display device.
      */
+    @UnsupportedAppUsage
     public String getDeviceName() {
         return mDeviceName;
     }
@@ -94,6 +97,7 @@ public final class WifiDisplay implements Parcelable {
      * provided by the user when renaming the device.
      * </p>
      */
+    @UnsupportedAppUsage
     public String getDeviceAlias() {
         return mDeviceAlias;
     }
@@ -101,6 +105,7 @@ public final class WifiDisplay implements Parcelable {
     /**
      * Returns true if device is available, false otherwise.
      */
+    @UnsupportedAppUsage
     public boolean isAvailable() {
         return mIsAvailable;
     }
@@ -108,6 +113,7 @@ public final class WifiDisplay implements Parcelable {
     /**
      * Returns true if device can be connected to (not in use), false otherwise.
      */
+    @UnsupportedAppUsage
     public boolean canConnect() {
         return mCanConnect;
     }
@@ -115,6 +121,7 @@ public final class WifiDisplay implements Parcelable {
     /**
      * Returns true if device has been remembered, false otherwise.
      */
+    @UnsupportedAppUsage
     public boolean isRemembered() {
         return mIsRemembered;
     }
@@ -136,6 +143,7 @@ public final class WifiDisplay implements Parcelable {
      * Returns true if the two displays have the same identity (address, name and alias).
      * This method does not compare the current status of the displays.
      */
+    @UnsupportedAppUsage
     public boolean equals(WifiDisplay other) {
         return other != null
                 && mDeviceAddress.equals(other.mDeviceAddress)
