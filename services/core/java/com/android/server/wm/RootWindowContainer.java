@@ -165,10 +165,18 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     }
 
     WindowState computeFocusedWindow() {
+        // While the keyguard is showing, we must focus anything besides the main display.
+        // Otherwise we risk input not going to the keyguard when the user expects it to.
+        final boolean forceDefaultDisplay = mService.mPolicy.isKeyguardShowingAndNotOccluded();
+
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final DisplayContent dc = mChildren.get(i);
             final WindowState win = dc.findFocusedWindow();
             if (win != null) {
+                if (forceDefaultDisplay && !dc.isDefaultDisplay) {
+                    EventLog.writeEvent(0x534e4554, "71786287", win.mOwnerUid, "");
+                    continue;
+                }
                 return win;
             }
         }
