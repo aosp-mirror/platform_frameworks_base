@@ -55,19 +55,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|top">
-            <TextClock
-                android:id="@+id/clock_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_centerHorizontal="true"
-                android:layout_alignParentTop="true"
-                android:letterSpacing="0.03"
-                android:textColor="?attr/wallpaperTextColor"
-                android:singleLine="true"
-                style="@style/widget_big_thin"
-                android:format12Hour="@string/keyguard_widget_12_hours_format"
-                android:format24Hour="@string/keyguard_widget_24_hours_format" />
+            <include layout="@layout/keyguard_clock_switch"
+                 android:id="@+id/clock_view"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content" />
             <View
                 android:id="@+id/clock_separator"
                 android:layout_width="@dimen/widget_separator_width"
