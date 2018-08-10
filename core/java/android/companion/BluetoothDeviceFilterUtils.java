@@ -21,6 +21,7 @@ import static android.text.TextUtils.firstNotEmpty;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.ScanFilter;
 import android.net.wifi.ScanResult;
@@ -124,14 +125,17 @@ public class BluetoothDeviceFilterUtils {
         Log.i(LOG_TAG, getDeviceDisplayNameInternal(device) + (result ? " ~ " : " !~ ") + criteria);
     }
 
+    @UnsupportedAppUsage
     public static String getDeviceDisplayNameInternal(@NonNull BluetoothDevice device) {
         return firstNotEmpty(device.getAliasName(), device.getAddress());
     }
 
+    @UnsupportedAppUsage
     public static String getDeviceDisplayNameInternal(@NonNull ScanResult device) {
         return firstNotEmpty(device.SSID, device.BSSID);
     }
 
+    @UnsupportedAppUsage
     public static String getDeviceMacAddress(@NonNull Parcelable device) {
         if (device instanceof BluetoothDevice) {
             return ((BluetoothDevice) device).getAddress();
