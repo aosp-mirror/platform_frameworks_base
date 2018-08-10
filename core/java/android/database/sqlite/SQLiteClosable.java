@@ -16,6 +16,7 @@
 
 package android.database.sqlite;
 
+import android.annotation.UnsupportedAppUsage;
 import java.io.Closeable;
 
 /**
@@ -24,6 +25,7 @@ import java.io.Closeable;
  * This class implements a primitive reference counting scheme for database objects.
  */
 public abstract class SQLiteClosable implements Closeable {
+    @UnsupportedAppUsage
     private int mReferenceCount = 1;
 
     /**

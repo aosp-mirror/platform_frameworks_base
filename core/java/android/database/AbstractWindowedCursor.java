@@ -16,6 +16,8 @@
 
 package android.database;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * A base class for Cursors that store their data in {@link CursorWindow}s.
  * <p>
@@ -179,6 +181,7 @@ public abstract class AbstractWindowedCursor extends AbstractCursor {
      * Closes the cursor window and sets {@link #mWindow} to null.
      * @hide
      */
+    @UnsupportedAppUsage
     protected void closeWindow() {
         if (mWindow != null) {
             mWindow.close();
@@ -193,6 +196,7 @@ public abstract class AbstractWindowedCursor extends AbstractCursor {
      * @param name The window name.
      * @hide
      */
+    @UnsupportedAppUsage
     protected void clearOrCreateWindow(String name) {
         if (mWindow == null) {
             mWindow = new CursorWindow(name);
@@ -203,6 +207,7 @@ public abstract class AbstractWindowedCursor extends AbstractCursor {
 
     /** @hide */
     @Override
+    @UnsupportedAppUsage
     protected void onDeactivateOrClose() {
         super.onDeactivateOrClose();
         closeWindow();

@@ -16,6 +16,7 @@
 
 package android.database;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.Bundle;
@@ -68,6 +69,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     @Deprecated
     protected ContentResolver mContentResolver;
 
+    @UnsupportedAppUsage
     private Uri mNotifyUri;
 
     private final Object mSelfObserverLock = new Object();
@@ -77,6 +79,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     private final DataSetObservable mDataSetObservable = new DataSetObservable();
     private final ContentObservable mContentObservable = new ContentObservable();
 
+    @UnsupportedAppUsage
     private Bundle mExtras = Bundle.EMPTY;
 
     /* -------------------------------------------------------- */
