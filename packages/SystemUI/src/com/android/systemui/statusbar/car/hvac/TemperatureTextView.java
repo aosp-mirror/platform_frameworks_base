@@ -21,7 +21,6 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 
 /**
@@ -31,8 +30,6 @@ import com.android.systemui.R;
  * hvacPropertyId - Example: CarHvacManager.ID_ZONED_TEMP_SETPOINT (16385)
  * hvacAreaId - Example: VehicleSeat.SEAT_ROW_1_LEFT (1)
  * hvacTempFormat - Example: "%.1f\u00B0" (1 decimal and the degree symbol)
- *
- * Note: It registers itself with {@link HvacController}
  */
 public class TemperatureTextView extends TextView implements TemperatureView {
 
@@ -47,10 +44,6 @@ public class TemperatureTextView extends TextView implements TemperatureView {
         mPropertyId = typedArray.getInt(R.styleable.TemperatureView_hvacPropertyId, -1);
         String format = typedArray.getString(R.styleable.TemperatureView_hvacTempFormat);
         mTempFormat = (format == null) ? "%.1f\u00B0" : format;
-
-        // register with controller
-        HvacController hvacController = Dependency.get(HvacController.class);
-        hvacController.addHvacTextView(this);
     }
 
     /**

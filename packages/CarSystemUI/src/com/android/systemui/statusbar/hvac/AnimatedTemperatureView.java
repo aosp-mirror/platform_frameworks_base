@@ -23,8 +23,6 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
-import com.android.systemui.statusbar.car.hvac.TemperatureView;
-import com.android.systemui.statusbar.car.hvac.HvacController;
 import android.util.AttributeSet;
 import android.util.Property;
 import android.view.Gravity;
@@ -36,8 +34,8 @@ import android.widget.ImageView;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.car.hvac.TemperatureView;
 
 /**
  * Simple text display of HVAC properties, It is designed to show mTemperature and is configured in
@@ -47,8 +45,6 @@ import com.android.systemui.R;
  * hvacAreaId - Example: VehicleSeat.SEAT_ROW_1_LEFT (1)
  * hvacTempFormat - Example: "%.1f\u00B0" (1 decimal and the degree symbol)
  * hvacOrientaion = Example: left
- * <p>
- * Note: It registers itself with {@link HvacController}
  */
 public class AnimatedTemperatureView extends FrameLayout implements TemperatureView {
 
@@ -158,11 +154,8 @@ public class AnimatedTemperatureView extends FrameLayout implements TemperatureV
                 ViewGroup.LayoutParams.MATCH_PARENT);
 
         typedArray.recycle();
-
-        // register with controller
-        HvacController hvacController = Dependency.get(HvacController.class);
-        hvacController.addHvacTextView(this);
     }
+
 
     private TextView generateTextView() {
         TextView textView = new TextView(getContext());
