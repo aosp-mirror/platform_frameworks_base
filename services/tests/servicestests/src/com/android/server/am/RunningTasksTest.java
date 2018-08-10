@@ -42,7 +42,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 
 /**
- * runtest --path frameworks/base/services/tests/servicestests/src/com/android/server/am/RunningTasksTest.java
+ * atest FrameworksServicesTests:RunningTasksTest
  */
 @MediumTest
 @Presubmit
