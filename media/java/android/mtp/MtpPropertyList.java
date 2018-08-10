@@ -16,6 +16,7 @@
 
 package android.mtp;
 
+import android.annotation.UnsupportedAppUsage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +50,7 @@ class MtpPropertyList {
         mStringValues = new ArrayList<>();
     }
 
+    @UnsupportedAppUsage
     public void append(int handle, int property, int type, long value) {
         mObjectHandles.add(handle);
         mPropertyCodes.add(property);
@@ -57,6 +59,7 @@ class MtpPropertyList {
         mStringValues.add(null);
     }
 
+    @UnsupportedAppUsage
     public void append(int handle, int property, String value) {
         mObjectHandles.add(handle);
         mPropertyCodes.add(property);

@@ -2366,10 +2366,6 @@ Landroid/media/VolumeShaper$State;-><init>(FF)V
 Landroid/media/VolumeShaper$State;->mVolume:F
 Landroid/media/VolumeShaper$State;->mXOffset:F
 Landroid/media/WebVttRenderer;-><init>(Landroid/content/Context;)V
-Landroid/mtp/MtpPropertyList;->append(IIIJ)V
-Landroid/mtp/MtpPropertyList;->append(IILjava/lang/String;)V
-Landroid/mtp/MtpStorage;->getPath()Ljava/lang/String;
-Landroid/mtp/MtpStorage;->getStorageId()I
 Landroid/net/ConnectivityManager;->ACTION_TETHER_STATE_CHANGED:Ljava/lang/String;
 Landroid/net/ConnectivityManager;->EXTRA_ACTIVE_TETHER:Ljava/lang/String;
 Landroid/net/ConnectivityManager;->EXTRA_AVAILABLE_TETHER:Ljava/lang/String;
