@@ -203,8 +203,42 @@ public class RankingHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testSortShouldRespectCritical() throws Exception {
+        ArrayList<NotificationRecord> notificationList = new ArrayList<NotificationRecord>(7);
+        NotificationRecord critical = generateRecord(0);
+        NotificationRecord critical_ish = generateRecord(1);
+        NotificationRecord critical_notAtAll = generateRecord(100);
+
+        notificationList.add(critical_ish);
+        notificationList.add(mRecordGroupGSortA);
+        notificationList.add(critical_notAtAll);
+        notificationList.add(mRecordGroupGSortB);
+        notificationList.add(mRecordNoGroup);
+        notificationList.add(mRecordNoGroupSortA);
+        notificationList.add(critical);
+        mHelper.sort(notificationList);
+
+        assertTrue(mHelper.indexOf(notificationList, critical) == 0);
+        assertTrue(mHelper.indexOf(notificationList, critical_ish) == 1);
+        assertTrue(mHelper.indexOf(notificationList, critical_notAtAll) == 6);
+    }
+
+    private NotificationRecord generateRecord(int criticality) {
+        NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_LOW);
+        final Notification.Builder builder = new Notification.Builder(getContext())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
+        Notification n = builder.build();
+        StatusBarNotification sbn = new StatusBarNotification("", "", 0, "", 0,
+                0, n, UserHandle.ALL, null, System.currentTimeMillis());
+        NotificationRecord notificationRecord = new NotificationRecord(getContext(), sbn, channel);
+        notificationRecord.setCriticality(criticality);
+        return notificationRecord;
+    }
+
+    @Test
     public void testFindAfterRankingWithASplitGroup() throws Exception {
-        ArrayList<NotificationRecord> notificationList = new ArrayList<NotificationRecord>(3);
+        ArrayList<NotificationRecord> notificationList = new ArrayList<NotificationRecord>(4);
         notificationList.add(mRecordGroupGSortA);
         notificationList.add(mRecordGroupGSortB);
         notificationList.add(mRecordNoGroup);
