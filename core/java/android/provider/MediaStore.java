@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -458,6 +459,7 @@ public final class MediaStore {
          * <P>Type: INTEGER (boolean)</P>
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String IS_DRM = "is_drm";
 
         /**
@@ -509,6 +511,7 @@ public final class MediaStore {
          * For use only by the MTP implementation.
          * @hide
          */
+        @UnsupportedAppUsage
         public static Uri getMtpObjectsUri(String volumeName) {
             return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
                     "/object");
@@ -518,6 +521,7 @@ public final class MediaStore {
          * For use only by the MTP implementation.
          * @hide
          */
+        @UnsupportedAppUsage
         public static final Uri getMtpObjectsUri(String volumeName,
                 long fileId) {
             return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
@@ -528,6 +532,7 @@ public final class MediaStore {
          * Used to implement the MTP GetObjectReferences and SetObjectReferences commands.
          * @hide
          */
+        @UnsupportedAppUsage
         public static final Uri getMtpReferencesUri(String volumeName,
                 long fileId) {
             return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
@@ -552,6 +557,7 @@ public final class MediaStore {
              * <P>Type: INTEGER</P>
              * @hide
              */
+            @UnsupportedAppUsage
             public static final String STORAGE_ID = "storage_id";
 
             /**
@@ -559,6 +565,7 @@ public final class MediaStore {
              * <P>Type: INTEGER</P>
              * @hide
              */
+            @UnsupportedAppUsage
             public static final String FORMAT = "format";
 
             /**

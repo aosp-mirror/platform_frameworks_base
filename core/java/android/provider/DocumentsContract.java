@@ -23,6 +23,7 @@ import static com.android.internal.util.Preconditions.checkCollectionElementsNot
 import static com.android.internal.util.Preconditions.checkCollectionNotEmpty;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -636,6 +637,7 @@ public final class DocumentsContract {
          * @see #COLUMN_FLAGS
          * @hide
          */
+        @UnsupportedAppUsage
         public static final int FLAG_ADVANCED = 1 << 17;
 
         /**
@@ -699,6 +701,7 @@ public final class DocumentsContract {
     public static final String EXTRA_RESULT = "result";
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static final String METHOD_CREATE_DOCUMENT = "android:createDocument";
     /** {@hide} */
     public static final String METHOD_RENAME_DOCUMENT = "android:renameDocument";
@@ -734,11 +737,13 @@ public final class DocumentsContract {
 
     private static final String PATH_ROOT = "root";
     private static final String PATH_RECENT = "recent";
+    @UnsupportedAppUsage
     private static final String PATH_DOCUMENT = "document";
     private static final String PATH_CHILDREN = "children";
     private static final String PATH_SEARCH = "search";
     // TODO(b/72055774): make private again once ScopedAccessProvider is refactored
     /** {@hide} */
+    @UnsupportedAppUsage
     public static final String PATH_TREE = "tree";
 
     private static final String PARAM_QUERY = "query";
@@ -1022,6 +1027,7 @@ public final class DocumentsContract {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static Uri setManageMode(Uri uri) {
         return uri.buildUpon().appendQueryParameter(PARAM_MANAGE, "true").build();
     }
@@ -1065,6 +1071,7 @@ public final class DocumentsContract {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static Bitmap getDocumentThumbnail(
             ContentProviderClient client, Uri documentUri, Point size, CancellationSignal signal)
             throws RemoteException, IOException {
@@ -1320,6 +1327,7 @@ public final class DocumentsContract {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static Uri moveDocument(ContentProviderClient client, Uri sourceDocumentUri,
             Uri sourceParentDocumentUri, Uri targetParentDocumentUri) throws RemoteException {
         final Bundle in = new Bundle();
