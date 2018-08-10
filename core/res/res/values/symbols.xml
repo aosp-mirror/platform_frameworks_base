@@ -2243,6 +2243,7 @@
   <java-symbol type="drawable" name="decor_maximize_button_light" />
   <java-symbol type="color" name="decor_button_dark_color" />
   <java-symbol type="color" name="decor_button_light_color" />
+  <java-symbol type="array" name="unloggable_phone_numbers" />
 
   <!-- From TelephonyProvider -->
   <java-symbol type="xml" name="apns" />
