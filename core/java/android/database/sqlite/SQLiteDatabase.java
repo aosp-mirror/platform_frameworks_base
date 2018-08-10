@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -91,6 +92,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
     // Thread-local for database sessions that belong to this database.
     // Each thread has its own database session.
     // INVARIANT: Immutable.
+    @UnsupportedAppUsage
     private final ThreadLocal<SQLiteSession> mThreadSession = ThreadLocal
             .withInitial(this::createSession);
 
@@ -124,12 +126,14 @@ public final class SQLiteDatabase extends SQLiteClosable {
 
     // The database configuration.
     // INVARIANT: Guarded by mLock.
+    @UnsupportedAppUsage
     private final SQLiteDatabaseConfiguration mConfigurationLocked;
 
     // The connection pool for the database, null when closed.
     // The pool itself is thread-safe, but the reference to it can only be acquired
     // when the lock is held.
     // INVARIANT: Guarded by mLock.
+    @UnsupportedAppUsage
     private SQLiteConnectionPool mConnectionPoolLocked;
 
     // True if the database has attached databases.
@@ -189,6 +193,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      */
     public static final int CONFLICT_NONE = 0;
 
+    @UnsupportedAppUsage
     private static final String[] CONFLICT_VALUES = new String[]
             {"", " OR ROLLBACK ", " OR ABORT ", " OR FAIL ", " OR IGNORE ", " OR REPLACE "};
 
@@ -399,6 +404,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @throws IllegalStateException if the thread does not yet have a session and
      * the database is not open.
      */
+    @UnsupportedAppUsage
     SQLiteSession getThreadSession() {
         return mThreadSession.get(); // initialValue() throws if database closed
     }
@@ -542,6 +548,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
         beginTransaction(transactionListener, false);
     }
 
+    @UnsupportedAppUsage
     private void beginTransaction(SQLiteTransactionListener transactionListener,
             boolean exclusive) {
         acquireReference();
@@ -729,6 +736,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
         return openDatabase(path.getPath(), openParams);
     }
 
+    @UnsupportedAppUsage
     private static SQLiteDatabase openDatabase(@NonNull String path,
             @NonNull OpenParams openParams) {
         Preconditions.checkArgument(openParams != null, "OpenParams cannot be null");
@@ -838,6 +846,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @see #isReadOnly()
      * @hide
      */
+    @UnsupportedAppUsage
     public void reopenReadWrite() {
         synchronized (mLock) {
             throwIfNotOpenLocked();
@@ -2137,6 +2146,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
         return dbStatsList;
     }
 
+    @UnsupportedAppUsage
     private void collectDbStats(ArrayList<DbStats> dbStatsList) {
         synchronized (mLock) {
             if (mConnectionPoolLocked != null) {
@@ -2145,6 +2155,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
         }
     }
 
+    @UnsupportedAppUsage
     private static ArrayList<SQLiteDatabase> getActiveDatabases() {
         ArrayList<SQLiteDatabase> databases = new ArrayList<SQLiteDatabase>();
         synchronized (sActiveDatabases) {

@@ -16,6 +16,7 @@
 
 package android.database.sqlite;
 
+import android.annotation.UnsupportedAppUsage;
 import android.database.AbstractWindowedCursor;
 import android.database.CursorWindow;
 import android.database.DatabaseUtils;
@@ -39,12 +40,14 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     static final int NO_COUNT = -1;
 
     /** The name of the table to edit */
+    @UnsupportedAppUsage
     private final String mEditTable;
 
     /** The names of the columns in the rows */
     private final String[] mColumns;
 
     /** The query object for the cursor */
+    @UnsupportedAppUsage
     private final SQLiteQuery mQuery;
 
     /** The compiled query this cursor came from */
@@ -139,6 +142,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         return mCount;
     }
 
+    @UnsupportedAppUsage
     private void fillWindow(int requiredPos) {
         clearOrCreateWindow(getDatabase().getPath());
         try {
