@@ -20,7 +20,6 @@ import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LE
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
@@ -59,12 +58,25 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
+
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static com.android.server.wm.utils.CoordinateTransforms.transformPhysicalToLogicalCoordinates;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
+import static com.android.server.wm.DisplayContentProto.ABOVE_APP_WINDOWS;
+import static com.android.server.wm.DisplayContentProto.BELOW_APP_WINDOWS;
+import static com.android.server.wm.DisplayContentProto.DISPLAY_FRAMES;
+import static com.android.server.wm.DisplayContentProto.DISPLAY_INFO;
+import static com.android.server.wm.DisplayContentProto.DOCKED_STACK_DIVIDER_CONTROLLER;
+import static com.android.server.wm.DisplayContentProto.DPI;
+import static com.android.server.wm.DisplayContentProto.ID;
+import static com.android.server.wm.DisplayContentProto.IME_WINDOWS;
+import static com.android.server.wm.DisplayContentProto.PINNED_STACK_CONTROLLER;
+import static com.android.server.wm.DisplayContentProto.ROTATION;
+import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
+import static com.android.server.wm.DisplayContentProto.STACKS;
+import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
@@ -101,19 +113,7 @@ import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE;
-import static com.android.server.wm.DisplayContentProto.ABOVE_APP_WINDOWS;
-import static com.android.server.wm.DisplayContentProto.BELOW_APP_WINDOWS;
-import static com.android.server.wm.DisplayContentProto.DISPLAY_FRAMES;
-import static com.android.server.wm.DisplayContentProto.DISPLAY_INFO;
-import static com.android.server.wm.DisplayContentProto.DOCKED_STACK_DIVIDER_CONTROLLER;
-import static com.android.server.wm.DisplayContentProto.DPI;
-import static com.android.server.wm.DisplayContentProto.ID;
-import static com.android.server.wm.DisplayContentProto.IME_WINDOWS;
-import static com.android.server.wm.DisplayContentProto.PINNED_STACK_CONTROLLER;
-import static com.android.server.wm.DisplayContentProto.ROTATION;
-import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
-import static com.android.server.wm.DisplayContentProto.STACKS;
-import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
+import static com.android.server.wm.utils.CoordinateTransforms.transformPhysicalToLogicalCoordinates;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
@@ -140,6 +140,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
+import android.view.Gravity;
 import android.view.InputDevice;
 import android.view.MagnificationSpec;
 import android.view.Surface;
@@ -1613,6 +1614,54 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
         if (height > displayInfo.largestNominalAppHeight) {
             displayInfo.largestNominalAppHeight = height;
+        }
+    }
+
+    /**
+     * Apps that use the compact menu panel (as controlled by the panelMenuIsCompact
+     * theme attribute) on devices that feature a physical options menu key attempt to position
+     * their menu panel window along the edge of the screen nearest the physical menu key.
+     * This lowers the travel distance between invoking the menu panel and selecting
+     * a menu option.
+     *
+     * This method helps control where that menu is placed. Its current implementation makes
+     * assumptions about the menu key and its relationship to the screen based on whether
+     * the device's natural orientation is portrait (width < height) or landscape.
+     *
+     * The menu key is assumed to be located along the bottom edge of natural-portrait
+     * devices and along the right edge of natural-landscape devices. If these assumptions
+     * do not hold for the target device, this method should be changed to reflect that.
+     *
+     * @return A {@link Gravity} value for placing the options menu window.
+     */
+    int getPreferredOptionsPanelGravity() {
+        final int rotation = getRotation();
+        if (mInitialDisplayWidth < mInitialDisplayHeight) {
+            // On devices with a natural orientation of portrait.
+            switch (rotation) {
+                default:
+                case Surface.ROTATION_0:
+                    return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+                case Surface.ROTATION_90:
+                    return Gravity.RIGHT | Gravity.BOTTOM;
+                case Surface.ROTATION_180:
+                    return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+                case Surface.ROTATION_270:
+                    return Gravity.START | Gravity.BOTTOM;
+            }
+        }
+
+        // On devices with a natural orientation of landscape.
+        switch (rotation) {
+            default:
+            case Surface.ROTATION_0:
+                return Gravity.RIGHT | Gravity.BOTTOM;
+            case Surface.ROTATION_90:
+                return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+            case Surface.ROTATION_180:
+                return Gravity.START | Gravity.BOTTOM;
+            case Surface.ROTATION_270:
+                return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
         }
     }
 

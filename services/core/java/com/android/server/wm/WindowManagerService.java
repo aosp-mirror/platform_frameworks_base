@@ -226,7 +226,6 @@ import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.internal.R;
-import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
@@ -269,7 +268,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
@@ -3954,56 +3952,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /**
-     * Apps that use the compact menu panel (as controlled by the panelMenuIsCompact
-     * theme attribute) on devices that feature a physical options menu key attempt to position
-     * their menu panel window along the edge of the screen nearest the physical menu key.
-     * This lowers the travel distance between invoking the menu panel and selecting
-     * a menu option.
-     *
-     * This method helps control where that menu is placed. Its current implementation makes
-     * assumptions about the menu key and its relationship to the screen based on whether
-     * the device's natural orientation is portrait (width < height) or landscape.
-     *
-     * The menu key is assumed to be located along the bottom edge of natural-portrait
-     * devices and along the right edge of natural-landscape devices. If these assumptions
-     * do not hold for the target device, this method should be changed to reflect that.
-     *
-     * @return A {@link Gravity} value for placing the options menu window
-     */
     @Override
-    public int getPreferredOptionsPanelGravity() {
+    public int getPreferredOptionsPanelGravity(int displayId) {
         synchronized (mWindowMap) {
-            // TODO(multidisplay): Assume that such devices physical keys are on the main screen.
-            final DisplayContent displayContent = getDefaultDisplayContentLocked();
-            final int rotation = displayContent.getRotation();
-            if (displayContent.mInitialDisplayWidth < displayContent.mInitialDisplayHeight) {
-                // On devices with a natural orientation of portrait
-                switch (rotation) {
-                    default:
-                    case Surface.ROTATION_0:
-                        return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
-                    case Surface.ROTATION_90:
-                        return Gravity.RIGHT | Gravity.BOTTOM;
-                    case Surface.ROTATION_180:
-                        return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
-                    case Surface.ROTATION_270:
-                        return Gravity.START | Gravity.BOTTOM;
-                }
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                return Gravity.CENTER | Gravity.BOTTOM;
             }
-
-            // On devices with a natural orientation of landscape
-            switch (rotation) {
-                default:
-                case Surface.ROTATION_0:
-                    return Gravity.RIGHT | Gravity.BOTTOM;
-                case Surface.ROTATION_90:
-                    return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
-                case Surface.ROTATION_180:
-                    return Gravity.START | Gravity.BOTTOM;
-                case Surface.ROTATION_270:
-                    return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
-            }
+            return displayContent.getPreferredOptionsPanelGravity();
         }
     }
 
