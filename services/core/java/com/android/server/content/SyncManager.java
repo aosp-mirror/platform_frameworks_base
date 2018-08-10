@@ -1014,12 +1014,7 @@ public class SyncManager {
                     Bundle finalExtras = new Bundle(extras);
                     String packageName = syncAdapterInfo.componentName.getPackageName();
                     // If the app did not run and has no account access, done
-                    try {
-                        if (!mPackageManagerInternal.wasPackageEverLaunched(packageName, userId)) {
-                            continue;
-                        }
-                    } catch (IllegalArgumentException e) {
-                        // Package not found, race with an uninstall
+                    if (!wasPackageEverLaunched(packageName, userId)) {
                         continue;
                     }
                     mAccountManagerInternal.requestAccountAccess(account.account,
@@ -3352,7 +3347,7 @@ public class SyncManager {
                     String packageName = op.owningPackage;
                     final int userId = UserHandle.getUserId(op.owningUid);
                     // If the app did not run and has no account access, done
-                    if (!mPackageManagerInternal.wasPackageEverLaunched(packageName, userId)) {
+                    if (!wasPackageEverLaunched(packageName, userId)) {
                         return;
                     }
                     mAccountManagerInternal.requestAccountAccess(op.target.account,
@@ -4058,5 +4053,13 @@ public class SyncManager {
 
     public void resetTodayStats() {
         mSyncStorageEngine.resetTodayStats(/*force=*/ true);
+    }
+
+    private boolean wasPackageEverLaunched(String packageName, int userId) {
+        try {
+            return mPackageManagerInternal.wasPackageEverLaunched(packageName, userId);
+        } catch (IllegalArgumentException e) {
+            return false; // Package has been removed.
+        }
     }
 }
