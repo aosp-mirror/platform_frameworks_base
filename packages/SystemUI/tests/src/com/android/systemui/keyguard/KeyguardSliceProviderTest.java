@@ -137,7 +137,8 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
 
     @Test
     public void addZenMode_addedToSlice() {
-        ListBuilder listBuilder = spy(new ListBuilder(getContext(), mProvider.getUri()));
+        ListBuilder listBuilder = spy(new ListBuilder(getContext(), mProvider.getUri(),
+            ListBuilder.INFINITY));
         mProvider.addZenMode(listBuilder);
         verify(listBuilder, never()).addRow(any(ListBuilder.RowBuilder.class));
 
