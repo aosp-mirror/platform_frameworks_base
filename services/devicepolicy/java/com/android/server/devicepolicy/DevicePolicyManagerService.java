@@ -377,6 +377,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final Set<String> GLOBAL_SETTINGS_WHITELIST;
     private static final Set<String> GLOBAL_SETTINGS_DEPRECATED;
     private static final Set<String> SYSTEM_SETTINGS_WHITELIST;
+    private static final Set<Integer> DA_DISALLOWED_POLICIES;
     static {
         SECURE_SETTINGS_WHITELIST = new ArraySet<>();
         SECURE_SETTINGS_WHITELIST.add(Settings.Secure.DEFAULT_INPUT_METHOD);
@@ -408,6 +409,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         SYSTEM_SETTINGS_WHITELIST.add(Settings.System.SCREEN_BRIGHTNESS);
         SYSTEM_SETTINGS_WHITELIST.add(Settings.System.SCREEN_BRIGHTNESS_MODE);
         SYSTEM_SETTINGS_WHITELIST.add(Settings.System.SCREEN_OFF_TIMEOUT);
+
+        DA_DISALLOWED_POLICIES = new ArraySet<>();
+        DA_DISALLOWED_POLICIES.add(DeviceAdminInfo.USES_POLICY_DISABLE_CAMERA);
+        DA_DISALLOWED_POLICIES.add(DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES);
+        DA_DISALLOWED_POLICIES.add(DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD);
+        DA_DISALLOWED_POLICIES.add(DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
     }
 
     /**
@@ -2607,6 +2614,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final int userId = UserHandle.getUserId(callingUid);
             final DevicePolicyData policy = getUserData(userId);
             ActiveAdmin admin = policy.mAdminMap.get(who);
+            final boolean isDeviceOwner = isDeviceOwner(admin.info.getComponent(), userId);
+            final boolean isProfileOwner = isProfileOwner(admin.info.getComponent(), userId);
+
             if (reqPolicy == DeviceAdminInfo.USES_POLICY_DEVICE_OWNER) {
                 throw new SecurityException("Admin " + admin.info.getComponent()
                          + " does not own the device");
@@ -2614,6 +2624,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (reqPolicy == DeviceAdminInfo.USES_POLICY_PROFILE_OWNER) {
                 throw new SecurityException("Admin " + admin.info.getComponent()
                         + " does not own the profile");
+            }
+            if (DA_DISALLOWED_POLICIES.contains(reqPolicy) && !isDeviceOwner && !isProfileOwner) {
+                throw new SecurityException("Admin " + admin.info.getComponent()
+                        + " is not a device owner or profile owner, so may not use policy: "
+                        + admin.info.getTagForPolicy(reqPolicy));
             }
             throw new SecurityException("Admin " + admin.info.getComponent()
                     + " did not specify uses-policy for: "
@@ -2694,7 +2709,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // DO always has the PO power.
             return ownsDevice || ownsProfile;
         } else {
-            return admin.info.usesPolicy(reqPolicy);
+            boolean allowedToUsePolicy = ownsDevice || ownsProfile
+                    || !DA_DISALLOWED_POLICIES.contains(reqPolicy)
+                    || getTargetSdk(admin.info.getPackageName(), userId) < Build.VERSION_CODES.Q;
+            return allowedToUsePolicy && admin.info.usesPolicy(reqPolicy);
         }
     }
 

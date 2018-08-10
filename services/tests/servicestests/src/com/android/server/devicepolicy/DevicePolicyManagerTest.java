@@ -1713,24 +1713,35 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                         UserManager.DISALLOW_ADD_USER),
                 eq(true), eq(CAMERA_DISABLED_GLOBALLY));
         reset(getServices().userManagerInternal);
+    }
 
-        // Set up another DA and let it disable camera.  Now DISALLOW_CAMERA will only be applied
-        // locally.
-        dpm.setCameraDisabled(admin1, false);
-        reset(getServices().userManagerInternal);
+    public void testDaDisallowedPolicies_SecurityException() throws Exception {
+        mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
 
-        setUpPackageManagerForAdmin(admin2, DpmMockContext.CALLER_SYSTEM_USER_UID);
-        dpm.setActiveAdmin(admin2, /* replace =*/ false, UserHandle.USER_SYSTEM);
-        dpm.setCameraDisabled(admin2, true);
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+        dpm.setActiveAdmin(admin1, /* replace =*/ false, UserHandle.USER_SYSTEM);
 
-        verify(getServices().userManagerInternal).setDevicePolicyUserRestrictions(
-                eq(UserHandle.USER_SYSTEM),
-                // DISALLOW_CAMERA will be applied to both local and global. <- TODO: fix this
-                MockUtils.checkUserRestrictions(UserManager.DISALLOW_FUN,
-                        UserManager.DISALLOW_ADD_USER),
-                eq(true), eq(CAMERA_DISABLED_LOCALLY));
-        reset(getServices().userManagerInternal);
-        // TODO Make sure restrictions are written to the file.
+        boolean originalCameraDisabled = dpm.getCameraDisabled(admin1);
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.setCameraDisabled(admin1, true));
+        assertEquals(originalCameraDisabled, dpm.getCameraDisabled(admin1));
+
+        int originalKeyguardDisabledFeatures = dpm.getKeyguardDisabledFeatures(admin1);
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.setKeyguardDisabledFeatures(admin1,
+                        DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_ALL));
+        assertEquals(originalKeyguardDisabledFeatures, dpm.getKeyguardDisabledFeatures(admin1));
+
+        long originalPasswordExpirationTimeout = dpm.getPasswordExpirationTimeout(admin1);
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.setPasswordExpirationTimeout(admin1, 1234));
+        assertEquals(originalPasswordExpirationTimeout, dpm.getPasswordExpirationTimeout(admin1));
+
+        int originalPasswordQuality = dpm.getPasswordQuality(admin1);
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_NUMERIC));
+        assertEquals(originalPasswordQuality, dpm.getPasswordQuality(admin1));
     }
 
     public void testSetUserRestriction_asPo() {
