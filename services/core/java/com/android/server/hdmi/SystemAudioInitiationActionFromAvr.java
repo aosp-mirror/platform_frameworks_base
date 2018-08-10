@@ -16,6 +16,7 @@
 package com.android.server.hdmi;
 
 import android.hardware.tv.cec.V1_0.SendMessageResult;
+
 import com.android.internal.annotations.VisibleForTesting;
 
 /**
@@ -91,7 +92,7 @@ public class SystemAudioInitiationActionFromAvr extends HdmiCecFeatureAction {
                             mSendRequestActiveSourceRetryCount++;
                             sendRequestActiveSource();
                         } else {
-                            audioSystem().setSystemAudioMode(false);
+                            audioSystem().checkSupportAndSetSystemAudioMode(false);
                             finish();
                         }
                     }
@@ -106,7 +107,7 @@ public class SystemAudioInitiationActionFromAvr extends HdmiCecFeatureAction {
                             mSendSetSystemAudioModeRetryCount++;
                             sendSetSystemAudioMode(on, dest);
                         } else {
-                            audioSystem().setSystemAudioMode(false);
+                            audioSystem().checkSupportAndSetSystemAudioMode(false);
                             finish();
                         }
                     }
@@ -115,7 +116,7 @@ public class SystemAudioInitiationActionFromAvr extends HdmiCecFeatureAction {
 
     private void handleActiveSourceTimeout() {
         HdmiLogger.debug("Cannot get active source.");
-        audioSystem().setSystemAudioMode(false);
+        audioSystem().checkSupportAndSetSystemAudioMode(false);
         finish();
     }
 
@@ -123,12 +124,12 @@ public class SystemAudioInitiationActionFromAvr extends HdmiCecFeatureAction {
         audioSystem().queryTvSystemAudioModeSupport(
                 supported -> {
                     if (supported) {
-                        if (audioSystem().setSystemAudioMode(true)) {
+                        if (audioSystem().checkSupportAndSetSystemAudioMode(true)) {
                             sendSetSystemAudioMode(true, Constants.ADDR_BROADCAST);
                         }
                         finish();
                     } else {
-                        audioSystem().setSystemAudioMode(false);
+                        audioSystem().checkSupportAndSetSystemAudioMode(false);
                         finish();
                     }
                 });

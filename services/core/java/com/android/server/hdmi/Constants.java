@@ -279,9 +279,9 @@ final class Constants {
      * <p>True means enabling muting logic.
      * <p>False means never mute device.
      */
-    // TODO(OEM): set to true to disable muting.
+    // TODO(OEM): Change property to ro and set to true to disable muting.
     static final String PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE =
-            "ro.hdmi.property_system_audio_mode_muting_enable";
+            "persist.sys.hdmi.property_system_audio_mode_muting_enable";
 
     // Set to false to allow playback device to go to suspend mode even
     // when it's an active source. True by default.
