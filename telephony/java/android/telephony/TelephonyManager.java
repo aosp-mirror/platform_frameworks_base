@@ -6648,14 +6648,12 @@ public class TelephonyManager {
     @Deprecated
     public boolean isTtyModeSupported() {
         try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null) {
-                return telephony.isTtyModeSupported();
+            TelecomManager telecomManager = TelecomManager.from(mContext);
+            if (telecomManager != null) {
+                return telecomManager.isTtySupported();
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#isTtyModeSupported", e);
         } catch (SecurityException e) {
-            Log.e(TAG, "Permission error calling ITelephony#isTtyModeSupported", e);
+            Log.e(TAG, "Permission error calling TelecomManager#isTtySupported", e);
         }
         return false;
     }
