@@ -40,7 +40,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
      * @hide
      */
     public CellIdentityTdscdma() {
-        super(TAG, TYPE_TDSCDMA, null, null, null, null);
+        super(TAG, CellInfo.TYPE_TDSCDMA, null, null, null, null);
         mLac = Integer.MAX_VALUE;
         mCid = Integer.MAX_VALUE;
         mCpid = Integer.MAX_VALUE;
@@ -75,7 +75,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
      */
     public CellIdentityTdscdma(String mcc, String mnc, int lac, int cid, int cpid, int uarfcn,
             String alphal, String alphas) {
-        super(TAG, TYPE_TDSCDMA, mcc, mnc, alphal, alphas);
+        super(TAG, CellInfo.TYPE_TDSCDMA, mcc, mnc, alphal, alphas);
         mLac = lac;
         mCid = cid;
         mCpid = cpid;
@@ -175,7 +175,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (DBG) log("writeToParcel(Parcel, int): " + toString());
-        super.writeToParcel(dest, TYPE_TDSCDMA);
+        super.writeToParcel(dest, CellInfo.TYPE_TDSCDMA);
         dest.writeInt(mLac);
         dest.writeInt(mCid);
         dest.writeInt(mCpid);
@@ -184,7 +184,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
 
     /** Construct from Parcel, type has already been processed */
     private CellIdentityTdscdma(Parcel in) {
-        super(TAG, TYPE_TDSCDMA, in);
+        super(TAG, CellInfo.TYPE_TDSCDMA, in);
         mLac = in.readInt();
         mCid = in.readInt();
         mCpid = in.readInt();

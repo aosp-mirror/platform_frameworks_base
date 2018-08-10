@@ -29,17 +29,43 @@ import java.lang.annotation.RetentionPolicy;
  */
 public abstract class CellInfo implements Parcelable {
 
-    // Type fields for parceling
-    /** @hide */
-    protected static final int TYPE_GSM = 1;
-    /** @hide */
-    protected static final int TYPE_CDMA = 2;
-    /** @hide */
-    protected static final int TYPE_LTE = 3;
-    /** @hide */
-    protected static final int TYPE_WCDMA = 4;
-    /** @hide */
-    protected static final int TYPE_TDCDMA = 5;
+    /**
+     * Cell identity type
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "TYPE_", value = {TYPE_GSM, TYPE_CDMA, TYPE_LTE, TYPE_WCDMA, TYPE_TDSCDMA})
+    public @interface Type {}
+    /**
+     * Unknown cell identity type
+     * @hide
+     */
+    public static final int TYPE_UNKNOWN        = 0;
+    /**
+     * GSM cell identity type
+     * @hide
+     */
+    public static final int TYPE_GSM            = 1;
+    /**
+     * CDMA cell identity type
+     * @hide
+     */
+    public static final int TYPE_CDMA           = 2;
+    /**
+     * LTE cell identity type
+     * @hide
+     */
+    public static final int TYPE_LTE            = 3;
+    /**
+     * WCDMA cell identity type
+     * @hide
+     */
+    public static final int TYPE_WCDMA          = 4;
+    /**
+     * TD-SCDMA cell identity type
+     * @hide
+     */
+    public static final int TYPE_TDSCDMA        = 5;
 
     // Type to distinguish where time stamp gets recorded.
 
@@ -161,6 +187,7 @@ public abstract class CellInfo implements Parcelable {
     public int getTimeStampType() {
         return mTimeStampType;
     }
+
     /** @hide */
     public void setTimeStampType(int timeStampType) {
         if (timeStampType < TIMESTAMP_TYPE_UNKNOWN || timeStampType > TIMESTAMP_TYPE_JAVA_RIL) {
@@ -272,7 +299,7 @@ public abstract class CellInfo implements Parcelable {
                     case TYPE_CDMA: return CellInfoCdma.createFromParcelBody(in);
                     case TYPE_LTE: return CellInfoLte.createFromParcelBody(in);
                     case TYPE_WCDMA: return CellInfoWcdma.createFromParcelBody(in);
-                    case TYPE_TDCDMA: return CellInfoTdscdma.createFromParcelBody(in);
+                    case TYPE_TDSCDMA: return CellInfoTdscdma.createFromParcelBody(in);
                     default: throw new RuntimeException("Bad CellInfo Parcel");
                 }
         }
