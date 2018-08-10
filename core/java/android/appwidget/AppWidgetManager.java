@@ -23,6 +23,7 @@ import android.annotation.RequiresFeature;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.app.IServiceConnection;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -463,6 +464,7 @@ public class AppWidgetManager {
 
     private final Context mContext;
     private final String mPackageName;
+    @UnsupportedAppUsage
     private final IAppWidgetService mService;
     private final DisplayMetrics mDisplayMetrics;
 
@@ -816,6 +818,7 @@ public class AppWidgetManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public List<AppWidgetProviderInfo> getInstalledProviders(int categoryFilter) {
         if (mService == null) {
             return Collections.emptyList();
@@ -842,6 +845,7 @@ public class AppWidgetManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public List<AppWidgetProviderInfo> getInstalledProvidersForProfile(int categoryFilter,
             @Nullable UserHandle profile, @Nullable String packageName) {
         if (mService == null) {
@@ -902,6 +906,7 @@ public class AppWidgetManager {
      *                      provider for this AppWidget.
      * @hide
      */
+    @UnsupportedAppUsage
     public void bindAppWidgetId(int appWidgetId, ComponentName provider) {
         if (mService == null) {
             return;
@@ -924,6 +929,7 @@ public class AppWidgetManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void bindAppWidgetId(int appWidgetId, ComponentName provider, Bundle options) {
         if (mService == null) {
             return;
@@ -1094,6 +1100,7 @@ public class AppWidgetManager {
      * @see Context#getServiceDispatcher(ServiceConnection, Handler, int)
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean bindRemoteViewsService(Context context, int appWidgetId, Intent intent,
             IServiceConnection connection, @Context.BindServiceFlags int flags) {
         if (mService == null) {
@@ -1139,6 +1146,7 @@ public class AppWidgetManager {
         }
     }
 
+    @UnsupportedAppUsage
     private boolean bindAppWidgetIdIfAllowed(int appWidgetId, int profileId,
             ComponentName provider, Bundle options) {
         if (mService == null) {
