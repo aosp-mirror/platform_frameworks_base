@@ -18,6 +18,7 @@ package android.appwidget;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -53,14 +54,17 @@ public class AppWidgetHost {
     static final int HANDLE_UPDATE = 1;
     static final int HANDLE_PROVIDER_CHANGED = 2;
     static final int HANDLE_PROVIDERS_CHANGED = 3;
+    @UnsupportedAppUsage
     static final int HANDLE_VIEW_DATA_CHANGED = 4;
 
     final static Object sServiceLock = new Object();
+    @UnsupportedAppUsage
     static IAppWidgetService sService;
     static boolean sServiceInitialized = false;
     private DisplayMetrics mDisplayMetrics;
 
     private String mContextOpPackageName;
+    @UnsupportedAppUsage
     private final Handler mHandler;
     private final int mHostId;
     private final Callbacks mCallbacks;
@@ -156,6 +160,7 @@ public class AppWidgetHost {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public AppWidgetHost(Context context, int hostId, OnClickHandler handler, Looper looper) {
         mContextOpPackageName = context.getOpPackageName();
         mHostId = hostId;
