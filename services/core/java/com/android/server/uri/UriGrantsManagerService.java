@@ -30,6 +30,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.ROOT_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myUid;
+
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
@@ -37,6 +38,7 @@ import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.server.uri.UriGrantsManagerService.H.PERSIST_URI_GRANTS_MSG;
+
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -73,14 +75,18 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
+
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
+
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
+
+import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -97,8 +103,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
-import libcore.io.IoUtils;
 
 /** Manages uri grants. */
 public class UriGrantsManagerService extends IUriGrantsManager.Stub {
@@ -150,7 +154,6 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
 
     void onActivityManagerInternalAdded() {
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
-        mPmInternal = LocalServices.getService(PackageManagerInternal.class);
     }
 
     public static final class Lifecycle extends SystemService {
@@ -296,7 +299,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         if (toPackage != null) {
             mAmInternal.enforceCallingPermission(FORCE_PERSISTABLE_URI_PERMISSIONS,
                     "takePersistableUriPermission");
-            uid = mPmInternal.getPackageUid(toPackage, 0, userId);
+            uid = getPmInternal().getPackageUid(toPackage, 0, userId);
         } else {
             enforceNotIsolatedCaller("takePersistableUriPermission");
             uid = Binder.getCallingUid();
@@ -361,7 +364,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         if (toPackage != null) {
             mAmInternal.enforceCallingPermission(FORCE_PERSISTABLE_URI_PERMISSIONS,
                     "releasePersistableUriPermission");
-            uid = mPmInternal.getPackageUid(toPackage, 0, userId);
+            uid = getPmInternal().getPackageUid(toPackage, 0, userId);
         } else {
             enforceNotIsolatedCaller("releasePersistableUriPermission");
             uid = Binder.getCallingUid();
@@ -1264,6 +1267,14 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                 mGrantFile.failWrite(fos);
             }
         }
+    }
+
+    private PackageManagerInternal getPmInternal() {
+        // Don't need to synchonize; worst-case scenario LocalServices will be called twice.
+        if (mPmInternal == null) {
+            mPmInternal = LocalServices.getService(PackageManagerInternal.class);
+        }
+        return mPmInternal;
     }
 
     final class H extends Handler {
