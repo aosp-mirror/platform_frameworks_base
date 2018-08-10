@@ -61,15 +61,6 @@ Landroid/app/VrStateCallback;-><init>()V
 Landroid/app/VrStateCallback;->onPersistentVrStateChanged(Z)V
 Landroid/app/WallpaperColors;-><init>(Landroid/graphics/Color;Landroid/graphics/Color;Landroid/graphics/Color;I)V
 Landroid/bluetooth/IBluetooth;->sendConnectionStateChange(Landroid/bluetooth/BluetoothDevice;III)V
-Landroid/companion/AssociationRequest;->getDeviceFilters()Ljava/util/List;
-Landroid/companion/AssociationRequest;->isSingleDevice()Z
-Landroid/companion/BluetoothDeviceFilter;->getAddress()Ljava/lang/String;
-Landroid/companion/BluetoothDeviceFilterUtils;->getDeviceDisplayNameInternal(Landroid/bluetooth/BluetoothDevice;)Ljava/lang/String;
-Landroid/companion/BluetoothDeviceFilterUtils;->getDeviceDisplayNameInternal(Landroid/net/wifi/ScanResult;)Ljava/lang/String;
-Landroid/companion/BluetoothDeviceFilterUtils;->getDeviceMacAddress(Landroid/os/Parcelable;)Ljava/lang/String;
-Landroid/companion/BluetoothLeDeviceFilter;->getScanFilter()Landroid/bluetooth/le/ScanFilter;
-Landroid/companion/DeviceFilter;->getDeviceDisplayName(Landroid/os/Parcelable;)Ljava/lang/String;
-Landroid/companion/DeviceFilter;->matches(Landroid/os/Parcelable;)Z
 Landroid/companion/ICompanionDeviceDiscoveryService$Stub;-><init>()V
 Landroid/companion/ICompanionDeviceDiscoveryServiceCallback;->onDeviceSelected(Ljava/lang/String;ILjava/lang/String;)V
 Landroid/companion/ICompanionDeviceDiscoveryServiceCallback;->onDeviceSelectionCancel()V
