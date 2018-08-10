@@ -20,6 +20,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCRE
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
@@ -145,6 +146,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String RULE_ATT_CREATION_TIME = "creationTime";
     private static final String RULE_ATT_ENABLER = "enabler";
 
+    @UnsupportedAppUsage
     public boolean allowAlarms = DEFAULT_ALLOW_ALARMS;
     public boolean allowMedia = DEFAULT_ALLOW_MEDIA;
     public boolean allowSystem = DEFAULT_ALLOW_SYSTEM;
@@ -161,8 +163,10 @@ public class ZenModeConfig implements Parcelable {
     public int version;
 
     public ZenRule manualRule;
+    @UnsupportedAppUsage
     public ArrayMap<String, ZenRule> automaticRules = new ArrayMap<>();
 
+    @UnsupportedAppUsage
     public ZenModeConfig() { }
 
     public ZenModeConfig(Parcel source) {
@@ -1043,6 +1047,7 @@ public class ZenModeConfig implements Parcelable {
         return true;
     }
 
+    @UnsupportedAppUsage
     public static ScheduleInfo tryParseScheduleConditionId(Uri conditionId) {
         final boolean isSchedule =  conditionId != null
                 && Condition.SCHEME.equals(conditionId.getScheme())
@@ -1068,10 +1073,15 @@ public class ZenModeConfig implements Parcelable {
     }
 
     public static class ScheduleInfo {
+        @UnsupportedAppUsage
         public int[] days;
+        @UnsupportedAppUsage
         public int startHour;
+        @UnsupportedAppUsage
         public int startMinute;
+        @UnsupportedAppUsage
         public int endHour;
+        @UnsupportedAppUsage
         public int endMinute;
         public boolean exitAtAlarm;
         public long nextAlarm;
@@ -1289,14 +1299,20 @@ public class ZenModeConfig implements Parcelable {
     }
 
     public static class ZenRule implements Parcelable {
+        @UnsupportedAppUsage
         public boolean enabled;
+        @UnsupportedAppUsage
         public boolean snoozing;         // user manually disabled this instance
+        @UnsupportedAppUsage
         public String name;              // required for automatic
+        @UnsupportedAppUsage
         public int zenMode;
+        @UnsupportedAppUsage
         public Uri conditionId;          // required for automatic
         public Condition condition;      // optional
         public ComponentName component;  // optional
         public String id;                // required for automatic (unique)
+        @UnsupportedAppUsage
         public long creationTime;        // required for automatic
         public String enabler;          // package name, only used for manual rules.
 
