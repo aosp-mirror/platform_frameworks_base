@@ -29,7 +29,7 @@
     <dimen name="car_primary_icon_size">36dp</dimen>
 
     <!-- dimensions for the car user switcher -->
-    <dimen name="car_user_switcher_name_text_size">@dimen/car_title2_size</dimen>
+    <dimen name="car_user_switcher_name_text_size">@dimen/car_body1_size</dimen>
     <dimen name="car_user_switcher_vertical_spacing_between_users">124dp</dimen>
 
     <!--These values represent MIN and MAX for hvac-->
