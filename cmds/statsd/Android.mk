@@ -45,7 +45,6 @@ statsd_common_src := \
     src/external/puller_util.cpp \
     src/logd/LogEvent.cpp \
     src/logd/LogListener.cpp \
-    src/logd/LogReader.cpp \
     src/matchers/CombinationLogMatchingTracker.cpp \
     src/matchers/matcher_util.cpp \
     src/matchers/SimpleLogMatchingTracker.cpp \
@@ -194,7 +193,6 @@ LOCAL_SRC_FILES := \
     tests/external/puller_util_test.cpp \
     tests/indexed_priority_queue_test.cpp \
     tests/LogEntryMatcher_test.cpp \
-    tests/LogReader_test.cpp \
     tests/LogEvent_test.cpp \
     tests/MetricsManager_test.cpp \
     tests/StatsLogProcessor_test.cpp \

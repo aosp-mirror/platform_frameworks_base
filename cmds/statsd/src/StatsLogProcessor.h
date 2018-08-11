@@ -18,7 +18,6 @@
 
 #include <gtest/gtest_prod.h>
 #include "config/ConfigListener.h"
-#include "logd/LogReader.h"
 #include "metrics/MetricsManager.h"
 #include "packages/UidMap.h"
 #include "external/StatsPullerManager.h"
@@ -52,9 +51,6 @@ public:
                       const std::function<bool(const ConfigKey&)>& sendBroadcast);
     virtual ~StatsLogProcessor();
 
-    void OnLogEvent(LogEvent* event, bool reconnectionStarts);
-
-    // for testing only.
     void OnLogEvent(LogEvent* event);
 
     void OnConfigUpdated(const int64_t timestampNs, const ConfigKey& key,
@@ -173,14 +169,6 @@ private:
     int64_t mLargestTimestampSeen = 0;
 
     int64_t mLastTimestampSeen = 0;
-
-    bool mInReconnection = false;
-
-    // Processed log count
-    uint64_t mLogCount = 0;
-
-    // Log loss detected count
-    int mLogLossCount = 0;
 
     long mLastPullerCacheClearTimeSec = 0;
 

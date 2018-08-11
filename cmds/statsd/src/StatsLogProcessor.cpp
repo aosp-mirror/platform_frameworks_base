@@ -161,10 +161,6 @@ void StatsLogProcessor::onIsolatedUidChangedEventLocked(const LogEvent& event) {
     }
 }
 
-void StatsLogProcessor::OnLogEvent(LogEvent* event) {
-    OnLogEvent(event, false);
-}
-
 void StatsLogProcessor::resetConfigs() {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     resetConfigsLocked(getElapsedRealtimeNs());
@@ -178,7 +174,7 @@ void StatsLogProcessor::resetConfigsLocked(const int64_t timestampNs) {
     resetConfigsLocked(timestampNs, configKeys);
 }
 
-void StatsLogProcessor::OnLogEvent(LogEvent* event, bool reconnected) {
+void StatsLogProcessor::OnLogEvent(LogEvent* event) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
 
 #ifdef VERY_VERBOSE_PRINTING
@@ -187,41 +183,6 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event, bool reconnected) {
     }
 #endif
     const int64_t currentTimestampNs = event->GetElapsedTimestampNs();
-
-    if (reconnected && mLastTimestampSeen != 0) {
-        // LogReader tells us the connection has just been reset. Now we need
-        // to enter reconnection state to find the last CP.
-        mInReconnection = true;
-    }
-
-    if (mInReconnection) {
-        // We see the checkpoint
-        if (currentTimestampNs == mLastTimestampSeen) {
-            mInReconnection = false;
-            // Found the CP. ignore this event, and we will start to read from next event.
-            return;
-        }
-        if (currentTimestampNs > mLargestTimestampSeen) {
-            // We see a new log but CP has not been found yet. Give up now.
-            mLogLossCount++;
-            mInReconnection = false;
-            StatsdStats::getInstance().noteLogLost(currentTimestampNs);
-            // Persist the data before we reset. Do we want this?
-            WriteDataToDiskLocked(CONFIG_RESET);
-            // We see fresher event before we see the checkpoint. We might have lost data.
-            // The best we can do is to reset.
-            resetConfigsLocked(currentTimestampNs);
-        } else {
-            // Still in search of the CP. Keep going.
-            return;
-        }
-    }
-
-    mLogCount++;
-    mLastTimestampSeen = currentTimestampNs;
-    if (mLargestTimestampSeen < currentTimestampNs) {
-        mLargestTimestampSeen = currentTimestampNs;
-    }
 
     resetIfConfigTtlExpiredLocked(currentTimestampNs);
 
