@@ -82,6 +82,28 @@ bool handleMetricWithLogTrackers(const int64_t what, const int metricIndex,
     return true;
 }
 
+bool handlePullMetricTriggerWithLogTrackers(
+        const int64_t trigger, const int metricIndex,
+        const vector<sp<LogMatchingTracker>>& allAtomMatchers,
+        const unordered_map<int64_t, int>& logTrackerMap,
+        unordered_map<int, std::vector<int>>& trackerToMetricMap, int& logTrackerIndex) {
+    auto logTrackerIt = logTrackerMap.find(trigger);
+    if (logTrackerIt == logTrackerMap.end()) {
+        ALOGW("cannot find the AtomMatcher \"%lld\" in config", (long long)trigger);
+        return false;
+    }
+    if (allAtomMatchers[logTrackerIt->second]->getAtomIds().size() > 1) {
+        ALOGE("AtomMatcher \"%lld\" has more than one tag ids."
+              "Trigger can only be one atom type.",
+              (long long)trigger);
+        return false;
+    }
+    logTrackerIndex = logTrackerIt->second;
+    auto& metric_list = trackerToMetricMap[logTrackerIndex];
+    metric_list.push_back(metricIndex);
+    return true;
+}
+
 bool handleMetricWithConditions(
         const int64_t condition, const int metricIndex,
         const unordered_map<int64_t, int>& conditionTrackerMap,
@@ -502,12 +524,28 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
         }
 
         sp<LogMatchingTracker> atomMatcher = allAtomMatchers.at(trackerIndex);
-        // If it is pulled atom, it should be simple matcher with one tagId.
+        // For GaugeMetric atom, it should be simple matcher with one tagId.
         if (atomMatcher->getAtomIds().size() != 1) {
             return false;
         }
         int atomTagId = *(atomMatcher->getAtomIds().begin());
         int pullTagId = statsPullerManager.PullerForMatcherExists(atomTagId) ? atomTagId : -1;
+
+        int triggerTrackerIndex;
+        int triggerAtomId = -1;
+        if (pullTagId != -1 && metric.has_trigger_event()) {
+            // event_trigger should be used with ALL_CONDITION_CHANGES
+            if (metric.sampling_type() != GaugeMetric::ALL_CONDITION_CHANGES) {
+                return false;
+            }
+            if (!handlePullMetricTriggerWithLogTrackers(metric.trigger_event(), metricIndex,
+                                                        allAtomMatchers, logTrackerMap,
+                                                        trackerToMetricMap, triggerTrackerIndex)) {
+                return false;
+            }
+            sp<LogMatchingTracker> triggerAtomMatcher = allAtomMatchers.at(triggerTrackerIndex);
+            triggerAtomId = *(triggerAtomMatcher->getAtomIds().begin());
+        }
 
         int conditionIndex = -1;
         if (metric.has_condition()) {
@@ -524,9 +562,9 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             }
         }
 
-        sp<MetricProducer> gaugeProducer =
-                new GaugeMetricProducer(key, metric, conditionIndex, wizard, pullTagId,
-                                        timeBaseTimeNs, currentTimeNs, pullerManager);
+        sp<MetricProducer> gaugeProducer = new GaugeMetricProducer(
+                key, metric, conditionIndex, wizard, pullTagId, triggerAtomId, atomTagId,
+                timeBaseTimeNs, currentTimeNs, pullerManager);
         allMetricProducers.push_back(gaugeProducer);
     }
     for (int i = 0; i < config.no_report_metric_size(); ++i) {

@@ -31,9 +31,6 @@ namespace android {
 namespace os {
 namespace statsd {
 
-// Util function to build a hard coded config with test metrics.
-StatsdConfig build_fake_config();
-
 /**
  * Keeps track of which configurations have been set from various sources.
  */
