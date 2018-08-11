@@ -459,6 +459,9 @@ message WifiLog {
 
   // Histogram of the EAP method type of all installed Passpoint profiles
   repeated PasspointProfileTypeCount installed_passpoint_profile_type = 123;
+
+  // Hardware revision (EVT, DVT, PVT etc.)
+  optional string hardware_revision = 124;
 }
 
 // Information that gets logged for every WiFi connection.
