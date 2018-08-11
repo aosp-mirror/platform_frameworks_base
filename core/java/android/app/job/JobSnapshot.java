@@ -50,6 +50,14 @@ public class JobSnapshot implements Parcelable {
     }
 
     /**
+     * Returning JobInfo bound to this snapshot
+     * @return JobInfo of this snapshot
+     */
+    public JobInfo getJobInfo() {
+        return mJob;
+    }
+
+    /**
      * Is this job actually runnable at this moment?
      */
     public boolean isRunnable() {
@@ -77,7 +85,7 @@ public class JobSnapshot implements Parcelable {
      */
     public boolean isRequireDeviceIdleSatisfied() {
         return !mJob.isRequireDeviceIdle()
-                || satisfied(JobInfo.CONSTRAINT_FLAG_BATTERY_NOT_LOW);
+                || satisfied(JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE);
     }
 
     public boolean isRequireStorageNotLowSatisfied() {
