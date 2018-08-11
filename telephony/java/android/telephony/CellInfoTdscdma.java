@@ -110,7 +110,7 @@ public final class CellInfoTdscdma extends CellInfo implements Parcelable {
     /** Implement the Parcelable interface */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags, TYPE_TDCDMA);
+        super.writeToParcel(dest, flags, TYPE_TDSCDMA);
         mCellIdentityTdscdma.writeToParcel(dest, flags);
         mCellSignalStrengthTdscdma.writeToParcel(dest, flags);
     }

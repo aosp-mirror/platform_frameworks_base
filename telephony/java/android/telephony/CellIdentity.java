@@ -17,14 +17,11 @@
 package android.telephony;
 
 import android.annotation.CallSuper;
-import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -32,44 +29,6 @@ import java.util.Objects;
  * CellIdentityXxx which represents cell identity for specific network access technology.
  */
 public abstract class CellIdentity implements Parcelable {
-    /**
-     * Cell identity type
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = "TYPE_", value = {TYPE_GSM, TYPE_CDMA, TYPE_LTE, TYPE_WCDMA, TYPE_TDSCDMA})
-    public @interface Type {}
-
-    /**
-     * Unknown cell identity type
-     * @hide
-     */
-    public static final int TYPE_UNKNOWN        = 0;
-    /**
-     * GSM cell identity type
-     * @hide
-     */
-    public static final int TYPE_GSM            = 1;
-    /**
-     * CDMA cell identity type
-     * @hide
-     */
-    public static final int TYPE_CDMA           = 2;
-    /**
-     * LTE cell identity type
-     * @hide
-     */
-    public static final int TYPE_LTE            = 3;
-    /**
-     * WCDMA cell identity type
-     * @hide
-     */
-    public static final int TYPE_WCDMA          = 4;
-    /**
-     * TDS-CDMA cell identity type
-     * @hide
-     */
-    public static final int TYPE_TDSCDMA        = 5;
 
     /** @hide */
     public static final int INVALID_CHANNEL_NUMBER = -1;
@@ -138,7 +97,9 @@ public abstract class CellIdentity implements Parcelable {
      * @hide
      * @return The type of the cell identity
      */
-    public @Type int getType() { return mType; }
+    public @CellInfo.Type int getType() {
+        return mType;
+    }
 
     /**
      * Returns the channel number of the cell identity.
@@ -217,11 +178,12 @@ public abstract class CellIdentity implements Parcelable {
                 public CellIdentity createFromParcel(Parcel in) {
                     int type = in.readInt();
                     switch (type) {
-                        case TYPE_GSM: return CellIdentityGsm.createFromParcelBody(in);
-                        case TYPE_WCDMA: return CellIdentityWcdma.createFromParcelBody(in);
-                        case TYPE_CDMA: return CellIdentityCdma.createFromParcelBody(in);
-                        case TYPE_LTE: return CellIdentityLte.createFromParcelBody(in);
-                        case TYPE_TDSCDMA: return CellIdentityTdscdma.createFromParcelBody(in);
+                        case CellInfo.TYPE_GSM: return CellIdentityGsm.createFromParcelBody(in);
+                        case CellInfo.TYPE_WCDMA: return CellIdentityWcdma.createFromParcelBody(in);
+                        case CellInfo.TYPE_CDMA: return CellIdentityCdma.createFromParcelBody(in);
+                        case CellInfo.TYPE_LTE: return CellIdentityLte.createFromParcelBody(in);
+                        case CellInfo.TYPE_TDSCDMA:
+                            return CellIdentityTdscdma.createFromParcelBody(in);
                         default: throw new IllegalArgumentException("Bad Cell identity Parcel");
                     }
                 }
