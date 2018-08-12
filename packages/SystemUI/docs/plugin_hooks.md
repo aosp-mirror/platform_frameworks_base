@@ -51,6 +51,10 @@ Expected interface: [NotificationSwipeActionHelper](/packages/SystemUI/plugin/sr
 
 Use: Control over swipes/input for notification views, can be used to control what happens when you swipe/long-press
 
+### Action: com.android.systemui.action.PLUGIN_CLOCK
+Expected interface: [ClockPlugin](/packages/SystemUI/plugin/src/com/android/systemui/plugins/ClockPlugin.java)
+
+Use: Allows replacement of the keyguard main clock.
 
 # Global plugin dependencies
 These classes can be accessed by any plugin using PluginDependency as long as they @Requires them.

@@ -1544,7 +1544,7 @@ public class TelephonyManager {
      * @return List of NeighboringCellInfo or null if info unavailable.
      *
      * @deprecated Use {@link #getAllCellInfo} which returns a superset of the information
-     *             from NeighboringCellInfo.
+     *             from NeighboringCellInfo, including LTE cell information.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -6648,14 +6648,12 @@ public class TelephonyManager {
     @Deprecated
     public boolean isTtyModeSupported() {
         try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null) {
-                return telephony.isTtyModeSupported();
+            TelecomManager telecomManager = TelecomManager.from(mContext);
+            if (telecomManager != null) {
+                return telecomManager.isTtySupported();
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#isTtyModeSupported", e);
         } catch (SecurityException e) {
-            Log.e(TAG, "Permission error calling ITelephony#isTtyModeSupported", e);
+            Log.e(TAG, "Permission error calling TelecomManager#isTtySupported", e);
         }
         return false;
     }

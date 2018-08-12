@@ -16,6 +16,7 @@
 
 package android.hardware.camera2.impl;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -231,6 +232,7 @@ public class CameraMetadataNative implements Parcelable {
          *
          * @return The tag numeric value corresponding to the string
          */
+        @UnsupportedAppUsage
         public final int getTag() {
             if (!mHasTag) {
                 mTag = CameraMetadataNative.getTag(mName, mVendorId);
@@ -1188,6 +1190,7 @@ public class CameraMetadataNative implements Parcelable {
         return true;
     }
 
+    @UnsupportedAppUsage
     private long mMetadataPtr; // native CameraMetadata*
 
     private native long nativeAllocate();
@@ -1202,13 +1205,16 @@ public class CameraMetadataNative implements Parcelable {
     private native synchronized boolean nativeIsEmpty();
     private native synchronized int nativeGetEntryCount();
 
+    @UnsupportedAppUsage
     private native synchronized byte[] nativeReadValues(int tag);
     private native synchronized void nativeWriteValues(int tag, byte[] src);
     private native synchronized void nativeDump() throws IOException; // dump to ALOGD
 
     private native synchronized ArrayList nativeGetAllVendorKeys(Class keyClass);
+    @UnsupportedAppUsage
     private native synchronized int nativeGetTagFromKeyLocal(String keyName)
             throws IllegalArgumentException;
+    @UnsupportedAppUsage
     private native synchronized int nativeGetTypeFromTagLocal(int tag)
             throws IllegalArgumentException;
     private static native int nativeGetTagFromKey(String keyName, long vendorId)

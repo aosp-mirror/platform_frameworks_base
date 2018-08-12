@@ -136,7 +136,14 @@ public class AppBackupUtils {
     /**
      * Checks if the app is in a stopped state.  This is not part of the general "eligible for
      * backup?" check because we *do* still need to restore data to apps in this state (e.g.
-     * newly-installing ones)
+     * newly-installing ones).
+     *
+     * <p>Reasons for such state:
+     * <ul>
+     *     <li>The app has been force-stopped.
+     *     <li>The app has been cleared.
+     *     <li>The app has just been installed.
+     * </ul>
      */
     public static boolean appIsStopped(ApplicationInfo app) {
         return ((app.flags & ApplicationInfo.FLAG_STOPPED) != 0);

@@ -284,7 +284,7 @@ public:
     /**
      * Records statsd skipped an event.
      */
-    void noteLogLost(int64_t timestamp);
+    void noteLogLost(int64_t timestamp, int32_t count);
 
     /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
@@ -341,8 +341,8 @@ private:
     // Logd errors. Size capped by kMaxLoggerErrors.
     std::list<const std::pair<int, int>> mLoggerErrors;
 
-    // Timestamps when we detect log loss after logd reconnect.
-    std::list<int64_t> mLogLossTimestampNs;
+    // Timestamps when we detect log loss, and the number of logs lost.
+    std::list<std::pair<int64_t, int32_t>> mLogLossTimestampNs;
 
     std::list<int32_t> mSystemServerRestartSec;
 

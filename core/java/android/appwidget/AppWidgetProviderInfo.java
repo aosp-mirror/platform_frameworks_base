@@ -18,6 +18,7 @@ package android.appwidget;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -270,6 +271,7 @@ public class AppWidgetProviderInfo implements Parcelable {
     public int widgetFeatures;
 
     /** @hide */
+    @UnsupportedAppUsage
     public ActivityInfo providerInfo;
 
     public AppWidgetProviderInfo() {

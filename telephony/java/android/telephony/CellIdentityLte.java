@@ -44,7 +44,7 @@ public final class CellIdentityLte extends CellIdentity {
      * @hide
      */
     public CellIdentityLte() {
-        super(TAG, TYPE_LTE, null, null, null, null);
+        super(TAG, CellInfo.TYPE_LTE, null, null, null, null);
         mCi = Integer.MAX_VALUE;
         mPci = Integer.MAX_VALUE;
         mTac = Integer.MAX_VALUE;
@@ -99,7 +99,7 @@ public final class CellIdentityLte extends CellIdentity {
      */
     public CellIdentityLte(int ci, int pci, int tac, int earfcn, int bandwidth, String mccStr,
             String mncStr, String alphal, String alphas) {
-        super(TAG, TYPE_LTE, mccStr, mncStr, alphal, alphas);
+        super(TAG, CellInfo.TYPE_LTE, mccStr, mncStr, alphal, alphas);
         mCi = ci;
         mPci = pci;
         mTac = tac;
@@ -241,7 +241,7 @@ public final class CellIdentityLte extends CellIdentity {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (DBG) log("writeToParcel(Parcel, int): " + toString());
-        super.writeToParcel(dest, TYPE_LTE);
+        super.writeToParcel(dest, CellInfo.TYPE_LTE);
         dest.writeInt(mCi);
         dest.writeInt(mPci);
         dest.writeInt(mTac);
@@ -251,7 +251,7 @@ public final class CellIdentityLte extends CellIdentity {
 
     /** Construct from Parcel, type has already been processed */
     private CellIdentityLte(Parcel in) {
-        super(TAG, TYPE_LTE, in);
+        super(TAG, CellInfo.TYPE_LTE, in);
         mCi = in.readInt();
         mPci = in.readInt();
         mTac = in.readInt();

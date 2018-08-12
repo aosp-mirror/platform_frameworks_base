@@ -421,8 +421,8 @@ interface IWindowManager
     boolean isWindowTraceEnabled();
 
     /**
-     * Requests that the WindowManager sends WindowManagerPolicy#ACTION_USER_ACTIVITY_NOTIFICATION
-     * on the next user activity.
+     * Requests that the WindowManager sends
+     * WindowManagerPolicyConstants#ACTION_USER_ACTIVITY_NOTIFICATION on the next user activity.
      */
     void requestUserActivityNotification();
 

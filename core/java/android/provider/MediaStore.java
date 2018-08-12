@@ -469,6 +469,12 @@ public final class MediaStore {
          * The height of the image/video in pixels.
          */
         public static final String HEIGHT = "height";
+
+        /**
+         * Package that contributed this media.
+         * @hide
+         */
+        public static final String OWNER_PACKAGE_NAME = "owner_package_name";
      }
 
     /**

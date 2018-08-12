@@ -28,7 +28,7 @@ import static com.android.internal.app.procstats.ProcessStats.PSS_USS_AVERAGE;
 import static com.android.internal.app.procstats.ProcessStats.PSS_USS_MAXIMUM;
 import static com.android.internal.app.procstats.ProcessStats.PSS_COUNT;
 
-import android.service.procstats.ProcessStatsProto;
+import android.service.procstats.ProcessStatsStateProto;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
 
@@ -153,16 +153,16 @@ public class PssTable extends SparseMappingTable.Table {
 
     public static void writeStatsToProto(ProtoOutputStream proto, final long[] stats,
             final int statsIndex) {
-        proto.write(ProcessStatsProto.State.SAMPLE_SIZE, stats[statsIndex + PSS_SAMPLE_COUNT]);
-        ProtoUtils.toAggStatsProto(proto, ProcessStatsProto.State.PSS,
+        proto.write(ProcessStatsStateProto.SAMPLE_SIZE, stats[statsIndex + PSS_SAMPLE_COUNT]);
+        ProtoUtils.toAggStatsProto(proto, ProcessStatsStateProto.PSS,
                 stats[statsIndex + PSS_MINIMUM],
                 stats[statsIndex + PSS_AVERAGE],
                 stats[statsIndex + PSS_MAXIMUM]);
-        ProtoUtils.toAggStatsProto(proto, ProcessStatsProto.State.USS,
+        ProtoUtils.toAggStatsProto(proto, ProcessStatsStateProto.USS,
                 stats[statsIndex + PSS_USS_MINIMUM],
                 stats[statsIndex + PSS_USS_AVERAGE],
                 stats[statsIndex + PSS_USS_MAXIMUM]);
-        ProtoUtils.toAggStatsProto(proto, ProcessStatsProto.State.RSS,
+        ProtoUtils.toAggStatsProto(proto, ProcessStatsStateProto.RSS,
                 stats[statsIndex + PSS_RSS_MINIMUM],
                 stats[statsIndex + PSS_RSS_AVERAGE],
                 stats[statsIndex + PSS_RSS_MAXIMUM]);

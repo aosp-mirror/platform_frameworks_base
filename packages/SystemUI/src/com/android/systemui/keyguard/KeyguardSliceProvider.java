@@ -45,6 +45,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import androidx.core.graphics.drawable.IconCompat;
 import androidx.slice.Slice;
 import androidx.slice.SliceProvider;
 import androidx.slice.builders.ListBuilder;
@@ -127,8 +128,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
 
     @Override
     public Slice onBindSlice(Uri sliceUri) {
-        ListBuilder builder = new ListBuilder(getContext(), mSliceUri);
-        builder.addRow(new RowBuilder(builder, mDateUri).setTitle(mLastText));
+        ListBuilder builder = new ListBuilder(getContext(), mSliceUri, ListBuilder.INFINITY);
+        builder.addRow(new RowBuilder(mDateUri).setTitle(mLastText));
         addNextAlarm(builder);
         addZenMode(builder);
         addPrimaryAction(builder);
@@ -139,11 +140,13 @@ public class KeyguardSliceProvider extends SliceProvider implements
         // Add simple action because API requires it; Keyguard handles presenting
         // its own slices so this action + icon are actually never used.
         PendingIntent pi = PendingIntent.getActivity(getContext(), 0, new Intent(), 0);
-        Icon icon = Icon.createWithResource(getContext(), R.drawable.ic_access_alarms_big);
-        SliceAction action = new SliceAction(pi, icon, mLastText);
+        IconCompat icon = IconCompat.createWithResource(getContext(),
+                R.drawable.ic_access_alarms_big);
+        SliceAction action = SliceAction.createDeeplink(pi, icon,
+                ListBuilder.ICON_IMAGE, mLastText);
 
-        RowBuilder primaryActionRow = new RowBuilder(builder, Uri.parse(KEYGUARD_ACTION_URI))
-            .setPrimaryAction(action);
+        RowBuilder primaryActionRow = new RowBuilder(Uri.parse(KEYGUARD_ACTION_URI))
+                .setPrimaryAction(action);
         builder.addRow(primaryActionRow);
     }
 
@@ -152,10 +155,11 @@ public class KeyguardSliceProvider extends SliceProvider implements
             return;
         }
 
-        Icon alarmIcon = Icon.createWithResource(getContext(), R.drawable.ic_access_alarms_big);
-        RowBuilder alarmRowBuilder = new RowBuilder(builder, mAlarmUri)
+        IconCompat alarmIcon = IconCompat.createWithResource(getContext(),
+                R.drawable.ic_access_alarms_big);
+        RowBuilder alarmRowBuilder = new RowBuilder(mAlarmUri)
                 .setTitle(mNextAlarm)
-                .addEndItem(alarmIcon);
+                .addEndItem(alarmIcon, ListBuilder.ICON_IMAGE);
         builder.addRow(alarmRowBuilder);
     }
 
@@ -167,10 +171,11 @@ public class KeyguardSliceProvider extends SliceProvider implements
         if (!isDndSuppressingNotifications()) {
             return;
         }
-        RowBuilder dndBuilder = new RowBuilder(builder, mDndUri)
+        RowBuilder dndBuilder = new RowBuilder(mDndUri)
                 .setContentDescription(getContext().getResources()
                         .getString(R.string.accessibility_quick_settings_dnd))
-                .addEndItem(Icon.createWithResource(getContext(), R.drawable.stat_sys_dnd));
+                .addEndItem(IconCompat.createWithResource(getContext(), R.drawable.stat_sys_dnd),
+                        ListBuilder.ICON_IMAGE);
         builder.addRow(dndBuilder);
     }
 

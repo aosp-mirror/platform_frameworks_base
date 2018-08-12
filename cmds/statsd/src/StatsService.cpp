@@ -883,8 +883,8 @@ void StatsService::Startup() {
     mConfigManager->Startup();
 }
 
-void StatsService::OnLogEvent(LogEvent* event, bool reconnectionStarts) {
-    mProcessor->OnLogEvent(event, reconnectionStarts);
+void StatsService::OnLogEvent(LogEvent* event) {
+    mProcessor->OnLogEvent(event);
 }
 
 Status StatsService::getData(int64_t key, const String16& packageName, vector<uint8_t>* output) {

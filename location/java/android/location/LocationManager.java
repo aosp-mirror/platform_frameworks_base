@@ -29,6 +29,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -68,6 +69,7 @@ public class LocationManager {
     private static final String TAG = "LocationManager";
 
     private final Context mContext;
+    @UnsupportedAppUsage
     private final ILocationManager mService;
     private final GnssMeasurementCallbackTransport mGnssMeasurementCallbackTransport;
     private final GnssNavigationMessageCallbackTransport mGnssNavigationMessageCallbackTransport;
@@ -1004,6 +1006,7 @@ public class LocationManager {
         }
     }
 
+    @UnsupportedAppUsage
     private void requestLocationUpdates(LocationRequest request, LocationListener listener,
             Looper looper, PendingIntent intent) {
 
@@ -2328,6 +2331,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean sendNiResponse(int notifId, int userResponse) {
         try {
             return mService.sendNiResponse(notifId, userResponse);

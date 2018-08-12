@@ -228,6 +228,14 @@ package android.app.usage {
 
 }
 
+package android.bluetooth {
+
+  public final class BluetoothClass implements android.os.Parcelable {
+    method public int getClassOfDevice();
+  }
+
+}
+
 package android.content {
 
   public abstract class ContentResolver {

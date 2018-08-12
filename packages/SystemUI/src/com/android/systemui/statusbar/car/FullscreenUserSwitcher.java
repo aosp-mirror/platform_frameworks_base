@@ -40,7 +40,6 @@ public class FullscreenUserSwitcher {
     private final int mShortAnimDuration;
     private final StatusBar mStatusBar;
     private final UserManagerHelper mUserManagerHelper;
-    private int mCurrentForegroundUserId;
     private boolean mShowing;
 
     public FullscreenUserSwitcher(StatusBar statusBar, ViewStub containerStub, Context context) {
@@ -55,7 +54,6 @@ public class FullscreenUserSwitcher {
         mUserGridView.setUserSelectionListener(this::onUserSelected);
 
         mUserManagerHelper = new UserManagerHelper(context);
-        updateCurrentForegroundUser();
 
         mShortAnimDuration = mContainer.getResources()
             .getInteger(android.R.integer.config_shortAnimTime);
@@ -78,22 +76,8 @@ public class FullscreenUserSwitcher {
     }
 
     public void onUserSwitched(int newUserId) {
-        // The logic for foreground user change is needed here to exclude the reboot case. On
-        // reboot, system fires ACTION_USER_SWITCHED change from -1 to 0 user. This is not an actual
-        // user switch. We only want to trigger keyguard dismissal when foreground user changes.
-        if (foregroundUserChanged()) {
-            toggleSwitchInProgress(false);
-            updateCurrentForegroundUser();
-            mParent.post(this::dismissKeyguard);
-        }
-    }
-
-    private boolean foregroundUserChanged() {
-        return mCurrentForegroundUserId != mUserManagerHelper.getForegroundUserId();
-    }
-
-    private void updateCurrentForegroundUser() {
-        mCurrentForegroundUserId = mUserManagerHelper.getForegroundUserId();
+        toggleSwitchInProgress(false);
+        mParent.post(this::dismissKeyguard);
     }
 
     private void onUserSelected(UserGridRecyclerView.UserRecord record) {

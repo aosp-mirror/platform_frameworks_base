@@ -20,6 +20,7 @@ import android.os.Parcel;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.procstats.ProcessStatsProto;
+import android.service.procstats.ProcessStatsStateProto;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
 import android.util.Log;
@@ -1377,14 +1378,14 @@ public final class ProcessState {
             }
             final long stateToken = proto.start(ProcessStatsProto.STATES);
             DumpUtils.printProcStateTagProto(proto,
-                    ProcessStatsProto.State.SCREEN_STATE,
-                    ProcessStatsProto.State.MEMORY_STATE,
-                    ProcessStatsProto.State.PROCESS_STATE,
+                    ProcessStatsStateProto.SCREEN_STATE,
+                    ProcessStatsStateProto.MEMORY_STATE,
+                    ProcessStatsStateProto.PROCESS_STATE,
                     type);
 
             long duration = durationByState.get(type);
             durationByState.delete(type); // remove the key since it is already being dumped.
-            proto.write(ProcessStatsProto.State.DURATION_MS, duration);
+            proto.write(ProcessStatsStateProto.DURATION_MS, duration);
 
             mPssTable.writeStatsToProtoForKey(proto, key);
 
@@ -1394,18 +1395,18 @@ public final class ProcessState {
         for (int i = 0; i < durationByState.size(); i++) {
             final long stateToken = proto.start(ProcessStatsProto.STATES);
             DumpUtils.printProcStateTagProto(proto,
-                    ProcessStatsProto.State.SCREEN_STATE,
-                    ProcessStatsProto.State.MEMORY_STATE,
-                    ProcessStatsProto.State.PROCESS_STATE,
+                    ProcessStatsStateProto.SCREEN_STATE,
+                    ProcessStatsStateProto.MEMORY_STATE,
+                    ProcessStatsStateProto.PROCESS_STATE,
                     durationByState.keyAt(i));
-            proto.write(ProcessStatsProto.State.DURATION_MS, durationByState.valueAt(i));
+            proto.write(ProcessStatsStateProto.DURATION_MS, durationByState.valueAt(i));
             proto.end(stateToken);
         }
 
         final long totalRunningDuration = getTotalRunningDuration(now);
         if (totalRunningDuration > 0) {
             final long stateToken = proto.start(ProcessStatsProto.TOTAL_RUNNING_STATE);
-            proto.write(ProcessStatsProto.State.DURATION_MS, totalRunningDuration);
+            proto.write(ProcessStatsStateProto.DURATION_MS, totalRunningDuration);
             if (mTotalRunningPss[PSS_SAMPLE_COUNT] != 0) {
                 PssTable.writeStatsToProto(proto, mTotalRunningPss, 0);
             }

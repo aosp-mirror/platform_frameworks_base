@@ -23,6 +23,7 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.service.procstats.ProcessStatsPackageProto;
 import android.service.procstats.ProcessStatsSectionProto;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
@@ -2013,10 +2014,8 @@ public final class ProcessStats implements Parcelable {
     }
 
     public void writeToProto(ProtoOutputStream proto, long fieldId, long now) {
-        final ArrayMap<String, SparseArray<LongSparseArray<PackageState>>> pkgMap =
-                mPackages.getMap();
-
         final long token = proto.start(fieldId);
+
         proto.write(ProcessStatsSectionProto.START_REALTIME_MS, mTimePeriodStartRealtime);
         proto.write(ProcessStatsSectionProto.END_REALTIME_MS,
                 mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime);
@@ -2041,16 +2040,31 @@ public final class ProcessStats implements Parcelable {
             proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_PARTIAL);
         }
 
-        ArrayMap<String, SparseArray<ProcessState>> procMap = mProcesses.getMap();
+        final ArrayMap<String, SparseArray<ProcessState>> procMap = mProcesses.getMap();
         for (int ip=0; ip<procMap.size(); ip++) {
-            String procName = procMap.keyAt(ip);
-            SparseArray<ProcessState> uids = procMap.valueAt(ip);
+            final String procName = procMap.keyAt(ip);
+            final SparseArray<ProcessState> uids = procMap.valueAt(ip);
             for (int iu=0; iu<uids.size(); iu++) {
                 final int uid = uids.keyAt(iu);
                 final ProcessState procState = uids.valueAt(iu);
-                procState.writeToProto(proto, ProcessStatsSectionProto.PROCESS_STATS, procName, uid, now);
+                procState.writeToProto(proto, ProcessStatsSectionProto.PROCESS_STATS, procName,
+                        uid, now);
             }
         }
+
+        final ArrayMap<String, SparseArray<LongSparseArray<PackageState>>> pkgMap =
+                mPackages.getMap();
+        for (int ip = 0; ip < pkgMap.size(); ip++) {
+            final SparseArray<LongSparseArray<PackageState>> uids = pkgMap.valueAt(ip);
+            for (int iu = 0; iu < uids.size(); iu++) {
+                final LongSparseArray<PackageState> vers = uids.valueAt(iu);
+                for (int iv = 0; iv < vers.size(); iv++) {
+                    final PackageState pkgState = vers.valueAt(iv);
+                    pkgState.writeToProto(proto, ProcessStatsSectionProto.PACKAGE_STATS, now);
+                }
+            }
+        }
+
         proto.end(token);
     }
 
@@ -2094,6 +2108,33 @@ public final class ProcessStats implements Parcelable {
             mAssociations.put(className, as);
             if (DEBUG) Slog.d(TAG, "GETASC: creating " + as + " in " + proc.getName());
             return as;
+        }
+
+        public void writeToProto(ProtoOutputStream proto, long fieldId, long now) {
+            final long token = proto.start(fieldId);
+
+            proto.write(ProcessStatsPackageProto.PACKAGE, mPackageName);
+            proto.write(ProcessStatsPackageProto.UID, mUid);
+            proto.write(ProcessStatsPackageProto.VERSION, mVersionCode);
+
+            for (int ip = 0; ip < mProcesses.size(); ip++) {
+                final String procName = mProcesses.keyAt(ip);
+                final ProcessState procState = mProcesses.valueAt(ip);
+                procState.writeToProto(proto, ProcessStatsPackageProto.PROCESS_STATS, procName,
+                        mUid, now);
+            }
+
+            for (int is = 0; is < mServices.size(); is++) {
+                final ServiceState serviceState = mServices.valueAt(is);
+                serviceState.writeToProto(proto, ProcessStatsPackageProto.PROCESS_STATS, now);
+            }
+
+            for (int ia=0; ia<mAssociations.size(); ia++) {
+                final AssociationState ascState = mAssociations.valueAt(ia);
+                ascState.writeToProto(proto, ProcessStatsPackageProto.ASSOCIATION_STATS, now);
+            }
+
+            proto.end(token);
         }
     }
 

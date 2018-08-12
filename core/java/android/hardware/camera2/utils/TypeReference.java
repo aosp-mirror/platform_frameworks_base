@@ -16,6 +16,7 @@
 
 package android.hardware.camera2.utils;
 
+import android.annotation.UnsupportedAppUsage;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
@@ -55,6 +56,7 @@ public abstract class TypeReference<T> {
      *
      * @see TypeReference
      */
+    @UnsupportedAppUsage
     protected TypeReference() {
         ParameterizedType thisType = (ParameterizedType)getClass().getGenericSuperclass();
 
@@ -136,6 +138,7 @@ public abstract class TypeReference<T> {
      *
      * @throws IllegalArgumentException if {@code type} had any type variables
      */
+    @UnsupportedAppUsage
     public static TypeReference<?> createSpecializedTypeReference(Type type) {
         return new SpecializedBaseTypeReference(type);
     }

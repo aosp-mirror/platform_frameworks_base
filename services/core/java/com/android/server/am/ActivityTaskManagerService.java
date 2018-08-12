@@ -727,7 +727,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId, reason);
         // TODO: Switch to user app stacks here.
         return getActivityStartController().startActivities(caller, -1, callingPackage, intents,
-                resolvedTypes, resultTo, SafeActivityOptions.fromBundle(bOptions), userId, reason);
+                resolvedTypes, resultTo, SafeActivityOptions.fromBundle(bOptions), userId, reason,
+                null /* originatingPendingIntent */);
     }
 
     @Override
@@ -5093,7 +5094,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         packageUid, packageName,
                         intents, resolvedTypes, null /* resultTo */,
                         SafeActivityOptions.fromBundle(bOptions), userId,
-                        false /* validateIncomingUser */);
+                        false /* validateIncomingUser */, null /* originatingPendingIntent */);
             }
         }
 

@@ -41,6 +41,7 @@ import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.car.hvac.HvacController;
+import com.android.systemui.statusbar.car.hvac.TemperatureView;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -82,6 +83,7 @@ public class CarStatusBar extends StatusBar implements
     private ActivityManagerWrapper mActivityManagerWrapper;
     private DeviceProvisionedController mDeviceProvisionedController;
     private boolean mDeviceIsProvisioned = true;
+    private HvacController mHvacController;
 
     @Override
     public void start() {
@@ -95,8 +97,7 @@ public class CarStatusBar extends StatusBar implements
         createBatteryController();
         mCarBatteryController.startListening();
 
-        Log.d(TAG, "Connecting to HVAC service");
-        Dependency.get(HvacController.class).connectToCarService();
+        mHvacController.connectToCarService();
 
         mCarFacetButtonController = Dependency.get(CarFacetButtonController.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
@@ -119,10 +120,11 @@ public class CarStatusBar extends StatusBar implements
      * before and after the device is provisioned
      */
     private void restartNavBars() {
+        // remove and reattach all hvac components such that we don't keep a reference to unused
+        // ui elements
+        mHvacController.removeAllComponents();
+        addTemperatureViewToController(mStatusBarWindow);
         mCarFacetButtonController.removeAll();
-
-        Dependency.get(HvacController.class).removeAllComponents();
-
         if (mNavigationBarWindow != null) {
             mNavigationBarWindow.removeAllViews();
             mNavigationBarView = null;
@@ -137,7 +139,20 @@ public class CarStatusBar extends StatusBar implements
             mRightNavigationBarWindow.removeAllViews();
             mRightNavigationBarView = null;
         }
+
         buildNavBarContent();
+    }
+
+    private void addTemperatureViewToController(View v) {
+        if (v instanceof TemperatureView) {
+            Log.d(TAG, "addTemperatureViewToController: found ");
+            mHvacController.addHvacTextView((TemperatureView) v);
+        } else if (v instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup) v;
+            for (int i = 0; i < viewGroup.getChildCount(); i++) {
+                addTemperatureViewToController(viewGroup.getChildAt(i));
+            }
+        }
     }
 
     /**
@@ -214,6 +229,7 @@ public class CarStatusBar extends StatusBar implements
     @Override
     protected void makeStatusBarView() {
         super.makeStatusBarView();
+        mHvacController = Dependency.get(HvacController.class);
 
         mNotificationPanelBackground = getDefaultWallpaper();
         mScrimController.setScrimBehindDrawable(mNotificationPanelBackground);
@@ -226,6 +242,7 @@ public class CarStatusBar extends StatusBar implements
             // when a device has connected by bluetooth.
             mBatteryMeterView.setVisibility(View.GONE);
         });
+        addTemperatureViewToController(mStatusBarWindow);
     }
 
     private BatteryController createBatteryController() {
@@ -264,7 +281,6 @@ public class CarStatusBar extends StatusBar implements
 
     private void buildNavBarWindows() {
         if (mShowBottom) {
-
             mNavigationBarWindow = (ViewGroup) View.inflate(mContext,
                     R.layout.navigation_bar_window, null);
         }
@@ -342,6 +358,7 @@ public class CarStatusBar extends StatusBar implements
             throw new RuntimeException("Unable to build botom nav bar due to missing layout");
         }
         mNavigationBarView.setStatusBar(this);
+        addTemperatureViewToController(mNavigationBarView);
     }
 
     private void buildLeft(int layout) {
@@ -352,6 +369,7 @@ public class CarStatusBar extends StatusBar implements
             throw new RuntimeException("Unable to build left nav bar due to missing layout");
         }
         mLeftNavigationBarView.setStatusBar(this);
+        addTemperatureViewToController(mLeftNavigationBarView);
     }
 
 
@@ -362,6 +380,8 @@ public class CarStatusBar extends StatusBar implements
             Log.e(TAG, "CarStatusBar failed inflate for R.layout.car_navigation_bar");
             throw new RuntimeException("Unable to build right nav bar due to missing layout");
         }
+        mRightNavigationBarView.setStatusBar(this);
+        addTemperatureViewToController(mRightNavigationBarView);
     }
 
     @Override

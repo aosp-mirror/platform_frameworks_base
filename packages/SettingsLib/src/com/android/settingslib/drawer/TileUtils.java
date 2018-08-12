@@ -126,6 +126,12 @@ public class TileUtils {
      */
     public static final String META_DATA_PREFERENCE_ICON_BACKGROUND_HINT =
             "com.android.settings.bg.hint";
+    /**
+     * Name of the meta-data item that should be set in the AndroidManifest.xml
+     * to specify the icon background color as raw ARGB.
+     */
+    public static final String META_DATA_PREFERENCE_ICON_BACKGROUND_ARGB =
+            "com.android.settings.bg.argb";
 
     /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml

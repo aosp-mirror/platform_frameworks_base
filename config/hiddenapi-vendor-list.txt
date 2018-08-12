@@ -1,4 +1,3 @@
-Landroid/accounts/AccountManager;-><init>(Landroid/content/Context;Landroid/accounts/IAccountManager;Landroid/os/Handler;)V
 Landroid/app/Activity;->managedQuery(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;
 Landroid/app/Activity;->registerRemoteAnimations(Landroid/view/RemoteAnimationDefinition;)V
 Landroid/app/ActivityManager$TaskDescription;->loadTaskDescriptionIcon(Ljava/lang/String;I)Landroid/graphics/Bitmap;
@@ -56,15 +55,6 @@ Landroid/app/TaskStackListener;->onTaskSnapshotChanged(ILandroid/app/ActivityMan
 Landroid/app/TaskStackListener;->onTaskStackChanged()V
 Landroid/app/WallpaperColors;-><init>(Landroid/graphics/Color;Landroid/graphics/Color;Landroid/graphics/Color;I)V
 Landroid/bluetooth/IBluetooth;->sendConnectionStateChange(Landroid/bluetooth/BluetoothDevice;III)V
-Landroid/companion/AssociationRequest;->getDeviceFilters()Ljava/util/List;
-Landroid/companion/AssociationRequest;->isSingleDevice()Z
-Landroid/companion/BluetoothDeviceFilter;->getAddress()Ljava/lang/String;
-Landroid/companion/BluetoothDeviceFilterUtils;->getDeviceDisplayNameInternal(Landroid/bluetooth/BluetoothDevice;)Ljava/lang/String;
-Landroid/companion/BluetoothDeviceFilterUtils;->getDeviceDisplayNameInternal(Landroid/net/wifi/ScanResult;)Ljava/lang/String;
-Landroid/companion/BluetoothDeviceFilterUtils;->getDeviceMacAddress(Landroid/os/Parcelable;)Ljava/lang/String;
-Landroid/companion/BluetoothLeDeviceFilter;->getScanFilter()Landroid/bluetooth/le/ScanFilter;
-Landroid/companion/DeviceFilter;->getDeviceDisplayName(Landroid/os/Parcelable;)Ljava/lang/String;
-Landroid/companion/DeviceFilter;->matches(Landroid/os/Parcelable;)Z
 Landroid/companion/ICompanionDeviceDiscoveryService$Stub;-><init>()V
 Landroid/companion/ICompanionDeviceDiscoveryServiceCallback;->onDeviceSelected(Ljava/lang/String;ILjava/lang/String;)V
 Landroid/companion/ICompanionDeviceDiscoveryServiceCallback;->onDeviceSelectionCancel()V
@@ -92,10 +82,6 @@ Landroid/content/pm/IPackageManager;->getPackageInfo(Ljava/lang/String;II)Landro
 Landroid/content/pm/IPackageStatsObserver;->onGetStatsCompleted(Landroid/content/pm/PackageStats;Z)V
 Landroid/database/sqlite/SqliteWrapper;->insert(Landroid/content/Context;Landroid/content/ContentResolver;Landroid/net/Uri;Landroid/content/ContentValues;)Landroid/net/Uri;
 Landroid/database/sqlite/SqliteWrapper;->query(Landroid/content/Context;Landroid/content/ContentResolver;Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;
-Landroid/hardware/camera2/CaptureRequest$Key;-><init>(Ljava/lang/String;Ljava/lang/Class;)V
-Landroid/hardware/display/DisplayManagerGlobal;->getInstance()Landroid/hardware/display/DisplayManagerGlobal;
-Landroid/hardware/display/DisplayManagerGlobal;->getRealDisplay(I)Landroid/view/Display;
-Landroid/hardware/location/GeofenceHardware;-><init>(Landroid/hardware/location/IGeofenceHardware;)V
 Landroid/hardware/location/IActivityRecognitionHardwareClient;->onAvailabilityChanged(ZLandroid/hardware/location/IActivityRecognitionHardware;)V
 Landroid/location/IGeocodeProvider;->getFromLocation(DDILandroid/location/GeocoderParams;Ljava/util/List;)Ljava/lang/String;
 Landroid/location/IGeocodeProvider;->getFromLocationName(Ljava/lang/String;DDDDILandroid/location/GeocoderParams;Ljava/util/List;)Ljava/lang/String;
@@ -104,7 +90,6 @@ Landroid/location/ILocationManager;->getNetworkProviderPackage()Ljava/lang/Strin
 Landroid/location/ILocationManager;->reportLocation(Landroid/location/Location;Z)V
 Landroid/location/INetInitiatedListener$Stub;-><init>()V
 Landroid/location/INetInitiatedListener;->sendNiResponse(II)Z
-Landroid/location/Location;->setExtraLocation(Ljava/lang/String;Landroid/location/Location;)V
 Landroid/media/AudioManager;->registerAudioPortUpdateListener(Landroid/media/AudioManager$OnAudioPortUpdateListener;)V
 Landroid/media/AudioManager;->unregisterAudioPortUpdateListener(Landroid/media/AudioManager$OnAudioPortUpdateListener;)V
 Landroid/media/AudioSystem;->checkAudioFlinger()I

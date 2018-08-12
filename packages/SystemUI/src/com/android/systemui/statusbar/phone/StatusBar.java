@@ -2239,7 +2239,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mNotificationPanel.expand(true /* animate */);
                 mMetricsLogger.count(NotificationPanelView.COUNTER_PANEL_OPEN, 1);
             } else if (!mNotificationPanel.isInSettings() && !mNotificationPanel.isExpanding()){
-                mNotificationPanel.flingSettings(0 /* velocity */, true /* expand */);
+                mNotificationPanel.flingSettings(0 /* velocity */,
+                        NotificationPanelView.FLING_EXPAND);
                 mMetricsLogger.count(NotificationPanelView.COUNTER_PANEL_OPEN_QS, 1);
             }
         }
@@ -3689,7 +3690,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         Log.w(TAG, "Launch transition: Timeout!");
         mNotificationPanel.onAffordanceLaunchEnded();
         releaseGestureWakeLock();
-        mNotificationPanel.resetViews();
+        mNotificationPanel.resetViews(false /* animate */);
     }
 
     private void runLaunchTransitionEndRunnable() {
@@ -3842,7 +3843,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         Trace.beginSection("StatusBar#updateKeyguardState");
         if (mState == StatusBarState.KEYGUARD) {
             mKeyguardIndicationController.setVisible(true);
-            mNotificationPanel.resetViews();
+            boolean dozingAnimated = mDozingRequested
+                    && DozeParameters.getInstance(mContext).shouldControlScreenOff();
+            mNotificationPanel.resetViews(dozingAnimated);
             if (mKeyguardUserSwitcher != null) {
                 mKeyguardUserSwitcher.setKeyguard(true, fromShadeLocked);
             }
@@ -3987,7 +3990,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (mNotificationPanel.isQsDetailShowing()) {
                 mNotificationPanel.closeQsDetail();
             } else {
-                mNotificationPanel.animateCloseQs();
+                mNotificationPanel.animateCloseQs(false /* animateAway */);
             }
             return true;
         }

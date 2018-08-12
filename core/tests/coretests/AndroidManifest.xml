@@ -1301,6 +1301,11 @@
                 android:process=":MemoryFileProvider">
         </provider>
 
+        <provider android:name="android.content.RedactingProvider"
+                android:authorities="android.content.RedactingProvider"
+                android:process=":RedactingProvider">
+        </provider>
+
         <!-- Application components used for os tests -->
 
         <service android:name="android.os.MessengerService"

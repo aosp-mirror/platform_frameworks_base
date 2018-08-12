@@ -241,6 +241,9 @@ public final class BinderProxy implements IBinder {
                         } else {
                             try {
                                 key = bp.getInterfaceDescriptor();
+                                if ((key == null || key.isEmpty()) && !bp.isBinderAlive()) {
+                                    key = "<proxy to dead node>";
+                                }
                             } catch (Throwable t) {
                                 key = "<exception during getDescriptor>";
                             }

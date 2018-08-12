@@ -1382,6 +1382,7 @@ public class KeyValueBackupTaskTest {
         verify(agentMock.agent).onQuotaExceeded(anyLong(), eq(1234L));
         assertEventLogged(EventLogTags.BACKUP_QUOTA_EXCEEDED, PACKAGE_1.packageName);
         assertBackupNotPendingFor(PACKAGE_1);
+        // TODO: Assert about state/staging files (possible bug)
     }
 
     @Test
@@ -1582,6 +1583,17 @@ public class KeyValueBackupTaskTest {
                 EventLogTags.BACKUP_AGENT_FAILURE,
                 PM_PACKAGE.packageName,
                 new RuntimeException().toString());
+    }
+
+    @Test
+    public void testRunTask_whenBackupRunning_doesNotThrow() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        when(mBackupManagerService.isBackupOperationInProgress()).thenReturn(true);
+        KeyValueBackupTask task =
+                createKeyValueBackupTask(
+                        transportMock.transportClient, mTransport.transportDirName);
+
+        runTask(task);
     }
 
     private void runTask(KeyValueBackupTask task) {

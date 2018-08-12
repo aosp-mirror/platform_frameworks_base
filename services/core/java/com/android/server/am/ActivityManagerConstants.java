@@ -207,6 +207,10 @@ final class ActivityManagerConstants extends ContentObserver {
     // Indicates if the processes need to be started asynchronously.
     public boolean FLAG_PROCESS_START_ASYNC = DEFAULT_PROCESS_START_ASYNC;
 
+    // Indicates whether the activity starts logging is enabled.
+    // Controlled by Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED
+    boolean mFlagActivityStartsLoggingEnabled;
+
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -235,6 +239,12 @@ final class ActivityManagerConstants extends ContentObserver {
     // memory trimming.
     public int CUR_TRIM_CACHED_PROCESSES;
 
+    private static final Uri ACTIVITY_MANAGER_CONSTANTS_URI = Settings.Global.getUriFor(
+                Settings.Global.ACTIVITY_MANAGER_CONSTANTS);
+
+    private static final Uri ACTIVITY_STARTS_LOGGING_ENABLED_URI = Settings.Global.getUriFor(
+                Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED);
+
     public ActivityManagerConstants(ActivityManagerService service, Handler handler) {
         super(handler);
         mService = service;
@@ -243,9 +253,10 @@ final class ActivityManagerConstants extends ContentObserver {
 
     public void start(ContentResolver resolver) {
         mResolver = resolver;
-        mResolver.registerContentObserver(Settings.Global.getUriFor(
-                Settings.Global.ACTIVITY_MANAGER_CONSTANTS), false, this);
+        mResolver.registerContentObserver(ACTIVITY_MANAGER_CONSTANTS_URI, false, this);
+        mResolver.registerContentObserver(ACTIVITY_STARTS_LOGGING_ENABLED_URI, false, this);
         updateConstants();
+        updateActivityStartsLoggingEnabled();
     }
 
     public void setOverrideMaxCachedProcesses(int value) {
@@ -263,7 +274,12 @@ final class ActivityManagerConstants extends ContentObserver {
 
     @Override
     public void onChange(boolean selfChange, Uri uri) {
-        updateConstants();
+        if (uri == null) return;
+        if (ACTIVITY_MANAGER_CONSTANTS_URI.equals(uri)) {
+            updateConstants();
+        } else if (ACTIVITY_STARTS_LOGGING_ENABLED_URI.equals(uri)) {
+            updateActivityStartsLoggingEnabled();
+        }
     }
 
     private void updateConstants() {
@@ -335,6 +351,11 @@ final class ActivityManagerConstants extends ContentObserver {
 
             updateMaxCachedProcesses();
         }
+    }
+
+    private void updateActivityStartsLoggingEnabled() {
+        mFlagActivityStartsLoggingEnabled = Settings.Global.getInt(mResolver,
+                Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED, 0) == 1;
     }
 
     private void updateMaxCachedProcesses() {

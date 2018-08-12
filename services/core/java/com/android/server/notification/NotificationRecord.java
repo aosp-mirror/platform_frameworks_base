@@ -144,6 +144,8 @@ public final class NotificationRecord {
     private int mPackageVisibility;
     private int mUserImportance = IMPORTANCE_UNSPECIFIED;
     private int mImportance = IMPORTANCE_UNSPECIFIED;
+    // Field used in global sort key to bypass normal notifications
+    private int mCriticality = CriticalNotificationExtractor.NORMAL;
     private CharSequence mImportanceExplanation = null;
 
     private int mSuppressedVisualEffects = 0;
@@ -744,6 +746,19 @@ public final class NotificationRecord {
     public boolean setIntercepted(boolean intercept) {
         mIntercept = intercept;
         return mIntercept;
+    }
+
+    /**
+     * Set to affect global sort key.
+     *
+     * @param criticality used in a string based sort thus 0 is the most critical
+     */
+    public void setCriticality(int criticality) {
+        mCriticality = criticality;
+    }
+
+    public int getCriticality() {
+        return mCriticality;
     }
 
     public boolean isIntercepted() {

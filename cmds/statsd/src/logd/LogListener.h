@@ -19,7 +19,6 @@
 #include "logd/LogEvent.h"
 
 #include <utils/RefBase.h>
-#include <vector>
 
 namespace android {
 namespace os {
@@ -33,7 +32,7 @@ public:
     LogListener();
     virtual ~LogListener();
 
-    virtual void OnLogEvent(LogEvent* msg, bool reconnectionStarts) = 0;
+    virtual void OnLogEvent(LogEvent* msg) = 0;
 };
 
 }  // namespace statsd

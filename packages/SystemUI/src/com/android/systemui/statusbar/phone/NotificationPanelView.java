@@ -92,6 +92,21 @@ public class NotificationPanelView extends PanelView implements
 
     private static final boolean DEBUG = false;
 
+    /**
+     * Fling expanding QS.
+     */
+    public static final int FLING_EXPAND = 0;
+
+    /**
+     * Fling collapsing QS, potentially stopping when QS becomes QQS.
+     */
+    public static final int FLING_COLLAPSE = 1;
+
+    /**
+     * Fing until QS is completely hidden.
+     */
+    public static final int FLING_HIDE = 2;
+
     // Cap and total height of Roboto font. Needs to be adjusted when font for the big clock is
     // changed.
     private static final int CAP_HEIGHT = 1456;
@@ -623,7 +638,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    public void resetViews() {
+    public void resetViews(boolean animate) {
         mIsLaunchTransitionFinished = false;
         mBlockTouches = false;
         mUnlockIconActive = false;
@@ -631,11 +646,15 @@ public class NotificationPanelView extends PanelView implements
             mAffordanceHelper.reset(false);
             mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_AFFORDANCE;
         }
-        closeQs();
         mStatusBar.getGutsManager().closeAndSaveGuts(true /* leavebehind */, true /* force */,
                 true /* controls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
-        mNotificationStackScroller.setOverScrollAmount(0f, true /* onTop */, false /* animate */,
-                true /* cancelAnimators */);
+        if (animate) {
+            animateCloseQs(true /* animateAway */);
+        } else {
+            closeQs();
+        }
+        mNotificationStackScroller.setOverScrollAmount(0f, true /* onTop */, animate,
+                !animate /* cancelAnimators */);
         mNotificationStackScroller.resetScrollPosition();
     }
 
@@ -657,7 +676,13 @@ public class NotificationPanelView extends PanelView implements
         setQsExpansion(mQsMinExpansionHeight);
     }
 
-    public void animateCloseQs() {
+    /**
+     * Animate QS closing by flinging it.
+     * If QS is expanded, it will collapse into QQS and stop.
+     *
+     * @param animateAway Do not stop when QS becomes QQS. Fling until QS isn't visible anymore.
+     */
+    public void animateCloseQs(boolean animateAway) {
         if (mQsExpansionAnimator != null) {
             if (!mQsAnimatorExpand) {
                 return;
@@ -666,14 +691,7 @@ public class NotificationPanelView extends PanelView implements
             mQsExpansionAnimator.cancel();
             setQsExpansion(height);
         }
-        flingSettings(0 /* vel */, false);
-    }
-
-    public void openQs() {
-        cancelQsAnimation();
-        if (mQsExpansionEnabled) {
-            setQsExpansion(mQsMaxExpansionHeight);
-        }
+        flingSettings(0 /* vel */, animateAway ? FLING_HIDE : FLING_COLLAPSE);
     }
 
     public void expandWithQs() {
@@ -686,7 +704,7 @@ public class NotificationPanelView extends PanelView implements
 
     public void expandWithoutQs() {
         if (isQsExpanded()) {
-            flingSettings(0 /* velocity */, false /* expand */);
+            flingSettings(0 /* velocity */, FLING_COLLAPSE);
         } else {
             expand(true /* animate */);
         }
@@ -830,7 +848,7 @@ public class NotificationPanelView extends PanelView implements
         if (expandsQs) {
             logQsSwipeDown(y);
         }
-        flingSettings(vel, expandsQs && !isCancelMotionEvent);
+        flingSettings(vel, expandsQs && !isCancelMotionEvent ? FLING_EXPAND : FLING_COLLAPSE);
     }
 
     private void logQsSwipeDown(float y) {
@@ -1099,7 +1117,8 @@ public class NotificationPanelView extends PanelView implements
         mLastOverscroll = 0f;
         mQsExpansionFromOverscroll = false;
         setQsExpansion(mQsExpansionHeight);
-        flingSettings(!mQsExpansionEnabled && open ? 0f : velocity, open && mQsExpansionEnabled,
+        flingSettings(!mQsExpansionEnabled && open ? 0f : velocity,
+                open && mQsExpansionEnabled ? FLING_EXPAND : FLING_COLLAPSE,
                 new Runnable() {
                     @Override
                     public void run() {
@@ -1466,13 +1485,35 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
-    public void flingSettings(float vel, boolean expand) {
-        flingSettings(vel, expand, null, false /* isClick */);
+    /**
+     * @see #flingSettings(float, int, Runnable, boolean)
+     */
+    public void flingSettings(float vel, int type) {
+        flingSettings(vel, type, null, false /* isClick */);
     }
 
-    protected void flingSettings(float vel, boolean expand, final Runnable onFinishRunnable,
+    /**
+     * Animates QS or QQS as if the user had swiped up or down.
+     *
+     * @param vel Finger velocity or 0 when not initiated by touch events.
+     * @param type Either {@link #FLING_EXPAND}, {@link #FLING_COLLAPSE} or {@link #FLING_HIDE}.
+     * @param onFinishRunnable Runnable to be executed at the end of animation.
+     * @param isClick If originated by click (different interpolator and duration.)
+     */
+    protected void flingSettings(float vel, int type, final Runnable onFinishRunnable,
             boolean isClick) {
-        float target = expand ? mQsMaxExpansionHeight : mQsMinExpansionHeight;
+        float target;
+        switch (type) {
+            case FLING_EXPAND:
+                target = mQsMaxExpansionHeight;
+                break;
+            case FLING_COLLAPSE:
+                target = mQsMinExpansionHeight;
+                break;
+            case FLING_HIDE:
+            default:
+                target = 0;
+        }
         if (target == mQsExpansionHeight) {
             if (onFinishRunnable != null) {
                 onFinishRunnable.run();
@@ -1482,7 +1523,8 @@ public class NotificationPanelView extends PanelView implements
 
         // If we move in the opposite direction, reset velocity and use a different duration.
         boolean oppositeDirection = false;
-        if (vel > 0 && !expand || vel < 0 && expand) {
+        boolean expanding = type == FLING_EXPAND;
+        if (vel > 0 && !expanding || vel < 0 && expanding) {
             vel = 0;
             oppositeDirection = true;
         }
@@ -1496,11 +1538,8 @@ public class NotificationPanelView extends PanelView implements
         if (oppositeDirection) {
             animator.setDuration(350);
         }
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                setQsExpansion((Float) animation.getAnimatedValue());
-            }
+        animator.addUpdateListener(animation -> {
+            setQsExpansion((Float) animation.getAnimatedValue());
         });
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -1514,7 +1553,7 @@ public class NotificationPanelView extends PanelView implements
         });
         animator.start();
         mQsExpansionAnimator = animator;
-        mQsAnimatorExpand = expand;
+        mQsAnimatorExpand = expanding;
     }
 
     /**
@@ -2000,10 +2039,12 @@ public class NotificationPanelView extends PanelView implements
     public void onClick(View v) {
         onQsExpansionStarted();
         if (mQsExpanded) {
-            flingSettings(0 /* vel */, false /* expand */, null, true /* isClick */);
+            flingSettings(0 /* vel */, FLING_COLLAPSE, null /* onFinishRunnable */,
+                    true /* isClick */);
         } else if (mQsExpansionEnabled) {
             mLockscreenGestureLogger.write(MetricsEvent.ACTION_SHADE_QS_TAP, 0, 0);
-            flingSettings(0 /* vel */, true /* expand */, null, true /* isClick */);
+            flingSettings(0 /* vel */, FLING_EXPAND, null /* onFinishRunnable */,
+                    true /* isClick */);
         }
     }
 

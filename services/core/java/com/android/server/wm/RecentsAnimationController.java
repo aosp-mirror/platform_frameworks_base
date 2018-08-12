@@ -361,6 +361,11 @@ public class RecentsAnimationController implements DeathRecipient {
                     new RemoteAnimationTarget[appAnimations.size()]);
             mPendingStart = false;
 
+            // Perform layout if it was scheduled before to make sure that we get correct content
+            // insets for the target app window after a rotation
+            final DisplayContent displayContent = mService.mRoot.getDisplayContent(mDisplayId);
+            displayContent.performLayout(false /* initial */, false /* updateInputWindows */);
+
             final Rect minimizedHomeBounds = mTargetAppToken != null
                     && mTargetAppToken.inSplitScreenSecondaryWindowingMode()
                             ? mMinimizedHomeBounds
@@ -369,8 +374,7 @@ public class RecentsAnimationController implements DeathRecipient {
                     && mTargetAppToken.findMainWindow() != null
                             ? mTargetAppToken.findMainWindow().mContentInsets
                             : null;
-            mRunner.onAnimationStart(mController, appTargets, contentInsets,
-                    minimizedHomeBounds);
+            mRunner.onAnimationStart(mController, appTargets, contentInsets, minimizedHomeBounds);
             if (DEBUG_RECENTS_ANIMATIONS) {
                 Slog.d(TAG, "startAnimation(): Notify animation start:");
                 for (int i = 0; i < mPendingAnimations.size(); i++) {

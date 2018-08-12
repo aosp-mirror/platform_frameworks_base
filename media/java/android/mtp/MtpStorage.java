@@ -16,6 +16,7 @@
 
 package android.mtp;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.storage.StorageVolume;
 
 /**
@@ -46,6 +47,7 @@ public class MtpStorage {
      *
      * @return the storage ID
      */
+    @UnsupportedAppUsage
     public final int getStorageId() {
         return mStorageId;
     }
@@ -55,6 +57,7 @@ public class MtpStorage {
      *
      * @return the storage file path
      */
+    @UnsupportedAppUsage
     public final String getPath() {
         return mPath;
     }

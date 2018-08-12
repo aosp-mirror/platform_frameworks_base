@@ -55,7 +55,7 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
 
     @Test
     public void showSlice_notifiesListener() {
-        ListBuilder builder = new ListBuilder(getContext(), mSliceUri);
+        ListBuilder builder = new ListBuilder(getContext(), mSliceUri, ListBuilder.INFINITY);
         AtomicBoolean notified = new AtomicBoolean();
         mKeyguardSliceView.setContentChangeListener(()-> notified.set(true));
         mKeyguardSliceView.onChanged(builder.build());
@@ -74,13 +74,11 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
 
     @Test
     public void hasHeader_readsSliceData() {
-        ListBuilder builder = new ListBuilder(getContext(), mSliceUri);
+        ListBuilder builder = new ListBuilder(getContext(), mSliceUri, ListBuilder.INFINITY);
         mKeyguardSliceView.onChanged(builder.build());
         Assert.assertFalse("View should not have a header", mKeyguardSliceView.hasHeader());
 
-        builder.setHeader((ListBuilder.HeaderBuilder headerBuilder) -> {
-            headerBuilder.setTitle("header title!");
-        });
+        builder.setHeader(new ListBuilder.HeaderBuilder().setTitle("header title!"));
         mKeyguardSliceView.onChanged(builder.build());
         Assert.assertTrue("View should have a header", mKeyguardSliceView.hasHeader());
     }

@@ -55,6 +55,7 @@ import java.util.List;
 
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABLE_SWIPE_UP;
+import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_OVERVIEW_BUTTON;
 import static com.android.systemui.shared.system.NavigationBarCompat.InteractionType;
 
 /**
@@ -68,6 +69,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     public static final boolean DEBUG_OVERVIEW_PROXY = false;
     private static final long BACKOFF_MILLIS = 1000;
     private static final long DEFERRED_CALLBACK_MILLIS = 5000;
+
+    // Default interaction flags if swipe up is disabled before connecting to launcher
+    private static final int DEFAULT_DISABLE_SWIPE_UP_STATE = FLAG_DISABLE_SWIPE_UP
+            | FLAG_SHOW_OVERVIEW_BUTTON;
 
     private final Context mContext;
     private final Handler mHandler;
@@ -220,7 +225,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
             // When launcher service is disabled, reset interaction flags because it is inactive
             if (!isEnabled()) {
-                mInteractionFlags = 0;
+                mInteractionFlags = getDefaultInteractionFlags();
                 Prefs.remove(mContext, Prefs.Key.QUICK_STEP_INTERACTION_FLAGS);
             }
 
@@ -300,7 +305,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 com.android.internal.R.string.config_recentsComponentName));
         mQuickStepIntent = new Intent(ACTION_QUICKSTEP)
                 .setPackage(mRecentsComponentName.getPackageName());
-        mInteractionFlags = Prefs.getInt(mContext, Prefs.Key.QUICK_STEP_INTERACTION_FLAGS, 0);
+        mInteractionFlags = Prefs.getInt(mContext, Prefs.Key.QUICK_STEP_INTERACTION_FLAGS,
+                getDefaultInteractionFlags());
 
         // Listen for the package update changes.
         if (SystemServicesProxy.getInstance(context)
@@ -397,6 +403,15 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
+    private int getDefaultInteractionFlags() {
+        // If there is no settings available use device default or get it from settings
+        final boolean defaultState = getSwipeUpDefaultValue();
+        final boolean swipeUpEnabled = getSwipeUpSettingAvailable()
+                ? getSwipeUpEnabledFromSettings(defaultState)
+                : defaultState;
+        return swipeUpEnabled ? 0 : DEFAULT_DISABLE_SWIPE_UP_STATE;
+    }
+
     private void notifyBackButtonAlphaChanged(float alpha, boolean animate) {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
             mConnectionCallbacks.get(i).onBackButtonAlphaChanged(alpha, animate);
@@ -427,6 +442,21 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 ActivityManagerWrapper.getInstance().getCurrentUserId()) != null;
     }
 
+    private boolean getSwipeUpDefaultValue() {
+        return mContext.getResources()
+                .getBoolean(com.android.internal.R.bool.config_swipe_up_gesture_default);
+    }
+
+    private boolean getSwipeUpSettingAvailable() {
+        return mContext.getResources()
+                .getBoolean(com.android.internal.R.bool.config_swipe_up_gesture_setting_available);
+    }
+
+    private boolean getSwipeUpEnabledFromSettings(boolean defaultValue) {
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.SWIPE_UP_TO_SWITCH_APPS_ENABLED, defaultValue ? 1 : 0) == 1;
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(TAG_OPS + " state:");
@@ -440,12 +470,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         pw.print("  quickStepIntent="); pw.println(mQuickStepIntent);
         pw.print("  quickStepIntentResolved="); pw.println(isEnabled());
 
-        final int swipeUpDefaultValue = mContext.getResources()
-                .getBoolean(com.android.internal.R.bool.config_swipe_up_gesture_default) ? 1 : 0;
-        final int swipeUpEnabled = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.SWIPE_UP_TO_SWITCH_APPS_ENABLED, swipeUpDefaultValue);
-        pw.print("  swipeUpSetting="); pw.println(swipeUpEnabled != 0);
-        pw.print("  swipeUpSettingDefault="); pw.println(swipeUpDefaultValue != 0);
+        final boolean swipeUpDefaultValue = getSwipeUpDefaultValue();
+        final boolean swipeUpEnabled = getSwipeUpEnabledFromSettings(swipeUpDefaultValue);
+        pw.print("  swipeUpSetting="); pw.println(swipeUpEnabled);
+        pw.print("  swipeUpSettingDefault="); pw.println(swipeUpDefaultValue);
     }
 
     public interface OverviewProxyListener {

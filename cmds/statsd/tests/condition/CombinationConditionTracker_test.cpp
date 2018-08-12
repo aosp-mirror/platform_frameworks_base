@@ -40,6 +40,7 @@ TEST(ConditionTrackerTest, TestUnknownCondition) {
     EXPECT_EQ(evaluateCombinationCondition(children, operation, conditionResults),
               ConditionState::kUnknown);
 }
+
 TEST(ConditionTrackerTest, TestAndCondition) {
     // Set up the matcher
     LogicalOperation operation = LogicalOperation::AND;
@@ -103,6 +104,11 @@ TEST(ConditionTrackerTest, TestNotCondition) {
     conditionResults.clear();
     conditionResults.push_back(ConditionState::kFalse);
     EXPECT_TRUE(evaluateCombinationCondition(children, operation, conditionResults));
+
+    children.clear();
+    conditionResults.clear();
+    EXPECT_EQ(evaluateCombinationCondition(children, operation, conditionResults),
+              ConditionState::kUnknown);
 }
 
 TEST(ConditionTrackerTest, TestNandCondition) {

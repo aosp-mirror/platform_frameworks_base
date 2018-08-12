@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -53,6 +54,7 @@ public class GeocoderParams implements Parcelable {
     /**
      * returns the Geocoder's locale
      */
+    @UnsupportedAppUsage
     public Locale getLocale() {
         return mLocale;
     }
@@ -60,6 +62,7 @@ public class GeocoderParams implements Parcelable {
     /**
      * returns the package name of the Geocoder's client
      */
+    @UnsupportedAppUsage
     public String getClientPackage() {
         return mPackageName;
     }

@@ -375,6 +375,7 @@ class TouchExplorer extends BaseEventStreamTransformation
             return false;
         }
 
+        mAms.onTouchInteractionEnd();
         // Remove pending event deliveries.
         mSendHoverEnterAndMoveDelayed.cancel();
         mSendHoverExitDelayed.cancel();
@@ -382,9 +383,9 @@ class TouchExplorer extends BaseEventStreamTransformation
         if (mSendTouchExplorationEndDelayed.isPending()) {
             mSendTouchExplorationEndDelayed.forceSendAndRemove();
         }
-        if (mSendTouchInteractionEndDelayed.isPending()) {
-            mSendTouchInteractionEndDelayed.forceSendAndRemove();
-        }
+
+        // Announce the end of a new touch interaction.
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
 
         // Try to use the standard accessibility API to click
         if (mAms.performActionOnAccessibilityFocusedItem(
@@ -487,20 +488,25 @@ class TouchExplorer extends BaseEventStreamTransformation
             case MotionEvent.ACTION_DOWN: {
                 mAms.onTouchInteractionStart();
 
-                sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_START);
-
                 // If we still have not notified the user for the last
                 // touch, we figure out what to do. If were waiting
                 // we resent the delayed callback and wait again.
                 mSendHoverEnterAndMoveDelayed.cancel();
                 mSendHoverExitDelayed.cancel();
 
-                if (mSendTouchExplorationEndDelayed.isPending()) {
-                    mSendTouchExplorationEndDelayed.forceSendAndRemove();
+                // If a touch exploration gesture is in progress send events for its end.
+                if(mTouchExplorationInProgress) {
+                    sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
                 }
 
-                if (mSendTouchInteractionEndDelayed.isPending()) {
+                // Avoid duplicated TYPE_TOUCH_INTERACTION_START event when 2nd tap of double tap.
+                if (!mGestureDetector.firstTapDetected()) {
+                    mSendTouchExplorationEndDelayed.forceSendAndRemove();
                     mSendTouchInteractionEndDelayed.forceSendAndRemove();
+                    sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_START);
+                } else {
+                    // Let gesture to handle to avoid duplicated TYPE_TOUCH_INTERACTION_END event.
+                    mSendTouchInteractionEndDelayed.cancel();
                 }
 
                 if (!mGestureDetector.firstTapDetected() && !mTouchExplorationInProgress) {

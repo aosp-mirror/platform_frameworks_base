@@ -40,6 +40,7 @@ namespace os {
 namespace statsd {
 
 static const int kLogMsgHeaderSize = 28;
+static const int kLibLogTag = 1006;
 
 StatsSocketListener::StatsSocketListener(const sp<LogListener>& listener)
     : SocketListener(getLogSocket(), false /*start listen*/), mListener(listener) {
@@ -99,6 +100,22 @@ bool StatsSocketListener::onDataAvailable(SocketClient* cli) {
     char* ptr = ((char*)buffer) + sizeof(android_log_header_t);
     n -= sizeof(android_log_header_t);
 
+    // When a log failed to write to statsd socket (e.g., due ot EBUSY), a special message would
+    // be sent to statsd when the socket communication becomes available again.
+    // The format is android_log_event_int_t with a single integer in the payload indicating the
+    // number of logs that failed. (*FORMAT MUST BE IN SYNC WITH system/core/libstats*)
+    // Note that all normal stats logs are in the format of event_list, so there won't be confusion.
+    //
+    // TODO(b/80538532): In addition to log it in StatsdStats, we should properly reset the config.
+    if (n == sizeof(android_log_event_int_t)) {
+        android_log_event_int_t* int_event = reinterpret_cast<android_log_event_int_t*>(ptr);
+        if (int_event->header.tag == kLibLogTag && int_event->payload.type == EVENT_TYPE_INT) {
+            ALOGE("Found dropped events: %d", int_event->payload.data);
+            StatsdStats::getInstance().noteLogLost(getElapsedRealtimeNs(), int_event->payload.data);
+            return true;
+        }
+    }
+
     log_msg msg;
 
     msg.entry.len = n;
@@ -111,7 +128,7 @@ bool StatsSocketListener::onDataAvailable(SocketClient* cli) {
     LogEvent event(msg);
 
     // Call the listener
-    mListener->OnLogEvent(&event, false /*reconnected, N/A in statsd socket*/);
+    mListener->OnLogEvent(&event);
 
     return true;
 }

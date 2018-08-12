@@ -22,6 +22,7 @@
 #include "anomaly/AlarmMonitor.h"
 #include "config/ConfigManager.h"
 #include "external/StatsPullerManager.h"
+#include "logd/LogListener.h"
 #include "packages/UidMap.h"
 #include "statscompanion_util.h"
 
@@ -75,7 +76,7 @@ public:
     /**
      * Called by LogReader when there's a log event to process.
      */
-    virtual void OnLogEvent(LogEvent* event, bool reconnectionStarts);
+    virtual void OnLogEvent(LogEvent* event);
 
     /**
      * Binder call for clients to request data for this configuration key.

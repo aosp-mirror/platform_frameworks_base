@@ -1240,7 +1240,7 @@ public abstract class PanelView extends FrameLayout {
         ));
     }
 
-    public abstract void resetViews();
+    public abstract void resetViews(boolean animate);
 
     protected abstract float getPeekHeight();
     /**

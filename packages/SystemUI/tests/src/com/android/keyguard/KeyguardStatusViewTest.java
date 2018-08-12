@@ -22,7 +22,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.LayoutInflater;
-import android.widget.TextClock;
 
 import com.android.systemui.SysuiTestCase;
 
@@ -40,7 +39,7 @@ public class KeyguardStatusViewTest extends SysuiTestCase {
     @Mock
     KeyguardSliceView mKeyguardSlice;
     @Mock
-    TextClock mClockView;
+    KeyguardClockSwitch mClockView;
     @InjectMocks
     KeyguardStatusView mKeyguardStatusView;
 

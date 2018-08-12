@@ -131,7 +131,9 @@ class TemperatureBackgroundAnimator {
     }
 
     void animateOpen() {
-        if (!mAnimationsReady || mCircleState == CircleState.ENTERING) {
+        if (!mAnimationsReady
+                || !mAnimatedView.isAttachedToWindow()
+                || mCircleState == CircleState.ENTERING) {
             return;
         }
 

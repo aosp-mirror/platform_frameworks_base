@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.car.hvac;
 
 import android.car.Car;
-import android.car.CarNotConnectedException;
 import android.car.hardware.CarPropertyValue;
 import android.car.hardware.hvac.CarHvacManager;
 import android.car.hardware.hvac.CarHvacManager.CarHvacEventCallback;
