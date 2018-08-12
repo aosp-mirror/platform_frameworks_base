@@ -856,4 +856,8 @@ final class ProcessRecord {
         }
         return list;
     }
+
+    boolean hasForegroundServices() {
+        return foregroundServices;
+    }
 }
