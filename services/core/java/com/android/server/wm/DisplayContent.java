@@ -814,7 +814,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // {@link DisplayContent} ready for use.
         mDisplayReady = true;
 
-        mInputMonitor = new InputMonitor(service, mDisplayId);
+        // TODO(b/112081256): Use independent InputMonitor.
+        mInputMonitor = isDefaultDisplay ? new InputMonitor(service, mDisplayId)
+                : mService.getDefaultDisplayContentLocked().mInputMonitor;
     }
 
     boolean isReady() {
@@ -2134,7 +2136,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mRemovingDisplay = false;
         }
 
-        mInputMonitor.onRemoved();
         mService.onDisplayRemoved(mDisplayId);
     }
 

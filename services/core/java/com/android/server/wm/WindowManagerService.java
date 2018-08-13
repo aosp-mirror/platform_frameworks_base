@@ -6071,21 +6071,26 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void createInputConsumer(IBinder token, String name, InputChannel inputChannel) {
         synchronized (mWindowMap) {
-            // TODO(b/112049699): multi-display inputConsumer, just support default in current.
-            // Need consider about the behavior from controller.
-            DisplayContent displayContent = getDefaultDisplayContentLocked();
-            displayContent.getInputMonitor().createInputConsumer(token, name, inputChannel,
-                    Binder.getCallingPid(), Binder.getCallingUserHandle());
+            // TODO(b/112049699): Fix this for multiple displays. There is only one inputChannel
+            // here to accept the return value.
+            DisplayContent display = mRoot.getDisplayContent(Display.DEFAULT_DISPLAY);
+            if (display != null) {
+                display.getInputMonitor().createInputConsumer(token, name, inputChannel,
+                        Binder.getCallingPid(), Binder.getCallingUserHandle());
+            }
         }
     }
 
     @Override
     public boolean destroyInputConsumer(String name) {
         synchronized (mWindowMap) {
-            // TODO(b/112049699): multi-display inputConsumer, just support default in current.
-            // Need consider about the behavior from controller.
-            DisplayContent displayContent = getDefaultDisplayContentLocked();
-            return displayContent.getInputMonitor().destroyInputConsumer(name);
+            // TODO(b/112049699): Fix this for multiple displays. For consistency with
+            // createInputConsumer above.
+            DisplayContent display = mRoot.getDisplayContent(Display.DEFAULT_DISPLAY);
+            if (display != null) {
+                return display.getInputMonitor().destroyInputConsumer(name);
+            }
+            return false;
         }
     }
 
