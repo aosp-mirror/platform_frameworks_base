@@ -1574,6 +1574,7 @@ Landroid/content/pm/UserInfo;->serialNumber:I
 Landroid/content/pm/VerifierInfo;-><init>(Ljava/lang/String;Ljava/security/PublicKey;)V
 Landroid/content/pm/XmlSerializerAndParser;->createFromXml(Lorg/xmlpull/v1/XmlPullParser;)Ljava/lang/Object;
 Landroid/content/pm/XmlSerializerAndParser;->writeAsXml(Ljava/lang/Object;Lorg/xmlpull/v1/XmlSerializer;)V
+Landroid/content/res/ApkAssets;->getAssetPath()Ljava/lang/String;
 Landroid/content/res/AssetFileDescriptor;->mFd:Landroid/os/ParcelFileDescriptor;
 Landroid/content/res/AssetFileDescriptor;->mLength:J
 Landroid/content/res/AssetFileDescriptor;->mStartOffset:J
@@ -1585,6 +1586,7 @@ Landroid/content/res/AssetManager;->addAssetPathAsSharedLibrary(Ljava/lang/Strin
 Landroid/content/res/AssetManager;->addOverlayPath(Ljava/lang/String;)I
 Landroid/content/res/AssetManager;->applyStyle(JIILandroid/content/res/XmlBlock$Parser;[IJJ)V
 Landroid/content/res/AssetManager;->createTheme()J
+Landroid/content/res/AssetManager;->getApkAssets()[Landroid/content/res/ApkAssets;
 Landroid/content/res/AssetManager;->getAssignedPackageIdentifiers()Landroid/util/SparseArray;
 Landroid/content/res/AssetManager;->getGlobalAssetCount()I
 Landroid/content/res/AssetManager;->getGlobalAssetManagerCount()I
@@ -5146,6 +5148,7 @@ Landroid/view/SurfaceControl;->getDisplayConfigs(Landroid/os/IBinder;)[Landroid/
 Landroid/view/SurfaceControl;->HIDDEN:I
 Landroid/view/SurfaceControl;->hide()V
 Landroid/view/SurfaceControl;->openTransaction()V
+Landroid/view/SurfaceControl;->screenshot(Landroid/graphics/Rect;III)Landroid/graphics/Bitmap;
 Landroid/view/SurfaceControl;->screenshot(Landroid/graphics/Rect;IIIIZI)Landroid/graphics/Bitmap;
 Landroid/view/SurfaceControl;->screenshot(Landroid/os/IBinder;Landroid/view/Surface;Landroid/graphics/Rect;IIIIZZ)V
 Landroid/view/SurfaceControl;->setDisplayLayerStack(Landroid/os/IBinder;I)V

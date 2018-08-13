@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  * <p>For example, to remove spaces from groups of 4-digits in a credit card:
  *
  * <pre class="prettyprint">
- * new TextValueSanitizer(Pattern.compile("^(\\d{4})\\s?(\\d{4})\\s?(\\d{4})\\s?(\\d{4})$",
+ * new TextValueSanitizer(Pattern.compile("^(\\d{4})\\s?(\\d{4})\\s?(\\d{4})\\s?(\\d{4})$"),
  *     "$1$2$3$4")
  * </pre>
  */

@@ -2170,6 +2170,21 @@ public class WifiManager {
     }
 
     /**
+     * Method that triggers a notification to the user about a conversion to their saved AP config.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void notifyUserOfApBandConversion() {
+        Log.d(TAG, "apBand was converted, notify the user");
+        try {
+            mService.notifyUserOfApBandConversion(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Enable/Disable TDLS on a specific local route.
      *
      * <p>

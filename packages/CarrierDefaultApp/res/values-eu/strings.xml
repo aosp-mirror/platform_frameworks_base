@@ -3,13 +3,13 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
     <string name="android_system_label" msgid="2797790869522345065">"Telefonia mugikorreko operadorea"</string>
-    <string name="portal_notification_id" msgid="5155057562457079297">"Agortu egin da datu-konexioa"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"Agortu egin dira datu mugikorrak"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"Desaktibatu da datu-konexioa"</string>
-    <string name="portal_notification_detail" msgid="2295729385924660881">"Sakatu hau %s webgunera joateko"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Sakatu hau %s gunera joateko"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Jarri harremanetan %s operadorearekin"</string>
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Ez dago datu-konexiorik"</string>
     <string name="no_mobile_data_connection" msgid="544980465184147010">"Gehitu datuak eta ibiltaritza-plana %s bidez"</string>
-    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Datu-konexioaren egoera"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Datu mugikorren egoera"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"Hasi saioa sare mugikorrean"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"Erabili nahi duzun sareak segurtasun-arazoak ditu."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Adibidez, baliteke saioa hasteko orria adierazitako erakundearena ez izatea."</string>

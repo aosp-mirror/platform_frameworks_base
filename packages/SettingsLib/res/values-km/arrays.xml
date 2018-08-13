@@ -138,12 +138,6 @@
     <item msgid="4681409244565426925">"បាន​បង្កើន​ប្រសិទ្ធភាព​​សម្រាប់គុណភាព​នៃ​ការ​ត​ភ្ជាប់"</item>
     <item msgid="364670732877872677">"កម្រិតល្អបំផុត (កម្រិតប៊ីតដែលអាចប្រែប្រួល)"</item>
   </string-array>
-  <string-array name="bluetooth_audio_active_device_summaries">
-    <item msgid="4862957058729193940"></item>
-    <item msgid="6481691720774549651">"សកម្ម"</item>
-    <item msgid="8962366465966010158">"សកម្ម (មេឌៀ)"</item>
-    <item msgid="4046665544396189228">"សកម្ម (ទូរសព្ទ)"</item>
-  </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"បិទ"</item>
     <item msgid="1593289376502312923">"64K"</item>
@@ -254,6 +248,6 @@
     <item msgid="2086000968159047375">"PTP (ពិធីការ​ផ្ទេរ​រូបភាព)"</item>
     <item msgid="7398830860950841822">"RNDIS (អ៊ីសឺណិត​យូអេសប៊ី)"</item>
     <item msgid="1718924214939774352">"ប្រភព​អូឌីយ៉ូ"</item>
-    <item msgid="8126315616613006284">"MIDI"</item>
+    <item msgid="8126315616613006284">"មីឌី"</item>
   </string-array>
 </resources>

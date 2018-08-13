@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import android.graphics.Rect;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +31,8 @@ import java.util.LinkedList;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.hardware.camera2.params.OutputConfiguration.ROTATION_90;
+import static android.view.Surface.ROTATION_0;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -48,8 +52,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
@@ -347,6 +353,32 @@ public class WindowStateTests extends WindowTestsBase {
 
         assertThat(app.mInputWindowHandle.displayId, is(mDisplayContent.getDisplayId()));
         assertThat(app.getDisplayId(), is(mDisplayContent.getDisplayId()));
+    }
+
+    @Test
+    public void testSeamlesslyRotateWindow() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+
+        app.mHasSurface = true;
+        app.mSurfaceControl = mock(SurfaceControl.class);
+        app.mWinAnimator.mSurfaceController = mock(WindowSurfaceController.class);
+        try {
+            app.mFrame.set(10, 20, 60, 80);
+
+            app.seamlesslyRotate(t, ROTATION_0, ROTATION_90);
+
+            assertTrue(app.mSeamlesslyRotated);
+            assertEquals(new Rect(20, mDisplayInfo.logicalWidth - 60,
+                    80, mDisplayInfo.logicalWidth - 10), app.mFrame);
+
+            verify(t).setPosition(app.mSurfaceControl, app.mFrame.left, app.mFrame.top);
+            verify(app.mWinAnimator.mSurfaceController).setPosition(t, 0, 50, false);
+            verify(app.mWinAnimator.mSurfaceController).setMatrix(t, 0, -1, 1, 0, false);
+        } finally {
+            app.mSurfaceControl = null;
+            app.mHasSurface = false;
+        }
     }
 
     private void testPrepareWindowToDisplayDuringRelayout(boolean wasVisible) {

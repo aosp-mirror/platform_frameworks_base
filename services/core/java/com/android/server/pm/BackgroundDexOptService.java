@@ -489,7 +489,7 @@ public class BackgroundDexOptService extends JobService {
         PinnerService pinnerService = LocalServices.getService(PinnerService.class);
         if (pinnerService != null) {
             Log.i(TAG, "Pinning optimized code " + updatedPackages);
-            pinnerService.update(updatedPackages);
+            pinnerService.update(updatedPackages, false /* force */);
         }
     }
 

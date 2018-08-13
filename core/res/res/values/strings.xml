@@ -3169,6 +3169,21 @@
     <!-- A notification is shown when the user connects to a Wi-Fi network and the system detects that that network has no Internet access. This is the notification's message. -->
     <string name="wifi_no_internet_detailed">Tap for options</string>
 
+    <!-- A notification is shown when the user's softap config has been changed due to underlying
+         hardware restrictions. This is the notifications's title.
+         [CHAR_LIMIT=NONE] -->
+    <string name="wifi_softap_config_change">Changes to your hotspot settings</string>
+
+    <!-- A notification is shown when the user's softap config has been changed due to underlying
+         hardware restrictions. This is the notification's summary message.
+         [CHAR_LIMIT=NONE] -->
+    <string name="wifi_softap_config_change_summary">Your hotspot band has changed.</string>
+
+    <!-- A notification is shown when the user's softap config has been changed due to underlying
+         hardware restrictions. This is the notification's full message.
+         [CHAR_LIMIT=NONE] -->
+    <string name="wifi_softap_config_change_detailed">This device doesn\u2019t support your preference for 5GHz only. Instead, this device will use the 5GHz band when available.</string>
+
     <!-- A notification might be shown if the device switches to another network type (e.g., mobile data) because it detects that the network it was using (e.g., Wi-Fi) has lost Internet connectivity. This is the notification's title. %1$s is the network type that the device switched to, e.g., cellular data. It is one of the strings in the network_switch_type_name array. -->
     <string name="network_switch_metered">Switched to <xliff:g id="network_type">%1$s</xliff:g></string>
 

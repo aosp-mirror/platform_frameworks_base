@@ -88,16 +88,16 @@ public class RecentsOnboarding {
     // Show quick scrub tips after opening overview this number of times.
     private static final int QUICK_SCRUB_SHOW_ON_OVERVIEW_OPENED_COUNT = 10;
     // Maximum number of dismissals while still showing swipe-up tips.
-    private static final int MAX_DISMISSAL_ON_SWIPE_UP_SHOW = 4;
+    private static final int MAX_DISMISSAL_ON_SWIPE_UP_SHOW = 2;
     // Number of dismissals for swipe-up tips when exponential backoff starts.
-    private static final int BACKOFF_DISMISSAL_COUNT_ON_SWIPE_UP_SHOW = 2;
+    private static final int BACKOFF_DISMISSAL_COUNT_ON_SWIPE_UP_SHOW = 1;
     // After explicitly dismissing for <= BACKOFF_DISMISSAL_COUNT_ON_SWIPE_UP_SHOW times, show again
     // after launching this number of apps for swipe-up tips.
     private static final int SWIPE_UP_SHOW_ON_APP_LAUNCH_AFTER_DISMISS = 5;
     // After explicitly dismissing for > BACKOFF_DISMISSAL_COUNT_ON_SWIPE_UP_SHOW but
     // <= MAX_DISMISSAL_ON_SWIPE_UP_SHOW times, show again after launching this number of apps for
     // swipe-up tips.
-    private static final int SWIPE_UP_SHOW_ON_APP_LAUNCH_AFTER_DISMISS_BACK_OFF = 10;
+    private static final int SWIPE_UP_SHOW_ON_APP_LAUNCH_AFTER_DISMISS_BACK_OFF = 40;
 
     private final Context mContext;
     private final WindowManager mWindowManager;
@@ -479,7 +479,7 @@ public class RecentsOnboarding {
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 x, -mNavBarHeight / 2,
-                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 flags,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;

@@ -32,9 +32,28 @@ Chunk ChunkIterator::Next() {
 
   if (len_ != 0) {
     // Prepare the next chunk.
-    VerifyNextChunk();
+    if (VerifyNextChunkNonFatal()) {
+      VerifyNextChunk();
+    }
   }
   return Chunk(this_chunk);
+}
+
+// TODO(b/111401637) remove this and have full resource file verification
+// Returns false if there was an error.
+bool ChunkIterator::VerifyNextChunkNonFatal() {
+  if (len_ < sizeof(ResChunk_header)) {
+    last_error_ = "not enough space for header";
+    last_error_was_fatal_ = false;
+    return false;
+  }
+  const size_t size = dtohl(next_chunk_->size);
+  if (size > len_) {
+    last_error_ = "chunk size is bigger than given data";
+    last_error_was_fatal_ = false;
+    return false;
+  }
+  return true;
 }
 
 // Returns false if there was an error.

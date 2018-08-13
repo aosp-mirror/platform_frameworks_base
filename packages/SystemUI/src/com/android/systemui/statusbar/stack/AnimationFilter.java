@@ -137,6 +137,10 @@ public class AnimationFilter {
                 // to look nice
                 customDelay = StackStateAnimator.ANIMATION_DELAY_HEADS_UP_CLICKED
                         + StackStateAnimator.ANIMATION_DELAY_HEADS_UP;
+            } else if (ev.animationType == NotificationStackScrollLayout.AnimationEvent
+                    .ANIMATION_TYPE_PULSE_APPEAR || ev.animationType ==
+                    NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_PULSE_DISAPPEAR) {
+                customDelay = StackStateAnimator.ANIMATION_DURATION_PULSE_APPEAR / 2;
             }
         }
     }

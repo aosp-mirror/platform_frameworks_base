@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Copyright (C) 2016 The Android Open Source Project
+    Copyright (C) 2018 The Android Open Source Project
 
-   Licensed under the Apache License, Version 2.0 (the "License");
+    Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
 
@@ -15,85 +15,28 @@ Copyright (C) 2016 The Android Open Source Project
     limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.egg"
-          android:versionCode="1"
-          android:versionName="1.0">
+    package="com.android.egg"
+    android:versionCode="1"
+    android:versionName="1.0">
 
-    <uses-sdk android:minSdkVersion="26" />
+    <uses-sdk android:minSdkVersion="28" />
 
-    <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <application
+        android:icon="@drawable/icon"
+        android:label="@string/app_name">
 
-    <application android:label="@string/app_name" android:icon="@drawable/icon">
-
-        <activity android:name=".octo.Ocquarium"
-            android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen"
-            android:label="@string/app_name">
+        <activity
+            android:name=".paint.PaintActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|uiMode"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
                 <category android:name="com.android.internal.category.PLATLOGO" />
             </intent-filter>
         </activity>
-
-        <!-- Android N lives on inside Android O... -->
-
-        <!-- Long press the QS tile to get here -->
-        <activity android:name=".neko.NekoLand"
-                  android:theme="@android:style/Theme.Material.NoActionBar"
-                  android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
-        </activity>
-
-        <!-- This is where the magic happens -->
-        <service
-            android:name=".neko.NekoService"
-            android:enabled="true"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="true" >
-        </service>
-
-        <!-- Used to show over lock screen -->
-        <activity android:name=".neko.NekoLockedActivity"
-                  android:excludeFromRecents="true"
-                  android:theme="@android:style/Theme.Material.Light.Dialog.NoActionBar"
-                  android:showOnLockScreen="true" />
-
-        <!-- Used to enable easter egg -->
-        <activity android:name=".neko.NekoActivationActivity"
-            android:excludeFromRecents="true"
-            android:theme="@android:style/Theme.NoDisplay"
-            >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <!-- The quick settings tile, disabled by default -->
-        <service
-            android:name=".neko.NekoTile"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            android:icon="@drawable/stat_icon"
-            android:enabled="false"
-            android:label="@string/default_tile_name">
-            <intent-filter>
-                <action android:name="android.service.quicksettings.action.QS_TILE" />
-            </intent-filter>
-        </service>
-
-        <!-- FileProvider for sending pictures -->
-        <provider
-                android:name="android.support.v4.content.FileProvider"
-                android:authorities="com.android.egg.fileprovider"
-                android:grantUriPermissions="true"
-                android:exported="false">
-            <meta-data
-                    android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/filepaths" />
-        </provider>
     </application>
+
 </manifest>

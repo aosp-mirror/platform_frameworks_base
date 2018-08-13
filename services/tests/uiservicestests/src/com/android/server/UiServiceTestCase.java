@@ -31,6 +31,7 @@ public class UiServiceTestCase {
 
     protected static final String PKG_N_MR1 = "com.example.n_mr1";
     protected static final String PKG_O = "com.example.o";
+    protected static final String PKG_P = "com.example.p";
 
     @Rule
     public final TestableContext mContext =
@@ -57,6 +58,8 @@ public class UiServiceTestCase {
                             return Build.VERSION_CODES.N_MR1;
                         case PKG_O:
                             return Build.VERSION_CODES.O;
+                        case PKG_P:
+                            return Build.VERSION_CODES.P;
                         default:
                             return Build.VERSION_CODES.CUR_DEVELOPMENT;
                     }

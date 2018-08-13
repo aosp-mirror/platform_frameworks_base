@@ -40,8 +40,6 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Csatlakozva a következőn keresztül: %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Elérhető a következőn keresztül: %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Csatlakozva, nincs internet-hozzáférés"</string>
-    <string name="wifi_status_no_internet" msgid="5784710974669608361">"Nincs internetkapcsolat"</string>
-    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Bejelentkezést igényel"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"A hozzáférési pont átmenetileg megtelt"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Csatlakozva a következőn keresztül: %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Elérhető a következőn keresztül: %1$s"</string>
@@ -65,9 +63,6 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Csatlakoztatva (telefonhang nélkül); az akkumulátor töltöttségi szintje: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Csatlakoztatva (médiahang nélkül); az akkumulátor töltöttségi szintje: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Csatlakoztatva (nincs telefon- és médiahang); az akkumulátor töltöttségi szintje: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktív, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>-os töltöttség"</string>
-    <string name="bluetooth_battery_level" msgid="1447164613319663655">"Akkumulátor: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktív"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Média audió"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonhívások"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Fájlátvitel"</string>
@@ -114,10 +109,6 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Fejhallgató"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Beviteli periféria"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Bal oldali hallókészülék párosítása…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Jobb oldali hallókészülék párosítása…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Bal oldali – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>-os töltöttség"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Jobb oldali – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>-os töltöttség"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi kikapcsolva."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Nincs Wi-Fi-kapcsolat."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi-jel: egy sáv."</string>
@@ -197,7 +188,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"Nem kapcsolódik ki"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"A képernyő soha nem kapcsol ki töltés során"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bluetooth HCI snoop napló engedélyezése"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Az összes Bluetooth HCI-csomag rögzítése egy fájlban (Bluetooth bekapcsolása a beállítás módosítása után)"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Az összes Bluetooth HCI-csomag rögzítése egy fájlban"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM-feloldás"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"A rendszerbetöltő feloldásának engedélyezése"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Engedélyezi az OEM-feloldást?"</string>
@@ -216,28 +207,26 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"A Bluetooth AVRCP-verziója"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"A Bluetooth AVRCP-verziójának kiválasztása"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth hang – Kodek"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Bluetooth-hangkodek aktiválása\nKiválasztás"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Bluetooth hangkodek kiválasztása"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth hang – mintavételezési gyakoriság"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Bluetooth-hangkodek aktiválása\nKiválasztás: Mintavételezési gyakoriság"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Bluetooth hangkodek kiválasztása:\nmintavételi gyakoriság"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth hang – bit/minta"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Bluetooth-hangkodek aktiválása\nKiválasztás: Bit/minta"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Bluetooth hangkodek kiválasztása:\nbit/minta"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth hang – Csatornamód"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Bluetooth-hangkodek aktiválása\nKiválasztás: Csatornamód"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Bluetooth hangkodek kiválasztása:\ncsatornamód"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth LDAC hangkodek: lejátszási minőség"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"Bluetooth LDAC hangkodek aktiválása\nKiválasztás: Lejátszási minőség"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Bluetooth LDAC hangkodek kiválasztása:\nlejátszási minőség"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streamelés: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privát DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"„Privát DNS” mód kiválasztása"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Ki"</string>
-    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automatikus"</string>
+    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
+    <skip />
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Privát DNS-szolgáltató gazdagépneve"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Adja meg a DNS-szolgáltató gazdagépnevét"</string>
-    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Nem sikerült kapcsolódni"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Vezeték nélküli kijelző tanúsítványával kapcsolatos lehetőségek megjelenítése"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi-naplózási szint növelése, RSSI/SSID megjelenítése a Wi‑Fi-választóban"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"MAC-cím véletlenszerű generálása Wi‑Fi-hálózatra való csatlakozáskor"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"Forgalomkorlátos"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Nem forgalomkorlátos"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Naplózási puffer mérete"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Naplózási pufferméret kiválasztása"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Törli a naplózó program állandó tárhelyét?"</string>
@@ -265,7 +254,7 @@
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ellenőrzés"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP-ellenőrzés beállítása"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Hibakeresés"</string>
-    <string name="debug_app" msgid="8349591734751384446">"Hibakereső alkalmazás kiválasztása"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Válassza az alkalmazás hibakeresése lehetőséget"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"Nincs beállítva alkalmazás hibakereséshez"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazás hibakeresése"</string>
     <string name="select_application" msgid="5156029161289091703">"Alkalmazás kiválasztása"</string>
@@ -316,8 +305,8 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Törölje a tevékenységeket"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Tevékenységek törlése, amint elhagyják azokat"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Háttérfolyamat-korlátozás"</string>
-    <string name="show_all_anrs" msgid="4924885492787069007">"Háttérben lévő ANR-ek"</string>
-    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Az Alkalmazás nem válaszol ablak megjelenítése a háttérben futó alkalmazásoknál"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"Összes ANR mutatása"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"Az Alkalmazás nem válaszol ablak megjelenítése"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Értesítő csatorna figyelmeztetései"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Figyelmeztet, ha egy alkalmazás érvényes csatorna nélkül küld értesítést"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Külső tárhely alkalmazásainak engedélyezése"</string>
@@ -367,26 +356,40 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Színkorrekció"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ez egy kísérleti funkció, és hatással lehet a teljesítményre."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Felülírva erre: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Körülbelül <xliff:g id="TIME_REMAINING">%1$s</xliff:g> maradt hátra"</string>
-    <string name="power_discharging_duration" msgid="8848256785736335185">"Körülbelül <xliff:g id="TIME_REMAINING">%1$s</xliff:g> maradt hátra (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Körülbelül <xliff:g id="TIME_REMAINING">%1$s</xliff:g> maradt hátra az eszköz használata alapján"</string>
-    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Körülbelül <xliff:g id="TIME_REMAINING">%1$s</xliff:g> maradt hátra az eszköz használata alapján (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> maradt hátra"</string>
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"A használat alapján nagyjából még ennyit bír: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"A használat alapján nagyjából még ennyit bír: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"Nagyjából még ennyit bír: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"Nagyjából még ennyit bír: <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Körülbelül <xliff:g id="TIME">%1$s</xliff:g> maradt hátra"</string>
+    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
+    <skip />
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Körülbelül <xliff:g id="TIME">%1$s</xliff:g> van hátra az eszköz igénybevétele alapján"</string>
+    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
+    <skip />
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> van hátra"</string>
+    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
+    <skip />
+    <!-- no translation found for power_discharge_by (6427074755635635749) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Kevesebb mint <xliff:g id="THRESHOLD">%1$s</xliff:g> van hátra"</string>
-    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Kevesebb mint <xliff:g id="THRESHOLD">%1$s</xliff:g> van hátra (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Kevesebb mint <xliff:g id="TIME_REMAINING">%1$s</xliff:g> van hátra (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"Több mint <xliff:g id="TIME_REMAINING">%1$s</xliff:g> van hátra"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"Előfordulhat, hogy a telefon hamarosan leáll"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"Előfordulhat, hogy a táblagép hamarosan leáll"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"Előfordulhat, hogy az eszköz hamarosan leáll"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"Előfordulhat, hogy a telefon hamarosan leáll (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"Előfordulhat, hogy a táblagép hamarosan leáll (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Előfordulhat, hogy az eszköz hamarosan leáll (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
+    <skip />
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> a teljes töltöttségig"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> a teljes feltöltésig"</string>
@@ -431,16 +434,14 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Regisztrált"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Nem regisztrált"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Nem érhető el"</string>
-    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"A MAC-cím generálása véletlenszerű."</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="other">%1$d eszköz csatlakozik</item>
       <item quantity="one">%1$d eszköz csatlakozik</item>
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Több idő."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Kevesebb idő."</string>
-    <string name="cancel" msgid="6859253417269739139">"Mégse"</string>
-    <string name="okay" msgid="1997666393121016642">"OK"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Bekapcsolás"</string>
+    <string name="cancel" msgid="6859253417269739139">"Mégse"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"A Ne zavarjanak mód bekapcsolása"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Soha"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Csak prioritásos"</string>
@@ -449,7 +450,4 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"Nem fogja hallani a következő ébresztést. Időpontja: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="4996153414057676512">"ekkor: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"ezen a napon: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Időtartam"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Mindig kérdezzen rá"</string>
-    <string name="time_unit_just_now" msgid="6363336622778342422">"Az imént"</string>
 </resources>

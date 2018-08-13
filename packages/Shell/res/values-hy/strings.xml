@@ -25,19 +25,19 @@
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Վրիպակների մասին հաշվետվությունը շուտով կստանաք հեռախոսին"</string>
     <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Ընտրեք՝ վրիպակի զեկույցն ուղարկելու համար"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Հպեք՝ վրիպակի զեկույցը տրամադրելու համար"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Ընտրեք՝ վրիպակի զեկույցն առանց սքրինշոթի ուղարկելու համար կամ սպասեք սքրինշոթի ստեղծմանը"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Հպեք՝ վրիպակի զեկույցն առանց սքրինշոթի ուղարկելու համար կամ սպասեք սքրինշոթի ստեղծմանը"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Հպեք՝ վրիպակի զեկույցն առանց սքրինշոթի ուղարկելու համար կամ սպասեք սքրինշոթի ստեղծմանը"</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"Վրիպակի զեկույցները պարունակում են տվյալներ համակարգի տարբեր մատյաններից և կարող են ներառել տեղեկություններ, որոնք դուք գաղտնի եք համարում (օրինակ՝ հավելվածի օգտագործման կամ տեղադրության մասին): Վրիպակի զեկույցները տրամադրեք միայն վստահելի մարդկանց և հավելվածներին:"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Ընտրեք՝ վրիպակի զեկույցն առանց էկրանի պատկերի ուղարկելու համար կամ սպասեք էկրանի պատկերի ստեղծմանը"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Հպեք՝ վրիպակի զեկույցն առանց էկրանի պատկերի ուղարկելու համար կամ սպասեք էկրանի պատկերի ստեղծմանը"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Հպեք՝ վրիպակի զեկույցն առանց էկրանի պատկերի ուղարկելու համար կամ սպասեք էկրանի պատկերի ստեղծմանը"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Վրիպակի զեկույցները պարունակում են տվյալներ համակարգի տարբեր մատյանի ֆայլերից և կարող են ներառել տեղեկություններ, որոնք դուք գաղտնի եք համարում (օրինակ՝ հավելվածի օգտագործման կամ տեղադրության մասին): Վրիպակի զեկույցները տրամադրեք միայն վստահելի մարդկանց և հավելվածներին:"</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Այլևս ցույց չտալ"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Վրիպակների հաշվետվություններ"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Հնարավոր չէ կարդալ վրիպակների զեկույցի ֆայլը"</string>
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Չհաջողվեց ավելացնել վրիպակի զեկույցի մանրամասները zip ֆայլին"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"անանուն"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Մանրամասներ"</string>
-    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Սքրինշոթ"</string>
-    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Սքրինշոթը հաջողությամբ ստացվեց:"</string>
-    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Չհաջողվեց ստանալ սքրինշոթը:"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Էկրանի պատկեր"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Էկրանի պատկերը հաջողությամբ ստացվեց:"</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Չհաջողվեց ստանալ էկրանի պատկերը:"</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"<xliff:g id="ID">#%d</xliff:g> վրիպակի զեկույցի մանրամասները"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"Ֆայլի անունը"</string>
     <string name="bugreport_info_title" msgid="2306030793918239804">"Վրիպակի զեկույցի վերնագիրը"</string>

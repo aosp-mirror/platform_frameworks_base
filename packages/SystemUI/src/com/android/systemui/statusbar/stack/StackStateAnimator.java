@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 
+import com.android.keyguard.KeyguardSliceView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
@@ -51,6 +52,8 @@ public class StackStateAnimator {
             = (int) (ANIMATION_DURATION_HEADS_UP_APPEAR
                     * HeadsUpAppearInterpolator.getFractionUntilOvershoot());
     public static final int ANIMATION_DURATION_HEADS_UP_DISAPPEAR = 300;
+    public static final int ANIMATION_DURATION_PULSE_APPEAR =
+            KeyguardSliceView.DEFAULT_ANIM_DURATION;
     public static final int ANIMATION_DURATION_BLOCKING_HELPER_FADE = 240;
     public static final int ANIMATION_DELAY_PER_ELEMENT_INTERRUPTING = 80;
     public static final int ANIMATION_DELAY_PER_ELEMENT_MANUAL = 32;
@@ -430,15 +433,26 @@ public class StackStateAnimator {
             } else if (event.animationType == NotificationStackScrollLayout
                     .AnimationEvent.ANIMATION_TYPE_PULSE_APPEAR) {
                 ExpandableViewState viewState = finalState.getViewStateForView(changingView);
-                mTmpState.copyFrom(viewState);
-                mTmpState.yTranslation += mPulsingAppearingTranslation;
-                mTmpState.alpha = 0;
-                mTmpState.applyToView(changingView);
+                if (viewState != null) {
+                    mTmpState.copyFrom(viewState);
+                    mTmpState.yTranslation += mPulsingAppearingTranslation;
+                    mTmpState.alpha = 0;
+                    mTmpState.applyToView(changingView);
+                }
             } else if (event.animationType == NotificationStackScrollLayout
                     .AnimationEvent.ANIMATION_TYPE_PULSE_DISAPPEAR) {
                 ExpandableViewState viewState = finalState.getViewStateForView(changingView);
-                viewState.yTranslation += mPulsingAppearingTranslation;
-                viewState.alpha = 0;
+                if (viewState != null) {
+                    viewState.alpha = 0;
+                    // We want to animate the alpha away before the view starts translating,
+                    // otherwise everything will overlap and look xtra ugly.
+                    float originalYTranslation = viewState.yTranslation;
+                    viewState.yTranslation = changingView.getTranslationY();
+                    mAnimationFilter.animateAlpha = true;
+                    mAnimationProperties.duration = ANIMATION_DURATION_PULSE_APPEAR / 2;
+                    viewState.animateTo(changingView, mAnimationProperties);
+                    viewState.yTranslation = originalYTranslation;
+                }
             } else if (event.animationType == NotificationStackScrollLayout
                     .AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR) {
                 // This item is added, initialize it's properties.

@@ -19,12 +19,12 @@
     <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"स्विस जर्मन"</string>
     <string name="keyboard_layout_belgian" msgid="2011984572838651558">"बेल्जियाई"</string>
     <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"बुल्‍गारियाई"</string>
-    <string name="keyboard_layout_italian" msgid="6497079660449781213">"इटैलियन"</string>
+    <string name="keyboard_layout_italian" msgid="6497079660449781213">"इतालवी"</string>
     <string name="keyboard_layout_danish" msgid="8036432066627127851">"डैनिश"</string>
     <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"नार्वेजियाई"</string>
     <string name="keyboard_layout_swedish" msgid="732959109088479351">"स्वीडिश"</string>
     <string name="keyboard_layout_finnish" msgid="5585659438924315466">"फ़िनिश"</string>
-    <string name="keyboard_layout_croatian" msgid="4172229471079281138">"क्रोएशियन"</string>
+    <string name="keyboard_layout_croatian" msgid="4172229471079281138">"क्रोएशियाई"</string>
     <string name="keyboard_layout_czech" msgid="1349256901452975343">"चेक"</string>
     <string name="keyboard_layout_estonian" msgid="8775830985185665274">"एस्टोनियाई"</string>
     <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"हंगेरियाई"</string>
@@ -43,5 +43,4 @@
     <string name="keyboard_layout_latvian" msgid="4405417142306250595">"लातवियाई"</string>
     <string name="keyboard_layout_persian" msgid="3920643161015888527">"फ़ारसी"</string>
     <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"अज़रबैजानी"</string>
-    <string name="keyboard_layout_polish" msgid="1121588624094925325">"पोलिश"</string>
 </resources>

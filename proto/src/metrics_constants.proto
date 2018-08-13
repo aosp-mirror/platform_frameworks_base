@@ -6116,7 +6116,21 @@ message MetricsEvent {
     // OS: P
     FIELD_AUTOFILL_SESSION_ID = 1456;
 
+    // NOTIFICATION_SINCE_INTERRUPTION_MILLIS added to P
+    // NOTIFICATION_INTERRUPTION added to P
+
     // ---- End P Constants, all P constants go above this line ----
+
+    // Time since this notification last interrupted (visibly or audible) the user
+    NOTIFICATION_SINCE_INTERRUPTION_MILLIS = 1500;
+
+    // OPEN: Notification interrupted the user, either audibly or visually.
+    //   Tagged data: NOTIFICATION_SINCE_INTERRUPTION_MILLIS
+    // CATEGORY: NOTIFICATION
+    NOTIFICATION_INTERRUPTION = 1501;
+
+    // ---- End Q Constants, all Q constants go above this line ----
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }

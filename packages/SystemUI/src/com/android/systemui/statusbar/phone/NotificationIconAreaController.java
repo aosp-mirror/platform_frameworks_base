@@ -47,6 +47,8 @@ public class NotificationIconAreaController implements DarkReceiver {
     private final Rect mTintArea = new Rect();
     private NotificationStackScrollLayout mNotificationScrollLayout;
     private Context mContext;
+    private boolean mFullyDark;
+    private boolean mHasShelfIconsWhenFullyDark;
 
     public NotificationIconAreaController(Context context, StatusBar statusBar) {
         mStatusBar = statusBar;
@@ -173,11 +175,38 @@ public class NotificationIconAreaController implements DarkReceiver {
     public void updateNotificationIcons() {
 
         updateStatusBarIcons();
-        updateIconsForLayout(entry -> entry.expandedIcon, mShelfIcons,
-                NotificationShelf.SHOW_AMBIENT_ICONS, false /* hideDismissed */,
-                false /* hideRepliedMessages */);
+        updateShelfIcons();
+        updateHasShelfIconsWhenFullyDark();
 
         applyNotificationIconsTint();
+    }
+
+    private void updateHasShelfIconsWhenFullyDark() {
+        boolean hasIconsWhenFullyDark = false;
+        for (int i = 0; i < mNotificationScrollLayout.getChildCount(); i++) {
+            View view = mNotificationScrollLayout.getChildAt(i);
+            if (view instanceof ExpandableNotificationRow) {
+                NotificationData.Entry ent = ((ExpandableNotificationRow) view).getEntry();
+                if (shouldShowNotificationIcon(ent,
+                        NotificationShelf.SHOW_AMBIENT_ICONS /* showAmbient */,
+                        false /* hideDismissed */,
+                        true /* hideReplied */)) {
+                    hasIconsWhenFullyDark = true;
+                    break;
+                }
+            }
+        }
+        mHasShelfIconsWhenFullyDark = hasIconsWhenFullyDark;
+    }
+
+    public boolean hasShelfIconsWhenFullyDark() {
+        return mHasShelfIconsWhenFullyDark;
+    }
+
+    private void updateShelfIcons() {
+        updateIconsForLayout(entry -> entry.expandedIcon, mShelfIcons,
+                NotificationShelf.SHOW_AMBIENT_ICONS, false /* hideDismissed */,
+                mFullyDark /* hideRepliedMessages */);
     }
 
     public void updateStatusBarIcons() {
@@ -318,6 +347,11 @@ public class NotificationIconAreaController implements DarkReceiver {
         }
         v.setStaticDrawableColor(color);
         v.setDecorColor(mIconTint);
+    }
+
+    public void setFullyDark(boolean fullyDark) {
+        mFullyDark = fullyDark;
+        updateShelfIcons();
     }
 
     public void setDark(boolean dark) {
