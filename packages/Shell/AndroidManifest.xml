@@ -331,7 +331,7 @@
                 android:resource="@xml/file_provider_paths" />
         </provider>
 
-        <provider
+        <!--<provider
             android:name=".BugreportStorageProvider"
             android:authorities="com.android.shell.documents"
             android:grantUriPermissions="true"
@@ -341,7 +341,7 @@
             <intent-filter>
                 <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
             </intent-filter>
-        </provider>
+        </provider>-->
 
         <provider android:name=".HeapDumpProvider"
                   android:authorities="com.android.shell.heapdump"
