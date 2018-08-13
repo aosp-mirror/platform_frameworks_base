@@ -1812,7 +1812,12 @@ public class TelephonyManager {
         if (telephony == null) return null;
 
         try {
-            return telephony.getMeidForSlot(slotIndex, getOpPackageName());
+            String meid = telephony.getMeidForSlot(slotIndex, getOpPackageName());
+            if (TextUtils.isEmpty(meid)) {
+                Log.d(TAG, "getMeid: return null because MEID is not available");
+                return null;
+            }
+            return meid;
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
