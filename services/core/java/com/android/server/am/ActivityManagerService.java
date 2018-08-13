@@ -539,14 +539,23 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     BroadcastQueue mFgBroadcastQueue;
     BroadcastQueue mBgBroadcastQueue;
+    BroadcastQueue mOffloadBroadcastQueue;
     // Convenient for easy iteration over the queues. Foreground is first
     // so that dispatch of foreground broadcasts gets precedence.
-    final BroadcastQueue[] mBroadcastQueues = new BroadcastQueue[2];
+    final BroadcastQueue[] mBroadcastQueues = new BroadcastQueue[3];
 
     BroadcastStats mLastBroadcastStats;
     BroadcastStats mCurBroadcastStats;
 
     BroadcastQueue broadcastQueueForIntent(Intent intent) {
+        if (isOnOffloadQueue(intent.getFlags())) {
+            if (DEBUG_BROADCAST_BACKGROUND) {
+                Slog.i(TAG_BROADCAST,
+                        "Broadcast intent " + intent + " on offload queue");
+            }
+            return mOffloadBroadcastQueue;
+        }
+
         final boolean isFg = (intent.getFlags() & Intent.FLAG_RECEIVER_FOREGROUND) != 0;
         if (DEBUG_BROADCAST_BACKGROUND) Slog.i(TAG_BROADCAST,
                 "Broadcast intent " + intent + " on "
@@ -2176,8 +2185,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 "foreground", BROADCAST_FG_TIMEOUT, false);
         mBgBroadcastQueue = new BroadcastQueue(this, mHandler,
                 "background", BROADCAST_BG_TIMEOUT, true);
+        mOffloadBroadcastQueue = new BroadcastQueue(this, mHandler,
+                "offload", BROADCAST_BG_TIMEOUT, true);
         mBroadcastQueues[0] = mFgBroadcastQueue;
         mBroadcastQueues[1] = mBgBroadcastQueue;
+        mBroadcastQueues[2] = mOffloadBroadcastQueue;
 
         mServices = new ActiveServices(this);
         mProviderMap = new ProviderMap(this);
@@ -13358,7 +13370,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     boolean isPendingBroadcastProcessLocked(int pid) {
         return mFgBroadcastQueue.isPendingBroadcastProcessLocked(pid)
-                || mBgBroadcastQueue.isPendingBroadcastProcessLocked(pid);
+                || mBgBroadcastQueue.isPendingBroadcastProcessLocked(pid)
+                || mOffloadBroadcastQueue.isPendingBroadcastProcessLocked(pid);
     }
 
     void skipPendingBroadcastLocked(int pid) {
@@ -14604,10 +14617,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             boolean doNext = false;
             BroadcastRecord r;
+            BroadcastQueue queue;
 
             synchronized(this) {
-                BroadcastQueue queue = (flags & Intent.FLAG_RECEIVER_FOREGROUND) != 0
-                        ? mFgBroadcastQueue : mBgBroadcastQueue;
+                if (isOnOffloadQueue(flags)) {
+                    queue = mOffloadBroadcastQueue;
+                } else {
+                    queue = (flags & Intent.FLAG_RECEIVER_FOREGROUND) != 0
+                            ? mFgBroadcastQueue : mBgBroadcastQueue;
+                }
+
                 r = queue.getMatchingOrderedReceiver(who);
                 if (r != null) {
                     doNext = r.queue.finishReceiverLocked(r, resultCode,
@@ -19473,5 +19492,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
+    }
+
+    private boolean isOnOffloadQueue(int flags) {
+        return ((flags & Intent.FLAG_RECEIVER_OFFLOAD) != 0);
     }
 }

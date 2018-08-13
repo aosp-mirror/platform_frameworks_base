@@ -5269,6 +5269,7 @@ public class Intent implements Parcelable, Cloneable {
             FLAG_RECEIVER_EXCLUDE_BACKGROUND,
             FLAG_RECEIVER_FROM_SHELL,
             FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS,
+            FLAG_RECEIVER_OFFLOAD,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flags {}
@@ -5313,6 +5314,7 @@ public class Intent implements Parcelable, Cloneable {
             FLAG_RECEIVER_EXCLUDE_BACKGROUND,
             FLAG_RECEIVER_FROM_SHELL,
             FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS,
+            FLAG_RECEIVER_OFFLOAD,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface MutableFlags {}
@@ -5738,6 +5740,12 @@ public class Intent implements Parcelable, Cloneable {
      * background priority class.
      */
     public static final int FLAG_RECEIVER_FOREGROUND = 0x10000000;
+    /**
+     * If set, when sending a broadcast the recipient will be run on the offload queue.
+     *
+     * @hide
+     */
+    public static final int FLAG_RECEIVER_OFFLOAD = 0x80000000;
     /**
      * If this is an ordered broadcast, don't allow receivers to abort the broadcast.
      * They can still propagate results through to later receivers, but they can not prevent

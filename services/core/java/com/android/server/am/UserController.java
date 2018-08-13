@@ -22,14 +22,15 @@ import static android.app.ActivityManager.USER_OP_ERROR_IS_SYSTEM;
 import static android.app.ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
 import static android.app.ActivityManager.USER_OP_IS_CURRENT;
 import static android.app.ActivityManager.USER_OP_SUCCESS;
-import static android.os.Process.SHELL_UID;
-import static android.os.Process.SYSTEM_UID;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
+import static android.os.Process.SHELL_UID;
+import static android.os.Process.SYSTEM_UID;
+
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.MY_PID;
 import static com.android.server.am.UserState.STATE_BOOTING;
 import static com.android.server.am.UserState.STATE_RUNNING_LOCKED;
@@ -40,7 +41,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import com.android.server.wm.ActivityTaskManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.Dialog;
@@ -99,6 +99,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemServiceManager;
 import com.android.server.pm.UserManagerService;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.PrintWriter;
@@ -549,7 +550,8 @@ class UserController implements Handler.Callback {
         final Intent bootIntent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
         bootIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
         bootIntent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
-                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
+                | Intent.FLAG_RECEIVER_OFFLOAD);
         mInjector.broadcastIntent(bootIntent, null, new IIntentReceiver.Stub() {
                     @Override
                     public void performReceive(Intent intent, int resultCode, String data,
