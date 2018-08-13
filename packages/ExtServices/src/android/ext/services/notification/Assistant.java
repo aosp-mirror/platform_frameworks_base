@@ -16,6 +16,7 @@
 
 package android.ext.services.notification;
 
+import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.service.notification.NotificationListenerService.Ranking
         .USER_SENTIMENT_NEGATIVE;
@@ -204,17 +205,22 @@ public class Assistant extends NotificationAssistantService {
             @NonNull StatusBarNotification statusBarNotification,
             @NonNull ArrayList<Notification.Action> smartActions,
             @NonNull ArrayList<CharSequence> smartReplies) {
-        if (smartActions.isEmpty() && smartReplies.isEmpty()) {
-            return null;
-        }
         Bundle signals = new Bundle();
-        signals.putParcelableArrayList(Adjustment.KEY_SMART_ACTIONS, smartActions);
-        signals.putCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES, smartReplies);
+        if (!smartActions.isEmpty()) {
+            signals.putParcelableArrayList(Adjustment.KEY_SMART_ACTIONS, smartActions);
+        }
+        if (!smartReplies.isEmpty()) {
+            signals.putCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES, smartReplies);
+        }
+
+        // TODO: Apply rules to what gets silenced
+        signals.putInt(Adjustment.KEY_IMPORTANCE, IMPORTANCE_LOW);
+
         return new Adjustment(
                 statusBarNotification.getPackageName(),
                 statusBarNotification.getKey(),
                 signals,
-                "smart action, reply" /* explanation */,
+                "",
                 statusBarNotification.getUserId());
     }
 

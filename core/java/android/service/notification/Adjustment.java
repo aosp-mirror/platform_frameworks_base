@@ -77,6 +77,18 @@ public final class Adjustment implements Parcelable {
     public static final String KEY_SMART_REPLIES = "key_smart_replies";
 
     /**
+     * Data type: int, one of importance values e.g.
+     * {@link android.app.NotificationManager#IMPORTANCE_MIN}.
+     *
+     * If used from
+     * {@link NotificationAssistantService#onNotificationEnqueued(StatusBarNotification)}, it can
+     * block a notification from appearing or silence it. If used from
+     * {@link NotificationAssistantService#adjustNotification(Adjustment)}, it can visually
+     * demote a notification.
+     */
+    public static final String KEY_IMPORTANCE = "key_importance";
+
+    /**
      * Create a notification adjustment.
      *
      * @param pkg The package of the notification.

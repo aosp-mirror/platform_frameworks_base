@@ -411,7 +411,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     @Test
     public void testLights() throws Exception {
         NotificationRecord r = getLightsNotification();
-        r.setImportance(NotificationManager.IMPORTANCE_DEFAULT, "for testing");
+        r.setSystemImportance(NotificationManager.IMPORTANCE_DEFAULT);
 
         mService.buzzBeepBlinkLocked(r);
 
@@ -454,7 +454,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     @Test
     public void testNoInterruptionForMin() throws Exception {
         NotificationRecord r = getBeepyNotification();
-        r.setImportance(NotificationManager.IMPORTANCE_MIN, "foo");
+        r.setSystemImportance(NotificationManager.IMPORTANCE_MIN);
 
         mService.buzzBeepBlinkLocked(r);
 
@@ -1015,7 +1015,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     @Test
     public void testA11yMinInitialPost() throws Exception {
         NotificationRecord r = getQuietNotification();
-        r.setImportance(IMPORTANCE_MIN, "");
+        r.setSystemImportance(IMPORTANCE_MIN);
         mService.buzzBeepBlinkLocked(r);
         verify(mAccessibilityService, never()).sendAccessibilityEvent(any(), anyInt());
     }
@@ -1072,7 +1072,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     @Test
     public void testLightsUnimportant() {
         NotificationRecord r = getLightsNotification();
-        r.setImportance(IMPORTANCE_LOW, "testing");
+        r.setSystemImportance(IMPORTANCE_LOW);
         mService.buzzBeepBlinkLocked(r);
         verifyNeverLights();
         assertFalse(r.isInterruptive());
