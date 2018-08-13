@@ -138,6 +138,10 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         return new DisplayWindowController(mDisplay, this);
     }
 
+    DisplayWindowController getWindowContainerController() {
+        return mWindowContainerController;
+    }
+
     void updateBounds() {
         mDisplay.getSize(mTmpDisplaySize);
         setBounds(0, 0, mTmpDisplaySize.x, mTmpDisplaySize.y);
@@ -837,7 +841,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         if (mStacks.isEmpty() && mRemoved) {
             mWindowContainerController.removeContainer();
             mWindowContainerController = null;
-            mSupervisor.releaseActivityDisplayLocked(mDisplayId);
+            mSupervisor.removeChild(this);
         }
     }
 

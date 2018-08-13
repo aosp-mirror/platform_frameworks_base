@@ -775,6 +775,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 true /* includingParents */);
     }
 
+    void positionChildWindowContainerAtBottom(TaskRecord child) {
+        mWindowContainerController.positionChildAtBottom(child.getWindowContainerController(),
+                true /* includingParents */);
+    }
+
     /**
      * Returns whether to defer the scheduling of the multi-window mode.
      */
@@ -2859,8 +2864,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         final int position = getAdjustedPositionForTask(task, mTaskHistory.size(), starting);
         mTaskHistory.add(position, task);
         updateTaskMovement(task, true);
-        mWindowContainerController.positionChildAtTop(task.getWindowContainerController(),
-                true /* includingParents */);
+        positionChildWindowContainerAtTop(task);
     }
 
     private void insertTaskAtBottom(TaskRecord task) {
@@ -2869,8 +2873,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         final int position = getAdjustedPositionForTask(task, 0, null);
         mTaskHistory.add(position, task);
         updateTaskMovement(task, true);
-        mWindowContainerController.positionChildAtBottom(task.getWindowContainerController(),
-                true /* includingParents */);
+        positionChildWindowContainerAtBottom(task);
     }
 
     void startActivityLocked(ActivityRecord r, ActivityRecord focusedTopActivity,
@@ -3141,8 +3144,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     p.reparent(targetTask, 0 /* position - bottom */, "resetTargetTaskIfNeeded");
                 }
 
-                mWindowContainerController.positionChildAtBottom(
-                        targetTask.getWindowContainerController(), false /* includingParents */);
+                positionChildWindowContainerAtBottom(targetTask);
                 replyChainEnd = -1;
             } else if (forceReset || finishOnTaskLaunch || clearWhenTaskReset) {
                 // If the activity should just be removed -- either
@@ -3277,8 +3279,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Pulling activity " + p
                                 + " from " + srcPos + " in to resetting task " + task);
                     }
-                    mWindowContainerController.positionChildAtTop(
-                            task.getWindowContainerController(), true /* includingParents */);
+                    positionChildWindowContainerAtTop(task);
 
                     // Now we've moved it in to place...  but what if this is
                     // a singleTop activity and we have put it on top of another
@@ -5239,8 +5240,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         addTask(task, toTop ? MAX_VALUE : 0, true /* schedulePictureInPictureModeChange */, reason);
         if (toTop) {
             // TODO: figure-out a way to remove this call.
-            mWindowContainerController.positionChildAtTop(task.getWindowContainerController(),
-                    true /* includingParents */);
+            positionChildWindowContainerAtTop(task);
         }
     }
 

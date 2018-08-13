@@ -872,8 +872,8 @@ public class RecentTasksTest extends ActivityTestsBase {
             super.initialize();
             mDisplay = new TestActivityDisplay(this, DEFAULT_DISPLAY);
             mOtherDisplay = new TestActivityDisplay(this, DEFAULT_DISPLAY);
-            attachDisplay(mOtherDisplay);
-            attachDisplay(mDisplay);
+            addChild(mOtherDisplay, ActivityDisplay.POSITION_TOP);
+            addChild(mDisplay, ActivityDisplay.POSITION_TOP);
         }
 
         @Override
@@ -1045,7 +1045,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         @Override
         void getTasks(int maxNum, List<RunningTaskInfo> list, int ignoreActivityType,
-                int ignoreWindowingMode, SparseArray<ActivityDisplay> activityDisplays,
+                int ignoreWindowingMode, ArrayList<ActivityDisplay> activityDisplays,
                 int callingUid, boolean allowed) {
             lastAllowed = allowed;
             super.getTasks(maxNum, list, ignoreActivityType, ignoreWindowingMode, activityDisplays,

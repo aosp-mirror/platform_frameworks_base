@@ -73,6 +73,10 @@ public class DisplayWindowController
         // override configuration propagation to just here.
     }
 
+    public int getDisplayId() {
+        return mDisplayId;
+    }
+
     /**
      * Positions the task stack at the given position in the task stack container.
      */
