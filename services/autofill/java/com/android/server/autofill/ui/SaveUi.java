@@ -82,18 +82,19 @@ final class SaveUi {
     }
 
     /**
-     * Wrapper that guarantees that only one callback is triggered by ignoring further calls after
+     * Wrapper that guarantees that only one callback action (either {@link #onSave()} or
+     * {@link #onCancel(IntentSender)}) is triggered by ignoring further calls after
      * it's destroyed.
      *
      * <p>It's needed becase {@link #onCancel(IntentSender)} is always called when the Save UI
      * dialog is dismissed.
      */
-    private class OneTimeListener implements OnSaveListener {
+    private class OneActionThenDestroyListener implements OnSaveListener {
 
         private final OnSaveListener mRealListener;
         private boolean mDone;
 
-        OneTimeListener(OnSaveListener realListener) {
+        OneActionThenDestroyListener(OnSaveListener realListener) {
             mRealListener = realListener;
         }
 
@@ -131,7 +132,7 @@ final class SaveUi {
 
     private final @NonNull Dialog mDialog;
 
-    private final @NonNull OneTimeListener mListener;
+    private final @NonNull OneActionThenDestroyListener mListener;
 
     private final @NonNull OverlayControl mOverlayControl;
 
@@ -151,7 +152,7 @@ final class SaveUi {
            @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener,
            boolean compatMode) {
         mPendingUi= pendingUi;
-        mListener = new OneTimeListener(listener);
+        mListener = new OneActionThenDestroyListener(listener);
         mOverlayControl = overlayControl;
         mServicePackageName = servicePackageName;
         mComponentName = componentName;
