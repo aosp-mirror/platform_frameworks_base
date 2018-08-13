@@ -5647,10 +5647,8 @@ public abstract class PackageManager {
      * @return {@code true} if the given package is suspended, {@code false} otherwise
      * @throws NameNotFoundException if the package could not be found.
      *
-     * @see #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle, String)
-     * @hide
+     * @see #isPackageSuspended()
      */
-    @SystemApi
     public boolean isPackageSuspended(String packageName) throws NameNotFoundException {
         throw new UnsupportedOperationException("isPackageSuspended not implemented");
     }
