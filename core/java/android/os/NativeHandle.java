@@ -100,6 +100,9 @@ public final class NativeHandle implements Closeable {
 
     /**
      * Explicitly duplicate NativeHandle (this dups all file descritptors).
+     *
+     * If this method is called, this must also be explicitly closed with
+     * {@link #close()}.
      */
     public NativeHandle dup() throws java.io.IOException {
         FileDescriptor[] fds = new FileDescriptor[mFds.length];
