@@ -646,12 +646,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             SystemProperties.set(PROP_QTAGUID_ENABLED, mBandwidthControlEnabled ? "1" : "0");
 
-            try {
-                mConnector.execute("strict", "enable");
-                mStrictEnabled = true;
-            } catch (NativeDaemonConnectorException e) {
-                Log.wtf(TAG, "Failed strict enable", e);
-            }
+            mStrictEnabled = true;
 
             setDataSaverModeEnabled(mDataSaverMode);
 
@@ -1809,26 +1804,26 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     private void applyUidCleartextNetworkPolicy(int uid, int policy) {
-        final String policyString;
+        final int policyValue;
         switch (policy) {
             case StrictMode.NETWORK_POLICY_ACCEPT:
-                policyString = "accept";
+                policyValue = INetd.PENALTY_POLICY_ACCEPT;
                 break;
             case StrictMode.NETWORK_POLICY_LOG:
-                policyString = "log";
+                policyValue = INetd.PENALTY_POLICY_LOG;
                 break;
             case StrictMode.NETWORK_POLICY_REJECT:
-                policyString = "reject";
+                policyValue = INetd.PENALTY_POLICY_REJECT;
                 break;
             default:
                 throw new IllegalArgumentException("Unknown policy " + policy);
         }
 
         try {
-            mConnector.execute("strict", "set_uid_cleartext_policy", uid, policyString);
+            mNetdService.strictUidCleartextPenalty(uid, policyValue);
             mUidCleartextPolicy.put(uid, policy);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -1846,6 +1841,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 return;
             }
 
+            // TODO: remove this code after removing prepareNativeDaemon()
             if (!mStrictEnabled) {
                 // Module isn't enabled yet; stash the requested policy away to
                 // apply later once the daemon is connected.
