@@ -149,6 +149,7 @@
             android:src="@drawable/screen_pinning_bg_circ" />
 
         <ImageView
+            android:id="@+id/screen_pinning_recents_icon"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingEnd="@dimen/screen_pinning_request_nav_side_padding"
