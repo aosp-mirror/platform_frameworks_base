@@ -65,12 +65,18 @@ public final class FillRequest implements Parcelable {
      */
     public static final int FLAG_MANUAL_REQUEST = 0x1;
 
+    /**
+     * Indicates this request was made using
+     * <a href="AutofillService.html#CompatibilityMode">compatibility mode</a>.
+     */
+    public static final int FLAG_COMPATIBILITY_MODE_REQUEST = 0x2;
+
     /** @hide */
     public static final int INVALID_REQUEST_ID = Integer.MIN_VALUE;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
-            FLAG_MANUAL_REQUEST
+            FLAG_MANUAL_REQUEST, FLAG_COMPATIBILITY_MODE_REQUEST
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface RequestFlags{}
@@ -93,7 +99,8 @@ public final class FillRequest implements Parcelable {
     public FillRequest(int id, @NonNull ArrayList<FillContext> contexts,
             @Nullable Bundle clientState, @RequestFlags int flags) {
         mId = id;
-        mFlags = Preconditions.checkFlagsArgument(flags, FLAG_MANUAL_REQUEST);
+        mFlags = Preconditions.checkFlagsArgument(flags,
+                FLAG_MANUAL_REQUEST | FLAG_COMPATIBILITY_MODE_REQUEST);
         mContexts = Preconditions.checkCollectionElementsNotNull(contexts, "contexts");
         mClientState = clientState;
     }

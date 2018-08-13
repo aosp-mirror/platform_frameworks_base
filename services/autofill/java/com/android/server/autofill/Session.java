@@ -290,6 +290,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                                     componentNameFromApp == null ? "null"
                                             : componentNameFromApp.flattenToShortString()));
                 }
+                // Flags used to start the session.
+                int flags = structure.getFlags();
+
                 if (mCompatMode) {
                     // Sanitize URL bar, if needed
                     final String[] urlBarIds = mService.getUrlBarResourceIdsForCompatMode(
@@ -310,11 +313,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             mViewStates.put(urlBarId, viewState);
                         }
                     }
+                    flags |= FillRequest.FLAG_COMPATIBILITY_MODE_REQUEST;
                 }
                 structure.sanitizeForParceling(true);
-
-                // Flags used to start the session.
-                final int flags = structure.getFlags();
 
                 if (mContexts == null) {
                     mContexts = new ArrayList<>(1);
