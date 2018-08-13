@@ -24449,6 +24449,17 @@ public class PackageManagerService extends IPackageManager.Stub
                 return getAppsWithSharedUserIdsLocked();
             }
         }
+
+        @Override
+        public boolean isOnlyCoreApps() {
+            return PackageManagerService.this.isOnlyCoreApps();
+        }
+
+        @Override
+        public void freeStorage(String volumeUuid, long bytes, int storageFlags)
+                throws IOException {
+            PackageManagerService.this.freeStorage(volumeUuid, bytes, storageFlags);
+        }
     }
 
     private SparseArray<String> getAppsWithSharedUserIdsLocked() {
