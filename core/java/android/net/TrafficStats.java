@@ -139,6 +139,8 @@ public class TrafficStats {
     public static final int TAG_SYSTEM_GPS = 0xFFFFFF44;
     /** @hide */
     public static final int TAG_SYSTEM_PAC = 0xFFFFFF45;
+    /** @hide */
+    public static final int TAG_SYSTEM_DHCP_SERVER = 0xFFFFFF46;
 
     private static INetworkStatsService sStatsService;
 
