@@ -20,6 +20,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.view.Display;
 import android.view.InputChannel;
 import android.view.WindowManager;
 import com.android.server.input.InputApplicationHandle;
