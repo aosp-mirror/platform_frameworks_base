@@ -2202,7 +2202,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         loge("ERROR: already-connected network explicitly selected.");
                     }
                     nai.networkMisc.explicitlySelected = true;
-                    nai.networkMisc.acceptUnvalidated = (boolean) msg.obj;
+                    nai.networkMisc.acceptUnvalidated = msg.arg1 == 1;
                     break;
                 }
                 case NetworkAgent.EVENT_PACKET_KEEPALIVE: {
