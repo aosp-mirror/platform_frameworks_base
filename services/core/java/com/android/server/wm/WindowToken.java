@@ -163,7 +163,7 @@ class WindowToken extends WindowContainer<WindowState> {
 
         for (int i = 0; i < count; i++) {
             final WindowState win = mChildren.get(i);
-            if (win.mWinAnimator.isAnimationSet()) {
+            if (win.isAnimating()) {
                 delayed = true;
             }
             changed |= win.onSetAppExiting();

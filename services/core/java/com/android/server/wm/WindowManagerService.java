@@ -2209,7 +2209,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
             focusMayChange = isDefaultDisplay;
             win.mAnimatingExit = true;
-        } else if (win.mWinAnimator.isAnimationSet()) {
+        } else if (win.isAnimating()) {
             // Currently in a hide animation... turn this into
             // an exit.
             win.mAnimatingExit = true;

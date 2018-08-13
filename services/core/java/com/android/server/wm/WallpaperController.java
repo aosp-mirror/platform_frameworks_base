@@ -177,7 +177,7 @@ class WallpaperController {
                 && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Found wallpaper target: " + w);
             mFindResults.setWallpaperTarget(w);
-            if (w == mWallpaperTarget && w.mWinAnimator.isAnimationSet()) {
+            if (w == mWallpaperTarget && w.isAnimating()) {
                 // The current wallpaper target is animating, so we'll look behind it for
                 // another possible target and figure out what is going on later.
                 if (DEBUG_WALLPAPER) Slog.v(TAG,
@@ -243,7 +243,7 @@ class WallpaperController {
     }
 
     boolean isWallpaperTargetAnimating() {
-        return mWallpaperTarget != null && mWallpaperTarget.mWinAnimator.isAnimationSet()
+        return mWallpaperTarget != null && mWallpaperTarget.isAnimating()
                 && (mWallpaperTarget.mAppToken == null
                         || !mWallpaperTarget.mAppToken.isWaitingForTransitionStart());
     }

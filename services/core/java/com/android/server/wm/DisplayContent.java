@@ -443,7 +443,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         // If this window is animating, make a note that we have an animating window and take
         // care of a request to run a detached wallpaper animation.
-        if (winAnimator.isAnimationSet()) {
+        if (w.isAnimating()) {
             final AnimationAdapter anim = w.getAnimation();
             if (anim != null) {
                 if ((flags & FLAG_SHOW_WALLPAPER) != 0 && anim.getDetachWallpaper()) {
@@ -2740,17 +2740,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 if (highestTarget != null) {
                     final AppTransition appTransition = mService.mAppTransition;
                     if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, appTransition + " " + highestTarget
-                            + " animating=" + highestTarget.mWinAnimator.isAnimationSet()
+                            + " animating=" + highestTarget.isAnimating()
                             + " layer=" + highestTarget.mWinAnimator.mAnimLayer
                             + " new layer=" + target.mWinAnimator.mAnimLayer);
 
+                    final boolean higherLayer =
+                            highestTarget.mWinAnimator.mAnimLayer > target.mWinAnimator.mAnimLayer;
                     if (appTransition.isTransitionSet()) {
                         // If we are currently setting up for an animation, hold everything until we
                         // can find out what will happen.
                         setInputMethodTarget(highestTarget, true);
                         return highestTarget;
-                    } else if (highestTarget.mWinAnimator.isAnimationSet() &&
-                            highestTarget.mWinAnimator.mAnimLayer > target.mWinAnimator.mAnimLayer) {
+                    } else if (highestTarget.isAnimating() && higherLayer) {
                         // If the window we are currently targeting is involved with an animation,
                         // and it is on top of the next target we will be over, then hold off on
                         // moving until that is done.

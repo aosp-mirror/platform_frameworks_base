@@ -253,13 +253,6 @@ class WindowStateAnimator {
         mWallpaperControllerLocked = mService.mRoot.mWallpaperController;
     }
 
-    /**
-     * Is the window or its container currently set to animate or currently animating?
-     */
-    boolean isAnimationSet() {
-        return mWin.isAnimating();
-    }
-
     void cancelExitAnimationForNextAnimationLocked() {
         if (DEBUG_ANIM) Slog.d(TAG,
                 "cancelExitAnimationForNextAnimationLocked: " + mWin);
@@ -1197,7 +1190,7 @@ class WindowStateAnimator {
                 w.mToken.hasVisible = true;
             }
         } else {
-            if (DEBUG_ANIM && isAnimationSet()) {
+            if (DEBUG_ANIM && mWin.isAnimating()) {
                 Slog.v(TAG, "prepareSurface: No changes in animation for " + this);
             }
             displayed = true;
@@ -1407,7 +1400,7 @@ class WindowStateAnimator {
         }
 
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-        return isAnimationSet();
+        return mWin.isAnimating();
     }
 
     void writeToProto(ProtoOutputStream proto, long fieldId) {
