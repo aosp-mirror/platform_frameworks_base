@@ -367,13 +367,6 @@ final class InputMonitor {
         }
     }
 
-    void onRemoved() {
-        // If DisplayContent removed, we need find a way to remove window handles of this display
-        // from InputDispatcher, so pass an empty InputWindowHandles to remove them.
-        mService.mInputManager.setInputWindows(mInputWindowHandles, mFocusedInputWindowHandle,
-                mDisplayId);
-    }
-
     private final class UpdateInputForAllWindowsConsumer implements Consumer<WindowState> {
         InputConsumerImpl navInputConsumer;
         InputConsumerImpl pipInputConsumer;
@@ -406,7 +399,8 @@ final class InputMonitor {
             this.inDrag = inDrag;
             wallpaperController = mService.mRoot.mWallpaperController;
 
-            mService.mRoot.getDisplayContent(mDisplayId).forAllWindows(this,
+            // TODO(b/112081256): Use independent InputMonitor for each display.
+            mService.mRoot/*.getDisplayContent(mDisplayId)*/.forAllWindows(this,
                     true /* traverseTopToBottom */);
             if (mAddWallpaperInputConsumerHandle) {
                 // No visible wallpaper found, add the wallpaper input consumer at the end.
@@ -414,8 +408,8 @@ final class InputMonitor {
             }
 
             // Send windows to native code.
-            mService.mInputManager.setInputWindows(mInputWindowHandles, mFocusedInputWindowHandle,
-                    mDisplayId);
+            // TODO: Update Input windows and focus by display?
+            mService.mInputManager.setInputWindows(mInputWindowHandles, mFocusedInputWindowHandle);
 
             clearInputWindowHandlesLw();
 
@@ -435,8 +429,7 @@ final class InputMonitor {
             final int flags = w.mAttrs.flags;
             final int privateFlags = w.mAttrs.privateFlags;
             final int type = w.mAttrs.type;
-            // TODO(b/111361570): multi-display focus, one focus for all display in current.
-            final boolean hasFocus = w == mService.mCurrentFocus;//mInputFocus;
+            final boolean hasFocus = w == mInputFocus;
             final boolean isVisible = w.isVisibleLw();
 
             if (mAddRecentsAnimationInputConsumerHandle) {
