@@ -43,6 +43,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.system.ErrnoException;
@@ -104,6 +105,7 @@ public final class PinnerService extends SystemService {
     private final Context mContext;
     private final ActivityManagerInternal mAmInternal;
     private final IActivityManager mAm;
+    private final UserManager mUserManager;
 
     /** The list of the statically pinned files. */
     @GuardedBy("this")
@@ -165,6 +167,8 @@ public final class PinnerService extends SystemService {
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
         mAm = ActivityManager.getService();
 
+        mUserManager = mContext.getSystemService(UserManager.class);
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         filter.addDataScheme("package");
@@ -195,12 +199,16 @@ public final class PinnerService extends SystemService {
      */
     @Override
     public void onSwitchUser(int userHandle) {
-        sendPinAppsMessage(userHandle);
+        if (!mUserManager.isManagedProfile(userHandle)) {
+            sendPinAppsMessage(userHandle);
+        }
     }
 
     @Override
     public void onUnlockUser(int userHandle) {
-        sendPinAppsMessage(userHandle);
+        if (!mUserManager.isManagedProfile(userHandle)) {
+            sendPinAppsMessage(userHandle);
+        }
     }
 
     /**
