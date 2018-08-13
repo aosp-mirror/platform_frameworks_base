@@ -24,6 +24,7 @@ package android.media.audiofx;
  * <p>Applications should not use the DefaultEffect class directly but one of its derived classes
  * to control specific types of defaults:
  * <ul>
+ *   <li> {@link android.media.audiofx.SourceDefaultEffect}</li>
  *   <li> {@link android.media.audiofx.StreamDefaultEffect}</li>
  * </ul>
  * <p>Creating a DefaultEffect object will register the corresponding effect engine as a default
