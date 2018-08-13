@@ -163,6 +163,8 @@ public final class ImsReasonInfo implements Parcelable {
     public static final int CODE_SIP_NOT_REACHABLE = 341;
     // Others
     public static final int CODE_SIP_CLIENT_ERROR = 342;
+    // 481 Transaction Does Not Exist
+    public static final int CODE_SIP_TRANSACTION_DOES_NOT_EXIST = 343;
     // 5xx responses
     // 501 : Server Internal Error
     public static final int CODE_SIP_SERVER_INTERNAL_ERROR = 351;

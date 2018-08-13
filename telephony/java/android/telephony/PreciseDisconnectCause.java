@@ -332,6 +332,8 @@ public class PreciseDisconnectCause {
     public static final int SIP_NOT_REACHABLE                                = 1320;
     /** Others */
     public static final int SIP_CLIENT_ERROR                                 = 1321;
+    /** 481 : Transaction Does Not Exist */
+    public static final int SIP_TRANSACTION_DOES_NOT_EXIST                   = 1322;
     /** 5xx responses
      *  501 : Server Internal Error
      */
