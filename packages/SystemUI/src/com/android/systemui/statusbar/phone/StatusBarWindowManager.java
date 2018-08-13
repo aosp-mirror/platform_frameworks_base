@@ -180,12 +180,12 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         mLpChanged.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
     }
 
-    private void applyExpandedFlag(State state) {
-        if (state.panelExpanded || state.isKeyguardShowingAndNotOccluded() || state.bouncerShowing
+    private void applyForceShowNavigationFlag(State state) {
+        if (state.panelExpanded || state.bouncerShowing
                 || ENABLE_REMOTE_INPUT && state.remoteInputActive) {
-            mLpChanged.privateFlags |= LayoutParams.PRIVATE_FLAG_STATUS_BAR_EXPANDED;
+            mLpChanged.privateFlags |= LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
         } else {
-            mLpChanged.privateFlags &= ~LayoutParams.PRIVATE_FLAG_STATUS_BAR_EXPANDED;
+            mLpChanged.privateFlags &= ~LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
         }
     }
 
@@ -243,7 +243,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         applyKeyguardFlags(state);
         applyForceStatusBarVisibleFlag(state);
         applyFocusableFlag(state);
-        applyExpandedFlag(state);
+        applyForceShowNavigationFlag(state);
         adjustScreenOrientation(state);
         applyHeight(state);
         applyUserActivityTimeout(state);

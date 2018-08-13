@@ -1692,13 +1692,13 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_IS_SCREEN_DECOR = 0x00400000;
 
         /**
-         * Flag to indicate that the status bar window is now in an explicit expanded state, meaning
-         * that status bar will not be hidden by any window with flag {@link #FLAG_FULLSCREEN} or
-         * {@link View#SYSTEM_UI_FLAG_FULLSCREEN} set.
-         * This can only be set by {@link LayoutParams#TYPE_STATUS_BAR}.
+         * Flag to indicate that the status bar window is in a state such that it forces showing
+         * the navigation bar unless the navigation bar window is explicitly set to
+         * {@link View#GONE}.
+         * It only takes effects if this is set by {@link LayoutParams#TYPE_STATUS_BAR}.
          * @hide
          */
-        public static final int PRIVATE_FLAG_STATUS_BAR_EXPANDED = 0x00800000;
+        public static final int PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION = 0x00800000;
 
         /**
          * Control flags that are private to the platform.
@@ -1790,9 +1790,9 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_IS_SCREEN_DECOR,
                         name = "IS_SCREEN_DECOR"),
                 @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_STATUS_BAR_EXPANDED,
-                        equals = PRIVATE_FLAG_STATUS_BAR_EXPANDED,
-                        name = "STATUS_BAR_EXPANDED")
+                        mask = PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION,
+                        equals = PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION,
+                        name = "STATUS_FORCE_SHOW_NAVIGATION")
         })
         @TestApi
         public int privateFlags;
