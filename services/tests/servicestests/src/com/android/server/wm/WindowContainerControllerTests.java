@@ -16,20 +16,21 @@
 
 package com.android.server.wm;
 
-import android.app.WindowConfiguration;
-import android.content.res.Configuration;
-import android.support.test.filters.FlakyTest;
-import org.junit.Test;
-
-import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.content.res.Configuration.EMPTY;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import android.content.res.Configuration;
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
 
 /**
  * Test class for {@link WindowContainerController}.

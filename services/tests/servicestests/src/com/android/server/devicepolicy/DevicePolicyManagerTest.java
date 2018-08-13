@@ -117,7 +117,7 @@ import java.util.concurrent.TimeUnit;
  adb install \
    -r ${ANDROID_PRODUCT_OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk &&
  adb shell am instrument -e class com.android.server.devicepolicy.DevicePolicyManagerTest \
-   -w com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
+   -w com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
 
  (mmma frameworks/base/services/tests/servicestests/ for non-ninja build)
  *

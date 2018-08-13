@@ -17,9 +17,9 @@
 package com.android.server.accessibility;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
@@ -43,8 +43,9 @@ import android.graphics.Region;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.MagnificationSpec;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 import com.android.server.wm.WindowManagerInternal;

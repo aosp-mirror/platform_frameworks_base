@@ -19,6 +19,7 @@ package com.android.server.accessibility;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
+
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
@@ -30,11 +31,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import android.content.Context;
 import android.os.Handler;
 import android.os.IPowerManager;
@@ -42,8 +38,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.KeyEvent;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.accessibility.KeyEventDispatcher.KeyEventFilter;
 import com.android.server.policy.WindowManagerPolicy;
@@ -55,6 +52,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Tests for KeyEventDispatcher

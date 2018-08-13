@@ -26,14 +26,14 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -62,26 +62,29 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
-import android.support.test.InstrumentationRegistry;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.util.SparseIntArray;
 
+import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.app.IVoiceInteractor;
-
 import com.android.server.AttributeCache;
 import com.android.server.wm.AppWindowContainerController;
+import com.android.server.wm.DisplayWindowController;
 import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.StackWindowController;
 import com.android.server.wm.TaskWindowContainerController;
 import com.android.server.wm.WindowManagerService;
 import com.android.server.wm.WindowTestUtils;
+import com.android.server.uri.UriGrantsManagerInternal;
+
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
 
 import java.util.List;
-
 
 /**
  * A base class to handle common operations in activity related unit tests.

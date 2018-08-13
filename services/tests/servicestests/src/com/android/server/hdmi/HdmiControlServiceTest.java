@@ -17,20 +17,27 @@ package com.android.server.hdmi;
 
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM;
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_PLAYBACK;
+
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import android.os.Looper;
 import android.os.test.TestLooper;
-import android.support.test.filters.SmallTest;
-import java.util.ArrayList;
+
+import androidx.test.filters.SmallTest;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests for {@link HdmiControlService} class. */
+import java.util.ArrayList;
+
+/**
+ * Tests for {@link HdmiControlService} class.
+ */
 @SmallTest
 @RunWith(JUnit4.class)
 public class HdmiControlServiceTest {

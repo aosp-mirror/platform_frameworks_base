@@ -16,28 +16,29 @@
 
 package com.android.server.am;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+
+import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_DONE;
+import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import android.app.ActivityOptions;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.MediumTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.am.LaunchParamsController.LaunchParams;
-import org.junit.runner.RunWith;
+
 import org.junit.Before;
 import org.junit.Test;
-
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_DONE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.doAnswer;
-
-import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for exercising resizing bounds due to activity options.

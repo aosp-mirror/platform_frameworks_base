@@ -41,9 +41,6 @@ import android.os.Looper;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject2;
@@ -51,6 +48,10 @@ import android.support.test.uiautomator.Until;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.servicestests.apps.suspendtestapp.SuspendTestActivity;
 import com.android.servicestests.apps.suspendtestapp.SuspendTestReceiver;

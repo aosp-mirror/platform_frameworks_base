@@ -20,18 +20,18 @@ import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
+
 import static org.junit.Assert.assertEquals;
 
 import android.app.ActivityOptions;
 import android.os.Bundle;
-import android.os.Debug;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.FlakyTest;
-import android.support.test.filters.MediumTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 
 /**
  * atest FrameworksServicesTests:ActivityOptionsTest
