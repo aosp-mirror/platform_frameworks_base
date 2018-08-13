@@ -797,7 +797,8 @@ public final class DisplayManager {
         void onDisplayRemoved(int displayId);
 
         /**
-         * Called whenever the properties of a logical display have changed.
+         * Called whenever the properties of a logical {@link android.view.Display},
+         * such as size and density, have changed.
          *
          * @param displayId The id of the logical display that changed.
          */
