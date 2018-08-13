@@ -20,7 +20,6 @@ import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LE
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
@@ -59,12 +58,25 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
+
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static com.android.server.wm.utils.CoordinateTransforms.transformPhysicalToLogicalCoordinates;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
+import static com.android.server.wm.DisplayContentProto.ABOVE_APP_WINDOWS;
+import static com.android.server.wm.DisplayContentProto.BELOW_APP_WINDOWS;
+import static com.android.server.wm.DisplayContentProto.DISPLAY_FRAMES;
+import static com.android.server.wm.DisplayContentProto.DISPLAY_INFO;
+import static com.android.server.wm.DisplayContentProto.DOCKED_STACK_DIVIDER_CONTROLLER;
+import static com.android.server.wm.DisplayContentProto.DPI;
+import static com.android.server.wm.DisplayContentProto.ID;
+import static com.android.server.wm.DisplayContentProto.IME_WINDOWS;
+import static com.android.server.wm.DisplayContentProto.PINNED_STACK_CONTROLLER;
+import static com.android.server.wm.DisplayContentProto.ROTATION;
+import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
+import static com.android.server.wm.DisplayContentProto.STACKS;
+import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
@@ -101,19 +113,7 @@ import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE;
-import static com.android.server.wm.DisplayContentProto.ABOVE_APP_WINDOWS;
-import static com.android.server.wm.DisplayContentProto.BELOW_APP_WINDOWS;
-import static com.android.server.wm.DisplayContentProto.DISPLAY_FRAMES;
-import static com.android.server.wm.DisplayContentProto.DISPLAY_INFO;
-import static com.android.server.wm.DisplayContentProto.DOCKED_STACK_DIVIDER_CONTROLLER;
-import static com.android.server.wm.DisplayContentProto.DPI;
-import static com.android.server.wm.DisplayContentProto.ID;
-import static com.android.server.wm.DisplayContentProto.IME_WINDOWS;
-import static com.android.server.wm.DisplayContentProto.PINNED_STACK_CONTROLLER;
-import static com.android.server.wm.DisplayContentProto.ROTATION;
-import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
-import static com.android.server.wm.DisplayContentProto.STACKS;
-import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
+import static com.android.server.wm.utils.CoordinateTransforms.transformPhysicalToLogicalCoordinates;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
@@ -3469,16 +3469,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         private void addStackReferenceIfNeeded(TaskStack stack) {
             if (stack.isActivityTypeHome()) {
-                // TODO(b/111363427) Rollback to throws exceptions once we figure out how to
-                // properly deal with home type stack when external display removed
                 if (mHomeStack != null) {
-                    // throw new IllegalArgumentException("addStackReferenceIfNeeded: home stack="
-                    //        + mHomeStack + " already exist on display=" + this + " stack=" + stack);
-                    Slog.e(TAG, "addStackReferenceIfNeeded: home stack="
+                    throw new IllegalArgumentException("addStackReferenceIfNeeded: home stack="
                             + mHomeStack + " already exist on display=" + this + " stack=" + stack);
-                } else {
-                    mHomeStack = stack;
+
                 }
+                mHomeStack = stack;
             }
             final int windowingMode = stack.getWindowingMode();
             if (windowingMode == WINDOWING_MODE_PINNED) {

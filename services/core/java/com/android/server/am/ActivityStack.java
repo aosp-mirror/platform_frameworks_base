@@ -36,6 +36,15 @@ import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
+import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 
 import static com.android.server.am.ActivityDisplay.POSITION_BOTTOM;
 import static com.android.server.am.ActivityDisplay.POSITION_TOP;
@@ -82,10 +91,6 @@ import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
-import static com.android.server.am.ActivityStackSupervisor.FindTaskResult;
-import static com.android.server.am.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
-import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
-import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.am.ActivityStackProto.BOUNDS;
 import static com.android.server.am.ActivityStackProto.CONFIGURATION_CONTAINER;
 import static com.android.server.am.ActivityStackProto.DISPLAY_ID;
@@ -93,15 +98,10 @@ import static com.android.server.am.ActivityStackProto.FULLSCREEN;
 import static com.android.server.am.ActivityStackProto.ID;
 import static com.android.server.am.ActivityStackProto.RESUMED_ACTIVITY;
 import static com.android.server.am.ActivityStackProto.TASKS;
-import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
-import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
-import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
-import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
-import static android.view.WindowManager.TRANSIT_TASK_OPEN;
-import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
-import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
-import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
+import static com.android.server.am.ActivityStackSupervisor.FindTaskResult;
+import static com.android.server.am.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
+import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 
 import static java.lang.Integer.MAX_VALUE;
 
@@ -115,12 +115,12 @@ import android.app.WindowConfiguration.ActivityType;
 import android.app.WindowConfiguration.WindowingMode;
 import android.app.servertransaction.ActivityResultItem;
 import android.app.servertransaction.ClientTransaction;
-import android.app.servertransaction.NewIntentItem;
-import android.app.servertransaction.WindowVisibilityItem;
 import android.app.servertransaction.DestroyActivityItem;
+import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.StopActivityItem;
+import android.app.servertransaction.WindowVisibilityItem;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -5191,7 +5191,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (isAttached()) {
                 getDisplay().positionChildAtBottom(this);
             }
-            if (!isActivityTypeHome()) {
+            if (!isActivityTypeHome() || getDisplay().isRemoved()) {
                 remove();
             }
         }

@@ -31,6 +31,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
 import static android.view.Display.REMOVE_MODE_DESTROY_CONTENT;
+
 import static com.android.server.am.ActivityDisplayProto.CONFIGURATION_CONTAINER;
 import static com.android.server.am.ActivityDisplayProto.FOCUSED_STACK_ID;
 import static com.android.server.am.ActivityDisplayProto.ID;
@@ -43,7 +44,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStackSupervisor.TAG_STATES;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
@@ -103,6 +103,12 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
 
     private boolean mSleeping;
 
+    /**
+     * The display is removed from the system and we are just waiting for all activities on it to be
+     * finished before removing this object.
+     */
+    private boolean mRemoved;
+
     // Cached reference to some special stacks we tend to get a lot so we don't need to loop
     // through the list to find them.
     private ActivityStack mHomeStack = null;
@@ -155,6 +161,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 + " from displayId=" + mDisplayId);
         mStacks.remove(stack);
         removeStackReferenceIfNeeded(stack);
+        releaseSelfIfNeeded();
         mSupervisor.mService.updateSleepIfNeededLocked();
         onStackOrderChanged();
     }
@@ -484,16 +491,11 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         final int windowingMode = stack.getWindowingMode();
 
         if (activityType == ACTIVITY_TYPE_HOME) {
-            // TODO(b/111363427) Rollback to throws exceptions once we figure out how to properly
-            // deal with home type stack when external display removed
             if (mHomeStack != null && mHomeStack != stack) {
-                // throw new IllegalArgumentException("addStackReferenceIfNeeded: home stack="
-                //         + mHomeStack + " already exist on display=" + this + " stack=" + stack);
-                Slog.e(TAG, "addStackReferenceIfNeeded: home stack="
+                throw new IllegalArgumentException("addStackReferenceIfNeeded: home stack="
                         + mHomeStack + " already exist on display=" + this + " stack=" + stack);
-            } else {
-                mHomeStack = stack;
             }
+            mHomeStack = stack;
         } else if (activityType == ACTIVITY_TYPE_RECENTS) {
             if (mRecentsStack != null && mRecentsStack != stack) {
                 throw new IllegalArgumentException("addStackReferenceIfNeeded: recents stack="
@@ -796,28 +798,47 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         return false;
     }
 
+    /**
+     * @see #mRemoved
+     */
+    boolean isRemoved() {
+        return mRemoved;
+    }
+
     void remove() {
         final boolean destroyContentOnRemoval = shouldDestroyContentOnRemove();
-        while (getChildCount() > 0) {
-            final ActivityStack stack = getChildAt(0);
-            if (destroyContentOnRemoval) {
-                // Override the stack configuration to make it equal to the current applied one, so
-                // that we don't accidentally report configuration change to activities that are
-                // going to be finished.
-                stack.onOverrideConfigurationChanged(stack.getConfiguration());
-                mSupervisor.moveStackToDisplayLocked(stack.mStackId, DEFAULT_DISPLAY,
-                        false /* onTop */);
+
+        // Stacks could be reparented from the removed display to other display. While
+        // reparenting the last stack of the removed display, the remove display is ready to be
+        // released (no more ActivityStack). But, we cannot release it at that moment or the
+        // related WindowContainer and WindowContainerController will also be removed. So, we
+        // set display as removed after reparenting stack finished.
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            final ActivityStack stack = mStacks.get(i);
+            // Always finish non-standard type stacks.
+            if (destroyContentOnRemoval || !stack.isActivityTypeStandardOrUndefined()) {
                 stack.finishAllActivitiesLocked(true /* immediately */);
             } else {
-                // Moving all tasks to fullscreen stack, because it's guaranteed to be
-                // a valid launch stack for all activities. This way the task history from
-                // external display will be preserved on primary after move.
-                mSupervisor.moveTasksToFullscreenStackLocked(stack, true /* onTop */);
+                // If default display is in split-window mode, set windowing mode of the stack to
+                // split-screen secondary. Otherwise, set the windowing mode to undefined by
+                // default to let stack inherited the windowing mode from the new display.
+                int windowingMode = mSupervisor.getDefaultDisplay().hasSplitScreenPrimaryStack()
+                        ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY : WINDOWING_MODE_UNDEFINED;
+                mSupervisor.moveStackToDisplayLocked(stack.mStackId, DEFAULT_DISPLAY, true);
+                stack.setWindowingMode(windowingMode);
             }
         }
+        mRemoved = true;
 
-        mWindowContainerController.removeContainer();
-        mWindowContainerController = null;
+        releaseSelfIfNeeded();
+    }
+
+    private void releaseSelfIfNeeded() {
+        if (mStacks.isEmpty() && mRemoved) {
+            mWindowContainerController.removeContainer();
+            mWindowContainerController = null;
+            mSupervisor.releaseActivityDisplayLocked(mDisplayId);
+        }
     }
 
     /** Update and get all UIDs that are present on the display and have access to it. */
