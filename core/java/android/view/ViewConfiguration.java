@@ -857,6 +857,7 @@ public class ViewConfiguration {
      *   the global actions dialog.
      * @hide
      */
+    @TestApi
     public long getDeviceGlobalActionKeyTimeout() {
         return mGlobalActionsKeyTimeout;
     }

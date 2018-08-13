@@ -5270,12 +5270,6 @@ Landroid/view/View;->removePerformClickCallback()V
 Landroid/view/View;->requestAccessibilityFocus()Z
 Landroid/view/View;->resetDisplayList()V
 Landroid/view/View;->resetPaddingToInitialValues()V
-Landroid/view/View;->resetResolvedDrawables()V
-Landroid/view/View;->resetResolvedLayoutDirection()V
-Landroid/view/View;->resetResolvedPadding()V
-Landroid/view/View;->resetResolvedTextAlignment()V
-Landroid/view/View;->resetResolvedTextDirection()V
-Landroid/view/View;->resetRtlProperties()V
 Landroid/view/View;->resolvePadding()V
 Landroid/view/View;->setAlphaNoInvalidation(F)Z
 Landroid/view/View;->setAnimationMatrix(Landroid/graphics/Matrix;)V
@@ -5283,7 +5277,6 @@ Landroid/view/View;->setAssistBlocked(Z)V
 Landroid/view/View;->setDisabledSystemUiVisibility(I)V
 Landroid/view/View;->setFlags(II)V
 Landroid/view/View;->setFrame(IIII)Z
-Landroid/view/View;->setIsRootNamespace(Z)V
 Landroid/view/View;->setLeftTopRightBottom(IIII)V
 Landroid/view/View;->setTagInternal(ILjava/lang/Object;)V
 Landroid/view/View;->setTransitionAlpha(F)V
@@ -5297,7 +5290,6 @@ Landroid/view/View;->toLocalMotionEvent(Landroid/view/MotionEvent;)Z
 Landroid/view/View;->transformMatrixToGlobal(Landroid/graphics/Matrix;)V
 Landroid/view/View;->transformMatrixToLocal(Landroid/graphics/Matrix;)V
 Landroid/view/View;->updateDisplayListIfDirty()Landroid/view/RenderNode;
-Landroid/view/ViewConfiguration;->getDeviceGlobalActionKeyTimeout()J
 Landroid/view/ViewConfiguration;->getDoubleTapMinTime()I
 Landroid/view/ViewConfiguration;->getDoubleTapSlop()I
 Landroid/view/ViewConfiguration;->getHoverTapSlop()I
@@ -5346,11 +5338,6 @@ Landroid/view/ViewGroup;->offsetChildrenTopAndBottom(I)V
 Landroid/view/ViewGroup;->onChildVisibilityChanged(Landroid/view/View;II)V
 Landroid/view/ViewGroup;->onInitializeAccessibilityNodeInfoInternal(Landroid/view/accessibility/AccessibilityNodeInfo;)V
 Landroid/view/ViewGroup;->removeTransientView(Landroid/view/View;)V
-Landroid/view/ViewGroup;->resetResolvedDrawables()V
-Landroid/view/ViewGroup;->resetResolvedLayoutDirection()V
-Landroid/view/ViewGroup;->resetResolvedPadding()V
-Landroid/view/ViewGroup;->resetResolvedTextAlignment()V
-Landroid/view/ViewGroup;->resetResolvedTextDirection()V
 Landroid/view/ViewGroup;->resolvePadding()V
 Landroid/view/ViewGroup;->suppressLayout(Z)V
 Landroid/view/ViewGroup;->transformPointToViewLocal([FLandroid/view/View;)V

@@ -1460,13 +1460,21 @@ package android.view {
     method public android.view.View getTooltipView();
     method public static boolean isDefaultFocusHighlightEnabled();
     method public boolean isDefaultFocusHighlightNeeded(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
+    method protected void resetResolvedDrawables();
+    method public void resetResolvedLayoutDirection();
+    method public void resetResolvedPadding();
+    method public void resetResolvedTextAlignment();
+    method public void resetResolvedTextDirection();
+    method public void resetRtlProperties();
     method public boolean restoreFocusInCluster(int);
     method public boolean restoreFocusNotInCluster();
     method public void setAutofilled(boolean);
     method public final void setFocusedInCluster();
+    method public void setIsRootNamespace(boolean);
   }
 
   public class ViewConfiguration {
+    method public long getDeviceGlobalActionKeyTimeout();
     method public static int getHoverTooltipHideShortTimeout();
     method public static int getHoverTooltipHideTimeout();
     method public static int getHoverTooltipShowTimeout();
