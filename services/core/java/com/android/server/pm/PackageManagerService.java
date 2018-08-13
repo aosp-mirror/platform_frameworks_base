@@ -90,6 +90,7 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
+
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
 import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
@@ -321,6 +322,11 @@ import com.android.server.security.VerityUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import dalvik.system.CloseGuard;
+import dalvik.system.VMRuntime;
+
+import libcore.io.IoUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -364,10 +370,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
-
-import dalvik.system.CloseGuard;
-import dalvik.system.VMRuntime;
-import libcore.io.IoUtils;
 
 /**
  * Keep track of all those APKs everywhere.
@@ -6369,17 +6371,17 @@ public class PackageManagerService extends IPackageManager.Stub
                 && intent.hasCategory(CATEGORY_DEFAULT);
     }
 
-    private boolean isDeviceProvisioned() {
-        return android.provider.Settings.Global.getInt(mContext.getContentResolver(),
-                android.provider.Settings.Global.DEVICE_PROVISIONED, 0) == 1;
-    }
-
     // TODO: handle preferred activities missing while user has amnesia
     ResolveInfo findPreferredActivity(Intent intent, String resolvedType, int flags,
             List<ResolveInfo> query, int priority, boolean always,
             boolean removeMatches, boolean debug, int userId) {
         if (!sUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
+        // Do NOT hold the packages lock; this calls up into the settings provider which
+        // could cause a deadlock.
+        final boolean isDeviceProvisioned =
+                android.provider.Settings.Global.getInt(mContext.getContentResolver(),
+                        android.provider.Settings.Global.DEVICE_PROVISIONED, 0) == 1;
         flags = updateFlagsForResolve(
                 flags, userId, intent, callingUid, false /*includeInstantApps*/);
         intent = updateIntentForResolve(intent);
@@ -6459,7 +6461,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             }
                         }
                         final boolean excludeSetupWizardHomeActivity = isHomeIntent(intent)
-                                && !isDeviceProvisioned();
+                                && !isDeviceProvisioned;
                         if (ai == null) {
                             // Do not remove launcher's preferred activity during SetupWizard
                             // due to it may not install yet
