@@ -25,6 +25,9 @@ public class SystemAudioInitiationActionFromAvr extends HdmiCecFeatureAction {
 
     // State that waits for <Active Source> once send <Request Active Source>.
     private static final int STATE_WAITING_FOR_ACTIVE_SOURCE = 1;
+    // State that waits for TV supporting Audio System Mode or not
+    // once received <Active Source>
+    private static final int STATE_WAITING_FOR_TV_SUPPORT = 2;
     @VisibleForTesting
     static final int MAX_RETRY_COUNT = 5;
 
@@ -60,6 +63,7 @@ public class SystemAudioInitiationActionFromAvr extends HdmiCecFeatureAction {
                 if (physicalAddress != getSourcePath()) {
                     audioSystem().setActiveSource(cmd.getSource(), physicalAddress);
                 }
+                mState = STATE_WAITING_FOR_TV_SUPPORT;
                 queryTvSystemAudioModeSupport();
                 return true;
         }
