@@ -17,6 +17,9 @@
 #ifndef AAPT2_DUMP_H
 #define AAPT2_DUMP_H
 
+#include <io/FileStream.h>
+#include <io/ZipArchive.h>
+
 #include "Command.h"
 #include "Debug.h"
 #include "LoadedApk.h"
@@ -226,6 +229,16 @@ class DumpXmlStringsCommand : public DumpApkCommand {
   std::vector<std::string> files_;
 };
 
+class DumpChunks : public DumpApkCommand {
+ public:
+  DumpChunks(text::Printer* printer, IDiagnostics* diag) : DumpApkCommand("chunks", printer, diag) {
+    SetDescription("Print the chunk information of the compiled resources.arsc in the APK.");
+  }
+
+  int Dump(LoadedApk* apk) override;
+};
+
+/** Prints the tree of a compiled xml in an APK. */
 class DumpXmlTreeCommand : public DumpApkCommand {
  public:
   explicit DumpXmlTreeCommand(text::Printer* printer, IDiagnostics* diag)
@@ -263,6 +276,7 @@ class DumpCommand : public Command {
     AddOptionalSubcommand(util::make_unique<DumpStringsCommand>(printer, diag_));
     AddOptionalSubcommand(util::make_unique<DumpStyleParentCommand>(printer, diag_));
     AddOptionalSubcommand(util::make_unique<DumpTableCommand>(printer, diag_));
+    AddOptionalSubcommand(util::make_unique<DumpChunks>(printer, diag_));
     AddOptionalSubcommand(util::make_unique<DumpXmlStringsCommand>(printer, diag_));
     AddOptionalSubcommand(util::make_unique<DumpXmlTreeCommand>(printer, diag_));
     AddOptionalSubcommand(util::make_unique<DumpOverlayableCommand>(printer, diag_));
