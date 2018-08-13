@@ -177,11 +177,11 @@ public class QSFactoryImpl implements QSFactory {
         if (tileSpec.startsWith(CustomTile.PREFIX)) return CustomTile.create(mHost, tileSpec);
 
         // Debug tiles.
-        if (Build.IS_DEBUGGABLE) {
+        /*if (Build.IS_DEBUGGABLE) {
             if (tileSpec.equals(GarbageMonitor.MemoryTile.TILE_SPEC)) {
                 return mMemoryTileProvider.get();
             }
-        }
+        }*/
 
         // Broken tiles.
         Log.w(TAG, "No stock tile spec: " + tileSpec);
