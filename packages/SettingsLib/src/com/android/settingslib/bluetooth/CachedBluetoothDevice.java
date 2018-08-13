@@ -23,7 +23,6 @@ import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.media.AudioManager;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
 import android.text.TextUtils;
@@ -51,7 +50,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private final Context mContext;
     private final LocalBluetoothAdapter mLocalAdapter;
     private final LocalBluetoothProfileManager mProfileManager;
-    private final AudioManager mAudioManager;
     private final BluetoothDevice mDevice;
     //TODO: consider remove, BluetoothDevice.getName() is already cached
     private String mName;
@@ -187,7 +185,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         mContext = context;
         mLocalAdapter = adapter;
         mProfileManager = profileManager;
-        mAudioManager = context.getSystemService(AudioManager.class);
         mDevice = device;
         mProfileConnectionState = new HashMap<LocalBluetoothProfile, Integer>();
         fillData();
