@@ -288,44 +288,48 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
 
     Printer r_txt_printer(&fout_text);
     for (const auto& package : table.packages) {
-      for (const auto& type : package->types) {
-        for (const auto& entry : type->entries) {
-          // Check access modifiers.
-          switch(entry->visibility.level) {
-            case Visibility::Level::kUndefined :
-              r_txt_printer.Print("default ");
-              break;
-            case Visibility::Level::kPublic :
-              r_txt_printer.Print("public ");
-              break;
-            case Visibility::Level::kPrivate :
-              r_txt_printer.Print("private ");
-          }
+      // Only print resources defined locally, e.g. don't write android attributes.
+      if (package->name.empty()) {
+        for (const auto& type : package->types) {
+          for (const auto& entry : type->entries) {
+            // Check access modifiers.
+            switch (entry->visibility.level) {
+              case Visibility::Level::kUndefined :
+                r_txt_printer.Print("default ");
+                break;
+              case Visibility::Level::kPublic :
+                r_txt_printer.Print("public ");
+                break;
+              case Visibility::Level::kPrivate :
+                r_txt_printer.Print("private ");
+            }
 
-          if (type->type != ResourceType::kStyleable) {
-            r_txt_printer.Print("int ");
-            r_txt_printer.Print(to_string(type->type));
-            r_txt_printer.Print(" ");
-            r_txt_printer.Println(entry->name);
-          } else {
-            r_txt_printer.Print("int[] styleable ");
-            r_txt_printer.Println(entry->name);
+            if (type->type != ResourceType::kStyleable) {
+              r_txt_printer.Print("int ");
+              r_txt_printer.Print(to_string(type->type));
+              r_txt_printer.Print(" ");
+              r_txt_printer.Println(entry->name);
+            } else {
+              r_txt_printer.Print("int[] styleable ");
+              r_txt_printer.Println(entry->name);
 
-            if (!entry->values.empty()) {
-              auto styleable = static_cast<const Styleable*>(entry->values.front()->value.get());
-              for (const auto& attr : styleable->entries) {
-                // The visibility of the children under the styleable does not matter as they are
-                // nested under their parent and use its visibility.
-                r_txt_printer.Print("default int styleable ");
-                r_txt_printer.Print(entry->name);
-                // If the package name is present, also include it in the mangled name (e.g.
-                // "android")
-                if (!attr.name.value().package.empty()) {
+              if (!entry->values.empty()) {
+                auto styleable =
+                    static_cast<const Styleable*>(entry->values.front()->value.get());
+                for (const auto& attr : styleable->entries) {
+                  // The visibility of the children under the styleable does not matter as they are
+                  // nested under their parent and use its visibility.
+                  r_txt_printer.Print("default int styleable ");
+                  r_txt_printer.Print(entry->name);
+                  // If the package name is present, also include it in the mangled name (e.g.
+                  // "android")
+                  if (!attr.name.value().package.empty()) {
+                    r_txt_printer.Print("_");
+                    r_txt_printer.Print(MakePackageSafeName(attr.name.value().package));
+                  }
                   r_txt_printer.Print("_");
-                  r_txt_printer.Print(MakePackageSafeName(attr.name.value().package));
+                  r_txt_printer.Println(attr.name.value().entry);
                 }
-                r_txt_printer.Print("_");
-                r_txt_printer.Println(attr.name.value().entry);
               }
             }
           }
