@@ -1791,13 +1791,13 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.DOZE_ALWAYS_ON,
                 SecureSettingsProto.Doze.ALWAYS_ON);
         dumpSetting(s, p,
-                Settings.Secure.DOZE_PULSE_ON_PICK_UP,
+                Settings.Secure.DOZE_PICK_UP_GESTURE,
                 SecureSettingsProto.Doze.PULSE_ON_PICK_UP);
         dumpSetting(s, p,
                 Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                 SecureSettingsProto.Doze.PULSE_ON_LONG_PRESS);
         dumpSetting(s, p,
-                Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP,
+                Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
                 SecureSettingsProto.Doze.PULSE_ON_DOUBLE_TAP);
         p.end(dozeToken);
 

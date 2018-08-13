@@ -50,7 +50,6 @@ import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
-import android.text.TextUtils;
 import android.util.Slog;
 import android.view.Display;
 
@@ -124,7 +123,7 @@ public final class DreamManagerService extends SystemService {
                 }
             }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mHandler);
             mContext.getContentResolver().registerContentObserver(
-                    Settings.Secure.getUriFor(Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP), false,
+                    Settings.Secure.getUriFor(Settings.Secure.DOZE_DOUBLE_TAP_GESTURE), false,
                     mDozeEnabledObserver, UserHandle.USER_ALL);
             writePulseGestureEnabled();
         }

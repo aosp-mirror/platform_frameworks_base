@@ -36,15 +36,8 @@ public class AmbientDisplayConfiguration {
 
     public boolean enabled(int user) {
         return pulseOnNotificationEnabled(user)
-                || pulseOnPickupEnabled(user)
-                || pulseOnDoubleTapEnabled(user)
                 || pulseOnLongPressEnabled(user)
                 || alwaysOnEnabled(user);
-    }
-
-    public boolean available() {
-        return pulseOnNotificationAvailable() || pulseOnPickupAvailable()
-                || pulseOnDoubleTapAvailable();
     }
 
     public boolean pulseOnNotificationEnabled(int user) {
@@ -55,30 +48,18 @@ public class AmbientDisplayConfiguration {
         return ambientDisplayAvailable();
     }
 
-    public boolean pulseOnPickupEnabled(int user) {
-        boolean settingEnabled = boolSettingDefaultOn(Settings.Secure.DOZE_PULSE_ON_PICK_UP, user);
-        return (settingEnabled || alwaysOnEnabled(user)) && pulseOnPickupAvailable();
+    public boolean pickupGestureEnabled(int user) {
+        return boolSettingDefaultOn(Settings.Secure.DOZE_PICK_UP_GESTURE, user)
+                && dozePickupSensorAvailable();
     }
 
-    public boolean pulseOnPickupAvailable() {
-        return dozePulsePickupSensorAvailable() && ambientDisplayAvailable();
-    }
-
-    public boolean dozePulsePickupSensorAvailable() {
+    public boolean dozePickupSensorAvailable() {
         return mContext.getResources().getBoolean(R.bool.config_dozePulsePickup);
     }
 
-    public boolean pulseOnPickupCanBeModified(int user) {
-        return !alwaysOnEnabled(user);
-    }
-
-    public boolean pulseOnDoubleTapEnabled(int user) {
-        return boolSettingDefaultOn(Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP, user)
-                && pulseOnDoubleTapAvailable();
-    }
-
-    public boolean pulseOnDoubleTapAvailable() {
-        return doubleTapSensorAvailable() && ambientDisplayAvailable();
+    public boolean doubleTapGestureEnabled(int user) {
+        return boolSettingDefaultOn(Settings.Secure.DOZE_DOUBLE_TAP_GESTURE, user)
+                && doubleTapSensorAvailable();
     }
 
     public boolean doubleTapSensorAvailable() {

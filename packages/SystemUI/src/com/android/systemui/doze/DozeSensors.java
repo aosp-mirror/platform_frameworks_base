@@ -91,13 +91,13 @@ public class DozeSensors {
                         false /* touchscreen */),
                 mPickupSensor = new TriggerSensor(
                         mSensorManager.getDefaultSensor(Sensor.TYPE_PICK_UP_GESTURE),
-                        Settings.Secure.DOZE_PULSE_ON_PICK_UP,
-                        config.pulseOnPickupAvailable(),
+                        Settings.Secure.DOZE_PICK_UP_GESTURE,
+                        config.dozePickupSensorAvailable(),
                         DozeLog.PULSE_REASON_SENSOR_PICKUP, false /* touchCoords */,
                         false /* touchscreen */),
                 new TriggerSensor(
                         findSensorWithType(config.doubleTapSensorType()),
-                        Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP,
+                        Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
                         true /* configured */,
                         DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP,
                         dozeParameters.doubleTapReportsTouchCoordinates(),
