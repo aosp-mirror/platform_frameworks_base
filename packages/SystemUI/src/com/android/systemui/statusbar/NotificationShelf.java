@@ -34,8 +34,10 @@ import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -94,6 +96,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private Rect mClipRect = new Rect();
     private int mCutoutHeight;
 
+    private final StateListener mStateListener = this::setStatusBarState;
+
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -112,6 +116,18 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mShelfState = new ShelfState();
         setBottomRoundness(1.0f, false /* animate */);
         initDimens();
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        Dependency.get(StatusBarStateController.class).addListener(mStateListener);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        Dependency.get(StatusBarStateController.class).removeListener(mStateListener);
     }
 
     public void bind(AmbientState ambientState, NotificationStackScrollLayout hostLayout) {
@@ -836,11 +852,9 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mCollapsedIcons.addOnLayoutChangeListener(this);
     }
 
-    public void setStatusBarState(int statusBarState) {
-        if (mStatusBarState != statusBarState) {
-            mStatusBarState = statusBarState;
-            updateInteractiveness();
-        }
+    private void setStatusBarState(int statusBarState) {
+        mStatusBarState = statusBarState;
+        updateInteractiveness();
     }
 
     private void updateInteractiveness() {

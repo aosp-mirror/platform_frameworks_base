@@ -44,7 +44,9 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.RemoteInputController;
+import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardBouncer.BouncerExpansionCallback;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -116,6 +118,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     // Dismiss action to be launched when we stop dozing or the keyguard is gone.
     private DismissWithActionRequest mPendingWakeupAction;
+    private final KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
 
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -557,8 +560,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     private long getNavBarShowDelay() {
-        if (mStatusBar.isKeyguardFadingAway()) {
-            return mStatusBar.getKeyguardFadingAwayDelay();
+        if (mKeyguardMonitor.isKeyguardFadingAway()) {
+            return mKeyguardMonitor.getKeyguardFadingAwayDelay();
         } else if (mBouncer.isShowing()) {
             return NAV_BAR_SHOW_DELAY_BOUNCER;
         } else {
@@ -677,7 +680,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public boolean isGoingToNotificationShade() {
-        return mStatusBar.isGoingToNotificationShade();
+        return Dependency.get(StatusBarStateController.class).leaveOpenOnKeyguardHide();
     }
 
     public boolean isSecure(int userId) {

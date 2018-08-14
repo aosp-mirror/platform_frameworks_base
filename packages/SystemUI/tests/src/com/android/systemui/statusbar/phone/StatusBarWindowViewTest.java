@@ -26,9 +26,11 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.MotionEvent;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,6 +46,7 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
+        mDependency.injectMockDependency(StatusBarStateController.class);
         mView = new StatusBarWindowView(getContext(), null);
         mStatusBar = mock(StatusBar.class);
         mView.setService(mStatusBar);
@@ -53,7 +56,8 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
 
     @Test
     public void testDragDownHelperCalledWhenDraggingDown() throws Exception {
-        when(mStatusBar.getBarState()).thenReturn(StatusBarState.SHADE);
+        when(Dependency.get(StatusBarStateController.class).getState())
+                .thenReturn(StatusBarState.SHADE);
         when(mDragDownHelper.isDraggingDown()).thenReturn(true);
         long now = SystemClock.elapsedRealtime();
         MotionEvent ev = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, 0 /* x */, 0 /* y */,

@@ -72,6 +72,11 @@ public class FakeKeyguardMonitor implements KeyguardMonitor {
     }
 
     @Override
+    public long calculateGoingToFullShadeDelay() {
+        return 0;
+    }
+
+    @Override
     public boolean canSkipBouncer() {
         return false;
     }

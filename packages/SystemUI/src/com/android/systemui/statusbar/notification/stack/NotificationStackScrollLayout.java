@@ -77,6 +77,9 @@ import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -89,7 +92,7 @@ import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
-import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
@@ -416,8 +419,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private NotificationIconAreaController mIconAreaController;
     private float mVerticalPanelTranslation;
+    private final NotificationLockscreenUserManager mLockscreenUserManager =
+            Dependency.get(NotificationLockscreenUserManager.class);
 
     private Interpolator mDarkXInterpolator = Interpolators.FAST_OUT_SLOW_IN;
+
+    private final StateListener mStateListener = this::setStatusBarState;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -474,6 +481,18 @@ public class NotificationStackScrollLayout extends ViewGroup
             mDebugPaint.setStrokeWidth(2);
             mDebugPaint.setStyle(Paint.Style.STROKE);
         }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        Dependency.get(StatusBarStateController.class).addListener(mStateListener);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        Dependency.get(StatusBarStateController.class).removeListener(mStateListener);
     }
 
     @Override
@@ -1471,7 +1490,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     };
 
-    public void setExpandingEnabled(boolean enable) {
+    private void setExpandingEnabled(boolean enable) {
         mExpandHelper.setEnabled(enable);
     }
 
@@ -3880,7 +3899,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mDimAnimator.start();
     }
 
-    public void setHideSensitive(boolean hideSensitive, boolean animate) {
+    private void setHideSensitive(boolean hideSensitive, boolean animate) {
         if (hideSensitive != mAmbientState.isHideSensitive()) {
             int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
@@ -4596,9 +4615,24 @@ public class NotificationStackScrollLayout extends ViewGroup
         updateClipping();
     }
 
-    public void setStatusBarState(int statusBarState) {
+    private void setStatusBarState(int statusBarState) {
         mStatusBarState = statusBarState;
         mAmbientState.setStatusBarState(statusBarState);
+        boolean onKeyguard = onKeyguard();
+        boolean publicMode = mLockscreenUserManager.isAnyProfilePublicMode();
+        if (mHeadsUpAppearanceController != null) {
+            mHeadsUpAppearanceController.setPublicMode(publicMode);
+        }
+
+        StatusBarStateController state = Dependency.get(StatusBarStateController.class);
+        setHideSensitive(publicMode, state.goingToFullShade() /* animate */);
+        setDimmed(onKeyguard, state.fromShadeLocked() /* animate */);
+        setExpandingEnabled(!onKeyguard);
+        ActivatableNotificationView activatedChild = getActivatedChild();
+        setActivatedChild(null);
+        if (activatedChild != null) {
+            activatedChild.makeInactive(false /* animate */);
+        }
     }
 
     public void setExpandingVelocity(float expandingVelocity) {

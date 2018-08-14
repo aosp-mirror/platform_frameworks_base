@@ -38,10 +38,13 @@ import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.R;
+import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -69,6 +72,8 @@ public class StatusBarWindowController implements RemoteInputController.Callback
     private final State mCurrentState = new State();
     private OtherwisedCollapsedListener mListener;
 
+    private final StateListener mStateListener = this::setStatusBarState;
+
     public StatusBarWindowController(Context context) {
         this(context, context.getSystemService(WindowManager.class), ActivityManager.getService(),
                 DozeParameters.getInstance(context));
@@ -83,6 +88,7 @@ public class StatusBarWindowController implements RemoteInputController.Callback
         mKeyguardScreenRotation = shouldEnableKeyguardScreenRotation();
         mDozeParameters = dozeParameters;
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
+        Dependency.get(StatusBarStateController.class).addListener(mStateListener);
     }
 
     private boolean shouldEnableKeyguardScreenRotation() {
@@ -385,9 +391,9 @@ public class StatusBarWindowController implements RemoteInputController.Callback
     }
 
     /**
-     * @param state The {@link StatusBarState} of the status bar.
+     * @param state The {@link StatusBarStateController} of the status bar.
      */
-    public void setStatusBarState(int state) {
+    private void setStatusBarState(int state) {
         mCurrentState.statusBarState = state;
         apply(mCurrentState);
     }

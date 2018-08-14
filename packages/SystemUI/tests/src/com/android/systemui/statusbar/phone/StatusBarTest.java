@@ -72,6 +72,8 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.AppOpsListener;
 import com.android.systemui.statusbar.CommandQueue;
@@ -92,7 +94,6 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.RemoteInputController;
-import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -137,6 +138,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private RemoteInputController mRemoteInputController;
+    @Mock private StatusBarStateController mStatusBarStateController;
 
     private TestableStatusBar mStatusBar;
     private FakeMetricsLogger mMetricsLogger;
@@ -158,6 +160,7 @@ public class StatusBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationListener.class, mNotificationListener);
         mDependency.injectTestDependency(KeyguardMonitor.class, mock(KeyguardMonitorImpl.class));
         mDependency.injectTestDependency(AppOpsListener.class, mock(AppOpsListener.class));
+        mDependency.injectTestDependency(StatusBarStateController.class, mStatusBarStateController);
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
@@ -561,7 +564,7 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.mState = StatusBarState.KEYGUARD;
         when(mStatusBar.mLockscreenUserManager.getCurrentProfiles()).thenReturn(
                 new SparseArray<>());
-        mStatusBar.updateKeyguardState(false, false);
+        mStatusBar.onStateChanged(StatusBarState.SHADE);
     }
 
     @Test
@@ -685,13 +688,13 @@ public class StatusBarTest extends SysuiTestCase {
 
         // By default, showKeyguardImpl sets state to KEYGUARD.
         mStatusBar.showKeyguardImpl();
-        assertTrue(mStatusBar.mState == StatusBarState.KEYGUARD);
+        verify(mStatusBarStateController).setState(eq(StatusBarState.KEYGUARD));
 
         // If useFullscreenUserSwitcher is true, state is set to FULLSCREEN_USER_SWITCHER.
         mStatusBar.mUserSwitcherController = mock(UserSwitcherController.class);
         when(mStatusBar.mUserSwitcherController.useFullscreenUserSwitcher()).thenReturn(true);
         mStatusBar.showKeyguardImpl();
-        assertTrue(mStatusBar.mState == StatusBarState.FULLSCREEN_USER_SWITCHER);
+        verify(mStatusBarStateController).setState(eq(StatusBarState.FULLSCREEN_USER_SWITCHER));
     }
 
     @Test

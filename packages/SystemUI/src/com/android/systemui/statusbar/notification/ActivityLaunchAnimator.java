@@ -29,13 +29,15 @@ import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.shared.system.SurfaceControlCompat;
 import com.android.systemui.shared.system.SyncRtSurfaceTransactionApplier;
 import com.android.systemui.shared.system.SyncRtSurfaceTransactionApplier.SurfaceParams;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -57,6 +59,7 @@ public class ActivityLaunchAnimator {
     private final NotificationPanelView mNotificationPanel;
     private final NotificationListContainer mNotificationContainer;
     private final StatusBarWindowView mStatusBarWindow;
+    private final StatusBarStateController mStatusBarStateController;
     private StatusBar mStatusBar;
     private final Runnable mTimeoutRunnable = () -> {
         setAnimationPending(false);
@@ -72,11 +75,12 @@ public class ActivityLaunchAnimator {
         mNotificationContainer = container;
         mStatusBarWindow = statusBarWindow;
         mStatusBar = statusBar;
+        mStatusBarStateController = Dependency.get(StatusBarStateController.class);
     }
 
     public RemoteAnimationAdapter getLaunchAnimation(
             ExpandableNotificationRow sourceNotification, boolean occluded) {
-        if (mStatusBar.getBarState() != StatusBarState.SHADE || occluded) {
+        if (mStatusBarStateController.getState() != StatusBarState.SHADE || occluded) {
             return null;
         }
         AnimationRunner animationRunner = new AnimationRunner(sourceNotification);
@@ -91,7 +95,7 @@ public class ActivityLaunchAnimator {
     public void setLaunchResult(int launchResult) {
         setAnimationPending((launchResult == ActivityManager.START_TASK_TO_FRONT
                 || launchResult == ActivityManager.START_SUCCESS)
-                        && mStatusBar.getBarState() == StatusBarState.SHADE);
+                        && mStatusBarStateController.getState() == StatusBarState.SHADE);
     }
 
     private void setAnimationPending(boolean pending) {

@@ -157,6 +157,11 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
         return mKeyguardFadingAwayDuration;
     }
 
+    @Override
+    public long calculateGoingToFullShadeDelay() {
+        return mKeyguardFadingAwayDelay + mKeyguardFadingAwayDuration;
+    }
+
     public void notifyKeyguardGoingAway(boolean keyguardGoingAway) {
         mKeyguardGoingAway = keyguardGoingAway;
     }

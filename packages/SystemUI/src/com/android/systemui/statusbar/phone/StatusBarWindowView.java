@@ -57,10 +57,12 @@ import android.widget.FrameLayout;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.view.FloatingActionMode;
 import com.android.internal.widget.FloatingToolbar;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 
 import java.io.FileDescriptor;
@@ -95,6 +97,8 @@ public class StatusBarWindowView extends FrameLayout {
     private boolean mTouchActive;
     private boolean mExpandAnimationRunning;
     private boolean mExpandAnimationPending;
+    private final StatusBarStateController
+            mStatusBarStateController = Dependency.get(StatusBarStateController.class);
 
     /**
      * If set to true, the current gesture started below the notch and we need to dispatch touch
@@ -346,7 +350,7 @@ public class StatusBarWindowView extends FrameLayout {
         boolean intercept = false;
         if (mNotificationPanel.isFullyExpanded()
                 && mStackScrollLayout.getVisibility() == View.VISIBLE
-                && mService.getBarState() == StatusBarState.KEYGUARD
+                && mStatusBarStateController.getState() == StatusBarState.KEYGUARD
                 && !mService.isBouncerShowing()
                 && !mService.isDozing()) {
             intercept = mDragDownHelper.onInterceptTouchEvent(ev);
@@ -371,7 +375,7 @@ public class StatusBarWindowView extends FrameLayout {
             mDoubleTapHelper.onTouchEvent(ev);
             handled = true;
         }
-        if ((mService.getBarState() == StatusBarState.KEYGUARD && !handled)
+        if ((mStatusBarStateController.getState() == StatusBarState.KEYGUARD && !handled)
                 || mDragDownHelper.isDraggingDown()) {
             // we still want to finish our drag down gesture when locking the screen
             handled = mDragDownHelper.onTouchEvent(ev);
