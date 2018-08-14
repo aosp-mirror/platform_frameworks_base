@@ -24,11 +24,12 @@ LOCAL_MODULE_TAG := tests
 LOCAL_SRC_FILES := $(call all-java-files-under,java)
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    android-support-test \
-    legacy-android-test
+    android-support-test
 
 LOCAL_JAVA_LIBRARIES := \
     android.test.runner \
-    mockito-target-minus-junit4
+    android.test.base \
+    android.test.mock \
+    mockito-target-minus-junit4 \
 
 include $(BUILD_STATIC_JAVA_LIBRARY)

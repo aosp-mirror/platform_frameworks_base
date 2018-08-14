@@ -119,8 +119,7 @@ class XmlPullParser : public IPackageDeclStack {
    * If xmlns:app="http://schemas.android.com/apk/res-auto", then
    * 'package' will be set to 'defaultPackage'.
    */
-  Maybe<ExtractedPackage> TransformPackageAlias(
-      const android::StringPiece& alias, const android::StringPiece& local_package) const override;
+  Maybe<ExtractedPackage> TransformPackageAlias(const android::StringPiece& alias) const override;
 
   //
   // Remaining methods are for retrieving information about attributes

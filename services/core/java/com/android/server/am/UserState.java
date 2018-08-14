@@ -24,6 +24,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ProgressReporter;
 
@@ -59,8 +60,10 @@ public final class UserState {
     /**
      * The last time that a provider was reported to usage stats as being brought to important
      * foreground procstate.
+     * <p><strong>Important: </strong>Only access this field when holding ActivityManagerService
+     * lock.
      */
-    public final ArrayMap<String,Long> mProviderLastReportedFg = new ArrayMap<>();
+    final ArrayMap<String,Long> mProviderLastReportedFg = new ArrayMap<>();
 
     public UserState(UserHandle handle) {
         mHandle = handle;
@@ -110,10 +113,29 @@ public final class UserState {
         }
     }
 
+    public static int stateToProtoEnum(int state) {
+        switch (state) {
+            case STATE_BOOTING: return UserStateProto.STATE_BOOTING;
+            case STATE_RUNNING_LOCKED: return UserStateProto.STATE_RUNNING_LOCKED;
+            case STATE_RUNNING_UNLOCKING: return UserStateProto.STATE_RUNNING_UNLOCKING;
+            case STATE_RUNNING_UNLOCKED: return UserStateProto.STATE_RUNNING_UNLOCKED;
+            case STATE_STOPPING: return UserStateProto.STATE_STOPPING;
+            case STATE_SHUTDOWN: return UserStateProto.STATE_SHUTDOWN;
+            default: return state;
+        }
+    }
+
     void dump(String prefix, PrintWriter pw) {
         pw.print(prefix);
         pw.print("state="); pw.print(stateToString(state));
         if (switching) pw.print(" SWITCHING");
         pw.println();
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(UserStateProto.STATE, stateToProtoEnum(state));
+        proto.write(UserStateProto.SWITCHING, switching);
+        proto.end(token);
     }
 }

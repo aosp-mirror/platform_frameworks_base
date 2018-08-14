@@ -20,6 +20,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <vector>
 
 //#define LOG_NDEBUG 0
 #define LOG_TAG "MediaRecorderJNI"
@@ -29,14 +30,17 @@
 #include <camera/Camera.h>
 #include <media/mediarecorder.h>
 #include <media/MediaAnalyticsItem.h>
+#include <media/MicrophoneInfo.h>
 #include <media/stagefright/PersistentSurface.h>
 #include <utils/threads.h>
 
 #include <nativehelper/ScopedUtfChars.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
+#include "android_media_AudioErrors.h"
 #include "android_media_MediaMetricsJNI.h"
+#include "android_media_MicrophoneInfo.h"
 #include "android_runtime/AndroidRuntime.h"
 
 #include <system/audio.h>
@@ -60,6 +64,12 @@ struct fields_t {
     jmethodID   post_event;
 };
 static fields_t fields;
+
+struct ArrayListFields {
+    jmethodID add;
+    jclass classId;
+};
+static ArrayListFields gArrayListFields;
 
 static Mutex sLock;
 
@@ -565,6 +575,13 @@ android_media_MediaRecorder_native_init(JNIEnv *env)
     if (fields.post_event == NULL) {
         return;
     }
+
+    clazz = env->FindClass("java/util/ArrayList");
+    if (clazz == NULL) {
+        return;
+    }
+    gArrayListFields.add = env->GetMethodID(clazz, "add", "(Ljava/lang/Object;)Z");
+    gArrayListFields.classId = static_cast<jclass>(env->NewGlobalRef(clazz));
 }
 
 
@@ -657,6 +674,95 @@ android_media_MediaRecorder_native_getMetrics(JNIEnv *env, jobject thiz)
     return mybundle;
 
 }
+
+static jboolean
+android_media_MediaRecorder_setInputDevice(JNIEnv *env, jobject thiz, jint device_id)
+{
+    ALOGV("android_media_MediaRecorder_setInputDevice");
+
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return false;
+    }
+
+    if (process_media_recorder_call(env, mr->setInputDevice(device_id),
+            "java/lang/RuntimeException", "setInputDevice failed.")) {
+        return false;
+    }
+    return true;
+}
+
+static jint
+android_media_MediaRecorder_getRoutedDeviceId(JNIEnv *env, jobject thiz)
+{
+    ALOGV("android_media_MediaRecorder_getRoutedDeviceId");
+
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return AUDIO_PORT_HANDLE_NONE;
+    }
+
+    audio_port_handle_t deviceId;
+    process_media_recorder_call(env, mr->getRoutedDeviceId(&deviceId),
+            "java/lang/RuntimeException", "getRoutedDeviceId failed.");
+    return (jint) deviceId;
+}
+
+static void
+android_media_MediaRecorder_enableDeviceCallback(JNIEnv *env, jobject thiz, jboolean enabled)
+{
+    ALOGV("android_media_MediaRecorder_enableDeviceCallback %d", enabled);
+
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    process_media_recorder_call(env, mr->enableAudioDeviceCallback(enabled),
+            "java/lang/RuntimeException", "enableDeviceCallback failed.");
+}
+
+static jint
+android_media_MediaRecord_getActiveMicrophones(JNIEnv *env,
+        jobject thiz, jobject jActiveMicrophones) {
+    if (jActiveMicrophones == NULL) {
+        ALOGE("jActiveMicrophones is null");
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+    if (!env->IsInstanceOf(jActiveMicrophones, gArrayListFields.classId)) {
+        ALOGE("getActiveMicrophones not an arraylist");
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return (jint)AUDIO_JAVA_NO_INIT;
+    }
+
+    jint jStatus = AUDIO_JAVA_SUCCESS;
+    std::vector<media::MicrophoneInfo> activeMicrophones;
+    status_t status = mr->getActiveMicrophones(&activeMicrophones);
+    if (status != NO_ERROR) {
+        ALOGE_IF(status != NO_ERROR, "MediaRecorder::getActiveMicrophones error %d", status);
+        jStatus = nativeToJavaStatus(status);
+        return jStatus;
+    }
+
+    for (size_t i = 0; i < activeMicrophones.size(); i++) {
+        jobject jMicrophoneInfo;
+        jStatus = convertMicrophoneInfoFromNative(env, &jMicrophoneInfo, &activeMicrophones[i]);
+        if (jStatus != AUDIO_JAVA_SUCCESS) {
+            return jStatus;
+        }
+        env->CallBooleanMethod(jActiveMicrophones, gArrayListFields.add, jMicrophoneInfo);
+        env->DeleteLocalRef(jMicrophoneInfo);
+    }
+    return jStatus;
+}
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -689,6 +795,12 @@ static const JNINativeMethod gMethods[] = {
     {"native_setInputSurface", "(Landroid/view/Surface;)V", (void *)android_media_MediaRecorder_setInputSurface },
 
     {"native_getMetrics",    "()Landroid/os/PersistableBundle;", (void *)android_media_MediaRecorder_native_getMetrics},
+
+    {"native_setInputDevice", "(I)Z",                           (void *)android_media_MediaRecorder_setInputDevice},
+    {"native_getRoutedDeviceId", "()I",                         (void *)android_media_MediaRecorder_getRoutedDeviceId},
+    {"native_enableDeviceCallback", "(Z)V",                     (void *)android_media_MediaRecorder_enableDeviceCallback},
+
+    {"native_getActiveMicrophones", "(Ljava/util/ArrayList;)I", (void *)android_media_MediaRecord_getActiveMicrophones},
 };
 
 // This function only registers the native methods, and is called from

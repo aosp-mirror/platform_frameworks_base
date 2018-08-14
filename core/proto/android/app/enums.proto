@@ -1,0 +1,103 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.app;
+
+option java_outer_classname = "AppProtoEnums";
+option java_multiple_files = true;
+
+// ActivityManagerInternal.java's APP_TRANSITION reasons.
+enum AppTransitionReasonEnum {
+    APP_TRANSITION_REASON_UNKNOWN = 0;
+    // The transition was started because we drew the splash screen.
+    APP_TRANSITION_SPLASH_SCREEN = 1;
+    // The transition was started because we all app windows were drawn.
+    APP_TRANSITION_WINDOWS_DRAWN = 2;
+    // The transition was started because of a timeout.
+    APP_TRANSITION_TIMEOUT = 3;
+    // The transition was started because of a we drew a task snapshot.
+    APP_TRANSITION_SNAPSHOT = 4;
+    // The transition was started because it was a recents animation and we only needed to wait on
+    // the wallpaper.
+    APP_TRANSITION_RECENTS_ANIM = 5;
+}
+
+// ActivityManager.java PROCESS_STATEs
+enum ProcessStateEnum {
+    // Unlike the ActivityManager PROCESS_STATE values, the ordering and numerical values
+    // here are completely fixed and arbitrary. Order is irrelevant.
+    // No attempt need be made to keep them in sync.
+    // The values here must not be modified. Any new process states can be appended to the end.
+
+    // Process state that is unknown to this proto file (i.e. is not mapped
+    // by ActivityManager.processStateAmToProto()). Can only happen if there's a bug in the mapping.
+    PROCESS_STATE_UNKNOWN_TO_PROTO = 998;
+    // Not a real process state.
+    PROCESS_STATE_UNKNOWN = 999;
+    // Process is a persistent system process.
+    PROCESS_STATE_PERSISTENT = 1000;
+    // Process is a persistent system process and is doing UI.
+    PROCESS_STATE_PERSISTENT_UI = 1001;
+    // Process is hosting the current top activities. Note that this covers
+    // all activities that are visible to the user.
+    PROCESS_STATE_TOP = 1002;
+    // Process is hosting a foreground service.
+    PROCESS_STATE_FOREGROUND_SERVICE = 1003;
+    // Process is hosting a foreground service due to a system binding.
+    PROCESS_STATE_BOUND_FOREGROUND_SERVICE = 1004;
+    // Process is important to the user, and something they are aware of.
+    PROCESS_STATE_IMPORTANT_FOREGROUND = 1005;
+    // Process is important to the user, but not something they are aware of.
+    PROCESS_STATE_IMPORTANT_BACKGROUND = 1006;
+    // Process is in the background transient so we will try to keep running.
+    PROCESS_STATE_TRANSIENT_BACKGROUND = 1007;
+    // Process is in the background running a backup/restore operation.
+    PROCESS_STATE_BACKUP = 1008;
+    // Process is in the background running a service. Unlike oom_adj, this
+    // level is used for both the normal running in background state and the
+    // executing operations state.
+    PROCESS_STATE_SERVICE = 1009;
+    // Process is in the background running a receiver. Note that from the
+    // perspective of oom_adj, receivers run at a higher foreground level, but
+    // for our prioritization here that is not necessary and putting them
+    // below services means many fewer changes in some process states as they
+    // receive broadcasts.
+    PROCESS_STATE_RECEIVER = 1010;
+    // Same as PROCESS_STATE_TOP but while device is sleeping.
+    PROCESS_STATE_TOP_SLEEPING = 1011;
+    // Process is in the background, but it can't restore its state so we want
+    // to try to avoid killing it.
+    PROCESS_STATE_HEAVY_WEIGHT = 1012;
+    // Process is in the background but hosts the home activity.
+    PROCESS_STATE_HOME = 1013;
+    // Process is in the background but hosts the last shown activity.
+    PROCESS_STATE_LAST_ACTIVITY = 1014;
+    // Process is being cached for later use and contains activities.
+    PROCESS_STATE_CACHED_ACTIVITY = 1015;
+    // Process is being cached for later use and is a client of another cached
+    // process that contains activities.
+    PROCESS_STATE_CACHED_ACTIVITY_CLIENT = 1016;
+    // Process is being cached for later use and has an activity that corresponds
+    // to an existing recent task.
+    PROCESS_STATE_CACHED_RECENT = 1017;
+    // Process is being cached for later use and is empty.
+    PROCESS_STATE_CACHED_EMPTY = 1018;
+    // Process does not exist.
+    PROCESS_STATE_NONEXISTENT = 1019;
+}
+

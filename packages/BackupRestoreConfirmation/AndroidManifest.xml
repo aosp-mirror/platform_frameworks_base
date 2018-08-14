@@ -30,6 +30,7 @@
                   android:title=""
                   android:windowSoftInputMode="stateAlwaysHidden"
                   android:excludeFromRecents="true"
+                  android:launchMode="singleTop"
                   android:exported="true" >
         </activity>
     </application>

@@ -20,8 +20,8 @@
 #include "Rect.h"
 #include "utils/Macros.h"
 
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 struct SkRect;
 
@@ -42,22 +42,22 @@ typedef int batchid_t;
 typedef const void* mergeid_t;
 
 namespace OpBatchType {
-    enum {
-        Bitmap,
-        MergedPatch,
-        AlphaVertices,
-        Vertices,
-        AlphaMaskTexture,
-        Text,
-        ColorText,
-        Shadow,
-        TextureLayer,
-        Functor,
-        CopyToLayer,
-        CopyFromLayer,
+enum {
+    Bitmap,
+    MergedPatch,
+    AlphaVertices,
+    Vertices,
+    AlphaMaskTexture,
+    Text,
+    ColorText,
+    Shadow,
+    TextureLayer,
+    Functor,
+    CopyToLayer,
+    CopyFromLayer,
 
-        Count // must be last
-    };
+    Count  // must be last
+};
 }
 
 typedef void (*BakedOpReceiver)(void*, const BakedOpState&);
@@ -68,37 +68,36 @@ typedef void (*MergedOpReceiver)(void*, const MergedBakedOpList& opList);
  * for a single FBO/layer.
  */
 class LayerBuilder {
-// Prevent copy/assign because users may stash pointer to offscreenBuffer and viewportClip
-PREVENT_COPY_AND_ASSIGN(LayerBuilder);
+    // Prevent copy/assign because users may stash pointer to offscreenBuffer and viewportClip
+    PREVENT_COPY_AND_ASSIGN(LayerBuilder);
+
 public:
     // Create LayerBuilder for Fbo0
     LayerBuilder(uint32_t width, uint32_t height, const Rect& repaintRect)
-            : LayerBuilder(width, height, repaintRect, nullptr, nullptr) {};
+            : LayerBuilder(width, height, repaintRect, nullptr, nullptr){};
 
     // Create LayerBuilder for an offscreen layer, where beginLayerOp is present for a
     // saveLayer, renderNode is present for a HW layer.
-    LayerBuilder(uint32_t width, uint32_t height,
-            const Rect& repaintRect, const BeginLayerOp* beginLayerOp, RenderNode* renderNode);
+    LayerBuilder(uint32_t width, uint32_t height, const Rect& repaintRect,
+                 const BeginLayerOp* beginLayerOp, RenderNode* renderNode);
 
     // iterate back toward target to see if anything drawn since should overlap the new op
     // if no target, merging ops still iterate to find similar batch to insert after
-    void locateInsertIndex(int batchId, const Rect& clippedBounds,
-            BatchBase** targetBatch, size_t* insertBatchIndex) const;
+    void locateInsertIndex(int batchId, const Rect& clippedBounds, BatchBase** targetBatch,
+                           size_t* insertBatchIndex) const;
 
     void deferUnmergeableOp(LinearAllocator& allocator, BakedOpState* op, batchid_t batchId);
 
     // insertion point of a new batch, will hopefully be immediately after similar batch
     // (generally, should be similar shader)
-    void deferMergeableOp(LinearAllocator& allocator,
-            BakedOpState* op, batchid_t batchId, mergeid_t mergeId);
+    void deferMergeableOp(LinearAllocator& allocator, BakedOpState* op, batchid_t batchId,
+                          mergeid_t mergeId);
 
     void replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers, MergedOpReceiver*) const;
 
     void deferLayerClear(const Rect& dstRect);
 
-    bool empty() const {
-        return mBatches.empty();
-    }
+    bool empty() const { return mBatches.empty(); }
 
     void clear();
 
@@ -114,6 +113,7 @@ public:
 
     // list of deferred CopyFromLayer ops, to be deferred upon encountering EndUnclippedLayerOps
     std::vector<BakedOpState*> activeUnclippedSaveLayers;
+
 private:
     void onDeferOp(LinearAllocator& allocator, const BakedOpState* bakedState);
     void flushLayerClears(LinearAllocator& allocator);
@@ -128,10 +128,10 @@ private:
     std::unordered_map<mergeid_t, MergingOpBatch*> mMergingBatchLookup[OpBatchType::Count];
 
     // Maps batch ids to the most recent *non-merging* batch of that id
-    OpBatch* mBatchLookup[OpBatchType::Count] = { nullptr };
+    OpBatch* mBatchLookup[OpBatchType::Count] = {nullptr};
 
     std::vector<Rect> mClearRects;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

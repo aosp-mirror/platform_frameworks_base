@@ -22,20 +22,20 @@
 #include "GammaFontRenderer.h"
 #include "GradientCache.h"
 #include "PatchCache.h"
-#include "ProgramCache.h"
 #include "PathCache.h"
+#include "ProgramCache.h"
 #include "RenderBufferCache.h"
-#include "renderstate/PixelBufferState.h"
-#include "renderstate/TextureState.h"
 #include "ResourceCache.h"
 #include "TessellationCache.h"
 #include "TextDropShadowCache.h"
 #include "TextureCache.h"
-#include "thread/TaskProcessor.h"
+#include "renderstate/PixelBufferState.h"
+#include "renderstate/TextureState.h"
 #include "thread/TaskManager.h"
+#include "thread/TaskProcessor.h"
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include <GLES3/gl3.h>
 
@@ -70,19 +70,14 @@ public:
         return *sInstance;
     }
 
-    static bool hasInstance() {
-        return sInstance != nullptr;
-    }
+    static bool hasInstance() { return sInstance != nullptr; }
+
 private:
     explicit Caches(RenderState& renderState);
     static Caches* sInstance;
 
 public:
-    enum class FlushMode {
-        Layers = 0,
-        Moderate,
-        Full
-    };
+    enum class FlushMode { Layers = 0, Moderate, Full };
 
     /**
      * Initialize caches.
@@ -181,9 +176,9 @@ private:
     void initConstraints();
     void initStaticProperties();
 
-    static void eventMarkNull(GLsizei length, const GLchar* marker) { }
-    static void startMarkNull(GLsizei length, const GLchar* marker) { }
-    static void endMarkNull() { }
+    static void eventMarkNull(GLsizei length, const GLchar* marker) {}
+    static void startMarkNull(GLsizei length, const GLchar* marker) {}
+    static void endMarkNull() {}
 
     RenderState* mRenderState;
 
@@ -198,9 +193,9 @@ private:
     // TODO: move below to RenderState
     PixelBufferState* mPixelBufferState = nullptr;
     TextureState* mTextureState = nullptr;
-    Program* mProgram = nullptr; // note: object owned by ProgramCache
+    Program* mProgram = nullptr;  // note: object owned by ProgramCache
 
-}; // class Caches
+};  // class Caches
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

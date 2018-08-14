@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -36,11 +37,54 @@ public class PackageInfo implements Parcelable {
     public String[] splitNames;
 
     /**
+     * @deprecated Use {@link #getLongVersionCode()} instead, which includes both
+     * this and the additional
+     * {@link android.R.styleable#AndroidManifest_versionCodeMajor versionCodeMajor} attribute.
      * The version number of this package, as specified by the &lt;manifest&gt;
      * tag's {@link android.R.styleable#AndroidManifest_versionCode versionCode}
      * attribute.
+     * @see #getLongVersionCode()
      */
+    @Deprecated
     public int versionCode;
+
+    /**
+     * @hide
+     * The major version number of this package, as specified by the &lt;manifest&gt;
+     * tag's {@link android.R.styleable#AndroidManifest_versionCode versionCodeMajor}
+     * attribute.
+     * @see #getLongVersionCode()
+     */
+    public int versionCodeMajor;
+
+    /**
+     * Return {@link android.R.styleable#AndroidManifest_versionCode versionCode} and
+     * {@link android.R.styleable#AndroidManifest_versionCodeMajor versionCodeMajor} combined
+     * together as a single long value.  The
+     * {@link android.R.styleable#AndroidManifest_versionCodeMajor versionCodeMajor} is placed in
+     * the upper 32 bits.
+     */
+    public long getLongVersionCode() {
+        return composeLongVersionCode(versionCodeMajor, versionCode);
+    }
+
+    /**
+     * Set the full version code in this PackageInfo, updating {@link #versionCode}
+     * with the lower bits.
+     * @see #getLongVersionCode()
+     */
+    public void setLongVersionCode(long longVersionCode) {
+        versionCodeMajor = (int) (longVersionCode>>32);
+        versionCode = (int) longVersionCode;
+    }
+
+    /**
+     * @hide Internal implementation for composing a minor and major version code in to
+     * a single long version code.
+     */
+    public static long composeLongVersionCode(int major, int minor) {
+        return (((long) major) << 32) | (((long) minor) & 0xffffffffL);
+    }
 
     /**
      * The version name of this package, as specified by the &lt;manifest&gt;
@@ -198,9 +242,30 @@ public class PackageInfo implements Parcelable {
      * equivalent to being signed with certificates B and A. This means that
      * in case multiple signatures are reported you cannot assume the one at
      * the first position to be the same across updates.
+     *
+     * <strong>Deprecated</strong> This has been replaced by the
+     * {@link PackageInfo#signingInfo} field, which takes into
+     * account signing certificate rotation.  For backwards compatibility in
+     * the event of signing certificate rotation, this will return the oldest
+     * reported signing certificate, so that an application will appear to
+     * callers as though no rotation occurred.
+     *
+     * @deprecated use {@code signingInfo} instead
      */
+    @Deprecated
     public Signature[] signatures;
-    
+
+    /**
+     * Signing information read from the package file, potentially
+     * including past signing certificates no longer used after signing
+     * certificate rotation.  This is only filled in if
+     * the flag {@link PackageManager#GET_SIGNING_CERTIFICATES} was set.
+     *
+     * Use this field instead of the deprecated {@code signatures} field.
+     * See {@link SigningInfo} for more information on its contents.
+     */
+    public SigningInfo signingInfo;
+
     /**
      * Application specified preferred configuration
      * {@link android.R.styleable#AndroidManifestUsesConfiguration
@@ -283,13 +348,62 @@ public class PackageInfo implements Parcelable {
      */
     public String overlayTarget;
 
+    /**
+     * The overlay category, if any, of this package
+     *
+     * @hide
+     */
+    public String overlayCategory;
+
     /** @hide */
     public int overlayPriority;
 
-    /** @hide */
-    public boolean isStaticOverlay;
+    /**
+     * Whether the overlay is static, meaning it cannot be enabled/disabled at runtime.
+     */
+    boolean mOverlayIsStatic;
+
+    /**
+     * The user-visible SDK version (ex. 26) of the framework against which the application claims
+     * to have been compiled, or {@code 0} if not specified.
+     * <p>
+     * This property is the compile-time equivalent of
+     * {@link android.os.Build.VERSION#SDK_INT Build.VERSION.SDK_INT}.
+     *
+     * @hide For platform use only; we don't expect developers to need to read this value.
+     */
+    public int compileSdkVersion;
+
+    /**
+     * The development codename (ex. "O", "REL") of the framework against which the application
+     * claims to have been compiled, or {@code null} if not specified.
+     * <p>
+     * This property is the compile-time equivalent of
+     * {@link android.os.Build.VERSION#CODENAME Build.VERSION.CODENAME}.
+     *
+     * @hide For platform use only; we don't expect developers to need to read this value.
+     */
+    @Nullable
+    public String compileSdkVersionCodename;
 
     public PackageInfo() {
+    }
+
+    /**
+     * Returns true if the package is a valid Runtime Overlay package.
+     * @hide
+     */
+    public boolean isOverlayPackage() {
+        return overlayTarget != null;
+    }
+
+    /**
+     * Returns true if the package is a valid static Runtime Overlay package. Static overlays
+     * are not updatable outside of a system update and are safe to load in the system process.
+     * @hide
+     */
+    public boolean isStaticOverlayPackage() {
+        return overlayTarget != null && mOverlayIsStatic;
     }
 
     @Override
@@ -309,6 +423,7 @@ public class PackageInfo implements Parcelable {
         dest.writeString(packageName);
         dest.writeStringArray(splitNames);
         dest.writeInt(versionCode);
+        dest.writeInt(versionCodeMajor);
         dest.writeString(versionName);
         dest.writeInt(baseRevisionCode);
         dest.writeIntArray(splitRevisionCodes);
@@ -342,8 +457,17 @@ public class PackageInfo implements Parcelable {
         dest.writeString(restrictedAccountType);
         dest.writeString(requiredAccountType);
         dest.writeString(overlayTarget);
-        dest.writeInt(isStaticOverlay ? 1 : 0);
+        dest.writeString(overlayCategory);
         dest.writeInt(overlayPriority);
+        dest.writeBoolean(mOverlayIsStatic);
+        dest.writeInt(compileSdkVersion);
+        dest.writeString(compileSdkVersionCodename);
+        if (signingInfo != null) {
+            dest.writeInt(1);
+            signingInfo.writeToParcel(dest, parcelableFlags);
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     public static final Parcelable.Creator<PackageInfo> CREATOR
@@ -363,6 +487,7 @@ public class PackageInfo implements Parcelable {
         packageName = source.readString();
         splitNames = source.createStringArray();
         versionCode = source.readInt();
+        versionCodeMajor = source.readInt();
         versionName = source.readString();
         baseRevisionCode = source.readInt();
         splitRevisionCodes = source.createIntArray();
@@ -394,8 +519,15 @@ public class PackageInfo implements Parcelable {
         restrictedAccountType = source.readString();
         requiredAccountType = source.readString();
         overlayTarget = source.readString();
-        isStaticOverlay = source.readInt() != 0;
+        overlayCategory = source.readString();
         overlayPriority = source.readInt();
+        mOverlayIsStatic = source.readBoolean();
+        compileSdkVersion = source.readInt();
+        compileSdkVersionCodename = source.readString();
+        int hasSigningInfo = source.readInt();
+        if (hasSigningInfo != 0) {
+            signingInfo = SigningInfo.CREATOR.createFromParcel(source);
+        }
 
         // The component lists were flattened with the redundant ApplicationInfo
         // instances omitted.  Distribute the canonical one here as appropriate.

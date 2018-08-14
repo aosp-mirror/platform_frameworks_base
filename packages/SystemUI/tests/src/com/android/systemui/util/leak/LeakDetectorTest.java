@@ -24,6 +24,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.leak.ReferenceTestUtils.CollectionWaiter;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -33,12 +34,38 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class LeakDetectorTest extends SysuiTestCase {
 
     private LeakDetector mLeakDetector;
+
+    // The references for which collection is observed are stored in fields. The allocation and
+    // of these references happens in separate methods (trackObjectWith/trackCollectionWith)
+    // from where they are set to null. The generated code might keep the allocated reference
+    // alive in a dex register when compiling in release mode. As R8 is used to compile this
+    // test the --dontoptimize flag is also required to ensure that these methods are not
+    // inlined, as that would defeat the purpose of having the mutation in methods.
+    private Object mObject;
+    private Collection<?> mCollection;
+
+    private CollectionWaiter trackObjectWith(Consumer<Object> tracker) {
+        mObject = new Object();
+        CollectionWaiter collectionWaiter = ReferenceTestUtils.createCollectionWaiter(mObject);
+        tracker.accept(mObject);
+        return collectionWaiter;
+    }
+
+    private CollectionWaiter trackCollectionWith(
+            BiConsumer<? super Collection<?>, String> tracker) {
+        mCollection = new ArrayList<>();
+        CollectionWaiter collectionWaiter = ReferenceTestUtils.createCollectionWaiter(mCollection);
+        tracker.accept(mCollection, "tag");
+        return collectionWaiter;
+    }
 
     @Before
     public void setup() {
@@ -51,31 +78,23 @@ public class LeakDetectorTest extends SysuiTestCase {
 
     @Test
     public void trackInstance_doesNotLeakTrackedObject() {
-        Object object = new Object();
-        CollectionWaiter collectionWaiter = ReferenceTestUtils.createCollectionWaiter(object);
-
-        mLeakDetector.trackInstance(object);
-        object = null;
+        CollectionWaiter collectionWaiter = trackObjectWith(mLeakDetector::trackInstance);
+        mObject = null;
         collectionWaiter.waitForCollection();
     }
 
+    @Ignore("b/75329085")
     @Test
     public void trackCollection_doesNotLeakTrackedObject() {
-        Collection<?> object = new ArrayList<>();
-        CollectionWaiter collectionWaiter = ReferenceTestUtils.createCollectionWaiter(object);
-
-        mLeakDetector.trackCollection(object, "tag");
-        object = null;
+        CollectionWaiter collectionWaiter = trackCollectionWith(mLeakDetector::trackCollection);
+        mCollection = null;
         collectionWaiter.waitForCollection();
     }
 
     @Test
     public void trackGarbage_doesNotLeakTrackedObject() {
-        Object object = new Object();
-        CollectionWaiter collectionWaiter = ReferenceTestUtils.createCollectionWaiter(object);
-
-        mLeakDetector.trackGarbage(object);
-        object = null;
+        CollectionWaiter collectionWaiter = trackObjectWith(mLeakDetector::trackGarbage);
+        mObject = null;
         collectionWaiter.waitForCollection();
     }
 

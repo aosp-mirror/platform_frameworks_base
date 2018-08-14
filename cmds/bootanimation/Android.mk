@@ -24,16 +24,15 @@ LOCAL_SRC_FILES:= \
     BootAnimationUtil.cpp \
 
 ifeq ($(PRODUCT_IOT),true)
-LOCAL_SRC_FILES += \
-    iot/iotbootanimation_main.cpp \
-    iot/BootAction.cpp
 
 LOCAL_SHARED_LIBRARIES += \
     libandroidthings \
-    libbase \
-    libbinder
+    libchrome \
 
-LOCAL_STATIC_LIBRARIES += cpufeatures
+LOCAL_SRC_FILES += \
+    iot/iotbootanimation_main.cpp \
+    iot/BootAction.cpp \
+    iot/BootParameters.cpp \
 
 else
 
@@ -77,12 +76,18 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     libbinder \
     libui \
-    libskia \
+    libhwui \
     libEGL \
     libGLESv1_CM \
     libgui \
     libtinyalsa \
     libbase
+
+ifeq ($(PRODUCT_IOT),true)
+
+LOCAL_INIT_RC := iot/bootanim_iot.rc
+
+endif # PRODUCT_IOT
 
 ifdef TARGET_32_BIT_SURFACEFLINGER
 LOCAL_32_BIT_ONLY := true

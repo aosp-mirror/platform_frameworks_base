@@ -20,7 +20,9 @@ LOCAL_MODULE_TAGS := tests
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
-LOCAL_STATIC_JAVA_LIBRARIES := legacy-android-test junit
+LOCAL_STATIC_JAVA_LIBRARIES := junit
+
+LOCAL_JAVA_LIBRARIES := android.test.base.stubs
 
 LOCAL_SDK_VERSION := current
 

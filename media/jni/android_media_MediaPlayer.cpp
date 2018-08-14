@@ -24,7 +24,7 @@
 #include <media/IMediaHTTPService.h>
 #include <media/MediaPlayerInterface.h>
 #include <media/MediaAnalyticsItem.h>
-#include <media/stagefright/Utils.h>            // for FOURCC definition
+#include <media/stagefright/foundation/ByteUtils.h>  // for FOURCC definition
 #include <stdio.h>
 #include <assert.h>
 #include <limits.h>
@@ -77,6 +77,8 @@ static StateExceptionFields gStateExceptionFields;
 // ----------------------------------------------------------------------------
 
 using namespace android;
+
+using media::VolumeShaper;
 
 // ----------------------------------------------------------------------------
 
@@ -369,25 +371,6 @@ android_media_MediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsu
 }
 
 static jobject
-android_media_MediaPlayer_getDefaultBufferingParams(JNIEnv *env, jobject thiz)
-{
-    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return NULL;
-    }
-
-    BufferingParams bp;
-    BufferingSettings &settings = bp.settings;
-    process_media_player_call(
-            env, thiz, mp->getDefaultBufferingSettings(&settings),
-            "java/lang/IllegalStateException", "unexpected error");
-    ALOGV("getDefaultBufferingSettings:{%s}", settings.toString().string());
-
-    return bp.asJobject(env, gBufferingParamsFields);
-}
-
-static jobject
 android_media_MediaPlayer_getBufferingParams(JNIEnv *env, jobject thiz)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
@@ -401,6 +384,9 @@ android_media_MediaPlayer_getBufferingParams(JNIEnv *env, jobject thiz)
     process_media_player_call(
             env, thiz, mp->getBufferingSettings(&settings),
             "java/lang/IllegalStateException", "unexpected error");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
     ALOGV("getBufferingSettings:{%s}", settings.toString().string());
 
     return bp.asJobject(env, gBufferingParamsFields);
@@ -572,6 +558,9 @@ android_media_MediaPlayer_getPlaybackParams(JNIEnv *env, jobject thiz)
     process_media_player_call(
             env, thiz, mp->getPlaybackSettings(&audioRate),
             "java/lang/IllegalStateException", "unexpected error");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
     ALOGV("getPlaybackSettings: %f %f %d %d",
             audioRate.mSpeed, audioRate.mPitch, audioRate.mFallbackMode, audioRate.mStretchMode);
 
@@ -640,6 +629,9 @@ android_media_MediaPlayer_getSyncParams(JNIEnv *env, jobject thiz)
     process_media_player_call(
             env, thiz, mp->getSyncSettings(&scp.sync, &scp.frameRate),
             "java/lang/IllegalStateException", "unexpected error");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
 
     ALOGV("getSyncSettings: %d %d %f %f",
             scp.sync.mSource, scp.sync.mAudioAdjustMode, scp.sync.mTolerance, scp.frameRate);
@@ -671,6 +663,18 @@ android_media_MediaPlayer_seekTo(JNIEnv *env, jobject thiz, jlong msec, jint mod
     }
     ALOGV("seekTo: %lld(msec), mode=%d", (long long)msec, mode);
     process_media_player_call( env, thiz, mp->seekTo((int)msec, (MediaPlayerSeekMode)mode), NULL, NULL );
+}
+
+static void
+android_media_MediaPlayer_notifyAt(JNIEnv *env, jobject thiz, jlong mediaTimeUs)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+    ALOGV("notifyAt: %lld", (long long)mediaTimeUs);
+    process_media_player_call( env, thiz, mp->notifyAt((int64_t)mediaTimeUs), NULL, NULL );
 }
 
 static jint
@@ -1373,6 +1377,44 @@ static void android_media_MediaPlayer_releaseDrm(JNIEnv *env, jobject thiz)
 // Modular DRM end
 // ----------------------------------------------------------------------------
 
+/////////////////////////////////////////////////////////////////////////////////////
+// AudioRouting begin
+static jboolean android_media_MediaPlayer_setOutputDevice(JNIEnv *env, jobject thiz, jint device_id)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        return false;
+    }
+    return mp->setOutputDevice(device_id) == NO_ERROR;
+}
+
+static jint android_media_MediaPlayer_getRoutedDeviceId(JNIEnv *env, jobject thiz)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        return AUDIO_PORT_HANDLE_NONE;
+    }
+    return mp->getRoutedDeviceId();
+}
+
+static void android_media_MediaPlayer_enableDeviceCallback(
+        JNIEnv* env, jobject thiz, jboolean enabled)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        return;
+    }
+
+    status_t status = mp->enableAudioDeviceCallback(enabled);
+    if (status != NO_ERROR) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        ALOGE("enable device callback failed: %d", status);
+    }
+}
+
+// AudioRouting end
+// ----------------------------------------------------------------------------
+
 static const JNINativeMethod gMethods[] = {
     {
         "nativeSetDataSource",
@@ -1384,7 +1426,6 @@ static const JNINativeMethod gMethods[] = {
     {"_setDataSource",      "(Ljava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer_setDataSourceFD},
     {"_setDataSource",      "(Landroid/media/MediaDataSource;)V",(void *)android_media_MediaPlayer_setDataSourceCallback },
     {"_setVideoSurface",    "(Landroid/view/Surface;)V",        (void *)android_media_MediaPlayer_setVideoSurface},
-    {"getDefaultBufferingParams", "()Landroid/media/BufferingParams;", (void *)android_media_MediaPlayer_getDefaultBufferingParams},
     {"getBufferingParams", "()Landroid/media/BufferingParams;", (void *)android_media_MediaPlayer_getBufferingParams},
     {"setBufferingParams", "(Landroid/media/BufferingParams;)V", (void *)android_media_MediaPlayer_setBufferingParams},
     {"_prepare",            "()V",                              (void *)android_media_MediaPlayer_prepare},
@@ -1399,6 +1440,7 @@ static const JNINativeMethod gMethods[] = {
     {"setSyncParams",     "(Landroid/media/SyncParams;)V",  (void *)android_media_MediaPlayer_setSyncParams},
     {"getSyncParams",     "()Landroid/media/SyncParams;",   (void *)android_media_MediaPlayer_getSyncParams},
     {"_seekTo",             "(JI)V",                            (void *)android_media_MediaPlayer_seekTo},
+    {"_notifyAt",           "(J)V",                             (void *)android_media_MediaPlayer_notifyAt},
     {"_pause",              "()V",                              (void *)android_media_MediaPlayer_pause},
     {"isPlaying",           "()Z",                              (void *)android_media_MediaPlayer_isPlaying},
     {"getCurrentPosition",  "()I",                              (void *)android_media_MediaPlayer_getCurrentPosition},
@@ -1433,6 +1475,11 @@ static const JNINativeMethod gMethods[] = {
     // Modular DRM
     { "_prepareDrm", "([B[B)V",                                 (void *)android_media_MediaPlayer_prepareDrm },
     { "_releaseDrm", "()V",                                     (void *)android_media_MediaPlayer_releaseDrm },
+
+    // AudioRouting
+    {"native_setOutputDevice", "(I)Z",                          (void *)android_media_MediaPlayer_setOutputDevice},
+    {"native_getRoutedDeviceId", "()I",                         (void *)android_media_MediaPlayer_getRoutedDeviceId},
+    {"native_enableDeviceCallback", "(Z)V",                     (void *)android_media_MediaPlayer_enableDeviceCallback},
 };
 
 // This function only registers the native methods

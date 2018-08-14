@@ -18,8 +18,9 @@ package com.android.printservice.recommendation.plugin.mdnsFilter;
 
 import android.content.Context;
 import android.net.nsd.NsdServiceInfo;
-import android.annotation.NonNull;
-import android.annotation.StringRes;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 
 import com.android.printservice.recommendation.PrintServicePlugin;
 import com.android.printservice.recommendation.util.MDNSFilteredDiscovery;

@@ -22,22 +22,22 @@
 
 #include "Resource.h"
 #include "ResourceTable.h"
+#include "text/Printer.h"
 #include "xml/XmlDom.h"
 
 namespace aapt {
 
 struct DebugPrintTableOptions {
   bool show_sources = false;
+  bool show_values = true;
 };
 
 struct Debug {
-  static void PrintTable(ResourceTable* table,
-                         const DebugPrintTableOptions& options = {});
-  static void PrintStyleGraph(ResourceTable* table,
-                              const ResourceName& target_style);
+  static void PrintTable(const ResourceTable& table, const DebugPrintTableOptions& options,
+                         text::Printer* printer);
+  static void PrintStyleGraph(ResourceTable* table, const ResourceName& target_style);
   static void DumpHex(const void* data, size_t len);
-  static void DumpXml(xml::XmlResource* doc);
-  static std::string ToString(xml::XmlResource* doc);
+  static void DumpXml(const xml::XmlResource& doc, text::Printer* printer);
 };
 
 }  // namespace aapt

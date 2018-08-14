@@ -74,13 +74,13 @@ struct SkiaShaderData {
 class SkiaShader {
 public:
     static void store(Caches& caches, const SkShader& shader, const Matrix4& modelViewMatrix,
-            GLuint* textureUnit, ProgramDescription* description,
-            SkiaShaderData* outData);
-    static void apply(Caches& caches, const SkiaShaderData& data,
-            const GLsizei width, const GLsizei height);
+                      GLuint* textureUnit, ProgramDescription* description,
+                      SkiaShaderData* outData);
+    static void apply(Caches& caches, const SkiaShaderData& data, const GLsizei width,
+                      const GLsizei height);
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_SKIA_SHADER_H
+#endif  // ANDROID_HWUI_SKIA_SHADER_H

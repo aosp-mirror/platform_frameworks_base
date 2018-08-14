@@ -22,6 +22,7 @@ import android.app.usage.ExternalStorageStats;
 /** {@hide} */
 interface IStorageStatsManager {
     boolean isQuotaSupported(String volumeUuid, String callingPackage);
+    boolean isReservedSupported(String volumeUuid, String callingPackage);
     long getTotalBytes(String volumeUuid, String callingPackage);
     long getFreeBytes(String volumeUuid, String callingPackage);
     long getCacheBytes(String volumeUuid, String callingPackage);

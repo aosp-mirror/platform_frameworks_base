@@ -20,6 +20,7 @@ import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -376,6 +377,7 @@ public class TelecomManager {
      * The phone number of the call used by Telecom to determine which call should be handed over.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String EXTRA_IS_HANDOVER = "android.telecom.extra.IS_HANDOVER";
 
     /**
@@ -493,6 +495,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int TTY_MODE_OFF = 0;
 
     /**
@@ -603,6 +606,14 @@ public class TelecomManager {
             "android.telecom.extra.CALL_BACK_INTENT";
 
     /**
+     * The dialer activity responsible for placing emergency calls from, for example, a locked
+     * keyguard.
+     * @hide
+     */
+    public static final ComponentName EMERGENCY_DIALER_COMPONENT =
+            ComponentName.createRelative("com.android.phone", ".EmergencyDialer");
+
+    /**
      * The boolean indicated by this extra controls whether or not a call is eligible to undergo
      * assisted dialing. This extra is stored under {@link #EXTRA_OUTGOING_CALL_EXTRAS}.
      * @hide
@@ -617,7 +628,7 @@ public class TelecomManager {
 
     /**
      * Indicates that the address or number of a call is allowed to be displayed for caller ID.
-    */
+     */
     public static final int PRESENTATION_ALLOWED = 1;
 
     /**
@@ -644,6 +655,7 @@ public class TelecomManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public static TelecomManager from(Context context) {
         return (TelecomManager) context.getSystemService(Context.TELECOM_SERVICE);
     }
@@ -713,6 +725,7 @@ public class TelecomManager {
      * @return The user outgoing phone account selected by the user.
      * @hide
      */
+    @UnsupportedAppUsage
     public PhoneAccountHandle getUserSelectedOutgoingPhoneAccount() {
         try {
             if (isServiceConnected()) {
@@ -728,6 +741,7 @@ public class TelecomManager {
      * Sets the user-chosen default for making outgoing phone calls.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setUserSelectedOutgoingPhoneAccount(PhoneAccountHandle accountHandle) {
         try {
             if (isServiceConnected()) {
@@ -765,6 +779,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public PhoneAccountHandle getSimCallManager(int userId) {
         try {
             if (isServiceConnected()) {
@@ -868,6 +883,7 @@ public class TelecomManager {
      * @return A list of {@code PhoneAccountHandle} objects.
      * @hide
      */
+    @UnsupportedAppUsage
     public List<PhoneAccountHandle> getCallCapablePhoneAccounts(boolean includeDisabledAccounts) {
         try {
             if (isServiceConnected()) {
@@ -1101,6 +1117,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean setDefaultDialer(String packageName) {
         try {
             if (isServiceConnected()) {
@@ -1118,6 +1135,7 @@ public class TelecomManager {
      * @return package name for the system dialer package or null if no system dialer is preloaded.
      * @hide
      */
+    @UnsupportedAppUsage
     public String getSystemDialerPackage() {
         try {
             if (isServiceConnected()) {
@@ -1405,6 +1423,7 @@ public class TelecomManager {
      * - {@link TelecomManager#TTY_MODE_VCO}
      * @hide
      */
+    @UnsupportedAppUsage
     public int getCurrentTtyMode() {
         try {
             if (isServiceConnected()) {

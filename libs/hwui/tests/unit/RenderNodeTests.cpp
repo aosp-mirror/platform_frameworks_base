@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include <VectorDrawable.h>
+#include <gtest/gtest.h>
 
 #include "AnimationContext.h"
 #include "DamageAccumulator.h"
@@ -32,21 +32,20 @@ using namespace android::uirenderer::renderthread;
 
 class ContextFactory : public android::uirenderer::IContextFactory {
 public:
-    android::uirenderer::AnimationContext* createAnimationContext
-        (android::uirenderer::renderthread::TimeLord& clock) override {
+    android::uirenderer::AnimationContext* createAnimationContext(
+            android::uirenderer::renderthread::TimeLord& clock) override {
         return new android::uirenderer::AnimationContext(clock);
     }
 };
 
 TEST(RenderNode, hasParents) {
-    auto child = TestUtils::createNode(0, 0, 200, 400,
-            [](RenderProperties& props, Canvas& canvas) {
+    auto child = TestUtils::createNode(0, 0, 200, 400, [](RenderProperties& props, Canvas& canvas) {
         canvas.drawColor(Color::Red_500, SkBlendMode::kSrcOver);
     });
     auto parent = TestUtils::createNode(0, 0, 200, 400,
-            [&child](RenderProperties& props, Canvas& canvas) {
-        canvas.drawRenderNode(child.get());
-    });
+                                        [&child](RenderProperties& props, Canvas& canvas) {
+                                            canvas.drawRenderNode(child.get());
+                                        });
 
     TestUtils::syncHierarchyPropertiesAndDisplayList(parent);
 
@@ -67,14 +66,13 @@ TEST(RenderNode, hasParents) {
 }
 
 TEST(RenderNode, validity) {
-    auto child = TestUtils::createNode(0, 0, 200, 400,
-            [](RenderProperties& props, Canvas& canvas) {
+    auto child = TestUtils::createNode(0, 0, 200, 400, [](RenderProperties& props, Canvas& canvas) {
         canvas.drawColor(Color::Red_500, SkBlendMode::kSrcOver);
     });
     auto parent = TestUtils::createNode(0, 0, 200, 400,
-            [&child](RenderProperties& props, Canvas& canvas) {
-        canvas.drawRenderNode(child.get());
-    });
+                                        [&child](RenderProperties& props, Canvas& canvas) {
+                                            canvas.drawRenderNode(child.get());
+                                        });
 
     EXPECT_TRUE(child->isValid());
     EXPECT_TRUE(parent->isValid());
@@ -111,9 +109,8 @@ TEST(RenderNode, validity) {
     EXPECT_TRUE(child->isValid());
     EXPECT_TRUE(child->nothingToDraw());
 
-    TestUtils::recordNode(*parent, [&child](Canvas& canvas) {
-        canvas.drawRenderNode(child.get());
-    });
+    TestUtils::recordNode(*parent,
+                          [&child](Canvas& canvas) { canvas.drawRenderNode(child.get()); });
 
     TestUtils::syncHierarchyPropertiesAndDisplayList(parent);
 
@@ -131,18 +128,17 @@ TEST(RenderNode, validity) {
 }
 
 TEST(RenderNode, multiTreeValidity) {
-    auto child = TestUtils::createNode(0, 0, 200, 400,
-            [](RenderProperties& props, Canvas& canvas) {
+    auto child = TestUtils::createNode(0, 0, 200, 400, [](RenderProperties& props, Canvas& canvas) {
         canvas.drawColor(Color::Red_500, SkBlendMode::kSrcOver);
     });
     auto parent1 = TestUtils::createNode(0, 0, 200, 400,
-            [&child](RenderProperties& props, Canvas& canvas) {
-        canvas.drawRenderNode(child.get());
-    });
+                                         [&child](RenderProperties& props, Canvas& canvas) {
+                                             canvas.drawRenderNode(child.get());
+                                         });
     auto parent2 = TestUtils::createNode(0, 0, 200, 400,
-            [&child](RenderProperties& props, Canvas& canvas) {
-        canvas.drawRenderNode(child.get());
-    });
+                                         [&child](RenderProperties& props, Canvas& canvas) {
+                                             canvas.drawRenderNode(child.get());
+                                         });
 
     EXPECT_TRUE(child->isValid());
     EXPECT_TRUE(parent1->isValid());
@@ -200,14 +196,12 @@ TEST(RenderNode, multiTreeValidity) {
     });
     TestUtils::syncHierarchyPropertiesAndDisplayList(child);
 
-    TestUtils::recordNode(*parent1, [&child](Canvas& canvas) {
-        canvas.drawRenderNode(child.get());
-    });
+    TestUtils::recordNode(*parent1,
+                          [&child](Canvas& canvas) { canvas.drawRenderNode(child.get()); });
     TestUtils::syncHierarchyPropertiesAndDisplayList(parent1);
 
-    TestUtils::recordNode(*parent2, [&child](Canvas& canvas) {
-        canvas.drawRenderNode(child.get());
-    });
+    TestUtils::recordNode(*parent2,
+                          [&child](Canvas& canvas) { canvas.drawRenderNode(child.get()); });
     TestUtils::syncHierarchyPropertiesAndDisplayList(parent2);
 
     EXPECT_TRUE(child->isValid());
@@ -240,9 +234,8 @@ TEST(RenderNode, releasedCallback) {
     class DecRefOnReleased : public GlFunctorLifecycleListener {
     public:
         explicit DecRefOnReleased(int* refcnt) : mRefCnt(refcnt) {}
-        void onGlFunctorReleased(Functor* functor) override {
-            *mRefCnt -= 1;
-        }
+        void onGlFunctorReleased(Functor* functor) override { *mRefCnt -= 1; }
+
     private:
         int* mRefCnt;
     };
@@ -251,8 +244,7 @@ TEST(RenderNode, releasedCallback) {
     sp<DecRefOnReleased> listener(new DecRefOnReleased(&refcnt));
     Functor noopFunctor;
 
-    auto node = TestUtils::createNode(0, 0, 200, 400,
-            [&](RenderProperties& props, Canvas& canvas) {
+    auto node = TestUtils::createNode(0, 0, 200, 400, [&](RenderProperties& props, Canvas& canvas) {
         refcnt++;
         canvas.callDrawGLFunction(&noopFunctor, listener.get());
     });
@@ -277,17 +269,17 @@ TEST(RenderNode, releasedCallback) {
 RENDERTHREAD_TEST(RenderNode, prepareTree_nullableDisplayList) {
     auto rootNode = TestUtils::createNode(0, 0, 200, 400, nullptr);
     ContextFactory contextFactory;
-    std::unique_ptr<CanvasContext> canvasContext(CanvasContext::create(
-            renderThread, false, rootNode.get(), &contextFactory));
+    std::unique_ptr<CanvasContext> canvasContext(
+            CanvasContext::create(renderThread, false, rootNode.get(), &contextFactory));
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;
 
     {
-        auto nonNullDLNode = TestUtils::createNode(0, 0, 200, 400,
-                [](RenderProperties& props, Canvas& canvas) {
-            canvas.drawColor(Color::Red_500, SkBlendMode::kSrcOver);
-        });
+        auto nonNullDLNode =
+                TestUtils::createNode(0, 0, 200, 400, [](RenderProperties& props, Canvas& canvas) {
+                    canvas.drawColor(Color::Red_500, SkBlendMode::kSrcOver);
+                });
         TestUtils::syncHierarchyPropertiesAndDisplayList(nonNullDLNode);
         EXPECT_TRUE(nonNullDLNode->getDisplayList());
         nonNullDLNode->prepareTree(info);
@@ -304,17 +296,16 @@ RENDERTHREAD_TEST(RenderNode, prepareTree_nullableDisplayList) {
 }
 
 RENDERTHREAD_TEST(RenderNode, prepareTree_HwLayer_AVD_enqueueDamage) {
-
     VectorDrawable::Group* group = new VectorDrawable::Group();
     sp<VectorDrawableRoot> vectorDrawable(new VectorDrawableRoot(group));
 
-    auto rootNode = TestUtils::createNode(0, 0, 200, 400,
-            [&](RenderProperties& props, Canvas& canvas) {
-        canvas.drawVectorDrawable(vectorDrawable.get());
-    });
+    auto rootNode =
+            TestUtils::createNode(0, 0, 200, 400, [&](RenderProperties& props, Canvas& canvas) {
+                canvas.drawVectorDrawable(vectorDrawable.get());
+            });
     ContextFactory contextFactory;
-    std::unique_ptr<CanvasContext> canvasContext(CanvasContext::create(
-            renderThread, false, rootNode.get(), &contextFactory));
+    std::unique_ptr<CanvasContext> canvasContext(
+            CanvasContext::create(renderThread, false, rootNode.get(), &contextFactory));
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     LayerUpdateQueue layerUpdateQueue;

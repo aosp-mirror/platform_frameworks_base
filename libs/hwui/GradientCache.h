@@ -60,13 +60,9 @@ struct GradientCacheEntry {
 
     static int compare(const GradientCacheEntry& lhs, const GradientCacheEntry& rhs);
 
-    bool operator==(const GradientCacheEntry& other) const {
-        return compare(*this, other) == 0;
-    }
+    bool operator==(const GradientCacheEntry& other) const { return compare(*this, other) == 0; }
 
-    bool operator!=(const GradientCacheEntry& other) const {
-        return compare(*this, other) != 0;
-    }
+    bool operator!=(const GradientCacheEntry& other) const { return compare(*this, other) != 0; }
 
     std::unique_ptr<uint32_t[]> colors;
     std::unique_ptr<float[]> positions;
@@ -82,7 +78,7 @@ private:
         memcpy(this->positions.get(), positions, count * sizeof(float));
     }
 
-}; // GradientCacheEntry
+};  // GradientCacheEntry
 
 // Caching support
 
@@ -103,7 +99,7 @@ inline hash_t hash_type(const GradientCacheEntry& entry) {
  * Any texture added to the cache causing the cache to grow beyond the maximum
  * allowed size will also cause the oldest texture to be kicked out.
  */
-class GradientCache: public OnEntryRemoved<GradientCacheEntry, Texture*> {
+class GradientCache : public OnEntryRemoved<GradientCacheEntry, Texture*> {
 public:
     explicit GradientCache(const Extensions& extensions);
     ~GradientCache();
@@ -138,11 +134,11 @@ private:
      * Adds a new linear gradient to the cache. The generated texture is
      * returned.
      */
-    Texture* addLinearGradient(GradientCacheEntry& gradient,
-            uint32_t* colors, float* positions, int count);
+    Texture* addLinearGradient(GradientCacheEntry& gradient, uint32_t* colors, float* positions,
+                               int count);
 
-    void generateTexture(uint32_t* colors, float* positions,
-            const uint32_t width, const uint32_t height, Texture* texture);
+    void generateTexture(uint32_t* colors, float* positions, const uint32_t width,
+                         const uint32_t height, Texture* texture);
 
     struct GradientInfo {
         uint32_t width;
@@ -155,12 +151,12 @@ private:
     size_t sourceBytesPerPixel() const;
 
     typedef void (GradientCache::*ChannelMixer)(const FloatColor& start, const FloatColor& end,
-            float amount, uint8_t*& dst) const;
+                                                float amount, uint8_t*& dst) const;
 
-    void mixBytes(const FloatColor& start, const FloatColor& end,
-            float amount, uint8_t*& dst) const;
-    void mixFloats(const FloatColor& start, const FloatColor& end,
-            float amount, uint8_t*& dst) const;
+    void mixBytes(const FloatColor& start, const FloatColor& end, float amount,
+                  uint8_t*& dst) const;
+    void mixFloats(const FloatColor& start, const FloatColor& end, float amount,
+                   uint8_t*& dst) const;
 
     LruCache<GradientCacheEntry, Texture*> mCache;
 
@@ -173,9 +169,9 @@ private:
     bool mHasLinearBlending;
 
     mutable Mutex mLock;
-}; // class GradientCache
+};  // class GradientCache
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_GRADIENT_CACHE_H
+#endif  // ANDROID_HWUI_GRADIENT_CACHE_H

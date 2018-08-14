@@ -41,6 +41,7 @@ public class SignalTileView extends QSIconViewImpl {
     private ImageView mOut;
 
     private int mWideOverlayIconStartPadding;
+    private int mSignalIndicatorToIconFrameSpacing;
 
     public SignalTileView(Context context) {
         super(context);
@@ -48,8 +49,13 @@ public class SignalTileView extends QSIconViewImpl {
         mIn = addTrafficView(R.drawable.ic_qs_signal_in);
         mOut = addTrafficView(R.drawable.ic_qs_signal_out);
 
+        setClipChildren(false);
+        setClipToPadding(false);
+
         mWideOverlayIconStartPadding = context.getResources().getDimensionPixelSize(
                 R.dimen.wide_type_icon_start_padding_qs);
+        mSignalIndicatorToIconFrameSpacing = context.getResources().getDimensionPixelSize(
+                R.dimen.signal_indicator_to_icon_frame_spacing);
     }
 
     private ImageView addTrafficView(int icon) {
@@ -99,10 +105,10 @@ public class SignalTileView extends QSIconViewImpl {
         boolean isRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
         int left, right;
         if (isRtl) {
-            right = mIconFrame.getLeft();
+            right = getLeft() - mSignalIndicatorToIconFrameSpacing;
             left = right - indicator.getMeasuredWidth();
         } else {
-            left = mIconFrame.getRight();
+            left = getRight() + mSignalIndicatorToIconFrameSpacing;
             right = left + indicator.getMeasuredWidth();
         }
         indicator.layout(

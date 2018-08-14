@@ -16,6 +16,10 @@
 
 package com.android.internal.util;
 
+import android.os.RemoteException;
+import android.util.ExceptionUtils;
+
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -25,14 +29,53 @@ public class FunctionalUtils {
     private FunctionalUtils() {}
 
     /**
+     * Converts a lambda expression that throws a checked exception(s) into a regular
+     * {@link Consumer} by propagating any checked exceptions as {@link RuntimeException}
+     */
+    public static <T> Consumer<T> uncheckExceptions(ThrowingConsumer<T> action) {
+        return action;
+    }
+
+    /**
+     * Wraps a given {@code action} into one that ignores any {@link RemoteException}s
+     */
+    public static <T> Consumer<T> ignoreRemoteException(RemoteExceptionIgnoringConsumer<T> action) {
+        return action;
+    }
+
+    /**
+     * Wraps the given {@link ThrowingRunnable} into one that handles any exceptions using the
+     * provided {@code handler}
+     */
+    public static Runnable handleExceptions(ThrowingRunnable r, Consumer<Throwable> handler) {
+        return () -> {
+            try {
+                r.run();
+            } catch (Throwable t) {
+                handler.accept(t);
+            }
+        };
+    }
+
+    /**
      * An equivalent of {@link Runnable} that allows throwing checked exceptions
      *
      * This can be used to specify a lambda argument without forcing all the checked exceptions
      * to be handled within it
      */
     @FunctionalInterface
-    public interface ThrowingRunnable {
-        void run() throws Exception;
+    @SuppressWarnings("FunctionalInterfaceMethodChanged")
+    public interface ThrowingRunnable extends Runnable {
+        void runOrThrow() throws Exception;
+
+        @Override
+        default void run() {
+            try {
+                runOrThrow();
+            } catch (Exception ex) {
+                throw ExceptionUtils.propagate(ex);
+            }
+        }
     }
 
     /**
@@ -43,17 +86,47 @@ public class FunctionalUtils {
      */
     @FunctionalInterface
     public interface ThrowingSupplier<T> {
-        T get() throws Exception;
+        T getOrThrow() throws Exception;
     }
 
     /**
-     * An equivalent of {@link java.util.function.Consumer} that allows throwing checked exceptions
+     * A {@link Consumer} that allows throwing checked exceptions from its single abstract method.
      *
-     * This can be used to specify a lambda argument without forcing all the checked exceptions
-     * to be handled within it
+     * Can be used together with {@link #uncheckExceptions} to effectively turn a lambda expression
+     * that throws a checked exception into a regular {@link Consumer}
      */
     @FunctionalInterface
-    public interface ThrowingConsumer<T> {
-        void accept(T t) throws Exception;
+    @SuppressWarnings("FunctionalInterfaceMethodChanged")
+    public interface ThrowingConsumer<T> extends Consumer<T> {
+        void acceptOrThrow(T t) throws Exception;
+
+        @Override
+        default void accept(T t) {
+            try {
+                acceptOrThrow(t);
+            } catch (Exception ex) {
+                throw ExceptionUtils.propagate(ex);
+            }
+        }
+    }
+
+    /**
+     * A {@link Consumer} that automatically ignores any {@link RemoteException}s.
+     *
+     * Used by {@link #ignoreRemoteException}
+     */
+    @FunctionalInterface
+    @SuppressWarnings("FunctionalInterfaceMethodChanged")
+    public interface RemoteExceptionIgnoringConsumer<T> extends Consumer<T> {
+        void acceptOrThrow(T t) throws RemoteException;
+
+        @Override
+        default void accept(T t) {
+            try {
+                acceptOrThrow(t);
+            } catch (RemoteException ex) {
+                // ignore
+            }
+        }
     }
 }

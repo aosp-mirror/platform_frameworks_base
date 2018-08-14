@@ -89,7 +89,7 @@ public interface WebViewFactoryProvider {
         * {@link android.webkit.WebView#setSafeBrowsingWhitelist(List<String>,
         * ValueCallback<Boolean>)}
         */
-        void setSafeBrowsingWhitelist(List<String> urls, ValueCallback<Boolean> callback);
+        void setSafeBrowsingWhitelist(List<String> hosts, ValueCallback<Boolean> callback);
 
         /**
          * Implement the API method
@@ -134,6 +134,14 @@ public interface WebViewFactoryProvider {
     TokenBindingService getTokenBindingService();
 
     /**
+     * Gets the TracingController instance for this WebView implementation. The
+     * implementation must return the same instance on subsequent calls.
+     *
+     * @return the TracingController instance
+     */
+    TracingController getTracingController();
+
+    /**
      * Gets the ServiceWorkerController instance for this WebView implementation. The
      * implementation must return the same instance on subsequent calls.
      *
@@ -164,4 +172,10 @@ public interface WebViewFactoryProvider {
      * @return the singleton WebViewDatabase instance
      */
     WebViewDatabase getWebViewDatabase(Context context);
+
+    /**
+     * Gets the classloader used to load internal WebView implementation classes. This interface
+     * should only be used by the WebView Support Library.
+     */
+    ClassLoader getWebViewClassLoader();
 }

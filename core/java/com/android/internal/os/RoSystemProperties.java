@@ -31,6 +31,8 @@ public class RoSystemProperties {
             SystemProperties.get("ro.control_privapp_permissions");
 
     // ------ ro.config.* -------- //
+    public static final boolean CONFIG_AVOID_GFX_ACCEL =
+            SystemProperties.getBoolean("ro.config.avoid_gfx_accel", false);
     public static final boolean CONFIG_LOW_RAM =
             SystemProperties.getBoolean("ro.config.low_ram", false);
     public static final boolean CONFIG_SMALL_BATTERY =

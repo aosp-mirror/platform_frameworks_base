@@ -21,6 +21,7 @@ import static android.view.autofill.Helper.sDebug;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
@@ -34,6 +35,8 @@ import com.android.internal.util.Preconditions;
  */
 final class OptionalValidators extends InternalValidator {
 
+    private static final String TAG = "OptionalValidators";
+
     @NonNull private final InternalValidator[] mValidators;
 
     OptionalValidators(@NonNull InternalValidator[] validators) {
@@ -44,6 +47,7 @@ final class OptionalValidators extends InternalValidator {
     public boolean isValid(@NonNull ValueFinder finder) {
         for (InternalValidator validator : mValidators) {
             final boolean valid = validator.isValid(finder);
+            if (sDebug) Log.d(TAG, "isValid(" + validator + "): " + valid);
             if (valid) return true;
         }
 

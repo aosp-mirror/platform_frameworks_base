@@ -79,7 +79,17 @@ public final class SyncResult implements Parcelable {
 
     /**
      * Used to indicate to the SyncManager that future sync requests that match the request's
-     * Account and authority should be delayed at least this many seconds.
+     * Account and authority should be delayed until a time in seconds since Java epoch.
+     *
+     * <p>For example, if you want to delay the next sync for at least 5 minutes, then:
+     * <pre>
+     * result.delayUntil = (System.currentTimeMillis() / 1000) + 5 * 60;
+     * </pre>
+     *
+     * <p>By default, when a sync fails, the system retries later with an exponential back-off
+     * with the system default initial delay time, which always wins over {@link #delayUntil} --
+     * i.e. if the system back-off time is larger than {@link #delayUntil}, {@link #delayUntil}
+     * will essentially be ignored.
      */
     public long delayUntil;
 

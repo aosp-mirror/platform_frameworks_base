@@ -20,7 +20,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.view.MotionEvent;
-import android.view.WindowManagerPolicy.PointerEventListener;
+import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.server.wm.WindowManagerService.H;
 
@@ -62,8 +62,8 @@ public class TaskTapPointerEventListener implements PointerEventListener {
 
                 synchronized (this) {
                     if (!mTouchExcludeRegion.contains(x, y)) {
-                        mService.mH.obtainMessage(H.TAP_OUTSIDE_TASK,
-                                x, y, mDisplayContent).sendToTarget();
+                        mService.mTaskPositioningController.handleTapOutsideTask(
+                                mDisplayContent, x, y);
                     }
                 }
             }

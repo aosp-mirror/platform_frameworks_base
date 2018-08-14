@@ -16,11 +16,18 @@
 
 package android.widget;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Binder;
 import android.os.Parcel;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
@@ -35,10 +42,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -336,7 +339,9 @@ public class RemoteViewsTest {
             parent.addView(R.id.layout, views);
             views = parent;
         }
+        // Both clone and parcel/unparcel work,
         views.clone();
+        parcelAndRecreate(views);
 
         views = new RemoteViews(mPackage, R.layout.remote_views_test);
         for (int i = 0; i < 11; i++) {
@@ -344,8 +349,10 @@ public class RemoteViewsTest {
             parent.addView(R.id.layout, views);
             views = parent;
         }
-        exception.expect(IllegalArgumentException.class);
+        // Clone works but parcel/unparcel fails
         views.clone();
+        exception.expect(IllegalArgumentException.class);
+        parcelAndRecreate(views);
     }
 
     @Test
@@ -355,15 +362,86 @@ public class RemoteViewsTest {
             views = new RemoteViews(views,
                     new RemoteViews(mPackage, R.layout.remote_views_test));
         }
+        // Both clone and parcel/unparcel work,
         views.clone();
+        parcelAndRecreate(views);
 
         views = new RemoteViews(mPackage, R.layout.remote_views_test);
         for (int i = 0; i < 11; i++) {
-            RemoteViews parent = new RemoteViews(mPackage, R.layout.remote_views_test);
-            parent.addView(R.id.layout, views);
-            views = parent;
+            views = new RemoteViews(views,
+                    new RemoteViews(mPackage, R.layout.remote_views_test));
         }
-        exception.expect(IllegalArgumentException.class);
+        // Clone works but parcel/unparcel fails
         views.clone();
+        exception.expect(IllegalArgumentException.class);
+        parcelAndRecreate(views);
+    }
+
+    private RemoteViews parcelAndRecreate(RemoteViews views) {
+        return parcelAndRecreateWithPendingIntentCookie(views, null);
+    }
+
+    private RemoteViews parcelAndRecreateWithPendingIntentCookie(RemoteViews views, Object cookie) {
+        Parcel p = Parcel.obtain();
+        try {
+            views.writeToParcel(p, 0);
+            p.setDataPosition(0);
+
+            if (cookie != null) {
+                p.setClassCookie(PendingIntent.class, cookie);
+            }
+
+            return RemoteViews.CREATOR.createFromParcel(p);
+        } finally {
+            p.recycle();
+        }
+    }
+
+    @Test
+    public void copyWithBinders() throws Exception {
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
+        for (int i = 1; i < 10; i++) {
+            PendingIntent pi = PendingIntent.getBroadcast(mContext, 0,
+                    new Intent("android.widget.RemoteViewsTest_" + i), PendingIntent.FLAG_ONE_SHOT);
+            views.setOnClickPendingIntent(i, pi);
+        }
+        try {
+            new RemoteViews(views);
+        } catch (Throwable t) {
+            throw new Exception(t);
+        }
+    }
+
+    @Test
+    public void copy_keepsPendingIntentWhitelistToken() throws Exception {
+        Binder whitelistToken = new Binder();
+
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
+        PendingIntent pi = PendingIntent.getBroadcast(mContext, 0,
+                new Intent("test"), PendingIntent.FLAG_ONE_SHOT);
+        views.setOnClickPendingIntent(1, pi);
+        RemoteViews withCookie = parcelAndRecreateWithPendingIntentCookie(views, whitelistToken);
+
+        RemoteViews cloned = new RemoteViews(withCookie);
+
+        PendingIntent found = extractAnyPendingIntent(cloned);
+        assertEquals(whitelistToken, found.getWhitelistToken());
+    }
+
+    private PendingIntent extractAnyPendingIntent(RemoteViews cloned) {
+        PendingIntent[] found = new PendingIntent[1];
+        Parcel p = Parcel.obtain();
+        try {
+            PendingIntent.setOnMarshaledListener((intent, parcel, flags) -> {
+                if (parcel == p) {
+                    found[0] = intent;
+                }
+            });
+            cloned.writeToParcel(p, 0);
+        } finally {
+            p.recycle();
+            PendingIntent.setOnMarshaledListener(null);
+        }
+        return found[0];
     }
 }

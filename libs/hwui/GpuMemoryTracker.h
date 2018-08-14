@@ -25,11 +25,11 @@ namespace uirenderer {
 
 extern pthread_t gGpuThread;
 
-#define ASSERT_GPU_THREAD() LOG_ALWAYS_FATAL_IF( \
-        !pthread_equal(gGpuThread, pthread_self()), \
-        "Error, %p of type %d (size=%d) used on wrong thread! cur thread %lu " \
-        "!= gpu thread %lu", this, static_cast<int>(mType), mSize, \
-        pthread_self(), gGpuThread)
+#define ASSERT_GPU_THREAD()                                                                    \
+    LOG_ALWAYS_FATAL_IF(!pthread_equal(gGpuThread, pthread_self()),                            \
+                        "Error, %p of type %d (size=%d) used on wrong thread! cur thread %lu " \
+                        "!= gpu thread %lu",                                                   \
+                        this, static_cast<int>(mType), mSize, pthread_self(), gGpuThread)
 
 enum class GpuObjectType {
     Texture = 0,
@@ -73,5 +73,5 @@ private:
     GpuObjectType mType;
 };
 
-} // namespace uirenderer
-} // namespace android;
+}  // namespace uirenderer
+}  // namespace android;

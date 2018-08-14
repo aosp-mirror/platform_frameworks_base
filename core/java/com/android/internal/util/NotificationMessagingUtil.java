@@ -26,7 +26,6 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 
 import java.util.Objects;
@@ -45,6 +44,18 @@ public class NotificationMessagingUtil {
         mContext = context;
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(DEFAULT_SMS_APP_SETTING), false, mSmsContentObserver);
+    }
+
+    public boolean isImportantMessaging(StatusBarNotification sbn, int importance) {
+        if (importance < NotificationManager.IMPORTANCE_LOW) {
+            return false;
+        }
+
+        return hasMessagingStyle(sbn) || (isCategoryMessage(sbn) && isDefaultMessagingApp(sbn));
+    }
+
+    public boolean isMessaging(StatusBarNotification sbn) {
+        return hasMessagingStyle(sbn) || isDefaultMessagingApp(sbn) || isCategoryMessage(sbn);
     }
 
     @SuppressWarnings("deprecation")
@@ -73,21 +84,12 @@ public class NotificationMessagingUtil {
         }
     };
 
-    public boolean isImportantMessaging(StatusBarNotification sbn, int importance) {
-        if (importance < NotificationManager.IMPORTANCE_LOW) {
-            return false;
-        }
-
+    private boolean hasMessagingStyle(StatusBarNotification sbn) {
         Class<? extends Notification.Style> style = sbn.getNotification().getNotificationStyle();
-        if (Notification.MessagingStyle.class.equals(style)) {
-            return true;
-        }
+        return Notification.MessagingStyle.class.equals(style);
+    }
 
-        if (Notification.CATEGORY_MESSAGE.equals(sbn.getNotification().category)
-                && isDefaultMessagingApp(sbn)) {
-            return true;
-        }
-
-        return false;
+    private boolean isCategoryMessage(StatusBarNotification sbn) {
+        return Notification.CATEGORY_MESSAGE.equals(sbn.getNotification().category);
     }
 }

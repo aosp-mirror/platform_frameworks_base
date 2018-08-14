@@ -130,4 +130,14 @@ public class SubMenuBuilder extends MenuBuilder implements SubMenu {
         }
         return super.getActionViewStatesKey() + ":" + itemId;
     }
+
+    @Override
+    public void setGroupDividerEnabled(boolean groupDividerEnabled) {
+        mParentMenu.setGroupDividerEnabled(groupDividerEnabled);
+    }
+
+    @Override
+    public boolean isGroupDividerEnabled() {
+        return mParentMenu.isGroupDividerEnabled();
+    }
 }

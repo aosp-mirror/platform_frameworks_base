@@ -16,6 +16,7 @@
 
 package android.hardware.usb;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -47,6 +48,7 @@ public final class UsbPortStatus implements Parcelable {
      *
      * @return True if there is anything connected to the port.
      */
+    @UnsupportedAppUsage
     public boolean isConnected() {
         return mCurrentMode != 0;
     }
@@ -57,6 +59,7 @@ public final class UsbPortStatus implements Parcelable {
      * @return The current mode: {@link UsbPort#MODE_DFP}, {@link UsbPort#MODE_UFP},
      * or 0 if nothing is connected.
      */
+    @UnsupportedAppUsage
     public int getCurrentMode() {
         return mCurrentMode;
     }
@@ -67,6 +70,7 @@ public final class UsbPortStatus implements Parcelable {
      * @return The current power role: {@link UsbPort#POWER_ROLE_SOURCE},
      * {@link UsbPort#POWER_ROLE_SINK}, or 0 if nothing is connected.
      */
+    @UnsupportedAppUsage
     public int getCurrentPowerRole() {
         return mCurrentPowerRole;
     }
@@ -77,6 +81,7 @@ public final class UsbPortStatus implements Parcelable {
      * @return The current data role: {@link UsbPort#DATA_ROLE_HOST},
      * {@link UsbPort#DATA_ROLE_DEVICE}, or 0 if nothing is connected.
      */
+    @UnsupportedAppUsage
     public int getCurrentDataRole() {
         return mCurrentDataRole;
     }
@@ -90,12 +95,14 @@ public final class UsbPortStatus implements Parcelable {
      * @param dataRole The data role to check: either {@link UsbPort#DATA_ROLE_HOST}
      * or {@link UsbPort#DATA_ROLE_DEVICE}, or 0 if no data role.
      */
+    @UnsupportedAppUsage
     public boolean isRoleCombinationSupported(int powerRole, int dataRole) {
         return (mSupportedRoleCombinations &
                 UsbPort.combineRolesAsBit(powerRole, dataRole)) != 0;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getSupportedRoleCombinations() {
         return mSupportedRoleCombinations;
     }

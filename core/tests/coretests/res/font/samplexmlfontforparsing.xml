@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<font-family xmlns:android="http://schemas.android.com/apk/res/android">
+    <font android:fontStyle="normal" android:fontWeight="400" android:fontVariationSettings="'wdth' 0.8"
+          android:font="@font/samplefont" android:ttcIndex="0" />
+    <font android:fontStyle="italic" android:fontWeight="400" android:fontVariationSettings="'cntr' 0.5"
+          android:font="@font/samplefont2" android:ttcIndex="1" />
+    <font android:fontStyle="normal" android:fontWeight="800" android:fontVariationSettings="'wdth' 500.0, 'wght' 300.0"
+          android:font="@font/samplefont3" android:ttcIndex="2" />
+    <font android:fontStyle="italic" android:fontWeight="800" android:font="@font/samplefont4" />
+</font-family>

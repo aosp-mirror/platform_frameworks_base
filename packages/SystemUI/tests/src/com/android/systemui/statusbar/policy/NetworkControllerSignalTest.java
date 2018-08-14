@@ -25,6 +25,8 @@ import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
@@ -32,7 +34,6 @@ import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.R;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -47,11 +48,11 @@ import static junit.framework.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@RunWithLooper
 public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
     @Test
-    @Ignore("Flaky")
     public void testNoIconWithoutMobile() {
         // Turn off mobile network support.
         Mockito.when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
@@ -66,7 +67,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testNoSimsIconPresent() {
         // No Subscriptions.
         mNetworkController.mMobileSignalControllers.clear();
@@ -76,7 +76,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testEmergencyOnly() {
         setupDefaultSignal();
         mNetworkController.recalculateEmergency();
@@ -88,7 +87,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testEmergencyOnlyNoSubscriptions() {
         setupDefaultSignal();
         setSubscriptions();
@@ -99,7 +97,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testNoEmergencyOnlyWrongSubscription() {
         setupDefaultSignal();
         setDefaultSubId(42);
@@ -108,7 +105,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testNoEmengencyNoSubscriptions() {
         setupDefaultSignal();
         setSubscriptions();
@@ -119,7 +115,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testNoSimlessIconWithoutMobile() {
         // Turn off mobile network support.
         Mockito.when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
@@ -138,7 +133,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testSignalStrength() {
         for (int testStrength = 0;
                 testStrength < SignalStrength.NUM_SIGNAL_STRENGTH_BINS; testStrength++) {
@@ -149,14 +143,13 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                     testStrength, DEFAULT_ICON);
 
             // Verify low inet number indexing.
-            setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, true);
+            setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, true);
             verifyLastMobileDataIndicators(true,
                     testStrength, DEFAULT_ICON, false, false);
         }
     }
 
     @Test
-    @Ignore("Flaky")
     public void testCdmaSignalStrength() {
         for (int testStrength = 0;
                 testStrength < SignalStrength.NUM_SIGNAL_STRENGTH_BINS; testStrength++) {
@@ -171,7 +164,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testSignalRoaming() {
         for (int testStrength = 0;
                 testStrength < SignalStrength.NUM_SIGNAL_STRENGTH_BINS; testStrength++) {
@@ -186,7 +178,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testCdmaSignalRoaming() {
         for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
                 testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
@@ -210,7 +201,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testQsSignalStrength() {
         for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
                 testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
@@ -224,7 +214,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testCdmaQsSignalStrength() {
         for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
                 testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
@@ -234,16 +223,15 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
             verifyLastQsMobileDataIndicators(true,
                     testStrength,
-                    TelephonyIcons.QS_DATA_1X, false, false);
+                    TelephonyIcons.ICON_1X, false, false);
         }
     }
 
     @Test
-    @Ignore("Flaky")
     public void testNoBangWithWifi() {
         setupDefaultSignal();
-        setConnectivity(mMobileSignalController.mTransportType, false, false);
-        setConnectivity(NetworkCapabilities.TRANSPORT_WIFI, true, true);
+        setConnectivityViaBroadcast(mMobileSignalController.mTransportType, false, false);
+        setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_WIFI, true, true);
 
         verifyLastMobileDataIndicators(true, DEFAULT_LEVEL, 0);
     }
@@ -251,7 +239,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     // Some tests of actual NetworkController code, just internals not display stuff
     // TODO: Put this somewhere else, maybe in its own file.
     @Test
-    @Ignore("Flaky")
     public void testHasCorrectMobileControllers() {
         int[] testSubscriptions = new int[] { 1, 5, 3 };
         int notTestSubscription = 0;
@@ -279,7 +266,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testSetCurrentSubscriptions() {
         // We will not add one controller to make sure it gets created.
         int indexToSkipController = 0;
@@ -333,7 +319,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testHistorySize() {
         // Verify valid history size, otherwise it gits printed out the wrong order and whatnot.
         assertEquals(0, SignalController.HISTORY_SIZE & (SignalController.HISTORY_SIZE - 1));
@@ -347,7 +332,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testOnReceive_stringsUpdatedAction_spn() {
         String expectedMNetworkName = "Test";
         Intent intent = createStringsUpdatedIntent(true /* showSpn */,
@@ -361,7 +345,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testOnReceive_stringsUpdatedAction_plmn() {
         String expectedMNetworkName = "Test";
 
@@ -376,7 +359,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testOnReceive_stringsUpdatedAction_bothFalse() {
         Intent intent = createStringsUpdatedIntent(false /* showSpn */,
               "Irrelevant" /* spn */,
@@ -392,7 +374,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testOnReceive_stringsUpdatedAction_bothTrueAndNull() {
         Intent intent = createStringsUpdatedIntent(true /* showSpn */,
             null /* spn */,
@@ -407,7 +388,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testOnReceive_stringsUpdatedAction_bothTrueAndNonNull() {
         String spn = "Test1";
         String plmn = "Test2";
@@ -442,7 +422,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testOnUpdateDataActivity_dataIn() {
         setupDefaultSignal();
 
@@ -457,7 +436,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testOnUpdateDataActivity_dataOut() {
       setupDefaultSignal();
 
@@ -471,7 +449,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testOnUpdateDataActivity_dataInOut() {
       setupDefaultSignal();
 
@@ -486,7 +463,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testOnUpdateDataActivity_dataActivityNone() {
       setupDefaultSignal();
 
@@ -501,7 +477,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testCarrierNetworkChange_carrierNetworkChange() {
       int strength = SignalStrength.SIGNAL_STRENGTH_GREAT;
 
@@ -531,7 +506,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testCarrierNetworkChange_roamingBeforeNetworkChange() {
       int strength = SignalStrength.SIGNAL_STRENGTH_GREAT;
 
@@ -565,7 +539,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testCarrierNetworkChange_roamingAfterNetworkChange() {
       int strength = SignalStrength.SIGNAL_STRENGTH_GREAT;
 

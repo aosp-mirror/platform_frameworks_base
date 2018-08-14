@@ -25,28 +25,27 @@ package android.webkit;
  * <p>
  * If reporting is enabled, all reports will be sent according to the privacy policy referenced by
  * {@link android.webkit.WebView#getSafeBrowsingPrivacyPolicyUrl()}.
- * </p>
  */
 public abstract class SafeBrowsingResponse {
 
     /**
      * Display the default interstitial.
      *
-     * @param allowReporting True if the interstitial should show a reporting checkbox.
+     * @param allowReporting {@code true} if the interstitial should show a reporting checkbox.
      */
     public abstract void showInterstitial(boolean allowReporting);
 
     /**
      * Act as if the user clicked "visit this unsafe site."
      *
-     * @param report True to enable Safe Browsing reporting.
+     * @param report {@code true} to enable Safe Browsing reporting.
      */
     public abstract void proceed(boolean report);
 
     /**
      * Act as if the user clicked "back to safety."
      *
-     * @param report True to enable Safe Browsing reporting.
+     * @param report {@code true} to enable Safe Browsing reporting.
      */
     public abstract void backToSafety(boolean report);
 }

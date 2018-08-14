@@ -43,6 +43,8 @@ struct EphemeralStorage {
     const ::android::hardware::hidl_string *allocTemporaryString(
             JNIEnv *env, jstring stringObj);
 
+    native_handle_t *allocTemporaryNativeHandle(int numFds, int numInts);
+
     DECLARE_ALLOC_METHODS(Int8,jbyte)
     DECLARE_ALLOC_METHODS(Int16,jshort)
     DECLARE_ALLOC_METHODS(Int32,jint)
@@ -61,6 +63,7 @@ private:
         TYPE_Int64_ARRAY,
         TYPE_Float_ARRAY,
         TYPE_Double_ARRAY,
+        TYPE_NATIVE_HANDLE,
     };
 
     struct Item {

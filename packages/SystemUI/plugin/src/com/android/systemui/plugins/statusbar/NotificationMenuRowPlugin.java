@@ -38,7 +38,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem
 public interface NotificationMenuRowPlugin extends Plugin {
 
     public static final String ACTION = "com.android.systemui.action.PLUGIN_NOTIFICATION_MENU_ROW";
-    public static final int VERSION = 3;
+    public static final int VERSION = 4;
 
     @ProvidesInterface(version = OnMenuEventListener.VERSION)
     public interface OnMenuEventListener {
@@ -69,6 +69,16 @@ public interface NotificationMenuRowPlugin extends Plugin {
      * @return the {@link MenuItem} to display when a notification is long pressed.
      */
     public MenuItem getLongpressMenuItem(Context context);
+
+    /**
+     * @return the {@link MenuItem} to display when app ops icons are pressed.
+     */
+    public MenuItem getAppOpsMenuItem(Context context);
+
+    /**
+     * @return the {@link MenuItem} to display when snooze item is pressed.
+     */
+    public MenuItem getSnoozeMenuItem(Context context);
 
     public void setMenuItems(ArrayList<MenuItem> items);
 

@@ -16,18 +16,44 @@
 
 package android.content.res;
 
+import static android.content.ConfigurationProto.COLOR_MODE;
+import static android.content.ConfigurationProto.DENSITY_DPI;
+import static android.content.ConfigurationProto.FONT_SCALE;
+import static android.content.ConfigurationProto.HARD_KEYBOARD_HIDDEN;
+import static android.content.ConfigurationProto.KEYBOARD;
+import static android.content.ConfigurationProto.KEYBOARD_HIDDEN;
+import static android.content.ConfigurationProto.LOCALES;
+import static android.content.ConfigurationProto.MCC;
+import static android.content.ConfigurationProto.MNC;
+import static android.content.ConfigurationProto.NAVIGATION;
+import static android.content.ConfigurationProto.NAVIGATION_HIDDEN;
+import static android.content.ConfigurationProto.ORIENTATION;
+import static android.content.ConfigurationProto.SCREEN_HEIGHT_DP;
+import static android.content.ConfigurationProto.SCREEN_LAYOUT;
+import static android.content.ConfigurationProto.SCREEN_WIDTH_DP;
+import static android.content.ConfigurationProto.SMALLEST_SCREEN_WIDTH_DP;
+import static android.content.ConfigurationProto.TOUCHSCREEN;
+import static android.content.ConfigurationProto.UI_MODE;
+import static android.content.ConfigurationProto.WINDOW_CONFIGURATION;
+import static android.content.ResourcesConfigurationProto.CONFIGURATION;
+import static android.content.ResourcesConfigurationProto.SCREEN_HEIGHT_PX;
+import static android.content.ResourcesConfigurationProto.SCREEN_WIDTH_PX;
+import static android.content.ResourcesConfigurationProto.SDK_VERSION;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
+import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
-import android.graphics.Rect;
 import android.os.Build;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.view.DisplayInfo;
+import android.util.DisplayMetrics;
+import android.util.proto.ProtoOutputStream;
 import android.view.View;
 
 import com.android.internal.util.XmlUtils;
@@ -41,7 +67,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Locale;
-
 
 /**
  * This class describes all device configuration information that can
@@ -297,14 +322,13 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public int screenLayout;
 
     /**
+     * Configuration relating to the windowing state of the object associated with this
+     * Configuration. Contents of this field are not intended to affect resources, but need to be
+     * communicated and propagated at the same time as the rest of Configuration.
      * @hide
-     * {@link android.graphics.Rect} defining app bounds. The dimensions override usages of
-     * {@link DisplayInfo#appHeight} and {@link DisplayInfo#appWidth} and mirrors these values at
-     * the display level. Lower levels can override these values to provide custom bounds to enforce
-     * features such as a max aspect ratio.
-     * TODO(b/36812336): Move appBounds out of {@link Configuration}.
      */
-    public Rect appBounds;
+    @TestApi
+    public final WindowConfiguration windowConfiguration = new WindowConfiguration();
 
     /** @hide */
     static public int resetScreenLayout(int curLayout) {
@@ -772,25 +796,24 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public int seq;
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
-                    NATIVE_CONFIG_MCC,
-                    NATIVE_CONFIG_MNC,
-                    NATIVE_CONFIG_LOCALE,
-                    NATIVE_CONFIG_TOUCHSCREEN,
-                    NATIVE_CONFIG_KEYBOARD,
-                    NATIVE_CONFIG_KEYBOARD_HIDDEN,
-                    NATIVE_CONFIG_NAVIGATION,
-                    NATIVE_CONFIG_ORIENTATION,
-                    NATIVE_CONFIG_DENSITY,
-                    NATIVE_CONFIG_SCREEN_SIZE,
-                    NATIVE_CONFIG_VERSION,
-                    NATIVE_CONFIG_SCREEN_LAYOUT,
-                    NATIVE_CONFIG_UI_MODE,
-                    NATIVE_CONFIG_SMALLEST_SCREEN_SIZE,
-                    NATIVE_CONFIG_LAYOUTDIR,
-                    NATIVE_CONFIG_COLOR_MODE,
-            })
+    @IntDef(flag = true, prefix = { "NATIVE_CONFIG_" }, value = {
+            NATIVE_CONFIG_MCC,
+            NATIVE_CONFIG_MNC,
+            NATIVE_CONFIG_LOCALE,
+            NATIVE_CONFIG_TOUCHSCREEN,
+            NATIVE_CONFIG_KEYBOARD,
+            NATIVE_CONFIG_KEYBOARD_HIDDEN,
+            NATIVE_CONFIG_NAVIGATION,
+            NATIVE_CONFIG_ORIENTATION,
+            NATIVE_CONFIG_DENSITY,
+            NATIVE_CONFIG_SCREEN_SIZE,
+            NATIVE_CONFIG_VERSION,
+            NATIVE_CONFIG_SCREEN_LAYOUT,
+            NATIVE_CONFIG_UI_MODE,
+            NATIVE_CONFIG_SMALLEST_SCREEN_SIZE,
+            NATIVE_CONFIG_LAYOUTDIR,
+            NATIVE_CONFIG_COLOR_MODE,
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NativeConfig {}
 
@@ -895,9 +918,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenWidthDp = o.compatScreenWidthDp;
         compatScreenHeightDp = o.compatScreenHeightDp;
         compatSmallestScreenWidthDp = o.compatSmallestScreenWidthDp;
-        setAppBounds(o.appBounds);
         assetsSeq = o.assetsSeq;
         seq = o.seq;
+        windowConfiguration.setTo(o.windowConfiguration);
     }
 
     public String toString() {
@@ -1046,9 +1069,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             case NAVIGATIONHIDDEN_YES: sb.append("/h"); break;
             default: sb.append("/"); sb.append(navigationHidden); break;
         }
-        if (appBounds != null) {
-            sb.append(" appBounds="); sb.append(appBounds);
-        }
+        sb.append(" winConfig="); sb.append(windowConfiguration);
         if (assetsSeq != 0) {
             sb.append(" as.").append(assetsSeq);
         }
@@ -1057,6 +1078,95 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
         sb.append('}');
         return sb.toString();
+    }
+
+    /**
+     * Write to a protocol buffer output stream.
+     * Protocol buffer message definition at {@link android.content.ConfigurationProto}
+     *
+     * @param protoOutputStream Stream to write the Configuration object to.
+     * @param fieldId           Field Id of the Configuration as defined in the parent message
+     * @hide
+     */
+    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
+        final long token = protoOutputStream.start(fieldId);
+        protoOutputStream.write(FONT_SCALE, fontScale);
+        protoOutputStream.write(MCC, mcc);
+        protoOutputStream.write(MNC, mnc);
+        mLocaleList.writeToProto(protoOutputStream, LOCALES);
+        protoOutputStream.write(SCREEN_LAYOUT, screenLayout);
+        protoOutputStream.write(COLOR_MODE, colorMode);
+        protoOutputStream.write(TOUCHSCREEN, touchscreen);
+        protoOutputStream.write(KEYBOARD, keyboard);
+        protoOutputStream.write(KEYBOARD_HIDDEN, keyboardHidden);
+        protoOutputStream.write(HARD_KEYBOARD_HIDDEN, hardKeyboardHidden);
+        protoOutputStream.write(NAVIGATION, navigation);
+        protoOutputStream.write(NAVIGATION_HIDDEN, navigationHidden);
+        protoOutputStream.write(ORIENTATION, orientation);
+        protoOutputStream.write(UI_MODE, uiMode);
+        protoOutputStream.write(SCREEN_WIDTH_DP, screenWidthDp);
+        protoOutputStream.write(SCREEN_HEIGHT_DP, screenHeightDp);
+        protoOutputStream.write(SMALLEST_SCREEN_WIDTH_DP, smallestScreenWidthDp);
+        protoOutputStream.write(DENSITY_DPI, densityDpi);
+        windowConfiguration.writeToProto(protoOutputStream, WINDOW_CONFIGURATION);
+        protoOutputStream.end(token);
+    }
+
+    /**
+     * Write full {@link android.content.ResourcesConfigurationProto} to protocol buffer output
+     * stream.
+     *
+     * @param protoOutputStream Stream to write the Configuration object to.
+     * @param fieldId           Field Id of the Configuration as defined in the parent message
+     * @param metrics           Current display information
+     * @hide
+     */
+    public void writeResConfigToProto(ProtoOutputStream protoOutputStream, long fieldId,
+            DisplayMetrics metrics) {
+        final int width, height;
+        if (metrics.widthPixels >= metrics.heightPixels) {
+            width = metrics.widthPixels;
+            height = metrics.heightPixels;
+        } else {
+            //noinspection SuspiciousNameCombination
+            width = metrics.heightPixels;
+            //noinspection SuspiciousNameCombination
+            height = metrics.widthPixels;
+        }
+
+        final long token = protoOutputStream.start(fieldId);
+        writeToProto(protoOutputStream, CONFIGURATION);
+        protoOutputStream.write(SDK_VERSION, Build.VERSION.RESOURCES_SDK_INT);
+        protoOutputStream.write(SCREEN_WIDTH_PX, width);
+        protoOutputStream.write(SCREEN_HEIGHT_PX, height);
+        protoOutputStream.end(token);
+    }
+
+    /**
+     * Convert the UI mode to a human readable format.
+     * @hide
+     */
+    public static String uiModeToString(int uiMode) {
+        switch (uiMode) {
+            case UI_MODE_TYPE_UNDEFINED:
+                return "UI_MODE_TYPE_UNDEFINED";
+            case UI_MODE_TYPE_NORMAL:
+                return "UI_MODE_TYPE_NORMAL";
+            case UI_MODE_TYPE_DESK:
+                return "UI_MODE_TYPE_DESK";
+            case UI_MODE_TYPE_CAR:
+                return "UI_MODE_TYPE_CAR";
+            case UI_MODE_TYPE_TELEVISION:
+                return "UI_MODE_TYPE_TELEVISION";
+            case UI_MODE_TYPE_APPLIANCE:
+                return "UI_MODE_TYPE_APPLIANCE";
+            case UI_MODE_TYPE_WATCH:
+                return "UI_MODE_TYPE_WATCH";
+            case UI_MODE_TYPE_VR_HEADSET:
+                return "UI_MODE_TYPE_VR_HEADSET";
+            default:
+                return Integer.toString(uiMode);
+        }
     }
 
     /**
@@ -1083,8 +1193,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         smallestScreenWidthDp = compatSmallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
         densityDpi = DENSITY_DPI_UNDEFINED;
         assetsSeq = ASSETS_SEQ_UNDEFINED;
-        appBounds = null;
         seq = 0;
+        windowConfiguration.setToDefaults();
     }
 
     /**
@@ -1183,7 +1293,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_ORIENTATION;
             orientation = delta.orientation;
         }
-
         if (((delta.screenLayout & SCREENLAYOUT_SIZE_MASK) != SCREENLAYOUT_SIZE_UNDEFINED)
                 && (delta.screenLayout & SCREENLAYOUT_SIZE_MASK)
                 != (screenLayout & SCREENLAYOUT_SIZE_MASK)) {
@@ -1271,16 +1380,15 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (delta.compatSmallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
             compatSmallestScreenWidthDp = delta.compatSmallestScreenWidthDp;
         }
-        if (delta.appBounds != null && !delta.appBounds.equals(appBounds)) {
-            changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
-            setAppBounds(delta.appBounds);
-        }
         if (delta.assetsSeq != ASSETS_SEQ_UNDEFINED && delta.assetsSeq != assetsSeq) {
             changed |= ActivityInfo.CONFIG_ASSETS_PATHS;
             assetsSeq = delta.assetsSeq;
         }
         if (delta.seq != 0) {
             seq = delta.seq;
+        }
+        if (windowConfiguration.updateFrom(delta.windowConfiguration) != 0) {
+            changed |= ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
         }
 
         return changed;
@@ -1433,13 +1541,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_ASSETS_PATHS;
         }
 
-        // Make sure that one of the values is not null and that they are not equal.
-        if ((compareUndefined || delta.appBounds != null)
-                && appBounds != delta.appBounds
-                && (appBounds == null || (!publicOnly && !appBounds.equals(delta.appBounds))
-                        || (publicOnly && (appBounds.width() != delta.appBounds.width()
-                                || appBounds.height() != delta.appBounds.height())))) {
-            changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
+        // WindowConfiguration differences aren't considered public...
+        if (!publicOnly
+                && windowConfiguration.diff(delta.windowConfiguration, compareUndefined) != 0) {
+            changed |= ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
         }
 
         return changed;
@@ -1508,12 +1613,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(mnc);
 
         fixUpLocaleList();
-        final int localeListSize = mLocaleList.size();
-        dest.writeInt(localeListSize);
-        for (int i = 0; i < localeListSize; ++i) {
-            final Locale l = mLocaleList.get(i);
-            dest.writeString(l.toLanguageTag());
-        }
+        dest.writeParcelable(mLocaleList, flags);
 
         if(userSetLocale) {
             dest.writeInt(1);
@@ -1537,7 +1637,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(compatScreenWidthDp);
         dest.writeInt(compatScreenHeightDp);
         dest.writeInt(compatSmallestScreenWidthDp);
-        dest.writeValue(appBounds);
+        dest.writeValue(windowConfiguration);
         dest.writeInt(assetsSeq);
         dest.writeInt(seq);
     }
@@ -1547,12 +1647,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         mcc = source.readInt();
         mnc = source.readInt();
 
-        final int localeListSize = source.readInt();
-        final Locale[] localeArray = new Locale[localeListSize];
-        for (int i = 0; i < localeListSize; ++i) {
-            localeArray[i] = Locale.forLanguageTag(source.readString());
-        }
-        mLocaleList = new LocaleList(localeArray);
+        mLocaleList = source.readParcelable(LocaleList.class.getClassLoader());
         locale = mLocaleList.get(0);
 
         userSetLocale = (source.readInt()==1);
@@ -1573,7 +1668,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenWidthDp = source.readInt();
         compatScreenHeightDp = source.readInt();
         compatSmallestScreenWidthDp = source.readInt();
-        appBounds = (Rect) source.readValue(null);
+        windowConfiguration.setTo((WindowConfiguration) source.readValue(null));
         assetsSeq = source.readInt();
         seq = source.readInt();
     }
@@ -1663,21 +1758,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (n != 0) return n;
         n = this.assetsSeq - that.assetsSeq;
         if (n != 0) return n;
-
-        if (this.appBounds == null && that.appBounds != null) {
-            return 1;
-        } else if (this.appBounds != null && that.appBounds == null) {
-            return -1;
-        } else if (this.appBounds != null && that.appBounds != null) {
-            n = this.appBounds.left - that.appBounds.left;
-            if (n != 0) return n;
-            n = this.appBounds.top - that.appBounds.top;
-            if (n != 0) return n;
-            n = this.appBounds.right - that.appBounds.right;
-            if (n != 0) return n;
-            n = this.appBounds.bottom - that.appBounds.bottom;
-            if (n != 0) return n;
-        }
+        n = windowConfiguration.compareTo(that.windowConfiguration);
+        if (n != 0) return n;
 
         // if (n != 0) return n;
         return n;
@@ -1768,33 +1850,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     /**
      * @hide
      *
-     * Helper method for setting the app bounds.
-     */
-    public void setAppBounds(Rect rect) {
-        if (rect == null) {
-            appBounds = null;
-            return;
-        }
-
-        setAppBounds(rect.left, rect.top, rect.right, rect.bottom);
-    }
-
-    /**
-     * @hide
-     *
-     * Helper method for setting the app bounds.
-     */
-    public void setAppBounds(int left, int top, int right, int bottom) {
-        if (appBounds == null) {
-            appBounds = new Rect();
-        }
-
-        appBounds.set(left, top, right, bottom);
-    }
-
-    /**
-     * @hide
-     *
      * Clears the locale without changing layout direction.
      */
     public void clearLocales() {
@@ -1849,6 +1904,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     /**
      * Return whether the screen has a wide color gamut and wide color gamut rendering
      * is supported by this device.
+     *
+     * When true, it implies the screen is colorspace aware but not
+     * necessarily color-managed. The final colors may still be changed by the
+     * screen depending on user settings.
      *
      * @return true if the screen has a wide color gamut and wide color gamut rendering
      * is supported, false otherwise
@@ -1915,11 +1974,21 @@ public final class Configuration implements Parcelable, Comparable<Configuration
 
     /**
      * Returns a string representation of the configuration that can be parsed
-     * by build tools (like AAPT).
+     * by build tools (like AAPT), without display metrics included
      *
      * @hide
      */
     public static String resourceQualifierString(Configuration config) {
+        return resourceQualifierString(config, null);
+    }
+
+    /**
+     * Returns a string representation of the configuration that can be parsed
+     * by build tools (like AAPT).
+     *
+     * @hide
+     */
+    public static String resourceQualifierString(Configuration config, DisplayMetrics metrics) {
         ArrayList<String> parts = new ArrayList<String>();
 
         if (config.mcc != 0) {
@@ -2094,6 +2163,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 break;
             case DENSITY_DPI_NONE:
                 parts.add("nodpi");
+                break;
             default:
                 parts.add(config.densityDpi + "dpi");
                 break;
@@ -2164,6 +2234,20 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 break;
             default:
                 break;
+        }
+
+        if (metrics != null) {
+            final int width, height;
+            if (metrics.widthPixels >= metrics.heightPixels) {
+                width = metrics.widthPixels;
+                height = metrics.heightPixels;
+            } else {
+                //noinspection SuspiciousNameCombination
+                width = metrics.heightPixels;
+                //noinspection SuspiciousNameCombination
+                height = metrics.widthPixels;
+            }
+            parts.add(width + "x" + height);
         }
 
         parts.add("v" + Build.VERSION.RESOURCES_SDK_INT);
@@ -2282,6 +2366,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (base.assetsSeq != change.assetsSeq) {
             delta.assetsSeq = change.assetsSeq;
         }
+
+        if (!base.windowConfiguration.equals(change.windowConfiguration)) {
+            delta.windowConfiguration.setTo(change.windowConfiguration);
+        }
         return delta;
     }
 
@@ -2354,10 +2442,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                         SMALLEST_SCREEN_WIDTH_DP_UNDEFINED);
         configOut.densityDpi = XmlUtils.readIntAttribute(parser, XML_ATTR_DENSITY,
                 DENSITY_DPI_UNDEFINED);
-        configOut.appBounds =
-            Rect.unflattenFromString(XmlUtils.readStringAttribute(parser, XML_ATTR_APP_BOUNDS));
 
-        // For persistence, we don't care about assetsSeq, so do not read it out.
+        // For persistence, we don't care about assetsSeq and WindowConfiguration, so do not read it
+        // out.
     }
 
 
@@ -2427,11 +2514,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             XmlUtils.writeIntAttribute(xml, XML_ATTR_DENSITY, config.densityDpi);
         }
 
-        if (config.appBounds != null) {
-            XmlUtils.writeStringAttribute(xml, XML_ATTR_APP_BOUNDS,
-                config.appBounds.flattenToString());
-        }
-
-        // For persistence, we do not care about assetsSeq, so do not write it out.
+        // For persistence, we do not care about assetsSeq and window configuration, so do not write
+        // it out.
     }
 }

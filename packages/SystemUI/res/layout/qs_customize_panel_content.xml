@@ -15,24 +15,44 @@
      limitations under the License.
 -->
 
-<merge xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <Toolbar
-        android:id="@*android:id/action_bar"
+<merge xmlns:android="http://schemas.android.com/apk/res/android">->
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
-        android:navigationContentDescription="@*android:string/action_bar_up_description"
-        style="?android:attr/toolbarStyle" />
+        android:layout_height="@*android:dimen/quick_qs_offset_height"
+        android:background="@android:color/transparent" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@android:id/list"
+    <com.android.keyguard.AlphaOptimizedLinearLayout
+        android:id="@+id/customize_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:scrollIndicators="top"
-        android:scrollbars="vertical"
-        android:importantForAccessibility="no" />
+        android:layout_marginLeft="@dimen/notification_side_paddings"
+        android:layout_marginRight="@dimen/notification_side_paddings"
+        android:orientation="vertical"
+        android:background="@drawable/qs_customizer_background">
+        <Toolbar
+            android:id="@*android:id/action_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/qs_customizer_toolbar"
+            android:navigationContentDescription="@*android:string/action_bar_up_description"
+            style="?android:attr/toolbarStyle" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@android:id/list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingTop="28dp"
+            android:paddingLeft="@dimen/qs_tile_layout_margin_side"
+            android:paddingRight="@dimen/qs_tile_layout_margin_side"
+            android:paddingBottom="28dp"
+            android:clipToPadding="false"
+            android:scrollIndicators="top"
+            android:scrollbars="vertical"
+            android:scrollbarStyle="outsideOverlay"
+            android:importantForAccessibility="no" />
+    </com.android.keyguard.AlphaOptimizedLinearLayout>
 
     <View
         android:id="@+id/nav_bar_background"

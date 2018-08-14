@@ -17,6 +17,10 @@ package com.android.settingslib.core.lifecycle.events;
 
 import android.content.Context;
 
+/**
+ * @deprecated pass {@link Context} in constructor instead
+ */
+@Deprecated
 public interface OnAttach {
     void onAttach(Context context);
 }

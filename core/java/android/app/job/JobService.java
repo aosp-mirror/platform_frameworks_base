@@ -18,16 +18,7 @@ package android.app.job;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
-import android.os.RemoteException;
-import android.util.Log;
-
-import com.android.internal.annotations.GuardedBy;
-
-import java.lang.ref.WeakReference;
 
 /**
  * <p>Entry point for the callback from the {@link android.app.job.JobScheduler}.</p>
@@ -55,7 +46,7 @@ public abstract class JobService extends Service {
      * </pre>
      *
      * <p>If a job service is declared in the manifest but not protected with this
-     * permission, that service will be ignored by the OS.
+     * permission, that service will be ignored by the system.
      */
     public static final String PERMISSION_BIND =
             "android.permission.BIND_JOB_SERVICE";
@@ -81,14 +72,63 @@ public abstract class JobService extends Service {
     }
 
     /**
-     * Override this method with the callback logic for your job. Any such logic needs to be
-     * performed on a separate thread, as this function is executed on your application's main
-     * thread.
+     * Call this to inform the JobScheduler that the job has finished its work.  When the
+     * system receives this message, it releases the wakelock being held for the job.
+     * <p>
+     * You can request that the job be scheduled again by passing {@code true} as
+     * the <code>wantsReschedule</code> parameter. This will apply back-off policy
+     * for the job; this policy can be adjusted through the
+     * {@link android.app.job.JobInfo.Builder#setBackoffCriteria(long, int)} method
+     * when the job is originally scheduled.  The job's initial
+     * requirements are preserved when jobs are rescheduled, regardless of backed-off
+     * policy.
+     * <p class="note">
+     * A job running while the device is dozing will not be rescheduled with the normal back-off
+     * policy.  Instead, the job will be re-added to the queue and executed again during
+     * a future idle maintenance window.
+     * </p>
      *
-     * @param params Parameters specifying info about this job, including the extras bundle you
-     *               optionally provided at job-creation time.
-     * @return True if your service needs to process the work (on a separate thread). False if
-     * there's no more work to be done for this job.
+     * @param params The parameters identifying this job, as supplied to
+     *               the job in the {@link #onStartJob(JobParameters)} callback.
+     * @param wantsReschedule {@code true} if this job should be rescheduled according
+     *     to the back-off criteria specified when it was first scheduled; {@code false}
+     *     otherwise.
+     */
+    public final void jobFinished(JobParameters params, boolean wantsReschedule) {
+        mEngine.jobFinished(params, wantsReschedule);
+    }
+
+    /**
+     * Called to indicate that the job has begun executing.  Override this method with the
+     * logic for your job.  Like all other component lifecycle callbacks, this method executes
+     * on your application's main thread.
+     * <p>
+     * Return {@code true} from this method if your job needs to continue running.  If you
+     * do this, the job remains active until you call
+     * {@link #jobFinished(JobParameters, boolean)} to tell the system that it has completed
+     * its work, or until the job's required constraints are no longer satisfied.  For
+     * example, if the job was scheduled using
+     * {@link JobInfo.Builder#setRequiresCharging(boolean) setRequiresCharging(true)},
+     * it will be immediately halted by the system if the user unplugs the device from power,
+     * the job's {@link #onStopJob(JobParameters)} callback will be invoked, and the app
+     * will be expected to shut down all ongoing work connected with that job.
+     * <p>
+     * The system holds a wakelock on behalf of your app as long as your job is executing.
+     * This wakelock is acquired before this method is invoked, and is not released until either
+     * you call {@link #jobFinished(JobParameters, boolean)}, or after the system invokes
+     * {@link #onStopJob(JobParameters)} to notify your job that it is being shut down
+     * prematurely.
+     * <p>
+     * Returning {@code false} from this method means your job is already finished.  The
+     * system's wakelock for the job will be released, and {@link #onStopJob(JobParameters)}
+     * will not be invoked.
+     *
+     * @param params Parameters specifying info about this job, including the optional
+     *     extras configured with {@link JobInfo.Builder#setExtras(android.os.PersistableBundle).
+     *     This object serves to identify this specific running job instance when calling
+     *     {@link #jobFinished(JobParameters, boolean)}.
+     * @return {@code true} if your service will continue running, using a separate thread
+     *     when appropriate.  {@code false} means that this job has completed its work.
      */
     public abstract boolean onStartJob(JobParameters params);
 
@@ -101,37 +141,17 @@ public abstract class JobService extends Service {
      * {@link android.app.job.JobInfo.Builder#setRequiredNetworkType(int)}, yet while your
      * job was executing the user toggled WiFi. Another example is if you had specified
      * {@link android.app.job.JobInfo.Builder#setRequiresDeviceIdle(boolean)}, and the phone left its
-     * idle maintenance window. You are solely responsible for the behaviour of your application
-     * upon receipt of this message; your app will likely start to misbehave if you ignore it. One
-     * immediate repercussion is that the system will cease holding a wakelock for you.</p>
+     * idle maintenance window. You are solely responsible for the behavior of your application
+     * upon receipt of this message; your app will likely start to misbehave if you ignore it.
+     * <p>
+     * Once this method returns, the system releases the wakelock that it is holding on
+     * behalf of the job.</p>
      *
-     * @param params Parameters specifying info about this job.
-     * @return True to indicate to the JobManager whether you'd like to reschedule this job based
-     * on the retry criteria provided at job creation-time. False to drop the job. Regardless of
-     * the value returned, your job must stop executing.
+     * @param params The parameters identifying this job, as supplied to
+     *               the job in the {@link #onStartJob(JobParameters)} callback.
+     * @return {@code true} to indicate to the JobManager whether you'd like to reschedule
+     * this job based on the retry criteria provided at job creation-time; or {@code false}
+     * to end the job entirely.  Regardless of the value returned, your job must stop executing.
      */
     public abstract boolean onStopJob(JobParameters params);
-
-    /**
-     * Call this to inform the JobManager you've finished executing. This can be called from any
-     * thread, as it will ultimately be run on your application's main thread. When the system
-     * receives this message it will release the wakelock being held.
-     * <p>
-     *     You can specify post-execution behaviour to the scheduler here with
-     *     <code>needsReschedule </code>. This will apply a back-off timer to your job based on
-     *     the default, or what was set with
-     *     {@link android.app.job.JobInfo.Builder#setBackoffCriteria(long, int)}. The original
-     *     requirements are always honoured even for a backed-off job. Note that a job running in
-     *     idle mode will not be backed-off. Instead what will happen is the job will be re-added
-     *     to the queue and re-executed within a future idle maintenance window.
-     * </p>
-     *
-     * @param params Parameters specifying system-provided info about this job, this was given to
-     *               your application in {@link #onStartJob(JobParameters)}.
-     * @param needsReschedule True if this job should be rescheduled according to the back-off
-     *                        criteria specified at schedule-time. False otherwise.
-     */
-    public final void jobFinished(JobParameters params, boolean needsReschedule) {
-        mEngine.jobFinished(params, needsReschedule);
-    }
 }

@@ -20,15 +20,21 @@ import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.IApplicationThread;
+import android.app.IServiceConnection;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DevicePolicyManagerInternal.OnCrossProfileWidgetProvidersChangeListener;
 import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetManagerInternal;
 import android.appwidget.AppWidgetProviderInfo;
 import android.appwidget.PendingHostUpdate;
 import android.content.BroadcastReceiver;
@@ -46,6 +52,7 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -71,7 +78,6 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.storage.StorageManager;
 import android.service.appwidget.AppWidgetServiceDumpProto;
 import android.service.appwidget.WidgetProto;
 import android.text.TextUtils;
@@ -93,20 +99,19 @@ import android.view.WindowManager;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
+import com.android.internal.app.SuspendedAppActivity;
 import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.widget.IRemoteViewsAdapterConnection;
 import com.android.internal.widget.IRemoteViewsFactory;
 import com.android.server.LocalServices;
 import com.android.server.WidgetBackupProvider;
 import com.android.server.policy.IconUtilities;
-
-import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -117,7 +122,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -131,6 +135,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -159,7 +164,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     // Bump if the stored widgets need to be upgraded.
     private static final int CURRENT_VERSION = 1;
 
-    private static final AtomicLong REQUEST_COUNTER = new AtomicLong();
+    // Every widget update request is associated which an increasing sequence number. This is
+    // used to verify which request has successfully been received by the host.
+    private static final AtomicLong UPDATE_COUNTER = new AtomicLong();
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -171,28 +178,30 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 Slog.i(TAG, "Received broadcast: " + action + " on user " + userId);
             }
 
-            if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
-                onConfigurationChanged();
-            } else if (Intent.ACTION_MANAGED_PROFILE_AVAILABLE.equals(action)
-                    || Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE.equals(action)) {
-                synchronized (mLock) {
-                    reloadWidgetsMaskedState(userId);
-                }
-            } else if (Intent.ACTION_PACKAGES_SUSPENDED.equals(action)) {
-                String[] packages = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-                updateWidgetPackageSuspensionMaskedState(packages, true, getSendingUserId());
-            } else if (Intent.ACTION_PACKAGES_UNSUSPENDED.equals(action)) {
-                String[] packages = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-                updateWidgetPackageSuspensionMaskedState(packages, false, getSendingUserId());
-            } else {
-                onPackageBroadcastReceived(intent, userId);
+            switch (action) {
+                case Intent.ACTION_CONFIGURATION_CHANGED:
+                    onConfigurationChanged();
+                    break;
+                case Intent.ACTION_MANAGED_PROFILE_AVAILABLE:
+                case Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE:
+                    synchronized (mLock) {
+                        reloadWidgetsMaskedState(userId);
+                    }
+                    break;
+                case Intent.ACTION_PACKAGES_SUSPENDED:
+                    onPackageBroadcastReceived(intent, getSendingUserId());
+                    updateWidgetPackageSuspensionMaskedState(intent, true, getSendingUserId());
+                    break;
+                case Intent.ACTION_PACKAGES_UNSUSPENDED:
+                    onPackageBroadcastReceived(intent, getSendingUserId());
+                    updateWidgetPackageSuspensionMaskedState(intent, false, getSendingUserId());
+                    break;
+                default:
+                    onPackageBroadcastReceived(intent, getSendingUserId());
+                    break;
             }
         }
     };
-
-    // Manages active connections to RemoteViewsServices.
-    private final HashMap<Pair<Integer, FilterComparison>, ServiceConnection>
-            mBoundRemoteViewsServices = new HashMap<>();
 
     // Manages persistent references to RemoteViewsServices from different App Widgets.
     private final HashMap<Pair<Integer, FilterComparison>, HashSet<Integer>>
@@ -221,6 +230,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private AppOpsManager mAppOpsManager;
     private KeyguardManager mKeyguardManager;
     private DevicePolicyManagerInternal mDevicePolicyManagerInternal;
+    private PackageManagerInternal mPackageManagerInternal;
 
     private SecurityPolicy mSecurityPolicy;
 
@@ -247,6 +257,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(KEYGUARD_SERVICE);
         mDevicePolicyManagerInternal = LocalServices.getService(DevicePolicyManagerInternal.class);
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mSaveStateHandler = BackgroundThread.getHandler();
         mCallbackHandler = new CallbackHandler(mContext.getMainLooper());
         mBackupRestoreController = new BackupRestoreController();
@@ -256,6 +267,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         computeMaximumWidgetBitmapMemory();
         registerBroadcastReceiver();
         registerOnCrossProfileProvidersChangedListener();
+
+        LocalServices.addService(AppWidgetManagerInternal.class, new AppWidgetManagerLocal());
     }
 
     private void computeMaximumWidgetBitmapMemory() {
@@ -379,25 +392,32 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         boolean changed = false;
         boolean componentsModified = false;
 
-        String pkgList[] = null;
-        if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
-            pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-            added = true;
-        } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
-            pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-            added = false;
-        } else {
-            Uri uri = intent.getData();
-            if (uri == null) {
-                return;
+        final String pkgList[];
+        switch (action) {
+            case Intent.ACTION_PACKAGES_SUSPENDED:
+            case Intent.ACTION_PACKAGES_UNSUSPENDED:
+                pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                changed = true;
+                break;
+            case Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE:
+                added = true;
+                // Follow through
+            case Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE:
+                pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                break;
+            default: {
+                Uri uri = intent.getData();
+                if (uri == null) {
+                    return;
+                }
+                String pkgName = uri.getSchemeSpecificPart();
+                if (pkgName == null) {
+                    return;
+                }
+                pkgList = new String[] { pkgName };
+                added = Intent.ACTION_PACKAGE_ADDED.equals(action);
+                changed = Intent.ACTION_PACKAGE_CHANGED.equals(action);
             }
-            String pkgName = uri.getSchemeSpecificPart();
-            if (pkgName == null) {
-                return;
-            }
-            pkgList = new String[] { pkgName };
-            added = Intent.ACTION_PACKAGE_ADDED.equals(action);
-            changed = Intent.ACTION_PACKAGE_CHANGED.equals(action);
         }
         if (pkgList == null || pkgList.length == 0) {
             return;
@@ -517,12 +537,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     /**
      * Incrementally update the masked state due to package suspension state.
      */
-    private void updateWidgetPackageSuspensionMaskedState(String[] packagesArray, boolean suspended,
+    private void updateWidgetPackageSuspensionMaskedState(Intent intent, boolean suspended,
             int profileId) {
+        String[] packagesArray = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
         if (packagesArray == null) {
             return;
         }
-        Set<String> packages = new ArraySet<String>(Arrays.asList(packagesArray));
+        Set<String> packages = new ArraySet<>(Arrays.asList(packagesArray));
         synchronized (mLock) {
             final int N = mProviders.size();
             for (int i = 0; i < N; i++) {
@@ -551,8 +572,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Context userContext = mContext.createPackageContextAsUser(providerPackage, 0,
                     UserHandle.of(providerUserId));
             PackageManager pm = userContext.getPackageManager();
-            Drawable icon = pm.getApplicationInfo(providerPackage, 0).loadUnbadgedIcon(pm);
+            Drawable icon = pm.getApplicationInfo(providerPackage, 0).loadUnbadgedIcon(pm).mutate();
             // Create a bitmap of the icon which is what the widget's remoteview requires.
+            icon.setColorFilter(mIconUtilities.getDisabledColorFilter());
             return mIconUtilities.createIconBitmap(icon);
         } catch (NameNotFoundException e) {
             Slog.e(TAG, "Fail to get application icon", e);
@@ -602,8 +624,17 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             if (provider.maskedBySuspendedPackage) {
                 UserInfo userInfo = mUserManager.getUserInfo(providerUserId);
                 showBadge = userInfo.isManagedProfile();
-                onClickIntent = mDevicePolicyManagerInternal.createShowAdminSupportIntent(
-                        providerUserId, true);
+                final String suspendingPackage = mPackageManagerInternal.getSuspendingPackage(
+                        providerPackage, providerUserId);
+                if (PLATFORM_PACKAGE_NAME.equals(suspendingPackage)) {
+                    onClickIntent = mDevicePolicyManagerInternal.createShowAdminSupportIntent(
+                            providerUserId, true);
+                } else {
+                    final String dialogMessage = mPackageManagerInternal.getSuspendedDialogMessage(
+                            providerPackage, providerUserId);
+                    onClickIntent = SuspendedAppActivity.createSuspendedAppInterceptIntent(
+                            providerPackage, suspendingPackage, dialogMessage, providerUserId);
+                }
             } else if (provider.maskedByQuietProfile) {
                 showBadge = true;
                 onClickIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(
@@ -806,6 +837,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mSecurityPolicy.enforceCallFromPackage(callingPackage);
 
         synchronized (mLock) {
+            // Instant apps cannot host app widgets.
+            if (mSecurityPolicy.isInstantAppLocked(callingPackage, userId)) {
+                Slog.w(TAG, "Instant package " + callingPackage + " cannot host app widgets");
+                return ParceledListSlice.emptyList();
+            }
+
             ensureGroupStateLoadedLocked(userId);
 
             // NOTE: The lookup is enforcing security across users by making
@@ -814,9 +851,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Host host = lookupOrAddHostLocked(id);
             host.callbacks = callbacks;
 
+            long updateSequenceNo = UPDATE_COUNTER.incrementAndGet();
             int N = appWidgetIds.length;
             ArrayList<PendingHostUpdate> outUpdates = new ArrayList<>(N);
-
             LongSparseArray<PendingHostUpdate> updatesMap = new LongSparseArray<>();
             for (int i = 0; i < N; i++) {
                 if (host.getPendingUpdatesForId(appWidgetIds[i], updatesMap)) {
@@ -828,6 +865,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     }
                 }
             }
+            // Reset the update counter once all the updates have been calculated
+            host.lastWidgetUpdateSequenceNo = updateSequenceNo;
             return new ParceledListSlice<>(outUpdates);
         }
     }
@@ -870,6 +909,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mSecurityPolicy.enforceCallFromPackage(callingPackage);
 
         synchronized (mLock) {
+            // Instant apps cannot host app widgets.
+            if (mSecurityPolicy.isInstantAppLocked(callingPackage, userId)) {
+                Slog.w(TAG, "Instant package " + callingPackage + " cannot host app widgets");
+                return AppWidgetManager.INVALID_APPWIDGET_ID;
+            }
+
             ensureGroupStateLoadedLocked(userId);
 
             if (mNextAppWidgetIds.indexOfKey(userId) < 0) {
@@ -1206,16 +1251,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     @Override
-    public void bindRemoteViewsService(String callingPackage, int appWidgetId,
-            Intent intent, IBinder callbacks) {
+    public boolean bindRemoteViewsService(String callingPackage, int appWidgetId, Intent intent,
+            IApplicationThread caller, IBinder activtiyToken, IServiceConnection connection,
+            int flags) {
         final int userId = UserHandle.getCallingUserId();
-
         if (DEBUG) {
             Slog.i(TAG, "bindRemoteViewsService() " + userId);
         }
-
-        // Make sure the package runs under the caller uid.
-        mSecurityPolicy.enforceCallFromPackage(callingPackage);
 
         synchronized (mLock) {
             ensureGroupStateLoadedLocked(userId);
@@ -1251,76 +1293,35 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             mSecurityPolicy.enforceServiceExistsAndRequiresBindRemoteViewsPermission(
                     componentName, widget.provider.getUserId());
 
-            // Good to go - the service pakcage is correct, it exists for the correct
+            // Good to go - the service package is correct, it exists for the correct
             // user, and requires the bind permission.
 
-            // If there is already a connection made for this service intent, then
-            // disconnect from that first. (This does not allow multiple connections
-            // to the same service under the same key).
-            ServiceConnectionProxy connection = null;
-            FilterComparison fc = new FilterComparison(intent);
-            Pair<Integer, FilterComparison> key = Pair.create(appWidgetId, fc);
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                // Ask ActivityManager to bind it. Notice that we are binding the service with the
+                // caller app instead of DevicePolicyManagerService.
+                if(ActivityManager.getService().bindService(
+                        caller, activtiyToken, intent,
+                        intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                        connection, flags, mContext.getOpPackageName(),
+                        widget.provider.getUserId()) != 0) {
 
-            if (mBoundRemoteViewsServices.containsKey(key)) {
-                connection = (ServiceConnectionProxy) mBoundRemoteViewsServices.get(key);
-                connection.disconnect();
-                unbindService(connection);
-                mBoundRemoteViewsServices.remove(key);
-            }
-
-            // Bind to the RemoteViewsService (which will trigger a callback to the
-            // RemoteViewsAdapter.onServiceConnected())
-            connection = new ServiceConnectionProxy(callbacks);
-            bindService(intent, connection, widget.provider.info.getProfile());
-            mBoundRemoteViewsServices.put(key, connection);
-
-            // Add it to the mapping of RemoteViewsService to appWidgetIds so that we
-            // can determine when we can call back to the RemoteViewsService later to
-            // destroy associated factories.
-            Pair<Integer, FilterComparison> serviceId = Pair.create(widget.provider.id.uid, fc);
-            incrementAppWidgetServiceRefCount(appWidgetId, serviceId);
-        }
-    }
-
-    @Override
-    public void unbindRemoteViewsService(String callingPackage, int appWidgetId, Intent intent) {
-        final int userId = UserHandle.getCallingUserId();
-
-        if (DEBUG) {
-            Slog.i(TAG, "unbindRemoteViewsService() " + userId);
-        }
-
-        // Make sure the package runs under the caller uid.
-        mSecurityPolicy.enforceCallFromPackage(callingPackage);
-
-        synchronized (mLock) {
-            ensureGroupStateLoadedLocked(userId);
-
-            // Unbind from the RemoteViewsService (which will trigger a callback to the bound
-            // RemoteViewsAdapter)
-            Pair<Integer, FilterComparison> key = Pair.create(appWidgetId,
-                    new FilterComparison(intent));
-            if (mBoundRemoteViewsServices.containsKey(key)) {
-                // We don't need to use the appWidgetId until after we are sure there is something
-                // to unbind. Note that this may mask certain issues with apps calling unbind()
-                // more than necessary.
-
-                // NOTE: The lookup is enforcing security across users by making
-                // sure the caller can only access widgets it hosts or provides.
-                Widget widget = lookupWidgetLocked(appWidgetId,
-                        Binder.getCallingUid(), callingPackage);
-
-                if (widget == null) {
-                    throw new IllegalArgumentException("Bad widget id " + appWidgetId);
+                    // Add it to the mapping of RemoteViewsService to appWidgetIds so that we
+                    // can determine when we can call back to the RemoteViewsService later to
+                    // destroy associated factories.
+                    incrementAppWidgetServiceRefCount(appWidgetId,
+                            Pair.create(widget.provider.id.uid, new FilterComparison(intent)));
+                    return true;
                 }
-
-                ServiceConnectionProxy connection = (ServiceConnectionProxy)
-                        mBoundRemoteViewsServices.get(key);
-                connection.disconnect();
-                mContext.unbindService(connection);
-                mBoundRemoteViewsServices.remove(key);
+            } catch (RemoteException ex) {
+                // Same process, should not happen.
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
             }
         }
+
+        // Failed to bind.
+        return false;
     }
 
     @Override
@@ -1593,7 +1594,65 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     @Override
+    public void updateAppWidgetProviderInfo(ComponentName componentName, String metadataKey) {
+        final int userId = UserHandle.getCallingUserId();
+        if (DEBUG) {
+            Slog.i(TAG, "updateAppWidgetProvider() " + userId);
+        }
+
+        // Make sure the package runs under the caller uid.
+        mSecurityPolicy.enforceCallFromPackage(componentName.getPackageName());
+
+        synchronized (mLock) {
+            ensureGroupStateLoadedLocked(userId);
+
+            // NOTE: The lookup is enforcing security across users by making
+            // sure the caller can access only its providers.
+            ProviderId providerId = new ProviderId(Binder.getCallingUid(), componentName);
+            Provider provider = lookupProviderLocked(providerId);
+            if (provider == null) {
+                throw new IllegalArgumentException(
+                        componentName + " is not a valid AppWidget provider");
+            }
+            if (Objects.equals(provider.infoTag, metadataKey)) {
+                // No change
+                return;
+            }
+
+            String keyToUse = metadataKey == null
+                    ? AppWidgetManager.META_DATA_APPWIDGET_PROVIDER : metadataKey;
+            AppWidgetProviderInfo info =
+                    parseAppWidgetProviderInfo(providerId, provider.info.providerInfo, keyToUse);
+            if (info == null) {
+                throw new IllegalArgumentException("Unable to parse " + keyToUse
+                        + " meta-data to a valid AppWidget provider");
+            }
+
+            provider.info = info;
+            provider.infoTag = metadataKey;
+
+            // Update all widgets for this provider
+            final int N = provider.widgets.size();
+            for (int i = 0; i < N; i++) {
+                Widget widget = provider.widgets.get(i);
+                scheduleNotifyProviderChangedLocked(widget);
+                updateAppWidgetInstanceLocked(widget, widget.views, false /* isPartialUpdate */);
+            }
+
+            saveGroupStateAsync(userId);
+            scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+        }
+    }
+
+    @Override
     public boolean isRequestPinAppWidgetSupported() {
+        synchronized (mLock) {
+            if (mSecurityPolicy.isCallerInstantAppLocked()) {
+                Slog.w(TAG, "Instant uid " + Binder.getCallingUid()
+                        + " query information about app widgets");
+                return false;
+            }
+        }
         return LocalServices.getService(ShortcutServiceInternal.class)
                 .isRequestPinItemSupported(UserHandle.getCallingUserId(),
                         LauncherApps.PinItemRequest.REQUEST_TYPE_APPWIDGET);
@@ -1644,6 +1703,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
 
         synchronized (mLock) {
+            if (mSecurityPolicy.isCallerInstantAppLocked()) {
+                Slog.w(TAG, "Instant uid " + Binder.getCallingUid()
+                        + " cannot access widget providers");
+                return ParceledListSlice.emptyList();
+            }
+
             ensureGroupStateLoadedLocked(userId);
 
             ArrayList<AppWidgetProviderInfo> result = new ArrayList<AppWidgetProviderInfo>();
@@ -1751,7 +1816,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     private void deleteAppWidgetLocked(Widget widget) {
         // We first unbind all services that are bound to this id
-        unbindAppWidgetRemoteViewsServicesLocked(widget);
+        // Check if we need to destroy any services (if no other app widgets are
+        // referencing the same service)
+        decrementAppWidgetServiceRefCount(widget);
 
         Host host = widget.host;
         host.widgets.remove(widget);
@@ -1793,28 +1860,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
-    // Unbinds from a RemoteViewsService when we delete an app widget
-    private void unbindAppWidgetRemoteViewsServicesLocked(Widget widget) {
-        int appWidgetId = widget.appWidgetId;
-        // Unbind all connections to Services bound to this AppWidgetId
-        Iterator<Pair<Integer, Intent.FilterComparison>> it = mBoundRemoteViewsServices.keySet()
-                .iterator();
-        while (it.hasNext()) {
-            final Pair<Integer, Intent.FilterComparison> key = it.next();
-            if (key.first == appWidgetId) {
-                final ServiceConnectionProxy conn = (ServiceConnectionProxy)
-                        mBoundRemoteViewsServices.get(key);
-                conn.disconnect();
-                mContext.unbindService(conn);
-                it.remove();
-            }
-        }
-
-        // Check if we need to destroy any services (if no other app widgets are
-        // referencing the same service)
-        decrementAppWidgetServiceRefCount(widget);
-    }
-
     // Destroys the cached factory on the RemoteViewsService's side related to the specified intent
     private void destroyRemoteViewsService(final Intent intent, Widget widget) {
         final ServiceConnection conn = new ServiceConnection() {
@@ -1850,7 +1895,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     // Adds to the ref-count for a given RemoteViewsService intent
     private void incrementAppWidgetServiceRefCount(int appWidgetId,
             Pair<Integer, FilterComparison> serviceId) {
-        HashSet<Integer> appWidgetIds = null;
+        final HashSet<Integer> appWidgetIds;
         if (mRemoteViewsServicesAppWidgets.containsKey(serviceId)) {
             appWidgetIds = mRemoteViewsServicesAppWidgets.get(serviceId);
         } else {
@@ -1914,9 +1959,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             // method with a wrong id. In that case, ignore the call.
             return;
         }
-        long requestId = REQUEST_COUNTER.incrementAndGet();
+        long requestId = UPDATE_COUNTER.incrementAndGet();
         if (widget != null) {
-            widget.updateRequestIds.put(viewId, requestId);
+            widget.updateSequenceNos.put(viewId, requestId);
         }
         if (widget == null || widget.host == null || widget.host.zombie
                 || widget.host.callbacks == null || widget.provider == null
@@ -1941,7 +1986,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             int appWidgetId, int viewId, long requestId) {
         try {
             callbacks.viewDataChanged(appWidgetId, viewId);
-            host.lastWidgetUpdateRequestId = requestId;
+            host.lastWidgetUpdateSequenceNo = requestId;
         } catch (RemoteException re) {
             // It failed; remove the callback. No need to prune because
             // we know that this host is still referenced by this instance.
@@ -1988,9 +2033,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void scheduleNotifyUpdateAppWidgetLocked(Widget widget, RemoteViews updateViews) {
-        long requestId = REQUEST_COUNTER.incrementAndGet();
+        long requestId = UPDATE_COUNTER.incrementAndGet();
         if (widget != null) {
-            widget.updateRequestIds.put(ID_VIEWS_UPDATE, requestId);
+            widget.updateSequenceNos.put(ID_VIEWS_UPDATE, requestId);
         }
         if (widget == null || widget.provider == null || widget.provider.zombie
                 || widget.host.callbacks == null || widget.host.zombie) {
@@ -2013,7 +2058,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             int appWidgetId, RemoteViews views, long requestId) {
         try {
             callbacks.updateAppWidget(appWidgetId, views);
-            host.lastWidgetUpdateRequestId = requestId;
+            host.lastWidgetUpdateSequenceNo = requestId;
         } catch (RemoteException re) {
             synchronized (mLock) {
                 Slog.e(TAG, "Widget host dead: " + host.id, re);
@@ -2023,11 +2068,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void scheduleNotifyProviderChangedLocked(Widget widget) {
-        long requestId = REQUEST_COUNTER.incrementAndGet();
+        long requestId = UPDATE_COUNTER.incrementAndGet();
         if (widget != null) {
             // When the provider changes, reset everything else.
-            widget.updateRequestIds.clear();
-            widget.updateRequestIds.append(ID_PROVIDER_CHANGED, requestId);
+            widget.updateSequenceNos.clear();
+            widget.updateSequenceNos.append(ID_PROVIDER_CHANGED, requestId);
         }
         if (widget == null || widget.provider == null || widget.provider.zombie
                 || widget.host.callbacks == null || widget.host.zombie) {
@@ -2050,7 +2095,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             int appWidgetId, AppWidgetProviderInfo info, long requestId) {
         try {
             callbacks.providerChanged(appWidgetId, info);
-            host.lastWidgetUpdateRequestId = requestId;
+            host.lastWidgetUpdateSequenceNo = requestId;
         } catch (RemoteException re) {
             synchronized (mLock){
                 Slog.e(TAG, "Widget host dead: " + host.id, re);
@@ -2213,7 +2258,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 ri.activityInfo.name);
         ProviderId providerId = new ProviderId(ri.activityInfo.applicationInfo.uid, componentName);
 
-        Provider provider = parseProviderInfoXml(providerId, ri);
+        Provider provider = parseProviderInfoXml(providerId, ri, null);
         if (provider != null) {
             // we might have an inactive entry for this provider already due to
             // a preceding restore operation.  if so, fix it up in place; otherwise
@@ -2407,6 +2452,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         out.attribute(null, "pkg", p.info.provider.getPackageName());
         out.attribute(null, "cl", p.info.provider.getClassName());
         out.attribute(null, "tag", Integer.toHexString(p.tag));
+        if (!TextUtils.isEmpty(p.infoTag)) {
+            out.attribute(null, "info_tag", p.infoTag);
+        }
         out.endTag(null, "p");
     }
 
@@ -2467,17 +2515,33 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     @SuppressWarnings("deprecation")
-    private Provider parseProviderInfoXml(ProviderId providerId, ResolveInfo ri) {
-        Provider provider = null;
-
-        ActivityInfo activityInfo = ri.activityInfo;
-        XmlResourceParser parser = null;
-        try {
-            parser = activityInfo.loadXmlMetaData(mContext.getPackageManager(),
+    private Provider parseProviderInfoXml(ProviderId providerId, ResolveInfo ri,
+            Provider oldProvider) {
+        AppWidgetProviderInfo info = null;
+        if (oldProvider != null && !TextUtils.isEmpty(oldProvider.infoTag)) {
+            info = parseAppWidgetProviderInfo(providerId, ri.activityInfo, oldProvider.infoTag);
+        }
+        if (info == null) {
+            info = parseAppWidgetProviderInfo(providerId, ri.activityInfo,
                     AppWidgetManager.META_DATA_APPWIDGET_PROVIDER);
+        }
+        if (info == null) {
+            return null;
+        }
+
+        Provider provider = new Provider();
+        provider.id = providerId;
+        provider.info = info;
+        return provider;
+    }
+
+    private AppWidgetProviderInfo parseAppWidgetProviderInfo(
+            ProviderId providerId, ActivityInfo activityInfo, String metadataKey) {
+        try (XmlResourceParser parser =
+                     activityInfo.loadXmlMetaData(mContext.getPackageManager(), metadataKey)) {
             if (parser == null) {
-                Slog.w(TAG, "No " + AppWidgetManager.META_DATA_APPWIDGET_PROVIDER
-                        + " meta-data for " + "AppWidget provider '" + providerId + '\'');
+                Slog.w(TAG, "No " + metadataKey + " meta-data for AppWidget provider '"
+                        + providerId + '\'');
                 return null;
             }
 
@@ -2497,9 +2561,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 return null;
             }
 
-            provider = new Provider();
-            provider.id = providerId;
-            AppWidgetProviderInfo info = provider.info = new AppWidgetProviderInfo();
+            AppWidgetProviderInfo info = new AppWidgetProviderInfo();
             info.provider = providerId.componentName;
             info.providerInfo = activityInfo;
 
@@ -2546,7 +2608,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         className);
             }
             info.label = activityInfo.loadLabel(mContext.getPackageManager()).toString();
-            info.icon = ri.getIconResource();
+            info.icon = activityInfo.getIconResource();
             info.previewImage = sa.getResourceId(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_previewImage, 0);
             info.autoAdvanceViewId = sa.getResourceId(
@@ -2557,8 +2619,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             info.widgetCategory = sa.getInt(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_widgetCategory,
                     AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN);
+            info.widgetFeatures = sa.getInt(
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_widgetFeatures, 0);
 
             sa.recycle();
+            return info;
         } catch (IOException | PackageManager.NameNotFoundException | XmlPullParserException e) {
             // Ok to catch Exception here, because anything going wrong because
             // of what a client process passes to us should not be fatal for the
@@ -2566,12 +2631,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Slog.w(TAG, "XML parsing failed for AppWidget provider "
                     + providerId.componentName + " for user " + providerId.uid, e);
             return null;
-        } finally {
-            if (parser != null) {
-                parser.close();
-            }
         }
-        return provider;
     }
 
     private int getUidForPackage(String packageName, int userId) {
@@ -2693,11 +2753,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
             // No file written for this user - nothing to do.
             AtomicFile file = getSavedStateFile(profileId);
-            try {
-                FileInputStream stream = file.openRead();
+            try (FileInputStream stream = file.openRead()) {
                 version = readProfileStateFromFileLocked(stream, profileId, loadedWidgets);
-                IoUtils.closeQuietly(stream);
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 Slog.w(TAG, "Failed to read state: " + e);
             }
         }
@@ -2936,7 +2994,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 if (provider.getUserId() != userId) {
                     continue;
                 }
-                if (provider.widgets.size() > 0) {
+                if (provider.shouldBePersisted()) {
                     serializeProvider(out, provider);
                 }
             }
@@ -3045,6 +3103,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         final int providerTag = !TextUtils.isEmpty(tagAttribute)
                                 ? Integer.parseInt(tagAttribute, 16) : legacyProviderIndex;
                         provider.tag = providerTag;
+
+                        provider.infoTag = parser.getAttributeValue(null, "info_tag");
+                        if (!TextUtils.isEmpty(provider.infoTag) && !mSafeMode) {
+                            AppWidgetProviderInfo info = parseAppWidgetProviderInfo(
+                                    providerId, providerInfo, provider.infoTag);
+                            if (info != null) {
+                                provider.info = info;
+                            }
+                        }
                     } else if ("h".equals(tag)) {
                         legacyHostIndex++;
                         Host host = new Host();
@@ -3299,7 +3366,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         providersUpdated = true;
                     }
                 } else {
-                    Provider parsed = parseProviderInfoXml(providerId, ri);
+                    Provider parsed = parseProviderInfoXml(providerId, ri, provider);
                     if (parsed != null) {
                         keep.add(providerId);
                         // Use the new AppWidgetProviderInfo.
@@ -3623,6 +3690,35 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     "hasBindAppWidgetPermission packageName=" + packageName);
         }
 
+        public boolean isCallerInstantAppLocked() {
+            final int callingUid =  Binder.getCallingUid();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                final String[] uidPackages = mPackageManager.getPackagesForUid(callingUid);
+                if (!ArrayUtils.isEmpty(uidPackages)) {
+                    return mPackageManager.isInstantApp(uidPackages[0],
+                            UserHandle.getCallingUserId());
+                }
+            } catch (RemoteException e) {
+                /* ignore - same process */
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            return false;
+        }
+
+        public boolean isInstantAppLocked(String packageName, int userId) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return mPackageManager.isInstantApp(packageName, userId);
+            } catch (RemoteException e) {
+                /* ignore - same process */
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            return false;
+        }
+
         public void enforceCallFromPackage(String packageName) {
             mAppOpsManager.checkPackage(Binder.getCallingUid(), packageName);
         }
@@ -3770,6 +3866,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         AppWidgetProviderInfo info;
         ArrayList<Widget> widgets = new ArrayList<>();
         PendingIntent broadcast;
+        String infoTag;
         boolean zombie; // if we're in safe mode, don't prune this just because nobody references it
 
         boolean maskedByLockedProfile;
@@ -3829,6 +3926,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         public boolean isMaskedLocked() {
             return maskedByQuietProfile || maskedByLockedProfile || maskedBySuspendedPackage;
         }
+
+        public boolean shouldBePersisted() {
+            return !widgets.isEmpty() || !TextUtils.isEmpty(infoTag);
+        }
     }
 
     private static final class ProviderId {
@@ -3887,7 +3988,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         boolean zombie; // if we're in safe mode, don't prune this just because nobody references it
 
         int tag = TAG_UNDEFINED; // for use while saving state (the index)
-        long lastWidgetUpdateRequestId; // request id for the last update successfully sent
+        // Sequence no for the last update successfully sent. This is updated whenever a
+        // widget update is successfully sent to the host callbacks. As all new/undelivered updates
+        // will have sequenceNo greater than this, all those updates will be sent when the host
+        // callbacks are attached again.
+        long lastWidgetUpdateSequenceNo;
 
         public int getUserId() {
             return UserHandle.getUserId(id.uid);
@@ -3914,18 +4019,18 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
          */
         public boolean getPendingUpdatesForId(int appWidgetId,
                 LongSparseArray<PendingHostUpdate> outUpdates) {
-            long updateRequestId = lastWidgetUpdateRequestId;
+            long updateSequenceNo = lastWidgetUpdateSequenceNo;
             int N = widgets.size();
             for (int i = 0; i < N; i++) {
                 Widget widget = widgets.get(i);
                 if (widget.appWidgetId == appWidgetId) {
                     outUpdates.clear();
-                    for (int j = widget.updateRequestIds.size() - 1; j >= 0; j--) {
-                        long requestId = widget.updateRequestIds.valueAt(j);
-                        if (requestId <= updateRequestId) {
+                    for (int j = widget.updateSequenceNos.size() - 1; j >= 0; j--) {
+                        long requestId = widget.updateSequenceNos.valueAt(j);
+                        if (requestId <= updateSequenceNo) {
                             continue;
                         }
-                        int id = widget.updateRequestIds.keyAt(j);
+                        int id = widget.updateSequenceNos.keyAt(j);
                         final PendingHostUpdate update;
                         switch (id) {
                             case ID_PROVIDER_CHANGED:
@@ -4021,8 +4126,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         RemoteViews maskedViews;
         Bundle options;
         Host host;
-        // Request ids for various operations
-        SparseLongArray updateRequestIds = new SparseLongArray(2);
+        // Map of request type to updateSequenceNo.
+        SparseLongArray updateSequenceNos = new SparseLongArray(2);
 
         @Override
         public String toString() {
@@ -4045,40 +4150,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         public RemoteViews getEffectiveViewsLocked() {
             return maskedViews != null ? maskedViews : views;
-        }
-    }
-
-    /**
-     * Acts as a proxy between the ServiceConnection and the RemoteViewsAdapterConnection. This
-     * needs to be a static inner class since a reference to the ServiceConnection is held globally
-     * and may lead us to leak AppWidgetService instances (if there were more than one).
-     */
-    private static final class ServiceConnectionProxy implements ServiceConnection {
-        private final IRemoteViewsAdapterConnection mConnectionCb;
-
-        ServiceConnectionProxy(IBinder connectionCb) {
-            mConnectionCb = IRemoteViewsAdapterConnection.Stub
-                    .asInterface(connectionCb);
-        }
-
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            try {
-                mConnectionCb.onServiceConnected(service);
-            } catch (RemoteException re) {
-                Slog.e(TAG, "Error passing service interface", re);
-            }
-        }
-
-        public void onServiceDisconnected(ComponentName name) {
-            disconnect();
-        }
-
-        public void disconnect() {
-            try {
-                mConnectionCb.onServiceDisconnected();
-            } catch (RemoteException re) {
-                Slog.e(TAG, "Error clearing service interface", re);
-            }
         }
     }
 
@@ -4189,7 +4260,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     for (int i = 0; i < N; i++) {
                         Provider provider = mProviders.get(i);
 
-                        if (!provider.widgets.isEmpty()
+                        if (provider.shouldBePersisted()
                                 && (provider.isInPackageForUser(backedupPackage, userId)
                                 || provider.hostedByPackageForUser(backedupPackage, userId))) {
                             provider.tag = index;
@@ -4635,7 +4706,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         // reconstructed due to the restore
                         host.widgets.remove(widget);
                         provider.widgets.remove(widget);
-                        unbindAppWidgetRemoteViewsServicesLocked(widget);
+                        // Check if we need to destroy any services (if no other app widgets are
+                        // referencing the same service)
+                        decrementAppWidgetServiceRefCount(widget);
                         removeWidgetLocked(widget);
                     }
                 }
@@ -4706,6 +4779,26 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 oldId = theOldId;
                 newId = theNewId;
                 notified = false;
+            }
+        }
+    }
+
+    private class AppWidgetManagerLocal extends AppWidgetManagerInternal {
+        @Override
+        public ArraySet<String> getHostedWidgetPackages(int uid) {
+            synchronized (mLock) {
+                ArraySet<String> widgetPackages = null;
+                final int widgetCount = mWidgets.size();
+                for (int i = 0; i < widgetCount; i++) {
+                    final Widget widget = mWidgets.get(i);
+                    if  (widget.host.id.uid == uid) {
+                        if (widgetPackages == null) {
+                            widgetPackages = new ArraySet<>();
+                        }
+                        widgetPackages.add(widget.provider.id.componentName.getPackageName());
+                    }
+                }
+                return widgetPackages;
             }
         }
     }

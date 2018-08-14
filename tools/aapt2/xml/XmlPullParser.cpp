@@ -141,17 +141,16 @@ const std::string& XmlPullParser::namespace_uri() const {
   return event_queue_.front().data2;
 }
 
-Maybe<ExtractedPackage> XmlPullParser::TransformPackageAlias(
-    const StringPiece& alias, const StringPiece& local_package) const {
+Maybe<ExtractedPackage> XmlPullParser::TransformPackageAlias(const StringPiece& alias) const {
   if (alias.empty()) {
-    return ExtractedPackage{local_package.to_string(), false /* private */};
+    return ExtractedPackage{{}, false /*private*/};
   }
 
   const auto end_iter = package_aliases_.rend();
   for (auto iter = package_aliases_.rbegin(); iter != end_iter; ++iter) {
     if (alias == iter->prefix) {
       if (iter->package.package.empty()) {
-        return ExtractedPackage{local_package.to_string(), iter->package.private_namespace};
+        return ExtractedPackage{{}, iter->package.private_namespace};
       }
       return iter->package;
     }

@@ -52,6 +52,21 @@ public class LockscreenGestureLogger {
         EventLogTags.writeSysuiLockscreenGesture(safeLookup(gesture), length, velocity);
     }
 
+    /**
+     * Record the location of a swipe gesture, expressed as percentages of the whole screen
+     * @param category the action
+     * @param xPercent x-location / width * 100
+     * @param yPercent y-location / height * 100
+     */
+    public void writeAtFractionalPosition(
+            int category, int xPercent, int yPercent, int rotation) {
+        mMetricsLogger.write(mLogMaker.setCategory(category)
+                .setType(MetricsEvent.TYPE_ACTION)
+                .addTaggedData(MetricsEvent.FIELD_GESTURE_X_PERCENT, xPercent)
+                .addTaggedData(MetricsEvent.FIELD_GESTURE_Y_PERCENT, yPercent)
+                .addTaggedData(MetricsEvent.FIELD_DEVICE_ROTATION, rotation));
+    }
+
     private int safeLookup(int gesture) {
         Integer value = mLegacyMap.get(gesture);
         if (value == null) {

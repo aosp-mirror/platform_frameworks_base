@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.util.PrintWriterPrinter;
+import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -118,5 +119,27 @@ class ActiveInstrumentation {
         }
         pw.print(prefix); pw.print("mArguments=");
         pw.println(mArguments);
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        long token = proto.start(fieldId);
+        mClass.writeToProto(proto, ActiveInstrumentationProto.CLASS);
+        proto.write(ActiveInstrumentationProto.FINISHED, mFinished);
+        for (int i=0; i<mRunningProcesses.size(); i++) {
+            mRunningProcesses.get(i).writeToProto(proto,
+                    ActiveInstrumentationProto.RUNNING_PROCESSES);
+        }
+        for (String p : mTargetProcesses) {
+            proto.write(ActiveInstrumentationProto.TARGET_PROCESSES, p);
+        }
+        if (mTargetInfo != null) {
+            mTargetInfo.writeToProto(proto, ActiveInstrumentationProto.TARGET_INFO);
+        }
+        proto.write(ActiveInstrumentationProto.PROFILE_FILE, mProfileFile);
+        proto.write(ActiveInstrumentationProto.WATCHER, mWatcher.toString());
+        proto.write(ActiveInstrumentationProto.UI_AUTOMATION_CONNECTION,
+                mUiAutomationConnection.toString());
+        proto.write(ActiveInstrumentationProto.ARGUMENTS, mArguments.toString());
+        proto.end(token);
     }
 }

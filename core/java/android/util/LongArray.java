@@ -16,6 +16,8 @@
 
 package android.util;
 
+import android.annotation.Nullable;
+
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
@@ -211,5 +213,19 @@ public class LongArray implements Cloneable {
      */
     public long[] toArray() {
         return Arrays.copyOf(mValues, mSize);
+    }
+
+    /**
+     * Test if each element of {@code a} equals corresponding element from {@code b}
+     */
+    public static boolean elementsEqual(@Nullable LongArray a, @Nullable LongArray b) {
+        if (a == null || b == null) return a == b;
+        if (a.mSize != b.mSize) return false;
+        for (int i = 0; i < a.mSize; i++) {
+            if (a.get(i) != b.get(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

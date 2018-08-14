@@ -27,17 +27,17 @@
 #include "IRenderPipeline.h"
 #include "LayerUpdateQueue.h"
 #include "RenderNode.h"
-#include "thread/Task.h"
-#include "thread/TaskProcessor.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
+#include "thread/Task.h"
+#include "thread/TaskProcessor.h"
 
-#include <cutils/compiler.h>
 #include <EGL/egl.h>
 #include <SkBitmap.h>
 #include <SkRect.h>
-#include <utils/Functor.h>
+#include <cutils/compiler.h>
 #include <gui/Surface.h>
+#include <utils/Functor.h>
 
 #include <functional>
 #include <set>
@@ -49,6 +49,7 @@ namespace uirenderer {
 
 class AnimationContext;
 class DeferredLayerUpdater;
+class ErrorHandler;
 class Layer;
 class Rect;
 class RenderState;
@@ -63,8 +64,8 @@ class Frame;
 // TODO: Rename to Renderer or some other per-window, top-level manager
 class CanvasContext : public IFrameCallback {
 public:
-    static CanvasContext* create(RenderThread& thread, bool translucent,
-            RenderNode* rootRenderNode, IContextFactory* contextFactory);
+    static CanvasContext* create(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
+                                 IContextFactory* contextFactory);
     virtual ~CanvasContext();
 
     /**
@@ -74,8 +75,10 @@ public:
      *
      *  @return true if the layer has been created or updated
      */
-    bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& dmgAccumulator) {
-        return mRenderPipeline->createOrUpdateLayer(node, dmgAccumulator, mWideColorGamut);
+    bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& dmgAccumulator,
+                             ErrorHandler* errorHandler) {
+        return mRenderPipeline->createOrUpdateLayer(node, dmgAccumulator, mWideColorGamut,
+                errorHandler);
     }
 
     /**
@@ -89,9 +92,7 @@ public:
     bool pinImages(std::vector<SkImage*>& mutableImages) {
         return mRenderPipeline->pinImages(mutableImages);
     }
-    bool pinImages(LsaVector<sk_sp<Bitmap>>& images) {
-        return mRenderPipeline->pinImages(images);
-    }
+    bool pinImages(LsaVector<sk_sp<Bitmap>>& images) { return mRenderPipeline->pinImages(images); }
 
     /**
      * Unpin any image that had be previously pinned to the GPU cache
@@ -117,20 +118,17 @@ public:
     // Won't take effect until next EGLSurface creation
     void setSwapBehavior(SwapBehavior swapBehavior);
 
-    void initialize(Surface* surface);
-    void updateSurface(Surface* surface);
-    bool pauseSurface(Surface* surface);
+    void setSurface(sp<Surface>&& surface);
+    bool pauseSurface();
     void setStopped(bool stopped);
     bool hasSurface() { return mNativeSurface.get(); }
 
-    void setup(float lightRadius,
-            uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
+    void setup(float lightRadius, uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     void setLightCenter(const Vector3& lightCenter);
     void setOpaque(bool opaque);
     void setWideGamut(bool wideGamut);
     bool makeCurrent();
-    void prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
-            int64_t syncQueued, RenderNode* target);
+    void prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t syncQueued, RenderNode* target);
     void draw();
     void destroy();
 
@@ -162,13 +160,9 @@ public:
     void addRenderNode(RenderNode* node, bool placeFront);
     void removeRenderNode(RenderNode* node);
 
-    void setContentDrawBounds(const Rect& bounds) {
-        mContentDrawBounds = bounds;
-    }
+    void setContentDrawBounds(const Rect& bounds) { mContentDrawBounds = bounds; }
 
-    RenderState& getRenderState() {
-        return mRenderThread.renderState();
-    }
+    RenderState& getRenderState() { return mRenderThread.renderState(); }
 
     void addFrameMetricsObserver(FrameMetricsObserver* observer) {
         if (mFrameMetricsReporter.get() == nullptr) {
@@ -196,16 +190,18 @@ public:
 
     IRenderPipeline* getRenderPipeline() { return mRenderPipeline.get(); }
 
+    void addFrameCompleteListener(std::function<void(int64_t)>&& func) {
+        mFrameCompleteCallbacks.push_back(std::move(func));
+    }
+
 private:
     CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
-            IContextFactory* contextFactory, std::unique_ptr<IRenderPipeline> renderPipeline);
+                  IContextFactory* contextFactory, std::unique_ptr<IRenderPipeline> renderPipeline);
 
     friend class RegisterFrameCallbackTask;
     // TODO: Replace with something better for layer & other GL object
     // lifecycle tracking
     friend class android::uirenderer::RenderState;
-
-    void setSurface(Surface* window);
 
     void freePrefetchedLayers();
 
@@ -221,6 +217,9 @@ private:
     // stopped indicates the CanvasContext will reject actual redraw operations,
     // and defer repaint until it is un-stopped
     bool mStopped = false;
+    // Incremented each time the CanvasContext is stopped. Used to ignore
+    // delayed messages that are triggered after stopping.
+    int mGenerationID;
     // CanvasContext is dirty if it has received an update that it has not
     // painted onto its surface.
     bool mIsDirty = false;
@@ -242,14 +241,14 @@ private:
     bool mOpaque;
     bool mWideColorGamut = false;
     BakedOpRenderer::LightInfo mLightInfo;
-    FrameBuilder::LightGeometry mLightGeometry = { {0, 0, 0}, 0 };
+    FrameBuilder::LightGeometry mLightGeometry = {{0, 0, 0}, 0};
 
     bool mHaveNewSurface = false;
     DamageAccumulator mDamageAccumulator;
     LayerUpdateQueue mLayerUpdateQueue;
     std::unique_ptr<AnimationContext> mAnimationContext;
 
-    std::vector< sp<RenderNode> > mRenderNodes;
+    std::vector<sp<RenderNode>> mRenderNodes;
 
     FrameInfo* mCurrentFrameInfo = nullptr;
     std::string mName;
@@ -269,9 +268,11 @@ private:
     };
     class FuncTaskProcessor;
 
-    std::vector< sp<FuncTask> > mFrameFences;
-    sp<TaskProcessor<bool> > mFrameWorkProcessor;
+    std::vector<sp<FuncTask>> mFrameFences;
+    sp<TaskProcessor<bool>> mFrameWorkProcessor;
     std::unique_ptr<IRenderPipeline> mRenderPipeline;
+
+    std::vector<std::function<void(int64_t)>> mFrameCompleteCallbacks;
 };
 
 } /* namespace renderthread */

@@ -30,10 +30,9 @@
 #include <stdlib.h>
 #include <utils/Log.h>
 
-
 // The ideal size of a page allocation (these need to be multiples of 8)
-#define INITIAL_PAGE_SIZE ((size_t)512) // 512b
-#define MAX_PAGE_SIZE ((size_t)131072) // 128kb
+#define INITIAL_PAGE_SIZE ((size_t)512)  // 512b
+#define MAX_PAGE_SIZE ((size_t)131072)   // 128kb
 
 // The maximum amount of wasted space we can have per page
 // Allocations exceeding this will have their own dedicated page
@@ -48,7 +47,7 @@
 #define ALIGN_SZ (sizeof(int))
 #endif
 
-#define ALIGN(x) (((x) + ALIGN_SZ - 1 ) & ~(ALIGN_SZ - 1))
+#define ALIGN(x) (((x) + ALIGN_SZ - 1) & ~(ALIGN_SZ - 1))
 #define ALIGN_PTR(p) ((void*)(ALIGN((size_t)(p))))
 
 #if LOG_NDEBUG
@@ -79,7 +78,7 @@ static void _addAllocation(int count) {
 #define RM_ALLOCATION(size) _addAllocation(-1);
 #endif
 
-#define min(x,y) (((x) < (y)) ? (x) : (y))
+#define min(x, y) (((x) < (y)) ? (x) : (y))
 
 namespace android {
 namespace uirenderer {
@@ -89,19 +88,13 @@ public:
     Page* next() { return mNextPage; }
     void setNext(Page* next) { mNextPage = next; }
 
-    Page()
-        : mNextPage(0)
-    {}
+    Page() : mNextPage(0) {}
 
     void* operator new(size_t /*size*/, void* buf) { return buf; }
 
-    void* start() {
-        return (void*) (((size_t)this) + sizeof(Page));
-    }
+    void* start() { return (void*)(((size_t)this) + sizeof(Page)); }
 
-    void* end(int pageSize) {
-        return (void*) (((size_t)start()) + pageSize);
-    }
+    void* end(int pageSize) { return (void*)(((size_t)start()) + pageSize); }
 
 private:
     Page(const Page& /*other*/) {}
@@ -109,15 +102,15 @@ private:
 };
 
 LinearAllocator::LinearAllocator()
-    : mPageSize(INITIAL_PAGE_SIZE)
-    , mMaxAllocSize(INITIAL_PAGE_SIZE * MAX_WASTE_RATIO)
-    , mNext(0)
-    , mCurrentPage(0)
-    , mPages(0)
-    , mTotalAllocated(0)
-    , mWastedSpace(0)
-    , mPageCount(0)
-    , mDedicatedPageCount(0) {}
+        : mPageSize(INITIAL_PAGE_SIZE)
+        , mMaxAllocSize(INITIAL_PAGE_SIZE * MAX_WASTE_RATIO)
+        , mNext(0)
+        , mCurrentPage(0)
+        , mPages(0)
+        , mTotalAllocated(0)
+        , mWastedSpace(0)
+        , mPageCount(0)
+        , mDedicatedPageCount(0) {}
 
 LinearAllocator::~LinearAllocator(void) {
     while (mDtorList) {
@@ -176,8 +169,7 @@ void* LinearAllocator::allocImpl(size_t size) {
         mDedicatedPageCount++;
         page->setNext(mPages);
         mPages = page;
-        if (!mCurrentPage)
-            mCurrentPage = mPages;
+        if (!mCurrentPage) mCurrentPage = mPages;
         return start(page);
     }
     ensureNext(size);
@@ -225,8 +217,8 @@ void LinearAllocator::rewindIfLastAlloc(void* ptr, size_t allocSize) {
     runDestructorFor(ptr);
     // Don't bother rewinding across pages
     allocSize = ALIGN(allocSize);
-    if (ptr >= start(mCurrentPage) && ptr < end(mCurrentPage)
-            && ptr == ((char*)mNext - allocSize)) {
+    if (ptr >= start(mCurrentPage) && ptr < end(mCurrentPage) &&
+        ptr == ((char*)mNext - allocSize)) {
         mWastedSpace += allocSize;
         mNext = ptr;
     }
@@ -261,9 +253,9 @@ void LinearAllocator::dumpMemoryStats(const char* prefix) {
     ALOGD("%sTotal allocated: %.2f%s", prefix, prettySize, prettySuffix);
     prettySuffix = toSize(mWastedSpace, prettySize);
     ALOGD("%sWasted space: %.2f%s (%.1f%%)", prefix, prettySize, prettySuffix,
-          (float) mWastedSpace / (float) mTotalAllocated * 100.0f);
+          (float)mWastedSpace / (float)mTotalAllocated * 100.0f);
     ALOGD("%sPages %zu (dedicated %zu)", prefix, mPageCount, mDedicatedPageCount);
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

@@ -26,6 +26,9 @@ bool ExtractResourceName(const StringPiece& str, StringPiece* out_package, Strin
   bool has_type_separator = false;
   const char* start = str.data();
   const char* end = start + str.size();
+  if (start[0] == '@') {
+      start++;
+  }
   const char* current = start;
   while (current != end) {
     if (out_type->size() == 0 && *current == '/') {

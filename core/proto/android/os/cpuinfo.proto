@@ -1,0 +1,108 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+syntax = "proto2";
+
+option java_multiple_files = true;
+
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+package android.os;
+
+/**
+ * Data structure of the linux command
+ * 'top -b -n 1 -H -s 6 -o pid,tid,user,pr,ni,%cpu,s,virt,res,pcy,cmd,name'
+ *
+ * Next Tag: 6
+ */
+message CpuInfoProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    message TaskStats {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 total = 1;    // total number of cpu tasks
+        optional int32 running = 2;  // number of running tasks
+        optional int32 sleeping = 3; // number of sleeping tasks
+        optional int32 stopped = 4;  // number of stopped tasks
+        optional int32 zombie = 5;   // number of zombie tasks
+    }
+    optional TaskStats task_stats = 1;
+
+    message MemStats { // unit in kB
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 total = 1;
+        optional int32 used = 2;
+        optional int32 free = 3;
+        optional int32 buffers = 4;
+        optional int32 cached = 5;
+    }
+    optional MemStats mem = 2;
+    optional MemStats swap = 3;
+
+    message CpuUsage { // unit is percentage %
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 cpu = 1;   // 400% cpu indicates 4 cores
+        optional int32 user = 2;
+        optional int32 nice = 3;
+        optional int32 sys = 4;
+        optional int32 idle = 5;
+        optional int32 iow = 6;
+        optional int32 irq = 7;
+        optional int32 sirq = 8;
+        optional int32 host = 9;
+    }
+    optional CpuUsage cpu_usage = 4;
+
+    // Next Tag: 13
+    message Task {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 pid = 1;
+        optional int32 tid = 2;
+        optional string user = 3;   // the process name which uses cpu
+        optional string pr = 4;     // priority of each task, using string type is because special value RT (real time)
+        optional sint32 ni = 5;     // niceness value
+        optional float cpu = 6;     // precentage of cpu usage of the task
+
+        enum Status {
+            STATUS_UNKNOWN = 0;
+            STATUS_D = 1;  // uninterruptible sleep
+            STATUS_R = 2;  // running
+            STATUS_S = 3;  // sleeping
+            STATUS_T = 4;  // traced or stopped
+            STATUS_Z = 5;  // zombie
+        }
+        optional Status s = 7;      // process status
+        optional string virt = 8;   // virtual memory size, i.e. 14.0G, 13.5M
+        optional string res = 9;    // Resident size, i.e. 0, 3.1G
+
+        // How Android memory manager will treat the task.
+        // TODO: use PsDumpProto.Process.Policy instead once we extern variables
+        // and are able to include the same .h file in two files.
+        enum Policy {
+            POLICY_UNKNOWN = 0;
+            POLICY_fg = 1;  // foreground, the name is lower case for parsing the value
+            POLICY_bg = 2;  // background, the name is lower case for parsing the value
+            POLICY_ta = 3;  // TODO: figure out what is this value
+        }
+        optional Policy pcy = 10;   // Policy of the task
+        optional string cmd = 11;   // thread name
+        optional string name = 12;  // program name
+    }
+    repeated Task tasks = 5;
+}

@@ -16,15 +16,18 @@
 
 #include "java/JavaClassGenerator.h"
 
-#include <sstream>
 #include <string>
 
+#include "io/StringStream.h"
 #include "test/Test.h"
 #include "util/Util.h"
 
-using android::StringPiece;
+using ::aapt::io::StringOutputStream;
+using ::android::StringPiece;
+using ::testing::HasSubstr;
 using ::testing::Lt;
 using ::testing::Ne;
+using ::testing::Not;
 
 namespace aapt {
 
@@ -43,7 +46,8 @@ TEST(JavaClassGeneratorTest, FailWhenEntryIsJavaKeyword) {
           .Build();
   JavaClassGenerator generator(context.get(), table.get(), {});
 
-  std::stringstream out;
+  std::string result;
+  StringOutputStream out(&result);
   EXPECT_FALSE(generator.Generate("android", &out));
 }
 
@@ -53,35 +57,28 @@ TEST(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
           .SetPackageId("android", 0x01)
           .AddSimple("android:id/hey-man", ResourceId(0x01020000))
           .AddValue("android:attr/cool.attr", ResourceId(0x01010000),
-                    test::AttributeBuilder(false).Build())
-          .AddValue(
-              "android:styleable/hey.dude", ResourceId(0x01030000),
-              test::StyleableBuilder()
-                  .AddItem("android:attr/cool.attr", ResourceId(0x01010000))
-                  .Build())
+                    test::AttributeBuilder().Build())
+          .AddValue("android:styleable/hey.dude", ResourceId(0x01030000),
+                    test::StyleableBuilder()
+                        .AddItem("android:attr/cool.attr", ResourceId(0x01010000))
+                        .Build())
           .Build();
 
   std::unique_ptr<IAaptContext> context =
       test::ContextBuilder()
-          .AddSymbolSource(
-              util::make_unique<ResourceTableSymbolSource>(table.get()))
+          .AddSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
           .SetNameManglerPolicy(NameManglerPolicy{"android"})
           .Build();
   JavaClassGenerator generator(context.get(), table.get(), {});
 
-  std::stringstream out;
+  std::string output;
+  StringOutputStream out(&output);
   EXPECT_TRUE(generator.Generate("android", &out));
+  out.Flush();
 
-  std::string output = out.str();
-
-  EXPECT_NE(std::string::npos,
-            output.find("public static final int hey_man=0x01020000;"));
-
-  EXPECT_NE(std::string::npos,
-            output.find("public static final int[] hey_dude={"));
-
-  EXPECT_NE(std::string::npos,
-            output.find("public static final int hey_dude_cool_attr=0;"));
+  EXPECT_THAT(output, HasSubstr("public static final int hey_man=0x01020000;"));
+  EXPECT_THAT(output, HasSubstr("public static final int[] hey_dude={"));
+  EXPECT_THAT(output, HasSubstr("public static final int hey_dude_cool_attr=0;"));
 }
 
 TEST(JavaClassGeneratorTest, CorrectPackageNameIsUsed) {
@@ -94,20 +91,20 @@ TEST(JavaClassGeneratorTest, CorrectPackageNameIsUsed) {
 
   std::unique_ptr<IAaptContext> context =
       test::ContextBuilder()
-          .AddSymbolSource(
-              util::make_unique<ResourceTableSymbolSource>(table.get()))
+          .AddSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
           .SetNameManglerPolicy(NameManglerPolicy{"android"})
           .Build();
   JavaClassGenerator generator(context.get(), table.get(), {});
-  std::stringstream out;
-  ASSERT_TRUE(generator.Generate("android", "com.android.internal", &out));
 
-  std::string output = out.str();
-  EXPECT_NE(std::string::npos, output.find("package com.android.internal;"));
-  EXPECT_NE(std::string::npos,
-            output.find("public static final int one=0x01020000;"));
-  EXPECT_EQ(std::string::npos, output.find("two"));
-  EXPECT_EQ(std::string::npos, output.find("com_foo$two"));
+  std::string output;
+  StringOutputStream out(&output);
+  ASSERT_TRUE(generator.Generate("android", "com.android.internal", &out));
+  out.Flush();
+
+  EXPECT_THAT(output, HasSubstr("package com.android.internal;"));
+  EXPECT_THAT(output, HasSubstr("public static final int one=0x01020000;"));
+  EXPECT_THAT(output, Not(HasSubstr("two")));
+  EXPECT_THAT(output, Not(HasSubstr("com_foo$two")));
 }
 
 TEST(JavaClassGeneratorTest, AttrPrivateIsWrittenAsAttr) {
@@ -120,18 +117,18 @@ TEST(JavaClassGeneratorTest, AttrPrivateIsWrittenAsAttr) {
 
   std::unique_ptr<IAaptContext> context =
       test::ContextBuilder()
-          .AddSymbolSource(
-              util::make_unique<ResourceTableSymbolSource>(table.get()))
+          .AddSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
           .SetNameManglerPolicy(NameManglerPolicy{"android"})
           .Build();
   JavaClassGenerator generator(context.get(), table.get(), {});
-  std::stringstream out;
-  ASSERT_TRUE(generator.Generate("android", &out));
 
-  std::string output = out.str();
-  EXPECT_NE(std::string::npos, output.find("public static final class attr"));
-  EXPECT_EQ(std::string::npos,
-            output.find("public static final class ^attr-private"));
+  std::string output;
+  StringOutputStream out(&output);
+  ASSERT_TRUE(generator.Generate("android", &out));
+  out.Flush();
+
+  EXPECT_THAT(output, HasSubstr("public static final class attr"));
+  EXPECT_THAT(output, Not(HasSubstr("public static final class ^attr-private")));
 }
 
 TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
@@ -142,16 +139,13 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
           .AddSimple("android:id/one", ResourceId(0x01020000))
           .AddSimple("android:id/two", ResourceId(0x01020001))
           .AddSimple("android:id/three", ResourceId(0x01020002))
-          .SetSymbolState("android:id/one", ResourceId(0x01020000),
-                          SymbolState::kPublic)
-          .SetSymbolState("android:id/two", ResourceId(0x01020001),
-                          SymbolState::kPrivate)
+          .SetSymbolState("android:id/one", ResourceId(0x01020000), Visibility::Level::kPublic)
+          .SetSymbolState("android:id/two", ResourceId(0x01020001), Visibility::Level::kPrivate)
           .Build();
 
   std::unique_ptr<IAaptContext> context =
       test::ContextBuilder()
-          .AddSymbolSource(
-              util::make_unique<ResourceTableSymbolSource>(table.get()))
+          .AddSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
           .SetNameManglerPolicy(NameManglerPolicy{"android"})
           .Build();
 
@@ -159,40 +153,40 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
   options.types = JavaClassGeneratorOptions::SymbolTypes::kPublic;
   {
     JavaClassGenerator generator(context.get(), table.get(), options);
-    std::stringstream out;
+    std::string output;
+    StringOutputStream out(&output);
     ASSERT_TRUE(generator.Generate("android", &out));
-    std::string output = out.str();
-    EXPECT_NE(std::string::npos,
-              output.find("public static final int one=0x01020000;"));
-    EXPECT_EQ(std::string::npos, output.find("two"));
-    EXPECT_EQ(std::string::npos, output.find("three"));
+    out.Flush();
+
+    EXPECT_THAT(output, HasSubstr("public static final int one=0x01020000;"));
+    EXPECT_THAT(output, Not(HasSubstr("two")));
+    EXPECT_THAT(output, Not(HasSubstr("three")));
   }
 
   options.types = JavaClassGeneratorOptions::SymbolTypes::kPublicPrivate;
   {
     JavaClassGenerator generator(context.get(), table.get(), options);
-    std::stringstream out;
+    std::string output;
+    StringOutputStream out(&output);
     ASSERT_TRUE(generator.Generate("android", &out));
-    std::string output = out.str();
-    EXPECT_NE(std::string::npos,
-              output.find("public static final int one=0x01020000;"));
-    EXPECT_NE(std::string::npos,
-              output.find("public static final int two=0x01020001;"));
-    EXPECT_EQ(std::string::npos, output.find("three"));
+    out.Flush();
+
+    EXPECT_THAT(output, HasSubstr("public static final int one=0x01020000;"));
+    EXPECT_THAT(output, HasSubstr("public static final int two=0x01020001;"));
+    EXPECT_THAT(output, Not(HasSubstr("three")));
   }
 
   options.types = JavaClassGeneratorOptions::SymbolTypes::kAll;
   {
     JavaClassGenerator generator(context.get(), table.get(), options);
-    std::stringstream out;
+    std::string output;
+    StringOutputStream out(&output);
     ASSERT_TRUE(generator.Generate("android", &out));
-    std::string output = out.str();
-    EXPECT_NE(std::string::npos,
-              output.find("public static final int one=0x01020000;"));
-    EXPECT_NE(std::string::npos,
-              output.find("public static final int two=0x01020001;"));
-    EXPECT_NE(std::string::npos,
-              output.find("public static final int three=0x01020002;"));
+    out.Flush();
+
+    EXPECT_THAT(output, HasSubstr("public static final int one=0x01020000;"));
+    EXPECT_THAT(output, HasSubstr("public static final int two=0x01020001;"));
+    EXPECT_THAT(output, HasSubstr("public static final int three=0x01020002;"));
   }
 }
 
@@ -235,10 +229,8 @@ TEST(JavaClassGeneratorTest, EmitOtherPackagesAttributesInStyleable) {
       test::ResourceTableBuilder()
           .SetPackageId("android", 0x01)
           .SetPackageId("com.lib", 0x02)
-          .AddValue("android:attr/bar", ResourceId(0x01010000),
-                    test::AttributeBuilder(false).Build())
-          .AddValue("com.lib:attr/bar", ResourceId(0x02010000),
-                    test::AttributeBuilder(false).Build())
+          .AddValue("android:attr/bar", ResourceId(0x01010000), test::AttributeBuilder().Build())
+          .AddValue("com.lib:attr/bar", ResourceId(0x02010000), test::AttributeBuilder().Build())
           .AddValue("android:styleable/foo", ResourceId(0x01030000),
                     test::StyleableBuilder()
                         .AddItem("android:attr/bar", ResourceId(0x01010000))
@@ -248,18 +240,18 @@ TEST(JavaClassGeneratorTest, EmitOtherPackagesAttributesInStyleable) {
 
   std::unique_ptr<IAaptContext> context =
       test::ContextBuilder()
-          .AddSymbolSource(
-              util::make_unique<ResourceTableSymbolSource>(table.get()))
+          .AddSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
           .SetNameManglerPolicy(NameManglerPolicy{"android"})
           .Build();
   JavaClassGenerator generator(context.get(), table.get(), {});
 
-  std::stringstream out;
+  std::string output;
+  StringOutputStream out(&output);
   EXPECT_TRUE(generator.Generate("android", &out));
+  out.Flush();
 
-  std::string output = out.str();
-  EXPECT_NE(std::string::npos, output.find("int foo_bar="));
-  EXPECT_NE(std::string::npos, output.find("int foo_com_lib_bar="));
+  EXPECT_THAT(output, HasSubstr("int foo_bar="));
+  EXPECT_THAT(output, HasSubstr("int foo_com_lib_bar="));
 }
 
 TEST(JavaClassGeneratorTest, CommentsForSimpleResourcesArePresent) {
@@ -273,35 +265,34 @@ TEST(JavaClassGeneratorTest, CommentsForSimpleResourcesArePresent) {
 
   std::unique_ptr<IAaptContext> context =
       test::ContextBuilder()
-          .AddSymbolSource(
-              util::make_unique<ResourceTableSymbolSource>(table.get()))
+          .AddSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
           .SetNameManglerPolicy(NameManglerPolicy{"android"})
           .Build();
   JavaClassGenerator generator(context.get(), table.get(), {});
-  std::stringstream out;
-  ASSERT_TRUE(generator.Generate("android", &out));
-  std::string actual = out.str();
 
-  const char* expectedText =
+  std::string output;
+  StringOutputStream out(&output);
+  ASSERT_TRUE(generator.Generate("android", &out));
+  out.Flush();
+
+  const char* expected_text =
       R"EOF(/**
      * This is a comment
      * @deprecated
      */
     @Deprecated
     public static final int foo=0x01010000;)EOF";
-
-  EXPECT_NE(std::string::npos, actual.find(expectedText));
+  EXPECT_THAT(output, HasSubstr(expected_text));
 }
 
 TEST(JavaClassGeneratorTest, CommentsForEnumAndFlagAttributesArePresent) {}
 
 TEST(JavaClassGeneratorTest, CommentsForStyleablesAndNestedAttributesArePresent) {
-  Attribute attr(false);
+  Attribute attr;
   attr.SetComment(StringPiece("This is an attribute"));
 
   Styleable styleable;
-  styleable.entries.push_back(
-      Reference(test::ParseNameOrDie("android:attr/one")));
+  styleable.entries.push_back(Reference(test::ParseNameOrDie("android:attr/one")));
   styleable.SetComment(StringPiece("This is a styleable"));
 
   std::unique_ptr<ResourceTable> table =
@@ -314,21 +305,22 @@ TEST(JavaClassGeneratorTest, CommentsForStyleablesAndNestedAttributesArePresent)
 
   std::unique_ptr<IAaptContext> context =
       test::ContextBuilder()
-          .AddSymbolSource(
-              util::make_unique<ResourceTableSymbolSource>(table.get()))
+          .AddSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
           .SetNameManglerPolicy(NameManglerPolicy{"android"})
           .Build();
   JavaClassGeneratorOptions options;
   options.use_final = false;
   JavaClassGenerator generator(context.get(), table.get(), options);
-  std::stringstream out;
-  ASSERT_TRUE(generator.Generate("android", &out));
-  std::string actual = out.str();
 
-  EXPECT_NE(std::string::npos, actual.find("attr name android:one"));
-  EXPECT_NE(std::string::npos, actual.find("attr description"));
-  EXPECT_NE(std::string::npos, actual.find(attr.GetComment().data()));
-  EXPECT_NE(std::string::npos, actual.find(styleable.GetComment().data()));
+  std::string output;
+  StringOutputStream out(&output);
+  ASSERT_TRUE(generator.Generate("android", &out));
+  out.Flush();
+
+  EXPECT_THAT(output, HasSubstr("attr name android:one"));
+  EXPECT_THAT(output, HasSubstr("attr description"));
+  EXPECT_THAT(output, HasSubstr(attr.GetComment()));
+  EXPECT_THAT(output, HasSubstr(styleable.GetComment()));
 }
 
 TEST(JavaClassGeneratorTest, StyleableAndIndicesAreColocated) {
@@ -355,9 +347,11 @@ TEST(JavaClassGeneratorTest, StyleableAndIndicesAreColocated) {
 
   JavaClassGeneratorOptions options;
   JavaClassGenerator generator(context.get(), table.get(), {});
-  std::stringstream out;
+
+  std::string output;
+  StringOutputStream out(&output);
   ASSERT_TRUE(generator.Generate("android", &out));
-  std::string output = out.str();
+  out.Flush();
 
   std::string::size_type actionbar_pos = output.find("int[] ActionBar");
   ASSERT_THAT(actionbar_pos, Ne(std::string::npos));
@@ -379,7 +373,7 @@ TEST(JavaClassGeneratorTest, StyleableAndIndicesAreColocated) {
 }
 
 TEST(JavaClassGeneratorTest, CommentsForRemovedAttributesAreNotPresentInClass) {
-  Attribute attr(false);
+  Attribute attr;
   attr.SetComment(StringPiece("removed"));
 
   std::unique_ptr<ResourceTable> table =
@@ -390,33 +384,34 @@ TEST(JavaClassGeneratorTest, CommentsForRemovedAttributesAreNotPresentInClass) {
 
   std::unique_ptr<IAaptContext> context =
       test::ContextBuilder()
-          .AddSymbolSource(
-              util::make_unique<ResourceTableSymbolSource>(table.get()))
+          .AddSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
           .SetNameManglerPolicy(NameManglerPolicy{"android"})
           .Build();
   JavaClassGeneratorOptions options;
   options.use_final = false;
   JavaClassGenerator generator(context.get(), table.get(), options);
-  std::stringstream out;
-  ASSERT_TRUE(generator.Generate("android", &out));
-  std::string actual = out.str();
 
-  EXPECT_EQ(std::string::npos, actual.find("@attr name android:one"));
-  EXPECT_EQ(std::string::npos, actual.find("@attr description"));
+  std::string output;
+  StringOutputStream out(&output);
+  ASSERT_TRUE(generator.Generate("android", &out));
+  out.Flush();
+
+  EXPECT_THAT(output, Not(HasSubstr("@attr name android:one")));
+  EXPECT_THAT(output, Not(HasSubstr("@attr description")));
 
   // We should find @removed only in the attribute javadoc and not anywhere else
-  // (i.e. the class
-  // javadoc).
-  const size_t pos = actual.find("removed");
-  EXPECT_NE(std::string::npos, pos);
-  EXPECT_EQ(std::string::npos, actual.find("removed", pos + 1));
+  // (i.e. the class javadoc).
+  const std::string kRemoved("removed");
+  ASSERT_THAT(output, HasSubstr(kRemoved));
+  std::string after_first_match = output.substr(output.find(kRemoved) + kRemoved.size());
+  EXPECT_THAT(after_first_match, Not(HasSubstr(kRemoved)));
 }
 
 TEST(JavaClassGeneratorTest, GenerateOnResourcesLoadedCallbackForSharedLibrary) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
           .SetPackageId("android", 0x00)
-          .AddValue("android:attr/foo", ResourceId(0x00010000), util::make_unique<Attribute>(false))
+          .AddValue("android:attr/foo", ResourceId(0x00010000), util::make_unique<Attribute>())
           .AddValue("android:id/foo", ResourceId(0x00020000), util::make_unique<Id>())
           .AddValue(
               "android:style/foo", ResourceId(0x00030000),
@@ -430,19 +425,17 @@ TEST(JavaClassGeneratorTest, GenerateOnResourcesLoadedCallbackForSharedLibrary) 
 
   JavaClassGeneratorOptions options;
   options.use_final = false;
-  options.rewrite_callback_options = OnResourcesLoadedCallbackOptions{
-      {"com.foo", "com.boo"},
-  };
+  options.rewrite_callback_options = OnResourcesLoadedCallbackOptions{{"com.foo", "com.boo"}};
   JavaClassGenerator generator(context.get(), table.get(), options);
 
-  std::stringstream out;
+  std::string output;
+  StringOutputStream out(&output);
   ASSERT_TRUE(generator.Generate("android", &out));
+  out.Flush();
 
-  std::string actual = out.str();
-
-  EXPECT_NE(std::string::npos, actual.find("void onResourcesLoaded"));
-  EXPECT_NE(std::string::npos, actual.find("com.foo.R.onResourcesLoaded"));
-  EXPECT_NE(std::string::npos, actual.find("com.boo.R.onResourcesLoaded"));
+  EXPECT_THAT(output, HasSubstr("void onResourcesLoaded"));
+  EXPECT_THAT(output, HasSubstr("com.foo.R.onResourcesLoaded"));
+  EXPECT_THAT(output, HasSubstr("com.boo.R.onResourcesLoaded"));
 }
 
 }  // namespace aapt

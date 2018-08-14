@@ -70,10 +70,12 @@ public:
 private:
     void setFrameInterval(nsecs_t frameIntervalNanos);
 
-    static void dumpData(int fd, const ProfileDataDescription* description, const ProfileData* data);
+    static void dumpData(int fd, const ProfileDataDescription* description,
+                         const ProfileData* data);
 
     std::array<int64_t, NUM_BUCKETS> mThresholds;
     int64_t mFrameInterval;
+    nsecs_t mSwapDeadline;
     // The amount of time we will erase from the total duration to account
     // for SF vsync offsets with HWC2 blocking dequeueBuffers.
     // (Vsync + mDequeueBlockTolerance) is the point at which we expect

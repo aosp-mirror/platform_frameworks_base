@@ -17,6 +17,7 @@
 package com.android.internal.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import android.support.test.filters.SmallTest;
@@ -128,6 +129,55 @@ public class RingBufferTest {
         expected2[lastIndex] = "a";
         assertArraysEqual(expected2, buffer.toArray());
     }
+
+    @Test
+    public void testGetNextSlot() {
+        int capacity = 100;
+        RingBuffer<DummyClass1> buffer = new RingBuffer<>(DummyClass1.class, capacity);
+
+        final DummyClass1[] actual = new DummyClass1[capacity];
+        final DummyClass1[] expected = new DummyClass1[capacity];
+        for (int i = 0; i < capacity; ++i) {
+            final DummyClass1 obj = buffer.getNextSlot();
+            obj.x = capacity * i;
+            actual[i] = obj;
+            expected[i] = new DummyClass1();
+            expected[i].x = capacity * i;
+        }
+        assertArraysEqual(expected, buffer.toArray());
+
+        for (int i = 0; i < capacity; ++i) {
+            if (actual[i] != buffer.getNextSlot()) {
+                fail("getNextSlot() should re-use objects if available");
+            }
+        }
+
+        RingBuffer<DummyClass2> buffer2 = new RingBuffer<>(DummyClass2.class, capacity);
+        assertNull("getNextSlot() should return null if the object can't be initiated "
+                + "(No nullary constructor)", buffer2.getNextSlot());
+
+        RingBuffer<DummyClass3> buffer3 = new RingBuffer<>(DummyClass3.class, capacity);
+        assertNull("getNextSlot() should return null if the object can't be initiated "
+                + "(Inaccessible class)", buffer3.getNextSlot());
+    }
+
+    public static final class DummyClass1 {
+        int x;
+
+        public boolean equals(Object o) {
+            if (o instanceof DummyClass1) {
+                final DummyClass1 other = (DummyClass1) o;
+                return other.x == this.x;
+            }
+            return false;
+        }
+    }
+
+    public static final class DummyClass2 {
+        public DummyClass2(int x) {}
+    }
+
+    private static final class DummyClass3 {}
 
     static <T> void assertArraysEqual(T[] expected, T[] got) {
         if (expected.length != got.length) {

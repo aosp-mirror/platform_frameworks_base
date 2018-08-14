@@ -24,12 +24,12 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.location.LocationManager;
 import android.os.Binder;
 import android.os.Process;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.util.Log;
 
 import java.util.List;
@@ -74,6 +74,7 @@ public final class LocationAccessPolicy {
                         pid, uid, "canAccessCellLocation");
             } else if (context.checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
                     pid, uid) == PackageManager.PERMISSION_DENIED) {
+                if (DBG) Log.w(TAG, "Permission checked failed (" + pid + "," + uid + ")");
                 return false;
             }
             final int opCode = AppOpsManager.permissionToOpCode(
@@ -96,10 +97,12 @@ public final class LocationAccessPolicy {
     }
 
     private static boolean isLocationModeEnabled(@NonNull Context context, @UserIdInt int userId) {
-        int locationMode = Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF, userId);
-        return locationMode != Settings.Secure.LOCATION_MODE_OFF
-                && locationMode != Settings.Secure.LOCATION_MODE_SENSORS_ONLY;
+        LocationManager locationManager = context.getSystemService(LocationManager.class);
+        if (locationManager == null) {
+            Log.w(TAG, "Couldn't get location manager, denying location access");
+            return false;
+        }
+        return locationManager.isLocationEnabledForUser(UserHandle.of(userId));
     }
 
     private static boolean checkInteractAcrossUsersFull(@NonNull Context context) {

@@ -18,17 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="backup_confirm_title" msgid="827563724209303345">"Backup completo"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"Restauração completa"</string>
-    <string name="backup_confirm_text" msgid="1878021282758896593">"Foi solicitado um backup completo de todos os dados para um computador conectado. Deseja permitir que isso aconteça?\n\nCaso você não tenha solicitado o backup, não permita que a operação prossiga."</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"Foi solicitado um backup completo de todos os dados para um computador conectado. Quer permitir que isso aconteça?\n\nCaso você não tenha solicitado o backup, não permita que a operação prossiga."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Fazer backup de meus dados"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Não fazer backup"</string>
-    <string name="restore_confirm_text" msgid="7499866728030461776">"Foi solicitada uma restauração completa de todos os dados de um computador conectado. Deseja permitir que isso ocorra?\n\nCaso você não tenha solicitado a restauração, não permita que a operação prossiga. Isso substituirá todos os dados existentes no dispositivo!"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"Foi solicitada uma restauração completa de todos os dados de um computador conectado. Quer permitir que isso ocorra?\n\nCaso você não tenha solicitado a restauração, não permita que a operação prossiga. Isso substituirá todos os dados existentes no dispositivo!"</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Restaurar meus dados"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"Não restaurar"</string>
     <string name="current_password_text" msgid="8268189555578298067">"Digite sua senha de backup atual abaixo:"</string>
     <string name="device_encryption_restore_text" msgid="1570864916855208992">"Insira sua senha de criptografia do dispositivo abaixo."</string>
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Insira sua senha de criptografia do dispositivo abaixo. Ela também será usada para criptografar o arquivo de backup."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Digite uma senha para usar para criptografar os dados de backup por completo. Se isso for deixado em branco, sua senha atual de backup será usada:"</string>
-    <string name="backup_enc_password_optional" msgid="1350137345907579306">"Se você deseja criptografar os dados de backup por completo, digite uma senha abaixo:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"Se você quer criptografar os dados de backup por completo, digite uma senha abaixo:"</string>
     <string name="backup_enc_password_required" msgid="7889652203371654149">"Como seu dispositivo está criptografado, é necessário criptografar seu backup. Insira uma senha abaixo:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Se os dados restaurados forem criptografada, digite a senha abaixo:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Iniciando backup..."</string>

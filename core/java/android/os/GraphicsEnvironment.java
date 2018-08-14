@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.opengl.EGL14;
 import android.os.Build;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.util.Log;
 
 import dalvik.system.VMRuntime;
@@ -29,18 +30,110 @@ import dalvik.system.VMRuntime;
 import java.io.File;
 
 /** @hide */
-public final class GraphicsEnvironment {
+public class GraphicsEnvironment {
+
+    private static final GraphicsEnvironment sInstance = new GraphicsEnvironment();
+
+    /**
+     * Returns the shared {@link GraphicsEnvironment} instance.
+     */
+    public static GraphicsEnvironment getInstance() {
+        return sInstance;
+    }
 
     private static final boolean DEBUG = false;
     private static final String TAG = "GraphicsEnvironment";
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
 
+    private ClassLoader mClassLoader;
+    private String mLayerPath;
+    private String mDebugLayerPath;
+
+    /**
+     * Set up GraphicsEnvironment
+     */
+    public void setup(Context context) {
+        setupGpuLayers(context);
+        chooseDriver(context);
+    }
+
+    /**
+     * Check whether application is debuggable
+     */
+    private static boolean isDebuggable(Context context) {
+        return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) > 0;
+    }
+
+    /**
+     * Store the layer paths available to the loader.
+     */
+    public void setLayerPaths(ClassLoader classLoader,
+                              String layerPath,
+                              String debugLayerPath) {
+        // We have to store these in the class because they are set up before we
+        // have access to the Context to properly set up GraphicsEnvironment
+        mClassLoader = classLoader;
+        mLayerPath = layerPath;
+        mDebugLayerPath = debugLayerPath;
+    }
+
+    /**
+     * Set up layer search paths for all apps
+     * If debuggable, check for additional debug settings
+     */
+    private void setupGpuLayers(Context context) {
+
+        String layerPaths = "";
+
+        // Only enable additional debug functionality if the following conditions are met:
+        // 1. App is debuggable
+        // 2. ENABLE_GPU_DEBUG_LAYERS is true
+        // 3. Package name is equal to GPU_DEBUG_APP
+
+        if (isDebuggable(context)) {
+
+            int enable = Settings.Global.getInt(context.getContentResolver(),
+                                                Settings.Global.ENABLE_GPU_DEBUG_LAYERS, 0);
+
+            if (enable != 0) {
+
+                String gpuDebugApp = Settings.Global.getString(context.getContentResolver(),
+                                                               Settings.Global.GPU_DEBUG_APP);
+
+                String packageName = context.getPackageName();
+
+                if ((gpuDebugApp != null && packageName != null)
+                        && (!gpuDebugApp.isEmpty() && !packageName.isEmpty())
+                        && gpuDebugApp.equals(packageName)) {
+                    Log.i(TAG, "GPU debug layers enabled for " + packageName);
+
+                    // Prepend the debug layer path as a searchable path.
+                    // This will ensure debug layers added will take precedence over
+                    // the layers specified by the app.
+                    layerPaths = mDebugLayerPath + ":";
+
+                    String layers = Settings.Global.getString(context.getContentResolver(),
+                                                              Settings.Global.GPU_DEBUG_LAYERS);
+
+                    Log.i(TAG, "Debug layer list: " + layers);
+                    if (layers != null && !layers.isEmpty()) {
+                        setDebugLayers(layers);
+                    }
+                }
+            }
+
+        }
+
+        // Include the app's lib directory in all cases
+        layerPaths += mLayerPath;
+
+        setLayerPaths(mClassLoader, layerPaths);
+    }
+
     /**
      * Choose whether the current process should use the builtin or an updated driver.
-     *
-     * @hide
      */
-    public static void chooseDriver(Context context) {
+    private static void chooseDriver(Context context) {
         String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
         if (driverPackageName == null || driverPackageName.isEmpty()) {
             return;
@@ -99,8 +192,6 @@ public final class GraphicsEnvironment {
      * on a separate thread, it can usually be finished well before the UI is ready to be drawn.
      *
      * Should only be called after chooseDriver().
-     *
-     * @hide
      */
     public static void earlyInitEGL() {
         Thread eglInitThread = new Thread(
@@ -124,6 +215,7 @@ public final class GraphicsEnvironment {
         return null;
     }
 
+    private static native void setLayerPaths(ClassLoader classLoader, String layerPaths);
+    private static native void setDebugLayers(String layers);
     private static native void setDriverPath(String path);
-
 }

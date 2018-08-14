@@ -32,8 +32,8 @@
 
 #include <androidfw/ResourceTypes.h>
 
-#include "Debug.h"
 #include "CanvasProperty.h"
+#include "Debug.h"
 #include "GlFunctorLifecycleListener.h"
 #include "Matrix.h"
 #include "RenderProperties.h"
@@ -74,6 +74,7 @@ struct FunctorContainer {
  */
 class DisplayList {
     friend class RecordingCanvas;
+
 public:
     struct Chunk {
         // range of included ops in DisplayList::ops()
@@ -106,14 +107,9 @@ public:
 
     size_t addChild(NodeOpType* childOp);
 
+    void ref(VirtualLightRefBase* prop) { referenceHolders.push_back(prop); }
 
-    void ref(VirtualLightRefBase* prop) {
-        referenceHolders.push_back(prop);
-    }
-
-    size_t getUsedSize() {
-        return allocator.usedSize();
-    }
+    size_t getUsedSize() { return allocator.usedSize(); }
 
     virtual bool isEmpty() const { return ops.empty(); }
     virtual bool hasFunctor() const { return !functors.empty(); }
@@ -125,7 +121,8 @@ public:
 
     virtual void syncContents();
     virtual void updateChildren(std::function<void(RenderNode*)> updateFn);
-    virtual bool prepareListAndChildren(TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
+    virtual bool prepareListAndChildren(
+            TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
             std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn);
 
     virtual void output(std::ostream& output, uint32_t level);
@@ -148,12 +145,13 @@ private:
     LsaVector<const Res_png_9patch*> patchResources;
     LsaVector<std::unique_ptr<const SkPaint>> paints;
     LsaVector<std::unique_ptr<const SkRegion>> regions;
-    LsaVector< sp<VirtualLightRefBase> > referenceHolders;
+    LsaVector<sp<VirtualLightRefBase>> referenceHolders;
 
     // List of functors
     LsaVector<FunctorContainer> functors;
 
-    // List of VectorDrawables that need to be notified of pushStaging. Note that this list gets nothing
+    // List of VectorDrawables that need to be notified of pushStaging. Note that this list gets
+    // nothing
     // but a callback during sync DisplayList, unlike the list of functors defined above, which
     // gets special treatment exclusive for webview.
     LsaVector<VectorDrawableRoot*> vectorDrawables;
@@ -161,5 +159,5 @@ private:
     void cleanupResources();
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

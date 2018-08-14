@@ -26,9 +26,7 @@ class GammaFontRenderer {
 public:
     GammaFontRenderer();
 
-    void clear() {
-        mRenderer.reset(nullptr);
-    }
+    void clear() { mRenderer.reset(nullptr); }
 
     void flush() {
         if (mRenderer) {
@@ -55,9 +53,7 @@ public:
         }
     }
 
-    uint32_t getSize() const {
-        return mRenderer ? mRenderer->getSize() : 0;
-    }
+    uint32_t getSize() const { return mRenderer ? mRenderer->getSize() : 0; }
 
     void endPrecaching();
 
@@ -68,7 +64,7 @@ private:
 #endif
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_GAMMA_FONT_RENDERER_H
+#endif  // ANDROID_HWUI_GAMMA_FONT_RENDERER_H

@@ -15,6 +15,8 @@
  */
 package android.hardware.fingerprint;
 
+import android.annotation.UnsupportedAppUsage;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -22,7 +24,7 @@ import android.os.Parcelable;
  * Container for fingerprint metadata.
  * @hide
  */
-public final class Fingerprint implements Parcelable {
+public final class Fingerprint extends BiometricAuthenticator.BiometricIdentifier {
     private CharSequence mName;
     private int mGroupId;
     private int mFingerId;
@@ -46,6 +48,7 @@ public final class Fingerprint implements Parcelable {
      * Gets the human-readable name for the given fingerprint.
      * @return name given to finger
      */
+    @UnsupportedAppUsage
     public CharSequence getName() { return mName; }
 
     /**
@@ -54,6 +57,7 @@ public final class Fingerprint implements Parcelable {
      * @return device-specific id for this finger
      * @hide
      */
+    @UnsupportedAppUsage
     public int getFingerId() { return mFingerId; }
 
     /**

@@ -16,7 +16,15 @@
 
 package android.os;
 
-import android.hardware.vibrator.V1_1.Constants.Effect_1_1;
+import android.annotation.Nullable;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.hardware.vibrator.V1_0.EffectStrength;
+import android.hardware.vibrator.V1_2.Effect;
+import android.net.Uri;
+import android.util.MathUtils;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Arrays;
 
@@ -36,12 +44,18 @@ public abstract class VibrationEffect implements Parcelable {
     public static final int DEFAULT_AMPLITUDE = -1;
 
     /**
+     * The maximum amplitude value
+     * @hide
+     */
+    public static final int MAX_AMPLITUDE = 255;
+
+    /**
      * A click effect.
      *
      * @see #get(int)
      * @hide
      */
-    public static final int EFFECT_CLICK = Effect_1_1.CLICK;
+    public static final int EFFECT_CLICK = Effect.CLICK;
 
     /**
      * A double click effect.
@@ -49,14 +63,62 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
-    public static final int EFFECT_DOUBLE_CLICK = Effect_1_1.DOUBLE_CLICK;
+    public static final int EFFECT_DOUBLE_CLICK = Effect.DOUBLE_CLICK;
 
     /**
      * A tick effect.
      * @see #get(int)
      * @hide
      */
-    public static final int EFFECT_TICK = Effect_1_1.TICK;
+    public static final int EFFECT_TICK = Effect.TICK;
+
+    /**
+     * A thud effect.
+     * @see #get(int)
+     * @hide
+     */
+    public static final int EFFECT_THUD = Effect.THUD;
+
+    /**
+     * A pop effect.
+     * @see #get(int)
+     * @hide
+     */
+    public static final int EFFECT_POP = Effect.POP;
+
+    /**
+     * A heavy click effect.
+     * @see #get(int)
+     * @hide
+     */
+    public static final int EFFECT_HEAVY_CLICK = Effect.HEAVY_CLICK;
+
+
+    /**
+     * Ringtone patterns. They may correspond with the device's ringtone audio, or may just be a
+     * pattern that can be played as a ringtone with any audio, depending on the device.
+     *
+     * @see #get(Uri, Context)
+     * @hide
+     */
+    @VisibleForTesting
+    public static final int[] RINGTONES = {
+        Effect.RINGTONE_1,
+        Effect.RINGTONE_2,
+        Effect.RINGTONE_3,
+        Effect.RINGTONE_4,
+        Effect.RINGTONE_5,
+        Effect.RINGTONE_6,
+        Effect.RINGTONE_7,
+        Effect.RINGTONE_8,
+        Effect.RINGTONE_9,
+        Effect.RINGTONE_10,
+        Effect.RINGTONE_11,
+        Effect.RINGTONE_12,
+        Effect.RINGTONE_13,
+        Effect.RINGTONE_14,
+        Effect.RINGTONE_15
+    };
 
     /** @hide to prevent subclassing from outside of the framework */
     public VibrationEffect() { }
@@ -190,6 +252,42 @@ public abstract class VibrationEffect implements Parcelable {
         return effect;
     }
 
+    /**
+     * Get a predefined vibration effect associated with a given URI.
+     *
+     * Predefined effects are a set of common vibration effects that should be identical, regardless
+     * of the app they come from, in order to provide a cohesive experience for users across
+     * the entire device. They also may be custom tailored to the device hardware in order to
+     * provide a better experience than you could otherwise build using the generic building
+     * blocks.
+     *
+     * @param uri The URI associated with the haptic effect.
+     * @param context The context used to get the URI to haptic effect association.
+     *
+     * @return The desired effect, or {@code null} if there's no associated effect.
+     *
+     * @hide
+     */
+    @Nullable
+    public static VibrationEffect get(Uri uri, Context context) {
+        String[] uris = context.getResources().getStringArray(
+                com.android.internal.R.array.config_ringtoneEffectUris);
+        for (int i = 0; i < uris.length && i < RINGTONES.length; i++) {
+            if (uris[i] == null) {
+                continue;
+            }
+            ContentResolver cr = context.getContentResolver();
+            Uri mappedUri = cr.uncanonicalize(Uri.parse(uris[i]));
+            if (mappedUri == null) {
+                continue;
+            }
+            if (mappedUri.equals(uri)) {
+                return get(RINGTONES[i]);
+            }
+        }
+        return null;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -198,38 +296,95 @@ public abstract class VibrationEffect implements Parcelable {
     /** @hide */
     public abstract void validate();
 
+    /**
+     * Gets the estimated duration of the vibration in milliseconds.
+     *
+     * For effects without a defined end (e.g. a Waveform with a non-negative repeat index), this
+     * returns Long.MAX_VALUE. For effects with an unknown duration (e.g. Prebaked effects where
+     * the length is device and potentially run-time dependent), this returns -1.
+     *
+     * @hide
+     */
+    public abstract long getDuration();
+
+    /**
+     * Scale the amplitude with the given constraints.
+     *
+     * This assumes that the previous value was in the range [0, MAX_AMPLITUDE]
+     * @hide
+     */
+    protected static int scale(int amplitude, float gamma, int maxAmplitude) {
+        float val = MathUtils.pow(amplitude / (float) MAX_AMPLITUDE, gamma);
+        return (int) (val * maxAmplitude);
+    }
+
     /** @hide */
     public static class OneShot extends VibrationEffect implements Parcelable {
-        private long mTiming;
-        private int mAmplitude;
+        private final long mDuration;
+        private final int mAmplitude;
 
         public OneShot(Parcel in) {
-            this(in.readLong(), in.readInt());
+            mDuration = in.readLong();
+            mAmplitude = in.readInt();
         }
 
         public OneShot(long milliseconds, int amplitude) {
-            mTiming = milliseconds;
+            mDuration = milliseconds;
             mAmplitude = amplitude;
         }
 
-        public long getTiming() {
-            return mTiming;
+        @Override
+        public long getDuration() {
+            return mDuration;
         }
 
         public int getAmplitude() {
             return mAmplitude;
         }
 
+        /**
+         * Scale the amplitude of this effect.
+         *
+         * @param gamma the gamma adjustment to apply
+         * @param maxAmplitude the new maximum amplitude of the effect
+         *
+         * @return A {@link OneShot} effect with the same timing but scaled amplitude.
+         */
+        public VibrationEffect scale(float gamma, int maxAmplitude) {
+            int newAmplitude = scale(mAmplitude, gamma, maxAmplitude);
+            return new OneShot(mDuration, newAmplitude);
+        }
+
+        /**
+         * Resolve default values into integer amplitude numbers.
+         *
+         * @param defaultAmplitude the default amplitude to apply, must be between 0 and
+         *         MAX_AMPLITUDE
+         * @return A {@link OneShot} effect with same physical meaning but explicitly set amplitude
+         *
+         * @hide
+         */
+        public OneShot resolve(int defaultAmplitude) {
+            if (defaultAmplitude > MAX_AMPLITUDE || defaultAmplitude < 0) {
+                throw new IllegalArgumentException(
+                        "Amplitude is negative or greater than MAX_AMPLITUDE");
+            }
+            if (mAmplitude == DEFAULT_AMPLITUDE) {
+                return new OneShot(mDuration, defaultAmplitude);
+            }
+            return this;
+        }
+
         @Override
         public void validate() {
             if (mAmplitude < -1 || mAmplitude == 0 || mAmplitude > 255) {
                 throw new IllegalArgumentException(
-                        "amplitude must either be DEFAULT_AMPLITUDE, " +
-                        "or between 1 and 255 inclusive (amplitude=" + mAmplitude + ")");
+                        "amplitude must either be DEFAULT_AMPLITUDE, "
+                        + "or between 1 and 255 inclusive (amplitude=" + mAmplitude + ")");
             }
-            if (mTiming <= 0) {
+            if (mDuration <= 0) {
                 throw new IllegalArgumentException(
-                        "timing must be positive (timing=" + mTiming + ")");
+                        "duration must be positive (duration=" + mDuration + ")");
             }
         }
 
@@ -239,26 +394,26 @@ public abstract class VibrationEffect implements Parcelable {
                 return false;
             }
             VibrationEffect.OneShot other = (VibrationEffect.OneShot) o;
-            return other.mTiming == mTiming && other.mAmplitude == mAmplitude;
+            return other.mDuration == mDuration && other.mAmplitude == mAmplitude;
         }
 
         @Override
         public int hashCode() {
             int result = 17;
-            result = 37 * (int) mTiming;
-            result = 37 * mAmplitude;
+            result += 37 * (int) mDuration;
+            result += 37 * mAmplitude;
             return result;
         }
 
         @Override
         public String toString() {
-            return "OneShot{mTiming=" + mTiming +", mAmplitude=" + mAmplitude + "}";
+            return "OneShot{mDuration=" + mDuration + ", mAmplitude=" + mAmplitude + "}";
         }
 
         @Override
         public void writeToParcel(Parcel out, int flags) {
             out.writeInt(PARCEL_TOKEN_ONE_SHOT);
-            out.writeLong(mTiming);
+            out.writeLong(mDuration);
             out.writeInt(mAmplitude);
         }
 
@@ -279,9 +434,9 @@ public abstract class VibrationEffect implements Parcelable {
 
     /** @hide */
     public static class Waveform extends VibrationEffect implements Parcelable {
-        private long[] mTimings;
-        private int[] mAmplitudes;
-        private int mRepeat;
+        private final long[] mTimings;
+        private final int[] mAmplitudes;
+        private final int mRepeat;
 
         public Waveform(Parcel in) {
             this(in.createLongArray(), in.createIntArray(), in.readInt());
@@ -308,34 +463,92 @@ public abstract class VibrationEffect implements Parcelable {
         }
 
         @Override
+        public long getDuration() {
+            if (mRepeat >= 0) {
+                return Long.MAX_VALUE;
+            }
+            long duration = 0;
+            for (long d : mTimings) {
+                duration += d;
+            }
+            return duration;
+        }
+
+        /**
+         * Scale the Waveform with the given gamma and new max amplitude.
+         *
+         * @param gamma the gamma adjustment to apply
+         * @param maxAmplitude the new maximum amplitude of the effect
+         *
+         * @return A {@link Waveform} effect with the same timings and repeat index
+         *         but scaled amplitude.
+         */
+        public VibrationEffect scale(float gamma, int maxAmplitude) {
+            if (gamma == 1.0f && maxAmplitude == MAX_AMPLITUDE) {
+                // Just return a copy of the original if there's no scaling to be done.
+                return new Waveform(mTimings, mAmplitudes, mRepeat);
+            }
+
+            int[] scaledAmplitudes = Arrays.copyOf(mAmplitudes, mAmplitudes.length);
+            for (int i = 0; i < scaledAmplitudes.length; i++) {
+                scaledAmplitudes[i] = scale(scaledAmplitudes[i], gamma, maxAmplitude);
+            }
+            return new Waveform(mTimings, scaledAmplitudes, mRepeat);
+        }
+
+        /**
+         * Resolve default values into integer amplitude numbers.
+         *
+         * @param defaultAmplitude the default amplitude to apply, must be between 0 and
+         *         MAX_AMPLITUDE
+         * @return A {@link Waveform} effect with same physical meaning but explicitly set
+         *         amplitude
+         *
+         * @hide
+         */
+        public Waveform resolve(int defaultAmplitude) {
+            if (defaultAmplitude > MAX_AMPLITUDE || defaultAmplitude < 0) {
+                throw new IllegalArgumentException(
+                        "Amplitude is negative or greater than MAX_AMPLITUDE");
+            }
+            int[] resolvedAmplitudes = Arrays.copyOf(mAmplitudes, mAmplitudes.length);
+            for (int i = 0; i < resolvedAmplitudes.length; i++) {
+                if (resolvedAmplitudes[i] == DEFAULT_AMPLITUDE) {
+                    resolvedAmplitudes[i] = defaultAmplitude;
+                }
+            }
+            return new Waveform(mTimings, resolvedAmplitudes, mRepeat);
+        }
+
+        @Override
         public void validate() {
             if (mTimings.length != mAmplitudes.length) {
                 throw new IllegalArgumentException(
-                        "timing and amplitude arrays must be of equal length" +
-                        " (timings.length=" + mTimings.length +
-                        ", amplitudes.length=" + mAmplitudes.length + ")");
+                        "timing and amplitude arrays must be of equal length"
+                        + " (timings.length=" + mTimings.length
+                        + ", amplitudes.length=" + mAmplitudes.length + ")");
             }
             if (!hasNonZeroEntry(mTimings)) {
-                throw new IllegalArgumentException("at least one timing must be non-zero" +
-                        " (timings=" + Arrays.toString(mTimings) + ")");
+                throw new IllegalArgumentException("at least one timing must be non-zero"
+                        + " (timings=" + Arrays.toString(mTimings) + ")");
             }
             for (long timing : mTimings) {
                 if (timing < 0) {
-                    throw new IllegalArgumentException("timings must all be >= 0" +
-                            " (timings=" + Arrays.toString(mTimings) + ")");
+                    throw new IllegalArgumentException("timings must all be >= 0"
+                            + " (timings=" + Arrays.toString(mTimings) + ")");
                 }
             }
             for (int amplitude : mAmplitudes) {
                 if (amplitude < -1 || amplitude > 255) {
                     throw new IllegalArgumentException(
-                            "amplitudes must all be DEFAULT_AMPLITUDE or between 0 and 255" +
-                            " (amplitudes=" + Arrays.toString(mAmplitudes) + ")");
+                            "amplitudes must all be DEFAULT_AMPLITUDE or between 0 and 255"
+                            + " (amplitudes=" + Arrays.toString(mAmplitudes) + ")");
                 }
             }
             if (mRepeat < -1 || mRepeat >= mTimings.length) {
                 throw new IllegalArgumentException(
-                        "repeat index must be within the bounds of the timings array" +
-                        " (timings.length=" + mTimings.length + ", index=" + mRepeat +")");
+                        "repeat index must be within the bounds of the timings array"
+                        + " (timings.length=" + mTimings.length + ", index=" + mRepeat + ")");
             }
         }
 
@@ -345,26 +558,26 @@ public abstract class VibrationEffect implements Parcelable {
                 return false;
             }
             VibrationEffect.Waveform other = (VibrationEffect.Waveform) o;
-            return Arrays.equals(mTimings, other.mTimings) &&
-                Arrays.equals(mAmplitudes, other.mAmplitudes) &&
-                mRepeat == other.mRepeat;
+            return Arrays.equals(mTimings, other.mTimings)
+                && Arrays.equals(mAmplitudes, other.mAmplitudes)
+                && mRepeat == other.mRepeat;
         }
 
         @Override
         public int hashCode() {
             int result = 17;
-            result = 37 * Arrays.hashCode(mTimings);
-            result = 37 * Arrays.hashCode(mAmplitudes);
-            result = 37 * mRepeat;
+            result += 37 * Arrays.hashCode(mTimings);
+            result += 37 * Arrays.hashCode(mAmplitudes);
+            result += 37 * mRepeat;
             return result;
         }
 
         @Override
         public String toString() {
-            return "Waveform{mTimings=" + Arrays.toString(mTimings) +
-                ", mAmplitudes=" + Arrays.toString(mAmplitudes) +
-                ", mRepeat=" + mRepeat +
-                "}";
+            return "Waveform{mTimings=" + Arrays.toString(mTimings)
+                + ", mAmplitudes=" + Arrays.toString(mAmplitudes)
+                + ", mRepeat=" + mRepeat
+                + "}";
         }
 
         @Override
@@ -402,16 +615,20 @@ public abstract class VibrationEffect implements Parcelable {
 
     /** @hide */
     public static class Prebaked extends VibrationEffect implements Parcelable {
-        private int mEffectId;
-        private boolean mFallback;
+        private final int mEffectId;
+        private final boolean mFallback;
+
+        private int mEffectStrength;
 
         public Prebaked(Parcel in) {
             this(in.readInt(), in.readByte() != 0);
+            mEffectStrength = in.readInt();
         }
 
         public Prebaked(int effectId, boolean fallback) {
             mEffectId = effectId;
             mFallback = fallback;
+            mEffectStrength = EffectStrength.MEDIUM;
         }
 
         public int getId() {
@@ -427,15 +644,57 @@ public abstract class VibrationEffect implements Parcelable {
         }
 
         @Override
+        public long getDuration() {
+            return -1;
+        }
+
+        /**
+         * Set the effect strength of the prebaked effect.
+         */
+        public void setEffectStrength(int strength) {
+            if (!isValidEffectStrength(strength)) {
+                throw new IllegalArgumentException("Invalid effect strength: " + strength);
+            }
+            mEffectStrength = strength;
+        }
+
+        /**
+         * Set the effect strength.
+         */
+        public int getEffectStrength() {
+            return mEffectStrength;
+        }
+
+        private static boolean isValidEffectStrength(int strength) {
+            switch (strength) {
+                case EffectStrength.LIGHT:
+                case EffectStrength.MEDIUM:
+                case EffectStrength.STRONG:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        @Override
         public void validate() {
             switch (mEffectId) {
                 case EFFECT_CLICK:
                 case EFFECT_DOUBLE_CLICK:
                 case EFFECT_TICK:
+                case EFFECT_THUD:
+                case EFFECT_POP:
+                case EFFECT_HEAVY_CLICK:
                     break;
                 default:
-                    throw new IllegalArgumentException(
-                            "Unknown prebaked effect type (value=" + mEffectId + ")");
+                    if (mEffectId < RINGTONES[0] || mEffectId > RINGTONES[RINGTONES.length - 1]) {
+                        throw new IllegalArgumentException(
+                                "Unknown prebaked effect type (value=" + mEffectId + ")");
+                    }
+            }
+            if (!isValidEffectStrength(mEffectStrength)) {
+                throw new IllegalArgumentException(
+                        "Unknown prebaked effect strength (value=" + mEffectStrength + ")");
             }
         }
 
@@ -445,17 +704,25 @@ public abstract class VibrationEffect implements Parcelable {
                 return false;
             }
             VibrationEffect.Prebaked other = (VibrationEffect.Prebaked) o;
-            return mEffectId == other.mEffectId && mFallback == other.mFallback;
+            return mEffectId == other.mEffectId
+                && mFallback == other.mFallback
+                && mEffectStrength == other.mEffectStrength;
         }
 
         @Override
         public int hashCode() {
-            return mEffectId;
+            int result = 17;
+            result += 37 * mEffectId;
+            result += 37 * mEffectStrength;
+            return result;
         }
 
         @Override
         public String toString() {
-            return "Prebaked{mEffectId=" + mEffectId + ", mFallback=" + mFallback + "}";
+            return "Prebaked{mEffectId=" + mEffectId
+                + ", mEffectStrength=" + mEffectStrength
+                + ", mFallback=" + mFallback
+                + "}";
         }
 
 
@@ -464,6 +731,7 @@ public abstract class VibrationEffect implements Parcelable {
             out.writeInt(PARCEL_TOKEN_EFFECT);
             out.writeInt(mEffectId);
             out.writeByte((byte) (mFallback ? 1 : 0));
+            out.writeInt(mEffectStrength);
         }
 
         public static final Parcelable.Creator<Prebaked> CREATOR =

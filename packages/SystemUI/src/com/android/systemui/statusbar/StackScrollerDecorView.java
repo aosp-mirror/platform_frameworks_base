@@ -16,11 +16,13 @@
 
 package com.android.systemui.statusbar;
 
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Interpolator;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Interpolators;
 
 /**
@@ -30,8 +32,20 @@ import com.android.systemui.Interpolators;
 public abstract class StackScrollerDecorView extends ExpandableView {
 
     protected View mContent;
-    private boolean mIsVisible;
-    private boolean mAnimating;
+    protected View mSecondaryView;
+    private boolean mIsVisible = true;
+    private boolean mContentVisible = true;
+    private boolean mIsSecondaryVisible = true;
+    private int mDuration = 260;
+    private boolean mContentAnimating;
+    private final Runnable mContentVisibilityEndRunnable = () -> {
+        mContentAnimating = false;
+        if (getVisibility() != View.GONE && !mIsVisible) {
+            setVisibility(GONE);
+            setWillBeGone(false);
+            notifyHeightChanged(false /* needsAnimation */);
+        }
+    };
 
     public StackScrollerDecorView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -41,7 +55,9 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mContent = findContentView();
-        setInvisible();
+        mSecondaryView = findSecondaryView();
+        setVisible(false /* nowVisible */, false /* animate */);
+        setSecondaryVisible(false /* nowVisible */, false /* animate */);
     }
 
     @Override
@@ -55,73 +71,137 @@ public abstract class StackScrollerDecorView extends ExpandableView {
         return true;
     }
 
-    public void performVisibilityAnimation(boolean nowVisible) {
-        animateText(nowVisible, null /* onFinishedRunnable */);
+    /**
+     * Set the content of this view to be visible in an animated way.
+     *
+     * @param contentVisible True if the content should be visible or false if it should be hidden.
+     */
+    public void setContentVisible(boolean contentVisible) {
+        setContentVisible(contentVisible, true /* animate */);
+    }
+    /**
+     * Set the content of this view to be visible.
+     * @param contentVisible True if the content should be visible or false if it should be hidden.
+     * @param animate Should an animation be performed.
+     */
+    private void setContentVisible(boolean contentVisible, boolean animate) {
+        if (mContentVisible != contentVisible) {
+            mContentAnimating = animate;
+            setViewVisible(mContent, contentVisible, animate, mContentVisibilityEndRunnable);
+            mContentVisible = contentVisible;
+        } if (!mContentAnimating) {
+            mContentVisibilityEndRunnable.run();
+        }
     }
 
-    public void performVisibilityAnimation(boolean nowVisible, Runnable onFinishedRunnable) {
-        animateText(nowVisible, onFinishedRunnable);
-    }
-
-    public boolean isVisible() {
-        return mIsVisible || mAnimating;
+    public boolean isContentVisible() {
+        return mContentVisible;
     }
 
     /**
-     * Animate the text to a new visibility.
+     * Make this view visible. If {@code false} is passed, the view will fade out it's content
+     * and set the view Visibility to GONE. If only the content should be changed
+     * {@link #setContentVisible(boolean)} can be used.
      *
-     * @param nowVisible should it now be visible
-     * @param onFinishedRunnable A runnable which should be run when the animation is
-     *        finished.
+     * @param nowVisible should the view be visible
+     * @param animate should the change be animated.
      */
-    private void animateText(boolean nowVisible, final Runnable onFinishedRunnable) {
-        if (nowVisible != mIsVisible) {
-            // Animate text
-            float endValue = nowVisible ? 1.0f : 0.0f;
-            Interpolator interpolator;
-            if (nowVisible) {
-                interpolator = Interpolators.ALPHA_IN;
-            } else {
-                interpolator = Interpolators.ALPHA_OUT;
-            }
-            mAnimating = true;
-            mContent.animate()
-                    .alpha(endValue)
-                    .setInterpolator(interpolator)
-                    .setDuration(260)
-                    .withEndAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            mAnimating = false;
-                            if (onFinishedRunnable != null) {
-                                onFinishedRunnable.run();
-                            }
-                        }
-                    });
+    public void setVisible(boolean nowVisible, boolean animate) {
+        if (mIsVisible != nowVisible) {
             mIsVisible = nowVisible;
-        } else {
-            if (onFinishedRunnable != null) {
-                onFinishedRunnable.run();
+            if (animate) {
+                if (nowVisible) {
+                    setVisibility(VISIBLE);
+                    setWillBeGone(false);
+                    notifyHeightChanged(false /* needsAnimation */);
+                } else {
+                    setWillBeGone(true);
+                }
+                setContentVisible(nowVisible, true /* animate */);
+            } else {
+                setVisibility(nowVisible ? VISIBLE : GONE);
+                setContentVisible(nowVisible, false /* animate */);
+                setWillBeGone(false);
+                notifyHeightChanged(false /* needsAnimation */);
             }
         }
     }
 
-    public void setInvisible() {
-        mContent.setAlpha(0.0f);
-        mIsVisible = false;
+    /**
+     * Set the secondary view of this layout to visible.
+     *
+     * @param nowVisible should the secondary view be visible
+     * @param animate should the change be animated
+     */
+    public void setSecondaryVisible(boolean nowVisible, boolean animate) {
+        if (mIsSecondaryVisible != nowVisible) {
+            setViewVisible(mSecondaryView, nowVisible, animate, null /* endRunnable */);
+            mIsSecondaryVisible = nowVisible;
+        }
+    }
+
+    @VisibleForTesting
+    boolean isSecondaryVisible() {
+        return mIsSecondaryVisible;
+    }
+
+    /**
+     * Is this view visible. If a view is currently animating to gone, it will
+     * return {@code false}.
+     */
+    public boolean isVisible() {
+        return mIsVisible;
+    }
+
+    void setDuration(int duration) {
+        mDuration = duration;
+    }
+
+    /**
+     * Animate a view to a new visibility.
+     * @param view Target view, maybe content view or dismiss view.
+     * @param nowVisible Should it now be visible.
+     * @param animate Should this be done in an animated way.
+     * @param endRunnable A runnable that is run when the animation is done.
+     */
+    private void setViewVisible(View view, boolean nowVisible,
+            boolean animate, Runnable endRunnable) {
+        if (view == null) {
+            return;
+        }
+        // cancel any previous animations
+        view.animate().cancel();
+        float endValue = nowVisible ? 1.0f : 0.0f;
+        if (!animate) {
+            view.setAlpha(endValue);
+            if (endRunnable != null) {
+                endRunnable.run();
+            }
+            return;
+        }
+
+        // Animate the view alpha
+        Interpolator interpolator = nowVisible ? Interpolators.ALPHA_IN : Interpolators.ALPHA_OUT;
+        view.animate()
+                .alpha(endValue)
+                .setInterpolator(interpolator)
+                .setDuration(mDuration)
+                .withEndAction(endRunnable);
     }
 
     @Override
-    public void performRemoveAnimation(long duration, float translationDirection,
-            Runnable onFinishedRunnable) {
+    public void performRemoveAnimation(long duration, long delay,
+            float translationDirection, boolean isHeadsUpAnimation, float endLocation,
+            Runnable onFinishedRunnable,
+            AnimatorListenerAdapter animationListener) {
         // TODO: Use duration
-        performVisibilityAnimation(false);
+        setContentVisible(false);
     }
 
     @Override
-    public void performAddAnimation(long delay, long duration) {
+    public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear) {
         // TODO: use delay and duration
-        performVisibilityAnimation(true);
+        setContentVisible(true);
     }
 
     @Override
@@ -129,9 +209,10 @@ public abstract class StackScrollerDecorView extends ExpandableView {
         return false;
     }
 
-    public void cancelAnimation() {
-        mContent.animate().cancel();
-    }
-
     protected abstract View findContentView();
+
+    /**
+     * Returns a view that might not always appear while the main content view is still visible.
+     */
+    protected abstract View findSecondaryView();
 }

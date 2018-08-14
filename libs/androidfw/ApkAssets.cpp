@@ -14,68 +14,142 @@
  * limitations under the License.
  */
 
-#define ATRACE_TAG ATRACE_TAG_RESOURCES
-
 #include "androidfw/ApkAssets.h"
 
 #include <algorithm>
 
+#include "android-base/errors.h"
+#include "android-base/file.h"
 #include "android-base/logging.h"
+#include "android-base/unique_fd.h"
+#include "android-base/utf8.h"
+#include "utils/Compat.h"
 #include "utils/FileMap.h"
-#include "utils/Trace.h"
 #include "ziparchive/zip_archive.h"
 
 #include "androidfw/Asset.h"
+#include "androidfw/Idmap.h"
+#include "androidfw/ResourceTypes.h"
 #include "androidfw/Util.h"
 
 namespace android {
 
+using base::SystemErrorCodeToString;
+using base::unique_fd;
+
+static const std::string kResourcesArsc("resources.arsc");
+
+ApkAssets::ApkAssets(void* unmanaged_handle, const std::string& path)
+    : zip_handle_(unmanaged_handle, ::CloseArchive), path_(path) {
+}
+
 std::unique_ptr<const ApkAssets> ApkAssets::Load(const std::string& path, bool system) {
-  return ApkAssets::LoadImpl(path, system, false /*load_as_shared_library*/);
+  return LoadImpl({} /*fd*/, path, nullptr, nullptr, system, false /*load_as_shared_library*/);
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadAsSharedLibrary(const std::string& path,
                                                                 bool system) {
-  return ApkAssets::LoadImpl(path, system, true /*load_as_shared_library*/);
+  return LoadImpl({} /*fd*/, path, nullptr, nullptr, system, true /*load_as_shared_library*/);
 }
 
-std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(const std::string& path, bool system,
-                                                     bool load_as_shared_library) {
-  ATRACE_CALL();
+std::unique_ptr<const ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap_path,
+                                                        bool system) {
+  std::unique_ptr<Asset> idmap_asset = CreateAssetFromFile(idmap_path);
+  if (idmap_asset == nullptr) {
+    return {};
+  }
+
+  const StringPiece idmap_data(
+      reinterpret_cast<const char*>(idmap_asset->getBuffer(true /*wordAligned*/)),
+      static_cast<size_t>(idmap_asset->getLength()));
+  std::unique_ptr<const LoadedIdmap> loaded_idmap = LoadedIdmap::Load(idmap_data);
+  if (loaded_idmap == nullptr) {
+    LOG(ERROR) << "failed to load IDMAP " << idmap_path;
+    return {};
+  }
+  return LoadImpl({} /*fd*/, loaded_idmap->OverlayApkPath(), std::move(idmap_asset),
+                  std::move(loaded_idmap), system, false /*load_as_shared_library*/);
+}
+
+std::unique_ptr<const ApkAssets> ApkAssets::LoadFromFd(unique_fd fd,
+                                                       const std::string& friendly_name,
+                                                       bool system, bool force_shared_lib) {
+  return LoadImpl(std::move(fd), friendly_name, nullptr /*idmap_asset*/, nullptr /*loaded_idmap*/,
+                  system, force_shared_lib);
+}
+
+std::unique_ptr<Asset> ApkAssets::CreateAssetFromFile(const std::string& path) {
+  unique_fd fd(base::utf8::open(path.c_str(), O_RDONLY | O_BINARY | O_CLOEXEC));
+  if (fd == -1) {
+    LOG(ERROR) << "Failed to open file '" << path << "': " << SystemErrorCodeToString(errno);
+    return {};
+  }
+
+  const off64_t file_len = lseek64(fd, 0, SEEK_END);
+  if (file_len < 0) {
+    LOG(ERROR) << "Failed to get size of file '" << path << "': " << SystemErrorCodeToString(errno);
+    return {};
+  }
+
+  std::unique_ptr<FileMap> file_map = util::make_unique<FileMap>();
+  if (!file_map->create(path.c_str(), fd, 0, static_cast<size_t>(file_len), true /*readOnly*/)) {
+    LOG(ERROR) << "Failed to mmap file '" << path << "': " << SystemErrorCodeToString(errno);
+    return {};
+  }
+  return Asset::createFromUncompressedMap(std::move(file_map), Asset::AccessMode::ACCESS_RANDOM);
+}
+
+std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
+    unique_fd fd, const std::string& path, std::unique_ptr<Asset> idmap_asset,
+    std::unique_ptr<const LoadedIdmap> loaded_idmap, bool system, bool load_as_shared_library) {
   ::ZipArchiveHandle unmanaged_handle;
-  int32_t result = ::OpenArchive(path.c_str(), &unmanaged_handle);
+  int32_t result;
+  if (fd >= 0) {
+    result =
+        ::OpenArchiveFd(fd.release(), path.c_str(), &unmanaged_handle, true /*assume_ownership*/);
+  } else {
+    result = ::OpenArchive(path.c_str(), &unmanaged_handle);
+  }
+
   if (result != 0) {
-    LOG(ERROR) << ::ErrorCodeString(result);
+    LOG(ERROR) << "Failed to open APK '" << path << "' " << ::ErrorCodeString(result);
     return {};
   }
 
   // Wrap the handle in a unique_ptr so it gets automatically closed.
-  std::unique_ptr<ApkAssets> loaded_apk(new ApkAssets());
-  loaded_apk->zip_handle_.reset(unmanaged_handle);
+  std::unique_ptr<ApkAssets> loaded_apk(new ApkAssets(unmanaged_handle, path));
 
-  ::ZipString entry_name("resources.arsc");
+  // Find the resource table.
+  ::ZipString entry_name(kResourcesArsc.c_str());
   ::ZipEntry entry;
   result = ::FindEntry(loaded_apk->zip_handle_.get(), entry_name, &entry);
   if (result != 0) {
-    LOG(ERROR) << ::ErrorCodeString(result);
-    return {};
+    // There is no resources.arsc, so create an empty LoadedArsc and return.
+    loaded_apk->loaded_arsc_ = LoadedArsc::CreateEmpty();
+    return std::move(loaded_apk);
   }
 
   if (entry.method == kCompressDeflated) {
-    LOG(WARNING) << "resources.arsc is compressed.";
+    LOG(WARNING) << kResourcesArsc << " in APK '" << path << "' is compressed.";
   }
 
-  loaded_apk->path_ = path;
-  loaded_apk->resources_asset_ =
-      loaded_apk->Open("resources.arsc", Asset::AccessMode::ACCESS_BUFFER);
+  // Open the resource table via mmap unless it is compressed. This logic is taken care of by Open.
+  loaded_apk->resources_asset_ = loaded_apk->Open(kResourcesArsc, Asset::AccessMode::ACCESS_BUFFER);
   if (loaded_apk->resources_asset_ == nullptr) {
+    LOG(ERROR) << "Failed to open '" << kResourcesArsc << "' in APK '" << path << "'.";
     return {};
   }
 
+  // Must retain ownership of the IDMAP Asset so that all pointers to its mmapped data remain valid.
+  loaded_apk->idmap_asset_ = std::move(idmap_asset);
+
+  const StringPiece data(
+      reinterpret_cast<const char*>(loaded_apk->resources_asset_->getBuffer(true /*wordAligned*/)),
+      loaded_apk->resources_asset_->getLength());
   loaded_apk->loaded_arsc_ =
-      LoadedArsc::Load(loaded_apk->resources_asset_->getBuffer(true /*wordAligned*/),
-                       loaded_apk->resources_asset_->getLength(), system, load_as_shared_library);
+      LoadedArsc::Load(data, loaded_idmap.get(), system, load_as_shared_library);
   if (loaded_apk->loaded_arsc_ == nullptr) {
+    LOG(ERROR) << "Failed to load '" << kResourcesArsc << "' in APK '" << path << "'.";
     return {};
   }
 
@@ -84,14 +158,12 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(const std::string& path, bo
 }
 
 std::unique_ptr<Asset> ApkAssets::Open(const std::string& path, Asset::AccessMode mode) const {
-  ATRACE_CALL();
   CHECK(zip_handle_ != nullptr);
 
   ::ZipString name(path.c_str());
   ::ZipEntry entry;
   int32_t result = ::FindEntry(zip_handle_.get(), name, &entry);
   if (result != 0) {
-    LOG(ERROR) << "No entry '" << path << "' found in APK '" << path_ << "'";
     return {};
   }
 
@@ -153,12 +225,16 @@ bool ApkAssets::ForEachFile(const std::string& root_path,
   while ((result = ::Next(cookie, &entry, &name)) == 0) {
     StringPiece full_file_path(reinterpret_cast<const char*>(name.name), name.name_length);
     StringPiece leaf_file_path = full_file_path.substr(root_path_full.size());
-    auto iter = std::find(leaf_file_path.begin(), leaf_file_path.end(), '/');
-    if (iter != leaf_file_path.end()) {
-      dirs.insert(
-          leaf_file_path.substr(0, std::distance(leaf_file_path.begin(), iter)).to_string());
-    } else if (!leaf_file_path.empty()) {
-      f(leaf_file_path, kFileTypeRegular);
+
+    if (!leaf_file_path.empty()) {
+      auto iter = std::find(leaf_file_path.begin(), leaf_file_path.end(), '/');
+      if (iter != leaf_file_path.end()) {
+        std::string dir =
+            leaf_file_path.substr(0, std::distance(leaf_file_path.begin(), iter)).to_string();
+        dirs.insert(std::move(dir));
+      } else {
+        f(leaf_file_path, kFileTypeRegular);
+      }
     }
   }
   ::EndIteration(cookie);

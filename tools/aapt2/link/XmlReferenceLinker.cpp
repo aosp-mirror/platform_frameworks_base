@@ -21,6 +21,7 @@
 #include "Diagnostics.h"
 #include "ResourceUtils.h"
 #include "SdkConstants.h"
+#include "ValueVisitor.h"
 #include "link/ReferenceLinker.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
@@ -31,16 +32,12 @@ namespace aapt {
 
 namespace {
 
-/**
- * Visits all references (including parents of styles, references in styles,
- * arrays, etc) and
- * links their symbolic name to their Resource ID, performing mangling and
- * package aliasing
- * as needed.
- */
-class ReferenceVisitor : public ValueVisitor {
+// Visits all references (including parents of styles, references in styles, arrays, etc) and
+// links their symbolic name to their Resource ID, performing mangling and package aliasing
+// as needed.
+class ReferenceVisitor : public DescendingValueVisitor {
  public:
-  using ValueVisitor::Visit;
+  using DescendingValueVisitor::Visit;
 
   ReferenceVisitor(const CallSite& callsite, IAaptContext* context, SymbolTable* symbols,
                    xml::IPackageDeclStack* decls)
@@ -52,7 +49,9 @@ class ReferenceVisitor : public ValueVisitor {
     }
   }
 
-  bool HasError() const { return error_; }
+  bool HasError() const {
+    return error_;
+  }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ReferenceVisitor);
@@ -64,9 +63,7 @@ class ReferenceVisitor : public ValueVisitor {
   bool error_;
 };
 
-/**
- * Visits each xml Element and compiles the attributes within.
- */
+// Visits each xml Element and compiles the attributes within.
 class XmlVisitor : public xml::PackageAwareVisitor {
  public:
   using xml::PackageAwareVisitor::Visit;
@@ -82,28 +79,21 @@ class XmlVisitor : public xml::PackageAwareVisitor {
 
   void Visit(xml::Element* el) override {
     // The default Attribute allows everything except enums or flags.
-    constexpr const static uint32_t kDefaultTypeMask =
-        0xffffffffu & ~(android::ResTable_map::TYPE_ENUM | android::ResTable_map::TYPE_FLAGS);
-    const static Attribute kDefaultAttribute(true /* weak */, kDefaultTypeMask);
+    Attribute default_attribute(android::ResTable_map::TYPE_ANY);
+    default_attribute.SetWeak(true);
 
     const Source source = source_.WithLine(el->line_number);
     for (xml::Attribute& attr : el->attributes) {
       // If the attribute has no namespace, interpret values as if
       // they were assigned to the default Attribute.
 
-      const Attribute* attribute = &kDefaultAttribute;
-      std::string attribute_package;
+      const Attribute* attribute = &default_attribute;
 
       if (Maybe<xml::ExtractedPackage> maybe_package =
               xml::ExtractPackageFromNamespace(attr.namespace_uri)) {
         // There is a valid package name for this attribute. We will look this up.
-        attribute_package = maybe_package.value().package;
-        if (attribute_package.empty()) {
-          // Empty package means the 'current' or 'local' package.
-          attribute_package = context_->GetCompilationPackage();
-        }
-
-        Reference attr_ref(ResourceNameRef(attribute_package, ResourceType::kAttr, attr.name));
+        Reference attr_ref(
+            ResourceNameRef(maybe_package.value().package, ResourceType::kAttr, attr.name));
         attr_ref.private_reference = maybe_package.value().private_namespace;
 
         std::string err_str;
@@ -111,9 +101,11 @@ class XmlVisitor : public xml::PackageAwareVisitor {
             ReferenceLinker::CompileXmlAttribute(attr_ref, callsite_, symbols_, &err_str);
 
         if (!attr.compiled_attribute) {
-          context_->GetDiagnostics()->Error(DiagMessage(source) << "attribute '"
-                                                                << attribute_package << ":"
-                                                                << attr.name << "' " << err_str);
+          DiagMessage error_msg(source);
+          error_msg << "attribute ";
+          ReferenceLinker::WriteAttributeName(attr_ref, callsite_, this, &error_msg);
+          error_msg << " " << err_str;
+          context_->GetDiagnostics()->Error(error_msg);
           error_ = true;
           continue;
         }
@@ -129,12 +121,8 @@ class XmlVisitor : public xml::PackageAwareVisitor {
       } else if ((attribute->type_mask & android::ResTable_map::TYPE_STRING) == 0) {
         // We won't be able to encode this as a string.
         DiagMessage msg(source);
-        msg << "'" << attr.value << "' "
-            << "is incompatible with attribute ";
-        if (!attribute_package.empty()) {
-          msg << attribute_package << ":";
-        }
-        msg << attr.name << " " << *attribute;
+        msg << "'" << attr.value << "' is incompatible with attribute " << attr.name << " "
+            << *attribute;
         context_->GetDiagnostics()->Error(msg);
         error_ = true;
       }
@@ -163,7 +151,17 @@ class XmlVisitor : public xml::PackageAwareVisitor {
 }  // namespace
 
 bool XmlReferenceLinker::Consume(IAaptContext* context, xml::XmlResource* resource) {
-  const CallSite callsite = {resource->file.name};
+  CallSite callsite{resource->file.name.package};
+
+  std::string out_name = resource->file.name.entry;
+  NameMangler::Unmangle(&out_name, &callsite.package);
+
+  if (callsite.package.empty()) {
+    // Assume an empty package means that the XML file is local. This is true of AndroidManifest.xml
+    // for example.
+    callsite.package = context->GetCompilationPackage();
+  }
+
   XmlVisitor visitor(resource->file.source, callsite, context, context->GetExternalSymbols());
   if (resource->root) {
     resource->root->Accept(&visitor);

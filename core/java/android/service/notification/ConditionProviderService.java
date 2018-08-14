@@ -18,6 +18,8 @@ package android.service.notification;
 
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
+import android.app.ActivityManager;
 import android.app.INotificationManager;
 import android.app.Service;
 import android.content.ComponentName;
@@ -56,6 +58,8 @@ import android.util.Log;
  *           &lt;/meta-data>
  * &lt;/service></pre>
  *
+ *  <p> Condition providers cannot be bound by the system on
+ * {@link ActivityManager#isLowRamDevice() low ram} devices</p>
  */
 public abstract class ConditionProviderService extends Service {
     private final String TAG = ConditionProviderService.class.getSimpleName()
@@ -197,7 +201,11 @@ public abstract class ConditionProviderService extends Service {
         return mProvider;
     }
 
-    private boolean isBound() {
+    /**
+     * @hide
+     */
+    @TestApi
+    public boolean isBound() {
         if (mProvider == null) {
             Log.w(TAG, "Condition provider service not yet bound.");
             return false;

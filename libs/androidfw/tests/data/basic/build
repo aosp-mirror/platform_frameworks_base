@@ -19,11 +19,15 @@ set -e
 
 PATH_TO_FRAMEWORK_RES=${ANDROID_BUILD_TOP}/prebuilts/sdk/current/public/android.jar
 
-aapt package \
-    -M AndroidManifest.xml \
-    -S res \
-    -A assets \
+aapt2 compile --dir res -o compiled.flata
+aapt2 link \
     -I $PATH_TO_FRAMEWORK_RES \
-    --split hdpi --split xhdpi --split xxhdpi --split fr,de \
-    -F basic.apk \
-    -f
+    --manifest AndroidManifest.xml \
+    -A assets \
+    --split basic_hdpi-v4.apk:hdpi \
+    --split basic_xhdpi-v4.apk:xhdpi \
+    --split basic_xxhdpi-v4.apk:xxhdpi \
+    --split basic_de_fr.apk:de,fr \
+    -o basic.apk \
+    compiled.flata
+rm compiled.flata

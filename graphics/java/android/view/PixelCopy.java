@@ -263,8 +263,16 @@ public final class PixelCopy {
                     "Only able to copy windows with decor views");
         }
         Surface surface = null;
-        if (source.peekDecorView().getViewRootImpl() != null) {
-            surface = source.peekDecorView().getViewRootImpl().mSurface;
+        final ViewRootImpl root = source.peekDecorView().getViewRootImpl();
+        if (root != null) {
+            surface = root.mSurface;
+            final Rect surfaceInsets = root.mWindowAttributes.surfaceInsets;
+            if (srcRect == null) {
+                srcRect = new Rect(surfaceInsets.left, surfaceInsets.top,
+                        root.mWidth + surfaceInsets.left, root.mHeight + surfaceInsets.top);
+            } else {
+                srcRect.offset(surfaceInsets.left, surfaceInsets.top);
+            }
         }
         if (surface == null || !surface.isValid()) {
             throw new IllegalArgumentException(

@@ -34,8 +34,8 @@ public abstract class MediaDataSource implements Closeable {
     /**
      * Called to request data from the given position.
      *
-     * Implementations should should write up to {@code size} bytes into
-     * {@code buffer}, and return the number of bytes written.
+     * Implementations should fill {@code buffer} with up to {@code size}
+     * bytes of data, and return the number of valid bytes in the buffer.
      *
      * Return {@code 0} if size is zero (thus no bytes are read).
      *

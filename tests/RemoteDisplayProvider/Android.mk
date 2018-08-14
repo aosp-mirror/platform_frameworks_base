@@ -21,6 +21,6 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_SDK_VERSION := current
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_RESOURCE_DIR = $(LOCAL_PATH)/res
-LOCAL_JAVA_LIBRARIES := com.android.media.remotedisplay
+LOCAL_JAVA_LIBRARIES := com.android.media.remotedisplay.stubs
 LOCAL_CERTIFICATE := platform
 include $(BUILD_PACKAGE)

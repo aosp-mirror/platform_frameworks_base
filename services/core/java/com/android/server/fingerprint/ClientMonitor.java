@@ -21,6 +21,7 @@ import android.content.Context;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
+import android.media.AudioAttributes;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.VibrationEffect;
@@ -39,6 +40,11 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     protected static final int ERROR_ESRCH = 3; // Likely fingerprint HAL is dead. See errno.h.
     protected static final boolean DEBUG = FingerprintService.DEBUG;
     private static final long[] DEFAULT_SUCCESS_VIBRATION_PATTERN = new long[] {0, 30};
+    private static final AudioAttributes FINGERPRINT_SONFICATION_ATTRIBUTES =
+            new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                    .build();
     private final Context mContext;
     private final long mHalDeviceId;
     private final int mTargetUserId;
@@ -74,7 +80,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
         mGroupId = groupId;
         mIsRestricted = restricted;
         mOwner = owner;
-        mSuccessVibrationEffect = getSuccessVibrationEffect(context);
+        mSuccessVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
         mErrorVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
         try {
             if (token != null) {
@@ -223,35 +229,14 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     public final void vibrateSuccess() {
         Vibrator vibrator = mContext.getSystemService(Vibrator.class);
         if (vibrator != null) {
-            vibrator.vibrate(mSuccessVibrationEffect);
+            vibrator.vibrate(mSuccessVibrationEffect, FINGERPRINT_SONFICATION_ATTRIBUTES);
         }
     }
 
     public final void vibrateError() {
         Vibrator vibrator = mContext.getSystemService(Vibrator.class);
         if (vibrator != null) {
-            vibrator.vibrate(mErrorVibrationEffect);
+            vibrator.vibrate(mErrorVibrationEffect, FINGERPRINT_SONFICATION_ATTRIBUTES);
         }
     }
-
-    private static VibrationEffect getSuccessVibrationEffect(Context ctx) {
-        int[] arr = ctx.getResources().getIntArray(
-                com.android.internal.R.array.config_longPressVibePattern);
-        final long[] vibePattern;
-        if (arr == null || arr.length == 0) {
-            vibePattern = DEFAULT_SUCCESS_VIBRATION_PATTERN;
-        } else {
-            vibePattern = new long[arr.length];
-            for (int i = 0; i < arr.length; i++) {
-                vibePattern[i] = arr[i];
-            }
-        }
-        if (vibePattern.length == 1) {
-            return VibrationEffect.createOneShot(
-                    vibePattern[0], VibrationEffect.DEFAULT_AMPLITUDE);
-        } else {
-            return VibrationEffect.createWaveform(vibePattern, -1);
-        }
-    }
-
 }

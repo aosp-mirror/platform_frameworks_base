@@ -24,5 +24,6 @@ LOCAL_PACKAGE_NAME := BinderProxyCountingTestApp
 LOCAL_SDK_VERSION := current
 LOCAL_CERTIFICATE := platform
 
+LOCAL_COMPATIBILITY_SUITE := device-tests
 include $(BUILD_PACKAGE)
 

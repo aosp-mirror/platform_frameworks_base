@@ -52,7 +52,10 @@ public abstract class Visibility extends Transition {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag=true, value={MODE_IN, MODE_OUT})
+    @IntDef(flag = true, prefix = { "MODE_" }, value = {
+            MODE_IN,
+            MODE_OUT
+    })
     @interface VisibilityMode {}
 
     /**
@@ -399,8 +402,11 @@ public abstract class Visibility extends Transition {
                 // Becoming GONE
                 if (startView == endView) {
                     viewToKeep = endView;
-                } else {
+                } else if (mCanRemoveViews) {
                     overlayView = startView;
+                } else {
+                    overlayView = TransitionUtils.copyViewImage(sceneRoot, startView,
+                            (View) startView.getParent());
                 }
             }
         }

@@ -24,6 +24,7 @@ public final class UsbTerminalTypes {
     private static final String TAG = "UsbTerminalTypes";
 
     // USB
+    public static final int TERMINAL_USB_UNDEFINED   = 0x0100;
     public static final int TERMINAL_USB_STREAMING   = 0x0101;
 
     // Inputs

@@ -16,6 +16,7 @@
 
 package android.renderscript;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
@@ -42,6 +43,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * must call {@link android.opengl.GLSurfaceView#setRenderer} to
      * register a renderer.
      */
+    @UnsupportedAppUsage
     public RSSurfaceView(Context context) {
         super(context);
         init();
@@ -54,6 +56,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * must call {@link android.opengl.GLSurfaceView#setRenderer} to
      * register a renderer.
      */
+    @UnsupportedAppUsage
     public RSSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();

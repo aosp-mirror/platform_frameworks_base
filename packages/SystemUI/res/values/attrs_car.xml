@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2018 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+    <!-- Allow for custom attribs to be added to a facet button -->
+    <declare-styleable name="CarFacetButton">
+        <!-- icon to be rendered (drawable) -->
+        <attr name="icon" format="reference"/>
+        <!-- icon to be rendered when in selected state -->
+        <attr name="selectedIcon" format="reference"/>
+        <!-- intent to start when button is click -->
+        <attr name="intent" format="string"/>
+        <!-- intent to start when a long press has happened -->
+        <attr name="longIntent" format="string"/>
+        <!-- categories that will be added as extras to the fired intents -->
+        <attr name="categories" format="string"/>
+        <!-- package names that will be added as extras to the fired intents -->
+        <attr name="packages" format="string" />
+        <!-- componentName names that will be used for detecting selected state -->
+        <attr name="componentNames" format="string" />
+        <!-- Alpha value to used when in selected state.  Defaults 1f  -->
+        <attr name="selectedAlpha" format="float" />
+        <!-- Alpha value to used when in un-selected state.  Defaults 0.7f  -->
+        <attr name="unselectedAlpha" format="float" />
+        <!-- Render a "more" icon. Defaults true  -->
+        <attr name="useMoreIcon" format="boolean" />
+
+    </declare-styleable>
+
+
+    <!-- Allow for custom attribs to be added to a nav button -->
+    <declare-styleable name="CarNavigationButton">
+        <!-- intent to start when button is click -->
+        <attr name="intent" format="string"/>
+        <!-- intent to start when a long press has happened -->
+        <attr name="longIntent" format="string"/>
+        <!-- start the intent as a broad cast instead of an activity if true-->
+        <attr name="broadcast" format="boolean"/>
+        <!-- Alpha value to used when in selected state.  Defaults 1f  -->
+        <attr name="selectedAlpha" format="float" />
+        <!-- Alpha value to used when in un-selected state.  Defaults 0.7f  -->
+        <attr name="unselectedAlpha" format="float" />
+        <!-- icon to be rendered when in selected state -->
+        <attr name="selectedIcon" format="reference"/>
+    </declare-styleable>
+
+    <!-- Custom attributes to configure hvac values -->
+    <declare-styleable name="TemperatureView">
+        <attr name="hvacAreaId" format="integer"/>
+        <attr name="hvacPropertyId" format="integer"/>
+        <attr name="hvacTempFormat" format="string"/>
+    </declare-styleable>
+
+    <declare-styleable name="carVolumeItems"/>
+    <declare-styleable name="carVolumeItems_item">
+        <!-- Align with AudioAttributes.USAGE_* -->
+        <attr name="usage">
+            <enum name="unknown" value="0"/>
+            <enum name="media" value="1"/>
+            <enum name="voice_communication" value="2"/>
+            <enum name="voice_communication_signalling" value="3"/>
+            <enum name="alarm" value="4"/>
+            <enum name="notification" value="5"/>
+            <enum name="notification_ringtone" value="6"/>
+            <enum name="notification_communication_request" value="7"/>
+            <enum name="notification_communication_instant" value="8"/>
+            <enum name="notification_communication_delayed" value="9"/>
+            <enum name="notification_event" value="10"/>
+            <enum name="assistance_accessibility" value="11"/>
+            <enum name="assistance_navigation_guidance" value="12"/>
+            <enum name="assistance_sonification" value="13"/>
+            <enum name="game" value="14"/>
+            <!-- hidden, do not use -->
+            <!-- enum name="virtual_source" value="15"/ -->
+            <enum name="assistant" value="16"/>
+        </attr>
+
+        <!-- Icon resource ids to render on UI -->
+        <attr name="icon" format="reference"/>
+    </declare-styleable>
+</resources>

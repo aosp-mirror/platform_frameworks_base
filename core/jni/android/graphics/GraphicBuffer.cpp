@@ -17,7 +17,7 @@
 #define LOG_TAG "GraphicBuffer"
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include <inttypes.h>
 
 #include "android_os_Parcel.h"

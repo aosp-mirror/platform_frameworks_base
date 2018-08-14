@@ -38,7 +38,11 @@ import java.util.Arrays;
  * in the desired paramters with {@link #setUri(Uri)}, {@link #setSelection(String)},
  * {@link #setSelectionArgs(String[])}, {@link #setSortOrder(String)},
  * and {@link #setProjection(String[])}.
+ *
+ * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
+ *      {@link android.support.v4.content.CursorLoader}
  */
+@Deprecated
 public class CursorLoader extends AsyncTaskLoader<Cursor> {
     final ForceLoadContentObserver mObserver;
 
@@ -142,7 +146,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     }
 
     /**
-     * Starts an asynchronous load of the contacts list data. When the result is ready the callbacks
+     * Starts an asynchronous load of the data. When the result is ready the callbacks
      * will be called on the UI thread. If a previous load has been completed and is still valid
      * the result may be passed to the callbacks immediately.
      *

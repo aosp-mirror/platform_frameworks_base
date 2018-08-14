@@ -20,6 +20,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 /**
  * Helper class for logging serious issues, which also keeps a small
@@ -62,5 +63,17 @@ public class LocalLog {
             }
             return true;
         }
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+
+        synchronized (mLines) {
+            for (int i = 0; i < mLines.size(); ++i) {
+                proto.write(LocalLogProto.LINES, mLines.get(i));
+            }
+        }
+
+        proto.end(token);
     }
 }

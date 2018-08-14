@@ -19,12 +19,12 @@
 #include <utils/Mutex.h>
 
 #include "Caches.h"
+#include "DeviceInfo.h"
+#include "Properties.h"
 #include "Texture.h"
 #include "TextureCache.h"
-#include "Properties.h"
-#include "utils/TraceUtils.h"
 #include "hwui/Bitmap.h"
-#include "DeviceInfo.h"
+#include "utils/TraceUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -36,7 +36,7 @@ namespace uirenderer {
 TextureCache::TextureCache()
         : mCache(LruCache<uint32_t, Texture*>::kUnlimitedCapacity)
         , mSize(0)
-        , mMaxSize(DeviceInfo::multiplyByResolution(4 * 6)) // 6 screen-sized RGBA_8888 bitmaps
+        , mMaxSize(DeviceInfo::multiplyByResolution(4 * 6))  // 6 screen-sized RGBA_8888 bitmaps
         , mFlushRate(.4f) {
     mCache.setOnEntryRemovedListener(this);
     mMaxTextureSize = DeviceInfo::get()->maxTextureSize();
@@ -67,8 +67,8 @@ void TextureCache::operator()(uint32_t&, Texture*& texture) {
     // This will be called already locked
     if (texture) {
         mSize -= texture->bitmapSize;
-        TEXTURE_LOGD("TextureCache::callback: name, removed size, mSize = %d, %d, %d",
-                texture->id, texture->bitmapSize, mSize);
+        TEXTURE_LOGD("TextureCache::callback: name, removed size, mSize = %d, %d, %d", texture->id,
+                     texture->bitmapSize, mSize);
         if (mDebugEnabled) {
             ALOGD("Texture deleted, size = %d", texture->bitmapSize);
         }
@@ -92,19 +92,19 @@ void TextureCache::resetMarkInUse(void* ownerToken) {
 
 bool TextureCache::canMakeTextureFromBitmap(Bitmap* bitmap) {
     if (bitmap->width() > mMaxTextureSize || bitmap->height() > mMaxTextureSize) {
-        ALOGW("Bitmap too large to be uploaded into a texture (%dx%d, max=%dx%d)",
-                bitmap->width(), bitmap->height(), mMaxTextureSize, mMaxTextureSize);
+        ALOGW("Bitmap too large to be uploaded into a texture (%dx%d, max=%dx%d)", bitmap->width(),
+              bitmap->height(), mMaxTextureSize, mMaxTextureSize);
         return false;
     }
     return true;
 }
 
 Texture* TextureCache::createTexture(Bitmap* bitmap) {
-     Texture* texture = new Texture(Caches::getInstance());
-     texture->bitmapSize = bitmap->rowBytes() * bitmap->height();
-     texture->generation = bitmap->getGenerationID();
-     texture->upload(*bitmap);
-     return texture;
+    Texture* texture = new Texture(Caches::getInstance());
+    texture->bitmapSize = bitmap->rowBytes() * bitmap->height();
+    texture->generation = bitmap->getGenerationID();
+    texture->upload(*bitmap);
+    return texture;
 }
 
 // Returns a prepared Texture* that either is already in the cache or can fit
@@ -113,9 +113,9 @@ Texture* TextureCache::getCachedTexture(Bitmap* bitmap) {
     if (bitmap->isHardware()) {
         auto textureIterator = mHardwareTextures.find(bitmap->getStableID());
         if (textureIterator == mHardwareTextures.end()) {
-            Texture*  texture = createTexture(bitmap);
-            mHardwareTextures.insert(std::make_pair(bitmap->getStableID(),
-                    std::unique_ptr<Texture>(texture)));
+            Texture* texture = createTexture(bitmap);
+            mHardwareTextures.insert(
+                    std::make_pair(bitmap->getStableID(), std::unique_ptr<Texture>(texture)));
             if (mDebugEnabled) {
                 ALOGD("Texture created for hw bitmap size = %d", texture->bitmapSize);
             }
@@ -147,7 +147,7 @@ Texture* TextureCache::getCachedTexture(Bitmap* bitmap) {
             texture = createTexture(bitmap);
             mSize += size;
             TEXTURE_LOGD("TextureCache::get: create texture(%p): name, size, mSize = %d, %d, %d",
-                     bitmap, texture->id, size, mSize);
+                         bitmap, texture->id, size, mSize);
             if (mDebugEnabled) {
                 ALOGD("Texture created, size = %d", size);
             }
@@ -201,7 +201,7 @@ bool TextureCache::destroyTexture(uint32_t pixelRefStableID) {
 
 void TextureCache::clear() {
     mCache.clear();
-    for(auto& iter: mHardwareTextures) {
+    for (auto& iter : mHardwareTextures) {
         iter.second->deleteTexture();
     }
     mHardwareTextures.clear();
@@ -223,5 +223,5 @@ void TextureCache::flush() {
     }
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

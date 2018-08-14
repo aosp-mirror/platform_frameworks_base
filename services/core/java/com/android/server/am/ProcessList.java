@@ -21,9 +21,11 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 
 import android.app.ActivityManager;
+import android.app.AppProtoEnums;
 import android.os.Build;
 import android.os.SystemClock;
 import com.android.internal.util.MemInfoReader;
@@ -40,7 +42,7 @@ import android.view.Display;
 /**
  * Activity manager code dealing with processes.
  */
-final class ProcessList {
+public final class ProcessList {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessList" : TAG_AM;
 
     // The minimum time we allow between crashes, for us to consider this
@@ -126,13 +128,15 @@ final class ProcessList {
 
     // Activity manager's version of Process.THREAD_GROUP_BG_NONINTERACTIVE
     static final int SCHED_GROUP_BACKGROUND = 0;
+      // Activity manager's version of Process.THREAD_GROUP_RESTRICTED
+    static final int SCHED_GROUP_RESTRICTED = 1;
     // Activity manager's version of Process.THREAD_GROUP_DEFAULT
-    static final int SCHED_GROUP_DEFAULT = 1;
+    static final int SCHED_GROUP_DEFAULT = 2;
     // Activity manager's version of Process.THREAD_GROUP_TOP_APP
-    static final int SCHED_GROUP_TOP_APP = 2;
+    static final int SCHED_GROUP_TOP_APP = 3;
     // Activity manager's version of Process.THREAD_GROUP_TOP_APP
     // Disambiguate between actual top app and processes bound to the top app
-    static final int SCHED_GROUP_TOP_APP_BOUND = 3;
+    static final int SCHED_GROUP_TOP_APP_BOUND = 4;
 
     // The minimum number of cached apps we want to be able to keep around,
     // without empty apps being able to push them out of memory.
@@ -358,14 +362,11 @@ final class ProcessList {
             case ActivityManager.PROCESS_STATE_TOP:
                 procState = "TOP ";
                 break;
-            case ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
-                procState = "BFGS";
-                break;
             case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
                 procState = "FGS ";
                 break;
-            case ActivityManager.PROCESS_STATE_TOP_SLEEPING:
-                procState = "TPSL";
+            case ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
+                procState = "BFGS";
                 break;
             case ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND:
                 procState = "IMPF";
@@ -379,14 +380,17 @@ final class ProcessList {
             case ActivityManager.PROCESS_STATE_BACKUP:
                 procState = "BKUP";
                 break;
-            case ActivityManager.PROCESS_STATE_HEAVY_WEIGHT:
-                procState = "HVY ";
-                break;
             case ActivityManager.PROCESS_STATE_SERVICE:
                 procState = "SVC ";
                 break;
             case ActivityManager.PROCESS_STATE_RECEIVER:
                 procState = "RCVR";
+                break;
+            case ActivityManager.PROCESS_STATE_TOP_SLEEPING:
+                procState = "TPSL";
+                break;
+            case ActivityManager.PROCESS_STATE_HEAVY_WEIGHT:
+                procState = "HVY ";
                 break;
             case ActivityManager.PROCESS_STATE_HOME:
                 procState = "HOME";
@@ -400,6 +404,9 @@ final class ProcessList {
             case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT:
                 procState = "CACC";
                 break;
+            case ActivityManager.PROCESS_STATE_CACHED_RECENT:
+                procState = "CRE ";
+                break;
             case ActivityManager.PROCESS_STATE_CACHED_EMPTY:
                 procState = "CEM ";
                 break;
@@ -411,6 +418,55 @@ final class ProcessList {
                 break;
         }
         return procState;
+    }
+
+    public static int makeProcStateProtoEnum(int curProcState) {
+        switch (curProcState) {
+            case ActivityManager.PROCESS_STATE_PERSISTENT:
+                return AppProtoEnums.PROCESS_STATE_PERSISTENT;
+            case ActivityManager.PROCESS_STATE_PERSISTENT_UI:
+                return AppProtoEnums.PROCESS_STATE_PERSISTENT_UI;
+            case ActivityManager.PROCESS_STATE_TOP:
+                return AppProtoEnums.PROCESS_STATE_TOP;
+            case ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
+                return AppProtoEnums.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+            case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
+                return AppProtoEnums.PROCESS_STATE_FOREGROUND_SERVICE;
+            case ActivityManager.PROCESS_STATE_TOP_SLEEPING:
+                return AppProtoEnums.PROCESS_STATE_TOP_SLEEPING;
+            case ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND:
+                return AppProtoEnums.PROCESS_STATE_IMPORTANT_FOREGROUND;
+            case ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND:
+                return AppProtoEnums.PROCESS_STATE_IMPORTANT_BACKGROUND;
+            case ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND:
+                return AppProtoEnums.PROCESS_STATE_TRANSIENT_BACKGROUND;
+            case ActivityManager.PROCESS_STATE_BACKUP:
+                return AppProtoEnums.PROCESS_STATE_BACKUP;
+            case ActivityManager.PROCESS_STATE_HEAVY_WEIGHT:
+                return AppProtoEnums.PROCESS_STATE_HEAVY_WEIGHT;
+            case ActivityManager.PROCESS_STATE_SERVICE:
+                return AppProtoEnums.PROCESS_STATE_SERVICE;
+            case ActivityManager.PROCESS_STATE_RECEIVER:
+                return AppProtoEnums.PROCESS_STATE_RECEIVER;
+            case ActivityManager.PROCESS_STATE_HOME:
+                return AppProtoEnums.PROCESS_STATE_HOME;
+            case ActivityManager.PROCESS_STATE_LAST_ACTIVITY:
+                return AppProtoEnums.PROCESS_STATE_LAST_ACTIVITY;
+            case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY:
+                return AppProtoEnums.PROCESS_STATE_CACHED_ACTIVITY;
+            case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT:
+                return AppProtoEnums.PROCESS_STATE_CACHED_ACTIVITY_CLIENT;
+            case ActivityManager.PROCESS_STATE_CACHED_RECENT:
+                return AppProtoEnums.PROCESS_STATE_CACHED_RECENT;
+            case ActivityManager.PROCESS_STATE_CACHED_EMPTY:
+                return AppProtoEnums.PROCESS_STATE_CACHED_EMPTY;
+            case ActivityManager.PROCESS_STATE_NONEXISTENT:
+                return AppProtoEnums.PROCESS_STATE_NONEXISTENT;
+            case ActivityManager.PROCESS_STATE_UNKNOWN:
+                return AppProtoEnums.PROCESS_STATE_UNKNOWN;
+            default:
+                return AppProtoEnums.PROCESS_STATE_UNKNOWN_TO_PROTO;
+        }
     }
 
     public static void appendRamKb(StringBuilder sb, long ramKb) {
@@ -429,13 +485,13 @@ final class ProcessList {
     public static final int PSS_MIN_TIME_FROM_STATE_CHANGE = 15*1000;
 
     // The maximum amount of time we want to go between PSS collections.
-    public static final int PSS_MAX_INTERVAL = 30*60*1000;
+    public static final int PSS_MAX_INTERVAL = 60*60*1000;
 
     // The minimum amount of time between successive PSS requests for *all* processes.
-    public static final int PSS_ALL_INTERVAL = 10*60*1000;
+    public static final int PSS_ALL_INTERVAL = 20*60*1000;
 
-    // The minimum amount of time between successive PSS requests for a process.
-    private static final int PSS_SHORT_INTERVAL = 2*60*1000;
+    // The amount of time until PSS when a persistent process first appears.
+    private static final int PSS_FIRST_PERSISTENT_INTERVAL = 30*1000;
 
     // The amount of time until PSS when a process first becomes top.
     private static final int PSS_FIRST_TOP_INTERVAL = 10*1000;
@@ -444,16 +500,34 @@ final class ProcessList {
     private static final int PSS_FIRST_BACKGROUND_INTERVAL = 20*1000;
 
     // The amount of time until PSS when a process first becomes cached.
-    private static final int PSS_FIRST_CACHED_INTERVAL = 30*1000;
+    private static final int PSS_FIRST_CACHED_INTERVAL = 20*1000;
 
     // The amount of time until PSS when an important process stays in the same state.
-    private static final int PSS_SAME_IMPORTANT_INTERVAL = 15*60*1000;
+    private static final int PSS_SAME_PERSISTENT_INTERVAL = 10*60*1000;
+
+    // The amount of time until PSS when the top process stays in the same state.
+    private static final int PSS_SAME_TOP_INTERVAL = 1*60*1000;
+
+    // The amount of time until PSS when an important process stays in the same state.
+    private static final int PSS_SAME_IMPORTANT_INTERVAL = 10*60*1000;
 
     // The amount of time until PSS when a service process stays in the same state.
-    private static final int PSS_SAME_SERVICE_INTERVAL = 20*60*1000;
+    private static final int PSS_SAME_SERVICE_INTERVAL = 5*60*1000;
 
     // The amount of time until PSS when a cached process stays in the same state.
-    private static final int PSS_SAME_CACHED_INTERVAL = 30*60*1000;
+    private static final int PSS_SAME_CACHED_INTERVAL = 10*60*1000;
+
+    // The amount of time until PSS when a persistent process first appears.
+    private static final int PSS_FIRST_ASLEEP_PERSISTENT_INTERVAL = 1*60*1000;
+
+    // The amount of time until PSS when a process first becomes top.
+    private static final int PSS_FIRST_ASLEEP_TOP_INTERVAL = 20*1000;
+
+    // The amount of time until PSS when a process first goes into the background.
+    private static final int PSS_FIRST_ASLEEP_BACKGROUND_INTERVAL = 30*1000;
+
+    // The amount of time until PSS when a process first becomes cached.
+    private static final int PSS_FIRST_ASLEEP_CACHED_INTERVAL = 1*60*1000;
 
     // The minimum time interval after a state change it is safe to collect PSS.
     public static final int PSS_TEST_MIN_TIME_FROM_STATE_CHANGE = 10*1000;
@@ -475,111 +549,129 @@ final class ProcessList {
     public static final int PROC_MEM_IMPORTANT = 2;
     public static final int PROC_MEM_SERVICE = 3;
     public static final int PROC_MEM_CACHED = 4;
+    public static final int PROC_MEM_NUM = 5;
 
+    // Map large set of system process states to
     private static final int[] sProcStateToProcMem = new int[] {
         PROC_MEM_PERSISTENT,            // ActivityManager.PROCESS_STATE_PERSISTENT
         PROC_MEM_PERSISTENT,            // ActivityManager.PROCESS_STATE_PERSISTENT_UI
         PROC_MEM_TOP,                   // ActivityManager.PROCESS_STATE_TOP
-        PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
-        PROC_MEM_TOP,                   // ActivityManager.PROCESS_STATE_TOP_SLEEPING
+        PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_BACKUP
-        PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
         PROC_MEM_SERVICE,               // ActivityManager.PROCESS_STATE_SERVICE
         PROC_MEM_CACHED,                // ActivityManager.PROCESS_STATE_RECEIVER
+        PROC_MEM_TOP,                   // ActivityManager.PROCESS_STATE_TOP_SLEEPING
+        PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
         PROC_MEM_CACHED,                // ActivityManager.PROCESS_STATE_HOME
         PROC_MEM_CACHED,                // ActivityManager.PROCESS_STATE_LAST_ACTIVITY
         PROC_MEM_CACHED,                // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY
         PROC_MEM_CACHED,                // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT
+        PROC_MEM_CACHED,                // ActivityManager.PROCESS_STATE_CACHED_RECENT
         PROC_MEM_CACHED,                // ActivityManager.PROCESS_STATE_CACHED_EMPTY
     };
 
     private static final long[] sFirstAwakePssTimes = new long[] {
-        PSS_SHORT_INTERVAL,             // ActivityManager.PROCESS_STATE_PERSISTENT
-        PSS_SHORT_INTERVAL,             // ActivityManager.PROCESS_STATE_PERSISTENT_UI
-        PSS_FIRST_TOP_INTERVAL,         // ActivityManager.PROCESS_STATE_TOP
-        PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
-        PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
-        PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_TOP_SLEEPING
-        PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
-        PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
-        PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
-        PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_BACKUP
-        PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
-        PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_SERVICE
-        PSS_FIRST_CACHED_INTERVAL,      // ActivityManager.PROCESS_STATE_RECEIVER
-        PSS_FIRST_CACHED_INTERVAL,      // ActivityManager.PROCESS_STATE_HOME
-        PSS_FIRST_CACHED_INTERVAL,      // ActivityManager.PROCESS_STATE_LAST_ACTIVITY
-        PSS_FIRST_CACHED_INTERVAL,      // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY
-        PSS_FIRST_CACHED_INTERVAL,      // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT
-        PSS_FIRST_CACHED_INTERVAL,      // ActivityManager.PROCESS_STATE_CACHED_EMPTY
+        PSS_FIRST_PERSISTENT_INTERVAL,  // PROC_MEM_PERSISTENT
+        PSS_FIRST_TOP_INTERVAL,         // PROC_MEM_TOP
+        PSS_FIRST_BACKGROUND_INTERVAL,  // PROC_MEM_IMPORTANT
+        PSS_FIRST_BACKGROUND_INTERVAL,  // PROC_MEM_SERVICE
+        PSS_FIRST_CACHED_INTERVAL,      // PROC_MEM_CACHED
     };
 
     private static final long[] sSameAwakePssTimes = new long[] {
-        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_PERSISTENT
-        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_PERSISTENT_UI
-        PSS_SHORT_INTERVAL,             // ActivityManager.PROCESS_STATE_TOP
-        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
-        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
-        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_TOP_SLEEPING
-        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
-        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
-        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
-        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_BACKUP
-        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
-        PSS_SAME_SERVICE_INTERVAL,      // ActivityManager.PROCESS_STATE_SERVICE
-        PSS_SAME_SERVICE_INTERVAL,      // ActivityManager.PROCESS_STATE_RECEIVER
-        PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_HOME
-        PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_LAST_ACTIVITY
-        PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY
-        PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT
-        PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_CACHED_EMPTY
+        PSS_SAME_PERSISTENT_INTERVAL,   // PROC_MEM_PERSISTENT
+        PSS_SAME_TOP_INTERVAL,          // PROC_MEM_TOP
+        PSS_SAME_IMPORTANT_INTERVAL,    // PROC_MEM_IMPORTANT
+        PSS_SAME_SERVICE_INTERVAL,      // PROC_MEM_SERVICE
+        PSS_SAME_CACHED_INTERVAL,       // PROC_MEM_CACHED
     };
 
-    private static final long[] sTestFirstAwakePssTimes = new long[] {
-        PSS_TEST_FIRST_TOP_INTERVAL,        // ActivityManager.PROCESS_STATE_PERSISTENT
-        PSS_TEST_FIRST_TOP_INTERVAL,        // ActivityManager.PROCESS_STATE_PERSISTENT_UI
-        PSS_TEST_FIRST_TOP_INTERVAL,        // ActivityManager.PROCESS_STATE_TOP
-        PSS_FIRST_BACKGROUND_INTERVAL,      // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
-        PSS_FIRST_BACKGROUND_INTERVAL,      // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
-        PSS_FIRST_BACKGROUND_INTERVAL,      // ActivityManager.PROCESS_STATE_TOP_SLEEPING
-        PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
-        PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
-        PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
-        PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_BACKUP
-        PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
-        PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_SERVICE
-        PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_RECEIVER
-        PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_HOME
-        PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_LAST_ACTIVITY
-        PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY
-        PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT
-        PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_CACHED_EMPTY
+    private static final long[] sFirstAsleepPssTimes = new long[] {
+        PSS_FIRST_ASLEEP_PERSISTENT_INTERVAL,   // PROC_MEM_PERSISTENT
+        PSS_FIRST_ASLEEP_TOP_INTERVAL,          // PROC_MEM_TOP
+        PSS_FIRST_ASLEEP_BACKGROUND_INTERVAL,   // PROC_MEM_IMPORTANT
+        PSS_FIRST_ASLEEP_BACKGROUND_INTERVAL,   // PROC_MEM_SERVICE
+        PSS_FIRST_ASLEEP_CACHED_INTERVAL,       // PROC_MEM_CACHED
     };
 
-    private static final long[] sTestSameAwakePssTimes = new long[] {
-        PSS_TEST_SAME_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_PERSISTENT
-        PSS_TEST_SAME_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_PERSISTENT_UI
-        PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_TOP
-        PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
-        PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
-        PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_TOP_SLEEPING
-        PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
-        PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
-        PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
-        PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_BACKUP
-        PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
-        PSS_TEST_SAME_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_SERVICE
-        PSS_TEST_SAME_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_RECEIVER
-        PSS_TEST_SAME_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_HOME
-        PSS_TEST_SAME_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_LAST_ACTIVITY
-        PSS_TEST_SAME_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY
-        PSS_TEST_SAME_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT
-        PSS_TEST_SAME_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_CACHED_EMPTY
+    private static final long[] sSameAsleepPssTimes = new long[] {
+        PSS_SAME_PERSISTENT_INTERVAL,   // PROC_MEM_PERSISTENT
+        PSS_SAME_TOP_INTERVAL,          // PROC_MEM_TOP
+        PSS_SAME_IMPORTANT_INTERVAL,    // PROC_MEM_IMPORTANT
+        PSS_SAME_SERVICE_INTERVAL,      // PROC_MEM_SERVICE
+        PSS_SAME_CACHED_INTERVAL,       // PROC_MEM_CACHED
     };
+
+    private static final long[] sTestFirstPssTimes = new long[] {
+        PSS_TEST_FIRST_TOP_INTERVAL,        // PROC_MEM_PERSISTENT
+        PSS_TEST_FIRST_TOP_INTERVAL,        // PROC_MEM_TOP
+        PSS_TEST_FIRST_BACKGROUND_INTERVAL, // PROC_MEM_IMPORTANT
+        PSS_TEST_FIRST_BACKGROUND_INTERVAL, // PROC_MEM_SERVICE
+        PSS_TEST_FIRST_BACKGROUND_INTERVAL, // PROC_MEM_CACHED
+    };
+
+    private static final long[] sTestSamePssTimes = new long[] {
+        PSS_TEST_SAME_BACKGROUND_INTERVAL,  // PROC_MEM_PERSISTENT
+        PSS_TEST_SAME_IMPORTANT_INTERVAL,   // PROC_MEM_TOP
+        PSS_TEST_SAME_IMPORTANT_INTERVAL,   // PROC_MEM_IMPORTANT
+        PSS_TEST_SAME_BACKGROUND_INTERVAL,  // PROC_MEM_SERVICE
+        PSS_TEST_SAME_BACKGROUND_INTERVAL,  // PROC_MEM_CACHED
+    };
+
+    public static final class ProcStateMemTracker {
+        final int[] mHighestMem = new int[PROC_MEM_NUM];
+        final float[] mScalingFactor = new float[PROC_MEM_NUM];
+        int mTotalHighestMem = PROC_MEM_CACHED;
+
+        int mPendingMemState;
+        int mPendingHighestMemState;
+        float mPendingScalingFactor;
+
+        public ProcStateMemTracker() {
+            for (int i = PROC_MEM_PERSISTENT; i < PROC_MEM_NUM; i++) {
+                mHighestMem[i] = PROC_MEM_NUM;
+                mScalingFactor[i] = 1.0f;
+            }
+            mPendingMemState = -1;
+        }
+
+        public void dumpLine(PrintWriter pw) {
+            pw.print("best=");
+            pw.print(mTotalHighestMem);
+            pw.print(" (");
+            boolean needSep = false;
+            for (int i = 0; i < PROC_MEM_NUM; i++) {
+                if (mHighestMem[i] < PROC_MEM_NUM) {
+                    if (needSep) {
+                        pw.print(", ");
+                        needSep = false;
+                    }
+                    pw.print(i);
+                    pw.print("=");
+                    pw.print(mHighestMem[i]);
+                    pw.print(" ");
+                    pw.print(mScalingFactor[i]);
+                    pw.print("x");
+                    needSep = true;
+                }
+            }
+            pw.print(")");
+            if (mPendingMemState >= 0) {
+                pw.print(" / pending state=");
+                pw.print(mPendingMemState);
+                pw.print(" highest=");
+                pw.print(mPendingHighestMemState);
+                pw.print(" ");
+                pw.print(mPendingScalingFactor);
+                pw.print("x");
+            }
+            pw.println();
+        }
+    }
 
     public static boolean procStatesDifferForMem(int procState1, int procState2) {
         return sProcStateToProcMem[procState1] != sProcStateToProcMem[procState2];
@@ -589,16 +681,52 @@ final class ProcessList {
         return test ? PSS_TEST_MIN_TIME_FROM_STATE_CHANGE : PSS_MIN_TIME_FROM_STATE_CHANGE;
     }
 
-    public static long computeNextPssTime(int procState, boolean first, boolean test,
+    public static void commitNextPssTime(ProcStateMemTracker tracker) {
+        if (tracker.mPendingMemState >= 0) {
+            tracker.mHighestMem[tracker.mPendingMemState] = tracker.mPendingHighestMemState;
+            tracker.mScalingFactor[tracker.mPendingMemState] = tracker.mPendingScalingFactor;
+            tracker.mTotalHighestMem = tracker.mPendingHighestMemState;
+            tracker.mPendingMemState = -1;
+        }
+    }
+
+    public static void abortNextPssTime(ProcStateMemTracker tracker) {
+        tracker.mPendingMemState = -1;
+    }
+
+    public static long computeNextPssTime(int procState, ProcStateMemTracker tracker, boolean test,
             boolean sleeping, long now) {
+        boolean first;
+        float scalingFactor;
+        final int memState = sProcStateToProcMem[procState];
+        if (tracker != null) {
+            final int highestMemState = memState < tracker.mTotalHighestMem
+                    ? memState : tracker.mTotalHighestMem;
+            first = highestMemState < tracker.mHighestMem[memState];
+            tracker.mPendingMemState = memState;
+            tracker.mPendingHighestMemState = highestMemState;
+            if (first) {
+                tracker.mPendingScalingFactor = scalingFactor = 1.0f;
+            } else {
+                scalingFactor = tracker.mScalingFactor[memState];
+                tracker.mPendingScalingFactor = scalingFactor * 1.5f;
+            }
+        } else {
+            first = true;
+            scalingFactor = 1.0f;
+        }
         final long[] table = test
                 ? (first
-                        ? sTestFirstAwakePssTimes
-                        : sTestSameAwakePssTimes)
+                ? sTestFirstPssTimes
+                : sTestSamePssTimes)
                 : (first
-                        ? sFirstAwakePssTimes
-                        : sSameAwakePssTimes);
-        return now + table[procState];
+                ? (sleeping ? sFirstAsleepPssTimes : sFirstAwakePssTimes)
+                : (sleeping ? sSameAsleepPssTimes : sSameAwakePssTimes));
+        long delay = (long)(table[memState] * scalingFactor);
+        if (delay > PSS_MAX_INTERVAL) {
+            delay = PSS_MAX_INTERVAL;
+        }
+        return now + delay;
     }
 
     long getMemLevel(int adjustment) {
@@ -620,6 +748,7 @@ final class ProcessList {
 
     /**
      * Set the out-of-memory badness adjustment for a process.
+     * If {@code pid <= 0}, this method will be a no-op.
      *
      * @param pid The process identifier to set.
      * @param uid The uid of the app
@@ -628,6 +757,10 @@ final class ProcessList {
      * {@hide}
      */
     public static final void setOomAdj(int pid, int uid, int amt) {
+        // This indicates that the process is not started yet and so no need to proceed further.
+        if (pid <= 0) {
+            return;
+        }
         if (amt == UNKNOWN_ADJ)
             return;
 
@@ -649,6 +782,10 @@ final class ProcessList {
      * {@hide}
      */
     public static final void remove(int pid) {
+        // This indicates that the process is not started yet and so no need to proceed further.
+        if (pid <= 0) {
+            return;
+        }
         ByteBuffer buf = ByteBuffer.allocate(4 * 2);
         buf.putInt(LMK_PROCREMOVE);
         buf.putInt(pid);

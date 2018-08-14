@@ -19,6 +19,7 @@ package android.telecom;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -308,6 +309,7 @@ public final class Call {
          * Call can be upgraded to a video call.
          * @hide
          */
+        @UnsupportedAppUsage
         public static final int CAPABILITY_CAN_UPGRADE_TO_VIDEO = 0x00080000;
 
         /**

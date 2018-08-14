@@ -20,20 +20,24 @@ import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.display.BrightnessConfiguration;
+import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.text.format.DateUtils;
 import android.util.EventLog;
 import android.util.MathUtils;
 import android.util.Slog;
-import android.util.Spline;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
@@ -56,8 +60,16 @@ class AutomaticBrightnessController {
     // the user is satisfied with the result before storing the sample.
     private static final int BRIGHTNESS_ADJUSTMENT_SAMPLE_DEBOUNCE_MILLIS = 10000;
 
+    // Timeout after which we remove the effects any user interactions might've had on the
+    // brightness mapping. This timeout doesn't start until we transition to a non-interactive
+    // display policy so that we don't reset while users are using their devices, but also so that
+    // we don't erroneously keep the short-term model if the device is dozing but the display is
+    // fully on.
+    private static final int SHORT_TERM_MODEL_TIMEOUT_MILLIS = 30000;
+
     private static final int MSG_UPDATE_AMBIENT_LUX = 1;
     private static final int MSG_BRIGHTNESS_ADJUSTMENT_SAMPLE = 2;
+    private static final int MSG_INVALIDATE_SHORT_TERM_MODEL = 3;
 
     // Length of the ambient light horizon used to calculate the long term estimate of ambient
     // light.
@@ -75,13 +87,14 @@ class AutomaticBrightnessController {
     // The light sensor, or null if not available or needed.
     private final Sensor mLightSensor;
 
-    // The auto-brightness spline adjustment.
-    // The brightness values have been scaled to a range of 0..1.
-    private final Spline mScreenAutoBrightnessSpline;
+    // The mapper to translate ambient lux to screen brightness in the range [0, 1.0].
+    private final BrightnessMappingStrategy mBrightnessMapper;
 
     // The minimum and maximum screen brightnesses.
     private final int mScreenBrightnessRangeMinimum;
     private final int mScreenBrightnessRangeMaximum;
+
+    // How much to scale doze brightness by (should be (0, 1.0]).
     private final float mDozeScaleFactor;
 
     // Initial light sensor event rate in milliseconds.
@@ -113,8 +126,8 @@ class AutomaticBrightnessController {
     // weighting values positive.
     private final int mWeightingIntercept;
 
-    // accessor object for determining thresholds to change brightness dynamically
-    private final HysteresisLevels mDynamicHysteresis;
+    // Configuration object for determining thresholds to change brightness dynamically
+    private final HysteresisLevels mHysteresisLevels;
 
     // Amount of time to delay auto-brightness after screen on while waiting for
     // the light sensor to warm-up in milliseconds.
@@ -149,9 +162,6 @@ class AutomaticBrightnessController {
     // A ring buffer containing all of the recent ambient light sensor readings.
     private AmbientLightRingBuffer mAmbientLightRingBuffer;
 
-    // A ring buffer containing the light sensor readings for the initial horizon period.
-    private AmbientLightRingBuffer mInitialHorizonAmbientLightRingBuffer;
-
     // The handler
     private AutomaticBrightnessHandler mHandler;
 
@@ -163,37 +173,33 @@ class AutomaticBrightnessController {
     // Use -1 if there is no current auto-brightness value available.
     private int mScreenAutoBrightness = -1;
 
-    // The screen auto-brightness adjustment factor in the range -1 (dimmer) to 1 (brighter)
-    private float mScreenAutoBrightnessAdjustment = 0.0f;
-
-    // The maximum range of gamma adjustment possible using the screen
-    // auto-brightness adjustment setting.
-    private float mScreenAutoBrightnessAdjustmentMaxGamma;
-
-    // The last screen auto-brightness gamma.  (For printing in dump() only.)
-    private float mLastScreenAutoBrightnessGamma = 1.0f;
-
-    // Are we going to adjust brightness while dozing.
-    private boolean mDozing;
+    // The current display policy. This is useful, for example,  for knowing when we're dozing,
+    // where the light sensor may not be available.
+    private int mDisplayPolicy = DisplayPowerRequest.POLICY_OFF;
 
     // True if we are collecting a brightness adjustment sample, along with some data
     // for the initial state of the sample.
     private boolean mBrightnessAdjustmentSamplePending;
-    private float mBrightnessAdjustmentSampleOldAdjustment;
     private float mBrightnessAdjustmentSampleOldLux;
     private int mBrightnessAdjustmentSampleOldBrightness;
-    private float mBrightnessAdjustmentSampleOldGamma;
+
+    // When the short term model is invalidated, we don't necessarily reset it (i.e. clear the
+    // user's adjustment) immediately, but wait for a drastic enough change in the ambient light.
+    // The anchor determines what were the light levels when the user has set her preference, and
+    // we use a relative threshold to determine when to revert to the OEM curve.
+    private boolean mShortTermModelValid;
+    private float mShortTermModelAnchor;
+    private float SHORT_TERM_MODEL_THRESHOLD_RATIO = 0.6f;
 
     public AutomaticBrightnessController(Callbacks callbacks, Looper looper,
-            SensorManager sensorManager, Spline autoBrightnessSpline, int lightSensorWarmUpTime,
-            int brightnessMin, int brightnessMax, float dozeScaleFactor,
+            SensorManager sensorManager, BrightnessMappingStrategy mapper,
+            int lightSensorWarmUpTime, int brightnessMin, int brightnessMax, float dozeScaleFactor,
             int lightSensorRate, int initialLightSensorRate, long brighteningLightDebounceConfig,
             long darkeningLightDebounceConfig, boolean resetAmbientLuxAfterWarmUpConfig,
-            int ambientLightHorizon, float autoBrightnessAdjustmentMaxGamma,
-            HysteresisLevels dynamicHysteresis) {
+            HysteresisLevels hysteresisLevels) {
         mCallbacks = callbacks;
         mSensorManager = sensorManager;
-        mScreenAutoBrightnessSpline = autoBrightnessSpline;
+        mBrightnessMapper = mapper;
         mScreenBrightnessRangeMinimum = brightnessMin;
         mScreenBrightnessRangeMaximum = brightnessMax;
         mLightSensorWarmUpTimeConfig = lightSensorWarmUpTime;
@@ -204,15 +210,14 @@ class AutomaticBrightnessController {
         mBrighteningLightDebounceConfig = brighteningLightDebounceConfig;
         mDarkeningLightDebounceConfig = darkeningLightDebounceConfig;
         mResetAmbientLuxAfterWarmUpConfig = resetAmbientLuxAfterWarmUpConfig;
-        mAmbientLightHorizon = ambientLightHorizon;
-        mWeightingIntercept = ambientLightHorizon;
-        mScreenAutoBrightnessAdjustmentMaxGamma = autoBrightnessAdjustmentMaxGamma;
-        mDynamicHysteresis = dynamicHysteresis;
+        mAmbientLightHorizon = AMBIENT_LIGHT_LONG_HORIZON_MILLIS;
+        mWeightingIntercept = AMBIENT_LIGHT_LONG_HORIZON_MILLIS;
+        mHysteresisLevels = hysteresisLevels;
+        mShortTermModelValid = true;
+        mShortTermModelAnchor = -1;
 
         mHandler = new AutomaticBrightnessHandler(looper);
         mAmbientLightRingBuffer =
-            new AmbientLightRingBuffer(mNormalLightSensorRate, mAmbientLightHorizon);
-        mInitialHorizonAmbientLightRingBuffer =
             new AmbientLightRingBuffer(mNormalLightSensorRate, mAmbientLightHorizon);
 
         if (!DEBUG_PRETEND_LIGHT_SENSOR_ABSENT) {
@@ -221,61 +226,165 @@ class AutomaticBrightnessController {
     }
 
     public int getAutomaticScreenBrightness() {
-        if (mDozing) {
+        if (!mAmbientLuxValid) {
+            return -1;
+        }
+        if (mDisplayPolicy == DisplayPowerRequest.POLICY_DOZE) {
             return (int) (mScreenAutoBrightness * mDozeScaleFactor);
         }
         return mScreenAutoBrightness;
     }
 
-    public void configure(boolean enable, float adjustment, boolean dozing,
-            boolean userInitiatedChange) {
+    public float getAutomaticScreenBrightnessAdjustment() {
+        return mBrightnessMapper.getAutoBrightnessAdjustment();
+    }
+
+    public void configure(boolean enable, @Nullable BrightnessConfiguration configuration,
+            float brightness, boolean userChangedBrightness, float adjustment,
+            boolean userChangedAutoBrightnessAdjustment, int displayPolicy) {
         // While dozing, the application processor may be suspended which will prevent us from
         // receiving new information from the light sensor. On some devices, we may be able to
         // switch to a wake-up light sensor instead but for now we will simply disable the sensor
         // and hold onto the last computed screen auto brightness.  We save the dozing flag for
         // debugging purposes.
-        mDozing = dozing;
-        boolean changed = setLightSensorEnabled(enable && !dozing);
-        if (enable && !dozing && userInitiatedChange) {
+        boolean dozing = (displayPolicy == DisplayPowerRequest.POLICY_DOZE);
+        boolean changed = setBrightnessConfiguration(configuration);
+        changed |= setDisplayPolicy(displayPolicy);
+        if (userChangedAutoBrightnessAdjustment) {
+            changed |= setAutoBrightnessAdjustment(adjustment);
+        }
+        if (userChangedBrightness && enable) {
+            // Update the brightness curve with the new user control point. It's critical this
+            // happens after we update the autobrightness adjustment since it may reset it.
+            changed |= setScreenBrightnessByUser(brightness);
+        }
+        final boolean userInitiatedChange =
+                userChangedBrightness || userChangedAutoBrightnessAdjustment;
+        if (userInitiatedChange && enable && !dozing) {
             prepareBrightnessAdjustmentSample();
         }
-        changed |= setScreenAutoBrightnessAdjustment(adjustment);
+        changed |= setLightSensorEnabled(enable && !dozing);
         if (changed) {
             updateAutoBrightness(false /*sendUpdate*/);
         }
     }
 
+    public boolean hasUserDataPoints() {
+        return mBrightnessMapper.hasUserDataPoints();
+    }
+
+    public boolean isDefaultConfig() {
+        return mBrightnessMapper.isDefaultConfig();
+    }
+
+    public BrightnessConfiguration getDefaultConfig() {
+        return mBrightnessMapper.getDefaultConfig();
+    }
+
+    private boolean setDisplayPolicy(int policy) {
+        if (mDisplayPolicy == policy) {
+            return false;
+        }
+        final int oldPolicy = mDisplayPolicy;
+        mDisplayPolicy = policy;
+        if (DEBUG) {
+            Slog.d(TAG, "Display policy transitioning from " + oldPolicy + " to " + policy);
+        }
+        if (!isInteractivePolicy(policy) && isInteractivePolicy(oldPolicy)) {
+            mHandler.sendEmptyMessageDelayed(MSG_INVALIDATE_SHORT_TERM_MODEL,
+                    SHORT_TERM_MODEL_TIMEOUT_MILLIS);
+        } else if (isInteractivePolicy(policy) && !isInteractivePolicy(oldPolicy)) {
+            mHandler.removeMessages(MSG_INVALIDATE_SHORT_TERM_MODEL);
+        }
+        return true;
+    }
+
+    private static boolean isInteractivePolicy(int policy) {
+        return policy == DisplayPowerRequest.POLICY_BRIGHT
+                || policy == DisplayPowerRequest.POLICY_DIM
+                || policy == DisplayPowerRequest.POLICY_VR;
+    }
+
+    private boolean setScreenBrightnessByUser(float brightness) {
+        if (!mAmbientLuxValid) {
+            // If we don't have a valid ambient lux then we don't have a valid brightness anyways,
+            // and we can't use this data to add a new control point to the short-term model.
+            return false;
+        }
+        mBrightnessMapper.addUserDataPoint(mAmbientLux, brightness);
+        mShortTermModelValid = true;
+        mShortTermModelAnchor = mAmbientLux;
+        if (DEBUG) {
+            Slog.d(TAG, "ShortTermModel: anchor=" + mShortTermModelAnchor);
+        }
+        return true;
+    }
+
+    public void resetShortTermModel() {
+        mBrightnessMapper.clearUserDataPoints();
+        mShortTermModelValid = true;
+        mShortTermModelAnchor = -1;
+    }
+
+    private void invalidateShortTermModel() {
+        if (DEBUG) {
+            Slog.d(TAG, "ShortTermModel: invalidate user data");
+        }
+        mShortTermModelValid = false;
+    }
+
+    public boolean setBrightnessConfiguration(BrightnessConfiguration configuration) {
+        if (mBrightnessMapper.setBrightnessConfiguration(configuration)) {
+            resetShortTermModel();
+            return true;
+        }
+        return false;
+    }
+
     public void dump(PrintWriter pw) {
         pw.println();
         pw.println("Automatic Brightness Controller Configuration:");
-        pw.println("  mScreenAutoBrightnessSpline=" + mScreenAutoBrightnessSpline);
         pw.println("  mScreenBrightnessRangeMinimum=" + mScreenBrightnessRangeMinimum);
         pw.println("  mScreenBrightnessRangeMaximum=" + mScreenBrightnessRangeMaximum);
+        pw.println("  mDozeScaleFactor=" + mDozeScaleFactor);
+        pw.println("  mInitialLightSensorRate=" + mInitialLightSensorRate);
+        pw.println("  mNormalLightSensorRate=" + mNormalLightSensorRate);
         pw.println("  mLightSensorWarmUpTimeConfig=" + mLightSensorWarmUpTimeConfig);
         pw.println("  mBrighteningLightDebounceConfig=" + mBrighteningLightDebounceConfig);
         pw.println("  mDarkeningLightDebounceConfig=" + mDarkeningLightDebounceConfig);
         pw.println("  mResetAmbientLuxAfterWarmUpConfig=" + mResetAmbientLuxAfterWarmUpConfig);
+        pw.println("  mAmbientLightHorizon=" + mAmbientLightHorizon);
+        pw.println("  mWeightingIntercept=" + mWeightingIntercept);
 
         pw.println();
         pw.println("Automatic Brightness Controller State:");
         pw.println("  mLightSensor=" + mLightSensor);
         pw.println("  mLightSensorEnabled=" + mLightSensorEnabled);
         pw.println("  mLightSensorEnableTime=" + TimeUtils.formatUptime(mLightSensorEnableTime));
+        pw.println("  mCurrentLightSensorRate=" + mCurrentLightSensorRate);
         pw.println("  mAmbientLux=" + mAmbientLux);
-        pw.println("  mAmbientLightHorizon=" + mAmbientLightHorizon);
+        pw.println("  mAmbientLuxValid=" + mAmbientLuxValid);
         pw.println("  mBrighteningLuxThreshold=" + mBrighteningLuxThreshold);
         pw.println("  mDarkeningLuxThreshold=" + mDarkeningLuxThreshold);
         pw.println("  mLastObservedLux=" + mLastObservedLux);
         pw.println("  mLastObservedLuxTime=" + TimeUtils.formatUptime(mLastObservedLuxTime));
         pw.println("  mRecentLightSamples=" + mRecentLightSamples);
         pw.println("  mAmbientLightRingBuffer=" + mAmbientLightRingBuffer);
-        pw.println("  mInitialHorizonAmbientLightRingBuffer=" +
-                mInitialHorizonAmbientLightRingBuffer);
         pw.println("  mScreenAutoBrightness=" + mScreenAutoBrightness);
-        pw.println("  mScreenAutoBrightnessAdjustment=" + mScreenAutoBrightnessAdjustment);
-        pw.println("  mScreenAutoBrightnessAdjustmentMaxGamma=" + mScreenAutoBrightnessAdjustmentMaxGamma);
-        pw.println("  mLastScreenAutoBrightnessGamma=" + mLastScreenAutoBrightnessGamma);
-        pw.println("  mDozing=" + mDozing);
+        pw.println("  mDisplayPolicy=" + DisplayPowerRequest.policyToString(mDisplayPolicy));
+        pw.println("  mShortTermModelAnchor=" + mShortTermModelAnchor);
+        pw.println("  mShortTermModelValid=" + mShortTermModelValid);
+        pw.println("  mBrightnessAdjustmentSamplePending=" + mBrightnessAdjustmentSamplePending);
+        pw.println("  mBrightnessAdjustmentSampleOldLux=" + mBrightnessAdjustmentSampleOldLux);
+        pw.println("  mBrightnessAdjustmentSampleOldBrightness="
+                + mBrightnessAdjustmentSampleOldBrightness);
+        pw.println("  mShortTermModelValid=" + mShortTermModelValid);
+
+        pw.println();
+        mBrightnessMapper.dump(pw);
+
+        pw.println();
+        mHysteresisLevels.dump(pw);
     }
 
     private boolean setLightSensorEnabled(boolean enable) {
@@ -288,22 +397,20 @@ class AutomaticBrightnessController {
                         mCurrentLightSensorRate * 1000, mHandler);
                 return true;
             }
-        } else {
-            if (mLightSensorEnabled) {
-                mLightSensorEnabled = false;
-                mAmbientLuxValid = !mResetAmbientLuxAfterWarmUpConfig;
-                mRecentLightSamples = 0;
-                mAmbientLightRingBuffer.clear();
-                mInitialHorizonAmbientLightRingBuffer.clear();
-                mCurrentLightSensorRate = -1;
-                mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
-                mSensorManager.unregisterListener(mLightSensorListener);
-            }
+        } else if (mLightSensorEnabled) {
+            mLightSensorEnabled = false;
+            mAmbientLuxValid = !mResetAmbientLuxAfterWarmUpConfig;
+            mRecentLightSamples = 0;
+            mAmbientLightRingBuffer.clear();
+            mCurrentLightSensorRate = -1;
+            mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
+            mSensorManager.unregisterListener(mLightSensorListener);
         }
         return false;
     }
 
     private void handleLightSensorEvent(long time, float lux) {
+        Trace.traceCounter(Trace.TRACE_TAG_POWER, "ALS", (int) lux);
         mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
 
         if (mAmbientLightRingBuffer.size() == 0) {
@@ -316,11 +423,6 @@ class AutomaticBrightnessController {
 
     private void applyLightSensorMeasurement(long time, float lux) {
         mRecentLightSamples++;
-        // Store all of the light measurements for the intial horizon period. This is to help
-        // diagnose dim wake ups and slow responses in b/27951906.
-        if (time <= mLightSensorEnableTime + mAmbientLightHorizon) {
-            mInitialHorizonAmbientLightRingBuffer.push(time, lux);
-        }
         mAmbientLightRingBuffer.prune(time - mAmbientLightHorizon);
         mAmbientLightRingBuffer.push(time, lux);
 
@@ -333,8 +435,9 @@ class AutomaticBrightnessController {
         // if the light sensor rate changed, update the sensor listener
         if (lightSensorRate != mCurrentLightSensorRate) {
             if (DEBUG) {
-                Slog.d(TAG, "adjustLightSensorRate: previousRate=" + mCurrentLightSensorRate
-                    + ", currentRate=" + lightSensorRate);
+                Slog.d(TAG, "adjustLightSensorRate: " +
+                        "previousRate=" + mCurrentLightSensorRate + ", " +
+                        "currentRate=" + lightSensorRate);
             }
             mCurrentLightSensorRate = lightSensorRate;
             mSensorManager.unregisterListener(mLightSensorListener);
@@ -343,21 +446,40 @@ class AutomaticBrightnessController {
         }
     }
 
-    private boolean setScreenAutoBrightnessAdjustment(float adjustment) {
-        if (adjustment != mScreenAutoBrightnessAdjustment) {
-            mScreenAutoBrightnessAdjustment = adjustment;
-            return true;
-        }
-        return false;
+    private boolean setAutoBrightnessAdjustment(float adjustment) {
+        return mBrightnessMapper.setAutoBrightnessAdjustment(adjustment);
     }
 
     private void setAmbientLux(float lux) {
         if (DEBUG) {
             Slog.d(TAG, "setAmbientLux(" + lux + ")");
         }
+        if (lux < 0) {
+            Slog.w(TAG, "Ambient lux was negative, ignoring and setting to 0");
+            lux = 0;
+        }
         mAmbientLux = lux;
-        mBrighteningLuxThreshold = mDynamicHysteresis.getBrighteningThreshold(lux);
-        mDarkeningLuxThreshold = mDynamicHysteresis.getDarkeningThreshold(lux);
+        mBrighteningLuxThreshold = mHysteresisLevels.getBrighteningThreshold(lux);
+        mDarkeningLuxThreshold = mHysteresisLevels.getDarkeningThreshold(lux);
+
+        // If the short term model was invalidated and the change is drastic enough, reset it.
+        if (!mShortTermModelValid && mShortTermModelAnchor != -1) {
+            final float minAmbientLux =
+                mShortTermModelAnchor - mShortTermModelAnchor * SHORT_TERM_MODEL_THRESHOLD_RATIO;
+            final float maxAmbientLux =
+                mShortTermModelAnchor + mShortTermModelAnchor * SHORT_TERM_MODEL_THRESHOLD_RATIO;
+            if (minAmbientLux < mAmbientLux && mAmbientLux < maxAmbientLux) {
+                if (DEBUG) {
+                    Slog.d(TAG, "ShortTermModel: re-validate user data, ambient lux is " +
+                            minAmbientLux + " < " + mAmbientLux + " < " + maxAmbientLux);
+                }
+                mShortTermModelValid = true;
+            } else {
+                Slog.d(TAG, "ShortTermModel: reset data, ambient lux is " + mAmbientLux +
+                        "(" + minAmbientLux + ", " + maxAmbientLux + ")");
+                resetShortTermModel();
+            }
+        }
     }
 
     private float calculateAmbientLux(long now, long horizon) {
@@ -381,10 +503,9 @@ class AutomaticBrightnessController {
             }
         }
         if (DEBUG) {
-            Slog.d(TAG, "calculateAmbientLux: selected endIndex=" + endIndex + ", point=("
-                    + mAmbientLightRingBuffer.getTime(endIndex) + ", "
-                    + mAmbientLightRingBuffer.getLux(endIndex)
-                    + ")");
+            Slog.d(TAG, "calculateAmbientLux: selected endIndex=" + endIndex + ", point=(" +
+                    mAmbientLightRingBuffer.getTime(endIndex) + ", " +
+                    mAmbientLightRingBuffer.getLux(endIndex) + ")");
         }
         float sum = 0;
         float totalWeight = 0;
@@ -400,17 +521,18 @@ class AutomaticBrightnessController {
             float weight = calculateWeight(startTime, endTime);
             float lux = mAmbientLightRingBuffer.getLux(i);
             if (DEBUG) {
-                Slog.d(TAG, "calculateAmbientLux: [" +
-                        (startTime) + ", " +
-                        (endTime) + "]: lux=" + lux + ", weight=" + weight);
+                Slog.d(TAG, "calculateAmbientLux: [" + startTime + ", " + endTime + "]: " +
+                        "lux=" + lux + ", " +
+                        "weight=" + weight);
             }
             totalWeight += weight;
-            sum += mAmbientLightRingBuffer.getLux(i) * weight;
+            sum += lux * weight;
             endTime = startTime;
         }
         if (DEBUG) {
-            Slog.d(TAG, "calculateAmbientLux: totalWeight=" + totalWeight +
-                    ", newAmbientLux=" + (sum / totalWeight));
+            Slog.d(TAG, "calculateAmbientLux: " +
+                    "totalWeight=" + totalWeight + ", " +
+                    "newAmbientLux=" + (sum / totalWeight));
         }
         return sum / totalWeight;
     }
@@ -463,9 +585,9 @@ class AutomaticBrightnessController {
                 mLightSensorWarmUpTimeConfig + mLightSensorEnableTime;
             if (time < timeWhenSensorWarmedUp) {
                 if (DEBUG) {
-                    Slog.d(TAG, "updateAmbientLux: Sensor not  ready yet: "
-                            + "time=" + time
-                            + ", timeWhenSensorWarmedUp=" + timeWhenSensorWarmedUp);
+                    Slog.d(TAG, "updateAmbientLux: Sensor not  ready yet: " +
+                            "time=" + time + ", " +
+                            "timeWhenSensorWarmedUp=" + timeWhenSensorWarmedUp);
                 }
                 mHandler.sendEmptyMessageAtTime(MSG_UPDATE_AMBIENT_LUX,
                         timeWhenSensorWarmedUp);
@@ -474,9 +596,9 @@ class AutomaticBrightnessController {
             setAmbientLux(calculateAmbientLux(time, AMBIENT_LIGHT_SHORT_HORIZON_MILLIS));
             mAmbientLuxValid = true;
             if (DEBUG) {
-                Slog.d(TAG, "updateAmbientLux: Initializing: "
-                        + "mAmbientLightRingBuffer=" + mAmbientLightRingBuffer
-                        + ", mAmbientLux=" + mAmbientLux);
+                Slog.d(TAG, "updateAmbientLux: Initializing: " +
+                        "mAmbientLightRingBuffer=" + mAmbientLightRingBuffer + ", " +
+                        "mAmbientLux=" + mAmbientLux);
             }
             updateAutoBrightness(true);
         }
@@ -494,17 +616,20 @@ class AutomaticBrightnessController {
         float slowAmbientLux = calculateAmbientLux(time, AMBIENT_LIGHT_LONG_HORIZON_MILLIS);
         float fastAmbientLux = calculateAmbientLux(time, AMBIENT_LIGHT_SHORT_HORIZON_MILLIS);
 
-        if (slowAmbientLux >= mBrighteningLuxThreshold &&
-                fastAmbientLux >= mBrighteningLuxThreshold && nextBrightenTransition <= time
-                || slowAmbientLux <= mDarkeningLuxThreshold
-                && fastAmbientLux <= mDarkeningLuxThreshold && nextDarkenTransition <= time) {
+        if ((slowAmbientLux >= mBrighteningLuxThreshold &&
+             fastAmbientLux >= mBrighteningLuxThreshold &&
+             nextBrightenTransition <= time)
+             ||
+            (slowAmbientLux <= mDarkeningLuxThreshold &&
+             fastAmbientLux <= mDarkeningLuxThreshold &&
+             nextDarkenTransition <= time)) {
             setAmbientLux(fastAmbientLux);
             if (DEBUG) {
-                Slog.d(TAG, "updateAmbientLux: "
-                        + ((fastAmbientLux > mAmbientLux) ? "Brightened" : "Darkened") + ": "
-                        + "mBrighteningLuxThreshold=" + mBrighteningLuxThreshold
-                        + ", mAmbientLightRingBuffer=" + mAmbientLightRingBuffer
-                        + ", mAmbientLux=" + mAmbientLux);
+                Slog.d(TAG, "updateAmbientLux: " +
+                        ((fastAmbientLux > mAmbientLux) ? "Brightened" : "Darkened") + ": " +
+                        "mBrighteningLuxThreshold=" + mBrighteningLuxThreshold + ", " +
+                        "mAmbientLightRingBuffer=" + mAmbientLightRingBuffer + ", " +
+                        "mAmbientLux=" + mAmbientLux);
             }
             updateAutoBrightness(true);
             nextBrightenTransition = nextAmbientLightBrighteningTransition(time);
@@ -520,8 +645,8 @@ class AutomaticBrightnessController {
         nextTransitionTime =
                 nextTransitionTime > time ? nextTransitionTime : time + mNormalLightSensorRate;
         if (DEBUG) {
-            Slog.d(TAG, "updateAmbientLux: Scheduling ambient lux update for "
-                    + nextTransitionTime + TimeUtils.formatUptime(nextTransitionTime));
+            Slog.d(TAG, "updateAmbientLux: Scheduling ambient lux update for " +
+                    nextTransitionTime + TimeUtils.formatUptime(nextTransitionTime));
         }
         mHandler.sendEmptyMessageAtTime(MSG_UPDATE_AMBIENT_LUX, nextTransitionTime);
     }
@@ -531,39 +656,18 @@ class AutomaticBrightnessController {
             return;
         }
 
-        float value = mScreenAutoBrightnessSpline.interpolate(mAmbientLux);
-        float gamma = 1.0f;
-
-        if (USE_SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT
-                && mScreenAutoBrightnessAdjustment != 0.0f) {
-            final float adjGamma = MathUtils.pow(mScreenAutoBrightnessAdjustmentMaxGamma,
-                    Math.min(1.0f, Math.max(-1.0f, -mScreenAutoBrightnessAdjustment)));
-            gamma *= adjGamma;
-            if (DEBUG) {
-                Slog.d(TAG, "updateAutoBrightness: adjGamma=" + adjGamma);
-            }
-        }
-
-        if (gamma != 1.0f) {
-            final float in = value;
-            value = MathUtils.pow(value, gamma);
-            if (DEBUG) {
-                Slog.d(TAG, "updateAutoBrightness: gamma=" + gamma
-                        + ", in=" + in + ", out=" + value);
-            }
-        }
+        float value = mBrightnessMapper.getBrightness(mAmbientLux);
 
         int newScreenAutoBrightness =
                 clampScreenBrightness(Math.round(value * PowerManager.BRIGHTNESS_ON));
         if (mScreenAutoBrightness != newScreenAutoBrightness) {
             if (DEBUG) {
-                Slog.d(TAG, "updateAutoBrightness: mScreenAutoBrightness="
-                        + mScreenAutoBrightness + ", newScreenAutoBrightness="
-                        + newScreenAutoBrightness);
+                Slog.d(TAG, "updateAutoBrightness: " +
+                        "mScreenAutoBrightness=" + mScreenAutoBrightness + ", " +
+                        "newScreenAutoBrightness=" + newScreenAutoBrightness);
             }
 
             mScreenAutoBrightness = newScreenAutoBrightness;
-            mLastScreenAutoBrightnessGamma = gamma;
             if (sendUpdate) {
                 mCallbacks.updateBrightness();
             }
@@ -578,10 +682,8 @@ class AutomaticBrightnessController {
     private void prepareBrightnessAdjustmentSample() {
         if (!mBrightnessAdjustmentSamplePending) {
             mBrightnessAdjustmentSamplePending = true;
-            mBrightnessAdjustmentSampleOldAdjustment = mScreenAutoBrightnessAdjustment;
             mBrightnessAdjustmentSampleOldLux = mAmbientLuxValid ? mAmbientLux : -1;
             mBrightnessAdjustmentSampleOldBrightness = mScreenAutoBrightness;
-            mBrightnessAdjustmentSampleOldGamma = mLastScreenAutoBrightnessGamma;
         } else {
             mHandler.removeMessages(MSG_BRIGHTNESS_ADJUSTMENT_SAMPLE);
         }
@@ -602,23 +704,17 @@ class AutomaticBrightnessController {
             mBrightnessAdjustmentSamplePending = false;
             if (mAmbientLuxValid && mScreenAutoBrightness >= 0) {
                 if (DEBUG) {
-                    Slog.d(TAG, "Auto-brightness adjustment changed by user: "
-                            + "adj=" + mScreenAutoBrightnessAdjustment
-                            + ", lux=" + mAmbientLux
-                            + ", brightness=" + mScreenAutoBrightness
-                            + ", gamma=" + mLastScreenAutoBrightnessGamma
-                            + ", ring=" + mAmbientLightRingBuffer);
+                    Slog.d(TAG, "Auto-brightness adjustment changed by user: " +
+                            "lux=" + mAmbientLux + ", " +
+                            "brightness=" + mScreenAutoBrightness + ", " +
+                            "ring=" + mAmbientLightRingBuffer);
                 }
 
                 EventLog.writeEvent(EventLogTags.AUTO_BRIGHTNESS_ADJ,
-                        mBrightnessAdjustmentSampleOldAdjustment,
                         mBrightnessAdjustmentSampleOldLux,
                         mBrightnessAdjustmentSampleOldBrightness,
-                        mBrightnessAdjustmentSampleOldGamma,
-                        mScreenAutoBrightnessAdjustment,
                         mAmbientLux,
-                        mScreenAutoBrightness,
-                        mLastScreenAutoBrightnessGamma);
+                        mScreenAutoBrightness);
             }
         }
     }
@@ -637,6 +733,10 @@ class AutomaticBrightnessController {
 
                 case MSG_BRIGHTNESS_ADJUSTMENT_SAMPLE:
                     collectBrightnessAdjustmentSample();
+                    break;
+
+                case MSG_INVALIDATE_SHORT_TERM_MODEL:
+                    invalidateShortTermModel();
                     break;
             }
         }

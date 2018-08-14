@@ -76,11 +76,13 @@ public class ShortcutManagerTest5 extends BaseShortcutManagerTest {
                 mMyPackage, mMyUserId, /*signature*/ false);
         assertEquals(mMyPackage, pi.packageName);
         assertNull(pi.signatures);
+        assertNull(pi.signingInfo);
 
         pi = mShortcutService.getPackageInfo(
                 mMyPackage, mMyUserId, /*signature*/ true);
         assertEquals(mMyPackage, pi.packageName);
-        assertNotNull(pi.signatures);
+        assertNull(pi.signatures);
+        assertNotNull(pi.signingInfo);
 
         pi = mShortcutService.getPackageInfo(
                 "no.such.package", mMyUserId, /*signature*/ true);

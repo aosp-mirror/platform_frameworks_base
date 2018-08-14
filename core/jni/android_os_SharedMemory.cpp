@@ -20,7 +20,7 @@
 
 #include <cutils/ashmem.h>
 #include <utils/Log.h>
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include <nativehelper/JniConstants.h>
 #include <nativehelper/ScopedLocalRef.h>
 

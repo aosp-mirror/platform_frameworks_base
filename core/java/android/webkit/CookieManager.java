@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.WebAddress;
 
@@ -42,9 +43,9 @@ public abstract class CookieManager {
     /**
      * Sets whether the application's {@link WebView} instances should send and
      * accept cookies.
-     * By default this is set to true and the WebView accepts cookies.
+     * By default this is set to {@code true} and the WebView accepts cookies.
      * <p>
-     * When this is true
+     * When this is {@code true}
      * {@link CookieManager#setAcceptThirdPartyCookies setAcceptThirdPartyCookies} and
      * {@link CookieManager#setAcceptFileSchemeCookies setAcceptFileSchemeCookies}
      * can be used to control the policy for those specific types of cookie.
@@ -58,7 +59,7 @@ public abstract class CookieManager {
      * Gets whether the application's {@link WebView} instances send and accept
      * cookies.
      *
-     * @return true if {@link WebView} instances send and accept cookies
+     * @return {@code true} if {@link WebView} instances send and accept cookies
      */
     public abstract boolean acceptCookie();
 
@@ -82,7 +83,7 @@ public abstract class CookieManager {
      * Gets whether the {@link WebView} should allow third party cookies to be set.
      *
      * @param webview the {@link WebView} instance to get the cookie policy for
-     * @return true if the {@link WebView} accepts third party cookies
+     * @return {@code true} if the {@link WebView} accepts third party cookies
      */
     public abstract boolean acceptThirdPartyCookies(WebView webview);
 
@@ -116,7 +117,8 @@ public abstract class CookieManager {
      *              HTTP response header
      * @param callback a callback to be executed when the cookie has been set
      */
-    public abstract void setCookie(String url, String value, ValueCallback<Boolean> callback);
+    public abstract void setCookie(String url, String value, @Nullable ValueCallback<Boolean>
+            callback);
 
     /**
      * Gets the cookies for the given URL.
@@ -175,7 +177,7 @@ public abstract class CookieManager {
      * method from a thread without a Looper.
      * @param callback a callback which is executed when the session cookies have been removed
      */
-    public abstract void removeSessionCookies(ValueCallback<Boolean> callback);
+    public abstract void removeSessionCookies(@Nullable ValueCallback<Boolean> callback);
 
     /**
      * Removes all cookies.
@@ -197,12 +199,12 @@ public abstract class CookieManager {
      * method from a thread without a Looper.
      * @param callback a callback which is executed when the cookies have been removed
      */
-    public abstract void removeAllCookies(ValueCallback<Boolean> callback);
+    public abstract void removeAllCookies(@Nullable ValueCallback<Boolean> callback);
 
     /**
      * Gets whether there are stored cookies.
      *
-     * @return true if there are stored cookies
+     * @return {@code true} if there are stored cookies
      */
     public abstract boolean hasCookies();
 
@@ -233,7 +235,7 @@ public abstract class CookieManager {
      * Gets whether the application's {@link WebView} instances send and accept
      * cookies for file scheme URLs.
      *
-     * @return true if {@link WebView} instances send and accept cookies for
+     * @return {@code true} if {@link WebView} instances send and accept cookies for
      *         file scheme URLs
      */
     // Static for backward compatibility.

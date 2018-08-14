@@ -20,8 +20,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.media.projection.IMediaProjection;
 import android.os.Handler;
 import android.os.IBinder;
@@ -71,8 +73,11 @@ public final class MediaProjectionManager {
      */
     public Intent createScreenCaptureIntent() {
         Intent i = new Intent();
-        i.setClassName("com.android.systemui",
-                "com.android.systemui.media.MediaProjectionPermissionActivity");
+        final ComponentName mediaProjectionPermissionDialogComponent =
+                ComponentName.unflattenFromString(mContext.getResources().getString(
+                        com.android.internal.R.string
+                        .config_mediaProjectionPermissionDialogComponent));
+        i.setComponent(mediaProjectionPermissionDialogComponent);
         return i;
     }
 

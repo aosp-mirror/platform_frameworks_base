@@ -16,7 +16,9 @@
 
 package android.telephony;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
+import android.text.TextUtils;
 
 import java.util.Objects;
 
@@ -52,7 +54,7 @@ public final class CellIdentityCdma extends CellIdentity {
      * @hide
      */
     public CellIdentityCdma() {
-        super(TAG, TYPE_CDMA, null, null, null, null);
+        super(TAG, CellInfo.TYPE_CDMA, null, null, null, null);
         mNetworkId = Integer.MAX_VALUE;
         mSystemId = Integer.MAX_VALUE;
         mBasestationId = Integer.MAX_VALUE;
@@ -92,7 +94,7 @@ public final class CellIdentityCdma extends CellIdentity {
      */
     public CellIdentityCdma(int nid, int sid, int bid, int lon, int lat, String alphal,
                              String alphas) {
-        super(TAG, TYPE_CDMA, null, null, alphal, alphas);
+        super(TAG, CellInfo.TYPE_CDMA, null, null, alphal, alphas);
         mNetworkId = nid;
         mSystemId = sid;
         mBasestationId = bid;
@@ -211,7 +213,7 @@ public final class CellIdentityCdma extends CellIdentity {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (DBG) log("writeToParcel(Parcel, int): " + toString());
-        super.writeToParcel(dest, TYPE_CDMA);
+        super.writeToParcel(dest, CellInfo.TYPE_CDMA);
         dest.writeInt(mNetworkId);
         dest.writeInt(mSystemId);
         dest.writeInt(mBasestationId);
@@ -221,7 +223,7 @@ public final class CellIdentityCdma extends CellIdentity {
 
     /** Construct from Parcel, type has already been processed */
     private CellIdentityCdma(Parcel in) {
-        super(TAG, TYPE_CDMA, in);
+        super(TAG, CellInfo.TYPE_CDMA, in);
         mNetworkId = in.readInt();
         mSystemId = in.readInt();
         mBasestationId = in.readInt();

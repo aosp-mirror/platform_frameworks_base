@@ -25,6 +25,7 @@ import android.os.IBinder;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutofillWindowPresenter;
+import android.view.KeyEvent;
 
 /**
  * Object running in the application process and responsible for autofilling it.
@@ -35,7 +36,7 @@ oneway interface IAutoFillManagerClient {
     /**
      * Notifies the client when the autofill enabled state changed.
      */
-    void setState(boolean enabled, boolean resetSession, boolean resetClient);
+    void setState(int flags);
 
     /**
       * Autofills the activity with the contents of a dataset.
@@ -53,7 +54,8 @@ oneway interface IAutoFillManagerClient {
       * the session is finished automatically.
       */
     void setTrackedViews(int sessionId, in @nullable AutofillId[] savableIds,
-            boolean saveOnAllViewsInvisible, in @nullable AutofillId[] fillableIds);
+            boolean saveOnAllViewsInvisible, boolean saveOnFinish,
+            in @nullable AutofillId[] fillableIds, in AutofillId saveTriggerId);
 
     /**
      * Requests showing the fill UI.
@@ -67,9 +69,17 @@ oneway interface IAutoFillManagerClient {
     void requestHideFillUi(int sessionId, in AutofillId id);
 
     /**
-     * Notifies no fill UI will be shown, and also mark the state as finished if necessary.
+     * Notifies no fill UI will be shown, and also mark the state as finished if necessary (if
+     * sessionFinishedState != 0).
      */
-    void notifyNoFillUi(int sessionId, in AutofillId id, boolean sessionFinished);
+    void notifyNoFillUi(int sessionId, in AutofillId id, int sessionFinishedState);
+
+    /**
+     * Dispatches unhandled keyevent from autofill ui. Autofill ui handles DPAD and ENTER events,
+     * other unhandled keyevents are dispatched to app's window to filter autofill result.
+     * Note this method is not called when autofill ui is in fullscreen mode (TV only).
+     */
+    void dispatchUnhandledKey(int sessionId, in AutofillId id, in KeyEvent keyEvent);
 
     /**
      * Starts the provided intent sender.

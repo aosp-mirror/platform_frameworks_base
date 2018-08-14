@@ -25,11 +25,9 @@ import android.widget.TextView;
 
 import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.systemui.R;
-import com.android.systemui.ViewInvertHelper;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
-import com.android.systemui.statusbar.phone.NotificationPanelView;
 
 /**
  * A hybrid view which may contain information about one ore more notifications.
@@ -41,7 +39,6 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
 
     protected TextView mTitleView;
     protected TextView mTextView;
-    private ViewInvertHelper mInvertHelper;
 
     public HybridNotificationView(Context context) {
         this(context, null);
@@ -73,7 +70,6 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
         super.onFinishInflate();
         mTitleView = (TextView) findViewById(R.id.notification_title);
         mTextView = (TextView) findViewById(R.id.notification_text);
-        mInvertHelper = new ViewInvertHelper(this, NotificationPanelView.DOZE_ANIMATION_DURATION);
         mTransformationHelper = new ViewTransformationHelper();
         mTransformationHelper.setCustomTransformation(
                 new ViewTransformationHelper.CustomTransformation() {
@@ -124,10 +120,6 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
             mTextView.setText(text.toString());
         }
         requestLayout();
-    }
-
-    public void setDark(boolean dark, boolean fade, long delay) {
-        mInvertHelper.setInverted(dark, fade, delay);
     }
 
     @Override

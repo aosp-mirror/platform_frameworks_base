@@ -21,12 +21,6 @@ import android.annotation.SystemApi;
 /** @hide */
 @SystemApi
 public interface IHwBinder {
-    // These MUST match their corresponding libhwbinder/IBinder.h definition !!!
-    /** @hide */
-    public static final int FIRST_CALL_TRANSACTION = 1;
-    /** @hide */
-    public static final int FLAG_ONEWAY = 1;
-
     /**
      * Process a hwbinder transaction.
      *

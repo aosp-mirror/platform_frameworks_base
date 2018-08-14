@@ -21,12 +21,11 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSHost;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 
@@ -88,6 +87,10 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
+        if (!isAvailable()) {
+            onManagedProfileRemoved();
+        }
+
         if (state.slash == null) {
             state.slash = new SlashState();
         }
@@ -98,7 +101,6 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
             state.value = mProfileController.isWorkModeEnabled();
         }
 
-        state.label = mContext.getString(R.string.quick_settings_work_mode_label);
         state.icon = mIcon;
         if (state.value) {
             state.slash.isSlashed = false;
@@ -109,6 +111,7 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
             state.contentDescription =  mContext.getString(
                     R.string.accessibility_quick_settings_work_mode_off);
         }
+        state.label = mContext.getString(R.string.quick_settings_work_mode_label);
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }

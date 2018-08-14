@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.annotation.IntDef;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -377,6 +378,7 @@ public class VideoProfile implements Parcelable {
          * @param maxZoom Maximum zoom supported by camera.
          * @hide
          */
+        @UnsupportedAppUsage
         public CameraCapabilities(int width, int height, boolean zoomSupported, float maxZoom) {
             mWidth = width;
             mHeight = height;

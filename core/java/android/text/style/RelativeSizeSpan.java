@@ -16,56 +16,85 @@
 
 package android.text.style;
 
+import android.annotation.FloatRange;
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.text.ParcelableSpan;
 import android.text.TextPaint;
 import android.text.TextUtils;
 
+/**
+ * Uniformly scales the size of the text to which it's attached by a certain proportion.
+ * <p>
+ * For example, a <code>RelativeSizeSpan</code> that increases the text size by 50% can be
+ * constructed like this:
+ * <pre>{@code
+ *  SpannableString string = new SpannableString("Text with relative size span");
+ *string.setSpan(new RelativeSizeSpan(1.5f), 10, 24, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);}</pre>
+ * <img src="{@docRoot}reference/android/images/text/style/relativesizespan.png" />
+ * <figcaption>Text increased by 50% with <code>RelativeSizeSpan</code>.</figcaption>
+ */
 public class RelativeSizeSpan extends MetricAffectingSpan implements ParcelableSpan {
 
     private final float mProportion;
 
-    public RelativeSizeSpan(float proportion) {
+    /**
+     * Creates a {@link RelativeSizeSpan} based on a proportion.
+     *
+     * @param proportion the proportion with which the text is scaled.
+     */
+    public RelativeSizeSpan(@FloatRange(from = 0) float proportion) {
         mProportion = proportion;
     }
 
-    public RelativeSizeSpan(Parcel src) {
+    /**
+     * Creates a {@link RelativeSizeSpan} from a parcel.
+     */
+    public RelativeSizeSpan(@NonNull Parcel src) {
         mProportion = src.readFloat();
     }
-    
+
+    @Override
     public int getSpanTypeId() {
         return getSpanTypeIdInternal();
     }
 
     /** @hide */
+    @Override
     public int getSpanTypeIdInternal() {
         return TextUtils.RELATIVE_SIZE_SPAN;
     }
-    
+
+    @Override
     public int describeContents() {
         return 0;
     }
 
-    public void writeToParcel(Parcel dest, int flags) {
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         writeToParcelInternal(dest, flags);
     }
 
     /** @hide */
-    public void writeToParcelInternal(Parcel dest, int flags) {
+    @Override
+    public void writeToParcelInternal(@NonNull Parcel dest, int flags) {
         dest.writeFloat(mProportion);
     }
 
+    /**
+     * @return the proportion with which the text size is changed.
+     */
     public float getSizeChange() {
         return mProportion;
     }
 
     @Override
-    public void updateDrawState(TextPaint ds) {
+    public void updateDrawState(@NonNull TextPaint ds) {
         ds.setTextSize(ds.getTextSize() * mProportion);
     }
 
     @Override
-    public void updateMeasureState(TextPaint ds) {
+    public void updateMeasureState(@NonNull TextPaint ds) {
         ds.setTextSize(ds.getTextSize() * mProportion);
     }
 }

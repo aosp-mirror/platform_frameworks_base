@@ -6,7 +6,7 @@
     <string name="portal_notification_id" msgid="5155057562457079297">"Τα δεδομένα κινητής τηλεφωνίας εξαντλήθηκαν"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"Τα δεδομένα κινητής τηλεφωνίας έχουν απενεργοποιηθεί"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"Πατήστε για να επισκεφτείτε τον ιστότοπο %s"</string>
-    <string name="no_data_notification_detail" msgid="3112125343857014825">"Επικοινωνήστε με τον παροχέα υπηρεσιών σας %s"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"Επικοινωνήστε με τον πάροχο υπηρεσιών σας %s"</string>
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Δεν υπάρχει σύνδεση δεδομένων κινητής τηλεφωνίας"</string>
     <string name="no_mobile_data_connection" msgid="544980465184147010">"Προσθήκη δεδομένων ή προγράμματος περιαγωγής μέσω του %s"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Κατάσταση δεδομένων κινητής τηλεφωνίας"</string>

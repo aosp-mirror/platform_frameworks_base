@@ -22,15 +22,14 @@
 class ListOfFadedTextAnimation;
 
 static TestScene::Registrar _ListOfFadedTextAnimation(TestScene::Info{
-    "fadingedges",
-    "A mock ListView of scrolling text with faded edge. Doesn't re-bind/re-record views"
-    "as they are recycled, so won't upload much content (either glyphs, or bitmaps).",
-    TestScene::simpleCreateScene<ListOfFadedTextAnimation>
-});
+        "fadingedges",
+        "A mock ListView of scrolling text with faded edge. Doesn't re-bind/re-record views"
+        "as they are recycled, so won't upload much content (either glyphs, or bitmaps).",
+        TestScene::simpleCreateScene<ListOfFadedTextAnimation>});
 
 class ListOfFadedTextAnimation : public TestListViewSceneBase {
-    void createListItem(RenderProperties& props, Canvas& canvas, int id,
-            int itemWidth, int itemHeight)  override {
+    void createListItem(RenderProperties& props, Canvas& canvas, int id, int itemWidth,
+                        int itemHeight) override {
         canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
         int length = dp(100);
         canvas.saveLayer(0, 0, length, itemHeight, nullptr, SaveFlags::HasAlphaLayer);
@@ -44,8 +43,8 @@ class ListOfFadedTextAnimation : public TestListViewSceneBase {
         pts[1].set(0, 1);
 
         SkColor colors[2] = {Color::Black, Color::Transparent};
-        sk_sp<SkShader> s(SkGradientShader::MakeLinear(pts, colors, NULL, 2,
-                SkShader::kClamp_TileMode));
+        sk_sp<SkShader> s(
+                SkGradientShader::MakeLinear(pts, colors, NULL, 2, SkShader::kClamp_TileMode));
 
         SkMatrix matrix;
         matrix.setScale(1, length);

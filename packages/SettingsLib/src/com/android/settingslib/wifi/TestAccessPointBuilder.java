@@ -23,6 +23,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Keep;
 
 import com.android.settingslib.wifi.AccessPoint.Speed;
@@ -58,7 +59,7 @@ public class TestAccessPointBuilder {
     private String mCarrierName = null;
 
     Context mContext;
-    private ArrayList<ScanResult> mScanResultCache;
+    private ArrayList<ScanResult> mScanResults;
     private ArrayList<TimestampedScoredNetwork> mScoredNetworkCache;
 
     @Keep
@@ -84,8 +85,9 @@ public class TestAccessPointBuilder {
         if (mProviderFriendlyName != null) {
             bundle.putString(AccessPoint.KEY_PROVIDER_FRIENDLY_NAME, mProviderFriendlyName);
         }
-        if (mScanResultCache != null) {
-            bundle.putParcelableArrayList(AccessPoint.KEY_SCANRESULTCACHE, mScanResultCache);
+        if (mScanResults != null) {
+            bundle.putParcelableArray(AccessPoint.KEY_SCANRESULTS,
+                    mScanResults.toArray(new Parcelable[mScanResults.size()]));
         }
         if (mScoredNetworkCache != null) {
             bundle.putParcelableArrayList(AccessPoint.KEY_SCOREDNETWORKCACHE, mScoredNetworkCache);
@@ -229,8 +231,8 @@ public class TestAccessPointBuilder {
         return this;
     }
 
-    public TestAccessPointBuilder setScanResultCache(ArrayList<ScanResult> scanResultCache) {
-        mScanResultCache = scanResultCache;
+    public TestAccessPointBuilder setScanResults(ArrayList<ScanResult> scanResults) {
+        mScanResults = scanResults;
         return this;
     }
 

@@ -21,37 +21,58 @@ import android.os.Parcel;
 
 /**
  * A class representing Wi-Fi Protected Setup
- *
+ * @deprecated This class is no longer supported.
  * {@see WifiP2pConfig}
  */
+@Deprecated
 public class WpsInfo implements Parcelable {
 
-    /** Push button configuration */
+    /** Push button configuration
+     * @deprecated This is no longer supported.*/
+    @Deprecated
     public static final int PBC     = 0;
-    /** Display pin method configuration - pin is generated and displayed on device */
+    /** Display pin method configuration - pin is generated and displayed on device
+     * @deprecated This is no longer supported.*/
+    @Deprecated
     public static final int DISPLAY = 1;
-    /** Keypad pin method configuration - pin is entered on device */
+    /** Keypad pin method configuration - pin is entered on device
+     * @deprecated This is no longer supported.*/
+    @Deprecated
     public static final int KEYPAD  = 2;
-    /** Label pin method configuration - pin is labelled on device */
+    /** Label pin method configuration - pin is labelled on device
+     * @deprecated This is no longer supported.*/
+    @Deprecated
     public static final int LABEL   = 3;
-    /** Invalid configuration */
+    /** Invalid configuration
+     * @deprecated This is no longer supported.*/
+    @Deprecated
     public static final int INVALID = 4;
 
-    /** Wi-Fi Protected Setup. www.wi-fi.org/wifi-protected-setup has details */
+    /** Wi-Fi Protected Setup. www.wi-fi.org/wifi-protected-setup has details
+     * @deprecated This is no longer supported.*/
+    @Deprecated
     public int setup;
 
-    /** Passed with pin method KEYPAD */
+    /** Passed with pin method KEYPAD
+     * @deprecated This is no longer supported.*/
+    @Deprecated
     public String BSSID;
 
-    /** Passed with pin method configuration */
+    /** Passed with pin method configuration
+     * @deprecated This is no longer supported.*/
+    @Deprecated
     public String pin;
 
+    /** @deprecated This API is no longer supported.*/
+    @Deprecated
     public WpsInfo() {
         setup = INVALID;
         BSSID = null;
         pin = null;
     }
 
+    /** @deprecated This API is no longer supported.*/
+    @Deprecated
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         sbuf.append(" setup: ").append(setup);
@@ -63,12 +84,16 @@ public class WpsInfo implements Parcelable {
         return sbuf.toString();
     }
 
-    /** Implement the Parcelable interface */
+    /** Implement the Parcelable interface
+     * @deprecated This API is no longer supported.*/
+    @Deprecated
     public int describeContents() {
         return 0;
     }
 
-    /* Copy constructor */
+    /* Copy constructor
+    * @deprecated This API is no longer supported.*/
+    @Deprecated
     public WpsInfo(WpsInfo source) {
         if (source != null) {
             setup = source.setup;
@@ -77,16 +102,22 @@ public class WpsInfo implements Parcelable {
         }
     }
 
-    /** Implement the Parcelable interface */
+    /** Implement the Parcelable interface
+     * @deprecated This API is no longer supported. */
+    @Deprecated
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(setup);
         dest.writeString(BSSID);
         dest.writeString(pin);
     }
 
-    /** Implement the Parcelable interface */
+    /** Implement the Parcelable interface
+     * @deprecated This API is no longer supported.*/
+    @Deprecated
     public static final Creator<WpsInfo> CREATOR =
         new Creator<WpsInfo>() {
+            /** @deprecated This API is nolonger supported.*/
+            @Deprecated
             public WpsInfo createFromParcel(Parcel in) {
                 WpsInfo config = new WpsInfo();
                 config.setup = in.readInt();
@@ -95,6 +126,8 @@ public class WpsInfo implements Parcelable {
                 return config;
             }
 
+            /** @deprecated This API is nolonger supported.*/
+            @Deprecated
             public WpsInfo[] newArray(int size) {
                 return new WpsInfo[size];
             }

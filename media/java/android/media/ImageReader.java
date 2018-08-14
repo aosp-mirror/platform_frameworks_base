@@ -640,7 +640,6 @@ public class ImageReader implements AutoCloseable {
      * The ImageReader continues to be usable after this call, but may need to reallocate buffers
      * when more buffers are needed for rendering.
      * </p>
-     * @hide
      */
     public void discardFreeBuffers() {
         synchronized (mCloseLock) {
@@ -728,18 +727,7 @@ public class ImageReader implements AutoCloseable {
             return false;
         }
 
-        if (format == ImageFormat.PRIVATE) {
-            // Usage need to be either USAGE0_GPU_SAMPLED_IMAGE or USAGE0_VIDEO_ENCODE or combined.
-            boolean isAllowed = (usage == HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
-            isAllowed = isAllowed || (usage == HardwareBuffer.USAGE_VIDEO_ENCODE);
-            isAllowed = isAllowed || (usage ==
-                    (HardwareBuffer.USAGE_VIDEO_ENCODE | HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE));
-            return isAllowed;
-        } else {
-            // Usage need to make the buffer CPU readable for explicit format.
-            return ((usage == HardwareBuffer.USAGE_CPU_READ_RARELY) ||
-                    (usage == HardwareBuffer.USAGE_CPU_READ_OFTEN));
-        }
+        return true;
     }
 
     /**
@@ -877,6 +865,24 @@ public class ImageReader implements AutoCloseable {
         }
 
         @Override
+        public int getTransform() {
+            throwISEIfImageIsInvalid();
+            return mTransform;
+        }
+
+        @Override
+        public int getScalingMode() {
+            throwISEIfImageIsInvalid();
+            return mScalingMode;
+        }
+
+        @Override
+        public HardwareBuffer getHardwareBuffer() {
+            throwISEIfImageIsInvalid();
+            return nativeGetHardwareBuffer();
+        }
+
+        @Override
         public void setTimestamp(long timestampNs) {
             throwISEIfImageIsInvalid();
             mTimestamp = timestampNs;
@@ -1004,9 +1010,11 @@ public class ImageReader implements AutoCloseable {
         private long mNativeBuffer;
 
         /**
-         * This field is set by native code during nativeImageSetup().
+         * These fields are set by native code during nativeImageSetup().
          */
         private long mTimestamp;
+        private int mTransform;
+        private int mScalingMode;
 
         private SurfacePlane[] mPlanes;
         private int mFormat = ImageFormat.UNKNOWN;
@@ -1018,6 +1026,7 @@ public class ImageReader implements AutoCloseable {
         private synchronized native int nativeGetWidth();
         private synchronized native int nativeGetHeight();
         private synchronized native int nativeGetFormat(int readerFormat);
+        private synchronized native HardwareBuffer nativeGetHardwareBuffer();
     }
 
     private synchronized native void nativeInit(Object weakSelf, int w, int h,

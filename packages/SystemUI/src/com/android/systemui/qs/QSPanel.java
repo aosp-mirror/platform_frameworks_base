@@ -16,8 +16,10 @@
 
 package com.android.systemui.qs;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static com.android.systemui.qs.tileimpl.QSTileImpl.getColorForState;
 
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -29,7 +31,6 @@ import android.service.quicksettings.Tile;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.internal.logging.MetricsLogger;
@@ -53,20 +54,19 @@ import com.android.systemui.tuner.TunerService.Tunable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-/** View that represents the quick settings tile panel. **/
+/** View that represents the quick settings tile panel (when expanded/pulled down). **/
 public class QSPanel extends LinearLayout implements Tunable, Callback, BrightnessMirrorListener {
 
     public static final String QS_SHOW_BRIGHTNESS = "qs_show_brightness";
+    public static final String QS_SHOW_HEADER = "qs_show_header";
 
     protected final Context mContext;
-    protected final ArrayList<TileRecord> mRecords = new ArrayList<TileRecord>();
+    protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
     protected final View mBrightnessView;
     private final H mHandler = new H();
-    private final View mPageIndicator;
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
+    private final QSTileRevealController mQsTileRevealController;
 
-    private int mPanelPaddingBottom;
-    private int mBrightnessPaddingTop;
     protected boolean mExpanded;
     protected boolean mListening;
 
@@ -75,6 +75,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     protected QSTileHost mHost;
 
     protected QSSecurityFooter mFooter;
+    private PageIndicator mPanelPageIndicator;
+    private PageIndicator mFooterPageIndicator;
     private boolean mGridContentVisible = true;
 
     protected QSTileLayout mTileLayout;
@@ -95,18 +97,22 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
         setOrientation(VERTICAL);
 
-        mBrightnessView = LayoutInflater.from(context).inflate(
-                R.layout.quick_settings_brightness_dialog, this, false);
+        mBrightnessView = LayoutInflater.from(mContext).inflate(
+            R.layout.quick_settings_brightness_dialog, this, false);
         addView(mBrightnessView);
 
-        setupTileLayout();
+        mTileLayout = (QSTileLayout) LayoutInflater.from(mContext).inflate(
+                R.layout.qs_paged_tile_layout, this, false);
+        mTileLayout.setListening(mListening);
+        addView((View) mTileLayout);
 
-        mPageIndicator = LayoutInflater.from(context).inflate(
+        mPanelPageIndicator = (PageIndicator) LayoutInflater.from(context).inflate(
                 R.layout.qs_page_indicator, this, false);
-        addView(mPageIndicator);
-        if (mTileLayout instanceof PagedTileLayout) {
-            ((PagedTileLayout) mTileLayout).setPageIndicator((PageIndicator) mPageIndicator);
-        }
+        addView(mPanelPageIndicator);
+
+        ((PagedTileLayout) mTileLayout).setPageIndicator(mPanelPageIndicator);
+        mQsTileRevealController = new QSTileRevealController(mContext, this,
+                (PagedTileLayout) mTileLayout);
 
         addDivider();
 
@@ -132,14 +138,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     public View getPageIndicator() {
-        return mPageIndicator;
+        return mPanelPageIndicator;
     }
 
-    protected void setupTileLayout() {
-        mTileLayout = (QSTileLayout) LayoutInflater.from(mContext).inflate(
-                R.layout.qs_paged_tile_layout, this, false);
-        mTileLayout.setListening(mListening);
-        addView((View) mTileLayout);
+    public QSTileRevealController getQsTileRevealController() {
+        return mQsTileRevealController;
     }
 
     public boolean isShowingCustomize() {
@@ -149,7 +152,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        Dependency.get(TunerService.class).addTunable(this, QS_SHOW_BRIGHTNESS);
+        final TunerService tunerService = Dependency.get(TunerService.class);
+        tunerService.addTunable(this, QS_SHOW_BRIGHTNESS);
+
         if (mHost != null) {
             setTiles(mHost.getTiles());
         }
@@ -181,9 +186,12 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     @Override
     public void onTuningChanged(String key, String newValue) {
         if (QS_SHOW_BRIGHTNESS.equals(key)) {
-            mBrightnessView.setVisibility(newValue == null || Integer.parseInt(newValue) != 0
-                    ? VISIBLE : GONE);
+            updateViewVisibilityForTuningValue(mBrightnessView, newValue);
         }
+    }
+
+    private void updateViewVisibilityForTuningValue(View view, @Nullable String newValue) {
+        view.setVisibility(newValue == null || Integer.parseInt(newValue) != 0 ? VISIBLE : GONE);
     }
 
     public void openDetails(String subPanel) {
@@ -235,15 +243,48 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         }
     }
 
+    /**
+     * Links the footer's page indicator, which is used in landscape orientation to save space.
+     *
+     * @param pageIndicator indicator to use for page scrolling
+     */
+    public void setFooterPageIndicator(PageIndicator pageIndicator) {
+        if (mTileLayout instanceof PagedTileLayout) {
+            mFooterPageIndicator = pageIndicator;
+            updatePageIndicator();
+        }
+    }
+
+    private void updatePageIndicator() {
+        if (mTileLayout instanceof PagedTileLayout) {
+            // If we're in landscape, and we have the footer page indicator (which we should if the
+            // footer has been initialized & linked), then we'll show the footer page indicator to
+            // save space in the main QS tile area. Otherwise, we'll use the default one under the
+            // tiles/above the footer.
+            boolean shouldUseFooterPageIndicator =
+                    getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE
+                            && mFooterPageIndicator != null;
+
+            mPanelPageIndicator.setVisibility(View.GONE);
+            if (mFooterPageIndicator != null) {
+                mFooterPageIndicator.setVisibility(View.GONE);
+            }
+
+            ((PagedTileLayout) mTileLayout).setPageIndicator(
+                    shouldUseFooterPageIndicator ? mFooterPageIndicator : mPanelPageIndicator);
+        }
+    }
+
     public QSTileHost getHost() {
         return mHost;
     }
 
     public void updateResources() {
         final Resources res = mContext.getResources();
-        mPanelPaddingBottom = res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom);
-        mBrightnessPaddingTop = res.getDimensionPixelSize(R.dimen.qs_brightness_padding_top);
-        setPadding(0, mBrightnessPaddingTop, 0, mPanelPaddingBottom);
+        setPadding(0, res.getDimensionPixelSize(R.dimen.qs_panel_padding_top), 0, res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom));
+
+        updatePageIndicator();
+
         for (TileRecord r : mRecords) {
             r.tile.clearState();
         }
@@ -293,6 +334,12 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         }
     }
 
+    public void setPageListener(final PagedTileLayout.PageListener pageListener) {
+        if (mTileLayout instanceof PagedTileLayout) {
+            ((PagedTileLayout) mTileLayout).setPageListener(pageListener);
+        }
+    }
+
     public boolean isExpanded() {
         return mExpanded;
     }
@@ -317,6 +364,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     public void refreshAllTiles() {
+        mBrightnessController.checkRestrictionAndSetEnabled();
         for (TileRecord r : mRecords) {
             r.tile.refreshState();
         }
@@ -348,6 +396,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     public void setTiles(Collection<QSTile> tiles, boolean collapsedView) {
+        if (!collapsedView) {
+            mQsTileRevealController.updateRevealedTiles(tiles);
+        }
         for (TileRecord record : mRecords) {
             mTileLayout.removeTile(record);
             record.tile.removeCallback(record.callback);
@@ -564,6 +615,17 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mFooter.showDeviceMonitoringDialog();
     }
 
+    public void setMargins(int sideMargins) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View view = getChildAt(i);
+            if (view != mTileLayout) {
+                LayoutParams lp = (LayoutParams) view.getLayoutParams();
+                lp.leftMargin = sideMargins;
+                lp.rightMargin = sideMargins;
+            }
+        }
+    }
+
     private class H extends Handler {
         private static final int SHOW_DETAIL = 1;
         private static final int SET_TILE_VISIBILITY = 2;
@@ -602,5 +664,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         boolean updateResources();
 
         void setListening(boolean listening);
+
+        default void setExpansion(float expansion) {}
     }
 }

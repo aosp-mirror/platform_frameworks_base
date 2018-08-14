@@ -23,6 +23,7 @@ import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.makeBundle;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.set;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -57,11 +58,13 @@ import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageParser;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.Signature;
+import android.content.pm.SigningInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -76,6 +79,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.test.InstrumentationTestCase;
 import android.test.mock.MockContext;
 import android.util.ArrayMap;
@@ -100,6 +104,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -289,6 +295,12 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
+        int injectBinderCallingPid() {
+            // Note it's not used in tests, so just return a "random" value.
+            return mInjectedCallingUid * 123;
+        }
+
+        @Override
         int injectGetPackageUid(String packageName, int userId) {
             return getInjectedPackageInfo(packageName, userId, false).applicationInfo.uid;
         }
@@ -319,8 +331,14 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        boolean hasShortcutHostPermission(@NonNull String callingPackage, int userId) {
+        boolean hasShortcutHostPermission(@NonNull String callingPackage, int userId,
+                int callingPid, int callingUid) {
             return mDefaultLauncherChecker.test(callingPackage, userId);
+        }
+
+        @Override
+        boolean injectHasUnlimitedShortcutsApiCallsPermission(int callingPid, int callingUid) {
+            return mInjectHasUnlimitedShortcutsApiCallsPermission;
         }
 
         @Override
@@ -452,6 +470,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
+        boolean injectHasAccessShortcutsPermission(int callingPid, int callingUid) {
+            return mInjectCheckAccessShortcutsPermission;
+        }
+
+        @Override
         void wtf(String message, Throwable th) {
             // During tests, WTF is fatal.
             fail(message + "  exception: " + th + "\n" + Log.getStackTraceString(th));
@@ -510,6 +533,12 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         @Override
         int injectBinderCallingUid() {
             return mInjectedCallingUid;
+        }
+
+        @Override
+        int injectBinderCallingPid() {
+            // Note it's not used in tests, so just return a "random" value.
+            return mInjectedCallingUid * 123;
         }
 
         @Override
@@ -581,6 +610,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected PackageManager mMockPackageManager;
     protected PackageManagerInternal mMockPackageManagerInternal;
     protected UserManager mMockUserManager;
+    protected UserManagerInternal mMockUserManagerInternal;
     protected UsageStatsManagerInternal mMockUsageStatsManagerInternal;
     protected ActivityManagerInternal mMockActivityManagerInternal;
 
@@ -697,6 +727,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected String mInjectedBuildFingerprint = "build1";
 
+    protected boolean mInjectCheckAccessShortcutsPermission = false;
+
+    protected boolean mInjectHasUnlimitedShortcutsApiCallsPermission = false;
+
     static {
         QUERY_ALL.setQueryFlags(
                 ShortcutQuery.FLAG_GET_ALL_KINDS);
@@ -715,6 +749,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         mMockPackageManager = mock(PackageManager.class);
         mMockPackageManagerInternal = mock(PackageManagerInternal.class);
         mMockUserManager = mock(UserManager.class);
+        mMockUserManagerInternal = mock(UserManagerInternal.class);
         mMockUsageStatsManagerInternal = mock(UsageStatsManagerInternal.class);
         mMockActivityManagerInternal = mock(ActivityManagerInternal.class);
 
@@ -724,6 +759,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         LocalServices.addService(UsageStatsManagerInternal.class, mMockUsageStatsManagerInternal);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
         LocalServices.addService(ActivityManagerInternal.class, mMockActivityManagerInternal);
+        LocalServices.removeServiceForTest(UserManagerInternal.class);
+        LocalServices.addService(UserManagerInternal.class, mMockUserManagerInternal);
 
         // Prepare injection values.
 
@@ -755,51 +792,57 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         deleteAllSavedFiles();
 
         // Set up users.
-        when(mMockUserManager.getUserInfo(anyInt())).thenAnswer(new AnswerWithSystemCheck<>(
-                inv -> mUserInfos.get((Integer) inv.getArguments()[0])));
-
         mUserInfos.put(USER_0, USER_INFO_0);
         mUserInfos.put(USER_10, USER_INFO_10);
         mUserInfos.put(USER_11, USER_INFO_11);
         mUserInfos.put(USER_P0, USER_INFO_P0);
         mUserInfos.put(USER_P1, USER_INFO_P1);
 
-        // Set up isUserRunning and isUserUnlocked.
-        when(mMockUserManager.isUserRunning(anyInt())).thenAnswer(new AnswerWithSystemCheck<>(
-                        inv -> b(mRunningUsers.get((Integer) inv.getArguments()[0]))));
-
-        when(mMockUserManager.isUserUnlocked(anyInt()))
-                .thenAnswer(new AnswerWithSystemCheck<>(inv -> {
+        when(mMockUserManagerInternal.isUserUnlockingOrUnlocked(anyInt()))
+                .thenAnswer(inv -> {
                     final int userId = (Integer) inv.getArguments()[0];
                     return b(mRunningUsers.get(userId)) && b(mUnlockedUsers.get(userId));
-                }));
-        // isUserUnlockingOrUnlocked() return the same value as isUserUnlocked().
-        when(mMockUserManager.isUserUnlockingOrUnlocked(anyInt()))
-                .thenAnswer(new AnswerWithSystemCheck<>(inv -> {
-                    final int userId = (Integer) inv.getArguments()[0];
-                    return b(mRunningUsers.get(userId)) && b(mUnlockedUsers.get(userId));
-                }));
-
-        when(mMockUserManager.getProfileParent(anyInt()))
-                .thenAnswer(new AnswerWithSystemCheck<>(inv -> {
+        });
+        when(mMockUserManagerInternal.getProfileParentId(anyInt()))
+                .thenAnswer(inv -> {
                     final int userId = (Integer) inv.getArguments()[0];
                     final UserInfo ui = mUserInfos.get(userId);
                     assertNotNull(ui);
                     if (ui.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
-                        return null;
+                        return userId;
                     }
                     final UserInfo parent = mUserInfos.get(ui.profileGroupId);
                     assertNotNull(parent);
-                    return parent;
-                }));
-        when(mMockUserManager.isManagedProfile(anyInt()))
-                .thenAnswer(new AnswerWithSystemCheck<>(inv -> {
-                    final int userId = (Integer) inv.getArguments()[0];
-                    final UserInfo ui = mUserInfos.get(userId);
-                    assertNotNull(ui);
-                    return ui.isManagedProfile();
-                }));
+                    return parent.id;
+                });
 
+        when(mMockUserManagerInternal.isProfileAccessible(anyInt(), anyInt(), anyString(),
+                anyBoolean())).thenAnswer(inv -> {
+                    final int callingUserId = (Integer) inv.getArguments()[0];
+                    final int targetUserId = (Integer) inv.getArguments()[1];
+                    if (targetUserId == callingUserId) {
+                        return true;
+                    }
+                    final UserInfo callingUserInfo = mUserInfos.get(callingUserId);
+                    final UserInfo targetUserInfo = mUserInfos.get(targetUserId);
+                    if (callingUserInfo == null || callingUserInfo.isManagedProfile()
+                            || targetUserInfo == null || !targetUserInfo.isEnabled()) {
+                        return false;
+                    }
+                    if (targetUserInfo.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
+                            && targetUserInfo.profileGroupId == callingUserInfo.profileGroupId) {
+                        return true;
+                    }
+                    final boolean isExternal = (Boolean) inv.getArguments()[3];
+                    if (!isExternal) {
+                        return false;
+                    }
+                    throw new SecurityException(inv.getArguments()[2] + " for unrelated profile "
+                            + targetUserId);
+                });
+
+        when(mMockUserManager.getUserInfo(anyInt())).thenAnswer(new AnswerWithSystemCheck<>(
+                inv -> mUserInfos.get((Integer) inv.getArguments()[0])));
         when(mMockActivityManagerInternal.getUidProcessState(anyInt())).thenReturn(
                 ActivityManager.PROCESS_STATE_CACHED_EMPTY);
 
@@ -829,10 +872,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
     }
 
-    private static boolean b(Boolean value) {
-        return (value != null && value);
-    }
-
     /**
      * Returns a boolean but also checks if the current UID is SYSTEM_UID.
      */
@@ -849,6 +888,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                     Process.SYSTEM_UID, mInjectedCallingUid);
             return mChecker.apply(invocation);
         }
+    }
+
+    private static boolean b(Boolean value) {
+        return (value != null && value);
     }
 
     protected void setUpAppResources() throws Exception {
@@ -998,9 +1041,15 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         pi.applicationInfo.flags = ApplicationInfo.FLAG_INSTALLED
                 | ApplicationInfo.FLAG_ALLOW_BACKUP;
         pi.versionCode = version;
-        pi.applicationInfo.versionCode = version;
-        pi.signatures = genSignatures(signatures);
-
+        pi.applicationInfo.setVersionCode(version);
+        pi.signatures = null;
+        pi.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        genSignatures(signatures),
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         return pi;
     }
 
@@ -1015,7 +1064,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected void updatePackageVersion(String packageName, int increment) {
         updatePackageInfo(packageName, pi -> {
             pi.versionCode += increment;
-            pi.applicationInfo.versionCode += increment;
+            pi.applicationInfo.setVersionCode(pi.applicationInfo.longVersionCode + increment);
         });
     }
 
@@ -1067,6 +1116,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         final PackageInfo ret = new PackageInfo();
         ret.packageName = pi.packageName;
         ret.versionCode = pi.versionCode;
+        ret.versionCodeMajor = pi.versionCodeMajor;
         ret.lastUpdateTime = pi.lastUpdateTime;
 
         ret.applicationInfo = new ApplicationInfo(pi.applicationInfo);
@@ -1086,7 +1136,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 !mDisabledPackages.contains(PackageWithUser.of(userId, packageName));
 
         if (getSignatures) {
-            ret.signatures = pi.signatures;
+            ret.signatures = null;
+            ret.signingInfo = pi.signingInfo;
         }
 
         return ret;
@@ -1198,7 +1249,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     }
 
     /**
-     * This controls {@link ShortcutService#hasShortcutHostPermission(String, int)}, but
+     * This controls {@link ShortcutService#hasShortcutHostPermission}, but
      * not {@link ShortcutService#getDefaultLauncher(int)}.  To control the later, use
      * {@link #setDefaultLauncher(int, ComponentName)}.
      */
@@ -1640,7 +1691,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected void assertShortcutLaunchable(@NonNull String packageName, @NonNull String shortcutId,
             int userId) {
         assertNotNull(launchShortcutAndGetIntent(packageName, shortcutId, userId));
-        assertNotNull(launchShortcutAndGetIntent_withShortcutInfo(packageName, shortcutId, userId));
     }
 
     protected void assertShortcutNotLaunched(@NonNull String packageName,
@@ -2113,22 +2163,30 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 PACKAGE_FALLBACK_LAUNCHER_PRIORITY);
     }
 
-    protected void makeCallerForeground() {
+    protected void makeUidForeground(int uid) {
         try {
             mService.mUidObserver.onUidStateChanged(
-                    mInjectedCallingUid, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
+                    uid, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+    }
+
+    protected void makeCallerForeground() {
+        makeUidForeground(mInjectedCallingUid);
+    }
+
+    protected void makeUidBackground(int uid) {
+        try {
+            mService.mUidObserver.onUidStateChanged(
+                    uid, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
     }
 
     protected void makeCallerBackground() {
-        try {
-            mService.mUidObserver.onUidStateChanged(
-                    mInjectedCallingUid, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0);
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
-        }
+        makeUidBackground(mInjectedCallingUid);
     }
 
     protected void publishManifestShortcutsAsCaller(int resId) {

@@ -27,7 +27,7 @@ namespace uirenderer {
 using namespace VectorDrawable;
 
 inline constexpr float lerp(float fromValue, float toValue, float fraction) {
-    return float (fromValue * (1 - fraction) + toValue * fraction);
+    return float(fromValue * (1 - fraction) + toValue * fraction);
 }
 
 inline constexpr float linearize(U8CPU component) {
@@ -35,25 +35,23 @@ inline constexpr float linearize(U8CPU component) {
 }
 
 // TODO: Add a test for this
-void ColorEvaluator::evaluate(SkColor* outColor,
-        const SkColor& fromColor, const SkColor& toColor, float fraction) const {
+void ColorEvaluator::evaluate(SkColor* outColor, const SkColor& fromColor, const SkColor& toColor,
+                              float fraction) const {
     float a = lerp(SkColorGetA(fromColor) / 255.0f, SkColorGetA(toColor) / 255.0f, fraction);
     float r = lerp(linearize(SkColorGetR(fromColor)), linearize(SkColorGetR(toColor)), fraction);
     float g = lerp(linearize(SkColorGetG(fromColor)), linearize(SkColorGetG(toColor)), fraction);
     float b = lerp(linearize(SkColorGetB(fromColor)), linearize(SkColorGetB(toColor)), fraction);
-    *outColor = SkColorSetARGB(
-            (U8CPU) roundf(a * 255.0f),
-            (U8CPU) roundf(OECF_sRGB(r) * 255.0f),
-            (U8CPU) roundf(OECF_sRGB(g) * 255.0f),
-            (U8CPU) roundf(OECF_sRGB(b) * 255.0f));
+    *outColor = SkColorSetARGB((U8CPU)roundf(a * 255.0f), (U8CPU)roundf(OECF_sRGB(r) * 255.0f),
+                               (U8CPU)roundf(OECF_sRGB(g) * 255.0f),
+                               (U8CPU)roundf(OECF_sRGB(b) * 255.0f));
 }
 
-void PathEvaluator::evaluate(PathData* out,
-        const PathData& from, const PathData& to, float fraction) const {
+void PathEvaluator::evaluate(PathData* out, const PathData& from, const PathData& to,
+                             float fraction) const {
     VectorDrawableUtils::interpolatePaths(out, from, to, fraction);
 }
 
-template<typename T>
+template <typename T>
 const T PropertyValuesHolderImpl<T>::getValueFromData(float fraction) const {
     if (mDataSource.size() == 0) {
         LOG_ALWAYS_FATAL("No data source is defined");
@@ -75,7 +73,7 @@ const T PropertyValuesHolderImpl<T>::getValueFromData(float fraction) const {
     return value;
 }
 
-template<typename T>
+template <typename T>
 const T PropertyValuesHolderImpl<T>::calculateAnimatedValue(float fraction) const {
     if (mDataSource.size() > 0) {
         return getValueFromData(fraction);
@@ -111,5 +109,5 @@ void RootAlphaPropertyValuesHolder::setFraction(float fraction) {
     mTree->mutateProperties()->setRootAlpha(animatedValue);
 }
 
-} // namepace uirenderer
-} // namespace android
+}  // namepace uirenderer
+}  // namespace android

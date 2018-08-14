@@ -22,12 +22,14 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.util.MergedConfiguration;
+import android.view.DisplayCutout;
 import android.view.InputChannel;
 import android.view.IWindow;
 import android.view.IWindowId;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.Surface;
+import android.view.SurfaceControl;
 
 /**
  * System private per-application interface to the window manager.
@@ -39,8 +41,9 @@ interface IWindowSession {
             in int viewVisibility, out Rect outContentInsets, out Rect outStableInsets,
             out InputChannel outInputChannel);
     int addToDisplay(IWindow window, int seq, in WindowManager.LayoutParams attrs,
-            in int viewVisibility, in int layerStackId, out Rect outContentInsets,
-            out Rect outStableInsets, out Rect outOutsets, out InputChannel outInputChannel);
+            in int viewVisibility, in int layerStackId, out Rect outFrame,
+            out Rect outContentInsets, out Rect outStableInsets, out Rect outOutsets,
+            out DisplayCutout.ParcelableWrapper displayCutout, out InputChannel outInputChannel);
     int addWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, out Rect outContentInsets, out Rect outStableInsets);
     int addToDisplayWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
@@ -63,6 +66,7 @@ interface IWindowSession {
      * @param viewVisibility Window root view's visibility.
      * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING},
      * {@link WindowManagerGlobal#RELAYOUT_DEFER_SURFACE_DESTROY}.
+     * @param frameNumber A frame number in which changes requested in this layout will be rendered.
      * @param outFrame Rect in which is placed the new position/size on
      * screen.
      * @param outOverscanInsets Rect in which is placed the offsets from
@@ -93,9 +97,10 @@ interface IWindowSession {
      */
     int relayout(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, out Rect outFrame, out Rect outOverscanInsets,
+            int flags, long frameNumber, out Rect outFrame, out Rect outOverscanInsets,
             out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,
             out Rect outOutsets, out Rect outBackdropFrame,
+            out DisplayCutout.ParcelableWrapper displayCutout,
             out MergedConfiguration outMergedConfiguration, out Surface outSurface);
 
     /*
@@ -147,25 +152,30 @@ interface IWindowSession {
     boolean performHapticFeedback(IWindow window, int effectId, boolean always);
 
     /**
-     * Allocate the drag's thumbnail surface.  Also assigns a token that identifies
-     * the drag to the OS and passes that as the return value.  A return value of
-     * null indicates failure.
-     */
-    IBinder prepareDrag(IWindow window, int flags,
-            int thumbnailWidth, int thumbnailHeight, out Surface outSurface);
-
-    /**
      * Initiate the drag operation itself
+     *
+     * @param window Window which initiates drag operation.
+     * @param flags See {@code View#startDragAndDrop}
+     * @param surface Surface containing drag shadow image
+     * @param touchSource See {@code InputDevice#getSource()}
+     * @param touchX X coordinate of last touch point
+     * @param touchY Y coordinate of last touch point
+     * @param thumbCenterX X coordinate for the position within the shadow image that should be
+     *         underneath the touch point during the drag and drop operation.
+     * @param thumbCenterY Y coordinate for the position within the shadow image that should be
+     *         underneath the touch point during the drag and drop operation.
+     * @param data Data transferred by drag and drop
+     * @return Token of drag operation which will be passed to cancelDragAndDrop.
      */
-    boolean performDrag(IWindow window, IBinder dragToken, int touchSource,
+    IBinder performDrag(IWindow window, int flags, in SurfaceControl surface, int touchSource,
             float touchX, float touchY, float thumbCenterX, float thumbCenterY, in ClipData data);
 
-   /**
+    /**
      * Report the result of a drop action targeted to the given window.
      * consumed is 'true' when the drop was accepted by a valid recipient,
      * 'false' otherwise.
      */
-	void reportDropResult(IWindow window, boolean consumed);
+    void reportDropResult(IWindow window, boolean consumed);
 
     /**
      * Cancel the current drag operation.
@@ -233,4 +243,12 @@ interface IWindowSession {
     boolean startMovingTask(IWindow window, float startX, float startY);
 
     void updatePointerIcon(IWindow window);
+
+    /**
+     * Update a tap exclude region with a rectangular area identified by provided id in the window.
+     * Touches on this region will not switch focus to this window. Passing an empty rect will
+     * remove the area from the exclude region of this window.
+     */
+    void updateTapExcludeRegion(IWindow window, int regionId, int left, int top, int width,
+            int height);
 }

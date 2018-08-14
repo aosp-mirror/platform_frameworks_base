@@ -30,8 +30,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
+import android.support.annotation.NonNull;
 import android.test.mock.MockContext;
 import android.util.ArrayMap;
+import android.util.ExceptionUtils;
+
+import com.android.internal.util.FunctionalUtils;
 
 import org.junit.Assert;
 
@@ -93,6 +97,21 @@ public class DpmMockContext extends MockContext {
         public void restoreCallingIdentity(long token) {
             callingUid = (int) (token >> 32);
             callingPid = (int) token;
+        }
+
+        public void withCleanCallingIdentity(@NonNull FunctionalUtils.ThrowingRunnable action) {
+            long callingIdentity = clearCallingIdentity();
+            Throwable throwableToPropagate = null;
+            try {
+                action.runOrThrow();
+            } catch (Throwable throwable) {
+                throwableToPropagate = throwable;
+            } finally {
+                restoreCallingIdentity(callingIdentity);
+                if (throwableToPropagate != null) {
+                    throw ExceptionUtils.propagate(throwableToPropagate);
+                }
+            }
         }
 
         public int getCallingUid() {

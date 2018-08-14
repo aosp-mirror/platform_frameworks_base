@@ -104,7 +104,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private PreparedStatement mPreparedStatementPool;
 
     // The recent operations log.
-    private final OperationLog mRecentOperations = new OperationLog();
+    private final OperationLog mRecentOperations;
 
     // The native SQLiteConnection pointer.  (FOR INTERNAL USE ONLY)
     private long mConnectionPtr;
@@ -162,6 +162,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             SQLiteDatabaseConfiguration configuration,
             int connectionId, boolean primaryConnection) {
         mPool = pool;
+        mRecentOperations = new OperationLog(mPool);
         mConfiguration = new SQLiteDatabaseConfiguration(configuration);
         mConnectionId = connectionId;
         mIsPrimaryConnection = primaryConnection;
@@ -288,12 +289,25 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
 
     private void setWalModeFromConfiguration() {
         if (!mConfiguration.isInMemoryDb() && !mIsReadOnlyConnection) {
-            if ((mConfiguration.openFlags & SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING) != 0) {
+            final boolean walEnabled =
+                    (mConfiguration.openFlags & SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING) != 0;
+            // Use compatibility WAL unless an app explicitly set journal/synchronous mode
+            // or DISABLE_COMPATIBILITY_WAL flag is set
+            final boolean useCompatibilityWal = mConfiguration.useCompatibilityWal();
+            if (walEnabled || useCompatibilityWal) {
                 setJournalMode("WAL");
-                setSyncMode(SQLiteGlobal.getWALSyncMode());
+                if (mConfiguration.syncMode != null) {
+                    setSyncMode(mConfiguration.syncMode);
+                } else if (useCompatibilityWal && SQLiteCompatibilityWalFlags.areFlagsSet()) {
+                    setSyncMode(SQLiteCompatibilityWalFlags.getWALSyncMode());
+                } else {
+                    setSyncMode(SQLiteGlobal.getWALSyncMode());
+                }
             } else {
-                setJournalMode(SQLiteGlobal.getDefaultJournalMode());
-                setSyncMode(SQLiteGlobal.getDefaultSyncMode());
+                setJournalMode(mConfiguration.journalMode == null
+                        ? SQLiteGlobal.getDefaultJournalMode() : mConfiguration.journalMode);
+                setSyncMode(mConfiguration.syncMode == null
+                        ? SQLiteGlobal.getDefaultSyncMode() : mConfiguration.syncMode);
             }
         }
     }
@@ -307,12 +321,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     }
 
     private static String canonicalizeSyncMode(String value) {
-        if (value.equals("0")) {
-            return "OFF";
-        } else if (value.equals("1")) {
-            return "NORMAL";
-        } else if (value.equals("2")) {
-            return "FULL";
+        switch (value) {
+            case "0": return "OFF";
+            case "1": return "NORMAL";
+            case "2": return "FULL";
         }
         return value;
     }
@@ -413,7 +425,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         boolean foreignKeyModeChanged = configuration.foreignKeyConstraintsEnabled
                 != mConfiguration.foreignKeyConstraintsEnabled;
         boolean walModeChanged = ((configuration.openFlags ^ mConfiguration.openFlags)
-                & SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING) != 0;
+                & (SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING
+                | SQLiteDatabase.DISABLE_COMPATIBILITY_WAL)) != 0;
         boolean localeChanged = !configuration.locale.equals(mConfiguration.locale);
 
         // Update configuration parameters.
@@ -1298,6 +1311,11 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         private final Operation[] mOperations = new Operation[MAX_RECENT_OPERATIONS];
         private int mIndex;
         private int mGeneration;
+        private final SQLiteConnectionPool mPool;
+
+        OperationLog(SQLiteConnectionPool pool) {
+            mPool = pool;
+        }
 
         public int beginOperation(String kind, String sql, Object[] bindArgs) {
             synchronized (mOperations) {
@@ -1381,8 +1399,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 }
                 operation.mEndTime = SystemClock.uptimeMillis();
                 operation.mFinished = true;
+                final long execTime = operation.mEndTime - operation.mStartTime;
+                mPool.onStatementExecuted(execTime);
                 return SQLiteDebug.DEBUG_LOG_SLOW_QUERIES && SQLiteDebug.shouldLogSlowQuery(
-                                operation.mEndTime - operation.mStartTime);
+                        execTime);
             }
             return false;
         }
@@ -1426,11 +1446,16 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 int index = mIndex;
                 Operation operation = mOperations[index];
                 if (operation != null) {
+                    // Note: SimpleDateFormat is not thread-safe, cannot be compile-time created,
+                    // and is relatively expensive to create during preloading. This method is only
+                    // used when dumping a connection, which is a rare (mainly error) case.
+                    SimpleDateFormat opDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
                     int n = 0;
                     do {
                         StringBuilder msg = new StringBuilder();
                         msg.append("    ").append(n).append(": [");
-                        msg.append(operation.getFormattedStartTime());
+                        String formattedStartTime = opDF.format(new Date(operation.mStartWallTime));
+                        msg.append(formattedStartTime);
                         msg.append("] ");
                         operation.describe(msg, verbose);
                         printer.println(msg.toString());
@@ -1518,12 +1543,5 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             return methodName;
         }
 
-        private String getFormattedStartTime() {
-            // Note: SimpleDateFormat is not thread-safe, cannot be compile-time created, and is
-            //       relatively expensive to create during preloading. This method is only used
-            //       when dumping a connection, which is a rare (mainly error) case. So:
-            //       DO NOT CACHE.
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date(mStartWallTime));
-        }
     }
 }

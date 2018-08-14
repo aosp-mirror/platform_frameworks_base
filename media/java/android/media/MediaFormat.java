@@ -87,6 +87,7 @@ import java.util.Map;
  * <tr><td>{@link #KEY_AAC_DRC_ATTENUATION_FACTOR}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the DRC attenuation factor.</td></tr>
  * <tr><td>{@link #KEY_AAC_DRC_HEAVY_COMPRESSION}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies whether to use heavy compression.</td></tr>
  * <tr><td>{@link #KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the maximum number of channels the decoder outputs.</td></tr>
+ * <tr><td>{@link #KEY_AAC_DRC_EFFECT_TYPE}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the MPEG-D DRC effect type to use.</td></tr>
  * <tr><td>{@link #KEY_CHANNEL_MASK}</td><td>Integer</td><td>optional, a mask of audio channel assignments</td></tr>
  * <tr><td>{@link #KEY_FLAC_COMPRESSION_LEVEL}</td><td>Integer</td><td><b>encoder-only</b>, optional, if content is FLAC audio, specifies the desired compression level.</td></tr>
  * </table>
@@ -95,6 +96,19 @@ import java.util.Map;
  * <table>
  * <tr><td>{@link #KEY_MIME}</td><td>String</td><td>The type of the format.</td></tr>
  * <tr><td>{@link #KEY_LANGUAGE}</td><td>String</td><td>The language of the content.</td></tr>
+ * </table>
+ *
+ * Image formats have the following keys:
+ * <table>
+ * <tr><td>{@link #KEY_MIME}</td><td>String</td><td>The type of the format.</td></tr>
+ * <tr><td>{@link #KEY_WIDTH}</td><td>Integer</td><td></td></tr>
+ * <tr><td>{@link #KEY_HEIGHT}</td><td>Integer</td><td></td></tr>
+ * <tr><td>{@link #KEY_COLOR_FORMAT}</td><td>Integer</td><td>set by the user
+ *         for encoders, readable in the output format of decoders</b></td></tr>
+ * <tr><td>{@link #KEY_TILE_WIDTH}</td><td>Integer</td><td>required if the image has grid</td></tr>
+ * <tr><td>{@link #KEY_TILE_HEIGHT}</td><td>Integer</td><td>required if the image has grid</td></tr>
+ * <tr><td>{@link #KEY_GRID_ROWS}</td><td>Integer</td><td>required if the image has grid</td></tr>
+ * <tr><td>{@link #KEY_GRID_COLUMNS}</td><td>Integer</td><td>required if the image has grid</td></tr>
  * </table>
  */
 public final class MediaFormat {
@@ -126,14 +140,53 @@ public final class MediaFormat {
     public static final String MIMETYPE_AUDIO_SCRAMBLED = "audio/scrambled";
 
     /**
+     * MIME type for HEIF still image data encoded in HEVC.
+     *
+     * To decode such an image, {@link MediaCodec} decoder for
+     * {@ #MIMETYPE_VIDEO_HEVC} shall be used. The client needs to form
+     * the correct {@link #MediaFormat} based on additional information in
+     * the track format, and send it to {@link MediaCodec#configure}.
+     *
+     * The track's MediaFormat will come with {@link #KEY_WIDTH} and
+     * {@link #KEY_HEIGHT} keys, which describes the width and height
+     * of the image. If the image doesn't contain grid (i.e. none of
+     * {@link #KEY_TILE_WIDTH}, {@link #KEY_TILE_HEIGHT},
+     * {@link #KEY_GRID_ROWS}, {@link #KEY_GRID_COLUMNS} are present}), the
+     * track will contain a single sample of coded data for the entire image,
+     * and the image width and height should be used to set up the decoder.
+     *
+     * If the image does come with grid, each sample from the track will
+     * contain one tile in the grid, of which the size is described by
+     * {@link #KEY_TILE_WIDTH} and {@link #KEY_TILE_HEIGHT}. This size
+     * (instead of {@link #KEY_WIDTH} and {@link #KEY_HEIGHT}) should be
+     * used to set up the decoder. The track contains {@link #KEY_GRID_ROWS}
+     * by {@link #KEY_GRID_COLUMNS} samples in row-major, top-row first,
+     * left-to-right order. The output image should be reconstructed by
+     * first tiling the decoding results of the tiles in the correct order,
+     * then trimming (before rotation is applied) on the bottom and right
+     * side, if the tiled area is larger than the image width and height.
+     */
+    public static final String MIMETYPE_IMAGE_ANDROID_HEIC = "image/vnd.android.heic";
+
+    /**
      * MIME type for WebVTT subtitle data.
      */
     public static final String MIMETYPE_TEXT_VTT = "text/vtt";
 
     /**
+     * MIME type for SubRip (SRT) container.
+     */
+    public static final String MIMETYPE_TEXT_SUBRIP = "application/x-subrip";
+
+    /**
      * MIME type for CEA-608 closed caption data.
      */
     public static final String MIMETYPE_TEXT_CEA_608 = "text/cea-608";
+
+    /**
+     * MIME type for CEA-708 closed caption data.
+     */
+    public static final String MIMETYPE_TEXT_CEA_708 = "text/cea-708";
 
     private Map<String, Object> mMap;
 
@@ -230,6 +283,54 @@ public final class MediaFormat {
      * nor by {@link MediaMuxer#addTrack MediaMuxer}.
      */
     public static final String KEY_FRAME_RATE = "frame-rate";
+
+    /**
+     * A key describing the width (in pixels) of each tile of the content in a
+     * {@link #MIMETYPE_IMAGE_ANDROID_HEIC} track. The associated value is an integer.
+     *
+     * Refer to {@link #MIMETYPE_IMAGE_ANDROID_HEIC} on decoding instructions of such tracks.
+     *
+     * @see #KEY_TILE_HEIGHT
+     * @see #KEY_GRID_ROWS
+     * @see #KEY_GRID_COLUMNS
+     */
+    public static final String KEY_TILE_WIDTH = "tile-width";
+
+    /**
+     * A key describing the height (in pixels) of each tile of the content in a
+     * {@link #MIMETYPE_IMAGE_ANDROID_HEIC} track. The associated value is an integer.
+     *
+     * Refer to {@link #MIMETYPE_IMAGE_ANDROID_HEIC} on decoding instructions of such tracks.
+     *
+     * @see #KEY_TILE_WIDTH
+     * @see #KEY_GRID_ROWS
+     * @see #KEY_GRID_COLUMNS
+     */
+    public static final String KEY_TILE_HEIGHT = "tile-height";
+
+    /**
+     * A key describing the number of grid rows in the content in a
+     * {@link #MIMETYPE_IMAGE_ANDROID_HEIC} track. The associated value is an integer.
+     *
+     * Refer to {@link #MIMETYPE_IMAGE_ANDROID_HEIC} on decoding instructions of such tracks.
+     *
+     * @see #KEY_TILE_WIDTH
+     * @see #KEY_TILE_HEIGHT
+     * @see #KEY_GRID_COLUMNS
+     */
+    public static final String KEY_GRID_ROWS = "grid-rows";
+
+    /**
+     * A key describing the number of grid columns in the content in a
+     * {@link #MIMETYPE_IMAGE_ANDROID_HEIC} track. The associated value is an integer.
+     *
+     * Refer to {@link #MIMETYPE_IMAGE_ANDROID_HEIC} on decoding instructions of such tracks.
+     *
+     * @see #KEY_TILE_WIDTH
+     * @see #KEY_TILE_HEIGHT
+     * @see #KEY_GRID_ROWS
+     */
+    public static final String KEY_GRID_COLUMNS = "grid-cols";
 
     /**
      * A key describing the raw audio sample encoding/format.
@@ -414,21 +515,48 @@ public final class MediaFormat {
      * The gain is derived as the difference between the Target Reference Level and the
      * Program Reference Level. The latter can be given in the bitstream and indicates the actual
      * loudness value of the program item.
+     * <p>The Target Reference Level controls loudness normalization for both MPEG-4 DRC and
+     * MPEG-D DRC.
      * <p>The value is given as an integer value between
-     * 0 and 127, and is calculated as -0.25 * Target Reference Level in dBFS.
-     * Therefore, it represents the range of Full Scale (0 dBFS) to -31.75 dBFS.
+     * 40 and 127, and is calculated as -4 * Target Reference Level in LKFS.
+     * Therefore, it represents the range of -10 to -31.75 LKFS.
+     * <p>The default value on mobile devices is 64 (-16 LKFS).
      * <p>This key is only used during decoding.
      */
     public static final String KEY_AAC_DRC_TARGET_REFERENCE_LEVEL = "aac-target-ref-level";
 
     /**
+     * A key describing for selecting the DRC effect type for MPEG-D DRC.
+     * The supported values are defined in ISO/IEC 23003-4:2015 and are described as follows:
+     * <table>
+     * <tr><th>Value</th><th>Effect</th></tr>
+     * <tr><th>-1</th><th>Off</th></tr>
+     * <tr><th>0</th><th>None</th></tr>
+     * <tr><th>1</th><th>Late night</th></tr>
+     * <tr><th>2</th><th>Noisy environment</th></tr>
+     * <tr><th>3</th><th>Limited playback range</th></tr>
+     * <tr><th>4</th><th>Low playback level</th></tr>
+     * <tr><th>5</th><th>Dialog enhancement</th></tr>
+     * <tr><th>6</th><th>General compression</th></tr>
+     * </table>
+     * <p>The value -1 (Off) disables DRC processing, while loudness normalization may still be
+     * active and dependent on KEY_AAC_DRC_TARGET_REFERENCE_LEVEL.<br>
+     * The value 0 (None) automatically enables DRC processing if necessary to prevent signal
+     * clipping<br>
+     * The value 6 (General compression) can be used for enabling MPEG-D DRC without particular
+     * DRC effect type request.<br>
+     * The default DRC effect type is 3 ("Limited playback range") on mobile devices.
+     * <p>This key is only used during decoding.
+     */
+    public static final String KEY_AAC_DRC_EFFECT_TYPE = "aac-drc-effect-type";
+
+    /**
      * A key describing the target reference level that was assumed at the encoder for
-     * calculation of attenuation gains for clipping prevention. This information can be provided
-     * if it is known, otherwise a worst-case assumption is used.
-     * <p>The value is given as an integer value between
-     * 0 and 127, and is calculated as -0.25 * Target Reference Level in dBFS.
-     * Therefore, it represents the range of Full Scale (0 dBFS) to -31.75 dBFS.
-     * The default value is the worst-case assumption of 127.
+     * calculation of attenuation gains for clipping prevention.
+     * <p>If it is known, this information can be provided as an integer value between
+     * 0 and 127, which is calculated as -4 * Encoded Target Level in LKFS.
+     * If the Encoded Target Level is unknown, the value can be set to -1.
+     * <p>The default value is -1 (unknown).
      * <p>The value is ignored when heavy compression is used (see
      * {@link #KEY_AAC_DRC_HEAVY_COMPRESSION}).
      * <p>This key is only used during decoding.
@@ -450,11 +578,12 @@ public final class MediaFormat {
      * factor is used to enable the negative gains, to prevent loud signal from surprising
      * the listener. In applications which generally need a low dynamic range, both the boost factor
      * and the attenuation factor are used in order to enable all DRC gains.
-     * <p>In order to prevent clipping, it is also recommended to apply the attenuation factors
+     * <p>In order to prevent clipping, it is also recommended to apply the attenuation gains
      * in case of a downmix and/or loudness normalization to high target reference levels.
      * <p>Both the boost and the attenuation factor parameters are given as integer values
      * between 0 and 127, representing the range of the factor of 0 (i.e. don't apply)
-     * to 1 (i.e. fully apply boost/attenuation factors respectively).
+     * to 1 (i.e. fully apply boost/attenuation gains respectively).
+     * <p>The default value is 127 (fully apply boost DRC gains).
      * <p>This key is only used during decoding.
      */
     public static final String KEY_AAC_DRC_BOOST_FACTOR = "aac-drc-boost-level";
@@ -464,6 +593,7 @@ public final class MediaFormat {
      * actual listening requirements.
      * See {@link #KEY_AAC_DRC_BOOST_FACTOR} for a description of the role of this attenuation
      * factor and the value range.
+     * <p>The default value is 127 (fully apply attenuation DRC gains).
      * <p>This key is only used during decoding.
      */
     public static final String KEY_AAC_DRC_ATTENUATION_FACTOR = "aac-drc-cut-level";
@@ -483,7 +613,7 @@ public final class MediaFormat {
      * Light compression usually contains clipping prevention for stereo downmixing while heavy
      * compression, if additionally provided in the bitstream, is usually stronger, and contains
      * clipping prevention for stereo and mono downmixing.
-     * <p>The default is light compression.
+     * <p>The default is 1 (heavy compression).
      * <p>This key is only used during decoding.
      */
     public static final String KEY_AAC_DRC_HEAVY_COMPRESSION = "aac-drc-heavy-compression";
@@ -510,8 +640,6 @@ public final class MediaFormat {
      * that are configured in constant-quality mode.  These values are device and
      * codec specific, but lower values generally result in more efficient
      * (smaller-sized) encoding.
-     *
-     * @hide
      *
      * @see MediaCodecInfo.EncoderCapabilities#getQualityRange()
      */
@@ -590,6 +718,21 @@ public final class MediaFormat {
     public static final String KEY_LATENCY = "latency";
 
     /**
+     * An optional key describing the maximum number of non-display-order coded frames.
+     * This is an optional parameter that applies only to video encoders. Application should
+     * check the value for this key in the output format to see if codec will produce
+     * non-display-order coded frames. If encoder supports it, the output frames' order will be
+     * different from the display order and each frame's display order could be retrived from
+     * {@link MediaCodec.BufferInfo#presentationTimeUs}. Before API level 27, application may
+     * receive non-display-order coded frames even though the application did not request it.
+     * Note: Application should not rearrange the frames to display order before feeding them
+     * to {@link MediaMuxer#writeSampleData}.
+     * <p>
+     * The default value is 0.
+     */
+    public static final String KEY_OUTPUT_REORDER_DEPTH = "output-reorder-depth";
+
+    /**
      * A key describing the desired clockwise rotation on an output surface.
      * This key is only used when the codec is configured using an output surface.
      * The associated value is an integer, representing degrees. Supported values
@@ -631,13 +774,15 @@ public final class MediaFormat {
     /**
      * A key for boolean DEFAULT behavior for the track. The track with DEFAULT=true is
      * selected in the absence of a specific user choice.
-     * This is currently only used for subtitle tracks, when the user selected
-     * 'Default' for the captioning locale.
+     * This is currently used in two scenarios:
+     * 1) for subtitle tracks, when the user selected 'Default' for the captioning locale.
+     * 2) for a {@link #MIMETYPE_IMAGE_ANDROID_HEIC} track, indicating the image is the
+     * primary item in the file.
+
      * The associated value is an integer, where non-0 means TRUE.  This is an optional
      * field; if not specified, DEFAULT is considered to be FALSE.
      */
     public static final String KEY_IS_DEFAULT = "is-default";
-
 
     /**
      * A key for the FORCED field for subtitle tracks. True if it is a

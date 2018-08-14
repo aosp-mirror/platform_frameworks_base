@@ -36,7 +36,7 @@ public final class IoThread extends ServiceThread {
         if (sInstance == null) {
             sInstance = new IoThread();
             sInstance.start();
-            sInstance.getLooper().setTraceTag(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+            sInstance.getLooper().setTraceTag(Trace.TRACE_TAG_SYSTEM_SERVER);
             sHandler = new Handler(sInstance.getLooper());
         }
     }

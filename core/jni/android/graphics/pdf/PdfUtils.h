@@ -24,24 +24,6 @@ namespace android {
 int getBlock(void* param, unsigned long position, unsigned char* outBuffer,
         unsigned long size);
 
-bool forwardPdfiumError(JNIEnv* env);
-
-#define HANDLE_PDFIUM_ERROR_STATE(env)                         \
-        {                                                      \
-            bool isExceptionPending = forwardPdfiumError(env); \
-            if (isExceptionPending) {                          \
-                return;                                        \
-            }                                                  \
-        }
-
-#define HANDLE_PDFIUM_ERROR_STATE_WITH_RET_CODE(env, retCode)  \
-        {                                                      \
-            bool isExceptionPending = forwardPdfiumError(env); \
-            if (isExceptionPending) {                          \
-                return retCode;                                \
-            }                                                  \
-        }
-
 jlong nativeOpen(JNIEnv* env, jclass thiz, jint fd, jlong size);
 void nativeClose(JNIEnv* env, jclass thiz, jlong documentPtr);
 

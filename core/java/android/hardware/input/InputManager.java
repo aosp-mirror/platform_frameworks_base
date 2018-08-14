@@ -17,10 +17,10 @@
 package android.hardware.input;
 
 import android.annotation.IntDef;
-import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.app.IInputForwarder;
 import android.content.Context;
 import android.media.AudioAttributes;
@@ -43,8 +43,6 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
-import android.view.inputmethod.InputMethodInfo;
-import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.os.SomeArgs;
 
@@ -67,6 +65,7 @@ public final class InputManager {
 
     private static InputManager sInstance;
 
+    @UnsupportedAppUsage
     private final IInputManager mIm;
 
     // Guarded by mInputDevicesLock
@@ -184,11 +183,16 @@ public final class InputManager {
      * Waits for the event to be delivered to the application and handled.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH = 2;  // see InputDispatcher.h
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({SWITCH_STATE_UNKNOWN, SWITCH_STATE_OFF, SWITCH_STATE_ON})
+    @IntDef(prefix = { "SWITCH_STATE_" }, value = {
+            SWITCH_STATE_UNKNOWN,
+            SWITCH_STATE_OFF,
+            SWITCH_STATE_ON
+    })
     public @interface SwitchState {}
 
     /**
@@ -222,6 +226,7 @@ public final class InputManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static InputManager getInstance() {
         synchronized (InputManager.class) {
             if (sInstance == null) {
@@ -699,52 +704,6 @@ public final class InputManager {
         }
     }
 
-
-    /**
-     * Gets the keyboard layout for the specified input device and IME subtype.
-     *
-     * @param identifier The identifier for the input device.
-     * @param inputMethodInfo The input method.
-     * @param inputMethodSubtype The input method subtype. {@code null} if this input method does
-     * not support any subtype.
-     *
-     * @return The associated {@link KeyboardLayout}, or null if one has not been set.
-     *
-     * @hide
-     */
-    @Nullable
-    public KeyboardLayout getKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
-            InputMethodInfo inputMethodInfo, @Nullable InputMethodSubtype inputMethodSubtype) {
-        try {
-            return mIm.getKeyboardLayoutForInputDevice(
-                    identifier, inputMethodInfo, inputMethodSubtype);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Sets the keyboard layout for the specified input device and IME subtype pair.
-     *
-     * @param identifier The identifier for the input device.
-     * @param inputMethodInfo The input method with which to associate the keyboard layout.
-     * @param inputMethodSubtype The input method subtype which which to associate the keyboard
-     * layout. {@code null} if this input method does not support any subtype.
-     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to set
-     *
-     * @hide
-     */
-    public void setKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
-            InputMethodInfo inputMethodInfo, @Nullable InputMethodSubtype inputMethodSubtype,
-            String keyboardLayoutDescriptor) {
-        try {
-            mIm.setKeyboardLayoutForInputDevice(identifier, inputMethodInfo,
-                    inputMethodSubtype, keyboardLayoutDescriptor);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
     /**
      * Gets the TouchCalibration applied to the specified input device's coordinates.
      *
@@ -911,6 +870,7 @@ public final class InputManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean injectInputEvent(InputEvent event, int mode) {
         if (event == null) {
             throw new IllegalArgumentException("event must not be null");
@@ -936,6 +896,7 @@ public final class InputManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setPointerIconType(int iconId) {
         try {
             mIm.setPointerIconType(iconId);
@@ -983,6 +944,7 @@ public final class InputManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public IInputForwarder createInputForwarder(int displayId) {
         try {
             return mIm.createInputForwarder(displayId);
@@ -1242,7 +1204,7 @@ public final class InputManager {
             int repeat;
             if (effect instanceof VibrationEffect.OneShot) {
                 VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) effect;
-                pattern = new long[] { 0, oneShot.getTiming() };
+                pattern = new long[] { 0, oneShot.getDuration() };
                 repeat = -1;
             } else if (effect instanceof VibrationEffect.Waveform) {
                 VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) effect;

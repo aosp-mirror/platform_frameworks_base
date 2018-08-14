@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2018 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="32dp"
+        android:height="32dp"
+        android:viewportWidth="21"
+        android:viewportHeight="22">
+
+    <group
+        android:translateX="-196.000000"
+        android:translateY="-77.000000">
+        <group
+            android:translateX="190.000000"
+            android:translateY="72.000000">
+            <path
+                android:fillType="evenOdd"
+                android:strokeWidth="1"
+                android:pathData="M 0 0 H 32 V 32 H 0 V 0 Z"/>
+            <group
+                android:translateX="6.666667"
+                android:translateY="5.333333">
+                <path
+                    android:fillColor="#4285F4"
+                    android:strokeWidth="1"
+                    android:pathData="M 17 0 L 19 0 Q 20 0 20 1 L 20 20.3333333 Q 20 21.3333333 19 21.3333333 L 17 21.3333333 Q 16 21.3333333 16 20.3333333 L 16 1 Q 16 0 17 0 Z"/>
+                <path
+                    android:fillColor="#4285F4"
+                    android:strokeWidth="1"
+                    android:pathData="M 1 13.3333333 L 3 13.3333333 Q 4 13.3333333 4 14.3333333 L 4 20.3333333 Q 4 21.3333333 3 21.3333333 L 1 21.3333333 Q 0 21.3333333 0 20.3333333 L 0 14.3333333 Q 0 13.3333333 1 13.3333333 Z"/>
+                <path
+                    android:fillColor="#4285F4"
+                    android:strokeWidth="1"
+                    android:pathData="M 9 6.66666667 L 11 6.66666667 Q 12 6.66666667 12 7.66666667 L 12 20.33333337 Q 12 21.33333337 11 21.33333337 L 9 21.33333337 Q 8 21.33333337 8 20.33333337 L 8 7.66666667 Q 8 6.66666667 9 6.66666667 Z"/>
+            </group>
+        </group>
+    </group>
+</vector>

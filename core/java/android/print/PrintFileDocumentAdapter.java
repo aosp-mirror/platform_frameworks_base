@@ -21,6 +21,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.CancellationSignal.OnCancelListener;
+import android.os.FileUtils;
+import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -114,28 +116,15 @@ public class PrintFileDocumentAdapter extends PrintDocumentAdapter {
 
         @Override
         protected Void doInBackground(Void... params) {
-            InputStream in = null;
-            OutputStream out = new FileOutputStream(mDestination.getFileDescriptor());
-            final byte[] buffer = new byte[8192];
-            try {
-                in = new FileInputStream(mFile);
-                while (true) {
-                    if (isCancelled()) {
-                        break;
-                    }
-                    final int readByteCount = in.read(buffer);
-                    if (readByteCount < 0) {
-                        break;
-                    }
-                    out.write(buffer, 0, readByteCount);
-                }
-             } catch (IOException ioe) {
-                 Log.e(LOG_TAG, "Error writing data!", ioe);
-                 mResultCallback.onWriteFailed(mContext.getString(
-                         R.string.write_fail_reason_cannot_write));
-             } finally {
-                IoUtils.closeQuietly(in);
-                IoUtils.closeQuietly(out);
+            try (InputStream in = new FileInputStream(mFile);
+                    OutputStream out = new FileOutputStream(mDestination.getFileDescriptor())) {
+                FileUtils.copy(in, out, null, mCancellationSignal);
+            } catch (OperationCanceledException e) {
+                // Ignored; already handled below
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error writing data!", e);
+                mResultCallback.onWriteFailed(mContext.getString(
+                        R.string.write_fail_reason_cannot_write));
             }
             return null;
         }

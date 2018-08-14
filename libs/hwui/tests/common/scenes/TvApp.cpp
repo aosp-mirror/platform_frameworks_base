@@ -14,40 +14,42 @@
  * limitations under the License.
  */
 
+#include "SkBlendMode.h"
 #include "TestSceneBase.h"
 #include "tests/common/BitmapAllocationTestUtils.h"
-#include "SkBlendMode.h"
 
 class TvApp;
 class TvAppNoRoundedCorner;
 class TvAppColorFilter;
 class TvAppNoRoundedCornerColorFilter;
 
-static bool _TvApp(
-        BitmapAllocationTestUtils::registerBitmapAllocationScene<TvApp>(
-                "tvapp", "A dense grid of cards:"
-                "with rounded corner, using overlay RenderNode for dimming."));
+static bool _TvApp(BitmapAllocationTestUtils::registerBitmapAllocationScene<TvApp>(
+        "tvapp",
+        "A dense grid of cards:"
+        "with rounded corner, using overlay RenderNode for dimming."));
 
 static bool _TvAppNoRoundedCorner(
         BitmapAllocationTestUtils::registerBitmapAllocationScene<TvAppNoRoundedCorner>(
-                "tvapp_norc", "A dense grid of cards:"
+                "tvapp_norc",
+                "A dense grid of cards:"
                 "no rounded corner, using overlay RenderNode for dimming"));
 
 static bool _TvAppColorFilter(
         BitmapAllocationTestUtils::registerBitmapAllocationScene<TvAppColorFilter>(
-                "tvapp_cf", "A dense grid of cards:"
+                "tvapp_cf",
+                "A dense grid of cards:"
                 "with rounded corner, using ColorFilter for dimming"));
 
 static bool _TvAppNoRoundedCornerColorFilter(
         BitmapAllocationTestUtils::registerBitmapAllocationScene<TvAppNoRoundedCornerColorFilter>(
-                "tvapp_norc_cf", "A dense grid of cards:"
+                "tvapp_norc_cf",
+                "A dense grid of cards:"
                 "no rounded corner, using ColorFilter for dimming"));
 
 class TvApp : public TestScene {
 public:
     TvApp(BitmapAllocationTestUtils::BitmapAllocator allocator)
-        : TestScene()
-        , mAllocator(allocator) { }
+            : TestScene(), mAllocator(allocator) {}
 
     sp<RenderNode> mBg;
     std::vector<sp<RenderNode>> mCards;
@@ -66,9 +68,7 @@ public:
 
         canvas.insertReorderBarrier(true);
         mSingleBitmap = mAllocator(dp(160), dp(120), kRGBA_8888_SkColorType,
-                 [](SkBitmap& skBitmap) {
-             skBitmap.eraseColor(0xFF0000FF);
-        });
+                                   [](SkBitmap& skBitmap) { skBitmap.eraseColor(0xFF0000FF); });
 
         for (int y = dp(18) - dp(178); y < height - dp(18); y += dp(178)) {
             bool isFirstCard = true;
@@ -90,69 +90,63 @@ public:
     }
 
 private:
-    sp<RenderNode> createBitmapNode(Canvas& canvas, SkColor color, int left, int top,
-            int width, int height) {
-        return TestUtils::createNode(left, top, left + width , top + height,
+    sp<RenderNode> createBitmapNode(Canvas& canvas, SkColor color, int left, int top, int width,
+                                    int height) {
+        return TestUtils::createNode(
+                left, top, left + width, top + height,
                 [this, width, height, color](RenderProperties& props, Canvas& canvas) {
-            sk_sp<Bitmap> bitmap = mAllocator(width, height, kRGBA_8888_SkColorType,
-                    [color](SkBitmap& skBitmap) {
-                 skBitmap.eraseColor(color);
-            });
-            canvas.drawBitmap(*bitmap, 0, 0, nullptr);
-        });
+                    sk_sp<Bitmap> bitmap =
+                            mAllocator(width, height, kRGBA_8888_SkColorType,
+                                       [color](SkBitmap& skBitmap) { skBitmap.eraseColor(color); });
+                    canvas.drawBitmap(*bitmap, 0, 0, nullptr);
+                });
     }
 
-    sp<RenderNode> createSharedBitmapNode(Canvas& canvas, int left, int top,
-            int width, int height, sk_sp<Bitmap>bitmap) {
-        return TestUtils::createNode(left, top, left + width , top + height,
-                [bitmap](RenderProperties& props, Canvas& canvas) {
-            canvas.drawBitmap(*bitmap, 0, 0, nullptr);
-        });
+    sp<RenderNode> createSharedBitmapNode(Canvas& canvas, int left, int top, int width, int height,
+                                          sk_sp<Bitmap> bitmap) {
+        return TestUtils::createNode(left, top, left + width, top + height,
+                                     [bitmap](RenderProperties& props, Canvas& canvas) {
+                                         canvas.drawBitmap(*bitmap, 0, 0, nullptr);
+                                     });
     }
 
-    sp<RenderNode> createInfoNode(Canvas& canvas, int left, int top,
-            int width, int height, const char* text, const char* text2) {
-        return TestUtils::createNode(left, top, left + width , top + height,
-                [text, text2](RenderProperties& props, Canvas& canvas) {
-            canvas.drawColor(0xFFFFEEEE, SkBlendMode::kSrcOver);
+    sp<RenderNode> createInfoNode(Canvas& canvas, int left, int top, int width, int height,
+                                  const char* text, const char* text2) {
+        return TestUtils::createNode(left, top, left + width, top + height,
+                                     [text, text2](RenderProperties& props, Canvas& canvas) {
+                                         canvas.drawColor(0xFFFFEEEE, SkBlendMode::kSrcOver);
 
-            SkPaint paint;
-            paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-            paint.setAntiAlias(true);
-            paint.setTextSize(24);
+                                         SkPaint paint;
+                                         paint.setAntiAlias(true);
+                                         paint.setTextSize(24);
 
-            paint.setColor(Color::Black);
-            TestUtils::drawUtf8ToCanvas(&canvas, text, paint, 10, 30);
-            paint.setTextSize(20);
-            TestUtils::drawUtf8ToCanvas(&canvas, text2, paint, 10, 54);
+                                         paint.setColor(Color::Black);
+                                         TestUtils::drawUtf8ToCanvas(&canvas, text, paint, 10, 30);
+                                         paint.setTextSize(20);
+                                         TestUtils::drawUtf8ToCanvas(&canvas, text2, paint, 10, 54);
 
-        });
+                                     });
     }
 
-    sp<RenderNode> createColorNode(Canvas& canvas, int left, int top,
-            int width, int height, SkColor color) {
-        return TestUtils::createNode(left, top, left + width , top + height,
-                [color](RenderProperties& props, Canvas& canvas) {
-            canvas.drawColor(color, SkBlendMode::kSrcOver);
-        });
+    sp<RenderNode> createColorNode(Canvas& canvas, int left, int top, int width, int height,
+                                   SkColor color) {
+        return TestUtils::createNode(left, top, left + width, top + height,
+                                     [color](RenderProperties& props, Canvas& canvas) {
+                                         canvas.drawColor(color, SkBlendMode::kSrcOver);
+                                     });
     }
 
-    virtual bool useSingleBitmap() {
-        return false;
-    }
+    virtual bool useSingleBitmap() { return false; }
 
-    virtual float roundedCornerRadius() {
-        return dp(2);
-    }
+    virtual float roundedCornerRadius() { return dp(2); }
 
     // when true, use overlay RenderNode for dimming, otherwise apply a ColorFilter to dim image
-    virtual bool useOverlay() {
-        return true;
-    }
+    virtual bool useOverlay() { return true; }
 
     sp<RenderNode> createCard(int x, int y, int width, int height, bool selected) {
-        return TestUtils::createNode(x, y, x + width, y + height,
-                [width, height, selected, this](RenderProperties& props, Canvas& canvas) {
+        return TestUtils::createNode(x, y, x + width, y + height, [width, height, selected, this](
+                                                                          RenderProperties& props,
+                                                                          Canvas& canvas) {
             if (selected) {
                 props.setElevation(dp(16));
                 props.setScaleX(1.2);
@@ -161,12 +155,14 @@ private:
             props.mutableOutline().setRoundRect(0, 0, width, height, roundedCornerRadius(), 1);
             props.mutableOutline().setShouldClip(true);
 
-            sk_sp<Bitmap> bitmap = useSingleBitmap() ? mSingleBitmap
-                 : mAllocator(width, dp(120), kRGBA_8888_SkColorType, [this](SkBitmap& skBitmap) {
-                       skBitmap.eraseColor(0xFF000000 | ((mSeed << 3) & 0xFF));
-                   });
-            sp<RenderNode> cardImage = createSharedBitmapNode(canvas, 0, 0, width, dp(120),
-                    bitmap);
+            sk_sp<Bitmap> bitmap =
+                    useSingleBitmap() ? mSingleBitmap
+                                      : mAllocator(width, dp(120), kRGBA_8888_SkColorType,
+                                                   [this](SkBitmap& skBitmap) {
+                                                       skBitmap.eraseColor(0xFF000000 |
+                                                                           ((mSeed << 3) & 0xFF));
+                                                   });
+            sp<RenderNode> cardImage = createSharedBitmapNode(canvas, 0, 0, width, dp(120), bitmap);
             canvas.drawRenderNode(cardImage.get());
             mCachedBitmaps.push_back(bitmap);
             mImages.push_back(cardImage);
@@ -176,12 +172,14 @@ private:
             mSeed++;
             char buffer2[128];
             sprintf(buffer2, "Studio %d", mSeed2++);
-            sp<RenderNode> infoArea = createInfoNode(canvas, 0, dp(120), width, height, buffer, buffer2);
+            sp<RenderNode> infoArea =
+                    createInfoNode(canvas, 0, dp(120), width, height, buffer, buffer2);
             canvas.drawRenderNode(infoArea.get());
             mInfoAreas.push_back(infoArea);
 
             if (useOverlay()) {
-                sp<RenderNode> overlayColor = createColorNode(canvas, 0, 0, width, height, 0x00000000);
+                sp<RenderNode> overlayColor =
+                        createColorNode(canvas, 0, 0, width, height, 0x00000000);
                 canvas.drawRenderNode(overlayColor.get());
                 mOverlays.push_back(overlayColor);
             }
@@ -196,30 +194,31 @@ private:
 
         // re-recording card's canvas, not necessary but to add some burden to CPU
         std::unique_ptr<Canvas> cardcanvas(Canvas::create_recording_canvas(
-                card->stagingProperties().getWidth(),
-                card->stagingProperties().getHeight()));
+                card->stagingProperties().getWidth(), card->stagingProperties().getHeight(),
+                card.get()));
         sp<RenderNode> image = mImages[ci];
         sp<RenderNode> infoArea = mInfoAreas[ci];
         cardcanvas->drawRenderNode(infoArea.get());
 
         if (useOverlay()) {
-             cardcanvas->drawRenderNode(image.get());
+            cardcanvas->drawRenderNode(image.get());
             // re-recording card overlay's canvas, animating overlay color alpha
             sp<RenderNode> overlay = mOverlays[ci];
-            std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
-                    overlay->stagingProperties().getWidth(),
-                    overlay->stagingProperties().getHeight()));
+            std::unique_ptr<Canvas> canvas(
+                    Canvas::create_recording_canvas(overlay->stagingProperties().getWidth(),
+                                                    overlay->stagingProperties().getHeight(),
+                                                    overlay.get()));
             canvas->drawColor((curFrame % 150) << 24, SkBlendMode::kSrcOver);
             overlay->setStagingDisplayList(canvas->finishRecording());
             cardcanvas->drawRenderNode(overlay.get());
         } else {
             // re-recording image node's canvas, animating ColorFilter
             std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
-                    image->stagingProperties().getWidth(),
-                    image->stagingProperties().getHeight()));
+                    image->stagingProperties().getWidth(), image->stagingProperties().getHeight(),
+                    image.get()));
             SkPaint paint;
-            sk_sp<SkColorFilter> filter(SkColorFilter::MakeModeFilter((curFrame % 150) << 24,
-                    SkBlendMode::kSrcATop));
+            sk_sp<SkColorFilter> filter(
+                    SkColorFilter::MakeModeFilter((curFrame % 150) << 24, SkBlendMode::kSrcATop));
             paint.setColorFilter(filter);
             sk_sp<Bitmap> bitmap = mCachedBitmaps[ci];
             canvas->drawBitmap(*bitmap, 0, 0, &paint);
@@ -233,42 +232,27 @@ private:
 
 class TvAppNoRoundedCorner : public TvApp {
 public:
-    TvAppNoRoundedCorner(BitmapAllocationTestUtils::BitmapAllocator allocator)
-        : TvApp(allocator) { }
+    TvAppNoRoundedCorner(BitmapAllocationTestUtils::BitmapAllocator allocator) : TvApp(allocator) {}
 
 private:
-
-    virtual float roundedCornerRadius() override {
-        return dp(0);
-    }
+    virtual float roundedCornerRadius() override { return dp(0); }
 };
 
 class TvAppColorFilter : public TvApp {
 public:
-    TvAppColorFilter(BitmapAllocationTestUtils::BitmapAllocator allocator)
-        : TvApp(allocator) { }
+    TvAppColorFilter(BitmapAllocationTestUtils::BitmapAllocator allocator) : TvApp(allocator) {}
 
 private:
-
-    virtual bool useOverlay() override {
-        return false;
-    }
+    virtual bool useOverlay() override { return false; }
 };
 
 class TvAppNoRoundedCornerColorFilter : public TvApp {
 public:
     TvAppNoRoundedCornerColorFilter(BitmapAllocationTestUtils::BitmapAllocator allocator)
-        : TvApp(allocator) { }
+            : TvApp(allocator) {}
 
 private:
+    virtual float roundedCornerRadius() override { return dp(0); }
 
-    virtual float roundedCornerRadius() override {
-        return dp(0);
-    }
-
-    virtual bool useOverlay() override {
-        return false;
-    }
+    virtual bool useOverlay() override { return false; }
 };
-
-

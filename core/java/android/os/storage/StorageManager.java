@@ -16,9 +16,6 @@
 
 package android.os.storage;
 
-import static android.net.TrafficStats.GB_IN_BYTES;
-import static android.net.TrafficStats.MB_IN_BYTES;
-
 import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -41,21 +38,24 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.IVold;
+import android.os.IVoldTaskListener;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
+import android.os.PersistableBundle;
 import android.os.ProxyFileDescriptorCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.text.TextUtils;
+import android.util.DataUnit;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -86,7 +86,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -111,15 +113,15 @@ public class StorageManager {
     /** {@hide} */
     public static final String PROP_HAS_ADOPTABLE = "vold.has_adoptable";
     /** {@hide} */
-    public static final String PROP_FORCE_ADOPTABLE = "persist.fw.force_adoptable";
+    public static final String PROP_HAS_RESERVED = "vold.has_reserved";
+    /** {@hide} */
+    public static final String PROP_ADOPTABLE = "persist.sys.adoptable";
     /** {@hide} */
     public static final String PROP_EMULATE_FBE = "persist.sys.emulate_fbe";
     /** {@hide} */
     public static final String PROP_SDCARDFS = "persist.sys.sdcardfs";
     /** {@hide} */
     public static final String PROP_VIRTUAL_DISK = "persist.sys.virtual_disk";
-    /** {@hide} */
-    public static final String PROP_ADOPTABLE_FBE = "persist.sys.adoptable_fbe";
 
     /** {@hide} */
     public static final String UUID_PRIVATE_INTERNAL = null;
@@ -195,15 +197,17 @@ public class StorageManager {
     public static final String EXTRA_REQUESTED_BYTES = "android.os.storage.extra.REQUESTED_BYTES";
 
     /** {@hide} */
-    public static final int DEBUG_FORCE_ADOPTABLE = 1 << 0;
+    public static final int DEBUG_ADOPTABLE_FORCE_ON = 1 << 0;
     /** {@hide} */
-    public static final int DEBUG_EMULATE_FBE = 1 << 1;
+    public static final int DEBUG_ADOPTABLE_FORCE_OFF = 1 << 1;
     /** {@hide} */
-    public static final int DEBUG_SDCARDFS_FORCE_ON = 1 << 2;
+    public static final int DEBUG_EMULATE_FBE = 1 << 2;
     /** {@hide} */
-    public static final int DEBUG_SDCARDFS_FORCE_OFF = 1 << 3;
+    public static final int DEBUG_SDCARDFS_FORCE_ON = 1 << 3;
     /** {@hide} */
-    public static final int DEBUG_VIRTUAL_DISK = 1 << 4;
+    public static final int DEBUG_SDCARDFS_FORCE_OFF = 1 << 4;
+    /** {@hide} */
+    public static final int DEBUG_VIRTUAL_DISK = 1 << 5;
 
     // NOTE: keep in sync with installd
     /** {@hide} */
@@ -219,27 +223,31 @@ public class StorageManager {
     public static final int FLAG_INCLUDE_INVISIBLE = 1 << 10;
 
     /** {@hide} */
-    public static final int FSTRIM_FLAG_DEEP = 1 << 0;
-    /** {@hide} */
-    public static final int FSTRIM_FLAG_BENCHMARK = 1 << 1;
+    public static final int FSTRIM_FLAG_DEEP = IVold.FSTRIM_FLAG_DEEP_TRIM;
 
     /** @hide The volume is not encrypted. */
-    public static final int ENCRYPTION_STATE_NONE = 1;
+    public static final int ENCRYPTION_STATE_NONE =
+            IVold.ENCRYPTION_STATE_NONE;
 
     /** @hide The volume has been encrypted succesfully. */
-    public static final int ENCRYPTION_STATE_OK = 0;
+    public static final int ENCRYPTION_STATE_OK =
+            IVold.ENCRYPTION_STATE_OK;
 
-    /** @hide The volume is in a bad state.*/
-    public static final int ENCRYPTION_STATE_ERROR_UNKNOWN = -1;
+    /** @hide The volume is in a bad state. */
+    public static final int ENCRYPTION_STATE_ERROR_UNKNOWN =
+            IVold.ENCRYPTION_STATE_ERROR_UNKNOWN;
 
     /** @hide Encryption is incomplete */
-    public static final int ENCRYPTION_STATE_ERROR_INCOMPLETE = -2;
+    public static final int ENCRYPTION_STATE_ERROR_INCOMPLETE =
+            IVold.ENCRYPTION_STATE_ERROR_INCOMPLETE;
 
     /** @hide Encryption is incomplete and irrecoverable */
-    public static final int ENCRYPTION_STATE_ERROR_INCONSISTENT = -3;
+    public static final int ENCRYPTION_STATE_ERROR_INCONSISTENT =
+            IVold.ENCRYPTION_STATE_ERROR_INCONSISTENT;
 
     /** @hide Underlying data is corrupt */
-    public static final int ENCRYPTION_STATE_ERROR_CORRUPT = -4;
+    public static final int ENCRYPTION_STATE_ERROR_CORRUPT =
+            IVold.ENCRYPTION_STATE_ERROR_CORRUPT;
 
     private static volatile IStorageManager sStorageManager = null;
 
@@ -750,10 +758,15 @@ public class StorageManager {
         }
         try {
             for (VolumeInfo vol : mStorageManager.getVolumes(0)) {
-                if (vol.path != null && FileUtils.contains(vol.path, pathString)) {
+                if (vol.path != null && FileUtils.contains(vol.path, pathString)
+                        && vol.type != VolumeInfo.TYPE_PUBLIC) {
                     // TODO: verify that emulated adopted devices have UUID of
                     // underlying volume
-                    return convert(vol.fsUuid);
+                    try {
+                        return convert(vol.fsUuid);
+                    } catch (IllegalArgumentException e) {
+                        continue;
+                    }
                 }
             }
         } catch (RemoteException e) {
@@ -879,9 +892,32 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    @Deprecated
     public long benchmark(String volId) {
+        final CompletableFuture<PersistableBundle> result = new CompletableFuture<>();
+        benchmark(volId, new IVoldTaskListener.Stub() {
+            @Override
+            public void onStatus(int status, PersistableBundle extras) {
+                // Ignored
+            }
+
+            @Override
+            public void onFinished(int status, PersistableBundle extras) {
+                result.complete(extras);
+            }
+        });
         try {
-            return mStorageManager.benchmark(volId);
+            // Convert ms to ns
+            return result.get(3, TimeUnit.MINUTES).getLong("run", Long.MAX_VALUE) * 1000000;
+        } catch (Exception e) {
+            return Long.MAX_VALUE;
+        }
+    }
+
+    /** {@hide} */
+    public void benchmark(String volId, IVoldTaskListener listener) {
+        try {
+            mStorageManager.benchmark(volId, listener);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1066,7 +1102,7 @@ public class StorageManager {
     public @NonNull List<StorageVolume> getStorageVolumes() {
         final ArrayList<StorageVolume> res = new ArrayList<>();
         Collections.addAll(res,
-                getVolumeList(UserHandle.myUserId(), FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE));
+                getVolumeList(mContext.getUserId(), FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE));
         return res;
     }
 
@@ -1077,7 +1113,7 @@ public class StorageManager {
      * {@link Context#getExternalFilesDir(String)}.
      */
     public @NonNull StorageVolume getPrimaryStorageVolume() {
-        return getVolumeList(UserHandle.myUserId(), FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE)[0];
+        return getVolumeList(mContext.getUserId(), FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE)[0];
     }
 
     /** {@hide} */
@@ -1091,6 +1127,15 @@ public class StorageManager {
     public long getPrimaryStorageSize() {
         return FileUtils.roundStorageSize(Environment.getDataDirectory().getTotalSpace()
                 + Environment.getRootDirectory().getTotalSpace());
+    }
+
+    /** {@hide} */
+    public void mkdirs(File file) {
+        try {
+            mStorageManager.mkdirs(mContext.getOpPackageName(), file.getAbsolutePath());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /** @removed */
@@ -1158,12 +1203,12 @@ public class StorageManager {
     }
 
     private static final int DEFAULT_THRESHOLD_PERCENTAGE = 5;
-    private static final long DEFAULT_THRESHOLD_MAX_BYTES = 500 * MB_IN_BYTES;
+    private static final long DEFAULT_THRESHOLD_MAX_BYTES = DataUnit.MEBIBYTES.toBytes(500);
 
     private static final int DEFAULT_CACHE_PERCENTAGE = 10;
-    private static final long DEFAULT_CACHE_MAX_BYTES = 5 * GB_IN_BYTES;
+    private static final long DEFAULT_CACHE_MAX_BYTES = DataUnit.GIBIBYTES.toBytes(5);
 
-    private static final long DEFAULT_FULL_THRESHOLD_BYTES = MB_IN_BYTES;
+    private static final long DEFAULT_FULL_THRESHOLD_BYTES = DataUnit.MEBIBYTES.toBytes(1);
 
     /**
      * Return the number of available bytes until the given path is considered
@@ -1278,15 +1323,6 @@ public class StorageManager {
     public void destroyUserStorage(String volumeUuid, int userId, int flags) {
         try {
             mStorageManager.destroyUserStorage(volumeUuid, userId, flags);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** {@hide} */
-    public void secdiscard(String path) {
-        try {
-            mStorageManager.secdiscard(path);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1432,6 +1468,11 @@ public class StorageManager {
     public static boolean isFileEncryptedNativeOrEmulated() {
         return isFileEncryptedNativeOnly()
                || isFileEncryptedEmulatedOnly();
+    }
+
+    /** {@hide} */
+    public static boolean hasAdoptable() {
+        return SystemProperties.getBoolean(PROP_HAS_ADOPTABLE, false);
     }
 
     /** {@hide} */
@@ -1651,7 +1692,7 @@ public class StorageManager {
     public static final int FLAG_ALLOCATE_DEFY_HALF_RESERVED = 1 << 2;
 
     /** @hide */
-    @IntDef(flag = true, value = {
+    @IntDef(flag = true, prefix = { "FLAG_ALLOCATE_" }, value = {
             FLAG_ALLOCATE_AGGRESSIVE,
             FLAG_ALLOCATE_DEFY_ALL_RESERVED,
             FLAG_ALLOCATE_DEFY_HALF_RESERVED,
@@ -1975,13 +2016,13 @@ public class StorageManager {
 
     /// Consts to match the password types in cryptfs.h
     /** @hide */
-    public static final int CRYPT_TYPE_PASSWORD = 0;
+    public static final int CRYPT_TYPE_PASSWORD = IVold.PASSWORD_TYPE_PASSWORD;
     /** @hide */
-    public static final int CRYPT_TYPE_DEFAULT = 1;
+    public static final int CRYPT_TYPE_DEFAULT = IVold.PASSWORD_TYPE_DEFAULT;
     /** @hide */
-    public static final int CRYPT_TYPE_PATTERN = 2;
+    public static final int CRYPT_TYPE_PATTERN = IVold.PASSWORD_TYPE_PATTERN;
     /** @hide */
-    public static final int CRYPT_TYPE_PIN = 3;
+    public static final int CRYPT_TYPE_PIN = IVold.PASSWORD_TYPE_PIN;
 
     // Constants for the data available via StorageManagerService.getField.
     /** @hide */

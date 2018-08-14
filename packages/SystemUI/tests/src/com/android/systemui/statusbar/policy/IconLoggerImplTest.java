@@ -17,7 +17,7 @@ package com.android.systemui.statusbar.policy;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_NUM_STATUS_ICONS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_STATUS_ICONS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent
-        .NOTIFICATION_SINCE_CREATE_MILLIS;
+        .RESERVED_FOR_LOGBUILDER_LATENCY_MILLIS;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -119,9 +119,9 @@ public class IconLoggerImplTest extends SysuiTestCase {
 
         verify(mMetricsLogger).write(argThat(maker -> {
             if (IconLoggerImpl.MIN_LOG_INTERVAL >
-                    (long) maker.getTaggedData(NOTIFICATION_SINCE_CREATE_MILLIS)) {
+                    (long) maker.getTaggedData(RESERVED_FOR_LOGBUILDER_LATENCY_MILLIS)) {
                 Log.e("IconLoggerImplTest", "Invalid latency "
-                        + maker.getTaggedData(NOTIFICATION_SINCE_CREATE_MILLIS));
+                        + maker.getTaggedData(RESERVED_FOR_LOGBUILDER_LATENCY_MILLIS));
                 return false;
             }
             if (1 != (int) maker.getTaggedData(FIELD_NUM_STATUS_ICONS)) {

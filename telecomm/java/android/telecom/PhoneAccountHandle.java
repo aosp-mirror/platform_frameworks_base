@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -40,7 +41,9 @@ import java.util.Objects;
  * See {@link PhoneAccount}, {@link TelecomManager}.
  */
 public final class PhoneAccountHandle implements Parcelable {
+    @UnsupportedAppUsage
     private final ComponentName mComponentName;
+    @UnsupportedAppUsage
     private final String mId;
     private final UserHandle mUserHandle;
 
@@ -164,6 +167,7 @@ public final class PhoneAccountHandle implements Parcelable {
         }
     };
 
+    @UnsupportedAppUsage
     private PhoneAccountHandle(Parcel in) {
         this(ComponentName.CREATOR.createFromParcel(in),
                 in.readString(),

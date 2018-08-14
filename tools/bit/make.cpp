@@ -167,7 +167,7 @@ read_modules(const string& buildOut, const string& device, map<string,Module>* r
         for (ssize_t i = module.classes.size() - 1; i >= 0; i--) {
             string cl = module.classes[i];
             if (!(cl == "JAVA_LIBRARIES" || cl == "EXECUTABLES" || cl == "SHARED_LIBRARIES"
-                    || cl == "APPS")) {
+                    || cl == "APPS" || cl == "NATIVE_TESTS")) {
                 module.classes.erase(module.classes.begin() + i);
             }
         }

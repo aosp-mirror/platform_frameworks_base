@@ -24,9 +24,7 @@ import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
-import android.graphics.GraphicBuffer;
 import android.os.Process;
 import android.os.SystemClock;
 import android.util.ArraySet;
@@ -41,7 +39,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 
 /**
  * Persists {@link TaskSnapshot}s to disk.
@@ -281,11 +278,13 @@ class TaskSnapshotPersister {
             mSnapshot = snapshot;
         }
 
+        @GuardedBy("mLock")
         @Override
         void onQueuedLocked() {
             mStoreQueueItems.offer(this);
         }
 
+        @GuardedBy("mLock")
         @Override
         void onDequeuedLocked() {
             mStoreQueueItems.remove(this);
@@ -316,6 +315,10 @@ class TaskSnapshotPersister {
             proto.insetTop = mSnapshot.getContentInsets().top;
             proto.insetRight = mSnapshot.getContentInsets().right;
             proto.insetBottom = mSnapshot.getContentInsets().bottom;
+            proto.isRealSnapshot = mSnapshot.isRealSnapshot();
+            proto.windowingMode = mSnapshot.getWindowingMode();
+            proto.systemUiVisibility = mSnapshot.getSystemUiVisibility();
+            proto.isTranslucent = mSnapshot.isTranslucent();
             final byte[] bytes = TaskSnapshotProto.toByteArray(proto);
             final File file = getProtoFile(mTaskId, mUserId);
             final AtomicFile atomicFile = new AtomicFile(file);

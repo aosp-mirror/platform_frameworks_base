@@ -1,0 +1,88 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+option java_multiple_files = true;
+
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+package android.os;
+
+//Memory usage of running processes
+message ProcrankProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Currently running process
+    // Next Tag: 11
+    message Process {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // ID of the process
+        optional int32 pid = 1;
+
+        // virtual set size, unit KB
+        optional int64 vss = 2;
+
+        // resident set size, unit KB
+        optional int64 rss = 3;
+
+        // proportional set size, unit KB
+        optional int64 pss = 4;
+
+        // unique set size, unit KB
+        optional int64 uss = 5;
+
+        // swap size, unit KB
+        optional int64 swap = 6;
+
+        // proportional swap size, unit KB
+        optional int64 pswap = 7;
+
+        // unique swap size, unit KB
+        optional int64 uswap = 8;
+
+        // zswap size, unit KB
+        optional int64 zswap = 9;
+
+        // process command
+        optional string cmdline = 10;
+    }
+    repeated Process processes = 1;
+
+    // Summary
+    // Next Tag: 3
+    message Summary {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional Process total = 1;
+
+        // TODO: sync on how to use these values
+        message Zram {
+            option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional string raw_text = 1;
+        }
+        optional Zram zram = 2;
+
+        message Ram {
+            option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional string raw_text = 1;
+        }
+        optional Ram ram = 3;
+    }
+    optional Summary summary = 2;
+}

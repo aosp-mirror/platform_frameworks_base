@@ -14,55 +14,52 @@
  * limitations under the License.
  */
 
-#include "TestSceneBase.h"
-#include "utils/Color.h"
-#include "tests/common/BitmapAllocationTestUtils.h"
 #include <SkImagePriv.h>
+#include "TestSceneBase.h"
+#include "tests/common/BitmapAllocationTestUtils.h"
+#include "utils/Color.h"
 
 class BitmapShaders;
 
-static bool _BitmapShaders(
-        BitmapAllocationTestUtils::registerBitmapAllocationScene<BitmapShaders>(
-                "bitmapShader", "Draws bitmap shaders with repeat and mirror modes."));
+static bool _BitmapShaders(BitmapAllocationTestUtils::registerBitmapAllocationScene<BitmapShaders>(
+        "bitmapShader", "Draws bitmap shaders with repeat and mirror modes."));
 
 class BitmapShaders : public TestScene {
 public:
     BitmapShaders(BitmapAllocationTestUtils::BitmapAllocator allocator)
-        : TestScene()
-        , mAllocator(allocator) { }
+            : TestScene(), mAllocator(allocator) {}
 
     sp<RenderNode> card;
     void createContent(int width, int height, Canvas& canvas) override {
         canvas.drawColor(Color::Grey_200, SkBlendMode::kSrcOver);
-        sk_sp<Bitmap> hwuiBitmap = mAllocator(200, 200, kRGBA_8888_SkColorType,
-                            [](SkBitmap& skBitmap) {
-            skBitmap.eraseColor(Color::White);
-            SkCanvas skCanvas(skBitmap);
-            SkPaint skPaint;
-            skPaint.setColor(Color::Red_500);
-            skCanvas.drawRect(SkRect::MakeWH(100, 100), skPaint);
-            skPaint.setColor(Color::Blue_500);
-            skCanvas.drawRect(SkRect::MakeXYWH(100, 100, 100, 100), skPaint);
-        });
+        sk_sp<Bitmap> hwuiBitmap =
+                mAllocator(200, 200, kRGBA_8888_SkColorType, [](SkBitmap& skBitmap) {
+                    skBitmap.eraseColor(Color::White);
+                    SkCanvas skCanvas(skBitmap);
+                    SkPaint skPaint;
+                    skPaint.setColor(Color::Red_500);
+                    skCanvas.drawRect(SkRect::MakeWH(100, 100), skPaint);
+                    skPaint.setColor(Color::Blue_500);
+                    skCanvas.drawRect(SkRect::MakeXYWH(100, 100, 100, 100), skPaint);
+                });
 
         SkPaint paint;
-        sk_sp<SkImage> image = hwuiBitmap->makeImage();
-        sk_sp<SkShader> repeatShader = image->makeShader(
-                SkShader::TileMode::kRepeat_TileMode,
-                SkShader::TileMode::kRepeat_TileMode,
-                nullptr);
+        sk_sp<SkColorFilter> colorFilter;
+        sk_sp<SkImage> image = hwuiBitmap->makeImage(&colorFilter);
+        sk_sp<SkShader> repeatShader =
+                image->makeShader(SkShader::TileMode::kRepeat_TileMode,
+                                  SkShader::TileMode::kRepeat_TileMode, nullptr);
         paint.setShader(std::move(repeatShader));
         canvas.drawRoundRect(0, 0, 500, 500, 50.0f, 50.0f, paint);
 
-        sk_sp<SkShader> mirrorShader = image->makeShader(
-                SkShader::TileMode::kMirror_TileMode,
-                SkShader::TileMode::kMirror_TileMode,
-                nullptr);
+        sk_sp<SkShader> mirrorShader =
+                image->makeShader(SkShader::TileMode::kMirror_TileMode,
+                                  SkShader::TileMode::kMirror_TileMode, nullptr);
         paint.setShader(std::move(mirrorShader));
         canvas.drawRoundRect(0, 600, 500, 1100, 50.0f, 50.0f, paint);
     }
 
-    void doFrame(int frameNr) override { }
+    void doFrame(int frameNr) override {}
 
     BitmapAllocationTestUtils::BitmapAllocator mAllocator;
 };

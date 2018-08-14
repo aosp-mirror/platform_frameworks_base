@@ -143,6 +143,29 @@ DropBoxManager::Entry::readFromParcel(const Parcel* in)
     return NO_ERROR;
 }
 
+const vector<uint8_t>&
+DropBoxManager::Entry::getData() const
+{
+    return mData;
+}
+
+const unique_fd&
+DropBoxManager::Entry::getFd() const
+{
+    return mFd;
+}
+
+int32_t
+DropBoxManager::Entry::getFlags() const
+{
+    return mFlags;
+}
+
+int64_t
+DropBoxManager::Entry::getTimestamp() const
+{
+    return mTimeMillis;
+}
 
 DropBoxManager::DropBoxManager()
 {
@@ -203,6 +226,17 @@ DropBoxManager::add(const Entry& entry)
         return Status::fromExceptionCode(Status::EX_NULL_POINTER, "can't find dropbox service");
     }
     return service->add(entry);
+}
+
+Status
+DropBoxManager::getNextEntry(const String16& tag, long msec, Entry* entry)
+{
+    sp<IDropBoxManagerService> service = interface_cast<IDropBoxManagerService>(
+        defaultServiceManager()->getService(android::String16("dropbox")));
+    if (service == NULL) {
+        return Status::fromExceptionCode(Status::EX_NULL_POINTER, "can't find dropbox service");
+    }
+    return service->getNextEntry(tag, msec, entry);
 }
 
 }} // namespace android::os

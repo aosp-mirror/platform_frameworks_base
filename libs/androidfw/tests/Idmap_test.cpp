@@ -22,7 +22,7 @@
 #include "TestHelpers.h"
 #include "data/basic/R.h"
 
-using com::android::basic::R;
+using ::com::android::basic::R;
 
 namespace android {
 

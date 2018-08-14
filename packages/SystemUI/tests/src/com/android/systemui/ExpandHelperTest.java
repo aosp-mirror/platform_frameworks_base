@@ -22,6 +22,8 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationTestHelper;
@@ -35,7 +37,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@RunWithLooper(setAsMainLooper = true)
 public class ExpandHelperTest extends SysuiTestCase {
 
     private ExpandableNotificationRow mRow;
@@ -47,9 +50,7 @@ public class ExpandHelperTest extends SysuiTestCase {
         Context context = getContext();
         mRow = new NotificationTestHelper(context).createRow();
         mCallback = mock(ExpandHelper.Callback.class);
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(
-                () -> mExpandHelper = new ExpandHelper(context, mCallback, 10, 100));
-
+        mExpandHelper = new ExpandHelper(context, mCallback, 10, 100);
     }
 
     @Test

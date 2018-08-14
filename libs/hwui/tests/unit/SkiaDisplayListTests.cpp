@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include <VectorDrawable.h>
+#include <gtest/gtest.h>
 
 #include "AnimationContext.h"
 #include "DamageAccumulator.h"
@@ -79,7 +79,7 @@ TEST(SkiaDisplayList, reuseDisplayList) {
     // detach the list that you just attempted to reuse
     availableList = renderNode->detachAvailableList();
     ASSERT_EQ(availableList.get(), &skiaDL);
-    availableList.release(); // prevents an invalid free since our DL is stack allocated
+    availableList.release();  // prevents an invalid free since our DL is stack allocated
 
     // after detaching there should return no available list
     availableList = renderNode->detachAvailableList();
@@ -115,8 +115,8 @@ public:
 RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
     auto rootNode = TestUtils::createNode(0, 0, 200, 400, nullptr);
     ContextFactory contextFactory;
-    std::unique_ptr<CanvasContext> canvasContext(CanvasContext::create(
-            renderThread, false, rootNode.get(), &contextFactory));
+    std::unique_ptr<CanvasContext> canvasContext(
+            CanvasContext::create(renderThread, false, rootNode.get(), &contextFactory));
     TreeInfo info(TreeInfo::MODE_FULL, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;
@@ -126,13 +126,13 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
     // prepare with a clean VD
     VectorDrawableRoot cleanVD(new VectorDrawable::Group());
     skiaDL.mVectorDrawables.push_back(&cleanVD);
-    cleanVD.getBitmapUpdateIfDirty(); // this clears the dirty bit
+    cleanVD.getBitmapUpdateIfDirty();  // this clears the dirty bit
 
     ASSERT_FALSE(cleanVD.isDirty());
     ASSERT_FALSE(cleanVD.getPropertyChangeWillBeConsumed());
     TestUtils::MockTreeObserver observer;
     ASSERT_FALSE(skiaDL.prepareListAndChildren(observer, info, false,
-            [](RenderNode*, TreeObserver&, TreeInfo&, bool) {}));
+                                               [](RenderNode*, TreeObserver&, TreeInfo&, bool) {}));
     ASSERT_TRUE(cleanVD.getPropertyChangeWillBeConsumed());
 
     // prepare again this time adding a dirty VD
@@ -142,7 +142,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
     ASSERT_TRUE(dirtyVD.isDirty());
     ASSERT_FALSE(dirtyVD.getPropertyChangeWillBeConsumed());
     ASSERT_TRUE(skiaDL.prepareListAndChildren(observer, info, false,
-            [](RenderNode*, TreeObserver&, TreeInfo&, bool) {}));
+                                              [](RenderNode*, TreeObserver&, TreeInfo&, bool) {}));
     ASSERT_TRUE(dirtyVD.getPropertyChangeWillBeConsumed());
 
     // prepare again this time adding a RenderNode and a callback
@@ -151,13 +151,15 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
     SkCanvas dummyCanvas;
     skiaDL.mChildNodes.emplace_back(renderNode.get(), &dummyCanvas);
     bool hasRun = false;
-    ASSERT_TRUE(skiaDL.prepareListAndChildren(observer, info, false,
-            [&hasRun, renderNode, infoPtr](RenderNode* n, TreeObserver& observer, TreeInfo& i, bool r) {
-        hasRun = true;
-        ASSERT_EQ(renderNode.get(), n);
-        ASSERT_EQ(infoPtr, &i);
-        ASSERT_FALSE(r);
-    }));
+    ASSERT_TRUE(skiaDL.prepareListAndChildren(
+            observer, info, false,
+            [&hasRun, renderNode, infoPtr](RenderNode* n, TreeObserver& observer, TreeInfo& i,
+                                           bool r) {
+                hasRun = true;
+                ASSERT_EQ(renderNode.get(), n);
+                ASSERT_EQ(infoPtr, &i);
+                ASSERT_FALSE(r);
+            }));
     ASSERT_TRUE(hasRun);
 
     canvasContext->destroy();
@@ -169,7 +171,5 @@ TEST(SkiaDisplayList, updateChildren) {
     sp<RenderNode> renderNode = new RenderNode();
     SkCanvas dummyCanvas;
     skiaDL.mChildNodes.emplace_back(renderNode.get(), &dummyCanvas);
-    skiaDL.updateChildren([renderNode](RenderNode* n) {
-        ASSERT_EQ(renderNode.get(), n);
-    });
+    skiaDL.updateChildren([renderNode](RenderNode* n) { ASSERT_EQ(renderNode.get(), n); });
 }

@@ -18,6 +18,7 @@ package android.hardware.usb;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import com.android.internal.util.Preconditions;
@@ -60,6 +61,7 @@ public class UsbDevice implements Parcelable {
     private @Nullable Parcelable[] mConfigurations;
 
     /** All interfaces on the device. Initialized on first call to getInterfaceList */
+    @UnsupportedAppUsage
     private @Nullable UsbInterface[] mInterfaces;
 
     /**

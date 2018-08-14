@@ -14,110 +14,131 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 package android.service;
+
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 option java_multiple_files = true;
 option java_outer_classname = "NetworkStatsServiceProto";
 
 // Represents dumpsys from NetworkStatsService (netstats).
 message NetworkStatsServiceDumpProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     repeated NetworkInterfaceProto active_interfaces = 1;
 
     repeated NetworkInterfaceProto active_uid_interfaces = 2;
 
     // Device level network stats, which may include non-IP layer traffic.
-    NetworkStatsRecorderProto dev_stats = 3;
+    optional NetworkStatsRecorderProto dev_stats = 3;
 
     // IP-layer traffic stats.
-    NetworkStatsRecorderProto xt_stats = 4;
+    optional NetworkStatsRecorderProto xt_stats = 4;
 
     // Per-UID network stats.
-    NetworkStatsRecorderProto uid_stats = 5;
+    optional NetworkStatsRecorderProto uid_stats = 5;
 
     // Per-UID, per-tag network stats, excluding the default tag (i.e. tag=0).
-    NetworkStatsRecorderProto uid_tag_stats = 6;
+    optional NetworkStatsRecorderProto uid_tag_stats = 6;
 }
 
 // Corresponds to NetworkStatsService.mActiveIfaces/mActiveUidIfaces.
 message NetworkInterfaceProto {
-    string interface = 1;
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    NetworkIdentitySetProto identities = 2;
+    optional string interface = 1;
+
+    optional NetworkIdentitySetProto identities = 2;
 }
 
 // Corresponds to NetworkIdentitySet.
 message NetworkIdentitySetProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     repeated NetworkIdentityProto identities = 1;
 }
 
 // Corresponds to NetworkIdentity.
 message NetworkIdentityProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Constats from ConnectivityManager.TYPE_*.
-    int32 type = 1;
+    optional int32 type = 1;
 
-    string subscriber_id = 2;
+    optional string subscriber_id = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
 
-    string network_id = 3;
+    optional string network_id = 3 [ (android.privacy).dest = DEST_EXPLICIT ];
 
-    bool roaming = 4;
+    optional bool roaming = 4;
 
-    bool metered = 5;
+    optional bool metered = 5;
 
-    bool default_network = 6;
+    optional bool default_network = 6;
 }
 
 // Corresponds to NetworkStatsRecorder.
 message NetworkStatsRecorderProto {
-    int64 pending_total_bytes = 1;
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    NetworkStatsCollectionProto complete_history = 2;
+    optional int64 pending_total_bytes = 1;
+
+    optional NetworkStatsCollectionProto complete_history = 2;
 }
 
 // Corresponds to NetworkStatsCollection.
 message NetworkStatsCollectionProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     repeated NetworkStatsCollectionStatsProto stats = 1;
 }
 
 // Corresponds to NetworkStatsCollection.mStats.
 message NetworkStatsCollectionStatsProto {
-    NetworkStatsCollectionKeyProto key = 1;
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    NetworkStatsHistoryProto history = 2;
+    optional NetworkStatsCollectionKeyProto key = 1;
+
+    optional NetworkStatsHistoryProto history = 2;
 }
 
 // Corresponds to NetworkStatsCollection.Key.
 message NetworkStatsCollectionKeyProto {
-    NetworkIdentitySetProto identity = 1;
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    int32 uid = 2;
+    optional NetworkIdentitySetProto identity = 1;
 
-    int32 set = 3;
+    optional int32 uid = 2;
 
-    int32 tag = 4;
+    optional int32 set = 3;
+
+    optional int32 tag = 4;
 }
 
 // Corresponds to NetworkStatsHistory.
 message NetworkStatsHistoryProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Duration for this bucket in milliseconds.
-    int64 bucket_duration_ms = 1;
+    optional int64 bucket_duration_ms = 1;
 
     repeated NetworkStatsHistoryBucketProto buckets = 2;
 }
 
 // Corresponds to each bucket in NetworkStatsHistory.
 message NetworkStatsHistoryBucketProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Bucket start time in milliseconds since epoch.
-    int64 bucket_start_ms = 1;
+    optional int64 bucket_start_ms = 1;
 
-    int64 rx_bytes = 2;
+    optional int64 rx_bytes = 2;
 
-    int64 rx_packets = 3;
+    optional int64 rx_packets = 3;
 
-    int64 tx_bytes = 4;
+    optional int64 tx_bytes = 4;
 
-    int64 tx_packets = 5;
+    optional int64 tx_packets = 5;
 
-    int64 operations = 6;
+    optional int64 operations = 6;
 }

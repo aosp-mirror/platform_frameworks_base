@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Build;
@@ -146,7 +148,7 @@ public class RescueParty {
         SystemProperties.set(PROP_RESCUE_LEVEL, Integer.toString(level));
 
         EventLogTags.writeRescueLevel(level, triggerUid);
-        PackageManagerService.logCriticalInfo(Log.WARN, "Incremented rescue level to "
+        logCriticalInfo(Log.WARN, "Incremented rescue level to "
                 + levelToString(level) + " triggered by UID " + triggerUid);
     }
 
@@ -166,12 +168,12 @@ public class RescueParty {
         try {
             executeRescueLevelInternal(context, level);
             EventLogTags.writeRescueSuccess(level);
-            PackageManagerService.logCriticalInfo(Log.DEBUG,
+            logCriticalInfo(Log.DEBUG,
                     "Finished rescue level " + levelToString(level));
         } catch (Throwable t) {
             final String msg = ExceptionUtils.getCompleteMessage(t);
             EventLogTags.writeRescueFailure(level, msg);
-            PackageManagerService.logCriticalInfo(Log.ERROR,
+            logCriticalInfo(Log.ERROR,
                     "Failed rescue level " + levelToString(level) + ": " + msg);
         }
     }

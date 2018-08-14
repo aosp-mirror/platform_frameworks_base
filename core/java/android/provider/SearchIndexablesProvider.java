@@ -72,6 +72,7 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
     private static final int MATCH_RES_CODE = 1;
     private static final int MATCH_RAW_CODE = 2;
     private static final int MATCH_NON_INDEXABLE_KEYS_CODE = 3;
+    private static final int MATCH_SITE_MAP_PAIRS_CODE = 4;
 
     /**
      * Implementation is provided by the parent class.
@@ -87,6 +88,8 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
                 MATCH_RAW_CODE);
         mMatcher.addURI(mAuthority, SearchIndexablesContract.NON_INDEXABLES_KEYS_PATH,
                 MATCH_NON_INDEXABLE_KEYS_CODE);
+        mMatcher.addURI(mAuthority, SearchIndexablesContract.SITE_MAP_PAIRS_PATH,
+                MATCH_SITE_MAP_PAIRS_CODE);
 
         // Sanity check our setup
         if (!info.exported) {
@@ -112,6 +115,8 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
                 return queryRawData(null);
             case MATCH_NON_INDEXABLE_KEYS_CODE:
                 return queryNonIndexableKeys(null);
+            case MATCH_SITE_MAP_PAIRS_CODE:
+                return querySiteMapPairs();
             default:
                 throw new UnsupportedOperationException("Unknown Uri " + uri);
         }
@@ -149,6 +154,17 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
      *                   should be included.
      */
     public abstract Cursor queryNonIndexableKeys(String[] projection);
+
+    /**
+     * Returns a {@link Cursor}, where rows are [parent class, child class] entries to form a site
+     * map. The list of pairs should be as complete as possible.
+     *
+     * @hide
+     */
+    public Cursor querySiteMapPairs() {
+        // By default no-op.
+        return null;
+    }
 
     @Override
     public String getType(Uri uri) {

@@ -31,16 +31,17 @@ import java.util.Arrays;
 
 public class NotificationChannels extends SystemUI {
     public static String ALERTS      = "ALR";
-    public static String SCREENSHOTS = "SCN";
+    public static String SCREENSHOTS_LEGACY = "SCN";
+    public static String SCREENSHOTS_HEADSUP = "SCN_HEADSUP";
     public static String GENERAL     = "GEN";
     public static String STORAGE     = "DSK";
     public static String TVPIP       = "TPP";
     public static String BATTERY     = "BAT";
+    public static String HINTS       = "HNT";
 
-    @VisibleForTesting
-    static void createAll(Context context) {
+    public static void createAll(Context context) {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
-        NotificationChannel batteryChannel = new NotificationChannel(BATTERY,
+        final NotificationChannel batteryChannel = new NotificationChannel(BATTERY,
                 context.getString(R.string.notification_channel_battery),
                 NotificationManager.IMPORTANCE_MAX);
         final String soundPath = Settings.Global.getString(context.getContentResolver(),
@@ -49,28 +50,47 @@ public class NotificationChannels extends SystemUI {
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
                 .build());
+        batteryChannel.setBlockableSystem(true);
+
+        final NotificationChannel alerts = new NotificationChannel(
+                ALERTS,
+                context.getString(R.string.notification_channel_alerts),
+                NotificationManager.IMPORTANCE_HIGH);
+
+        final NotificationChannel general = new NotificationChannel(
+                GENERAL,
+                context.getString(R.string.notification_channel_general),
+                NotificationManager.IMPORTANCE_MIN);
+
+        final NotificationChannel storage = new NotificationChannel(
+                STORAGE,
+                context.getString(R.string.notification_channel_storage),
+                isTv(context)
+                        ? NotificationManager.IMPORTANCE_DEFAULT
+                        : NotificationManager.IMPORTANCE_LOW);
+
+        final NotificationChannel hint = new NotificationChannel(
+                HINTS,
+                context.getString(R.string.notification_channel_hints),
+                NotificationManager.IMPORTANCE_DEFAULT);
+        // No need to bypass DND.
 
         nm.createNotificationChannels(Arrays.asList(
-                new NotificationChannel(
-                        ALERTS,
-                        context.getString(R.string.notification_channel_alerts),
-                        NotificationManager.IMPORTANCE_HIGH),
-                new NotificationChannel(
-                        SCREENSHOTS,
+                alerts,
+                general,
+                storage,
+                createScreenshotChannel(
                         context.getString(R.string.notification_channel_screenshot),
-                        NotificationManager.IMPORTANCE_LOW),
-                new NotificationChannel(
-                        GENERAL,
-                        context.getString(R.string.notification_channel_general),
-                        NotificationManager.IMPORTANCE_MIN),
-                new NotificationChannel(
-                        STORAGE,
-                        context.getString(R.string.notification_channel_storage),
-                        isTv(context)
-                                ? NotificationManager.IMPORTANCE_DEFAULT
-                                : NotificationManager.IMPORTANCE_LOW),
-                batteryChannel
+                        nm.getNotificationChannel(SCREENSHOTS_LEGACY)),
+                batteryChannel,
+                hint
         ));
+
+        // Delete older SS channel if present.
+        // Screenshots promoted to heads-up in P, this cleans up the lower priority channel from O.
+        // This line can be deleted in Q.
+        nm.deleteNotificationChannel(SCREENSHOTS_LEGACY);
+
 
         if (isTv(context)) {
             // TV specific notification channel for TV PIP controls.
@@ -81,6 +101,41 @@ public class NotificationChannels extends SystemUI {
                     context.getString(R.string.notification_channel_tv_pip),
                     NotificationManager.IMPORTANCE_MAX));
         }
+    }
+
+    /**
+     * Set up screenshot channel, respecting any previously committed user settings on legacy
+     * channel.
+     * @return
+     */
+    @VisibleForTesting static NotificationChannel createScreenshotChannel(
+            String name, NotificationChannel legacySS) {
+        NotificationChannel screenshotChannel = new NotificationChannel(SCREENSHOTS_HEADSUP,
+                name, NotificationManager.IMPORTANCE_HIGH); // pop on screen
+
+        screenshotChannel.setSound(Uri.parse(""), // silent
+                new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build());
+        screenshotChannel.setBlockableSystem(true);
+
+        if (legacySS != null) {
+            // Respect any user modified fields from the old channel.
+            int userlock = legacySS.getUserLockedFields();
+            if ((userlock & NotificationChannel.USER_LOCKED_IMPORTANCE) != 0) {
+                screenshotChannel.setImportance(legacySS.getImportance());
+            }
+            if ((userlock & NotificationChannel.USER_LOCKED_SOUND) != 0)  {
+                screenshotChannel.setSound(legacySS.getSound(), legacySS.getAudioAttributes());
+            }
+            if ((userlock & NotificationChannel.USER_LOCKED_VIBRATION) != 0)  {
+                screenshotChannel.setVibrationPattern(legacySS.getVibrationPattern());
+            }
+            if ((userlock & NotificationChannel.USER_LOCKED_LIGHTS) != 0)  {
+                screenshotChannel.setLightColor(legacySS.getLightColor());
+            }
+            // skip show_badge, irrelevant for system channel
+        }
+
+        return screenshotChannel;
     }
 
     @Override

@@ -89,6 +89,7 @@ public class UserRestrictionsUtilsTest extends AndroidTestCase {
         assertFalse(UserRestrictionsUtils.canDeviceOwnerChange(UserManager.DISALLOW_RECORD_AUDIO));
         assertFalse(UserRestrictionsUtils.canDeviceOwnerChange(UserManager.DISALLOW_WALLPAPER));
         assertTrue(UserRestrictionsUtils.canDeviceOwnerChange(UserManager.DISALLOW_ADD_USER));
+        assertTrue(UserRestrictionsUtils.canDeviceOwnerChange(UserManager.DISALLOW_USER_SWITCH));
     }
 
     public void testCanProfileOwnerChange() {
@@ -97,6 +98,8 @@ public class UserRestrictionsUtilsTest extends AndroidTestCase {
                 UserManager.DISALLOW_RECORD_AUDIO, user));
         assertFalse(UserRestrictionsUtils.canProfileOwnerChange(
                 UserManager.DISALLOW_WALLPAPER, user));
+        assertFalse(UserRestrictionsUtils.canProfileOwnerChange(
+                UserManager.DISALLOW_USER_SWITCH, user));
         assertTrue(UserRestrictionsUtils.canProfileOwnerChange(
                 UserManager.DISALLOW_ADD_USER, user));
         assertTrue(UserRestrictionsUtils.canProfileOwnerChange(
@@ -109,6 +112,8 @@ public class UserRestrictionsUtilsTest extends AndroidTestCase {
                 UserManager.DISALLOW_WALLPAPER, user));
         assertFalse(UserRestrictionsUtils.canProfileOwnerChange(
                 UserManager.DISALLOW_ADD_USER, user));
+        assertFalse(UserRestrictionsUtils.canProfileOwnerChange(
+                UserManager.DISALLOW_USER_SWITCH, user));
         assertTrue(UserRestrictionsUtils.canProfileOwnerChange(
                 UserManager.DISALLOW_ADJUST_VOLUME, user));
     }

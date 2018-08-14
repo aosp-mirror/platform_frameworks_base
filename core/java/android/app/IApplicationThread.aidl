@@ -20,6 +20,7 @@ import android.app.IInstrumentationWatcher;
 import android.app.IUiAutomationConnection;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
+import android.app.servertransaction.ClientTransaction;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.Intent;
@@ -52,24 +53,6 @@ import java.util.Map;
  * {@hide}
  */
 oneway interface IApplicationThread {
-    void schedulePauseActivity(IBinder token, boolean finished, boolean userLeaving,
-            int configChanges, boolean dontReport);
-    void scheduleStopActivity(IBinder token, boolean showWindow,
-            int configChanges);
-    void scheduleWindowVisibility(IBinder token, boolean showWindow);
-    void scheduleResumeActivity(IBinder token, int procState, boolean isForward,
-            in Bundle resumeArgs);
-    void scheduleSendResult(IBinder token, in List<ResultInfo> results);
-    void scheduleLaunchActivity(in Intent intent, IBinder token, int ident,
-            in ActivityInfo info, in Configuration curConfig, in Configuration overrideConfig,
-            in CompatibilityInfo compatInfo, in String referrer, IVoiceInteractor voiceInteractor,
-            int procState, in Bundle state, in PersistableBundle persistentState,
-            in List<ResultInfo> pendingResults, in List<ReferrerIntent> pendingNewIntents,
-            boolean notResumed, boolean isForward, in ProfilerInfo profilerInfo);
-    void scheduleNewIntent(
-            in List<ReferrerIntent> intent, IBinder token, boolean andPause);
-    void scheduleDestroyActivity(IBinder token, boolean finished,
-            int configChanges);
     void scheduleReceiver(in Intent intent, in ActivityInfo info,
             in CompatibilityInfo compatInfo,
             int resultCode, in String data, in Bundle extras, boolean sync,
@@ -84,9 +67,9 @@ oneway interface IApplicationThread {
             int debugMode, boolean enableBinderTracking, boolean trackAllocation,
             boolean restrictedBackupMode, boolean persistent, in Configuration config,
             in CompatibilityInfo compatInfo, in Map services,
-            in Bundle coreSettings, in String buildSerial);
+            in Bundle coreSettings, in String buildSerial, boolean isAutofillCompatEnabled);
+    void runIsolatedEntryPoint(in String entryPoint, in String[] entryPointArgs);
     void scheduleExit();
-    void scheduleConfigurationChanged(in Configuration config);
     void scheduleServiceArgs(IBinder token, in ParceledListSlice args);
     void updateTimeZone();
     void processInBackground();
@@ -100,12 +83,6 @@ oneway interface IApplicationThread {
             int resultCode, in String data, in Bundle extras, boolean ordered,
             boolean sticky, int sendingUser, int processState);
     void scheduleLowMemory();
-    void scheduleActivityConfigurationChanged(IBinder token, in Configuration overrideConfig);
-    void scheduleActivityMovedToDisplay(IBinder token, int displayId,
-            in Configuration overrideConfig);
-    void scheduleRelaunchActivity(IBinder token, in List<ResultInfo> pendingResults,
-            in List<ReferrerIntent> pendingNewIntents, int configChanges, boolean notResumed,
-            in Configuration config, in Configuration overrideConfig, boolean preserveWindow);
     void scheduleSleeping(IBinder token, boolean sleeping);
     void profilerControl(boolean start, in ProfilerInfo profilerInfo, int profileType);
     void setSchedulingGroup(int group);
@@ -130,6 +107,9 @@ oneway interface IApplicationThread {
     void dumpMemInfo(in ParcelFileDescriptor fd, in Debug.MemoryInfo mem, boolean checkin,
             boolean dumpInfo, boolean dumpDalvik, boolean dumpSummaryOnly, boolean dumpUnreachable,
             in String[] args);
+    void dumpMemInfoProto(in ParcelFileDescriptor fd, in Debug.MemoryInfo mem,
+            boolean dumpInfo, boolean dumpDalvik, boolean dumpSummaryOnly, boolean dumpUnreachable,
+            in String[] args);
     void dumpGfxInfo(in ParcelFileDescriptor fd, in String[] args);
     void dumpProvider(in ParcelFileDescriptor fd, IBinder servicetoken,
             in String[] args);
@@ -145,14 +125,11 @@ oneway interface IApplicationThread {
     void notifyCleartextNetwork(in byte[] firstPacket);
     void startBinderTracking();
     void stopBinderTrackingAndDump(in ParcelFileDescriptor fd);
-    void scheduleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode,
-            in Configuration newConfig);
-    void schedulePictureInPictureModeChanged(IBinder token, boolean isInPictureInPictureMode,
-            in Configuration newConfig);
     void scheduleLocalVoiceInteractionStarted(IBinder token,
             IVoiceInteractor voiceInteractor);
     void handleTrustStorageUpdate();
     void attachAgent(String path);
     void scheduleApplicationInfoChanged(in ApplicationInfo ai);
     void setNetworkBlockSeq(long procStateSeq);
+    void scheduleTransaction(in ClientTransaction transaction);
 }

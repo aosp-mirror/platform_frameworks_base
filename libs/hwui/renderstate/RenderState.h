@@ -26,14 +26,14 @@
 #include "renderstate/Stencil.h"
 #include "utils/Macros.h"
 
-#include <set>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
-#include <ui/Region.h>
-#include <utils/Mutex.h>
-#include <utils/Functor.h>
-#include <utils/RefBase.h>
 #include <private/hwui/DrawGlInfo.h>
+#include <ui/Region.h>
+#include <utils/Functor.h>
+#include <utils/Mutex.h>
+#include <utils/RefBase.h>
+#include <set>
 
 class GrContext;
 
@@ -57,6 +57,7 @@ class RenderState {
     friend class renderthread::RenderThread;
     friend class Caches;
     friend class renderthread::CacheManager;
+
 public:
     void onGLContextCreated();
     void onGLContextDestroyed();
@@ -79,12 +80,8 @@ public:
 
     void debugOverdraw(bool enable, bool clear);
 
-    void registerLayer(Layer* layer) {
-        mActiveLayers.insert(layer);
-    }
-    void unregisterLayer(Layer* layer) {
-        mActiveLayers.erase(layer);
-    }
+    void registerLayer(Layer* layer) { mActiveLayers.insert(layer); }
+    void unregisterLayer(Layer* layer) { mActiveLayers.erase(layer); }
 
     void registerCanvasContext(renderthread::CanvasContext* context) {
         mRegisteredContexts.insert(context);
@@ -126,7 +123,6 @@ private:
 
     explicit RenderState(renderthread::RenderThread& thread);
     ~RenderState();
-
 
     renderthread::RenderThread& mRenderThread;
     Caches* mCaches = nullptr;

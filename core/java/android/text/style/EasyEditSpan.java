@@ -16,6 +16,7 @@
 
 package android.text.style;
 
+import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.os.Parcel;
 import android.text.ParcelableSpan;
@@ -79,7 +80,7 @@ public class EasyEditSpan implements ParcelableSpan {
     /**
      * Constructor called from {@link TextUtils} to restore the span.
      */
-    public EasyEditSpan(Parcel source) {
+    public EasyEditSpan(@NonNull Parcel source) {
         mPendingIntent = source.readParcelable(null);
         mDeleteEnabled = (source.readByte() == 1);
     }
@@ -90,12 +91,12 @@ public class EasyEditSpan implements ParcelableSpan {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         writeToParcelInternal(dest, flags);
     }
 
     /** @hide */
-    public void writeToParcelInternal(Parcel dest, int flags) {
+    public void writeToParcelInternal(@NonNull Parcel dest, int flags) {
         dest.writeParcelable(mPendingIntent, 0);
         dest.writeByte((byte) (mDeleteEnabled ? 1 : 0));
     }

@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_DEFAULT;
+
 import android.app.ActivityThread;
 import android.content.Context;
 import android.os.IBinder;
@@ -62,6 +64,11 @@ public abstract class SystemService {
      * such as the PowerManager or PackageManager.
      */
     public static final int PHASE_SYSTEM_SERVICES_READY = 500;
+
+    /**
+     * After receiving this boot phase, services can safely call into device specific services.
+     */
+    public static final int PHASE_DEVICE_SPECIFIC_SERVICES_READY = 520;
 
     /**
      * After receiving this boot phase, services can broadcast Intents.
@@ -194,6 +201,9 @@ public abstract class SystemService {
 
     /**
      * Publish the service so it is accessible to other services and apps.
+     *
+     * @param name the name of the new service
+     * @param service the service object
      */
     protected final void publishBinderService(String name, IBinder service) {
         publishBinderService(name, service, false);
@@ -201,10 +211,29 @@ public abstract class SystemService {
 
     /**
      * Publish the service so it is accessible to other services and apps.
+     *
+     * @param name the name of the new service
+     * @param service the service object
+     * @param allowIsolated set to true to allow isolated sandboxed processes
+     * to access this service
      */
     protected final void publishBinderService(String name, IBinder service,
             boolean allowIsolated) {
-        ServiceManager.addService(name, service, allowIsolated);
+        publishBinderService(name, service, allowIsolated, DUMP_FLAG_PRIORITY_DEFAULT);
+    }
+
+    /**
+     * Publish the service so it is accessible to other services and apps.
+     *
+     * @param name the name of the new service
+     * @param service the service object
+     * @param allowIsolated set to true to allow isolated sandboxed processes
+     * to access this service
+     * @param dumpPriority supported dump priority levels as a bitmask
+     */
+    protected final void publishBinderService(String name, IBinder service,
+            boolean allowIsolated, int dumpPriority) {
+        ServiceManager.addService(name, service, allowIsolated, dumpPriority);
     }
 
     /**

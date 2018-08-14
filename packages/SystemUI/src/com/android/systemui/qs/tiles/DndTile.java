@@ -19,6 +19,8 @@ package com.android.systemui.qs.tiles;
 import static android.provider.Settings.Global.ZEN_MODE_ALARMS;
 import static android.provider.Settings.Global.ZEN_MODE_OFF;
 
+import android.app.ActivityManager;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -27,35 +29,37 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.service.quicksettings.Tile;
-import android.util.Log;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Switch;
 import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.settingslib.notification.EnableZenModeDialog;
 import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SysUIToast;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
-import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.statusbar.policy.ZenModeController.Callback;
 import com.android.systemui.volume.ZenModePanel;
 
 /** Quick settings tile: Do not disturb **/
@@ -69,9 +73,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     private static final String ACTION_SET_VISIBLE = "com.android.systemui.dndtile.SET_VISIBLE";
     private static final String EXTRA_VISIBLE = "visible";
-
-    private static final QSTile.Icon TOTAL_SILENCE =
-            ResourceIcon.get(R.drawable.ic_qs_dnd_on_total_silence);
 
     private final ZenModeController mController;
     private final DndDetailAdapter mDetailAdapter;
@@ -131,11 +132,53 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleClick() {
+        // Zen is currently on
         if (mState.value) {
             mController.setZen(ZEN_MODE_OFF, null, TAG);
         } else {
-            int zen = Prefs.getInt(mContext, Prefs.Key.DND_FAVORITE_ZEN, Global.ZEN_MODE_ALARMS);
-            mController.setZen(zen, null, TAG);
+            showDetail(true);
+        }
+    }
+
+    @Override
+    public void showDetail(boolean show) {
+        int zenDuration = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.ZEN_DURATION, 0);
+        boolean showOnboarding = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0;
+        if (showOnboarding) {
+            // don't show on-boarding again or notification ever
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
+            // turn on DND
+            mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
+            // show on-boarding screen
+            Intent intent = new Intent(Settings.ZEN_MODE_ONBOARDING);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(intent, 0);
+        } else {
+            switch (zenDuration) {
+                case Settings.Global.ZEN_DURATION_PROMPT:
+                    mUiHandler.post(() -> {
+                        Dialog mDialog = new EnableZenModeDialog(mContext).createDialog();
+                        mDialog.getWindow().setType(
+                                WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+                        SystemUIDialog.setShowForAllUsers(mDialog, true);
+                        SystemUIDialog.registerDismissListener(mDialog);
+                        SystemUIDialog.setWindowOnTop(mDialog);
+                        mUiHandler.post(() -> mDialog.show());
+                        mHost.collapsePanels();
+                    });
+                    break;
+                case Settings.Global.ZEN_DURATION_FOREVER:
+                    mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
+                    break;
+                default:
+                    Uri conditionId = ZenModeConfig.toTimeCondition(mContext, zenDuration,
+                            ActivityManager.getCurrentUser(), true).id;
+                    mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                            conditionId, TAG);
+            }
         }
     }
 
@@ -159,9 +202,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
                     showDetail(true);
                 }
             });
-            int zen = Prefs.getInt(mContext, Prefs.Key.DND_FAVORITE_ZEN,
-                    Global.ZEN_MODE_ALARMS);
-            mController.setZen(zen, null, TAG);
+            mController.setZen(Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
         } else {
             showDetail(true);
         }
@@ -183,29 +224,30 @@ public class DndTile extends QSTileImpl<BooleanState> {
         state.value = newValue;
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.slash.isSlashed = !state.value;
+        state.label = getTileLabel();
+        state.secondaryLabel = TextUtils.emptyIfNull(ZenModeConfig.getDescription(mContext,
+                zen != Global.ZEN_MODE_OFF, mController.getConfig(), false));
+        state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_ADJUST_VOLUME);
         switch (zen) {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
-                state.label = mContext.getString(R.string.quick_settings_dnd_priority_label);
-                state.contentDescription = mContext.getString(
-                        R.string.accessibility_quick_settings_dnd_priority_on);
+                state.contentDescription =
+                        mContext.getString(R.string.accessibility_quick_settings_dnd) + ", "
+                        + state.secondaryLabel;
                 break;
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
-                state.icon = TOTAL_SILENCE;
-                state.label = mContext.getString(R.string.quick_settings_dnd_none_label);
-                state.contentDescription = mContext.getString(
-                        R.string.accessibility_quick_settings_dnd_none_on);
+                state.contentDescription =
+                        mContext.getString(R.string.accessibility_quick_settings_dnd) + ", " +
+                        mContext.getString(R.string.accessibility_quick_settings_dnd_none_on)
+                                + ", " + state.secondaryLabel;
                 break;
             case ZEN_MODE_ALARMS:
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
-                state.label = mContext.getString(R.string.quick_settings_dnd_alarms_label);
-                state.contentDescription = mContext.getString(
-                        R.string.accessibility_quick_settings_dnd_alarms_on);
+                state.contentDescription =
+                        mContext.getString(R.string.accessibility_quick_settings_dnd) + ", " +
+                        mContext.getString(R.string.accessibility_quick_settings_dnd_alarms_on)
+                                + ", " + state.secondaryLabel;
                 break;
             default:
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
-                state.label = mContext.getString(R.string.quick_settings_dnd_label);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_dnd);
                 break;
@@ -236,7 +278,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
     public void handleSetListening(boolean listening) {
         if (mListening == listening) return;
         mListening = listening;
-        if (mController == null) return;
         if (mListening) {
             mController.addCallback(mZenCallback);
             Prefs.registerListener(mContext, mPrefListener);
@@ -315,9 +356,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
                 mController.setZen(ZEN_MODE_OFF, null, TAG);
                 mAuto = false;
             } else {
-                int zen = Prefs.getInt(mContext, Prefs.Key.DND_FAVORITE_ZEN,
-                        ZEN_MODE_ALARMS);
-                mController.setZen(zen, null, TAG);
+                mController.setZen(Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
             }
         }
 

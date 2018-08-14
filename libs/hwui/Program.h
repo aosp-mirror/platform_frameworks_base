@@ -39,25 +39,25 @@ namespace uirenderer {
 
 // Debug
 #if DEBUG_PROGRAMS
-    #define PROGRAM_LOGD(...) ALOGD(__VA_ARGS__)
+#define PROGRAM_LOGD(...) ALOGD(__VA_ARGS__)
 #else
-    #define PROGRAM_LOGD(...)
+#define PROGRAM_LOGD(...)
 #endif
 
 #define COLOR_COMPONENT_THRESHOLD 1.0f
 #define COLOR_COMPONENT_INV_THRESHOLD 0.0f
 
-#define PROGRAM_KEY_TEXTURE             0x01
-#define PROGRAM_KEY_A8_TEXTURE          0x02
-#define PROGRAM_KEY_BITMAP              0x04
-#define PROGRAM_KEY_GRADIENT            0x08
-#define PROGRAM_KEY_BITMAP_FIRST        0x10
-#define PROGRAM_KEY_COLOR_MATRIX        0x20
-#define PROGRAM_KEY_COLOR_BLEND         0x40
-#define PROGRAM_KEY_BITMAP_NPOT         0x80
-#define PROGRAM_KEY_BITMAP_EXTERNAL    0x100
+#define PROGRAM_KEY_TEXTURE 0x01
+#define PROGRAM_KEY_A8_TEXTURE 0x02
+#define PROGRAM_KEY_BITMAP 0x04
+#define PROGRAM_KEY_GRADIENT 0x08
+#define PROGRAM_KEY_BITMAP_FIRST 0x10
+#define PROGRAM_KEY_COLOR_MATRIX 0x20
+#define PROGRAM_KEY_COLOR_BLEND 0x40
+#define PROGRAM_KEY_BITMAP_NPOT 0x80
+#define PROGRAM_KEY_BITMAP_EXTERNAL 0x100
 
-#define PROGRAM_KEY_BITMAP_WRAPS_MASK  0x600
+#define PROGRAM_KEY_BITMAP_WRAPS_MASK 0x600
 #define PROGRAM_KEY_BITMAP_WRAPT_MASK 0x1800
 
 #define PROGRAM_KEY_SWAP_SRC_DST_SHIFT 13
@@ -71,7 +71,7 @@ namespace uirenderer {
 #define PROGRAM_BITMAP_WRAPS_SHIFT 9
 #define PROGRAM_BITMAP_WRAPT_SHIFT 11
 
-#define PROGRAM_GRADIENT_TYPE_SHIFT 33 // 2 bits for gradient type
+#define PROGRAM_GRADIENT_TYPE_SHIFT 33  // 2 bits for gradient type
 #define PROGRAM_MODULATE_SHIFT 35
 
 #define PROGRAM_HAS_VERTEX_ALPHA_SHIFT 36
@@ -91,7 +91,7 @@ namespace uirenderer {
 #define PROGRAM_HAS_LINEAR_TEXTURE 45
 
 #define PROGRAM_HAS_COLOR_SPACE_CONVERSION 46
-#define PROGRAM_TRANSFER_FUNCTION 47 // 2 bits for transfer function
+#define PROGRAM_TRANSFER_FUNCTION 47  // 2 bits for transfer function
 #define PROGRAM_HAS_TRANSLUCENT_CONVERSION 49
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -110,21 +110,11 @@ typedef uint64_t programid;
  * A ProgramDescription must be used in conjunction with a ProgramCache.
  */
 struct ProgramDescription {
-    enum class ColorFilterMode : int8_t {
-        None = 0,
-        Matrix,
-        Blend
-    };
+    enum class ColorFilterMode : int8_t { None = 0, Matrix, Blend };
 
-    enum Gradient : int8_t {
-        kGradientLinear = 0,
-        kGradientCircular,
-        kGradientSweep
-    };
+    enum Gradient : int8_t { kGradientLinear = 0, kGradientCircular, kGradientSweep };
 
-    ProgramDescription() {
-        reset();
-    }
+    ProgramDescription() { reset(); }
 
     // Texturing
     bool hasTexture;
@@ -243,7 +233,7 @@ struct ProgramDescription {
      */
     bool setAlpha8ColorModulate(const float r, const float g, const float b, const float a) {
         modulate = a < COLOR_COMPONENT_THRESHOLD || r > COLOR_COMPONENT_INV_THRESHOLD ||
-                g > COLOR_COMPONENT_INV_THRESHOLD || b > COLOR_COMPONENT_INV_THRESHOLD;
+                   g > COLOR_COMPONENT_INV_THRESHOLD || b > COLOR_COMPONENT_INV_THRESHOLD;
         return modulate;
     }
 
@@ -277,12 +267,12 @@ struct ProgramDescription {
                 break;
             case ColorFilterMode::Blend:
                 key |= PROGRAM_KEY_COLOR_BLEND;
-                key |= ((int) colorMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_COLOR_OP_SHIFT;
+                key |= ((int)colorMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_COLOR_OP_SHIFT;
                 break;
             case ColorFilterMode::None:
                 break;
         }
-        key |= ((int) framebufferMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT;
+        key |= ((int)framebufferMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT;
         key |= programid(swapSrcDst) << PROGRAM_KEY_SWAP_SRC_DST_SHIFT;
         key |= programid(modulate) << PROGRAM_MODULATE_SHIFT;
         key |= programid(hasVertexAlpha) << PROGRAM_HAS_VERTEX_ALPHA_SHIFT;
@@ -307,8 +297,7 @@ struct ProgramDescription {
     void log(const char* message) const {
 #if DEBUG_PROGRAMS
         programid k = key();
-        PROGRAM_LOGD("%s (key = 0x%.8x%.8x)", message, uint32_t(k >> 32),
-                uint32_t(k & 0xffffffff));
+        PROGRAM_LOGD("%s (key = 0x%.8x%.8x)", message, uint32_t(k >> 32), uint32_t(k & 0xffffffff));
 #endif
     }
 
@@ -325,7 +314,7 @@ private:
         return 0;
     }
 
-}; // struct ProgramDescription
+};  // struct ProgramDescription
 
 /**
  * A program holds a vertex and a fragment shader. It offers several utility
@@ -333,10 +322,7 @@ private:
  */
 class Program {
 public:
-    enum ShaderBindings {
-        kBindingPosition,
-        kBindingTexCoords
-    };
+    enum ShaderBindings { kBindingPosition, kBindingTexCoords };
 
     /**
      * Creates a new program with the specified vertex and fragment
@@ -370,23 +356,19 @@ public:
      * Indicates whether this program is currently in use with
      * the GL context.
      */
-    inline bool isInUse() const {
-        return mUse;
-    }
+    inline bool isInUse() const { return mUse; }
 
     /**
      * Indicates whether this program was correctly compiled and linked.
      */
-    inline bool isInitialized() const {
-        return mInitialized;
-    }
+    inline bool isInitialized() const { return mInitialized; }
 
     /**
      * Binds the program with the specified projection, modelView and
      * transform matrices.
      */
-    void set(const mat4& projectionMatrix, const mat4& modelViewMatrix,
-             const mat4& transformMatrix, bool offset = false);
+    void set(const mat4& projectionMatrix, const mat4& modelViewMatrix, const mat4& transformMatrix,
+             bool offset = false);
 
     /**
      * Sets the color associated with this shader.
@@ -456,9 +438,9 @@ private:
 
     mat4 mProjection;
     bool mOffset;
-}; // class Program
+};  // class Program
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_PROGRAM_H
+#endif  // ANDROID_HWUI_PROGRAM_H
