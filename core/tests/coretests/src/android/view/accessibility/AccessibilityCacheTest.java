@@ -501,11 +501,34 @@ public class AccessibilityCacheTest {
     }
 
     @Test
-    public void addNode_whenNodeBeingReplacedIsOwnGrandparent_doesntCrash() {
+    public void addNode_whenNodeBeingReplacedIsOwnGrandparentWithTwoChildren_doesntCrash() {
         AccessibilityNodeInfo parentNodeInfo =
                 getNodeWithA11yAndWindowId(PARENT_VIEW_ID, WINDOW_ID_1);
         parentNodeInfo.addChild(getMockViewWithA11yAndWindowIds(CHILD_VIEW_ID, WINDOW_ID_1));
         parentNodeInfo.addChild(getMockViewWithA11yAndWindowIds(OTHER_CHILD_VIEW_ID, WINDOW_ID_1));
+        AccessibilityNodeInfo childNodeInfo =
+                getNodeWithA11yAndWindowId(CHILD_VIEW_ID, WINDOW_ID_1);
+        childNodeInfo.setParent(getMockViewWithA11yAndWindowIds(PARENT_VIEW_ID, WINDOW_ID_1));
+        childNodeInfo.addChild(getMockViewWithA11yAndWindowIds(PARENT_VIEW_ID, WINDOW_ID_1));
+
+        AccessibilityNodeInfo replacementParentNodeInfo =
+                getNodeWithA11yAndWindowId(PARENT_VIEW_ID, WINDOW_ID_1);
+        try {
+            mAccessibilityCache.add(parentNodeInfo);
+            mAccessibilityCache.add(childNodeInfo);
+            mAccessibilityCache.add(replacementParentNodeInfo);
+        } finally {
+            parentNodeInfo.recycle();
+            childNodeInfo.recycle();
+            replacementParentNodeInfo.recycle();
+        }
+    }
+
+    @Test
+    public void addNode_whenNodeBeingReplacedIsOwnGrandparentWithOneChild_doesntCrash() {
+        AccessibilityNodeInfo parentNodeInfo =
+                getNodeWithA11yAndWindowId(PARENT_VIEW_ID, WINDOW_ID_1);
+        parentNodeInfo.addChild(getMockViewWithA11yAndWindowIds(CHILD_VIEW_ID, WINDOW_ID_1));
         AccessibilityNodeInfo childNodeInfo =
                 getNodeWithA11yAndWindowId(CHILD_VIEW_ID, WINDOW_ID_1);
         childNodeInfo.setParent(getMockViewWithA11yAndWindowIds(PARENT_VIEW_ID, WINDOW_ID_1));
