@@ -33,7 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Correio de voz"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema de conexão ou código MMI inválido."</string>
-    <string name="mmiFdnError" msgid="5224398216385316471">"A operação é limitada somente a números de chamadas fixas."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"A operação é limitada somente a números de discagem fixa."</string>
     <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Não é possível alterar as configurações de encaminhamento de chamada do seu smartphone em roaming."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"O serviço foi ativado."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"O serviço foi ativado para:"</string>
