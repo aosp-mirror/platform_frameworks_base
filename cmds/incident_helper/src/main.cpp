@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
 
     fprintf(stderr, "Pasring section %d...\n", sectionID);
     TextParserBase* parser = selectParser(sectionID);
-    if (parser != NULL) {
+    if (parser != nullptr) {
         fprintf(stderr, "Running parser: %s\n", parser->name.string());
         status_t err = parser->Parse(STDIN_FILENO, STDOUT_FILENO);
         if (err != NO_ERROR) {
