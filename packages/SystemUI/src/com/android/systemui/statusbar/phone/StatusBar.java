@@ -3924,6 +3924,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDozeScrimController.setDozing(mDozing);
         mKeyguardIndicationController.setDozing(mDozing);
         mNotificationPanel.setDozing(mDozing, animate);
+        mNotificationLogger.setDozing(mDozing);
         updateQsExpansionEnabled();
         Trace.endSection();
     }

@@ -1332,6 +1332,12 @@ public abstract class NotificationListenerService extends Service {
         }
 
         @Override
+        public void onNotificationsSeen(List<String> keys)
+                throws RemoteException {
+            // no-op in the listener
+        }
+
+        @Override
         public void onNotificationSnoozedUntilContext(
                 IStatusBarNotificationHolder notificationHolder, String snoozeCriterionId)
                 throws RemoteException {
