@@ -15,6 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.android.systemui.tests">
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -64,6 +65,13 @@
                 <action android:name="com.android.systemui.action.TEST_ACTION" />
             </intent-filter>
         </receiver>
+
+        <provider
+            android:name="androidx.lifecycle.ProcessLifecycleOwnerInitializer"
+            tools:replace="android:authorities"
+            android:authorities="${applicationId}.lifecycle-tests"
+            android:exported="false"
+            android:multiprocess="true" />
     </application>
 
     <instrumentation android:name="android.testing.TestableInstrumentation"
