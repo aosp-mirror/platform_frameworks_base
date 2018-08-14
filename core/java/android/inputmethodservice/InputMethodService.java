@@ -16,6 +16,7 @@
 
 package android.inputmethodservice;
 
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
@@ -461,10 +462,11 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @MainThread
         @Override
-        public final void initializeInternal(IBinder token,
+        public final void initializeInternal(IBinder token, int displayId,
                 IInputMethodPrivilegedOperations privilegedOperations) {
             mPrivOps.set(privilegedOperations);
             mImm.registerInputMethodPrivOps(token, mPrivOps);
+            updateInputMethodDisplay(displayId);
             attachToken(token);
         }
 
@@ -480,6 +482,22 @@ public class InputMethodService extends AbstractInputMethodService {
             }
             mToken = token;
             mWindow.setToken(token);
+        }
+
+        /**
+         * {@inheritDoc}
+         * @hide
+         */
+        @MainThread
+        @Override
+        public void updateInputMethodDisplay(int displayId) {
+            // Update display for adding IME window to the right display.
+            if (displayId != DEFAULT_DISPLAY) {
+                // TODO(b/111364446) Need to address context lifecycle issue if need to re-create
+                // for update resources & configuration correctly when show soft input
+                // in non-default display.
+                updateDisplay(displayId);
+            }
         }
 
         /**
@@ -930,6 +948,9 @@ public class InputMethodService extends AbstractInputMethodService {
         // If the previous IME has occupied non-empty inset in the screen, we need to decide whether
         // we continue to use the same size of the inset or update it
         mShouldClearInsetOfPreviousIme = (mImm.getInputMethodWindowVisibleHeight() > 0);
+        // TODO(b/111364446) Need to address context lifecycle issue if need to re-create
+        // for update resources & configuration correctly when show soft input
+        // in non-default display.
         mInflater = (LayoutInflater)getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         mWindow = new SoftInputWindow(this, "InputMethod", mTheme, null, null, mDispatcherState,

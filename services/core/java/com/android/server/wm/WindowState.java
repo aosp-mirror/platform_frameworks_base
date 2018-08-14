@@ -845,7 +845,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mWindowFrames.mContainingFrame.bottom =
                         mWindowFrames.mContainingFrame.top + frozen.height();
             }
-            final WindowState imeWin = mService.mInputMethodWindow;
+            final WindowState imeWin = mService.mRoot.getCurrentInputMethodWindow();
             // IME is up and obscuring this window. Adjust the window position so it is visible.
             if (imeWin != null && imeWin.isVisibleNow() && isInputMethodTarget()) {
                 if (inFreeformWindowingMode() && mWindowFrames.mContainingFrame.bottom

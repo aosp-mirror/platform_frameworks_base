@@ -681,10 +681,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 i--;
                 WindowState win = mService.mDestroySurface.get(i);
                 win.mDestroying = false;
-                if (mService.mInputMethodWindow == win) {
-                    mService.setInputMethodWindowLocked(null);
+                final DisplayContent displayContent = win.getDisplayContent();
+                if (displayContent.mInputMethodWindow == win) {
+                    displayContent.setInputMethodWindowLocked(null);
                 }
-                if (win.getDisplayContent().mWallpaperController.isWallpaperTarget(win)) {
+                if (displayContent.mWallpaperController.isWallpaperTarget(win)) {
                     wallpaperDestroyed = true;
                 }
                 win.destroySurfaceUnchecked();
@@ -1112,5 +1113,19 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             callback.accept(mChildren.get(i));
         }
+    }
+
+    /**
+     * Get current topmost focused IME window in system.
+     * Will look on all displays in current Z-order.
+     */
+    WindowState getCurrentInputMethodWindow() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final DisplayContent displayContent = mChildren.get(i);
+            if (displayContent.mInputMethodWindow != null) {
+                return displayContent.mInputMethodWindow;
+            }
+        }
+        return null;
     }
 }
