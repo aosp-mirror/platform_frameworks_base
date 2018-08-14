@@ -171,7 +171,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
      */
     private void cleanUpHeadsUpStatesOnAdd(NotificationGroup group, boolean addIsPending) {
         if (!addIsPending && group.hunSummaryOnNextAddition) {
-            if (!mHeadsUpManager.isHeadsUp(group.summary.key)) {
+            if (!mHeadsUpManager.contains(group.summary.key)) {
                 mHeadsUpManager.showNotification(group.summary);
             }
             group.hunSummaryOnNextAddition = false;
@@ -208,15 +208,17 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
                 NotificationData.Entry entry = children.get(i);
                 if (onlySummaryAlerts(entry) && entry.row.isHeadsUp()) {
                     releasedChild = true;
-                    mHeadsUpManager.releaseImmediately(entry.key);
+                    mHeadsUpManager.removeNotification(
+                            entry.key, true /* releaseImmediately */);
                 }
             }
             if (isolatedChild != null && onlySummaryAlerts(isolatedChild)
                     && isolatedChild.row.isHeadsUp()) {
                 releasedChild = true;
-                mHeadsUpManager.releaseImmediately(isolatedChild.key);
+                mHeadsUpManager.removeNotification(
+                        isolatedChild.key, true /* releaseImmediately */);
             }
-            if (releasedChild && !mHeadsUpManager.isHeadsUp(group.summary.key)) {
+            if (releasedChild && !mHeadsUpManager.contains(group.summary.key)) {
                 boolean notifyImmediately = (numChildren - numPendingChildren) > 1;
                 if (notifyImmediately) {
                     mHeadsUpManager.showNotification(group.summary);
@@ -546,8 +548,8 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
                     // the notification is actually already removed, no need to do heads-up on it.
                     return;
                 }
-                if (mHeadsUpManager.isHeadsUp(child.key)) {
-                    mHeadsUpManager.updateNotification(child, true);
+                if (mHeadsUpManager.contains(child.key)) {
+                    mHeadsUpManager.updateNotification(child.key, true /* alert */);
                 } else {
                     if (onlySummaryAlerts(entry)) {
                         notificationGroup.lastHeadsUpTransfer = SystemClock.elapsedRealtime();
@@ -556,7 +558,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
                 }
             }
         }
-        mHeadsUpManager.releaseImmediately(entry.key);
+        mHeadsUpManager.removeNotification(entry.key, true /* releaseImmediately */);
     }
 
     private boolean onlySummaryAlerts(NotificationData.Entry entry) {
