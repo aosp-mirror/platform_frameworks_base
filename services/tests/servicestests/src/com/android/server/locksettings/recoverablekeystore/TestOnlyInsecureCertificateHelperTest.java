@@ -3,8 +3,9 @@ package com.android.server.locksettings.recoverablekeystore;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.security.keystore.recovery.TrustedRootCertificates;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.widget.LockPatternUtils;
 
@@ -13,6 +14,7 @@ import org.junit.runner.RunWith;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.crypto.SecretKey;
 
 @SmallTest

@@ -30,11 +30,11 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.hardware.display.BrightnessConfiguration;
 import android.os.PowerManager;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.MathUtils;
 import android.util.Spline;
-import android.util.Slog;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -531,8 +531,8 @@ public class BrightnessMappingStrategyTest {
     @Test
     public void testGammaCorrectionChangeAtEdges() {
         // The algorithm behaves differently at the edges, because gamma correction there tends to
-        // be extreme. If we add a user data point at (x0, y0+0.3), the adjustment should be
-        // 0.3*2 = 0.6, resulting in a gamma of 3**-0.6 = ~0.52.
+        // be extreme. If we add a user data point at (x0, y0+0.3), the adjustment should be 0.3,
+        // resulting in a gamma of 3**-0.6 = ~0.52.
         final int x0 = 100;
         final int x2 = 2500;
         final int x4 = 4900;
@@ -547,17 +547,15 @@ public class BrightnessMappingStrategyTest {
         assertEquals(y2, strategy.getBrightness(x2), 0.01f /* tolerance */);
         assertEquals(y4, strategy.getBrightness(x4), 0.01f /* tolerance */);
         // Rollin':
-        float increase = 0.3f;
-        float adjustment = increase * 2;
+        float adjustment = 0.3f;
         float gamma = (float) MathUtils.pow(MAXIMUM_GAMMA, -adjustment);
-        strategy.addUserDataPoint(x0, y0 + increase);
-        assertEquals(y0 + increase, strategy.getBrightness(x0), 0.01f /* tolerance */);
+        strategy.addUserDataPoint(x0, y0 + adjustment);
+        assertEquals(y0 + adjustment, strategy.getBrightness(x0), 0.01f /* tolerance */);
         assertEquals(MathUtils.pow(y2, gamma), strategy.getBrightness(x2), 0.01f /* tolerance */);
         assertEquals(MathUtils.pow(y4, gamma), strategy.getBrightness(x4), 0.01f /* tolerance */);
         assertEquals(adjustment, strategy.getAutoBrightnessAdjustment(), 0.01f /* tolerance */);
-        // Similarly, if we set a user data point at (x4, 1.0), the adjustment should be (1-y4)*2.
-        increase = 1.0f - y4;
-        adjustment = increase * 2;
+        // Similarly, if we set a user data point at (x4, 1.0), the adjustment should be 1 - y4.
+        adjustment = 1.0f - y4;
         gamma = (float) MathUtils.pow(MAXIMUM_GAMMA, -adjustment);
         strategy.addUserDataPoint(x4, 1.0f);
         assertEquals(MathUtils.pow(y0, gamma), strategy.getBrightness(x0), 0.01f /* tolerance */);

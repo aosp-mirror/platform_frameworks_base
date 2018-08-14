@@ -22,20 +22,26 @@ import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC
 import static com.android.server.hdmi.HdmiControlService.STANDBY_SCREEN_OFF;
 import static com.google.common.truth.Truth.assertThat;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
 import android.media.AudioManager;
 import android.os.Looper;
 import android.os.SystemProperties;
 import android.os.test.TestLooper;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
+
 import com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.util.ArrayList;
 
 @SmallTest
 @RunWith(JUnit4.class)

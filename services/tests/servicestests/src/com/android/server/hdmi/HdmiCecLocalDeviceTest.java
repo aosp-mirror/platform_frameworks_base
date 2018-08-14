@@ -16,24 +16,29 @@
 package com.android.server.hdmi;
 
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_TV;
+
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.Constants.ADDR_UNREGISTERED;
 import static com.android.server.hdmi.Constants.MESSAGE_DEVICE_VENDOR_ID;
 import static com.android.server.hdmi.Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import android.hardware.hdmi.HdmiControlManager;
 import android.os.test.TestLooper;
-import android.support.test.filters.SmallTest;
-import java.util.Arrays;
+
+import androidx.test.filters.SmallTest;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.util.Arrays;
 
 @SmallTest
 @RunWith(JUnit4.class)

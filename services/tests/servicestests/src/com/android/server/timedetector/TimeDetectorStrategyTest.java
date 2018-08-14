@@ -18,8 +18,9 @@ package com.android.server.timedetector;
 
 import static org.junit.Assert.assertEquals;
 
-import android.support.test.runner.AndroidJUnit4;
 import android.util.TimestampedValue;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

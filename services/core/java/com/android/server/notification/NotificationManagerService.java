@@ -3484,20 +3484,25 @@ public class NotificationManagerService extends SystemService {
         public void applyAdjustmentsFromAssistant(INotificationListener token,
                 List<Adjustment> adjustments) {
 
+            boolean needsSort = false;
             final long identity = Binder.clearCallingIdentity();
             try {
-                boolean appliedAdjustment = false;
                 synchronized (mNotificationLock) {
                     mAssistants.checkServiceTokenLocked(token);
                     for (Adjustment adjustment : adjustments) {
                         NotificationRecord r = mNotificationsByKey.get(adjustment.getKey());
                         if (r != null && mAssistants.isSameUser(token, r.getUserId())) {
                             applyAdjustment(r, adjustment);
-                            appliedAdjustment = true;
+                            r.applyAdjustments();
+                            if (r.getImportance() == IMPORTANCE_NONE) {
+                                cancelNotificationsFromListener(token, new String[]{r.getKey()});
+                            } else {
+                                needsSort = true;
+                            }
                         }
                     }
                 }
-                if (appliedAdjustment) {
+                if (needsSort) {
                     mRankingHandler.requestSort();
                 }
             } finally {
@@ -4118,14 +4123,16 @@ public class NotificationManagerService extends SystemService {
                 // an opinion otherwise (and the channel hasn't yet shown a fg service).
                 if (TextUtils.isEmpty(channelId)
                         || NotificationChannel.DEFAULT_CHANNEL_ID.equals(channelId)) {
-                    r.setImportance(IMPORTANCE_LOW, "Bumped for foreground service");
+                    r.setSystemImportance(IMPORTANCE_LOW);
                 } else {
                     channel.setImportance(IMPORTANCE_LOW);
+                    r.setSystemImportance(IMPORTANCE_LOW);
                     if (!fgServiceShown) {
                         channel.unlockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
                         channel.setFgServiceShown(true);
                     }
-                    mPreferencesHelper.updateNotificationChannel(pkg, notificationUid, channel, false);
+                    mPreferencesHelper.updateNotificationChannel(
+                            pkg, notificationUid, channel, false);
                     r.updateNotificationChannel(channel);
                 }
             } else if (!fgServiceShown && !TextUtils.isEmpty(channelId)
@@ -4299,16 +4306,21 @@ public class NotificationManagerService extends SystemService {
             usageStats.registerSuspendedByAdmin(r);
             return isPackageSuspended;
         }
-        final boolean isBlocked =
-                mPreferencesHelper.isGroupBlocked(pkg, callingUid, r.getChannel().getGroup())
-                || mPreferencesHelper.getImportance(pkg, callingUid)
-                        == NotificationManager.IMPORTANCE_NONE
-                || r.getChannel().getImportance() == NotificationManager.IMPORTANCE_NONE;
+        final boolean isBlocked = isBlocked(r);
         if (isBlocked) {
             Slog.e(TAG, "Suppressing notification from package by user request.");
             usageStats.registerBlocked(r);
         }
         return isBlocked;
+    }
+
+    private boolean isBlocked(NotificationRecord r) {
+        final String pkg = r.sbn.getPackageName();
+        final int callingUid = r.sbn.getUid();
+        return mPreferencesHelper.isGroupBlocked(pkg, callingUid, r.getChannel().getGroup())
+                || mPreferencesHelper.getImportance(pkg, callingUid)
+                == NotificationManager.IMPORTANCE_NONE
+                || r.getImportance() == NotificationManager.IMPORTANCE_NONE;
     }
 
     protected class SnoozeNotificationRunnable implements Runnable {
@@ -4384,6 +4396,88 @@ public class NotificationManagerService extends SystemService {
             }
             r.recordSnoozed();
             savePolicyFile();
+        }
+    }
+
+    protected class CancelNotificationRunnable implements Runnable {
+        private final int mCallingUid;
+        private final int mCallingPid;
+        private final String mPkg;
+        private final String mTag;
+        private final int mId;
+        private final int mMustHaveFlags;
+        private final int mMustNotHaveFlags;
+        private final boolean mSendDelete;
+        private final int mUserId;
+        private final int mReason;
+        private final int mRank;
+        private final int mCount;
+        private final ManagedServiceInfo mListener;
+
+        CancelNotificationRunnable(final int callingUid, final int callingPid,
+                final String pkg, final String tag, final int id,
+                final int mustHaveFlags, final int mustNotHaveFlags, final boolean sendDelete,
+                final int userId, final int reason, int rank, int count,
+                final ManagedServiceInfo listener) {
+            this.mCallingUid = callingUid;
+            this.mCallingPid = callingPid;
+            this.mPkg = pkg;
+            this.mTag = tag;
+            this.mId = id;
+            this.mMustHaveFlags = mustHaveFlags;
+            this.mMustNotHaveFlags = mustNotHaveFlags;
+            this.mSendDelete = sendDelete;
+            this.mUserId = userId;
+            this.mReason = reason;
+            this.mRank = rank;
+            this.mCount = count;
+            this.mListener = listener;
+        }
+
+        @Override
+        public void run() {
+            String listenerName = mListener == null ? null : mListener.component.toShortString();
+            if (DBG) {
+                EventLogTags.writeNotificationCancel(mCallingUid, mCallingPid, mPkg, mId, mTag,
+                        mUserId, mMustHaveFlags, mMustNotHaveFlags, mReason, listenerName);
+            }
+
+            synchronized (mNotificationLock) {
+                // Look for the notification, searching both the posted and enqueued lists.
+                NotificationRecord r = findNotificationLocked(mPkg, mTag, mId, mUserId);
+                if (r != null) {
+                    // The notification was found, check if it should be removed.
+
+                    // Ideally we'd do this in the caller of this method. However, that would
+                    // require the caller to also find the notification.
+                    if (mReason == REASON_CLICK) {
+                        mUsageStats.registerClickedByUser(r);
+                    }
+
+                    if ((r.getNotification().flags & mMustHaveFlags) != mMustHaveFlags) {
+                        return;
+                    }
+                    if ((r.getNotification().flags & mMustNotHaveFlags) != 0) {
+                        return;
+                    }
+
+                    // Cancel the notification.
+                    boolean wasPosted = removeFromNotificationListsLocked(r);
+                    cancelNotificationLocked(
+                            r, mSendDelete, mReason, mRank, mCount, wasPosted, listenerName);
+                    cancelGroupChildrenLocked(r, mCallingUid, mCallingPid, listenerName,
+                            mSendDelete, null);
+                    updateLightsLocked();
+                } else {
+                    // No notification was found, assume that it is snoozed and cancel it.
+                    if (mReason != REASON_SNOOZED) {
+                        final boolean wasSnoozed = mSnoozeHelper.cancel(mUserId, mPkg, mTag, mId);
+                        if (wasSnoozed) {
+                            savePolicyFile();
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -4483,6 +4577,11 @@ public class NotificationManagerService extends SystemService {
                     }
                     if (r == null) {
                         Slog.i(TAG, "Cannot find enqueued record for key: " + key);
+                        return;
+                    }
+
+                    if (isBlocked(r)) {
+                        Slog.i(TAG, "notification blocked by assistant request");
                         return;
                     }
 
@@ -5409,6 +5508,11 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        protected void scheduleCancelNotification(CancelNotificationRunnable cancelRunnable) {
+            if (!hasCallbacks(cancelRunnable)) {
+                sendMessage(Message.obtain(this, cancelRunnable));
+            }
+        }
     }
 
     private final class RankingHandlerWorker extends Handler implements RankingHandler
@@ -5734,56 +5838,15 @@ public class NotificationManagerService extends SystemService {
     void cancelNotification(final int callingUid, final int callingPid,
             final String pkg, final String tag, final int id,
             final int mustHaveFlags, final int mustNotHaveFlags, final boolean sendDelete,
-            final int userId, final int reason, int rank, int count, final ManagedServiceInfo listener) {
-
+            final int userId, final int reason, int rank, int count,
+            final ManagedServiceInfo listener) {
         // In enqueueNotificationInternal notifications are added by scheduling the
         // work on the worker handler. Hence, we also schedule the cancel on this
         // handler to avoid a scenario where an add notification call followed by a
         // remove notification call ends up in not removing the notification.
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                String listenerName = listener == null ? null : listener.component.toShortString();
-                if (DBG) EventLogTags.writeNotificationCancel(callingUid, callingPid, pkg, id, tag,
-                        userId, mustHaveFlags, mustNotHaveFlags, reason, listenerName);
-
-                synchronized (mNotificationLock) {
-                    // Look for the notification, searching both the posted and enqueued lists.
-                    NotificationRecord r = findNotificationLocked(pkg, tag, id, userId);
-                    if (r != null) {
-                        // The notification was found, check if it should be removed.
-
-                        // Ideally we'd do this in the caller of this method. However, that would
-                        // require the caller to also find the notification.
-                        if (reason == REASON_CLICK) {
-                            mUsageStats.registerClickedByUser(r);
-                        }
-
-                        if ((r.getNotification().flags & mustHaveFlags) != mustHaveFlags) {
-                            return;
-                        }
-                        if ((r.getNotification().flags & mustNotHaveFlags) != 0) {
-                            return;
-                        }
-
-                        // Cancel the notification.
-                        boolean wasPosted = removeFromNotificationListsLocked(r);
-                        cancelNotificationLocked(r, sendDelete, reason, rank, count, wasPosted, listenerName);
-                        cancelGroupChildrenLocked(r, callingUid, callingPid, listenerName,
-                                sendDelete, null);
-                        updateLightsLocked();
-                    } else {
-                        // No notification was found, assume that it is snoozed and cancel it.
-                        if (reason != REASON_SNOOZED) {
-                            final boolean wasSnoozed = mSnoozeHelper.cancel(userId, pkg, tag, id);
-                            if (wasSnoozed) {
-                                savePolicyFile();
-                            }
-                        }
-                    }
-                }
-            }
-        });
+        mHandler.scheduleCancelNotification(new CancelNotificationRunnable(callingUid, callingPid,
+                pkg, tag, id, mustHaveFlags, mustNotHaveFlags, sendDelete, userId, reason, rank,
+                count, listener));
     }
 
     /**

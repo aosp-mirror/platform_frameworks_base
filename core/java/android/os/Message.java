@@ -349,7 +349,7 @@ public final class Message implements Parcelable {
     }
 
     /**
-     * Retrieve the a {@link android.os.Handler Handler} implementation that
+     * Retrieve the {@link android.os.Handler Handler} implementation that
      * will receive this message. The object must implement
      * {@link android.os.Handler#handleMessage(android.os.Message)
      * Handler.handleMessage()}. Each Handler has its own name-space for

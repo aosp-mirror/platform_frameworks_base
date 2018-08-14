@@ -101,31 +101,31 @@ public class SensorLoggerSession {
 
     public Session toProto() {
         Session proto = new Session();
-        proto.setStartTimestampMillis(mStartTimestampMillis);
-        proto.setDurationMillis(mEndTimestampMillis - mStartTimestampMillis);
-        proto.setBuild(Build.FINGERPRINT);
-        proto.setResult(mResult);
-        proto.setType(mType);
+        proto.startTimestampMillis = mStartTimestampMillis;
+        proto.durationMillis = mEndTimestampMillis - mStartTimestampMillis;
+        proto.build = Build.FINGERPRINT;
+        proto.result = mResult;
+        proto.type = mType;
         proto.sensorEvents = mSensorEvents.toArray(proto.sensorEvents);
         proto.touchEvents = mMotionEvents.toArray(proto.touchEvents);
         proto.phoneEvents = mPhoneEvents.toArray(proto.phoneEvents);
-        proto.setTouchAreaWidth(mTouchAreaWidth);
-        proto.setTouchAreaHeight(mTouchAreaHeight);
+        proto.touchAreaWidth = mTouchAreaWidth;
+        proto.touchAreaHeight = mTouchAreaHeight;
         return proto;
     }
 
     private PhoneEvent phoneEventToProto(int eventType, long sysTimeNanos) {
         PhoneEvent proto = new PhoneEvent();
-        proto.setType(eventType);
-        proto.setTimeOffsetNanos(sysTimeNanos - mStartSystemTimeNanos);
+        proto.type = eventType;
+        proto.timeOffsetNanos = sysTimeNanos - mStartSystemTimeNanos;
         return proto;
     }
 
     private SensorEvent sensorEventToProto(android.hardware.SensorEvent ev, long sysTimeNanos) {
         SensorEvent proto = new SensorEvent();
-        proto.setType(ev.sensor.getType());
-        proto.setTimeOffsetNanos(sysTimeNanos - mStartSystemTimeNanos);
-        proto.setTimestamp(ev.timestamp);
+        proto.type = ev.sensor.getType();
+        proto.timeOffsetNanos = sysTimeNanos - mStartSystemTimeNanos;
+        proto.timestamp = ev.timestamp;
         proto.values = ev.values.clone();
         return proto;
     }
@@ -133,17 +133,17 @@ public class SensorLoggerSession {
     private TouchEvent motionEventToProto(MotionEvent ev) {
         int count = ev.getPointerCount();
         TouchEvent proto = new TouchEvent();
-        proto.setTimeOffsetNanos(ev.getEventTimeNano() - mStartSystemTimeNanos);
-        proto.setAction(ev.getActionMasked());
-        proto.setActionIndex(ev.getActionIndex());
+        proto.timeOffsetNanos = ev.getEventTimeNano() - mStartSystemTimeNanos;
+        proto.action = ev.getActionMasked();
+        proto.actionIndex = ev.getActionIndex();
         proto.pointers = new TouchEvent.Pointer[count];
         for (int i = 0; i < count; i++) {
             TouchEvent.Pointer p = new TouchEvent.Pointer();
-            p.setX(ev.getX(i));
-            p.setY(ev.getY(i));
-            p.setSize(ev.getSize(i));
-            p.setPressure(ev.getPressure(i));
-            p.setId(ev.getPointerId(i));
+            p.x = ev.getX(i);
+            p.y = ev.getY(i);
+            p.size = ev.getSize(i);
+            p.pressure = ev.getPressure(i);
+            p.id = ev.getPointerId(i);
             proto.pointers[i] = p;
         }
         return proto;

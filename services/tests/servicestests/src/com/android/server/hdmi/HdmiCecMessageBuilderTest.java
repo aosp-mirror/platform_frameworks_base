@@ -21,7 +21,9 @@ import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.hardware.hdmi.HdmiDeviceInfo;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;

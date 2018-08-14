@@ -602,6 +602,13 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    public boolean isImportanceLocked() {
+        return (mUserLockedFields & USER_LOCKED_IMPORTANCE) != 0;
+    }
+
+    /**
+     * @hide
+     */
     public void populateFromXmlForRestore(XmlPullParser parser, Context context) {
         populateFromXml(parser, true, context);
     }

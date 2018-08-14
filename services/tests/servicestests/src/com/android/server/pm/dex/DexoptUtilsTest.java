@@ -16,9 +16,8 @@
 
 package com.android.server.pm.dex;
 
-import com.android.server.pm.PackageDexOptimizer;
-
 import static com.android.server.pm.PackageDexOptimizer.SKIP_SHARED_LIBRARY_CHECK;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -26,16 +25,17 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.content.pm.ApplicationInfo;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.SparseArray;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import dalvik.system.DelegateLastClassLoader;
 import dalvik.system.DexClassLoader;
 import dalvik.system.PathClassLoader;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.util.Arrays;

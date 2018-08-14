@@ -54,17 +54,15 @@ class RunningTasks {
 
         // Gather all of the tasks across all of the tasks, and add them to the sorted set
         mTmpSortedSet.clear();
-        mTmpStackTasks.clear();
         final int numDisplays = activityDisplays.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
             final ActivityDisplay display = activityDisplays.valueAt(displayNdx);
             for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getChildAt(stackNdx);
+                mTmpStackTasks.clear();
                 stack.getRunningTasks(mTmpStackTasks, ignoreActivityType, ignoreWindowingMode,
                         callingUid, allowed);
-                for (int i = mTmpStackTasks.size() - 1; i >= 0; i--) {
-                    mTmpSortedSet.addAll(mTmpStackTasks);
-                }
+                mTmpSortedSet.addAll(mTmpStackTasks);
             }
         }
 

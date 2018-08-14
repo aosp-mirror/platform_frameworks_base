@@ -3242,9 +3242,9 @@ public class SettingsProvider extends ContentProvider {
                             getSettingLocked(Settings.Secure.DOZE_ENABLED).getValue());
 
                     if (dozeExplicitlyDisabled) {
-                        secureSettings.insertSettingLocked(Settings.Secure.DOZE_PULSE_ON_PICK_UP,
+                        secureSettings.insertSettingLocked(Settings.Secure.DOZE_PICK_UP_GESTURE,
                                 "0", null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                        secureSettings.insertSettingLocked(Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP,
+                        secureSettings.insertSettingLocked(Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
                                 "0", null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 131;

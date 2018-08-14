@@ -20,10 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.android.frameworks.servicestests.R;
-import com.android.servicestests.aidl.ICmdReceiverService;
-import com.android.servicestests.aidl.INetworkStateObserver;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -34,12 +30,16 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.support.test.uiautomator.UiDevice;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.servicestests.aidl.ICmdReceiverService;
+import com.android.servicestests.aidl.INetworkStateObserver;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -64,7 +64,7 @@ import java.util.concurrent.TimeUnit;
  * Install: adb install -r \
  *     ${ANDROID_PRODUCT_OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk
  * Run: adb shell am instrument -e class com.android.server.net.ConnOnActivityStartTest -w \
- *     com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
+ *     com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  */
 @LargeTest
 @RunWith(AndroidJUnit4.class)

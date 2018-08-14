@@ -16,30 +16,31 @@
 
 package com.android.server.wm;
 
-import android.app.IActivityManager;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import android.app.IActivityTaskManager;
-import android.graphics.Rect;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.Display;
-import org.mockito.Mockito;
-
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+
 import static com.android.server.wm.TaskPositioner.MIN_ASPECT;
 import static com.android.server.wm.WindowManagerService.dipToPixel;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_WIDTH_IN_DP;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import android.app.IActivityTaskManager;
+import android.graphics.Rect;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.Display;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 /**
  * Tests for the {@link TaskPositioner} class.

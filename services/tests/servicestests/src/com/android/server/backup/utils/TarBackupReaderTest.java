@@ -29,8 +29,6 @@ import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSION_OF_BA
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -47,13 +45,14 @@ import android.content.pm.SigningInfo;
 import android.os.Bundle;
 import android.os.Process;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.servicestests.R;
-import com.android.server.backup.FileMetadata;
 import com.android.server.backup.BackupManagerService;
+import com.android.server.backup.FileMetadata;
 import com.android.server.backup.restore.PerformAdbRestoreTask;
 import com.android.server.backup.restore.RestorePolicy;
 import com.android.server.backup.testutils.PackageManagerStub;
