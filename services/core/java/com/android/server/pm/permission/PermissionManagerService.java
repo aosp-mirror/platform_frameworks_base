@@ -30,6 +30,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
@@ -37,6 +38,7 @@ import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.PackageParser.Package;
 import android.metrics.LogMaker;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -455,8 +457,9 @@ public class PermissionManagerService {
                                         " to " + newPermissionGroupName);
 
                                 try {
-                                    revokeRuntimePermission(permissionName, packageName, false,
-                                            Process.SYSTEM_UID, userId, permissionCallback);
+                                    revokeRuntimePermission(permissionName, packageName,
+                                            mSettings.getPermission(permissionName), false,
+                                            Process.SYSTEM_UID, userId, permissionCallback, false);
                                 } catch (IllegalArgumentException e) {
                                     Slog.e(TAG, "Could not revoke " + permissionName + " from "
                                             + packageName, e);
@@ -549,9 +552,59 @@ public class PermissionManagerService {
 
     }
 
-    private void removeAllPermissions(PackageParser.Package pkg, boolean chatty) {
+    private void revokeAllPermissions(
+            @NonNull List<BasePermission> bps,
+            @NonNull List<String> allPackageNames,
+            @Nullable PermissionCallback permissionCallback) {
+        AsyncTask.execute(() -> {
+            final int numRemovedPermissions = bps.size();
+            for (int permissionNum = 0; permissionNum < numRemovedPermissions; permissionNum++) {
+                final int[] userIds = mUserManagerInt.getUserIds();
+                final int numUserIds = userIds.length;
+
+                final int numPackages = allPackageNames.size();
+                for (int packageNum = 0; packageNum < numPackages; packageNum++) {
+                    final String packageName = allPackageNames.get(packageNum);
+                    final ApplicationInfo applicationInfo = mPackageManagerInt.getApplicationInfo(
+                            packageName, 0, Process.SYSTEM_UID, UserHandle.USER_SYSTEM);
+                    if (applicationInfo != null
+                            && applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
+                        continue;
+                    }
+                    for (int userIdNum = 0; userIdNum < numUserIds; userIdNum++) {
+                        final int userId = userIds[userIdNum];
+                        final String permissionName = bps.get(permissionNum).getName();
+                        if (checkPermission(permissionName, packageName, UserHandle.USER_SYSTEM,
+                                userId) == PackageManager.PERMISSION_GRANTED) {
+                            try {
+                                revokeRuntimePermission(
+                                        permissionName,
+                                        packageName,
+                                        bps.get(permissionNum),
+                                        false,
+                                        Process.SYSTEM_UID,
+                                        userId,
+                                        permissionCallback,
+                                        true);
+                            } catch (IllegalArgumentException e) {
+                                Slog.e(TAG, "Could not revoke " + permissionName + " from "
+                                        + packageName, e);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    private void removeAllPermissions(
+            @NonNull PackageParser.Package pkg,
+            @NonNull List<String> allPackageNames,
+            @Nullable PermissionCallback permissionCallback,
+            boolean chatty) {
         synchronized (mLock) {
             int N = pkg.permissions.size();
+            List<BasePermission> bps = new ArrayList<BasePermission>(N);
             StringBuilder r = null;
             for (int i=0; i<N; i++) {
                 PackageParser.Permission p = pkg.permissions.get(i);
@@ -560,6 +613,9 @@ public class PermissionManagerService {
                     bp = mSettings.mPermissionTrees.get(p.info.name);
                 }
                 if (bp != null && bp.isPermission(p)) {
+                    if ((p.info.getProtection() & PermissionInfo.PROTECTION_DANGEROUS) != 0) {
+                        bps.add(bp);
+                    }
                     bp.setPermission(null);
                     if (DEBUG_REMOVE && chatty) {
                         if (r == null) {
@@ -578,6 +634,7 @@ public class PermissionManagerService {
                     }
                 }
             }
+            revokeAllPermissions(bps, allPackageNames, permissionCallback);
             if (r != null) {
                 if (DEBUG_REMOVE) Log.d(TAG, "  Permissions: " + r);
             }
@@ -1490,9 +1547,10 @@ public class PermissionManagerService {
         }
 
     }
-
-    private void revokeRuntimePermission(String permName, String packageName,
-            boolean overridePolicy, int callingUid, int userId, PermissionCallback callback) {
+    
+    private void revokeRuntimePermission(String permName, String packageName, BasePermission bp,
+            boolean overridePolicy, int callingUid, int userId, PermissionCallback callback,
+            boolean permissionRemoved) {
         if (!mUserManagerInt.exists(userId)) {
             Log.e(TAG, "No such user:" + userId);
             return;
@@ -1517,7 +1575,7 @@ public class PermissionManagerService {
         if (mPackageManagerInt.filterAppAccess(pkg, Binder.getCallingUid(), userId)) {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
-        final BasePermission bp = mSettings.getPermissionLocked(permName);
+
         if (bp == null) {
             throw new IllegalArgumentException("Unknown permission: " + permName);
         }
@@ -2073,8 +2131,10 @@ public class PermissionManagerService {
             PermissionManagerService.this.addAllPermissionGroups(pkg, chatty);
         }
         @Override
-        public void removeAllPermissions(Package pkg, boolean chatty) {
-            PermissionManagerService.this.removeAllPermissions(pkg, chatty);
+        public void removeAllPermissions(Package pkg, List<String> allPackageNames,
+                PermissionCallback permissionCallback, boolean chatty) {
+            PermissionManagerService.this.removeAllPermissions(
+                    pkg, allPackageNames, permissionCallback, chatty);
         }
         @Override
         public boolean addDynamicPermission(PermissionInfo info, boolean async, int callingUid,
@@ -2110,7 +2170,8 @@ public class PermissionManagerService {
                 boolean overridePolicy, int callingUid, int userId,
                 PermissionCallback callback) {
             PermissionManagerService.this.revokeRuntimePermission(permName, packageName,
-                    overridePolicy, callingUid, userId, callback);
+                    mSettings.getPermission(permName), overridePolicy, callingUid, userId,
+                    callback, false);
         }
         @Override
         public void updatePermissions(String packageName, Package pkg, boolean replaceGrant,
