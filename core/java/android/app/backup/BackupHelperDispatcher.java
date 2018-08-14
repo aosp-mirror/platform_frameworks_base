@@ -16,6 +16,7 @@
 
 package android.app.backup;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -29,7 +30,9 @@ public class BackupHelperDispatcher {
     private static final String TAG = "BackupHelperDispatcher";
 
     private static class Header {
+        @UnsupportedAppUsage
         int chunkSize; // not including the header
+        @UnsupportedAppUsage
         String keyPrefix;
     }
 

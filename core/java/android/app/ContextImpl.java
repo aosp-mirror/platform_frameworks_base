@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -156,36 +157,50 @@ class ContextImpl extends Context {
      * Map from package name, to preference name, to cached preferences.
      */
     @GuardedBy("ContextImpl.class")
+    @UnsupportedAppUsage
     private static ArrayMap<String, ArrayMap<File, SharedPreferencesImpl>> sSharedPrefsCache;
 
     /**
      * Map from preference name to generated path.
      */
     @GuardedBy("ContextImpl.class")
+    @UnsupportedAppUsage
     private ArrayMap<String, File> mSharedPrefsPaths;
 
+    @UnsupportedAppUsage
     final @NonNull ActivityThread mMainThread;
+    @UnsupportedAppUsage
     final @NonNull LoadedApk mPackageInfo;
+    @UnsupportedAppUsage
     private @Nullable ClassLoader mClassLoader;
 
     private final @Nullable IBinder mActivityToken;
 
     private final @NonNull UserHandle mUser;
 
+    @UnsupportedAppUsage
     private final ApplicationContentResolver mContentResolver;
 
+    @UnsupportedAppUsage
     private final String mBasePackageName;
+    @UnsupportedAppUsage
     private final String mOpPackageName;
 
     private final @NonNull ResourcesManager mResourcesManager;
+    @UnsupportedAppUsage
     private @NonNull Resources mResources;
     private @Nullable Display mDisplay; // may be null if default display
 
+    @UnsupportedAppUsage
     private final int mFlags;
 
+    @UnsupportedAppUsage
     private Context mOuterContext;
+    @UnsupportedAppUsage
     private int mThemeResource = 0;
+    @UnsupportedAppUsage
     private Resources.Theme mTheme = null;
+    @UnsupportedAppUsage
     private PackageManager mPackageManager;
     private Context mReceiverRestrictedContext = null;
 
@@ -200,6 +215,7 @@ class ContextImpl extends Context {
     @GuardedBy("mSync")
     private File mDatabasesDir;
     @GuardedBy("mSync")
+    @UnsupportedAppUsage
     private File mPreferencesDir;
     @GuardedBy("mSync")
     private File mFilesDir;
@@ -211,6 +227,7 @@ class ContextImpl extends Context {
     private File mCodeCacheDir;
 
     // The system service cache for the system services that are cached per-ContextImpl.
+    @UnsupportedAppUsage
     final Object[] mServiceCache = SystemServiceRegistry.createServiceCache();
 
     static final int STATE_UNINITIALIZED = 0;
@@ -235,6 +252,7 @@ class ContextImpl extends Context {
     @ServiceInitializationState
     final int[] mServiceInitializationStateArray = new int[mServiceCache.length];
 
+    @UnsupportedAppUsage
     static ContextImpl getImpl(Context context) {
         Context nextContext;
         while ((context instanceof ContextWrapper) &&
@@ -546,6 +564,7 @@ class ContextImpl extends Context {
         }
     }
 
+    @UnsupportedAppUsage
     private File getPreferencesDir() {
         synchronized (mSync) {
             if (mPreferencesDir == null) {
@@ -2220,6 +2239,7 @@ class ContextImpl extends Context {
     }
 
     @Override
+    @UnsupportedAppUsage
     public Display getDisplay() {
         if (mDisplay == null) {
             return mResourcesManager.getAdjustedDisplay(Display.DEFAULT_DISPLAY,
@@ -2317,6 +2337,7 @@ class ContextImpl extends Context {
         mIsAutofillCompatEnabled = autofillCompatEnabled;
     }
 
+    @UnsupportedAppUsage
     static ContextImpl createSystemContext(ActivityThread mainThread) {
         LoadedApk packageInfo = new LoadedApk(mainThread);
         ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, null, 0,
@@ -2340,6 +2361,7 @@ class ContextImpl extends Context {
         return context;
     }
 
+    @UnsupportedAppUsage
     static ContextImpl createAppContext(ActivityThread mainThread, LoadedApk packageInfo) {
         if (packageInfo == null) throw new IllegalArgumentException("packageInfo");
         ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, null, 0,
@@ -2348,6 +2370,7 @@ class ContextImpl extends Context {
         return context;
     }
 
+    @UnsupportedAppUsage
     static ContextImpl createActivityContext(ActivityThread mainThread,
             LoadedApk packageInfo, ActivityInfo activityInfo, IBinder activityToken, int displayId,
             Configuration overrideConfiguration) {
@@ -2462,6 +2485,7 @@ class ContextImpl extends Context {
         mPackageInfo.installSystemApplicationInfo(info, classLoader);
     }
 
+    @UnsupportedAppUsage
     final void scheduleFinalCleanup(String who, String what) {
         mMainThread.scheduleContextCleanup(this, who, what);
     }
@@ -2471,6 +2495,7 @@ class ContextImpl extends Context {
         mPackageInfo.removeContextRegistrations(getOuterContext(), who, what);
     }
 
+    @UnsupportedAppUsage
     final Context getReceiverRestrictedContext() {
         if (mReceiverRestrictedContext != null) {
             return mReceiverRestrictedContext;
@@ -2478,15 +2503,18 @@ class ContextImpl extends Context {
         return mReceiverRestrictedContext = new ReceiverRestrictedContext(getOuterContext());
     }
 
+    @UnsupportedAppUsage
     final void setOuterContext(Context context) {
         mOuterContext = context;
     }
 
+    @UnsupportedAppUsage
     final Context getOuterContext() {
         return mOuterContext;
     }
 
     @Override
+    @UnsupportedAppUsage
     public IBinder getActivityToken() {
         return mActivityToken;
     }
@@ -2567,6 +2595,7 @@ class ContextImpl extends Context {
     // ----------------------------------------------------------------------
 
     private static final class ApplicationContentResolver extends ContentResolver {
+        @UnsupportedAppUsage
         private final ActivityThread mMainThread;
 
         public ApplicationContentResolver(Context context, ActivityThread mainThread) {
@@ -2575,6 +2604,7 @@ class ContextImpl extends Context {
         }
 
         @Override
+        @UnsupportedAppUsage
         protected IContentProvider acquireProvider(Context context, String auth) {
             return mMainThread.acquireProvider(context,
                     ContentProvider.getAuthorityWithoutUserId(auth),

@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentProviderNative;
 import android.content.IContentProvider;
 import android.content.pm.ProviderInfo;
@@ -29,11 +30,15 @@ import android.os.Parcelable;
  * @hide
  */
 public class ContentProviderHolder implements Parcelable {
+    @UnsupportedAppUsage
     public final ProviderInfo info;
+    @UnsupportedAppUsage
     public IContentProvider provider;
     public IBinder connection;
+    @UnsupportedAppUsage
     public boolean noReleaseNeeded;
 
+    @UnsupportedAppUsage
     public ContentProviderHolder(ProviderInfo _info) {
         info = _info;
     }
@@ -68,6 +73,7 @@ public class ContentProviderHolder implements Parcelable {
         }
     };
 
+    @UnsupportedAppUsage
     private ContentProviderHolder(Parcel source) {
         info = ProviderInfo.CREATOR.createFromParcel(source);
         provider = ContentProviderNative.asInterface(

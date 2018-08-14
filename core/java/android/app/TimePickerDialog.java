@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -43,6 +44,7 @@ public class TimePickerDialog extends AlertDialog implements OnClickListener,
     private static final String MINUTE = "minute";
     private static final String IS_24_HOUR = "is24hour";
 
+    @UnsupportedAppUsage
     private final TimePicker mTimePicker;
     private final OnTimeSetListener mTimeSetListener;
 

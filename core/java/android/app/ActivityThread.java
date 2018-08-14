@@ -27,6 +27,7 @@ import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
@@ -249,15 +250,21 @@ public final class ActivityThread extends ClientTransactionHandler {
     @GuardedBy("mNetworkPolicyLock")
     private long mNetworkBlockSeq = INVALID_PROC_STATE_SEQ;
 
+    @UnsupportedAppUsage
     private ContextImpl mSystemContext;
     private ContextImpl mSystemUiContext;
 
+    @UnsupportedAppUsage
     static volatile IPackageManager sPackageManager;
 
+    @UnsupportedAppUsage
     final ApplicationThread mAppThread = new ApplicationThread();
+    @UnsupportedAppUsage
     final Looper mLooper = Looper.myLooper();
+    @UnsupportedAppUsage
     final H mH = new H();
     final Executor mExecutor = new HandlerExecutor(mH);
+    @UnsupportedAppUsage
     final ArrayMap<IBinder, ActivityClientRecord> mActivities = new ArrayMap<>();
     /** The activities to be truly destroyed (not include relaunch). */
     final Map<IBinder, ClientTransactionItem> mActivitiesToBeDestroyed =
@@ -266,28 +273,40 @@ public final class ActivityThread extends ClientTransactionHandler {
     // be reported when next we idle.
     ActivityClientRecord mNewActivities = null;
     // Number of activities that are currently visible on-screen.
+    @UnsupportedAppUsage
     int mNumVisibleActivities = 0;
     ArrayList<WeakReference<AssistStructure>> mLastAssistStructures = new ArrayList<>();
     private int mLastSessionId;
+    @UnsupportedAppUsage
     final ArrayMap<IBinder, Service> mServices = new ArrayMap<>();
+    @UnsupportedAppUsage
     AppBindData mBoundApplication;
     Profiler mProfiler;
+    @UnsupportedAppUsage
     int mCurDefaultDisplayDpi;
+    @UnsupportedAppUsage
     boolean mDensityCompatMode;
+    @UnsupportedAppUsage
     Configuration mConfiguration;
     Configuration mCompatConfiguration;
+    @UnsupportedAppUsage
     Application mInitialApplication;
+    @UnsupportedAppUsage
     final ArrayList<Application> mAllApplications
             = new ArrayList<Application>();
     // set of instantiated backup agents, keyed by package name
     final ArrayMap<String, BackupAgent> mBackupAgents = new ArrayMap<String, BackupAgent>();
     /** Reference to singleton {@link ActivityThread} */
+    @UnsupportedAppUsage
     private static volatile ActivityThread sCurrentActivityThread;
+    @UnsupportedAppUsage
     Instrumentation mInstrumentation;
     String mInstrumentationPackageName = null;
+    @UnsupportedAppUsage
     String mInstrumentationAppDir = null;
     String[] mInstrumentationSplitAppDirs = null;
     String mInstrumentationLibDir = null;
+    @UnsupportedAppUsage
     String mInstrumentedAppDir = null;
     String[] mInstrumentedSplitAppDirs = null;
     String mInstrumentedLibDir = null;
@@ -307,16 +326,20 @@ public final class ActivityThread extends ClientTransactionHandler {
     // or window manager or anything that depends on them while holding this lock.
     // These LoadedApk are only valid for the userId that we're running as.
     @GuardedBy("mResourcesManager")
+    @UnsupportedAppUsage
     final ArrayMap<String, WeakReference<LoadedApk>> mPackages = new ArrayMap<>();
     @GuardedBy("mResourcesManager")
+    @UnsupportedAppUsage
     final ArrayMap<String, WeakReference<LoadedApk>> mResourcePackages = new ArrayMap<>();
     @GuardedBy("mResourcesManager")
     final ArrayList<ActivityClientRecord> mRelaunchingActivities = new ArrayList<>();
     @GuardedBy("mResourcesManager")
+    @UnsupportedAppUsage
     Configuration mPendingConfiguration = null;
     // An executor that performs multi-step transactions.
     private final TransactionExecutor mTransactionExecutor = new TransactionExecutor(this);
 
+    @UnsupportedAppUsage
     private final ResourcesManager mResourcesManager;
 
     private static final class ProviderKey {
@@ -344,12 +367,16 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     // The lock of mProviderMap protects the following variables.
+    @UnsupportedAppUsage
     final ArrayMap<ProviderKey, ProviderClientRecord> mProviderMap
         = new ArrayMap<ProviderKey, ProviderClientRecord>();
+    @UnsupportedAppUsage
     final ArrayMap<IBinder, ProviderRefCount> mProviderRefCountMap
         = new ArrayMap<IBinder, ProviderRefCount>();
+    @UnsupportedAppUsage
     final ArrayMap<IBinder, ProviderClientRecord> mLocalProviders
         = new ArrayMap<IBinder, ProviderClientRecord>();
+    @UnsupportedAppUsage
     final ArrayMap<ComponentName, ProviderClientRecord> mLocalProvidersByName
             = new ArrayMap<ComponentName, ProviderClientRecord>();
 
@@ -366,26 +393,32 @@ public final class ActivityThread extends ClientTransactionHandler {
     final GcIdler mGcIdler = new GcIdler();
     boolean mGcIdlerScheduled = false;
 
+    @UnsupportedAppUsage
     static volatile Handler sMainThreadHandler;  // set once in main()
 
     Bundle mCoreSettings = null;
 
     /** Activity client record, used for bookkeeping for the real {@link Activity} instance. */
     public static final class ActivityClientRecord {
+        @UnsupportedAppUsage
         public IBinder token;
         int ident;
+        @UnsupportedAppUsage
         Intent intent;
         String referrer;
         IVoiceInteractor voiceInteractor;
         Bundle state;
         PersistableBundle persistentState;
+        @UnsupportedAppUsage
         Activity activity;
         Window window;
         Activity parent;
         String embeddedID;
         Activity.NonConfigurationInstances lastNonConfigurationInstances;
         // TODO(lifecycler): Use mLifecycleState instead.
+        @UnsupportedAppUsage
         boolean paused;
+        @UnsupportedAppUsage
         boolean stopped;
         boolean hideForNow;
         Configuration newConfig;
@@ -399,8 +432,11 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         ProfilerInfo profilerInfo;
 
+        @UnsupportedAppUsage
         ActivityInfo activityInfo;
+        @UnsupportedAppUsage
         CompatibilityInfo compatInfo;
+        @UnsupportedAppUsage
         public LoadedApk packageInfo;
 
         List<ResultInfo> pendingResults;
@@ -412,12 +448,14 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         Window mPendingRemoveWindow;
         WindowManager mPendingRemoveWindowManager;
+        @UnsupportedAppUsage
         boolean mPreserveWindow;
 
         @LifecycleState
         private int mLifecycleState = PRE_ON_CREATE;
 
         @VisibleForTesting
+        @UnsupportedAppUsage
         public ActivityClientRecord() {
             this.isForward = false;
             init();
@@ -553,8 +591,11 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     final class ProviderClientRecord {
         final String[] mNames;
+        @UnsupportedAppUsage
         final IContentProvider mProvider;
+        @UnsupportedAppUsage
         final ContentProvider mLocalProvider;
+        @UnsupportedAppUsage
         final ContentProviderHolder mHolder;
 
         ProviderClientRecord(String[] names, IContentProvider provider,
@@ -574,8 +615,11 @@ public final class ActivityThread extends ClientTransactionHandler {
             this.intent = intent;
         }
 
+        @UnsupportedAppUsage
         Intent intent;
+        @UnsupportedAppUsage
         ActivityInfo info;
+        @UnsupportedAppUsage
         CompatibilityInfo compatInfo;
         public String toString() {
             return "ReceiverData{intent=" + intent + " packageName=" +
@@ -597,9 +641,13 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     static final class CreateServiceData {
+        @UnsupportedAppUsage
         IBinder token;
+        @UnsupportedAppUsage
         ServiceInfo info;
+        @UnsupportedAppUsage
         CompatibilityInfo compatInfo;
+        @UnsupportedAppUsage
         Intent intent;
         public String toString() {
             return "CreateServiceData{token=" + token + " className="
@@ -609,7 +657,9 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     static final class BindServiceData {
+        @UnsupportedAppUsage
         IBinder token;
+        @UnsupportedAppUsage
         Intent intent;
         boolean rebind;
         public String toString() {
@@ -618,10 +668,12 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     static final class ServiceArgsData {
+        @UnsupportedAppUsage
         IBinder token;
         boolean taskRemoved;
         int startId;
         int flags;
+        @UnsupportedAppUsage
         Intent args;
         public String toString() {
             return "ServiceArgsData{token=" + token + " startId=" + startId
@@ -630,20 +682,28 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     static final class AppBindData {
+        @UnsupportedAppUsage
         LoadedApk info;
+        @UnsupportedAppUsage
         String processName;
+        @UnsupportedAppUsage
         ApplicationInfo appInfo;
+        @UnsupportedAppUsage
         List<ProviderInfo> providers;
         ComponentName instrumentationName;
+        @UnsupportedAppUsage
         Bundle instrumentationArgs;
         IInstrumentationWatcher instrumentationWatcher;
         IUiAutomationConnection instrumentationUiAutomationConnection;
         int debugMode;
         boolean enableBinderTracking;
         boolean trackAllocation;
+        @UnsupportedAppUsage
         boolean restrictedBackupMode;
+        @UnsupportedAppUsage
         boolean persistent;
         Configuration config;
+        @UnsupportedAppUsage
         CompatibilityInfo compatInfo;
         String buildSerial;
 
@@ -1561,16 +1621,24 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     class H extends Handler {
         public static final int BIND_APPLICATION        = 110;
+        @UnsupportedAppUsage
         public static final int EXIT_APPLICATION        = 111;
+        @UnsupportedAppUsage
         public static final int RECEIVER                = 113;
+        @UnsupportedAppUsage
         public static final int CREATE_SERVICE          = 114;
+        @UnsupportedAppUsage
         public static final int SERVICE_ARGS            = 115;
+        @UnsupportedAppUsage
         public static final int STOP_SERVICE            = 116;
 
         public static final int CONFIGURATION_CHANGED   = 118;
         public static final int CLEAN_UP_CONTEXT        = 119;
+        @UnsupportedAppUsage
         public static final int GC_WHEN_IDLE            = 120;
+        @UnsupportedAppUsage
         public static final int BIND_SERVICE            = 121;
+        @UnsupportedAppUsage
         public static final int UNBIND_SERVICE          = 122;
         public static final int DUMP_SERVICE            = 123;
         public static final int LOW_MEMORY              = 124;
@@ -1578,21 +1646,26 @@ public final class ActivityThread extends ClientTransactionHandler {
         public static final int CREATE_BACKUP_AGENT     = 128;
         public static final int DESTROY_BACKUP_AGENT    = 129;
         public static final int SUICIDE                 = 130;
+        @UnsupportedAppUsage
         public static final int REMOVE_PROVIDER         = 131;
         public static final int ENABLE_JIT              = 132;
         public static final int DISPATCH_PACKAGE_BROADCAST = 133;
+        @UnsupportedAppUsage
         public static final int SCHEDULE_CRASH          = 134;
         public static final int DUMP_HEAP               = 135;
         public static final int DUMP_ACTIVITY           = 136;
         public static final int SLEEPING                = 137;
         public static final int SET_CORE_SETTINGS       = 138;
         public static final int UPDATE_PACKAGE_COMPATIBILITY_INFO = 139;
+        @UnsupportedAppUsage
         public static final int DUMP_PROVIDER           = 141;
         public static final int UNSTABLE_PROVIDER_DIED  = 142;
         public static final int REQUEST_ASSIST_CONTEXT_EXTRAS = 143;
         public static final int TRANSLUCENT_CONVERSION_COMPLETE = 144;
+        @UnsupportedAppUsage
         public static final int INSTALL_PROVIDER        = 145;
         public static final int ON_NEW_ACTIVITY_OPTIONS = 146;
+        @UnsupportedAppUsage
         public static final int ENTER_ANIMATION_COMPLETE = 149;
         public static final int START_BINDER_TRACKING = 150;
         public static final int STOP_BINDER_TRACKING_AND_DUMP = 151;
@@ -1881,6 +1954,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    @UnsupportedAppUsage
     public static ActivityThread currentActivityThread() {
         return sCurrentActivityThread;
     }
@@ -1895,23 +1969,27 @@ public final class ActivityThread extends ClientTransactionHandler {
                 ? am.getApplication().getOpPackageName() : null;
     }
 
+    @UnsupportedAppUsage
     public static String currentPackageName() {
         ActivityThread am = currentActivityThread();
         return (am != null && am.mBoundApplication != null)
             ? am.mBoundApplication.appInfo.packageName : null;
     }
 
+    @UnsupportedAppUsage
     public static String currentProcessName() {
         ActivityThread am = currentActivityThread();
         return (am != null && am.mBoundApplication != null)
             ? am.mBoundApplication.processName : null;
     }
 
+    @UnsupportedAppUsage
     public static Application currentApplication() {
         ActivityThread am = currentActivityThread();
         return am != null ? am.mInitialApplication : null;
     }
 
+    @UnsupportedAppUsage
     public static IPackageManager getPackageManager() {
         if (sPackageManager != null) {
             //Slog.v("PackageManager", "returning cur default = " + sPackageManager);
@@ -1949,10 +2027,12 @@ public final class ActivityThread extends ClientTransactionHandler {
                 displayId, null, pkgInfo.getCompatibilityInfo(), pkgInfo.getClassLoader());
     }
 
+    @UnsupportedAppUsage
     final Handler getHandler() {
         return mH;
     }
 
+    @UnsupportedAppUsage
     public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
             int flags) {
         return getPackageInfo(packageName, compatInfo, flags, UserHandle.myUserId());
@@ -2007,6 +2087,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         return null;
     }
 
+    @UnsupportedAppUsage
     public final LoadedApk getPackageInfo(ApplicationInfo ai, CompatibilityInfo compatInfo,
             int flags) {
         boolean includeCode = (flags&Context.CONTEXT_INCLUDE_CODE) != 0;
@@ -2034,11 +2115,13 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     @Override
+    @UnsupportedAppUsage
     public final LoadedApk getPackageInfoNoCheck(ApplicationInfo ai,
             CompatibilityInfo compatInfo) {
         return getPackageInfo(ai, compatInfo, null, false, true, false);
     }
 
+    @UnsupportedAppUsage
     public final LoadedApk peekPackageInfo(String packageName, boolean includeCode) {
         synchronized (mResourcesManager) {
             WeakReference<LoadedApk> ref;
@@ -2098,15 +2181,18 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    @UnsupportedAppUsage
     ActivityThread() {
         mResourcesManager = ResourcesManager.getInstance();
     }
 
+    @UnsupportedAppUsage
     public ApplicationThread getApplicationThread()
     {
         return mAppThread;
     }
 
+    @UnsupportedAppUsage
     public Instrumentation getInstrumentation()
     {
         return mInstrumentation;
@@ -2121,6 +2207,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         return mProfiler.profileFile;
     }
 
+    @UnsupportedAppUsage
     public Looper getLooper() {
         return mLooper;
     }
@@ -2129,14 +2216,17 @@ public final class ActivityThread extends ClientTransactionHandler {
         return mExecutor;
     }
 
+    @UnsupportedAppUsage
     public Application getApplication() {
         return mInitialApplication;
     }
 
+    @UnsupportedAppUsage
     public String getProcessName() {
         return mBoundApplication.processName;
     }
 
+    @UnsupportedAppUsage
     public ContextImpl getSystemContext() {
         synchronized (this) {
             if (mSystemContext == null) {
@@ -2172,6 +2262,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    @UnsupportedAppUsage
     void scheduleGcIdler() {
         if (!mGcIdlerScheduled) {
             mGcIdlerScheduled = true;
@@ -2668,6 +2759,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         proto.end(asToken);
     }
 
+    @UnsupportedAppUsage
     public void registerOnActivityPausedListener(Activity activity,
             OnActivityPausedListener listener) {
         synchronized (mOnPauseListeners) {
@@ -2680,6 +2772,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    @UnsupportedAppUsage
     public void unregisterOnActivityPausedListener(Activity activity,
             OnActivityPausedListener listener) {
         synchronized (mOnPauseListeners) {
@@ -2701,6 +2794,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         return aInfo;
     }
 
+    @UnsupportedAppUsage
     public final Activity startActivityNow(Activity parent, String id,
         Intent intent, ActivityInfo activityInfo, IBinder token, Bundle state,
         Activity.NonConfigurationInstances lastNonConfigurationInstances) {
@@ -2731,6 +2825,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         return performLaunchActivity(r, null /* customIntent */);
     }
 
+    @UnsupportedAppUsage
     public final Activity getActivity(IBinder token) {
         final ActivityClientRecord activityRecord = mActivities.get(token);
         return activityRecord != null ? activityRecord.activity : null;
@@ -2741,6 +2836,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         return mActivities.get(token);
     }
 
+    @UnsupportedAppUsage
     public final void sendActivityResult(
             IBinder token, String id, int requestCode,
             int resultCode, Intent data) {
@@ -3122,6 +3218,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    @UnsupportedAppUsage
     void performNewIntents(IBinder token, List<ReferrerIntent> intents, boolean andPause) {
         final ActivityClientRecord r = mActivities.get(token);
         if (r == null) {
@@ -3342,6 +3439,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         return sCurrentBroadcastIntent.get();
     }
 
+    @UnsupportedAppUsage
     private void handleReceiver(ReceiverData data) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
@@ -3513,6 +3611,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    @UnsupportedAppUsage
     private void handleCreateService(CreateServiceData data) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
@@ -4055,6 +4154,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     /** Called from {@link LocalActivityManager}. */
+    @UnsupportedAppUsage
     final void performStopActivity(IBinder token, boolean saveState, String reason) {
         ActivityClientRecord r = mActivities.get(token);
         performStopActivityInner(r, null /* stopInfo */, false /* keepShown */, saveState,
@@ -5561,6 +5661,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         LocaleList.setDefault(new LocaleList(bestLocale, newLocaleList));
     }
 
+    @UnsupportedAppUsage
     private void handleBindApplication(AppBindData data) {
         // Register the UI Thread as a sensitive thread to the runtime.
         VMRuntime.registerSensitiveThread();
@@ -5950,6 +6051,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    @UnsupportedAppUsage
     private void installContentProviders(
             Context context, List<ProviderInfo> providers) {
         final ArrayList<ContentProviderHolder> results = new ArrayList<>();
@@ -5979,6 +6081,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    @UnsupportedAppUsage
     public final IContentProvider acquireProvider(
             Context c, String auth, int userId, boolean stable) {
         final IContentProvider provider = acquireExistingProvider(c, auth, userId, stable);
@@ -6093,6 +6196,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    @UnsupportedAppUsage
     public final IContentProvider acquireExistingProvider(
             Context c, String auth, int userId, boolean stable) {
         synchronized (mProviderMap) {
@@ -6123,6 +6227,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    @UnsupportedAppUsage
     public final boolean releaseProvider(IContentProvider provider, boolean stable) {
         if (provider == null) {
             return false;
@@ -6255,6 +6360,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    @UnsupportedAppUsage
     final void handleUnstableProviderDied(IBinder provider, boolean fromClient) {
         synchronized (mProviderMap) {
             handleUnstableProviderDiedLocked(provider, fromClient);
@@ -6356,6 +6462,7 @@ public final class ActivityThread extends ClientTransactionHandler {
      * and returns the existing provider.  This can happen due to concurrent
      * attempts to acquire the same provider.
      */
+    @UnsupportedAppUsage
     private ContentProviderHolder installProvider(Context context,
             ContentProviderHolder holder, ProviderInfo info,
             boolean noisy, boolean noReleaseNeeded, boolean stable) {
@@ -6503,6 +6610,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         System.exit(0);
     }
 
+    @UnsupportedAppUsage
     private void attach(boolean system, long startSeq) {
         sCurrentActivityThread = this;
         mSystemThread = system;
@@ -6587,6 +6695,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         ViewRootImpl.addConfigCallback(configChangedCallback);
     }
 
+    @UnsupportedAppUsage
     public static ActivityThread systemMain() {
         // The system process on low-memory devices do not get to use hardware
         // accelerated drawing, since this can add too much overhead to the
@@ -6601,6 +6710,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         return thread;
     }
 
+    @UnsupportedAppUsage
     public final void installSystemProviders(List<ProviderInfo> providers) {
         if (providers != null) {
             installContentProviders(mInitialApplication, providers);

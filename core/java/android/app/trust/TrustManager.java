@@ -19,6 +19,7 @@ package android.app.trust;
 import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Handler;
@@ -74,6 +75,7 @@ public class TrustManager {
      *
      * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
      */
+    @UnsupportedAppUsage
     public void reportUnlockAttempt(boolean successful, int userId) {
         try {
             mService.reportUnlockAttempt(successful, userId);

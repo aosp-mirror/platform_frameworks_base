@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -93,11 +94,14 @@ import java.lang.ref.WeakReference;
 public class Dialog implements DialogInterface, Window.Callback,
         KeyEvent.Callback, OnCreateContextMenuListener, Window.OnWindowDismissedCallback {
     private static final String TAG = "Dialog";
+    @UnsupportedAppUsage
     private Activity mOwnerActivity;
 
     private final WindowManager mWindowManager;
 
+    @UnsupportedAppUsage
     final Context mContext;
+    @UnsupportedAppUsage
     final Window mWindow;
 
     View mDecor;
@@ -110,22 +114,30 @@ public class Dialog implements DialogInterface, Window.Callback,
     protected boolean mCancelable = true;
 
     private String mCancelAndDismissTaken;
+    @UnsupportedAppUsage
     private Message mCancelMessage;
+    @UnsupportedAppUsage
     private Message mDismissMessage;
+    @UnsupportedAppUsage
     private Message mShowMessage;
 
+    @UnsupportedAppUsage
     private OnKeyListener mOnKeyListener;
 
     private boolean mCreated = false;
+    @UnsupportedAppUsage
     private boolean mShowing = false;
     private boolean mCanceled = false;
 
+    @UnsupportedAppUsage
     private final Handler mHandler = new Handler();
 
     private static final int DISMISS = 0x43;
+    @UnsupportedAppUsage
     private static final int CANCEL = 0x44;
     private static final int SHOW = 0x45;
 
+    @UnsupportedAppUsage
     private final Handler mListenersHandler;
 
     private SearchEvent mSearchEvent;
@@ -361,6 +373,7 @@ public class Dialog implements DialogInterface, Window.Callback,
         }
     }
 
+    @UnsupportedAppUsage
     void dismissDialog() {
         if (mDecor == null || !mShowing) {
             return;
