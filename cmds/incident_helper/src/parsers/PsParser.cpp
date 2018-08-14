@@ -48,7 +48,7 @@ status_t PsParser::Parse(const int in, const int out) const {
         if (nline++ == 0) {
             header = parseHeader(line, DEFAULT_WHITESPACE);
 
-            const char* headerNames[] = { "LABEL", "USER", "PID", "TID", "PPID", "VSZ", "RSS", "WCHAN", "ADDR", "S", "PRI", "NI", "RTPRIO", "SCH", "PCY", "TIME", "CMD", NULL };
+            const char* headerNames[] = { "LABEL", "USER", "PID", "TID", "PPID", "VSZ", "RSS", "WCHAN", "ADDR", "S", "PRI", "NI", "RTPRIO", "SCH", "PCY", "TIME", "CMD", nullptr };
             if (!getColumnIndices(columnIndices, headerNames, line)) {
                 return -1;
             }
