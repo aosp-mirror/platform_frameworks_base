@@ -449,7 +449,6 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"அலாரம்: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"கால அளவு"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ஒவ்வொரு முறையும் கேள்"</string>
-    <!-- no translation found for zen_mode_forever (2704305038191592967) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="2704305038191592967">"ஆஃப் செய்யும் வரை"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"சற்றுமுன்"</string>
 </resources>
