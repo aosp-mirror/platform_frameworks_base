@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -55,6 +56,7 @@ import android.util.AndroidException;
  * {@link android.app.PendingIntent#getIntentSender() PendingIntent.getIntentSender()}.
  */
 public class IntentSender implements Parcelable {
+    @UnsupportedAppUsage
     private final IIntentSender mTarget;
     IBinder mWhitelistToken;
 
@@ -356,6 +358,7 @@ public class IntentSender implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public IIntentSender getTarget() {
         return mTarget;
     }
@@ -366,6 +369,7 @@ public class IntentSender implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public IntentSender(IIntentSender target) {
         mTarget = target;
     }

@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -297,6 +298,7 @@ public class PackageInfo implements Parcelable {
      * the {@link android.R.attr#installLocation} attribute.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int INSTALL_LOCATION_UNSPECIFIED = -1;
 
     /**
@@ -329,6 +331,7 @@ public class PackageInfo implements Parcelable {
     public boolean isStub;
 
     /** @hide */
+    @UnsupportedAppUsage
     public boolean coreApp;
 
     /** @hide */
@@ -346,6 +349,7 @@ public class PackageInfo implements Parcelable {
      * Package name of target package, or null.
      * @hide
      */
+    @UnsupportedAppUsage
     public String overlayTarget;
 
     /**
@@ -483,6 +487,7 @@ public class PackageInfo implements Parcelable {
         }
     };
 
+    @UnsupportedAppUsage
     private PackageInfo(Parcel source) {
         packageName = source.readString();
         splitNames = source.createStringArray();

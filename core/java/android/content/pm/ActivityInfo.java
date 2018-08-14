@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.annotation.IntDef;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -222,6 +223,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * See {@link android.R.attr#resizeableActivity}.
      * @hide
      */
+    @UnsupportedAppUsage
     public int resizeMode = RESIZE_MODE_RESIZEABLE;
 
     /**
@@ -355,6 +357,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * {@link android.R.attr#showForAllUsers} attribute.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int FLAG_SHOW_FOR_ALL_USERS = 0x0400;
     /**
      * Bit in {@link #flags} corresponding to an immersive activity
@@ -476,6 +479,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * this activity is launched into such a container a SecurityException will be
      * thrown. Set from the {@link android.R.attr#allowEmbedded} attribute.
      */
+    @UnsupportedAppUsage
     public static final int FLAG_ALLOW_EMBEDDED = 0x80000000;
 
     /**
@@ -816,6 +820,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static @NativeConfig int activityInfoConfigJavaToNative(@Config int input) {
         int output = 0;
         for (int i = 0; i < CONFIG_NATIVE_BITS.length; i++) {
@@ -1047,11 +1052,13 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * Returns true if the activity supports picture-in-picture.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean supportsPictureInPicture() {
         return (flags & FLAG_SUPPORTS_PICTURE_IN_PICTURE) != 0;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static boolean isResizeableMode(int mode) {
         return mode == RESIZE_MODE_RESIZEABLE
                 || mode == RESIZE_MODE_FORCE_RESIZEABLE

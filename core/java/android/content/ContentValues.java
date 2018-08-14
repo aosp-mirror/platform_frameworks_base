@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
@@ -41,6 +42,7 @@ public final class ContentValues implements Parcelable {
      * @deprecated kept around for lame people doing reflection
      */
     @Deprecated
+    @UnsupportedAppUsage
     private HashMap<String, Object> mValues;
 
     private final ArrayMap<String, Object> mMap;
@@ -77,6 +79,7 @@ public final class ContentValues implements Parcelable {
      * @deprecated kept around for lame people doing reflection
      */
     @Deprecated
+    @UnsupportedAppUsage
     private ContentValues(HashMap<String, Object> from) {
         mMap = new ArrayMap<>();
         mMap.putAll(from);
@@ -523,6 +526,7 @@ public final class ContentValues implements Parcelable {
      * {@hide}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void putStringArrayList(String key, ArrayList<String> value) {
         mMap.put(key, value);
     }
@@ -533,6 +537,7 @@ public final class ContentValues implements Parcelable {
      */
     @SuppressWarnings("unchecked")
     @Deprecated
+    @UnsupportedAppUsage
     public ArrayList<String> getStringArrayList(String key) {
         return (ArrayList<String>) mMap.get(key);
     }

@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -437,6 +438,7 @@ public abstract class ContentResolver {
     public static final String ANY_CURSOR_ITEM_TYPE = "vnd.android.cursor.item/*";
 
     /** @hide */
+    @UnsupportedAppUsage
     public static final int SYNC_ERROR_SYNC_ALREADY_IN_PROGRESS = 1;
     /** @hide */
     public static final int SYNC_ERROR_AUTHENTICATION = 2;
@@ -493,6 +495,7 @@ public abstract class ContentResolver {
     public static final int SYNC_OBSERVER_TYPE_PENDING = 1<<1;
     public static final int SYNC_OBSERVER_TYPE_ACTIVE = 1<<2;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int SYNC_OBSERVER_TYPE_STATUS = 1<<3;
     /** @hide */
     public static final int SYNC_OBSERVER_TYPE_ALL = 0x7fffffff;
@@ -575,6 +578,7 @@ public abstract class ContentResolver {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     protected abstract IContentProvider acquireProvider(Context c, String name);
 
     /**
@@ -584,17 +588,22 @@ public abstract class ContentResolver {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     protected IContentProvider acquireExistingProvider(Context c, String name) {
         return acquireProvider(c, name);
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public abstract boolean releaseProvider(IContentProvider icp);
     /** @hide */
+    @UnsupportedAppUsage
     protected abstract IContentProvider acquireUnstableProvider(Context c, String name);
     /** @hide */
+    @UnsupportedAppUsage
     public abstract boolean releaseUnstableProvider(IContentProvider icp);
     /** @hide */
+    @UnsupportedAppUsage
     public abstract void unstableProviderDied(IContentProvider icp);
 
     /** @hide */
@@ -1528,7 +1537,9 @@ public abstract class ContentResolver {
      * @hide
      */
     public class OpenResourceIdResult {
+        @UnsupportedAppUsage
         public Resources r;
+        @UnsupportedAppUsage
         public int id;
     }
 
@@ -1537,6 +1548,7 @@ public abstract class ContentResolver {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public OpenResourceIdResult getResourceId(Uri uri) throws FileNotFoundException {
         String authority = uri.getAuthority();
         Resources r;
@@ -1782,6 +1794,7 @@ public abstract class ContentResolver {
      * @return The ContentProvider for the given URI, or null if no content provider is found.
      * @hide
      */
+    @UnsupportedAppUsage
     public final IContentProvider acquireProvider(Uri uri) {
         if (!SCHEME_CONTENT.equals(uri.getScheme())) {
             return null;
@@ -1801,6 +1814,7 @@ public abstract class ContentResolver {
      * @return The ContentProvider for the given URI, or null if no content provider is found.
      * @hide
      */
+    @UnsupportedAppUsage
     public final IContentProvider acquireExistingProvider(Uri uri) {
         if (!SCHEME_CONTENT.equals(uri.getScheme())) {
             return null;
@@ -1815,6 +1829,7 @@ public abstract class ContentResolver {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public final IContentProvider acquireProvider(String name) {
         if (name == null) {
             return null;
@@ -1843,6 +1858,7 @@ public abstract class ContentResolver {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public final IContentProvider acquireUnstableProvider(String name) {
         if (name == null) {
             return null;
@@ -1976,6 +1992,7 @@ public abstract class ContentResolver {
     }
 
     /** @hide - designated user version */
+    @UnsupportedAppUsage
     public final void registerContentObserver(Uri uri, boolean notifyForDescendents,
             ContentObserver observer, @UserIdInt int userHandle) {
         try {
@@ -2155,6 +2172,7 @@ public abstract class ContentResolver {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void takePersistableUriPermission(@NonNull String toPackage, @NonNull Uri uri,
             @Intent.AccessUriMode int modeFlags) {
         Preconditions.checkNotNull(toPackage, "toPackage");
@@ -2789,6 +2807,7 @@ public abstract class ContentResolver {
      * @return the SyncStatusInfo for the authority, or null if none exists
      * @hide
      */
+    @UnsupportedAppUsage
     public static SyncStatusInfo getSyncStatus(Account account, String authority) {
         try {
             return getContentService().getSyncStatus(account, authority, null);
@@ -2801,6 +2820,7 @@ public abstract class ContentResolver {
      * @see #getSyncStatus(Account, String)
      * @hide
      */
+    @UnsupportedAppUsage
     public static SyncStatusInfo getSyncStatusAsUser(Account account, String authority,
             @UserIdInt int userId) {
         try {
@@ -3043,6 +3063,7 @@ public abstract class ContentResolver {
     public static final String CONTENT_SERVICE_NAME = "content";
 
     /** @hide */
+    @UnsupportedAppUsage
     public static IContentService getContentService() {
         if (sContentService != null) {
             return sContentService;
@@ -3053,13 +3074,17 @@ public abstract class ContentResolver {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public String getPackageName() {
         return mPackageName;
     }
 
+    @UnsupportedAppUsage
     private static volatile IContentService sContentService;
+    @UnsupportedAppUsage
     private final Context mContext;
 
+    @UnsupportedAppUsage
     final String mPackageName;
     final int mTargetSdkVersion;
 

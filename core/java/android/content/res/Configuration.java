@@ -44,6 +44,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
@@ -127,6 +128,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * questionable whether this is the right way to expose the functionality.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean userSetLocale;
 
 
@@ -793,6 +795,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     /**
      * @hide Internal book-keeping.
      */
+    @UnsupportedAppUsage
     public int seq;
 
     /** @hide */
@@ -1207,6 +1210,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     @Deprecated public void makeDefault() {
         setToDefaults();
     }
@@ -1978,6 +1982,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static String resourceQualifierString(Configuration config) {
         return resourceQualifierString(config, null);
     }
@@ -2264,6 +2269,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * This is fine for device configurations as no member is ever undefined.
      * {@hide}
      */
+    @UnsupportedAppUsage
     public static Configuration generateDelta(Configuration base, Configuration change) {
         final Configuration delta = new Configuration();
         if (base.fontScale != change.fontScale) {

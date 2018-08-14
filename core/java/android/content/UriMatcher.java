@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 
 import java.util.ArrayList;
@@ -277,6 +278,8 @@ public class UriMatcher
 
     private int mCode;
     private final int mWhich;
+    @UnsupportedAppUsage
     private final String mText;
+    @UnsupportedAppUsage
     private ArrayList<UriMatcher> mChildren;
 }

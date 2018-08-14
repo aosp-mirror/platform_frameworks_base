@@ -17,6 +17,7 @@
 package android.content;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetFileDescriptor;
 import android.database.BulkCursorDescriptor;
 import android.database.BulkCursorToCursorAdaptor;
@@ -50,6 +51,7 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
      * Cast a Binder object into a content resolver interface, generating
      * a proxy if needed.
      */
+    @UnsupportedAppUsage
     static public IContentProvider asInterface(IBinder obj)
     {
         if (obj == null) {

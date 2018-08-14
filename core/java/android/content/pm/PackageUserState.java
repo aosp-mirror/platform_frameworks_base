@@ -28,6 +28,7 @@ import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.BaseBundle;
 import android.os.PersistableBundle;
 import android.util.ArraySet;
@@ -67,6 +68,7 @@ public class PackageUserState {
 
     public String[] overlayPaths;
 
+    @UnsupportedAppUsage
     public PackageUserState() {
         installed = true;
         hidden = false;

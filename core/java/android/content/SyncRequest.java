@@ -17,6 +17,7 @@
 package android.content;
 
 import android.accounts.Account;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,10 +30,13 @@ import android.os.Parcelable;
 public class SyncRequest implements Parcelable {
     private static final String TAG = "SyncRequest";
     /** Account to pass to the sync adapter. Can be null. */
+    @UnsupportedAppUsage
     private final Account mAccountToSync;
     /** Authority string that corresponds to a ContentProvider. */
+    @UnsupportedAppUsage
     private final String mAuthority;
     /** Bundle containing user info as well as sync settings. */
+    @UnsupportedAppUsage
     private final Bundle mExtras;
     /** Don't allow this sync request on metered networks. */
     private final boolean mDisallowMetered;
@@ -44,8 +48,10 @@ public class SyncRequest implements Parcelable {
     /**
      * Specifies a point in the future at which the sync must have been scheduled to run.
      */
+    @UnsupportedAppUsage
     private final long mSyncRunTimeSecs;
     /** Periodic versus one-off. */
+    @UnsupportedAppUsage
     private final boolean mIsPeriodic;
     /** Service versus provider. */
     private final boolean mIsAuthority;

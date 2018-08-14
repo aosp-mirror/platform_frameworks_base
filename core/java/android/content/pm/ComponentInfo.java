@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
@@ -162,6 +163,7 @@ public class ComponentInfo extends PackageItemInfo {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public ComponentName getComponentName() {
         return new ComponentName(packageName, name);
     }

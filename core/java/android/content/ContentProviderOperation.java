@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentProvider;
 import android.database.Cursor;
 import android.net.Uri;
@@ -35,16 +36,22 @@ import java.util.Map;
  */
 public class ContentProviderOperation implements Parcelable {
     /** @hide exposed for unit tests */
+    @UnsupportedAppUsage
     public final static int TYPE_INSERT = 1;
     /** @hide exposed for unit tests */
+    @UnsupportedAppUsage
     public final static int TYPE_UPDATE = 2;
     /** @hide exposed for unit tests */
+    @UnsupportedAppUsage
     public final static int TYPE_DELETE = 3;
     /** @hide exposed for unit tests */
     public final static int TYPE_ASSERT = 4;
 
+    @UnsupportedAppUsage
     private final int mType;
+    @UnsupportedAppUsage
     private final Uri mUri;
+    @UnsupportedAppUsage
     private final String mSelection;
     private final String[] mSelectionArgs;
     private final ContentValues mValues;
@@ -218,6 +225,7 @@ public class ContentProviderOperation implements Parcelable {
     }
 
     /** @hide exposed for unit tests */
+    @UnsupportedAppUsage
     public int getType() {
         return mType;
     }

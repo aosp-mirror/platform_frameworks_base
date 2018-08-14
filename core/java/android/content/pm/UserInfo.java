@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemProperties;
@@ -41,6 +42,7 @@ public class UserInfo implements Parcelable {
      * Primary user. Only one user can have this flag set. It identifies the first human user
      * on a device.
      */
+    @UnsupportedAppUsage
     public static final int FLAG_PRIMARY = 0x00000001;
 
     /**
@@ -94,12 +96,19 @@ public class UserInfo implements Parcelable {
 
     public static final int NO_PROFILE_GROUP_ID = UserHandle.USER_NULL;
 
+    @UnsupportedAppUsage
     public int id;
+    @UnsupportedAppUsage
     public int serialNumber;
+    @UnsupportedAppUsage
     public String name;
+    @UnsupportedAppUsage
     public String iconPath;
+    @UnsupportedAppUsage
     public int flags;
+    @UnsupportedAppUsage
     public long creationTime;
+    @UnsupportedAppUsage
     public long lastLoggedInTime;
     public String lastLoggedInFingerprint;
     /**
@@ -107,19 +116,24 @@ public class UserInfo implements Parcelable {
      * If this user is a child user, it would be its parent user id.
      * Otherwise, it would be {@link #NO_PROFILE_GROUP_ID}.
      */
+    @UnsupportedAppUsage
     public int profileGroupId;
     public int restrictedProfileParentId;
     /** Which profile badge color/label to use. */
     public int profileBadge;
 
     /** User is only partially created. */
+    @UnsupportedAppUsage
     public boolean partial;
+    @UnsupportedAppUsage
     public boolean guestToRemove;
 
+    @UnsupportedAppUsage
     public UserInfo(int id, String name, int flags) {
         this(id, name, null, flags);
     }
 
+    @UnsupportedAppUsage
     public UserInfo(int id, String name, String iconPath, int flags) {
         this.id = id;
         this.name = name;
@@ -129,26 +143,32 @@ public class UserInfo implements Parcelable {
         this.restrictedProfileParentId = NO_PROFILE_GROUP_ID;
     }
 
+    @UnsupportedAppUsage
     public boolean isPrimary() {
         return (flags & FLAG_PRIMARY) == FLAG_PRIMARY;
     }
 
+    @UnsupportedAppUsage
     public boolean isAdmin() {
         return (flags & FLAG_ADMIN) == FLAG_ADMIN;
     }
 
+    @UnsupportedAppUsage
     public boolean isGuest() {
         return (flags & FLAG_GUEST) == FLAG_GUEST;
     }
 
+    @UnsupportedAppUsage
     public boolean isRestricted() {
         return (flags & FLAG_RESTRICTED) == FLAG_RESTRICTED;
     }
 
+    @UnsupportedAppUsage
     public boolean isManagedProfile() {
         return (flags & FLAG_MANAGED_PROFILE) == FLAG_MANAGED_PROFILE;
     }
 
+    @UnsupportedAppUsage
     public boolean isEnabled() {
         return (flags & FLAG_DISABLED) != FLAG_DISABLED;
     }
@@ -238,6 +258,7 @@ public class UserInfo implements Parcelable {
         profileBadge = orig.profileBadge;
     }
 
+    @UnsupportedAppUsage
     public UserHandle getUserHandle() {
         return new UserHandle(id);
     }
@@ -267,6 +288,7 @@ public class UserInfo implements Parcelable {
         dest.writeInt(profileBadge);
     }
 
+    @UnsupportedAppUsage
     public static final Parcelable.Creator<UserInfo> CREATOR
             = new Parcelable.Creator<UserInfo>() {
         public UserInfo createFromParcel(Parcel source) {
