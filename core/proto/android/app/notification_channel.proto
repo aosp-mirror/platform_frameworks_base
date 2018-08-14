@@ -15,7 +15,6 @@
  */
 
 syntax = "proto2";
-option java_package = "android.app";
 option java_multiple_files = true;
 
 package android.app;
@@ -29,8 +28,11 @@ import "frameworks/base/libs/incident/proto/android/privacy.proto";
 message NotificationChannelProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
+    // Notification Channel ID. Provided by the app.
     optional string id = 1 [ (android.privacy).dest = DEST_EXPLICIT ];
+    // User-visible Notification Channel name. Provided by the app.
     optional string name = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
+    // User-visible Notification Channel description. Provided by the app.
     optional string description = 3 [ (android.privacy).dest = DEST_EXPLICIT ];
     optional int32 importance = 4;
     optional bool can_bypass_dnd = 5;
@@ -49,6 +51,7 @@ message NotificationChannelProto {
     optional bool show_badge = 13;
     // Default is false.
     optional bool is_deleted = 14;
+    // Provided by the app but will match a NotificationChannelGroup id.
     optional string group = 15 [ (android.privacy).dest = DEST_EXPLICIT ];
     optional android.media.AudioAttributesProto audio_attributes = 16;
     // If this is a blockable system notification channel.

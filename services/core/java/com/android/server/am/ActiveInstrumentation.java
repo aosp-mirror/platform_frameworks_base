@@ -139,7 +139,9 @@ class ActiveInstrumentation {
         proto.write(ActiveInstrumentationProto.WATCHER, mWatcher.toString());
         proto.write(ActiveInstrumentationProto.UI_AUTOMATION_CONNECTION,
                 mUiAutomationConnection.toString());
-        proto.write(ActiveInstrumentationProto.ARGUMENTS, mArguments.toString());
+        if (mArguments != null) {
+            mArguments.writeToProto(proto, ActiveInstrumentationProto.ARGUMENTS);
+        }
         proto.end(token);
     }
 }

@@ -18,7 +18,6 @@ syntax = "proto2";
 option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/os/backtrace.proto";
-import "frameworks/base/core/proto/android/os/batterystats.proto";
 import "frameworks/base/core/proto/android/os/batterytype.proto";
 import "frameworks/base/core/proto/android/os/cpufreq.proto";
 import "frameworks/base/core/proto/android/os/cpuinfo.proto";
