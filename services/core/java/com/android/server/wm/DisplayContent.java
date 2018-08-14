@@ -439,36 +439,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return;
         }
 
-        final int flags = w.mAttrs.flags;
-
-        // If this window is animating, make a note that we have an animating window and take
-        // care of a request to run a detached wallpaper animation.
-        if (w.isAnimating()) {
-            final AnimationAdapter anim = w.getAnimation();
-            if (anim != null) {
-                if ((flags & FLAG_SHOW_WALLPAPER) != 0 && anim.getDetachWallpaper()) {
-                    mTmpWindow = w;
-                }
-                final int color = anim.getBackgroundColor();
-                if (color != 0) {
-                    final TaskStack stack = w.getStack();
-                    if (stack != null) {
-                        stack.setAnimationBackground(winAnimator, color);
-                    }
-                }
-            }
-        }
-
-        // If this window's app token is running a detached wallpaper animation, make a note so
-        // we can ensure the wallpaper is displayed behind it.
-        final AppWindowToken atoken = winAnimator.mWin.mAppToken;
-        final AnimationAdapter animation = atoken != null ? atoken.getAnimation() : null;
-        if (animation != null) {
-            if ((flags & FLAG_SHOW_WALLPAPER) != 0 && animation.getDetachWallpaper()) {
-                mTmpWindow = w;
-            }
-
-            final int color = animation.getBackgroundColor();
+        // If this window is animating, ensure the animation background is set.
+        final AnimationAdapter anim = w.mAppToken != null
+                ? w.mAppToken.getAnimation()
+                : w.getAnimation();
+        if (anim != null) {
+            final int color = anim.getBackgroundColor();
             if (color != 0) {
                 final TaskStack stack = w.getStack();
                 if (stack != null) {
@@ -2904,26 +2880,16 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return false;
     }
 
-    void updateWindowsForAnimator(WindowAnimator animator) {
-        mTmpWindowAnimator = animator;
+    void updateWindowsForAnimator() {
         forAllWindows(mUpdateWindowsForAnimator, true /* traverseTopToBottom */);
     }
 
-    void updateWallpaperForAnimator(WindowAnimator animator) {
+    /**
+     * Updates the {@link TaskStack#setAnimationBackground} for all windows.
+     */
+    void updateBackgroundForAnimator() {
         resetAnimationBackgroundAnimator();
-
-        // Used to indicate a detached wallpaper.
-        mTmpWindow = null;
-        mTmpWindowAnimator = animator;
-
         forAllWindows(mUpdateWallpaperForAnimator, true /* traverseTopToBottom */);
-
-        if (animator.mWindowDetachedWallpaper != mTmpWindow) {
-            if (DEBUG_WALLPAPER) Slog.v(TAG, "Detached wallpaper changed from "
-                    + animator.mWindowDetachedWallpaper + " to " + mTmpWindow);
-            animator.mWindowDetachedWallpaper = mTmpWindow;
-            animator.mBulkUpdateParams |= SET_WALLPAPER_MAY_CHANGE;
-        }
     }
 
     boolean isInputMethodClientFocus(int uid, int pid) {

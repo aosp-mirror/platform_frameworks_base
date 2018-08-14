@@ -72,11 +72,6 @@ public class WindowAnimationSpec implements AnimationSpec {
     }
 
     @Override
-    public boolean getDetachWallpaper() {
-        return mAnimation.getDetachWallpaper();
-    }
-
-    @Override
     public boolean getShowWallpaper() {
         return mAnimation.getShowWallpaper();
     }

@@ -44,11 +44,6 @@ class LocalAnimationAdapter implements AnimationAdapter {
     }
 
     @Override
-    public boolean getDetachWallpaper() {
-        return mSpec.getDetachWallpaper();
-    }
-
-    @Override
     public boolean getShowWallpaper() {
         return mSpec.getShowWallpaper();
     }
@@ -96,13 +91,6 @@ class LocalAnimationAdapter implements AnimationAdapter {
      * Describes how to apply an animation.
      */
     interface AnimationSpec {
-
-        /**
-         * @see AnimationAdapter#getDetachWallpaper
-         */
-        default boolean getDetachWallpaper() {
-            return false;
-        }
 
         /**
          * @see AnimationAdapter#getShowWallpaper

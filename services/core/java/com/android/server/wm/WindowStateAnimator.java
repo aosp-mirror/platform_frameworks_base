@@ -263,10 +263,6 @@ class WindowStateAnimator {
                         + ", reportedVisible="
                         + (mWin.mAppToken != null ? mWin.mAppToken.reportedVisible : false));
 
-        if (mAnimator.mWindowDetachedWallpaper == mWin) {
-            mAnimator.mWindowDetachedWallpaper = null;
-        }
-
         mWin.checkPolicyVisibilityChange();
         final DisplayContent displayContent = mWin.getDisplayContent();
         if (mAttrType == LayoutParams.TYPE_STATUS_BAR && mWin.mPolicyVisibility) {
@@ -276,7 +272,6 @@ class WindowStateAnimator {
                 displayContent.setLayoutNeeded();
             }
         }
-
         mWin.onExitAnimationDone();
         final int displayId = mWin.getDisplayId();
         int pendingLayoutChanges = FINISH_LAYOUT_REDO_ANIM;

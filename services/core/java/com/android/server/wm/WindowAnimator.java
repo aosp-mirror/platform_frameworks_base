@@ -58,17 +58,6 @@ public class WindowAnimator {
     /** Time of current animation step. Reset on each iteration */
     long mCurrentTime;
 
-    boolean mAppWindowAnimating;
-    /** Skip repeated AppWindowTokens initialization. Note that AppWindowsToken's version of this
-     * is a long initialized to Long.MIN_VALUE so that it doesn't match this value on startup. */
-    int mAnimTransactionSequence;
-
-    /** Window currently running an animation that has requested it be detached
-     * from the wallpaper.  This means we need to ensure the wallpaper is
-     * visible behind it in case it animates in a way that would allow it to be
-     * seen. If multiple windows satisfy this, use the lowest window. */
-    WindowState mWindowDetachedWallpaper = null;
-
     int mBulkUpdateParams = 0;
     Object mLastWindowFreezeSource;
 
@@ -191,9 +180,8 @@ public class WindowAnimator {
 
                     // Update animations of all applications, including those
                     // associated with exiting/removed apps
-                    ++mAnimTransactionSequence;
-                    dc.updateWindowsForAnimator(this);
-                    dc.updateWallpaperForAnimator(this);
+                    dc.updateWindowsForAnimator();
+                    dc.updateBackgroundForAnimator();
                     dc.prepareSurfaces();
                 }
 
@@ -317,8 +305,6 @@ public class WindowAnimator {
         pw.println();
 
         if (dumpAll) {
-            pw.print(prefix); pw.print("mAnimTransactionSequence=");
-                    pw.print(mAnimTransactionSequence);
             pw.print(prefix); pw.print("mCurrentTime=");
                     pw.println(TimeUtils.formatUptime(mCurrentTime));
         }
@@ -326,10 +312,6 @@ public class WindowAnimator {
             pw.print(prefix); pw.print("mBulkUpdateParams=0x");
                     pw.print(Integer.toHexString(mBulkUpdateParams));
                     pw.println(bulkUpdateParamsToString(mBulkUpdateParams));
-        }
-        if (mWindowDetachedWallpaper != null) {
-            pw.print(prefix); pw.print("mWindowDetachedWallpaper=");
-                pw.println(mWindowDetachedWallpaper);
         }
     }
 
