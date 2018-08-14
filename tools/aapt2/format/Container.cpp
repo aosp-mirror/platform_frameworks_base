@@ -270,7 +270,8 @@ ContainerReader::ContainerReader(io::InputStream* in)
   }
 
   if (magic != kContainerFormatMagic) {
-    error_ = "magic value doesn't match AAPT";
+    error_ =
+        StringPrintf("magic value is 0x%08x but AAPT expects 0x%08x", magic, kContainerFormatMagic);
     return;
   }
 
