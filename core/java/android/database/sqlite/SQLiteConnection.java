@@ -208,10 +208,15 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     }
 
     private void open() {
-        mConnectionPtr = nativeOpen(mConfiguration.path, mConfiguration.openFlags,
-                mConfiguration.label,
-                SQLiteDebug.Consts.DEBUG_SQL_STATEMENTS, SQLiteDebug.Consts.DEBUG_SQL_TIME,
-                mConfiguration.lookasideSlotSize, mConfiguration.lookasideSlotCount);
+        final int cookie = mRecentOperations.beginOperation("open", null, null);
+        try {
+            mConnectionPtr = nativeOpen(mConfiguration.path, mConfiguration.openFlags,
+                    mConfiguration.label,
+                    SQLiteDebug.Consts.DEBUG_SQL_STATEMENTS, SQLiteDebug.Consts.DEBUG_SQL_TIME,
+                    mConfiguration.lookasideSlotSize, mConfiguration.lookasideSlotCount);
+        } finally {
+            mRecentOperations.endOperation(cookie);
+        }
         setPageSize();
         setForeignKeyModeFromConfiguration();
         setWalModeFromConfiguration();
