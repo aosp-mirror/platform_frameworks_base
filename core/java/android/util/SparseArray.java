@@ -19,6 +19,7 @@ package android.util;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
+import android.annotation.UnsupportedAppUsage;
 import libcore.util.EmptyArray;
 
 /**
@@ -55,8 +56,11 @@ public class SparseArray<E> implements Cloneable {
     private static final Object DELETED = new Object();
     private boolean mGarbage = false;
 
+    @UnsupportedAppUsage
     private int[] mKeys;
+    @UnsupportedAppUsage
     private Object[] mValues;
+    @UnsupportedAppUsage
     private int mSize;
 
     /**

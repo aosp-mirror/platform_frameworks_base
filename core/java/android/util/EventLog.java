@@ -17,6 +17,7 @@
 package android.util;
 
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -82,6 +83,7 @@ public class EventLog {
         private static final byte FLOAT_TYPE = 4;
 
         /** @param data containing event, read from the system */
+        @UnsupportedAppUsage
         /*package*/ Event(byte[] data) {
             mBuffer = ByteBuffer.wrap(data);
             mBuffer.order(ByteOrder.nativeOrder());
