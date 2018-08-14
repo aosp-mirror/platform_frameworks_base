@@ -97,7 +97,7 @@ bool getColumnIndices(std::vector<int>& indices, const char** headerNames, const
 
     size_t lastIndex = 0;
     int i = 0;
-    while (headerNames[i] != NULL) {
+    while (headerNames[i] != nullptr) {
         std::string s = headerNames[i];
         lastIndex = line.find(s, lastIndex);
         if (lastIndex == std::string::npos) {
@@ -237,18 +237,18 @@ double toDouble(const std::string& s) {
 Reader::Reader(const int fd)
 {
     mFile = fdopen(fd, "r");
-    mStatus = mFile == NULL ? "Invalid fd " + std::to_string(fd) : "";
+    mStatus = mFile == nullptr ? "Invalid fd " + std::to_string(fd) : "";
 }
 
 Reader::~Reader()
 {
-    if (mFile != NULL) fclose(mFile);
+    if (mFile != nullptr) fclose(mFile);
 }
 
 bool Reader::readLine(std::string* line) {
-    if (mFile == NULL) return false;
+    if (mFile == nullptr) return false;
 
-    char* buf = NULL;
+    char* buf = nullptr;
     size_t len = 0;
     ssize_t read = getline(&buf, &len, mFile);
     if (read != -1) {
