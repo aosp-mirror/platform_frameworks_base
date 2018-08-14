@@ -32,6 +32,7 @@ import android.annotation.Nullable;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Context;
+import android.graphics.Rect;
 import android.graphics.Point;
 import android.hardware.input.InputManager;
 import android.os.Build;
@@ -118,6 +119,11 @@ class DragState {
     private final Interpolator mCubicEaseOutInterpolator = new DecelerateInterpolator(1.5f);
     private Point mDisplaySize = new Point();
 
+    // A surface used to catch input events for the drag-and-drop operation.
+    SurfaceControl mInputSurface;
+
+    private final Rect mTmpClipRect = new Rect();
+
     DragState(WindowManagerService service, DragDropController controller, IBinder token,
             SurfaceControl surface, int flags, IBinder localWin) {
         mService = service;
@@ -127,6 +133,42 @@ class DragState {
         mFlags = flags;
         mLocalWin = localWin;
         mNotifiedWindows = new ArrayList<WindowState>();
+
+    }
+
+    void hideInputSurface(SurfaceControl.Transaction t, int displayId) {
+        if (displayId != mDisplayContent.getDisplayId()) {
+            return;
+        }
+
+        if (mInputSurface != null) {
+            t.hide(mInputSurface);
+        }
+    }
+
+    void showInputSurface(SurfaceControl.Transaction t, int displayId) {
+        if (displayId != mDisplayContent.getDisplayId()) {
+            return;
+        }
+
+        if (mInputSurface == null) {
+            mInputSurface = mService.makeSurfaceBuilder(mService.mRoot.getDisplayContent(displayId)
+                    .getSession()).setContainerLayer(true)
+                    .setName("Drag and Drop Input Consumer").setSize(1, 1).build();
+        }
+        final InputWindowHandle h = getInputWindowHandle();
+        if (h == null) {
+            Slog.w(TAG_WM, "Drag is in progress but there is no "
+                    + "drag window handle.");
+            return;
+        }
+
+        t.show(mInputSurface);
+        t.setInputWindowInfo(mInputSurface, h);
+        t.setLayer(mInputSurface, Integer.MAX_VALUE);
+
+        mTmpClipRect.set(0, 0, mDisplaySize.x, mDisplaySize.y);
+        t.setWindowCrop(mSurfaceControl, mTmpClipRect);
     }
 
     /**

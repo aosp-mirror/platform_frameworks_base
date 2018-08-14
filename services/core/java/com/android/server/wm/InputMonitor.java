@@ -274,14 +274,9 @@ final class InputMonitor {
             if (DEBUG_DRAG) {
                 Log.d(TAG_WM, "Inserting drag window");
             }
-            final InputWindowHandle dragWindowHandle =
-                    mService.mDragDropController.getInputWindowHandleLocked();
-            if (dragWindowHandle == null) {
-                Slog.w(TAG_WM, "Drag is in progress but there is no "
-                        + "drag window handle.");
-            } else if (dragWindowHandle.displayId == mDisplayId) {
-                addInputWindowHandle(dragWindowHandle);
-            }
+            mService.mDragDropController.showInputSurface(mInputTransaction, mDisplayId);
+        } else {
+            mService.mDragDropController.hideInputSurface(mInputTransaction, mDisplayId);
         }
 
         final boolean inPositioning = mService.mTaskPositioningController.isPositioningLocked();
@@ -289,14 +284,9 @@ final class InputMonitor {
             if (DEBUG_TASK_POSITIONING) {
                 Log.d(TAG_WM, "Inserting window handle for repositioning");
             }
-            final InputWindowHandle dragWindowHandle =
-                    mService.mTaskPositioningController.getDragWindowHandleLocked();
-            if (dragWindowHandle == null) {
-                Slog.e(TAG_WM,
-                        "Repositioning is in progress but there is no drag window handle.");
-            } else if (dragWindowHandle.displayId == mDisplayId) {
-                addInputWindowHandle(dragWindowHandle);
-            }
+            mService.mTaskPositioningController.showInputSurface(mInputTransaction, mDisplayId);
+        } else {
+            mService.mTaskPositioningController.hideInputSurface(mInputTransaction, mDisplayId);
         }
 
         // Add all windows on the default display.
