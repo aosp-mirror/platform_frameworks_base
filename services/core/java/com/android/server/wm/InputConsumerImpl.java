@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -25,6 +26,8 @@ import android.view.WindowManager;
 
 import android.view.InputApplicationHandle;
 import android.view.InputWindowHandle;
+import android.view.SurfaceControl;
+import android.util.Slog;
 
 import java.io.PrintWriter;
 
@@ -38,6 +41,9 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
     final String mName;
     final int mClientPid;
     final UserHandle mClientUser;
+
+    final SurfaceControl mInputSurface;
+    Rect mTmpClipRect = new Rect();
 
     InputConsumerImpl(WindowManagerService service, IBinder token, String name,
             InputChannel inputChannel, int clientPid, UserHandle clientUser, int displayId) {
@@ -80,6 +86,11 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         mWindowHandle.ownerUid = Process.myUid();
         mWindowHandle.inputFeatures = 0;
         mWindowHandle.scaleFactor = 1.0f;
+
+        mInputSurface = mService.makeSurfaceBuilder(mService.mRoot.getDisplayContent(displayId)
+                .getSession()).setContainerLayer(true).setName("Input Consumer " + name)
+                .setSize(1, 1)
+                .build();
     }
 
     void linkToDeathRecipient() {
@@ -102,12 +113,27 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         mToken.unlinkToDeath(this, 0);
     }
 
-    void layout(int dw, int dh) {
-        mWindowHandle.touchableRegion.set(0, 0, dw, dh);
-        mWindowHandle.frameLeft = 0;
-        mWindowHandle.frameTop = 0;
-        mWindowHandle.frameRight = dw;
-        mWindowHandle.frameBottom = dh;
+    void layout(SurfaceControl.Transaction t, int dw, int dh) {
+        t.setPosition(mInputSurface, 0, 0);
+
+        mTmpClipRect.set(0, 0, dw, dh);
+        t.setWindowCrop(mInputSurface, mTmpClipRect);
+    }
+
+    void layout(SurfaceControl.Transaction t, Rect r) {
+        t.setPosition(mInputSurface, r.left, r.top);
+        mTmpClipRect.set(0, 0, r.width(), r.height());
+        t.setWindowCrop(mInputSurface, mTmpClipRect);
+    }
+
+    void hide(SurfaceControl.Transaction t) {
+        t.hide(mInputSurface);
+    }
+
+    void show(SurfaceControl.Transaction t, WindowState w) {
+        t.show(mInputSurface);
+        t.setInputWindowInfo(mInputSurface, mWindowHandle);
+        t.setRelativeLayer(mInputSurface, w.getSurfaceControl(), 1);
     }
 
     private int getLayerLw(int windowType) {

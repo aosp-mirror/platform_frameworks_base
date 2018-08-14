@@ -2172,6 +2172,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Not modal or full screen modal
             getTouchableRegion(region);
         }
+
+        // The area containing the shadows is not touchable.
+        region.translate(mAttrs.surfaceInsets.left, mAttrs.surfaceInsets.top);
+
         return flags;
     }
 
@@ -2803,25 +2807,32 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void getTouchableRegion(Region outRegion) {
+        if (inPinnedWindowingMode() && !isFocused()) {
+            outRegion.setEmpty();
+            return;
+        }
+
         final Rect frame = mWindowFrames.mFrame;
         switch (mTouchableInsets) {
             default:
             case TOUCHABLE_INSETS_FRAME:
                 outRegion.set(frame);
+                outRegion.translate(-frame.left, -frame.top);
                 break;
             case TOUCHABLE_INSETS_CONTENT:
                 applyInsets(outRegion, frame, mGivenContentInsets);
+                outRegion.translate(-frame.left, -frame.top);
                 break;
             case TOUCHABLE_INSETS_VISIBLE:
                 applyInsets(outRegion, frame, mGivenVisibleInsets);
+                outRegion.translate(-frame.left, -frame.top);
                 break;
             case TOUCHABLE_INSETS_REGION: {
                 outRegion.set(mGivenTouchableRegion);
-                outRegion.translate(frame.left, frame.top);
                 break;
             }
         }
-        cropRegionToStackBoundsIfNeeded(outRegion);
+        outRegion.translate(mAttrs.surfaceInsets.left, mAttrs.surfaceInsets.top);
     }
 
     private void cropRegionToStackBoundsIfNeeded(Region region) {

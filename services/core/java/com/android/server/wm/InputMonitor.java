@@ -129,6 +129,7 @@ final class InputMonitor {
     private boolean disposeInputConsumer(InputConsumerImpl consumer) {
         if (consumer != null) {
             consumer.disposeChannelsLw();
+            consumer.hide(mInputTransaction);
             return true;
         }
         return false;
@@ -140,7 +141,16 @@ final class InputMonitor {
 
     void layoutInputConsumers(int dw, int dh) {
         for (int i = mInputConsumers.size() - 1; i >= 0; i--) {
-            mInputConsumers.valueAt(i).layout(dw, dh);
+            mInputConsumers.valueAt(i).layout(mInputTransaction, dw, dh);
+        }
+    }
+
+    // The visibility of the input consumers is recomputed each time we
+    // update the input windows. We use a model where consumers begin invisible
+    // (set so by this function) and must meet some condition for visibility on each update.
+    void resetInputConsumers(SurfaceControl.Transaction t) {
+        for (int i = mInputConsumers.size() - 1; i >= 0; i--) {
+            mInputConsumers.valueAt(i).hide(t);
         }
     }
 
@@ -398,7 +408,11 @@ final class InputMonitor {
             final DisplayContent dc = mService.mRoot.getDisplayContent(mDisplayId);
             wallpaperController = dc.mWallpaperController;
 
-            dc.forAllWindows(this, true /* traverseTopToBottom */);
+            resetInputConsumers(mInputTransaction);
+
+            dc.forAllWindows(this,
+                    true /* traverseTopToBottom */);
+
             if (mAddWallpaperInputConsumerHandle) {
                 // No visible wallpaper found, add the wallpaper input consumer at the end.
                 addInputWindowHandle(wallpaperInputConsumer.mWindowHandle);
@@ -434,41 +448,36 @@ final class InputMonitor {
                         && recentsAnimationController.shouldApplyInputConsumer(w.mAppToken)) {
                     if (recentsAnimationController.updateInputConsumerForApp(
                             recentsAnimationInputConsumer.mWindowHandle, hasFocus)) {
-                        addInputWindowHandle(recentsAnimationInputConsumer.mWindowHandle);
+                        recentsAnimationInputConsumer.show(mInputTransaction, w);
                         mAddRecentsAnimationInputConsumerHandle = false;
                     }
-                    // If the target app window does not yet exist, then we don't add the input
-                    // consumer window, but also don't add the app window below.
-                    return;
                 }
             }
 
             if (w.inPinnedWindowingMode()) {
-                if (mAddPipInputConsumerHandle
-                        && (inputWindowHandle.layer <= pipInputConsumer.mWindowHandle.layer)) {
+                if (mAddPipInputConsumerHandle) {
                     // Update the bounds of the Pip input consumer to match the window bounds.
                     w.getBounds(mTmpRect);
+                    // The touchable region is relative to the surface top-left
+                    mTmpRect.top = mTmpRect.left = 0;
+
+                    pipInputConsumer.layout(mInputTransaction, mTmpRect);
                     pipInputConsumer.mWindowHandle.touchableRegion.set(mTmpRect);
-                    addInputWindowHandle(pipInputConsumer.mWindowHandle);
+                    pipInputConsumer.show(mInputTransaction, w);
                     mAddPipInputConsumerHandle = false;
-                }
-                // TODO: Fix w.canReceiveTouchInput() to handle this case
-                if (!hasFocus) {
-                    // Skip this pinned stack window if it does not have focus
-                    return;
                 }
             }
 
             if (mAddInputConsumerHandle
                     && inputWindowHandle.layer <= navInputConsumer.mWindowHandle.layer) {
-                addInputWindowHandle(navInputConsumer.mWindowHandle);
+                navInputConsumer.show(mInputTransaction, w);
                 mAddInputConsumerHandle = false;
             }
 
             if (mAddWallpaperInputConsumerHandle) {
                 if (w.mAttrs.type == TYPE_WALLPAPER && w.isVisibleLw()) {
                     // Add the wallpaper input consumer above the first visible wallpaper.
-                    addInputWindowHandle(wallpaperInputConsumer.mWindowHandle);
+                    wallpaperInputConsumer.show(mInputTransaction, w);
                     mAddWallpaperInputConsumerHandle = false;
                 }
             }
