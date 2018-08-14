@@ -99,7 +99,6 @@ public class CarStatusBar extends StatusBar implements
             Log.d(TAG, "Connecting to HVAC service");
             Dependency.get(HvacController.class).connectToCarService();
         }
-        mCarFacetButtonController = Dependency.get(CarFacetButtonController.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mDeviceIsProvisioned = mDeviceProvisionedController.isDeviceProvisioned();
         if (!mDeviceIsProvisioned) {
@@ -117,7 +116,7 @@ public class CarStatusBar extends StatusBar implements
 
     /**
      * Remove all content from navbars and rebuild them. Used to allow for different nav bars
-     * before and after the device is provisioned
+     * before and after the device is provisioned. Also for change of density and font size.
      */
     private void restartNavBars() {
         mCarFacetButtonController.removeAll();
@@ -216,6 +215,7 @@ public class CarStatusBar extends StatusBar implements
     protected void makeStatusBarView() {
         super.makeStatusBarView();
 
+        mCarFacetButtonController = Dependency.get(CarFacetButtonController.class);
         mNotificationPanelBackground = getDefaultWallpaper();
         mScrimController.setScrimBehindDrawable(mNotificationPanelBackground);
 
@@ -513,6 +513,7 @@ public class CarStatusBar extends StatusBar implements
     @Override
     public void onDensityOrFontScaleChanged() {
         super.onDensityOrFontScaleChanged();
+        restartNavBars();
         // Need to update the background on density changed in case the change was due to night
         // mode.
         mNotificationPanelBackground = getDefaultWallpaper();
