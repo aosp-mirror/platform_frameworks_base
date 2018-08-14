@@ -338,10 +338,13 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
 
   const std::string type_str = util::GetString(type_pool_, type->id - 1);
 
-  const ResourceType* parsed_type = ParseResourceType(type_str);
-  if (!parsed_type) {
-    diag_->Error(DiagMessage(source_)
-                 << "invalid type name '" << type_str << "' for type with ID " << (int)type->id);
+  // Be lenient on the name of the type if the table is lenient on resource validation.
+  auto parsed_type = ResourceType::kUnknown;
+  if (const ResourceType* parsed = ParseResourceType(type_str)) {
+    parsed_type = *parsed;
+  } else if (table_->GetValidateResources()) {
+    diag_->Error(DiagMessage(source_) << "invalid type name '" << type_str << "' for type with ID "
+                                      << (int) type->id);
     return false;
   }
 
@@ -352,7 +355,7 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
       continue;
     }
 
-    const ResourceName name(package->name, *parsed_type,
+    const ResourceName name(package->name, parsed_type,
                             util::GetString(key_pool_, util::DeviceToHost32(entry->key.index)));
 
     const ResourceId res_id(package->id.value(), type->id, static_cast<uint16_t>(it.index()));

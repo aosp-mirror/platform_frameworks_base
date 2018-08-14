@@ -66,6 +66,11 @@ enum class ResourceType {
   kStyle,
   kStyleable,
   kTransition,
+
+  // Not a parsed type. It is only used when loading resource tables that may have modified type
+  // names
+  kUnknown,
+
   kXml,
 };
 
