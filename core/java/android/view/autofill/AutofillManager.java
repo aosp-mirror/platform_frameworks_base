@@ -2292,7 +2292,14 @@ public final class AutofillManager {
         @Override
         public AccessibilityEvent onAccessibilityEvent(AccessibilityEvent event,
                 boolean accessibilityEnabled, int relevantEventTypes) {
-            switch (event.getEventType()) {
+            final int type = event.getEventType();
+            if (sVerbose) {
+                // NOTE: this is waaay spammy, but that's life.
+                Log.v(TAG, "onAccessibilityEvent(" + AccessibilityEvent.eventTypeToString(type)
+                        + "): "
+                        + AccessibilityNodeInfo.getVirtualDescendantId(event.getSourceNodeId()));
+            }
+            switch (type) {
                 case AccessibilityEvent.TYPE_VIEW_FOCUSED: {
                     synchronized (mLock) {
                         if (mFocusedWindowId == event.getWindowId()
