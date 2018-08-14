@@ -1166,7 +1166,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Stille beltoon ingesteld"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volume inkomend gesprek"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volume tijdens gesprek in Bluetooth-modus"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"Alarmvolume"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Wekkervolume"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Meldingsvolume"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volume"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth-volume"</string>

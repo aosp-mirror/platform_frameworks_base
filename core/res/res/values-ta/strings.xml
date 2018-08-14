@@ -60,7 +60,7 @@
     <string name="ClirMmi" msgid="7784673673446833091">"வெளிசெல்லும் அழைப்பாளர் ஐடி"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"இணைக்கப்பட்ட லைன் ஐடி"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"இணைக்கப்பட்ட லைன் ஐடியை வரம்பிடல்"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"அழைப்புப் பகிர்வு"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"அழைப்பு திருப்பிவிடுதல்"</string>
     <string name="CwMmi" msgid="9129678056795016867">"அழைப்பு காத்திருப்பு"</string>
     <string name="BaMmi" msgid="455193067926770581">"அழைப்புத் தவிர்ப்பு"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"கடவுச்சொல்லை மாற்று"</string>
@@ -88,7 +88,7 @@
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"அவசர அழைப்பைச் செய்ய முடியாது"</string>
     <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"வைஃபை மூலம் அவசர அழைப்புகளைச் செய்ய முடியாது"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"விழிப்பூட்டல்கள்"</string>
-    <string name="notification_channel_call_forward" msgid="2419697808481833249">"அழைப்புப் பகிர்வு"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"அழைப்பு திருப்பிவிடுதல்"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"அவசரகாலத் திரும்ப அழைக்கும் பயன்முறை"</string>
     <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"மொபைல் டேட்டாவின் நிலை"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS செய்திகள்"</string>
@@ -272,7 +272,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"தொடர்புகளை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"இருப்பிடம்"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"இந்தச் சாதனத்தின் இருப்பிடத்தை அறிந்து கொள்ள"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"இந்தச் சாதனத்தின் இருப்பிடத்தை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"இந்தச் சாதனத்தின் இருப்பிடத்தை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"இந்த ஆப்ஸைப் பயன்படுத்தும் சமயத்தில் மட்டுமே, இது உங்கள் இருப்பிடத்தை அணுகும்."</string>
     <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"இதன் இருப்பிடத்தை எப்போதுமே &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; அணுக அனுமதிக்கவா?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"இந்த ஆப்ஸைப் பயன்படுத்தாத சமயங்களில் கூட, இது உங்கள் இருப்பிடத்தை அணுகும்."</string>
@@ -281,7 +281,7 @@
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"கேலெண்டரை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS அனுப்பலாம், வந்த SMSகளைப் பார்க்கலாம்"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"மெசேஜ்களை அனுப்பவும், அவற்றைப் பார்க்கவும் &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"மெசேஜ்களை அனுப்பவும், பார்க்கவும் &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"சேமிப்பிடம்"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"உங்கள் சாதனத்தில் உள்ள படங்கள், மீடியா மற்றும் கோப்புகளை அணுக வேண்டும்"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"உங்கள் சாதனத்திலுள்ள படங்கள், மீடியா, ஃபைல்கள் ஆகியவற்றை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
@@ -296,7 +296,7 @@
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"உங்கள் மொபைல் அழைப்புப் பதிவுகளை அணுக, &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ஃபோன்"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"யாரையும் தொலைபேசியில் அழைக்கலாம்"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"மொபைல் அழைப்புகள் செய்யவும், அவற்றை நிர்வகிக்கவும், &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"மொபைல் அழைப்புகள் செய்யவும், அவற்றை நிர்வகிக்கவும், &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"உடல் சென்சார்கள்"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"உங்கள் உடல் இயக்கம் பற்றி உணர்விகள் கூறும் தகவலைப் பார்க்கலாம்"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"உங்கள் உடலியக்கக் குறிகள் பற்றிய சென்சார் தரவை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>

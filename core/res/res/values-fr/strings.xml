@@ -1278,7 +1278,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"Aucune autorisation requise"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"Cela peut engendrer des frais"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Rechargement via USB de cet appareil"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Appareil en charge via USB"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Rechargement via USB de l\'appareil connecté"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Transfert de fichiers via USB activé"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"PTP via USB activé"</string>
