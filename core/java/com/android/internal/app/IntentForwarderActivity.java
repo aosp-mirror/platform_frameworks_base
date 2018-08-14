@@ -28,7 +28,6 @@ import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -59,8 +58,10 @@ public class IntentForwarderActivity extends Activity  {
     public static String FORWARD_INTENT_TO_MANAGED_PROFILE
             = "com.android.internal.app.ForwardIntentToManagedProfile";
 
-    private static final Set<String> ALLOWED_TEXT_MESSAGE_SCHEME
+    private static final Set<String> ALLOWED_TEXT_MESSAGE_SCHEMES
             = new HashSet<>(Arrays.asList("sms", "smsto", "mms", "mmsto"));
+
+    private static final String TEL_SCHEME = "tel";
 
     private Injector mInjector;
 
@@ -144,13 +145,21 @@ public class IntentForwarderActivity extends Activity  {
     }
 
     private boolean isTextMessageIntent(Intent intent) {
-        return Intent.ACTION_SENDTO.equals(intent.getAction()) && intent.getData() != null
-            && ALLOWED_TEXT_MESSAGE_SCHEME.contains(intent.getData().getScheme());
+        return (Intent.ACTION_SENDTO.equals(intent.getAction()) || isViewActionIntent(intent))
+                && ALLOWED_TEXT_MESSAGE_SCHEMES.contains(intent.getScheme());
     }
 
     private boolean isDialerIntent(Intent intent) {
         return Intent.ACTION_DIAL.equals(intent.getAction())
-            || Intent.ACTION_CALL.equals(intent.getAction());
+                || Intent.ACTION_CALL.equals(intent.getAction())
+                || Intent.ACTION_CALL_PRIVILEGED.equals(intent.getAction())
+                || Intent.ACTION_CALL_EMERGENCY.equals(intent.getAction())
+                || (isViewActionIntent(intent) && TEL_SCHEME.equals(intent.getScheme()));
+    }
+
+    private boolean isViewActionIntent(Intent intent) {
+        return Intent.ACTION_VIEW.equals(intent.getAction())
+                && intent.hasCategory(Intent.CATEGORY_BROWSABLE);
     }
 
     private boolean isTargetResolverOrChooserActivity(ActivityInfo activityInfo) {
