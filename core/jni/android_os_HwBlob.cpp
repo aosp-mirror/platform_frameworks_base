@@ -21,6 +21,7 @@
 #include "android_os_HwBlob.h"
 
 #include "android_os_HwParcel.h"
+#include "android_os_NativeHandle.h"
 
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
@@ -31,6 +32,7 @@
 #include "core_jni_helpers.h"
 
 using android::AndroidRuntime;
+using android::hardware::hidl_handle;
 using android::hardware::hidl_string;
 
 #define PACKAGE_PATH    "android/os"
@@ -82,6 +84,7 @@ sp<JHwBlob> JHwBlob::GetNativeContext(JNIEnv *env, jobject thiz) {
 JHwBlob::JHwBlob(JNIEnv *env, jobject thiz, size_t size)
     : mBuffer(nullptr),
       mSize(size),
+      mType(BlobType::GENERIC),
       mOwnsBuffer(true),
       mHandle(0) {
     if (size > 0) {
@@ -159,6 +162,15 @@ size_t JHwBlob::size() const {
     return mSize;
 }
 
+void JHwBlob::specializeBlobTo(BlobType type) {
+    CHECK_EQ(static_cast<int>(mType), static_cast<int>(BlobType::GENERIC));
+    mType = type;
+}
+
+JHwBlob::BlobType JHwBlob::type() const {
+    return mType;
+}
+
 status_t JHwBlob::putBlob(size_t offset, const sp<JHwBlob> &blob) {
     size_t index = mSubBlobs.add();
     BlobInfo *info = &mSubBlobs.editItemAt(index);
@@ -172,42 +184,52 @@ status_t JHwBlob::putBlob(size_t offset, const sp<JHwBlob> &blob) {
 }
 
 status_t JHwBlob::writeToParcel(hardware::Parcel *parcel) const {
-    size_t handle;
+    CHECK_EQ(static_cast<int>(mType), static_cast<int>(BlobType::GENERIC));
+
+    size_t handle = 0;
     status_t err = parcel->writeBuffer(data(), size(), &handle);
 
     if (err != OK) {
         return err;
     }
 
-    for (size_t i = 0; i < mSubBlobs.size(); ++i) {
-        const BlobInfo &info = mSubBlobs[i];
-
-        err = info.mBlob->writeEmbeddedToParcel(parcel, handle, info.mOffset);
-
-        if (err != OK) {
-            return err;
-        }
-    }
-
-    return OK;
+    return writeSubBlobsToParcel(parcel, handle);
 }
 
 status_t JHwBlob::writeEmbeddedToParcel(
         hardware::Parcel *parcel,
         size_t parentHandle,
         size_t parentOffset) const {
-    size_t handle;
-    status_t err = parcel->writeEmbeddedBuffer(
-            data(), size(), &handle, parentHandle, parentOffset);
+    size_t handle = 0;
+    status_t err = OK;
+
+    switch (mType) {
+        case BlobType::GENERIC: {
+            err = parcel->writeEmbeddedBuffer(data(), size(), &handle, parentHandle, parentOffset);
+            break;
+        }
+        case BlobType::NATIVE_HANDLE: {
+            err = parcel->writeEmbeddedNativeHandle(
+                    static_cast<const native_handle *>(data()), parentHandle, parentOffset);
+
+            CHECK(mSubBlobs.empty());
+            break;
+        }
+        default: { err = INVALID_OPERATION; }
+    }
 
     if (err != OK) {
         return err;
     }
 
+    return writeSubBlobsToParcel(parcel, handle);
+}
+
+status_t JHwBlob::writeSubBlobsToParcel(hardware::Parcel *parcel,
+        size_t parentHandle) const {
     for (size_t i = 0; i < mSubBlobs.size(); ++i) {
         const BlobInfo &info = mSubBlobs[i];
-
-        err = info.mBlob->writeEmbeddedToParcel(parcel, handle, info.mOffset);
+        status_t err = info.mBlob->writeEmbeddedToParcel(parcel, parentHandle, info.mOffset);
 
         if (err != OK) {
             return err;
@@ -252,7 +274,7 @@ static void releaseNativeContext(void *nativeContext) {
     }
 }
 
-static jlong JHwBlob_native_init(JNIEnv *env) {
+static jlong JHwBlob_native_init(JNIEnv *env, jclass /*clazz*/) {
     JHwBlob::InitClass(env);
 
     return reinterpret_cast<jlong>(&releaseNativeContext);
@@ -456,6 +478,31 @@ static void JHwBlob_native_putString(
     blob->putBlob(offset + hidl_string::kOffsetOfBuffer, subBlob);
 }
 
+static void JHwBlob_native_putNativeHandle(JNIEnv *env, jobject thiz,
+        jlong offset, jobject jHandle) {
+    std::unique_ptr<native_handle_t, int(*)(native_handle_t*)> nativeHandle(
+            JNativeHandle::MakeCppNativeHandle(env, jHandle, nullptr /* storage */),
+            native_handle_delete);
+
+    size_t size = 0;
+    if (nativeHandle != nullptr) {
+        size = sizeof(native_handle_t) + nativeHandle->numFds * sizeof(int)
+               + nativeHandle->numInts * sizeof(int);
+    }
+
+    ScopedLocalRef<jobject> subBlobObj(env, JHwBlob::NewObject(env, size));
+    sp<JHwBlob> subBlob = JHwBlob::GetNativeContext(env, subBlobObj.get());
+    subBlob->specializeBlobTo(JHwBlob::BlobType::NATIVE_HANDLE);
+    subBlob->write(0 /* offset */, nativeHandle.get(), size);
+
+    hidl_handle cppHandle;
+    cppHandle.setTo(static_cast<native_handle_t *>(subBlob->data()), false /* shouldOwn */);
+
+    sp<JHwBlob> blob = JHwBlob::GetNativeContext(env, thiz);
+    blob->write(offset, &cppHandle, sizeof(cppHandle));
+    blob->putBlob(offset + hidl_handle::kOffsetOfNativeHandle, subBlob);
+}
+
 #define DEFINE_BLOB_ARRAY_PUTTER(Suffix,Type,NewType)                          \
 static void JHwBlob_native_put ## Suffix ## Array(                             \
         JNIEnv *env, jobject thiz, jlong offset, Type ## Array array) {        \
@@ -563,6 +610,8 @@ static JNINativeMethod gMethods[] = {
     { "putFloat", "(JF)V", (void *)JHwBlob_native_putFloat },
     { "putDouble", "(JD)V", (void *)JHwBlob_native_putDouble },
     { "putString", "(JLjava/lang/String;)V", (void *)JHwBlob_native_putString },
+    { "putNativeHandle", "(JL" PACKAGE_PATH "/NativeHandle;)V",
+        (void*)JHwBlob_native_putNativeHandle },
 
     { "putBoolArray", "(J[Z)V", (void *)JHwBlob_native_putBoolArray },
     { "putInt8Array", "(J[B)V", (void *)JHwBlob_native_putInt8Array },
