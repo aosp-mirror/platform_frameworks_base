@@ -66,6 +66,13 @@
             </intent-filter>
         </receiver>
 
+        <provider
+            android:name="androidx.lifecycle.ProcessLifecycleOwnerInitializer"
+            tools:replace="android:authorities"
+            android:authorities="${applicationId}.lifecycle-tests"
+            android:exported="false"
+            android:multiprocess="true" />
+
         <provider android:name="com.android.systemui.keyguard.KeyguardSliceProvider"
             android:authorities="com.android.systemui.test.keyguard.disabled"
             android:enabled="false"
