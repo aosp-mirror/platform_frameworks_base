@@ -1456,14 +1456,13 @@ public class ZenModeConfig implements Parcelable {
                     && Objects.equals(other.condition, condition)
                     && Objects.equals(other.component, component)
                     && Objects.equals(other.id, id)
-                    && other.creationTime == creationTime
                     && Objects.equals(other.enabler, enabler);
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
-                    component, id, creationTime, enabler);
+                    component, id, enabler);
         }
 
         public boolean isAutomaticActive() {
