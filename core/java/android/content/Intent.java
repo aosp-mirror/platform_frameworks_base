@@ -2250,6 +2250,7 @@ public class Intent implements Parcelable, Cloneable {
      * <p>Includes the following extras:
      * <ul>
      * <li> {@link #EXTRA_CHANGED_PACKAGE_LIST} is the set of packages which have been suspended
+     * <li> {@link #EXTRA_CHANGED_UID_LIST} is the set of uids which have been suspended
      * </ul>
      *
      * <p class="note">This is a protected intent that can only be sent
@@ -2262,6 +2263,7 @@ public class Intent implements Parcelable, Cloneable {
      * <p>Includes the following extras:
      * <ul>
      * <li> {@link #EXTRA_CHANGED_PACKAGE_LIST} is the set of packages which have been unsuspended
+     * <li> {@link #EXTRA_CHANGED_UID_LIST} is the set of uids which have been unsuspended
      * </ul>
      *
      * <p class="note">This is a protected intent that can only be sent
