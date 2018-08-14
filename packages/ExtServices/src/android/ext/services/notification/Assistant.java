@@ -23,8 +23,10 @@ import static android.service.notification.NotificationListenerService.Ranking
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.app.INotificationManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -45,6 +47,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 
@@ -85,6 +88,7 @@ public class Assistant extends NotificationAssistantService {
     private float mDismissToViewRatioLimit;
     private int mStreakLimit;
     private SmartActionsHelper mSmartActionsHelper;
+    private NotificationCategorizer mNotificationCategorizer;
 
     // key : impressions tracker
     // TODO: prune deleted channels and apps
@@ -94,6 +98,7 @@ public class Assistant extends NotificationAssistantService {
 
     private Ranking mFakeRanking = null;
     private AtomicFile mFile = null;
+    protected SettingsObserver mSettingsObserver;
 
     public Assistant() {
     }
@@ -103,8 +108,9 @@ public class Assistant extends NotificationAssistantService {
         super.onCreate();
         // Contexts are correctly hooked up by the creation step, which is required for the observer
         // to be hooked up/initialized.
-        new SettingsObserver(mHandler);
+        mSettingsObserver = new SettingsObserver(mHandler);
         mSmartActionsHelper = new SmartActionsHelper();
+        mNotificationCategorizer = new NotificationCategorizer();
     }
 
     private void loadFile() {
@@ -191,18 +197,21 @@ public class Assistant extends NotificationAssistantService {
     }
 
     @Override
-    public Adjustment onNotificationEnqueued(StatusBarNotification sbn) {
-        if (DEBUG) Log.i(TAG, "ENQUEUED " + sbn.getKey());
+    public Adjustment onNotificationEnqueued(StatusBarNotification sbn,
+            NotificationChannel channel) {
+        if (DEBUG) Log.i(TAG, "ENQUEUED " + sbn.getKey() + " on " + channel.getId());
+        NotificationEntry entry = new NotificationEntry(
+                ActivityThread.getPackageManager(), sbn, channel);
         ArrayList<Notification.Action> actions =
-                mSmartActionsHelper.suggestActions(this, sbn);
-        ArrayList<CharSequence> replies = mSmartActionsHelper.suggestReplies(this, sbn);
-        return createEnqueuedNotificationAdjustment(sbn, actions, replies);
+                mSmartActionsHelper.suggestActions(this, entry);
+        ArrayList<CharSequence> replies = mSmartActionsHelper.suggestReplies(this, entry);
+        return createEnqueuedNotificationAdjustment(entry, actions, replies);
     }
 
     /** A convenience helper for creating an adjustment for an SBN. */
     @Nullable
     private Adjustment createEnqueuedNotificationAdjustment(
-            @NonNull StatusBarNotification statusBarNotification,
+            @NonNull NotificationEntry entry,
             @NonNull ArrayList<Notification.Action> smartActions,
             @NonNull ArrayList<CharSequence> smartReplies) {
         Bundle signals = new Bundle();
@@ -212,16 +221,16 @@ public class Assistant extends NotificationAssistantService {
         if (!smartReplies.isEmpty()) {
             signals.putCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES, smartReplies);
         }
-
-        // TODO: Apply rules to what gets silenced
-        signals.putInt(Adjustment.KEY_IMPORTANCE, IMPORTANCE_LOW);
+        if (mNotificationCategorizer.shouldSilence(entry)) {
+            signals.putInt(Adjustment.KEY_IMPORTANCE, IMPORTANCE_LOW);
+        }
 
         return new Adjustment(
-                statusBarNotification.getPackageName(),
-                statusBarNotification.getKey(),
+                entry.getSbn().getPackageName(),
+                entry.getSbn().getKey(),
                 signals,
                 "",
-                statusBarNotification.getUserId());
+                entry.getSbn().getUserId());
     }
 
     @Override
@@ -331,29 +340,35 @@ public class Assistant extends NotificationAssistantService {
 
     // for testing
 
-    protected void setFile(AtomicFile file) {
+    @VisibleForTesting
+    public void setFile(AtomicFile file) {
         mFile = file;
     }
 
-    protected void setFakeRanking(Ranking ranking) {
+    @VisibleForTesting
+    public void setFakeRanking(Ranking ranking) {
         mFakeRanking = ranking;
     }
 
-    protected void setNoMan(INotificationManager noMan) {
+    @VisibleForTesting
+    public void setNoMan(INotificationManager noMan) {
         mNoMan = noMan;
     }
 
-    protected void setContext(Context context) {
+    @VisibleForTesting
+    public void setContext(Context context) {
         mSystemContext = context;
     }
 
-    protected ChannelImpressions getImpressions(String key) {
+    @VisibleForTesting
+    public ChannelImpressions getImpressions(String key) {
         synchronized (mkeyToImpressions) {
             return mkeyToImpressions.get(key);
         }
     }
 
-    protected void insertImpressions(String key, ChannelImpressions ci) {
+    @VisibleForTesting
+    public void insertImpressions(String key, ChannelImpressions ci) {
         synchronized (mkeyToImpressions) {
             mkeyToImpressions.put(key, ci);
         }
@@ -368,7 +383,7 @@ public class Assistant extends NotificationAssistantService {
     /**
      * Observer for updates on blocking helper threshold values.
      */
-    private final class SettingsObserver extends ContentObserver {
+    protected final class SettingsObserver extends ContentObserver {
         private final Uri STREAK_LIMIT_URI =
                 Settings.Global.getUriFor(Settings.Global.BLOCKING_HELPER_STREAK_LIMIT);
         private final Uri DISMISS_TO_VIEW_RATIO_LIMIT_URI =

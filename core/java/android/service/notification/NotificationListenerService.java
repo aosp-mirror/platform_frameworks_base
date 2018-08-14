@@ -1318,7 +1318,8 @@ public abstract class NotificationListenerService extends Service {
         }
 
         @Override
-        public void onNotificationEnqueued(IStatusBarNotificationHolder notificationHolder)
+        public void onNotificationEnqueuedWithChannel(
+                IStatusBarNotificationHolder notificationHolder, NotificationChannel channel)
                 throws RemoteException {
             // no-op in the listener
         }

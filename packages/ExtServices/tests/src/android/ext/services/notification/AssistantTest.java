@@ -20,7 +20,6 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 
-import static junit.framework.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -33,7 +32,6 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.ContentResolver;
-import android.content.IContentProvider;
 import android.content.Intent;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -47,7 +45,6 @@ import android.support.test.InstrumentationRegistry;
 import android.test.ServiceTestCase;
 import android.testing.TestableContext;
 import android.util.AtomicFile;
-import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
 
@@ -57,7 +54,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedInputStream;
@@ -435,12 +431,10 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
                 Settings.Global.BLOCKING_HELPER_STREAK_LIMIT, newStreakLimit);
 
         // Notify for the settings values we updated.
-        resolver.notifyChange(
-                Settings.Global.getUriFor(Settings.Global.BLOCKING_HELPER_STREAK_LIMIT), null);
-        resolver.notifyChange(
-                Settings.Global.getUriFor(
-                        Settings.Global.BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT),
-                null);
+        mAssistant.mSettingsObserver.onChange(false, Settings.Global.getUriFor(
+                Settings.Global.BLOCKING_HELPER_STREAK_LIMIT));
+        mAssistant.mSettingsObserver.onChange(false, Settings.Global.getUriFor(
+                Settings.Global.BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT));
 
         // With the new threshold, the blocking helper should be triggered.
         assertEquals(true, ci.shouldTriggerBlock());
