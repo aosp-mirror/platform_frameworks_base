@@ -102,7 +102,7 @@ public class ZenModeHelper {
     private final ZenModeFiltering mFiltering;
     protected final RingerModeDelegate mRingerModeDelegate = new
             RingerModeDelegate();
-    private final ZenModeConditions mConditions;
+    @VisibleForTesting protected final ZenModeConditions mConditions;
     private final SparseArray<ZenModeConfig> mConfigs = new SparseArray<>();
     private final Metrics mMetrics = new Metrics();
     private final ConditionProviders.Config mServiceConfig;
