@@ -155,7 +155,7 @@ public class UserGridRecyclerView extends PagedListView implements
      * Adapter to populate the grid layout with the available user profiles
      */
     public final class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserAdapterViewHolder>
-            implements Dialog.OnClickListener {
+            implements Dialog.OnClickListener, Dialog.OnCancelListener {
 
         private final Context mContext;
         private List<UserRecord> mUsers;
@@ -231,6 +231,7 @@ public class UserGridRecyclerView extends PagedListView implements
                         .setMessage(message)
                         .setNegativeButton(android.R.string.cancel, this)
                         .setPositiveButton(android.R.string.ok, this)
+                        .setOnCancelListener(this)
                         .create();
                     // Sets window flags for the SysUI dialog
                     SystemUIDialog.applyFlags(mDialog);
@@ -274,6 +275,14 @@ public class UserGridRecyclerView extends PagedListView implements
                 if (mAddUserView != null) {
                     mAddUserView.setEnabled(true);
                 }
+            }
+        }
+
+        @Override
+        public void onCancel(DialogInterface dialog) {
+            // Enable the add button again if user cancels dialog by clicking outside the dialog
+            if (mAddUserView != null) {
+                mAddUserView.setEnabled(true);
             }
         }
 
