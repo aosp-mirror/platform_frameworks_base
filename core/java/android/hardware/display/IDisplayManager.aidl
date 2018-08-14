@@ -16,7 +16,10 @@
 
 package android.hardware.display;
 
+import android.content.pm.ParceledListSlice;
 import android.graphics.Point;
+import android.hardware.display.BrightnessConfiguration;
+import android.hardware.display.Curve;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.WifiDisplay;
@@ -63,6 +66,9 @@ interface IDisplayManager {
     // Requires CONFIGURE_DISPLAY_COLOR_MODE
     void requestColorMode(int displayId, int colorMode);
 
+    // Requires CONTROL_DISPLAY_SATURATION
+    void setSaturationLevel(float level);
+
     // Requires CAPTURE_VIDEO_OUTPUT, CAPTURE_SECURE_VIDEO_OUTPUT, or an appropriate
     // MediaProjection token for certain combinations of flags.
     int createVirtualDisplay(in IVirtualDisplayCallback callback,
@@ -81,4 +87,33 @@ interface IDisplayManager {
 
     // Get a stable metric for the device's display size. No permissions required.
     Point getStableDisplaySize();
+
+    // Requires BRIGHTNESS_SLIDER_USAGE permission.
+    ParceledListSlice getBrightnessEvents(String callingPackage);
+
+    // Requires ACCESS_AMBIENT_LIGHT_STATS permission.
+    ParceledListSlice getAmbientBrightnessStats();
+
+    // Sets the global brightness configuration for a given user. Requires
+    // CONFIGURE_DISPLAY_BRIGHTNESS, and INTERACT_ACROSS_USER if the user being configured is not
+    // the same as the calling user.
+    void setBrightnessConfigurationForUser(in BrightnessConfiguration c, int userId,
+            String packageName);
+
+    // Gets the global brightness configuration for a given user. Requires
+    // CONFIGURE_DISPLAY_BRIGHTNESS, and INTERACT_ACROSS_USER if the user is not
+    // the same as the calling user.
+    BrightnessConfiguration getBrightnessConfigurationForUser(int userId);
+
+    // Gets the default brightness configuration if configured.
+    BrightnessConfiguration getDefaultBrightnessConfiguration();
+
+    // Temporarily sets the display brightness.
+    void setTemporaryBrightness(int brightness);
+
+    // Temporarily sets the auto brightness adjustment factor.
+    void setTemporaryAutoBrightnessAdjustment(float adjustment);
+
+    // Get the minimum brightness curve.
+    Curve getMinimumBrightnessCurve();
 }

@@ -16,7 +16,9 @@
 
 package android.hardware.display;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager.DisplayListener;
@@ -30,6 +32,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayAdjustments;
@@ -37,6 +40,8 @@ import android.view.DisplayInfo;
 import android.view.Surface;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Manager communication with the display manager service on behalf of
@@ -62,10 +67,12 @@ public final class DisplayManagerGlobal {
     public static final int EVENT_DISPLAY_CHANGED = 2;
     public static final int EVENT_DISPLAY_REMOVED = 3;
 
+    @UnsupportedAppUsage
     private static DisplayManagerGlobal sInstance;
 
     private final Object mLock = new Object();
 
+    @UnsupportedAppUsage
     private final IDisplayManager mDm;
 
     private DisplayManagerCallback mCallback;
@@ -87,6 +94,7 @@ public final class DisplayManagerGlobal {
      * @return The display manager instance, may be null early in system startup
      * before the display manager has been fully initialized.
      */
+    @UnsupportedAppUsage
     public static DisplayManagerGlobal getInstance() {
         synchronized (DisplayManagerGlobal.class) {
             if (sInstance == null) {
@@ -106,6 +114,7 @@ public final class DisplayManagerGlobal {
      * @return Information about the specified display, or null if it does not exist.
      * This object belongs to an internal cache and should be treated as if it were immutable.
      */
+    @UnsupportedAppUsage
     public DisplayInfo getDisplayInfo(int displayId) {
         try {
             synchronized (mLock) {
@@ -142,6 +151,7 @@ public final class DisplayManagerGlobal {
      *
      * @return An array containing all display ids.
      */
+    @UnsupportedAppUsage
     public int[] getDisplayIds() {
         try {
             synchronized (mLock) {
@@ -205,6 +215,7 @@ public final class DisplayManagerGlobal {
      * @param displayId The logical display id.
      * @return The display object, or null if there is no display with the given id.
      */
+    @UnsupportedAppUsage
     public Display getRealDisplay(int displayId) {
         return getCompatibleDisplay(displayId, DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
     }
@@ -333,6 +344,7 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    @UnsupportedAppUsage
     public void disconnectWifiDisplay() {
         try {
             mDm.disconnectWifiDisplay();
@@ -365,6 +377,7 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    @UnsupportedAppUsage
     public WifiDisplayStatus getWifiDisplayStatus() {
         try {
             return mDm.getWifiDisplayStatus();
@@ -376,6 +389,17 @@ public final class DisplayManagerGlobal {
     public void requestColorMode(int displayId, int colorMode) {
         try {
             mDm.requestColorMode(displayId, colorMode);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the level of color saturation to apply to the display.
+     */
+    public void setSaturationLevel(float level) {
+        try {
+            mDm.setSaturationLevel(level);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -451,6 +475,131 @@ public final class DisplayManagerGlobal {
     public Point getStableDisplaySize() {
         try {
             return mDm.getStableDisplaySize();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieves brightness change events.
+     */
+    public List<BrightnessChangeEvent> getBrightnessEvents(String callingPackage) {
+        try {
+            ParceledListSlice<BrightnessChangeEvent> events =
+                    mDm.getBrightnessEvents(callingPackage);
+            if (events == null) {
+                return Collections.emptyList();
+            }
+            return events.getList();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the global brightness configuration for a given user.
+     *
+     * @hide
+     */
+    public void setBrightnessConfigurationForUser(BrightnessConfiguration c, int userId,
+            String packageName) {
+        try {
+            mDm.setBrightnessConfigurationForUser(c, userId, packageName);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the global brightness configuration for a given user or null if one hasn't been set.
+     *
+     * @hide
+     */
+    public BrightnessConfiguration getBrightnessConfigurationForUser(int userId) {
+        try {
+            return mDm.getBrightnessConfigurationForUser(userId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the default brightness configuration or null if one hasn't been configured.
+     *
+     * @hide
+     */
+    public BrightnessConfiguration getDefaultBrightnessConfiguration() {
+        try {
+            return mDm.getDefaultBrightnessConfiguration();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Temporarily sets the brightness of the display.
+     * <p>
+     * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS} permission.
+     * </p>
+     *
+     * @param brightness The brightness value from 0 to 255.
+     *
+     * @hide Requires signature permission.
+     */
+    public void setTemporaryBrightness(int brightness) {
+        try {
+            mDm.setTemporaryBrightness(brightness);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Temporarily sets the auto brightness adjustment factor.
+     * <p>
+     * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS} permission.
+     * </p>
+     *
+     * @param adjustment The adjustment factor from -1.0 to 1.0.
+     *
+     * @hide Requires signature permission.
+     */
+    public void setTemporaryAutoBrightnessAdjustment(float adjustment) {
+        try {
+            mDm.setTemporaryAutoBrightnessAdjustment(adjustment);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the minimum brightness curve, which guarantess that any brightness curve that dips
+     * below it is rejected by the system.
+     * This prevent auto-brightness from setting the screen so dark as to prevent the user from
+     * resetting or disabling it, and maps lux to the absolute minimum nits that are still readable
+     * in that ambient brightness.
+     *
+     * @return The minimum brightness curve (as lux values and their corresponding nits values).
+     */
+    public Pair<float[], float[]> getMinimumBrightnessCurve() {
+        try {
+            Curve curve = mDm.getMinimumBrightnessCurve();
+            return Pair.create(curve.getX(), curve.getY());
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieves ambient brightness stats.
+     */
+    public List<AmbientBrightnessDayStats> getAmbientBrightnessStats() {
+        try {
+            ParceledListSlice<AmbientBrightnessDayStats> stats = mDm.getAmbientBrightnessStats();
+            if (stats == null) {
+                return Collections.emptyList();
+            }
+            return stats.getList();
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

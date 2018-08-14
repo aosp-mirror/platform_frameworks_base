@@ -31,6 +31,11 @@ public interface ServiceConnection {
      * the {@link android.os.IBinder} of the communication channel to the
      * Service.
      *
+     * <p class="note"><b>Note:</b> If the system has started to bind your
+     * client app to a service, it's possible that your app will never receive
+     * this callback. Your app won't receive a callback if there's an issue with
+     * the service, such as the service crashing while being created.
+     *
      * @param name The concrete component name of the service that has
      * been connected.
      *
@@ -62,5 +67,22 @@ public interface ServiceConnection {
      * connection is dead.
      */
     default void onBindingDied(ComponentName name) {
+    }
+
+    /**
+     * Called when the service being bound has returned {@code null} from its
+     * {@link android.app.Service#onBind(Intent) onBind()} method.  This indicates
+     * that the attempting service binding represented by this ServiceConnection
+     * will never become usable.
+     *
+     * <p class="note">The app which requested the binding must still call
+     * {@link Context#unbindService(ServiceConnection)} to release the tracking
+     * resources associated with this ServiceConnection even if this callback was
+     * invoked following {@link Context#bindService Context.bindService() bindService()}.
+     *
+     * @param name The concrete component name of the service whose binding
+     *     has been rejected by the Service implementation.
+     */
+    default void onNullBinding(ComponentName name) {
     }
 }

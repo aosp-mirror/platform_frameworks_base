@@ -16,7 +16,9 @@
 
 package com.android.internal.os;
 
+import static android.os.BatteryStats.STATS_CURRENT;
 import static android.os.BatteryStats.STATS_SINCE_CHARGED;
+import static android.os.BatteryStats.STATS_SINCE_UNPLUGGED;
 
 import static com.android.internal.os.BatteryStatsImpl.LongSamplingCounterArray;
 import static com.android.internal.os.BatteryStatsImpl.TimeBase;
@@ -61,7 +63,6 @@ public class LongSamplingCounterArrayTest {
 
     private static final long[] COUNTS = {1111, 2222, 3333, 4444};
     private static final long[] LOADED_COUNTS = {5555, 6666, 7777, 8888};
-    private static final long[] PLUGGED_COUNTS = {9999, 11111, 22222, 33333};
     private static final long[] UNPLUGGED_COUNTS = {44444, 55555, 66666, 77777};
     private static final long[] ZEROES = {0, 0, 0, 0};
 
@@ -83,11 +84,10 @@ public class LongSamplingCounterArrayTest {
         parcel.setDataPosition(0);
 
         // Now clear counterArray and verify values are read from parcel correctly.
-        updateCounts(null, null, null, null);
+        updateCounts(null, null, null);
         mCounterArray = LongSamplingCounterArray.readFromParcel(parcel, mTimeBase);
         assertArrayEquals(COUNTS, mCounterArray.mCounts, "Unexpected counts");
         assertArrayEquals(LOADED_COUNTS, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(COUNTS, mCounterArray.mPluggedCounts, "Unexpected pluggedCounts");
         assertArrayEquals(UNPLUGGED_COUNTS, mCounterArray.mUnpluggedCounts,
                 "Unexpected unpluggedCounts");
         parcel.recycle();
@@ -101,11 +101,10 @@ public class LongSamplingCounterArrayTest {
         parcel.setDataPosition(0);
 
         // Now clear counterArray and verify values are read from parcel correctly.
-        updateCounts(null, null, null, null);
+        updateCounts(null, null, null);
         mCounterArray = LongSamplingCounterArray.readSummaryFromParcelLocked(parcel, mTimeBase);
         assertArrayEquals(COUNTS, mCounterArray.mCounts, "Unexpected counts");
         assertArrayEquals(COUNTS, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(COUNTS, mCounterArray.mPluggedCounts, "Unexpected pluggedCounts");
         assertArrayEquals(COUNTS, mCounterArray.mUnpluggedCounts, "Unexpected unpluggedCounts");
         parcel.recycle();
     }
@@ -116,8 +115,7 @@ public class LongSamplingCounterArrayTest {
         mCounterArray.onTimeStarted(0, 0, 0);
         assertArrayEquals(COUNTS, mCounterArray.mCounts, "Unexpected counts");
         assertArrayEquals(LOADED_COUNTS, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(PLUGGED_COUNTS, mCounterArray.mPluggedCounts, "Unexpected pluggedCounts");
-        assertArrayEquals(PLUGGED_COUNTS, mCounterArray.mUnpluggedCounts,
+        assertArrayEquals(COUNTS, mCounterArray.mUnpluggedCounts,
                 "Unexpected unpluggedCounts");
     }
 
@@ -127,7 +125,6 @@ public class LongSamplingCounterArrayTest {
         mCounterArray.onTimeStopped(0, 0, 0);
         assertArrayEquals(COUNTS, mCounterArray.mCounts, "Unexpected counts");
         assertArrayEquals(LOADED_COUNTS, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(COUNTS, mCounterArray.mPluggedCounts, "Unexpected pluggedCounts");
         assertArrayEquals(UNPLUGGED_COUNTS, mCounterArray.mUnpluggedCounts,
                 "Unexpected unpluggedCounts");
     }
@@ -137,24 +134,50 @@ public class LongSamplingCounterArrayTest {
         initializeCounterArrayWithDefaultValues();
 
         when(mTimeBase.isRunning()).thenReturn(false);
-        long[] actualVal = mCounterArray.getCountsLocked(STATS_SINCE_CHARGED);
-        long[] expectedVal = PLUGGED_COUNTS;
-        assertArrayEquals(expectedVal, actualVal, "Unexpected values");
+        assertArrayEquals(COUNTS, mCounterArray.getCountsLocked(STATS_SINCE_CHARGED),
+                "Unexpected values");
+        assertArrayEquals(subtract(COUNTS, LOADED_COUNTS),
+                mCounterArray.getCountsLocked(STATS_CURRENT), "Unexpected values");
+        assertArrayEquals(subtract(COUNTS, UNPLUGGED_COUNTS),
+                mCounterArray.getCountsLocked(STATS_SINCE_UNPLUGGED), "Unexpected values");
 
         when(mTimeBase.isRunning()).thenReturn(true);
-        actualVal = mCounterArray.getCountsLocked(STATS_SINCE_CHARGED);
-        expectedVal = COUNTS;
-        assertArrayEquals(expectedVal, actualVal, "Unexpected values");
+        assertArrayEquals(COUNTS, mCounterArray.getCountsLocked(STATS_SINCE_CHARGED),
+                "Unexpected values");
+        assertArrayEquals(subtract(COUNTS, LOADED_COUNTS),
+                mCounterArray.getCountsLocked(STATS_CURRENT), "Unexpected values");
+        assertArrayEquals(subtract(COUNTS, UNPLUGGED_COUNTS),
+                mCounterArray.getCountsLocked(STATS_SINCE_UNPLUGGED), "Unexpected values");
+    }
+
+    private long[] subtract(long[] val, long[] toSubtract) {
+        final long[] result = val.clone();
+        if (toSubtract != null) {
+            for (int i = val.length - 1; i >= 0; --i) {
+                result[i] -= toSubtract[i];
+            }
+        }
+        return result;
     }
 
     @Test
     public void testAddCountLocked() {
+        updateCounts(null, null, null);
         final long[] deltas = {123, 234, 345, 456};
         when(mTimeBase.isRunning()).thenReturn(true);
         mCounterArray.addCountLocked(deltas);
         assertArrayEquals(deltas, mCounterArray.mCounts, "Unexpected counts");
         assertArrayEquals(null, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(null, mCounterArray.mPluggedCounts, "Unexpected pluggedCounts");
+        assertArrayEquals(null, mCounterArray.mUnpluggedCounts, "Unexpected unpluggedCounts");
+
+        updateCounts(null, null, null);
+        mCounterArray.addCountLocked(deltas, false);
+        assertArrayEquals(null, mCounterArray.mCounts, "Unexpected counts");
+        assertArrayEquals(null, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
+        assertArrayEquals(null, mCounterArray.mUnpluggedCounts, "Unexpected unpluggedCounts");
+        mCounterArray.addCountLocked(deltas, true);
+        assertArrayEquals(deltas, mCounterArray.mCounts, "Unexpected counts");
+        assertArrayEquals(null, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
         assertArrayEquals(null, mCounterArray.mUnpluggedCounts, "Unexpected unpluggedCounts");
 
         initializeCounterArrayWithDefaultValues();
@@ -165,7 +188,18 @@ public class LongSamplingCounterArrayTest {
         mCounterArray.addCountLocked(deltas);
         assertArrayEquals(newCounts, mCounterArray.mCounts, "Unexpected counts");
         assertArrayEquals(LOADED_COUNTS, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(PLUGGED_COUNTS, mCounterArray.mPluggedCounts, "Unexpected pluggedCounts");
+        assertArrayEquals(UNPLUGGED_COUNTS, mCounterArray.mUnpluggedCounts,
+                "Unexpected unpluggedCounts");
+
+        initializeCounterArrayWithDefaultValues();
+        mCounterArray.addCountLocked(deltas, false);
+        assertArrayEquals(COUNTS, mCounterArray.mCounts, "Unexpected counts");
+        assertArrayEquals(LOADED_COUNTS, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
+        assertArrayEquals(UNPLUGGED_COUNTS, mCounterArray.mUnpluggedCounts,
+                "Unexpected unpluggedCounts");
+        mCounterArray.addCountLocked(deltas, true);
+        assertArrayEquals(newCounts, mCounterArray.mCounts, "Unexpected counts");
+        assertArrayEquals(LOADED_COUNTS, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
         assertArrayEquals(UNPLUGGED_COUNTS, mCounterArray.mUnpluggedCounts,
                 "Unexpected unpluggedCounts");
     }
@@ -177,7 +211,6 @@ public class LongSamplingCounterArrayTest {
         mCounterArray.reset(false /* detachIfReset */);
         assertArrayEquals(ZEROES, mCounterArray.mCounts, "Unexpected counts");
         assertArrayEquals(ZEROES, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(ZEROES, mCounterArray.mPluggedCounts, "Unexpected pluggedCounts");
         assertArrayEquals(ZEROES, mCounterArray.mUnpluggedCounts, "Unexpected unpluggedCounts");
         verifyZeroInteractions(mTimeBase);
 
@@ -186,7 +219,6 @@ public class LongSamplingCounterArrayTest {
         mCounterArray.reset(true /* detachIfReset */);
         assertArrayEquals(ZEROES, mCounterArray.mCounts, "Unexpected counts");
         assertArrayEquals(ZEROES, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(ZEROES, mCounterArray.mPluggedCounts, "Unexpected pluggedCounts");
         assertArrayEquals(ZEROES, mCounterArray.mUnpluggedCounts, "Unexpected unpluggedCounts");
         verify(mTimeBase).remove(mCounterArray);
         verifyNoMoreInteractions(mTimeBase);
@@ -200,7 +232,7 @@ public class LongSamplingCounterArrayTest {
     }
 
     private void initializeCounterArrayWithDefaultValues() {
-        updateCounts(COUNTS, LOADED_COUNTS, PLUGGED_COUNTS, UNPLUGGED_COUNTS);
+        updateCounts(COUNTS, LOADED_COUNTS, UNPLUGGED_COUNTS);
     }
 
     private void assertArrayEquals(long[] expected, long[] actual, String msg) {
@@ -208,11 +240,9 @@ public class LongSamplingCounterArrayTest {
                 + ", actual: " + Arrays.toString(actual), Arrays.equals(expected, actual));
     }
 
-    private void updateCounts(long[] counts, long[] loadedCounts,
-            long[] pluggedCounts, long[] unpluggedCounts) {
-        mCounterArray.mCounts = counts;
-        mCounterArray.mLoadedCounts = loadedCounts;
-        mCounterArray.mPluggedCounts = pluggedCounts;
-        mCounterArray.mUnpluggedCounts = unpluggedCounts;
+    private void updateCounts(long[] counts, long[] loadedCounts, long[] unpluggedCounts) {
+        mCounterArray.mCounts = counts == null ? null : counts.clone();
+        mCounterArray.mLoadedCounts = loadedCounts == null ? null : loadedCounts.clone();
+        mCounterArray.mUnpluggedCounts = unpluggedCounts == null ? null : unpluggedCounts.clone();
     }
 }

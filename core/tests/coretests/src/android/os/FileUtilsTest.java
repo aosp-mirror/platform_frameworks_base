@@ -21,24 +21,38 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import android.content.Context;
+import android.os.FileUtils.MemoryPipe;
 import android.provider.DocumentsContract.Document;
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 
 import libcore.io.IoUtils;
+import libcore.io.Streams;
 
 import com.google.android.collect.Sets;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Random;
 
-@MediumTest
-public class FileUtilsTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class FileUtilsTest {
     private static final String TEST_DATA =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
@@ -47,10 +61,14 @@ public class FileUtilsTest extends AndroidTestCase {
     private File mCopyFile;
     private File mTarget;
 
+    private final int[] DATA_SIZES = { 32, 32_000, 32_000_000 };
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    private Context getContext() {
+        return InstrumentationRegistry.getContext();
+    }
+
+    @Before
+    public void setUp() throws Exception {
         mDir = getContext().getDir("testing", Context.MODE_PRIVATE);
         mTestFile = new File(mDir, "test.file");
         mCopyFile = new File(mDir, "copy.file");
@@ -59,22 +77,24 @@ public class FileUtilsTest extends AndroidTestCase {
         FileUtils.deleteContents(mTarget);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         IoUtils.deleteContents(mDir);
         FileUtils.deleteContents(mTarget);
     }
 
     // TODO: test setPermissions(), getPermissions()
 
+    @Test
     public void testCopyFile() throws Exception {
-        stageFile(mTestFile, TEST_DATA);
+        writeFile(mTestFile, TEST_DATA);
         assertFalse(mCopyFile.exists());
         FileUtils.copyFile(mTestFile, mCopyFile);
         assertTrue(mCopyFile.exists());
         assertEquals(TEST_DATA, FileUtils.readTextFile(mCopyFile, 0, null));
     }
 
+    @Test
     public void testCopyToFile() throws Exception {
         final String s = "Foo Bar";
         assertFalse(mCopyFile.exists());
@@ -83,6 +103,105 @@ public class FileUtilsTest extends AndroidTestCase {
         assertEquals(s, FileUtils.readTextFile(mCopyFile, 0, null));
     }
 
+    @Test
+    public void testCopy_FileToFile() throws Exception {
+        for (int size : DATA_SIZES) {
+            final File src = new File(mTarget, "src");
+            final File dest = new File(mTarget, "dest");
+
+            byte[] expected = new byte[size];
+            byte[] actual = new byte[size];
+            new Random().nextBytes(expected);
+            writeFile(src, expected);
+
+            try (FileInputStream in = new FileInputStream(src);
+                    FileOutputStream out = new FileOutputStream(dest)) {
+                FileUtils.copy(in, out);
+            }
+
+            actual = readFile(dest);
+            assertArrayEquals(expected, actual);
+        }
+    }
+
+    @Test
+    public void testCopy_FileToPipe() throws Exception {
+        for (int size : DATA_SIZES) {
+            final File src = new File(mTarget, "src");
+
+            byte[] expected = new byte[size];
+            byte[] actual = new byte[size];
+            new Random().nextBytes(expected);
+            writeFile(src, expected);
+
+            try (FileInputStream in = new FileInputStream(src);
+                    MemoryPipe out = MemoryPipe.createSink(actual)) {
+                FileUtils.copy(in.getFD(), out.getFD());
+                out.join();
+            }
+
+            assertArrayEquals(expected, actual);
+        }
+    }
+
+    @Test
+    public void testCopy_PipeToFile() throws Exception {
+        for (int size : DATA_SIZES) {
+            final File dest = new File(mTarget, "dest");
+
+            byte[] expected = new byte[size];
+            byte[] actual = new byte[size];
+            new Random().nextBytes(expected);
+
+            try (MemoryPipe in = MemoryPipe.createSource(expected);
+                    FileOutputStream out = new FileOutputStream(dest)) {
+                FileUtils.copy(in.getFD(), out.getFD());
+            }
+
+            actual = readFile(dest);
+            assertArrayEquals(expected, actual);
+        }
+    }
+
+    @Test
+    public void testCopy_PipeToPipe() throws Exception {
+        for (int size : DATA_SIZES) {
+            byte[] expected = new byte[size];
+            byte[] actual = new byte[size];
+            new Random().nextBytes(expected);
+
+            try (MemoryPipe in = MemoryPipe.createSource(expected);
+                    MemoryPipe out = MemoryPipe.createSink(actual)) {
+                FileUtils.copy(in.getFD(), out.getFD());
+                out.join();
+            }
+
+            assertArrayEquals(expected, actual);
+        }
+    }
+
+    @Test
+    public void testCopy_ShortPipeToFile() throws Exception {
+        byte[] source = new byte[33_000_000];
+        new Random().nextBytes(source);
+
+        for (int size : DATA_SIZES) {
+            final File dest = new File(mTarget, "dest");
+
+            byte[] expected = Arrays.copyOf(source, size);
+            byte[] actual = new byte[size];
+
+            try (MemoryPipe in = MemoryPipe.createSource(source);
+                    FileOutputStream out = new FileOutputStream(dest)) {
+                FileUtils.copy(in.getFD(), out.getFD(), null, null, size);
+            }
+
+            actual = readFile(dest);
+            assertArrayEquals(expected, actual);
+        }
+    }
+
+    @Test
     public void testIsFilenameSafe() throws Exception {
         assertTrue(FileUtils.isFilenameSafe(new File("foobar")));
         assertTrue(FileUtils.isFilenameSafe(new File("a_b-c=d.e/0,1+23")));
@@ -90,8 +209,9 @@ public class FileUtilsTest extends AndroidTestCase {
         assertFalse(FileUtils.isFilenameSafe(new File("foo\nbar")));
     }
 
+    @Test
     public void testReadTextFile() throws Exception {
-        stageFile(mTestFile, TEST_DATA);
+        writeFile(mTestFile, TEST_DATA);
 
         assertEquals(TEST_DATA, FileUtils.readTextFile(mTestFile, 0, null));
 
@@ -110,8 +230,9 @@ public class FileUtilsTest extends AndroidTestCase {
         assertEquals(TEST_DATA, FileUtils.readTextFile(mTestFile, -100, "<>"));
     }
 
+    @Test
     public void testReadTextFileWithZeroLengthFile() throws Exception {
-        stageFile(mTestFile, TEST_DATA);
+        writeFile(mTestFile, TEST_DATA);
         new FileOutputStream(mTestFile).close();  // Zero out the file
         assertEquals("", FileUtils.readTextFile(mTestFile, 0, null));
         assertEquals("", FileUtils.readTextFile(mTestFile, 1, "<>"));
@@ -120,6 +241,7 @@ public class FileUtilsTest extends AndroidTestCase {
         assertEquals("", FileUtils.readTextFile(mTestFile, -10, "<>"));
     }
 
+    @Test
     public void testContains() throws Exception {
         assertTrue(FileUtils.contains(new File("/"), new File("/moo.txt")));
         assertTrue(FileUtils.contains(new File("/"), new File("/")));
@@ -137,11 +259,13 @@ public class FileUtilsTest extends AndroidTestCase {
         assertFalse(FileUtils.contains(new File("/sdcard/"), new File("/sdcard.txt")));
     }
 
+    @Test
     public void testDeleteOlderEmptyDir() throws Exception {
         FileUtils.deleteOlderFiles(mDir, 10, WEEK_IN_MILLIS);
         assertDirContents();
     }
 
+    @Test
     public void testDeleteOlderTypical() throws Exception {
         touch("file1", HOUR_IN_MILLIS);
         touch("file2", 1 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
@@ -152,6 +276,7 @@ public class FileUtilsTest extends AndroidTestCase {
         assertDirContents("file1", "file2", "file3");
     }
 
+    @Test
     public void testDeleteOlderInFuture() throws Exception {
         touch("file1", -HOUR_IN_MILLIS);
         touch("file2", HOUR_IN_MILLIS);
@@ -166,6 +291,7 @@ public class FileUtilsTest extends AndroidTestCase {
         assertDirContents("file1", "file2");
     }
 
+    @Test
     public void testDeleteOlderOnlyAge() throws Exception {
         touch("file1", HOUR_IN_MILLIS);
         touch("file2", 1 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
@@ -177,6 +303,7 @@ public class FileUtilsTest extends AndroidTestCase {
         assertDirContents("file1");
     }
 
+    @Test
     public void testDeleteOlderOnlyCount() throws Exception {
         touch("file1", HOUR_IN_MILLIS);
         touch("file2", 1 * DAY_IN_MILLIS + HOUR_IN_MILLIS);
@@ -188,6 +315,7 @@ public class FileUtilsTest extends AndroidTestCase {
         assertDirContents("file1", "file2");
     }
 
+    @Test
     public void testValidExtFilename() throws Exception {
         assertTrue(FileUtils.isValidExtFilename("a"));
         assertTrue(FileUtils.isValidExtFilename("foo.bar"));
@@ -208,6 +336,7 @@ public class FileUtilsTest extends AndroidTestCase {
         assertEquals("foo.bar", FileUtils.buildValidExtFilename("foo.bar"));
     }
 
+    @Test
     public void testValidFatFilename() throws Exception {
         assertTrue(FileUtils.isValidFatFilename("a"));
         assertTrue(FileUtils.isValidFatFilename("foo bar.baz"));
@@ -233,6 +362,7 @@ public class FileUtilsTest extends AndroidTestCase {
         assertEquals("foo_bar__baz", FileUtils.buildValidFatFilename("foo?bar**baz"));
     }
 
+    @Test
     public void testTrimFilename() throws Exception {
         assertEquals("short.txt", FileUtils.trimFilename("short.txt", 16));
         assertEquals("extrem...eme.txt", FileUtils.trimFilename("extremelylongfilename.txt", 16));
@@ -245,6 +375,7 @@ public class FileUtilsTest extends AndroidTestCase {
         assertEquals("a...z", FileUtils.trimFilename(unicode, 6));
     }
 
+    @Test
     public void testBuildUniqueFile_normal() throws Exception {
         assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test"));
         assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.jpg"));
@@ -263,6 +394,7 @@ public class FileUtilsTest extends AndroidTestCase {
                 FileUtils.buildUniqueFile(mTarget, "application/x-flac", "test.flac"));
     }
 
+    @Test
     public void testBuildUniqueFile_unknown() throws Exception {
         assertNameEquals("test",
                 FileUtils.buildUniqueFile(mTarget, "application/octet-stream", "test"));
@@ -275,6 +407,7 @@ public class FileUtilsTest extends AndroidTestCase {
         assertNameEquals("test.lolz", FileUtils.buildUniqueFile(mTarget, "lolz/lolz", "test.lolz"));
     }
 
+    @Test
     public void testBuildUniqueFile_dir() throws Exception {
         assertNameEquals("test", FileUtils.buildUniqueFile(mTarget, Document.MIME_TYPE_DIR, "test"));
         new File(mTarget, "test").mkdir();
@@ -288,6 +421,7 @@ public class FileUtilsTest extends AndroidTestCase {
                 FileUtils.buildUniqueFile(mTarget, Document.MIME_TYPE_DIR, "test.jpg"));
     }
 
+    @Test
     public void testBuildUniqueFile_increment() throws Exception {
         assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.jpg"));
         new File(mTarget, "test.jpg").createNewFile();
@@ -298,6 +432,7 @@ public class FileUtilsTest extends AndroidTestCase {
                 FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.jpg"));
     }
 
+    @Test
     public void testBuildUniqueFile_mimeless() throws Exception {
         assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "test.jpg"));
         new File(mTarget, "test.jpg").createNewFile();
@@ -312,6 +447,7 @@ public class FileUtilsTest extends AndroidTestCase {
         assertNameEquals("test.foo (1).bar", FileUtils.buildUniqueFile(mTarget, "test.foo.bar"));
     }
 
+    @Test
     public void testRoundStorageSize() throws Exception {
         final long M128 = 128000000L;
         final long M256 = 256000000L;
@@ -350,12 +486,21 @@ public class FileUtilsTest extends AndroidTestCase {
         file.setLastModified(System.currentTimeMillis() - age);
     }
 
-    private void stageFile(File file, String data) throws Exception {
-        FileWriter writer = new FileWriter(file);
-        try {
-            writer.write(data, 0, data.length());
-        } finally {
-            writer.close();
+    private void writeFile(File file, String data) throws Exception {
+        writeFile(file, data.getBytes());
+    }
+
+    private void writeFile(File file, byte[] data) throws Exception {
+        try (FileOutputStream out = new FileOutputStream(file)) {
+            out.write(data);
+        }
+    }
+
+    private byte[] readFile(File file) throws Exception {
+        try (FileInputStream in = new FileInputStream(file);
+                ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Streams.copy(in, out);
+            return out.toByteArray();
         }
     }
 

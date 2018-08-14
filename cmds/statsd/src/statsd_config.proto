@@ -1,0 +1,371 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.os.statsd;
+
+option java_package = "com.android.internal.os";
+option java_outer_classname = "StatsdConfigProto";
+
+import "frameworks/base/cmds/statsd/src/perfetto/perfetto_config.proto";
+
+enum Position {
+  POSITION_UNKNOWN = 0;
+
+  FIRST = 1;
+
+  LAST = 2;
+
+  ANY = 3;
+
+  ALL = 4;
+}
+
+enum TimeUnit {
+  TIME_UNIT_UNSPECIFIED = 0;
+  ONE_MINUTE = 1;
+  FIVE_MINUTES = 2;
+  TEN_MINUTES = 3;
+  THIRTY_MINUTES = 4;
+  ONE_HOUR = 5;
+  THREE_HOURS = 6;
+  SIX_HOURS = 7;
+  TWELVE_HOURS = 8;
+  ONE_DAY = 9;
+  CTS = 1000;
+}
+
+message FieldMatcher {
+  optional int32 field = 1;
+
+  optional Position position = 2;
+
+  repeated FieldMatcher child = 3;
+}
+
+message FieldValueMatcher {
+  optional int32 field = 1;
+
+  optional Position position = 2;
+
+  oneof value_matcher {
+    bool eq_bool = 3;
+    string eq_string = 4;
+    int64 eq_int = 5;
+
+    int64 lt_int = 6;
+    int64 gt_int = 7;
+    float lt_float = 8;
+    float gt_float = 9;
+
+    int64 lte_int = 10;
+    int64 gte_int = 11;
+
+    MessageMatcher matches_tuple = 12;
+
+    StringListMatcher eq_any_string = 13;
+    StringListMatcher neq_any_string = 14;
+  }
+}
+
+message MessageMatcher {
+  repeated FieldValueMatcher field_value_matcher = 1;
+}
+
+message StringListMatcher {
+    repeated string str_value = 1;
+}
+
+enum LogicalOperation {
+  LOGICAL_OPERATION_UNSPECIFIED = 0;
+  AND = 1;
+  OR = 2;
+  NOT = 3;
+  NAND = 4;
+  NOR = 5;
+}
+
+message SimpleAtomMatcher {
+  optional int32 atom_id = 1;
+
+  repeated FieldValueMatcher field_value_matcher = 2;
+}
+
+message AtomMatcher {
+  optional int64 id = 1;
+
+  message Combination {
+    optional LogicalOperation operation = 1;
+
+    repeated int64 matcher = 2;
+  }
+  oneof contents {
+    SimpleAtomMatcher simple_atom_matcher = 2;
+    Combination combination = 3;
+  }
+}
+
+message SimplePredicate {
+  optional int64 start = 1;
+
+  optional int64 stop = 2;
+
+  optional bool count_nesting = 3 [default = true];
+
+  optional int64 stop_all = 4;
+
+  enum InitialValue {
+    UNKNOWN = 0;
+    FALSE = 1;
+  }
+  optional InitialValue initial_value = 5 [default = FALSE];
+
+  optional FieldMatcher dimensions = 6;
+}
+
+message Predicate {
+  optional int64 id = 1;
+
+  message Combination {
+    optional LogicalOperation operation = 1;
+
+    repeated int64 predicate = 2;
+  }
+
+  oneof contents {
+    SimplePredicate simple_predicate = 2;
+    Combination combination = 3;
+  }
+}
+
+message MetricConditionLink {
+  optional int64 condition = 1;
+
+  optional FieldMatcher fields_in_what = 2;
+
+  optional FieldMatcher fields_in_condition = 3;
+}
+
+message FieldFilter {
+  optional bool include_all = 1 [default = false];
+  optional FieldMatcher fields = 2;
+}
+
+message EventMetric {
+  optional int64 id = 1;
+
+  optional int64 what = 2;
+
+  optional int64 condition = 3;
+
+  repeated MetricConditionLink links = 4;
+}
+
+message CountMetric {
+  optional int64 id = 1;
+
+  optional int64 what = 2;
+
+  optional int64 condition = 3;
+
+  optional FieldMatcher dimensions_in_what = 4;
+
+  optional FieldMatcher dimensions_in_condition = 7;
+
+  optional TimeUnit bucket = 5;
+
+  repeated MetricConditionLink links = 6;
+}
+
+message DurationMetric {
+  optional int64 id = 1;
+
+  optional int64 what = 2;
+
+  optional int64 condition = 3;
+
+  repeated MetricConditionLink links = 4;
+
+  enum AggregationType {
+    SUM = 1;
+
+    MAX_SPARSE = 2;
+  }
+  optional AggregationType aggregation_type = 5 [default = SUM];
+
+  optional FieldMatcher dimensions_in_what = 6;
+
+  optional FieldMatcher dimensions_in_condition = 8;
+
+  optional TimeUnit bucket = 7;
+}
+
+message GaugeMetric {
+  optional int64 id = 1;
+
+  optional int64 what = 2;
+
+  optional FieldFilter gauge_fields_filter = 3;
+
+  optional int64 condition = 4;
+
+  optional FieldMatcher dimensions_in_what = 5;
+
+  optional FieldMatcher dimensions_in_condition = 8;
+
+  optional TimeUnit bucket = 6;
+
+  repeated MetricConditionLink links = 7;
+
+  enum SamplingType {
+    RANDOM_ONE_SAMPLE = 1;
+    ALL_CONDITION_CHANGES = 2;
+    CONDITION_CHANGE_TO_TRUE = 3;
+  }
+  optional SamplingType sampling_type = 9 [default = RANDOM_ONE_SAMPLE] ;
+
+  optional int64 min_bucket_size_nanos = 10;
+  optional int64 max_num_gauge_atoms_per_bucket = 11 [default = 10];
+}
+
+message ValueMetric {
+  optional int64 id = 1;
+
+  optional int64 what = 2;
+
+  optional FieldMatcher value_field = 3;
+
+  optional int64 condition = 4;
+
+  optional FieldMatcher dimensions_in_what = 5;
+
+  optional FieldMatcher dimensions_in_condition = 9;
+
+  optional TimeUnit bucket = 6;
+
+  repeated MetricConditionLink links = 7;
+
+  enum AggregationType {
+    SUM = 1;
+  }
+  optional AggregationType aggregation_type = 8 [default = SUM];
+
+  optional int64 min_bucket_size_nanos = 10;
+
+  optional bool use_absolute_value_on_reset = 11 [default = false];
+}
+
+message Alert {
+  optional int64 id = 1;
+
+  optional int64 metric_id = 2;
+
+  optional int32 num_buckets = 3;
+
+  optional int32 refractory_period_secs = 4;
+
+  optional double trigger_if_sum_gt = 5;
+}
+
+message Alarm {
+  optional int64 id = 1;
+
+  optional int64 offset_millis = 2;
+
+  optional int64 period_millis = 3;
+}
+
+message IncidentdDetails {
+  repeated int32 section = 1;
+
+  enum Destination {
+    AUTOMATIC = 0;
+    EXPLICIT = 1;
+  }
+  optional Destination dest = 2;
+}
+
+message PerfettoDetails {
+  optional perfetto.protos.TraceConfig trace_config = 1;
+}
+
+message BroadcastSubscriberDetails {
+  optional int64 subscriber_id = 1;
+  repeated string cookie = 2;
+}
+
+message Subscription {
+  optional int64 id = 1;
+
+  enum RuleType {
+    RULE_TYPE_UNSPECIFIED = 0;
+    ALARM = 1;
+    ALERT = 2;
+  }
+  optional RuleType rule_type = 2;
+
+  optional int64 rule_id = 3;
+
+  oneof subscriber_information {
+    IncidentdDetails incidentd_details = 4;
+    PerfettoDetails perfetto_details = 5;
+    BroadcastSubscriberDetails broadcast_subscriber_details = 6;
+  }
+
+  optional float probability_of_informing = 7 [default = 1.1];
+}
+
+message StatsdConfig {
+  optional int64 id = 1;
+
+  repeated EventMetric event_metric = 2;
+
+  repeated CountMetric count_metric = 3;
+
+  repeated ValueMetric value_metric = 4;
+
+  repeated GaugeMetric gauge_metric = 5;
+
+  repeated DurationMetric duration_metric = 6;
+
+  repeated AtomMatcher atom_matcher = 7;
+
+  repeated Predicate predicate = 8;
+
+  repeated Alert alert = 9;
+
+  repeated Alarm alarm = 10;
+
+  repeated Subscription subscription = 11;
+
+  repeated string allowed_log_source = 12;
+
+  repeated int64 no_report_metric = 13;
+
+  message Annotation {
+    optional int64 field_int64 = 1;
+    optional int32 field_int32 = 2;
+  }
+  repeated Annotation annotation = 14;
+
+  optional int64 ttl_in_seconds = 15;
+
+  optional bool hash_strings_in_metric_report = 16 [default = true];
+
+  // Field number 1000 is reserved for later use.
+  reserved 1000;
+}

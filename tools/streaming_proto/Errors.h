@@ -4,7 +4,7 @@
 #include <vector>
 
 namespace android {
-namespace javastream_proto {
+namespace stream_proto {
 
 using namespace std;
 
@@ -44,5 +44,5 @@ extern const string UNKNOWN_FILE;
 extern const int UNKNOWN_LINE;
 
 
-} // namespace javastream_proto
+} // namespace stream_proto
 } // namespace android

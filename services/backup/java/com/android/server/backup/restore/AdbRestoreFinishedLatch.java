@@ -16,14 +16,15 @@
 
 package com.android.server.backup.restore;
 
-import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 
 import android.util.Slog;
 
+import com.android.internal.util.Preconditions;
+import com.android.server.backup.BackupAgentTimeoutParameters;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.BackupRestoreTask;
-import com.android.server.backup.RefactoredBackupManagerService;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -34,21 +35,27 @@ import java.util.concurrent.TimeUnit;
 public class AdbRestoreFinishedLatch implements BackupRestoreTask {
 
     private static final String TAG = "AdbRestoreFinishedLatch";
-    private RefactoredBackupManagerService backupManagerService;
+    private BackupManagerService backupManagerService;
     final CountDownLatch mLatch;
     private final int mCurrentOpToken;
+    private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
-    public AdbRestoreFinishedLatch(RefactoredBackupManagerService backupManagerService,
+    public AdbRestoreFinishedLatch(BackupManagerService backupManagerService,
             int currentOpToken) {
         this.backupManagerService = backupManagerService;
         mLatch = new CountDownLatch(1);
         mCurrentOpToken = currentOpToken;
+        mAgentTimeoutParameters = Preconditions.checkNotNull(
+                backupManagerService.getAgentTimeoutParameters(),
+                "Timeout parameters cannot be null");
     }
 
     void await() {
         boolean latched = false;
+        long fullBackupAgentTimeoutMillis =
+                mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis();
         try {
-            latched = mLatch.await(TIMEOUT_FULL_BACKUP_INTERVAL, TimeUnit.MILLISECONDS);
+            latched = mLatch.await(fullBackupAgentTimeoutMillis, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             Slog.w(TAG, "Interrupted!");
         }

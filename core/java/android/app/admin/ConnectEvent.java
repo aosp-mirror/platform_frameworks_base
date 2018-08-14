@@ -32,29 +32,30 @@ import java.net.UnknownHostException;
 public final class ConnectEvent extends NetworkEvent implements Parcelable {
 
     /** The destination IP address. */
-    private final String ipAddress;
+    private final String mIpAddress;
 
     /** The destination port number. */
-    private final int port;
+    private final int mPort;
 
     /** @hide */
     public ConnectEvent(String ipAddress, int port, String packageName, long timestamp) {
         super(packageName, timestamp);
-        this.ipAddress = ipAddress;
-        this.port = port;
+        this.mIpAddress = ipAddress;
+        this.mPort = port;
     }
 
     private ConnectEvent(Parcel in) {
-        this.ipAddress = in.readString();
-        this.port = in.readInt();
-        this.packageName = in.readString();
-        this.timestamp = in.readLong();
+        this.mIpAddress = in.readString();
+        this.mPort = in.readInt();
+        this.mPackageName = in.readString();
+        this.mTimestamp = in.readLong();
+        this.mId = in.readLong();
     }
 
     public InetAddress getInetAddress() {
         try {
             // ipAddress is already an address, not a host name, no DNS resolution will happen.
-            return InetAddress.getByName(ipAddress);
+            return InetAddress.getByName(mIpAddress);
         } catch (UnknownHostException e) {
             // Should never happen as we aren't passing a host name.
             return InetAddress.getLoopbackAddress();
@@ -62,13 +63,13 @@ public final class ConnectEvent extends NetworkEvent implements Parcelable {
     }
 
     public int getPort() {
-        return port;
+        return mPort;
     }
 
     @Override
     public String toString() {
-        return String.format("ConnectEvent(%s, %d, %d, %s)", ipAddress, port, timestamp,
-                packageName);
+        return String.format("ConnectEvent(%d, %s, %d, %d, %s)", mId, mIpAddress, mPort, mTimestamp,
+                mPackageName);
     }
 
     public static final Parcelable.Creator<ConnectEvent> CREATOR
@@ -96,10 +97,10 @@ public final class ConnectEvent extends NetworkEvent implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         // write parcel token first
         out.writeInt(PARCEL_TOKEN_CONNECT_EVENT);
-        out.writeString(ipAddress);
-        out.writeInt(port);
-        out.writeString(packageName);
-        out.writeLong(timestamp);
+        out.writeString(mIpAddress);
+        out.writeInt(mPort);
+        out.writeString(mPackageName);
+        out.writeLong(mTimestamp);
+        out.writeLong(mId);
     }
 }
-

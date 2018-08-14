@@ -29,6 +29,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Defines the configuration of a Aware publish session. Built using
@@ -81,14 +82,19 @@ public final class PublishConfig implements Parcelable {
     public final boolean mEnableTerminateNotification;
 
     /** @hide */
+    public final boolean mEnableRanging;
+
+    /** @hide */
     public PublishConfig(byte[] serviceName, byte[] serviceSpecificInfo, byte[] matchFilter,
-            int publishType, int ttlSec, boolean enableTerminateNotification) {
+            int publishType, int ttlSec, boolean enableTerminateNotification,
+            boolean enableRanging) {
         mServiceName = serviceName;
         mServiceSpecificInfo = serviceSpecificInfo;
         mMatchFilter = matchFilter;
         mPublishType = publishType;
         mTtlSec = ttlSec;
         mEnableTerminateNotification = enableTerminateNotification;
+        mEnableRanging = enableRanging;
     }
 
     @Override
@@ -103,7 +109,8 @@ public final class PublishConfig implements Parcelable {
                 + (new TlvBufferUtils.TlvIterable(0, 1, mMatchFilter)).toString()
                 + ", mMatchFilter.length=" + (mMatchFilter == null ? 0 : mMatchFilter.length)
                 + ", mPublishType=" + mPublishType + ", mTtlSec=" + mTtlSec
-                + ", mEnableTerminateNotification=" + mEnableTerminateNotification + "]";
+                + ", mEnableTerminateNotification=" + mEnableTerminateNotification
+                + ", mEnableRanging=" + mEnableRanging + "]";
     }
 
     @Override
@@ -119,6 +126,7 @@ public final class PublishConfig implements Parcelable {
         dest.writeInt(mPublishType);
         dest.writeInt(mTtlSec);
         dest.writeInt(mEnableTerminateNotification ? 1 : 0);
+        dest.writeInt(mEnableRanging ? 1 : 0);
     }
 
     public static final Creator<PublishConfig> CREATOR = new Creator<PublishConfig>() {
@@ -135,9 +143,10 @@ public final class PublishConfig implements Parcelable {
             int publishType = in.readInt();
             int ttlSec = in.readInt();
             boolean enableTerminateNotification = in.readInt() != 0;
+            boolean enableRanging = in.readInt() != 0;
 
             return new PublishConfig(serviceName, ssi, matchFilter, publishType,
-                    ttlSec, enableTerminateNotification);
+                    ttlSec, enableTerminateNotification, enableRanging);
         }
     };
 
@@ -157,21 +166,14 @@ public final class PublishConfig implements Parcelable {
                 lhs.mServiceSpecificInfo) && Arrays.equals(mMatchFilter, lhs.mMatchFilter)
                 && mPublishType == lhs.mPublishType
                 && mTtlSec == lhs.mTtlSec
-                && mEnableTerminateNotification == lhs.mEnableTerminateNotification;
+                && mEnableTerminateNotification == lhs.mEnableTerminateNotification
+                && mEnableRanging == lhs.mEnableRanging;
     }
 
     @Override
     public int hashCode() {
-        int result = 17;
-
-        result = 31 * result + Arrays.hashCode(mServiceName);
-        result = 31 * result + Arrays.hashCode(mServiceSpecificInfo);
-        result = 31 * result + Arrays.hashCode(mMatchFilter);
-        result = 31 * result + mPublishType;
-        result = 31 * result + mTtlSec;
-        result = 31 * result + (mEnableTerminateNotification ? 1 : 0);
-
-        return result;
+        return Objects.hash(mServiceName, mServiceSpecificInfo, mMatchFilter, mPublishType, mTtlSec,
+                mEnableTerminateNotification, mEnableRanging);
     }
 
     /**
@@ -180,7 +182,7 @@ public final class PublishConfig implements Parcelable {
      *
      * @hide
      */
-    public void assertValid(Characteristics characteristics)
+    public void assertValid(Characteristics characteristics, boolean rttSupported)
             throws IllegalArgumentException {
         WifiAwareUtils.validateServiceName(mServiceName);
 
@@ -214,6 +216,10 @@ public final class PublishConfig implements Parcelable {
                         "Match filter longer than supported by device characteristics");
             }
         }
+
+        if (!rttSupported && mEnableRanging) {
+            throw new IllegalArgumentException("Ranging is not supported");
+        }
     }
 
     /**
@@ -226,6 +232,7 @@ public final class PublishConfig implements Parcelable {
         private int mPublishType = PUBLISH_TYPE_UNSOLICITED;
         private int mTtlSec = 0;
         private boolean mEnableTerminateNotification = true;
+        private boolean mEnableRanging = false;
 
         /**
          * Specify the service name of the publish session. The actual on-air
@@ -352,12 +359,35 @@ public final class PublishConfig implements Parcelable {
         }
 
         /**
+         * Configure whether the publish discovery session supports ranging and allows peers to
+         * measure distance to it. This API is used in conjunction with
+         * {@link SubscribeConfig.Builder#setMinDistanceMm(int)} and
+         * {@link SubscribeConfig.Builder#setMaxDistanceMm(int)} to specify a minimum and/or
+         * maximum distance at which discovery will be triggered.
+         * <p>
+         * Optional. Disabled by default - i.e. any peer attempt to measure distance to this device
+         * will be refused and discovery will proceed without ranging constraints.
+         * <p>
+         * The device must support Wi-Fi RTT for this feature to be used. Feature support is checked
+         * as described in {@link android.net.wifi.rtt}.
+         *
+         * @param enable If true, ranging is supported on request of the peer.
+         *
+         * @return The builder to facilitate chaining
+         *         {@code builder.setXXX(..).setXXX(..)}.
+         */
+        public Builder setRangingEnabled(boolean enable) {
+            mEnableRanging = enable;
+            return this;
+        }
+
+        /**
          * Build {@link PublishConfig} given the current requests made on the
          * builder.
          */
         public PublishConfig build() {
             return new PublishConfig(mServiceName, mServiceSpecificInfo, mMatchFilter, mPublishType,
-                    mTtlSec, mEnableTerminateNotification);
+                    mTtlSec, mEnableTerminateNotification, mEnableRanging);
         }
     }
 }

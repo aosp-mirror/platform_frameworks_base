@@ -33,7 +33,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.R;
 
-import libcore.util.Objects;
+import java.util.Objects;
 
 public class RadioListPreference extends CustomListPreference {
 
@@ -124,7 +124,7 @@ public class RadioListPreference extends CustomListPreference {
                 SelectablePreference pref = new SelectablePreference(context);
                 getPreferenceScreen().addPreference(pref);
                 pref.setTitle(entry);
-                pref.setChecked(Objects.equal(current, values[i]));
+                pref.setChecked(Objects.equals(current, values[i]));
                 pref.setKey(String.valueOf(i));
             }
         }

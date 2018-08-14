@@ -35,6 +35,8 @@ namespace convert {
 namespace V1_0 = hardware::broadcastradio::V1_0;
 namespace V1_1 = hardware::broadcastradio::V1_1;
 
+hardware::hidl_vec<hardware::hidl_string> StringListToHal(JNIEnv *env, jobject jList);
+
 JavaRef<jobject> VendorInfoFromHal(JNIEnv *env, const hardware::hidl_vec<V1_1::VendorKeyValue> &info);
 hardware::hidl_vec<V1_1::VendorKeyValue> VendorInfoToHal(JNIEnv *env, jobject jInfo);
 

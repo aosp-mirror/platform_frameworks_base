@@ -16,11 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.HOME_STACK_ID;
-import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
 /**
  * Describes the mode in which a window is drag resizing.
@@ -39,15 +35,12 @@ class DragResizeMode {
      */
     static final int DRAG_RESIZE_MODE_DOCKED_DIVIDER = 1;
 
-    static boolean isModeAllowedForStack(int stackId, int mode) {
+    static boolean isModeAllowedForStack(TaskStack stack, int mode) {
         switch (mode) {
             case DRAG_RESIZE_MODE_FREEFORM:
-                return stackId == FREEFORM_WORKSPACE_STACK_ID;
+                return stack.getWindowingMode() == WINDOWING_MODE_FREEFORM;
             case DRAG_RESIZE_MODE_DOCKED_DIVIDER:
-                return stackId == DOCKED_STACK_ID
-                        || stackId == FULLSCREEN_WORKSPACE_STACK_ID
-                        || stackId == HOME_STACK_ID
-                        || stackId == RECENTS_STACK_ID;
+                return stack.inSplitScreenWindowingMode();
             default:
                 return false;
         }

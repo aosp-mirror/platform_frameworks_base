@@ -63,15 +63,6 @@ public final class MediaStore {
 
     private static final String CONTENT_AUTHORITY_SLASH = "content://" + AUTHORITY + "/";
 
-   /**
-     * Broadcast Action:  A broadcast to indicate the end of an MTP session with the host.
-     * This broadcast is only sent if MTP activity has modified the media database during the
-     * most recent MTP session.
-     *
-     * @hide
-     */
-    public static final String ACTION_MTP_SESSION_END = "android.provider.action.MTP_SESSION_END";
-
     /**
      * The method name used by the media scanner and mtp to tell the media provider to
      * rescan and reclassify that have become unhidden because of renaming folders or
@@ -79,6 +70,13 @@ public final class MediaStore {
      * @hide
      */
     public static final String UNHIDE_CALL = "unhide";
+
+    /**
+     * The method name used by the media scanner service to reload all localized ringtone titles due
+     * to a locale change.
+     * @hide
+     */
+    public static final String RETRANSLATE_CALL = "update_titles";
 
     /**
      * This is for internal use by the media scanner only.
@@ -694,8 +692,8 @@ public final class MediaStore {
             // Log.v(TAG, "getThumbnail: origId="+origId+", kind="+kind+", isVideo="+isVideo);
             // If the magic is non-zero, we simply return thumbnail if it does exist.
             // querying MediaProvider and simply return thumbnail.
-            MiniThumbFile thumbFile = new MiniThumbFile(isVideo ? Video.Media.EXTERNAL_CONTENT_URI
-                    : Images.Media.EXTERNAL_CONTENT_URI);
+            MiniThumbFile thumbFile = MiniThumbFile.instance(
+                    isVideo ? Video.Media.EXTERNAL_CONTENT_URI : Images.Media.EXTERNAL_CONTENT_URI);
             Cursor c = null;
             try {
                 long magic = thumbFile.getMagic(origId);
@@ -1358,6 +1356,18 @@ public final class MediaStore {
              * @hide
              */
             public static final String GENRE = "genre";
+
+            /**
+             * The resource URI of a localized title, if any
+             * <P>Type: TEXT</P>
+             * Conforms to this pattern:
+             *   Scheme: {@link ContentResolver.SCHEME_ANDROID_RESOURCE}
+             *   Authority: Package Name of ringtone title provider
+             *   First Path Segment: Type of resource (must be "string")
+             *   Second Path Segment: Resource ID of title
+             * @hide
+             */
+            public static final String TITLE_RESOURCE_URI = "title_resource_uri";
         }
 
         /**

@@ -20,13 +20,20 @@ package android.text;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.text.style.BulletSpan;
 import android.text.style.QuoteSpan;
 import android.text.style.SubscriptSpan;
 import android.text.style.UnderlineSpan;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@Presubmit
+@SmallTest
+@RunWith(AndroidJUnit4.class)
 public class SpannableStringBuilderTest extends SpannableTest {
 
     protected Spannable newSpannableWithText(String text) {

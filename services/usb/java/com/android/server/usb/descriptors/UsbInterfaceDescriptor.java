@@ -15,8 +15,14 @@
  */
 package com.android.server.usb.descriptors;
 
+import android.hardware.usb.UsbEndpoint;
+import android.hardware.usb.UsbInterface;
+import android.util.Log;
+
 import com.android.server.usb.descriptors.report.ReportCanvas;
 import com.android.server.usb.descriptors.report.UsbStrings;
+
+import java.util.ArrayList;
 
 /**
  * @hide
@@ -25,14 +31,18 @@ import com.android.server.usb.descriptors.report.UsbStrings;
  */
 public class UsbInterfaceDescriptor extends UsbDescriptor {
     private static final String TAG = "UsbInterfaceDescriptor";
+    private static final boolean DEBUG = false;
 
-    protected byte mInterfaceNumber;  // 2:1 Number of Interface
+    protected int mInterfaceNumber;   // 2:1 Number of Interface
     protected byte mAlternateSetting; // 3:1 Value used to select alternative setting
     protected byte mNumEndpoints;     // 4:1 Number of Endpoints used for this interface
-    protected byte mUsbClass;         // 5:1 Class Code
-    protected byte mUsbSubclass;      // 6:1 Subclass Code
-    protected byte mProtocol;         // 7:1 Protocol Code
+    protected int mUsbClass;          // 5:1 Class Code
+    protected int mUsbSubclass;       // 6:1 Subclass Code
+    protected int mProtocol;          // 7:1 Protocol Code
     protected byte mDescrIndex;       // 8:1 Index of String Descriptor Describing this interface
+
+    private ArrayList<UsbEndpointDescriptor> mEndpointDescriptors =
+            new ArrayList<UsbEndpointDescriptor>();
 
     UsbInterfaceDescriptor(int length, byte type) {
         super(length, type);
@@ -41,18 +51,18 @@ public class UsbInterfaceDescriptor extends UsbDescriptor {
 
     @Override
     public int parseRawDescriptors(ByteStream stream) {
-        mInterfaceNumber = stream.getByte();
+        mInterfaceNumber = stream.getUnsignedByte();
         mAlternateSetting = stream.getByte();
         mNumEndpoints = stream.getByte();
-        mUsbClass = stream.getByte();
-        mUsbSubclass = stream.getByte();
-        mProtocol = stream.getByte();
+        mUsbClass = stream.getUnsignedByte();
+        mUsbSubclass = stream.getUnsignedByte();
+        mProtocol = stream.getUnsignedByte();
         mDescrIndex = stream.getByte();
 
         return mLength;
     }
 
-    public byte getInterfaceNumber() {
+    public int getInterfaceNumber() {
         return mInterfaceNumber;
     }
 
@@ -64,15 +74,15 @@ public class UsbInterfaceDescriptor extends UsbDescriptor {
         return mNumEndpoints;
     }
 
-    public byte getUsbClass() {
+    public int getUsbClass() {
         return mUsbClass;
     }
 
-    public byte getUsbSubclass() {
+    public int getUsbSubclass() {
         return mUsbSubclass;
     }
 
-    public byte getProtocol() {
+    public int getProtocol() {
         return mProtocol;
     }
 
@@ -80,13 +90,34 @@ public class UsbInterfaceDescriptor extends UsbDescriptor {
         return mDescrIndex;
     }
 
+    void addEndpointDescriptor(UsbEndpointDescriptor endpoint) {
+        mEndpointDescriptors.add(endpoint);
+    }
+
+    UsbInterface toAndroid(UsbDescriptorParser parser) {
+        if (DEBUG) {
+            Log.d(TAG, "toAndroid() class:" + Integer.toHexString(mUsbClass)
+                    + " subclass:" + Integer.toHexString(mUsbSubclass)
+                    + " " + mEndpointDescriptors.size() + " endpoints.");
+        }
+        String name = parser.getDescriptorString(mDescrIndex);
+        UsbInterface ntrface = new UsbInterface(
+                mInterfaceNumber, mAlternateSetting, name, mUsbClass, mUsbSubclass, mProtocol);
+        UsbEndpoint[] endpoints = new UsbEndpoint[mEndpointDescriptors.size()];
+        for (int index = 0; index < mEndpointDescriptors.size(); index++) {
+            endpoints[index] = mEndpointDescriptors.get(index).toAndroid(parser);
+        }
+        ntrface.setEndpoints(endpoints);
+        return ntrface;
+    }
+
     @Override
     public void report(ReportCanvas canvas) {
         super.report(canvas);
 
-        byte usbClass = getUsbClass();
-        byte usbSubclass = getUsbSubclass();
-        byte protocol = getProtocol();
+        int usbClass = getUsbClass();
+        int usbSubclass = getUsbSubclass();
+        int protocol = getProtocol();
         String className = UsbStrings.getClassName(usbClass);
         String subclassName = "";
         if (usbClass == UsbDescriptor.CLASSID_AUDIO) {

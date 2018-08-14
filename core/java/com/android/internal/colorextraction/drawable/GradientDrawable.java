@@ -57,6 +57,8 @@ public class GradientDrawable extends Drawable {
     private int mMainColor;
     private int mSecondaryColor;
     private ValueAnimator mColorAnimation;
+    private int mMainColorTo;
+    private int mSecondaryColorTo;
 
     public GradientDrawable(@NonNull Context context) {
         mDensity = context.getResources().getDisplayMetrics().density;
@@ -76,13 +78,16 @@ public class GradientDrawable extends Drawable {
     }
 
     public void setColors(int mainColor, int secondaryColor, boolean animated) {
-        if (mainColor == mMainColor && secondaryColor == mSecondaryColor) {
+        if (mainColor == mMainColorTo && secondaryColor == mSecondaryColorTo) {
             return;
         }
 
         if (mColorAnimation != null && mColorAnimation.isRunning()) {
             mColorAnimation.cancel();
         }
+
+        mMainColorTo = mainColor;
+        mSecondaryColorTo = mainColor;
 
         if (animated) {
             final int mainFrom = mMainColor;

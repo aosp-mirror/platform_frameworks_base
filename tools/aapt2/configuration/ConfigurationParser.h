@@ -17,6 +17,7 @@
 #ifndef AAPT2_CONFIGURATION_H
 #define AAPT2_CONFIGURATION_H
 
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -28,31 +29,6 @@
 namespace aapt {
 
 namespace configuration {
-
-/** A mapping of group labels to group of configuration items. */
-template<class T>
-using Group = std::unordered_map<std::string, std::vector<T>>;
-
-/** Output artifact configuration options. */
-struct Artifact {
-  /** Name to use for output of processing foo.apk -> foo.<name>.apk. */
-  std::string name;
-  /** If present, uses the ABI group with this name. */
-  Maybe<std::string> abi_group;
-  /** If present, uses the screen density group with this name. */
-  Maybe<std::string> screen_density_group;
-  /** If present, uses the locale group with this name. */
-  Maybe<std::string> locale_group;
-  /** If present, uses the Android SDK group with this name. */
-  Maybe<std::string> android_sdk_group;
-  /** If present, uses the device feature group with this name. */
-  Maybe<std::string> device_feature_group;
-  /** If present, uses the OpenGL texture group with this name. */
-  Maybe<std::string> gl_texture_group;
-
-  /** Convert an artifact name template into a name string based on configuration contents. */
-  Maybe<std::string> ToArtifactName(const std::string& format, IDiagnostics* diag) const;
-};
 
 /** Enumeration of currently supported ABIs. */
 enum class Abi {
@@ -67,7 +43,7 @@ enum class Abi {
 };
 
 /** Helper method to convert an ABI to a string representing the path within the APK. */
-const std::string& AbiToString(Abi abi);
+const android::StringPiece& AbiToString(Abi abi);
 
 /**
  * Represents an individual locale. When a locale is included, it must be
@@ -95,10 +71,17 @@ struct AndroidManifest {
 };
 
 struct AndroidSdk {
-  Maybe<std::string> min_sdk_version;
-  Maybe<std::string> target_sdk_version;
-  Maybe<std::string> max_sdk_version;
+  std::string label;
+  int min_sdk_version;  // min_sdk_version is mandatory if splitting by SDK.
+  Maybe<int> target_sdk_version;
+  Maybe<int> max_sdk_version;
   Maybe<AndroidManifest> manifest;
+
+  static AndroidSdk ForMinSdk(int min_sdk) {
+    AndroidSdk sdk;
+    sdk.min_sdk_version = min_sdk;
+    return sdk;
+  }
 
   inline friend bool operator==(const AndroidSdk& lhs, const AndroidSdk& rhs) {
     return lhs.min_sdk_version == rhs.min_sdk_version &&
@@ -121,27 +104,29 @@ struct GlTexture {
   }
 };
 
-/** AAPT2 XML configuration file binary representation. */
-struct PostProcessingConfiguration {
-  // TODO: Support named artifacts?
-  std::vector<Artifact> artifacts;
-  Maybe<std::string> artifact_format;
+/** An artifact with all the details pulled from the PostProcessingConfiguration. */
+struct OutputArtifact {
+  std::string name;
+  int version;
+  std::vector<Abi> abis;
+  std::vector<ConfigDescription> screen_densities;
+  std::vector<ConfigDescription> locales;
+  Maybe<AndroidSdk> android_sdk;
+  std::vector<DeviceFeature> features;
+  std::vector<GlTexture> textures;
 
-  Group<Abi> abi_groups;
-  Group<ConfigDescription> screen_density_groups;
-  Group<Locale> locale_groups;
-  Group<AndroidSdk> android_sdk_groups;
-  Group<DeviceFeature> device_feature_groups;
-  Group<GlTexture> gl_texture_groups;
+  inline int GetMinSdk(int default_value = -1) const {
+    if (!android_sdk) {
+      return default_value;
+    }
+    return android_sdk.value().min_sdk_version;
+  }
 };
 
 }  // namespace configuration
 
 // Forward declaration of classes used in the API.
 struct IDiagnostics;
-namespace xml {
-class Element;
-}
 
 /**
  * XML configuration file parser for the split and optimize commands.
@@ -153,8 +138,8 @@ class ConfigurationParser {
   static Maybe<ConfigurationParser> ForPath(const std::string& path);
 
   /** Returns a ConfigurationParser for the configuration in the provided file contents. */
-  static ConfigurationParser ForContents(const std::string& contents) {
-    ConfigurationParser parser{contents};
+  static ConfigurationParser ForContents(const std::string& contents, const std::string& path) {
+    ConfigurationParser parser{contents, path};
     return parser;
   }
 
@@ -168,7 +153,7 @@ class ConfigurationParser {
    * Parses the configuration file and returns the results. If the configuration could not be parsed
    * the result is empty and any errors will be displayed with the provided diagnostics context.
    */
-  Maybe<configuration::PostProcessingConfiguration> Parse();
+  Maybe<std::vector<configuration::OutputArtifact>> Parse(const android::StringPiece& apk_path);
 
  protected:
   /**
@@ -176,40 +161,18 @@ class ConfigurationParser {
    * diagnostics context. The default diagnostics context can be overridden with a call to
    * WithDiagnostics(IDiagnostics *).
    */
-  explicit ConfigurationParser(std::string contents);
+  ConfigurationParser(std::string contents, const std::string& config_path);
 
   /** Returns the current diagnostics context to any subclasses. */
   IDiagnostics* diagnostics() {
     return diag_;
   }
 
-  /**
-   * An ActionHandler for processing XML elements in the XmlActionExecutor. Returns true if the
-   * element was successfully processed, otherwise returns false.
-   */
-  using ActionHandler = std::function<bool(configuration::PostProcessingConfiguration* config,
-                                           xml::Element* element, IDiagnostics* diag)>;
-
-  /** Handler for <artifact> tags. */
-  static ActionHandler artifact_handler_;
-  /** Handler for <artifact-format> tags. */
-  static ActionHandler artifact_format_handler_;
-  /** Handler for <abi-group> tags. */
-  static ActionHandler abi_group_handler_;
-  /** Handler for <screen-density-group> tags. */
-  static ActionHandler screen_density_group_handler_;
-  /** Handler for <locale-group> tags. */
-  static ActionHandler locale_group_handler_;
-  /** Handler for <android-sdk-group> tags. */
-  static ActionHandler android_sdk_group_handler_;
-  /** Handler for <gl-texture-group> tags. */
-  static ActionHandler gl_texture_group_handler_;
-  /** Handler for <device-feature-group> tags. */
-  static ActionHandler device_feature_group_handler_;
-
  private:
   /** The contents of the configuration file to parse. */
   const std::string contents_;
+  /** Path to the input configuration. */
+  const std::string config_path_;
   /** The diagnostics context to send messages to. */
   IDiagnostics* diag_;
 };

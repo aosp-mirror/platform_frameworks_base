@@ -38,13 +38,9 @@ class IConfigFilter {
 };
 
 /**
- * Implements config axis matching. An axis is one component of a configuration,
- * like screen
- * density or locale. If an axis is specified in the filter, and the axis is
- * specified in
- * the configuration to match, they must be compatible. Otherwise the
- * configuration to match is
- * accepted.
+ * Implements config axis matching. An axis is one component of a configuration, like screen density
+ * or locale. If an axis is specified in the filter, and the axis is specified in the configuration
+ * to match, they must be compatible. Otherwise the configuration to match is accepted.
  *
  * Used when handling "-c" options.
  */

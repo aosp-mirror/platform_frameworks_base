@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
 
@@ -105,5 +106,31 @@ final class IntentBindRecord {
         }
         sb.append('}');
         return stringName = sb.toString();
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        long token = proto.start(fieldId);
+        if (intent != null) {
+            intent.getIntent().writeToProto(proto,
+                    IntentBindRecordProto.INTENT, false, true, false, false);
+        }
+        if (binder != null) {
+            proto.write(IntentBindRecordProto.BINDER, binder.toString());
+        }
+        proto.write(IntentBindRecordProto.AUTO_CREATE,
+                (collectFlags()&Context.BIND_AUTO_CREATE) != 0);
+        proto.write(IntentBindRecordProto.REQUESTED, requested);
+        proto.write(IntentBindRecordProto.RECEIVED, received);
+        proto.write(IntentBindRecordProto.HAS_BOUND, hasBound);
+        proto.write(IntentBindRecordProto.DO_REBIND, doRebind);
+
+        final int N = apps.size();
+        for (int i=0; i<N; i++) {
+            AppBindRecord a = apps.valueAt(i);
+            if (a != null) {
+                a.writeToProto(proto, IntentBindRecordProto.APPS);
+            }
+        }
+        proto.end(token);
     }
 }

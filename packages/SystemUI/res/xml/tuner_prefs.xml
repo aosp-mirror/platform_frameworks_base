@@ -105,13 +105,6 @@
         android:title="@string/volume_and_do_not_disturb">
 
         <!-- Action for this is
-             MetricsConstants.ACTION_TUNER_DO_NOT_DISTURB_VOLUME_PANEL -->
-        <com.android.systemui.tuner.TunerSwitch
-            android:key="sysui_show_full_zen"
-            android:title="@string/tuner_full_zen_title"
-            sysui:metricsAction="314" />
-
-        <!-- Action for this is
              MetricsConstants.ACTION_TUNER_DO_NOT_DISTURB_VOLUME_SHORTCUT -->
         <com.android.systemui.tuner.TunerSwitch
             android:key="sysui_volume_down_silent,sysui_volume_up_silent"

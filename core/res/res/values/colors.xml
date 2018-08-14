@@ -33,11 +33,16 @@
          a light UI more visible. -->
     <drawable name="screen_background_light_transparent">#80ffffff</drawable>
     <color name="safe_mode_text">#80ffffff</color>
+    <!-- The color white, equivalent to 0xffffffff -->
     <color name="white">#ffffffff</color>
+    <!-- The color black, equivalent to 0xff000000 -->
     <color name="black">#ff000000</color>
     <color name="red">#ffff0000</color>
+    <!-- Fully transparent, equivalent to 0x00000000 -->
     <color name="transparent">#00000000</color>
+    <!-- Equivalent to 0xff000000 -->
     <color name="background_dark">#ff000000</color>
+    <!-- Equivalent to 0xffffffff -->
     <color name="background_light">#ffffffff</color>
     <color name="bright_foreground_dark">@android:color/background_light</color>
     <color name="bright_foreground_light">@android:color/background_dark</color>
@@ -73,13 +78,14 @@
     <drawable name="editbox_dropdown_light_frame">@drawable/editbox_dropdown_background</drawable>
 
     <drawable name="input_method_fullscreen_background">#fff9f9f9</drawable>
-    <color name="input_method_navigation_guard">#ff000000</color>
+    <color name="decor_view_status_guard">#ff000000</color>
 
     <!-- For date picker widget -->
     <drawable name="selected_day_background">#ff0092f4</drawable>
 
     <!-- For settings framework -->
     <color name="lighter_gray">#ddd</color>
+    <!-- A dark gray, equivalent to 0xffaaaaaa -->
     <color name="darker_gray">#aaa</color>
 
     <!-- For security permissions -->
@@ -130,18 +136,19 @@
     <drawable name="notification_template_divider_media">#29ffffff</drawable>
     <color name="notification_primary_text_color_light">@color/primary_text_default_material_light</color>
     <color name="notification_primary_text_color_dark">@color/primary_text_default_material_dark</color>
-    <color name="notification_secondary_text_color_light">@color/secondary_text_material_light</color>
-    <color name="notification_secondary_text_color_dark">@color/secondary_text_material_dark</color>
+    <color name="notification_secondary_text_color_light">@color/primary_text_default_material_light</color>
+    <item name="notification_secondary_text_disabled_alpha" format="float" type="dimen">0.38</item>
+    <color name="notification_secondary_text_color_dark">@color/primary_text_default_material_dark</color>
+    <color name="notification_default_color_dark">@color/primary_text_default_material_light</color>
+    <color name="notification_default_color_light">#a3202124</color>
 
     <color name="notification_material_background_color">#ffffffff</color>
 
     <color name="notification_default_color">#757575</color> <!-- Gray 600 -->
-    <color name="notification_icon_default_color">@color/notification_default_color</color>
 
     <color name="notification_progress_background_color">@color/secondary_text_material_light</color>
 
     <color name="notification_action_list">#ffeeeeee</color>
-    <color name="notification_action_list_dark">#ffe0e0e0</color>
 
     <!-- Keyguard colors -->
     <color name="keyguard_avatar_frame_color">#ffffffff</color>
@@ -167,12 +174,12 @@
     <color name="user_icon_default_white">#ffffffff</color><!-- white -->
 
     <!-- Default profile badge colors -->
-    <color name="profile_badge_1">#ffff6d00</color><!-- Orange -->
-    <color name="profile_badge_2">#ff000000</color><!-- Black -->
+    <color name="profile_badge_1">#ff1A73E8</color><!-- Blue -->
+    <color name="profile_badge_2">#ffff6d00</color><!-- Orange -->
     <color name="profile_badge_3">#ff22f033</color><!-- Green -->
 
     <!-- Default instant app badge color -->
-    <color name="instant_app_badge">#FFFFFFFF</color><!-- White -->
+    <color name="instant_app_badge">#ff757575</color><!-- Grey -->
 
     <!-- Multi-sim sim colors -->
     <color name="Teal_700">#ff00796b</color>

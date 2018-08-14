@@ -73,8 +73,11 @@
     <!-- Vibration duration for GlowPadView used in SearchPanelView -->
     <integer translatable="false" name="config_search_panel_view_vibration_duration">20</integer>
 
+    <!-- Show mic or phone affordance on Keyguard -->
+    <bool name="config_keyguardShowLeftAffordance">false</bool>
+
     <!-- Show camera affordance on Keyguard -->
-    <bool name="config_keyguardShowCameraAffordance">true</bool>
+    <bool name="config_keyguardShowCameraAffordance">false</bool>
 
     <!-- Whether we should use SRC drawing mode when drawing the scrim behind. If this flag is set,
          we change the canvas opacity so libhwui doesn't call glClear on our surface, and then we
@@ -90,7 +93,16 @@
     <integer name="navigation_bar_deadzone_hold">333</integer>
     <integer name="navigation_bar_deadzone_decay">333</integer>
 
+    <!-- orientation of the dead zone when touches have recently occurred elsewhere on screen -->
+    <integer name="navigation_bar_deadzone_orientation">0</integer>
+
     <bool name="config_dead_zone_flash">false</bool>
+
+    <!-- Whether to enable dimming navigation buttons when wallpaper is not visible, should be
+         enabled for OLED devices to reduce/prevent burn in on the navigation bar (because of the
+         black background and static button placements) and disabled for all other devices to
+         prevent wasting cpu cycles on the dimming animation -->
+    <bool name="config_navigation_bar_enable_auto_dim_no_visible_wallpaper">true</bool>
 
     <!-- Whether QuickSettings is in a phone landscape -->
     <bool name="quick_settings_wide">false</bool>
@@ -100,7 +112,6 @@
 
     <!-- The number of rows in the QuickSettings -->
     <integer name="quick_settings_num_rows">1</integer>
-    <integer name="quick_settings_num_rows_portrait">2</integer>
 
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">1</integer>
@@ -169,12 +180,6 @@
 
     <!-- The animation duration for scrolling the stack to a particular item. -->
     <integer name="recents_animate_task_stack_scroll_duration">200</integer>
-
-    <!-- The animation duration for scrolling the stack to a particular item. -->
-    <integer name="recents_auto_advance_duration">750</integer>
-
-    <!-- The animation duration for subsequent scrolling the stack to a particular item. -->
-    <integer name="recents_subsequent_auto_advance_duration">1000</integer>
 
     <!-- The delay to enforce between each alt-tab key press. -->
     <integer name="recents_alt_tab_key_delay">200</integer>
@@ -256,10 +261,7 @@
     <string name="doze_brightness_sensor_type" translatable="false"></string>
 
     <!-- Doze: pulse parameter - how long does it take to fade in? -->
-    <integer name="doze_pulse_duration_in">900</integer>
-
-    <!-- Doze: pulse parameter - how long does it take to fade in after a pickup? -->
-    <integer name="doze_pulse_duration_in_pickup">130</integer>
+    <integer name="doze_pulse_duration_in">130</integer>
 
     <!-- Doze: pulse parameter - once faded in, how long does it stay visible? -->
     <integer name="doze_pulse_duration_visible">6000</integer>
@@ -310,6 +312,12 @@
     <!-- Enable the default volume dialog -->
     <bool name="enable_volume_ui">true</bool>
 
+    <!-- Enable the default volume level warning dialog -->
+    <bool name="enable_safety_warning">true</bool>
+
+    <!-- Whether to show operator name in the status bar -->
+    <bool name="config_showOperatorNameInStatusBar">false</bool>
+
     <!-- Duration of the full carrier network change icon animation. -->
     <integer name="carrier_network_change_anim_time">3000</integer>
 
@@ -322,8 +330,44 @@
     <!-- SystemUIFactory component -->
     <string name="config_systemUIFactoryComponent" translatable="false">com.android.systemui.SystemUIFactory</string>
 
+    <!-- SystemUI Services: The classes of the stuff to start. -->
+    <string-array name="config_systemUIServiceComponents" translatable="false">
+        <item>com.android.systemui.Dependency</item>
+        <item>com.android.systemui.util.NotificationChannels</item>
+        <item>com.android.systemui.statusbar.CommandQueue$CommandQueueStart</item>
+        <item>com.android.systemui.keyguard.KeyguardViewMediator</item>
+        <item>com.android.systemui.recents.Recents</item>
+        <item>com.android.systemui.volume.VolumeUI</item>
+        <item>com.android.systemui.stackdivider.Divider</item>
+        <item>com.android.systemui.SystemBars</item>
+        <item>com.android.systemui.usb.StorageNotification</item>
+        <item>com.android.systemui.power.PowerUI</item>
+        <item>com.android.systemui.media.RingtonePlayer</item>
+        <item>com.android.systemui.keyboard.KeyboardUI</item>
+        <item>com.android.systemui.pip.PipUI</item>
+        <item>com.android.systemui.shortcut.ShortcutKeyDispatcher</item>
+        <item>@string/config_systemUIVendorServiceComponent</item>
+        <item>com.android.systemui.util.leak.GarbageMonitor$Service</item>
+        <item>com.android.systemui.LatencyTester</item>
+        <item>com.android.systemui.globalactions.GlobalActionsComponent</item>
+        <item>com.android.systemui.ScreenDecorations</item>
+        <item>com.android.systemui.fingerprint.FingerprintDialogImpl</item>
+        <item>com.android.systemui.SliceBroadcastRelayHandler</item>
+    </string-array>
+
+    <!-- SystemUI vender service, used in config_systemUIServiceComponents. -->
+    <string name="config_systemUIVendorServiceComponent" translatable="false">com.android.systemui.VendorServices</string>
+
+    <!-- SystemUI Services (per user): The classes of the stuff to start for each user. This is a subset of the config_systemUIServiceComponents -->
+    <string-array name="config_systemUIServiceComponentsPerUser" translatable="false">
+        <item>com.android.systemui.Dependency</item>
+        <item>com.android.systemui.util.NotificationChannels</item>
+        <item>com.android.systemui.recents.Recents</item>
+    </string-array>
+
     <!-- Nav bar button default ordering/layout -->
     <string name="config_navBarLayout" translatable="false">left[.5W],back[1WC];home;recent[1WC],right[.5W]</string>
+    <string name="config_navBarLayoutQuickstep" translatable="false">back[1.7WC];home;contextual[1.7WC]</string>
 
     <bool name="quick_settings_show_full_alarm">false</bool>
 
@@ -331,7 +375,7 @@
     <integer name="config_showTemperatureWarning">0</integer>
 
     <!-- Temp at which to show a warning notification if config_showTemperatureWarning is true.
-         If < 0, uses the value from
+         If < 0, uses the skin temperature sensor shutdown value from
          HardwarePropertiesManager#getDeviceTemperatures - config_warningTemperatureTolerance. -->
     <integer name="config_warningTemperature">-1</integer>
 
@@ -342,6 +386,8 @@
     <item type="id" name="action_split_task_to_left" />
     <item type="id" name="action_split_task_to_right" />
     <item type="id" name="action_split_task_to_top" />
+
+    <item type="id" name="action_toggle_overview"/>
 
     <!-- Whether or not the gear icon on notifications should be shown. The gear is shown when the
          the notification is not swiped enough to dismiss it. -->
@@ -435,4 +481,22 @@
         <item>60</item>
         <item>120</item>
     </integer-array>
+
+    <!-- Smart replies in notifications: Whether smart replies in notifications are enabled. -->
+    <bool name="config_smart_replies_in_notifications_enabled">true</bool>
+
+    <!-- Smart replies in notifications: Whether we disable the feature unless the app targets P -->
+    <bool name="config_smart_replies_in_notifications_requires_targeting_p">true</bool>
+
+    <!-- Smart replies in notifications: Maximum number of times SmartReplyView will try to find a
+         better (narrower) line-break for a double-line smart reply button. -->
+    <integer name="config_smart_replies_in_notifications_max_squeeze_remeasure_attempts">3</integer>
+
+    <!-- Screenshot editing default activity.  Must handle ACTION_EDIT image/png intents.
+         Blank sends the user to the Chooser first.
+         This name is in the ComponentName flattened format (package/class)  -->
+    <string name="config_screenshotEditor" translatable="false"></string>
+
+    <!-- On debuggable builds, alert the user if SystemUI PSS goes over this number (in kb) -->
+    <integer name="watch_heap_limit">256000</integer>
 </resources>

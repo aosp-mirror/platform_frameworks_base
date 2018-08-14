@@ -18,11 +18,20 @@ package android.net.wifi.aware;
 
 /**
  * Opaque object used to represent a Wi-Fi Aware peer. Obtained from discovery sessions in
- * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle, byte[], java.util.List)}, used
- * when sending messages e,g, {@link DiscoverySession#sendMessage(PeerHandle, int, byte[])},
+ * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle, byte[], java.util.List)} or
+ * received messages in {@link DiscoverySessionCallback#onMessageReceived(PeerHandle, byte[])}, and
+ * used when sending messages e,g, {@link DiscoverySession#sendMessage(PeerHandle, int, byte[])},
  * or when configuring a network link to a peer, e.g.
  * {@link DiscoverySession#createNetworkSpecifierOpen(PeerHandle)} or
  * {@link DiscoverySession#createNetworkSpecifierPassphrase(PeerHandle, String)}.
+ * <p>
+ * Note that while a {@code PeerHandle} can be used to track a particular peer (i.e. you can compare
+ * the values received from subsequent messages) - it is good practice not to rely on it. Instead
+ * use an application level peer identifier encoded in the message,
+ * {@link DiscoverySession#sendMessage(PeerHandle, int, byte[])}, and/or in the Publish
+ * configuration's service-specific information field,
+ * {@link PublishConfig.Builder#setServiceSpecificInfo(byte[])}, or match filter,
+ * {@link PublishConfig.Builder#setMatchFilter(java.util.List)}.
  */
 public class PeerHandle {
     /** @hide */

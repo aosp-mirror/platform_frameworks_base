@@ -18,7 +18,9 @@
 
 #include "test/Test.h"
 
-using android::ResTable_map;
+using ::android::ResTable_map;
+using ::testing::Eq;
+using ::testing::IsNull;
 using ::testing::NotNull;
 
 namespace aapt {
@@ -263,7 +265,7 @@ TEST(ReferenceLinkerTest, AppsWithSamePackageButDifferentIdAreVisibleNonPublic) 
                          .Build());
 
   std::string error;
-  const CallSite call_site{ResourceNameRef("com.app.test", ResourceType::kString, "foo")};
+  const CallSite call_site{"com.app.test"};
   const SymbolTable::Symbol* symbol = ReferenceLinker::ResolveSymbolCheckVisibility(
       *test::BuildReference("com.app.test:string/foo"), call_site, &table, &error);
   ASSERT_THAT(symbol, NotNull());
@@ -281,7 +283,7 @@ TEST(ReferenceLinkerTest, AppsWithDifferentPackageCanNotUseEachOthersAttribute) 
                          .Build());
 
   std::string error;
-  const CallSite call_site{ResourceNameRef("com.app.ext", ResourceType::kLayout, "foo")};
+  const CallSite call_site{"com.app.ext"};
 
   EXPECT_FALSE(ReferenceLinker::CompileXmlAttribute(
       *test::BuildReference("com.app.test:attr/foo"), call_site, &table, &error));
@@ -291,6 +293,29 @@ TEST(ReferenceLinkerTest, AppsWithDifferentPackageCanNotUseEachOthersAttribute) 
   ASSERT_TRUE(ReferenceLinker::CompileXmlAttribute(
       *test::BuildReference("com.app.test:attr/public_foo"), call_site, &table, &error));
   EXPECT_TRUE(error.empty());
+}
+
+TEST(ReferenceLinkerTest, ReferenceWithNoPackageUsesCallSitePackage) {
+  NameMangler mangler(NameManglerPolicy{"com.app.test"});
+  SymbolTable table(&mangler);
+  table.AppendSource(test::StaticSymbolSourceBuilder()
+                         .AddSymbol("com.app.test:string/foo", ResourceId(0x7f010000))
+                         .AddSymbol("com.app.lib:string/foo", ResourceId(0x7f010001))
+                         .Build());
+
+  const SymbolTable::Symbol* s = ReferenceLinker::ResolveSymbol(*test::BuildReference("string/foo"),
+                                                                CallSite{"com.app.test"}, &table);
+  ASSERT_THAT(s, NotNull());
+  EXPECT_THAT(s->id, Eq(make_value<ResourceId>(0x7f010000)));
+
+  s = ReferenceLinker::ResolveSymbol(*test::BuildReference("string/foo"), CallSite{"com.app.lib"},
+                                     &table);
+  ASSERT_THAT(s, NotNull());
+  EXPECT_THAT(s->id, Eq(make_value<ResourceId>(0x7f010001)));
+
+  EXPECT_THAT(ReferenceLinker::ResolveSymbol(*test::BuildReference("string/foo"),
+                                             CallSite{"com.app.bad"}, &table),
+              IsNull());
 }
 
 }  // namespace aapt

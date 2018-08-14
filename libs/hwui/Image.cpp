@@ -25,11 +25,11 @@ namespace uirenderer {
 Image::Image(sp<GraphicBuffer> buffer) {
     // Create the EGLImage object that maps the GraphicBuffer
     EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    EGLClientBuffer clientBuffer = (EGLClientBuffer) buffer->getNativeBuffer();
-    EGLint attrs[] = { EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE };
+    EGLClientBuffer clientBuffer = (EGLClientBuffer)buffer->getNativeBuffer();
+    EGLint attrs[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE};
 
-    mImage = eglCreateImageKHR(display, EGL_NO_CONTEXT,
-            EGL_NATIVE_BUFFER_ANDROID, clientBuffer, attrs);
+    mImage = eglCreateImageKHR(display, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID, clientBuffer,
+                               attrs);
 
     if (mImage == EGL_NO_IMAGE_KHR) {
         ALOGW("Error creating image (%#x)", eglGetError());
@@ -57,5 +57,5 @@ Image::~Image() {
     }
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

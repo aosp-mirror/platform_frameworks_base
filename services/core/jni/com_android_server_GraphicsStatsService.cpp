@@ -39,7 +39,7 @@ static jlong createDump(JNIEnv*, jobject, jint fd, jboolean isProto) {
 }
 
 static void addToDump(JNIEnv* env, jobject, jlong dumpPtr, jstring jpath, jstring jpackage,
-        jint versionCode, jlong startTime, jlong endTime, jbyteArray jdata) {
+        jlong versionCode, jlong startTime, jlong endTime, jbyteArray jdata) {
     std::string path;
     const ProfileData* data = nullptr;
     LOG_ALWAYS_FATAL_IF(jdata == nullptr && jpath == nullptr, "Path and data can't both be null");
@@ -78,7 +78,7 @@ static void finishDump(JNIEnv*, jobject, jlong dumpPtr) {
 }
 
 static void saveBuffer(JNIEnv* env, jobject clazz, jstring jpath, jstring jpackage,
-        jint versionCode, jlong startTime, jlong endTime, jbyteArray jdata) {
+        jlong versionCode, jlong startTime, jlong endTime, jbyteArray jdata) {
     ScopedByteArrayRO buffer(env, jdata);
     LOG_ALWAYS_FATAL_IF(buffer.size() != sizeof(ProfileData),
             "Buffer size %zu doesn't match expected %zu!", buffer.size(), sizeof(ProfileData));
@@ -96,10 +96,10 @@ static void saveBuffer(JNIEnv* env, jobject clazz, jstring jpath, jstring jpacka
 static const JNINativeMethod sMethods[] = {
     { "nGetAshmemSize", "()I", (void*) getAshmemSize },
     { "nCreateDump", "(IZ)J", (void*) createDump },
-    { "nAddToDump", "(JLjava/lang/String;Ljava/lang/String;IJJ[B)V", (void*) addToDump },
+    { "nAddToDump", "(JLjava/lang/String;Ljava/lang/String;JJJ[B)V", (void*) addToDump },
     { "nAddToDump", "(JLjava/lang/String;)V", (void*) addFileToDump },
     { "nFinishDump", "(J)V", (void*) finishDump },
-    { "nSaveBuffer", "(Ljava/lang/String;Ljava/lang/String;IJJ[B)V", (void*) saveBuffer },
+    { "nSaveBuffer", "(Ljava/lang/String;Ljava/lang/String;JJJ[B)V", (void*) saveBuffer },
 };
 
 int register_android_server_GraphicsStatsService(JNIEnv* env)

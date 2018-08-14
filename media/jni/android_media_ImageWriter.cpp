@@ -25,11 +25,14 @@
 #include <gui/Surface.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_Surface.h>
+#include <android_runtime/android_hardware_HardwareBuffer.h>
+#include <private/android/AHardwareBufferHelpers.h>
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
 
 #include <stdint.h>
 #include <inttypes.h>
+#include <android/hardware_buffer_jni.h>
 
 #define IMAGE_BUFFER_JNI_ID           "mNativeBuffer"
 #define IMAGE_FORMAT_UNKNOWN          0 // This is the same value as ImageFormat#UNKNOWN.
@@ -249,7 +252,14 @@ static jlong ImageWriter_init(JNIEnv* env, jobject thiz, jobject weakThiz, jobje
      * after disconnect. MEDIA or CAMERA are treated the same internally. The producer listener
      * will be cleared after disconnect call.
      */
-    producer->connect(/*api*/NATIVE_WINDOW_API_CAMERA, /*listener*/ctx);
+    res = producer->connect(/*api*/NATIVE_WINDOW_API_CAMERA, /*listener*/ctx);
+    if (res != OK) {
+        ALOGE("%s: Connecting to surface producer interface failed: %s (%d)",
+                __FUNCTION__, strerror(-res), res);
+        jniThrowRuntimeException(env, "Failed to connect to native window");
+        return 0;
+    }
+
     jlong nativeCtx = reinterpret_cast<jlong>(ctx.get());
 
     // Get the dimension and format of the producer.
@@ -421,7 +431,8 @@ static void ImageWriter_cancelImage(JNIEnv* env, jobject thiz, jlong nativeCtx, 
 }
 
 static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, jobject image,
-        jlong timestampNs, jint left, jint top, jint right, jint bottom) {
+        jlong timestampNs, jint left, jint top, jint right, jint bottom, jint transform,
+        jint scalingMode) {
     ALOGV("%s", __FUNCTION__);
     JNIImageWriterContext* const ctx = reinterpret_cast<JNIImageWriterContext *>(nativeCtx);
     if (ctx == NULL || thiz == NULL) {
@@ -465,6 +476,18 @@ static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, j
         return;
     }
 
+    res = native_window_set_buffers_transform(anw.get(), transform);
+    if (res != OK) {
+        jniThrowRuntimeException(env, "Set transform failed");
+        return;
+    }
+
+    res = native_window_set_scaling_mode(anw.get(), scalingMode);
+    if (res != OK) {
+        jniThrowRuntimeException(env, "Set scaling mode failed");
+        return;
+    }
+
     // Finally, queue input buffer
     res = anw->queueBuffer(anw.get(), buffer, fenceFd);
     if (res != OK) {
@@ -487,7 +510,7 @@ static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, j
 
 static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nativeCtx,
         jlong nativeBuffer, jint imageFormat, jlong timestampNs, jint left, jint top,
-        jint right, jint bottom) {
+        jint right, jint bottom, jint transform, jint scalingMode) {
     ALOGV("%s", __FUNCTION__);
     JNIImageWriterContext* const ctx = reinterpret_cast<JNIImageWriterContext *>(nativeCtx);
     if (ctx == NULL || thiz == NULL) {
@@ -530,8 +553,8 @@ static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nat
     }
     sp < ANativeWindow > anw = surface;
 
-    // Step 2. Set timestamp and crop. Note that we do not need unlock the image because
-    // it was not locked.
+    // Step 2. Set timestamp, crop, transform and scaling mode. Note that we do not need unlock the
+    // image because it was not locked.
     ALOGV("timestamp to be queued: %" PRId64, timestampNs);
     res = native_window_set_buffers_timestamp(anw.get(), timestampNs);
     if (res != OK) {
@@ -547,6 +570,18 @@ static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nat
     res = native_window_set_crop(anw.get(), &cropRect);
     if (res != OK) {
         jniThrowRuntimeException(env, "Set crop rect failed");
+        return res;
+    }
+
+    res = native_window_set_buffers_transform(anw.get(), transform);
+    if (res != OK) {
+        jniThrowRuntimeException(env, "Set transform failed");
+        return res;
+    }
+
+    res = native_window_set_scaling_mode(anw.get(), scalingMode);
+    if (res != OK) {
+        jniThrowRuntimeException(env, "Set scaling mode failed");
         return res;
     }
 
@@ -676,6 +711,20 @@ static jint Image_getFormat(JNIEnv* env, jobject thiz) {
     return static_cast<jint>(publicFmt);
 }
 
+static jobject Image_getHardwareBuffer(JNIEnv* env, jobject thiz) {
+    GraphicBuffer* buffer;
+    Image_getNativeContext(env, thiz, &buffer, NULL);
+    if (buffer == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Image is not initialized");
+        return NULL;
+    }
+    AHardwareBuffer* b = AHardwareBuffer_from_GraphicBuffer(buffer);
+    // don't user the public AHardwareBuffer_toHardwareBuffer() because this would force us
+    // to link against libandroid.so
+    return android_hardware_HardwareBuffer_createFromAHardwareBuffer(env, b);
+}
+
 static void Image_setFenceFd(JNIEnv* env, jobject thiz, int fenceFd) {
     ALOGV("%s:", __FUNCTION__);
     env->SetIntField(thiz, gSurfaceImageClassInfo.mNativeFenceFd, reinterpret_cast<jint>(fenceFd));
@@ -785,18 +834,20 @@ static JNINativeMethod gImageWriterMethods[] = {
     {"nativeInit",              "(Ljava/lang/Object;Landroid/view/Surface;II)J",
                                                               (void*)ImageWriter_init },
     {"nativeClose",              "(J)V",                      (void*)ImageWriter_close },
-    {"nativeAttachAndQueueImage", "(JJIJIIII)I",          (void*)ImageWriter_attachAndQueueImage },
+    {"nativeAttachAndQueueImage", "(JJIJIIIIII)I",          (void*)ImageWriter_attachAndQueueImage },
     {"nativeDequeueInputImage", "(JLandroid/media/Image;)V",  (void*)ImageWriter_dequeueImage },
-    {"nativeQueueInputImage",   "(JLandroid/media/Image;JIIII)V",  (void*)ImageWriter_queueImage },
+    {"nativeQueueInputImage",   "(JLandroid/media/Image;JIIIIII)V",  (void*)ImageWriter_queueImage },
     {"cancelImage",             "(JLandroid/media/Image;)V",   (void*)ImageWriter_cancelImage },
 };
 
 static JNINativeMethod gImageMethods[] = {
     {"nativeCreatePlanes",      "(II)[Landroid/media/ImageWriter$WriterSurfaceImage$SurfacePlane;",
-                                                              (void*)Image_createSurfacePlanes },
-    {"nativeGetWidth",         "()I",                         (void*)Image_getWidth },
-    {"nativeGetHeight",        "()I",                         (void*)Image_getHeight },
-    {"nativeGetFormat",        "()I",                         (void*)Image_getFormat },
+                                                               (void*)Image_createSurfacePlanes },
+    {"nativeGetWidth",          "()I",                         (void*)Image_getWidth },
+    {"nativeGetHeight",         "()I",                         (void*)Image_getHeight },
+    {"nativeGetFormat",         "()I",                         (void*)Image_getFormat },
+    {"nativeGetHardwareBuffer", "()Landroid/hardware/HardwareBuffer;",
+                                                               (void*)Image_getHardwareBuffer },
 };
 
 int register_android_media_ImageWriter(JNIEnv *env) {

@@ -28,6 +28,7 @@ message ResultsBundleEntry {
     optional double value_double = 5;
     optional sint64 value_long = 6;
     optional ResultsBundle value_bundle = 7;
+    optional bytes value_bytes = 8;
 }
 
 message ResultsBundle {

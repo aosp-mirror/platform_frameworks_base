@@ -16,4 +16,5 @@
   -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <solid android:color="@color/qs_background_dark" />
+    <corners android:radius="8dp" />
 </shape>

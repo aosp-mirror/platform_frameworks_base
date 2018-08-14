@@ -142,7 +142,7 @@ public class TooltipPopup {
         mTmpAnchorPos[1] -= mTmpAppPos[1];
         // mTmpAnchorPos is now relative to the main app window.
 
-        outParams.x = mTmpAnchorPos[0] + offsetX - mTmpDisplayFrame.width() / 2;
+        outParams.x = mTmpAnchorPos[0] + offsetX - appView.getWidth() / 2;
 
         final int spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
         mContentView.measure(spec, spec);
@@ -157,6 +157,9 @@ public class TooltipPopup {
                 outParams.y = yBelow;
             }
         } else {
+            // Use mTmpDisplayFrame.height() as the lower boundary instead of appView.getHeight(),
+            // as the latter includes the navigation bar, and tooltips do not look good over
+            // the navigation bar.
             if (yBelow + tooltipHeight <= mTmpDisplayFrame.height()) {
                 outParams.y = yBelow;
             } else {

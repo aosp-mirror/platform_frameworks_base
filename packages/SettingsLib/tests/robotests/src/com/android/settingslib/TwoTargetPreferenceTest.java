@@ -16,34 +16,32 @@
 
 package com.android.settingslib;
 
+import static com.android.settingslib.TwoTargetPreference.ICON_SIZE_DEFAULT;
+import static com.android.settingslib.TwoTargetPreference.ICON_SIZE_MEDIUM;
+import static com.android.settingslib.TwoTargetPreference.ICON_SIZE_SMALL;
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+
 import android.content.Context;
 import android.support.v7.preference.PreferenceViewHolder;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@RunWith(SettingLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 public class TwoTargetPreferenceTest {
 
     private PreferenceViewHolder mViewHolder;
-    @Mock
     private View mDivider;
-    @Mock
     private View mWidgetFrame;
+    private View mRootView;
     private TwoTargetPreference mPreference;
     private Context mContext;
 
@@ -52,11 +50,11 @@ public class TwoTargetPreferenceTest {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
         mPreference = spy(new TwoTargetPreference(mContext));
-        mViewHolder = PreferenceViewHolder.createInstanceForTests(mock(View.class));
-        when(mViewHolder.findViewById(R.id.two_target_divider))
-                .thenReturn(mDivider);
-        when(mViewHolder.findViewById(android.R.id.widget_frame))
-                .thenReturn(mWidgetFrame);
+        mRootView = View.inflate(mContext, R.layout.preference_two_target, null /* parent */);
+        mViewHolder = PreferenceViewHolder.createInstanceForTests(mRootView);
+
+        mDivider = mViewHolder.findViewById(R.id.two_target_divider);
+        mWidgetFrame = mViewHolder.findViewById(android.R.id.widget_frame);
     }
 
     @Test
@@ -65,8 +63,8 @@ public class TwoTargetPreferenceTest {
 
         mPreference.onBindViewHolder(mViewHolder);
 
-        verify(mDivider).setVisibility(View.GONE);
-        verify(mWidgetFrame).setVisibility(View.GONE);
+        assertThat(mDivider.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mWidgetFrame.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
@@ -75,7 +73,53 @@ public class TwoTargetPreferenceTest {
 
         mPreference.onBindViewHolder(mViewHolder);
 
-        verify(mDivider).setVisibility(View.VISIBLE);
-        verify(mWidgetFrame).setVisibility(View.VISIBLE);
+        assertThat(mDivider.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mWidgetFrame.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void bind_smallIcon_shouldUseSmallIconSize() {
+        mPreference.setIconSize(ICON_SIZE_SMALL);
+
+        mPreference.onBindViewHolder(mViewHolder);
+
+        final int smallIconSize = mContext.getResources().getDimensionPixelSize(
+                R.dimen.two_target_pref_small_icon_size);
+        final LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mViewHolder
+                .findViewById(android.R.id.icon)
+                .getLayoutParams();
+
+        assertThat(layoutParams.width).isEqualTo(smallIconSize);
+        assertThat(layoutParams.height).isEqualTo(smallIconSize);
+    }
+
+    @Test
+    public void bind_mediumIcon_shouldUseMediumIconSize() {
+        mPreference.setIconSize(ICON_SIZE_MEDIUM);
+
+        mPreference.onBindViewHolder(mViewHolder);
+
+        final int size = mContext.getResources().getDimensionPixelSize(
+                R.dimen.two_target_pref_medium_icon_size);
+        final LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mViewHolder
+                .findViewById(android.R.id.icon)
+                .getLayoutParams();
+
+        assertThat(layoutParams.width).isEqualTo(size);
+        assertThat(layoutParams.height).isEqualTo(size);
+    }
+
+    @Test
+    public void bind_defaultIcon_shouldUseDefaultIconSize() {
+        mPreference.setIconSize(ICON_SIZE_DEFAULT);
+
+        mPreference.onBindViewHolder(mViewHolder);
+
+        final LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mViewHolder
+                .findViewById(android.R.id.icon)
+                .getLayoutParams();
+
+        assertThat(layoutParams.width).isEqualTo(ViewGroup.LayoutParams.WRAP_CONTENT);
+        assertThat(layoutParams.height).isEqualTo(ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 }

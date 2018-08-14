@@ -18,24 +18,25 @@
 
 #include "Caches.h"
 #include "DeviceInfo.h"
+#include "Outline.h"
 #include "Rect.h"
 #include "RevealClip.h"
-#include "Outline.h"
 #include "utils/MathUtils.h"
 #include "utils/PaintUtils.h"
 
 #include <SkBlendMode.h>
 #include <SkCamera.h>
+#include <SkColor.h>
 #include <SkMatrix.h>
 #include <SkRegion.h>
 
-#include <algorithm>
-#include <stddef.h>
-#include <vector>
-#include <cutils/compiler.h>
 #include <androidfw/ResourceTypes.h>
+#include <cutils/compiler.h>
+#include <stddef.h>
 #include <utils/Log.h>
+#include <algorithm>
 #include <ostream>
+#include <vector>
 
 class SkBitmap;
 class SkColorFilter;
@@ -55,15 +56,14 @@ class RenderProperties;
 // Keep in sync with View.java:LAYER_TYPE_*
 enum class LayerType {
     None = 0,
-    // Although we cannot build the software layer directly (must be done at
-    // record time), this information is used when applying alpha.
+    // We cannot build the software layer directly (must be done at record time) and all management
+    // of software layers is handled in Java.
     Software = 1,
     RenderLayer = 2,
-    // TODO: LayerTypeSurfaceTexture? Maybe?
 };
 
 enum ClippingFlags {
-    CLIP_TO_BOUNDS =      0x1 << 0,
+    CLIP_TO_BOUNDS = 0x1 << 0,
     CLIP_TO_CLIP_BOUNDS = 0x1 << 1,
 };
 
@@ -77,43 +77,27 @@ public:
         return false;
     }
 
-    bool setOpaque(bool opaque) {
-        return RP_SET(mOpaque, opaque);
-    }
+    bool setOpaque(bool opaque) { return RP_SET(mOpaque, opaque); }
 
-    bool opaque() const {
-        return mOpaque;
-    }
+    bool opaque() const { return mOpaque; }
 
-    bool setAlpha(uint8_t alpha) {
-        return RP_SET(mAlpha, alpha);
-    }
+    bool setAlpha(uint8_t alpha) { return RP_SET(mAlpha, alpha); }
 
-    uint8_t alpha() const {
-        return mAlpha;
-    }
+    uint8_t alpha() const { return mAlpha; }
 
-    bool setXferMode(SkBlendMode mode) {
-        return RP_SET(mMode, mode);
-    }
+    bool setXferMode(SkBlendMode mode) { return RP_SET(mMode, mode); }
 
-    SkBlendMode xferMode() const {
-        return mMode;
-    }
+    SkBlendMode xferMode() const { return mMode; }
 
     bool setColorFilter(SkColorFilter* filter);
 
-    SkColorFilter* colorFilter() const {
-        return mColorFilter;
-    }
+    SkColorFilter* colorFilter() const { return mColorFilter; }
 
     // Sets alpha, xfermode, and colorfilter from an SkPaint
     // paint may be NULL, in which case defaults will be set
     bool setFromPaint(const SkPaint* paint);
 
-    bool needsBlending() const {
-        return !opaque() || alpha() < 255;
-    }
+    bool needsBlending() const { return !opaque() || alpha() < 255; }
 
     LayerProperties& operator=(const LayerProperties& other);
 
@@ -123,9 +107,7 @@ private:
     void reset();
 
     // Private since external users should go through properties().effectiveLayerType()
-    LayerType type() const {
-        return mType;
-    }
+    LayerType type() const { return mType; }
 
     friend class RenderProperties;
 
@@ -169,16 +151,17 @@ public:
      */
     bool prepareForFunctorPresence(bool willHaveFunctor, bool ancestorDictatesFunctorsNeedLayer) {
         // parent may have already dictated that a descendant layer is needed
-        bool functorsNeedLayer = ancestorDictatesFunctorsNeedLayer
+        bool functorsNeedLayer =
+                ancestorDictatesFunctorsNeedLayer
 
                 // Round rect clipping forces layer for functors
-                || CC_UNLIKELY(getOutline().willRoundRectClip())
-                || CC_UNLIKELY(getRevealClip().willClip())
+                || CC_UNLIKELY(getOutline().willRoundRectClip()) ||
+                CC_UNLIKELY(getRevealClip().willClip())
 
                 // Complex matrices forces layer, due to stencil clipping
-                || CC_UNLIKELY(getTransformMatrix() && !getTransformMatrix()->isScaleTranslate())
-                || CC_UNLIKELY(getAnimationMatrix() && !getAnimationMatrix()->isScaleTranslate())
-                || CC_UNLIKELY(getStaticMatrix() && !getStaticMatrix()->isScaleTranslate());
+                || CC_UNLIKELY(getTransformMatrix() && !getTransformMatrix()->isScaleTranslate()) ||
+                CC_UNLIKELY(getAnimationMatrix() && !getAnimationMatrix()->isScaleTranslate()) ||
+                CC_UNLIKELY(getStaticMatrix() && !getStaticMatrix()->isScaleTranslate());
 
         mComputedFields.mNeedLayerForFunctors = (willHaveFunctor && functorsNeedLayer);
 
@@ -210,9 +193,7 @@ public:
         return RP_SET(mPrimitiveFields.mProjectionReceiver, shouldReceive);
     }
 
-    bool isProjectionReceiver() const {
-        return mPrimitiveFields.mProjectionReceiver;
-    }
+    bool isProjectionReceiver() const { return mPrimitiveFields.mProjectionReceiver; }
 
     bool setStaticMatrix(const SkMatrix* matrix) {
         delete mStaticMatrix;
@@ -225,9 +206,7 @@ public:
     }
 
     // Can return NULL
-    const SkMatrix* getStaticMatrix() const {
-        return mStaticMatrix;
-    }
+    const SkMatrix* getStaticMatrix() const { return mStaticMatrix; }
 
     bool setAnimationMatrix(const SkMatrix* matrix) {
         delete mAnimationMatrix;
@@ -244,124 +223,85 @@ public:
         return RP_SET(mPrimitiveFields.mAlpha, alpha);
     }
 
-    float getAlpha() const {
-        return mPrimitiveFields.mAlpha;
-    }
+    float getAlpha() const { return mPrimitiveFields.mAlpha; }
 
     bool setHasOverlappingRendering(bool hasOverlappingRendering) {
         return RP_SET(mPrimitiveFields.mHasOverlappingRendering, hasOverlappingRendering);
     }
 
-    bool hasOverlappingRendering() const {
-        return mPrimitiveFields.mHasOverlappingRendering;
-    }
+    bool hasOverlappingRendering() const { return mPrimitiveFields.mHasOverlappingRendering; }
 
     bool setElevation(float elevation) {
         return RP_SET(mPrimitiveFields.mElevation, elevation);
         // Don't dirty matrix/pivot, since they don't respect Z
     }
 
-    float getElevation() const {
-        return mPrimitiveFields.mElevation;
-    }
+    float getElevation() const { return mPrimitiveFields.mElevation; }
 
     bool setTranslationX(float translationX) {
         return RP_SET_AND_DIRTY(mPrimitiveFields.mTranslationX, translationX);
     }
 
-    float getTranslationX() const {
-        return mPrimitiveFields.mTranslationX;
-    }
+    float getTranslationX() const { return mPrimitiveFields.mTranslationX; }
 
     bool setTranslationY(float translationY) {
         return RP_SET_AND_DIRTY(mPrimitiveFields.mTranslationY, translationY);
     }
 
-    float getTranslationY() const {
-        return mPrimitiveFields.mTranslationY;
-    }
+    float getTranslationY() const { return mPrimitiveFields.mTranslationY; }
 
     bool setTranslationZ(float translationZ) {
         return RP_SET(mPrimitiveFields.mTranslationZ, translationZ);
         // mMatrixOrPivotDirty not set, since matrix doesn't respect Z
     }
 
-    float getTranslationZ() const {
-        return mPrimitiveFields.mTranslationZ;
-    }
+    float getTranslationZ() const { return mPrimitiveFields.mTranslationZ; }
 
     // Animation helper
-    bool setX(float value) {
-        return setTranslationX(value - getLeft());
-    }
+    bool setX(float value) { return setTranslationX(value - getLeft()); }
 
     // Animation helper
-    float getX() const {
-        return getLeft() + getTranslationX();
-    }
+    float getX() const { return getLeft() + getTranslationX(); }
 
     // Animation helper
-    bool setY(float value) {
-        return setTranslationY(value - getTop());
-    }
+    bool setY(float value) { return setTranslationY(value - getTop()); }
 
     // Animation helper
-    float getY() const {
-        return getTop() + getTranslationY();
-    }
+    float getY() const { return getTop() + getTranslationY(); }
 
     // Animation helper
-    bool setZ(float value) {
-        return setTranslationZ(value - getElevation());
-    }
+    bool setZ(float value) { return setTranslationZ(value - getElevation()); }
 
-    float getZ() const {
-        return getElevation() + getTranslationZ();
-    }
+    float getZ() const { return getElevation() + getTranslationZ(); }
 
     bool setRotation(float rotation) {
         return RP_SET_AND_DIRTY(mPrimitiveFields.mRotation, rotation);
     }
 
-    float getRotation() const {
-        return mPrimitiveFields.mRotation;
-    }
+    float getRotation() const { return mPrimitiveFields.mRotation; }
 
     bool setRotationX(float rotationX) {
         return RP_SET_AND_DIRTY(mPrimitiveFields.mRotationX, rotationX);
     }
 
-    float getRotationX() const {
-        return mPrimitiveFields.mRotationX;
-    }
+    float getRotationX() const { return mPrimitiveFields.mRotationX; }
 
     bool setRotationY(float rotationY) {
         return RP_SET_AND_DIRTY(mPrimitiveFields.mRotationY, rotationY);
     }
 
-    float getRotationY() const {
-        return mPrimitiveFields.mRotationY;
-    }
+    float getRotationY() const { return mPrimitiveFields.mRotationY; }
 
-    bool setScaleX(float scaleX) {
-        return RP_SET_AND_DIRTY(mPrimitiveFields.mScaleX, scaleX);
-    }
+    bool setScaleX(float scaleX) { return RP_SET_AND_DIRTY(mPrimitiveFields.mScaleX, scaleX); }
 
-    float getScaleX() const {
-        return mPrimitiveFields.mScaleX;
-    }
+    float getScaleX() const { return mPrimitiveFields.mScaleX; }
 
-    bool setScaleY(float scaleY) {
-        return RP_SET_AND_DIRTY(mPrimitiveFields.mScaleY, scaleY);
-    }
+    bool setScaleY(float scaleY) { return RP_SET_AND_DIRTY(mPrimitiveFields.mScaleY, scaleY); }
 
-    float getScaleY() const {
-        return mPrimitiveFields.mScaleY;
-    }
+    float getScaleY() const { return mPrimitiveFields.mScaleY; }
 
     bool setPivotX(float pivotX) {
-        if (RP_SET(mPrimitiveFields.mPivotX, pivotX)
-                || !mPrimitiveFields.mPivotExplicitlySet) {
+        if (RP_SET(mPrimitiveFields.mPivotX, pivotX) || !mPrimitiveFields.mPivotExplicitlySet) {
             mPrimitiveFields.mMatrixOrPivotDirty = true;
             mPrimitiveFields.mPivotExplicitlySet = true;
             return true;
@@ -373,13 +313,10 @@ public:
      * so the value returned may be stale if the RenderProperties has been
      * modified since the last call to updateMatrix()
      */
-    float getPivotX() const {
-        return mPrimitiveFields.mPivotX;
-    }
+    float getPivotX() const { return mPrimitiveFields.mPivotX; }
 
     bool setPivotY(float pivotY) {
-        if (RP_SET(mPrimitiveFields.mPivotY, pivotY)
-                || !mPrimitiveFields.mPivotExplicitlySet) {
+        if (RP_SET(mPrimitiveFields.mPivotY, pivotY) || !mPrimitiveFields.mPivotExplicitlySet) {
             mPrimitiveFields.mMatrixOrPivotDirty = true;
             mPrimitiveFields.mPivotExplicitlySet = true;
             return true;
@@ -387,12 +324,12 @@ public:
         return false;
     }
 
-    float getPivotY() const {
-        return mPrimitiveFields.mPivotY;
-    }
+    float getPivotY() const { return mPrimitiveFields.mPivotY; }
 
-    bool isPivotExplicitlySet() const {
-        return mPrimitiveFields.mPivotExplicitlySet;
+    bool isPivotExplicitlySet() const { return mPrimitiveFields.mPivotExplicitlySet; }
+
+    bool resetPivot() {
+        return RP_SET_AND_DIRTY(mPrimitiveFields.mPivotExplicitlySet, false);
     }
 
     bool setCameraDistance(float distance) {
@@ -420,9 +357,7 @@ public:
         return false;
     }
 
-    int getLeft() const {
-        return mPrimitiveFields.mLeft;
-    }
+    int getLeft() const { return mPrimitiveFields.mLeft; }
 
     bool setTop(int top) {
         if (RP_SET(mPrimitiveFields.mTop, top)) {
@@ -435,9 +370,7 @@ public:
         return false;
     }
 
-    int getTop() const {
-        return mPrimitiveFields.mTop;
-    }
+    int getTop() const { return mPrimitiveFields.mTop; }
 
     bool setRight(int right) {
         if (RP_SET(mPrimitiveFields.mRight, right)) {
@@ -450,9 +383,7 @@ public:
         return false;
     }
 
-    int getRight() const {
-        return mPrimitiveFields.mRight;
-    }
+    int getRight() const { return mPrimitiveFields.mRight; }
 
     bool setBottom(int bottom) {
         if (RP_SET(mPrimitiveFields.mBottom, bottom)) {
@@ -465,9 +396,7 @@ public:
         return false;
     }
 
-    int getBottom() const {
-        return mPrimitiveFields.mBottom;
-    }
+    int getBottom() const { return mPrimitiveFields.mBottom; }
 
     bool setLeftTop(int left, int top) {
         bool leftResult = setLeft(left);
@@ -476,8 +405,8 @@ public:
     }
 
     bool setLeftTopRightBottom(int left, int top, int right, int bottom) {
-        if (left != mPrimitiveFields.mLeft || top != mPrimitiveFields.mTop
-                || right != mPrimitiveFields.mRight || bottom != mPrimitiveFields.mBottom) {
+        if (left != mPrimitiveFields.mLeft || top != mPrimitiveFields.mTop ||
+            right != mPrimitiveFields.mRight || bottom != mPrimitiveFields.mBottom) {
             mPrimitiveFields.mLeft = left;
             mPrimitiveFields.mTop = top;
             mPrimitiveFields.mRight = right;
@@ -510,17 +439,11 @@ public:
         return false;
     }
 
-    int getWidth() const {
-        return mPrimitiveFields.mWidth;
-    }
+    int getWidth() const { return mPrimitiveFields.mWidth; }
 
-    int getHeight() const {
-        return mPrimitiveFields.mHeight;
-    }
+    int getHeight() const { return mPrimitiveFields.mHeight; }
 
-    const SkMatrix* getAnimationMatrix() const {
-        return mAnimationMatrix;
-    }
+    const SkMatrix* getAnimationMatrix() const { return mAnimationMatrix; }
 
     bool hasTransformMatrix() const {
         return getTransformMatrix() && !getTransformMatrix()->isIdentity();
@@ -536,17 +459,11 @@ public:
         return mComputedFields.mTransformMatrix;
     }
 
-    int getClippingFlags() const {
-        return mPrimitiveFields.mClippingFlags;
-    }
+    int getClippingFlags() const { return mPrimitiveFields.mClippingFlags; }
 
-    bool getClipToBounds() const {
-        return mPrimitiveFields.mClippingFlags & CLIP_TO_BOUNDS;
-    }
+    bool getClipToBounds() const { return mPrimitiveFields.mClippingFlags & CLIP_TO_BOUNDS; }
 
-    const Rect& getClipBounds() const {
-        return mPrimitiveFields.mClipBounds;
-    }
+    const Rect& getClipBounds() const { return mPrimitiveFields.mClipBounds; }
 
     void getClippingRectForFlags(uint32_t flags, Rect* outRect) const {
         if (flags & CLIP_TO_BOUNDS) {
@@ -559,41 +476,25 @@ public:
         }
     }
 
-    bool getHasOverlappingRendering() const {
-        return mPrimitiveFields.mHasOverlappingRendering;
-    }
+    bool getHasOverlappingRendering() const { return mPrimitiveFields.mHasOverlappingRendering; }
 
-    const Outline& getOutline() const {
-        return mPrimitiveFields.mOutline;
-    }
+    const Outline& getOutline() const { return mPrimitiveFields.mOutline; }
 
-    const RevealClip& getRevealClip() const {
-        return mPrimitiveFields.mRevealClip;
-    }
+    const RevealClip& getRevealClip() const { return mPrimitiveFields.mRevealClip; }
 
-    bool getProjectBackwards() const {
-        return mPrimitiveFields.mProjectBackwards;
-    }
+    bool getProjectBackwards() const { return mPrimitiveFields.mProjectBackwards; }
 
     void debugOutputProperties(std::ostream& output, const int level) const;
 
     void updateMatrix();
 
-    Outline& mutableOutline() {
-        return mPrimitiveFields.mOutline;
-    }
+    Outline& mutableOutline() { return mPrimitiveFields.mOutline; }
 
-    RevealClip& mutableRevealClip() {
-        return mPrimitiveFields.mRevealClip;
-    }
+    RevealClip& mutableRevealClip() { return mPrimitiveFields.mRevealClip; }
 
-    const LayerProperties& layerProperties() const {
-        return mLayerProperties;
-    }
+    const LayerProperties& layerProperties() const { return mLayerProperties; }
 
-    LayerProperties& mutateLayerProperties() {
-        return mLayerProperties;
-    }
+    LayerProperties& mutateLayerProperties() { return mLayerProperties; }
 
     // Returns true if damage calculations should be clipped to bounds
     // TODO: Figure out something better for getZ(), as children should still be
@@ -605,24 +506,37 @@ public:
     }
 
     bool hasShadow() const {
-        return getZ() > 0.0f
-                && getOutline().getPath() != nullptr
-                && getOutline().getAlpha() != 0.0f;
+        return getZ() > 0.0f && getOutline().getPath() != nullptr &&
+               getOutline().getAlpha() != 0.0f;
+    }
+
+    SkColor getSpotShadowColor() const {
+        return mPrimitiveFields.mSpotShadowColor;
+    }
+
+    bool setSpotShadowColor(SkColor shadowColor) {
+        return RP_SET(mPrimitiveFields.mSpotShadowColor, shadowColor);
+    }
+
+    SkColor getAmbientShadowColor() const {
+        return mPrimitiveFields.mAmbientShadowColor;
+    }
+
+    bool setAmbientShadowColor(SkColor shadowColor) {
+        return RP_SET(mPrimitiveFields.mAmbientShadowColor, shadowColor);
     }
 
     bool fitsOnLayer() const {
         const DeviceInfo* deviceInfo = DeviceInfo::get();
-        return mPrimitiveFields.mWidth <= deviceInfo->maxTextureSize()
-                        && mPrimitiveFields.mHeight <= deviceInfo->maxTextureSize();
+        return mPrimitiveFields.mWidth <= deviceInfo->maxTextureSize() &&
+               mPrimitiveFields.mHeight <= deviceInfo->maxTextureSize();
     }
 
     bool promotedToLayer() const {
-        return mLayerProperties.mType == LayerType::None
-                && fitsOnLayer()
-                && (mComputedFields.mNeedLayerForFunctors
-                        || (!MathUtils::isZero(mPrimitiveFields.mAlpha)
-                                && mPrimitiveFields.mAlpha < 1
-                                && mPrimitiveFields.mHasOverlappingRendering));
+        return mLayerProperties.mType == LayerType::None && fitsOnLayer() &&
+               (mComputedFields.mNeedLayerForFunctors ||
+                (!MathUtils::isZero(mPrimitiveFields.mAlpha) && mPrimitiveFields.mAlpha < 1 &&
+                 mPrimitiveFields.mHasOverlappingRendering));
     }
 
     LayerType effectiveLayerType() const {
@@ -635,6 +549,8 @@ private:
         int mLeft = 0, mTop = 0, mRight = 0, mBottom = 0;
         int mWidth = 0, mHeight = 0;
         int mClippingFlags = CLIP_TO_BOUNDS;
+        SkColor mSpotShadowColor = SK_ColorBLACK;
+        SkColor mAmbientShadowColor = SK_ColorBLACK;
         float mAlpha = 1;
         float mTranslationX = 0, mTranslationY = 0, mTranslationZ = 0;
         float mElevation = 0;

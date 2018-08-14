@@ -16,18 +16,19 @@
 
 package android.hardware.camera2.impl;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
-import android.hardware.camera2.marshal.Marshaler;
 import android.hardware.camera2.marshal.MarshalQueryable;
 import android.hardware.camera2.marshal.MarshalRegistry;
+import android.hardware.camera2.marshal.Marshaler;
 import android.hardware.camera2.marshal.impl.MarshalQueryableArray;
-import android.hardware.camera2.marshal.impl.MarshalQueryableBoolean;
 import android.hardware.camera2.marshal.impl.MarshalQueryableBlackLevelPattern;
+import android.hardware.camera2.marshal.impl.MarshalQueryableBoolean;
 import android.hardware.camera2.marshal.impl.MarshalQueryableColorSpaceTransform;
 import android.hardware.camera2.marshal.impl.MarshalQueryableEnum;
 import android.hardware.camera2.marshal.impl.MarshalQueryableHighSpeedVideoConfiguration;
@@ -48,6 +49,7 @@ import android.hardware.camera2.marshal.impl.MarshalQueryableString;
 import android.hardware.camera2.params.Face;
 import android.hardware.camera2.params.HighSpeedVideoConfiguration;
 import android.hardware.camera2.params.LensShadingMap;
+import android.hardware.camera2.params.OisSample;
 import android.hardware.camera2.params.ReprocessFormatsMap;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationDuration;
@@ -56,8 +58,8 @@ import android.hardware.camera2.params.TonemapCurve;
 import android.hardware.camera2.utils.TypeReference;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.ServiceSpecificException;
 import android.util.Log;
 import android.util.Size;
@@ -83,6 +85,7 @@ public class CameraMetadataNative implements Parcelable {
         private final Class<T> mType;
         private final TypeReference<T> mTypeReference;
         private final String mName;
+        private final String mFallbackName;
         private final int mHash;
 
         /**
@@ -95,8 +98,25 @@ public class CameraMetadataNative implements Parcelable {
                 throw new NullPointerException("Type needs to be non-null");
             }
             mName = name;
+            mFallbackName = null;
             mType = type;
             mVendorId = vendorId;
+            mTypeReference = TypeReference.createSpecializedTypeReference(type);
+            mHash = mName.hashCode() ^ mTypeReference.hashCode();
+        }
+
+        /**
+         * @hide
+         */
+        public Key(String name, String fallbackName, Class<T> type) {
+            if (name == null) {
+                throw new NullPointerException("Key needs a valid name");
+            } else if (type == null) {
+                throw new NullPointerException("Type needs to be non-null");
+            }
+            mName = name;
+            mFallbackName = fallbackName;
+            mType = type;
             mTypeReference = TypeReference.createSpecializedTypeReference(type);
             mHash = mName.hashCode() ^ mTypeReference.hashCode();
         }
@@ -114,6 +134,7 @@ public class CameraMetadataNative implements Parcelable {
                 throw new NullPointerException("Type needs to be non-null");
             }
             mName = name;
+            mFallbackName = null;
             mType = type;
             mTypeReference = TypeReference.createSpecializedTypeReference(type);
             mHash = mName.hashCode() ^ mTypeReference.hashCode();
@@ -133,6 +154,7 @@ public class CameraMetadataNative implements Parcelable {
                 throw new NullPointerException("TypeReference needs to be non-null");
             }
             mName = name;
+            mFallbackName = null;
             mType = (Class<T>)typeReference.getRawType();
             mTypeReference = typeReference;
             mHash = mName.hashCode() ^ mTypeReference.hashCode();
@@ -210,6 +232,7 @@ public class CameraMetadataNative implements Parcelable {
          *
          * @return The tag numeric value corresponding to the string
          */
+        @UnsupportedAppUsage
         public final int getTag() {
             if (!mHasTag) {
                 mTag = CameraMetadataNative.getTag(mName, mVendorId);
@@ -493,7 +516,16 @@ public class CameraMetadataNative implements Parcelable {
         int tag = nativeGetTagFromKeyLocal(key.getName());
         byte[] values = readValues(tag);
         if (values == null) {
-            return null;
+            // If the key returns null, use the fallback key if exists.
+            // This is to support old key names for the newly published keys.
+            if (key.mFallbackName == null) {
+                return null;
+            }
+            tag = nativeGetTagFromKeyLocal(key.mFallbackName);
+            values = readValues(tag);
+            if (values == null) {
+                return null;
+            }
         }
 
         int nativeType = nativeGetTypeFromTagLocal(tag);
@@ -612,6 +644,15 @@ public class CameraMetadataNative implements Parcelable {
                     @SuppressWarnings("unchecked")
                     public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
                         return (T) metadata.getLensShadingMap();
+                    }
+                });
+        sGetCommandMap.put(
+                CaptureResult.STATISTICS_OIS_SAMPLES.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getOisSamples();
                     }
                 });
     }
@@ -962,6 +1003,50 @@ public class CameraMetadataNative implements Parcelable {
         return tc;
     }
 
+    private OisSample[] getOisSamples() {
+        long[] timestamps = getBase(CaptureResult.STATISTICS_OIS_TIMESTAMPS);
+        float[] xShifts = getBase(CaptureResult.STATISTICS_OIS_X_SHIFTS);
+        float[] yShifts = getBase(CaptureResult.STATISTICS_OIS_Y_SHIFTS);
+
+        if (timestamps == null) {
+            if (xShifts != null) {
+                throw new AssertionError("timestamps is null but xShifts is not");
+            }
+
+            if (yShifts != null) {
+                throw new AssertionError("timestamps is null but yShifts is not");
+            }
+
+            return null;
+        }
+
+        if (xShifts == null) {
+            throw new AssertionError("timestamps is not null but xShifts is");
+        }
+
+        if (yShifts == null) {
+            throw new AssertionError("timestamps is not null but yShifts is");
+        }
+
+        if (xShifts.length != timestamps.length) {
+            throw new AssertionError(String.format(
+                    "timestamps has %d entries but xShifts has %d", timestamps.length,
+                    xShifts.length));
+        }
+
+        if (yShifts.length != timestamps.length) {
+            throw new AssertionError(String.format(
+                    "timestamps has %d entries but yShifts has %d", timestamps.length,
+                    yShifts.length));
+        }
+
+        OisSample[] samples = new OisSample[timestamps.length];
+        for (int i = 0; i < timestamps.length; i++) {
+            samples[i] = new OisSample(timestamps[i], xShifts[i], yShifts[i]);
+        }
+        return samples;
+    }
+
     private <T> void setBase(CameraCharacteristics.Key<T> key, T value) {
         setBase(key.getNativeKey(), value);
     }
@@ -1102,6 +1187,7 @@ public class CameraMetadataNative implements Parcelable {
         return true;
     }
 
+    @UnsupportedAppUsage
     private long mMetadataPtr; // native CameraMetadata*
 
     private native long nativeAllocate();
@@ -1116,13 +1202,16 @@ public class CameraMetadataNative implements Parcelable {
     private native synchronized boolean nativeIsEmpty();
     private native synchronized int nativeGetEntryCount();
 
+    @UnsupportedAppUsage
     private native synchronized byte[] nativeReadValues(int tag);
     private native synchronized void nativeWriteValues(int tag, byte[] src);
     private native synchronized void nativeDump() throws IOException; // dump to ALOGD
 
     private native synchronized ArrayList nativeGetAllVendorKeys(Class keyClass);
+    @UnsupportedAppUsage
     private native synchronized int nativeGetTagFromKeyLocal(String keyName)
             throws IllegalArgumentException;
+    @UnsupportedAppUsage
     private native synchronized int nativeGetTypeFromTagLocal(int tag)
             throws IllegalArgumentException;
     private static native int nativeGetTagFromKey(String keyName, long vendorId)

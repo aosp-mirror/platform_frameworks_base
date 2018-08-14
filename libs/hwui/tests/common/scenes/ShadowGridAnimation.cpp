@@ -19,15 +19,14 @@
 class ShadowGridAnimation;
 
 static TestScene::Registrar _ShadowGrid(TestScene::Info{
-    "shadowgrid",
-    "A grid of rounded rects that cast a shadow. Simplified scenario of an "
-    "Android TV-style launcher interface. High CPU/GPU load.",
-    TestScene::simpleCreateScene<ShadowGridAnimation>
-});
+        "shadowgrid",
+        "A grid of rounded rects that cast a shadow. Simplified scenario of an "
+        "Android TV-style launcher interface. High CPU/GPU load.",
+        TestScene::simpleCreateScene<ShadowGridAnimation>});
 
 class ShadowGridAnimation : public TestScene {
 public:
-    std::vector< sp<RenderNode> > cards;
+    std::vector<sp<RenderNode> > cards;
     void createContent(int width, int height, Canvas& canvas) override {
         canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver);
         canvas.insertReorderBarrier(true);
@@ -50,14 +49,16 @@ public:
             cards[ci]->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
         }
     }
+
 private:
     sp<RenderNode> createCard(int x, int y, int width, int height) {
         return TestUtils::createNode(x, y, x + width, y + height,
-                [width, height](RenderProperties& props, Canvas& canvas) {
-            props.setElevation(dp(16));
-            props.mutableOutline().setRoundRect(0, 0, width, height, dp(6), 1);
-            props.mutableOutline().setShouldClip(true);
-            canvas.drawColor(0xFFEEEEEE, SkBlendMode::kSrcOver);
-        });
+                                     [width, height](RenderProperties& props, Canvas& canvas) {
+                                         props.setElevation(dp(16));
+                                         props.mutableOutline().setRoundRect(0, 0, width, height,
+                                                                             dp(6), 1);
+                                         props.mutableOutline().setShouldClip(true);
+                                         canvas.drawColor(0xFFEEEEEE, SkBlendMode::kSrcOver);
+                                     });
     }
 };

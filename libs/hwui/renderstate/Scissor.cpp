@@ -23,12 +23,7 @@ namespace android {
 namespace uirenderer {
 
 Scissor::Scissor()
-    : mEnabled(false)
-    , mScissorX(0)
-    , mScissorY(0)
-    , mScissorWidth(0)
-    , mScissorHeight(0) {
-}
+        : mEnabled(false), mScissorX(0), mScissorY(0), mScissorWidth(0), mScissorHeight(0) {}
 
 bool Scissor::setEnabled(bool enabled) {
     if (mEnabled != enabled) {
@@ -44,9 +39,8 @@ bool Scissor::setEnabled(bool enabled) {
 }
 
 bool Scissor::set(GLint x, GLint y, GLint width, GLint height) {
-    if (mEnabled && (x != mScissorX || y != mScissorY
-            || width != mScissorWidth || height != mScissorHeight)) {
-
+    if (mEnabled &&
+        (x != mScissorX || y != mScissorY || width != mScissorWidth || height != mScissorHeight)) {
         if (x < 0) {
             width += x;
             x = 0;
@@ -80,10 +74,7 @@ void Scissor::set(int viewportHeight, const Rect& clip) {
     GLint width = std::max(0, ((int)clip.right) - x);
     GLint height = std::max(0, (viewportHeight - (int)clip.top) - y);
 
-    if (x != mScissorX
-            || y != mScissorY
-            || width != mScissorWidth
-            || height != mScissorHeight) {
+    if (x != mScissorX || y != mScissorY || width != mScissorWidth || height != mScissorHeight) {
         glScissor(x, y, width, height);
 
         mScissorX = x;
@@ -104,10 +95,9 @@ void Scissor::invalidate() {
 }
 
 void Scissor::dump() {
-    ALOGD("Scissor: enabled %d, %d %d %d %d",
-            mEnabled, mScissorX, mScissorY, mScissorWidth, mScissorHeight);
+    ALOGD("Scissor: enabled %d, %d %d %d %d", mEnabled, mScissorX, mScissorY, mScissorWidth,
+          mScissorHeight);
 }
 
 } /* namespace uirenderer */
 } /* namespace android */
-

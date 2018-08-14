@@ -256,7 +256,12 @@ import java.lang.reflect.InvocationTargetException;
  * <p>After each call to this function, a new entry is on the stack, and
  * pressing back will pop it to return the user to whatever previous state
  * the activity UI was in.
+ *
+ * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
+ *      {@link android.support.v4.app.Fragment} for consistent behavior across all devices
+ *      and access to <a href="{@docRoot}topic/libraries/architecture/lifecycle.html">Lifecycle</a>.
  */
+@Deprecated
 public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListener {
     private static final ArrayMap<String, Class<?>> sClassMap =
             new ArrayMap<String, Class<?>>();
@@ -414,7 +419,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * State information that has been retrieved from a fragment instance
      * through {@link FragmentManager#saveFragmentInstanceState(Fragment)
      * FragmentManager.saveFragmentInstanceState}.
+     *
+     * @deprecated Use {@link android.support.v4.app.Fragment.SavedState}
      */
+    @Deprecated
     public static class SavedState implements Parcelable {
         final Bundle mState;
 
@@ -458,7 +466,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     /**
      * Thrown by {@link Fragment#instantiate(Context, String, Bundle)} when
      * there is an instantiation failure.
+     *
+     * @deprecated Use {@link android.support.v4.app.Fragment.InstantiationException}
      */
+    @Deprecated
     static public class InstantiationException extends AndroidRuntimeException {
         public InstantiationException(String msg, Exception cause) {
             super(msg, cause);
@@ -1031,7 +1042,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
 
     /**
      * Return the LoaderManager for this fragment, creating it if needed.
+     *
+     * @deprecated Use {@link android.support.v4.app.Fragment#getLoaderManager()}
      */
+    @Deprecated
     public LoaderManager getLoaderManager() {
         if (mLoaderManager != null) {
             return mLoaderManager;
@@ -2297,7 +2311,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * transaction have called {@link #startPostponedEnterTransition()}.
      * <p>
      * This method should be called before being added to the FragmentTransaction or
-     * in {@link #onCreate(Bundle), {@link #onAttach(Context)}, or
+     * in {@link #onCreate(Bundle)}, {@link #onAttach(Context)}, or
      * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}}.
      * {@link #startPostponedEnterTransition()} must be called to allow the Fragment to
      * start the transitions.

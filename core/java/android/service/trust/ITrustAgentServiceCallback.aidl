@@ -32,4 +32,5 @@ oneway interface ITrustAgentServiceCallback {
     void isEscrowTokenActive(long handle, int userId);
     void removeEscrowToken(long handle, int userId);
     void unlockUserWithToken(long handle, in byte[] token, int userId);
+    void showKeyguardErrorMessage(in CharSequence message);
 }

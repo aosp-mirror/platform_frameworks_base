@@ -14,55 +14,290 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 option java_multiple_files = true;
-option java_outer_classname = "IncidentProtoMetadata";
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/os/backtrace.proto";
+import "frameworks/base/core/proto/android/os/batterystats.proto";
+import "frameworks/base/core/proto/android/os/batterytype.proto";
+import "frameworks/base/core/proto/android/os/cpufreq.proto";
+import "frameworks/base/core/proto/android/os/cpuinfo.proto";
+import "frameworks/base/core/proto/android/os/data.proto";
+import "frameworks/base/core/proto/android/os/kernelwake.proto";
+import "frameworks/base/core/proto/android/os/pagetypeinfo.proto";
+import "frameworks/base/core/proto/android/os/procrank.proto";
+import "frameworks/base/core/proto/android/os/ps.proto";
+import "frameworks/base/core/proto/android/os/system_properties.proto";
+import "frameworks/base/core/proto/android/providers/settings.proto";
+import "frameworks/base/core/proto/android/server/activitymanagerservice.proto";
+import "frameworks/base/core/proto/android/server/alarmmanagerservice.proto";
+import "frameworks/base/core/proto/android/server/fingerprint.proto";
+import "frameworks/base/core/proto/android/server/jobscheduler.proto";
+import "frameworks/base/core/proto/android/server/powermanagerservice.proto";
+import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 import "frameworks/base/core/proto/android/service/appwidget.proto";
 import "frameworks/base/core/proto/android/service/battery.proto";
-import "frameworks/base/core/proto/android/service/fingerprint.proto";
+import "frameworks/base/core/proto/android/service/batterystats.proto";
 import "frameworks/base/core/proto/android/service/diskstats.proto";
+import "frameworks/base/core/proto/android/service/graphicsstats.proto";
 import "frameworks/base/core/proto/android/service/netstats.proto";
 import "frameworks/base/core/proto/android/service/notification.proto";
 import "frameworks/base/core/proto/android/service/package.proto";
-import "frameworks/base/core/proto/android/service/power.proto";
-import "frameworks/base/core/proto/android/providers/settings.proto";
+import "frameworks/base/core/proto/android/service/print.proto";
+import "frameworks/base/core/proto/android/service/procstats.proto";
+import "frameworks/base/core/proto/android/service/usb.proto";
+import "frameworks/base/core/proto/android/util/event_log_tags.proto";
+import "frameworks/base/core/proto/android/util/log.proto";
+import "frameworks/base/libs/incident/proto/android/os/header.proto";
+import "frameworks/base/libs/incident/proto/android/os/metadata.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/libs/incident/proto/android/section.proto";
 
 package android.os;
 
-message IncidentHeaderProto {
-    enum Cause {
-        CAUSE_UNKNOWN = 0;
-        CAUSE_USER = 1;
-        CAUSE_ANR = 2;
-        CAUSE_CRASH = 3;
-    }
-
-    Cause cause = 1;
-}
-
+// Privacy tag can be marked to override UNSET messages so generic
+// message type can be handled case by case, e.g. GZippedFileProto.
 message IncidentProto {
-    // Incident header
+    reserved 1001;
+
+    // Incident header from callers
     repeated IncidentHeaderProto header = 1;
+    // Internal metadata of incidentd
+    optional IncidentMetadata metadata = 2;
 
     // Device information
-    //SystemProperties system_properties = 1000;
+    optional SystemPropertiesProto system_properties = 1000 [
+        (section).type = SECTION_COMMAND,
+        (section).args = "getprop"
+    ];
+
+    // Device Logs
+    optional android.util.EventLogTagMapProto event_log_tag_map = 1100 [
+        (section).type = SECTION_FILE,
+        (section).args = "/system/etc/event-log-tags"
+    ];
+
+    optional android.util.LogProto main_logs = 1101 [
+        (section).type = SECTION_LOG,
+        (section).args = "LOG_ID_MAIN"
+    ];
+
+    optional android.util.LogProto radio_logs = 1102 [
+        (section).type = SECTION_LOG,
+        (section).args = "LOG_ID_RADIO"
+    ];
+
+    optional android.util.LogProto events_logs = 1103 [
+        (section).type = SECTION_LOG,
+        (section).args = "LOG_ID_EVENTS"
+    ];
+
+    optional android.util.LogProto system_logs = 1104 [
+        (section).type = SECTION_LOG,
+        (section).args = "LOG_ID_SYSTEM"
+    ];
+
+    optional android.util.LogProto crash_logs = 1105 [
+        (section).type = SECTION_LOG,
+        (section).args = "LOG_ID_CRASH"
+    ];
+
+    optional android.util.LogProto stats_logs = 1106 [
+        (section).type = SECTION_LOG,
+        (section).args = "LOG_ID_STATS"
+    ];
+
+    optional android.util.LogProto security_logs = 1107 [
+        (section).type = SECTION_LOG,
+        (section).args = "LOG_ID_SECURITY"
+    ];
+
+    optional android.util.LogProto kernel_logs = 1108 [
+        (section).type = SECTION_LOG,
+        (section).args = "LOG_ID_KERNEL"
+    ];
+
+    // Stack dumps
+    optional android.os.BackTraceProto native_traces = 1200 [
+        (section).type = SECTION_TOMBSTONE,
+        (section).args = "native"
+    ];
+
+    optional android.os.BackTraceProto hal_traces = 1201 [
+        (section).type = SECTION_TOMBSTONE,
+        (section).args = "hal"
+    ];
+
+    optional android.os.BackTraceProto java_traces = 1202 [
+        (section).type = SECTION_TOMBSTONE,
+        (section).args = "java"
+    ];
 
     // Linux services
-    //Procrank procrank = 2000;
-    //PageTypeInfo page_type_info = 2001;
-    //KernelWakeSources kernel_wake_sources = 2002;
+    optional ProcrankProto procrank = 2000 [
+        // Disable procrank for reasons below:
+        // 1. incidentd can't execute `procrank` because it don't have DAC perms
+        //    since it is running as its own uid, no root access.
+        // 2. the same information is able to be accessed by meminfo dumpsys.
+        // 3. leave this one here to show case of how to disable a section
+        //    (no removal allowed if you are familiar with PROTOBUF).
+        (section).type = SECTION_NONE,
+        (section).args = "procrank"
+    ];
+
+    optional PageTypeInfoProto page_type_info = 2001 [
+        (section).type = SECTION_FILE,
+        (section).args = "/proc/pagetypeinfo"
+    ];
+
+    optional KernelWakeSourcesProto kernel_wake_sources = 2002 [
+        (section).type = SECTION_FILE,
+        (section).args = "/d/wakeup_sources"
+    ];
+
+    optional CpuInfoProto cpu_info = 2003 [
+        (section).type = SECTION_COMMAND,
+        (section).args = "top -b -n 1 -H -s 6 -o pid,tid,user,pr,ni,%cpu,s,virt,res,pcy,cmd,name"
+    ];
+
+    optional CpuFreqProto cpu_freq = 2004 [
+        (section).type = SECTION_FILE,
+        (section).device_specific = true,
+        (section).args = "/sys/devices/system/cpu/cpufreq/all_time_in_state"
+    ];
+
+    optional PsProto processes_and_threads = 2005 [
+        (section).type = SECTION_COMMAND,
+        (section).args = "ps -A -T -Z -O pri,nice,rtprio,sched,pcy,time"
+    ];
+
+    optional BatteryTypeProto battery_type = 2006 [
+        (section).type = SECTION_FILE,
+        (section).device_specific = true,
+        (section).args = "/sys/class/power_supply/bms/battery_type"
+    ];
+
+    optional GZippedFileProto last_kmsg = 2007 [
+        (section).type = SECTION_GZIP,
+        (section).args = "/sys/fs/pstore/console-ramoops /sys/fs/pstore/console-ramoops-0 /proc/last_kmsg",
+        (privacy).dest = DEST_EXPLICIT
+    ];
 
     // System Services
-    android.service.fingerprint.FingerprintServiceDumpProto fingerprint = 3000;
-    android.service.NetworkStatsServiceDumpProto netstats = 3001;
-    android.providers.settings.SettingsServiceDumpProto settings = 3002;
-    android.service.appwidget.AppWidgetServiceDumpProto appwidget = 3003;
-    android.service.battery.BatteryServiceDumpProto battery = 3006;
-    android.service.diskstats.DiskStatsServiceDumpProto diskstats = 3007;
-    android.service.notification.NotificationServiceDumpProto notification = 3004;
-    android.service.pm.PackageServiceDumpProto package = 3008;
-    android.service.power.PowerServiceDumpProto power = 3009;
+    optional com.android.server.fingerprint.FingerprintServiceDumpProto fingerprint = 3000 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "fingerprint --proto --incident"
+    ];
+
+    optional android.service.NetworkStatsServiceDumpProto netstats = 3001 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "netstats --proto"
+    ];
+
+    optional android.providers.settings.SettingsServiceDumpProto settings = 3002 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "settings --proto"
+    ];
+
+    optional android.service.appwidget.AppWidgetServiceDumpProto appwidget = 3003;
+    optional android.service.notification.NotificationServiceDumpProto notification = 3004 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "notification --proto"
+    ];
+
+    optional android.service.batterystats.BatteryStatsServiceDumpProto batterystats = 3005 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "batterystats --proto"
+    ];
+
+    optional android.service.battery.BatteryServiceDumpProto battery = 3006 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "battery --proto"
+    ];
+
+    optional android.service.diskstats.DiskStatsServiceDumpProto diskstats = 3007 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "diskstats --proto"
+    ];
+
+    optional android.service.pm.PackageServiceDumpProto package = 3008 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "package --proto"
+    ];
+
+    optional com.android.server.power.PowerManagerServiceDumpProto power = 3009 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "power --proto"
+    ];
+
+    optional android.service.print.PrintServiceDumpProto print = 3010 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "print --proto"
+    ];
+
+    optional android.service.procstats.ProcessStatsServiceDumpProto procstats = 3011 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "procstats --proto"
+    ];
+
+    optional com.android.server.am.ActivityManagerServiceDumpActivitiesProto activities = 3012 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "activity --proto activities"
+    ];
+
+    optional com.android.server.am.ActivityManagerServiceDumpBroadcastsProto broadcasts = 3013 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "activity --proto broadcasts"
+    ];
+
+    optional com.android.server.am.ActivityManagerServiceDumpServicesProto amservices = 3014 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "activity --proto service"
+    ];
+
+    optional com.android.server.am.ActivityManagerServiceDumpProcessesProto amprocesses = 3015 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "activity --proto processes"
+    ];
+
+    optional com.android.server.AlarmManagerServiceDumpProto alarm = 3016 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "alarm --proto"
+    ];
+
+    optional com.android.server.wm.WindowManagerServiceDumpProto window = 3017 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "window --proto"
+    ];
+
+    optional com.android.server.am.MemInfoDumpProto meminfo = 3018 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "meminfo -a --proto"
+    ];
+
+    optional android.service.GraphicsStatsServiceDumpProto graphicsstats = 3019 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "graphicsstats --proto"
+    ];
+
+    optional com.android.server.job.JobSchedulerServiceDumpProto jobscheduler = 3020 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "jobscheduler --proto"
+    ];
+
+    optional android.service.usb.UsbServiceDumpProto usb = 3021 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "usb --proto"
+    ];
+
+    // The history can be large and may cause issues in consumers, so put the
+    // history in a separate section to compensate.
+    optional android.service.batterystats.BatteryStatsServiceDumpHistoryProto battery_history = 3022 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "batterystats --proto --history",
+        (section).userdebug_and_eng_only = true
+    ];
+
+    // Reserved for OEMs.
+    extensions 50000 to 100000;
 }

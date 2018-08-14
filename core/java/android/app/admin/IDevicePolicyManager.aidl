@@ -26,6 +26,7 @@ import android.app.admin.PasswordMetrics;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.IPackageDataObserver;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.StringParceledListSlice;
 import android.graphics.Bitmap;
@@ -35,6 +36,9 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
+import android.security.keymaster.KeymasterCertificateChain;
+import android.security.keystore.ParcelableKeyGenParameterSpec;
+import android.telephony.data.ApnSetting;
 
 import java.util.List;
 
@@ -77,6 +81,7 @@ interface IDevicePolicyManager {
 
     boolean isActivePasswordSufficient(int userHandle, boolean parent);
     boolean isProfileActivePasswordSufficientForParent(int userHandle);
+    boolean isUsingUnifiedPassword(in ComponentName admin);
     int getCurrentFailedPasswordAttempts(int userHandle, boolean parent);
     int getProfileWithMinimumFailedPasswordsForWipe(int userHandle, boolean parent);
 
@@ -87,14 +92,13 @@ interface IDevicePolicyManager {
 
     void setMaximumTimeToLock(in ComponentName who, long timeMs, boolean parent);
     long getMaximumTimeToLock(in ComponentName who, int userHandle, boolean parent);
-    long getMaximumTimeToLockForUserAndProfiles(int userHandle);
 
     void setRequiredStrongAuthTimeout(in ComponentName who, long timeMs, boolean parent);
     long getRequiredStrongAuthTimeout(in ComponentName who, int userId, boolean parent);
 
     void lockNow(int flags, boolean parent);
 
-    void wipeData(int flags);
+    void wipeDataWithReason(int flags, String wipeReasonForUser);
 
     ComponentName setGlobalProxy(in ComponentName admin, String proxySpec, String exclusionList);
     ComponentName getGlobalProxyAdmin(int userHandle);
@@ -161,8 +165,14 @@ interface IDevicePolicyManager {
     boolean isCaCertApproved(in String alias, int userHandle);
 
     boolean installKeyPair(in ComponentName who, in String callerPackage, in byte[] privKeyBuffer,
-            in byte[] certBuffer, in byte[] certChainBuffer, String alias, boolean requestAccess);
+            in byte[] certBuffer, in byte[] certChainBuffer, String alias, boolean requestAccess,
+            boolean isUserSelectable);
     boolean removeKeyPair(in ComponentName who, in String callerPackage, String alias);
+    boolean generateKeyPair(in ComponentName who, in String callerPackage, in String algorithm,
+            in ParcelableKeyGenParameterSpec keySpec,
+            in int idAttestationFlags, out KeymasterCertificateChain attestationChain);
+    boolean setKeyPairCertificate(in ComponentName who, in String callerPackage, in String alias,
+            in byte[] certBuffer, in byte[] certChainBuffer, boolean isUserSelectable);
     void choosePrivateKeyAlias(int uid, in Uri uri, in String alias, IBinder aliasCallback);
 
     void setDelegatedScopes(in ComponentName who, in String delegatePackage, in List<String> scopes);
@@ -177,6 +187,8 @@ interface IDevicePolicyManager {
 
     void addPersistentPreferredActivity(in ComponentName admin, in IntentFilter filter, in ComponentName activity);
     void clearPackagePersistentPreferredActivities(in ComponentName admin, String packageName);
+
+    void setDefaultSmsApplication(in ComponentName admin, String packageName);
 
     void setApplicationRestrictions(in ComponentName who, in String callerPackage, in String packageName, in Bundle settings);
     Bundle getApplicationRestrictions(in ComponentName who, in String callerPackage, in String packageName);
@@ -213,9 +225,14 @@ interface IDevicePolicyManager {
     UserHandle createAndManageUser(in ComponentName who, in String name, in ComponentName profileOwner, in PersistableBundle adminExtras, in int flags);
     boolean removeUser(in ComponentName who, in UserHandle userHandle);
     boolean switchUser(in ComponentName who, in UserHandle userHandle);
+    int startUserInBackground(in ComponentName who, in UserHandle userHandle);
+    int stopUser(in ComponentName who, in UserHandle userHandle);
+    int logoutUser(in ComponentName who);
+    List<UserHandle> getSecondaryUsers(in ComponentName who);
 
     void enableSystemApp(in ComponentName admin, in String callerPackage, in String packageName);
     int enableSystemAppWithIntent(in ComponentName admin, in String callerPackage, in Intent intent);
+    boolean installExistingPackage(in ComponentName admin, in String callerPackage, in String packageName);
 
     void setAccountManagementDisabled(in ComponentName who, in String accountType, in boolean disabled);
     String[] getAccountTypesWithManagementDisabled();
@@ -225,8 +242,15 @@ interface IDevicePolicyManager {
     String[] getLockTaskPackages(in ComponentName who);
     boolean isLockTaskPermitted(in String pkg);
 
+    void setLockTaskFeatures(in ComponentName who, int flags);
+    int getLockTaskFeatures(in ComponentName who);
+
     void setGlobalSetting(in ComponentName who, in String setting, in String value);
+    void setSystemSetting(in ComponentName who, in String setting, in String value);
     void setSecureSetting(in ComponentName who, in String setting, in String value);
+
+    boolean setTime(in ComponentName who, long millis);
+    boolean setTimeZone(in ComponentName who, String timeZone);
 
     void setMasterVolumeMuted(in ComponentName admin, boolean on);
     boolean isMasterVolumeMuted(in ComponentName admin);
@@ -269,6 +293,7 @@ interface IDevicePolicyManager {
 
     void setSystemUpdatePolicy(in ComponentName who, in SystemUpdatePolicy policy);
     SystemUpdatePolicy getSystemUpdatePolicy();
+    void clearSystemUpdatePolicyFreezePeriodRecord();
 
     boolean setKeyguardDisabled(in ComponentName admin, boolean disabled);
     boolean setStatusBarDisabled(in ComponentName who, boolean disabled);
@@ -322,6 +347,7 @@ interface IDevicePolicyManager {
     boolean isSecurityLoggingEnabled(in ComponentName admin);
     ParceledListSlice retrieveSecurityLogs(in ComponentName admin);
     ParceledListSlice retrievePreRebootSecurityLogs(in ComponentName admin);
+    long forceSecurityLogs();
 
     boolean isUninstallInQueue(String packageName);
     void uninstallPackageWithActiveAdmins(String packageName);
@@ -334,6 +360,8 @@ interface IDevicePolicyManager {
 
     void setBackupServiceEnabled(in ComponentName admin, boolean enabled);
     boolean isBackupServiceEnabled(in ComponentName admin);
+    boolean setMandatoryBackupTransport(in ComponentName admin, in ComponentName backupTransportComponent);
+    ComponentName getMandatoryBackupTransport();
 
     void setNetworkLoggingEnabled(in ComponentName admin, boolean enabled);
     boolean isNetworkLoggingEnabled(in ComponentName admin);
@@ -343,6 +371,7 @@ interface IDevicePolicyManager {
         IApplicationThread caller, IBinder token, in Intent service,
         IServiceConnection connection, int flags, int targetUserId);
     List<UserHandle> getBindDeviceAdminTargetUsers(in ComponentName admin);
+    boolean isEphemeralUser(in ComponentName admin);
 
     long getLastSecurityLogRetrievalTime();
     long getLastBugReportRequestTime();
@@ -355,4 +384,31 @@ interface IDevicePolicyManager {
 
     boolean isCurrentInputMethodSetByOwner();
     StringParceledListSlice getOwnerInstalledCaCerts(in UserHandle user);
+
+    void clearApplicationUserData(in ComponentName admin, in String packageName, in IPackageDataObserver callback);
+
+    void setLogoutEnabled(in ComponentName admin, boolean enabled);
+    boolean isLogoutEnabled();
+
+    List<String> getDisallowedSystemApps(in ComponentName admin, int userId, String provisioningAction);
+
+    void transferOwnership(in ComponentName admin, in ComponentName target, in PersistableBundle bundle);
+    PersistableBundle getTransferOwnershipBundle();
+
+    void setStartUserSessionMessage(in ComponentName admin, in CharSequence startUserSessionMessage);
+    void setEndUserSessionMessage(in ComponentName admin, in CharSequence endUserSessionMessage);
+    CharSequence getStartUserSessionMessage(in ComponentName admin);
+    CharSequence getEndUserSessionMessage(in ComponentName admin);
+
+    List<String> setMeteredDataDisabledPackages(in ComponentName admin, in List<String> packageNames);
+    List<String> getMeteredDataDisabledPackages(in ComponentName admin);
+
+    int addOverrideApn(in ComponentName admin, in ApnSetting apnSetting);
+    boolean updateOverrideApn(in ComponentName admin, int apnId, in ApnSetting apnSetting);
+    boolean removeOverrideApn(in ComponentName admin, int apnId);
+    List<ApnSetting> getOverrideApns(in ComponentName admin);
+    void setOverrideApnsEnabled(in ComponentName admin, boolean enabled);
+    boolean isOverrideApnEnabled(in ComponentName admin);
+
+    boolean isMeteredDataDisabledPackageForUser(in ComponentName admin, String packageName, int userId);
 }

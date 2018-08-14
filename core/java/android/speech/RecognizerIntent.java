@@ -141,6 +141,10 @@ public class RecognizerIntent {
      * <ul>
      *   <li>{@link #EXTRA_SECURE}
      * </ul>
+     *
+     * <p class="note">
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
      */
     public static final String ACTION_VOICE_SEARCH_HANDS_FREE =
             "android.speech.action.VOICE_SEARCH_HANDS_FREE";

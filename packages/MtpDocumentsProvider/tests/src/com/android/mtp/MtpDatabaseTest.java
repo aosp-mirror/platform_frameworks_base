@@ -237,7 +237,8 @@ public class MtpDatabaseTest extends AndroidTestCase {
         assertEquals(
                 COLUMN_FLAGS,
                 DocumentsContract.Document.FLAG_SUPPORTS_DELETE |
-                DocumentsContract.Document.FLAG_SUPPORTS_WRITE,
+                DocumentsContract.Document.FLAG_SUPPORTS_WRITE |
+                DocumentsContract.Document.FLAG_SUPPORTS_METADATA,
                 cursor.getInt(9));
         assertEquals(2 * 1024 * 1024, getInt(cursor, COLUMN_SIZE));
         assertEquals(

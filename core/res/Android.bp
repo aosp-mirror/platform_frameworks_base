@@ -30,6 +30,9 @@ android_app {
 
         // Framework doesn't need versioning since it IS the platform.
         "--no-auto-version",
+
+        // Allow overlay to add resource
+        "--auto-add-overlay",
     ],
 
     // Create package-export.apk, which other packages can use to get

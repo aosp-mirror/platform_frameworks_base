@@ -41,6 +41,9 @@ struct LocaleValue {
    */
   bool InitFromFilterString(const android::StringPiece& config);
 
+  // Initializes this LocaleValue from a BCP-47 locale tag.
+  bool InitFromBcp47Tag(const android::StringPiece& bcp47tag);
+
   /**
    * Initialize this LocaleValue from parts of a vector.
    */
@@ -67,6 +70,8 @@ struct LocaleValue {
   inline bool operator>(const LocaleValue& o) const;
 
  private:
+  bool InitFromBcp47TagImpl(const android::StringPiece& bcp47tag, const char separator);
+
   void set_language(const char* language);
   void set_region(const char* language);
   void set_script(const char* script);

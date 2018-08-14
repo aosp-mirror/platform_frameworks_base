@@ -50,6 +50,7 @@ import com.android.internal.R;
 import com.android.internal.widget.NumericTextView;
 import com.android.internal.widget.NumericTextView.OnValueChangedListener;
 
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Calendar;
@@ -804,18 +805,54 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
     private void updateHeaderSeparator() {
         final String bestDateTimePattern = DateFormat.getBestDateTimePattern(mLocale,
                 (mIs24Hour) ? "Hm" : "hm");
-        final String separatorText;
-        // See http://www.unicode.org/reports/tr35/tr35-dates.html for hour formats
-        final char[] hourFormats = {'H', 'h', 'K', 'k'};
-        int hIndex = lastIndexOfAny(bestDateTimePattern, hourFormats);
-        if (hIndex == -1) {
-            // Default case
-            separatorText = ":";
-        } else {
-            separatorText = Character.toString(bestDateTimePattern.charAt(hIndex + 1));
-        }
+        final String separatorText = getHourMinSeparatorFromPattern(bestDateTimePattern);
         mSeparatorView.setText(separatorText);
         mTextInputPickerView.updateSeparator(separatorText);
+    }
+
+    /**
+     * This helper method extracts the time separator from the {@code datetimePattern}.
+     *
+     * The time separator is defined in the Unicode CLDR and cannot be supposed to be ":".
+     *
+     * See http://unicode.org/cldr/trac/browser/trunk/common/main
+     *
+     * @return Separator string. This is the character or set of quoted characters just after the
+     * hour marker in {@code dateTimePattern}. Returns a colon (:) if it can't locate the
+     * separator.
+     *
+     * @hide
+     */
+    private static String getHourMinSeparatorFromPattern(String dateTimePattern) {
+        final String defaultSeparator = ":";
+        boolean foundHourPattern = false;
+        for (int i = 0; i < dateTimePattern.length(); i++) {
+            switch (dateTimePattern.charAt(i)) {
+                // See http://www.unicode.org/reports/tr35/tr35-dates.html for hour formats.
+                case 'H':
+                case 'h':
+                case 'K':
+                case 'k':
+                    foundHourPattern = true;
+                    continue;
+                case ' ': // skip spaces
+                    continue;
+                case '\'':
+                    if (!foundHourPattern) {
+                        continue;
+                    }
+                    SpannableStringBuilder quotedSubstring = new SpannableStringBuilder(
+                            dateTimePattern.substring(i));
+                    int quotedTextLength = DateFormat.appendQuotedText(quotedSubstring, 0);
+                    return quotedSubstring.subSequence(0, quotedTextLength).toString();
+                default:
+                    if (!foundHourPattern) {
+                        continue;
+                    }
+                    return Character.toString(dateTimePattern.charAt(i));
+            }
+        }
+        return defaultSeparator;
     }
 
     static private int lastIndexOfAny(String str, char[] any) {

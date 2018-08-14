@@ -16,14 +16,19 @@
 
 package com.android.systemui.qs;
 
+import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
+
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Point;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.statusbar.CommandQueue;
 
 /**
  * Wrapper view with background which contains {@link QSPanel} and {@link BaseStatusBarHeader}
@@ -33,13 +38,19 @@ public class QSContainerImpl extends FrameLayout {
     private final Point mSizePoint = new Point();
 
     private int mHeightOverride = -1;
-    protected View mQSPanel;
+    private QSPanel mQSPanel;
     private View mQSDetail;
-    protected View mHeader;
-    protected float mQsExpansion;
+    private QuickStatusBarHeader mHeader;
+    private float mQsExpansion;
     private QSCustomizer mQSCustomizer;
     private View mQSFooter;
-    private float mFullElevation;
+
+    private View mBackground;
+    private View mBackgroundGradient;
+    private View mStatusBarBackground;
+
+    private int mSideMargins;
+    private boolean mQsDisabled;
 
     public QSContainerImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -53,10 +64,31 @@ public class QSContainerImpl extends FrameLayout {
         mHeader = findViewById(R.id.header);
         mQSCustomizer = findViewById(R.id.qs_customize);
         mQSFooter = findViewById(R.id.qs_footer);
-        mFullElevation = mQSPanel.getElevation();
+        mBackground = findViewById(R.id.quick_settings_background);
+        mStatusBarBackground = findViewById(R.id.quick_settings_status_bar_background);
+        mBackgroundGradient = findViewById(R.id.quick_settings_gradient_view);
+        mSideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
 
         setClickable(true);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+        setMargins();
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // Hide the backgrounds when in landscape mode.
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mBackgroundGradient.setVisibility(View.INVISIBLE);
+            mStatusBarBackground.setVisibility(View.INVISIBLE);
+        } else {
+            mBackgroundGradient.setVisibility(View.VISIBLE);
+            mStatusBarBackground.setVisibility(View.VISIBLE);
+        }
+
+        updateResources();
+        mSizePoint.set(0, 0); // Will be retrieved on next measure pass.
     }
 
     @Override
@@ -82,15 +114,30 @@ public class QSContainerImpl extends FrameLayout {
 
         // QSCustomizer will always be the height of the screen, but do this after
         // other measuring to avoid changing the height of the QS.
-        getDisplay().getRealSize(mSizePoint);
         mQSCustomizer.measure(widthMeasureSpec,
-                MeasureSpec.makeMeasureSpec(mSizePoint.y, MeasureSpec.EXACTLY));
+                MeasureSpec.makeMeasureSpec(getDisplayHeight(), MeasureSpec.EXACTLY));
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         updateExpansion();
+    }
+
+    public void disable(int state1, int state2, boolean animate) {
+        final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
+        if (disabled == mQsDisabled) return;
+        mQsDisabled = disabled;
+        mBackgroundGradient.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
+        mBackground.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
+    }
+
+    private void updateResources() {
+        LayoutParams layoutParams = (LayoutParams) mQSPanel.getLayoutParams();
+        layoutParams.topMargin = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.quick_qs_offset_height);
+
+        mQSPanel.setLayoutParams(layoutParams);
     }
 
     /**
@@ -110,6 +157,8 @@ public class QSContainerImpl extends FrameLayout {
         mQSDetail.setBottom(getTop() + height);
         // Pin QS Footer to the bottom of the panel.
         mQSFooter.setTranslationY(height - mQSFooter.getHeight());
+        mBackground.setTop(mQSPanel.getTop());
+        mBackground.setBottom(height);
     }
 
     protected int calculateContainerHeight() {
@@ -122,5 +171,26 @@ public class QSContainerImpl extends FrameLayout {
     public void setExpansion(float expansion) {
         mQsExpansion = expansion;
         updateExpansion();
+    }
+
+    private void setMargins() {
+        setMargins(mQSDetail);
+        setMargins(mBackground);
+        setMargins(mQSFooter);
+        mQSPanel.setMargins(mSideMargins);
+        mHeader.setMargins(mSideMargins);
+    }
+
+    private void setMargins(View view) {
+        FrameLayout.LayoutParams lp = (LayoutParams) view.getLayoutParams();
+        lp.rightMargin = mSideMargins;
+        lp.leftMargin = mSideMargins;
+    }
+
+    private int getDisplayHeight() {
+        if (mSizePoint.y == 0) {
+            getDisplay().getRealSize(mSizePoint);
+        }
+        return mSizePoint.y;
     }
 }

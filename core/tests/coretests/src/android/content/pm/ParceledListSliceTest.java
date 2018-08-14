@@ -2,6 +2,7 @@ package android.content.pm;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.test.filters.LargeTest;
 
 import junit.framework.TestCase;
 
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@LargeTest
 public class ParceledListSliceTest extends TestCase {
 
     public void testSmallList() throws Exception {

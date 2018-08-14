@@ -16,15 +16,18 @@
 
 package com.android.server.display;
 
+import android.app.ActivityManager;
 import android.opengl.Matrix;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
-
+import com.android.internal.app.ColorDisplayController;
 import java.util.Arrays;
 
 /**
@@ -34,10 +37,16 @@ public class DisplayTransformManager {
 
     private static final String TAG = "DisplayTransformManager";
 
+    private static final String SURFACE_FLINGER = "SurfaceFlinger";
+
     /**
      * Color transform level used by Night display to tint the display red.
      */
     public static final int LEVEL_COLOR_MATRIX_NIGHT_DISPLAY = 100;
+    /**
+     * Color transform level used to adjust the color saturation of the display.
+     */
+    public static final int LEVEL_COLOR_MATRIX_SATURATION = 150;
     /**
      * Color transform level used by A11y services to make the display monochromatic.
      */
@@ -49,6 +58,25 @@ public class DisplayTransformManager {
 
     private static final int SURFACE_FLINGER_TRANSACTION_COLOR_MATRIX = 1015;
     private static final int SURFACE_FLINGER_TRANSACTION_DALTONIZER = 1014;
+
+    private static final String PERSISTENT_PROPERTY_SATURATION = "persist.sys.sf.color_saturation";
+    private static final String PERSISTENT_PROPERTY_DISPLAY_COLOR = "persist.sys.sf.native_mode";
+
+    /**
+     * SurfaceFlinger global saturation factor.
+     */
+    private static final int SURFACE_FLINGER_TRANSACTION_SATURATION = 1022;
+    /**
+     * SurfaceFlinger display color (managed, unmanaged, etc.).
+     */
+    private static final int SURFACE_FLINGER_TRANSACTION_DISPLAY_COLOR = 1023;
+
+    private static final float COLOR_SATURATION_NATURAL = 1.0f;
+    private static final float COLOR_SATURATION_BOOSTED = 1.1f;
+
+    private static final int DISPLAY_COLOR_MANAGED = 0;
+    private static final int DISPLAY_COLOR_UNMANAGED = 1;
+    private static final int DISPLAY_COLOR_ENHANCED = 2;
 
     /**
      * Map of level -> color transformation matrix.
@@ -161,7 +189,7 @@ public class DisplayTransformManager {
      * Propagates the provided color transformation matrix to the SurfaceFlinger.
      */
     private static void applyColorMatrix(float[] m) {
-        final IBinder flinger = ServiceManager.getService("SurfaceFlinger");
+        final IBinder flinger = ServiceManager.getService(SURFACE_FLINGER);
         if (flinger != null) {
             final Parcel data = Parcel.obtain();
             data.writeInterfaceToken("android.ui.ISurfaceComposer");
@@ -187,7 +215,7 @@ public class DisplayTransformManager {
      * Propagates the provided Daltonization mode to the SurfaceFlinger.
      */
     private static void applyDaltonizerMode(int mode) {
-        final IBinder flinger = ServiceManager.getService("SurfaceFlinger");
+        final IBinder flinger = ServiceManager.getService(SURFACE_FLINGER);
         if (flinger != null) {
             final Parcel data = Parcel.obtain();
             data.writeInterfaceToken("android.ui.ISurfaceComposer");
@@ -199,6 +227,91 @@ public class DisplayTransformManager {
             } finally {
                 data.recycle();
             }
+        }
+    }
+
+    /**
+     * Return true when the color matrix works in linear space.
+     */
+    public static boolean needsLinearColorMatrix() {
+        return SystemProperties.getInt(PERSISTENT_PROPERTY_DISPLAY_COLOR,
+                DISPLAY_COLOR_UNMANAGED) != DISPLAY_COLOR_UNMANAGED;
+    }
+
+    /**
+     * Return true when the specified colorMode requires the color matrix to
+     * work in linear space.
+     */
+    public static boolean needsLinearColorMatrix(int colorMode) {
+        return colorMode != ColorDisplayController.COLOR_MODE_SATURATED;
+    }
+
+    public boolean setColorMode(int colorMode, float[] nightDisplayMatrix) {
+        if (colorMode == ColorDisplayController.COLOR_MODE_NATURAL) {
+            applySaturation(COLOR_SATURATION_NATURAL);
+            setDisplayColor(DISPLAY_COLOR_MANAGED);
+        } else if (colorMode == ColorDisplayController.COLOR_MODE_BOOSTED) {
+            applySaturation(COLOR_SATURATION_BOOSTED);
+            setDisplayColor(DISPLAY_COLOR_MANAGED);
+        } else if (colorMode == ColorDisplayController.COLOR_MODE_SATURATED) {
+            applySaturation(COLOR_SATURATION_NATURAL);
+            setDisplayColor(DISPLAY_COLOR_UNMANAGED);
+        } else if (colorMode == ColorDisplayController.COLOR_MODE_AUTOMATIC) {
+            applySaturation(COLOR_SATURATION_NATURAL);
+            setDisplayColor(DISPLAY_COLOR_ENHANCED);
+        }
+        setColorMatrix(LEVEL_COLOR_MATRIX_NIGHT_DISPLAY, nightDisplayMatrix);
+
+        updateConfiguration();
+
+        return true;
+    }
+
+    /**
+     * Propagates the provided saturation to the SurfaceFlinger.
+     */
+    private void applySaturation(float saturation) {
+        SystemProperties.set(PERSISTENT_PROPERTY_SATURATION, Float.toString(saturation));
+        final IBinder flinger = ServiceManager.getService(SURFACE_FLINGER);
+        if (flinger != null) {
+            final Parcel data = Parcel.obtain();
+            data.writeInterfaceToken("android.ui.ISurfaceComposer");
+            data.writeFloat(saturation);
+            try {
+                flinger.transact(SURFACE_FLINGER_TRANSACTION_SATURATION, data, null, 0);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Failed to set saturation", ex);
+            } finally {
+                data.recycle();
+            }
+        }
+    }
+
+    /**
+     * Toggles native mode on/off in SurfaceFlinger.
+     */
+    private void setDisplayColor(int color) {
+        SystemProperties.set(PERSISTENT_PROPERTY_DISPLAY_COLOR, Integer.toString(color));
+        final IBinder flinger = ServiceManager.getService(SURFACE_FLINGER);
+        if (flinger != null) {
+            final Parcel data = Parcel.obtain();
+            data.writeInterfaceToken("android.ui.ISurfaceComposer");
+            data.writeInt(color);
+            try {
+                flinger.transact(SURFACE_FLINGER_TRANSACTION_DISPLAY_COLOR, data, null, 0);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Failed to set display color", ex);
+            } finally {
+                data.recycle();
+            }
+        }
+    }
+
+    private void updateConfiguration() {
+        try {
+            ActivityManager.getService().updateConfiguration(null);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not update configuration", e);
         }
     }
 }

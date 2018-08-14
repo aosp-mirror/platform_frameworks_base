@@ -30,7 +30,9 @@ import static org.mockito.Mockito.when;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.os.UserHandle;
 import android.os.UserManager;
 
 import org.junit.Before;
@@ -39,12 +41,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.annotation.Config;
 
 import java.util.Arrays;
+import java.util.Collections;
 
-@RunWith(SettingLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 public class RestrictedLockUtilsTest {
 
     @Mock
@@ -53,13 +54,15 @@ public class RestrictedLockUtilsTest {
     private DevicePolicyManager mDevicePolicyManager;
     @Mock
     private UserManager mUserManager;
+    @Mock
+    private PackageManager mPackageManager;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private RestrictedLockUtils.Proxy mProxy;
 
-    private static final int mUserId = 194;
-    private static final int mProfileId = 160;
-    private static final ComponentName mAdmin1 = new ComponentName("admin1", "admin1class");
-    private static final ComponentName mAdmin2 = new ComponentName("admin2", "admin2class");
+    private final int mUserId = 194;
+    private final int mProfileId = 160;
+    private final ComponentName mAdmin1 = new ComponentName("admin1", "admin1class");
+    private final ComponentName mAdmin2 = new ComponentName("admin2", "admin2class");
 
     @Before
     public void setUp() {
@@ -69,8 +72,65 @@ public class RestrictedLockUtilsTest {
                 .thenReturn(mDevicePolicyManager);
         when(mContext.getSystemService(Context.USER_SERVICE))
                 .thenReturn(mUserManager);
+        when(mContext.getPackageManager())
+                .thenReturn(mPackageManager);
 
         RestrictedLockUtils.sProxy = mProxy;
+    }
+
+    @Test
+    public void checkIfRestrictionEnforced_deviceOwner() {
+        UserManager.EnforcingUser enforcingUser = new UserManager.EnforcingUser(mUserId,
+                UserManager.RESTRICTION_SOURCE_DEVICE_OWNER);
+        final String userRestriction = UserManager.DISALLOW_UNINSTALL_APPS;
+        when(mUserManager.getUserRestrictionSources(userRestriction,
+                UserHandle.of(mUserId))).
+                thenReturn(Collections.singletonList(enforcingUser));
+        setUpDeviceOwner(mAdmin1);
+
+        EnforcedAdmin enforcedAdmin = RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
+                userRestriction, mUserId);
+
+        assertThat(enforcedAdmin).isNotNull();
+        assertThat(enforcedAdmin.enforcedRestriction).isEqualTo(userRestriction);
+        assertThat(enforcedAdmin.component).isEqualTo(mAdmin1);
+    }
+
+    @Test
+    public void checkIfRestrictionEnforced_profileOwner() {
+        UserManager.EnforcingUser enforcingUser = new UserManager.EnforcingUser(mUserId,
+                UserManager.RESTRICTION_SOURCE_PROFILE_OWNER);
+        final String userRestriction = UserManager.DISALLOW_UNINSTALL_APPS;
+        when(mUserManager.getUserRestrictionSources(userRestriction,
+                UserHandle.of(mUserId))).
+                thenReturn(Collections.singletonList(enforcingUser));
+        setUpProfileOwner(mAdmin1, mUserId);
+
+        EnforcedAdmin enforcedAdmin = RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
+                userRestriction, mUserId);
+
+        assertThat(enforcedAdmin).isNotNull();
+        assertThat(enforcedAdmin.enforcedRestriction).isEqualTo(userRestriction);
+        assertThat(enforcedAdmin.component).isEqualTo(mAdmin1);
+    }
+
+    @Test
+    public void checkIfDevicePolicyServiceDisabled_noEnforceAdminForManagedProfile() {
+        when(mContext.getSystemService(Context.DEVICE_POLICY_SERVICE)).thenReturn(null);
+        final EnforcedAdmin enforcedAdmin = RestrictedLockUtils.checkIfAccountManagementDisabled(
+                mContext, "account_type", mUserId);
+
+        assertThat(enforcedAdmin).isEqualTo(null);
+    }
+
+    @Test
+    public void checkIfDeviceAdminFeatureDisabled_noEnforceAdminForManagedProfile() {
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN))
+                .thenReturn(false);
+        final EnforcedAdmin enforcedAdmin = RestrictedLockUtils.checkIfAccountManagementDisabled(
+                mContext, "account_type", mUserId);
+
+        assertThat(enforcedAdmin).isEqualTo(null);
     }
 
     @Test
@@ -240,5 +300,13 @@ public class RestrictedLockUtilsTest {
     private void setUpActiveAdmins(int userId, ComponentName[] activeAdmins) {
         when(mDevicePolicyManager.getActiveAdminsAsUser(userId))
                 .thenReturn(Arrays.asList(activeAdmins));
+    }
+
+    private void setUpDeviceOwner(ComponentName admin) {
+        when(mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser()).thenReturn(admin);
+    }
+
+    private void setUpProfileOwner(ComponentName admin, int userId) {
+        when(mDevicePolicyManager.getProfileOwnerAsUser(userId)).thenReturn(admin);
     }
 }

@@ -18,6 +18,7 @@ package com.android.internal.statusbar;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
+import android.hardware.biometrics.IBiometricPromptReceiver;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 
@@ -33,6 +34,8 @@ oneway interface IStatusBar
     void animateExpandSettingsPanel(String subPanel);
     void animateCollapsePanels();
     void togglePanel();
+
+    void showWirelessChargingAnimation(int batteryLevel);
 
     /**
      * Notifies the status bar of a System UI visibility flag change.
@@ -55,7 +58,7 @@ oneway interface IStatusBar
             boolean showImeSwitcher);
     void setWindowState(int window, int state);
 
-    void showRecentApps(boolean triggeredFromAltTab, boolean fromHome);
+    void showRecentApps(boolean triggeredFromAltTab);
     void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
     void toggleRecentApps();
     void toggleSplitScreen();
@@ -113,6 +116,11 @@ oneway interface IStatusBar
     void showGlobalActionsMenu();
 
     /**
+     * Notifies the status bar that a new rotation suggestion is available.
+     */
+    void onProposedRotationChanged(int rotation, boolean isValid);
+
+    /**
      * Set whether the top app currently hides the statusbar.
      *
      * @param hidesStatusBar whether it is being hidden
@@ -124,5 +132,22 @@ oneway interface IStatusBar
     void clickQsTile(in ComponentName tile);
     void handleSystemKey(in int key);
 
+    /**
+     * Methods to show toast messages for screen pinning
+     */
+    void showPinningEnterExitToast(boolean entering);
+    void showPinningEscapeToast();
+
     void showShutdownUi(boolean isReboot, String reason);
+
+    // Used to show the dialog when FingerprintService starts authentication
+    void showFingerprintDialog(in Bundle bundle, IBiometricPromptReceiver receiver);
+    // Used to hide the dialog when a finger is authenticated
+    void onFingerprintAuthenticated();
+    // Used to set a temporary message, e.g. fingerprint not recognized, finger moved too fast, etc
+    void onFingerprintHelp(String message);
+    // Used to set a message - the dialog will dismiss after a certain amount of time
+    void onFingerprintError(String error);
+    // Used to hide the fingerprint dialog when the authenticationclient is stopped
+    void hideFingerprintDialog();
 }

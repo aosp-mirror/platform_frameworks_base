@@ -177,30 +177,6 @@ public final class FillContext implements Parcelable {
         return foundNodes;
     }
 
-    /**
-     * Finds the {@link ViewNode} that has the requested {@code id}, if any.
-     *
-     * @hide
-     */
-    @Nullable public ViewNode findViewNodeByAutofillId(@NonNull AutofillId id) {
-        final LinkedList<ViewNode> nodesToProcess = new LinkedList<>();
-        final int numWindowNodes = mStructure.getWindowNodeCount();
-        for (int i = 0; i < numWindowNodes; i++) {
-            nodesToProcess.add(mStructure.getWindowNodeAt(i).getRootViewNode());
-        }
-        while (!nodesToProcess.isEmpty()) {
-            final ViewNode node = nodesToProcess.removeFirst();
-            if (id.equals(node.getAutofillId())) {
-                return node;
-            }
-            for (int i = 0; i < node.getChildCount(); i++) {
-                nodesToProcess.addLast(node.getChildAt(i));
-            }
-        }
-
-        return null;
-    }
-
     public static final Parcelable.Creator<FillContext> CREATOR =
             new Parcelable.Creator<FillContext>() {
         @Override

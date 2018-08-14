@@ -44,8 +44,10 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.KeyEvent;
-import android.view.WindowManagerPolicy;
+
 import com.android.server.accessibility.KeyEventDispatcher.KeyEventFilter;
+import com.android.server.policy.WindowManagerPolicy;
+
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;

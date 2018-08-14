@@ -19,7 +19,6 @@ package android.os.storage;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
-import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Parcel;
@@ -78,13 +77,12 @@ import java.io.File;
 public final class StorageVolume implements Parcelable {
 
     private final String mId;
-    private final int mStorageId;
     private final File mPath;
+    private final File mInternalPath;
     private final String mDescription;
     private final boolean mPrimary;
     private final boolean mRemovable;
     private final boolean mEmulated;
-    private final long mMtpReserveSize;
     private final boolean mAllowMassStorage;
     private final long mMaxFileSize;
     private final UserHandle mOwner;
@@ -121,17 +119,16 @@ public final class StorageVolume implements Parcelable {
     public static final int STORAGE_ID_PRIMARY = 0x00010001;
 
     /** {@hide} */
-    public StorageVolume(String id, int storageId, File path, String description, boolean primary,
-            boolean removable, boolean emulated, long mtpReserveSize, boolean allowMassStorage,
+    public StorageVolume(String id, File path, File internalPath, String description,
+            boolean primary, boolean removable, boolean emulated, boolean allowMassStorage,
             long maxFileSize, UserHandle owner, String fsUuid, String state) {
         mId = Preconditions.checkNotNull(id);
-        mStorageId = storageId;
         mPath = Preconditions.checkNotNull(path);
+        mInternalPath = Preconditions.checkNotNull(internalPath);
         mDescription = Preconditions.checkNotNull(description);
         mPrimary = primary;
         mRemovable = removable;
         mEmulated = emulated;
-        mMtpReserveSize = mtpReserveSize;
         mAllowMassStorage = allowMassStorage;
         mMaxFileSize = maxFileSize;
         mOwner = Preconditions.checkNotNull(owner);
@@ -141,13 +138,12 @@ public final class StorageVolume implements Parcelable {
 
     private StorageVolume(Parcel in) {
         mId = in.readString();
-        mStorageId = in.readInt();
         mPath = new File(in.readString());
+        mInternalPath = new File(in.readString());
         mDescription = in.readString();
         mPrimary = in.readInt() != 0;
         mRemovable = in.readInt() != 0;
         mEmulated = in.readInt() != 0;
-        mMtpReserveSize = in.readLong();
         mAllowMassStorage = in.readInt() != 0;
         mMaxFileSize = in.readLong();
         mOwner = in.readParcelable(null);
@@ -168,6 +164,16 @@ public final class StorageVolume implements Parcelable {
      */
     public String getPath() {
         return mPath.toString();
+    }
+
+    /**
+     * Returns the path of the underlying filesystem.
+     *
+     * @return the internal path
+     * @hide
+     */
+    public String getInternalPath() {
+        return mInternalPath.toString();
     }
 
     /** {@hide} */
@@ -208,34 +214,6 @@ public final class StorageVolume implements Parcelable {
      */
     public boolean isEmulated() {
         return mEmulated;
-    }
-
-    /**
-     * Returns the MTP storage ID for the volume.
-     * this is also used for the storage_id column in the media provider.
-     *
-     * @return MTP storage ID
-     * @hide
-     */
-    public int getStorageId() {
-        return mStorageId;
-    }
-
-    /**
-     * Number of megabytes of space to leave unallocated by MTP.
-     * MTP will subtract this value from the free space it reports back
-     * to the host via GetStorageInfo, and will not allow new files to
-     * be added via MTP if there is less than this amount left free in the storage.
-     * If MTP has dedicated storage this value should be zero, but if MTP is
-     * sharing storage with the rest of the system, set this to a positive value
-     * to ensure that MTP activity does not result in the storage being
-     * too close to full.
-     *
-     * @return MTP reserve space
-     * @hide
-     */
-    public int getMtpReserveSpace() {
-        return (int) (mMtpReserveSize / TrafficStats.MB_IN_BYTES);
     }
 
     /**
@@ -385,13 +363,12 @@ public final class StorageVolume implements Parcelable {
         pw.println("StorageVolume:");
         pw.increaseIndent();
         pw.printPair("mId", mId);
-        pw.printPair("mStorageId", mStorageId);
         pw.printPair("mPath", mPath);
+        pw.printPair("mInternalPath", mInternalPath);
         pw.printPair("mDescription", mDescription);
         pw.printPair("mPrimary", mPrimary);
         pw.printPair("mRemovable", mRemovable);
         pw.printPair("mEmulated", mEmulated);
-        pw.printPair("mMtpReserveSize", mMtpReserveSize);
         pw.printPair("mAllowMassStorage", mAllowMassStorage);
         pw.printPair("mMaxFileSize", mMaxFileSize);
         pw.printPair("mOwner", mOwner);
@@ -420,17 +397,44 @@ public final class StorageVolume implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeString(mId);
-        parcel.writeInt(mStorageId);
         parcel.writeString(mPath.toString());
+        parcel.writeString(mInternalPath.toString());
         parcel.writeString(mDescription);
         parcel.writeInt(mPrimary ? 1 : 0);
         parcel.writeInt(mRemovable ? 1 : 0);
         parcel.writeInt(mEmulated ? 1 : 0);
-        parcel.writeLong(mMtpReserveSize);
         parcel.writeInt(mAllowMassStorage ? 1 : 0);
         parcel.writeLong(mMaxFileSize);
         parcel.writeParcelable(mOwner, flags);
         parcel.writeString(mFsUuid);
         parcel.writeString(mState);
+    }
+
+    /** {@hide} */
+    public static final class ScopedAccessProviderContract {
+
+        private ScopedAccessProviderContract() {
+            throw new UnsupportedOperationException("contains constants only");
+        }
+
+        public static final String AUTHORITY = "com.android.documentsui.scopedAccess";
+
+        public static final String TABLE_PACKAGES = "packages";
+        public static final String TABLE_PERMISSIONS = "permissions";
+
+        public static final String COL_PACKAGE = "package_name";
+        public static final String COL_VOLUME_UUID = "volume_uuid";
+        public static final String COL_DIRECTORY = "directory";
+        public static final String COL_GRANTED = "granted";
+
+        public static final String[] TABLE_PACKAGES_COLUMNS = new String[] { COL_PACKAGE };
+        public static final String[] TABLE_PERMISSIONS_COLUMNS =
+                new String[] { COL_PACKAGE, COL_VOLUME_UUID, COL_DIRECTORY, COL_GRANTED };
+
+        public static final int TABLE_PACKAGES_COL_PACKAGE = 0;
+        public static final int TABLE_PERMISSIONS_COL_PACKAGE = 0;
+        public static final int TABLE_PERMISSIONS_COL_VOLUME_UUID = 1;
+        public static final int TABLE_PERMISSIONS_COL_DIRECTORY = 2;
+        public static final int TABLE_PERMISSIONS_COL_GRANTED = 3;
     }
 }

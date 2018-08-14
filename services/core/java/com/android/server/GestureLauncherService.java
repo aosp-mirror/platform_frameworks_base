@@ -40,13 +40,13 @@ import android.provider.Settings;
 import android.util.MutableBoolean;
 import android.util.Slog;
 import android.view.KeyEvent;
-import android.view.WindowManagerInternal;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.LocalServices;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.wm.WindowManagerInternal;
 
 /**
  * The service that listens for gestures detected in sensor firmware and starts the intent

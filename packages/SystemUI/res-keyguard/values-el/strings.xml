@@ -28,12 +28,15 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Αγγίξτε για εισαγ. κωδ. πρόσβ."</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Πληκτρολογήστε τον κωδικό πρόσβασης για ξεκλείδωμα"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Πληκτρολογήστε τον αριθμό PIN για ξεκλείδωμα"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Εισαγάγετε τον αριθμό PIN σας"</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"Εισαγάγετε το μοτίβο σας"</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"Εισαγάγετε τον κωδικό πρόσβ."</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Λανθασμένος κωδικός PIN."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Μη έγκυρη κάρτα."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"Φορτίστηκε"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"Φόρτιση σε εξέλιξη"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Ταχεία φόρτιση"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Αργή φόρτιση"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Φόρτιση"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Γρήγορη φόρτιση"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Αργή φόρτιση"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Συνδέστε τον φορτιστή."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Πατήστε \"Μενού\" για ξεκλείδωμα."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Κλειδωμένο δίκτυο"</string>
@@ -43,26 +46,32 @@
     <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"Τοποθετήστε μια κάρτα SIM."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"Η κάρτα SIM δεν υπάρχει ή δεν είναι δυνατή η ανάγνωσή της. Τοποθετήστε μια κάρτα SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"Η κάρτα SIM δεν μπορεί να χρησιμοποιηθεί."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"Η κάρτα SIM έχει απενεργοποιηθεί οριστικά.\n Επικοινωνήστε με τον παροχέα υπηρεσιών ασύρματου δικτύου για να λάβετε μια νέα κάρτα SIM."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"Η κάρτα SIM έχει απενεργοποιηθεί οριστικά.\n Επικοινωνήστε με τον πάροχο υπηρεσιών ασύρματου δικτύου για να λάβετε μια νέα κάρτα SIM."</string>
     <string name="keyguard_sim_locked_message" msgid="953766009432168127">"Η κάρτα SIM είναι κλειδωμένη."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"Η κάρτα SIM είναι κλειδωμένη με κωδικό PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"Ξεκλείδωμα κάρτας SIM…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"Περιοχή αριθμού PIN"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Κωδικός πρόσβασης συσκευής"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"Περιοχή αριθμού PIN κάρτας SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Περιοχή κωδικού PUK κάρτας SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Το επόμενο ξυπνητήρι ορίστηκε στις <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Διαγραφή"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"Απενεργοποίηση eSIM"</string>
+    <string name="error_disable_esim_title" msgid="4852978431156228006">"Αδυναμία απενεργοποίησης eSIM"</string>
+    <string name="error_disable_esim_msg" msgid="676694908770135639">"Δεν είναι δυνατή η απενεργοποίηση της eSIM, εξαιτίας κάποιου σφάλματος."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Ξεχάσατε το μοτίβο"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Λάθος μοτίβο"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"Λανθασμένος κωδικός πρόσβασης"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Λανθασμένο PIN"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Δοκιμάστε ξανά σε <xliff:g id="NUMBER">%d</xliff:g> δευτερόλεπτα."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="other">Δοκιμάστε ξανά σε <xliff:g id="NUMBER">%d</xliff:g> δευτερόλεπτα.</item>
+      <item quantity="one">Δοκιμάστε ξανά σε 1 δευτερόλεπτο.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Σχεδιάστε το μοτίβο σας"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Εισαγωγή αριθμού PIN κάρτας SIM"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Εισαγάγετε τον αριθμό PIN της κάρτας SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
-    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"Απενεργοποιήστε την eSIM, για να χρησιμοποιήσετε τη συσκευή χωρίς υπηρεσία για κινητά."</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Απενεργοποιήστε την eSIM, για να χρησιμοποιήσετε τη συσκευή χωρίς υπηρεσία για κινητά."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"Εισαγάγετε τον αριθμό PIN"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Εισαγάγετε κωδικό πρόσβασης"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"Η κάρτα SIM είναι απενεργοποιημένη αυτή τη στιγμή. Εισαγάγετε τον κωδικό PUK για να συνεχίσετε. Επικοινωνήστε με την εταιρεία κινητής τηλεφωνίας σας για λεπτομέρειες."</string>
@@ -132,4 +141,12 @@
       <item quantity="one">Η συσκευή δεν έχει ξεκλειδωθεί εδώ και <xliff:g id="NUMBER_0">%d</xliff:g> ώρα. Επιβεβαιώστε τον κωδικό πρόσβασης.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Δεν αναγνωρίστηκε"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">Εισαγάγετε τον αριθμό PIN της κάρτας SIM. Απομένουν άλλες <xliff:g id="NUMBER_1">%d</xliff:g> προσπάθειες.</item>
+      <item quantity="one">Εισαγάγετε τον αριθμό PIN της κάρτας SIM. Απομένει άλλη <xliff:g id="NUMBER_0">%d</xliff:g> προσπάθεια. Στη συνέχεια, θα πρέπει να επικοινωνήσετε με τον πάροχο κινητής τηλεφωνίας, για να ξεκλειδώσετε τη συσκευή.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
+      <item quantity="other">Η κάρτα SIM απενεργοποιήθηκε. Καταχωρίστε τον κωδικό PUK, για να συνεχίσετε. Απομένουν <xliff:g id="_NUMBER_1">%d</xliff:g> ακόμη προσπάθειες προτού να μην είναι πλέον δυνατή η χρήση της κάρτας SIM. Επικοινωνήστε με την εταιρεία κινητής τηλεφωνίας για λεπτομέρειες.</item>
+      <item quantity="one">Η κάρτα SIM απενεργοποιήθηκε. Καταχωρίστε τον κωδικό PUK, για να συνεχίσετε. Απομένει <xliff:g id="_NUMBER_0">%d</xliff:g> ακόμη προσπάθεια προτού να μην είναι πλέον δυνατή η χρήση της κάρτας SIM. Επικοινωνήστε με την εταιρεία κινητής τηλεφωνίας για λεπτομέρειες.</item>
+    </plurals>
 </resources>

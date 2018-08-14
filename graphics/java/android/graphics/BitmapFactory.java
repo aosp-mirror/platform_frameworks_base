@@ -18,6 +18,8 @@ package android.graphics;
 
 import static android.graphics.BitmapFactory.Options.validate;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -355,6 +357,7 @@ public class BitmapFactory {
          * decode, in the case of which a more accurate, but slightly slower,
          * IDCT method will be used instead.
          */
+        @Deprecated
         public boolean inPreferQualityOverSpeed;
 
         /**
@@ -413,6 +416,7 @@ public class BitmapFactory {
          * can check, inbetween the bounds decode and the image decode, to see
          * if the operation is canceled.
          */
+        @Deprecated
         public boolean mCancel;
 
         /**
@@ -427,6 +431,7 @@ public class BitmapFactory {
          *  or if inJustDecodeBounds is true, will set outWidth/outHeight
          *  to -1
          */
+        @Deprecated
         public void requestCancelDecode() {
             mCancel = true;
         }
@@ -516,8 +521,9 @@ public class BitmapFactory {
      *         is not {@link ColorSpace.Model#RGB RGB}, or if the specified color space's transfer
      *         function is not an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
      */
-    public static Bitmap decodeResourceStream(Resources res, TypedValue value,
-            InputStream is, Rect pad, Options opts) {
+    @Nullable
+    public static Bitmap decodeResourceStream(@Nullable Resources res, @Nullable TypedValue value,
+            @Nullable InputStream is, @Nullable Rect pad, @Nullable Options opts) {
         validate(opts);
         if (opts == null) {
             opts = new Options();
@@ -705,7 +711,9 @@ public class BitmapFactory {
      * <code>is.mark(1024)</code> would be called. As of
      * {@link android.os.Build.VERSION_CODES#KITKAT}, this is no longer the case.</p>
      */
-    public static Bitmap decodeStream(InputStream is, Rect outPadding, Options opts) {
+    @Nullable
+    public static Bitmap decodeStream(@Nullable InputStream is, @Nullable Rect outPadding,
+            @Nullable Options opts) {
         // we don't throw in this case, thus allowing the caller to only check
         // the cache, and not force the image to be decoded.
         if (is == null) {
@@ -740,7 +748,8 @@ public class BitmapFactory {
      * Private helper function for decoding an InputStream natively. Buffers the input enough to
      * do a rewind as needed, and supplies temporary storage if necessary. is MUST NOT be null.
      */
-    private static Bitmap decodeStreamInternal(InputStream is, Rect outPadding, Options opts) {
+    private static Bitmap decodeStreamInternal(@NonNull InputStream is,
+            @Nullable Rect outPadding, @Nullable Options opts) {
         // ASSERT(is != null);
         byte [] tempStorage = null;
         if (opts != null) tempStorage = opts.inTempStorage;

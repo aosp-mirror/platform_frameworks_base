@@ -24,6 +24,7 @@ public class BrowseFragment extends android.support.v17.leanback.app.BrowseSuppo
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        TestHelper.initHeaderState(this);
         super.onCreate(savedInstanceState);
         BitmapLoader.clear();
         TestHelper.initBackground(getActivity());

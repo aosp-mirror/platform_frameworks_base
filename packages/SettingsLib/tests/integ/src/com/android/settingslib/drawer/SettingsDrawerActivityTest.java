@@ -18,8 +18,6 @@ package com.android.settingslib.drawer;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.doesNotExist;
-import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withContentDescription;
 
 import android.app.Instrumentation;
@@ -49,35 +47,14 @@ public class SettingsDrawerActivityTest {
     }
 
     @Test
-    public void startActivityWithNoExtra_showNoNavUp() {
-        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
-        instrumentation.startActivitySync(new Intent(instrumentation.getTargetContext(),
-                TestActivity.class));
-
-        onView(withContentDescription(com.android.internal.R.string.action_bar_up_description))
-                .check(doesNotExist());
-    }
-
-    @Test
-    public void startActivityWithExtraToHideMenu_showNavUp() {
-        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
-        Intent intent = new Intent(instrumentation.getTargetContext(), TestActivity.class)
-                .putExtra(TestActivity.EXTRA_SHOW_MENU, false);
+    public void startActivity_doNotShowNavUp() {
+        final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        final Intent intent = new Intent(instrumentation.getTargetContext(), TestActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         instrumentation.startActivitySync(intent);
 
         onView(withContentDescription(com.android.internal.R.string.action_bar_up_description))
                 .check(doesNotExist());
-    }
-
-    @Test
-    public void startActivityWithExtraToShowMenu_showNavUp() {
-        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
-        Intent intent = new Intent(instrumentation.getTargetContext(), TestActivity.class)
-                .putExtra(TestActivity.EXTRA_SHOW_MENU, true);
-        instrumentation.startActivitySync(intent);
-
-        onView(withContentDescription(com.android.internal.R.string.action_bar_up_description))
-                .check(matches(isDisplayed()));
     }
 
     /**
@@ -86,5 +63,6 @@ public class SettingsDrawerActivityTest {
      * Use this activity because SettingsDrawerActivity hasn't been registered in its
      * AndroidManifest.xml
      */
-    public static class TestActivity extends SettingsDrawerActivity {}
+    public static class TestActivity extends SettingsDrawerActivity {
+    }
 }

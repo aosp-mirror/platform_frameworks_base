@@ -19,11 +19,11 @@ package android.service.autofill;
 import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 import android.util.Pair;
 import android.widget.RemoteViews;
 
@@ -32,7 +32,7 @@ import com.android.internal.util.Preconditions;
 import java.util.ArrayList;
 
 /**
- * Defines a custom description for the Save UI affordance.
+ * Defines a custom description for the autofill save UI.
  *
  * <p>This is useful when the autofill service needs to show a detailed view of what would be saved;
  * for example, when the screen contains a credit card, it could display a logo of the credit card
@@ -67,18 +67,18 @@ import java.util.ArrayList;
  * // Image child - different logo for each bank, based on credit card prefix
  * builder.addChild(R.id.templateccLogo,
  *   new ImageTransformation.Builder(ccNumberId)
- *     .addOption(Pattern.compile(""^4815.*$"), R.drawable.ic_credit_card_logo1)
- *     .addOption(Pattern.compile(""^1623.*$"), R.drawable.ic_credit_card_logo2)
- *     .addOption(Pattern.compile(""^42.*$"), R.drawable.ic_credit_card_logo3)
+ *     .addOption(Pattern.compile("^4815.*$"), R.drawable.ic_credit_card_logo1)
+ *     .addOption(Pattern.compile("^1623.*$"), R.drawable.ic_credit_card_logo2)
+ *     .addOption(Pattern.compile("^42.*$"), R.drawable.ic_credit_card_logo3)
  *     .build();
  * // Masked credit card number (as .....LAST_4_DIGITS)
  * builder.addChild(R.id.templateCcNumber, new CharSequenceTransformation
- *     .Builder(ccNumberId, Pattern.compile(""^.*(\\d\\d\\d\\d)$"), "...$1")
+ *     .Builder(ccNumberId, Pattern.compile("^.*(\\d\\d\\d\\d)$"), "...$1")
  *     .build();
  * // Expiration date as MM / YYYY:
  * builder.addChild(R.id.templateExpDate, new CharSequenceTransformation
- *     .Builder(ccExpMonthId, Pattern.compile(""^(\\d\\d)$"), "Exp: $1")
- *     .addField(ccExpYearId, Pattern.compile(""^(\\d\\d)$"), "/$1")
+ *     .Builder(ccExpMonthId, Pattern.compile("^(\\d\\d)$"), "Exp: $1")
+ *     .addField(ccExpYearId, Pattern.compile("^(\\d\\d)$"), "/$1")
  *     .build();
  * </pre>
  *
@@ -87,38 +87,32 @@ import java.util.ArrayList;
  */
 public final class CustomDescription implements Parcelable {
 
-    private static final String TAG = "CustomDescription";
-
     private final RemoteViews mPresentation;
     private final ArrayList<Pair<Integer, InternalTransformation>> mTransformations;
+    private final ArrayList<Pair<InternalValidator, BatchUpdates>> mUpdates;
 
     private CustomDescription(Builder builder) {
         mPresentation = builder.mPresentation;
         mTransformations = builder.mTransformations;
+        mUpdates = builder.mUpdates;
     }
 
     /** @hide */
-    public RemoteViews getPresentation(ValueFinder finder) {
-        if (mTransformations != null) {
-            final int size = mTransformations.size();
-            if (sDebug) Log.d(TAG, "getPresentation(): applying " + size + " transformations");
-            for (int i = 0; i < size; i++) {
-                final Pair<Integer, InternalTransformation> pair = mTransformations.get(i);
-                final int id = pair.first;
-                final InternalTransformation transformation = pair.second;
-                if (sDebug) Log.d(TAG, "#" + i + ": " + transformation);
-
-                try {
-                    transformation.apply(finder, mPresentation, id);
-                } catch (Exception e) {
-                    // Do not log full exception to avoid PII leaking
-                    Log.e(TAG, "Could not apply transformation " + transformation + ": "
-                            + e.getClass());
-                    return null;
-                }
-            }
-        }
+    @Nullable
+    public RemoteViews getPresentation() {
         return mPresentation;
+    }
+
+    /** @hide */
+    @Nullable
+    public ArrayList<Pair<Integer, InternalTransformation>> getTransformations() {
+        return mTransformations;
+    }
+
+    /** @hide */
+    @Nullable
+    public ArrayList<Pair<InternalValidator, BatchUpdates>> getUpdates() {
+        return mUpdates;
     }
 
     /**
@@ -127,7 +121,9 @@ public final class CustomDescription implements Parcelable {
     public static class Builder {
         private final RemoteViews mPresentation;
 
+        private boolean mDestroyed;
         private ArrayList<Pair<Integer, InternalTransformation>> mTransformations;
+        private ArrayList<Pair<InternalValidator, BatchUpdates>> mUpdates;
 
         /**
          * Default constructor.
@@ -135,7 +131,7 @@ public final class CustomDescription implements Parcelable {
          * <p><b>Note:</b> If any child view of presentation triggers a
          * {@link RemoteViews#setOnClickPendingIntent(int, android.app.PendingIntent) pending intent
          * on click}, such {@link PendingIntent} must follow the restrictions below, otherwise
-         * it might not be triggered or the Save affordance might not be shown when its activity
+         * it might not be triggered or the autofill save UI might not be shown when its activity
          * is finished:
          * <ul>
          *   <li>It cannot be created with the {@link PendingIntent#FLAG_IMMUTABLE} flag.
@@ -145,9 +141,11 @@ public final class CustomDescription implements Parcelable {
          * </ul>
          *
          * @param parentPresentation template presentation with (optional) children views.
+         * @throws NullPointerException if {@code parentPresentation} is null (on Android
+         * {@link android.os.Build.VERSION_CODES#P} or higher).
          */
-        public Builder(RemoteViews parentPresentation) {
-            mPresentation = parentPresentation;
+        public Builder(@NonNull RemoteViews parentPresentation) {
+            mPresentation = Preconditions.checkNotNull(parentPresentation);
         }
 
         /**
@@ -164,6 +162,7 @@ public final class CustomDescription implements Parcelable {
          * by the Android System.
          */
         public Builder addChild(int id, @NonNull Transformation transformation) {
+            throwIfDestroyed();
             Preconditions.checkArgument((transformation instanceof InternalTransformation),
                     "not provided by Android System: " + transformation);
             if (mTransformations == null) {
@@ -174,10 +173,111 @@ public final class CustomDescription implements Parcelable {
         }
 
         /**
+         * Updates the {@link RemoteViews presentation template} when a condition is satisfied by
+         * applying a series of remote view operations. This allows dynamic customization of the
+         * portion of the save UI that is controlled by the autofill service. Such dynamic
+         * customization is based on the content of target views.
+         *
+         * <p>The updates are applied in the sequence they are added, after the
+         * {@link #addChild(int, Transformation) transformations} are applied to the children
+         * views.
+         *
+         * <p>For example, to make children views visible when fields are not empty:
+         *
+         * <pre class="prettyprint">
+         * RemoteViews template = new RemoteViews(pgkName, R.layout.my_full_template);
+         *
+         * Pattern notEmptyPattern = Pattern.compile(".+");
+         * Validator hasAddress = new RegexValidator(addressAutofillId, notEmptyPattern);
+         * Validator hasCcNumber = new RegexValidator(ccNumberAutofillId, notEmptyPattern);
+         *
+         * RemoteViews addressUpdates = new RemoteViews(pgkName, R.layout.my_full_template)
+         * addressUpdates.setViewVisibility(R.id.address, View.VISIBLE);
+         *
+         * // Make address visible
+         * BatchUpdates addressBatchUpdates = new BatchUpdates.Builder()
+         *     .updateTemplate(addressUpdates)
+         *     .build();
+         *
+         * RemoteViews ccUpdates = new RemoteViews(pgkName, R.layout.my_full_template)
+         * ccUpdates.setViewVisibility(R.id.cc_number, View.VISIBLE);
+         *
+         * // Mask credit card number (as .....LAST_4_DIGITS) and make it visible
+         * BatchUpdates ccBatchUpdates = new BatchUpdates.Builder()
+         *     .updateTemplate(ccUpdates)
+         *     .transformChild(R.id.templateCcNumber, new CharSequenceTransformation
+         *                     .Builder(ccNumberId, Pattern.compile("^.*(\\d\\d\\d\\d)$"), "...$1")
+         *                     .build())
+         *     .build();
+         *
+         * CustomDescription customDescription = new CustomDescription.Builder(template)
+         *     .batchUpdate(hasAddress, addressBatchUpdates)
+         *     .batchUpdate(hasCcNumber, ccBatchUpdates)
+         *     .build();
+         * </pre>
+         *
+         * <p>Another approach is to add a child first, then apply the transformations. Example:
+         *
+         * <pre class="prettyprint">
+         * RemoteViews template = new RemoteViews(pgkName, R.layout.my_base_template);
+         *
+         * RemoteViews addressPresentation = new RemoteViews(pgkName, R.layout.address)
+         * RemoteViews addressUpdates = new RemoteViews(pgkName, R.layout.my_template)
+         * addressUpdates.addView(R.id.parentId, addressPresentation);
+         * BatchUpdates addressBatchUpdates = new BatchUpdates.Builder()
+         *     .updateTemplate(addressUpdates)
+         *     .build();
+         *
+         * RemoteViews ccPresentation = new RemoteViews(pgkName, R.layout.cc)
+         * RemoteViews ccUpdates = new RemoteViews(pgkName, R.layout.my_template)
+         * ccUpdates.addView(R.id.parentId, ccPresentation);
+         * BatchUpdates ccBatchUpdates = new BatchUpdates.Builder()
+         *     .updateTemplate(ccUpdates)
+         *     .transformChild(R.id.templateCcNumber, new CharSequenceTransformation
+         *                     .Builder(ccNumberId, Pattern.compile("^.*(\\d\\d\\d\\d)$"), "...$1")
+         *                     .build())
+         *     .build();
+         *
+         * CustomDescription customDescription = new CustomDescription.Builder(template)
+         *     .batchUpdate(hasAddress, addressBatchUpdates)
+         *     .batchUpdate(hasCcNumber, ccBatchUpdates)
+         *     .build();
+         * </pre>
+         *
+         * @param condition condition used to trigger the updates.
+         * @param updates actions to be applied to the
+         * {@link #CustomDescription.Builder(RemoteViews) template presentation} when the condition
+         * is satisfied.
+         *
+         * @return this builder
+         * @throws IllegalArgumentException if {@code condition} is not a class provided
+         * by the Android System.
+         */
+        public Builder batchUpdate(@NonNull Validator condition, @NonNull BatchUpdates updates) {
+            throwIfDestroyed();
+            Preconditions.checkArgument((condition instanceof InternalValidator),
+                    "not provided by Android System: " + condition);
+            Preconditions.checkNotNull(updates);
+            if (mUpdates == null) {
+                mUpdates = new ArrayList<>();
+            }
+            mUpdates.add(new Pair<>((InternalValidator) condition, updates));
+            return this;
+        }
+
+        /**
          * Creates a new {@link CustomDescription} instance.
          */
         public CustomDescription build() {
+            throwIfDestroyed();
+            mDestroyed = true;
             return new CustomDescription(this);
+        }
+
+        private void throwIfDestroyed() {
+            if (mDestroyed) {
+                throw new IllegalStateException("Already called #build()");
+            }
         }
     }
 
@@ -190,7 +290,10 @@ public final class CustomDescription implements Parcelable {
 
         return new StringBuilder("CustomDescription: [presentation=")
                 .append(mPresentation)
-                .append(", transformations=").append(mTransformations)
+                .append(", transformations=")
+                    .append(mTransformations == null ? "N/A" : mTransformations.size())
+                .append(", updates=")
+                    .append(mUpdates == null ? "N/A" : mUpdates.size())
                 .append("]").toString();
     }
 
@@ -205,6 +308,8 @@ public final class CustomDescription implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(mPresentation, flags);
+        if (mPresentation == null) return;
+
         if (mTransformations == null) {
             dest.writeIntArray(null);
         } else {
@@ -219,6 +324,21 @@ public final class CustomDescription implements Parcelable {
             dest.writeIntArray(ids);
             dest.writeParcelableArray(values, flags);
         }
+        if (mUpdates == null) {
+            dest.writeParcelableArray(null, flags);
+        } else {
+            final int size = mUpdates.size();
+            final InternalValidator[] conditions = new InternalValidator[size];
+            final BatchUpdates[] updates = new BatchUpdates[size];
+
+            for (int i = 0; i < size; i++) {
+                final Pair<InternalValidator, BatchUpdates> pair = mUpdates.get(i);
+                conditions[i] = pair.first;
+                updates[i] = pair.second;
+            }
+            dest.writeParcelableArray(conditions, flags);
+            dest.writeParcelableArray(updates, flags);
+        }
     }
     public static final Parcelable.Creator<CustomDescription> CREATOR =
             new Parcelable.Creator<CustomDescription>() {
@@ -227,7 +347,10 @@ public final class CustomDescription implements Parcelable {
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
-            final Builder builder = new Builder(parcel.readParcelable(null));
+            final RemoteViews parentPresentation = parcel.readParcelable(null);
+            if (parentPresentation == null) return null;
+
+            final Builder builder = new Builder(parentPresentation);
             final int[] ids = parcel.createIntArray();
             if (ids != null) {
                 final InternalTransformation[] values =
@@ -235,6 +358,15 @@ public final class CustomDescription implements Parcelable {
                 final int size = ids.length;
                 for (int i = 0; i < size; i++) {
                     builder.addChild(ids[i], values[i]);
+                }
+            }
+            final InternalValidator[] conditions =
+                    parcel.readParcelableArray(null, InternalValidator.class);
+            if (conditions != null) {
+                final BatchUpdates[] updates = parcel.readParcelableArray(null, BatchUpdates.class);
+                final int size = conditions.length;
+                for (int i = 0; i < size; i++) {
+                    builder.batchUpdate(conditions[i], updates[i]);
                 }
             }
             return builder.build();

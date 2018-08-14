@@ -18,11 +18,14 @@
 package android.hardware;
 
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 
 /**
  * Class representing a sensor. Use {@link SensorManager#getSensorList} to get
- * the list of available Sensors.
+ * the list of available sensors. For more information about Android sensors,
+ * read the
+ * <a href="/guide/topics/sensors/sensors_motion.html">Motion Sensors guide</a>.</p>
  *
  * @see SensorManager
  * @see SensorEventListener
@@ -502,6 +505,7 @@ public final class Sensor {
      *
      * @hide Expected to be used internally for always on display.
      */
+    @UnsupportedAppUsage
     public static final int TYPE_PICK_UP_GESTURE = 25;
 
     /**
@@ -541,6 +545,7 @@ public final class Sensor {
      * @hide Expected to be used internally for auto-rotate and speaker rotation.
      *
      */
+    @UnsupportedAppUsage
     public static final int TYPE_DEVICE_ORIENTATION = 27;
 
     /**
@@ -889,6 +894,7 @@ public final class Sensor {
     private String  mStringType;
     private String  mRequiredPermission;
     private int     mMaxDelay;
+    @UnsupportedAppUsage
     private int     mFlags;
     private int     mId;
 
@@ -1012,6 +1018,7 @@ public final class Sensor {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getHandle() {
         return mHandle;
     }

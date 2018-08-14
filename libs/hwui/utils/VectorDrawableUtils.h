@@ -20,8 +20,8 @@
 #include "VectorDrawable.h"
 
 #include <cutils/compiler.h>
-#include "SkPath.h"
 #include <vector>
+#include "SkPath.h"
 
 namespace android {
 namespace uirenderer {
@@ -30,11 +30,11 @@ class VectorDrawableUtils {
 public:
     ANDROID_API static bool canMorph(const PathData& morphFrom, const PathData& morphTo);
     ANDROID_API static bool interpolatePathData(PathData* outData, const PathData& morphFrom,
-            const PathData& morphTo, float fraction);
+                                                const PathData& morphTo, float fraction);
     ANDROID_API static void verbsToPath(SkPath* outPath, const PathData& data);
     static void interpolatePaths(PathData* outPathData, const PathData& from, const PathData& to,
-            float fraction);
+                                 float fraction);
 };
-} // namespace uirenderer
-} // namespace android
+}  // namespace uirenderer
+}  // namespace android
 #endif /* ANDROID_HWUI_VECTORDRAWABLE_UTILS_H*/

@@ -20,9 +20,10 @@
 #include "EglManager.h"
 #include "Frame.h"
 #include "GlLayer.h"
+#include "OpenGLReadback.h"
 #include "ProfileRenderer.h"
 #include "renderstate/RenderState.h"
-#include "OpenGLReadback.h"
+#include "TreeInfo.h"
 
 #include <cutils/properties.h>
 #include <strings.h>
@@ -32,9 +33,7 @@ namespace uirenderer {
 namespace renderthread {
 
 OpenGLPipeline::OpenGLPipeline(RenderThread& thread)
-        :  mEglManager(thread.eglManager())
-        , mRenderThread(thread) {
-}
+        : mEglManager(thread.eglManager()), mRenderThread(thread) {}
 
 MakeCurrentResult OpenGLPipeline::makeCurrent() {
     // TODO: Figure out why this workaround is needed, see b/13913604
@@ -51,22 +50,20 @@ MakeCurrentResult OpenGLPipeline::makeCurrent() {
 
 Frame OpenGLPipeline::getFrame() {
     LOG_ALWAYS_FATAL_IF(mEglSurface == EGL_NO_SURFACE,
-                "drawRenderNode called on a context with no surface!");
+                        "drawRenderNode called on a context with no surface!");
     return mEglManager.beginFrame(mEglSurface);
 }
 
 bool OpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
-        const FrameBuilder::LightGeometry& lightGeometry,
-        LayerUpdateQueue* layerUpdateQueue,
-        const Rect& contentDrawBounds, bool opaque, bool wideColorGamut,
-        const BakedOpRenderer::LightInfo& lightInfo,
-        const std::vector< sp<RenderNode> >& renderNodes,
-        FrameInfoVisualizer* profiler) {
-
+                          const FrameBuilder::LightGeometry& lightGeometry,
+                          LayerUpdateQueue* layerUpdateQueue, const Rect& contentDrawBounds,
+                          bool opaque, bool wideColorGamut,
+                          const BakedOpRenderer::LightInfo& lightInfo,
+                          const std::vector<sp<RenderNode>>& renderNodes,
+                          FrameInfoVisualizer* profiler) {
     mEglManager.damageFrame(frame, dirty);
 
     bool drew = false;
-
 
     auto& caches = Caches::getInstance();
     FrameBuilder frameBuilder(dirty, frame.width(), frame.height(), lightGeometry, caches);
@@ -76,8 +73,8 @@ bool OpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, const S
 
     frameBuilder.deferRenderNodeScene(renderNodes, contentDrawBounds);
 
-    BakedOpRenderer renderer(caches, mRenderThread.renderState(),
-            opaque, wideColorGamut, lightInfo);
+    BakedOpRenderer renderer(caches, mRenderThread.renderState(), opaque, wideColorGamut,
+                             lightInfo);
     frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
     ProfileRenderer profileRenderer(renderer);
     profiler->draw(profileRenderer);
@@ -100,8 +97,7 @@ bool OpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, const S
 }
 
 bool OpenGLPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
-        FrameInfo* currentFrameInfo, bool* requireSwap) {
-
+                                 FrameInfo* currentFrameInfo, bool* requireSwap) {
     GL_CHECKPOINT(LOW);
 
     // Even if we decided to cancel the frame, from the perspective of jank
@@ -123,13 +119,14 @@ bool OpenGLPipeline::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap
     layer->updateTexImage();
     layer->apply();
     return OpenGLReadbackImpl::copyLayerInto(mRenderThread,
-            static_cast<GlLayer&>(*layer->backingLayer()), bitmap);
+                                             static_cast<GlLayer&>(*layer->backingLayer()), bitmap);
 }
 
 static Layer* createLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,
-        SkColorFilter* colorFilter, int alpha, SkBlendMode mode, bool blend) {
-    GlLayer* layer = new GlLayer(renderState, layerWidth, layerHeight, colorFilter, alpha,
-            mode, blend);
+                          sk_sp<SkColorFilter> colorFilter, int alpha, SkBlendMode mode,
+                          bool blend) {
+    GlLayer* layer =
+            new GlLayer(renderState, layerWidth, layerHeight, colorFilter, alpha, mode, blend);
     Caches::getInstance().textureState().activateTexture(0);
     layer->generateTexture();
     return layer;
@@ -147,7 +144,6 @@ void OpenGLPipeline::onStop() {
 }
 
 bool OpenGLPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior, ColorMode colorMode) {
-
     if (mEglSurface != EGL_NO_SURFACE) {
         mEglManager.destroySurface(mEglSurface);
         mEglSurface = EGL_NO_SURFACE;
@@ -184,14 +180,16 @@ void OpenGLPipeline::onDestroyHardwareResources() {
 }
 
 void OpenGLPipeline::renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
-        LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
-        const BakedOpRenderer::LightInfo& lightInfo) {
-    static const std::vector< sp<RenderNode> > emptyNodeList;
+                                  LayerUpdateQueue* layerUpdateQueue, bool opaque,
+                                  bool wideColorGamut,
+                                  const BakedOpRenderer::LightInfo& lightInfo) {
+    static const std::vector<sp<RenderNode>> emptyNodeList;
     auto& caches = Caches::getInstance();
     FrameBuilder frameBuilder(*layerUpdateQueue, lightGeometry, caches);
     layerUpdateQueue->clear();
     // TODO: Handle wide color gamut contexts
-    BakedOpRenderer renderer(caches, mRenderThread.renderState(), opaque, wideColorGamut, lightInfo);
+    BakedOpRenderer renderer(caches, mRenderThread.renderState(), opaque, wideColorGamut,
+                             lightInfo);
     LOG_ALWAYS_FATAL_IF(renderer.didDraw(), "shouldn't draw in buildlayer case");
     frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
 }
@@ -205,13 +203,15 @@ static bool layerMatchesWH(OffscreenBuffer* layer, int width, int height) {
 }
 
 bool OpenGLPipeline::createOrUpdateLayer(RenderNode* node,
-        const DamageAccumulator& damageAccumulator, bool wideColorGamut) {
+                                         const DamageAccumulator& damageAccumulator,
+                                         bool wideColorGamut,
+                                         ErrorHandler* errorHandler) {
     RenderState& renderState = mRenderThread.renderState();
     OffscreenBufferPool& layerPool = renderState.layerPool();
     bool transformUpdateNeeded = false;
     if (node->getLayer() == nullptr) {
-        node->setLayer(layerPool.get(renderState,
-                node->getWidth(), node->getHeight(), wideColorGamut));
+        node->setLayer(
+                layerPool.get(renderState, node->getWidth(), node->getHeight(), wideColorGamut));
         transformUpdateNeeded = true;
     } else if (!layerMatchesWH(node->getLayer(), node->getWidth(), node->getHeight())) {
         // TODO: remove now irrelevant, currently enqueued damage (respecting damage ordering)
@@ -229,6 +229,22 @@ bool OpenGLPipeline::createOrUpdateLayer(RenderNode* node,
         Matrix4 windowTransform;
         damageAccumulator.computeCurrentTransform(&windowTransform);
         node->getLayer()->setWindowTransform(windowTransform);
+    }
+
+    if (!node->hasLayer()) {
+        Caches::getInstance().dumpMemoryUsage();
+        if (errorHandler) {
+            std::ostringstream err;
+            err << "Unable to create layer for " << node->getName();
+            const int maxTextureSize = Caches::getInstance().maxTextureSize;
+            if (node->getWidth() > maxTextureSize || node->getHeight() > maxTextureSize) {
+                err << ", size " << node->getWidth() << "x" << node->getHeight()
+                    << " exceeds max size " << maxTextureSize;
+            } else {
+                err << ", see logcat for more info";
+            }
+            errorHandler->onError(err.str());
+        }
     }
 
     return transformUpdateNeeded;
@@ -273,8 +289,7 @@ void OpenGLPipeline::invokeFunctor(const RenderThread& thread, Functor* functor)
 
 class AutoEglFence {
 public:
-    AutoEglFence(EGLDisplay display)
-            : mDisplay(display) {
+    AutoEglFence(EGLDisplay display) : mDisplay(display) {
         fence = eglCreateSyncKHR(mDisplay, EGL_SYNC_FENCE_KHR, NULL);
     }
 
@@ -285,17 +300,17 @@ public:
     }
 
     EGLSyncKHR fence = EGL_NO_SYNC_KHR;
+
 private:
     EGLDisplay mDisplay = EGL_NO_DISPLAY;
 };
 
 class AutoEglImage {
 public:
-    AutoEglImage(EGLDisplay display, EGLClientBuffer clientBuffer)
-            : mDisplay(display) {
-        EGLint imageAttrs[] = { EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE };
-        image = eglCreateImageKHR(display, EGL_NO_CONTEXT,
-                EGL_NATIVE_BUFFER_ANDROID, clientBuffer, imageAttrs);
+    AutoEglImage(EGLDisplay display, EGLClientBuffer clientBuffer) : mDisplay(display) {
+        EGLint imageAttrs[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE};
+        image = eglCreateImageKHR(display, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID, clientBuffer,
+                                  imageAttrs);
     }
 
     ~AutoEglImage() {
@@ -305,21 +320,19 @@ public:
     }
 
     EGLImageKHR image = EGL_NO_IMAGE_KHR;
+
 private:
     EGLDisplay mDisplay = EGL_NO_DISPLAY;
 };
 
 class AutoGlTexture {
 public:
-    AutoGlTexture(uirenderer::Caches& caches)
-            : mCaches(caches) {
+    AutoGlTexture(uirenderer::Caches& caches) : mCaches(caches) {
         glGenTextures(1, &mTexture);
         caches.textureState().bindTexture(mTexture);
     }
 
-    ~AutoGlTexture() {
-        mCaches.textureState().deleteTexture(mTexture);
-    }
+    ~AutoGlTexture() { mCaches.textureState().deleteTexture(mTexture); }
 
 private:
     uirenderer::Caches& mCaches;
@@ -327,18 +340,17 @@ private:
 };
 
 static bool uploadBitmapToGraphicBuffer(uirenderer::Caches& caches, SkBitmap& bitmap,
-        GraphicBuffer& buffer, GLint format, GLint type) {
+                                        GraphicBuffer& buffer, GLint format, GLint type) {
     EGLDisplay display = eglGetCurrentDisplay();
-    LOG_ALWAYS_FATAL_IF(display == EGL_NO_DISPLAY,
-                "Failed to get EGL_DEFAULT_DISPLAY! err=%s",
-                uirenderer::renderthread::EglManager::eglErrorString());
+    LOG_ALWAYS_FATAL_IF(display == EGL_NO_DISPLAY, "Failed to get EGL_DEFAULT_DISPLAY! err=%s",
+                        uirenderer::renderthread::EglManager::eglErrorString());
     // We use an EGLImage to access the content of the GraphicBuffer
     // The EGL image is later bound to a 2D texture
-    EGLClientBuffer clientBuffer = (EGLClientBuffer) buffer.getNativeBuffer();
+    EGLClientBuffer clientBuffer = (EGLClientBuffer)buffer.getNativeBuffer();
     AutoEglImage autoImage(display, clientBuffer);
     if (autoImage.image == EGL_NO_IMAGE_KHR) {
         ALOGW("Could not create EGL image, err =%s",
-                uirenderer::renderthread::EglManager::eglErrorString());
+              uirenderer::renderthread::EglManager::eglErrorString());
         return false;
     }
     AutoGlTexture glTexture(caches);
@@ -346,8 +358,8 @@ static bool uploadBitmapToGraphicBuffer(uirenderer::Caches& caches, SkBitmap& bi
 
     GL_CHECKPOINT(MODERATE);
 
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap.width(), bitmap.height(),
-            format, type, bitmap.getPixels());
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap.width(), bitmap.height(), format, type,
+                    bitmap.getPixels());
 
     GL_CHECKPOINT(MODERATE);
 
@@ -362,7 +374,7 @@ static bool uploadBitmapToGraphicBuffer(uirenderer::Caches& caches, SkBitmap& bi
     // The flag EGL_SYNC_FLUSH_COMMANDS_BIT_KHR will trigger a
     // pipeline flush (similar to what a glFlush() would do.)
     EGLint waitStatus = eglClientWaitSyncKHR(display, autoFence.fence,
-            EGL_SYNC_FLUSH_COMMANDS_BIT_KHR, FENCE_TIMEOUT);
+                                             EGL_SYNC_FLUSH_COMMANDS_BIT_KHR, FENCE_TIMEOUT);
     if (waitStatus != EGL_CONDITION_SATISFIED_KHR) {
         LOG_ALWAYS_FATAL("Failed to wait for the fence %#x", eglGetError());
         return false;
@@ -373,24 +385,24 @@ static bool uploadBitmapToGraphicBuffer(uirenderer::Caches& caches, SkBitmap& bi
 // TODO: handle SRGB sanely
 static PixelFormat internalFormatToPixelFormat(GLint internalFormat) {
     switch (internalFormat) {
-    case GL_LUMINANCE:
-        return PIXEL_FORMAT_RGBA_8888;
-    case GL_SRGB8_ALPHA8:
-        return PIXEL_FORMAT_RGBA_8888;
-    case GL_RGBA:
-        return PIXEL_FORMAT_RGBA_8888;
-    case GL_RGB:
-        return PIXEL_FORMAT_RGB_565;
-    case GL_RGBA16F:
-        return PIXEL_FORMAT_RGBA_FP16;
-    default:
-        LOG_ALWAYS_FATAL("Unsupported bitmap colorType: %d", internalFormat);
-        return PIXEL_FORMAT_UNKNOWN;
+        case GL_LUMINANCE:
+            return PIXEL_FORMAT_RGBA_8888;
+        case GL_SRGB8_ALPHA8:
+            return PIXEL_FORMAT_RGBA_8888;
+        case GL_RGBA:
+            return PIXEL_FORMAT_RGBA_8888;
+        case GL_RGB:
+            return PIXEL_FORMAT_RGB_565;
+        case GL_RGBA16F:
+            return PIXEL_FORMAT_RGBA_FP16;
+        default:
+            LOG_ALWAYS_FATAL("Unsupported bitmap colorType: %d", internalFormat);
+            return PIXEL_FORMAT_UNKNOWN;
     }
 }
 
 sk_sp<Bitmap> OpenGLPipeline::allocateHardwareBitmap(RenderThread& renderThread,
-        SkBitmap& skBitmap) {
+                                                     SkBitmap& skBitmap) {
     renderThread.eglManager().initialize();
     uirenderer::Caches& caches = uirenderer::Caches::getInstance();
 
@@ -404,13 +416,14 @@ sk_sp<Bitmap> OpenGLPipeline::allocateHardwareBitmap(RenderThread& renderThread,
     bool hasLinearBlending = caches.extensions().hasLinearBlending();
     GLint format, type, internalFormat;
     uirenderer::Texture::colorTypeToGlFormatAndType(caches, skBitmap.colorType(),
-            needSRGB && hasLinearBlending, &internalFormat, &format, &type);
+                                                    needSRGB && hasLinearBlending, &internalFormat,
+                                                    &format, &type);
 
     PixelFormat pixelFormat = internalFormatToPixelFormat(internalFormat);
-    sp<GraphicBuffer> buffer = new GraphicBuffer(info.width(), info.height(), pixelFormat,
-            GraphicBuffer::USAGE_HW_TEXTURE |
-            GraphicBuffer::USAGE_SW_WRITE_NEVER |
-            GraphicBuffer::USAGE_SW_READ_NEVER,
+    sp<GraphicBuffer> buffer = new GraphicBuffer(
+            info.width(), info.height(), pixelFormat,
+            GraphicBuffer::USAGE_HW_TEXTURE | GraphicBuffer::USAGE_SW_WRITE_NEVER |
+                    GraphicBuffer::USAGE_SW_READ_NEVER,
             std::string("Bitmap::allocateHardwareBitmap pid [") + std::to_string(getpid()) + "]");
 
     status_t error = buffer->initCheck();
@@ -420,8 +433,8 @@ sk_sp<Bitmap> OpenGLPipeline::allocateHardwareBitmap(RenderThread& renderThread,
     }
 
     SkBitmap bitmap;
-    if (CC_UNLIKELY(uirenderer::Texture::hasUnsupportedColorType(skBitmap.info(),
-            hasLinearBlending))) {
+    if (CC_UNLIKELY(
+                uirenderer::Texture::hasUnsupportedColorType(skBitmap.info(), hasLinearBlending))) {
         sk_sp<SkColorSpace> sRGB = SkColorSpace::MakeSRGB();
         bitmap = uirenderer::Texture::uploadToN32(skBitmap, hasLinearBlending, std::move(sRGB));
     } else {

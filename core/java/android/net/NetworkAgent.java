@@ -372,7 +372,7 @@ public abstract class NetworkAgent extends Handler {
         if (score < 0) {
             throw new IllegalArgumentException("Score must be >= 0");
         }
-        queueOrSendMessage(EVENT_NETWORK_SCORE_CHANGED, new Integer(score));
+        queueOrSendMessage(EVENT_NETWORK_SCORE_CHANGED,  score, 0);
     }
 
     /**
@@ -387,7 +387,7 @@ public abstract class NetworkAgent extends Handler {
      * {@link #saveAcceptUnvalidated} to respect the user's choice.
      */
     public void explicitlySelected(boolean acceptUnvalidated) {
-        queueOrSendMessage(EVENT_SET_EXPLICITLY_SELECTED, acceptUnvalidated);
+        queueOrSendMessage(EVENT_SET_EXPLICITLY_SELECTED, acceptUnvalidated ? 1 : 0, 0);
     }
 
     /**

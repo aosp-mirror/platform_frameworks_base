@@ -16,7 +16,11 @@
 
 package android.view.animation;
 
+import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 
 /**
  * An animation that controls the clip of an object. See the
@@ -26,8 +30,84 @@ import android.graphics.Rect;
  * @hide
  */
 public class ClipRectAnimation extends Animation {
-    protected Rect mFromRect = new Rect();
-    protected Rect mToRect = new Rect();
+    protected final Rect mFromRect = new Rect();
+    protected final Rect mToRect = new Rect();
+
+    private int mFromLeftType = ABSOLUTE;
+    private int mFromTopType = ABSOLUTE;
+    private int mFromRightType = ABSOLUTE;
+    private int mFromBottomType = ABSOLUTE;
+
+    private int mToLeftType = ABSOLUTE;
+    private int mToTopType = ABSOLUTE;
+    private int mToRightType = ABSOLUTE;
+    private int mToBottomType = ABSOLUTE;
+
+    private float mFromLeftValue;
+    private float mFromTopValue;
+    private float mFromRightValue;
+    private float mFromBottomValue;
+
+    private float mToLeftValue;
+    private float mToTopValue;
+    private float mToRightValue;
+    private float mToBottomValue;
+
+    /**
+     * Constructor used when a ClipRectAnimation is loaded from a resource.
+     *
+     * @param context Application context to use
+     * @param attrs Attribute set from which to read values
+     */
+    public ClipRectAnimation(Context context, AttributeSet attrs) {
+        super(context, attrs);
+
+        TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.ClipRectAnimation);
+
+        Description d = Description.parseValue(a.peekValue(
+                com.android.internal.R.styleable.ClipRectAnimation_fromLeft));
+        mFromLeftType = d.type;
+        mFromLeftValue = d.value;
+
+        d = Description.parseValue(a.peekValue(
+                com.android.internal.R.styleable.ClipRectAnimation_fromTop));
+        mFromTopType = d.type;
+        mFromTopValue = d.value;
+
+        d = Description.parseValue(a.peekValue(
+                com.android.internal.R.styleable.ClipRectAnimation_fromRight));
+        mFromRightType = d.type;
+        mFromRightValue = d.value;
+
+        d = Description.parseValue(a.peekValue(
+                com.android.internal.R.styleable.ClipRectAnimation_fromBottom));
+        mFromBottomType = d.type;
+        mFromBottomValue = d.value;
+
+
+        d = Description.parseValue(a.peekValue(
+                com.android.internal.R.styleable.ClipRectAnimation_toLeft));
+        mToLeftType = d.type;
+        mToLeftValue = d.value;
+
+        d = Description.parseValue(a.peekValue(
+                com.android.internal.R.styleable.ClipRectAnimation_toTop));
+        mToTopType = d.type;
+        mToTopValue = d.value;
+
+        d = Description.parseValue(a.peekValue(
+                com.android.internal.R.styleable.ClipRectAnimation_toRight));
+        mToRightType = d.type;
+        mToRightValue = d.value;
+
+        d = Description.parseValue(a.peekValue(
+                com.android.internal.R.styleable.ClipRectAnimation_toBottom));
+        mToBottomType = d.type;
+        mToBottomValue = d.value;
+
+        a.recycle();
+    }
 
     /**
      * Constructor to use when building a ClipRectAnimation from code
@@ -39,8 +119,15 @@ public class ClipRectAnimation extends Animation {
         if (fromClip == null || toClip == null) {
             throw new RuntimeException("Expected non-null animation clip rects");
         }
-        mFromRect.set(fromClip);
-        mToRect.set(toClip);
+        mFromLeftValue = fromClip.left;
+        mFromTopValue = fromClip.top;
+        mFromRightValue= fromClip.right;
+        mFromBottomValue = fromClip.bottom;
+
+        mToLeftValue = toClip.left;
+        mToTopValue = toClip.top;
+        mToRightValue= toClip.right;
+        mToBottomValue = toClip.bottom;
     }
 
     /**
@@ -48,8 +135,7 @@ public class ClipRectAnimation extends Animation {
      */
     public ClipRectAnimation(int fromL, int fromT, int fromR, int fromB,
             int toL, int toT, int toR, int toB) {
-        mFromRect.set(fromL, fromT, fromR, fromB);
-        mToRect.set(toL, toT, toR, toB);
+        this(new Rect(fromL, fromT, fromR, fromB), new Rect(toL, toT, toR, toB));
     }
 
     @Override
@@ -64,5 +150,18 @@ public class ClipRectAnimation extends Animation {
     @Override
     public boolean willChangeTransformationMatrix() {
         return false;
+    }
+
+    @Override
+    public void initialize(int width, int height, int parentWidth, int parentHeight) {
+        super.initialize(width, height, parentWidth, parentHeight);
+        mFromRect.set((int) resolveSize(mFromLeftType, mFromLeftValue, width, parentWidth),
+                (int) resolveSize(mFromTopType, mFromTopValue, height, parentHeight),
+                (int) resolveSize(mFromRightType, mFromRightValue, width, parentWidth),
+                (int) resolveSize(mFromBottomType, mFromBottomValue, height, parentHeight));
+        mToRect.set((int) resolveSize(mToLeftType, mToLeftValue, width, parentWidth),
+                (int) resolveSize(mToTopType, mToTopValue, height, parentHeight),
+                (int) resolveSize(mToRightType, mToRightValue, width, parentWidth),
+                (int) resolveSize(mToBottomType, mToBottomValue, height, parentHeight));
     }
 }

@@ -10,3 +10,31 @@ option java_package android.app.admin
 210006 security_keyguard_dismissed
 210007 security_keyguard_dismiss_auth_attempt   (success|1),(method_strength|1)
 210008 security_keyguard_secured
+
+# Additional event types for NIAP MDFPP 3.1 compliant audit logging.
+
+210009 security_os_startup                      (boot_state|3),(verity_mode|3)
+210010 security_os_shutdown
+210011 security_logging_started
+210012 security_logging_stopped
+210013 security_media_mounted                   (path|3),(label|3)
+210014 security_media_unmounted                 (path|3),(label|3)
+210015 security_log_buffer_size_critical
+210016 security_password_expiration_set         (package|3),(admin_user|1),(target_user|1),(timeout|2|3)
+210017 security_password_complexity_set         (package|3),(admin_user|1),(target_user|1),(length|1),(quality|1),(num_letters|1),(num_non_letters|1),(num_numeric|1),(num_uppercase|1),(num_lowercase|1),(num_symbols|1)
+210018 security_password_history_length_set     (package|3),(admin_user|1),(target_user|1),(length|1)
+210019 security_max_screen_lock_timeout_set     (package|3),(admin_user|1),(target_user|1),(timeout|2|3)
+210020 security_max_password_attempts_set       (package|3),(admin_user|1),(target_user|1),(num_failures|1)
+210021 security_keyguard_disabled_features_set  (package|3),(admin_user|1),(target_user|1),(features|1)
+210022 security_remote_lock                     (package|3),(admin_user|1),(target_user|1)
+210023 security_wipe_failed                     (package|3),(admin_user|1)
+210024 security_key_generated                   (success|1),(key_id|3),(uid|1)
+210025 security_key_imported                    (success|1),(key_id|3),(uid|1)
+210026 security_key_destroyed                   (success|1),(key_id|3),(uid|1)
+210027 security_user_restriction_added          (package|3),(admin_user|1),(restriction|3)
+210028 security_user_restriction_removed        (package|3),(admin_user|1),(restriction|3)
+210029 security_cert_authority_installed        (success|1),(subject|3)
+210030 security_cert_authority_removed          (success|1),(subject|3)
+210031 security_crypto_self_test_completed      (success|1)
+210032 security_key_integrity_violation         (key_id|3),(uid|1)
+210033 security_cert_validation_failure         (reason|3)

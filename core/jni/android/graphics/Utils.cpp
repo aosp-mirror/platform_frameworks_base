@@ -42,11 +42,43 @@ bool AssetStreamAdaptor::isAtEnd() const {
     return fAsset->getRemainingLength() == 0;
 }
 
-SkStreamRewindable* AssetStreamAdaptor::duplicate() const {
+SkStreamRewindable* AssetStreamAdaptor::onDuplicate() const {
     // Cannot create a duplicate, since each AssetStreamAdaptor
     // would be modifying the Asset.
     //return new AssetStreamAdaptor(fAsset);
     return NULL;
+}
+
+bool AssetStreamAdaptor::hasPosition() const {
+    return fAsset->seek(0, SEEK_CUR) != -1;
+}
+
+size_t AssetStreamAdaptor::getPosition() const {
+    const off64_t offset = fAsset->seek(0, SEEK_CUR);
+    if (offset == -1) {
+        SkDebugf("---- fAsset->seek(0, SEEK_CUR) failed\n");
+        return 0;
+    }
+
+    return offset;
+}
+
+bool AssetStreamAdaptor::seek(size_t position) {
+    if (fAsset->seek(position, SEEK_SET) == -1) {
+        SkDebugf("---- fAsset->seek(0, SEEK_SET) failed\n");
+        return false;
+    }
+
+    return true;
+}
+
+bool AssetStreamAdaptor::move(long offset) {
+    if (fAsset->seek(offset, SEEK_CUR) == -1) {
+        SkDebugf("---- fAsset->seek(%i, SEEK_CUR) failed\n", offset);
+        return false;
+    }
+
+    return true;
 }
 
 size_t AssetStreamAdaptor::read(void* buffer, size_t size) {
@@ -116,4 +148,12 @@ jobject android::nullObjectReturn(const char msg[]) {
 
 bool android::isSeekable(int descriptor) {
     return ::lseek64(descriptor, 0, SEEK_CUR) != -1;
+}
+
+JNIEnv* android::get_env_or_die(JavaVM* jvm) {
+    JNIEnv* env;
+    if (jvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", jvm);
+    }
+    return env;
 }

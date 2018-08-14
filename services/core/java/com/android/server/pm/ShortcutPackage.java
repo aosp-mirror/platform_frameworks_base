@@ -33,6 +33,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.server.pm.ShortcutService.DumpFilter;
 import com.android.server.pm.ShortcutService.ShortcutOperation;
 import com.android.server.pm.ShortcutService.Stats;
 
@@ -83,6 +84,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String ATTR_DISABLED_MESSAGE = "dmessage";
     private static final String ATTR_DISABLED_MESSAGE_RES_ID = "dmessageid";
     private static final String ATTR_DISABLED_MESSAGE_RES_NAME = "dmessagename";
+    private static final String ATTR_DISABLED_REASON = "disabled-reason";
     private static final String ATTR_INTENT_LEGACY = "intent";
     private static final String ATTR_INTENT_NO_EXTRA = "intent-base";
     private static final String ATTR_RANK = "rank";
@@ -155,13 +157,25 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     @Override
-    protected void onRestoreBlocked() {
-        // Can't restore due to version/signature mismatch.  Remove all shortcuts.
-        mShortcuts.clear();
+    protected boolean canRestoreAnyVersion() {
+        return false;
     }
 
     @Override
-    protected void onRestored() {
+    protected void onRestored(int restoreBlockReason) {
+        // Shortcuts have been restored.
+        // - Unshadow all shortcuts.
+        // - Set disabled reason.
+        // - Disable if needed.
+        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+            ShortcutInfo si = mShortcuts.valueAt(i);
+            si.clearFlags(ShortcutInfo.FLAG_SHADOW);
+
+            si.setDisabledReason(restoreBlockReason);
+            if (restoreBlockReason != ShortcutInfo.DISABLED_REASON_NOT_DISABLED) {
+                si.addFlags(ShortcutInfo.FLAG_DISABLED);
+            }
+        }
         // Because some launchers may not have been restored (e.g. allowBackup=false),
         // we need to re-calculate the pinned shortcuts.
         refreshPinnedFlags();
@@ -175,31 +189,47 @@ class ShortcutPackage extends ShortcutPackageItem {
         return mShortcuts.get(id);
     }
 
-    private void ensureNotImmutable(@Nullable ShortcutInfo shortcut) {
-        if (shortcut != null && shortcut.isImmutable()) {
+    public boolean isShortcutExistsAndInvisibleToPublisher(String id) {
+        ShortcutInfo si = findShortcutById(id);
+        return si != null && !si.isVisibleToPublisher();
+    }
+
+    public boolean isShortcutExistsAndVisibleToPublisher(String id) {
+        ShortcutInfo si = findShortcutById(id);
+        return si != null && si.isVisibleToPublisher();
+    }
+
+    private void ensureNotImmutable(@Nullable ShortcutInfo shortcut, boolean ignoreInvisible) {
+        if (shortcut != null && shortcut.isImmutable()
+                && (!ignoreInvisible || shortcut.isVisibleToPublisher())) {
             throw new IllegalArgumentException(
                     "Manifest shortcut ID=" + shortcut.getId()
                             + " may not be manipulated via APIs");
         }
     }
 
-    public void ensureNotImmutable(@NonNull String id) {
-        ensureNotImmutable(mShortcuts.get(id));
+    public void ensureNotImmutable(@NonNull String id, boolean ignoreInvisible) {
+        ensureNotImmutable(mShortcuts.get(id), ignoreInvisible);
     }
 
-    public void ensureImmutableShortcutsNotIncludedWithIds(@NonNull List<String> shortcutIds) {
+    public void ensureImmutableShortcutsNotIncludedWithIds(@NonNull List<String> shortcutIds,
+            boolean ignoreInvisible) {
         for (int i = shortcutIds.size() - 1; i >= 0; i--) {
-            ensureNotImmutable(shortcutIds.get(i));
+            ensureNotImmutable(shortcutIds.get(i), ignoreInvisible);
         }
     }
 
-    public void ensureImmutableShortcutsNotIncluded(@NonNull List<ShortcutInfo> shortcuts) {
+    public void ensureImmutableShortcutsNotIncluded(@NonNull List<ShortcutInfo> shortcuts,
+            boolean ignoreInvisible) {
         for (int i = shortcuts.size() - 1; i >= 0; i--) {
-            ensureNotImmutable(shortcuts.get(i).getId());
+            ensureNotImmutable(shortcuts.get(i).getId(), ignoreInvisible);
         }
     }
 
-    private ShortcutInfo deleteShortcutInner(@NonNull String id) {
+    /**
+     * Delete a shortcut by ID. This will *always* remove it even if it's immutable or invisible.
+     */
+    private ShortcutInfo forceDeleteShortcutInner(@NonNull String id) {
         final ShortcutInfo shortcut = mShortcuts.remove(id);
         if (shortcut != null) {
             mShortcutUser.mService.removeIconLocked(shortcut);
@@ -209,10 +239,14 @@ class ShortcutPackage extends ShortcutPackageItem {
         return shortcut;
     }
 
-    private void addShortcutInner(@NonNull ShortcutInfo newShortcut) {
+    /**
+     * Force replace a shortcut. If there's already a shortcut with the same ID, it'll be removed,
+     * even if it's invisible.
+     */
+    private void forceReplaceShortcutInner(@NonNull ShortcutInfo newShortcut) {
         final ShortcutService s = mShortcutUser.mService;
 
-        deleteShortcutInner(newShortcut.getId());
+        forceDeleteShortcutInner(newShortcut.getId());
 
         // Extract Icon and update the icon res ID and the bitmap path.
         s.saveIconAndFixUpShortcutLocked(newShortcut);
@@ -221,11 +255,12 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     /**
-     * Add a shortcut, or update one with the same ID, with taking over existing flags.
+     * Add a shortcut. If there's already a one with the same ID, it'll be removed, even if it's
+     * invisible.
      *
      * It checks the max number of dynamic shortcuts.
      */
-    public void addOrUpdateDynamicShortcut(@NonNull ShortcutInfo newShortcut) {
+    public void addOrReplaceDynamicShortcut(@NonNull ShortcutInfo newShortcut) {
 
         Preconditions.checkArgument(newShortcut.isEnabled(),
                 "add/setDynamicShortcuts() cannot publish disabled shortcuts");
@@ -241,7 +276,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         } else {
             // It's an update case.
             // Make sure the target is updatable. (i.e. should be mutable.)
-            oldShortcut.ensureUpdatableWith(newShortcut);
+            oldShortcut.ensureUpdatableWith(newShortcut, /*isUpdating=*/ false);
 
             wasPinned = oldShortcut.isPinned();
         }
@@ -251,7 +286,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             newShortcut.addFlags(ShortcutInfo.FLAG_PINNED);
         }
 
-        addShortcutInner(newShortcut);
+        forceReplaceShortcutInner(newShortcut);
     }
 
     /**
@@ -272,7 +307,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
         if (removeList != null) {
             for (int i = removeList.size() - 1; i >= 0; i--) {
-                deleteShortcutInner(removeList.get(i));
+                forceDeleteShortcutInner(removeList.get(i));
             }
         }
     }
@@ -280,13 +315,13 @@ class ShortcutPackage extends ShortcutPackageItem {
     /**
      * Remove all dynamic shortcuts.
      */
-    public void deleteAllDynamicShortcuts() {
+    public void deleteAllDynamicShortcuts(boolean ignoreInvisible) {
         final long now = mShortcutUser.mService.injectCurrentTimeMillis();
 
         boolean changed = false;
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             final ShortcutInfo si = mShortcuts.valueAt(i);
-            if (si.isDynamic()) {
+            if (si.isDynamic() && (!ignoreInvisible || si.isVisibleToPublisher())) {
                 changed = true;
 
                 si.setTimestamp(now);
@@ -306,9 +341,10 @@ class ShortcutPackage extends ShortcutPackageItem {
      * @return true if it's actually removed because it wasn't pinned, or false if it's still
      * pinned.
      */
-    public boolean deleteDynamicWithId(@NonNull String shortcutId) {
+    public boolean deleteDynamicWithId(@NonNull String shortcutId, boolean ignoreInvisible) {
         final ShortcutInfo removed = deleteOrDisableWithId(
-                shortcutId, /* disable =*/ false, /* overrideImmutable=*/ false);
+                shortcutId, /* disable =*/ false, /* overrideImmutable=*/ false, ignoreInvisible,
+                ShortcutInfo.DISABLED_REASON_NOT_DISABLED);
         return removed == null;
     }
 
@@ -319,9 +355,11 @@ class ShortcutPackage extends ShortcutPackageItem {
      * @return true if it's actually removed because it wasn't pinned, or false if it's still
      * pinned.
      */
-    private boolean disableDynamicWithId(@NonNull String shortcutId) {
+    private boolean disableDynamicWithId(@NonNull String shortcutId, boolean ignoreInvisible,
+            int disabledReason) {
         final ShortcutInfo disabled = deleteOrDisableWithId(
-                shortcutId, /* disable =*/ true, /* overrideImmutable=*/ false);
+                shortcutId, /* disable =*/ true, /* overrideImmutable=*/ false, ignoreInvisible,
+                disabledReason);
         return disabled == null;
     }
 
@@ -330,9 +368,10 @@ class ShortcutPackage extends ShortcutPackageItem {
      * is pinned, it'll remain as a pinned shortcut but will be disabled.
      */
     public void disableWithId(@NonNull String shortcutId, String disabledMessage,
-            int disabledMessageResId, boolean overrideImmutable) {
+            int disabledMessageResId, boolean overrideImmutable, boolean ignoreInvisible,
+            int disabledReason) {
         final ShortcutInfo disabled = deleteOrDisableWithId(shortcutId, /* disable =*/ true,
-                overrideImmutable);
+                overrideImmutable, ignoreInvisible, disabledReason);
 
         if (disabled != null) {
             if (disabledMessage != null) {
@@ -347,14 +386,18 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     @Nullable
     private ShortcutInfo deleteOrDisableWithId(@NonNull String shortcutId, boolean disable,
-            boolean overrideImmutable) {
+            boolean overrideImmutable, boolean ignoreInvisible, int disabledReason) {
+        Preconditions.checkState(
+                (disable == (disabledReason != ShortcutInfo.DISABLED_REASON_NOT_DISABLED)),
+                "disable and disabledReason disagree: " + disable + " vs " + disabledReason);
         final ShortcutInfo oldShortcut = mShortcuts.get(shortcutId);
 
-        if (oldShortcut == null || !oldShortcut.isEnabled()) {
+        if (oldShortcut == null || !oldShortcut.isEnabled()
+                && (ignoreInvisible && !oldShortcut.isVisibleToPublisher())) {
             return null; // Doesn't exist or already disabled.
         }
         if (!overrideImmutable) {
-            ensureNotImmutable(oldShortcut);
+            ensureNotImmutable(oldShortcut, /*ignoreInvisible=*/ true);
         }
         if (oldShortcut.isPinned()) {
 
@@ -362,6 +405,10 @@ class ShortcutPackage extends ShortcutPackageItem {
             oldShortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_MANIFEST);
             if (disable) {
                 oldShortcut.addFlags(ShortcutInfo.FLAG_DISABLED);
+                // Do not overwrite the disabled reason if one is alreay set.
+                if (oldShortcut.getDisabledReason() == ShortcutInfo.DISABLED_REASON_NOT_DISABLED) {
+                    oldShortcut.setDisabledReason(disabledReason);
+                }
             }
             oldShortcut.setTimestamp(mShortcutUser.mService.injectCurrentTimeMillis());
 
@@ -372,7 +419,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
             return oldShortcut;
         } else {
-            deleteShortcutInner(shortcutId);
+            forceDeleteShortcutInner(shortcutId);
             return null;
         }
     }
@@ -380,9 +427,23 @@ class ShortcutPackage extends ShortcutPackageItem {
     public void enableWithId(@NonNull String shortcutId) {
         final ShortcutInfo shortcut = mShortcuts.get(shortcutId);
         if (shortcut != null) {
-            ensureNotImmutable(shortcut);
+            ensureNotImmutable(shortcut, /*ignoreInvisible=*/ true);
             shortcut.clearFlags(ShortcutInfo.FLAG_DISABLED);
+            shortcut.setDisabledReason(ShortcutInfo.DISABLED_REASON_NOT_DISABLED);
         }
+    }
+
+    public void updateInvisibleShortcutForPinRequestWith(@NonNull ShortcutInfo shortcut) {
+        final ShortcutInfo source = mShortcuts.get(shortcut.getId());
+        Preconditions.checkNotNull(source);
+
+        mShortcutUser.mService.validateShortcutForPinRequest(shortcut);
+
+        shortcut.addFlags(ShortcutInfo.FLAG_PINNED);
+
+        forceReplaceShortcutInner(shortcut);
+
+        adjustRanks();
     }
 
     /**
@@ -398,8 +459,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
 
         // Then, for the pinned set for each launcher, set the pin flag one by one.
-        mShortcutUser.mService.getUserShortcutsLocked(getPackageUserId())
-                .forAllLaunchers(launcherShortcuts -> {
+        mShortcutUser.forAllLaunchers(launcherShortcuts -> {
             final ArraySet<String> pinned = launcherShortcuts.getPinnedShortcutIds(
                     getPackageName(), getPackageUserId());
 
@@ -430,7 +490,7 @@ class ShortcutPackage extends ShortcutPackageItem {
      * <p>This takes care of the resetting the counter for foreground apps as well as after
      * locale changes.
      */
-    public int getApiCallCount() {
+    public int getApiCallCount(boolean unlimited) {
         final ShortcutService s = mShortcutUser.mService;
 
         // Reset the counter if:
@@ -438,8 +498,9 @@ class ShortcutPackage extends ShortcutPackageItem {
         // - the package is *not* in foreground now, but was in foreground at some point
         // since the previous time it had been.
         if (s.isUidForegroundLocked(mPackageUid)
-                || mLastKnownForegroundElapsedTime
-                    < s.getUidLastForegroundElapsedTimeLocked(mPackageUid)) {
+                || (mLastKnownForegroundElapsedTime
+                    < s.getUidLastForegroundElapsedTimeLocked(mPackageUid))
+                || unlimited) {
             mLastKnownForegroundElapsedTime = s.injectElapsedRealtime();
             resetRateLimiting();
         }
@@ -478,10 +539,10 @@ class ShortcutPackage extends ShortcutPackageItem {
      * <p>This takes care of the resetting the counter for foreground apps as well as after
      * locale changes, which is done internally by {@link #getApiCallCount}.
      */
-    public boolean tryApiCall() {
+    public boolean tryApiCall(boolean unlimited) {
         final ShortcutService s = mShortcutUser.mService;
 
-        if (getApiCallCount() >= s.mMaxUpdatesPerInterval) {
+        if (getApiCallCount(unlimited) >= s.mMaxUpdatesPerInterval) {
             return false;
         }
         mApiCallCount++;
@@ -509,7 +570,7 @@ class ShortcutPackage extends ShortcutPackageItem {
      */
     public void findAll(@NonNull List<ShortcutInfo> result,
             @Nullable Predicate<ShortcutInfo> query, int cloneFlag) {
-        findAll(result, query, cloneFlag, null, 0);
+        findAll(result, query, cloneFlag, null, 0, /*getPinnedByAnyLauncher=*/ false);
     }
 
     /**
@@ -521,7 +582,7 @@ class ShortcutPackage extends ShortcutPackageItem {
      */
     public void findAll(@NonNull List<ShortcutInfo> result,
             @Nullable Predicate<ShortcutInfo> query, int cloneFlag,
-            @Nullable String callingLauncher, int launcherUserId) {
+            @Nullable String callingLauncher, int launcherUserId, boolean getPinnedByAnyLauncher) {
         if (getPackageInfo().isShadow()) {
             // Restored and the app not installed yet, so don't return any.
             return;
@@ -543,19 +604,27 @@ class ShortcutPackage extends ShortcutPackageItem {
             final boolean isPinnedByCaller = (callingLauncher == null)
                     || ((pinnedByCallerSet != null) && pinnedByCallerSet.contains(si.getId()));
 
-            if (si.isFloating()) {
-                if (!isPinnedByCaller) {
-                    continue;
+            if (!getPinnedByAnyLauncher) {
+                if (si.isFloating()) {
+                    if (!isPinnedByCaller) {
+                        continue;
+                    }
                 }
             }
             final ShortcutInfo clone = si.clone(cloneFlag);
 
             // Fix up isPinned for the caller.  Note we need to do it before the "test" callback,
             // since it may check isPinned.
-            if (!isPinnedByCaller) {
-                clone.clearFlags(ShortcutInfo.FLAG_PINNED);
+            // However, if getPinnedByAnyLauncher is set, we do it after the test.
+            if (!getPinnedByAnyLauncher) {
+                if (!isPinnedByCaller) {
+                    clone.clearFlags(ShortcutInfo.FLAG_PINNED);
+                }
             }
             if (query == null || query.test(clone)) {
+                if (!isPinnedByCaller) {
+                    clone.clearFlags(ShortcutInfo.FLAG_PINNED);
+                }
                 result.add(clone);
             }
         }
@@ -635,7 +704,7 @@ class ShortcutPackage extends ShortcutPackageItem {
      */
     public boolean rescanPackageIfNeeded(boolean isNewApp, boolean forceRescan) {
         final ShortcutService s = mShortcutUser.mService;
-        final long start = s.injectElapsedRealtime();
+        final long start = s.getStatStartTime();
 
         final PackageInfo pi;
         try {
@@ -656,7 +725,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 // This means if a system app's version code doesn't change on an OTA,
                 // we don't notice it's updated.  But that's fine since their version code *should*
                 // really change on OTAs.
-                if ((getPackageInfo().getVersionCode() == pi.versionCode)
+                if ((getPackageInfo().getVersionCode() == pi.getLongVersionCode())
                         && (getPackageInfo().getLastUpdateTime() == pi.lastUpdateTime)
                         && areAllActivitiesStillEnabled()) {
                     return false;
@@ -690,10 +759,30 @@ class ShortcutPackage extends ShortcutPackageItem {
         if (ShortcutService.DEBUG) {
             Slog.d(TAG, String.format("Package %s %s, version %d -> %d", getPackageName(),
                     (isNewApp ? "added" : "updated"),
-                    getPackageInfo().getVersionCode(), pi.versionCode));
+                    getPackageInfo().getVersionCode(), pi.getLongVersionCode()));
         }
 
-        getPackageInfo().updateVersionInfo(pi);
+        getPackageInfo().updateFromPackageInfo(pi);
+        final long newVersionCode = getPackageInfo().getVersionCode();
+
+        // See if there are any shortcuts that were prevented restoring because the app was of a
+        // lower version, and re-enable them.
+        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+            final ShortcutInfo si = mShortcuts.valueAt(i);
+            if (si.getDisabledReason() != ShortcutInfo.DISABLED_REASON_VERSION_LOWER) {
+                continue;
+            }
+            if (getPackageInfo().getBackupSourceVersionCode() > newVersionCode) {
+                if (ShortcutService.DEBUG) {
+                    Slog.d(TAG, String.format("Shortcut %s require version %s, still not restored.",
+                            si.getId(), getPackageInfo().getBackupSourceVersionCode()));
+                }
+                continue;
+            }
+            Slog.i(TAG, String.format("Restoring shortcut: %s", si.getId()));
+            si.clearFlags(ShortcutInfo.FLAG_DISABLED);
+            si.setDisabledReason(ShortcutInfo.DISABLED_REASON_NOT_DISABLED);
+        }
 
         // For existing shortcuts, update timestamps if they have any resources.
         // Also check if shortcuts' activities are still main activities.  Otherwise, disable them.
@@ -713,7 +802,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                         Slog.w(TAG, String.format(
                                 "%s is no longer main activity. Disabling shorcut %s.",
                                 getPackageName(), si.getId()));
-                        if (disableDynamicWithId(si.getId())) {
+                        if (disableDynamicWithId(si.getId(), /*ignoreInvisible*/ false,
+                                ShortcutInfo.DISABLED_REASON_APP_CHANGED)) {
                             continue; // Actually removed.
                         }
                         // Still pinned, so fall-through and possibly update the resources.
@@ -809,7 +899,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
                 // Note even if enabled=false, we still need to update all fields, so do it
                 // regardless.
-                addShortcutInner(newShortcut); // This will clean up the old one too.
+                forceReplaceShortcutInner(newShortcut); // This will clean up the old one too.
 
                 if (!newDisabled && toDisableList != null) {
                     // Still alive, don't remove.
@@ -831,7 +921,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                 final String id = toDisableList.valueAt(i);
 
                 disableWithId(id, /* disable message =*/ null, /* disable message resid */ 0,
-                        /* overrideImmutable=*/ true);
+                        /* overrideImmutable=*/ true, /*ignoreInvisible=*/ false,
+                        ShortcutInfo.DISABLED_REASON_APP_CHANGED);
             }
             removeOrphans();
         }
@@ -869,7 +960,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                     service.wtf("Found manifest shortcuts in excess list.");
                     continue;
                 }
-                deleteDynamicWithId(shortcut.getId());
+                deleteDynamicWithId(shortcut.getId(), /*ignoreInvisible=*/ true);
             }
         }
 
@@ -1075,7 +1166,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         if (ret != 0) {
             return ret;
         }
-        // If they're stil tie, just sort by their IDs.
+        // If they're still tie, just sort by their IDs.
         // This may happen with updateShortcuts() -- see
         // the testUpdateShortcuts_noManifestShortcuts() test.
         return a.getId().compareTo(b.getId());
@@ -1145,7 +1236,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         return false;
     }
 
-    public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String prefix, DumpFilter filter) {
         pw.println();
 
         pw.print(prefix);
@@ -1158,7 +1249,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         pw.print(prefix);
         pw.print("  ");
         pw.print("Calls: ");
-        pw.print(getApiCallCount());
+        pw.print(getApiCallCount(/*unlimited=*/ false));
         pw.println();
 
         // getApiCallCount() may have updated mLastKnownForegroundElapsedTime.
@@ -1187,9 +1278,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         final int size = shortcuts.size();
         for (int i = 0; i < size; i++) {
             final ShortcutInfo si = shortcuts.valueAt(i);
-            pw.print(prefix);
-            pw.print("    ");
-            pw.println(si.toInsecureString());
+            pw.println(si.toDumpString(prefix + "    "));
             if (si.getBitmapPath() != null) {
                 final long len = new File(si.getBitmapPath()).length();
                 pw.print(prefix);
@@ -1259,25 +1348,34 @@ class ShortcutPackage extends ShortcutPackageItem {
         ShortcutService.writeAttr(out, ATTR_NAME, getPackageName());
         ShortcutService.writeAttr(out, ATTR_CALL_COUNT, mApiCallCount);
         ShortcutService.writeAttr(out, ATTR_LAST_RESET, mLastResetTime);
-        getPackageInfo().saveToXml(out);
+        getPackageInfo().saveToXml(mShortcutUser.mService, out, forBackup);
 
         for (int j = 0; j < size; j++) {
-            saveShortcut(out, mShortcuts.valueAt(j), forBackup);
+            saveShortcut(out, mShortcuts.valueAt(j), forBackup,
+                    getPackageInfo().isBackupAllowed());
         }
 
         out.endTag(null, TAG_ROOT);
     }
 
-    private void saveShortcut(XmlSerializer out, ShortcutInfo si, boolean forBackup)
+    private void saveShortcut(XmlSerializer out, ShortcutInfo si, boolean forBackup,
+            boolean appSupportsBackup)
             throws IOException, XmlPullParserException {
 
         final ShortcutService s = mShortcutUser.mService;
 
         if (forBackup) {
             if (!(si.isPinned() && si.isEnabled())) {
-                return; // We only backup pinned shortcuts that are enabled.
+                // We only backup pinned shortcuts that are enabled.
+                // Note, this means, shortcuts that are restored but are blocked restore, e.g. due
+                // to a lower version code, will not be ported to a new device.
+                return;
             }
         }
+        final boolean shouldBackupDetails =
+                !forBackup // It's not backup
+                || appSupportsBackup; // Or, it's a backup and app supports backup.
+
         // Note: at this point no shortcuts should have bitmaps pending save, but if they do,
         // just remove the bitmap.
         if (si.isIconPendingSave()) {
@@ -1294,20 +1392,31 @@ class ShortcutPackage extends ShortcutPackageItem {
         ShortcutService.writeAttr(out, ATTR_TEXT, si.getText());
         ShortcutService.writeAttr(out, ATTR_TEXT_RES_ID, si.getTextResId());
         ShortcutService.writeAttr(out, ATTR_TEXT_RES_NAME, si.getTextResName());
-        ShortcutService.writeAttr(out, ATTR_DISABLED_MESSAGE, si.getDisabledMessage());
-        ShortcutService.writeAttr(out, ATTR_DISABLED_MESSAGE_RES_ID,
-                si.getDisabledMessageResourceId());
-        ShortcutService.writeAttr(out, ATTR_DISABLED_MESSAGE_RES_NAME,
-                si.getDisabledMessageResName());
+        if (shouldBackupDetails) {
+            ShortcutService.writeAttr(out, ATTR_DISABLED_MESSAGE, si.getDisabledMessage());
+            ShortcutService.writeAttr(out, ATTR_DISABLED_MESSAGE_RES_ID,
+                    si.getDisabledMessageResourceId());
+            ShortcutService.writeAttr(out, ATTR_DISABLED_MESSAGE_RES_NAME,
+                    si.getDisabledMessageResName());
+        }
+        ShortcutService.writeAttr(out, ATTR_DISABLED_REASON, si.getDisabledReason());
         ShortcutService.writeAttr(out, ATTR_TIMESTAMP,
                 si.getLastChangedTimestamp());
         if (forBackup) {
             // Don't write icon information.  Also drop the dynamic flag.
-            ShortcutService.writeAttr(out, ATTR_FLAGS,
-                    si.getFlags() &
-                            ~(ShortcutInfo.FLAG_HAS_ICON_FILE | ShortcutInfo.FLAG_HAS_ICON_RES
+
+            int flags = si.getFlags() &
+                    ~(ShortcutInfo.FLAG_HAS_ICON_FILE | ShortcutInfo.FLAG_HAS_ICON_RES
                             | ShortcutInfo.FLAG_ICON_FILE_PENDING_SAVE
-                            | ShortcutInfo.FLAG_DYNAMIC));
+                            | ShortcutInfo.FLAG_DYNAMIC);
+            ShortcutService.writeAttr(out, ATTR_FLAGS, flags);
+
+            // Set the publisher version code at every backup.
+            final long packageVersionCode = getPackageInfo().getVersionCode();
+            if (packageVersionCode == 0) {
+                s.wtf("Package version code should be available at this point.");
+                // However, 0 is a valid version code, so we just go ahead with it...
+            }
         } else {
             // When writing for backup, ranks shouldn't be saved, since shortcuts won't be restored
             // as dynamic.
@@ -1319,26 +1428,28 @@ class ShortcutPackage extends ShortcutPackageItem {
             ShortcutService.writeAttr(out, ATTR_BITMAP_PATH, si.getBitmapPath());
         }
 
-        {
-            final Set<String> cat = si.getCategories();
-            if (cat != null && cat.size() > 0) {
-                out.startTag(null, TAG_CATEGORIES);
-                XmlUtils.writeStringArrayXml(cat.toArray(new String[cat.size()]),
-                        NAME_CATEGORIES, out);
-                out.endTag(null, TAG_CATEGORIES);
+        if (shouldBackupDetails) {
+            {
+                final Set<String> cat = si.getCategories();
+                if (cat != null && cat.size() > 0) {
+                    out.startTag(null, TAG_CATEGORIES);
+                    XmlUtils.writeStringArrayXml(cat.toArray(new String[cat.size()]),
+                            NAME_CATEGORIES, out);
+                    out.endTag(null, TAG_CATEGORIES);
+                }
             }
-        }
-        final Intent[] intentsNoExtras = si.getIntentsNoExtras();
-        final PersistableBundle[] intentsExtras = si.getIntentPersistableExtrases();
-        final int numIntents = intentsNoExtras.length;
-        for (int i = 0; i < numIntents; i++) {
-            out.startTag(null, TAG_INTENT);
-            ShortcutService.writeAttr(out, ATTR_INTENT_NO_EXTRA, intentsNoExtras[i]);
-            ShortcutService.writeTagExtra(out, TAG_EXTRAS, intentsExtras[i]);
-            out.endTag(null, TAG_INTENT);
-        }
+            final Intent[] intentsNoExtras = si.getIntentsNoExtras();
+            final PersistableBundle[] intentsExtras = si.getIntentPersistableExtrases();
+            final int numIntents = intentsNoExtras.length;
+            for (int i = 0; i < numIntents; i++) {
+                out.startTag(null, TAG_INTENT);
+                ShortcutService.writeAttr(out, ATTR_INTENT_NO_EXTRA, intentsNoExtras[i]);
+                ShortcutService.writeTagExtra(out, TAG_EXTRAS, intentsExtras[i]);
+                out.endTag(null, TAG_INTENT);
+            }
 
-        ShortcutService.writeTagExtra(out, TAG_EXTRAS, si.getExtras());
+            ShortcutService.writeTagExtra(out, TAG_EXTRAS, si.getExtras());
+        }
 
         out.endTag(null, TAG_SHORTCUT);
     }
@@ -1358,6 +1469,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         ret.mLastResetTime =
                 ShortcutService.parseLongAttribute(parser, ATTR_LAST_RESET);
 
+
         final int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -1371,10 +1483,11 @@ class ShortcutPackage extends ShortcutPackageItem {
                 switch (tag) {
                     case ShortcutPackageInfo.TAG_ROOT:
                         ret.getPackageInfo().loadFromXml(parser, fromBackup);
+
                         continue;
                     case TAG_SHORTCUT:
                         final ShortcutInfo si = parseShortcut(parser, packageName,
-                                shortcutUser.getUserId());
+                                shortcutUser.getUserId(), fromBackup);
 
                         // Don't use addShortcut(), we don't need to save the icon.
                         ret.mShortcuts.put(si.getId(), si);
@@ -1387,7 +1500,8 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     private static ShortcutInfo parseShortcut(XmlPullParser parser, String packageName,
-            @UserIdInt int userId) throws IOException, XmlPullParserException {
+            @UserIdInt int userId, boolean fromBackup)
+            throws IOException, XmlPullParserException {
         String id;
         ComponentName activityComponent;
         // Icon icon;
@@ -1400,6 +1514,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         String disabledMessage;
         int disabledMessageResId;
         String disabledMessageResName;
+        int disabledReason;
         Intent intentLegacy;
         PersistableBundle intentPersistableExtrasLegacy = null;
         ArrayList<Intent> intents = new ArrayList<>();
@@ -1410,6 +1525,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         int iconResId;
         String iconResName;
         String bitmapPath;
+        int backupVersionCode;
         ArraySet<String> categories = null;
 
         id = ShortcutService.parseStringAttribute(parser, ATTR_ID);
@@ -1426,6 +1542,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 ATTR_DISABLED_MESSAGE_RES_ID);
         disabledMessageResName = ShortcutService.parseStringAttribute(parser,
                 ATTR_DISABLED_MESSAGE_RES_NAME);
+        disabledReason = ShortcutService.parseIntAttribute(parser, ATTR_DISABLED_REASON);
         intentLegacy = ShortcutService.parseIntentAttributeNoDefault(parser, ATTR_INTENT_LEGACY);
         rank = (int) ShortcutService.parseLongAttribute(parser, ATTR_RANK);
         lastChangedTimestamp = ShortcutService.parseLongAttribute(parser, ATTR_TIMESTAMP);
@@ -1482,6 +1599,19 @@ class ShortcutPackage extends ShortcutPackageItem {
             intents.add(intentLegacy);
         }
 
+
+        if ((disabledReason == ShortcutInfo.DISABLED_REASON_NOT_DISABLED)
+                && ((flags & ShortcutInfo.FLAG_DISABLED) != 0)) {
+            // We didn't used to have the disabled reason, so if a shortcut is disabled
+            // and has no reason, we assume it was disabled by publisher.
+            disabledReason = ShortcutInfo.DISABLED_REASON_BY_APP;
+        }
+
+        // All restored shortcuts are initially "shadow".
+        if (fromBackup) {
+            flags |= ShortcutInfo.FLAG_SHADOW;
+        }
+
         return new ShortcutInfo(
                 userId, id, packageName, activityComponent, /* icon =*/ null,
                 title, titleResId, titleResName, text, textResId, textResName,
@@ -1489,7 +1619,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 categories,
                 intents.toArray(new Intent[intents.size()]),
                 rank, extras, lastChangedTimestamp, flags,
-                iconResId, iconResName, bitmapPath);
+                iconResId, iconResName, bitmapPath, disabledReason);
     }
 
     private static Intent parseIntent(XmlPullParser parser)
@@ -1603,6 +1733,20 @@ class ShortcutPackage extends ShortcutPackageItem {
                 failed = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " has both resource and bitmap icons");
+            }
+            if (si.isEnabled()
+                    != (si.getDisabledReason() == ShortcutInfo.DISABLED_REASON_NOT_DISABLED)) {
+                failed = true;
+                Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
+                        + " isEnabled() and getDisabledReason() disagree: "
+                        + si.isEnabled() + " vs " + si.getDisabledReason());
+            }
+            if ((si.getDisabledReason() == ShortcutInfo.DISABLED_REASON_VERSION_LOWER)
+                    && (getPackageInfo().getBackupSourceVersionCode()
+                    == ShortcutInfo.VERSION_CODE_UNKNOWN)) {
+                failed = true;
+                Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
+                        + " RESTORED_VERSION_LOWER with no backup source version code.");
             }
             if (s.isDummyMainActivity(si.getActivity())) {
                 failed = true;

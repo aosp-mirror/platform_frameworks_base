@@ -41,10 +41,30 @@
          Should be 0 on devices with plenty of room (e.g. tablets) -->
     <dimen name="eca_overlap">-10dip</dimen>
 
-    <!-- Default clock parameters -->
-    <dimen name="bottom_text_spacing_digital">-1dp</dimen>
-    <dimen name="widget_label_font_size">14sp</dimen>
-    <dimen name="widget_big_font_size">72dp</dimen>
+    <!-- Slice header -->
+    <dimen name="widget_title_font_size">24dp</dimen>
+    <dimen name="widget_title_bottom_margin">7dp</dimen>
+    <dimen name="bottom_text_spacing_digital">0dp</dimen>
+    <!-- Slice subtitle -->
+    <dimen name="widget_label_font_size">16dp</dimen>
+    <!-- Slice offset when pulsing -->
+    <dimen name="widget_pulsing_bottom_padding">48dp</dimen>
+    <!-- Clock without header -->
+    <dimen name="widget_big_font_size">64dp</dimen>
+    <!-- Clock with header -->
+    <dimen name="widget_small_font_size">24dp</dimen>
+    <dimen name="widget_small_font_stroke">0.6dp</dimen>
+    <!-- Dash between clock and header -->
+    <dimen name="widget_separator_width">12dp</dimen>
+    <dimen name="widget_separator_thickness">1dp</dimen>
+    <dimen name="widget_vertical_padding">26dp</dimen>
+    <dimen name="widget_icon_bottom_padding">14dp</dimen>
+    <!-- Subtitle paddings -->
+    <dimen name="widget_horizontal_padding">8dp</dimen>
+    <dimen name="widget_icon_size">16dp</dimen>
+    <dimen name="widget_icon_padding">8dp</dimen>
+    <!-- Space between notification shelf and dash above it -->
+    <dimen name="widget_bottom_separator_padding">28dp</dimen>
 
     <!-- The y translation to apply at the start in appear animations. -->
     <dimen name="appear_y_translation_start">32dp</dimen>
@@ -58,7 +78,7 @@
     <dimen name="password_char_padding">8dp</dimen>
 
     <!-- The vertical margin between the date and the owner info. -->
-    <dimen name="date_owner_info_margin">6dp</dimen>
+    <dimen name="date_owner_info_margin">4dp</dimen>
 
     <!-- The translation for disappearing security views after having solved them. -->
     <dimen name="disappear_y_translation">-32dp</dimen>

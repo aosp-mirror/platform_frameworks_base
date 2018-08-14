@@ -411,7 +411,14 @@ public final class BluetoothLeAdvertiser {
         try {
             gatt = mBluetoothManager.getBluetoothGatt();
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to get Bluetooth gatt - ", e);
+            Log.e(TAG, "Failed to get Bluetooth GATT - ", e);
+            postStartSetFailure(handler, callback,
+                    AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR);
+            return;
+        }
+
+        if (gatt == null) {
+            Log.e(TAG, "Bluetooth GATT is null");
             postStartSetFailure(handler, callback,
                     AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR);
             return;

@@ -26,7 +26,6 @@
 #include <SkGlyph.h>
 #include <utils/Log.h>
 
-
 namespace android {
 namespace uirenderer {
 
@@ -53,9 +52,8 @@ struct CacheBlock {
     CacheBlock* mNext;
     CacheBlock* mPrev;
 
-    CacheBlock(uint16_t x, uint16_t y, uint16_t width, uint16_t height):
-            mX(x), mY(y), mWidth(width), mHeight(height), mNext(nullptr), mPrev(nullptr) {
-    }
+    CacheBlock(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
+            : mX(x), mY(y), mWidth(width), mHeight(height), mNext(nullptr), mPrev(nullptr) {}
 
     static CacheBlock* insertBlock(CacheBlock* head, CacheBlock* newBlock);
     static CacheBlock* removeBlock(CacheBlock* head, CacheBlock* blockToRemove);
@@ -63,9 +61,8 @@ struct CacheBlock {
     void output() {
         CacheBlock* currBlock = this;
         while (currBlock) {
-            ALOGD("Block: this, x, y, w, h = %p, %d, %d, %d, %d",
-                    currBlock, currBlock->mX, currBlock->mY,
-                    currBlock->mWidth, currBlock->mHeight);
+            ALOGD("Block: this, x, y, w, h = %p, %d, %d, %d, %d", currBlock, currBlock->mX,
+                  currBlock->mY, currBlock->mWidth, currBlock->mHeight);
             currBlock = currBlock->mNext;
         }
     }
@@ -91,29 +88,19 @@ public:
 
     bool fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_t* retOriginY);
 
-    inline uint16_t getWidth() const {
-        return mWidth;
-    }
+    inline uint16_t getWidth() const { return mWidth; }
 
-    inline uint16_t getHeight() const {
-        return mHeight;
-    }
+    inline uint16_t getHeight() const { return mHeight; }
 
-    inline GLenum getFormat() const {
-        return mFormat;
-    }
+    inline GLenum getFormat() const { return mFormat; }
 
     inline uint32_t getOffset(uint16_t x, uint16_t y) const {
         return (y * getWidth() + x) * PixelBuffer::formatSize(mFormat);
     }
 
-    inline const Rect* getDirtyRect() const {
-        return &mDirtyRect;
-    }
+    inline const Rect* getDirtyRect() const { return &mDirtyRect; }
 
-    inline PixelBuffer* getPixelBuffer() const {
-        return mPixelBuffer;
-    }
+    inline PixelBuffer* getPixelBuffer() const { return mPixelBuffer; }
 
     Texture& getTexture() {
         allocatePixelBuffer();
@@ -125,43 +112,28 @@ public:
         return mTexture.id();
     }
 
-    inline bool isDirty() const {
-        return mDirty;
-    }
+    inline bool isDirty() const { return mDirty; }
 
-    inline bool getLinearFiltering() const {
-        return mLinearFiltering;
-    }
+    inline bool getLinearFiltering() const { return mLinearFiltering; }
 
     /**
      * This method assumes that the proper texture unit is active.
      */
     void setLinearFiltering(bool linearFiltering);
 
-    inline uint16_t getGlyphCount() const {
-        return mNumGlyphs;
-    }
+    inline uint16_t getGlyphCount() const { return mNumGlyphs; }
 
-    TextureVertex* mesh() const {
-        return mMesh;
-    }
+    TextureVertex* mesh() const { return mMesh; }
 
-    uint32_t meshElementCount() const {
-        return mCurrentQuad * 6;
-    }
+    uint32_t meshElementCount() const { return mCurrentQuad * 6; }
 
-    uint16_t* indices() const {
-        return (uint16_t*) nullptr;
-    }
+    uint16_t* indices() const { return (uint16_t*)nullptr; }
 
-    void resetMesh() {
-        mCurrentQuad = 0;
-    }
+    void resetMesh() { mCurrentQuad = 0; }
 
-    inline void addQuad(float x1, float y1, float u1, float v1,
-            float x2, float y2, float u2, float v2,
-            float x3, float y3, float u3, float v3,
-            float x4, float y4, float u4, float v4) {
+    inline void addQuad(float x1, float y1, float u1, float v1, float x2, float y2, float u2,
+                        float v2, float x3, float y3, float u3, float v3, float x4, float y4,
+                        float u4, float v4) {
         TextureVertex* mesh = mMesh + mCurrentQuad * 4;
         TextureVertex::set(mesh++, x2, y2, u2, v2);
         TextureVertex::set(mesh++, x3, y3, u3, v3);
@@ -170,13 +142,9 @@ public:
         mCurrentQuad++;
     }
 
-    bool canDraw() const {
-        return mCurrentQuad > 0;
-    }
+    bool canDraw() const { return mCurrentQuad > 0; }
 
-    bool endOfMesh() const {
-        return mCurrentQuad == mMaxQuadCount;
-    }
+    bool endOfMesh() const { return mCurrentQuad == mMaxQuadCount; }
 
     uint32_t calculateFreeMemory() const;
 
@@ -199,7 +167,7 @@ private:
     Rect mDirtyRect;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_CACHE_TEXTURE_H
+#endif  // ANDROID_HWUI_CACHE_TEXTURE_H

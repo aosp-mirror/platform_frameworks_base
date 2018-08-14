@@ -16,12 +16,14 @@
 
 package android.media;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.audiopolicy.AudioMix;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /* IF YOU CHANGE ANY OF THE CONSTANTS IN THIS FILE, DO NOT FORGET
  * TO UPDATE THE CORRESPONDING NATIVE GLUE AND AudioManager.java.
@@ -400,6 +402,7 @@ public class AudioSystem
     public static final int DEVICE_OUT_BUS = 0x1000000;
     public static final int DEVICE_OUT_PROXY = 0x2000000;
     public static final int DEVICE_OUT_USB_HEADSET = 0x4000000;
+    public static final int DEVICE_OUT_HEARING_AID = 0x8000000;
 
     public static final int DEVICE_OUT_DEFAULT = DEVICE_BIT_DEFAULT;
 
@@ -430,6 +433,7 @@ public class AudioSystem
                                               DEVICE_OUT_BUS |
                                               DEVICE_OUT_PROXY |
                                               DEVICE_OUT_USB_HEADSET |
+                                              DEVICE_OUT_HEARING_AID |
                                               DEVICE_OUT_DEFAULT);
     public static final int DEVICE_OUT_ALL_A2DP = (DEVICE_OUT_BLUETOOTH_A2DP |
                                                    DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
@@ -545,6 +549,7 @@ public class AudioSystem
     public static final String DEVICE_OUT_BUS_NAME = "bus";
     public static final String DEVICE_OUT_PROXY_NAME = "proxy";
     public static final String DEVICE_OUT_USB_HEADSET_NAME = "usb_headset";
+    public static final String DEVICE_OUT_HEARING_AID_NAME = "hearing_aid_out";
 
     public static final String DEVICE_IN_COMMUNICATION_NAME = "communication";
     public static final String DEVICE_IN_AMBIENT_NAME = "ambient";
@@ -627,6 +632,8 @@ public class AudioSystem
             return DEVICE_OUT_PROXY_NAME;
         case DEVICE_OUT_USB_HEADSET:
             return DEVICE_OUT_USB_HEADSET_NAME;
+        case DEVICE_OUT_HEARING_AID:
+            return DEVICE_OUT_HEARING_AID_NAME;
         case DEVICE_OUT_DEFAULT:
         default:
             return Integer.toString(device);
@@ -709,7 +716,8 @@ public class AudioSystem
     public static final int FORCE_HDMI_SYSTEM_AUDIO_ENFORCED = 12;
     public static final int FORCE_ENCODED_SURROUND_NEVER = 13;
     public static final int FORCE_ENCODED_SURROUND_ALWAYS = 14;
-    public static final int NUM_FORCE_CONFIG = 15;
+    public static final int FORCE_ENCODED_SURROUND_MANUAL = 15;
+    public static final int NUM_FORCE_CONFIG = 16;
     public static final int FORCE_DEFAULT = FORCE_NONE;
 
     public static String forceUseConfigToString(int config) {
@@ -729,6 +737,7 @@ public class AudioSystem
             case FORCE_HDMI_SYSTEM_AUDIO_ENFORCED: return "FORCE_HDMI_SYSTEM_AUDIO_ENFORCED";
             case FORCE_ENCODED_SURROUND_NEVER: return "FORCE_ENCODED_SURROUND_NEVER";
             case FORCE_ENCODED_SURROUND_ALWAYS: return "FORCE_ENCODED_SURROUND_ALWAYS";
+            case FORCE_ENCODED_SURROUND_MANUAL: return "FORCE_ENCODED_SURROUND_MANUAL";
             default: return "unknown config (" + config + ")" ;
         }
     }
@@ -741,7 +750,8 @@ public class AudioSystem
     public static final int FOR_SYSTEM = 4;
     public static final int FOR_HDMI_SYSTEM_AUDIO = 5;
     public static final int FOR_ENCODED_SURROUND = 6;
-    private static final int NUM_FORCE_USE = 7;
+    public static final int FOR_VIBRATE_RINGING = 7;
+    private static final int NUM_FORCE_USE = 8;
 
     public static String forceUseUsageToString(int usage) {
         switch (usage) {
@@ -752,6 +762,7 @@ public class AudioSystem
             case FOR_SYSTEM: return "FOR_SYSTEM";
             case FOR_HDMI_SYSTEM_AUDIO: return "FOR_HDMI_SYSTEM_AUDIO";
             case FOR_ENCODED_SURROUND: return "FOR_ENCODED_SURROUND";
+            case FOR_VIBRATE_RINGING: return "FOR_VIBRATE_RINGING";
             default: return "unknown usage (" + usage + ")" ;
         }
     }
@@ -792,7 +803,7 @@ public class AudioSystem
     public static native int getPrimaryOutputFrameCount();
     public static native int getOutputLatency(int stream);
 
-    public static native int setLowRamDevice(boolean isLowRamDevice);
+    public static native int setLowRamDevice(boolean isLowRamDevice, long totalMemory);
     public static native int checkAudioFlinger();
 
     public static native int listAudioPorts(ArrayList<AudioPort> ports, int[] generation);
@@ -817,6 +828,21 @@ public class AudioSystem
     public static native int systemReady();
 
     public static native float getStreamVolumeDB(int stream, int index, int device);
+
+    static boolean isOffloadSupported(@NonNull AudioFormat format) {
+        return native_is_offload_supported(format.getEncoding(), format.getSampleRate(),
+                format.getChannelMask(), format.getChannelIndexMask());
+    }
+
+    private static native boolean native_is_offload_supported(int encoding, int sampleRate,
+            int channelMask, int channelIndexMask);
+
+    public static native int getMicrophones(ArrayList<MicrophoneInfo> microphonesInfo);
+
+    public static native int getSurroundFormats(Map<Integer, Boolean> surroundFormats,
+                                                boolean reported);
+
+    public static native int setSurroundFormatEnabled(int audioFormat, boolean enabled);
 
     // Items shared with audio service
 
@@ -914,7 +940,8 @@ public class AudioSystem
             (1 << STREAM_MUSIC) |
             (1 << STREAM_RING) |
             (1 << STREAM_NOTIFICATION) |
-            (1 << STREAM_SYSTEM);
+            (1 << STREAM_SYSTEM) |
+            (1 << STREAM_VOICE_CALL);
 
     /**
      * Event posted by AudioTrack and AudioRecord JNI (JNIDeviceCallback) when routing changes.

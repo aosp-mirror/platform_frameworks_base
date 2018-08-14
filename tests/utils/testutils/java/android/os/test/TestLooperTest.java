@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 
@@ -37,6 +38,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.MockitoAnnotations;
 
+import java.util.concurrent.Executor;
+
 /**
  * Test TestLooperAbstractTime which provides control over "time". Note that
  * real-time is being used as well. Therefore small time increments are NOT
@@ -48,6 +51,7 @@ public class TestLooperTest {
     private TestLooper mTestLooper;
     private Handler mHandler;
     private Handler mHandlerSpy;
+    private Executor mExecutor;
 
     @Rule
     public ErrorCollector collector = new ErrorCollector();
@@ -59,6 +63,7 @@ public class TestLooperTest {
         mTestLooper = new TestLooper();
         mHandler = new Handler(mTestLooper.getLooper());
         mHandlerSpy = spy(mHandler);
+        mExecutor = mTestLooper.getNewExecutor();
     }
 
     /**
@@ -90,6 +95,32 @@ public class TestLooperTest {
         collector.checkThat("4: messageC", messageC, equalTo(messageCaptor.getValue().what));
 
         inOrder.verify(mHandlerSpy, never()).handleMessage(any(Message.class));
+    }
+
+    /**
+     * Basic test of the Executor with no time stamps: dispatch 4 executables, check that all 4
+     * executed in correct order.
+     */
+    @Test
+    public void testNoTimeMovementExecutor() {
+        final Runnable runnableA = mock(Runnable.class);
+        final Runnable runnableB = mock(Runnable.class);
+        final Runnable runnableC = mock(Runnable.class);
+
+        InOrder inOrder = inOrder(runnableA, runnableB, runnableC);
+
+        mExecutor.execute(runnableA);
+        mExecutor.execute(runnableB);
+        mExecutor.execute(runnableA);
+        mExecutor.execute(runnableC);
+        mTestLooper.dispatchAll();
+
+        inOrder.verify(runnableA).run();
+        inOrder.verify(runnableB).run();
+        inOrder.verify(runnableA).run();
+        inOrder.verify(runnableC).run();
+
+        inOrder.verifyNoMoreInteractions();
     }
 
     /**

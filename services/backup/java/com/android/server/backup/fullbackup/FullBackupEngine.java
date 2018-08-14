@@ -16,18 +16,15 @@
 
 package com.android.server.backup.fullbackup;
 
-import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_MANIFEST_FILENAME;
-import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_METADATA_FILENAME;
-import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_METADATA_VERSION;
-import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_WIDGET_METADATA_TOKEN;
-import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT;
-import static com.android.server.backup.RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
-import static com.android.server.backup.RefactoredBackupManagerService.TAG;
-import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
-import static com.android.server.backup.RefactoredBackupManagerService
-        .TIMEOUT_SHARED_BACKUP_INTERVAL;
+import static com.android.server.backup.BackupManagerService.BACKUP_MANIFEST_FILENAME;
+import static com.android.server.backup.BackupManagerService.BACKUP_METADATA_FILENAME;
+import static com.android.server.backup.BackupManagerService.BACKUP_METADATA_VERSION;
+import static com.android.server.backup.BackupManagerService.BACKUP_WIDGET_METADATA_TOKEN;
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP_WAIT;
+import static com.android.server.backup.BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
+import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
@@ -44,9 +41,11 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.StringBuilderPrinter;
 
+import com.android.internal.util.Preconditions;
 import com.android.server.AppWidgetBackupBridge;
+import com.android.server.backup.BackupAgentTimeoutParameters;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.BackupRestoreTask;
-import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.utils.FullBackupUtils;
 
 import java.io.BufferedOutputStream;
@@ -62,7 +61,7 @@ import java.io.OutputStream;
  */
 public class FullBackupEngine {
 
-    private RefactoredBackupManagerService backupManagerService;
+    private BackupManagerService backupManagerService;
     OutputStream mOutput;
     FullBackupPreflight mPreflightHook;
     BackupRestoreTask mTimeoutMonitor;
@@ -74,6 +73,8 @@ public class FullBackupEngine {
     PackageInfo mPkg;
     private final long mQuota;
     private final int mOpToken;
+    private final int mTransportFlags;
+    private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
     class FullBackupRunner implements Runnable {
 
@@ -100,7 +101,8 @@ public class FullBackupEngine {
         @Override
         public void run() {
             try {
-                FullBackupDataOutput output = new FullBackupDataOutput(mPipe);
+                FullBackupDataOutput output = new FullBackupDataOutput(
+                        mPipe, -1, mTransportFlags);
 
                 if (mWriteManifest) {
                     final boolean writeWidgetData = mWidgetData != null;
@@ -135,8 +137,8 @@ public class FullBackupEngine {
                 final boolean isSharedStorage =
                         mPackage.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE);
                 final long timeout = isSharedStorage ?
-                        TIMEOUT_SHARED_BACKUP_INTERVAL :
-                        TIMEOUT_FULL_BACKUP_INTERVAL;
+                        mAgentTimeoutParameters.getSharedBackupAgentTimeoutMillis() :
+                        mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis();
 
                 if (DEBUG) {
                     Slog.d(TAG, "Calling doFullBackup() on " + mPackage.packageName);
@@ -147,7 +149,7 @@ public class FullBackupEngine {
                                 mTimeoutMonitor /* in parent class */,
                                 OP_TYPE_BACKUP_WAIT);
                 mAgent.doFullBackup(mPipe, mQuota, mToken,
-                        backupManagerService.getBackupManagerBinder());
+                        backupManagerService.getBackupManagerBinder(), mTransportFlags);
             } catch (IOException e) {
                 Slog.e(TAG, "Error running full backup for " + mPackage.packageName);
             } catch (RemoteException e) {
@@ -161,10 +163,11 @@ public class FullBackupEngine {
         }
     }
 
-    public FullBackupEngine(RefactoredBackupManagerService backupManagerService,
+    public FullBackupEngine(BackupManagerService backupManagerService,
             OutputStream output,
             FullBackupPreflight preflightHook, PackageInfo pkg,
-            boolean alsoApks, BackupRestoreTask timeoutMonitor, long quota, int opToken) {
+            boolean alsoApks, BackupRestoreTask timeoutMonitor, long quota, int opToken,
+            int transportFlags) {
         this.backupManagerService = backupManagerService;
         mOutput = output;
         mPreflightHook = preflightHook;
@@ -176,6 +179,10 @@ public class FullBackupEngine {
         mMetadataFile = new File(mFilesDir, BACKUP_METADATA_FILENAME);
         mQuota = quota;
         mOpToken = opToken;
+        mTransportFlags = transportFlags;
+        mAgentTimeoutParameters = Preconditions.checkNotNull(
+                backupManagerService.getAgentTimeoutParameters(),
+                "Timeout parameters cannot be null");
     }
 
     public int preflightCheck() throws RemoteException {

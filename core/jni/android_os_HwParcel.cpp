@@ -22,6 +22,7 @@
 
 #include "android_os_HwBinder.h"
 #include "android_os_HwBlob.h"
+#include "android_os_NativeHandle.h"
 #include "android_os_HwRemoteBinder.h"
 
 #include <nativehelper/JNIHelp.h>
@@ -34,6 +35,7 @@
 
 using android::AndroidRuntime;
 
+using ::android::hardware::hidl_handle;
 using ::android::hardware::hidl_string;
 using ::android::hardware::hidl_vec;
 
@@ -436,6 +438,18 @@ static void JHwParcel_native_writeString(
     signalExceptionForError(env, err);
 }
 
+static void JHwParcel_native_writeNativeHandle(JNIEnv *env, jobject thiz, jobject valObj) {
+    sp<JHwParcel> impl = JHwParcel::GetNativeContext(env, thiz);
+
+    EphemeralStorage *storage = impl->getStorage();
+    native_handle_t *handle = JNativeHandle::MakeCppNativeHandle(env, valObj, storage);
+
+    hardware::Parcel *parcel = impl->getParcel();
+    status_t err = parcel->writeNativeHandleNoDup(handle);
+
+    signalExceptionForError(env, err);
+}
+
 #define DEFINE_PARCEL_VECTOR_WRITER(Suffix,Type)                               \
 static void JHwParcel_native_write ## Suffix ## Vector(                        \
         JNIEnv *env, jobject thiz, Type ## Array valObj) {                     \
@@ -524,12 +538,96 @@ static void JHwParcel_native_writeBoolVector(
     signalExceptionForError(env, err);
 }
 
+template<typename T>
+static void WriteHidlVector(JNIEnv *env, jobject thiz, const hidl_vec<T> &vec) {
+    hardware::Parcel *parcel = JHwParcel::GetNativeContext(env, thiz)->getParcel();
+
+    size_t parentHandle;
+    status_t err = parcel->writeBuffer(&vec, sizeof(vec), &parentHandle);
+
+    if (err == OK) {
+        size_t childHandle;
+        err = ::android::hardware::writeEmbeddedToParcel(
+                vec,
+                parcel,
+                parentHandle,
+                0 /* parentOffset */,
+                &childHandle);
+
+        for (size_t i = 0; (err == OK) && (i < vec.size()); ++i) {
+            err = ::android::hardware::writeEmbeddedToParcel(
+                    vec[i],
+                    parcel,
+                    childHandle,
+                    i * sizeof(T));
+        }
+    }
+
+    signalExceptionForError(env, err);
+}
+
+static void JHwParcel_native_writeStringVector(
+        JNIEnv *env, jobject thiz, jobjectArray arrayObj) {
+    if (arrayObj == nullptr) {
+        jniThrowException(env, "java/lang/NullPointerException", nullptr);
+        return;
+    }
+
+    sp<JHwParcel> impl = JHwParcel::GetNativeContext(env, thiz);
+    EphemeralStorage *storage = impl->getStorage();
+
+    void *vecPtr = storage->allocTemporaryStorage(sizeof(hidl_vec<hidl_string>));
+    hidl_vec<hidl_string> *vec = new (vecPtr) hidl_vec<hidl_string>();
+
+    jsize len = env->GetArrayLength(arrayObj);
+    hidl_string *strings = storage->allocStringArray(len);
+    vec->setToExternal(strings, len, false /* shouldOwn */);
+
+    for (jsize i = 0; i < len; ++i) {
+        ScopedLocalRef<jstring> stringObj(env, (jstring) env->GetObjectArrayElement(arrayObj, i));
+
+        const hidl_string *s = storage->allocTemporaryString(env, stringObj.get());
+        strings[i].setToExternal(s->c_str(), s->size());
+    }
+
+    WriteHidlVector(env, thiz, *vec);
+}
+
+static void JHwParcel_native_writeNativeHandleVector(
+        JNIEnv *env, jobject thiz, jobjectArray jHandleArray) {
+    if (jHandleArray == nullptr) {
+        jniThrowException(env, "java/lang/NullPointerException", nullptr);
+        return;
+    }
+
+    sp<JHwParcel> impl = JHwParcel::GetNativeContext(env, thiz);
+    EphemeralStorage *storage = impl->getStorage();
+
+    void *vecPtr = storage->allocTemporaryStorage(sizeof(hidl_vec<hidl_handle>));
+    hidl_vec<hidl_handle> *vec = new (vecPtr) hidl_vec<hidl_handle>();
+
+    jsize len = env->GetArrayLength(jHandleArray);
+    hidl_handle *handles = static_cast<hidl_handle *>(
+            storage->allocTemporaryStorage(len * sizeof(hidl_handle)));
+
+    vec->setToExternal(handles, len, false /* shouldOwn */);
+    for (jsize i = 0; i < len; i++) {
+        ScopedLocalRef<jobject> jHandle(env, env->GetObjectArrayElement(jHandleArray, i));
+
+        native_handle_t* handle = JNativeHandle::MakeCppNativeHandle(env, jHandle.get(), storage);
+
+        new (&(handles[i])) hidl_handle();
+        handles[i].setTo(handle, false /* shouldOwn */);
+    }
+
+    WriteHidlVector(env, thiz, *vec);
+}
+
 static void JHwParcel_native_writeStrongBinder(
         JNIEnv *env, jobject thiz, jobject binderObj) {
     sp<hardware::IBinder> binder;
     if (binderObj != NULL) {
-        ScopedLocalRef<jclass> hwBinderKlass(
-                env, FindClassOrDie(env, PACKAGE_PATH "/HwBinder"));
+        ScopedLocalRef<jclass> hwBinderKlass(env, FindClassOrDie(env, PACKAGE_PATH "/HwBinder"));
 
         ScopedLocalRef<jclass> hwRemoteBinderKlass(
                 env, FindClassOrDie(env, PACKAGE_PATH "/HwRemoteBinder"));
@@ -587,6 +685,37 @@ static jstring JHwParcel_native_readString(JNIEnv *env, jobject thiz) {
     return MakeStringObjFromHidlString(env, *s);
 }
 
+static jobject ReadNativeHandle(JNIEnv *env, jobject thiz, jboolean embedded,
+        jlong parentHandle, jlong offset) {
+    hardware::Parcel *parcel =
+            JHwParcel::GetNativeContext(env, thiz)->getParcel();
+
+    const native_handle_t *handle = nullptr;
+    status_t err = OK;
+
+    if (embedded) {
+        err = parcel->readNullableEmbeddedNativeHandle(parentHandle, offset, &handle);
+    } else {
+        err = parcel->readNullableNativeHandleNoDup(&handle);
+    }
+
+    if (err != OK) {
+        signalExceptionForError(env, err);
+        return nullptr;
+    }
+
+    return JNativeHandle::MakeJavaNativeHandleObj(env, handle);
+}
+
+static jobject JHwParcel_native_readNativeHandle(JNIEnv *env, jobject thiz) {
+    return ReadNativeHandle(env, thiz, false /*embedded*/, 0L /*parentHandle*/, 0L /*offset*/);
+}
+
+static jobject JHwParcel_native_readEmbeddedNativeHandle(
+        JNIEnv *env, jobject thiz, jlong parentHandle, jlong offset) {
+    return ReadNativeHandle(env, thiz, true /*embedded*/, parentHandle, offset);
+}
+
 #define DEFINE_PARCEL_VECTOR_READER(Suffix,Type,NewType)                       \
 static Type ## Array JHwParcel_native_read ## Suffix ## Vector(                \
         JNIEnv *env, jobject thiz) {                                           \
@@ -630,10 +759,8 @@ DEFINE_PARCEL_VECTOR_READER(Int64,jlong,Long)
 DEFINE_PARCEL_VECTOR_READER(Float,jfloat,Float)
 DEFINE_PARCEL_VECTOR_READER(Double,jdouble,Double)
 
-static jbooleanArray JHwParcel_native_readBoolVector(
-        JNIEnv *env, jobject thiz) {
-    hardware::Parcel *parcel =
-        JHwParcel::GetNativeContext(env, thiz)->getParcel();
+static jbooleanArray JHwParcel_native_readBoolVector(JNIEnv *env, jobject thiz) {
+    hardware::Parcel *parcel = JHwParcel::GetNativeContext(env, thiz)->getParcel();
 
     size_t parentHandle;
 
@@ -692,101 +819,62 @@ static jobjectArray MakeStringArray(
     return arrayObj;
 }
 
-static jobjectArray JHwParcel_native_readStringVector(
-        JNIEnv *env, jobject thiz) {
-    typedef hidl_vec<hidl_string> string_vec;
+template<typename T>
+static const hidl_vec<T> *ReadHidlVector(JNIEnv *env, jobject thiz) {
+    const hidl_vec<T> *vec;
 
-    hardware::Parcel *parcel =
-        JHwParcel::GetNativeContext(env, thiz)->getParcel();
-
-    size_t parentHandle;
-
-    const string_vec *vec;
-    status_t err = parcel->readBuffer(sizeof(*vec), &parentHandle,
-            reinterpret_cast<const void **>(&vec));
-
-    if (err != OK) {
-        signalExceptionForError(env, err);
-        return NULL;
-    }
-
-    size_t childHandle;
-    err = ::android::hardware::readEmbeddedFromParcel(
-            const_cast<string_vec &>(*vec),
-            *parcel, parentHandle, 0 /* parentOffset */, &childHandle);
-
-    for (size_t i = 0; (err == OK) && (i < vec->size()); ++i) {
-        err = android::hardware::readEmbeddedFromParcel(
-                    const_cast<hidl_string &>((*vec)[i]),
-                    *parcel,
-                    childHandle,
-                    i * sizeof(hidl_string) /* parentOffset */);
-    }
-
-    if (err != OK) {
-        signalExceptionForError(env, err);
-        return NULL;
-    }
-
-    return MakeStringArray(env, &(*vec)[0], vec->size());
-}
-
-static void JHwParcel_native_writeStringVector(
-        JNIEnv *env, jobject thiz, jobjectArray arrayObj) {
-    typedef hidl_vec<hidl_string> string_vec;
-
-    if (arrayObj == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
-        return;
-    }
-
-    jsize len = env->GetArrayLength(arrayObj);
-
-    sp<JHwParcel> impl = JHwParcel::GetNativeContext(env, thiz);
-
-    void *vecPtr =
-        impl->getStorage()->allocTemporaryStorage(sizeof(string_vec));
-
-    string_vec *vec = new (vecPtr) string_vec;
-
-    hidl_string *strings = impl->getStorage()->allocStringArray(len);
-    vec->setToExternal(strings, len);
-
-    for (jsize i = 0; i < len; ++i) {
-        ScopedLocalRef<jstring> stringObj(
-                env,
-                (jstring)env->GetObjectArrayElement(arrayObj, i));
-
-        const hidl_string *s =
-            impl->getStorage()->allocTemporaryString(env, stringObj.get());
-
-        strings[i].setToExternal(s->c_str(), s->size());
-    }
-
-    hardware::Parcel *parcel = impl->getParcel();
+    hardware::Parcel *parcel = JHwParcel::GetNativeContext(env, thiz)->getParcel();
 
     size_t parentHandle;
-    status_t err = parcel->writeBuffer(vec, sizeof(*vec), &parentHandle);
+    status_t err = parcel->readBuffer(sizeof(hidl_vec<T>),
+            &parentHandle, reinterpret_cast<const void **>(&vec));
 
     if (err == OK) {
         size_t childHandle;
-        err = ::android::hardware::writeEmbeddedToParcel(
-                *vec,
-                parcel,
-                parentHandle,
+        err = ::android::hardware::readEmbeddedFromParcel(
+                const_cast<hidl_vec<T> &>(*vec),
+                *parcel, parentHandle,
                 0 /* parentOffset */,
                 &childHandle);
 
-        for (size_t i = 0; (err == OK) && (i < vec->size()); ++i) {
-            err = ::android::hardware::writeEmbeddedToParcel(
-                    (*vec)[i],
-                    parcel,
+        for (size_t i = 0; (err == OK) && (i < vec->size()); i++) {
+            err = android::hardware::readEmbeddedFromParcel(
+                    const_cast<T &>((*vec)[i]),
+                    *parcel,
                     childHandle,
-                    i * sizeof(hidl_string));
+                    i * sizeof(T) /* parentOffset */);
         }
     }
 
-    signalExceptionForError(env, err);
+    if (err != OK) {
+        signalExceptionForError(env, err);
+        return nullptr;
+    }
+
+    return vec;
+}
+
+static jobjectArray JHwParcel_native_readStringVector(
+        JNIEnv *env, jobject thiz) {
+    const hidl_vec<hidl_string> *vec = ReadHidlVector<hidl_string>(env, thiz);
+    return MakeStringArray(env, &(*vec)[0], vec->size());
+}
+
+static jobjectArray JHwParcel_native_readNativeHandleVector(
+        JNIEnv *env, jobject thiz) {
+    const hidl_vec<hidl_handle> *vec = ReadHidlVector<hidl_handle>(env, thiz);
+
+    jsize length = vec->size();
+    jobjectArray objArray = JNativeHandle::AllocJavaNativeHandleObjArray(
+            env, length);
+
+    for (jsize i = 0; i < length; i++) {
+        jobject jHandle = JNativeHandle::MakeJavaNativeHandleObj(env, (*vec)[i].getNativeHandle());
+
+        env->SetObjectArrayElement(objArray, i, jHandle);
+    }
+
+    return objArray;
 }
 
 static jobject JHwParcel_native_readStrongBinder(JNIEnv *env, jobject thiz) {
@@ -890,6 +978,9 @@ static JNINativeMethod gMethods[] = {
     { "writeString", "(Ljava/lang/String;)V",
         (void *)JHwParcel_native_writeString },
 
+    { "writeNativeHandle", "(L" PACKAGE_PATH "/NativeHandle;)V",
+        (void *)JHwParcel_native_writeNativeHandle },
+
     { "writeBoolVector", "([Z)V", (void *)JHwParcel_native_writeBoolVector },
     { "writeInt8Vector", "([B)V", (void *)JHwParcel_native_writeInt8Vector },
     { "writeInt16Vector", "([S)V", (void *)JHwParcel_native_writeInt16Vector },
@@ -902,6 +993,9 @@ static JNINativeMethod gMethods[] = {
 
     { "writeStringVector", "([Ljava/lang/String;)V",
         (void *)JHwParcel_native_writeStringVector },
+
+    { "writeNativeHandleVector", "([L" PACKAGE_PATH "/NativeHandle;)V",
+        (void *)JHwParcel_native_writeNativeHandleVector },
 
     { "writeStrongBinder", "(L" PACKAGE_PATH "/IHwBinder;)V",
         (void *)JHwParcel_native_writeStrongBinder },
@@ -919,6 +1013,12 @@ static JNINativeMethod gMethods[] = {
 
     { "readString", "()Ljava/lang/String;",
         (void *)JHwParcel_native_readString },
+
+    { "readNativeHandle", "()L" PACKAGE_PATH "/NativeHandle;",
+        (void *)JHwParcel_native_readNativeHandle },
+
+    { "readEmbeddedNativeHandle", "(JJ)L" PACKAGE_PATH "/NativeHandle;",
+        (void *)JHwParcel_native_readEmbeddedNativeHandle },
 
     { "readBoolVectorAsArray", "()[Z",
         (void *)JHwParcel_native_readBoolVector },
@@ -943,6 +1043,9 @@ static JNINativeMethod gMethods[] = {
 
     { "readStringVectorAsArray", "()[Ljava/lang/String;",
         (void *)JHwParcel_native_readStringVector },
+
+    { "readNativeHandleAsArray", "()[L" PACKAGE_PATH "/NativeHandle;",
+        (void *)JHwParcel_native_readNativeHandleVector },
 
     { "readStrongBinder", "()L" PACKAGE_PATH "/IHwBinder;",
         (void *)JHwParcel_native_readStrongBinder },

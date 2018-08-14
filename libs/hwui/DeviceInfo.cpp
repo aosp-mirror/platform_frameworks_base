@@ -16,11 +16,13 @@
 
 #include <DeviceInfo.h>
 
+#include "Properties.h"
+
 #include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
 
-#include <thread>
 #include <mutex>
+#include <thread>
 
 #include <log/log.h>
 
@@ -28,6 +30,19 @@
 
 namespace android {
 namespace uirenderer {
+
+static constexpr android::DisplayInfo sDummyDisplay {
+        1080,   // w
+        1920,   // h
+        320.0,  // xdpi
+        320.0,  // ydpi
+        60.0,   // fps
+        2.0,    // density
+        0,      // orientation
+        false,  // secure?
+        0,      // appVsyncOffset
+        0,      // presentationDeadline
+};
 
 static DeviceInfo* sDeviceInfo = nullptr;
 static std::once_flag sInitializedFlag;
@@ -47,21 +62,26 @@ void DeviceInfo::initialize() {
 void DeviceInfo::initialize(int maxTextureSize) {
     std::call_once(sInitializedFlag, [maxTextureSize]() {
         sDeviceInfo = new DeviceInfo();
-        sDeviceInfo->loadDisplayInfo();
+        sDeviceInfo->mDisplayInfo = DeviceInfo::queryDisplayInfo();
         sDeviceInfo->mMaxTextureSize = maxTextureSize;
     });
 }
 
 void DeviceInfo::load() {
-    loadDisplayInfo();
+    mDisplayInfo = queryDisplayInfo();
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
 }
 
-void DeviceInfo::loadDisplayInfo() {
-    sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(
-            ISurfaceComposer::eDisplayIdMain));
-    status_t status = SurfaceComposerClient::getDisplayInfo(dtoken, &mDisplayInfo);
+DisplayInfo DeviceInfo::queryDisplayInfo() {
+    if (Properties::isolatedProcess) {
+        return sDummyDisplay;
+    }
+
+    DisplayInfo displayInfo;
+    sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(ISurfaceComposer::eDisplayIdMain));
+    status_t status = SurfaceComposerClient::getDisplayInfo(dtoken, &displayInfo);
     LOG_ALWAYS_FATAL_IF(status, "Failed to get display info, error %d", status);
+    return displayInfo;
 }
 
 } /* namespace uirenderer */

@@ -16,10 +16,14 @@
 
 package com.android.server.wm;
 
+import android.support.test.filters.FlakyTest;
+import android.view.SurfaceControl;
+import android.view.SurfaceSession;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -29,8 +33,6 @@ import java.util.Comparator;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
@@ -43,14 +45,23 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyFloat;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 /**
  * Test class for {@link WindowContainer}.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.WindowContainerTests
+ *  atest FrameworksServicesTests:com.android.server.wm.WindowContainerTests
  */
 @SmallTest
 @Presubmit
+@FlakyTest(bugId = 74078662)
 @RunWith(AndroidJUnit4.class)
 public class WindowContainerTests extends WindowTestsBase {
 
@@ -99,6 +110,21 @@ public class WindowContainerTests extends WindowTestsBase {
         assertTrue(layerNeg2.mOnParentSetCalled);
         assertTrue(secondLayerNeg1.mOnParentSetCalled);
         assertTrue(layer0.mOnParentSetCalled);
+    }
+
+    @Test
+    public void testAddChildSetsSurfacePosition() throws Exception {
+        MockSurfaceBuildingContainer top = new MockSurfaceBuildingContainer();
+
+        final SurfaceControl.Transaction transaction = mock(SurfaceControl.Transaction.class);
+        sWm.mTransactionFactory = () -> transaction;
+
+        WindowContainer child = new WindowContainer(sWm);
+        child.setBounds(1, 1, 10, 10);
+
+        verify(transaction, never()).setPosition(any(), anyFloat(), anyFloat());
+        top.addChild(child, 0);
+        verify(transaction, times(1)).setPosition(any(), eq(1.f), eq(1.f));
     }
 
     @Test
@@ -193,7 +219,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testRemoveImmediately_WithController() throws Exception {
-        final WindowContainer container = new WindowContainer();
+        final WindowContainer container = new WindowContainer(sWm);
         final WindowContainerController controller = new WindowContainerController(null, sWm);
 
         container.setController(controller);
@@ -208,7 +234,7 @@ public class WindowContainerTests extends WindowTestsBase {
     @Test
     public void testSetController() throws Exception {
         final WindowContainerController controller = new WindowContainerController(null, sWm);
-        final WindowContainer container = new WindowContainer();
+        final WindowContainer container = new WindowContainer(sWm);
 
         container.setController(controller);
         assertEquals(controller, container.getController());
@@ -333,12 +359,19 @@ public class WindowContainerTests extends WindowTestsBase {
         final TestWindowContainer child12 = child1.addChildWindow(builder.setIsAnimating(true));
         final TestWindowContainer child21 = child2.addChildWindow();
 
-        assertTrue(root.isAnimating());
+        assertFalse(root.isAnimating());
         assertTrue(child1.isAnimating());
-        assertFalse(child11.isAnimating());
+        assertTrue(child11.isAnimating());
         assertTrue(child12.isAnimating());
         assertFalse(child2.isAnimating());
         assertFalse(child21.isAnimating());
+
+        assertTrue(root.isSelfOrChildAnimating());
+        assertTrue(child1.isSelfOrChildAnimating());
+        assertFalse(child11.isSelfOrChildAnimating());
+        assertTrue(child12.isSelfOrChildAnimating());
+        assertFalse(child2.isSelfOrChildAnimating());
+        assertFalse(child21.isSelfOrChildAnimating());
     }
 
     @Test
@@ -560,165 +593,114 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testConfigurationInit() throws Exception {
+    public void testPrefixOrderIndex() throws Exception {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.build();
 
-        // Check root container initial config.
-        final TestWindowContainer root = builder.setLayer(0).build();
-        assertEquals(Configuration.EMPTY, root.getOverrideConfiguration());
-        assertEquals(Configuration.EMPTY, root.getMergedOverrideConfiguration());
-        assertEquals(Configuration.EMPTY, root.getConfiguration());
-
-        // Check child initial config.
         final TestWindowContainer child1 = root.addChildWindow();
-        assertEquals(Configuration.EMPTY, child1.getOverrideConfiguration());
-        assertEquals(Configuration.EMPTY, child1.getMergedOverrideConfiguration());
-        assertEquals(Configuration.EMPTY, child1.getConfiguration());
 
-        // Check child initial config if root has overrides.
-        final Configuration rootOverrideConfig = new Configuration();
-        rootOverrideConfig.fontScale = 1.3f;
-        root.onOverrideConfigurationChanged(rootOverrideConfig);
+        final TestWindowContainer child11 = child1.addChildWindow();
+        final TestWindowContainer child12 = child1.addChildWindow();
+
         final TestWindowContainer child2 = root.addChildWindow();
-        assertEquals(Configuration.EMPTY, child2.getOverrideConfiguration());
-        assertEquals(rootOverrideConfig, child2.getMergedOverrideConfiguration());
-        assertEquals(rootOverrideConfig, child2.getConfiguration());
 
-        // Check child initial config if root has parent config set.
-        final Configuration rootParentConfig = new Configuration();
-        rootParentConfig.fontScale = 0.8f;
-        rootParentConfig.orientation = SCREEN_ORIENTATION_LANDSCAPE;
-        root.onConfigurationChanged(rootParentConfig);
-        final Configuration rootFullConfig = new Configuration(rootParentConfig);
-        rootFullConfig.updateFrom(rootOverrideConfig);
+        final TestWindowContainer child21 = child2.addChildWindow();
+        final TestWindowContainer child22 = child2.addChildWindow();
 
-        final TestWindowContainer child3 = root.addChildWindow();
-        assertEquals(Configuration.EMPTY, child3.getOverrideConfiguration());
-        assertEquals(rootOverrideConfig, child3.getMergedOverrideConfiguration());
-        assertEquals(rootFullConfig, child3.getConfiguration());
+        final TestWindowContainer child221 = child22.addChildWindow();
+        final TestWindowContainer child222 = child22.addChildWindow();
+        final TestWindowContainer child223 = child22.addChildWindow();
+
+        final TestWindowContainer child23 = child2.addChildWindow();
+
+        assertEquals(0, root.getPrefixOrderIndex());
+        assertEquals(1, child1.getPrefixOrderIndex());
+        assertEquals(2, child11.getPrefixOrderIndex());
+        assertEquals(3, child12.getPrefixOrderIndex());
+        assertEquals(4, child2.getPrefixOrderIndex());
+        assertEquals(5, child21.getPrefixOrderIndex());
+        assertEquals(6, child22.getPrefixOrderIndex());
+        assertEquals(7, child221.getPrefixOrderIndex());
+        assertEquals(8, child222.getPrefixOrderIndex());
+        assertEquals(9, child223.getPrefixOrderIndex());
+        assertEquals(10, child23.getPrefixOrderIndex());
     }
 
     @Test
-    public void testConfigurationChangeOnAddRemove() throws Exception {
+    public void testPrefixOrder_addEntireSubtree() throws Exception {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.build();
+        final TestWindowContainer subtree = builder.build();
+        final TestWindowContainer subtree2 = builder.build();
 
-        // Init root's config.
-        final TestWindowContainer root = builder.setLayer(0).build();
-        final Configuration rootOverrideConfig = new Configuration();
-        rootOverrideConfig.fontScale = 1.3f;
-        root.onOverrideConfigurationChanged(rootOverrideConfig);
+        final TestWindowContainer child1 = subtree.addChildWindow();
+        final TestWindowContainer child11 = child1.addChildWindow();
+        final TestWindowContainer child2 = subtree2.addChildWindow();
+        final TestWindowContainer child3 = subtree2.addChildWindow();
+        subtree.addChild(subtree2, 1);
+        root.addChild(subtree, 0);
 
-        // Init child's config.
-        final TestWindowContainer child = root.addChildWindow();
-        final Configuration childOverrideConfig = new Configuration();
-        childOverrideConfig.densityDpi = 320;
-        child.onOverrideConfigurationChanged(childOverrideConfig);
-        final Configuration mergedOverrideConfig = new Configuration(root.getConfiguration());
-        mergedOverrideConfig.updateFrom(childOverrideConfig);
-
-        // Check configuration update when child is removed from parent - it should remain same.
-        root.removeChild(child);
-        assertEquals(childOverrideConfig, child.getOverrideConfiguration());
-        assertEquals(mergedOverrideConfig, child.getMergedOverrideConfiguration());
-        assertEquals(mergedOverrideConfig, child.getConfiguration());
-
-        // It may be paranoia... but let's check if parent's config didn't change after removal.
-        assertEquals(rootOverrideConfig, root.getOverrideConfiguration());
-        assertEquals(rootOverrideConfig, root.getMergedOverrideConfiguration());
-        assertEquals(rootOverrideConfig, root.getConfiguration());
-
-        // Init different root
-        final TestWindowContainer root2 = builder.setLayer(0).build();
-        final Configuration rootOverrideConfig2 = new Configuration();
-        rootOverrideConfig2.fontScale = 1.1f;
-        root2.onOverrideConfigurationChanged(rootOverrideConfig2);
-
-        // Check configuration update when child is added to different parent.
-        mergedOverrideConfig.setTo(rootOverrideConfig2);
-        mergedOverrideConfig.updateFrom(childOverrideConfig);
-        root2.addChildWindow(child);
-        assertEquals(childOverrideConfig, child.getOverrideConfiguration());
-        assertEquals(mergedOverrideConfig, child.getMergedOverrideConfiguration());
-        assertEquals(mergedOverrideConfig, child.getConfiguration());
+        assertEquals(0, root.getPrefixOrderIndex());
+        assertEquals(1, subtree.getPrefixOrderIndex());
+        assertEquals(2, child1.getPrefixOrderIndex());
+        assertEquals(3, child11.getPrefixOrderIndex());
+        assertEquals(4, subtree2.getPrefixOrderIndex());
+        assertEquals(5, child2.getPrefixOrderIndex());
+        assertEquals(6, child3.getPrefixOrderIndex());
     }
 
     @Test
-    public void testConfigurationChangePropagation() throws Exception {
+    public void testPrefixOrder_remove() throws Exception {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.build();
 
-        // Builds 3-level vertical hierarchy with one window container on each level.
-        // In addition to different overrides on each level, everyone in hierarchy will have one
-        // common overridden value - orientation;
-
-        // Init root's config.
-        final TestWindowContainer root = builder.setLayer(0).build();
-        final Configuration rootOverrideConfig = new Configuration();
-        rootOverrideConfig.fontScale = 1.3f;
-        rootOverrideConfig.orientation = SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-        root.onOverrideConfigurationChanged(rootOverrideConfig);
-
-        // Init children.
         final TestWindowContainer child1 = root.addChildWindow();
-        final Configuration childOverrideConfig1 = new Configuration();
-        childOverrideConfig1.densityDpi = 320;
-        childOverrideConfig1.orientation = SCREEN_ORIENTATION_LANDSCAPE;
-        child1.onOverrideConfigurationChanged(childOverrideConfig1);
 
-        final TestWindowContainer child2 = child1.addChildWindow();
-        final Configuration childOverrideConfig2 = new Configuration();
-        childOverrideConfig2.screenWidthDp = 150;
-        childOverrideConfig2.orientation = SCREEN_ORIENTATION_PORTRAIT;
-        child2.onOverrideConfigurationChanged(childOverrideConfig2);
+        final TestWindowContainer child11 = child1.addChildWindow();
+        final TestWindowContainer child12 = child1.addChildWindow();
 
-        // Check configuration on all levels when root override is updated.
-        rootOverrideConfig.smallestScreenWidthDp = 200;
-        root.onOverrideConfigurationChanged(rootOverrideConfig);
+        final TestWindowContainer child2 = root.addChildWindow();
 
-        final Configuration mergedOverrideConfig1 = new Configuration(rootOverrideConfig);
-        mergedOverrideConfig1.updateFrom(childOverrideConfig1);
-        final Configuration mergedConfig1 = new Configuration(mergedOverrideConfig1);
+        assertEquals(0, root.getPrefixOrderIndex());
+        assertEquals(1, child1.getPrefixOrderIndex());
+        assertEquals(2, child11.getPrefixOrderIndex());
+        assertEquals(3, child12.getPrefixOrderIndex());
+        assertEquals(4, child2.getPrefixOrderIndex());
 
-        final Configuration mergedOverrideConfig2 = new Configuration(mergedOverrideConfig1);
-        mergedOverrideConfig2.updateFrom(childOverrideConfig2);
-        final Configuration mergedConfig2 = new Configuration(mergedOverrideConfig2);
+        root.removeChild(child1);
 
-        assertEquals(rootOverrideConfig, root.getOverrideConfiguration());
-        assertEquals(rootOverrideConfig, root.getMergedOverrideConfiguration());
-        assertEquals(rootOverrideConfig, root.getConfiguration());
+        assertEquals(1, child2.getPrefixOrderIndex());
+    }
 
-        assertEquals(childOverrideConfig1, child1.getOverrideConfiguration());
-        assertEquals(mergedOverrideConfig1, child1.getMergedOverrideConfiguration());
-        assertEquals(mergedConfig1, child1.getConfiguration());
+    /**
+     * Ensure children of a {@link WindowContainer} do not have
+     * {@link WindowContainer#onParentResize()} called when {@link WindowContainer#onParentResize()}
+     * is invoked with overridden bounds.
+     */
+    @Test
+    public void testOnParentResizePropagation() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.build();
 
-        assertEquals(childOverrideConfig2, child2.getOverrideConfiguration());
-        assertEquals(mergedOverrideConfig2, child2.getMergedOverrideConfiguration());
-        assertEquals(mergedConfig2, child2.getConfiguration());
+        final TestWindowContainer child = root.addChildWindow();
+        child.setBounds(new Rect(1,1,2,2));
 
-        // Check configuration on all levels when root parent config is updated.
-        final Configuration rootParentConfig = new Configuration();
-        rootParentConfig.screenHeightDp = 100;
-        rootParentConfig.orientation = SCREEN_ORIENTATION_REVERSE_PORTRAIT;
-        root.onConfigurationChanged(rootParentConfig);
-        final Configuration mergedRootConfig = new Configuration(rootParentConfig);
-        mergedRootConfig.updateFrom(rootOverrideConfig);
+        final TestWindowContainer grandChild = mock(TestWindowContainer.class);
 
-        mergedConfig1.setTo(mergedRootConfig);
-        mergedConfig1.updateFrom(mergedOverrideConfig1);
+        child.addChildWindow(grandChild);
+        root.onResize();
 
-        mergedConfig2.setTo(mergedConfig1);
-        mergedConfig2.updateFrom(mergedOverrideConfig2);
+        // Make sure the child does not propagate resize through onParentResize when bounds are set.
+        verify(grandChild, never()).onParentResize();
 
-        assertEquals(rootOverrideConfig, root.getOverrideConfiguration());
-        assertEquals(rootOverrideConfig, root.getMergedOverrideConfiguration());
-        assertEquals(mergedRootConfig, root.getConfiguration());
+        child.removeChild(grandChild);
 
-        assertEquals(childOverrideConfig1, child1.getOverrideConfiguration());
-        assertEquals(mergedOverrideConfig1, child1.getMergedOverrideConfiguration());
-        assertEquals(mergedConfig1, child1.getConfiguration());
+        child.setBounds(null);
+        child.addChildWindow(grandChild);
+        root.onResize();
 
-        assertEquals(childOverrideConfig2, child2.getOverrideConfiguration());
-        assertEquals(mergedOverrideConfig2, child2.getMergedOverrideConfiguration());
-        assertEquals(mergedConfig2, child2.getConfiguration());
+        // Make sure the child propagates resize through onParentResize when no bounds set.
+        verify(grandChild, times(1)).onParentResize();
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
@@ -749,6 +731,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
         TestWindowContainer(int layer, boolean isAnimating, boolean isVisible,
             Integer orientation) {
+            super(sWm);
             mLayer = layer;
             mIsAnimating = isAnimating;
             mIsVisible = isVisible;
@@ -779,10 +762,6 @@ public class WindowContainerTests extends WindowTestsBase {
             return addChildWindow(new TestWindowContainerBuilder().setLayer(1));
         }
 
-        TestWindowContainer getChildAt(int index) {
-            return mChildren.get(index);
-        }
-
         @Override
         void onParentSet() {
             mOnParentSetCalled = true;
@@ -795,8 +774,8 @@ public class WindowContainerTests extends WindowTestsBase {
         }
 
         @Override
-        boolean isAnimating() {
-            return mIsAnimating || super.isAnimating();
+        boolean isSelfAnimating() {
+            return mIsAnimating;
         }
 
         @Override
@@ -864,6 +843,30 @@ public class WindowContainerTests extends WindowTestsBase {
 
         TestWindowContainer build() {
             return new TestWindowContainer(mLayer, mIsAnimating, mIsVisible, mOrientation);
+        }
+    }
+
+    private class MockSurfaceBuildingContainer extends WindowContainer<WindowContainer> {
+        final SurfaceSession mSession = new SurfaceSession();
+
+        MockSurfaceBuildingContainer() {
+            super(sWm);
+        }
+
+        class MockSurfaceBuilder extends SurfaceControl.Builder {
+            MockSurfaceBuilder(SurfaceSession ss) {
+                super(ss);
+            }
+
+            @Override
+            public SurfaceControl build() {
+                return mock(SurfaceControl.class);
+            }
+        }
+
+        @Override
+        SurfaceControl.Builder makeChildSurface(WindowContainer child) {
+            return new MockSurfaceBuilder(mSession);
         }
     }
 }

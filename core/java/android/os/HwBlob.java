@@ -232,6 +232,14 @@ public class HwBlob {
      * @throws IndexOutOfBoundsException when [offset, offset + sizeof(jstring)] is out of range
      */
     public native final void putString(long offset, String x);
+    /**
+     * Writes a native handle (without duplicating the underlying file descriptors) at an offset.
+     *
+     * @param offset location to write value
+     * @param x a {@link NativeHandle} instance to write
+     * @throws IndexOutOfBoundsException when [offset, offset + sizeof(jobject)] is out of range
+     */
+    public native final void putNativeHandle(long offset, NativeHandle x);
 
     /**
      * Put a boolean array contiguously at an offset in the blob.

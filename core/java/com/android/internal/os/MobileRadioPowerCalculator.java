@@ -50,11 +50,33 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
     }
 
     public MobileRadioPowerCalculator(PowerProfile profile, BatteryStats stats) {
-        mPowerRadioOn = profile.getAveragePower(PowerProfile.POWER_RADIO_ACTIVE);
-        for (int i = 0; i < mPowerBins.length; i++) {
-            mPowerBins[i] = profile.getAveragePower(PowerProfile.POWER_RADIO_ON, i);
+        double temp =
+                profile.getAveragePowerOrDefault(PowerProfile.POWER_RADIO_ACTIVE, -1);
+        if (temp != -1) {
+            mPowerRadioOn = temp;
+        } else {
+            double sum = 0;
+            sum += profile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_RX);
+            for (int i = 0; i < mPowerBins.length; i++) {
+                sum += profile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_TX, i);
+            }
+            mPowerRadioOn = sum / (mPowerBins.length + 1);
         }
-        mPowerScan = profile.getAveragePower(PowerProfile.POWER_RADIO_SCANNING);
+
+        temp = profile.getAveragePowerOrDefault(PowerProfile.POWER_RADIO_ON, -1);
+        if (temp != -1 ) {
+            for (int i = 0; i < mPowerBins.length; i++) {
+                mPowerBins[i] = profile.getAveragePower(PowerProfile.POWER_RADIO_ON, i);
+            }
+        } else {
+            double idle = profile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_IDLE);
+            mPowerBins[0] = idle * 25 / 180;
+            for (int i = 1; i < mPowerBins.length; i++) {
+                mPowerBins[i] = Math.max(1, idle / 256);
+            }
+        }
+
+        mPowerScan = profile.getAveragePowerOrDefault(PowerProfile.POWER_RADIO_SCANNING, 0);
         mStats = stats;
     }
 

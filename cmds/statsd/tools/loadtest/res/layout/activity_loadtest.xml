@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+** Copyright 2007, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:id="@+id/outside"
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        android:orientation="vertical">
+      <requestFocus />
+
+        <LinearLayout
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <TextView
+                android:textSize="30dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/replication_label" />
+            <EditText
+                android:id="@+id/replication"
+                android:inputType="number"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLength="4"
+                android:text="@integer/replication_default"
+                android:textSize="30dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <TextView
+                android:textSize="30dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/bucket_label" />
+             <Spinner
+                 android:id="@+id/bucket_spinner"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:prompt="@string/bucket_label"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <TextView
+                android:textSize="30dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/period_label" />
+            <EditText
+                android:id="@+id/period"
+                android:inputType="number"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLength="3"
+                android:text="@integer/period_default"
+                android:textSize="30dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <TextView
+                android:textSize="30dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/burst_label" />
+            <EditText
+                android:id="@+id/burst"
+                android:inputType="number"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLength="4"
+                android:text="@integer/burst_default"
+                android:textSize="30dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <TextView
+                android:textSize="30dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/duration_label" />
+            <EditText
+                android:id="@+id/duration"
+                android:inputType="number"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLength="4"
+                android:text="@integer/duration_default"
+                android:textSize="30dp"/>
+        </LinearLayout>
+        <CheckBox
+            android:id="@+id/placebo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/placebo"
+            android:checked="false" />
+
+        <LinearLayout
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <CheckBox
+                android:id="@+id/include_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/count"
+                android:checked="true"/>
+            <CheckBox
+                android:id="@+id/include_duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/duration"
+                android:checked="true"/>
+            <CheckBox
+                android:id="@+id/include_event"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/event"
+                android:checked="true"/>
+            <CheckBox
+                android:id="@+id/include_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/value"
+                android:checked="true"/>
+            <CheckBox
+                android:id="@+id/include_gauge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/gauge"
+                android:checked="true"/>
+        </LinearLayout>
+
+        <Space
+            android:layout_width="1dp"
+            android:layout_height="30dp"/>
+
+        <Button
+            android:id="@+id/start_stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#ffff0000"
+            android:text="@string/start"
+            android:textSize="50dp"/>
+
+        <Space
+            android:layout_width="1dp"
+            android:layout_height="30dp"/>
+
+        <Space
+            android:layout_width="1dp"
+            android:layout_height="30dp"/>
+
+        <TextView
+            android:id="@+id/report_text"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+</ScrollView>

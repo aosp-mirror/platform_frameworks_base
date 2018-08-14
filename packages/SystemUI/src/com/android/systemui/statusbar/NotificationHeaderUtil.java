@@ -75,7 +75,7 @@ public class NotificationHeaderUtil {
                 if (shouldApply) {
                     // lets gray it out
                     int grey = view.getContext().getColor(
-                            com.android.internal.R.color.notification_icon_default_color);
+                            com.android.internal.R.color.notification_default_color_light);
                     imageView.getDrawable().setColorFilter(grey, PorterDuff.Mode.SRC_ATOP);
                 } else {
                     // lets reset it
@@ -128,6 +128,7 @@ public class NotificationHeaderUtil {
         mComparators.add(HeaderProcessor.forTextView(mRow,
                 com.android.internal.R.id.header_text));
         mDividers.add(com.android.internal.R.id.header_text_divider);
+        mDividers.add(com.android.internal.R.id.header_text_secondary_divider);
         mDividers.add(com.android.internal.R.id.time_divider);
     }
 

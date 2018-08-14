@@ -23,7 +23,7 @@ import java.util.Objects;
 
 /** @hide */
 public final class VolumePolicy implements Parcelable {
-    public static final VolumePolicy DEFAULT = new VolumePolicy(false, false, true, 400);
+    public static final VolumePolicy DEFAULT = new VolumePolicy(false, false, false, 400);
 
     /**
      * Accessibility volume policy where the STREAM_MUSIC volume (i.e. media volume) affects

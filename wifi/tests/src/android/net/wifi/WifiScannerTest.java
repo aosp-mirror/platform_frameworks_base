@@ -16,19 +16,23 @@
 
 package android.net.wifi;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.validateMockitoUsage;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Parcel;
 import android.os.test.TestLooper;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.filters.SmallTest;
+import android.net.wifi.WifiScanner.ScanSettings;
 
 import com.android.internal.util.test.BidirectionalAsyncChannelServer;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -68,6 +72,52 @@ public class WifiScannerTest {
     @After
     public void cleanup() {
         validateMockitoUsage();
+    }
+
+    /**
+     * Verify parcel read/write for ScanSettings.
+     */
+    @Test
+    public void verifyScanSettingsParcelWithBand() throws Exception {
+        ScanSettings writeSettings = new ScanSettings();
+        writeSettings.type = WifiScanner.TYPE_LOW_POWER;
+        writeSettings.band = WifiScanner.WIFI_BAND_BOTH_WITH_DFS;
+
+        ScanSettings readSettings = parcelWriteRead(writeSettings);
+        assertEquals(readSettings.type, writeSettings.type);
+        assertEquals(readSettings.band, writeSettings.band);
+        assertEquals(0, readSettings.channels.length);
+    }
+
+    /**
+     * Verify parcel read/write for ScanSettings.
+     */
+    @Test
+    public void verifyScanSettingsParcelWithChannels() throws Exception {
+        ScanSettings writeSettings = new ScanSettings();
+        writeSettings.type = WifiScanner.TYPE_HIGH_ACCURACY;
+        writeSettings.band = WifiScanner.WIFI_BAND_UNSPECIFIED;
+        writeSettings.channels = new WifiScanner.ChannelSpec[] {
+                new WifiScanner.ChannelSpec(5),
+                new WifiScanner.ChannelSpec(7)
+        };
+
+        ScanSettings readSettings = parcelWriteRead(writeSettings);
+        assertEquals(writeSettings.type, readSettings.type);
+        assertEquals(writeSettings.band, readSettings.band);
+        assertEquals(2, readSettings.channels.length);
+        assertEquals(5, readSettings.channels[0].frequency);
+        assertEquals(7, readSettings.channels[1].frequency);
+    }
+
+    /**
+     * Write the provided {@link ScanSettings} to a parcel and deserialize it.
+     */
+    private static ScanSettings parcelWriteRead(ScanSettings writeSettings) throws Exception {
+        Parcel parcel = Parcel.obtain();
+        writeSettings.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);    // Rewind data position back to the beginning for read.
+        return ScanSettings.CREATOR.createFromParcel(parcel);
     }
 
 }

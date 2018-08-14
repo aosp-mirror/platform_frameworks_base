@@ -31,11 +31,10 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-#define GET_PROC(F) m ## F = (PFN_vk ## F) vkGetInstanceProcAddr(instance, "vk" #F)
-#define GET_DEV_PROC(F) m ## F = (PFN_vk ## F) vkGetDeviceProcAddr(device, "vk" #F)
+#define GET_PROC(F) m##F = (PFN_vk##F)vkGetInstanceProcAddr(instance, "vk" #F)
+#define GET_DEV_PROC(F) m##F = (PFN_vk##F)vkGetDeviceProcAddr(device, "vk" #F)
 
-VulkanManager::VulkanManager(RenderThread& thread) : mRenderThread(thread) {
-}
+VulkanManager::VulkanManager(RenderThread& thread) : mRenderThread(thread) {}
 
 void VulkanManager::destroy() {
     if (!hasVkContext()) return;
@@ -51,12 +50,15 @@ void VulkanManager::destroy() {
 }
 
 void VulkanManager::initialize() {
-    if (hasVkContext()) { return; }
+    if (hasVkContext()) {
+        return;
+    }
 
     auto canPresent = [](VkInstance, VkPhysicalDevice, uint32_t) { return true; };
 
     mBackendContext.reset(GrVkBackendContext::Create(vkGetInstanceProcAddr, vkGetDeviceProcAddr,
-            &mPresentQueueIndex, canPresent));
+                                                     &mPresentQueueIndex, canPresent));
+    LOG_ALWAYS_FATAL_IF(!mBackendContext.get());
 
     // Get all the addresses of needed vulkan functions
     VkInstance instance = mBackendContext->fInstance;
@@ -99,15 +101,19 @@ void VulkanManager::initialize() {
         // this needs to be on the render queue
         commandPoolInfo.queueFamilyIndex = mBackendContext->fGraphicsQueueIndex;
         commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        SkDEBUGCODE(VkResult res =) mCreateCommandPool(mBackendContext->fDevice,
-                &commandPoolInfo, nullptr, &mCommandPool);
+        SkDEBUGCODE(VkResult res =) mCreateCommandPool(mBackendContext->fDevice, &commandPoolInfo,
+                                                       nullptr, &mCommandPool);
         SkASSERT(VK_SUCCESS == res);
     }
 
     mGetDeviceQueue(mBackendContext->fDevice, mPresentQueueIndex, 0, &mPresentQueue);
 
-    mRenderThread.setGrContext(GrContext::Create(kVulkan_GrBackend,
-            (GrBackendContext) mBackendContext.get()));
+    GrContextOptions options;
+    options.fDisableDistanceFieldPaths = true;
+    mRenderThread.cacheManager().configureContext(&options);
+    sk_sp<GrContext> grContext(GrContext::MakeVulkan(mBackendContext, options));
+    LOG_ALWAYS_FATAL_IF(!grContext.get());
+    mRenderThread.setGrContext(grContext);
     DeviceInfo::initialize(mRenderThread.getGrContext()->caps()->maxRenderTargetSize());
 
     if (Properties::enablePartialUpdates && Properties::useBufferAge) {
@@ -127,20 +133,19 @@ VulkanSurface::BackbufferInfo* VulkanManager::getAvailableBackbuffer(VulkanSurfa
         surface->mCurrentBackbufferIndex = 0;
     }
 
-    VulkanSurface::BackbufferInfo* backbuffer = surface->mBackbuffers +
-            surface->mCurrentBackbufferIndex;
+    VulkanSurface::BackbufferInfo* backbuffer =
+            surface->mBackbuffers + surface->mCurrentBackbufferIndex;
 
     // Before we reuse a backbuffer, make sure its fences have all signaled so that we can safely
     // reuse its commands buffers.
-    VkResult res = mWaitForFences(mBackendContext->fDevice, 2, backbuffer->mUsageFences,
-            true, UINT64_MAX);
+    VkResult res =
+            mWaitForFences(mBackendContext->fDevice, 2, backbuffer->mUsageFences, true, UINT64_MAX);
     if (res != VK_SUCCESS) {
         return nullptr;
     }
 
     return backbuffer;
 }
-
 
 SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface* surface) {
     VulkanSurface::BackbufferInfo* backbuffer = getAvailableBackbuffer(surface);
@@ -154,7 +159,8 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface* surface) {
     // The acquire will signal the attached mAcquireSemaphore. We use this to know the image has
     // finished presenting and that it is safe to begin sending new commands to the returned image.
     res = mAcquireNextImageKHR(mBackendContext->fDevice, surface->mSwapchain, UINT64_MAX,
-            backbuffer->mAcquireSemaphore, VK_NULL_HANDLE, &backbuffer->mImageIndex);
+                               backbuffer->mAcquireSemaphore, VK_NULL_HANDLE,
+                               &backbuffer->mImageIndex);
 
     if (VK_ERROR_SURFACE_LOST_KHR == res) {
         // need to figure out how to create a new vkSurface without the platformData*
@@ -172,7 +178,8 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface* surface) {
 
         // acquire the image
         res = mAcquireNextImageKHR(mBackendContext->fDevice, surface->mSwapchain, UINT64_MAX,
-                backbuffer->mAcquireSemaphore, VK_NULL_HANDLE, &backbuffer->mImageIndex);
+                                   backbuffer->mAcquireSemaphore, VK_NULL_HANDLE,
+                                   &backbuffer->mImageIndex);
 
         if (VK_SUCCESS != res) {
             return nullptr;
@@ -182,25 +189,25 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface* surface) {
     // set up layout transfer from initial to color attachment
     VkImageLayout layout = surface->mImageInfos[backbuffer->mImageIndex].mImageLayout;
     SkASSERT(VK_IMAGE_LAYOUT_UNDEFINED == layout || VK_IMAGE_LAYOUT_PRESENT_SRC_KHR == layout);
-    VkPipelineStageFlags srcStageMask = (VK_IMAGE_LAYOUT_UNDEFINED == layout) ?
-                                        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT :
-                                        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    VkPipelineStageFlags srcStageMask = (VK_IMAGE_LAYOUT_UNDEFINED == layout)
+                                                ? VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT
+                                                : VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    VkAccessFlags srcAccessMask = (VK_IMAGE_LAYOUT_UNDEFINED == layout) ?
-                                  0 : VK_ACCESS_MEMORY_READ_BIT;
+    VkAccessFlags srcAccessMask =
+            (VK_IMAGE_LAYOUT_UNDEFINED == layout) ? 0 : VK_ACCESS_MEMORY_READ_BIT;
     VkAccessFlags dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
     VkImageMemoryBarrier imageMemoryBarrier = {
-        VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,    // sType
-        NULL,                                      // pNext
-        srcAccessMask,                             // outputMask
-        dstAccessMask,                             // inputMask
-        layout,                                    // oldLayout
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,  // newLayout
-        mPresentQueueIndex,                        // srcQueueFamilyIndex
-        mBackendContext->fGraphicsQueueIndex,      // dstQueueFamilyIndex
-        surface->mImages[backbuffer->mImageIndex], // image
-        { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }  // subresourceRange
+            VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,     // sType
+            NULL,                                       // pNext
+            srcAccessMask,                              // outputMask
+            dstAccessMask,                              // inputMask
+            layout,                                     // oldLayout
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,   // newLayout
+            mPresentQueueIndex,                         // srcQueueFamilyIndex
+            mBackendContext->fGraphicsQueueIndex,       // dstQueueFamilyIndex
+            surface->mImages[backbuffer->mImageIndex],  // image
+            {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1}     // subresourceRange
     };
     mResetCommandBuffer(backbuffer->mTransitionCmdBuffers[0], 0);
 
@@ -210,8 +217,8 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface* surface) {
     info.flags = 0;
     mBeginCommandBuffer(backbuffer->mTransitionCmdBuffers[0], &info);
 
-    mCmdPipelineBarrier(backbuffer->mTransitionCmdBuffers[0], srcStageMask, dstStageMask, 0,
-            0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+    mCmdPipelineBarrier(backbuffer->mTransitionCmdBuffers[0], srcStageMask, dstStageMask, 0, 0,
+                        nullptr, 0, nullptr, 1, &imageMemoryBarrier);
 
     mEndCommandBuffer(backbuffer->mTransitionCmdBuffers[0]);
 
@@ -235,7 +242,7 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface* surface) {
     GrVkImageInfo* imageInfo;
     sk_sp<SkSurface> skSurface = surface->mImageInfos[backbuffer->mImageIndex].mSurface;
     skSurface->getRenderTargetHandle((GrBackendObject*)&imageInfo,
-            SkSurface::kFlushRead_BackendHandleAccess);
+                                     SkSurface::kFlushRead_BackendHandleAccess);
     imageInfo->updateImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     surface->mBackbuffer = std::move(skSurface);
@@ -246,14 +253,14 @@ void VulkanManager::destroyBuffers(VulkanSurface* surface) {
     if (surface->mBackbuffers) {
         for (uint32_t i = 0; i < surface->mImageCount + 1; ++i) {
             mWaitForFences(mBackendContext->fDevice, 2, surface->mBackbuffers[i].mUsageFences, true,
-                    UINT64_MAX);
+                           UINT64_MAX);
             surface->mBackbuffers[i].mImageIndex = -1;
             mDestroySemaphore(mBackendContext->fDevice, surface->mBackbuffers[i].mAcquireSemaphore,
-                    nullptr);
+                              nullptr);
             mDestroySemaphore(mBackendContext->fDevice, surface->mBackbuffers[i].mRenderSemaphore,
-                    nullptr);
+                              nullptr);
             mFreeCommandBuffers(mBackendContext->fDevice, mCommandPool, 2,
-                    surface->mBackbuffers[i].mTransitionCmdBuffers);
+                                surface->mBackbuffers[i].mTransitionCmdBuffers);
             mDestroyFence(mBackendContext->fDevice, surface->mBackbuffers[i].mUsageFences[0], 0);
             mDestroyFence(mBackendContext->fDevice, surface->mBackbuffers[i].mUsageFences[1], 0);
         }
@@ -290,11 +297,11 @@ void VulkanManager::destroySurface(VulkanSurface* surface) {
 
 void VulkanManager::createBuffers(VulkanSurface* surface, VkFormat format, VkExtent2D extent) {
     mGetSwapchainImagesKHR(mBackendContext->fDevice, surface->mSwapchain, &surface->mImageCount,
-            nullptr);
+                           nullptr);
     SkASSERT(surface->mImageCount);
     surface->mImages = new VkImage[surface->mImageCount];
-    mGetSwapchainImagesKHR(mBackendContext->fDevice, surface->mSwapchain,
-            &surface->mImageCount, surface->mImages);
+    mGetSwapchainImagesKHR(mBackendContext->fDevice, surface->mSwapchain, &surface->mImageCount,
+                           surface->mImages);
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
@@ -303,7 +310,7 @@ void VulkanManager::createBuffers(VulkanSurface* surface, VkFormat format, VkExt
     for (uint32_t i = 0; i < surface->mImageCount; ++i) {
         GrVkImageInfo info;
         info.fImage = surface->mImages[i];
-        info.fAlloc = { VK_NULL_HANDLE, 0, 0, 0 };
+        info.fAlloc = GrVkAlloc();
         info.fImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         info.fImageTiling = VK_IMAGE_TILING_OPTIMAL;
         info.fFormat = format;
@@ -312,8 +319,8 @@ void VulkanManager::createBuffers(VulkanSurface* surface, VkFormat format, VkExt
         GrBackendRenderTarget backendRT(extent.width, extent.height, 0, 0, info);
 
         VulkanSurface::ImageInfo& imageInfo = surface->mImageInfos[i];
-        imageInfo.mSurface = SkSurface::MakeFromBackendRenderTarget(mRenderThread.getGrContext(),
-                backendRT, kTopLeft_GrSurfaceOrigin, nullptr, &props);
+        imageInfo.mSurface = SkSurface::MakeFromBackendRenderTarget(
+                mRenderThread.getGrContext(), backendRT, kTopLeft_GrSurfaceOrigin, nullptr, &props);
     }
 
     SkASSERT(mCommandPool != VK_NULL_HANDLE);
@@ -343,16 +350,16 @@ void VulkanManager::createBuffers(VulkanSurface* surface, VkFormat format, VkExt
     for (uint32_t i = 0; i < surface->mImageCount + 1; ++i) {
         SkDEBUGCODE(VkResult res);
         surface->mBackbuffers[i].mImageIndex = -1;
-        SkDEBUGCODE(res = ) mCreateSemaphore(mBackendContext->fDevice, &semaphoreInfo, nullptr,
-                &surface->mBackbuffers[i].mAcquireSemaphore);
-        SkDEBUGCODE(res = ) mCreateSemaphore(mBackendContext->fDevice, &semaphoreInfo, nullptr,
-                &surface->mBackbuffers[i].mRenderSemaphore);
-        SkDEBUGCODE(res = ) mAllocateCommandBuffers(mBackendContext->fDevice, &commandBuffersInfo,
-                surface->mBackbuffers[i].mTransitionCmdBuffers);
-        SkDEBUGCODE(res = ) mCreateFence(mBackendContext->fDevice, &fenceInfo, nullptr,
-                &surface->mBackbuffers[i].mUsageFences[0]);
-        SkDEBUGCODE(res = ) mCreateFence(mBackendContext->fDevice, &fenceInfo, nullptr,
-                &surface->mBackbuffers[i].mUsageFences[1]);
+        SkDEBUGCODE(res =) mCreateSemaphore(mBackendContext->fDevice, &semaphoreInfo, nullptr,
+                                            &surface->mBackbuffers[i].mAcquireSemaphore);
+        SkDEBUGCODE(res =) mCreateSemaphore(mBackendContext->fDevice, &semaphoreInfo, nullptr,
+                                            &surface->mBackbuffers[i].mRenderSemaphore);
+        SkDEBUGCODE(res =) mAllocateCommandBuffers(mBackendContext->fDevice, &commandBuffersInfo,
+                                                   surface->mBackbuffers[i].mTransitionCmdBuffers);
+        SkDEBUGCODE(res =) mCreateFence(mBackendContext->fDevice, &fenceInfo, nullptr,
+                                        &surface->mBackbuffers[i].mUsageFences[0]);
+        SkDEBUGCODE(res =) mCreateFence(mBackendContext->fDevice, &fenceInfo, nullptr,
+                                        &surface->mBackbuffers[i].mUsageFences[1]);
         SkASSERT(VK_SUCCESS == res);
     }
     surface->mCurrentBackbufferIndex = surface->mImageCount;
@@ -362,35 +369,36 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
     // check for capabilities
     VkSurfaceCapabilitiesKHR caps;
     VkResult res = mGetPhysicalDeviceSurfaceCapabilitiesKHR(mBackendContext->fPhysicalDevice,
-            surface->mVkSurface, &caps);
+                                                            surface->mVkSurface, &caps);
     if (VK_SUCCESS != res) {
         return false;
     }
 
     uint32_t surfaceFormatCount;
     res = mGetPhysicalDeviceSurfaceFormatsKHR(mBackendContext->fPhysicalDevice, surface->mVkSurface,
-            &surfaceFormatCount, nullptr);
+                                              &surfaceFormatCount, nullptr);
     if (VK_SUCCESS != res) {
         return false;
     }
 
     FatVector<VkSurfaceFormatKHR, 4> surfaceFormats(surfaceFormatCount);
     res = mGetPhysicalDeviceSurfaceFormatsKHR(mBackendContext->fPhysicalDevice, surface->mVkSurface,
-            &surfaceFormatCount, surfaceFormats.data());
+                                              &surfaceFormatCount, surfaceFormats.data());
     if (VK_SUCCESS != res) {
         return false;
     }
 
     uint32_t presentModeCount;
     res = mGetPhysicalDeviceSurfacePresentModesKHR(mBackendContext->fPhysicalDevice,
-            surface->mVkSurface, &presentModeCount, nullptr);
+                                                   surface->mVkSurface, &presentModeCount, nullptr);
     if (VK_SUCCESS != res) {
         return false;
     }
 
     FatVector<VkPresentModeKHR, VK_PRESENT_MODE_RANGE_SIZE_KHR> presentModes(presentModeCount);
     res = mGetPhysicalDeviceSurfacePresentModesKHR(mBackendContext->fPhysicalDevice,
-            surface->mVkSurface, &presentModeCount, presentModes.data());
+                                                   surface->mVkSurface, &presentModeCount,
+                                                   presentModes.data());
     if (VK_SUCCESS != res) {
         return false;
     }
@@ -420,12 +428,12 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
                                    VK_IMAGE_USAGE_TRANSFER_DST_BIT;
     SkASSERT((caps.supportedUsageFlags & usageFlags) == usageFlags);
     SkASSERT(caps.supportedTransforms & caps.currentTransform);
-    SkASSERT(caps.supportedCompositeAlpha & (VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR |
-                                             VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR));
+    SkASSERT(caps.supportedCompositeAlpha &
+             (VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR | VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR));
     VkCompositeAlphaFlagBitsKHR composite_alpha =
-        (caps.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR) ?
-                                        VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR :
-                                        VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+            (caps.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)
+                    ? VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR
+                    : VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 
     // Pick our surface format. For now, just make sure it matches our sRGB request:
     VkFormat surfaceFormat = VK_FORMAT_UNDEFINED;
@@ -470,7 +478,7 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
     swapchainCreateInfo.imageArrayLayers = 1;
     swapchainCreateInfo.imageUsage = usageFlags;
 
-    uint32_t queueFamilies[] = { mBackendContext->fGraphicsQueueIndex, mPresentQueueIndex };
+    uint32_t queueFamilies[] = {mBackendContext->fGraphicsQueueIndex, mPresentQueueIndex};
     if (mBackendContext->fGraphicsQueueIndex != mPresentQueueIndex) {
         swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         swapchainCreateInfo.queueFamilyIndexCount = 2;
@@ -488,7 +496,7 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
     swapchainCreateInfo.oldSwapchain = surface->mSwapchain;
 
     res = mCreateSwapchainKHR(mBackendContext->fDevice, &swapchainCreateInfo, nullptr,
-            &surface->mSwapchain);
+                              &surface->mSwapchain);
     if (VK_SUCCESS != res) {
         return false;
     }
@@ -507,7 +515,6 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
     return true;
 }
 
-
 VulkanSurface* VulkanManager::createSurface(ANativeWindow* window) {
     initialize();
 
@@ -524,21 +531,20 @@ VulkanSurface* VulkanManager::createSurface(ANativeWindow* window) {
     surfaceCreateInfo.flags = 0;
     surfaceCreateInfo.window = window;
 
-    VkResult res = mCreateAndroidSurfaceKHR(mBackendContext->fInstance, &surfaceCreateInfo,
-            nullptr, &surface->mVkSurface);
+    VkResult res = mCreateAndroidSurfaceKHR(mBackendContext->fInstance, &surfaceCreateInfo, nullptr,
+                                            &surface->mVkSurface);
     if (VK_SUCCESS != res) {
         delete surface;
         return nullptr;
     }
 
-SkDEBUGCODE(
-    VkBool32 supported;
-    res = mGetPhysicalDeviceSurfaceSupportKHR(mBackendContext->fPhysicalDevice,
-            mPresentQueueIndex, surface->mVkSurface, &supported);
-    // All physical devices and queue families on Android must be capable of presentation with any
-    // native window.
-    SkASSERT(VK_SUCCESS == res && supported);
-);
+    SkDEBUGCODE(VkBool32 supported; res = mGetPhysicalDeviceSurfaceSupportKHR(
+                                            mBackendContext->fPhysicalDevice, mPresentQueueIndex,
+                                            surface->mVkSurface, &supported);
+                // All physical devices and queue families on Android must be capable of
+                // presentation with any
+                // native window.
+                SkASSERT(VK_SUCCESS == res && supported););
 
     if (!createSwapchain(surface)) {
         destroySurface(surface);
@@ -573,11 +579,9 @@ static VkAccessFlags layoutToSrcAccessMask(const VkImageLayout layout) {
     VkAccessFlags flags = 0;
     if (VK_IMAGE_LAYOUT_GENERAL == layout) {
         flags = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT |
-                VK_ACCESS_TRANSFER_WRITE_BIT |
-                VK_ACCESS_TRANSFER_READ_BIT |
-                VK_ACCESS_SHADER_READ_BIT |
-                VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_HOST_READ_BIT;
+                VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT |
+                VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_HOST_WRITE_BIT |
+                VK_ACCESS_HOST_READ_BIT;
     } else if (VK_IMAGE_LAYOUT_PREINITIALIZED == layout) {
         flags = VK_ACCESS_HOST_WRITE_BIT;
     } else if (VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL == layout) {
@@ -600,12 +604,13 @@ void VulkanManager::swapBuffers(VulkanSurface* surface) {
         mDeviceWaitIdle(mBackendContext->fDevice);
     }
 
-    VulkanSurface::BackbufferInfo* backbuffer = surface->mBackbuffers +
-            surface->mCurrentBackbufferIndex;
+    SkASSERT(surface->mBackbuffers);
+    VulkanSurface::BackbufferInfo* backbuffer =
+            surface->mBackbuffers + surface->mCurrentBackbufferIndex;
     GrVkImageInfo* imageInfo;
     SkSurface* skSurface = surface->mImageInfos[backbuffer->mImageIndex].mSurface.get();
     skSurface->getRenderTargetHandle((GrBackendObject*)&imageInfo,
-            SkSurface::kFlushRead_BackendHandleAccess);
+                                     SkSurface::kFlushRead_BackendHandleAccess);
     // Check to make sure we never change the actually wrapped image
     SkASSERT(imageInfo->fImage == surface->mImages[backbuffer->mImageIndex]);
 
@@ -618,16 +623,16 @@ void VulkanManager::swapBuffers(VulkanSurface* surface) {
     VkAccessFlags dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
 
     VkImageMemoryBarrier imageMemoryBarrier = {
-        VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,    // sType
-        NULL,                                      // pNext
-        srcAccessMask,                             // outputMask
-        dstAccessMask,                             // inputMask
-        layout,                                    // oldLayout
-        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,           // newLayout
-        mBackendContext->fGraphicsQueueIndex,      // srcQueueFamilyIndex
-        mPresentQueueIndex,                        // dstQueueFamilyIndex
-        surface->mImages[backbuffer->mImageIndex], // image
-        { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }  // subresourceRange
+            VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,     // sType
+            NULL,                                       // pNext
+            srcAccessMask,                              // outputMask
+            dstAccessMask,                              // inputMask
+            layout,                                     // oldLayout
+            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,            // newLayout
+            mBackendContext->fGraphicsQueueIndex,       // srcQueueFamilyIndex
+            mPresentQueueIndex,                         // dstQueueFamilyIndex
+            surface->mImages[backbuffer->mImageIndex],  // image
+            {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1}     // subresourceRange
     };
 
     mResetCommandBuffer(backbuffer->mTransitionCmdBuffers[1], 0);
@@ -636,8 +641,8 @@ void VulkanManager::swapBuffers(VulkanSurface* surface) {
     info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     info.flags = 0;
     mBeginCommandBuffer(backbuffer->mTransitionCmdBuffers[1], &info);
-    mCmdPipelineBarrier(backbuffer->mTransitionCmdBuffers[1], srcStageMask, dstStageMask, 0,
-            0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+    mCmdPipelineBarrier(backbuffer->mTransitionCmdBuffers[1], srcStageMask, dstStageMask, 0, 0,
+                        nullptr, 0, nullptr, 1, &imageMemoryBarrier);
     mEndCommandBuffer(backbuffer->mTransitionCmdBuffers[1]);
 
     surface->mImageInfos[backbuffer->mImageIndex].mImageLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
@@ -661,16 +666,15 @@ void VulkanManager::swapBuffers(VulkanSurface* surface) {
     // Submit present operation to present queue. We use a semaphore here to make sure all rendering
     // to the image is complete and that the layout has been change to present on the graphics
     // queue.
-    const VkPresentInfoKHR presentInfo =
-    {
-        VK_STRUCTURE_TYPE_PRESENT_INFO_KHR, // sType
-        NULL, // pNext
-        1, // waitSemaphoreCount
-        &backbuffer->mRenderSemaphore, // pWaitSemaphores
-        1, // swapchainCount
-        &surface->mSwapchain, // pSwapchains
-        &backbuffer->mImageIndex, // pImageIndices
-        NULL // pResults
+    const VkPresentInfoKHR presentInfo = {
+            VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,  // sType
+            NULL,                                // pNext
+            1,                                   // waitSemaphoreCount
+            &backbuffer->mRenderSemaphore,       // pWaitSemaphores
+            1,                                   // swapchainCount
+            &surface->mSwapchain,                // pSwapchains
+            &backbuffer->mImageIndex,            // pImageIndices
+            NULL                                 // pResults
     };
 
     mQueuePresentKHR(mPresentQueue, &presentInfo);
@@ -682,10 +686,11 @@ void VulkanManager::swapBuffers(VulkanSurface* surface) {
 }
 
 int VulkanManager::getAge(VulkanSurface* surface) {
-    VulkanSurface::BackbufferInfo* backbuffer = surface->mBackbuffers +
-            surface->mCurrentBackbufferIndex;
-    if (mSwapBehavior == SwapBehavior::Discard
-            || surface->mImageInfos[backbuffer->mImageIndex].mInvalid) {
+    SkASSERT(surface->mBackbuffers);
+    VulkanSurface::BackbufferInfo* backbuffer =
+            surface->mBackbuffers + surface->mCurrentBackbufferIndex;
+    if (mSwapBehavior == SwapBehavior::Discard ||
+        surface->mImageInfos[backbuffer->mImageIndex].mInvalid) {
         return 0;
     }
     uint16_t lastUsed = surface->mImageInfos[backbuffer->mImageIndex].mLastUsed;

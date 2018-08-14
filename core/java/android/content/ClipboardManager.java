@@ -16,12 +16,15 @@
 
 package android.content;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.os.Handler;
-import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 
@@ -45,6 +48,7 @@ import java.util.ArrayList;
 @SystemService(Context.CLIPBOARD_SERVICE)
 public class ClipboardManager extends android.text.ClipboardManager {
     private final Context mContext;
+    private final Handler mHandler;
     private final IClipboard mService;
 
     private final ArrayList<OnPrimaryClipChangedListener> mPrimaryClipChangedListeners
@@ -52,20 +56,11 @@ public class ClipboardManager extends android.text.ClipboardManager {
 
     private final IOnPrimaryClipChangedListener.Stub mPrimaryClipChangedServiceListener
             = new IOnPrimaryClipChangedListener.Stub() {
-        public void dispatchPrimaryClipChanged() {
-            mHandler.sendEmptyMessage(MSG_REPORT_PRIMARY_CLIP_CHANGED);
-        }
-    };
-
-    static final int MSG_REPORT_PRIMARY_CLIP_CHANGED = 1;
-
-    private final Handler mHandler = new Handler() {
         @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_REPORT_PRIMARY_CLIP_CHANGED:
-                    reportPrimaryClipChanged();
-            }
+        public void dispatchPrimaryClipChanged() {
+            mHandler.post(() -> {
+                reportPrimaryClipChanged();
+            });
         }
     };
 
@@ -89,6 +84,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
     /** {@hide} */
     public ClipboardManager(Context context, Handler handler) throws ServiceNotFoundException {
         mContext = context;
+        mHandler = handler;
         mService = IClipboard.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.CLIPBOARD_SERVICE));
     }
@@ -98,12 +94,13 @@ public class ClipboardManager extends android.text.ClipboardManager {
      * is involved in normal cut and paste operations.
      *
      * @param clip The clipped data item to set.
+     * @see #getPrimaryClip()
+     * @see #clearPrimaryClip()
      */
-    public void setPrimaryClip(ClipData clip) {
+    public void setPrimaryClip(@NonNull ClipData clip) {
         try {
-            if (clip != null) {
-                clip.prepareToLeaveProcess(true);
-            }
+            Preconditions.checkNotNull(clip);
+            clip.prepareToLeaveProcess(true);
             mService.setPrimaryClip(clip, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -111,9 +108,24 @@ public class ClipboardManager extends android.text.ClipboardManager {
     }
 
     /**
-     * Returns the current primary clip on the clipboard.
+     * Clears any current primary clip on the clipboard.
+     *
+     * @see #setPrimaryClip(ClipData)
      */
-    public ClipData getPrimaryClip() {
+    public void clearPrimaryClip() {
+        try {
+            mService.clearPrimaryClip(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the current primary clip on the clipboard.
+     *
+     * @see #setPrimaryClip(ClipData)
+     */
+    public @Nullable ClipData getPrimaryClip() {
         try {
             return mService.getPrimaryClip(mContext.getOpPackageName());
         } catch (RemoteException e) {
@@ -124,8 +136,10 @@ public class ClipboardManager extends android.text.ClipboardManager {
     /**
      * Returns a description of the current primary clip on the clipboard
      * but not a copy of its data.
+     *
+     * @see #setPrimaryClip(ClipData)
      */
-    public ClipDescription getPrimaryClipDescription() {
+    public @Nullable ClipDescription getPrimaryClipDescription() {
         try {
             return mService.getPrimaryClipDescription(mContext.getOpPackageName());
         } catch (RemoteException e) {

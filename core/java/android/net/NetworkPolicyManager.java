@@ -29,9 +29,9 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.telephony.SubscriptionPlan;
 import android.util.DebugUtils;
 import android.util.Pair;
+import android.util.Range;
 
 import com.google.android.collect.Sets;
 
@@ -107,6 +107,9 @@ public class NetworkPolicyManager {
     public static final String FIREWALL_CHAIN_NAME_POWERSAVE = "powersave";
 
     private static final boolean ALLOW_PLATFORM_APP_POLICY = true;
+
+    public static final int FOREGROUND_THRESHOLD_STATE =
+            ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 
     /**
      * {@link Intent} extra that indicates which {@link NetworkTemplate} rule it
@@ -256,8 +259,25 @@ public class NetworkPolicyManager {
     }
 
     /** {@hide} */
+    @Deprecated
     public static Iterator<Pair<ZonedDateTime, ZonedDateTime>> cycleIterator(NetworkPolicy policy) {
-        return policy.cycleIterator();
+        final Iterator<Range<ZonedDateTime>> it = policy.cycleIterator();
+        return new Iterator<Pair<ZonedDateTime, ZonedDateTime>>() {
+            @Override
+            public boolean hasNext() {
+                return it.hasNext();
+            }
+
+            @Override
+            public Pair<ZonedDateTime, ZonedDateTime> next() {
+                if (hasNext()) {
+                    final Range<ZonedDateTime> r = it.next();
+                    return Pair.create(r.getLower(), r.getUpper());
+                } else {
+                    return Pair.create(null, null);
+                }
+            }
+        };
     }
 
     /**
@@ -332,7 +352,7 @@ public class NetworkPolicyManager {
      * to access network when the device is idle or in battery saver mode. Otherwise, false.
      */
     public static boolean isProcStateAllowedWhileIdleOrPowerSaveMode(int procState) {
-        return procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+        return procState <= FOREGROUND_THRESHOLD_STATE;
     }
 
     /**
@@ -340,7 +360,7 @@ public class NetworkPolicyManager {
      * to access network when the device is in data saver mode. Otherwise, false.
      */
     public static boolean isProcStateAllowedWhileOnRestrictBackground(int procState) {
-        return procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+        return procState <= FOREGROUND_THRESHOLD_STATE;
     }
 
     public static String resolveNetworkId(WifiConfiguration config) {

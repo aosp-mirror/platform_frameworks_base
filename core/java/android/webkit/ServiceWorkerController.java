@@ -33,7 +33,7 @@ import android.annotation.Nullable;
  *     return null;
  *   }
  * });
- * </pre></p>
+ * </pre>
  */
 public abstract class ServiceWorkerController {
 

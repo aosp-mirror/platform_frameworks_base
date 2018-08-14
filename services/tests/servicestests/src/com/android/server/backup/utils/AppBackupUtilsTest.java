@@ -18,16 +18,26 @@ package com.android.server.backup.utils;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageParser;
 import android.content.pm.Signature;
+import android.content.pm.SigningInfo;
 import android.os.Process;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.BackupManagerService;
+import com.android.server.backup.testutils.PackageManagerStub;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -43,6 +53,15 @@ public class AppBackupUtilsTest {
     private static final Signature SIGNATURE_3 = generateSignature((byte) 3);
     private static final Signature SIGNATURE_4 = generateSignature((byte) 4);
 
+    private PackageManagerStub mPackageManagerStub;
+    private PackageManagerInternal mMockPackageManagerInternal;
+
+    @Before
+    public void setUp() throws Exception {
+        mPackageManagerStub = new PackageManagerStub();
+        mMockPackageManagerInternal = mock(PackageManagerInternal.class);
+    }
+
     @Test
     public void appIsEligibleForBackup_backupNotAllowed_returnsFalse() throws Exception {
         ApplicationInfo applicationInfo = new ApplicationInfo();
@@ -51,7 +70,8 @@ public class AppBackupUtilsTest {
         applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
 
-        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo);
+        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
+                mPackageManagerStub);
 
         assertThat(isEligible).isFalse();
     }
@@ -65,7 +85,8 @@ public class AppBackupUtilsTest {
         applicationInfo.backupAgentName = null;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
 
-        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo);
+        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
+                mPackageManagerStub);
 
         assertThat(isEligible).isFalse();
     }
@@ -76,15 +97,16 @@ public class AppBackupUtilsTest {
         applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
         applicationInfo.uid = Process.SYSTEM_UID;
         applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
-        applicationInfo.packageName = RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
+        applicationInfo.packageName = BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 
-        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo);
+        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
+                mPackageManagerStub);
 
         assertThat(isEligible).isFalse();
     }
 
     @Test
-    public void appIsEligibleForBackup_systemAppWithCustomBackupAgent_returnsTrue()
+    public void appIsEligibleForBackup_systemAppWithCustomBackupAgentAndEnabled_returnsTrue()
             throws Exception {
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
@@ -92,13 +114,17 @@ public class AppBackupUtilsTest {
         applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
 
-        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo);
+        PackageManagerStub.sApplicationEnabledSetting =
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+
+        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
+                mPackageManagerStub);
 
         assertThat(isEligible).isTrue();
     }
 
     @Test
-    public void appIsEligibleForBackup_nonSystemAppWithoutCustomBackupAgent_returnsTrue()
+    public void appIsEligibleForBackup_nonSystemAppWithoutCustomBackupAgentAndEnabled_returnsTrue()
             throws Exception {
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
@@ -106,13 +132,17 @@ public class AppBackupUtilsTest {
         applicationInfo.backupAgentName = null;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
 
-        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo);
+        PackageManagerStub.sApplicationEnabledSetting =
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+
+        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
+                mPackageManagerStub);
 
         assertThat(isEligible).isTrue();
     }
 
     @Test
-    public void appIsEligibleForBackup_nonSystemAppWithCustomBackupAgent_returnsTrue()
+    public void appIsEligibleForBackup_nonSystemAppWithCustomBackupAgentAndEnabled_returnsTrue()
             throws Exception {
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
@@ -120,9 +150,131 @@ public class AppBackupUtilsTest {
         applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
 
-        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo);
+        PackageManagerStub.sApplicationEnabledSetting =
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+
+        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
+                mPackageManagerStub);
 
         assertThat(isEligible).isTrue();
+    }
+
+    @Test
+    public void appIsEligibleForBackup_systemAppWithCustomBackupAgentAndDisabled_returnsFalse()
+            throws Exception {
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
+        applicationInfo.uid = Process.SYSTEM_UID;
+        applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
+        applicationInfo.packageName = TEST_PACKAGE_NAME;
+
+        PackageManagerStub.sApplicationEnabledSetting =
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+
+        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
+                mPackageManagerStub);
+
+        assertThat(isEligible).isFalse();
+    }
+
+    @Test
+    public void appIsEligibleForBackup_nonSystemAppWithoutCustomBackupAgentAndDisabled_returnsFalse()
+            throws Exception {
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
+        applicationInfo.uid = Process.FIRST_APPLICATION_UID;
+        applicationInfo.backupAgentName = null;
+        applicationInfo.packageName = TEST_PACKAGE_NAME;
+
+        PackageManagerStub.sApplicationEnabledSetting =
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+
+        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
+                mPackageManagerStub);
+
+        assertThat(isEligible).isFalse();
+    }
+
+    @Test
+    public void appIsEligibleForBackup_nonSystemAppWithCustomBackupAgentAndDisbled_returnsFalse()
+            throws Exception {
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
+        applicationInfo.uid = Process.FIRST_APPLICATION_UID;
+        applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
+        applicationInfo.packageName = TEST_PACKAGE_NAME;
+
+        PackageManagerStub.sApplicationEnabledSetting =
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+
+        boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
+                mPackageManagerStub);
+
+        assertThat(isEligible).isFalse();
+    }
+
+    @Test
+    public void appIsDisabled_stateEnabled_returnsFalse() throws Exception {
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags = 0;
+        applicationInfo.uid = Process.FIRST_APPLICATION_UID;
+        applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
+        applicationInfo.packageName = TEST_PACKAGE_NAME;
+
+        PackageManagerStub.sApplicationEnabledSetting =
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+
+        boolean isDisabled = AppBackupUtils.appIsDisabled(applicationInfo, mPackageManagerStub);
+
+        assertThat(isDisabled).isFalse();
+    }
+
+    @Test
+    public void appIsDisabled_stateDisabled_returnsTrue() throws Exception {
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags = 0;
+        applicationInfo.uid = Process.FIRST_APPLICATION_UID;
+        applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
+        applicationInfo.packageName = TEST_PACKAGE_NAME;
+
+        PackageManagerStub.sApplicationEnabledSetting =
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+
+        boolean isDisabled = AppBackupUtils.appIsDisabled(applicationInfo, mPackageManagerStub);
+
+        assertThat(isDisabled).isTrue();
+    }
+
+    @Test
+    public void appIsDisabled_stateDisabledUser_returnsTrue() throws Exception {
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags = 0;
+        applicationInfo.uid = Process.FIRST_APPLICATION_UID;
+        applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
+        applicationInfo.packageName = TEST_PACKAGE_NAME;
+
+        PackageManagerStub.sApplicationEnabledSetting =
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
+
+        boolean isDisabled = AppBackupUtils.appIsDisabled(applicationInfo, mPackageManagerStub);
+
+        assertThat(isDisabled).isTrue();
+    }
+
+    @Test
+    public void appIsDisabled_stateDisabledUntilUsed_returnsTrue() throws Exception {
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags = 0;
+        applicationInfo.uid = Process.FIRST_APPLICATION_UID;
+        applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
+        applicationInfo.packageName = TEST_PACKAGE_NAME;
+
+        PackageManagerStub.sApplicationEnabledSetting =
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
+
+        boolean isDisabled = AppBackupUtils.appIsDisabled(applicationInfo, mPackageManagerStub);
+
+        assertThat(isDisabled).isTrue();
     }
 
     @Test
@@ -221,7 +373,8 @@ public class AppBackupUtilsTest {
 
     @Test
     public void signaturesMatch_targetIsNull_returnsFalse() throws Exception {
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1}, null);
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1}, null,
+                mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }
@@ -229,10 +382,12 @@ public class AppBackupUtilsTest {
     @Test
     public void signaturesMatch_systemApplication_returnsTrue() throws Exception {
         PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test";
         packageInfo.applicationInfo = new ApplicationInfo();
         packageInfo.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo);
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isTrue();
     }
@@ -241,10 +396,18 @@ public class AppBackupUtilsTest {
     public void signaturesMatch_disallowsUnsignedApps_storedSignatureNull_returnsFalse()
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[] {SIGNATURE_1};
+        packageInfo.packageName = "test";
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(null, packageInfo);
+        boolean result = AppBackupUtils.signaturesMatch(null, packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }
@@ -253,10 +416,18 @@ public class AppBackupUtilsTest {
     public void signaturesMatch_disallowsUnsignedApps_storedSignatureEmpty_returnsFalse()
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[] {SIGNATURE_1};
+        packageInfo.packageName = "test";
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo);
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }
@@ -267,11 +438,12 @@ public class AppBackupUtilsTest {
     signaturesMatch_disallowsUnsignedApps_targetSignatureEmpty_returnsFalse()
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[0];
+        packageInfo.packageName = "test";
+        packageInfo.signingInfo = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1},
-                packageInfo);
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1}, packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }
@@ -281,11 +453,12 @@ public class AppBackupUtilsTest {
     signaturesMatch_disallowsUnsignedApps_targetSignatureNull_returnsFalse()
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = null;
+        packageInfo.packageName = "test";
+        packageInfo.signingInfo = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1},
-                packageInfo);
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1}, packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }
@@ -294,10 +467,11 @@ public class AppBackupUtilsTest {
     public void signaturesMatch_disallowsUnsignedApps_bothSignaturesNull_returnsFalse()
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = null;
+        packageInfo.signingInfo = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(null, packageInfo);
+        boolean result = AppBackupUtils.signaturesMatch(null, packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }
@@ -306,10 +480,12 @@ public class AppBackupUtilsTest {
     public void signaturesMatch_disallowsUnsignedApps_bothSignaturesEmpty_returnsFalse()
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[0];
+        packageInfo.packageName = "test";
+        packageInfo.signingInfo = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo);
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }
@@ -321,11 +497,19 @@ public class AppBackupUtilsTest {
         Signature signature3Copy = new Signature(SIGNATURE_3.toByteArray());
 
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[]{SIGNATURE_1, SIGNATURE_2, SIGNATURE_3};
+        packageInfo.packageName = "test";
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(
-                new Signature[]{signature3Copy, signature1Copy, signature2Copy}, packageInfo);
+                new Signature[] {signature3Copy, signature1Copy, signature2Copy}, packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isTrue();
     }
@@ -336,11 +520,19 @@ public class AppBackupUtilsTest {
         Signature signature2Copy = new Signature(SIGNATURE_2.toByteArray());
 
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[]{SIGNATURE_1, SIGNATURE_2, SIGNATURE_3};
+        packageInfo.packageName = "test";
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(
-                new Signature[]{signature2Copy, signature1Copy}, packageInfo);
+                new Signature[]{signature2Copy, signature1Copy}, packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isTrue();
     }
@@ -351,11 +543,19 @@ public class AppBackupUtilsTest {
         Signature signature2Copy = new Signature(SIGNATURE_2.toByteArray());
 
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[]{signature1Copy, signature2Copy};
+        packageInfo.packageName = "test";
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {signature1Copy, signature2Copy},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(
-                new Signature[]{SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}, packageInfo);
+                new Signature[]{SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}, packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }
@@ -366,11 +566,99 @@ public class AppBackupUtilsTest {
         Signature signature2Copy = new Signature(SIGNATURE_2.toByteArray());
 
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[]{SIGNATURE_1, SIGNATURE_2, SIGNATURE_3};
+        packageInfo.packageName = "test";
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(
-                new Signature[]{signature1Copy, signature2Copy, SIGNATURE_4}, packageInfo);
+                new Signature[]{signature1Copy, signature2Copy, SIGNATURE_4}, packageInfo,
+                mMockPackageManagerInternal);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void signaturesMatch_singleStoredSignatureNoRotation_returnsTrue()
+            throws Exception {
+        Signature signature1Copy = new Signature(SIGNATURE_1.toByteArray());
+
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test";
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(signature1Copy,
+                packageInfo.packageName);
+
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {signature1Copy},
+                packageInfo, mMockPackageManagerInternal);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void signaturesMatch_singleStoredSignatureWithRotationAssumeDataCapability_returnsTrue()
+            throws Exception {
+        Signature signature1Copy = new Signature(SIGNATURE_1.toByteArray());
+
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test";
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_2},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2},
+                        new int[] {0, 0}));
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        // we know signature1Copy is in history, and we want to assume it has
+        // SigningDetails.CertCapabilities.INSTALLED_DATA capability
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(signature1Copy,
+                packageInfo.packageName);
+
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {signature1Copy},
+                packageInfo, mMockPackageManagerInternal);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void
+            signaturesMatch_singleStoredSignatureWithRotationAssumeNoDataCapability_returnsFalse()
+            throws Exception {
+        Signature signature1Copy = new Signature(SIGNATURE_1.toByteArray());
+
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test";
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_2},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2},
+                        new int[] {0, 0}));
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        // we know signature1Copy is in history, but we want to assume it does not have
+        // SigningDetails.CertCapabilities.INSTALLED_DATA capability
+        doReturn(false).when(mMockPackageManagerInternal).isDataRestoreSafe(signature1Copy,
+                packageInfo.packageName);
+
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {signature1Copy},
+                packageInfo, mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }

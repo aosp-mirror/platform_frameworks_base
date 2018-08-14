@@ -24,6 +24,7 @@ import android.util.Log;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Implements the RadioTuner interface by forwarding calls to radio service.
@@ -32,15 +33,18 @@ class TunerAdapter extends RadioTuner {
     private static final String TAG = "BroadcastRadio.TunerAdapter";
 
     @NonNull private final ITuner mTuner;
+    @NonNull private final TunerCallbackAdapter mCallback;
     private boolean mIsClosed = false;
 
     private @RadioManager.Band int mBand;
 
-    TunerAdapter(ITuner tuner, @RadioManager.Band int band) {
-        if (tuner == null) {
-            throw new NullPointerException();
-        }
-        mTuner = tuner;
+    private ProgramList mLegacyListProxy;
+    private Map<String, String> mLegacyListFilter;
+
+    TunerAdapter(@NonNull ITuner tuner, @NonNull TunerCallbackAdapter callback,
+            @RadioManager.Band int band) {
+        mTuner = Objects.requireNonNull(tuner);
+        mCallback = Objects.requireNonNull(callback);
         mBand = band;
     }
 
@@ -52,6 +56,11 @@ class TunerAdapter extends RadioTuner {
                 return;
             }
             mIsClosed = true;
+            if (mLegacyListProxy != null) {
+                mLegacyListProxy.close();
+                mLegacyListProxy = null;
+            }
+            mCallback.close();
         }
         try {
             mTuner.close();
@@ -62,6 +71,7 @@ class TunerAdapter extends RadioTuner {
 
     @Override
     public int setConfiguration(RadioManager.BandConfig config) {
+        if (config == null) return RadioManager.STATUS_BAD_VALUE;
         try {
             mTuner.setConfiguration(config);
             mBand = config.getType();
@@ -193,15 +203,17 @@ class TunerAdapter extends RadioTuner {
     @Override
     public int getProgramInformation(RadioManager.ProgramInfo[] info) {
         if (info == null || info.length != 1) {
-            throw new IllegalArgumentException("The argument must be an array of length 1");
+            Log.e(TAG, "The argument must be an array of length 1");
+            return RadioManager.STATUS_BAD_VALUE;
         }
-        try {
-            info[0] = mTuner.getProgramInformation();
-            return RadioManager.STATUS_OK;
-        } catch (RemoteException e) {
-            Log.e(TAG, "service died", e);
-            return RadioManager.STATUS_DEAD_OBJECT;
+
+        RadioManager.ProgramInfo current = mCallback.getCurrentProgramInformation();
+        if (current == null) {
+            Log.w(TAG, "Didn't get program info yet");
+            return RadioManager.STATUS_INVALID_OPERATION;
         }
+        info[0] = current;
+        return RadioManager.STATUS_OK;
     }
 
     @Override
@@ -225,26 +237,117 @@ class TunerAdapter extends RadioTuner {
     @Override
     public @NonNull List<RadioManager.ProgramInfo>
             getProgramList(@Nullable Map<String, String> vendorFilter) {
-        try {
-            return mTuner.getProgramList(vendorFilter);
-        } catch (RemoteException e) {
-            throw new RuntimeException("service died", e);
+        synchronized (mTuner) {
+            if (mLegacyListProxy == null || !Objects.equals(mLegacyListFilter, vendorFilter)) {
+                Log.i(TAG, "Program list filter has changed, requesting new list");
+                mLegacyListProxy = new ProgramList();
+                mLegacyListFilter = vendorFilter;
+
+                mCallback.clearLastCompleteList();
+                mCallback.setProgramListObserver(mLegacyListProxy, () -> { });
+                try {
+                    mTuner.startProgramListUpdates(new ProgramList.Filter(vendorFilter));
+                } catch (RemoteException ex) {
+                    throw new RuntimeException("service died", ex);
+                }
+            }
+
+            List<RadioManager.ProgramInfo> list = mCallback.getLastCompleteList();
+            if (list == null) throw new IllegalStateException("Program list is not ready yet");
+            return list;
+        }
+    }
+
+    @Override
+    public @Nullable ProgramList getDynamicProgramList(@Nullable ProgramList.Filter filter) {
+        synchronized (mTuner) {
+            if (mLegacyListProxy != null) {
+                mLegacyListProxy.close();
+                mLegacyListProxy = null;
+            }
+            mLegacyListFilter = null;
+
+            ProgramList list = new ProgramList();
+            mCallback.setProgramListObserver(list, () -> {
+                try {
+                    mTuner.stopProgramListUpdates();
+                } catch (RemoteException ex) {
+                    Log.e(TAG, "Couldn't stop program list updates", ex);
+                }
+            });
+
+            try {
+                mTuner.startProgramListUpdates(filter);
+            } catch (UnsupportedOperationException ex) {
+                Log.i(TAG, "Program list is not supported with this hardware");
+                return null;
+            } catch (RemoteException ex) {
+                mCallback.setProgramListObserver(null, () -> { });
+                throw new RuntimeException("service died", ex);
+            }
+
+            return list;
         }
     }
 
     @Override
     public boolean isAnalogForced() {
         try {
-            return mTuner.isAnalogForced();
-        } catch (RemoteException e) {
-            throw new RuntimeException("service died", e);
+            return isConfigFlagSet(RadioManager.CONFIG_FORCE_ANALOG);
+        } catch (UnsupportedOperationException ex) {
+            throw new IllegalStateException(ex);
         }
     }
 
     @Override
     public void setAnalogForced(boolean isForced) {
         try {
-            mTuner.setAnalogForced(isForced);
+            setConfigFlag(RadioManager.CONFIG_FORCE_ANALOG, isForced);
+        } catch (UnsupportedOperationException ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
+
+    @Override
+    public boolean isConfigFlagSupported(@RadioManager.ConfigFlag int flag) {
+        try {
+            return mTuner.isConfigFlagSupported(flag);
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
+        }
+    }
+
+    @Override
+    public boolean isConfigFlagSet(@RadioManager.ConfigFlag int flag) {
+        try {
+            return mTuner.isConfigFlagSet(flag);
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
+        }
+    }
+
+    @Override
+    public void setConfigFlag(@RadioManager.ConfigFlag int flag, boolean value) {
+        try {
+            mTuner.setConfigFlag(flag, value);
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
+        }
+    }
+
+    @Override
+    public @NonNull Map<String, String> setParameters(@NonNull Map<String, String> parameters) {
+        try {
+            return mTuner.setParameters(Objects.requireNonNull(parameters));
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
+        }
+    }
+
+    @Override
+    public @NonNull Map<String, String> getParameters(@NonNull List<String> keys) {
+        try {
+            return mTuner.getParameters(Objects.requireNonNull(keys));
         } catch (RemoteException e) {
             throw new RuntimeException("service died", e);
         }
@@ -252,11 +355,7 @@ class TunerAdapter extends RadioTuner {
 
     @Override
     public boolean isAntennaConnected() {
-        try {
-            return mTuner.isAntennaConnected();
-        } catch (RemoteException e) {
-            throw new RuntimeException("service died", e);
-        }
+        return mCallback.isAntennaConnected();
     }
 
     @Override

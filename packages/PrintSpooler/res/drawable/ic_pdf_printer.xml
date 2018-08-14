@@ -18,7 +18,7 @@
     android:height="36dp"
     android:viewportWidth="48.0"
     android:viewportHeight="48.0"
-    android:tint="@color/pdf_printer_color">
+    android:tint="@*android:color/accent_device_default_light">
     <path
         android:pathData="M40,4L16,4c-2.21,0 -4,1.79 -4,4v24c0,2.21 1.79,4 4,4h24c2.21,0 4,-1.79 4,-4L44,8c0,-2.21 -1.79,-4 -4,-4zM23,19c0,1.66 -1.34,3 -3,3h-2v4h-3L15,14h5c1.66,0 3,1.34 3,3v2zM33,23c0,1.66 -1.34,3 -3,3h-5L25,14h5c1.66,0 3,1.34 3,3v6zM41,17h-3v2h3v3h-3v4h-3L35,14h6v3zM18,19h2v-2h-2v2zM8,12L4,12v28c0,2.21 1.79,4 4,4h28v-4L8,40L8,12zM28,23h2v-6h-2v6z"
         android:fillColor="@android:color/black"/>

@@ -20,7 +20,6 @@ import android.os.Bundle;
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
 
-import com.android.connectivitymanagertest.stress.WifiApStress;
 import com.android.connectivitymanagertest.stress.WifiStressTest;
 
 import junit.framework.TestSuite;
@@ -35,7 +34,7 @@ import junit.framework.TestSuite;
  */
 
 public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunner {
-    private int mSoftApIterations = 100;
+    private int mSoftApIterations = 0;
     private int mScanIterations = 100;
     private int mReconnectIterations = 100;
     // sleep time before restart wifi, default is set to 2 minutes
@@ -47,7 +46,6 @@ public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunn
     @Override
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
-        suite.addTestSuite(WifiApStress.class);
         suite.addTestSuite(WifiStressTest.class);
         return suite;
     }
@@ -60,13 +58,6 @@ public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunn
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        String valueStr = icicle.getString("softap_iterations");
-        if (valueStr != null) {
-            int iteration = Integer.parseInt(valueStr);
-            if (iteration > 0) {
-                mSoftApIterations = iteration;
-            }
-        }
 
         String scanIterationStr = icicle.getString("scan_iterations");
         if (scanIterationStr != null) {

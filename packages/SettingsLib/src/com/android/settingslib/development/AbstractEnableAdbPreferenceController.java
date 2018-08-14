@@ -16,11 +16,13 @@
 
 package com.android.settingslib.development;
 
+import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.support.annotation.VisibleForTesting;
 import android.support.v14.preference.SwitchPreference;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.preference.Preference;
@@ -28,15 +30,20 @@ import android.support.v7.preference.PreferenceScreen;
 import android.support.v7.preference.TwoStatePreference;
 import android.text.TextUtils;
 
-import com.android.settingslib.core.AbstractPreferenceController;
+import com.android.settingslib.core.ConfirmationDialogController;
 
-public abstract class AbstractEnableAdbPreferenceController extends AbstractPreferenceController {
+public abstract class AbstractEnableAdbPreferenceController extends
+        DeveloperOptionsPreferenceController implements ConfirmationDialogController {
     private static final String KEY_ENABLE_ADB = "enable_adb";
     public static final String ACTION_ENABLE_ADB_STATE_CHANGED =
             "com.android.settingslib.development.AbstractEnableAdbController."
                     + "ENABLE_ADB_STATE_CHANGED";
 
-    private SwitchPreference mPreference;
+    public static final int ADB_SETTING_ON = 1;
+    public static final int ADB_SETTING_OFF = 0;
+
+
+    protected SwitchPreference mPreference;
 
     public AbstractEnableAdbPreferenceController(Context context) {
         super(context);
@@ -52,7 +59,8 @@ public abstract class AbstractEnableAdbPreferenceController extends AbstractPref
 
     @Override
     public boolean isAvailable() {
-        return mContext.getSystemService(UserManager.class).isAdminUser();
+        final UserManager um = mContext.getSystemService(UserManager.class);
+        return um != null && (um.isAdminUser() || um.isDemoUser());
     }
 
     @Override
@@ -62,12 +70,13 @@ public abstract class AbstractEnableAdbPreferenceController extends AbstractPref
 
     private boolean isAdbEnabled() {
         final ContentResolver cr = mContext.getContentResolver();
-        return Settings.Global.getInt(cr, Settings.Global.ADB_ENABLED, 0) != 0;
+        return Settings.Global.getInt(cr, Settings.Global.ADB_ENABLED, ADB_SETTING_OFF)
+                != ADB_SETTING_OFF;
     }
 
     @Override
     public void updateState(Preference preference) {
-        ((TwoStatePreference)preference).setChecked(isAdbEnabled());
+        ((TwoStatePreference) preference).setChecked(isAdbEnabled());
     }
 
     public void enablePreference(boolean enabled) {
@@ -89,9 +98,13 @@ public abstract class AbstractEnableAdbPreferenceController extends AbstractPref
 
     @Override
     public boolean handlePreferenceTreeClick(Preference preference) {
+        if (isUserAMonkey()) {
+            return false;
+        }
+
         if (TextUtils.equals(KEY_ENABLE_ADB, preference.getKey())) {
             if (!isAdbEnabled()) {
-                showConfirmationDialog((SwitchPreference) preference);
+                showConfirmationDialog(preference);
             } else {
                 writeAdbSetting(false);
             }
@@ -103,14 +116,17 @@ public abstract class AbstractEnableAdbPreferenceController extends AbstractPref
 
     protected void writeAdbSetting(boolean enabled) {
         Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.ADB_ENABLED, enabled ? 1 : 0);
+                Settings.Global.ADB_ENABLED, enabled ? ADB_SETTING_ON : ADB_SETTING_OFF);
         notifyStateChanged();
     }
 
-    protected void notifyStateChanged() {
+    private void notifyStateChanged() {
         LocalBroadcastManager.getInstance(mContext)
                 .sendBroadcast(new Intent(ACTION_ENABLE_ADB_STATE_CHANGED));
     }
 
-    public abstract void showConfirmationDialog(SwitchPreference preference);
+    @VisibleForTesting
+    boolean isUserAMonkey() {
+        return ActivityManager.isUserAMonkey();
+    }
 }

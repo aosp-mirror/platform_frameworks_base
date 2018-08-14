@@ -30,7 +30,10 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Layout;
 import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
+import android.text.method.MovementMethod;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -101,6 +104,9 @@ public class AlertController {
     private ImageView mIconView;
     private TextView mTitleView;
     protected TextView mMessageView;
+    private MovementMethod mMessageMovementMethod;
+    @Layout.HyphenationFrequency
+    private Integer mMessageHyphenationFrequency;
     private View mCustomTitleView;
 
     private boolean mForceInverseBackground;
@@ -287,6 +293,21 @@ public class AlertController {
         mMessage = message;
         if (mMessageView != null) {
             mMessageView.setText(message);
+        }
+    }
+
+    public void setMessageMovementMethod(MovementMethod movementMethod) {
+        mMessageMovementMethod = movementMethod;
+        if (mMessageView != null) {
+            mMessageView.setMovementMethod(movementMethod);
+        }
+    }
+
+    public void setMessageHyphenationFrequency(
+            @Layout.HyphenationFrequency int hyphenationFrequency) {
+        mMessageHyphenationFrequency = hyphenationFrequency;
+        if (mMessageView != null) {
+            mMessageView.setHyphenationFrequency(hyphenationFrequency);
         }
     }
 
@@ -676,6 +697,12 @@ public class AlertController {
 
         if (mMessage != null) {
             mMessageView.setText(mMessage);
+            if (mMessageMovementMethod != null) {
+                mMessageView.setMovementMethod(mMessageMovementMethod);
+            }
+            if (mMessageHyphenationFrequency != null) {
+                mMessageView.setHyphenationFrequency(mMessageHyphenationFrequency);
+            }
         } else {
             mMessageView.setVisibility(View.GONE);
             mScrollView.removeView(mMessageView);

@@ -336,8 +336,13 @@ static jbyteArray android_os_Parcel_createByteArray(JNIEnv* env, jclass clazz, j
                 jbyte* a2 = (jbyte*)env->GetPrimitiveArrayCritical(ret, 0);
                 if (a2) {
                     const void* data = parcel->readInplace(len);
-                    memcpy(a2, data, len);
+                    if (data) {
+                        memcpy(a2, data, len);
+                    }
                     env->ReleasePrimitiveArrayCritical(ret, a2, 0);
+                    if (!data) {
+                        ret = NULL;
+                    }
                 }
             }
         }
@@ -360,9 +365,14 @@ static jboolean android_os_Parcel_readByteArray(JNIEnv* env, jclass clazz, jlong
         jbyte* ar = (jbyte*)env->GetPrimitiveArrayCritical((jarray)dest, 0);
         if (ar) {
             const void* data = parcel->readInplace(len);
-            memcpy(ar, data, len);
+            if (data) {
+                memcpy(ar, data, len);
+                ret = JNI_TRUE;
+            } else {
+                ret = JNI_FALSE;
+            }
+
             env->ReleasePrimitiveArrayCritical((jarray)dest, ar, 0);
-            ret = JNI_TRUE;
         }
     }
     return ret;

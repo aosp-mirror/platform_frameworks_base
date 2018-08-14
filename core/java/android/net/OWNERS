@@ -1,8 +1,20 @@
 set noparent
 
+codewiz@google.com
 ek@google.com
 jsharkey@android.com
 jchalard@google.com
 lorenzo@google.com
+reminv@google.com
 satk@google.com
 silberst@google.com
+
+per-file SSL*=flooey@google.com
+per-file SSL*=narayan@google.com
+per-file SSL*=tobiast@google.com
+per-file Uri*=flooey@google.com
+per-file Uri*=narayan@google.com
+per-file Uri*=tobiast@google.com
+per-file Url*=flooey@google.com
+per-file Url*=narayan@google.com
+per-file Url*=tobiast@google.com

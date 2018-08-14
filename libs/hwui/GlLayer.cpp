@@ -23,17 +23,16 @@
 
 #include <utils/Log.h>
 
-#define ATRACE_LAYER_WORK(label) \
-    ATRACE_FORMAT("%s HW Layer DisplayList %s %ux%u", \
-            label, \
-            (renderNode.get() != NULL) ? renderNode->getName() : "", \
-            getWidth(), getHeight())
+#define ATRACE_LAYER_WORK(label)                                                       \
+    ATRACE_FORMAT("%s HW Layer DisplayList %s %ux%u", label,                           \
+                  (renderNode.get() != NULL) ? renderNode->getName() : "", getWidth(), \
+                  getHeight())
 
 namespace android {
 namespace uirenderer {
 
 GlLayer::GlLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,
-        SkColorFilter* colorFilter, int alpha, SkBlendMode mode, bool blend)
+                 sk_sp<SkColorFilter> colorFilter, int alpha, SkBlendMode mode, bool blend)
         : Layer(renderState, Api::OpenGL, colorFilter, alpha, mode)
         , caches(Caches::getInstance())
         , texture(caches) {
@@ -73,5 +72,5 @@ void GlLayer::generateTexture() {
     }
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.content.res.Resources;
@@ -68,6 +69,8 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private Context mContext;
     private FrameLayout mMenuContainer;
     private MenuItem mInfoItem;
+    private MenuItem mAppOpsItem;
+    private MenuItem mSnoozeItem;
     private ArrayList<MenuItem> mMenuItems;
     private OnMenuEventListener mMenuListener;
 
@@ -88,6 +91,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private float mHorizSpaceForIcon = -1;
     private int mVertSpaceForIcons = -1;
     private int mIconPadding = -1;
+    private int mSidePadding;
 
     private float mAlpha = 0f;
     private float mPrevX;
@@ -117,6 +121,16 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     @Override
     public MenuItem getLongpressMenuItem(Context context) {
         return mInfoItem;
+    }
+
+    @Override
+    public MenuItem getAppOpsMenuItem(Context context) {
+        return mAppOpsItem;
+    }
+
+    @Override
+    public MenuItem getSnoozeMenuItem(Context context) {
+        return mSnoozeItem;
     }
 
     @Override
@@ -175,7 +189,6 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         final Resources res = mContext.getResources();
         mHorizSpaceForIcon = res.getDimensionPixelSize(R.dimen.notification_menu_icon_size);
         mVertSpaceForIcons = res.getDimensionPixelSize(R.dimen.notification_min_height);
-        mIconPadding = res.getDimensionPixelSize(R.dimen.notification_menu_icon_padding);
         mMenuItems.clear();
         // Construct the menu items based on the notification
         if (mParent != null && mParent.getStatusBarNotification() != null) {
@@ -183,11 +196,15 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             boolean isForeground = (flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
             if (!isForeground) {
                 // Only show snooze for non-foreground notifications
-                mMenuItems.add(createSnoozeItem(mContext));
+                mSnoozeItem = createSnoozeItem(mContext);
+                mMenuItems.add(mSnoozeItem);
             }
         }
         mInfoItem = createInfoItem(mContext);
         mMenuItems.add(mInfoItem);
+
+        mAppOpsItem = createAppOpsItem(mContext);
+        mMenuItems.add(mAppOpsItem);
 
         // Construct the menu views
         if (mMenuContainer != null) {
@@ -614,6 +631,14 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         return info;
     }
 
+    public static MenuItem createAppOpsItem(Context context) {
+        AppOpsInfo appOpsContent = (AppOpsInfo) LayoutInflater.from(context).inflate(
+                R.layout.app_ops_info, null, false);
+        MenuItem info = new NotificationMenuItem(context, null, appOpsContent,
+                -1 /*don't show in slow swipe menu */);
+        return info;
+    }
+
     private void addMenuView(MenuItem item, ViewGroup parent) {
         View menuView = item.getMenuView();
         if (menuView != null) {
@@ -631,22 +656,29 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         GutsContent mGutsContent;
         String mContentDescription;
 
+        /**
+         * Add a new 'guts' panel. If iconResId < 0 it will not appear in the slow swipe menu
+         * but can still be exposed via other affordances.
+         */
         public NotificationMenuItem(Context context, String s, GutsContent content, int iconResId) {
             Resources res = context.getResources();
             int padding = res.getDimensionPixelSize(R.dimen.notification_menu_icon_padding);
             int tint = res.getColor(R.color.notification_gear_color);
-            AlphaOptimizedImageView iv = new AlphaOptimizedImageView(context);
-            iv.setPadding(padding, padding, padding, padding);
-            Drawable icon = context.getResources().getDrawable(iconResId);
-            iv.setImageDrawable(icon);
-            iv.setColorFilter(tint);
-            iv.setAlpha(1f);
-            mMenuView = iv;
+            if (iconResId >= 0) {
+                AlphaOptimizedImageView iv = new AlphaOptimizedImageView(context);
+                iv.setPadding(padding, padding, padding, padding);
+                Drawable icon = context.getResources().getDrawable(iconResId);
+                iv.setImageDrawable(icon);
+                iv.setColorFilter(tint);
+                iv.setAlpha(1f);
+                mMenuView = iv;
+            }
             mContentDescription = s;
             mGutsContent = content;
         }
 
         @Override
+        @Nullable
         public View getMenuView() {
             return mMenuView;
         }

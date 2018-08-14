@@ -16,11 +16,15 @@
 
 package com.android.internal.inputmethod;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
@@ -28,16 +32,22 @@ import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController.ControllerImpl;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class InputMethodSubtypeSwitchingControllerTest {
     private static final String DUMMY_PACKAGE_NAME = "dummy package name";
     private static final String DUMMY_IME_LABEL = "dummy ime label";
     private static final String DUMMY_SETTING_ACTIVITY_NAME = "";
     private static final boolean DUMMY_IS_AUX_IME = false;
     private static final boolean DUMMY_FORCE_DEFAULT = false;
+    private static final boolean DUMMY_IS_VR_IME = false;
     private static final int DUMMY_IS_DEFAULT_RES_ID = 0;
     private static final String SYSTEM_LOCALE = "en_US";
     private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
@@ -75,7 +85,7 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
         }
         final InputMethodInfo imi = new InputMethodInfo(ri, DUMMY_IS_AUX_IME,
                 DUMMY_SETTING_ACTIVITY_NAME, subtypes, DUMMY_IS_DEFAULT_RES_ID,
-                DUMMY_FORCE_DEFAULT, supportsSwitchingToNextInputMethod);
+                DUMMY_FORCE_DEFAULT, supportsSwitchingToNextInputMethod, DUMMY_IS_VR_IME);
         if (subtypes == null) {
             items.add(new ImeSubtypeListItem(imeName, null /* variableName */, imi,
                     NOT_A_SUBTYPE_ID, null, SYSTEM_LOCALE));
@@ -111,7 +121,8 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
                 .build());
         final InputMethodInfo imi = new InputMethodInfo(ri, DUMMY_IS_AUX_IME,
                 DUMMY_SETTING_ACTIVITY_NAME, subtypes, DUMMY_IS_DEFAULT_RES_ID,
-                DUMMY_FORCE_DEFAULT, true /* supportsSwitchingToNextInputMethod */);
+                DUMMY_FORCE_DEFAULT, true /* supportsSwitchingToNextInputMethod */,
+                DUMMY_IS_VR_IME);
         return new ImeSubtypeListItem(imeName, subtypeName, imi, subtypeIndex, subtypeLocale,
                 systemLocale);
     }
@@ -188,7 +199,7 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
         controller.onUserActionLocked(subtypeListItem.mImi, subtype);
     }
 
-    @SmallTest
+    @Test
     public void testControllerImpl() throws Exception {
         final List<ImeSubtypeListItem> disabledItems = createDisabledImeSubtypes();
         final ImeSubtypeListItem disabledIme_en_US = disabledItems.get(0);
@@ -248,7 +259,7 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
                 disabledSubtypeUnawareIme, null, null);
     }
 
-    @SmallTest
+    @Test
     public void testControllerImplWithUserAction() throws Exception {
         final List<ImeSubtypeListItem> enabledItems = createEnabledImeSubtypes();
         final ImeSubtypeListItem latinIme_en_US = enabledItems.get(0);
@@ -329,7 +340,7 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
                 switchingUnawarelatinIme_en_UK, switchUnawareJapaneseIme_ja_JP);
     }
 
-    @SmallTest
+    @Test
     public void testImeSubtypeListItem() throws Exception {
         final List<ImeSubtypeListItem> items = new ArrayList<>();
         addDummyImeSubtypeListItems(items, "LatinIme", "LatinIme",
@@ -358,7 +369,7 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
         assertFalse(item_EN_US.mIsSystemLocale);
     }
 
-    @SmallTest
+    @Test
     public void testImeSubtypeListComparator() throws Exception {
         {
             final List<ImeSubtypeListItem> items = Arrays.asList(

@@ -25,6 +25,8 @@ import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.MutableLong;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoUtils;
 
 import java.io.PrintWriter;
 
@@ -118,5 +120,23 @@ public class AppTimeTracker {
             pw.println();
             pw.print(prefix); pw.print("mStartedPackage="); pw.println(mStartedPackage);
         }
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId, boolean details) {
+        final long token = proto.start(fieldId);
+        proto.write(AppTimeTrackerProto.RECEIVER, mReceiver.toString());
+        proto.write(AppTimeTrackerProto.TOTAL_DURATION_MS, mTotalTime);
+        for (int i=0; i<mPackageTimes.size(); i++) {
+            final long ptoken = proto.start(AppTimeTrackerProto.PACKAGE_TIMES);
+            proto.write(AppTimeTrackerProto.PackageTime.PACKAGE, mPackageTimes.keyAt(i));
+            proto.write(AppTimeTrackerProto.PackageTime.DURATION_MS, mPackageTimes.valueAt(i).value);
+            proto.end(ptoken);
+        }
+        if (details && mStartedTime != 0) {
+            ProtoUtils.toDuration(proto, AppTimeTrackerProto.STARTED_TIME,
+                    mStartedTime, SystemClock.elapsedRealtime());
+            proto.write(AppTimeTrackerProto.STARTED_PACKAGE, mStartedPackage);
+        }
+        proto.end(token);
     }
 }

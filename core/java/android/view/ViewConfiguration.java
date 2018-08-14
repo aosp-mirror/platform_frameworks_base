@@ -84,10 +84,15 @@ public class ViewConfiguration {
 
     /**
      * Defines the duration in milliseconds a user needs to hold down the
-     * appropriate button to bring up the accessibility shortcut (first time) or enable it
-     * (once shortcut is configured).
+     * appropriate button to bring up the accessibility shortcut for the first time
      */
     private static final int A11Y_SHORTCUT_KEY_TIMEOUT = 3000;
+
+    /**
+     * Defines the duration in milliseconds a user needs to hold down the
+     * appropriate button to enable the accessibility shortcut once it's configured.
+     */
+    private static final int A11Y_SHORTCUT_KEY_TIMEOUT_AFTER_CONFIRMATION = 1000;
 
     /**
      * Defines the duration in milliseconds we will wait to see if a touch event
@@ -285,6 +290,7 @@ public class ViewConfiguration {
     private final int mMaximumFlingVelocity;
     private final int mScrollbarSize;
     private final int mTouchSlop;
+    private final int mHoverSlop;
     private final int mMinScrollbarTouchTarget;
     private final int mDoubleTapTouchSlop;
     private final int mPagingTouchSlop;
@@ -297,6 +303,7 @@ public class ViewConfiguration {
     private final long mGlobalActionsKeyTimeout;
     private final float mVerticalScrollFactor;
     private final float mHorizontalScrollFactor;
+    private final boolean mShowMenuShortcutsWhenKeyboardPresent;
 
     private boolean sHasPermanentMenuKey;
     private boolean sHasPermanentMenuKeySet;
@@ -315,6 +322,7 @@ public class ViewConfiguration {
         mMaximumFlingVelocity = MAXIMUM_FLING_VELOCITY;
         mScrollbarSize = SCROLL_BAR_SIZE;
         mTouchSlop = TOUCH_SLOP;
+        mHoverSlop = TOUCH_SLOP / 2;
         mMinScrollbarTouchTarget = MIN_SCROLLBAR_TOUCH_TARGET;
         mDoubleTapTouchSlop = DOUBLE_TAP_TOUCH_SLOP;
         mPagingTouchSlop = PAGING_TOUCH_SLOP;
@@ -328,6 +336,7 @@ public class ViewConfiguration {
         mGlobalActionsKeyTimeout = GLOBAL_ACTIONS_KEY_TIMEOUT;
         mHorizontalScrollFactor = HORIZONTAL_SCROLL_FACTOR;
         mVerticalScrollFactor = VERTICAL_SCROLL_FACTOR;
+        mShowMenuShortcutsWhenKeyboardPresent = false;
     }
 
     /**
@@ -402,6 +411,8 @@ public class ViewConfiguration {
                 com.android.internal.R.bool.config_ui_enableFadingMarquee);
         mTouchSlop = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_viewConfigurationTouchSlop);
+        mHoverSlop = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_viewConfigurationHoverSlop);
         mMinScrollbarTouchTarget = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_minScrollbarTouchTarget);
         mPagingTouchSlop = mTouchSlop * 2;
@@ -419,6 +430,10 @@ public class ViewConfiguration {
                 com.android.internal.R.dimen.config_horizontalScrollFactor);
         mVerticalScrollFactor = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_verticalScrollFactor);
+
+        mShowMenuShortcutsWhenKeyboardPresent = res.getBoolean(
+            com.android.internal.R.bool.config_showMenuShortcutsWhenKeyboardPresent);
+
     }
 
     /**
@@ -632,6 +647,14 @@ public class ViewConfiguration {
      */
     public int getScaledTouchSlop() {
         return mTouchSlop;
+    }
+
+    /**
+     * @return Distance in pixels a hover can wander while it is still considered "stationary".
+     *
+     */
+    public int getScaledHoverSlop() {
+        return mHoverSlop;
     }
 
     /**
@@ -851,6 +874,15 @@ public class ViewConfiguration {
     }
 
     /**
+     * @return The amount of time a user needs to press the relevant keys to activate the
+     *   accessibility shortcut after it's confirmed that accessibility shortcut is used.
+     * @hide
+     */
+    public long getAccessibilityShortcutKeyTimeoutAfterConfirmation() {
+        return A11Y_SHORTCUT_KEY_TIMEOUT_AFTER_CONFIRMATION;
+    }
+
+    /**
      * The amount of friction applied to scrolls and flings.
      *
      * @return A scalar dimensionless value representing the coefficient of
@@ -881,6 +913,15 @@ public class ViewConfiguration {
      */
     public boolean hasPermanentMenuKey() {
         return sHasPermanentMenuKey;
+    }
+
+    /**
+     * Check if shortcuts should be displayed in menus.
+     *
+     * @return {@code True} if shortcuts should be displayed in menus.
+     */
+    public boolean shouldShowMenuShortcutsWhenKeyboardPresent() {
+        return mShowMenuShortcutsWhenKeyboardPresent;
     }
 
     /**

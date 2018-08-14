@@ -113,8 +113,8 @@ void Snapshot::resetClip(float left, float top, float right, float bottom) {
 // Clipping round rect
 ///////////////////////////////////////////////////////////////////////////////
 
-void Snapshot::setClippingRoundRect(LinearAllocator& allocator, const Rect& bounds,
-        float radius, bool highPriority) {
+void Snapshot::setClippingRoundRect(LinearAllocator& allocator, const Rect& bounds, float radius,
+                                    bool highPriority) {
     if (bounds.isEmpty()) {
         mClipArea->setEmpty();
         return;
@@ -135,7 +135,7 @@ void Snapshot::setClippingRoundRect(LinearAllocator& allocator, const Rect& boun
     state->matrix.loadInverse(roundRectDrawingMatrix);
 
     // compute area under rounded corners - only draws overlapping these rects need to be clipped
-    for (int i = 0 ; i < 4; i++) {
+    for (int i = 0; i < 4; i++) {
         state->dangerRects[i] = bounds;
     }
     state->dangerRects[0].bottom = state->dangerRects[1].bottom = bounds.top + radius;
@@ -170,15 +170,16 @@ static Snapshot* getClipRoot(Snapshot* target) {
 }
 
 const ClipBase* Snapshot::serializeIntersectedClip(LinearAllocator& allocator,
-        const ClipBase* recordedClip, const Matrix4& recordedClipTransform) {
+                                                   const ClipBase* recordedClip,
+                                                   const Matrix4& recordedClipTransform) {
     auto target = this;
     if (CC_UNLIKELY(recordedClip && recordedClip->intersectWithRoot)) {
         // Clip must be intersected with root, instead of current clip.
         target = getClipRoot(this);
     }
 
-    return target->mClipArea->serializeIntersectedClip(allocator,
-            recordedClip, recordedClipTransform);
+    return target->mClipArea->serializeIntersectedClip(allocator, recordedClip,
+                                                       recordedClipTransform);
 }
 
 void Snapshot::applyClip(const ClipBase* recordedClip, const Matrix4& transform) {
@@ -194,15 +195,15 @@ void Snapshot::applyClip(const ClipBase* recordedClip, const Matrix4& transform)
 ///////////////////////////////////////////////////////////////////////////////
 
 void Snapshot::dump() const {
-    ALOGD("Snapshot %p, flags %x, prev %p, height %d, hasComplexClip %d",
-            this, flags, previous, getViewportHeight(), !mClipArea->isSimple());
+    ALOGD("Snapshot %p, flags %x, prev %p, height %d, hasComplexClip %d", this, flags, previous,
+          getViewportHeight(), !mClipArea->isSimple());
     const Rect& clipRect(mClipArea->getClipRect());
-    ALOGD("  ClipRect %.1f %.1f %.1f %.1f, clip simple %d",
-            clipRect.left, clipRect.top, clipRect.right, clipRect.bottom, mClipArea->isSimple());
+    ALOGD("  ClipRect %.1f %.1f %.1f %.1f, clip simple %d", clipRect.left, clipRect.top,
+          clipRect.right, clipRect.bottom, mClipArea->isSimple());
 
     ALOGD("  Transform (at %p):", transform);
     transform->dump();
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

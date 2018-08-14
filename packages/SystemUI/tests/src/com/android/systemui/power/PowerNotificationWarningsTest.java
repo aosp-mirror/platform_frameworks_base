@@ -38,6 +38,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.NotificationChannels;
 
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,6 +47,9 @@ import org.mockito.ArgumentCaptor;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class PowerNotificationWarningsTest extends SysuiTestCase {
+
+    public static final String FORMATTED_45M = "0h 45m";
+    public static final String FORMATTED_HOUR = "1h 0m";
     private final NotificationManager mMockNotificationManager = mock(NotificationManager.class);
     private PowerNotificationWarnings mPowerNotificationWarnings;
 

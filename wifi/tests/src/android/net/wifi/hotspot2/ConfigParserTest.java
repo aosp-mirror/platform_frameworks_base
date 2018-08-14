@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 import android.net.wifi.FakeKeys;
 import android.net.wifi.hotspot2.pps.Credential;
 import android.net.wifi.hotspot2.pps.HomeSp;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.filters.SmallTest;
 
 import java.io.BufferedReader;
 import java.io.IOException;

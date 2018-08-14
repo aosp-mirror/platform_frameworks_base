@@ -16,8 +16,6 @@
 
 package com.android.internal.util;
 
-import static com.android.internal.util.ArrayUtils.isEmpty;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.ArraySet;
@@ -30,7 +28,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.function.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -84,6 +83,17 @@ public class CollectionUtils {
             }
         }
         return emptyIfNull(result);
+    }
+
+    /** Add all elements matching {@code predicate} in {@code source} to {@code dest}. */
+    public static <T> void addIf(@Nullable List<T> source, @NonNull Collection<? super T> dest,
+            @Nullable Predicate<? super T> predicate) {
+        for (int i = 0; i < size(source); i++) {
+            final T item = source.get(i);
+            if (predicate.test(item)) {
+                dest.add(item);
+            }
+        }
     }
 
     /**
@@ -140,14 +150,14 @@ public class CollectionUtils {
     public static @NonNull <I, O> List<O> mapNotNull(@Nullable List<I> cur,
             Function<? super I, ? extends O> f) {
         if (isEmpty(cur)) return Collections.emptyList();
-        final ArrayList<O> result = new ArrayList<>();
+        List<O> result = null;
         for (int i = 0; i < cur.size(); i++) {
             O transformed = f.apply(cur.get(i));
             if (transformed != null) {
-                result.add(transformed);
+                result = add(result, transformed);
             }
         }
-        return result;
+        return emptyIfNull(result);
     }
 
     /**
@@ -173,10 +183,17 @@ public class CollectionUtils {
     }
 
     /**
-     * Returns the size of the given list, or 0 if the list is null
+     * Returns the size of the given collection, or 0 if null
      */
     public static int size(@Nullable Collection<?> cur) {
         return cur != null ? cur.size() : 0;
+    }
+
+    /**
+     * Returns whether the given collection {@link Collection#isEmpty is empty} or {@code null}
+     */
+    public static boolean isEmpty(@Nullable Collection<?> cur) {
+        return size(cur) == 0;
     }
 
     /**
@@ -290,11 +307,11 @@ public class CollectionUtils {
             if (cur instanceof ArraySet) {
                 ArraySet<T> arraySet = (ArraySet<T>) cur;
                 for (int i = 0; i < size; i++) {
-                    action.accept(arraySet.valueAt(i));
+                    action.acceptOrThrow(arraySet.valueAt(i));
                 }
             } else {
                 for (T t : cur) {
-                    action.accept(t);
+                    action.acceptOrThrow(t);
                 }
             }
         } catch (Exception e) {

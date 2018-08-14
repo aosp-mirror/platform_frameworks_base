@@ -60,6 +60,12 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         }
     }
 
+    public static class DESede extends AndroidKeyStoreKeyGeneratorSpi {
+        public DESede() {
+            super(KeymasterDefs.KM_ALGORITHM_3DES, 168);
+        }
+    }
+
     protected static abstract class HmacBase extends AndroidKeyStoreKeyGeneratorSpi {
         protected HmacBase(int keymasterDigest) {
             super(KeymasterDefs.KM_ALGORITHM_HMAC,
@@ -237,12 +243,7 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 // Check that user authentication related parameters are acceptable. This method
                 // will throw an IllegalStateException if there are issues (e.g., secure lock screen
                 // not set up).
-                KeymasterUtils.addUserAuthArgs(new KeymasterArguments(),
-                        spec.isUserAuthenticationRequired(),
-                        spec.getUserAuthenticationValidityDurationSeconds(),
-                        spec.isUserAuthenticationValidWhileOnBody(),
-                        spec.isInvalidatedByBiometricEnrollment(),
-                        GateKeeper.INVALID_SECURE_USER_ID /* boundToSpecificSecureUserId */);
+                KeymasterUtils.addUserAuthArgs(new KeymasterArguments(), spec);
             } catch (IllegalStateException | IllegalArgumentException e) {
                 throw new InvalidAlgorithmParameterException(e);
             }
@@ -278,12 +279,7 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         args.addEnums(KeymasterDefs.KM_TAG_BLOCK_MODE, mKeymasterBlockModes);
         args.addEnums(KeymasterDefs.KM_TAG_PADDING, mKeymasterPaddings);
         args.addEnums(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigests);
-        KeymasterUtils.addUserAuthArgs(args,
-                spec.isUserAuthenticationRequired(),
-                spec.getUserAuthenticationValidityDurationSeconds(),
-                spec.isUserAuthenticationValidWhileOnBody(),
-                spec.isInvalidatedByBiometricEnrollment(),
-                GateKeeper.INVALID_SECURE_USER_ID /* boundToSpecificSecureUserId */);
+        KeymasterUtils.addUserAuthArgs(args, spec);
         KeymasterUtils.addMinMacLengthAuthorizationIfNecessary(
                 args,
                 mKeymasterAlgorithm,
@@ -305,7 +301,7 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 KeyStoreCryptoOperationUtils.getRandomBytesToMixIntoKeystoreRng(
                         mRng, (mKeySizeBits + 7) / 8);
         int flags = 0;
-        String keyAliasInKeystore = Credentials.USER_SECRET_KEY + spec.getKeystoreAlias();
+        String keyAliasInKeystore = Credentials.USER_PRIVATE_KEY + spec.getKeystoreAlias();
         KeyCharacteristics resultingKeyCharacteristics = new KeyCharacteristics();
         boolean success = false;
         try {

@@ -35,6 +35,7 @@ import android.os.UserHandle;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -195,4 +196,37 @@ public class VpnConfig implements Parcelable {
             return new VpnConfig[size];
         }
     };
+
+    @Override
+    public String toString() {
+        return new StringBuilder()
+                .append("VpnConfig")
+                .append("{ user=").append(user)
+                .append(", interface=").append(interfaze)
+                .append(", session=").append(session)
+                .append(", mtu=").append(mtu)
+                .append(", addresses=").append(toString(addresses))
+                .append(", routes=").append(toString(routes))
+                .append(", dns=").append(toString(dnsServers))
+                .append(", searchDomains=").append(toString(searchDomains))
+                .append(", allowedApps=").append(toString(allowedApplications))
+                .append(", disallowedApps=").append(toString(disallowedApplications))
+                .append(", configureIntent=").append(configureIntent)
+                .append(", startTime=").append(startTime)
+                .append(", legacy=").append(legacy)
+                .append(", blocking=").append(blocking)
+                .append(", allowBypass=").append(allowBypass)
+                .append(", allowIPv4=").append(allowIPv4)
+                .append(", allowIPv6=").append(allowIPv6)
+                .append(", underlyingNetworks=").append(Arrays.toString(underlyingNetworks))
+                .append("}")
+                .toString();
+    }
+
+    static <T> String toString(List<T> ls) {
+        if (ls == null) {
+            return "null";
+        }
+        return Arrays.toString(ls.toArray());
+    }
 }

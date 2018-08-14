@@ -21,7 +21,9 @@ import android.annotation.Nullable;
 import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseIntArray;
 
+import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
@@ -182,11 +184,24 @@ public class Binder implements IBinder {
         try {
             if (binder instanceof BinderProxy) {
                 ((BinderProxy) binder).mWarnOnBlocking = false;
-            } else if (binder != null
+            } else if (binder != null && binder.getInterfaceDescriptor() != null
                     && binder.queryLocalInterface(binder.getInterfaceDescriptor()) == null) {
                 Log.w(TAG, "Unable to allow blocking on interface " + binder);
             }
         } catch (RemoteException ignored) {
+        }
+        return binder;
+    }
+
+    /**
+     * Reset the given interface back to the default blocking behavior,
+     * reverting any changes made by {@link #allowBlocking(IBinder)}.
+     *
+     * @hide
+     */
+    public static IBinder defaultBlocking(IBinder binder) {
+        if (binder instanceof BinderProxy) {
+            ((BinderProxy) binder).mWarnOnBlocking = sWarnOnBlocking;
         }
         return binder;
     }
@@ -284,7 +299,7 @@ public class Binder implements IBinder {
         long callingIdentity = clearCallingIdentity();
         Throwable throwableToPropagate = null;
         try {
-            action.run();
+            action.runOrThrow();
         } catch (Throwable throwable) {
             throwableToPropagate = throwable;
         } finally {
@@ -308,7 +323,7 @@ public class Binder implements IBinder {
         long callingIdentity = clearCallingIdentity();
         Throwable throwableToPropagate = null;
         try {
-            return action.get();
+            return action.getOrThrow();
         } catch (Throwable throwable) {
             throwableToPropagate = throwable;
             return null; // overridden by throwing in finally block
@@ -435,7 +450,7 @@ public class Binder implements IBinder {
      * descriptor.
      */
     public @Nullable IInterface queryLocalInterface(@NonNull String descriptor) {
-        if (mDescriptor.equals(descriptor)) {
+        if (mDescriptor != null && mDescriptor.equals(descriptor)) {
             return mOwner;
         }
         return null;
@@ -707,6 +722,8 @@ public class Binder implements IBinder {
     // Entry point from android_util_Binder.cpp's onTransact
     private boolean execTransact(int code, long dataObj, long replyObj,
             int flags) {
+        BinderCallsStats binderCallsStats = BinderCallsStats.getInstance();
+        BinderCallsStats.CallSession callSession = binderCallsStats.callStarted(this, code);
         Parcel data = Parcel.obtain(dataObj);
         Parcel reply = Parcel.obtain(replyObj);
         // theoretically, we should call transact, which will call onTransact,
@@ -751,8 +768,8 @@ public class Binder implements IBinder {
         // to the main transaction loop to wait for another incoming transaction.  Either
         // way, strict mode begone!
         StrictMode.clearGatheredViolations();
+        binderCallsStats.callEnded(callSession);
 
         return res;
     }
 }
-

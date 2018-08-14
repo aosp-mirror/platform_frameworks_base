@@ -31,9 +31,7 @@ namespace uirenderer {
 */
 
 class ANDROID_API TestWindowContext {
-
 public:
-
     TestWindowContext();
     ~TestWindowContext();
 
@@ -58,11 +56,9 @@ private:
     class TestWindowData;
 
     TestWindowData* mData;
-
 };
 
 }  // namespace uirenderer
 }  // namespace android
 
 #endif  // TESTWINDOWCONTEXT_H_
-

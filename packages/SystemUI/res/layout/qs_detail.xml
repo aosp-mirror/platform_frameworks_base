@@ -23,7 +23,8 @@
     android:clickable="true"
     android:orientation="vertical"
     android:paddingBottom="8dp"
-    android:visibility="invisible">
+    android:visibility="invisible"
+    android:elevation="4dp" >
 
     <include
         android:id="@+id/qs_detail_header"

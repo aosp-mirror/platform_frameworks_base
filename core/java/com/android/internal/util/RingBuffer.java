@@ -45,8 +45,43 @@ public class RingBuffer<T> {
         return (int) Math.min(mBuffer.length, (long) mCursor);
     }
 
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+
+    public void clear() {
+        for (int i = 0; i < size(); ++i) {
+            mBuffer[i] = null;
+        }
+        mCursor = 0;
+    }
+
     public void append(T t) {
         mBuffer[indexOf(mCursor++)] = t;
+    }
+
+    /**
+     * Returns object of type <T> at the next writable slot, creating one if it is not already
+     * available. In case of any errors while creating the object, <code>null</code> will
+     * be returned.
+     */
+    public T getNextSlot() {
+        final int nextSlotIdx = indexOf(mCursor++);
+        if (mBuffer[nextSlotIdx] == null) {
+            mBuffer[nextSlotIdx] = createNewItem();
+        }
+        return mBuffer[nextSlotIdx];
+    }
+
+    /**
+     * @return a new object of type <T> or null if a new object could not be created.
+     */
+    protected T createNewItem() {
+        try {
+            return (T) mBuffer.getClass().getComponentType().newInstance();
+        } catch (IllegalAccessException | InstantiationException e) {
+            return null;
+        }
     }
 
     public T[] toArray() {

@@ -30,7 +30,8 @@
 #include "ValueVisitor.h"
 #include "util/Util.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
+using ::android::StringPiece16;
 
 namespace aapt {
 
@@ -189,7 +190,7 @@ std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::FindByName(
   ResourceTable::SearchResult sr = result.value();
 
   std::unique_ptr<SymbolTable::Symbol> symbol = util::make_unique<SymbolTable::Symbol>();
-  symbol->is_public = (sr.entry->symbol_status.state == SymbolState::kPublic);
+  symbol->is_public = (sr.entry->visibility.level == Visibility::Level::kPublic);
 
   if (sr.package->id && sr.type->id && sr.entry->id) {
     symbol->id = ResourceId(sr.package->id.value(), sr.type->id.value(), sr.entry->id.value());
@@ -226,6 +227,10 @@ std::map<size_t, std::string> AssetManagerSymbolSource::GetAssignedPackageIds() 
   return package_map;
 }
 
+bool AssetManagerSymbolSource::IsPackageDynamic(uint32_t packageId) const {
+  return assets_.getResources(false).isPackageDynamic(packageId);
+}
+
 static std::unique_ptr<SymbolTable::Symbol> LookupAttributeInTable(
     const android::ResTable& table, ResourceId id) {
   // Try as a bag.
@@ -242,7 +247,7 @@ static std::unique_ptr<SymbolTable::Symbol> LookupAttributeInTable(
   // Check to see if it is an attribute.
   for (size_t i = 0; i < (size_t)count; i++) {
     if (entry[i].map.name.ident == android::ResTable_map::ATTR_TYPE) {
-      s->attribute = std::make_shared<Attribute>(false, entry[i].map.value.data);
+      s->attribute = std::make_shared<Attribute>(entry[i].map.value.data);
       break;
     }
   }
@@ -289,13 +294,36 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByName(
   const android::ResTable& table = assets_.getResources(false);
 
   const std::u16string package16 = util::Utf8ToUtf16(name.package);
-  const std::u16string type16 = util::Utf8ToUtf16(ToString(name.type));
+  const std::u16string type16 = util::Utf8ToUtf16(to_string(name.type));
   const std::u16string entry16 = util::Utf8ToUtf16(name.entry);
+  const std::u16string mangled_entry16 =
+      util::Utf8ToUtf16(NameMangler::MangleEntry(name.package, name.entry));
 
-  uint32_t type_spec_flags = 0;
-  ResourceId res_id = table.identifierForName(
-      entry16.data(), entry16.size(), type16.data(), type16.size(),
-      package16.data(), package16.size(), &type_spec_flags);
+  uint32_t type_spec_flags;
+  ResourceId res_id;
+
+  // There can be mangled resources embedded within other packages. Here we will
+  // look into each package and look-up the mangled name until we find the resource.
+  const size_t count = table.getBasePackageCount();
+  for (size_t i = 0; i < count; i++) {
+    const android::String16 package_name = table.getBasePackageName(i);
+    StringPiece16 real_package16 = package16;
+    StringPiece16 real_entry16 = entry16;
+    std::u16string scratch_entry16;
+    if (StringPiece16(package_name) != package16) {
+      real_entry16 = mangled_entry16;
+      real_package16 = package_name.string();
+    }
+
+    type_spec_flags = 0;
+    res_id = table.identifierForName(real_entry16.data(), real_entry16.size(), type16.data(),
+                                     type16.size(), real_package16.data(), real_package16.size(),
+                                     &type_spec_flags);
+    if (res_id.is_valid()) {
+      break;
+    }
+  }
+
   if (!res_id.is_valid()) {
     return {};
   }
@@ -306,6 +334,7 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByName(
   } else {
     s = util::make_unique<SymbolTable::Symbol>();
     s->id = res_id;
+    s->is_dynamic = table.isResourceDynamic(res_id.id);
   }
 
   if (s) {
@@ -330,7 +359,6 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
     // Exit early and avoid the error logs from AssetManager.
     return {};
   }
-
   const android::ResTable& table = assets_.getResources(false);
   Maybe<ResourceName> maybe_name = GetResourceName(table, id);
   if (!maybe_name) {
@@ -346,6 +374,7 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
   } else {
     s = util::make_unique<SymbolTable::Symbol>();
     s->id = id;
+    s->is_dynamic = table.isResourceDynamic(id.id);
   }
 
   if (s) {

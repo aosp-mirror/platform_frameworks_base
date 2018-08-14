@@ -1097,6 +1097,7 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     private List<HdmiDeviceInfo> getMhlDevicesLocked() {
         return mMhlDevices;
     }

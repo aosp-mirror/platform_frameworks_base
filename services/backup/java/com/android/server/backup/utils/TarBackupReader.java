@@ -34,14 +34,14 @@ import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_SYSTEM_APP_NO
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSIONS_MATCH;
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER;
 
-import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_MANIFEST_FILENAME;
-import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_MANIFEST_VERSION;
-import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_METADATA_FILENAME;
-import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_WIDGET_METADATA_TOKEN;
-import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
-import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.BACKUP_MANIFEST_FILENAME;
+import static com.android.server.backup.BackupManagerService.BACKUP_MANIFEST_VERSION;
+import static com.android.server.backup.BackupManagerService.BACKUP_METADATA_FILENAME;
+import static com.android.server.backup.BackupManagerService.BACKUP_WIDGET_METADATA_TOKEN;
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
+import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupManagerMonitor;
@@ -50,6 +50,7 @@ import android.app.backup.IBackupManagerMonitor;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.os.Bundle;
 import android.os.Process;
@@ -385,7 +386,8 @@ public class TarBackupReader {
      * @return a restore policy constant.
      */
     public RestorePolicy chooseRestorePolicy(PackageManager packageManager,
-            boolean allowApks, FileMetadata info, Signature[] signatures) {
+            boolean allowApks, FileMetadata info, Signature[] signatures,
+            PackageManagerInternal pmi) {
         if (signatures == null) {
             return RestorePolicy.IGNORE;
         }
@@ -395,7 +397,7 @@ public class TarBackupReader {
         // Okay, got the manifest info we need...
         try {
             PackageInfo pkgInfo = packageManager.getPackageInfo(
-                    info.packageName, PackageManager.GET_SIGNATURES);
+                    info.packageName, PackageManager.GET_SIGNING_CERTIFICATES);
             // Fall through to IGNORE if the app explicitly disallows backup
             final int flags = pkgInfo.applicationInfo.flags;
             if ((flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0) {
@@ -411,7 +413,7 @@ public class TarBackupReader {
                     // such packages are signed with the platform cert instead of
                     // the app developer's cert, so they're different on every
                     // device.
-                    if (AppBackupUtils.signaturesMatch(signatures, pkgInfo)) {
+                    if (AppBackupUtils.signaturesMatch(signatures, pkgInfo, pmi)) {
                         if ((pkgInfo.applicationInfo.flags
                                 & ApplicationInfo.FLAG_RESTORE_ANY_VERSION) != 0) {
                             Slog.i(TAG, "Package has restoreAnyVersion; taking data");
@@ -422,7 +424,7 @@ public class TarBackupReader {
                                     LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
                                     null);
                             policy = RestorePolicy.ACCEPT;
-                        } else if (pkgInfo.versionCode >= info.version) {
+                        } else if (pkgInfo.getLongVersionCode() >= info.version) {
                             Slog.i(TAG, "Sig + version match; taking data");
                             policy = RestorePolicy.ACCEPT;
                             mMonitor = BackupManagerMonitorUtils.monitorEvent(
@@ -439,7 +441,7 @@ public class TarBackupReader {
                                 Slog.i(TAG, "Data version " + info.version
                                         + " is newer than installed "
                                         + "version "
-                                        + pkgInfo.versionCode
+                                        + pkgInfo.getLongVersionCode()
                                         + " - requiring apk");
                                 policy = RestorePolicy.ACCEPT_IF_APK;
                             } else {

@@ -15,6 +15,7 @@
 */
 package android.animation;
 
+import android.support.test.filters.LargeTest;
 import android.test.ActivityInstrumentationTestCase2;
 
 import java.util.HashSet;
@@ -24,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.android.frameworks.coretests.R;
 
+@LargeTest
 public class AnimatorInflaterTest extends ActivityInstrumentationTestCase2<BasicAnimatorActivity>  {
     Set<Integer> identityHashes = new HashSet<Integer>();
 

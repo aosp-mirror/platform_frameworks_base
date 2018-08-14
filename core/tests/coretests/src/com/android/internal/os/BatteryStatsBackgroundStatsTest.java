@@ -194,9 +194,19 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
 
     @SmallTest
     public void testAppBluetoothScan() throws Exception {
+        doTestAppBluetoothScanInternal(new WorkSource(UID));
+    }
+
+    @SmallTest
+    public void testAppBluetoothScan_workChain() throws Exception {
+        WorkSource ws = new WorkSource();
+        ws.createWorkChain().addNode(UID, "foo");
+        doTestAppBluetoothScanInternal(ws);
+    }
+
+    private void doTestAppBluetoothScanInternal(WorkSource ws) throws Exception {
         final MockClocks clocks = new MockClocks();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
-        WorkSource ws = new WorkSource(UID); // needed for bluetooth
         long curr = 0; // realtime in us
 
         // On battery

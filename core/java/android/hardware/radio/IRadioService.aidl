@@ -16,6 +16,8 @@
 
 package android.hardware.radio;
 
+import android.hardware.radio.IAnnouncementListener;
+import android.hardware.radio.ICloseHandle;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
@@ -30,4 +32,7 @@ interface IRadioService {
 
     ITuner openTuner(int moduleId, in RadioManager.BandConfig bandConfig, boolean withAudio,
             in ITunerCallback callback);
+
+    ICloseHandle addAnnouncementListener(in int[] enabledTypes,
+            in IAnnouncementListener listener);
 }

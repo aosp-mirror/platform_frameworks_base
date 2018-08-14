@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -31,6 +32,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.media.audiopolicy.AudioPolicy;
+import android.media.audiopolicy.AudioPolicy.AudioPolicyFocusListener;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionLegacyHelper;
@@ -43,20 +45,31 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Slog;
 import android.view.KeyEvent;
 
+import com.android.internal.annotations.GuardedBy;
+
+import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+
 
 /**
  * AudioManager provides access to volume and ringer mode control.
@@ -396,6 +409,18 @@ public class AudioManager {
      * @see #adjustStreamVolume(int, int, int)
      */
     public static final int ADJUST_TOGGLE_MUTE = 101;
+
+    /** @hide */
+    @IntDef(flag = false, prefix = "ADJUST", value = {
+            ADJUST_RAISE,
+            ADJUST_LOWER,
+            ADJUST_SAME,
+            ADJUST_MUTE,
+            ADJUST_UNMUTE,
+            ADJUST_TOGGLE_MUTE }
+            )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VolumeAdjustment {}
 
     /** @hide */
     public static final String adjustToString(int adj) {
@@ -912,13 +937,28 @@ public class AudioManager {
 
     /**
      * Returns the minimum volume index for a particular stream.
-     *
+     * @param streamType The stream type whose minimum volume index is returned. Must be one of
+     *     {@link #STREAM_VOICE_CALL}, {@link #STREAM_SYSTEM},
+     *     {@link #STREAM_RING}, {@link #STREAM_MUSIC}, {@link #STREAM_ALARM},
+     *     {@link #STREAM_NOTIFICATION}, {@link #STREAM_DTMF} or {@link #STREAM_ACCESSIBILITY}.
+     * @return The minimum valid volume index for the stream.
+     * @see #getStreamVolume(int)
+     */
+    public int getStreamMinVolume(int streamType) {
+        if (!isPublicStreamType(streamType)) {
+            throw new IllegalArgumentException("Invalid stream type " + streamType);
+        }
+        return getStreamMinVolumeInt(streamType);
+    }
+
+    /**
+     * @hide
+     * Same as {@link #getStreamMinVolume(int)} but without the check on the public stream type.
      * @param streamType The stream type whose minimum volume index is returned.
      * @return The minimum valid volume index for the stream.
      * @see #getStreamVolume(int)
-     * @hide
      */
-    public int getStreamMinVolume(int streamType) {
+    public int getStreamMinVolumeInt(int streamType) {
         final IAudioService service = getService();
         try {
             return service.getStreamMinVolume(streamType);
@@ -941,6 +981,72 @@ public class AudioManager {
             return service.getStreamVolume(streamType);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    // keep in sync with frameworks/av/services/audiopolicy/common/include/Volume.h
+    private static final float VOLUME_MIN_DB = -758.0f;
+
+    /** @hide */
+    @IntDef(flag = false, prefix = "STREAM", value = {
+            STREAM_VOICE_CALL,
+            STREAM_SYSTEM,
+            STREAM_RING,
+            STREAM_MUSIC,
+            STREAM_ALARM,
+            STREAM_NOTIFICATION,
+            STREAM_DTMF,
+            STREAM_ACCESSIBILITY }
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PublicStreamTypes {}
+
+    /**
+     * Returns the volume in dB (decibel) for the given stream type at the given volume index, on
+     * the given type of audio output device.
+     * @param streamType stream type for which the volume is queried.
+     * @param index the volume index for which the volume is queried. The index value must be
+     *     between the minimum and maximum index values for the given stream type (see
+     *     {@link #getStreamMinVolume(int)} and {@link #getStreamMaxVolume(int)}).
+     * @param deviceType the type of audio output device for which volume is queried.
+     * @return a volume expressed in dB.
+     *     A negative value indicates the audio signal is attenuated. A typical maximum value
+     *     at the maximum volume index is 0 dB (no attenuation nor amplification). Muting is
+     *     reflected by a value of {@link Float#NEGATIVE_INFINITY}.
+     */
+    public float getStreamVolumeDb(@PublicStreamTypes int streamType, int index,
+            @AudioDeviceInfo.AudioDeviceTypeOut int deviceType) {
+        if (!isPublicStreamType(streamType)) {
+            throw new IllegalArgumentException("Invalid stream type " + streamType);
+        }
+        if (index > getStreamMaxVolume(streamType) || index < getStreamMinVolume(streamType)) {
+            throw new IllegalArgumentException("Invalid stream volume index " + index);
+        }
+        if (!AudioDeviceInfo.isValidAudioDeviceTypeOut(deviceType)) {
+            throw new IllegalArgumentException("Invalid audio output device type " + deviceType);
+        }
+        final float gain = AudioSystem.getStreamVolumeDB(streamType, index,
+                AudioDeviceInfo.convertDeviceTypeToInternalDevice(deviceType));
+        if (gain <= VOLUME_MIN_DB) {
+            return Float.NEGATIVE_INFINITY;
+        } else {
+            return gain;
+        }
+    }
+
+    private static boolean isPublicStreamType(int streamType) {
+        switch (streamType) {
+            case STREAM_VOICE_CALL:
+            case STREAM_SYSTEM:
+            case STREAM_RING:
+            case STREAM_MUSIC:
+            case STREAM_ALARM:
+            case STREAM_NOTIFICATION:
+            case STREAM_DTMF:
+            case STREAM_ACCESSIBILITY:
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -1246,9 +1352,23 @@ public class AudioManager {
      }
 
     //====================================================================
+    // Offload query
+    /**
+     * @hide
+     * Returns whether offloaded playback of an audio format is supported on the device.
+     * Offloaded playback is where the decoding of an audio stream is not competing with other
+     * software resources. In general, it is supported by dedicated hardware, such as audio DSPs.
+     * @param format the audio format (codec, sample rate, channels) being checked.
+     * @return true if the given audio format can be offloaded.
+     */
+    public boolean isOffloadedPlaybackSupported(@NonNull AudioFormat format) {
+        return AudioSystem.isOffloadSupported(format);
+    }
+
+    //====================================================================
     // Bluetooth SCO control
     /**
-     * Sticky broadcast intent action indicating that the bluetoooth SCO audio
+     * Sticky broadcast intent action indicating that the Bluetooth SCO audio
      * connection state has changed. The intent contains on extra {@link #EXTRA_SCO_AUDIO_STATE}
      * indicating the new state which is either {@link #SCO_AUDIO_STATE_DISCONNECTED}
      * or {@link #SCO_AUDIO_STATE_CONNECTED}
@@ -1262,7 +1382,7 @@ public class AudioManager {
             "android.media.SCO_AUDIO_STATE_CHANGED";
 
      /**
-     * Sticky broadcast intent action indicating that the bluetoooth SCO audio
+     * Sticky broadcast intent action indicating that the Bluetooth SCO audio
      * connection state has been updated.
      * <p>This intent has two extras:
      * <ul>
@@ -1984,7 +2104,6 @@ public class AudioManager {
                 Settings.System.SOUND_EFFECTS_ENABLED, 0, user) != 0;
     }
 
-
     /**
      *  Load Sound effects.
      *  This method must be called when sound effects are enabled.
@@ -2209,6 +2328,20 @@ public class AudioManager {
                 }
             }
         }
+
+        @Override
+        public void dispatchFocusResultFromExtPolicy(int requestResult, String clientId) {
+            synchronized (mFocusRequestsLock) {
+                // TODO use generation counter as the key instead
+                final BlockingFocusResultReceiver focusReceiver =
+                        mFocusRequestsAwaitingResult.remove(clientId);
+                if (focusReceiver != null) {
+                    focusReceiver.notifyResult(requestResult);
+                } else {
+                    Log.e(TAG, "dispatchFocusResultFromExtPolicy found no result receiver");
+                }
+            }
+        }
     };
 
     private String getIdForAudioFocusListener(OnAudioFocusChangeListener l) {
@@ -2260,6 +2393,40 @@ public class AudioManager {
       * {@link AudioFocusRequest.Builder#setAcceptsDelayedFocusGain(boolean)}
       */
     public static final int AUDIOFOCUS_REQUEST_DELAYED = 2;
+
+    /** @hide */
+    @IntDef(flag = false, prefix = "AUDIOFOCUS_REQUEST", value = {
+            AUDIOFOCUS_REQUEST_FAILED,
+            AUDIOFOCUS_REQUEST_GRANTED,
+            AUDIOFOCUS_REQUEST_DELAYED }
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FocusRequestResult {}
+
+    /**
+     * @hide
+     * code returned when a synchronous focus request on the client-side is to be blocked
+     * until the external audio focus policy decides on the response for the client
+     */
+    public static final int AUDIOFOCUS_REQUEST_WAITING_FOR_EXT_POLICY = 100;
+
+    /**
+     * Timeout duration in ms when waiting on an external focus policy for the result for a
+     * focus request
+     */
+    private static final int EXT_FOCUS_POLICY_TIMEOUT_MS = 200;
+
+    private static final String FOCUS_CLIENT_ID_STRING = "android_audio_focus_client_id";
+
+    private final Object mFocusRequestsLock = new Object();
+    /**
+     * Map of all receivers of focus request results, one per unresolved focus request.
+     * Receivers are added before sending the request to the external focus policy,
+     * and are removed either after receiving the result, or after the timeout.
+     * This variable is lazily initialized.
+     */
+    @GuardedBy("mFocusRequestsLock")
+    private HashMap<String, BlockingFocusResultReceiver> mFocusRequestsAwaitingResult;
 
 
     /**
@@ -2527,18 +2694,100 @@ public class AudioManager {
             // some tests don't have a Context
             sdk = Build.VERSION.SDK_INT;
         }
-        try {
-            status = service.requestAudioFocus(afr.getAudioAttributes(),
-                    afr.getFocusGain(), mICallBack,
-                    mAudioFocusDispatcher,
-                    getIdForAudioFocusListener(afr.getOnAudioFocusChangeListener()),
-                    getContext().getOpPackageName() /* package name */, afr.getFlags(),
-                    ap != null ? ap.cb() : null,
-                    sdk);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+
+        final String clientId = getIdForAudioFocusListener(afr.getOnAudioFocusChangeListener());
+        final BlockingFocusResultReceiver focusReceiver;
+        synchronized (mFocusRequestsLock) {
+            try {
+                // TODO status contains result and generation counter for ext policy
+                status = service.requestAudioFocus(afr.getAudioAttributes(),
+                        afr.getFocusGain(), mICallBack,
+                        mAudioFocusDispatcher,
+                        clientId,
+                        getContext().getOpPackageName() /* package name */, afr.getFlags(),
+                        ap != null ? ap.cb() : null,
+                        sdk);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            if (status != AudioManager.AUDIOFOCUS_REQUEST_WAITING_FOR_EXT_POLICY) {
+                // default path with no external focus policy
+                return status;
+            }
+            if (mFocusRequestsAwaitingResult == null) {
+                mFocusRequestsAwaitingResult =
+                        new HashMap<String, BlockingFocusResultReceiver>(1);
+            }
+            focusReceiver = new BlockingFocusResultReceiver(clientId);
+            mFocusRequestsAwaitingResult.put(clientId, focusReceiver);
         }
-        return status;
+        focusReceiver.waitForResult(EXT_FOCUS_POLICY_TIMEOUT_MS);
+        if (DEBUG && !focusReceiver.receivedResult()) {
+            Log.e(TAG, "requestAudio response from ext policy timed out, denying request");
+        }
+        synchronized (mFocusRequestsLock) {
+            mFocusRequestsAwaitingResult.remove(clientId);
+        }
+        return focusReceiver.requestResult();
+    }
+
+    // helper class that abstracts out the handling of spurious wakeups in Object.wait()
+    private static final class SafeWaitObject {
+        private boolean mQuit = false;
+
+        public void safeNotify() {
+            synchronized (this) {
+                mQuit = true;
+                this.notify();
+            }
+        }
+
+        public void safeWait(long millis) throws InterruptedException {
+            final long timeOutTime = java.lang.System.currentTimeMillis() + millis;
+            synchronized (this) {
+                while (!mQuit) {
+                    final long timeToWait = timeOutTime - java.lang.System.currentTimeMillis();
+                    if (timeToWait < 0) { break; }
+                    this.wait(timeToWait);
+                }
+            }
+        }
+    }
+
+    private static final class BlockingFocusResultReceiver {
+        private final SafeWaitObject mLock = new SafeWaitObject();
+        @GuardedBy("mLock")
+        private boolean mResultReceived = false;
+        // request denied by default (e.g. timeout)
+        private int mFocusRequestResult = AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        private final String mFocusClientId;
+
+        BlockingFocusResultReceiver(String clientId) {
+            mFocusClientId = clientId;
+        }
+
+        boolean receivedResult() { return mResultReceived; }
+        int requestResult() { return mFocusRequestResult; }
+
+        void notifyResult(int requestResult) {
+            synchronized (mLock) {
+                mResultReceived = true;
+                mFocusRequestResult = requestResult;
+                mLock.safeNotify();
+            }
+        }
+
+        public void waitForResult(long timeOutMs) {
+            synchronized (mLock) {
+                if (mResultReceived) {
+                    // the result was received before waiting
+                    return;
+                }
+                try {
+                    mLock.safeWait(timeOutMs);
+                } catch (InterruptedException e) { }
+            }
+        }
     }
 
     /**
@@ -2578,6 +2827,32 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             return service.getFocusRampTimeMs(focusGain, attr);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Set the result to the audio focus request received through
+     * {@link AudioPolicyFocusListener#onAudioFocusRequest(AudioFocusInfo, int)}.
+     * @param afi the information about the focus requester
+     * @param requestResult the result to the focus request to be passed to the requester
+     * @param ap a valid registered {@link AudioPolicy} configured as a focus policy.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void setFocusRequestResult(@NonNull AudioFocusInfo afi,
+            @FocusRequestResult int requestResult, @NonNull AudioPolicy ap) {
+        if (afi == null) {
+            throw new IllegalArgumentException("Illegal null AudioFocusInfo");
+        }
+        if (ap == null) {
+            throw new IllegalArgumentException("Illegal null AudioPolicy");
+        }
+        final IAudioService service = getService();
+        try {
+            service.setFocusRequestResultFromExtPolicy(afi, requestResult, ap.cb());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2874,7 +3149,7 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             String regId = service.registerAudioPolicy(policy.getConfig(), policy.cb(),
-                    policy.hasFocusListener(), policy.isFocusPolicy());
+                    policy.hasFocusListener(), policy.isFocusPolicy(), policy.isVolumeController());
             if (regId == null) {
                 return ERROR;
             } else {
@@ -4178,7 +4453,15 @@ public class AudioManager {
                         Log.w(TAG, "updateAudioPortCache: listAudioPatches failed");
                         return status;
                     }
-                } while (patchGeneration[0] != portGeneration[0]);
+                    // Loop until patch generation is the same as port generation unless audio ports
+                    // and audio patches are not null.
+                } while (patchGeneration[0] != portGeneration[0]
+                        && (ports == null || patches == null));
+                // If the patch generation doesn't equal port generation, return ERROR here in case
+                // of mismatch between audio ports and audio patches.
+                if (patchGeneration[0] != portGeneration[0]) {
+                    return ERROR;
+                }
 
                 for (int i = 0; i < newPatches.size(); i++) {
                     for (int j = 0; j < newPatches.get(i).sources().length; j++) {
@@ -4316,8 +4599,7 @@ public class AudioManager {
 
     private static boolean checkTypes(AudioDevicePort port) {
         return AudioDeviceInfo.convertInternalDeviceToDeviceType(port.type()) !=
-                    AudioDeviceInfo.TYPE_UNKNOWN &&
-                port.type() != AudioSystem.DEVICE_IN_BACK_MIC;
+                    AudioDeviceInfo.TYPE_UNKNOWN;
     }
 
     /**
@@ -4437,7 +4719,7 @@ public class AudioManager {
                 NativeEventHandlerDelegate delegate =
                         new NativeEventHandlerDelegate(callback, handler);
                 mDeviceCallbacks.put(callback, delegate);
-                broadcastDeviceListChange(delegate.getHandler());
+                broadcastDeviceListChange_sync(delegate.getHandler());
             }
         }
     }
@@ -4459,6 +4741,96 @@ public class AudioManager {
         }
     }
 
+    /**
+     * Set port id for microphones by matching device type and address.
+     * @hide
+     */
+    public static void setPortIdForMicrophones(ArrayList<MicrophoneInfo> microphones) {
+        AudioDeviceInfo[] devices = getDevicesStatic(AudioManager.GET_DEVICES_INPUTS);
+        for (int i = microphones.size() - 1; i >= 0; i--) {
+            boolean foundPortId = false;
+            for (AudioDeviceInfo device : devices) {
+                if (device.getPort().type() == microphones.get(i).getInternalDeviceType()
+                        && TextUtils.equals(device.getAddress(), microphones.get(i).getAddress())) {
+                    microphones.get(i).setId(device.getId());
+                    foundPortId = true;
+                    break;
+                }
+            }
+            if (!foundPortId) {
+                Log.i(TAG, "Failed to find port id for device with type:"
+                        + microphones.get(i).getType() + " address:"
+                        + microphones.get(i).getAddress());
+                microphones.remove(i);
+            }
+        }
+    }
+
+    /**
+     * Convert {@link AudioDeviceInfo} to {@link MicrophoneInfo}.
+     * @hide
+     */
+    public static MicrophoneInfo microphoneInfoFromAudioDeviceInfo(AudioDeviceInfo deviceInfo) {
+        int deviceType = deviceInfo.getType();
+        int micLocation = (deviceType == AudioDeviceInfo.TYPE_BUILTIN_MIC
+                || deviceType == AudioDeviceInfo.TYPE_TELEPHONY) ? MicrophoneInfo.LOCATION_MAINBODY
+                : deviceType == AudioDeviceInfo.TYPE_UNKNOWN ? MicrophoneInfo.LOCATION_UNKNOWN
+                        : MicrophoneInfo.LOCATION_PERIPHERAL;
+        MicrophoneInfo microphone = new MicrophoneInfo(
+                deviceInfo.getPort().name() + deviceInfo.getId(),
+                deviceInfo.getPort().type(), deviceInfo.getAddress(), micLocation,
+                MicrophoneInfo.GROUP_UNKNOWN, MicrophoneInfo.INDEX_IN_THE_GROUP_UNKNOWN,
+                MicrophoneInfo.POSITION_UNKNOWN, MicrophoneInfo.ORIENTATION_UNKNOWN,
+                new ArrayList<Pair<Float, Float>>(), new ArrayList<Pair<Integer, Integer>>(),
+                MicrophoneInfo.SENSITIVITY_UNKNOWN, MicrophoneInfo.SPL_UNKNOWN,
+                MicrophoneInfo.SPL_UNKNOWN, MicrophoneInfo.DIRECTIONALITY_UNKNOWN);
+        microphone.setId(deviceInfo.getId());
+        return microphone;
+    }
+
+    /**
+     * Add {@link MicrophoneInfo} by device information while filtering certain types.
+     */
+    private void addMicrophonesFromAudioDeviceInfo(ArrayList<MicrophoneInfo> microphones,
+                    HashSet<Integer> filterTypes) {
+        AudioDeviceInfo[] devices = getDevicesStatic(GET_DEVICES_INPUTS);
+        for (AudioDeviceInfo device : devices) {
+            if (filterTypes.contains(device.getType())) {
+                continue;
+            }
+            MicrophoneInfo microphone = microphoneInfoFromAudioDeviceInfo(device);
+            microphones.add(microphone);
+        }
+    }
+
+    /**
+     * Returns a list of {@link MicrophoneInfo} that corresponds to the characteristics
+     * of all available microphones. The list is empty when no microphones are available
+     * on the device. An error during the query will result in an IOException being thrown.
+     *
+     * @return a list that contains all microphones' characteristics
+     * @throws IOException if an error occurs.
+     */
+    public List<MicrophoneInfo> getMicrophones() throws IOException {
+        ArrayList<MicrophoneInfo> microphones = new ArrayList<MicrophoneInfo>();
+        int status = AudioSystem.getMicrophones(microphones);
+        HashSet<Integer> filterTypes = new HashSet<>();
+        filterTypes.add(AudioDeviceInfo.TYPE_TELEPHONY);
+        if (status != AudioManager.SUCCESS) {
+            // fail and populate microphones with unknown characteristics by device information.
+            if (status != AudioManager.ERROR_INVALID_OPERATION) {
+                Log.e(TAG, "getMicrophones failed:" + status);
+            }
+            Log.i(TAG, "fallback on device info");
+            addMicrophonesFromAudioDeviceInfo(microphones, filterTypes);
+            return microphones;
+        }
+        setPortIdForMicrophones(microphones);
+        filterTypes.add(AudioDeviceInfo.TYPE_BUILTIN_MIC);
+        addMicrophonesFromAudioDeviceInfo(microphones, filterTypes);
+        return microphones;
+    }
+
     // Since we need to calculate the changes since THE LAST NOTIFICATION, and not since the
     // (unpredictable) last time updateAudioPortCache() was called by someone, keep a list
     // of the ports that exist at the time of the last notification.
@@ -4466,9 +4838,9 @@ public class AudioManager {
 
     /**
      * Internal method to compute and generate add/remove messages and then send to any
-     * registered callbacks.
+     * registered callbacks. Must be called synchronized on mDeviceCallbacks.
      */
-    private void broadcastDeviceListChange(Handler handler) {
+    private void broadcastDeviceListChange_sync(Handler handler) {
         int status;
 
         // Get the new current set of ports
@@ -4490,20 +4862,18 @@ public class AudioManager {
             AudioDeviceInfo[] removed_devices =
                     calcListDeltas(current_ports, mPreviousPorts, GET_DEVICES_ALL);
             if (added_devices.length != 0 || removed_devices.length != 0) {
-                synchronized (mDeviceCallbacks) {
-                    for (int i = 0; i < mDeviceCallbacks.size(); i++) {
-                        handler = mDeviceCallbacks.valueAt(i).getHandler();
-                        if (handler != null) {
-                            if (removed_devices.length != 0) {
-                                handler.sendMessage(Message.obtain(handler,
-                                                                   MSG_DEVICES_DEVICES_REMOVED,
-                                                                   removed_devices));
-                            }
-                            if (added_devices.length != 0) {
-                                handler.sendMessage(Message.obtain(handler,
-                                                                   MSG_DEVICES_DEVICES_ADDED,
-                                                                   added_devices));
-                            }
+                for (int i = 0; i < mDeviceCallbacks.size(); i++) {
+                    handler = mDeviceCallbacks.valueAt(i).getHandler();
+                    if (handler != null) {
+                        if (removed_devices.length != 0) {
+                            handler.sendMessage(Message.obtain(handler,
+                                    MSG_DEVICES_DEVICES_REMOVED,
+                                    removed_devices));
+                        }
+                        if (added_devices.length != 0) {
+                            handler.sendMessage(Message.obtain(handler,
+                                    MSG_DEVICES_DEVICES_ADDED,
+                                    added_devices));
                         }
                     }
                 }
@@ -4519,7 +4889,9 @@ public class AudioManager {
     private class OnAmPortUpdateListener implements AudioManager.OnAudioPortUpdateListener {
         static final String TAG = "OnAmPortUpdateListener";
         public void onAudioPortListUpdate(AudioPort[] portList) {
-            broadcastDeviceListChange(null);
+            synchronized (mDeviceCallbacks) {
+                broadcastDeviceListChange_sync(null);
+            }
         }
 
         /**
@@ -4533,9 +4905,179 @@ public class AudioManager {
          * Callback method called when the mediaserver dies
          */
         public void onServiceDied() {
-            broadcastDeviceListChange(null);
+            synchronized (mDeviceCallbacks) {
+                broadcastDeviceListChange_sync(null);
+            }
         }
     }
+
+
+    /**
+     * @hide
+     * Abstract class to receive event notification about audioserver process state.
+     */
+    @SystemApi
+    public abstract static class AudioServerStateCallback {
+        public void onAudioServerDown() { }
+        public void onAudioServerUp() { }
+    }
+
+    private Executor mAudioServerStateExec;
+    private AudioServerStateCallback mAudioServerStateCb;
+    private final Object mAudioServerStateCbLock = new Object();
+
+    private final IAudioServerStateDispatcher mAudioServerStateDispatcher =
+            new IAudioServerStateDispatcher.Stub() {
+        @Override
+        public void dispatchAudioServerStateChange(boolean state) {
+            Executor exec;
+            AudioServerStateCallback cb;
+
+            synchronized (mAudioServerStateCbLock) {
+                exec = mAudioServerStateExec;
+                cb = mAudioServerStateCb;
+            }
+
+            if ((exec == null) || (cb == null)) {
+                return;
+            }
+            if (state) {
+                exec.execute(() -> cb.onAudioServerUp());
+            } else {
+                exec.execute(() -> cb.onAudioServerDown());
+            }
+        }
+    };
+
+    /**
+     * @hide
+     * Registers a callback for notification of audio server state changes.
+     * @param executor {@link Executor} to handle the callbacks
+     * @param stateCallback the callback to receive the audio server state changes
+     *        To remove the callabck, pass a null reference for both executor and stateCallback.
+     */
+    @SystemApi
+    public void setAudioServerStateCallback(@NonNull Executor executor,
+            @NonNull AudioServerStateCallback stateCallback) {
+        if (stateCallback == null) {
+            throw new IllegalArgumentException("Illegal null AudioServerStateCallback");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException(
+                    "Illegal null Executor for the AudioServerStateCallback");
+        }
+
+        synchronized (mAudioServerStateCbLock) {
+            if (mAudioServerStateCb != null) {
+                throw new IllegalStateException(
+                    "setAudioServerStateCallback called with already registered callabck");
+            }
+            final IAudioService service = getService();
+            try {
+                service.registerAudioServerStateDispatcher(mAudioServerStateDispatcher);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            mAudioServerStateExec = executor;
+            mAudioServerStateCb = stateCallback;
+        }
+    }
+
+    /**
+     * @hide
+     * Unregisters the callback for notification of audio server state changes.
+     */
+    @SystemApi
+    public void clearAudioServerStateCallback() {
+        synchronized (mAudioServerStateCbLock) {
+            if (mAudioServerStateCb != null) {
+                final IAudioService service = getService();
+                try {
+                    service.unregisterAudioServerStateDispatcher(
+                            mAudioServerStateDispatcher);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+            mAudioServerStateExec = null;
+            mAudioServerStateCb = null;
+        }
+    }
+
+    /**
+     * @hide
+     * Checks if native audioservice is running or not.
+     * @return true if native audioservice runs, false otherwise.
+     */
+    @SystemApi
+    public boolean isAudioServerRunning() {
+        final IAudioService service = getService();
+        try {
+            return service.isAudioServerRunning();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Returns all surround formats.
+     * @return a map where the key is a surround format and
+     * the value indicates the surround format is enabled or not
+     */
+    public Map<Integer, Boolean> getSurroundFormats() {
+        Map<Integer, Boolean> surroundFormats = new HashMap<>();
+        int status = AudioSystem.getSurroundFormats(surroundFormats, false);
+        if (status != AudioManager.SUCCESS) {
+            // fail and bail!
+            Log.e(TAG, "getSurroundFormats failed:" + status);
+            return new HashMap<Integer, Boolean>(); // Always return a map.
+        }
+        return surroundFormats;
+    }
+
+    /**
+     * @hide
+     * Set a certain surround format as enabled or not.
+     * @param audioFormat a surround format, the value is one of
+     *        {@link AudioFormat#ENCODING_AC3}, {@link AudioFormat#ENCODING_E_AC3},
+     *        {@link AudioFormat#ENCODING_DTS}, {@link AudioFormat#ENCODING_DTS_HD},
+     *        {@link AudioFormat#ENCODING_AAC_LC}, {@link AudioFormat#ENCODING_DOLBY_TRUEHD},
+     *        {@link AudioFormat#ENCODING_E_AC3_JOC}. Once {@link AudioFormat#ENCODING_AAC_LC} is
+     *        set as enabled, {@link AudioFormat#ENCODING_AAC_LC},
+     *        {@link AudioFormat#ENCODING_AAC_HE_V1}, {@link AudioFormat#ENCODING_AAC_HE_V2},
+     *        {@link AudioFormat#ENCODING_AAC_ELD}, {@link AudioFormat#ENCODING_AAC_XHE} are
+     *        all enabled.
+     * @param enabled the required surround format state, true for enabled, false for disabled
+     * @return true if successful, otherwise false
+     */
+    public boolean setSurroundFormatEnabled(
+            @AudioFormat.SurroundSoundEncoding int audioFormat, boolean enabled) {
+        int status = AudioSystem.setSurroundFormatEnabled(audioFormat, enabled);
+        return status == AudioManager.SUCCESS;
+    }
+
+    /**
+     * @hide
+     * Returns all surround formats that are reported by the connected HDMI device.
+     * The keys are not affected by calling setSurroundFormatEnabled(), and the values
+     * are not affected by calling setSurroundFormatEnabled() when in AUTO mode.
+     * This information can used to show the AUTO setting for SurroundSound.
+     *
+     * @return a map where the key is a surround format and
+     * the value indicates the surround format is enabled or not
+     */
+    public Map<Integer, Boolean> getReportedSurroundFormats() {
+        Map<Integer, Boolean> reportedSurroundFormats = new HashMap<>();
+        int status = AudioSystem.getSurroundFormats(reportedSurroundFormats, true);
+        if (status != AudioManager.SUCCESS) {
+            // fail and bail!
+            Log.e(TAG, "getReportedSurroundFormats failed:" + status);
+            return new HashMap<Integer, Boolean>(); // Always return a map.
+        }
+        return reportedSurroundFormats;
+    }
+
 
     //---------------------------------------------------------
     // Inner classes

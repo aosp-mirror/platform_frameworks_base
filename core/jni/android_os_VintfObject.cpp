@@ -96,7 +96,7 @@ static jobjectArray android_os_VintfObject_report(JNIEnv* env, jclass)
     return toJavaStringArray(env, cStrings);
 }
 
-static jint verify(JNIEnv* env, jobjectArray packageInfo, android::vintf::DisabledChecks checks) {
+static jint verify(JNIEnv* env, jobjectArray packageInfo, android::vintf::CheckFlags::Type checks) {
     std::vector<std::string> cPackageInfo;
     if (packageInfo) {
         size_t count = env->GetArrayLength(packageInfo);
@@ -116,11 +116,11 @@ static jint verify(JNIEnv* env, jobjectArray packageInfo, android::vintf::Disabl
 }
 
 static jint android_os_VintfObject_verify(JNIEnv* env, jclass, jobjectArray packageInfo) {
-    return verify(env, packageInfo, ::android::vintf::ENABLE_ALL_CHECKS);
+    return verify(env, packageInfo, ::android::vintf::CheckFlags::ENABLE_ALL_CHECKS);
 }
 
 static jint android_os_VintfObject_verifyWithoutAvb(JNIEnv* env, jclass) {
-    return verify(env, nullptr, ::android::vintf::DISABLE_AVB_CHECK);
+    return verify(env, nullptr, ::android::vintf::CheckFlags::DISABLE_AVB_CHECK);
 }
 
 static jobjectArray android_os_VintfObject_getHalNamesAndVersions(JNIEnv* env, jclass) {

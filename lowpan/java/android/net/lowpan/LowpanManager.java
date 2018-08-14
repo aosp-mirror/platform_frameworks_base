@@ -57,7 +57,7 @@ public class LowpanManager {
      * This design pattern allows us to skip removal of items
      * from this Map without leaking memory.
      */
-    private final Map<ILowpanInterface, WeakReference<LowpanInterface>> mBinderCache =
+    private final Map<IBinder, WeakReference<LowpanInterface>> mBinderCache =
             new WeakHashMap<>();
 
     private final ILowpanManager mService;
@@ -109,13 +109,27 @@ public class LowpanManager {
 
     /** @hide */
     @Nullable
+    public LowpanInterface getInterfaceNoCreate(@NonNull ILowpanInterface ifaceService) {
+        LowpanInterface iface = null;
+
+        synchronized (mBinderCache) {
+            if (mBinderCache.containsKey(ifaceService.asBinder())) {
+                iface = mBinderCache.get(ifaceService.asBinder()).get();
+            }
+        }
+
+        return iface;
+    }
+
+    /** @hide */
+    @Nullable
     public LowpanInterface getInterface(@NonNull ILowpanInterface ifaceService) {
         LowpanInterface iface = null;
 
         try {
             synchronized (mBinderCache) {
-                if (mBinderCache.containsKey(ifaceService)) {
-                    iface = mBinderCache.get(ifaceService).get();
+                if (mBinderCache.containsKey(ifaceService.asBinder())) {
+                    iface = mBinderCache.get(ifaceService.asBinder()).get();
                 }
 
                 if (iface == null) {
@@ -127,7 +141,7 @@ public class LowpanManager {
                         mInterfaceCache.put(iface.getName(), iface);
                     }
 
-                    mBinderCache.put(ifaceService, new WeakReference(iface));
+                    mBinderCache.put(ifaceService.asBinder(), new WeakReference(iface));
 
                     /* Make sure we remove the object from the
                      * interface cache if the associated service
@@ -260,7 +274,7 @@ public class LowpanManager {
                     public void onInterfaceRemoved(ILowpanInterface ifaceService) {
                         Runnable runnable =
                                 () -> {
-                                    LowpanInterface iface = getInterface(ifaceService);
+                                    LowpanInterface iface = getInterfaceNoCreate(ifaceService);
 
                                     if (iface != null) {
                                         cb.onInterfaceRemoved(iface);

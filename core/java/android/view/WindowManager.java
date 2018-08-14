@@ -16,6 +16,33 @@
 
 package android.view;
 
+import static android.content.pm.ActivityInfo.COLOR_MODE_DEFAULT;
+import static android.view.WindowLayoutParamsProto.ALPHA;
+import static android.view.WindowLayoutParamsProto.BUTTON_BRIGHTNESS;
+import static android.view.WindowLayoutParamsProto.COLOR_MODE;
+import static android.view.WindowLayoutParamsProto.FLAGS;
+import static android.view.WindowLayoutParamsProto.FORMAT;
+import static android.view.WindowLayoutParamsProto.GRAVITY;
+import static android.view.WindowLayoutParamsProto.HAS_SYSTEM_UI_LISTENERS;
+import static android.view.WindowLayoutParamsProto.HEIGHT;
+import static android.view.WindowLayoutParamsProto.HORIZONTAL_MARGIN;
+import static android.view.WindowLayoutParamsProto.INPUT_FEATURE_FLAGS;
+import static android.view.WindowLayoutParamsProto.NEEDS_MENU_KEY;
+import static android.view.WindowLayoutParamsProto.PREFERRED_REFRESH_RATE;
+import static android.view.WindowLayoutParamsProto.PRIVATE_FLAGS;
+import static android.view.WindowLayoutParamsProto.ROTATION_ANIMATION;
+import static android.view.WindowLayoutParamsProto.SCREEN_BRIGHTNESS;
+import static android.view.WindowLayoutParamsProto.SOFT_INPUT_MODE;
+import static android.view.WindowLayoutParamsProto.SUBTREE_SYSTEM_UI_VISIBILITY_FLAGS;
+import static android.view.WindowLayoutParamsProto.SYSTEM_UI_VISIBILITY_FLAGS;
+import static android.view.WindowLayoutParamsProto.TYPE;
+import static android.view.WindowLayoutParamsProto.USER_ACTIVITY_TIMEOUT;
+import static android.view.WindowLayoutParamsProto.VERTICAL_MARGIN;
+import static android.view.WindowLayoutParamsProto.WIDTH;
+import static android.view.WindowLayoutParamsProto.WINDOW_ANIMATIONS;
+import static android.view.WindowLayoutParamsProto.X;
+import static android.view.WindowLayoutParamsProto.Y;
+
 import android.Manifest.permission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -35,6 +62,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -70,11 +99,219 @@ public interface WindowManager extends ViewManager {
     int DOCKED_BOTTOM = 4;
 
     /** @hide */
-    final static String INPUT_CONSUMER_PIP = "pip_input_consumer";
+    String INPUT_CONSUMER_PIP = "pip_input_consumer";
     /** @hide */
-    final static String INPUT_CONSUMER_NAVIGATION = "nav_input_consumer";
+    String INPUT_CONSUMER_NAVIGATION = "nav_input_consumer";
     /** @hide */
-    final static String INPUT_CONSUMER_WALLPAPER = "wallpaper_input_consumer";
+    String INPUT_CONSUMER_WALLPAPER = "wallpaper_input_consumer";
+    /** @hide */
+    String INPUT_CONSUMER_RECENTS_ANIMATION = "recents_animation_input_consumer";
+
+    /**
+     * Not set up for a transition.
+     * @hide
+     */
+    int TRANSIT_UNSET = -1;
+
+    /**
+     * No animation for transition.
+     * @hide
+     */
+    int TRANSIT_NONE = 0;
+
+    /**
+     * A window in a new activity is being opened on top of an existing one in the same task.
+     * @hide
+     */
+    int TRANSIT_ACTIVITY_OPEN = 6;
+
+    /**
+     * The window in the top-most activity is being closed to reveal the previous activity in the
+     * same task.
+     * @hide
+     */
+    int TRANSIT_ACTIVITY_CLOSE = 7;
+
+    /**
+     * A window in a new task is being opened on top of an existing one in another activity's task.
+     * @hide
+     */
+    int TRANSIT_TASK_OPEN = 8;
+
+    /**
+     * A window in the top-most activity is being closed to reveal the previous activity in a
+     * different task.
+     * @hide
+     */
+    int TRANSIT_TASK_CLOSE = 9;
+
+    /**
+     * A window in an existing task is being displayed on top of an existing one in another
+     * activity's task.
+     * @hide
+     */
+    int TRANSIT_TASK_TO_FRONT = 10;
+
+    /**
+     * A window in an existing task is being put below all other tasks.
+     * @hide
+     */
+    int TRANSIT_TASK_TO_BACK = 11;
+
+    /**
+     * A window in a new activity that doesn't have a wallpaper is being opened on top of one that
+     * does, effectively closing the wallpaper.
+     * @hide
+     */
+    int TRANSIT_WALLPAPER_CLOSE = 12;
+
+    /**
+     * A window in a new activity that does have a wallpaper is being opened on one that didn't,
+     * effectively opening the wallpaper.
+     * @hide
+     */
+    int TRANSIT_WALLPAPER_OPEN = 13;
+
+    /**
+     * A window in a new activity is being opened on top of an existing one, and both are on top
+     * of the wallpaper.
+     * @hide
+     */
+    int TRANSIT_WALLPAPER_INTRA_OPEN = 14;
+
+    /**
+     * The window in the top-most activity is being closed to reveal the previous activity, and
+     * both are on top of the wallpaper.
+     * @hide
+     */
+    int TRANSIT_WALLPAPER_INTRA_CLOSE = 15;
+
+    /**
+     * A window in a new task is being opened behind an existing one in another activity's task.
+     * The new window will show briefly and then be gone.
+     * @hide
+     */
+    int TRANSIT_TASK_OPEN_BEHIND = 16;
+
+    /**
+     * A window in a task is being animated in-place.
+     * @hide
+     */
+    int TRANSIT_TASK_IN_PLACE = 17;
+
+    /**
+     * An activity is being relaunched (e.g. due to configuration change).
+     * @hide
+     */
+    int TRANSIT_ACTIVITY_RELAUNCH = 18;
+
+    /**
+     * A task is being docked from recents.
+     * @hide
+     */
+    int TRANSIT_DOCK_TASK_FROM_RECENTS = 19;
+
+    /**
+     * Keyguard is going away.
+     * @hide
+     */
+    int TRANSIT_KEYGUARD_GOING_AWAY = 20;
+
+    /**
+     * Keyguard is going away with showing an activity behind that requests wallpaper.
+     * @hide
+     */
+    int TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER = 21;
+
+    /**
+     * Keyguard is being occluded.
+     * @hide
+     */
+    int TRANSIT_KEYGUARD_OCCLUDE = 22;
+
+    /**
+     * Keyguard is being unoccluded.
+     * @hide
+     */
+    int TRANSIT_KEYGUARD_UNOCCLUDE = 23;
+
+    /**
+     * A translucent activity is being opened.
+     * @hide
+     */
+    int TRANSIT_TRANSLUCENT_ACTIVITY_OPEN = 24;
+
+    /**
+     * A translucent activity is being closed.
+     * @hide
+     */
+    int TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE = 25;
+
+    /**
+     * A crashing activity is being closed.
+     * @hide
+     */
+    int TRANSIT_CRASHING_ACTIVITY_CLOSE = 26;
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "TRANSIT_" }, value = {
+            TRANSIT_UNSET,
+            TRANSIT_NONE,
+            TRANSIT_ACTIVITY_OPEN,
+            TRANSIT_ACTIVITY_CLOSE,
+            TRANSIT_TASK_OPEN,
+            TRANSIT_TASK_CLOSE,
+            TRANSIT_TASK_TO_FRONT,
+            TRANSIT_TASK_TO_BACK,
+            TRANSIT_WALLPAPER_CLOSE,
+            TRANSIT_WALLPAPER_OPEN,
+            TRANSIT_WALLPAPER_INTRA_OPEN,
+            TRANSIT_WALLPAPER_INTRA_CLOSE,
+            TRANSIT_TASK_OPEN_BEHIND,
+            TRANSIT_TASK_IN_PLACE,
+            TRANSIT_ACTIVITY_RELAUNCH,
+            TRANSIT_DOCK_TASK_FROM_RECENTS,
+            TRANSIT_KEYGUARD_GOING_AWAY,
+            TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
+            TRANSIT_KEYGUARD_OCCLUDE,
+            TRANSIT_KEYGUARD_UNOCCLUDE,
+            TRANSIT_TRANSLUCENT_ACTIVITY_OPEN,
+            TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE,
+            TRANSIT_CRASHING_ACTIVITY_CLOSE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface TransitionType {}
+
+    /**
+     * Transition flag: Keyguard is going away, but keeping the notification shade open
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE = 0x1;
+
+    /**
+     * Transition flag: Keyguard is going away, but doesn't want an animation for it
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION = 0x2;
+
+    /**
+     * Transition flag: Keyguard is going away while it was showing the system wallpaper.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER = 0x4;
+
+    /**
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE,
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION,
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface TransitionFlags {}
 
     /**
      * Exception that is thrown when trying to add view whose
@@ -267,93 +504,93 @@ public interface WindowManager extends ViewManager {
          */
         @ViewDebug.ExportedProperty(mapping = {
                 @ViewDebug.IntToString(from = TYPE_BASE_APPLICATION,
-                        to = "TYPE_BASE_APPLICATION"),
+                        to = "BASE_APPLICATION"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION,
-                        to = "TYPE_APPLICATION"),
+                        to = "APPLICATION"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_STARTING,
-                        to = "TYPE_APPLICATION_STARTING"),
+                        to = "APPLICATION_STARTING"),
                 @ViewDebug.IntToString(from = TYPE_DRAWN_APPLICATION,
-                        to = "TYPE_DRAWN_APPLICATION"),
+                        to = "DRAWN_APPLICATION"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_PANEL,
-                        to = "TYPE_APPLICATION_PANEL"),
+                        to = "APPLICATION_PANEL"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_MEDIA,
-                        to = "TYPE_APPLICATION_MEDIA"),
+                        to = "APPLICATION_MEDIA"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_SUB_PANEL,
-                        to = "TYPE_APPLICATION_SUB_PANEL"),
+                        to = "APPLICATION_SUB_PANEL"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_ABOVE_SUB_PANEL,
-                        to = "TYPE_APPLICATION_ABOVE_SUB_PANEL"),
+                        to = "APPLICATION_ABOVE_SUB_PANEL"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_ATTACHED_DIALOG,
-                        to = "TYPE_APPLICATION_ATTACHED_DIALOG"),
+                        to = "APPLICATION_ATTACHED_DIALOG"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_MEDIA_OVERLAY,
-                        to = "TYPE_APPLICATION_MEDIA_OVERLAY"),
+                        to = "APPLICATION_MEDIA_OVERLAY"),
                 @ViewDebug.IntToString(from = TYPE_STATUS_BAR,
-                        to = "TYPE_STATUS_BAR"),
+                        to = "STATUS_BAR"),
                 @ViewDebug.IntToString(from = TYPE_SEARCH_BAR,
-                        to = "TYPE_SEARCH_BAR"),
+                        to = "SEARCH_BAR"),
                 @ViewDebug.IntToString(from = TYPE_PHONE,
-                        to = "TYPE_PHONE"),
+                        to = "PHONE"),
                 @ViewDebug.IntToString(from = TYPE_SYSTEM_ALERT,
-                        to = "TYPE_SYSTEM_ALERT"),
+                        to = "SYSTEM_ALERT"),
                 @ViewDebug.IntToString(from = TYPE_TOAST,
-                        to = "TYPE_TOAST"),
+                        to = "TOAST"),
                 @ViewDebug.IntToString(from = TYPE_SYSTEM_OVERLAY,
-                        to = "TYPE_SYSTEM_OVERLAY"),
+                        to = "SYSTEM_OVERLAY"),
                 @ViewDebug.IntToString(from = TYPE_PRIORITY_PHONE,
-                        to = "TYPE_PRIORITY_PHONE"),
+                        to = "PRIORITY_PHONE"),
                 @ViewDebug.IntToString(from = TYPE_SYSTEM_DIALOG,
-                        to = "TYPE_SYSTEM_DIALOG"),
+                        to = "SYSTEM_DIALOG"),
                 @ViewDebug.IntToString(from = TYPE_KEYGUARD_DIALOG,
-                        to = "TYPE_KEYGUARD_DIALOG"),
+                        to = "KEYGUARD_DIALOG"),
                 @ViewDebug.IntToString(from = TYPE_SYSTEM_ERROR,
-                        to = "TYPE_SYSTEM_ERROR"),
+                        to = "SYSTEM_ERROR"),
                 @ViewDebug.IntToString(from = TYPE_INPUT_METHOD,
-                        to = "TYPE_INPUT_METHOD"),
+                        to = "INPUT_METHOD"),
                 @ViewDebug.IntToString(from = TYPE_INPUT_METHOD_DIALOG,
-                        to = "TYPE_INPUT_METHOD_DIALOG"),
+                        to = "INPUT_METHOD_DIALOG"),
                 @ViewDebug.IntToString(from = TYPE_WALLPAPER,
-                        to = "TYPE_WALLPAPER"),
+                        to = "WALLPAPER"),
                 @ViewDebug.IntToString(from = TYPE_STATUS_BAR_PANEL,
-                        to = "TYPE_STATUS_BAR_PANEL"),
+                        to = "STATUS_BAR_PANEL"),
                 @ViewDebug.IntToString(from = TYPE_SECURE_SYSTEM_OVERLAY,
-                        to = "TYPE_SECURE_SYSTEM_OVERLAY"),
+                        to = "SECURE_SYSTEM_OVERLAY"),
                 @ViewDebug.IntToString(from = TYPE_DRAG,
-                        to = "TYPE_DRAG"),
+                        to = "DRAG"),
                 @ViewDebug.IntToString(from = TYPE_STATUS_BAR_SUB_PANEL,
-                        to = "TYPE_STATUS_BAR_SUB_PANEL"),
+                        to = "STATUS_BAR_SUB_PANEL"),
                 @ViewDebug.IntToString(from = TYPE_POINTER,
-                        to = "TYPE_POINTER"),
+                        to = "POINTER"),
                 @ViewDebug.IntToString(from = TYPE_NAVIGATION_BAR,
-                        to = "TYPE_NAVIGATION_BAR"),
+                        to = "NAVIGATION_BAR"),
                 @ViewDebug.IntToString(from = TYPE_VOLUME_OVERLAY,
-                        to = "TYPE_VOLUME_OVERLAY"),
+                        to = "VOLUME_OVERLAY"),
                 @ViewDebug.IntToString(from = TYPE_BOOT_PROGRESS,
-                        to = "TYPE_BOOT_PROGRESS"),
+                        to = "BOOT_PROGRESS"),
                 @ViewDebug.IntToString(from = TYPE_INPUT_CONSUMER,
-                        to = "TYPE_INPUT_CONSUMER"),
+                        to = "INPUT_CONSUMER"),
                 @ViewDebug.IntToString(from = TYPE_DREAM,
-                        to = "TYPE_DREAM"),
+                        to = "DREAM"),
                 @ViewDebug.IntToString(from = TYPE_NAVIGATION_BAR_PANEL,
-                        to = "TYPE_NAVIGATION_BAR_PANEL"),
+                        to = "NAVIGATION_BAR_PANEL"),
                 @ViewDebug.IntToString(from = TYPE_DISPLAY_OVERLAY,
-                        to = "TYPE_DISPLAY_OVERLAY"),
+                        to = "DISPLAY_OVERLAY"),
                 @ViewDebug.IntToString(from = TYPE_MAGNIFICATION_OVERLAY,
-                        to = "TYPE_MAGNIFICATION_OVERLAY"),
+                        to = "MAGNIFICATION_OVERLAY"),
                 @ViewDebug.IntToString(from = TYPE_PRESENTATION,
-                        to = "TYPE_PRESENTATION"),
+                        to = "PRESENTATION"),
                 @ViewDebug.IntToString(from = TYPE_PRIVATE_PRESENTATION,
-                        to = "TYPE_PRIVATE_PRESENTATION"),
+                        to = "PRIVATE_PRESENTATION"),
                 @ViewDebug.IntToString(from = TYPE_VOICE_INTERACTION,
-                        to = "TYPE_VOICE_INTERACTION"),
+                        to = "VOICE_INTERACTION"),
                 @ViewDebug.IntToString(from = TYPE_VOICE_INTERACTION_STARTING,
-                        to = "TYPE_VOICE_INTERACTION_STARTING"),
+                        to = "VOICE_INTERACTION_STARTING"),
                 @ViewDebug.IntToString(from = TYPE_DOCK_DIVIDER,
-                        to = "TYPE_DOCK_DIVIDER"),
+                        to = "DOCK_DIVIDER"),
                 @ViewDebug.IntToString(from = TYPE_QS_DIALOG,
-                        to = "TYPE_QS_DIALOG"),
+                        to = "QS_DIALOG"),
                 @ViewDebug.IntToString(from = TYPE_SCREENSHOT,
-                        to = "TYPE_SCREENSHOT"),
+                        to = "SCREENSHOT"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_OVERLAY,
-                        to = "TYPE_APPLICATION_OVERLAY")
+                        to = "APPLICATION_OVERLAY")
         })
         public int type;
 
@@ -601,8 +838,10 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_DRAG               = FIRST_SYSTEM_WINDOW+16;
 
         /**
-         * Window type: panel that slides out from under the status bar
-         * In multiuser systems shows on all users' windows.
+         * Window type: panel that slides out from over the status bar
+         * In multiuser systems shows on all users' windows. These windows
+         * are displayed on top of the stauts bar and any {@link #TYPE_STATUS_BAR_PANEL}
+         * windows.
          * @hide
          */
         public static final int TYPE_STATUS_BAR_SUB_PANEL = FIRST_SYSTEM_WINDOW+17;
@@ -857,7 +1096,12 @@ public interface WindowManager extends ViewManager {
          *  decorations around the border (such as the status bar).  The
          *  window must correctly position its contents to take the screen
          *  decoration into account.  This flag is normally set for you
-         *  by Window as described in {@link Window#setFlags}. */
+         *  by Window as described in {@link Window#setFlags}.
+         *
+         *  <p>Note: on displays that have a {@link DisplayCutout}, the window may be placed
+         *  such that it avoids the {@link DisplayCutout} area if necessary according to the
+         *  {@link #layoutInDisplayCutoutMode}.
+         */
         public static final int FLAG_LAYOUT_IN_SCREEN   = 0x00000100;
 
         /** Window flag: allow window to extend outside of the screen. */
@@ -1197,63 +1441,69 @@ public interface WindowManager extends ViewManager {
          */
         @ViewDebug.ExportedProperty(flagMapping = {
             @ViewDebug.FlagToString(mask = FLAG_ALLOW_LOCK_WHILE_SCREEN_ON, equals = FLAG_ALLOW_LOCK_WHILE_SCREEN_ON,
-                    name = "FLAG_ALLOW_LOCK_WHILE_SCREEN_ON"),
+                    name = "ALLOW_LOCK_WHILE_SCREEN_ON"),
             @ViewDebug.FlagToString(mask = FLAG_DIM_BEHIND, equals = FLAG_DIM_BEHIND,
-                    name = "FLAG_DIM_BEHIND"),
+                    name = "DIM_BEHIND"),
             @ViewDebug.FlagToString(mask = FLAG_BLUR_BEHIND, equals = FLAG_BLUR_BEHIND,
-                    name = "FLAG_BLUR_BEHIND"),
+                    name = "BLUR_BEHIND"),
             @ViewDebug.FlagToString(mask = FLAG_NOT_FOCUSABLE, equals = FLAG_NOT_FOCUSABLE,
-                    name = "FLAG_NOT_FOCUSABLE"),
+                    name = "NOT_FOCUSABLE"),
             @ViewDebug.FlagToString(mask = FLAG_NOT_TOUCHABLE, equals = FLAG_NOT_TOUCHABLE,
-                    name = "FLAG_NOT_TOUCHABLE"),
+                    name = "NOT_TOUCHABLE"),
             @ViewDebug.FlagToString(mask = FLAG_NOT_TOUCH_MODAL, equals = FLAG_NOT_TOUCH_MODAL,
-                    name = "FLAG_NOT_TOUCH_MODAL"),
+                    name = "NOT_TOUCH_MODAL"),
             @ViewDebug.FlagToString(mask = FLAG_TOUCHABLE_WHEN_WAKING, equals = FLAG_TOUCHABLE_WHEN_WAKING,
-                    name = "FLAG_TOUCHABLE_WHEN_WAKING"),
+                    name = "TOUCHABLE_WHEN_WAKING"),
             @ViewDebug.FlagToString(mask = FLAG_KEEP_SCREEN_ON, equals = FLAG_KEEP_SCREEN_ON,
-                    name = "FLAG_KEEP_SCREEN_ON"),
+                    name = "KEEP_SCREEN_ON"),
             @ViewDebug.FlagToString(mask = FLAG_LAYOUT_IN_SCREEN, equals = FLAG_LAYOUT_IN_SCREEN,
-                    name = "FLAG_LAYOUT_IN_SCREEN"),
+                    name = "LAYOUT_IN_SCREEN"),
             @ViewDebug.FlagToString(mask = FLAG_LAYOUT_NO_LIMITS, equals = FLAG_LAYOUT_NO_LIMITS,
-                    name = "FLAG_LAYOUT_NO_LIMITS"),
+                    name = "LAYOUT_NO_LIMITS"),
             @ViewDebug.FlagToString(mask = FLAG_FULLSCREEN, equals = FLAG_FULLSCREEN,
-                    name = "FLAG_FULLSCREEN"),
+                    name = "FULLSCREEN"),
             @ViewDebug.FlagToString(mask = FLAG_FORCE_NOT_FULLSCREEN, equals = FLAG_FORCE_NOT_FULLSCREEN,
-                    name = "FLAG_FORCE_NOT_FULLSCREEN"),
+                    name = "FORCE_NOT_FULLSCREEN"),
             @ViewDebug.FlagToString(mask = FLAG_DITHER, equals = FLAG_DITHER,
-                    name = "FLAG_DITHER"),
+                    name = "DITHER"),
             @ViewDebug.FlagToString(mask = FLAG_SECURE, equals = FLAG_SECURE,
-                    name = "FLAG_SECURE"),
+                    name = "SECURE"),
             @ViewDebug.FlagToString(mask = FLAG_SCALED, equals = FLAG_SCALED,
-                    name = "FLAG_SCALED"),
+                    name = "SCALED"),
             @ViewDebug.FlagToString(mask = FLAG_IGNORE_CHEEK_PRESSES, equals = FLAG_IGNORE_CHEEK_PRESSES,
-                    name = "FLAG_IGNORE_CHEEK_PRESSES"),
+                    name = "IGNORE_CHEEK_PRESSES"),
             @ViewDebug.FlagToString(mask = FLAG_LAYOUT_INSET_DECOR, equals = FLAG_LAYOUT_INSET_DECOR,
-                    name = "FLAG_LAYOUT_INSET_DECOR"),
+                    name = "LAYOUT_INSET_DECOR"),
             @ViewDebug.FlagToString(mask = FLAG_ALT_FOCUSABLE_IM, equals = FLAG_ALT_FOCUSABLE_IM,
-                    name = "FLAG_ALT_FOCUSABLE_IM"),
+                    name = "ALT_FOCUSABLE_IM"),
             @ViewDebug.FlagToString(mask = FLAG_WATCH_OUTSIDE_TOUCH, equals = FLAG_WATCH_OUTSIDE_TOUCH,
-                    name = "FLAG_WATCH_OUTSIDE_TOUCH"),
+                    name = "WATCH_OUTSIDE_TOUCH"),
             @ViewDebug.FlagToString(mask = FLAG_SHOW_WHEN_LOCKED, equals = FLAG_SHOW_WHEN_LOCKED,
-                    name = "FLAG_SHOW_WHEN_LOCKED"),
+                    name = "SHOW_WHEN_LOCKED"),
             @ViewDebug.FlagToString(mask = FLAG_SHOW_WALLPAPER, equals = FLAG_SHOW_WALLPAPER,
-                    name = "FLAG_SHOW_WALLPAPER"),
+                    name = "SHOW_WALLPAPER"),
             @ViewDebug.FlagToString(mask = FLAG_TURN_SCREEN_ON, equals = FLAG_TURN_SCREEN_ON,
-                    name = "FLAG_TURN_SCREEN_ON"),
+                    name = "TURN_SCREEN_ON"),
             @ViewDebug.FlagToString(mask = FLAG_DISMISS_KEYGUARD, equals = FLAG_DISMISS_KEYGUARD,
-                    name = "FLAG_DISMISS_KEYGUARD"),
+                    name = "DISMISS_KEYGUARD"),
             @ViewDebug.FlagToString(mask = FLAG_SPLIT_TOUCH, equals = FLAG_SPLIT_TOUCH,
-                    name = "FLAG_SPLIT_TOUCH"),
+                    name = "SPLIT_TOUCH"),
             @ViewDebug.FlagToString(mask = FLAG_HARDWARE_ACCELERATED, equals = FLAG_HARDWARE_ACCELERATED,
-                    name = "FLAG_HARDWARE_ACCELERATED"),
-            @ViewDebug.FlagToString(mask = FLAG_LOCAL_FOCUS_MODE, equals = FLAG_LOCAL_FOCUS_MODE,
-                    name = "FLAG_LOCAL_FOCUS_MODE"),
+                    name = "HARDWARE_ACCELERATED"),
+            @ViewDebug.FlagToString(mask = FLAG_LAYOUT_IN_OVERSCAN, equals = FLAG_LAYOUT_IN_OVERSCAN,
+                    name = "LOCAL_FOCUS_MODE"),
             @ViewDebug.FlagToString(mask = FLAG_TRANSLUCENT_STATUS, equals = FLAG_TRANSLUCENT_STATUS,
-                    name = "FLAG_TRANSLUCENT_STATUS"),
+                    name = "TRANSLUCENT_STATUS"),
             @ViewDebug.FlagToString(mask = FLAG_TRANSLUCENT_NAVIGATION, equals = FLAG_TRANSLUCENT_NAVIGATION,
-                    name = "FLAG_TRANSLUCENT_NAVIGATION"),
+                    name = "TRANSLUCENT_NAVIGATION"),
+            @ViewDebug.FlagToString(mask = FLAG_LOCAL_FOCUS_MODE, equals = FLAG_LOCAL_FOCUS_MODE,
+                    name = "LOCAL_FOCUS_MODE"),
+            @ViewDebug.FlagToString(mask = FLAG_SLIPPERY, equals = FLAG_SLIPPERY,
+                    name = "FLAG_SLIPPERY"),
+            @ViewDebug.FlagToString(mask = FLAG_LAYOUT_ATTACHED_IN_DECOR, equals = FLAG_LAYOUT_ATTACHED_IN_DECOR,
+                    name = "FLAG_LAYOUT_ATTACHED_IN_DECOR"),
             @ViewDebug.FlagToString(mask = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, equals = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
-                    name = "FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS")
+                    name = "DRAWS_SYSTEM_BAR_BACKGROUNDS")
         }, formatToHexString = true)
         public int flags;
 
@@ -1413,7 +1663,7 @@ public interface WindowManager extends ViewManager {
          * this window is visible.
          * @hide
          */
-        @RequiresPermission(android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS)
+        @RequiresPermission(permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS)
         public static final int PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 0x00080000;
 
         /**
@@ -1434,9 +1684,104 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN = 0x00200000;
 
         /**
+         * Flag to indicate that this window should be considered a screen decoration similar to the
+         * nav bar and status bar. This will cause this window to affect the window insets reported
+         * to other windows when it is visible.
+         * @hide
+         */
+        @RequiresPermission(permission.STATUS_BAR_SERVICE)
+        public static final int PRIVATE_FLAG_IS_SCREEN_DECOR = 0x00400000;
+
+        /**
          * Control flags that are private to the platform.
          * @hide
          */
+        @ViewDebug.ExportedProperty(flagMapping = {
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED,
+                        equals = PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED,
+                        name = "FAKE_HARDWARE_ACCELERATED"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED,
+                        equals = PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED,
+                        name = "FORCE_HARDWARE_ACCELERATED"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS,
+                        equals = PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS,
+                        name = "WANTS_OFFSET_NOTIFICATIONS"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_SHOW_FOR_ALL_USERS,
+                        equals = PRIVATE_FLAG_SHOW_FOR_ALL_USERS,
+                        name = "SHOW_FOR_ALL_USERS"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_NO_MOVE_ANIMATION,
+                        equals = PRIVATE_FLAG_NO_MOVE_ANIMATION,
+                        name = "NO_MOVE_ANIMATION"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_COMPATIBLE_WINDOW,
+                        equals = PRIVATE_FLAG_COMPATIBLE_WINDOW,
+                        name = "COMPATIBLE_WINDOW"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_SYSTEM_ERROR,
+                        equals = PRIVATE_FLAG_SYSTEM_ERROR,
+                        name = "SYSTEM_ERROR"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR,
+                        equals = PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR,
+                        name = "INHERIT_TRANSLUCENT_DECOR"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_KEYGUARD,
+                        equals = PRIVATE_FLAG_KEYGUARD,
+                        name = "KEYGUARD"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
+                        equals = PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
+                        name = "DISABLE_WALLPAPER_TOUCH_EVENTS"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT,
+                        equals = PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT,
+                        name = "FORCE_STATUS_BAR_VISIBLE_TRANSPARENT"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_PRESERVE_GEOMETRY,
+                        equals = PRIVATE_FLAG_PRESERVE_GEOMETRY,
+                        name = "PRESERVE_GEOMETRY"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
+                        equals = PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
+                        name = "FORCE_DECOR_VIEW_VISIBILITY"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH,
+                        equals = PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH,
+                        name = "WILL_NOT_REPLACE_ON_RELAUNCH"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
+                        equals = PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
+                        name = "LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND,
+                        equals = PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND,
+                        name = "FORCE_DRAW_STATUS_BAR_BACKGROUND"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE,
+                        equals = PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE,
+                        name = "SUSTAINED_PERFORMANCE_MODE"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                        equals = PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                        name = "HIDE_NON_SYSTEM_OVERLAY_WINDOWS"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
+                        equals = PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
+                        name = "IS_ROUNDED_CORNERS_OVERLAY"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN,
+                        equals = PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN,
+                        name = "ACQUIRES_SLEEP_TOKEN"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_IS_SCREEN_DECOR,
+                        equals = PRIVATE_FLAG_IS_SCREEN_DECOR,
+                        name = "IS_SCREEN_DECOR")
+        })
         @TestApi
         public int privateFlags;
 
@@ -1509,7 +1854,9 @@ public interface WindowManager extends ViewManager {
         public static final int SOFT_INPUT_MASK_STATE = 0x0f;
 
         /**
-         * Visibility state for {@link #softInputMode}: no state has been specified.
+         * Visibility state for {@link #softInputMode}: no state has been specified. The system may
+         * show or hide the software keyboard for better user experience when the window gains
+         * focus.
          */
         public static final int SOFT_INPUT_STATE_UNSPECIFIED = 0;
 
@@ -1536,12 +1883,20 @@ public interface WindowManager extends ViewManager {
          * Visibility state for {@link #softInputMode}: please show the soft
          * input area when normally appropriate (when the user is navigating
          * forward to your window).
+         *
+         * <p>Applications that target {@link android.os.Build.VERSION_CODES#P} and later, this flag
+         * is ignored unless there is a focused view that returns {@code true} from
+         * {@link View#isInEditMode()} when the window is focused.</p>
          */
         public static final int SOFT_INPUT_STATE_VISIBLE = 4;
 
         /**
          * Visibility state for {@link #softInputMode}: please always make the
          * soft input area visible when this window receives input focus.
+         *
+         * <p>Applications that target {@link android.os.Build.VERSION_CODES#P} and later, this flag
+         * is ignored unless there is a focused view that returns {@code true} from
+         * {@link View#isInEditMode()} when the window is focused.</p>
          */
         public static final int SOFT_INPUT_STATE_ALWAYS_VISIBLE = 5;
 
@@ -1602,7 +1957,7 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         @Retention(RetentionPolicy.SOURCE)
-        @IntDef(flag = true, value = {
+        @IntDef(flag = true, prefix = { "SOFT_INPUT_" }, value = {
                 SOFT_INPUT_STATE_UNSPECIFIED,
                 SOFT_INPUT_STATE_UNCHANGED,
                 SOFT_INPUT_STATE_HIDDEN,
@@ -1882,6 +2237,128 @@ public interface WindowManager extends ViewManager {
          */
         public boolean hasSystemUiListeners;
 
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(
+                flag = true,
+                value = {LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT,
+                        LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES,
+                        LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER})
+        @interface LayoutInDisplayCutoutMode {}
+
+        /**
+         * Controls how the window is laid out if there is a {@link DisplayCutout}.
+         *
+         * <p>
+         * Defaults to {@link #LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT}.
+         *
+         * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
+         * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+         * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+         * @see DisplayCutout
+         * @see android.R.attr#windowLayoutInDisplayCutoutMode
+         *         android:windowLayoutInDisplayCutoutMode
+         */
+        @LayoutInDisplayCutoutMode
+        public int layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+
+        /**
+         * The window is allowed to extend into the {@link DisplayCutout} area, only if the
+         * {@link DisplayCutout} is fully contained within a system bar. Otherwise, the window is
+         * laid out such that it does not overlap with the {@link DisplayCutout} area.
+         *
+         * <p>
+         * In practice, this means that if the window did not set {@link #FLAG_FULLSCREEN} or
+         * {@link View#SYSTEM_UI_FLAG_FULLSCREEN}, it can extend into the cutout area in portrait
+         * if the cutout is at the top edge. Similarly for
+         * {@link View#SYSTEM_UI_FLAG_HIDE_NAVIGATION} and a cutout at the bottom of the screen.
+         * Otherwise (i.e. fullscreen or landscape) it is laid out such that it does not overlap the
+         * cutout area.
+         *
+         * <p>
+         * The usual precautions for not overlapping with the status and navigation bar are
+         * sufficient for ensuring that no important content overlaps with the DisplayCutout.
+         *
+         * @see DisplayCutout
+         * @see WindowInsets
+         * @see #layoutInDisplayCutoutMode
+         * @see android.R.attr#windowLayoutInDisplayCutoutMode
+         *         android:windowLayoutInDisplayCutoutMode
+         */
+        public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT = 0;
+
+        /**
+         * @deprecated use {@link #LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES}
+         * @hide
+         */
+        @Deprecated
+        public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS = 1;
+
+        /**
+         * The window is always allowed to extend into the {@link DisplayCutout} areas on the short
+         * edges of the screen.
+         *
+         * The window will never extend into a {@link DisplayCutout} area on the long edges of the
+         * screen.
+         *
+         * <p>
+         * The window must make sure that no important content overlaps with the
+         * {@link DisplayCutout}.
+         *
+         * <p>
+         * In this mode, the window extends under cutouts on the short edge of the display in both
+         * portrait and landscape, regardless of whether the window is hiding the system bars:<br/>
+         * <img src="{@docRoot}reference/android/images/display_cutout/short_edge/fullscreen_top_no_letterbox.png"
+         * height="720"
+         * alt="Screenshot of a fullscreen activity on a display with a cutout at the top edge in
+         *         portrait, no letterbox is applied."/>
+         *
+         * <img src="{@docRoot}reference/android/images/display_cutout/short_edge/landscape_top_no_letterbox.png"
+         * width="720"
+         * alt="Screenshot of an activity on a display with a cutout at the top edge in landscape,
+         *         no letterbox is applied."/>
+         *
+         * <p>
+         * A cutout in the corner is considered to be on the short edge: <br/>
+         * <img src="{@docRoot}reference/android/images/display_cutout/short_edge/fullscreen_corner_no_letterbox.png"
+         * height="720"
+         * alt="Screenshot of a fullscreen activity on a display with a cutout in the corner in
+         *         portrait, no letterbox is applied."/>
+         *
+         * <p>
+         * On the other hand, should the cutout be on the long edge of the display, a letterbox will
+         * be applied such that the window does not extend into the cutout on either long edge:
+         * <br/>
+         * <img src="{@docRoot}reference/android/images/display_cutout/short_edge/portrait_side_letterbox.png"
+         * height="720"
+         * alt="Screenshot of an activity on a display with a cutout on the long edge in portrait,
+         *         letterbox is applied."/>
+         *
+         * @see DisplayCutout
+         * @see WindowInsets#getDisplayCutout()
+         * @see #layoutInDisplayCutoutMode
+         * @see android.R.attr#windowLayoutInDisplayCutoutMode
+         *         android:windowLayoutInDisplayCutoutMode
+         */
+        public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES = 1;
+
+        /**
+         * The window is never allowed to overlap with the DisplayCutout area.
+         *
+         * <p>
+         * This should be used with windows that transiently set
+         * {@link View#SYSTEM_UI_FLAG_FULLSCREEN} or {@link View#SYSTEM_UI_FLAG_HIDE_NAVIGATION}
+         * to avoid a relayout of the window when the respective flag is set or cleared.
+         *
+         * @see DisplayCutout
+         * @see #layoutInDisplayCutoutMode
+         * @see android.R.attr#windowLayoutInDisplayCutoutMode
+         *         android:windowLayoutInDisplayCutoutMode
+         */
+        public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER = 2;
+
+
         /**
          * When this window has focus, disable touch pad pointer gesture processing.
          * The window will receive raw position updates from the touch pad instead
@@ -1942,7 +2419,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
-        public int accessibilityIdOfAnchor = -1;
+        public long accessibilityIdOfAnchor = AccessibilityNodeInfo.UNDEFINED_NODE_ID;
 
         /**
          * The window title isn't kept in sync with what is displayed in the title bar, so we
@@ -1976,7 +2453,7 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         @ActivityInfo.ColorMode
-        private int mColorMode = ActivityInfo.COLOR_MODE_DEFAULT;
+        private int mColorMode = COLOR_MODE_DEFAULT;
 
         public LayoutParams() {
             super(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -2107,6 +2584,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(flags);
             out.writeInt(privateFlags);
             out.writeInt(softInputMode);
+            out.writeInt(layoutInDisplayCutoutMode);
             out.writeInt(gravity);
             out.writeFloat(horizontalMargin);
             out.writeFloat(verticalMargin);
@@ -2135,7 +2613,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(hasManualSurfaceInsets ? 1 : 0);
             out.writeInt(preservePreviousSurfaceInsets ? 1 : 0);
             out.writeInt(needsMenuKey);
-            out.writeInt(accessibilityIdOfAnchor);
+            out.writeLong(accessibilityIdOfAnchor);
             TextUtils.writeToParcel(accessibilityTitle, out, parcelableFlags);
             out.writeInt(mColorMode);
             out.writeLong(hideTimeoutMilliseconds);
@@ -2162,6 +2640,7 @@ public interface WindowManager extends ViewManager {
             flags = in.readInt();
             privateFlags = in.readInt();
             softInputMode = in.readInt();
+            layoutInDisplayCutoutMode = in.readInt();
             gravity = in.readInt();
             horizontalMargin = in.readFloat();
             verticalMargin = in.readFloat();
@@ -2190,7 +2669,7 @@ public interface WindowManager extends ViewManager {
             hasManualSurfaceInsets = in.readInt() != 0;
             preservePreviousSurfaceInsets = in.readInt() != 0;
             needsMenuKey = in.readInt();
-            accessibilityIdOfAnchor = in.readInt();
+            accessibilityIdOfAnchor = in.readLong();
             accessibilityTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             mColorMode = in.readInt();
             hideTimeoutMilliseconds = in.readLong();
@@ -2299,6 +2778,10 @@ public interface WindowManager extends ViewManager {
             if (softInputMode != o.softInputMode) {
                 softInputMode = o.softInputMode;
                 changes |= SOFT_INPUT_MODE_CHANGED;
+            }
+            if (layoutInDisplayCutoutMode != o.layoutInDisplayCutoutMode) {
+                layoutInDisplayCutoutMode = o.layoutInDisplayCutoutMode;
+                changes |= LAYOUT_CHANGED;
             }
             if (gravity != o.gravity) {
                 gravity = o.gravity;
@@ -2441,9 +2924,14 @@ public interface WindowManager extends ViewManager {
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder(256);
-            sb.append("WM.LayoutParams{");
-            sb.append("(");
+            return toString("");
+        }
+
+        /**
+         * @hide
+         */
+        public void dumpDimensions(StringBuilder sb) {
+            sb.append('(');
             sb.append(x);
             sb.append(',');
             sb.append(y);
@@ -2454,6 +2942,15 @@ public interface WindowManager extends ViewManager {
             sb.append((height == MATCH_PARENT ? "fill" : (height == WRAP_CONTENT
                     ? "wrap" : String.valueOf(height))));
             sb.append(")");
+        }
+
+        /**
+         * @hide
+         */
+        public String toString(String prefix) {
+            StringBuilder sb = new StringBuilder(256);
+            sb.append('{');
+            dumpDimensions(sb);
             if (horizontalMargin != 0) {
                 sb.append(" hm=");
                 sb.append(horizontalMargin);
@@ -2463,26 +2960,23 @@ public interface WindowManager extends ViewManager {
                 sb.append(verticalMargin);
             }
             if (gravity != 0) {
-                sb.append(" gr=#");
-                sb.append(Integer.toHexString(gravity));
+                sb.append(" gr=");
+                sb.append(Gravity.toString(gravity));
             }
             if (softInputMode != 0) {
-                sb.append(" sim=#");
-                sb.append(Integer.toHexString(softInputMode));
+                sb.append(" sim={");
+                sb.append(softInputModeToString(softInputMode));
+                sb.append('}');
+            }
+            if (layoutInDisplayCutoutMode != 0) {
+                sb.append(" layoutInDisplayCutoutMode=");
+                sb.append(layoutInDisplayCutoutModeToString(layoutInDisplayCutoutMode));
             }
             sb.append(" ty=");
-            sb.append(type);
-            sb.append(" fl=#");
-            sb.append(Integer.toHexString(flags));
-            if (privateFlags != 0) {
-                if ((privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0) {
-                    sb.append(" compatible=true");
-                }
-                sb.append(" pfl=0x").append(Integer.toHexString(privateFlags));
-            }
+            sb.append(ViewDebug.intToString(LayoutParams.class, "type", type));
             if (format != PixelFormat.OPAQUE) {
                 sb.append(" fmt=");
-                sb.append(format);
+                sb.append(PixelFormat.formatToString(format));
             }
             if (windowAnimations != 0) {
                 sb.append(" wanim=0x");
@@ -2490,7 +2984,7 @@ public interface WindowManager extends ViewManager {
             }
             if (screenOrientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
                 sb.append(" or=");
-                sb.append(screenOrientation);
+                sb.append(ActivityInfo.screenOrientationToString(screenOrientation));
             }
             if (alpha != 1.0f) {
                 sb.append(" alpha=");
@@ -2506,7 +3000,7 @@ public interface WindowManager extends ViewManager {
             }
             if (rotationAnimation != ROTATION_ANIMATION_ROTATE) {
                 sb.append(" rotAnim=");
-                sb.append(rotationAnimation);
+                sb.append(rotationAnimationToString(rotationAnimation));
             }
             if (preferredRefreshRate != 0) {
                 sb.append(" preferredRefreshRate=");
@@ -2516,20 +3010,12 @@ public interface WindowManager extends ViewManager {
                 sb.append(" preferredDisplayMode=");
                 sb.append(preferredDisplayModeId);
             }
-            if (systemUiVisibility != 0) {
-                sb.append(" sysui=0x");
-                sb.append(Integer.toHexString(systemUiVisibility));
-            }
-            if (subtreeSystemUiVisibility != 0) {
-                sb.append(" vsysui=0x");
-                sb.append(Integer.toHexString(subtreeSystemUiVisibility));
-            }
             if (hasSystemUiListeners) {
                 sb.append(" sysuil=");
                 sb.append(hasSystemUiListeners);
             }
             if (inputFeatures != 0) {
-                sb.append(" if=0x").append(Integer.toHexString(inputFeatures));
+                sb.append(" if=").append(inputFeatureToString(inputFeatures));
             }
             if (userActivityTimeout >= 0) {
                 sb.append(" userActivityTimeout=").append(userActivityTimeout);
@@ -2545,13 +3031,66 @@ public interface WindowManager extends ViewManager {
                     sb.append(" (!preservePreviousSurfaceInsets)");
                 }
             }
-            if (needsMenuKey != NEEDS_MENU_UNSET) {
-                sb.append(" needsMenuKey=");
-                sb.append(needsMenuKey);
+            if (needsMenuKey == NEEDS_MENU_SET_TRUE) {
+                sb.append(" needsMenuKey");
             }
-            sb.append(" colorMode=").append(mColorMode);
+            if (mColorMode != COLOR_MODE_DEFAULT) {
+                sb.append(" colorMode=").append(ActivityInfo.colorModeToString(mColorMode));
+            }
+            sb.append(System.lineSeparator());
+            sb.append(prefix).append("  fl=").append(
+                    ViewDebug.flagsToString(LayoutParams.class, "flags", flags));
+            if (privateFlags != 0) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  pfl=").append(ViewDebug.flagsToString(
+                        LayoutParams.class, "privateFlags", privateFlags));
+            }
+            if (systemUiVisibility != 0) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  sysui=").append(ViewDebug.flagsToString(
+                        View.class, "mSystemUiVisibility", systemUiVisibility));
+            }
+            if (subtreeSystemUiVisibility != 0) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  vsysui=").append(ViewDebug.flagsToString(
+                        View.class, "mSystemUiVisibility", subtreeSystemUiVisibility));
+            }
             sb.append('}');
             return sb.toString();
+        }
+
+        /**
+         * @hide
+         */
+        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+            final long token = proto.start(fieldId);
+            proto.write(TYPE, type);
+            proto.write(X, x);
+            proto.write(Y, y);
+            proto.write(WIDTH, width);
+            proto.write(HEIGHT, height);
+            proto.write(HORIZONTAL_MARGIN, horizontalMargin);
+            proto.write(VERTICAL_MARGIN, verticalMargin);
+            proto.write(GRAVITY, gravity);
+            proto.write(SOFT_INPUT_MODE, softInputMode);
+            proto.write(FORMAT, format);
+            proto.write(WINDOW_ANIMATIONS, windowAnimations);
+            proto.write(ALPHA, alpha);
+            proto.write(SCREEN_BRIGHTNESS, screenBrightness);
+            proto.write(BUTTON_BRIGHTNESS, buttonBrightness);
+            proto.write(ROTATION_ANIMATION, rotationAnimation);
+            proto.write(PREFERRED_REFRESH_RATE, preferredRefreshRate);
+            proto.write(WindowLayoutParamsProto.PREFERRED_DISPLAY_MODE_ID, preferredDisplayModeId);
+            proto.write(HAS_SYSTEM_UI_LISTENERS, hasSystemUiListeners);
+            proto.write(INPUT_FEATURE_FLAGS, inputFeatures);
+            proto.write(USER_ACTIVITY_TIMEOUT, userActivityTimeout);
+            proto.write(NEEDS_MENU_KEY, needsMenuKey);
+            proto.write(COLOR_MODE, mColorMode);
+            proto.write(FLAGS, flags);
+            proto.write(PRIVATE_FLAGS, privateFlags);
+            proto.write(SYSTEM_UI_VISIBILITY_FLAGS, systemUiVisibility);
+            proto.write(SUBTREE_SYSTEM_UI_VISIBILITY_FLAGS, subtreeSystemUiVisibility);
+            proto.end(token);
         }
 
         /**
@@ -2623,6 +3162,103 @@ public interface WindowManager extends ViewManager {
             return x == 0 && y == 0
                     && width == WindowManager.LayoutParams.MATCH_PARENT
                     && height == WindowManager.LayoutParams.MATCH_PARENT;
+        }
+
+        private static String layoutInDisplayCutoutModeToString(
+                @LayoutInDisplayCutoutMode int mode) {
+            switch (mode) {
+                case LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT:
+                    return "default";
+                case LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS:
+                    return "always";
+                case LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER:
+                    return "never";
+                default:
+                    return "unknown(" + mode + ")";
+            }
+        }
+
+        private static String softInputModeToString(@SoftInputModeFlags int softInputMode) {
+            final StringBuilder result = new StringBuilder();
+            final int state = softInputMode & SOFT_INPUT_MASK_STATE;
+            if (state != 0) {
+                result.append("state=");
+                switch (state) {
+                    case SOFT_INPUT_STATE_UNCHANGED:
+                        result.append("unchanged");
+                        break;
+                    case SOFT_INPUT_STATE_HIDDEN:
+                        result.append("hidden");
+                        break;
+                    case SOFT_INPUT_STATE_ALWAYS_HIDDEN:
+                        result.append("always_hidden");
+                        break;
+                    case SOFT_INPUT_STATE_VISIBLE:
+                        result.append("visible");
+                        break;
+                    case SOFT_INPUT_STATE_ALWAYS_VISIBLE:
+                        result.append("always_visible");
+                        break;
+                    default:
+                        result.append(state);
+                        break;
+                }
+                result.append(' ');
+            }
+            final int adjust = softInputMode & SOFT_INPUT_MASK_ADJUST;
+            if (adjust != 0) {
+                result.append("adjust=");
+                switch (adjust) {
+                    case SOFT_INPUT_ADJUST_RESIZE:
+                        result.append("resize");
+                        break;
+                    case SOFT_INPUT_ADJUST_PAN:
+                        result.append("pan");
+                        break;
+                    case SOFT_INPUT_ADJUST_NOTHING:
+                        result.append("nothing");
+                        break;
+                    default:
+                        result.append(adjust);
+                        break;
+                }
+                result.append(' ');
+            }
+            if ((softInputMode & SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
+                result.append("forwardNavigation").append(' ');
+            }
+            result.deleteCharAt(result.length() - 1);
+            return result.toString();
+        }
+
+        private static String rotationAnimationToString(int rotationAnimation) {
+            switch (rotationAnimation) {
+                case ROTATION_ANIMATION_UNSPECIFIED:
+                    return "UNSPECIFIED";
+                case ROTATION_ANIMATION_ROTATE:
+                    return "ROTATE";
+                case ROTATION_ANIMATION_CROSSFADE:
+                    return "CROSSFADE";
+                case ROTATION_ANIMATION_JUMPCUT:
+                    return "JUMPCUT";
+                case ROTATION_ANIMATION_SEAMLESS:
+                    return "SEAMLESS";
+                default:
+                    return Integer.toString(rotationAnimation);
+            }
+        }
+
+        private static String inputFeatureToString(int inputFeature) {
+            switch (inputFeature) {
+                case INPUT_FEATURE_DISABLE_POINTER_GESTURES:
+                    return "DISABLE_POINTER_GESTURES";
+                case INPUT_FEATURE_NO_INPUT_CHANNEL:
+                    return "NO_INPUT_CHANNEL";
+                case INPUT_FEATURE_DISABLE_USER_ACTIVITY:
+                    return "DISABLE_USER_ACTIVITY";
+                default:
+                    return Integer.toString(inputFeature);
+            }
         }
     }
 }

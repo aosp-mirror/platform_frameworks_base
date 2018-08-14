@@ -980,11 +980,13 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public void setCellBandwidths(int[] bandwidths) {
         mCellBandwidths = bandwidths;
     }
 
     /** @hide */
+    @TestApi
     public void setChannelNumber(int channelNumber) {
         mChannelNumber = channelNumber;
     }
@@ -1175,6 +1177,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public void setRilVoiceRadioTechnology(int rt) {
         if (rt == RIL_RADIO_TECHNOLOGY_LTE_CA) {
             rt = RIL_RADIO_TECHNOLOGY_LTE;
@@ -1184,6 +1187,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public void setRilDataRadioTechnology(int rt) {
         if (rt == RIL_RADIO_TECHNOLOGY_LTE_CA) {
             rt = RIL_RADIO_TECHNOLOGY_LTE;

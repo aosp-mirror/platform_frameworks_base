@@ -30,8 +30,12 @@ import android.provider.TimeZoneRulesDataContract;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -57,7 +61,7 @@ public class PackageTrackerTest {
     private ConfigHelper mMockConfigHelper;
     private PackageManagerHelper mMockPackageManagerHelper;
 
-    private FakeClockHelper mFakeClock;
+    private FakeClock mFakeClock;
     private FakeIntentHelper mFakeIntentHelper;
     private PackageStatusStorage mPackageStatusStorage;
     private PackageTracker mPackageTracker;
@@ -66,7 +70,7 @@ public class PackageTrackerTest {
     public void setUp() throws Exception {
         Context context = InstrumentationRegistry.getContext();
 
-        mFakeClock = new FakeClockHelper();
+        mFakeClock = new FakeClock();
 
         // Read-only interfaces so are easy to mock.
         mMockConfigHelper = mock(ConfigHelper.class);
@@ -101,7 +105,7 @@ public class PackageTrackerTest {
         configureTrackingDisabled();
 
         // Initialize the tracker.
-        mPackageTracker.start();
+        assertFalse(mPackageTracker.start());
 
         // Check the IntentHelper was not initialized.
         mFakeIntentHelper.assertNotInitialized();
@@ -116,7 +120,7 @@ public class PackageTrackerTest {
         configureTrackingDisabled();
 
         // Initialize the tracker.
-        mPackageTracker.start();
+        assertFalse(mPackageTracker.start());
 
         // Check reliability triggering state.
         mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
@@ -138,7 +142,7 @@ public class PackageTrackerTest {
         configureTrackingDisabled();
 
         // Initialize the tracker.
-        mPackageTracker.start();
+        assertFalse(mPackageTracker.start());
 
         // Check reliability triggering state.
         mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
@@ -163,7 +167,7 @@ public class PackageTrackerTest {
         mPackageStatusStorage.generateCheckToken(INITIAL_APP_PACKAGE_VERSIONS);
 
         // Initialize the tracker.
-        mPackageTracker.start();
+        assertFalse(mPackageTracker.start());
 
         // Check reliability triggering state.
         mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
@@ -259,6 +263,35 @@ public class PackageTrackerTest {
      }
 
     @Test
+    public void trackingEnabled_storageInitializationFails() throws Exception {
+        // Create a PackageStateStorage that will fail to initialize.
+        PackageStatusStorage packageStatusStorage =
+                new PackageStatusStorage(new File("/system/does/not/exist"));
+
+        // Create a new PackageTracker to use the bad storage.
+        mPackageTracker = new PackageTracker(
+                mFakeClock,
+                mMockConfigHelper,
+                mMockPackageManagerHelper,
+                packageStatusStorage,
+                mFakeIntentHelper);
+
+        // Set up device configuration.
+        configureTrackingEnabled();
+        configureReliabilityConfigSettingsOk();
+        configureValidApplications();
+
+        // Initialize the tracker.
+        assertFalse(mPackageTracker.start());
+
+        // Check the IntentHelper was not initialized.
+        mFakeIntentHelper.assertNotInitialized();
+
+        // Check reliability triggering state.
+        mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
+    }
+
+    @Test
     public void trackingEnabled_packageUpdate_badUpdateAppManifestEntry() throws Exception {
         // Set up device configuration.
         configureTrackingEnabled();
@@ -266,7 +299,7 @@ public class PackageTrackerTest {
         configureValidApplications();
 
         // Initialize the tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -303,7 +336,7 @@ public class PackageTrackerTest {
         configureValidApplications();
 
         // Initialize the tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -348,7 +381,7 @@ public class PackageTrackerTest {
         configureValidApplications();
 
         // Initialize the tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -396,7 +429,7 @@ public class PackageTrackerTest {
         configureValidApplications();
 
         // Initialize the tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -435,7 +468,7 @@ public class PackageTrackerTest {
         configureValidApplications();
 
         // Initialize the tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -481,7 +514,7 @@ public class PackageTrackerTest {
         configureValidApplications();
 
         // Initialize the tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -530,7 +563,7 @@ public class PackageTrackerTest {
         configureValidApplications();
 
         // Initialize the tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -590,7 +623,7 @@ public class PackageTrackerTest {
         configureValidApplications();
 
         // Initialize the package tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -652,7 +685,7 @@ public class PackageTrackerTest {
         configureValidApplications();
 
         // Initialize the package tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -708,7 +741,7 @@ public class PackageTrackerTest {
         configureValidApplications();
 
         // Initialize the package tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -757,7 +790,7 @@ public class PackageTrackerTest {
         PackageVersions packageVersions = configureValidApplications();
 
         // Initialize the package tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -794,7 +827,7 @@ public class PackageTrackerTest {
                 PackageStatus.CHECK_COMPLETED_SUCCESS, packageVersions);
 
         // Initialize the package tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -834,7 +867,7 @@ public class PackageTrackerTest {
                 PackageStatus.CHECK_COMPLETED_FAILURE, oldPackageVersions);
 
         // Initialize the package tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -880,7 +913,7 @@ public class PackageTrackerTest {
                 PackageStatus.CHECK_COMPLETED_FAILURE, oldPackageVersions);
 
         // Initialize the package tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -939,7 +972,7 @@ public class PackageTrackerTest {
                 PackageStatus.CHECK_COMPLETED_FAILURE, oldPackageVersions);
 
         // Initialize the package tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -1014,7 +1047,7 @@ public class PackageTrackerTest {
                 PackageStatus.CHECK_COMPLETED_FAILURE, oldPackageVersions);
 
         // Initialize the package tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -1080,7 +1113,7 @@ public class PackageTrackerTest {
                 PackageStatus.CHECK_COMPLETED_SUCCESS, currentPackageVersions);
 
         // Initialize the package tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -1135,7 +1168,7 @@ public class PackageTrackerTest {
                 PackageStatus.CHECK_COMPLETED_SUCCESS, currentPackageVersions);
 
         // Initialize the package tracker.
-        mPackageTracker.start();
+        assertTrue(mPackageTracker.start());
 
         // Check the intent helper is properly configured.
         checkIntentHelperInitializedAndReliabilityTrackingEnabled();
@@ -1246,13 +1279,13 @@ public class PackageTrackerTest {
     }
 
     private void configureUpdateAppPackageVersion(String updateAppPackageName,
-            int updataAppPackageVersion) throws Exception {
+            long updataAppPackageVersion) throws Exception {
         when(mMockPackageManagerHelper.getInstalledPackageVersion(updateAppPackageName))
                 .thenReturn(updataAppPackageVersion);
     }
 
     private void configureDataAppPackageVersion(String dataAppPackageName,
-            int dataAppPackageVersion) throws Exception {
+            long dataAppPackageVersion) throws Exception {
         when(mMockPackageManagerHelper.getInstalledPackageVersion(dataAppPackageName))
                 .thenReturn(dataAppPackageVersion);
     }
@@ -1366,7 +1399,7 @@ public class PackageTrackerTest {
     /**
      * A fake IntentHelper implementation for use in tests.
      */
-    private static class FakeIntentHelper implements IntentHelper {
+    private static class FakeIntentHelper implements PackageTrackerIntentHelper {
 
         private PackageTracker mPackageTracker;
         private String mUpdateAppPackageName;
@@ -1444,17 +1477,32 @@ public class PackageTrackerTest {
         }
     }
 
-    private static class FakeClockHelper implements ClockHelper {
+    private static class FakeClock extends Clock {
 
         private long currentTime = 1000;
 
         @Override
-        public long currentTimestamp() {
+        public long millis() {
             return currentTime;
         }
 
         public void incrementClock(long millis) {
             currentTime += millis;
+        }
+
+        @Override
+        public ZoneId getZone() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Clock withZone(ZoneId zone) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Instant instant() {
+            throw new UnsupportedOperationException();
         }
     }
 

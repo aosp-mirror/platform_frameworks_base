@@ -14,55 +14,69 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 package android.service.pm;
+
+import "frameworks/base/core/proto/android/content/featureinfo.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 option java_multiple_files = true;
 option java_outer_classname = "PackageServiceProto";
 
 message PackageServiceDumpProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     message PackageShortProto {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
         // Name of package. e.g. "com.android.providers.telephony".
-        string name = 1;
+        optional string name = 1;
         // UID for this package as assigned by Android OS.
-        int32 uid = 2;
+        optional int32 uid = 2;
     }
     message SharedLibraryProto {
-        string name = 1;
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string name = 1;
         // True if library path is not null (jar), false otherwise (apk)
-        bool is_jar = 2;
+        optional bool is_jar = 2;
         // Should be filled if is_jar is true
-        string path = 3;
+        optional string path = 3;
         // Should be filled if is_jar is false
-        string apk = 4;
-    }
-    message FeatureProto {
-        string name = 1;
-        int32 version = 2;
+        optional string apk = 4;
     }
     message SharedUserProto {
-        int32 user_id = 1;
-        string name = 2;
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 user_id = 1;
+        // Name of the shared UID. eg: android.uid.bluetooth
+        optional string name = 2;
     }
 
     // Installed packages.
-    PackageShortProto required_verifier_package = 1;
-    PackageShortProto verifier_package = 2;
+    optional PackageShortProto required_verifier_package = 1;
+    optional PackageShortProto verifier_package = 2;
     repeated SharedLibraryProto shared_libraries = 3;
-    repeated FeatureProto features = 4;
+    repeated android.content.pm.FeatureInfoProto features = 4;
     repeated PackageProto packages = 5;
     repeated SharedUserProto shared_users = 6;
     // Messages from the settings problem file
-    repeated string messages = 7;
+    repeated string messages = 7 [ (android.privacy).dest = DEST_EXPLICIT ];
 }
 
 message PackageProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     message SplitProto {
-        string name = 1;
-        int32 revision_code = 2;
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // The split name of package, e.g. base
+        optional string name = 1;
+        optional int32 revision_code = 2;
     }
     message UserInfoProto {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
         enum InstallType {
             NOT_INSTALLED_FOR_USER = 0;
             FULL_APP_INSTALL = 1;
@@ -87,32 +101,33 @@ message PackageProto {
             COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED = 4;
         }
 
-        int32 id = 1;
-        InstallType install_type = 2;
+        optional int32 id = 1;
+        optional InstallType install_type = 2;
         // Is the app restricted by owner / admin
-        bool is_hidden = 3;
-        bool is_suspended = 4;
-        bool is_stopped = 5;
-        bool is_launched = 6;
-        EnabledState enabled_state = 7;
-        string last_disabled_app_caller = 8;
+        optional bool is_hidden = 3;
+        optional bool is_suspended = 4;
+        optional bool is_stopped = 5;
+        optional bool is_launched = 6;
+        optional EnabledState enabled_state = 7;
+        optional string last_disabled_app_caller = 8;
+        optional string suspending_package = 9;
     }
 
     // Name of package. e.g. "com.android.providers.telephony".
-    string name = 1;
+    optional string name = 1;
     // UID for this package as assigned by Android OS.
-    int32 uid = 2;
+    optional int32 uid = 2;
     // Package's reported version.
-    int32 version_code = 3;
+    optional int32 version_code = 3;
     // Package's reported version string (what's displayed to the user).
-    string version_string = 4;
+    optional string version_string = 4;
     // UTC timestamp of install
-    int64 install_time_ms = 5;
+    optional int64 install_time_ms = 5;
     // Millisecond UTC timestamp of latest update adjusted to Google's server clock.
-    int64 update_time_ms = 6;
+    optional int64 update_time_ms = 6;
     // From "dumpsys package" - name of package which installed this one.
     // Typically "" if system app or "com.android.vending" if Play Store.
-    string installer_name = 7;
+    optional string installer_name = 7;
     // Split APKs.
     repeated SplitProto splits = 8;
     // Per-user package info.

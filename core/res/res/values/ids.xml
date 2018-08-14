@@ -128,6 +128,7 @@
   <item type="id" name="accessibilityActionContextClick" />
 
   <item type="id" name="remote_input_tag" />
+  <item type="id" name="pending_intent_tag" />
 
   <item type="id" name="cross_task_transition" />
 
@@ -139,7 +140,36 @@
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_MOVE_WINDOW}. -->
   <item type="id" name="accessibilityActionMoveWindow" />
 
+  <!-- A tag used to save an animator in top -->
+  <item type="id" name="tag_top_animator" />
+
+  <!-- A tag used to save the current top override -->
+  <item type="id" name="tag_top_override" />
+
+  <!-- A tag used to save the original top of a view -->
+  <item type="id" name="tag_layout_top" />
+
+  <!-- A tag used to save whether a view was laid out before -->
+  <item type="id" name="tag_is_first_layout" />
+
+  <!-- A tag used to save an animator in alpha -->
+  <item type="id" name="tag_alpha_animator" />
+
+  <!-- A tag used to save the clip children in a tag -->
+  <item type="id" name="clip_children_tag" />
+
+  <!-- A tag used to save the set of deactivated children that clip -->
+  <item type="id" name="clip_children_set_tag" />
+
+  <!-- A tag used to save the clip to padding in a tag -->
+  <item type="id" name="clip_to_padding_tag" />
+
   <!-- Action used to manually trigger an autofill request -->
   <item type="id" name="autofill" />
 
+    <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SHOW_TOOLTIP}. -->
+    <item type="id" name="accessibilityActionShowTooltip" />
+
+    <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_HIDE_TOOLTIP}. -->
+    <item type="id" name="accessibilityActionHideTooltip" />
 </resources>

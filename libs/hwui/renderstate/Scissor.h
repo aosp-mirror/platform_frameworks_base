@@ -26,6 +26,7 @@ class Rect;
 
 class Scissor {
     friend class RenderState;
+
 public:
     bool setEnabled(bool enabled);
     bool set(GLint x, GLint y, GLint width, GLint height);
@@ -33,6 +34,7 @@ public:
     void reset();
     bool isEnabled() { return mEnabled; }
     void dump();
+
 private:
     Scissor();
     void invalidate();
@@ -46,4 +48,4 @@ private:
 } /* namespace uirenderer */
 } /* namespace android */
 
-#endif // RENDERSTATE_SCISSOR_H
+#endif  // RENDERSTATE_SCISSOR_H

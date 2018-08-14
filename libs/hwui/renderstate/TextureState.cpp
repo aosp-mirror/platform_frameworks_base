@@ -19,9 +19,9 @@
 #include "utils/TraceUtils.h"
 
 #include <GLES3/gl3.h>
-#include <memory>
-#include <SkCanvas.h>
 #include <SkBitmap.h>
+#include <SkCanvas.h>
+#include <memory>
 
 namespace android {
 namespace uirenderer {
@@ -30,22 +30,16 @@ namespace uirenderer {
 static const int SHADOW_LUT_SIZE = 128;
 
 // Must define as many texture units as specified by kTextureUnitsCount
-const GLenum kTextureUnits[] = {
-    GL_TEXTURE0,
-    GL_TEXTURE1,
-    GL_TEXTURE2,
-    GL_TEXTURE3
-};
+const GLenum kTextureUnits[] = {GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, GL_TEXTURE3};
 
-TextureState::TextureState()
-        : mTextureUnit(0) {
+TextureState::TextureState() : mTextureUnit(0) {
     glActiveTexture(kTextureUnits[0]);
     resetBoundTextures();
 
     GLint maxTextureUnits;
     glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
     LOG_ALWAYS_FATAL_IF(maxTextureUnits < kTextureUnitsCount,
-            "At least %d texture units are required!", kTextureUnitsCount);
+                        "At least %d texture units are required!", kTextureUnitsCount);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 }
 
@@ -86,8 +80,8 @@ void TextureState::constructTexture(Caches& caches) {
 
 void TextureState::activateTexture(GLuint textureUnit) {
     LOG_ALWAYS_FATAL_IF(textureUnit >= kTextureUnitsCount,
-            "Tried to use texture unit index %d, only %d exist",
-            textureUnit, kTextureUnitsCount);
+                        "Tried to use texture unit index %d, only %d exist", textureUnit,
+                        kTextureUnitsCount);
     if (mTextureUnit != textureUnit) {
         glActiveTexture(kTextureUnits[textureUnit]);
         mTextureUnit = textureUnit;
@@ -151,4 +145,3 @@ void TextureState::unbindTexture(GLuint texture) {
 
 } /* namespace uirenderer */
 } /* namespace android */
-

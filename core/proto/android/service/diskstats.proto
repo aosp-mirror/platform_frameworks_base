@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 package android.service.diskstats;
+
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 option java_multiple_files = true;
 option java_outer_classname = "DiskStatsServiceProto";
 
 message DiskStatsServiceDumpProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     enum EncryptionType {
         // Unknown encryption type
         ENCRYPTION_UNKNOWN = 0;
@@ -33,50 +36,62 @@ message DiskStatsServiceDumpProto {
         ENCRYPTION_FILE_BASED = 3;
     }
     // Whether the latency test resulted in an error
-    bool has_test_error = 1;
-    // If the test errored, error message is contained here
-    string error_message = 2;
+    optional bool has_test_error = 1;
+    // If the test errored, error message is contained here, it is just IOException.
+    optional string error_message = 2;
     // 512B write latency in milliseconds, if the test was successful
-    int32 write_512b_latency_millis = 3;
+    optional int32 write_512b_latency_millis = 3;
     // Free Space in the major partitions
     repeated DiskStatsFreeSpaceProto partitions_free_space = 4;
     // Is the device using file-based encryption, full disk encryption or other
-    EncryptionType encryption = 5;
+    optional EncryptionType encryption = 5;
     // Cached values of folder sizes, etc.
-    DiskStatsCachedValuesProto cached_folder_sizes = 6;
+    optional DiskStatsCachedValuesProto cached_folder_sizes = 6;
+    // Average write speed of storaged benchmark for last 24 hours
+    optional int32 benchmarked_write_speed_kbps = 7;
 }
 
 message DiskStatsCachedValuesProto {
-    // Total app data size, in kilobytes
-    int64 agg_apps_size = 1;
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Total app code size, in kilobytes
+    optional int64 agg_apps_size_kb = 1;
     // Total app cache size, in kilobytes
-    int64 agg_apps_cache_size = 2;
+    optional int64 agg_apps_cache_size_kb = 2;
     // Size of image files, in kilobytes
-    int64 photos_size = 3;
+    optional int64 photos_size_kb = 3;
     // Size of video files, in kilobytes
-    int64 videos_size = 4;
+    optional int64 videos_size_kb = 4;
     // Size of audio files, in kilobytes
-    int64 audio_size = 5;
+    optional int64 audio_size_kb = 5;
     // Size of downloads, in kilobytes
-    int64 downloads_size = 6;
+    optional int64 downloads_size_kb = 6;
     // Size of system directory, in kilobytes
-    int64 system_size = 7;
+    optional int64 system_size_kb = 7;
     // Size of other files, in kilobytes
-    int64 other_size = 8;
+    optional int64 other_size_kb = 8;
     // Sizes of individual packages
     repeated DiskStatsAppSizesProto app_sizes = 9;
+    // Total app data size, in kilobytes
+    optional int64 agg_apps_data_size_kb = 10;
 }
 
 message DiskStatsAppSizesProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Name of the package
-    string package_name = 1;
-    // App's data size in kilobytes
-    int64 app_size = 2;
+    optional string package_name = 1;
+    // App's code size in kilobytes
+    optional int64 app_size_kb = 2;
     // App's cache size in kilobytes
-    int64 cache_size = 3;
+    optional int64 cache_size_kb = 3;
+    // App's data size in kilobytes
+    optional int64 app_data_size_kb = 4;
 }
 
 message DiskStatsFreeSpaceProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     enum Folder {
         // Data folder
         FOLDER_DATA = 0;
@@ -86,9 +101,9 @@ message DiskStatsFreeSpaceProto {
         FOLDER_SYSTEM = 2;
     }
     // Which folder?
-    Folder folder = 1;
+    optional Folder folder = 1;
     // Available space, in kilobytes
-    int64 available_space = 2;
+    optional int64 available_space_kb = 2;
     // Total space, in kilobytes
-    int64 total_space = 3;
+    optional int64 total_space_kb = 3;
 }

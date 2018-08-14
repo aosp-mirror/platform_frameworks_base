@@ -28,12 +28,15 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"මුරපදය ටයිප් කිරීමට ස්පර්ශ කරන්න"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"අගුළු ඇරීමට මුරපදය ටයිප් කරන්න"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"අගුළු හැරීමට PIN එක ටයිප් කරන්න"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"ඔබේ PIN ඇතුළු කරන්න"</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"ඔබගේ රටාව ඇතුළු කරන්න"</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"ඔබගේ මුරපදය ඇතුළු කරන්න"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"වැරදි PIN කේතයකි."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"වලංගු නොවන කාඩ්පත."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"අරෝපිතයි"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"ආරෝපණය වෙමින්"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"වේගයෙන් ආරෝපණය වෙමින්"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"සෙමින් ආරෝපණය වෙමින්"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ආරෝපණය වෙමින්"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • වේගයෙන් ආරෝපණය වෙමින්"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • සෙමින් ආරෝපණය වෙමින්"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"ඔබගේ ආරෝපකයට සම්බන්ධ කරන්න."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"අගුලු හැරීමට මෙනුව ඔබන්න."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"ජාලය අගුළු දමා ඇත"</string>
@@ -48,21 +51,27 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM පත PUK අගුළු ලා ඇත."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"SIM පත අගුළු හරිමින්..."</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"PIN කොටස"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"උපාංග මුරපදය"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"SIM PIN කොටස"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM PUK කොටස"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"<xliff:g id="ALARM">%1$s</xliff:g>ට ඊළඟ එලාමය සකසා ඇත"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"මකන්න"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"eSIM අබල කරන්න"</string>
+    <string name="error_disable_esim_title" msgid="4852978431156228006">"eSIM අබල කළ නොහැකිය."</string>
+    <string name="error_disable_esim_msg" msgid="676694908770135639">"දෝෂයක් හේතුවෙන් eSIM අබල කළ නොහැකිය."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"ඇතුල් කරන්න"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"රටාව අමතකයි"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"වැරදි රටාවකි"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"වැරදි මුරපදය"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"PIN එක වැරදියි"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"තත්පර <xliff:g id="NUMBER">%d</xliff:g> කින් නැවත උත්සහ කරන්න."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="one">තත්පර <xliff:g id="NUMBER">%d</xliff:g>කින් නැවත උත්සාහ කරන්න.</item>
+      <item quantity="other">තත්පර <xliff:g id="NUMBER">%d</xliff:g>කින් නැවත උත්සාහ කරන්න.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"ඔබගේ රටාව අඳින්න"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"SIM PIN ඇතුළු කරන්න"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" සඳහා SIM PIN ඇතුළු කරන්න"</string>
-    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"ජංගම සේවාවෙන් තොරව උපාංගය භාවිත කිරීමට eSIM අබල කරන්න."</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> ජංගම සේවාවෙන් තොරව උපාංගය භාවිත කිරීමට eSIM අබල කරන්න."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"PIN එක ඇතුළු කරන්න"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"මුරපදය ඇතුළු කරන්න"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"දැන් SIM එක අබල කර ඇත. ඉදිරියට යාමට PUK කේතය යොදන්න. විස්තර සඳහා වාහකයා අමතන්න."</string>
@@ -132,4 +141,12 @@
       <item quantity="other">උපාංගය පැය <xliff:g id="NUMBER_1">%d</xliff:g>ක් අගුලු හැර නැත. මුරපදය තහවුරු කරන්න.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"හඳුනා නොගන්නා ලදී"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="one">SIM PIN ඇතුළු කරන්න, ඔබ සතුව උත්සාහයන් <xliff:g id="NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත.</item>
+      <item quantity="other">SIM PIN ඇතුළු කරන්න, ඔබ සතුව උත්සාහයන් <xliff:g id="NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
+      <item quantity="one">SIM දැන් අබල කර ඇත. දිගටම කරගෙන යාමට PUK කේතය ඇතුළු කරන්න. SIM ස්ථිරවම භාවිත කළ නොහැකි බවට පත් වීමට පෙර ඔබ සතුව උත්සාහයන් <xliff:g id="_NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත. විස්තර සඳහා වාහක සම්බන්ධ කර ගන්න.</item>
+      <item quantity="other">SIM දැන් අබල කර ඇත. දිගටම කරගෙන යාමට PUK කේතය ඇතුළු කරන්න. SIM ස්ථිරවම භාවිත කළ නොහැකි බවට පත් වීමට පෙර ඔබ සතුව උත්සාහයන් <xliff:g id="_NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත. විස්තර සඳහා වාහක සම්බන්ධ කර ගන්න.</item>
+    </plurals>
 </resources>

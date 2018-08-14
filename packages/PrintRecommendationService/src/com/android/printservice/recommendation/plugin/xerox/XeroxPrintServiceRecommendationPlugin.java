@@ -15,9 +15,10 @@
  */
 package com.android.printservice.recommendation.plugin.xerox;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.net.nsd.NsdManager;
+
+import androidx.annotation.NonNull;
 
 import com.android.printservice.recommendation.PrintServicePlugin;
 import com.android.printservice.recommendation.R;

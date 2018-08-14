@@ -62,9 +62,23 @@ public class SearchIndexablesContract {
     public static final String NON_INDEXABLES_KEYS = "non_indexables_key";
 
     /**
+     * Site map pairs data key
+     *
+     * @hide
+     */
+    public static final String SITE_MAP_PAIRS_KEYS = "site_map_pairs";
+
+    /**
      * ContentProvider path for non indexable data keys.
      */
     public static final String NON_INDEXABLES_KEYS_PATH = SETTINGS + "/" + NON_INDEXABLES_KEYS;
+
+    /**
+     * ContentProvider path for sitemap keys.
+     *
+     * @hide
+     */
+    public static final String SITE_MAP_PAIRS_PATH = SETTINGS + "/" + SITE_MAP_PAIRS_KEYS;
 
     /**
      * Indexable xml resources columns.
@@ -110,6 +124,18 @@ public class SearchIndexablesContract {
             RawData.COLUMN_USER_ID,                 // 13
             RawData.PAYLOAD_TYPE,                   // 14
             RawData.PAYLOAD                         // 15
+    };
+
+    /**
+     * Columns for site map queries.
+     *
+     * @hide
+     */
+    public static final String[] SITE_MAP_COLUMNS = new String[] {
+            SiteMapColumns.PARENT_CLASS,
+            SiteMapColumns.PARENT_TITLE,
+            SiteMapColumns.CHILD_CLASS,
+            SiteMapColumns.CHILD_TITLE,
     };
 
     /**
@@ -166,6 +192,16 @@ public class SearchIndexablesContract {
          * XML resource ID for the {@link android.preference.PreferenceScreen} to load and index.
          */
         public static final String COLUMN_XML_RESID = "xmlResId";
+    }
+
+    /**
+     * @hide
+     */
+    public static final class SiteMapColumns {
+        public static final String PARENT_CLASS = "parent_class";
+        public static final String CHILD_CLASS = "child_class";
+        public static final String PARENT_TITLE = "parent_title";
+        public static final String CHILD_TITLE = "child_title";
     }
 
     /**

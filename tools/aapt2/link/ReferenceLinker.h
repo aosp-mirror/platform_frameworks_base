@@ -21,7 +21,6 @@
 
 #include "Resource.h"
 #include "ResourceValues.h"
-#include "ValueVisitor.h"
 #include "link/Linkers.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
@@ -29,83 +28,58 @@
 
 namespace aapt {
 
-/**
- * Resolves all references to resources in the ResourceTable and assigns them
- * IDs.
- * The ResourceTable must already have IDs assigned to each resource.
- * Once the ResourceTable is processed by this linker, it is ready to be
- * flattened.
- */
+// Resolves all references to resources in the ResourceTable and assigns them IDs.
+// The ResourceTable must already have IDs assigned to each resource.
+// Once the ResourceTable is processed by this linker, it is ready to be flattened.
 class ReferenceLinker : public IResourceTableConsumer {
  public:
   ReferenceLinker() = default;
 
-  /**
-   * Returns true if the symbol is visible by the reference and from the
-   * callsite.
-   */
-  static bool IsSymbolVisible(const SymbolTable::Symbol& symbol,
-                              const Reference& ref, const CallSite& callsite);
+  // Performs name mangling and looks up the resource in the symbol table. Uses the callsite's
+  // package if the reference has no package name defined (implicit).
+  // Returns nullptr if the symbol was not found.
+  static const SymbolTable::Symbol* ResolveSymbol(const Reference& reference,
+                                                  const CallSite& callsite, SymbolTable* symbols);
 
-  /**
-   * Performs name mangling and looks up the resource in the symbol table.
-   * Returns nullptr if the symbol was not found.
-   */
-  static const SymbolTable::Symbol* ResolveSymbol(const Reference& reference, SymbolTable* symbols);
-
-  /**
-   * Performs name mangling and looks up the resource in the symbol table. If
-   * the symbol is not visible by the reference at the callsite, nullptr is
-   * returned. out_error holds the error message.
-   */
+  // Performs name mangling and looks up the resource in the symbol table. If the symbol is not
+  // visible by the reference at the callsite, nullptr is returned.
+  // `out_error` holds the error message.
   static const SymbolTable::Symbol* ResolveSymbolCheckVisibility(const Reference& reference,
                                                                  const CallSite& callsite,
                                                                  SymbolTable* symbols,
                                                                  std::string* out_error);
 
-  /**
-   * Same as resolveSymbolCheckVisibility(), but also makes sure the symbol is
-   * an attribute.
-   * That is, the return value will have a non-null value for
-   * ISymbolTable::Symbol::attribute.
-   */
+  // Same as ResolveSymbolCheckVisibility(), but also makes sure the symbol is an attribute.
+  // That is, the return value will have a non-null value for ISymbolTable::Symbol::attribute.
   static const SymbolTable::Symbol* ResolveAttributeCheckVisibility(const Reference& reference,
                                                                     const CallSite& callsite,
                                                                     SymbolTable* symbols,
                                                                     std::string* out_error);
 
-  /**
-   * Resolves the attribute reference and returns an xml::AaptAttribute if
-   * successful.
-   * If resolution fails, outError holds the error message.
-   */
+  // Resolves the attribute reference and returns an xml::AaptAttribute if successful.
+  // If resolution fails, outError holds the error message.
   static Maybe<xml::AaptAttribute> CompileXmlAttribute(const Reference& reference,
                                                        const CallSite& callsite,
                                                        SymbolTable* symbols,
                                                        std::string* out_error);
 
-  /**
-   * Writes the resource name to the DiagMessage, using the
-   * "orig_name (aka <transformed_name>)" syntax.
-   */
-  static void WriteResourceName(DiagMessage* out_msg, const Reference& orig,
-                                const Reference& transformed);
+  // Writes the resource name to the DiagMessage, using the
+  // "orig_name (aka <transformed_name>)" syntax.
+  static void WriteResourceName(const Reference& orig, const CallSite& callsite,
+                                const xml::IPackageDeclStack* decls, DiagMessage* out_msg);
 
-  /**
-   * Transforms the package name of the reference to the fully qualified package
-   * name using
-   * the xml::IPackageDeclStack, then mangles and looks up the symbol. If the
-   * symbol is visible
-   * to the reference at the callsite, the reference is updated with an ID.
-   * Returns false on failure, and an error message is logged to the
-   * IDiagnostics in the context.
-   */
+  // Same as WriteResourceName but omits the 'attr' part.
+  static void WriteAttributeName(const Reference& ref, const CallSite& callsite,
+                                 const xml::IPackageDeclStack* decls, DiagMessage* out_msg);
+
+  // Transforms the package name of the reference to the fully qualified package name using
+  // the xml::IPackageDeclStack, then mangles and looks up the symbol. If the symbol is visible
+  // to the reference at the callsite, the reference is updated with an ID.
+  // Returns false on failure, and an error message is logged to the IDiagnostics in the context.
   static bool LinkReference(const CallSite& callsite, Reference* reference, IAaptContext* context,
-                            SymbolTable* symbols, xml::IPackageDeclStack* decls);
+                            SymbolTable* symbols, const xml::IPackageDeclStack* decls);
 
-  /**
-   * Links all references in the ResourceTable.
-   */
+  // Links all references in the ResourceTable.
   bool Consume(IAaptContext* context, ResourceTable* table) override;
 
  private:

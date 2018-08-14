@@ -96,6 +96,48 @@ public final class RadioMetadata implements Parcelable {
      */
     public static final String METADATA_KEY_CLOCK = "android.hardware.radio.metadata.CLOCK";
 
+    /**
+     * Technology-independent program name (station name).
+     */
+    public static final String METADATA_KEY_PROGRAM_NAME =
+            "android.hardware.radio.metadata.PROGRAM_NAME";
+
+    /**
+     * DAB ensemble name.
+     */
+    public static final String METADATA_KEY_DAB_ENSEMBLE_NAME =
+            "android.hardware.radio.metadata.DAB_ENSEMBLE_NAME";
+
+    /**
+     * DAB ensemble name - short version (up to 8 characters).
+     */
+    public static final String METADATA_KEY_DAB_ENSEMBLE_NAME_SHORT =
+            "android.hardware.radio.metadata.DAB_ENSEMBLE_NAME_SHORT";
+
+    /**
+     * DAB service name.
+     */
+    public static final String METADATA_KEY_DAB_SERVICE_NAME =
+            "android.hardware.radio.metadata.DAB_SERVICE_NAME";
+
+    /**
+     * DAB service name - short version (up to 8 characters).
+     */
+    public static final String METADATA_KEY_DAB_SERVICE_NAME_SHORT =
+            "android.hardware.radio.metadata.DAB_SERVICE_NAME_SHORT";
+
+    /**
+     * DAB component name.
+     */
+    public static final String METADATA_KEY_DAB_COMPONENT_NAME =
+            "android.hardware.radio.metadata.DAB_COMPONENT_NAME";
+
+    /**
+     * DAB component name.
+     */
+    public static final String METADATA_KEY_DAB_COMPONENT_NAME_SHORT =
+            "android.hardware.radio.metadata.DAB_COMPONENT_NAME_SHORT";
+
 
     private static final int METADATA_TYPE_INVALID = -1;
     private static final int METADATA_TYPE_INT = 0;
@@ -119,6 +161,13 @@ public final class RadioMetadata implements Parcelable {
         METADATA_KEYS_TYPE.put(METADATA_KEY_ICON, METADATA_TYPE_BITMAP);
         METADATA_KEYS_TYPE.put(METADATA_KEY_ART, METADATA_TYPE_BITMAP);
         METADATA_KEYS_TYPE.put(METADATA_KEY_CLOCK, METADATA_TYPE_CLOCK);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_PROGRAM_NAME, METADATA_TYPE_TEXT);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_DAB_ENSEMBLE_NAME, METADATA_TYPE_TEXT);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_DAB_ENSEMBLE_NAME_SHORT, METADATA_TYPE_TEXT);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_DAB_SERVICE_NAME, METADATA_TYPE_TEXT);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_DAB_SERVICE_NAME_SHORT, METADATA_TYPE_TEXT);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_DAB_COMPONENT_NAME, METADATA_TYPE_TEXT);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_DAB_COMPONENT_NAME_SHORT, METADATA_TYPE_TEXT);
     }
 
     // keep in sync with: system/media/radio/include/system/radio_metadata.h
@@ -218,6 +267,29 @@ public final class RadioMetadata implements Parcelable {
 
     private RadioMetadata(Parcel in) {
         mBundle = in.readBundle();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("RadioMetadata[");
+
+        final String removePrefix = "android.hardware.radio.metadata";
+
+        boolean first = true;
+        for (String key : mBundle.keySet()) {
+            if (first) first = false;
+            else sb.append(", ");
+
+            String keyDisp = key;
+            if (key.startsWith(removePrefix)) keyDisp = key.substring(removePrefix.length());
+
+            sb.append(keyDisp);
+            sb.append('=');
+            sb.append(mBundle.get(key));
+        }
+
+        sb.append("]");
+        return sb.toString();
     }
 
     /**

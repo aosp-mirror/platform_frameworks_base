@@ -142,7 +142,7 @@ public class DoubleTapHelper {
                 && Math.abs(event.getY() - mDownY) < mTouchSlop;
     }
 
-    private boolean isWithinDoubleTapSlop(MotionEvent event) {
+    public boolean isWithinDoubleTapSlop(MotionEvent event) {
         if (!mActivated) {
             // If we're not activated there's no double tap slop to satisfy.
             return true;

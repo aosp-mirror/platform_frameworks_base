@@ -17,39 +17,72 @@
 package android.hardware.location;
 
 // Declare any non-default types here with import statements
-import android.hardware.location.ContextHubMessage;
 import android.hardware.location.ContextHubInfo;
+import android.hardware.location.ContextHubMessage;
 import android.hardware.location.NanoApp;
-import android.hardware.location.NanoAppInstanceInfo;
+import android.hardware.location.NanoAppBinary;
 import android.hardware.location.NanoAppFilter;
+import android.hardware.location.NanoAppInstanceInfo;
 import android.hardware.location.IContextHubCallback;
+import android.hardware.location.IContextHubClient;
+import android.hardware.location.IContextHubClientCallback;
+import android.hardware.location.IContextHubTransactionCallback;
 
 /**
  * @hide
  */
 interface IContextHubService {
 
-    // register a callback to receive messages
+    // Registers a callback to receive messages
     int registerCallback(in IContextHubCallback callback);
 
     // Gets a list of available context hub handles
     int[] getContextHubHandles();
 
-    // Get the properties of a hub
+    // Gets the properties of a hub
     ContextHubInfo getContextHubInfo(int contextHubHandle);
 
-    // Load a nanoapp on a specified context hub
-    int loadNanoApp(int hubHandle, in NanoApp app);
+    // Loads a nanoapp at the specified hub (old API)
+    int loadNanoApp(int contextHubHandle, in NanoApp nanoApp);
 
-    // Unload a nanoapp instance
-    int unloadNanoApp(int nanoAppInstanceHandle);
+    // Unloads a nanoapp given its instance ID (old API)
+    int unloadNanoApp(int nanoAppHandle);
 
-    // get information about a nanoAppInstance
-    NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppInstanceHandle);
+    // Gets the NanoAppInstanceInfo of a nanoapp give its instance ID
+    NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppHandle);
 
-    // find all nanoApp instances matching some filter
-    int[] findNanoAppOnHub(int hubHandle, in NanoAppFilter filter);
+    // Finds all nanoApp instances matching some filter
+    int[] findNanoAppOnHub(int contextHubHandle, in NanoAppFilter filter);
 
-    // send a message to a nanoApp
-    int sendMessage(int hubHandle, int nanoAppHandle, in ContextHubMessage msg);
+    // Sends a message to a nanoApp
+    int sendMessage(int contextHubHandle, int nanoAppHandle, in ContextHubMessage msg);
+
+    // Creates a client to send and receive messages
+    IContextHubClient createClient(in IContextHubClientCallback client, int contextHubId);
+
+    // Returns a list of ContextHub objects of available hubs
+    List<ContextHubInfo> getContextHubs();
+
+    // Loads a nanoapp at the specified hub (new API)
+    void loadNanoAppOnHub(
+            int contextHubId, in IContextHubTransactionCallback transactionCallback,
+            in NanoAppBinary nanoAppBinary);
+
+    // Unloads a nanoapp on a specified context hub (new API)
+    void unloadNanoAppFromHub(
+            int contextHubId, in IContextHubTransactionCallback transactionCallback,
+            long nanoAppId);
+
+    // Enables a nanoapp at the specified hub
+    void enableNanoApp(
+            int contextHubId, in IContextHubTransactionCallback transactionCallback,
+            long nanoAppId);
+
+    // Disables a nanoapp at the specified hub
+    void disableNanoApp(
+            int contextHubId, in IContextHubTransactionCallback transactionCallback,
+            long nanoAppId);
+
+    // Queries for a list of nanoapps
+    void queryNanoApps(int contextHubId, in IContextHubTransactionCallback transactionCallback);
 }

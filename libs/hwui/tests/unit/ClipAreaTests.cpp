@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include <SkPath.h>
 #include <SkRegion.h>
+#include <gtest/gtest.h>
 
 #include "ClipArea.h"
 
@@ -194,7 +194,8 @@ TEST(ClipArea, serializeIntersectedClip) {
     {
         auto origRectClip = area.serializeClip(allocator);
         ASSERT_NE(nullptr, origRectClip);
-        EXPECT_EQ(origRectClip, area.serializeIntersectedClip(allocator, nullptr, Matrix4::identity()));
+        EXPECT_EQ(origRectClip,
+                  area.serializeIntersectedClip(allocator, nullptr, Matrix4::identity()));
     }
 
     // rect
@@ -208,11 +209,13 @@ TEST(ClipArea, serializeIntersectedClip) {
         ASSERT_EQ(ClipMode::Rectangle, resolvedClip->mode);
         EXPECT_EQ(Rect(100, 100, 200, 200), resolvedClip->rect);
 
-        EXPECT_EQ(resolvedClip, area.serializeIntersectedClip(allocator, &recordedClip, translateScale))
+        EXPECT_EQ(resolvedClip,
+                  area.serializeIntersectedClip(allocator, &recordedClip, translateScale))
                 << "Must return previous serialization, since input is same";
 
         ClipRect recordedClip2(Rect(100, 100));
-        EXPECT_NE(resolvedClip, area.serializeIntersectedClip(allocator, &recordedClip2, translateScale))
+        EXPECT_NE(resolvedClip,
+                  area.serializeIntersectedClip(allocator, &recordedClip2, translateScale))
                 << "Shouldn't return previous serialization, since matrix location is different";
     }
 
@@ -222,7 +225,8 @@ TEST(ClipArea, serializeIntersectedClip) {
     area.clipRectWithTransform(Rect(200, 200), &rotate, SkRegion::kIntersect_Op);
     {
         ClipRect recordedClip(Rect(100, 100));
-        auto resolvedClip = area.serializeIntersectedClip(allocator, &recordedClip, Matrix4::identity());
+        auto resolvedClip =
+                area.serializeIntersectedClip(allocator, &recordedClip, Matrix4::identity());
         ASSERT_NE(nullptr, resolvedClip);
         ASSERT_EQ(ClipMode::RectangleList, resolvedClip->mode);
         auto clipRectList = reinterpret_cast<const ClipRectList*>(resolvedClip);
@@ -243,8 +247,9 @@ TEST(ClipArea, serializeIntersectedClip) {
 
         Matrix4 translate10x20;
         translate10x20.loadTranslate(10, 20, 0);
-        auto resolvedClip = area.serializeIntersectedClip(allocator, &recordedClip,
-                translate10x20); // Note: only translate for now, others not handled correctly
+        auto resolvedClip = area.serializeIntersectedClip(
+                allocator, &recordedClip,
+                translate10x20);  // Note: only translate for now, others not handled correctly
         ASSERT_NE(nullptr, resolvedClip);
         ASSERT_EQ(ClipMode::Region, resolvedClip->mode);
         auto clipRegion = reinterpret_cast<const ClipRegion*>(resolvedClip);
@@ -267,7 +272,8 @@ TEST(ClipArea, serializeIntersectedClip_snap) {
         ClipRect recordedClip(Rect(100.12, 100.74));
         Matrix4 translateScale;
         translateScale.loadTranslate(100, 100, 0);
-        translateScale.scale(2, 3, 1); // recorded clip will have non-int coords, even after transform
+        translateScale.scale(2, 3,
+                             1);  // recorded clip will have non-int coords, even after transform
         auto resolvedClip = area.serializeIntersectedClip(allocator, &recordedClip, translateScale);
         ASSERT_NE(nullptr, resolvedClip);
         EXPECT_EQ(ClipMode::Rectangle, resolvedClip->mode);
@@ -343,5 +349,5 @@ TEST(ClipArea, applyTransformToRegion_rotate90) {
     EXPECT_EQ(SkIRect::MakeLTRB(-4, 1, -2, 3), region.getBounds());
 }
 
-} // namespace uirenderer
-} // namespace android
+}  // namespace uirenderer
+}  // namespace android

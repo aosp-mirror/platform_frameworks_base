@@ -16,6 +16,9 @@
 
 #pragma once
 
+#include <gui/Surface.h>
+#include <utils/StrongPointer.h>
+
 #include <string>
 #include <unordered_map>
 
@@ -52,9 +55,8 @@ public:
 
     class Registrar {
     public:
-        explicit Registrar(const TestScene::Info& info) {
-            TestScene::registerScene(info);
-        }
+        explicit Registrar(const TestScene::Info& info) { TestScene::registerScene(info); }
+
     private:
         Registrar() = delete;
         Registrar(const Registrar&) = delete;
@@ -67,8 +69,10 @@ public:
 
     static std::unordered_map<std::string, Info>& testMap();
     static void registerScene(const Info& info);
+
+    sp<Surface> renderTarget;
 };
 
-} // namespace test
-} // namespace uirenderer
-} // namespace android
+}  // namespace test
+}  // namespace uirenderer
+}  // namespace android

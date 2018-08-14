@@ -16,6 +16,7 @@
 
 package android.app.admin;
 
+import android.annotation.UserIdInt;
 import android.content.Intent;
 
 import java.util.List;
@@ -101,4 +102,49 @@ public abstract class DevicePolicyManagerInternal {
      * not enforced by the profile/device owner.
      */
     public abstract Intent createUserRestrictionSupportIntent(int userId, String userRestriction);
+
+    /**
+     * Returns whether this user/profile is affiliated with the device.
+     *
+     * <p>
+     * By definition, the user that the device owner runs on is always affiliated with the device.
+     * Any other user/profile is considered affiliated with the device if the set specified by its
+     * profile owner via {@link DevicePolicyManager#setAffiliationIds} intersects with the device
+     * owner's.
+     * <p>
+     * Profile owner on the primary user will never be considered as affiliated as there is no
+     * device owner to be affiliated with.
+     */
+    public abstract boolean isUserAffiliatedWithDevice(int userId);
+
+    /**
+     * Reports that a profile has changed to use a unified or separate credential.
+     *
+     * @param userId User ID of the profile.
+     */
+    public abstract void reportSeparateProfileChallengeChanged(@UserIdInt int userId);
+
+    /**
+     * Check whether the user could have their password reset in an untrusted manor due to there
+     * being an admin which can call {@link #resetPassword} to reset the password without knowledge
+     * of the previous password.
+     *
+     * @param userId The user in question
+     */
+    public abstract boolean canUserHaveUntrustedCredentialReset(@UserIdInt int userId);
+
+    /**
+     * Return text of error message if printing is disabled.
+     * Called by Print Service when printing is disabled by PO or DO when printing is attempted.
+     *
+     * @param userId The user in question
+     * @return localized error message
+     */
+    public abstract CharSequence getPrintingDisabledReasonForUser(@UserIdInt int userId);
+
+    /**
+     * @return cached version of DPM policies that can be accessed without risking deadlocks.
+     * Do not call it directly. Use {@link DevicePolicyCache#getInstance()} instead.
+     */
+    protected abstract DevicePolicyCache getDevicePolicyCache();
 }

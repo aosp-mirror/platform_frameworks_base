@@ -30,8 +30,8 @@
 
 #include <stddef.h>
 #include <stdlib.h>
-#include <type_traits>
 #include <utils/Log.h>
+#include <type_traits>
 
 #include <vector>
 
@@ -43,28 +43,27 @@ class InlineStdAllocator {
 public:
     struct Allocation {
         PREVENT_COPY_AND_ASSIGN(Allocation);
+
     public:
-        Allocation() {};
+        Allocation(){};
         // char array instead of T array, so memory is uninitialized, with no destructors run
         char array[sizeof(T) * SIZE];
         bool inUse = false;
     };
 
-    typedef T value_type; // needed to implement std::allocator
-    typedef T* pointer; // needed to implement std::allocator
+    typedef T value_type;  // needed to implement std::allocator
+    typedef T* pointer;    // needed to implement std::allocator
 
-    explicit InlineStdAllocator(Allocation& allocation)
-            : mAllocation(allocation) {}
-    InlineStdAllocator(const InlineStdAllocator& other)
-            : mAllocation(other.mAllocation) {}
+    explicit InlineStdAllocator(Allocation& allocation) : mAllocation(allocation) {}
+    InlineStdAllocator(const InlineStdAllocator& other) : mAllocation(other.mAllocation) {}
     ~InlineStdAllocator() {}
 
     T* allocate(size_t num, const void* = 0) {
         if (!mAllocation.inUse && num <= SIZE) {
             mAllocation.inUse = true;
-            return (T*) mAllocation.array;
+            return (T*)mAllocation.array;
         } else {
-            return (T*) malloc(num * sizeof(T));
+            return (T*)malloc(num * sizeof(T));
         }
     }
 
@@ -88,20 +87,19 @@ public:
 template <typename T, size_t SIZE>
 class FatVector : public std::vector<T, InlineStdAllocator<T, SIZE>> {
 public:
-    FatVector() : std::vector<T, InlineStdAllocator<T, SIZE>>(
-            InlineStdAllocator<T, SIZE>(mAllocation)) {
+    FatVector()
+            : std::vector<T, InlineStdAllocator<T, SIZE>>(
+                      InlineStdAllocator<T, SIZE>(mAllocation)) {
         this->reserve(SIZE);
     }
 
-    explicit FatVector(size_t capacity) : FatVector() {
-        this->resize(capacity);
-    }
+    explicit FatVector(size_t capacity) : FatVector() { this->resize(capacity); }
 
 private:
     typename InlineStdAllocator<T, SIZE>::Allocation mAllocation;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_FAT_VECTOR_H
+#endif  // ANDROID_FAT_VECTOR_H

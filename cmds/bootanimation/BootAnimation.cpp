@@ -66,9 +66,12 @@
 namespace android {
 
 static const char OEM_BOOTANIMATION_FILE[] = "/oem/media/bootanimation.zip";
+static const char PRODUCT_BOOTANIMATION_FILE[] = "/product/media/bootanimation.zip";
 static const char SYSTEM_BOOTANIMATION_FILE[] = "/system/media/bootanimation.zip";
+static const char PRODUCT_ENCRYPTED_BOOTANIMATION_FILE[] = "/product/media/bootanimation-encrypted.zip";
 static const char SYSTEM_ENCRYPTED_BOOTANIMATION_FILE[] = "/system/media/bootanimation-encrypted.zip";
 static const char OEM_SHUTDOWNANIMATION_FILE[] = "/oem/media/shutdownanimation.zip";
+static const char PRODUCT_SHUTDOWNANIMATION_FILE[] = "/product/media/shutdownanimation.zip";
 static const char SYSTEM_SHUTDOWNANIMATION_FILE[] = "/system/media/shutdownanimation.zip";
 
 static const char SYSTEM_DATA_DIR_PATH[] = "/data/system";
@@ -260,9 +263,9 @@ status_t BootAnimation::readyToRun() {
     sp<SurfaceControl> control = session()->createSurface(String8("BootAnimation"),
             dinfo.w, dinfo.h, PIXEL_FORMAT_RGB_565);
 
-    SurfaceComposerClient::openGlobalTransaction();
-    control->setLayer(0x40000000);
-    SurfaceComposerClient::closeGlobalTransaction();
+    SurfaceComposerClient::Transaction t;
+    t.setLayer(control, 0x40000000)
+        .apply();
 
     sp<Surface> s = control->getSurface();
 
@@ -308,14 +311,20 @@ status_t BootAnimation::readyToRun() {
     bool encryptedAnimation = atoi(decrypt) != 0 ||
         !strcmp("trigger_restart_min_framework", decrypt);
 
-    if (!mShuttingDown && encryptedAnimation &&
-        (access(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE, R_OK) == 0)) {
-        mZipFileName = SYSTEM_ENCRYPTED_BOOTANIMATION_FILE;
-        return NO_ERROR;
+    if (!mShuttingDown && encryptedAnimation) {
+        static const char* encryptedBootFiles[] =
+            {PRODUCT_ENCRYPTED_BOOTANIMATION_FILE, SYSTEM_ENCRYPTED_BOOTANIMATION_FILE};
+        for (const char* f : encryptedBootFiles) {
+            if (access(f, R_OK) == 0) {
+                mZipFileName = f;
+                return NO_ERROR;
+            }
+        }
     }
-    static const char* bootFiles[] = {OEM_BOOTANIMATION_FILE, SYSTEM_BOOTANIMATION_FILE};
+    static const char* bootFiles[] =
+        {PRODUCT_BOOTANIMATION_FILE, OEM_BOOTANIMATION_FILE, SYSTEM_BOOTANIMATION_FILE};
     static const char* shutdownFiles[] =
-        {OEM_SHUTDOWNANIMATION_FILE, SYSTEM_SHUTDOWNANIMATION_FILE};
+        {PRODUCT_SHUTDOWNANIMATION_FILE, OEM_SHUTDOWNANIMATION_FILE, SYSTEM_SHUTDOWNANIMATION_FILE};
 
     for (const char* f : (!mShuttingDown ? bootFiles : shutdownFiles)) {
         if (access(f, R_OK) == 0) {

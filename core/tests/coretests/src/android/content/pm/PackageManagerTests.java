@@ -46,13 +46,8 @@ import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.StatFs;
 import android.os.SystemClock;
-import android.os.storage.IStorageManager;
-import android.os.storage.StorageListener;
-import android.os.storage.StorageManager;
-import android.os.storage.StorageResultCode;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.system.ErrnoException;
@@ -103,8 +98,6 @@ public class PackageManagerTests extends AndroidTestCase {
 
     private static final int APP_INSTALL_SDCARD = PackageHelper.APP_INSTALL_EXTERNAL;
 
-    private boolean mOrigState;
-
     void failStr(String errMsg) {
         Log.w(TAG, "errMsg=" + errMsg);
         fail(errMsg);
@@ -112,29 +105,6 @@ public class PackageManagerTests extends AndroidTestCase {
 
     void failStr(Exception e) {
         failStr(e.getMessage());
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        mOrigState = checkMediaState(Environment.MEDIA_MOUNTED);
-        if (!mountMedia()) {
-            Log.i(TAG, "sdcard not mounted? Some of these tests might fail");
-        }
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        // Restore media state.
-        boolean newState = checkMediaState(Environment.MEDIA_MOUNTED);
-        if (newState != mOrigState) {
-            if (mOrigState) {
-                mountMedia();
-            } else {
-                unmountMedia();
-            }
-        }
-        super.tearDown();
     }
 
     private abstract static class GenericReceiver extends BroadcastReceiver {
@@ -782,17 +752,6 @@ public class PackageManagerTests extends AndroidTestCase {
         sampleInstallFromRawResource(0, true);
     }
 
-    @LargeTest
-    public void testInstallSdcard() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        mountMedia();
-        sampleInstallFromRawResource(PackageManager.INSTALL_EXTERNAL, true);
-    }
-
     /* ------------------------- Test replacing packages -------------- */
     class ReplaceReceiver extends GenericReceiver {
         String pkgName;
@@ -871,7 +830,7 @@ public class PackageManagerTests extends AndroidTestCase {
             receiver = new InstallReceiver(ip.pkg.packageName);
         }
         try {
-            invokeInstallPackage(ip.packageURI, flags, receiver, replace);
+            invokeInstallPackage(ip.packageURI, flags, receiver, true);
             if (replace) {
                 assertInstall(ip.pkg, flags, ip.pkg.installLocation);
             }
@@ -881,7 +840,7 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     @LargeTest
-    public void testReplaceFailNormalInternal() throws Exception {
+    public void testReplaceFlagDoesNotNeedToBeSet() throws Exception {
         sampleReplaceFromRawResource(0);
     }
 
@@ -1079,240 +1038,6 @@ public class PackageManagerTests extends AndroidTestCase {
         }
 
         deleteFromRawResource(PackageManager.INSTALL_EXTERNAL, PackageManager.DELETE_KEEP_DATA);
-    }
-
-    /* sdcard mount/unmount tests ***** */
-
-    class SdMountReceiver extends GenericReceiver {
-        String pkgNames[];
-
-        boolean status = true;
-
-        SdMountReceiver(String[] pkgNames) {
-            this.pkgNames = pkgNames;
-            IntentFilter filter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
-            super.setFilter(filter);
-        }
-
-        public boolean notifyNow(Intent intent) {
-            Log.i(TAG, "okay 1");
-            String action = intent.getAction();
-            if (!Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
-                return false;
-            }
-            String rpkgList[] = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-            for (String pkg : pkgNames) {
-                boolean found = false;
-                for (String rpkg : rpkgList) {
-                    if (rpkg.equals(pkg)) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    status = false;
-                    return true;
-                }
-            }
-            return true;
-        }
-    }
-
-    class SdUnMountReceiver extends GenericReceiver {
-        String pkgNames[];
-
-        boolean status = true;
-
-        SdUnMountReceiver(String[] pkgNames) {
-            this.pkgNames = pkgNames;
-            IntentFilter filter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-            super.setFilter(filter);
-        }
-
-        public boolean notifyNow(Intent intent) {
-            String action = intent.getAction();
-            if (!Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
-                return false;
-            }
-            String rpkgList[] = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-            for (String pkg : pkgNames) {
-                boolean found = false;
-                for (String rpkg : rpkgList) {
-                    if (rpkg.equals(pkg)) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    status = false;
-                    return true;
-                }
-            }
-            return true;
-        }
-    }
-
-    IStorageManager getSm() {
-        IBinder service = ServiceManager.getService("mount");
-        if (service != null) {
-            return IStorageManager.Stub.asInterface(service);
-        } else {
-            Log.e(TAG, "Can't get storagemanager service");
-        }
-        return null;
-    }
-
-    boolean checkMediaState(String desired) {
-        String actual = Environment.getExternalStorageState();
-        if (desired.equals(actual)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    boolean mountMedia() {
-        // We can't mount emulated storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return true;
-        }
-
-        if (checkMediaState(Environment.MEDIA_MOUNTED)) {
-            return true;
-        }
-
-        final String path = Environment.getExternalStorageDirectory().toString();
-        StorageListener observer = new StorageListener(Environment.MEDIA_MOUNTED);
-        StorageManager sm = (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
-        sm.registerListener(observer);
-        try {
-            // Wait on observer
-            synchronized (observer) {
-                int ret = getSm().mountVolume(path);
-                if (ret != StorageResultCode.OperationSucceeded) {
-                    throw new Exception("Could not mount the media");
-                }
-                long waitTime = 0;
-                while ((!observer.isDone()) && (waitTime < MAX_WAIT_TIME)) {
-                    observer.wait(WAIT_TIME_INCR);
-                    waitTime += WAIT_TIME_INCR;
-                }
-                if (!observer.isDone()) {
-                    throw new Exception("Timed out waiting for unmount media notification");
-                }
-                return true;
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Exception : " + e);
-            return false;
-        } finally {
-            sm.unregisterListener(observer);
-        }
-    }
-
-    private boolean unmountMedia() {
-        // We can't unmount emulated storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return true;
-        }
-
-        if (checkMediaState(Environment.MEDIA_UNMOUNTED)) {
-            return true;
-        }
-
-        final String path = Environment.getExternalStorageDirectory().getPath();
-        StorageListener observer = new StorageListener(Environment.MEDIA_UNMOUNTED);
-        StorageManager sm = (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
-        sm.registerListener(observer);
-        try {
-            // Wait on observer
-            synchronized (observer) {
-                getSm().unmountVolume(path, true, false);
-                long waitTime = 0;
-                while ((!observer.isDone()) && (waitTime < MAX_WAIT_TIME)) {
-                    observer.wait(WAIT_TIME_INCR);
-                    waitTime += WAIT_TIME_INCR;
-                }
-                if (!observer.isDone()) {
-                    throw new Exception("Timed out waiting for unmount media notification");
-                }
-                return true;
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Exception : " + e);
-            return false;
-        } finally {
-            sm.unregisterListener(observer);
-        }
-    }
-
-    private boolean mountFromRawResource() throws Exception {
-        // Install pkg on sdcard
-        InstallParams ip = sampleInstallFromRawResource(PackageManager.INSTALL_EXTERNAL, false);
-        if (localLOGV) Log.i(TAG, "Installed pkg on sdcard");
-        boolean origState = checkMediaState(Environment.MEDIA_MOUNTED);
-        boolean registeredReceiver = false;
-        SdMountReceiver receiver = new SdMountReceiver(new String[]{ip.pkg.packageName});
-        try {
-            if (localLOGV) Log.i(TAG, "Unmounting media");
-            // Unmount media
-            assertTrue(unmountMedia());
-            if (localLOGV) Log.i(TAG, "Unmounted media");
-            // Register receiver here
-            PackageManager pm = getPm();
-            mContext.registerReceiver(receiver, receiver.filter);
-            registeredReceiver = true;
-
-            // Wait on receiver
-            synchronized (receiver) {
-                if (localLOGV) Log.i(TAG, "Mounting media");
-                // Mount media again
-                assertTrue(mountMedia());
-                if (localLOGV) Log.i(TAG, "Mounted media");
-                if (localLOGV) Log.i(TAG, "Waiting for notification");
-                long waitTime = 0;
-                // Verify we received the broadcast
-                waitTime = 0;
-                while ((!receiver.isDone()) && (waitTime < MAX_WAIT_TIME)) {
-                    receiver.wait(WAIT_TIME_INCR);
-                    waitTime += WAIT_TIME_INCR;
-                }
-                if(!receiver.isDone()) {
-                    failStr("Timed out waiting for EXTERNAL_APPLICATIONS notification");
-                }
-                return receiver.received;
-            }
-        } catch (InterruptedException e) {
-            failStr(e);
-            return false;
-        } finally {
-            if (registeredReceiver) {
-                mContext.unregisterReceiver(receiver);
-            }
-            // Restore original media state
-            if (origState) {
-                mountMedia();
-            } else {
-                unmountMedia();
-            }
-            if (localLOGV) Log.i(TAG, "Cleaning up install");
-            cleanUpInstall(ip);
-        }
-    }
-
-    /*
-     * Install package on sdcard. Unmount and then mount the media.
-     * (Use PackageManagerService private api for now)
-     * Make sure the installed package is available.
-     */
-    @LargeTest
-    public void testMountSdNormalInternal() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        assertTrue(mountFromRawResource());
     }
 
     void cleanUpInstall(InstallParams ip) throws Exception {
@@ -1710,64 +1435,6 @@ public class PackageManagerTests extends AndroidTestCase {
             }
             // Restore default install location
             setInstallLoc(origDefaultLoc);
-        }
-    }
-
-    /*
-     * Test that an install error code is returned when media is unmounted
-     * and package installed on sdcard via package manager flag.
-     */
-    @LargeTest
-    public void testInstallSdcardUnmount() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        boolean origState = checkMediaState(Environment.MEDIA_MOUNTED);
-        try {
-            // Unmount sdcard
-            assertTrue(unmountMedia());
-            // Try to install and make sure an error code is returned.
-            installFromRawResource("install.apk", R.raw.install,
-                    PackageManager.INSTALL_EXTERNAL, false,
-                    true, PackageInstaller.STATUS_FAILURE_STORAGE,
-                    PackageInfo.INSTALL_LOCATION_AUTO);
-        } finally {
-            // Restore original media state
-            if (origState) {
-                mountMedia();
-            } else {
-                unmountMedia();
-            }
-        }
-    }
-
-    /*
-     * Unmount sdcard. Try installing an app with manifest option to install
-     * on sdcard. Make sure it gets installed on internal flash.
-     */
-    @LargeTest
-    public void testInstallManifestSdcardUnmount() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        boolean origState = checkMediaState(Environment.MEDIA_MOUNTED);
-        try {
-            // Unmount sdcard
-            assertTrue(unmountMedia());
-            InstallParams ip = new InstallParams("install.apk", R.raw.install_loc_sdcard);
-            installFromRawResource(ip, 0, true, false, -1,
-                    PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
-        } finally {
-            // Restore original media state
-            if (origState) {
-                mountMedia();
-            } else {
-                unmountMedia();
-            }
         }
     }
 
@@ -2522,133 +2189,6 @@ public class PackageManagerTests extends AndroidTestCase {
             }
             if (ip != null) {
                 cleanUpInstall(ip);
-            }
-        }
-    }
-
-    /*
-     * Ensure that permissions are properly declared.
-     */
-    @LargeTest
-    public void testInstallOnSdPermissionsUnmount() throws Exception {
-        InstallParams ip = null;
-        boolean origMediaState = checkMediaState(Environment.MEDIA_MOUNTED);
-        try {
-            // **: Upon installing a package, are its declared permissions published?
-            int iFlags = PackageManager.INSTALL_INTERNAL;
-            int iApk = R.raw.install_decl_perm;
-            ip = installFromRawResource("install.apk", iApk,
-                    iFlags, false,
-                    false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
-            assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
-            assertPermissions(BASE_PERMISSIONS_DEFINED);
-            // Unmount media here
-            assertTrue(unmountMedia());
-            // Mount media again
-            mountMedia();
-            //Check permissions now
-            assertPermissions(BASE_PERMISSIONS_DEFINED);
-        } finally {
-            if (ip != null) {
-                cleanUpInstall(ip);
-            }
-        }
-    }
-
-    /* This test creates a stale container via StorageManagerService and then installs
-     * a package and verifies that the stale container is cleaned up and install
-     * is successful.
-     * Please note that this test is very closely tied to the framework's
-     * naming convention for secure containers.
-     */
-    @LargeTest
-    public void testInstallSdcardStaleContainer() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        boolean origMediaState = checkMediaState(Environment.MEDIA_MOUNTED);
-        try {
-            // Mount media first
-            mountMedia();
-            String outFileName = "install.apk";
-            int rawResId = R.raw.install;
-            PackageManager pm = mContext.getPackageManager();
-            File filesDir = mContext.getFilesDir();
-            File outFile = new File(filesDir, outFileName);
-            Uri packageURI = getInstallablePackage(rawResId, outFile);
-            PackageParser.Package pkg = parsePackage(packageURI);
-            assertNotNull(pkg);
-            // Install an app on sdcard.
-            installFromRawResource(outFileName, rawResId,
-                    PackageManager.INSTALL_EXTERNAL, false,
-                    false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
-            // Unmount sdcard
-            unmountMedia();
-            // Delete the app on sdcard to leave a stale container on sdcard.
-            GenericReceiver receiver = new DeleteReceiver(pkg.packageName);
-            assertTrue(invokeDeletePackage(pkg.packageName, 0, receiver));
-            mountMedia();
-            // Reinstall the app and make sure it gets installed.
-            installFromRawResource(outFileName, rawResId,
-                    PackageManager.INSTALL_EXTERNAL, true,
-                    false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
-        } catch (Exception e) {
-            failStr(e.getMessage());
-        } finally {
-            if (origMediaState) {
-                mountMedia();
-            } else {
-                unmountMedia();
-            }
-
-        }
-    }
-
-    /* This test installs an application on sdcard and unmounts media.
-     * The app is then re-installed on internal storage. The sdcard is mounted
-     * and verified that the re-installation on internal storage takes precedence.
-     */
-    @LargeTest
-    public void testInstallSdcardStaleContainerReinstall() throws Exception {
-        // Do not run on devices with emulated external storage.
-        if (Environment.isExternalStorageEmulated()) {
-            return;
-        }
-
-        boolean origMediaState = checkMediaState(Environment.MEDIA_MOUNTED);
-        try {
-            // Mount media first
-            mountMedia();
-            String outFileName = "install.apk";
-            int rawResId = R.raw.install;
-            PackageManager pm = mContext.getPackageManager();
-            File filesDir = mContext.getFilesDir();
-            File outFile = new File(filesDir, outFileName);
-            Uri packageURI = getInstallablePackage(rawResId, outFile);
-            PackageParser.Package pkg = parsePackage(packageURI);
-            assertNotNull(pkg);
-            // Install an app on sdcard.
-            installFromRawResource(outFileName, rawResId,
-                    PackageManager.INSTALL_EXTERNAL, false,
-                    false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
-            // Unmount sdcard
-            unmountMedia();
-            // Reinstall the app and make sure it gets installed on internal storage.
-            installFromRawResource(outFileName, rawResId,
-                    PackageManager.INSTALL_REPLACE_EXISTING, false,
-                    false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
-            mountMedia();
-            // Verify that the app installed is on internal storage.
-            assertInstall(pkg, 0, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
-        } catch (Exception e) {
-            failStr(e.getMessage());
-        } finally {
-            if (origMediaState) {
-                mountMedia();
-            } else {
-                unmountMedia();
             }
         }
     }

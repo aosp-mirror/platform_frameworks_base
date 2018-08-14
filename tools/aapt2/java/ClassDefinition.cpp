@@ -18,33 +18,45 @@
 
 #include "androidfw/StringPiece.h"
 
-using android::StringPiece;
+using ::aapt::text::Printer;
+using ::android::StringPiece;
 
 namespace aapt {
 
-void ClassMember::WriteToStream(const StringPiece& prefix, bool final, std::ostream* out) const {
-  processor_.WriteToStream(out, prefix);
+void ClassMember::Print(bool /*final*/, Printer* printer) const {
+  processor_.Print(printer);
 }
 
 void MethodDefinition::AppendStatement(const StringPiece& statement) {
   statements_.push_back(statement.to_string());
 }
 
-void MethodDefinition::WriteToStream(const StringPiece& prefix, bool final,
-                                     std::ostream* out) const {
-  *out << prefix << signature_ << " {\n";
+void MethodDefinition::Print(bool final, Printer* printer) const {
+  printer->Print(signature_).Println(" {");
+  printer->Indent();
   for (const auto& statement : statements_) {
-    *out << prefix << "  " << statement << "\n";
+    printer->Println(statement);
   }
-  *out << prefix << "}";
+  printer->Undent();
+  printer->Print("}");
 }
 
 ClassDefinition::Result ClassDefinition::AddMember(std::unique_ptr<ClassMember> member) {
   Result result = Result::kAdded;
   auto iter = indexed_members_.find(member->GetName());
   if (iter != indexed_members_.end()) {
-    // Overwrite the entry.
-    ordered_members_[iter->second].reset();
+    // Overwrite the entry. Be careful, as the key in indexed_members_ is actually memory owned
+    // by the value at ordered_members_[index]. Since overwriting a value for a key doesn't replace
+    // the key (the initial key inserted into the unordered_map is kept), we must erase and then
+    // insert a new key, whose memory is being kept around. We do all this to avoid using more
+    // memory for each key.
+    size_t index = iter->second;
+
+    // Erase the key + value from the map.
+    indexed_members_.erase(iter);
+
+    // Now clear the memory that was backing the key (now erased).
+    ordered_members_[index].reset();
     result = Result::kOverridden;
   }
 
@@ -62,34 +74,32 @@ bool ClassDefinition::empty() const {
   return true;
 }
 
-void ClassDefinition::WriteToStream(const StringPiece& prefix, bool final,
-                                    std::ostream* out) const {
+void ClassDefinition::Print(bool final, Printer* printer) const {
   if (empty() && !create_if_empty_) {
     return;
   }
 
-  ClassMember::WriteToStream(prefix, final, out);
+  ClassMember::Print(final, printer);
 
-  *out << prefix << "public ";
+  printer->Print("public ");
   if (qualifier_ == ClassQualifier::kStatic) {
-    *out << "static ";
+    printer->Print("static ");
   }
-  *out << "final class " << name_ << " {\n";
-
-  std::string new_prefix = prefix.to_string();
-  new_prefix.append(kIndent);
+  printer->Print("final class ").Print(name_).Println(" {");
+  printer->Indent();
 
   for (const std::unique_ptr<ClassMember>& member : ordered_members_) {
     // There can be nullptr members when a member is added to the ClassDefinition
     // and takes precedence over a previous member with the same name. The overridden member is
     // set to nullptr.
     if (member != nullptr) {
-      member->WriteToStream(new_prefix, final, out);
-      *out << "\n";
+      member->Print(final, printer);
+      printer->Println();
     }
   }
 
-  *out << prefix << "}";
+  printer->Undent();
+  printer->Print("}");
 }
 
 constexpr static const char* sWarningHeader =
@@ -100,12 +110,12 @@ constexpr static const char* sWarningHeader =
     " * should not be modified by hand.\n"
     " */\n\n";
 
-bool ClassDefinition::WriteJavaFile(const ClassDefinition* def,
-                                    const StringPiece& package, bool final,
-                                    std::ostream* out) {
-  *out << sWarningHeader << "package " << package << ";\n\n";
-  def->WriteToStream("", final, out);
-  return bool(*out);
+void ClassDefinition::WriteJavaFile(const ClassDefinition* def, const StringPiece& package,
+                                    bool final, io::OutputStream* out) {
+  Printer printer(out);
+  printer.Print(sWarningHeader).Print("package ").Print(package).Println(";");
+  printer.Println();
+  def->Print(final, &printer);
 }
 
 }  // namespace aapt
