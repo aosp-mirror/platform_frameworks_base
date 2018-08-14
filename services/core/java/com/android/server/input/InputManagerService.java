@@ -17,25 +17,6 @@
 package com.android.server.input;
 
 import android.annotation.NonNull;
-import android.os.LocaleList;
-import android.os.ShellCallback;
-import android.util.Log;
-import android.view.Display;
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.internal.notification.SystemNotificationChannels;
-import com.android.internal.os.SomeArgs;
-import com.android.internal.R;
-import com.android.internal.util.DumpUtils;
-import com.android.internal.util.Preconditions;
-import com.android.internal.util.XmlUtils;
-import com.android.server.DisplayThread;
-import com.android.server.LocalServices;
-import com.android.server.Watchdog;
-import com.android.server.policy.WindowManagerPolicy;
-
-import org.xmlpull.v1.XmlPullParser;
-
-import android.Manifest;
 import android.app.IInputForwarder;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -50,8 +31,8 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
@@ -61,10 +42,10 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
+import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerInternal;
-import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.TouchCalibration;
 import android.os.Binder;
@@ -72,6 +53,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
@@ -81,6 +63,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -97,6 +80,23 @@ import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.widget.Toast;
 
+import com.android.internal.R;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.os.SomeArgs;
+import com.android.internal.util.DumpUtils;
+import com.android.internal.util.Preconditions;
+import com.android.internal.util.XmlUtils;
+import com.android.server.DisplayThread;
+import com.android.server.LocalServices;
+import com.android.server.Watchdog;
+import com.android.server.policy.WindowManagerPolicy;
+
+import libcore.io.IoUtils;
+import libcore.io.Streams;
+
+import org.xmlpull.v1.XmlPullParser;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
@@ -112,9 +112,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-
-import libcore.io.IoUtils;
-import libcore.io.Streams;
 
 /*
  * Wraps the C++ InputManager and provides its callbacks.
@@ -212,7 +209,8 @@ public class InputManagerService extends IInputManager.Stub
             int injectorPid, int injectorUid, int syncMode, int timeoutMillis,
             int policyFlags);
     private static native void nativeToggleCapsLock(long ptr, int deviceId);
-    private static native void nativeSetInputWindows(long ptr, InputWindowHandle[] windowHandles);
+    private static native void nativeSetInputWindows(long ptr, InputWindowHandle[] windowHandles,
+            int displayId);
     private static native void nativeSetInputDispatchMode(long ptr, boolean enabled, boolean frozen);
     private static native void nativeSetSystemUiVisibility(long ptr, int visibility);
     private static native void nativeSetFocusedApplication(long ptr,
@@ -1467,7 +1465,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     public void setInputWindows(InputWindowHandle[] windowHandles,
-            InputWindowHandle focusedWindowHandle) {
+            InputWindowHandle focusedWindowHandle, int displayId) {
         final IWindow newFocusedWindow =
             focusedWindowHandle != null ? focusedWindowHandle.clientWindow : null;
         if (mFocusedWindow != newFocusedWindow) {
@@ -1476,7 +1474,7 @@ public class InputManagerService extends IInputManager.Stub
                 setPointerCapture(false);
             }
         }
-        nativeSetInputWindows(mPtr, windowHandles);
+        nativeSetInputWindows(mPtr, windowHandles, displayId);
     }
 
     public void setFocusedApplication(InputApplicationHandle application) {

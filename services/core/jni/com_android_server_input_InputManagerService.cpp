@@ -210,7 +210,7 @@ public:
             const sp<InputWindowHandle>& inputWindowHandle, bool monitor);
     status_t unregisterInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel);
 
-    void setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray);
+    void setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray, int32_t displayId);
     void setFocusedApplication(JNIEnv* env, jobject applicationHandleObj);
     void setInputDispatchMode(bool enabled, bool frozen);
     void setSystemUiVisibility(int32_t visibility);
@@ -736,7 +736,8 @@ void NativeInputManager::getDispatcherConfiguration(InputDispatcherConfiguration
     }
 }
 
-void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray) {
+void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray,
+         int32_t displayId) {
     Vector<sp<InputWindowHandle> > windowHandles;
 
     if (windowHandleObjArray) {
@@ -756,7 +757,7 @@ void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleO
         }
     }
 
-    mInputManager->getDispatcher()->setInputWindows(windowHandles);
+    mInputManager->getDispatcher()->setInputWindows(windowHandles, displayId);
 
     // Do this after the dispatcher has updated the window handle state.
     bool newPointerGesturesEnabled = true;
@@ -1446,10 +1447,10 @@ static void nativeToggleCapsLock(JNIEnv* env, jclass /* clazz */,
 }
 
 static void nativeSetInputWindows(JNIEnv* env, jclass /* clazz */,
-        jlong ptr, jobjectArray windowHandleObjArray) {
+        jlong ptr, jobjectArray windowHandleObjArray, jint displayId) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->setInputWindows(env, windowHandleObjArray);
+    im->setInputWindows(env, windowHandleObjArray, displayId);
 }
 
 static void nativeSetFocusedApplication(JNIEnv* env, jclass /* clazz */,
@@ -1678,7 +1679,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeInjectInputEvent },
     { "nativeToggleCapsLock", "(JI)V",
             (void*) nativeToggleCapsLock },
-    { "nativeSetInputWindows", "(J[Lcom/android/server/input/InputWindowHandle;)V",
+    { "nativeSetInputWindows", "(J[Lcom/android/server/input/InputWindowHandle;I)V",
             (void*) nativeSetInputWindows },
     { "nativeSetFocusedApplication", "(JLcom/android/server/input/InputApplicationHandle;)V",
             (void*) nativeSetFocusedApplication },
