@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -43,6 +44,7 @@ import java.util.List;
  */
 @Deprecated
 public class FragmentController {
+    @UnsupportedAppUsage
     private final FragmentHostCallback<?> mHost;
 
     /**

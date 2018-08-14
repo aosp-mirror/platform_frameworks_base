@@ -25,6 +25,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -357,6 +358,7 @@ public class ActivityOptions {
      * supply these options as the options Bundle when starting an activity.
      * @hide
      */
+    @UnsupportedAppUsage
     public static ActivityOptions makeCustomAnimation(Context context,
             int enterResId, int exitResId, Handler handler, OnAnimationStartedListener listener) {
         ActivityOptions opts = new ActivityOptions();
@@ -582,6 +584,7 @@ public class ActivityOptions {
      * thumbnails are aspect scaled to/from a new location.
      * @hide
      */
+    @UnsupportedAppUsage
     public static ActivityOptions makeMultiThumbFutureAspectScaleAnimation(Context context,
             Handler handler, IAppTransitionAnimationSpecsFuture specsFuture,
             OnAnimationStartedListener listener, boolean scaleUp) {
@@ -847,6 +850,7 @@ public class ActivityOptions {
      * @hide
      */
     @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
+    @UnsupportedAppUsage
     public static ActivityOptions makeRemoteAnimation(
             RemoteAnimationAdapter remoteAnimationAdapter) {
         final ActivityOptions opts = new ActivityOptions();
@@ -1278,6 +1282,7 @@ public class ActivityOptions {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setSplitScreenCreateMode(int splitScreenCreateMode) {
         mSplitScreenCreateMode = splitScreenCreateMode;
     }

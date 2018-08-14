@@ -21,6 +21,7 @@ import android.annotation.AttrRes;
 import android.annotation.DrawableRes;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.ResourceId;
@@ -69,6 +70,7 @@ import com.android.internal.app.AlertController;
  * </div>
  */
 public class AlertDialog extends Dialog implements DialogInterface {
+    @UnsupportedAppUsage
     private AlertController mAlert;
 
     /**
@@ -449,6 +451,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
     }
 
     public static class Builder {
+        @UnsupportedAppUsage
         private final AlertController.AlertParams P;
 
         /**
@@ -1049,6 +1052,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * @deprecated Set the padding on the view itself.
          */
         @Deprecated
+        @UnsupportedAppUsage
         public Builder setView(View view, int viewSpacingLeft, int viewSpacingTop,
                 int viewSpacingRight, int viewSpacingBottom) {
             P.mView = view;
@@ -1080,6 +1084,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
         /**
          * @hide
          */
+        @UnsupportedAppUsage
         public Builder setRecycleOnMeasureEnabled(boolean enabled) {
             P.mRecycleOnMeasure = enabled;
             return this;

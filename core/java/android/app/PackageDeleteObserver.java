@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.content.pm.IPackageDeleteObserver2;
 
