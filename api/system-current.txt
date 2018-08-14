@@ -201,6 +201,7 @@ package android {
     field public static final java.lang.String WRITE_EMBEDDED_SUBSCRIPTIONS = "android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS";
     field public static final java.lang.String WRITE_GSERVICES = "android.permission.WRITE_GSERVICES";
     field public static final java.lang.String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
+    field public static final java.lang.String WRITE_OBB = "android.permission.WRITE_OBB";
     field public static final java.lang.String WRITE_SECURE_SETTINGS = "android.permission.WRITE_SECURE_SETTINGS";
   }
 
