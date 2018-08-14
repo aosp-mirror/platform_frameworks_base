@@ -62,11 +62,10 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -130,6 +129,7 @@ public class MediaScanner implements AutoCloseable {
             Files.FileColumns.DATA, // 1
             Files.FileColumns.FORMAT, // 2
             Files.FileColumns.DATE_MODIFIED, // 3
+            Files.FileColumns.MEDIA_TYPE, // 4
     };
 
     private static final String[] ID_PROJECTION = new String[] {
@@ -140,6 +140,7 @@ public class MediaScanner implements AutoCloseable {
     private static final int FILES_PRESCAN_PATH_COLUMN_INDEX = 1;
     private static final int FILES_PRESCAN_FORMAT_COLUMN_INDEX = 2;
     private static final int FILES_PRESCAN_DATE_MODIFIED_COLUMN_INDEX = 3;
+    private static final int FILES_PRESCAN_MEDIA_TYPE_COLUMN_INDEX = 4;
 
     private static final String[] PLAYLIST_MEMBERS_PROJECTION = new String[] {
             Audio.Playlists.Members.PLAYLIST_ID, // 0
@@ -366,13 +367,21 @@ public class MediaScanner implements AutoCloseable {
         String mPath;
         long mLastModified;
         int mFormat;
+        int mMediaType;
         boolean mLastModifiedChanged;
 
+        /** @deprecated kept intact for lame apps using reflection */
+        @Deprecated
         FileEntry(long rowId, String path, long lastModified, int format) {
+            this(rowId, path, lastModified, format, FileColumns.MEDIA_TYPE_NONE);
+        }
+
+        FileEntry(long rowId, String path, long lastModified, int format, int mediaType) {
             mRowId = rowId;
             mPath = path;
             mLastModified = lastModified;
             mFormat = format;
+            mMediaType = mediaType;
             mLastModifiedChanged = false;
         }
 
@@ -541,7 +550,8 @@ public class MediaScanner implements AutoCloseable {
                     entry.mLastModified = lastModified;
                 } else {
                     entry = new FileEntry(0, path, lastModified,
-                            (isDirectory ? MtpConstants.FORMAT_ASSOCIATION : 0));
+                            (isDirectory ? MtpConstants.FORMAT_ASSOCIATION : 0),
+                            FileColumns.MEDIA_TYPE_NONE);
                 }
                 entry.mLastModifiedChanged = true;
             }
@@ -1009,14 +1019,21 @@ public class MediaScanner implements AutoCloseable {
             }
 
             Uri tableUri = mFilesUri;
+            int mediaType = FileColumns.MEDIA_TYPE_NONE;
             MediaInserter inserter = mMediaInserter;
             if (mScanSuccess && !mNoMedia) {
                 if (MediaFile.isVideoFileType(mFileType)) {
                     tableUri = mVideoUri;
+                    mediaType = FileColumns.MEDIA_TYPE_VIDEO;
                 } else if (MediaFile.isImageFileType(mFileType)) {
                     tableUri = mImagesUri;
+                    mediaType = FileColumns.MEDIA_TYPE_IMAGE;
                 } else if (MediaFile.isAudioFileType(mFileType)) {
                     tableUri = mAudioUri;
+                    mediaType = FileColumns.MEDIA_TYPE_AUDIO;
+                } else if (MediaFile.isPlayListFileType(mFileType)) {
+                    tableUri = mPlaylistsUri;
+                    mediaType = FileColumns.MEDIA_TYPE_PLAYLIST;
                 }
             }
             Uri result = null;
@@ -1079,20 +1096,16 @@ public class MediaScanner implements AutoCloseable {
                 // with squashed lower case paths
                 values.remove(MediaStore.MediaColumns.DATA);
 
-                int mediaType = 0;
-                if (mScanSuccess && !MediaScanner.isNoMediaPath(entry.mPath)) {
-                    int fileType = MediaFile.getFileTypeForMimeType(mMimeType);
-                    if (MediaFile.isAudioFileType(fileType)) {
-                        mediaType = FileColumns.MEDIA_TYPE_AUDIO;
-                    } else if (MediaFile.isVideoFileType(fileType)) {
-                        mediaType = FileColumns.MEDIA_TYPE_VIDEO;
-                    } else if (MediaFile.isImageFileType(fileType)) {
-                        mediaType = FileColumns.MEDIA_TYPE_IMAGE;
-                    } else if (MediaFile.isPlayListFileType(fileType)) {
-                        mediaType = FileColumns.MEDIA_TYPE_PLAYLIST;
+                if (mScanSuccess && !mNoMedia) {
+                    // Changing media type must be done as separate update
+                    if (mediaType != entry.mMediaType) {
+                        final ContentValues mediaTypeValues = new ContentValues();
+                        mediaTypeValues.put(FileColumns.MEDIA_TYPE, mediaType);
+                        mMediaProvider.update(ContentUris.withAppendedId(mFilesUri, rowId),
+                                mediaTypeValues, null, null);
                     }
-                    values.put(FileColumns.MEDIA_TYPE, mediaType);
                 }
+
                 mMediaProvider.update(result, values, null, null);
             }
 
@@ -1577,9 +1590,10 @@ public class MediaScanner implements AutoCloseable {
                     where, selectionArgs, null, null);
             if (c.moveToFirst()) {
                 long rowId = c.getLong(FILES_PRESCAN_ID_COLUMN_INDEX);
-                int format = c.getInt(FILES_PRESCAN_FORMAT_COLUMN_INDEX);
                 long lastModified = c.getLong(FILES_PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
-                return new FileEntry(rowId, path, lastModified, format);
+                int format = c.getInt(FILES_PRESCAN_FORMAT_COLUMN_INDEX);
+                int mediaType = c.getInt(FILES_PRESCAN_MEDIA_TYPE_COLUMN_INDEX);
+                return new FileEntry(rowId, path, lastModified, format, mediaType);
             }
         } catch (RemoteException e) {
         } finally {
