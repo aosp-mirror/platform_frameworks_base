@@ -1486,6 +1486,36 @@ public class StorageManager {
         return path;
     }
 
+    /**
+     * Translate given shared storage path from a path in an app sandbox
+     * namespace to a path in the system namespace.
+     *
+     * @hide
+     */
+    public File translateAppToSystem(File file, String packageName) {
+        try {
+            return new File(mStorageManager.translateAppToSystem(file.getAbsolutePath(),
+                    packageName, mContext.getUserId()));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Translate given shared storage path from a path in the system namespace
+     * to a path in an app sandbox namespace.
+     *
+     * @hide
+     */
+    public File translateSystemToApp(File file, String packageName) {
+        try {
+            return new File(mStorageManager.translateSystemToApp(file.getAbsolutePath(),
+                    packageName, mContext.getUserId()));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** {@hide} */
     @VisibleForTesting
     public @NonNull ParcelFileDescriptor openProxyFileDescriptor(
