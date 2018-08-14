@@ -99,12 +99,6 @@ class WindowSurfacePlacer {
     private boolean mTraversalScheduled;
     private int mDeferDepth = 0;
 
-    private static final class LayerAndToken {
-        public int layer;
-        public AppWindowToken token;
-    }
-    private final LayerAndToken mTmpLayerAndToken = new LayerAndToken();
-
     private final SparseIntArray mTempTransitionReasons = new SparseIntArray();
 
     private final Runnable mPerformSurfacePlacement;
@@ -299,10 +293,16 @@ class WindowSurfacePlacer {
         // done behind a dream window.
         final ArraySet<Integer> activityTypes = collectActivityTypes(mService.mOpeningApps,
                 mService.mClosingApps);
-        final AppWindowToken animLpToken = mService.mPolicy.allowAppAnimationsLw()
+        final boolean allowAnimations = mService.mPolicy.allowAppAnimationsLw();
+        final AppWindowToken animLpToken = allowAnimations
                 ? findAnimLayoutParamsToken(transit, activityTypes)
                 : null;
-
+        final AppWindowToken topOpeningApp = allowAnimations
+                ? getTopApp(mService.mOpeningApps, false /* ignoreHidden */)
+                : null;
+        final AppWindowToken topClosingApp = allowAnimations
+                ? getTopApp(mService.mClosingApps, false /* ignoreHidden */)
+                : null;
         final LayoutParams animLp = getAnimLp(animLpToken);
         overrideWithRemoteAnimationIfSet(animLpToken, transit, activityTypes);
 
@@ -314,17 +314,14 @@ class WindowSurfacePlacer {
         try {
             processApplicationsAnimatingInPlace(transit);
 
-            mTmpLayerAndToken.token = null;
-            handleClosingApps(transit, animLp, voiceInteraction, mTmpLayerAndToken);
-            final AppWindowToken topClosingApp = mTmpLayerAndToken.token;
-            final AppWindowToken topOpeningApp = handleOpeningApps(transit, animLp,
-                    voiceInteraction);
+            handleClosingApps(transit, animLp, voiceInteraction);
+            handleOpeningApps(transit, animLp, voiceInteraction);
 
             mService.mAppTransition.setLastAppTransition(transit, topOpeningApp, topClosingApp);
 
             final int flags = mService.mAppTransition.getTransitFlags();
-            layoutRedo = mService.mAppTransition.goodToGo(transit, topOpeningApp,
-                    topClosingApp, mService.mOpeningApps, mService.mClosingApps);
+            layoutRedo = mService.mAppTransition.goodToGo(transit, topOpeningApp, topClosingApp,
+                    mService.mOpeningApps, mService.mClosingApps);
             handleNonAppWindowsInTransition(transit, flags);
             mService.mAppTransition.postAnimationCallback();
             mService.mAppTransition.clear();
@@ -451,10 +448,7 @@ class WindowSurfacePlacer {
         return false;
     }
 
-    private AppWindowToken handleOpeningApps(int transit, LayoutParams animLp,
-            boolean voiceInteraction) {
-        AppWindowToken topOpeningApp = null;
-        int topOpeningLayer = Integer.MIN_VALUE;
+    private void handleOpeningApps(int transit, LayoutParams animLp, boolean voiceInteraction) {
         final int appsCount = mService.mOpeningApps.size();
         for (int i = 0; i < appsCount; i++) {
             AppWindowToken wtoken = mService.mOpeningApps.valueAt(i);
@@ -479,24 +473,15 @@ class WindowSurfacePlacer {
                         "<<< CLOSE TRANSACTION handleAppTransitionReadyLocked()");
             }
 
-            if (animLp != null) {
-                final int layer = wtoken.getHighestAnimLayer();
-                if (topOpeningApp == null || layer > topOpeningLayer) {
-                    topOpeningApp = wtoken;
-                    topOpeningLayer = layer;
-                }
-            }
             if (mService.mAppTransition.isNextAppTransitionThumbnailUp()) {
                 wtoken.attachThumbnailAnimation();
             } else if (mService.mAppTransition.isNextAppTransitionOpenCrossProfileApps()) {
                 wtoken.attachCrossProfileAppsThumbnailAnimation();
             }
         }
-        return topOpeningApp;
     }
 
-    private void handleClosingApps(int transit, LayoutParams animLp, boolean voiceInteraction,
-            LayerAndToken layerAndToken) {
+    private void handleClosingApps(int transit, LayoutParams animLp, boolean voiceInteraction) {
         final int appsCount;
         appsCount = mService.mClosingApps.size();
         for (int i = 0; i < appsCount; i++) {
@@ -519,13 +504,6 @@ class WindowSurfacePlacer {
                 wtoken.getController().removeStartingWindow();
             }
 
-            if (animLp != null) {
-                int layer = wtoken.getHighestAnimLayer();
-                if (layerAndToken.token == null || layer > layerAndToken.layer) {
-                    layerAndToken.token = wtoken;
-                    layerAndToken.layer = layer;
-                }
-            }
             if (mService.mAppTransition.isNextAppTransitionThumbnailDown()) {
                 wtoken.attachThumbnailAnimation();
             }

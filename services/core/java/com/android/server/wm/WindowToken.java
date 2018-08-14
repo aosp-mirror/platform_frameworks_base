@@ -235,18 +235,6 @@ class WindowToken extends WindowContainer<WindowState> {
         return false;
     }
 
-    int getHighestAnimLayer() {
-        int highest = -1;
-        for (int j = 0; j < mChildren.size(); j++) {
-            final WindowState w = mChildren.get(j);
-            final int wLayer = w.getHighestAnimLayer();
-            if (wLayer > highest) {
-                highest = wLayer;
-            }
-        }
-        return highest;
-    }
-
     AppWindowToken asAppWindowToken() {
         // TODO: Not sure if this is the best way to handle this vs. using instanceof and casting.
         // I am not an app window token!

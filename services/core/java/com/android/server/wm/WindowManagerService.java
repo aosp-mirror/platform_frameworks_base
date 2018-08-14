@@ -5569,11 +5569,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 if (mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS
                         && mode != UPDATE_FOCUS_WILL_PLACE_SURFACES) {
-                    final int prevImeAnimLayer =
-                            displayContent.mInputMethodWindow.mWinAnimator.mAnimLayer;
                     displayContent.assignWindowLayers(false /* setLayoutNeeded */);
-                    imWindowChanged |= prevImeAnimLayer
-                            != displayContent.mInputMethodWindow.mWinAnimator.mAnimLayer;
                 }
             }
 

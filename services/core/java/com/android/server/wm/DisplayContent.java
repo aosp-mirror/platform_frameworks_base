@@ -2307,21 +2307,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mPinnedStackControllerLocked.setAdjustedForIme(imeVisible, imeHeight);
     }
 
-    /**
-     * If a window that has an animation specifying a colored background and the current wallpaper
-     * is visible, then the color goes *below* the wallpaper so we don't cause the wallpaper to
-     * suddenly disappear.
-     */
-    int getLayerForAnimationBackground(WindowStateAnimator winAnimator) {
-        final WindowState visibleWallpaper = mBelowAppWindowsContainers.getWindow(
-                w -> w.mIsWallpaper && w.isVisibleNow());
-
-        if (visibleWallpaper != null) {
-            return visibleWallpaper.mWinAnimator.mAnimLayer;
-        }
-        return winAnimator.mAnimLayer;
-    }
-
     void prepareFreezingTaskBounds() {
         for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mTaskStackContainers.getChildAt(stackNdx);
@@ -2740,21 +2725,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 if (highestTarget != null) {
                     final AppTransition appTransition = mService.mAppTransition;
                     if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, appTransition + " " + highestTarget
-                            + " animating=" + highestTarget.isAnimating()
-                            + " layer=" + highestTarget.mWinAnimator.mAnimLayer
-                            + " new layer=" + target.mWinAnimator.mAnimLayer);
+                            + " animating=" + highestTarget.isAnimating());
 
-                    final boolean higherLayer =
-                            highestTarget.mWinAnimator.mAnimLayer > target.mWinAnimator.mAnimLayer;
                     if (appTransition.isTransitionSet()) {
                         // If we are currently setting up for an animation, hold everything until we
                         // can find out what will happen.
-                        setInputMethodTarget(highestTarget, true);
-                        return highestTarget;
-                    } else if (highestTarget.isAnimating() && higherLayer) {
-                        // If the window we are currently targeting is involved with an animation,
-                        // and it is on top of the next target we will be over, then hold off on
-                        // moving until that is done.
                         setInputMethodTarget(highestTarget, true);
                         return highestTarget;
                     }

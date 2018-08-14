@@ -3217,10 +3217,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " mWallpaperVisible=" + mWallpaperVisible);
         }
         if (dumpAll) {
-            pw.println(prefix + "mBaseLayer=" + mBaseLayer
-                    + " mSubLayer=" + mSubLayer
-                    + " mAnimLayer=" + mLayer + "=" + mWinAnimator.mAnimLayer
-                    + " mLastLayer=" + mWinAnimator.mLastLayer);
+            pw.print(prefix); pw.print("mBaseLayer="); pw.print(mBaseLayer);
+                    pw.print(" mSubLayer="); pw.print(mSubLayer);
         }
         if (dumpAll) {
             pw.println(prefix + "mToken=" + mToken);
@@ -3748,18 +3746,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
         return windowInfo;
-    }
-
-    int getHighestAnimLayer() {
-        int highest = mWinAnimator.mAnimLayer;
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState c = mChildren.get(i);
-            final int childLayer = c.getHighestAnimLayer();
-            if (childLayer > highest) {
-                highest = childLayer;
-            }
-        }
-        return highest;
     }
 
     @Override
