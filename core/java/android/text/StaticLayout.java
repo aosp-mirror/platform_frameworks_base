@@ -20,6 +20,7 @@ import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Paint;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LeadingMarginSpan.LeadingMarginSpan2;
@@ -482,6 +483,7 @@ public class StaticLayout extends Layout {
      * @deprecated Use {@link Builder} instead.
      */
     @Deprecated
+    @UnsupportedAppUsage
     public StaticLayout(CharSequence source, int bufstart, int bufend,
                         TextPaint paint, int outerwidth,
                         Alignment align, TextDirectionHeuristic textDir,
@@ -1282,6 +1284,7 @@ public class StaticLayout extends Layout {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getHeight(boolean cap) {
         if (cap && mLineCount > mMaximumVisibleLineCount && mMaxLineHeight == -1
                 && Log.isLoggable(TAG, Log.WARN)) {
@@ -1294,8 +1297,10 @@ public class StaticLayout extends Layout {
                 ? mMaxLineHeight : super.getHeight();
     }
 
+    @UnsupportedAppUsage
     private int mLineCount;
     private int mTopPadding, mBottomPadding;
+    @UnsupportedAppUsage
     private int mColumns;
     private int mEllipsizedWidth;
 
@@ -1323,11 +1328,15 @@ public class StaticLayout extends Layout {
     private static final int DESCENT = 2;
     private static final int EXTRA = 3;
     private static final int HYPHEN = 4;
+    @UnsupportedAppUsage
     private static final int ELLIPSIS_START = 5;
     private static final int ELLIPSIS_COUNT = 6;
 
+    @UnsupportedAppUsage
     private int[] mLines;
+    @UnsupportedAppUsage
     private Directions[] mLineDirections;
+    @UnsupportedAppUsage
     private int mMaximumVisibleLineCount = Integer.MAX_VALUE;
 
     private static final int START_MASK = 0x1FFFFFFF;
@@ -1346,10 +1355,15 @@ public class StaticLayout extends Layout {
     // Unused, here because of gray list private API accesses.
     /*package*/ static class LineBreaks {
         private static final int INITIAL_SIZE = 16;
+        @UnsupportedAppUsage
         public int[] breaks = new int[INITIAL_SIZE];
+        @UnsupportedAppUsage
         public float[] widths = new float[INITIAL_SIZE];
+        @UnsupportedAppUsage
         public float[] ascents = new float[INITIAL_SIZE];
+        @UnsupportedAppUsage
         public float[] descents = new float[INITIAL_SIZE];
+        @UnsupportedAppUsage
         public int[] flags = new int[INITIAL_SIZE]; // hasTab
         // breaks, widths, and flags should all have the same length
     }

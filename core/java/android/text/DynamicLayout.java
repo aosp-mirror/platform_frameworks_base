@@ -20,6 +20,7 @@ import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.text.style.ReplacementSpan;
@@ -353,6 +354,7 @@ public class DynamicLayout extends Layout {
      * @deprecated Use {@link Builder} instead.
      */
     @Deprecated
+    @UnsupportedAppUsage
     public DynamicLayout(@NonNull CharSequence base, @NonNull CharSequence display,
                          @NonNull TextPaint paint,
                          @IntRange(from = 0) int width,
@@ -944,6 +946,7 @@ public class DynamicLayout extends Layout {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public int[] getBlockEndLines() {
         return mBlockEndLines;
     }
@@ -951,6 +954,7 @@ public class DynamicLayout extends Layout {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public int[] getBlockIndices() {
         return mBlockIndices;
     }
@@ -973,6 +977,7 @@ public class DynamicLayout extends Layout {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public int getNumberOfBlocks() {
         return mNumberOfBlocks;
     }
@@ -980,6 +985,7 @@ public class DynamicLayout extends Layout {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public int getIndexFirstChangedBlock() {
         return mIndexFirstChangedBlock;
     }
@@ -987,6 +993,7 @@ public class DynamicLayout extends Layout {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setIndexFirstChangedBlock(int i) {
         mIndexFirstChangedBlock = i;
     }
@@ -1169,6 +1176,7 @@ public class DynamicLayout extends Layout {
 
     private Rect mTempRect = new Rect();
 
+    @UnsupportedAppUsage
     private static StaticLayout sStaticLayout = null;
     private static StaticLayout.Builder sBuilder = null;
 

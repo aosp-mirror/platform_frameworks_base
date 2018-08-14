@@ -16,6 +16,8 @@
 
 package android.text.method;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * This transformation method causes any carriage return characters (\r)
  * to be hidden by displaying them as zero-width non-breaking space
@@ -48,5 +50,6 @@ extends ReplacementTransformationMethod {
         return sInstance;
     }
 
+    @UnsupportedAppUsage
     private static HideReturnsTransformationMethod sInstance;
 }
