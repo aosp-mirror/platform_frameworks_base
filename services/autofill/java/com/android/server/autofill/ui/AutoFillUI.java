@@ -268,9 +268,10 @@ public final class AutoFillUI {
             @Nullable String servicePackageName, @NonNull SaveInfo info,
             @NonNull ValueFinder valueFinder, @NonNull ComponentName componentName,
             @NonNull AutoFillUiCallback callback, @NonNull PendingUi pendingSaveUi,
-            boolean compatMode) {
+            boolean isUpdate, boolean compatMode) {
         if (sVerbose) {
-            Slog.v(TAG, "showSaveUi() for " + componentName.toShortString() + ": " + info);
+            Slog.v(TAG, "showSaveUi(update=" + isUpdate + ") for " + componentName.toShortString()
+                    + ": " + info);
         }
         int numIds = 0;
         numIds += info.getRequiredIds() == null ? 0 : info.getRequiredIds().length;
@@ -280,6 +281,9 @@ public final class AutoFillUI {
                 .newLogMaker(MetricsEvent.AUTOFILL_SAVE_UI, componentName, servicePackageName,
                         pendingSaveUi.sessionId, compatMode)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_IDS, numIds);
+        if (isUpdate) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_UPDATE, 1);
+        }
 
         mHandler.post(() -> {
             if (callback != mCallback) {
@@ -328,7 +332,7 @@ public final class AutoFillUI {
                     }
                     mMetricsLogger.write(log);
                 }
-            }, compatMode);
+            }, isUpdate, compatMode);
         });
     }
 
