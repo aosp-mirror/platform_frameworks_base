@@ -1871,23 +1871,41 @@ public abstract class NotificationListenerService extends Service {
             Collections.addAll(mIntercepted, dndInterceptedKeys);
         }
 
+        private ArrayMap<String, Integer> buildIntMapFromBundle(Bundle bundle) {
+            ArrayMap<String, Integer> newMap = new ArrayMap<>(bundle.size());
+            for (String key : bundle.keySet()) {
+                newMap.put(key, bundle.getInt(key));
+            }
+            return newMap;
+        }
+
+        private ArrayMap<String, String> buildStringMapFromBundle(Bundle bundle) {
+            ArrayMap<String, String> newMap = new ArrayMap<>(bundle.size());
+            for (String key : bundle.keySet()) {
+                newMap.put(key, bundle.getString(key));
+            }
+            return newMap;
+        }
+
+        private ArrayMap<String, Boolean> buildBooleanMapFromBundle(Bundle bundle) {
+            ArrayMap<String, Boolean> newMap = new ArrayMap<>(bundle.size());
+            for (String key : bundle.keySet()) {
+                newMap.put(key, bundle.getBoolean(key));
+            }
+            return newMap;
+        }
+
         // Locked by 'this'
         private void buildVisibilityOverridesLocked() {
-            Bundle visibilityBundle = mRankingUpdate.getVisibilityOverrides();
-            mVisibilityOverrides = new ArrayMap<>(visibilityBundle.size());
-            for (String key: visibilityBundle.keySet()) {
-               mVisibilityOverrides.put(key, visibilityBundle.getInt(key));
-            }
+            mVisibilityOverrides = buildIntMapFromBundle(mRankingUpdate.getVisibilityOverrides());
         }
 
         // Locked by 'this'
         private void buildSuppressedVisualEffectsLocked() {
-            Bundle suppressedBundle = mRankingUpdate.getSuppressedVisualEffects();
-            mSuppressedVisualEffects = new ArrayMap<>(suppressedBundle.size());
-            for (String key: suppressedBundle.keySet()) {
-                mSuppressedVisualEffects.put(key, suppressedBundle.getInt(key));
-            }
+            mSuppressedVisualEffects =
+                buildIntMapFromBundle(mRankingUpdate.getSuppressedVisualEffects());
         }
+
         // Locked by 'this'
         private void buildImportanceLocked() {
             String[] orderedKeys = mRankingUpdate.getOrderedKeys();
@@ -1901,20 +1919,13 @@ public abstract class NotificationListenerService extends Service {
 
         // Locked by 'this'
         private void buildImportanceExplanationLocked() {
-            Bundle explanationBundle = mRankingUpdate.getImportanceExplanation();
-            mImportanceExplanation = new ArrayMap<>(explanationBundle.size());
-            for (String key: explanationBundle.keySet()) {
-                mImportanceExplanation.put(key, explanationBundle.getString(key));
-            }
+            mImportanceExplanation =
+                buildStringMapFromBundle(mRankingUpdate.getImportanceExplanation());
         }
 
         // Locked by 'this'
         private void buildOverrideGroupKeys() {
-            Bundle overrideGroupKeys = mRankingUpdate.getOverrideGroupKeys();
-            mOverrideGroupKeys = new ArrayMap<>(overrideGroupKeys.size());
-            for (String key: overrideGroupKeys.keySet()) {
-                mOverrideGroupKeys.put(key, overrideGroupKeys.getString(key));
-            }
+            mOverrideGroupKeys = buildStringMapFromBundle(mRankingUpdate.getOverrideGroupKeys());
         }
 
         // Locked by 'this'
@@ -1946,29 +1957,17 @@ public abstract class NotificationListenerService extends Service {
 
         // Locked by 'this'
         private void buildShowBadgeLocked() {
-            Bundle showBadge = mRankingUpdate.getShowBadge();
-            mShowBadge = new ArrayMap<>(showBadge.size());
-            for (String key : showBadge.keySet()) {
-                mShowBadge.put(key, showBadge.getBoolean(key));
-            }
+            mShowBadge = buildBooleanMapFromBundle(mRankingUpdate.getShowBadge());
         }
 
         // Locked by 'this'
         private void buildUserSentimentLocked() {
-            Bundle userSentiment = mRankingUpdate.getUserSentiment();
-            mUserSentiment = new ArrayMap<>(userSentiment.size());
-            for (String key : userSentiment.keySet()) {
-                mUserSentiment.put(key, userSentiment.getInt(key));
-            }
+            mUserSentiment = buildIntMapFromBundle(mRankingUpdate.getUserSentiment());
         }
 
         // Locked by 'this'
         private void buildHiddenLocked() {
-            Bundle hidden = mRankingUpdate.getHidden();
-            mHidden = new ArrayMap<>(hidden.size());
-            for (String key : hidden.keySet()) {
-                mHidden.put(key, hidden.getBoolean(key));
-            }
+            mHidden = buildBooleanMapFromBundle(mRankingUpdate.getHidden());
         }
 
         // Locked by 'this'
