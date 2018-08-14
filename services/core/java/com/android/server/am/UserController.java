@@ -2179,7 +2179,9 @@ class UserController implements Handler.Callback {
 
         void startUserWidgets(int userId) {
             AppWidgetManagerInternal awm = LocalServices.getService(AppWidgetManagerInternal.class);
-            awm.unlockUser(userId);
+            if (awm != null) {
+                awm.unlockUser(userId);
+            }
         }
 
         void updateUserConfiguration() {
