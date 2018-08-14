@@ -17,6 +17,7 @@
 package android.content.res;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.util.TypedValue;
 
 import com.android.internal.util.XmlUtils;
@@ -37,6 +38,7 @@ import java.io.Reader;
 final class XmlBlock implements AutoCloseable {
     private static final boolean DEBUG=false;
 
+    @UnsupportedAppUsage
     public XmlBlock(byte[] data) {
         mAssets = null;
         mNative = nativeCreate(data, 0, data.length);
@@ -69,6 +71,7 @@ final class XmlBlock implements AutoCloseable {
         }
     }
 
+    @UnsupportedAppUsage
     public XmlResourceParser newParser() {
         synchronized (this) {
             if (mNative != 0) {
@@ -462,7 +465,9 @@ final class XmlBlock implements AutoCloseable {
             return mStrings.get(id);
         }
 
+        @UnsupportedAppUsage
         /*package*/ long mParseState;
+        @UnsupportedAppUsage
         private final XmlBlock mBlock;
         private boolean mStarted = false;
         private boolean mDecNextDepth = false;

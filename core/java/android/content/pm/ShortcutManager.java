@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.usage.UsageStatsManager;
@@ -288,6 +289,7 @@ public class ShortcutManager {
     private static final String TAG = "ShortcutManager";
 
     private final Context mContext;
+    @UnsupportedAppUsage
     private final IShortcutService mService;
 
     /**
