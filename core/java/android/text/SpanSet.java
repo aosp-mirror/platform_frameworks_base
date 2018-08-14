@@ -16,6 +16,7 @@
 
 package android.text;
 
+import android.annotation.UnsupportedAppUsage;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
@@ -32,6 +33,7 @@ public class SpanSet<E> {
     private final Class<? extends E> classType;
 
     int numberOfSpans;
+    @UnsupportedAppUsage
     E[] spans;
     int[] spanStarts;
     int[] spanEnds;

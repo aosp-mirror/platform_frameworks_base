@@ -16,6 +16,7 @@
 
 package android.text.style;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.text.ParcelableSpan;
 import android.text.TextPaint;
@@ -30,11 +31,13 @@ import android.text.TextUtils;
 public class SuggestionRangeSpan extends CharacterStyle implements ParcelableSpan {
     private int mBackgroundColor;
 
+    @UnsupportedAppUsage
     public SuggestionRangeSpan() {
         // 0 is a fully transparent black. Has to be set using #setBackgroundColor
         mBackgroundColor = 0;
     }
 
+    @UnsupportedAppUsage
     public SuggestionRangeSpan(Parcel src) {
         mBackgroundColor = src.readInt();
     }
@@ -64,6 +67,7 @@ public class SuggestionRangeSpan extends CharacterStyle implements ParcelableSpa
         return TextUtils.SUGGESTION_RANGE_SPAN;
     }
 
+    @UnsupportedAppUsage
     public void setBackgroundColor(int backgroundColor) {
         mBackgroundColor = backgroundColor;
     }
