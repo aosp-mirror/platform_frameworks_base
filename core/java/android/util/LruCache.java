@@ -16,6 +16,7 @@
 
 package android.util;
 
+import android.annotation.UnsupportedAppUsage;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -60,6 +61,7 @@ import java.util.Map;
  * Support Package</a> for earlier releases.
  */
 public class LruCache<K, V> {
+    @UnsupportedAppUsage
     private final LinkedHashMap<K, V> map;
 
     /** Size of this cache in units. Not necessarily the number of elements. */

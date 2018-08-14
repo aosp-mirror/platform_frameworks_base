@@ -19,6 +19,7 @@ package android.util;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
+import android.annotation.UnsupportedAppUsage;
 import libcore.util.EmptyArray;
 
 /**
@@ -45,8 +46,11 @@ import libcore.util.EmptyArray;
  * @hide
  */
 public class LongSparseLongArray implements Cloneable {
+    @UnsupportedAppUsage
     private long[] mKeys;
+    @UnsupportedAppUsage
     private long[] mValues;
+    @UnsupportedAppUsage
     private int mSize;
 
     /**
