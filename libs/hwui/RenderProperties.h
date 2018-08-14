@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "Caches.h"
 #include "DeviceInfo.h"
 #include "Outline.h"
 #include "Rect.h"

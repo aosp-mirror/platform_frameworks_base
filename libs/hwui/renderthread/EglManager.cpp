@@ -18,6 +18,7 @@
 
 #include <cutils/properties.h>
 #include <log/log.h>
+#include <private/gui/SyncFeatures.h>
 #include <utils/Trace.h>
 #include "utils/StringUtils.h"
 
@@ -462,6 +463,109 @@ bool EglManager::setPreserveBuffer(EGLSurface surface, bool preserve) {
     }
 
     return preserved;
+}
+
+status_t EglManager::fenceWait(sp<Fence>& fence) {
+    if (!hasEglContext()) {
+        ALOGE("EglManager::fenceWait: EGLDisplay not initialized");
+        return INVALID_OPERATION;
+    }
+
+    if (SyncFeatures::getInstance().useWaitSync() &&
+        SyncFeatures::getInstance().useNativeFenceSync()) {
+        // Block GPU on the fence.
+        // Create an EGLSyncKHR from the current fence.
+        int fenceFd = fence->dup();
+        if (fenceFd == -1) {
+            ALOGE("EglManager::fenceWait: error dup'ing fence fd: %d", errno);
+            return -errno;
+        }
+        EGLint attribs[] = {
+            EGL_SYNC_NATIVE_FENCE_FD_ANDROID, fenceFd,
+            EGL_NONE
+        };
+        EGLSyncKHR sync = eglCreateSyncKHR(mEglDisplay,
+                EGL_SYNC_NATIVE_FENCE_ANDROID, attribs);
+        if (sync == EGL_NO_SYNC_KHR) {
+            close(fenceFd);
+            ALOGE("EglManager::fenceWait: error creating EGL fence: %#x", eglGetError());
+            return UNKNOWN_ERROR;
+        }
+
+        // XXX: The spec draft is inconsistent as to whether this should
+        // return an EGLint or void.  Ignore the return value for now, as
+        // it's not strictly needed.
+        eglWaitSyncKHR(mEglDisplay, sync, 0);
+        EGLint eglErr = eglGetError();
+        eglDestroySyncKHR(mEglDisplay, sync);
+        if (eglErr != EGL_SUCCESS) {
+            ALOGE("EglManager::fenceWait: error waiting for EGL fence: %#x", eglErr);
+            return UNKNOWN_ERROR;
+        }
+    } else {
+        // Block CPU on the fence.
+        status_t err = fence->waitForever("EglManager::fenceWait");
+        if (err != NO_ERROR) {
+            ALOGE("EglManager::fenceWait: error waiting for fence: %d", err);
+            return err;
+        }
+    }
+    return OK;
+}
+
+status_t EglManager::createReleaseFence(bool useFenceSync, EGLSyncKHR* eglFence,
+        sp<Fence>& nativeFence) {
+    if (!hasEglContext()) {
+        ALOGE("EglManager::createReleaseFence: EGLDisplay not initialized");
+        return INVALID_OPERATION;
+    }
+
+    if (SyncFeatures::getInstance().useNativeFenceSync()) {
+        EGLSyncKHR sync = eglCreateSyncKHR(mEglDisplay,
+                EGL_SYNC_NATIVE_FENCE_ANDROID, nullptr);
+        if (sync == EGL_NO_SYNC_KHR) {
+            ALOGE("EglManager::createReleaseFence: error creating EGL fence: %#x",
+                    eglGetError());
+            return UNKNOWN_ERROR;
+        }
+        glFlush();
+        int fenceFd = eglDupNativeFenceFDANDROID(mEglDisplay, sync);
+        eglDestroySyncKHR(mEglDisplay, sync);
+        if (fenceFd == EGL_NO_NATIVE_FENCE_FD_ANDROID) {
+            ALOGE("EglManager::createReleaseFence: error dup'ing native fence "
+                    "fd: %#x", eglGetError());
+            return UNKNOWN_ERROR;
+        }
+        nativeFence = new Fence(fenceFd);
+        *eglFence = EGL_NO_SYNC_KHR;
+    } else if (useFenceSync && SyncFeatures::getInstance().useFenceSync()) {
+        if (*eglFence != EGL_NO_SYNC_KHR) {
+            // There is already a fence for the current slot.  We need to
+            // wait on that before replacing it with another fence to
+            // ensure that all outstanding buffer accesses have completed
+            // before the producer accesses it.
+            EGLint result = eglClientWaitSyncKHR(mEglDisplay, *eglFence, 0, 1000000000);
+            if (result == EGL_FALSE) {
+                ALOGE("EglManager::createReleaseFence: error waiting for previous fence: %#x",
+                        eglGetError());
+                return UNKNOWN_ERROR;
+            } else if (result == EGL_TIMEOUT_EXPIRED_KHR) {
+                ALOGE("EglManager::createReleaseFence: timeout waiting for previous fence");
+                return TIMED_OUT;
+            }
+            eglDestroySyncKHR(mEglDisplay, *eglFence);
+        }
+
+        // Create a fence for the outstanding accesses in the current
+        // OpenGL ES context.
+        *eglFence = eglCreateSyncKHR(mEglDisplay, EGL_SYNC_FENCE_KHR, nullptr);
+        if (*eglFence == EGL_NO_SYNC_KHR) {
+            ALOGE("EglManager::createReleaseFence: error creating fence: %#x", eglGetError());
+            return UNKNOWN_ERROR;
+        }
+        glFlush();
+    }
+    return OK;
 }
 
 } /* namespace renderthread */
