@@ -39,10 +39,13 @@ import static com.android.server.am.ActivityDisplayProto.RESUMED_ACTIVITY;
 import static com.android.server.am.ActivityDisplayProto.STACKS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STATES;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityStackSupervisor.FindTaskResult;
 import static com.android.server.am.ActivityStackSupervisor.TAG_STATES;
+import static com.android.server.am.ActivityStackSupervisor.TAG_TASKS;
 
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
@@ -120,6 +123,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     private Point mTmpDisplaySize = new Point();
 
     private DisplayWindowController mWindowContainerController;
+
+    private final FindTaskResult mTmpFindTaskResult = new FindTaskResult();
 
     @VisibleForTesting
     ActivityDisplay(ActivityStackSupervisor supervisor, int displayId) {
@@ -443,6 +448,41 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             }
         }
         return someActivityPaused;
+    }
+
+    /**
+     * Find task for putting the Activity in.
+     */
+    void findTaskLocked(final ActivityRecord r, final boolean isPreferredDisplay,
+            FindTaskResult result) {
+        mTmpFindTaskResult.clear();
+        for (int stackNdx = getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = getChildAt(stackNdx);
+            if (!r.hasCompatibleActivityType(stack)) {
+                if (DEBUG_TASKS) {
+                    Slog.d(TAG_TASKS, "Skipping stack: (mismatch activity/stack) " + stack);
+                }
+                continue;
+            }
+
+            stack.findTaskLocked(r, mTmpFindTaskResult);
+            // It is possible to have tasks in multiple stacks with the same root affinity, so
+            // we should keep looking after finding an affinity match to see if there is a
+            // better match in another stack. Also, task affinity isn't a good enough reason
+            // to target a display which isn't the source of the intent, so skip any affinity
+            // matches not on the specified display.
+            if (mTmpFindTaskResult.mRecord != null) {
+                if (mTmpFindTaskResult.mIdealMatch) {
+                    result.setTo(mTmpFindTaskResult);
+                    return;
+                } else if (isPreferredDisplay) {
+                    // Note: since the traversing through the stacks is top down, the floating
+                    // tasks should always have lower priority than any affinity-matching tasks
+                    // in the fullscreen stacks
+                    result.setTo(mTmpFindTaskResult);
+                }
+            }
+        }
     }
 
     /**
