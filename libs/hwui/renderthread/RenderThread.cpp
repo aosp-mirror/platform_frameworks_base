@@ -189,6 +189,7 @@ void RenderThread::requireGlContext() {
     LOG_ALWAYS_FATAL_IF(!glInterface.get());
 
     GrContextOptions options;
+    options.fPreferExternalImagesOverES3 = true;
     options.fDisableDistanceFieldPaths = true;
     cacheManager().configureContext(&options);
     sk_sp<GrContext> grContext(GrContext::MakeGL(std::move(glInterface), options));
