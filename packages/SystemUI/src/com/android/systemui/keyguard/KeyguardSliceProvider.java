@@ -30,6 +30,7 @@ import android.icu.text.DateFormat;
 import android.icu.text.DisplayContext;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Trace;
 import android.provider.Settings;
 import android.service.notification.ZenModeConfig;
 import android.text.TextUtils;
@@ -72,6 +73,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
     @VisibleForTesting
     static final int ALARM_VISIBILITY_HOURS = 12;
 
+    private static KeyguardSliceProvider sInstance;
+
     protected final Uri mSliceUri;
     protected final Uri mDateUri;
     protected final Uri mAlarmUri;
@@ -89,6 +92,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     protected AlarmManager mAlarmManager;
     protected ContentResolver mContentResolver;
     private AlarmManager.AlarmClockInfo mNextAlarmInfo;
+    private PendingIntent mPendingIntent;
 
     /**
      * Receiver responsible for time ticking and updating the date format.
@@ -117,6 +121,10 @@ public class KeyguardSliceProvider extends SliceProvider implements
         this(new Handler());
     }
 
+    public static KeyguardSliceProvider getAttachedInstance() {
+        return KeyguardSliceProvider.sInstance;
+    }
+
     @VisibleForTesting
     KeyguardSliceProvider(Handler handler) {
         mHandler = handler;
@@ -128,23 +136,24 @@ public class KeyguardSliceProvider extends SliceProvider implements
 
     @Override
     public Slice onBindSlice(Uri sliceUri) {
+        Trace.beginSection("KeyguardSliceProvider#onBindSlice");
         ListBuilder builder = new ListBuilder(getContext(), mSliceUri, ListBuilder.INFINITY);
         builder.addRow(new RowBuilder(mDateUri).setTitle(mLastText));
         addNextAlarm(builder);
         addZenMode(builder);
         addPrimaryAction(builder);
-        return builder.build();
+        Slice slice = builder.build();
+        Trace.endSection();
+        return slice;
     }
 
     protected void addPrimaryAction(ListBuilder builder) {
         // Add simple action because API requires it; Keyguard handles presenting
         // its own slices so this action + icon are actually never used.
-        PendingIntent pi = PendingIntent.getActivity(getContext(), 0, new Intent(), 0);
         IconCompat icon = IconCompat.createWithResource(getContext(),
                 R.drawable.ic_access_alarms_big);
-        SliceAction action = SliceAction.createDeeplink(pi, icon,
+        SliceAction action = SliceAction.createDeeplink(mPendingIntent, icon,
                 ListBuilder.ICON_IMAGE, mLastText);
-
         RowBuilder primaryActionRow = new RowBuilder(Uri.parse(KEYGUARD_ACTION_URI))
                 .setPrimaryAction(action);
         builder.addRow(primaryActionRow);
@@ -154,7 +163,6 @@ public class KeyguardSliceProvider extends SliceProvider implements
         if (TextUtils.isEmpty(mNextAlarm)) {
             return;
         }
-
         IconCompat alarmIcon = IconCompat.createWithResource(getContext(),
                 R.drawable.ic_access_alarms_big);
         RowBuilder alarmRowBuilder = new RowBuilder(mAlarmUri)
@@ -198,6 +206,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
         mZenModeController = new ZenModeControllerImpl(getContext(), mHandler);
         mZenModeController.addCallback(this);
         mDatePattern = getContext().getString(R.string.system_ui_aod_date_pattern);
+        mPendingIntent = PendingIntent.getActivity(getContext(), 0, new Intent(), 0);
+        KeyguardSliceProvider.sInstance = this;
         registerClockUpdate();
         updateClock();
         return true;

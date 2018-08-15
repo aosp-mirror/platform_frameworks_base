@@ -27,6 +27,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Trace;
 import android.provider.Settings;
 import android.text.Layout;
 import android.text.TextUtils;
@@ -148,6 +149,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     }
 
     private void showSlice() {
+        Trace.beginSection("KeyguardSliceView#showSlice");
         if (mPulsing || mSlice == null) {
             mTitle.setVisibility(GONE);
             mRow.setVisibility(GONE);
@@ -236,6 +238,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         if (mContentChangeListener != null) {
             mContentChangeListener.run();
         }
+        Trace.endSection();
     }
 
     public void setPulsing(boolean pulsing, boolean animate) {
@@ -383,8 +386,23 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     }
 
     public void refresh() {
-        Slice slice = SliceViewManager.getInstance(getContext()).bindSlice(mKeyguardSliceUri);
+        Slice slice;
+        Trace.beginSection("KeyguardSliceView#refresh");
+        // We can optimize performance and avoid binder calls when we know that we're bound
+        // to a Slice on the same process.
+        if (KeyguardSliceProvider.KEYGUARD_SLICE_URI.equals(mKeyguardSliceUri.toString())) {
+            KeyguardSliceProvider instance = KeyguardSliceProvider.getAttachedInstance();
+            if (instance != null) {
+                slice = instance.onBindSlice(mKeyguardSliceUri);
+            } else {
+                Log.w(TAG, "Keyguard slice not bound yet?");
+                slice = null;
+            }
+        } else {
+            slice = SliceViewManager.getInstance(getContext()).bindSlice(mKeyguardSliceUri);
+        }
         onChanged(slice);
+        Trace.endSection();
     }
 
     public static class Row extends LinearLayout {
