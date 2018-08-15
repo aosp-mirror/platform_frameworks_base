@@ -372,11 +372,6 @@ interface INetworkManagementService
     void stopClatd(String interfaceName);
 
     /**
-     * Determine whether the clatd (464xlat) service has been started on the given interface.
-     */
-    boolean isClatdStarted(String interfaceName);
-
-    /**
      * Start listening for mobile activity state changes.
      */
     void registerNetworkActivityListener(INetworkActivityListener listener);
