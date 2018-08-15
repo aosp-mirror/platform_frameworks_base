@@ -37,6 +37,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
@@ -374,6 +375,7 @@ public final class Settings {
      * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @UnsupportedAppUsage
     public static final String ACTION_TRUSTED_CREDENTIALS_USER =
             "com.android.settings.TRUSTED_CREDENTIALS_USER";
 
@@ -684,6 +686,7 @@ public final class Settings {
      * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @UnsupportedAppUsage
     public static final String ACTION_USER_DICTIONARY_INSERT =
             "com.android.settings.USER_DICTIONARY_INSERT";
 
@@ -1451,7 +1454,9 @@ public final class Settings {
     public static final String ACTION_APP_NOTIFICATION_REDACTION
             = "android.settings.ACTION_APP_NOTIFICATION_REDACTION";
 
-    /** @hide */ public static final String EXTRA_APP_UID = "app_uid";
+    /** @hide */
+    @UnsupportedAppUsage
+    public static final String EXTRA_APP_UID = "app_uid";
 
     /**
      * Activity Action: Show a dialog with disabled by policy message.
@@ -1951,6 +1956,7 @@ public final class Settings {
         @GuardedBy("mLock")
         private final Uri mUri;
         @GuardedBy("mLock")
+        @UnsupportedAppUsage
         private IContentProvider mContentProvider;
 
         public ContentProviderHolder(Uri uri) {
@@ -1988,6 +1994,7 @@ public final class Settings {
         private final HashMap<String, String> mValues = new HashMap<>();
 
         private final Uri mUri;
+        @UnsupportedAppUsage
         private final ContentProviderHolder mProviderHolder;
 
         // The method we'll call (or null, to not use) on the provider
@@ -2027,6 +2034,7 @@ public final class Settings {
             return true;
         }
 
+        @UnsupportedAppUsage
         public String getStringForUser(ContentResolver cr, String name, final int userHandle) {
             final boolean isSelf = (userHandle == UserHandle.myUserId());
             int currentGeneration = -1;
@@ -2244,15 +2252,18 @@ public final class Settings {
         public static final Uri CONTENT_URI =
             Uri.parse("content://" + AUTHORITY + "/system");
 
+        @UnsupportedAppUsage
         private static final ContentProviderHolder sProviderHolder =
                 new ContentProviderHolder(CONTENT_URI);
 
+        @UnsupportedAppUsage
         private static final NameValueCache sNameValueCache = new NameValueCache(
                 CONTENT_URI,
                 CALL_METHOD_GET_SYSTEM,
                 CALL_METHOD_PUT_SYSTEM,
                 sProviderHolder);
 
+        @UnsupportedAppUsage
         private static final HashSet<String> MOVED_TO_SECURE;
         static {
             MOVED_TO_SECURE = new HashSet<>(30);
@@ -2289,7 +2300,9 @@ public final class Settings {
             MOVED_TO_SECURE.add(Secure.INSTALL_NON_MARKET_APPS);
         }
 
+        @UnsupportedAppUsage
         private static final HashSet<String> MOVED_TO_GLOBAL;
+        @UnsupportedAppUsage
         private static final HashSet<String> MOVED_TO_SECURE_THEN_GLOBAL;
         static {
             MOVED_TO_GLOBAL = new HashSet<>();
@@ -2375,6 +2388,7 @@ public final class Settings {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public static String getStringForUser(ContentResolver resolver, String name,
                 int userHandle) {
             if (MOVED_TO_SECURE.contains(name)) {
@@ -2402,6 +2416,7 @@ public final class Settings {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public static boolean putStringForUser(ContentResolver resolver, String name, String value,
                 int userHandle) {
             if (MOVED_TO_SECURE.contains(name)) {
@@ -2456,6 +2471,7 @@ public final class Settings {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public static int getIntForUser(ContentResolver cr, String name, int def, int userHandle) {
             String v = getStringForUser(cr, name, userHandle);
             try {
@@ -2489,6 +2505,7 @@ public final class Settings {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public static int getIntForUser(ContentResolver cr, String name, int userHandle)
                 throws SettingNotFoundException {
             String v = getStringForUser(cr, name, userHandle);
@@ -2517,6 +2534,7 @@ public final class Settings {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public static boolean putIntForUser(ContentResolver cr, String name, int value,
                 int userHandle) {
             return putStringForUser(cr, name, Integer.toString(value), userHandle);
@@ -2935,6 +2953,7 @@ public final class Settings {
          * {@hide}
          */
         @Deprecated
+        @UnsupportedAppUsage
         public static final String AIRPLANE_MODE_TOGGLEABLE_RADIOS =
                 Global.AIRPLANE_MODE_TOGGLEABLE_RADIOS;
 
@@ -3214,6 +3233,7 @@ public final class Settings {
          * or less (<0.0 >-1.0) bright.
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String SCREEN_AUTO_BRIGHTNESS_ADJ = "screen_auto_brightness_adj";
 
         private static final Validator SCREEN_AUTO_BRIGHTNESS_ADJ_VALIDATOR =
@@ -3404,6 +3424,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String MASTER_MONO = "master_mono";
 
         private static final Validator MASTER_MONO_VALIDATOR = BOOLEAN_VALIDATOR;
@@ -3440,6 +3461,7 @@ public final class Settings {
          * Kept for use by legacy database upgrade code in DatabaseHelper.
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String VIBRATE_IN_SILENT = "vibrate_in_silent";
 
         private static final Validator VIBRATE_IN_SILENT_VALIDATOR = BOOLEAN_VALIDATOR;
@@ -3742,6 +3764,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY =
                 "hide_rotation_lock_toggle_for_accessibility";
 
@@ -3797,6 +3820,7 @@ public final class Settings {
          * boolean (1 or 0).
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String HEARING_AID = "hearing_aid";
 
         /** @hide */
@@ -3811,6 +3835,7 @@ public final class Settings {
          * 3 = HCO
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String TTY_MODE = "tty_mode";
 
         /** @hide */
@@ -3850,6 +3875,7 @@ public final class Settings {
          * pending. The value is boolean (1 or 0).
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String NOTIFICATION_LIGHT_PULSE = "notification_light_pulse";
 
         /** @hide */
@@ -3861,6 +3887,7 @@ public final class Settings {
          * 1 = yes
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String POINTER_LOCATION = "pointer_location";
 
         /** @hide */
@@ -3872,6 +3899,7 @@ public final class Settings {
          * 1 = yes
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String SHOW_TOUCHES = "show_touches";
 
         /** @hide */
@@ -3907,6 +3935,7 @@ public final class Settings {
          * @hide
          */
         @Deprecated
+        @UnsupportedAppUsage
         public static final String DOCK_SOUNDS_ENABLED = Global.DOCK_SOUNDS_ENABLED;
 
         private static final Validator DOCK_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
@@ -3915,6 +3944,7 @@ public final class Settings {
          * Whether to play sounds when the keyguard is shown and dismissed.
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String LOCKSCREEN_SOUNDS_ENABLED = "lockscreen_sounds_enabled";
 
         /** @hide */
@@ -3943,6 +3973,7 @@ public final class Settings {
          * @hide
          */
         @Deprecated
+        @UnsupportedAppUsage
         public static final String DESK_DOCK_SOUND = Global.DESK_DOCK_SOUND;
 
         /**
@@ -3951,6 +3982,7 @@ public final class Settings {
          * @hide
          */
         @Deprecated
+        @UnsupportedAppUsage
         public static final String DESK_UNDOCK_SOUND = Global.DESK_UNDOCK_SOUND;
 
         /**
@@ -3959,6 +3991,7 @@ public final class Settings {
          * @hide
          */
         @Deprecated
+        @UnsupportedAppUsage
         public static final String CAR_DOCK_SOUND = Global.CAR_DOCK_SOUND;
 
         /**
@@ -3967,6 +4000,7 @@ public final class Settings {
          * @hide
          */
         @Deprecated
+        @UnsupportedAppUsage
         public static final String CAR_UNDOCK_SOUND = Global.CAR_UNDOCK_SOUND;
 
         /**
@@ -3975,6 +4009,7 @@ public final class Settings {
          * @hide
          */
         @Deprecated
+        @UnsupportedAppUsage
         public static final String LOCK_SOUND = Global.LOCK_SOUND;
 
         /**
@@ -3983,6 +4018,7 @@ public final class Settings {
          * @hide
          */
         @Deprecated
+        @UnsupportedAppUsage
         public static final String UNLOCK_SOUND = Global.UNLOCK_SOUND;
 
         /**
@@ -4048,6 +4084,7 @@ public final class Settings {
          *   +7 = fastest
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String POINTER_SPEED = "pointer_speed";
 
         /** @hide */
@@ -4112,6 +4149,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String[] SETTINGS_TO_BACKUP = {
             STAY_ON_WHILE_PLUGGED_IN,   // moved to global
             WIFI_USE_STATIC_IP,
@@ -4180,6 +4218,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final Set<String> PUBLIC_SETTINGS = new ArraySet<>();
         static {
             PUBLIC_SETTINGS.add(END_BUTTON_BEHAVIOR);
@@ -4234,6 +4273,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final Set<String> PRIVATE_SETTINGS = new ArraySet<>();
         static {
             PRIVATE_SETTINGS.add(WIFI_USE_STATIC_IP);
@@ -4285,6 +4325,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final Map<String, Validator> VALIDATORS = new ArrayMap<>();
         static {
             VALIDATORS.put(STAY_ON_WHILE_PLUGGED_IN, STAY_ON_WHILE_PLUGGED_IN_VALIDATOR);
@@ -4369,6 +4410,7 @@ public final class Settings {
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
          */
+        @UnsupportedAppUsage
         private static final Set<String> CLONE_TO_MANAGED_PROFILE = new ArraySet<>();
         static {
             CLONE_TO_MANAGED_PROFILE.add(DATE_FORMAT);
@@ -4707,10 +4749,12 @@ public final class Settings {
         public static final Uri CONTENT_URI =
             Uri.parse("content://" + AUTHORITY + "/secure");
 
+        @UnsupportedAppUsage
         private static final ContentProviderHolder sProviderHolder =
                 new ContentProviderHolder(CONTENT_URI);
 
         // Populated lazily, guarded by class object:
+        @UnsupportedAppUsage
         private static final NameValueCache sNameValueCache = new NameValueCache(
                 CONTENT_URI,
                 CALL_METHOD_GET_SECURE,
@@ -4720,7 +4764,9 @@ public final class Settings {
         private static ILockSettings sLockSettings = null;
 
         private static boolean sIsSystemProcess;
+        @UnsupportedAppUsage
         private static final HashSet<String> MOVED_TO_LOCK_SETTINGS;
+        @UnsupportedAppUsage
         private static final HashSet<String> MOVED_TO_GLOBAL;
         static {
             MOVED_TO_LOCK_SETTINGS = new HashSet<>(3);
@@ -4864,6 +4910,7 @@ public final class Settings {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public static String getStringForUser(ContentResolver resolver, String name,
                 int userHandle) {
             if (MOVED_TO_GLOBAL.contains(name)) {
@@ -4918,12 +4965,14 @@ public final class Settings {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public static boolean putStringForUser(ContentResolver resolver, String name, String value,
                 int userHandle) {
             return putStringForUser(resolver, name, value, null, false, userHandle);
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public static boolean putStringForUser(@NonNull ContentResolver resolver,
                 @NonNull String name, @Nullable String value, @Nullable String tag,
                 boolean makeDefault, @UserIdInt int userHandle) {
@@ -5079,6 +5128,7 @@ public final class Settings {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public static int getIntForUser(ContentResolver cr, String name, int def, int userHandle) {
             if (LOCATION_MODE.equals(name)) {
                 // Map from to underlying location provider storage API to location mode
@@ -5148,6 +5198,7 @@ public final class Settings {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public static boolean putIntForUser(ContentResolver cr, String name, int value,
                 int userHandle) {
             return putStringForUser(cr, name, Integer.toString(value), userHandle);
@@ -5172,6 +5223,7 @@ public final class Settings {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public static long getLongForUser(ContentResolver cr, String name, long def,
                 int userHandle) {
             String valString = getStringForUser(cr, name, userHandle);
@@ -5235,6 +5287,7 @@ public final class Settings {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public static boolean putLongForUser(ContentResolver cr, String name, long value,
                 int userHandle) {
             return putStringForUser(cr, name, Long.toString(value), userHandle);
@@ -5788,6 +5841,7 @@ public final class Settings {
          * subject to current DeviceAdmin policy limits.
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String LOCK_SCREEN_LOCK_AFTER_TIMEOUT = "lock_screen_lock_after_timeout";
 
 
@@ -5829,6 +5883,7 @@ public final class Settings {
          * @deprecated
          */
         @Deprecated
+        @UnsupportedAppUsage
         public static final String LOCK_SCREEN_OWNER_INFO_ENABLED =
             "lock_screen_owner_info_enabled";
 
@@ -5837,6 +5892,7 @@ public final class Settings {
          * in their full "private" form (same as when the device is unlocked).
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS =
                 "lock_screen_allow_private_notifications";
 
@@ -6270,6 +6326,7 @@ public final class Settings {
          * @see android.graphics.Typeface
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String ACCESSIBILITY_CAPTIONING_TYPEFACE =
                 "accessibility_captioning_typeface";
 
@@ -6303,6 +6360,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED =
                 "accessibility_display_daltonizer_enabled";
 
@@ -6321,6 +6379,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String ACCESSIBILITY_DISPLAY_DALTONIZER =
                 "accessibility_display_daltonizer";
 
@@ -6334,6 +6393,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String ACCESSIBILITY_AUTOCLICK_ENABLED =
                 "accessibility_autoclick_enabled";
 
@@ -6359,6 +6419,7 @@ public final class Settings {
          * (0 = false, 1 = true)
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String ACCESSIBILITY_LARGE_POINTER_ICON =
                 "accessibility_large_pointer_icon";
 
@@ -6369,6 +6430,7 @@ public final class Settings {
          * The timeout for considering a press to be a long press in milliseconds.
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String LONG_PRESS_TIMEOUT = "long_press_timeout";
 
         private static final Validator LONG_PRESS_TIMEOUT_VALIDATOR =
@@ -6389,6 +6451,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String ENABLED_PRINT_SERVICES =
             "enabled_print_services";
 
@@ -6747,6 +6810,7 @@ public final class Settings {
          * Type: int ( 0 = disabled, 1 = enabled )
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String BACKUP_ENABLED = "backup_enabled";
 
         /**
@@ -6755,6 +6819,7 @@ public final class Settings {
          * Type: int ( 0 = disabled, 1 = enabled )
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String BACKUP_AUTO_RESTORE = "backup_auto_restore";
 
         /**
@@ -6762,12 +6827,14 @@ public final class Settings {
          * Type: int ( 0 = unprovisioned, 1 = fully provisioned )
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String BACKUP_PROVISIONED = "backup_provisioned";
 
         /**
          * Component of the transport to use for backup/restore.
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String BACKUP_TRANSPORT = "backup_transport";
 
         /**
@@ -6945,6 +7012,7 @@ public final class Settings {
          * Also prevents ANRs and crash dialogs from being suppressed.
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String ANR_SHOW_BACKGROUND = "anr_show_background";
 
         /**
@@ -6964,6 +7032,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String VOICE_RECOGNITION_SERVICE = "voice_recognition_service";
 
         /**
@@ -6972,6 +7041,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String PACKAGE_VERIFIER_USER_CONSENT =
             "package_verifier_user_consent";
 
@@ -6981,6 +7051,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String SELECTED_SPELL_CHECKER = "selected_spell_checker";
 
         private static final Validator SELECTED_SPELL_CHECKER_VALIDATOR = COMPONENT_NAME_VALIDATOR;
@@ -6991,6 +7062,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String SELECTED_SPELL_CHECKER_SUBTYPE =
                 "selected_spell_checker_subtype";
 
@@ -7015,6 +7087,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String INCALL_POWER_BUTTON_BEHAVIOR = "incall_power_button_behavior";
 
         private static final Validator INCALL_POWER_BUTTON_BEHAVIOR_VALIDATOR =
@@ -7081,6 +7154,7 @@ public final class Settings {
          * Whether the device should doze if configured.
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String DOZE_ENABLED = "doze_enabled";
 
         private static final Validator DOZE_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
@@ -7198,6 +7272,7 @@ public final class Settings {
          * The default NFC payment component
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String NFC_PAYMENT_DEFAULT_COMPONENT = "nfc_payment_default_component";
 
         private static final Validator NFC_PAYMENT_DEFAULT_COMPONENT_VALIDATOR =
@@ -7213,12 +7288,14 @@ public final class Settings {
          * Specifies the package name currently configured to be the primary sms application
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String SMS_DEFAULT_APPLICATION = "sms_default_application";
 
         /**
          * Specifies the package name currently configured to be the default dialer application
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String DIALER_DEFAULT_APPLICATION = "dialer_default_application";
 
         /**
@@ -7320,6 +7397,7 @@ public final class Settings {
          * {@link NotificationManager#isNotificationAssistantAccessGranted(ComponentName)}.
          */
         @Deprecated
+        @UnsupportedAppUsage
         public static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
 
         private static final Validator ENABLED_NOTIFICATION_LISTENERS_VALIDATOR =
@@ -7356,6 +7434,7 @@ public final class Settings {
         private static final Validator SYNC_PARENT_SOUNDS_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /** @hide */
+        @UnsupportedAppUsage
         public static final String IMMERSIVE_MODE_CONFIRMATIONS = "immersive_mode_confirmations";
 
         /**
@@ -7398,6 +7477,7 @@ public final class Settings {
          * This preference enables notification display on the lockscreen.
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS =
                 "lock_screen_show_notifications";
 
@@ -7459,6 +7539,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String ASSISTANT = "assistant";
 
         /**
@@ -7943,6 +8024,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String[] SETTINGS_TO_BACKUP = {
             BUGREPORT_IN_POWER_MENU,                            // moved to global
             ALLOW_MOCK_LOCATION,
@@ -8446,6 +8528,7 @@ public final class Settings {
          * @hide
          * No longer used. Should be removed once all dependencies have been updated.
          */
+        @UnsupportedAppUsage
         public static final String ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED =
                 "enable_accessibility_global_gesture_enabled";
 
@@ -9024,6 +9107,7 @@ public final class Settings {
         * ConnectivityManager for more info.
         * @hide
         */
+       @UnsupportedAppUsage
        public static final String MOBILE_DATA = "mobile_data";
 
        /**
@@ -9110,6 +9194,7 @@ public final class Settings {
         * scorer app, external network scores will neither be requested nor accepted.
         * @hide
         */
+       @UnsupportedAppUsage
        public static final String NETWORK_SCORER_APP = "network_scorer_app";
 
         /**
@@ -9187,6 +9272,7 @@ public final class Settings {
         * 0 = do not verify apps before installation
         * @hide
         */
+       @UnsupportedAppUsage
        public static final String PACKAGE_VERIFIER_ENABLE = "package_verifier_enable";
 
        /** Timeout for package verification.
@@ -9426,6 +9512,7 @@ public final class Settings {
         * by the system).
         * @hide
         */
+       @UnsupportedAppUsage
        public static final String WEBVIEW_PROVIDER = "webview_provider";
 
        /**
@@ -9803,6 +9890,7 @@ public final class Settings {
         *
         * @hide
         */
+       @UnsupportedAppUsage
        public static final String WIFI_SAVED_STATE = "wifi_saved_state";
 
        /**
@@ -9843,6 +9931,7 @@ public final class Settings {
         * the setting needs to be set to 0 to disable it.
         * @hide
         */
+       @UnsupportedAppUsage
        public static final String WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED =
                "wifi_watchdog_poor_network_test_enabled";
 
@@ -11234,6 +11323,7 @@ public final class Settings {
          * See RIL_PreferredNetworkType in ril.h
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String PREFERRED_NETWORK_MODE =
                 "preferred_network_mode";
 
@@ -11615,12 +11705,21 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String ZEN_MODE = "zen_mode";
 
-        /** @hide */ public static final int ZEN_MODE_OFF = 0;
-        /** @hide */ public static final int ZEN_MODE_IMPORTANT_INTERRUPTIONS = 1;
-        /** @hide */ public static final int ZEN_MODE_NO_INTERRUPTIONS = 2;
-        /** @hide */ public static final int ZEN_MODE_ALARMS = 3;
+        /** @hide */
+        @UnsupportedAppUsage
+        public static final int ZEN_MODE_OFF = 0;
+        /** @hide */
+        @UnsupportedAppUsage
+        public static final int ZEN_MODE_IMPORTANT_INTERRUPTIONS = 1;
+        /** @hide */
+        @UnsupportedAppUsage
+        public static final int ZEN_MODE_NO_INTERRUPTIONS = 2;
+        /** @hide */
+        @UnsupportedAppUsage
+        public static final int ZEN_MODE_ALARMS = 3;
 
         /** @hide */ public static String zenModeToString(int mode) {
             if (mode == ZEN_MODE_IMPORTANT_INTERRUPTIONS) return "ZEN_MODE_IMPORTANT_INTERRUPTIONS";
@@ -11653,6 +11752,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String ZEN_MODE_CONFIG_ETAG = "zen_mode_config_etag";
 
         /**
@@ -11674,11 +11774,16 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String HEADS_UP_NOTIFICATIONS_ENABLED =
                 "heads_up_notifications_enabled";
 
-        /** @hide */ public static final int HEADS_UP_OFF = 0;
-        /** @hide */ public static final int HEADS_UP_ON = 1;
+        /** @hide */
+        @UnsupportedAppUsage
+        public static final int HEADS_UP_OFF = 0;
+        /** @hide */
+        @UnsupportedAppUsage
+        public static final int HEADS_UP_ON = 1;
 
         /**
          * The name of the device
@@ -11700,6 +11805,7 @@ public final class Settings {
          * Type: int (0 for false, 1 for true)
          * @hide
          */
+        @UnsupportedAppUsage
         public static final String REQUIRE_PASSWORD_TO_DECRYPT = "require_password_to_decrypt";
 
         /**
@@ -12171,10 +12277,12 @@ public final class Settings {
         public static final String[] LEGACY_RESTORE_SETTINGS = {
         };
 
+        @UnsupportedAppUsage
         private static final ContentProviderHolder sProviderHolder =
                 new ContentProviderHolder(CONTENT_URI);
 
         // Populated lazily, guarded by class object:
+        @UnsupportedAppUsage
         private static final NameValueCache sNameValueCache = new NameValueCache(
                     CONTENT_URI,
                     CALL_METHOD_GET_GLOBAL,
@@ -12182,6 +12290,7 @@ public final class Settings {
                     sProviderHolder);
 
         // Certain settings have been moved from global to the per-user secure namespace
+        @UnsupportedAppUsage
         private static final HashSet<String> MOVED_TO_SECURE;
         static {
             MOVED_TO_SECURE = new HashSet<>(1);
@@ -12210,6 +12319,7 @@ public final class Settings {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public static String getStringForUser(ContentResolver resolver, String name,
                 int userHandle) {
             if (MOVED_TO_SECURE.contains(name)) {
@@ -12336,6 +12446,7 @@ public final class Settings {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public static boolean putStringForUser(ContentResolver resolver,
                 String name, String value, int userHandle) {
             return putStringForUser(resolver, name, value, null, false, userHandle);
@@ -12590,6 +12701,7 @@ public final class Settings {
           * The supported values are 0 = disable or 1 = enable prompt.
           * @hide
           */
+        @UnsupportedAppUsage
         public static final String MULTI_SIM_VOICE_PROMPT = "multi_sim_voice_prompt";
 
         /**
@@ -12619,6 +12731,7 @@ public final class Settings {
           * iccId,appType,appId,activationStatus,3gppIndex,3gpp2Index
           * @hide
          */
+        @UnsupportedAppUsage
         public static final String[] MULTI_SIM_USER_PREFERRED_SUBS = {"user_preferred_sub1",
                 "user_preferred_sub2","user_preferred_sub3"};
 
@@ -12968,6 +13081,7 @@ public final class Settings {
         /**
          * The content:// style URL for this table
          */
+        @UnsupportedAppUsage
         public static final Uri CONTENT_URI =
             Uri.parse("content://" + AUTHORITY + "/bookmarks");
 
@@ -13076,6 +13190,7 @@ public final class Settings {
          *            cleared (the bookmark is not removed).
          * @return The unique content URL for the new bookmark entry.
          */
+        @UnsupportedAppUsage
         public static Uri add(ContentResolver cr,
                                            Intent intent,
                                            String title,
@@ -13187,6 +13302,7 @@ public final class Settings {
      * callingPackage, a negative result will be returned.
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean isCallingPackageAllowedToWriteSettings(Context context, int uid,
             String callingPackage, boolean throwException) {
         return isCallingPackageAllowedToPerformAppOpsProtectedOperation(context, uid,
@@ -13243,6 +13359,7 @@ public final class Settings {
      * a negative result will be returned.
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean isCallingPackageAllowedToDrawOverlays(Context context, int uid,
             String callingPackage, boolean throwException) {
         return isCallingPackageAllowedToPerformAppOpsProtectedOperation(context, uid,
@@ -13273,6 +13390,7 @@ public final class Settings {
      * OP_WRITE_SETTINGS
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean isCallingPackageAllowedToPerformAppOpsProtectedOperation(Context context,
             int uid, String callingPackage, boolean throwException, int appOpsOpCode, String[]
             permissions, boolean makeNote) {

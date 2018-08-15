@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -218,6 +219,7 @@ public class Browser {
      *  the string.
      *  @hide pending API council approval
      */
+    @UnsupportedAppUsage
     public static final void sendString(Context c,
                                         String stringToSend,
                                         String chooserDialogTitle) {
@@ -323,6 +325,7 @@ public class Browser {
      *  @hide pending API council approval
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static final String[] getVisitedHistory(ContentResolver cr) {
         return new String[0];
     }

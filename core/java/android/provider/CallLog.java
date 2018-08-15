@@ -17,6 +17,7 @@
 
 package android.provider;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -609,6 +610,7 @@ public class CallLog {
          *        as they don't have permissions.
          * {@hide}
          */
+        @UnsupportedAppUsage
         public static Uri addCall(CallerInfo ci, Context context, String number,
                 String postDialDigits, String viaNumber, int presentation, int callType,
                 int features, PhoneAccountHandle accountHandle, long start, int duration,
