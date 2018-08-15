@@ -16,6 +16,7 @@
 
 package android.text;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -321,6 +322,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      * if boring.
      * @hide
      */
+    @UnsupportedAppUsage
     public static Metrics isBoring(CharSequence text, TextPaint paint,
             TextDirectionHeuristic textDir, Metrics metrics) {
         final int textLength = text.length();

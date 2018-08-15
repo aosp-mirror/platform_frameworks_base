@@ -18,6 +18,7 @@ package android.text;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -411,6 +412,7 @@ public abstract class Layout {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void drawText(Canvas canvas, int firstLine, int lastLine) {
         int previousLineBottom = getLineTop(firstLine);
         int previousLineEnd = getLineStart(firstLine);
@@ -578,6 +580,7 @@ public abstract class Layout {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void drawBackground(Canvas canvas, Path highlight, Paint highlightPaint,
             int cursorOffsetVertical, int firstLine, int lastLine) {
         // First, draw LineBackgroundSpans.
@@ -658,6 +661,7 @@ public abstract class Layout {
      * @return The range of lines that need to be drawn, possibly empty.
      * @hide
      */
+    @UnsupportedAppUsage
     public long getLineRangeForDraw(Canvas canvas) {
         int dtop, dbottom;
 
@@ -928,6 +932,7 @@ public abstract class Layout {
      * @return true if at a level boundary
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isLevelBoundary(int offset) {
         int line = getLineForOffset(offset);
         Directions dirs = getLineDirections(line);
@@ -1134,6 +1139,7 @@ public abstract class Layout {
      * optionally clamp it so that it doesn't exceed the width of the layout.
      * @hide
      */
+    @UnsupportedAppUsage
     public float getPrimaryHorizontal(int offset, boolean clamped) {
         boolean trailing = primaryIsTrailingPrevious(offset);
         return getHorizontal(offset, trailing, clamped);
@@ -1153,6 +1159,7 @@ public abstract class Layout {
      * optionally clamp it so that it doesn't exceed the width of the layout.
      * @hide
      */
+    @UnsupportedAppUsage
     public float getSecondaryHorizontal(int offset, boolean clamped) {
         boolean trailing = primaryIsTrailingPrevious(offset);
         return getHorizontal(offset, !trailing, clamped);
@@ -1783,6 +1790,7 @@ public abstract class Layout {
      * only robust for left-aligned displays.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean shouldClampCursor(int line) {
         // Only clamp cursor position in left-aligned displays.
         switch (getParagraphAlignment(line)) {
@@ -2435,6 +2443,7 @@ public abstract class Layout {
     }
 
     private CharSequence mText;
+    @UnsupportedAppUsage
     private TextPaint mPaint;
     private TextPaint mWorkPaint = new TextPaint();
     private int mWidth;
@@ -2460,6 +2469,7 @@ public abstract class Layout {
 
     /* package */ static final int DIR_REQUEST_LTR = 1;
     /* package */ static final int DIR_REQUEST_RTL = -1;
+    @UnsupportedAppUsage
     /* package */ static final int DIR_REQUEST_DEFAULT_LTR = 2;
     /* package */ static final int DIR_REQUEST_DEFAULT_RTL = -2;
 
@@ -2473,8 +2483,10 @@ public abstract class Layout {
         ALIGN_OPPOSITE,
         ALIGN_CENTER,
         /** @hide */
+        @UnsupportedAppUsage
         ALIGN_LEFT,
         /** @hide */
+        @UnsupportedAppUsage
         ALIGN_RIGHT,
     }
 
@@ -2482,11 +2494,13 @@ public abstract class Layout {
 
     /** @hide */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    @UnsupportedAppUsage
     public static final Directions DIRS_ALL_LEFT_TO_RIGHT =
         new Directions(new int[] { 0, RUN_LENGTH_MASK });
 
     /** @hide */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    @UnsupportedAppUsage
     public static final Directions DIRS_ALL_RIGHT_TO_LEFT =
         new Directions(new int[] { 0, RUN_LENGTH_MASK | RUN_RTL_FLAG });
 

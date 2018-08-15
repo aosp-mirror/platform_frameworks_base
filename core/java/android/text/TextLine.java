@@ -18,6 +18,7 @@ package android.text;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;
@@ -50,6 +51,7 @@ public class TextLine {
     private static final boolean DEBUG = false;
 
     private TextPaint mPaint;
+    @UnsupportedAppUsage
     private CharSequence mText;
     private int mStart;
     private int mLen;
@@ -59,6 +61,7 @@ public class TextLine {
     private TabStops mTabs;
     private char[] mChars;
     private boolean mCharsValid;
+    @UnsupportedAppUsage
     private Spanned mSpanned;
     private PrecomputedText mComputed;
 
@@ -73,16 +76,20 @@ public class TextLine {
 
     private final TextPaint mWorkPaint = new TextPaint();
     private final TextPaint mActivePaint = new TextPaint();
+    @UnsupportedAppUsage
     private final SpanSet<MetricAffectingSpan> mMetricAffectingSpanSpanSet =
             new SpanSet<MetricAffectingSpan>(MetricAffectingSpan.class);
+    @UnsupportedAppUsage
     private final SpanSet<CharacterStyle> mCharacterStyleSpanSet =
             new SpanSet<CharacterStyle>(CharacterStyle.class);
+    @UnsupportedAppUsage
     private final SpanSet<ReplacementSpan> mReplacementSpanSpanSet =
             new SpanSet<ReplacementSpan>(ReplacementSpan.class);
 
     private final DecorationInfo mDecorationInfo = new DecorationInfo();
     private final ArrayList<DecorationInfo> mDecorations = new ArrayList<>();
 
+    @UnsupportedAppUsage
     private static final TextLine[] sCached = new TextLine[3];
 
     /**
@@ -91,6 +98,7 @@ public class TextLine {
      * @return an uninitialized TextLine
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    @UnsupportedAppUsage
     public static TextLine obtain() {
         TextLine tl;
         synchronized (sCached) {

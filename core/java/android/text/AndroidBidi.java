@@ -16,6 +16,7 @@
 
 package android.text;
 
+import android.annotation.UnsupportedAppUsage;
 import android.icu.lang.UCharacter;
 import android.icu.lang.UCharacterDirection;
 import android.icu.lang.UProperty;
@@ -61,6 +62,7 @@ public class AndroidBidi {
     /**
      * Runs the bidi algorithm on input text.
      */
+    @UnsupportedAppUsage
     public static int bidi(int dir, char[] chs, byte[] chInfo) {
         if (chs == null || chInfo == null) {
             throw new NullPointerException();
