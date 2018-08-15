@@ -791,8 +791,19 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 showSwipeUpUI ? mQuickStepAccessibilityDelegate : null);
     }
 
+    public boolean isNotificationsFullyCollapsed() {
+        return mPanelView.isFullyCollapsed();
+    }
+
+    /**
+     * Updates the {@link WindowManager.LayoutParams.FLAG_SLIPPERY} state dependent on if swipe up
+     * is enabled, or the notifications is fully opened without being in an animated state. If
+     * slippery is enabled, touch events will leave the nav bar window and enter into the fullscreen
+     * app/home window, if not nav bar will receive a cancelled touch event once gesture leaves bar.
+     */
     public void updateSlippery() {
-        setSlippery(!isQuickStepSwipeUpEnabled() || mPanelView.isFullyExpanded());
+        setSlippery(!isQuickStepSwipeUpEnabled() ||
+                (mPanelView.isFullyExpanded() && !mPanelView.isCollapsing()));
     }
 
     private void setSlippery(boolean slippery) {

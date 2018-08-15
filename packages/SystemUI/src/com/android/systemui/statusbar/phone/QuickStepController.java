@@ -45,9 +45,6 @@ import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManagerGlobal;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Interpolator;
-import androidx.annotation.DimenRes;
 import com.android.systemui.Dependency;
 import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
@@ -72,6 +69,7 @@ public class QuickStepController implements GestureHelper {
     private boolean mQuickScrubActive;
     private boolean mAllowGestureDetection;
     private boolean mQuickStepStarted;
+    private boolean mNotificationsVisibleOnDown;
     private int mTouchDownX;
     private int mTouchDownY;
     private boolean mDragPositive;
@@ -221,6 +219,7 @@ public class QuickStepController implements GestureHelper {
                 mNavigationBarView.transformMatrixToLocal(mTransformLocalMatrix);
                 mQuickStepStarted = false;
                 mAllowGestureDetection = true;
+                mNotificationsVisibleOnDown = !mNavigationBarView.isNotificationsFullyCollapsed();
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
@@ -257,7 +256,8 @@ public class QuickStepController implements GestureHelper {
                 // Decide to start quickstep if dragging away from the navigation bar, otherwise in
                 // the parallel direction, decide to start quickscrub. Only one may run.
                 if (!mQuickScrubActive && exceededSwipeUpTouchSlop) {
-                    if (mNavigationBarView.isQuickStepSwipeUpEnabled()) {
+                    if (mNavigationBarView.isQuickStepSwipeUpEnabled()
+                            && !mNotificationsVisibleOnDown) {
                         startQuickStep(event);
                     }
                     break;
@@ -303,13 +303,26 @@ public class QuickStepController implements GestureHelper {
                 break;
         }
 
-        // Proxy motion events to launcher if not handled by quick scrub
-        // Proxy motion events up/cancel that would be sent after long press on any nav button
-        if (!mQuickScrubActive && !mIsInScreenPinning && (mAllowGestureDetection
-                || action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP)) {
+        if (shouldProxyEvents(action)) {
             proxyMotionEvents(event);
         }
         return mQuickScrubActive || mQuickStepStarted || deadZoneConsumed;
+    }
+
+    private boolean shouldProxyEvents(int action) {
+        if (!mQuickScrubActive && !mIsInScreenPinning) {
+            // Allow down, cancel and up events, move and other events are passed if notifications
+            // are not showing and disabled gestures (such as long press) are not executed
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_CANCEL:
+                case MotionEvent.ACTION_UP:
+                    return true;
+                default:
+                    return !mNotificationsVisibleOnDown && mAllowGestureDetection;
+            }
+        }
+        return false;
     }
 
     @Override
