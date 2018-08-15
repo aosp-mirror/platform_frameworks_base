@@ -1399,6 +1399,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private final ColorExtractor mColorExtractor;
         private boolean mKeyguardShowing;
         private boolean mShouldDisplaySeparatedButton;
+        private boolean mShowing;
 
         public ActionsDialog(Context context, OnClickListener clickListener, MyAdapter adapter,
                 OnItemLongClickListener longClickListener, boolean shouldDisplaySeparatedButton) {
@@ -1507,6 +1508,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         @Override
         public void show() {
             super.show();
+            mShowing = true;
             mGradientDrawable.setAlpha(0);
             mHardwareLayout.setTranslationX(getAnimTranslation());
             mHardwareLayout.setAlpha(0);
@@ -1526,6 +1528,10 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         @Override
         public void dismiss() {
+            if (!mShowing) {
+                return;
+            }
+            mShowing = false;
             mHardwareLayout.setTranslationX(0);
             mHardwareLayout.setAlpha(1);
             mHardwareLayout.animate()
@@ -1544,6 +1550,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         void dismissImmediately() {
             super.dismiss();
+            mShowing = false;
         }
 
         private float getAnimTranslation() {
