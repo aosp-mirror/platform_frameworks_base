@@ -19,6 +19,7 @@ package android.service.wallpaper;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Service;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
@@ -108,6 +109,7 @@ public abstract class WallpaperService extends Service {
     private static final int MSG_VISIBILITY_CHANGED = 10010;
     private static final int MSG_WALLPAPER_OFFSETS = 10020;
     private static final int MSG_WALLPAPER_COMMAND = 10025;
+    @UnsupportedAppUsage
     private static final int MSG_WINDOW_RESIZED = 10030;
     private static final int MSG_WINDOW_MOVED = 10035;
     private static final int MSG_TOUCH_EVENT = 10040;
@@ -190,6 +192,7 @@ public abstract class WallpaperService extends Service {
 
         final Object mLock = new Object();
         boolean mOffsetMessageEnqueued;
+        @UnsupportedAppUsage
         float mPendingXOffset;
         float mPendingYOffset;
         float mPendingXOffsetStep;
@@ -479,6 +482,7 @@ public abstract class WallpaperService extends Service {
         }
 
         /** {@hide} */
+        @UnsupportedAppUsage
         public void setFixedSizeAllowed(boolean allowed) {
             mFixedSizeAllowed = allowed;
         }
