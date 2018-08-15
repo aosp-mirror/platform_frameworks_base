@@ -105,9 +105,6 @@ public class WindowAnimator {
         // Create the DisplayContentsAnimator object by retrieving it if the associated
         // {@link DisplayContent} exists.
         getDisplayContentsAnimatorLocked(displayId);
-        if (displayId == DEFAULT_DISPLAY) {
-            mInitialized = true;
-        }
     }
 
     void removeDisplayLocked(final int displayId) {
@@ -120,6 +117,10 @@ public class WindowAnimator {
         }
 
         mDisplayContentsAnimators.delete(displayId);
+    }
+
+    void ready() {
+        mInitialized = true;
     }
 
     /**

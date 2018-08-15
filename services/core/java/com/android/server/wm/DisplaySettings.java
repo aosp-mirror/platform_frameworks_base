@@ -16,12 +16,14 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_AUTO;
+import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_DISABLED;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.app.WindowConfiguration;
-import android.graphics.Rect;
 import android.os.Environment;
+import android.provider.Settings;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
@@ -33,6 +35,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.wm.DisplayContent.ForceScalingMode;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -65,17 +68,24 @@ class DisplaySettings {
         private int mWindowingMode = WindowConfiguration.WINDOWING_MODE_UNDEFINED;
         private int mUserRotationMode = WindowManagerPolicy.USER_ROTATION_FREE;
         private int mUserRotation = Surface.ROTATION_0;
+        private int mForcedWidth;
+        private int mForcedHeight;
+        private int mForcedDensity;
+        private int mForcedScalingMode = FORCE_SCALING_MODE_AUTO;
 
         private Entry(String _name) {
             mName = _name;
         }
 
+        /** @return {@code true} if all values are default. */
         private boolean isEmpty() {
             return mOverscanLeft == 0 && mOverscanTop == 0 && mOverscanRight == 0
                     && mOverscanBottom == 0
                     && mWindowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED
                     && mUserRotationMode == WindowManagerPolicy.USER_ROTATION_FREE
-                    && mUserRotation == Surface.ROTATION_0;
+                    && mUserRotation == Surface.ROTATION_0
+                    && mForcedWidth == 0 && mForcedHeight == 0 && mForcedDensity == 0
+                    && mForcedScalingMode == FORCE_SCALING_MODE_AUTO;
         }
     }
 
@@ -87,64 +97,84 @@ class DisplaySettings {
     DisplaySettings(WindowManagerService service, File folder) {
         mService = service;
         mFile = new AtomicFile(new File(folder, "display_settings.xml"), "wm-displays");
+        readSettings();
     }
 
-    private Entry getEntry(String name, String uniqueId) {
+    private Entry getEntry(DisplayInfo displayInfo) {
         // Try to get the entry with the unique if possible.
         // Else, fall back on the display name.
         Entry entry;
-        if (uniqueId == null || (entry = mEntries.get(uniqueId)) == null) {
-            entry = mEntries.get(name);
+        if (displayInfo.uniqueId == null || (entry = mEntries.get(displayInfo.uniqueId)) == null) {
+            entry = mEntries.get(displayInfo.name);
         }
         return entry;
     }
 
-    private Entry getOrCreateEntry(String uniqueId, String name) {
-        Entry entry = getEntry(uniqueId, name);
-        if (entry == null) {
-            entry = new Entry(uniqueId);
-            mEntries.put(uniqueId, entry);
-        }
-        return entry;
+    private Entry getOrCreateEntry(DisplayInfo displayInfo) {
+        final Entry entry = getEntry(displayInfo);
+        return entry != null ? entry : new Entry(displayInfo.uniqueId);
     }
 
-    private void removeEntryIfEmpty(String uniqueId, String name) {
-        final Entry entry = getEntry(uniqueId, name);
-        if (entry.isEmpty()) {
-            mEntries.remove(uniqueId);
-            mEntries.remove(name);
-        }
-    }
-
-    private void getOverscanLocked(String name, String uniqueId, Rect outRect) {
-        final Entry entry = getEntry(name, uniqueId);
-        if (entry != null) {
-            outRect.left = entry.mOverscanLeft;
-            outRect.top = entry.mOverscanTop;
-            outRect.right = entry.mOverscanRight;
-            outRect.bottom = entry.mOverscanBottom;
-        } else {
-            outRect.set(0, 0, 0, 0);
-        }
-    }
-
-    void setOverscanLocked(String uniqueId, String name, int left, int top, int right,
-            int bottom) {
-        Entry entry = mEntries.get(uniqueId);
-        if (left == 0 && top == 0 && right == 0 && bottom == 0 && entry == null) {
-            // All default value, no action needed.
-            return;
-        }
-        entry = getOrCreateEntry(uniqueId, name);
+    void setOverscanLocked(DisplayInfo displayInfo, int left, int top, int right, int bottom) {
+        final Entry entry = getOrCreateEntry(displayInfo);
         entry.mOverscanLeft = left;
         entry.mOverscanTop = top;
         entry.mOverscanRight = right;
         entry.mOverscanBottom = bottom;
-        removeEntryIfEmpty(uniqueId, name);
+        writeSettingsIfNeeded(entry, displayInfo);
     }
 
-    private int getWindowingModeLocked(String name, String uniqueId, int displayId) {
-        final Entry entry = getEntry(name, uniqueId);
+    void setUserRotation(DisplayContent displayContent, int rotationMode, int rotation) {
+        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        final Entry entry = getOrCreateEntry(displayInfo);
+        entry.mUserRotationMode = rotationMode;
+        entry.mUserRotation = rotation;
+        writeSettingsIfNeeded(entry, displayInfo);
+    }
+
+    void setForcedSize(DisplayContent displayContent, int width, int height) {
+        if (displayContent.isDefaultDisplay) {
+            final String sizeString = (width == 0 || height == 0) ? "" : (width + "," + height);
+            Settings.Global.putString(mService.mContext.getContentResolver(),
+                    Settings.Global.DISPLAY_SIZE_FORCED, sizeString);
+            return;
+        }
+
+        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        final Entry entry = getOrCreateEntry(displayInfo);
+        entry.mForcedWidth = width;
+        entry.mForcedHeight = height;
+        writeSettingsIfNeeded(entry, displayInfo);
+    }
+
+    void setForcedDensity(DisplayContent displayContent, int density, int userId) {
+        if (displayContent.isDefaultDisplay) {
+            final String densityString = density == 0 ? "" : Integer.toString(density);
+            Settings.Secure.putStringForUser(mService.mContext.getContentResolver(),
+                    Settings.Secure.DISPLAY_DENSITY_FORCED, densityString, userId);
+            return;
+        }
+
+        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        final Entry entry = getOrCreateEntry(displayInfo);
+        entry.mForcedDensity = density;
+        writeSettingsIfNeeded(entry, displayInfo);
+    }
+
+    void setForcedScalingMode(DisplayContent displayContent, @ForceScalingMode int mode) {
+        if (displayContent.isDefaultDisplay) {
+            Settings.Global.putInt(mService.mContext.getContentResolver(),
+                    Settings.Global.DISPLAY_SCALING_FORCE, mode);
+            return;
+        }
+
+        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        final Entry entry = getOrCreateEntry(displayInfo);
+        entry.mForcedScalingMode = mode;
+        writeSettingsIfNeeded(entry, displayInfo);
+    }
+
+    private int getWindowingModeLocked(Entry entry, int displayId) {
         int windowingMode = entry != null ? entry.mWindowingMode
                 : WindowConfiguration.WINDOWING_MODE_UNDEFINED;
         // This display used to be in freeform, but we don't support freeform anymore, so fall
@@ -168,54 +198,35 @@ class DisplaySettings {
         return windowingMode;
     }
 
-    void setUserRotation(DisplayContent dc, int rotationMode, int rotation) {
+    void applySettingsToDisplayLocked(DisplayContent dc) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
+        final Entry entry = getEntry(displayInfo);
 
-        final String uniqueId = displayInfo.uniqueId;
-        final String name = displayInfo.name;
-        Entry entry = getEntry(displayInfo.name, uniqueId);
-        if (rotationMode == WindowManagerPolicy.USER_ROTATION_FREE
-                && rotation == Surface.ROTATION_0 && entry == null) {
-            // All default values. No action needed.
+        // Setting windowing mode first, because it may override overscan values later.
+        dc.setWindowingMode(getWindowingModeLocked(entry, dc.getDisplayId()));
+
+        if (entry == null) {
             return;
         }
 
-        entry = getOrCreateEntry(uniqueId, name);
-        entry.mUserRotationMode = rotationMode;
-        entry.mUserRotation = rotation;
-        removeEntryIfEmpty(uniqueId, name);
+        displayInfo.overscanLeft = entry.mOverscanLeft;
+        displayInfo.overscanTop = entry.mOverscanTop;
+        displayInfo.overscanRight = entry.mOverscanRight;
+        displayInfo.overscanBottom = entry.mOverscanBottom;
+
+        dc.getDisplayRotation().restoreUserRotation(entry.mUserRotationMode, entry.mUserRotation);
+
+        if (entry.mForcedDensity != 0) {
+            dc.mBaseDisplayDensity = entry.mForcedDensity;
+        }
+        if (entry.mForcedWidth != 0 && entry.mForcedHeight != 0) {
+            dc.updateBaseDisplayMetrics(entry.mForcedWidth, entry.mForcedHeight,
+                    dc.mBaseDisplayDensity);
+        }
+        dc.mDisplayScalingDisabled = entry.mForcedScalingMode == FORCE_SCALING_MODE_DISABLED;
     }
 
-    private void restoreUserRotation(DisplayContent dc) {
-        final DisplayInfo info = dc.getDisplayInfo();
-
-        final Entry entry = getEntry(info.name, info.uniqueId);
-        final int userRotationMode = entry != null ? entry.mUserRotationMode
-                : WindowManagerPolicy.USER_ROTATION_FREE;
-        final int userRotation = entry != null ? entry.mUserRotation
-                : Surface.ROTATION_0;
-
-        dc.getDisplayRotation().restoreUserRotation(userRotationMode, userRotation);
-    }
-
-    void applySettingsToDisplayLocked(DisplayContent dc) {
-        final DisplayInfo displayInfo = dc.getDisplayInfo();
-
-        // Setting windowing mode first, because it may override overscan values later.
-        dc.setWindowingMode(getWindowingModeLocked(displayInfo.name, displayInfo.uniqueId,
-                dc.getDisplayId()));
-
-        final Rect rect = new Rect();
-        getOverscanLocked(displayInfo.name, displayInfo.uniqueId, rect);
-        displayInfo.overscanLeft = rect.left;
-        displayInfo.overscanTop = rect.top;
-        displayInfo.overscanRight = rect.right;
-        displayInfo.overscanBottom = rect.bottom;
-
-        restoreUserRotation(dc);
-    }
-
-    void readSettingsLocked() {
+    private void readSettings() {
         FileInputStream stream;
         try {
             stream = mFile.openRead();
@@ -306,12 +317,29 @@ class DisplaySettings {
                     WindowManagerPolicy.USER_ROTATION_FREE);
             entry.mUserRotation = getIntAttribute(parser, "userRotation",
                     Surface.ROTATION_0);
+            entry.mForcedWidth = getIntAttribute(parser, "forcedWidth");
+            entry.mForcedHeight = getIntAttribute(parser, "forcedHeight");
+            entry.mForcedDensity = getIntAttribute(parser, "forcedDensity");
+            entry.mForcedScalingMode = getIntAttribute(parser, "forcedScalingMode",
+                    FORCE_SCALING_MODE_AUTO);
             mEntries.put(name, entry);
         }
         XmlUtils.skipCurrentTag(parser);
     }
 
-    void writeSettingsLocked() {
+    private void writeSettingsIfNeeded(Entry changedEntry, DisplayInfo displayInfo) {
+        if (changedEntry.isEmpty()) {
+            boolean removed = mEntries.remove(displayInfo.uniqueId) != null;
+            // Legacy name might have been in used, so we need to clear it.
+            removed |= mEntries.remove(displayInfo.name) != null;
+            if (!removed) {
+                // The entry didn't exist so nothing is changed and no need to update the file.
+                return;
+            }
+        } else {
+            mEntries.put(displayInfo.uniqueId, changedEntry);
+        }
+
         FileOutputStream stream;
         try {
             stream = mFile.startWrite();
@@ -350,6 +378,17 @@ class DisplaySettings {
                 }
                 if (entry.mUserRotation != Surface.ROTATION_0) {
                     out.attribute(null, "userRotation", Integer.toString(entry.mUserRotation));
+                }
+                if (entry.mForcedWidth != 0 && entry.mForcedHeight != 0) {
+                    out.attribute(null, "forcedWidth", Integer.toString(entry.mForcedWidth));
+                    out.attribute(null, "forcedHeight", Integer.toString(entry.mForcedHeight));
+                }
+                if (entry.mForcedDensity != 0) {
+                    out.attribute(null, "forcedDensity", Integer.toString(entry.mForcedDensity));
+                }
+                if (entry.mForcedScalingMode != FORCE_SCALING_MODE_AUTO) {
+                    out.attribute(null, "forcedScalingMode",
+                            Integer.toString(entry.mForcedScalingMode));
                 }
                 out.endTag(null, "display");
             }

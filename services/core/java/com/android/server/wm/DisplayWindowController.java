@@ -81,6 +81,22 @@ public class DisplayWindowController
     }
 
     /**
+     * Called when the corresponding display receives
+     * {@link android.hardware.display.DisplayManager.DisplayListener#onDisplayChanged(int)}.
+     */
+    public void onDisplayChanged() {
+        synchronized (mWindowMap) {
+            if (mContainer == null) {
+                if (DEBUG_DISPLAY) Slog.i(TAG_WM, "onDisplayChanged: could not find display="
+                        + mDisplayId);
+                return;
+            }
+            mContainer.updateDisplayInfo();
+            mService.mWindowPlacerLocked.requestTraversal();
+        }
+    }
+
+    /**
      * Positions the task stack at the given position in the task stack container.
      */
     public void positionChildAt(StackWindowController child, int position,

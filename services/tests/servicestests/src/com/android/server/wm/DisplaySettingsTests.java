@@ -21,6 +21,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
 
 import android.app.WindowConfiguration;
 import android.platform.test.annotations.Presubmit;
@@ -68,10 +71,9 @@ public class DisplaySettingsTests extends WindowTestsBase {
         sWm.setIsPc(false);
 
         mTarget = new DisplaySettings(sWm, mTestFolder);
-        mTarget.readSettingsLocked();
 
         mPrimaryDisplay = sWm.getDefaultDisplayContentLocked();
-        mSecondaryDisplay = createNewDisplay();
+        mSecondaryDisplay = mDisplayContent;
         assertNotEquals(Display.DEFAULT_DISPLAY, mSecondaryDisplay.getDisplayId());
     }
 
@@ -134,6 +136,65 @@ public class DisplaySettingsTests extends WindowTestsBase {
     }
 
     @Test
+    public void testDefaultToOriginalMetrics() {
+        final int originalWidth = mSecondaryDisplay.mBaseDisplayWidth;
+        final int originalHeight = mSecondaryDisplay.mBaseDisplayHeight;
+        final int originalDensity = mSecondaryDisplay.mBaseDisplayDensity;
+        final boolean originalScalingDisabled = mSecondaryDisplay.mDisplayScalingDisabled;
+
+        mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
+
+        assertEquals(originalWidth, mSecondaryDisplay.mBaseDisplayWidth);
+        assertEquals(originalHeight, mSecondaryDisplay.mBaseDisplayHeight);
+        assertEquals(originalDensity, mSecondaryDisplay.mBaseDisplayDensity);
+        assertEquals(originalScalingDisabled, mSecondaryDisplay.mDisplayScalingDisabled);
+    }
+
+    @Test
+    public void testSetForcedSize() {
+        final DisplayInfo originalInfo = new DisplayInfo(mSecondaryDisplay.getDisplayInfo());
+        // Provides the orginal display info to avoid changing initial display size.
+        doAnswer(invocation -> {
+            ((DisplayInfo) invocation.getArguments()[1]).copyFrom(originalInfo);
+            return null;
+        }).when(sWm.mDisplayManagerInternal).getNonOverrideDisplayInfo(anyInt(), any());
+
+        mTarget.setForcedSize(mSecondaryDisplay, 1000 /* width */, 2000 /* height */);
+        applySettingsToDisplayByNewInstance(mSecondaryDisplay);
+
+        assertEquals(1000 /* width */, mSecondaryDisplay.mBaseDisplayWidth);
+        assertEquals(2000 /* height */, mSecondaryDisplay.mBaseDisplayHeight);
+
+        sWm.clearForcedDisplaySize(mSecondaryDisplay.getDisplayId());
+        assertEquals(mSecondaryDisplay.mInitialDisplayWidth, mSecondaryDisplay.mBaseDisplayWidth);
+        assertEquals(mSecondaryDisplay.mInitialDisplayHeight, mSecondaryDisplay.mBaseDisplayHeight);
+    }
+
+    @Test
+    public void testSetForcedDensity() {
+        mTarget.setForcedDensity(mSecondaryDisplay, 600 /* density */, 0 /* userId */);
+        applySettingsToDisplayByNewInstance(mSecondaryDisplay);
+
+        assertEquals(600 /* density */, mSecondaryDisplay.mBaseDisplayDensity);
+
+        sWm.clearForcedDisplayDensityForUser(mSecondaryDisplay.getDisplayId(), 0 /* userId */);
+        assertEquals(mSecondaryDisplay.mInitialDisplayDensity,
+                mSecondaryDisplay.mBaseDisplayDensity);
+    }
+
+    @Test
+    public void testSetForcedScalingMode() {
+        mTarget.setForcedScalingMode(mSecondaryDisplay, DisplayContent.FORCE_SCALING_MODE_DISABLED);
+        applySettingsToDisplayByNewInstance(mSecondaryDisplay);
+
+        assertTrue(mSecondaryDisplay.mDisplayScalingDisabled);
+
+        sWm.setForcedDisplayScalingMode(mSecondaryDisplay.getDisplayId(),
+                DisplayContent.FORCE_SCALING_MODE_AUTO);
+        assertFalse(mSecondaryDisplay.mDisplayScalingDisabled);
+    }
+
+    @Test
     public void testDefaultToZeroOverscan() {
         mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
 
@@ -143,8 +204,7 @@ public class DisplaySettingsTests extends WindowTestsBase {
     @Test
     public void testPersistOverscanInSameInstance() {
         final DisplayInfo info = mPrimaryDisplay.getDisplayInfo();
-        mTarget.setOverscanLocked(info.uniqueId, info.name, 1 /* left */, 2 /* top */,
-                3 /* right */, 4 /* bottom */);
+        mTarget.setOverscanLocked(info, 1 /* left */, 2 /* top */, 3 /* right */, 4 /* bottom */);
 
         mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
 
@@ -154,14 +214,9 @@ public class DisplaySettingsTests extends WindowTestsBase {
     @Test
     public void testPersistOverscanAcrossInstances() {
         final DisplayInfo info = mPrimaryDisplay.getDisplayInfo();
-        mTarget.setOverscanLocked(info.uniqueId, info.name, 1 /* left */, 2 /* top */,
-                3 /* right */, 4 /* bottom */);
-        mTarget.writeSettingsLocked();
+        mTarget.setOverscanLocked(info, 1 /* left */, 2 /* top */, 3 /* right */, 4 /* bottom */);
 
-        DisplaySettings target = new DisplaySettings(sWm, mTestFolder);
-        target.readSettingsLocked();
-
-        target.applySettingsToDisplayLocked(mPrimaryDisplay);
+        applySettingsToDisplayByNewInstance(mPrimaryDisplay);
 
         assertOverscan(mPrimaryDisplay, 1 /* left */, 2 /* top */, 3 /* right */, 4 /* bottom */);
     }
@@ -208,12 +263,8 @@ public class DisplaySettingsTests extends WindowTestsBase {
     public void testPersistUserRotationModeAcrossInstances() {
         mTarget.setUserRotation(mSecondaryDisplay, WindowManagerPolicy.USER_ROTATION_LOCKED,
                 Surface.ROTATION_270);
-        mTarget.writeSettingsLocked();
 
-        DisplaySettings target = new DisplaySettings(sWm, mTestFolder);
-        target.readSettingsLocked();
-
-        target.applySettingsToDisplayLocked(mSecondaryDisplay);
+        applySettingsToDisplayByNewInstance(mSecondaryDisplay);
 
         final DisplayRotation rotation = mSecondaryDisplay.getDisplayRotation();
         assertEquals(WindowManagerPolicy.USER_ROTATION_LOCKED, rotation.getUserRotationMode());
@@ -225,7 +276,7 @@ public class DisplaySettingsTests extends WindowTestsBase {
         mTarget.setUserRotation(mSecondaryDisplay, WindowManagerPolicy.USER_ROTATION_LOCKED,
                 Surface.ROTATION_270);
 
-        mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
+        applySettingsToDisplayByNewInstance(mSecondaryDisplay);
 
         assertEquals(Surface.ROTATION_270,
                 mSecondaryDisplay.getDisplayRotation().getUserRotation());
@@ -239,6 +290,15 @@ public class DisplaySettingsTests extends WindowTestsBase {
         assertEquals(top, info.overscanTop);
         assertEquals(right, info.overscanRight);
         assertEquals(bottom, info.overscanBottom);
+    }
+
+    /**
+     * This method helps to ensure read and write persistent settings successfully because the
+     * constructor of {@link DisplaySettings} should read the persistent file from the given path
+     * that also means the previous state must be written correctly.
+     */
+    private void applySettingsToDisplayByNewInstance(DisplayContent display) {
+        new DisplaySettings(sWm, mTestFolder).applySettingsToDisplayLocked(display);
     }
 
     private static boolean deleteRecursively(File file) {
