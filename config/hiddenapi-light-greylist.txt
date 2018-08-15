@@ -5603,15 +5603,6 @@ Llibcore/io/Memory;->pokeLong(JJZ)V
 Llibcore/io/Streams;->copy(Ljava/io/InputStream;Ljava/io/OutputStream;)I
 Llibcore/util/BasicLruCache;->map:Ljava/util/LinkedHashMap;
 Llibcore/util/ZoneInfo;->mTransitions:[J
-Lorg/apache/http/conn/ssl/AbstractVerifier;->BAD_COUNTRY_2LDS:[Ljava/lang/String;
-Lorg/apache/http/conn/ssl/SSLSocketFactory;-><init>()V
-Lorg/apache/http/conn/ssl/SSLSocketFactory;-><init>(Ljavax/net/ssl/SSLSocketFactory;)V
-Lorg/apache/http/conn/ssl/SSLSocketFactory;->createKeyManagers(Ljava/security/KeyStore;Ljava/lang/String;)[Ljavax/net/ssl/KeyManager;
-Lorg/apache/http/conn/ssl/SSLSocketFactory;->createTrustManagers(Ljava/security/KeyStore;)[Ljavax/net/ssl/TrustManager;
-Lorg/apache/http/conn/ssl/SSLSocketFactory;->hostnameVerifier:Lorg/apache/http/conn/ssl/X509HostnameVerifier;
-Lorg/apache/http/conn/ssl/SSLSocketFactory;->nameResolver:Lorg/apache/http/conn/scheme/HostNameResolver;
-Lorg/apache/http/conn/ssl/SSLSocketFactory;->socketfactory:Ljavax/net/ssl/SSLSocketFactory;
-Lorg/apache/http/conn/ssl/SSLSocketFactory;->sslcontext:Ljavax/net/ssl/SSLContext;
 Lorg/ccil/cowan/tagsoup/AttributesImpl;->data:[Ljava/lang/String;
 Lorg/ccil/cowan/tagsoup/AttributesImpl;->length:I
 Lorg/ccil/cowan/tagsoup/ElementType;->theAtts:Lorg/ccil/cowan/tagsoup/AttributesImpl;
