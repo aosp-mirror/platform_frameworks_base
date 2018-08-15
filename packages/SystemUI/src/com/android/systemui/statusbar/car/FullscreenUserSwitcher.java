@@ -18,13 +18,15 @@ package com.android.systemui.statusbar.car;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.car.user.CarUserManagerHelper;
 import android.content.Context;
+import android.content.pm.UserInfo;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewStub;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import com.android.settingslib.users.UserManagerHelper;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.StatusBar;
 
@@ -37,7 +39,7 @@ public class FullscreenUserSwitcher {
     private final UserGridRecyclerView mUserGridView;
     private final int mShortAnimDuration;
     private final StatusBar mStatusBar;
-    private final CarUserManagerHelper mCarUserManagerHelper;
+    private final UserManagerHelper mUserManagerHelper;
     private boolean mShowing;
 
     public FullscreenUserSwitcher(StatusBar statusBar, ViewStub containerStub, Context context) {
@@ -51,14 +53,14 @@ public class FullscreenUserSwitcher {
         mUserGridView.buildAdapter();
         mUserGridView.setUserSelectionListener(this::onUserSelected);
 
-        mCarUserManagerHelper = new CarUserManagerHelper(context);
+        mUserManagerHelper = new UserManagerHelper(context);
 
         mShortAnimDuration = mContainer.getResources()
             .getInteger(android.R.integer.config_shortAnimTime);
     }
 
     public void show() {
-        if (mCarUserManagerHelper.isHeadlessSystemUser()) {
+        if (mUserManagerHelper.isHeadlessSystemUser()) {
             showUserGrid();
         }
         if (mShowing) {
@@ -79,12 +81,12 @@ public class FullscreenUserSwitcher {
     }
 
     private void onUserSelected(UserGridRecyclerView.UserRecord record) {
-        if (mCarUserManagerHelper.isHeadlessSystemUser()) {
+        if (mUserManagerHelper.isHeadlessSystemUser()) {
             hideUserGrid();
         }
 
         if (record.mIsForeground || (record.mIsStartGuestSession
-                && mCarUserManagerHelper.isForegroundUserGuest())) {
+                && mUserManagerHelper.foregroundUserIsGuestUser())) {
             dismissKeyguard();
             return;
         }
