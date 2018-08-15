@@ -25,17 +25,16 @@ import static android.app.backup.BackupManager.SUCCESS;
 import static android.app.backup.ForwardingBackupAgent.forward;
 
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.createBackupWakeLock;
-import static com.android.server.backup.testing.BackupManagerServiceTestUtils
-        .createInitializedBackupManagerService;
-import static com.android.server.backup.testing.BackupManagerServiceTestUtils
-        .setUpBackupManagerServiceBasics;
-import static com.android.server.backup.testing.BackupManagerServiceTestUtils
-        .setUpBinderCallerAndApplicationAsSystem;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils.createInitializedBackupManagerService;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils.setUpBackupManagerServiceBasics;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils.setUpBinderCallerAndApplicationAsSystem;
 import static com.android.server.backup.testing.PackageData.PM_PACKAGE;
 import static com.android.server.backup.testing.PackageData.fullBackupPackage;
 import static com.android.server.backup.testing.PackageData.keyValuePackage;
 import static com.android.server.backup.testing.TestUtils.assertEventLogged;
+import static com.android.server.backup.testing.TestUtils.messagesInLooper;
 import static com.android.server.backup.testing.TestUtils.uncheck;
+import static com.android.server.backup.testing.TestUtils.waitUntil;
 import static com.android.server.backup.testing.TransportData.backupTransport;
 import static com.android.server.backup.testing.Utils.oneTimeIterable;
 
@@ -51,17 +50,19 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 import static org.robolectric.shadow.api.Shadow.extract;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
 import android.annotation.Nullable;
@@ -72,6 +73,7 @@ import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupManager;
 import android.app.backup.BackupTransport;
+import android.app.backup.IBackupCallback;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
@@ -81,6 +83,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.ConditionVariable;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.Looper;
@@ -102,6 +105,7 @@ import com.android.server.backup.TransportManager;
 import com.android.server.backup.internal.BackupHandler;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.testing.PackageData;
+import com.android.server.backup.testing.TestUtils.ThrowingRunnable;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
@@ -121,6 +125,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
@@ -143,6 +148,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 // TODO: When returning to RUNNING_QUEUE vs FINAL, RUNNING_QUEUE sets status = OK. Why? Verify?
@@ -165,6 +171,8 @@ import java.util.stream.Stream;
 public class KeyValueBackupTaskTest {
     private static final PackageData PACKAGE_1 = keyValuePackage(1);
     private static final PackageData PACKAGE_2 = keyValuePackage(2);
+    private static final String BACKUP_AGENT_SHARED_PREFS_SYNCHRONIZER_CLASS =
+            "android.app.backup.BackupAgent$SharedPrefsSynchronizer";
 
     @Mock private TransportManager mTransportManager;
     @Mock private DataChangedJournal mOldJournal;
@@ -182,6 +190,7 @@ public class KeyValueBackupTaskTest {
     private File mDataDir;
     private Application mApplication;
     private ShadowApplication mShadowApplication;
+    private Looper mMainLooper;
     private FrameworkShadowLooper mShadowMainLooper;
     private Context mContext;
 
@@ -195,7 +204,8 @@ public class KeyValueBackupTaskTest {
         mShadowApplication = shadowOf(mApplication);
         mContext = mApplication;
 
-        mShadowMainLooper = extract(Looper.getMainLooper());
+        mMainLooper = Looper.getMainLooper();
+        mShadowMainLooper = extract(mMainLooper);
 
         File cacheDir = mApplication.getCacheDir();
         // Corresponds to /data/backup
@@ -1596,12 +1606,284 @@ public class KeyValueBackupTaskTest {
         runTask(task);
     }
 
+    @Test
+    public void
+            testRunTask_whenMarkCancelDuringFirstAgentOnBackup_doesNotCallTransportAfterWaitCancel()
+                    throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        AgentMock agentMock = setUpAgent(PACKAGE_1);
+        setUpAgentsWithData(PACKAGE_2);
+        KeyValueBackupTask task =
+                createKeyValueBackupTask(
+                        transportMock.transportClient,
+                        mTransport.transportDirName,
+                        PACKAGE_1,
+                        PACKAGE_2);
+        agentOnBackupDo(
+                agentMock,
+                (oldState, dataOutput, newState) -> {
+                    writeData(dataOutput, "key", "data".getBytes());
+                    writeState(newState, "newState".getBytes());
+                    runInWorkerThread(task::markCancel);
+                });
+
+        ConditionVariable taskFinished = runTaskAsync(task);
+
+        verifyAndUnblockAgentCalls(2);
+        task.waitCancel();
+        reset(transportMock.transport);
+        taskFinished.block();
+        verifyZeroInteractions(transportMock.transport);
+    }
+
+    @Test
+    public void testRunTask_whenMarkCancelDuringAgentOnBackup_doesNotCallTransportForPackage()
+            throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        AgentMock agentMock = setUpAgent(PACKAGE_1);
+        KeyValueBackupTask task =
+                createKeyValueBackupTask(
+                        transportMock.transportClient, mTransport.transportDirName, PACKAGE_1);
+        agentOnBackupDo(
+                agentMock,
+                (oldState, dataOutput, newState) -> {
+                    writeData(dataOutput, "key", "data".getBytes());
+                    writeState(newState, "newState".getBytes());
+                    runInWorkerThread(task::markCancel);
+                });
+
+        ConditionVariable taskFinished = runTaskAsync(task);
+
+        verifyAndUnblockAgentCalls(2);
+        taskFinished.block();
+        // For PM
+        verify(transportMock.transport, times(1)).finishBackup();
+        verify(transportMock.transport, never())
+                .performBackup(argThat(packageInfo(PACKAGE_1)), any(), anyInt());
+    }
+
+    @Test
+    public void testRunTask_whenMarkCancelDuringTransportPerformBackup_callsTransportForPackage()
+            throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgentWithData(PACKAGE_1);
+        KeyValueBackupTask task =
+                createKeyValueBackupTask(
+                        transportMock.transportClient, mTransport.transportDirName, PACKAGE_1);
+        when(transportMock.transport.performBackup(
+                        argThat(packageInfo(PACKAGE_1)), any(), anyInt()))
+                .thenAnswer(
+                        invocation -> {
+                            runInWorkerThread(task::markCancel);
+                            return BackupTransport.TRANSPORT_OK;
+                        });
+
+        ConditionVariable taskFinished = runTaskAsync(task);
+
+        verifyAndUnblockAgentCalls(2);
+        taskFinished.block();
+        InOrder inOrder = inOrder(transportMock.transport);
+        inOrder.verify(transportMock.transport)
+                .performBackup(argThat(packageInfo(PACKAGE_1)), any(), anyInt());
+        inOrder.verify(transportMock.transport).finishBackup();
+    }
+
+    @Test
+    public void
+            testRunTask_whenMarkCancelDuringSecondAgentOnBackup_callsTransportForFirstPackageButNotForSecond()
+                    throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgentWithData(PACKAGE_1);
+        AgentMock agentMock = setUpAgent(PACKAGE_2);
+        KeyValueBackupTask task =
+                createKeyValueBackupTask(
+                        transportMock.transportClient,
+                        mTransport.transportDirName,
+                        PACKAGE_1,
+                        PACKAGE_2);
+        agentOnBackupDo(
+                agentMock,
+                (oldState, dataOutput, newState) -> {
+                    writeData(dataOutput, "key", "data".getBytes());
+                    writeState(newState, "newState".getBytes());
+                    runInWorkerThread(task::markCancel);
+                });
+
+        ConditionVariable taskFinished = runTaskAsync(task);
+
+        verifyAndUnblockAgentCalls(3);
+        taskFinished.block();
+        InOrder inOrder = inOrder(transportMock.transport);
+        inOrder.verify(transportMock.transport)
+                .performBackup(argThat(packageInfo(PACKAGE_1)), any(), anyInt());
+        inOrder.verify(transportMock.transport).finishBackup();
+        verify(transportMock.transport, never())
+                .performBackup(argThat(packageInfo(PACKAGE_2)), any(), anyInt());
+    }
+
+    @Test
+    public void
+            testRunTask_whenMarkCancelDuringTransportPerformBackupForFirstPackage_callsTransportForFirstPackageButNotForSecond()
+                    throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgentsWithData(PACKAGE_1, PACKAGE_2);
+        KeyValueBackupTask task =
+                createKeyValueBackupTask(
+                        transportMock.transportClient,
+                        mTransport.transportDirName,
+                        PACKAGE_1,
+                        PACKAGE_2);
+        when(transportMock.transport.performBackup(
+                        argThat(packageInfo(PACKAGE_1)), any(), anyInt()))
+                .thenAnswer(
+                        invocation -> {
+                            runInWorkerThread(task::markCancel);
+                            return BackupTransport.TRANSPORT_OK;
+                        });
+
+        ConditionVariable taskFinished = runTaskAsync(task);
+
+        verifyAndUnblockAgentCalls(2);
+        taskFinished.block();
+        InOrder inOrder = inOrder(transportMock.transport);
+        inOrder.verify(transportMock.transport)
+                .performBackup(argThat(packageInfo(PACKAGE_1)), any(), anyInt());
+        inOrder.verify(transportMock.transport).finishBackup();
+        verify(transportMock.transport, never())
+                .performBackup(argThat(packageInfo(PACKAGE_2)), any(), anyInt());
+    }
+
+    @Test
+    public void testRunTask_afterMarkCancel_doesNotCallAgentOrTransport() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        AgentMock agentMock = setUpAgentWithData(PACKAGE_1);
+        KeyValueBackupTask task =
+                createKeyValueBackupTask(
+                        transportMock.transportClient, mTransport.transportDirName, PACKAGE_1);
+        task.markCancel();
+
+        runTask(task);
+
+        verify(agentMock.agent, never()).onBackup(any(), any(), any());
+        verify(transportMock.transport, never()).performBackup(any(), any(), anyInt());
+        verify(transportMock.transport, never()).finishBackup();
+    }
+
+    @Test
+    public void testWaitCancel_afterCancelledTaskFinished_returns() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgentWithData(PACKAGE_1);
+        KeyValueBackupTask task =
+                createKeyValueBackupTask(
+                        transportMock.transportClient, mTransport.transportDirName, PACKAGE_1);
+        task.markCancel();
+        runTask(task);
+
+        task.waitCancel();
+    }
+
+    @Test
+    public void testWaitCancel_whenMarkCancelDuringAgentOnBackup_unregistersTask() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgentWithData(PACKAGE_1);
+        AgentMock agentMock = setUpAgent(PACKAGE_1);
+        KeyValueBackupTask task =
+                createKeyValueBackupTask(
+                        transportMock.transportClient, mTransport.transportDirName, PACKAGE_1);
+        agentOnBackupDo(
+                agentMock,
+                (oldState, dataOutput, newState) -> {
+                    writeData(dataOutput, "key", "data".getBytes());
+                    writeState(newState, "newState".getBytes());
+                    runInWorkerThread(task::markCancel);
+                });
+        ConditionVariable taskFinished = runTaskAsync(task);
+        verifyAndUnblockAgentCalls(1);
+        boolean backupInProgressDuringBackup = mBackupManagerService.isBackupOperationInProgress();
+        assertThat(backupInProgressDuringBackup).isTrue();
+        verifyAndUnblockAgentCalls(1);
+
+        task.waitCancel();
+
+        boolean backupInProgressAfterWaitCancel =
+                mBackupManagerService.isBackupOperationInProgress();
+        assertThat(backupInProgressDuringBackup).isTrue();
+        assertThat(backupInProgressAfterWaitCancel).isFalse();
+        taskFinished.block();
+    }
+
+    @Test
+    public void testMarkCancel_afterTaskFinished_returns() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgentWithData(PACKAGE_1);
+        KeyValueBackupTask task =
+                createKeyValueBackupTask(
+                        transportMock.transportClient, mTransport.transportDirName, PACKAGE_1);
+        runTask(task);
+
+        task.markCancel();
+    }
+
     private void runTask(KeyValueBackupTask task) {
         // Pretend we are not on the main-thread to prevent RemoteCall from complaining
         mShadowMainLooper.setCurrentThread(false);
         task.run();
         mShadowMainLooper.reset();
         assertTaskPostConditions();
+    }
+
+    private ConditionVariable runTaskAsync(KeyValueBackupTask task) {
+        return runInWorkerThreadAsync(task::run);
+    }
+
+    private static ConditionVariable runInWorkerThreadAsync(ThrowingRunnable runnable) {
+        ConditionVariable finished = new ConditionVariable(false);
+        new Thread(
+                        () -> {
+                            uncheck(runnable);
+                            finished.open();
+                        },
+                        "test-worker-thread")
+                .start();
+        return finished;
+    }
+
+    private static void runInWorkerThread(ThrowingRunnable runnable) {
+        runInWorkerThreadAsync(runnable).block();
+    }
+
+    /**
+     * If you have kicked-off the task with {@link #runTaskAsync(KeyValueBackupTask)}, call this to
+     * unblock the task thread that will be waiting for the agent's {@link
+     * IBackupAgent#doBackup(ParcelFileDescriptor, ParcelFileDescriptor, ParcelFileDescriptor, long,
+     * IBackupCallback, int)}.
+     *
+     * @param times The number of {@link IBackupAgent#doBackup(ParcelFileDescriptor,
+     *     ParcelFileDescriptor, ParcelFileDescriptor, long, IBackupCallback, int)} calls. Remember
+     *     to count PM calls.
+     */
+    private void verifyAndUnblockAgentCalls(int times)
+            throws InterruptedException, TimeoutException {
+        // HACK: IBackupAgent.doBackup() posts a runnable to the front of the main-thread queue and
+        // immediately waits for its execution. In Robolectric, if we are in the main-thread this
+        // runnable is executed inline (this is called unpaused looper), that's why when we run the
+        // task in the main-thread (runTask() as opposed to runTaskAsync()) we don't need to call
+        // this method. However, if we are not in the main-thread nobody executes the runnable for
+        // us, thus IBackupAgent code will be stuck waiting for someone to execute the runnable.
+        // This method waits for that *specific* runnable, identifying it via class name, and then
+        // idles the main looper (for 0 seconds because it's posted at the front of the queue),
+        // which executes the method.
+        for (int i = 0; i < times; i++) {
+            waitUntil(() -> messagesInLooper(mMainLooper, this::isSharedPrefsSynchronizer) > 0);
+            mShadowMainLooper.idle();
+        }
+    }
+
+    private boolean isSharedPrefsSynchronizer(@Nullable Message message) {
+        String className = BACKUP_AGENT_SHARED_PREFS_SYNCHRONIZER_CLASS;
+        return message != null
+                && message.getCallback() != null
+                && className.equals(message.getCallback().getClass().getName());
     }
 
     private TransportMock setUpTransport(TransportData transport) throws Exception {
@@ -1724,11 +2006,8 @@ public class KeyValueBackupTaskTest {
             String transportDirName,
             boolean nonIncremental,
             PackageData... packages) {
-        ArrayList<BackupRequest> keyValueBackupRequests =
-                Stream.of(packages)
-                        .map(packageData -> packageData.packageName)
-                        .map(BackupRequest::new)
-                        .collect(toCollection(ArrayList::new));
+        List<String> queue =
+                Stream.of(packages).map(packageData -> packageData.packageName).collect(toList());
         mBackupManagerService.getPendingBackups().clear();
         // mOldJournal is a mock, but it would be the value returned by BMS.getJournal() now
         mBackupManagerService.setJournal(null);
@@ -1738,7 +2017,7 @@ public class KeyValueBackupTaskTest {
                         mBackupManagerService,
                         transportClient,
                         transportDirName,
-                        keyValueBackupRequests,
+                        queue,
                         mOldJournal,
                         mObserver,
                         mMonitor,

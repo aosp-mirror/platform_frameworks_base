@@ -45,7 +45,6 @@ import android.os.PowerManager;
 import android.os.PowerSaveState;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
-import com.android.server.backup.keyvalue.BackupRequest;
 import com.android.server.backup.testing.BackupManagerServiceTestUtils;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
@@ -769,7 +768,7 @@ public class BackupManagerServiceTest {
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(BackupManager.SUCCESS);
         ShadowKeyValueBackupTask shadowTask = ShadowKeyValueBackupTask.getLastCreated();
-        assertThat(shadowTask.getQueue()).containsExactly(new BackupRequest(PACKAGE_1));
+        assertThat(shadowTask.getQueue()).containsExactly(PACKAGE_1);
         assertThat(shadowTask.getPendingFullBackups()).isEmpty();
         // TODO: Assert more about KeyValueBackupTask
         tearDownForRequestBackup();

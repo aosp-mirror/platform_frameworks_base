@@ -23,7 +23,6 @@ import android.app.backup.IBackupObserver;
 import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.internal.OnTaskFinishedListener;
-import com.android.server.backup.keyvalue.BackupRequest;
 import com.android.server.backup.keyvalue.KeyValueBackupTask;
 import com.android.server.backup.transport.TransportClient;
 
@@ -51,7 +50,7 @@ public class ShadowKeyValueBackupTask {
     }
 
     private OnTaskFinishedListener mListener;
-    private List<BackupRequest> mQueue;
+    private List<String> mQueue;
     private List<String> mPendingFullBackups;
 
     @Implementation
@@ -59,7 +58,7 @@ public class ShadowKeyValueBackupTask {
             BackupManagerService backupManagerService,
             TransportClient transportClient,
             String dirName,
-            List<BackupRequest> queue,
+            List<String> queue,
             @Nullable DataChangedJournal journal,
             IBackupObserver observer,
             IBackupManagerMonitor monitor,
@@ -78,7 +77,7 @@ public class ShadowKeyValueBackupTask {
         mListener.onFinished("ShadowKeyValueBackupTask.execute()");
     }
 
-    public List<BackupRequest> getQueue() {
+    public List<String> getQueue() {
         return mQueue;
     }
 

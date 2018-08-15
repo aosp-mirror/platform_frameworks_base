@@ -99,7 +99,6 @@ public class BackupManagerServiceTestUtils {
             Handler backupHandler,
             PowerManager.WakeLock wakeLock,
             BackupAgentTimeoutParameters agentTimeoutParameters) {
-        SparseArray<Operation> operations = new SparseArray<>();
 
         when(backupManagerService.getContext()).thenReturn(application);
         when(backupManagerService.getTransportManager()).thenReturn(transportManager);
@@ -107,7 +106,6 @@ public class BackupManagerServiceTestUtils {
         when(backupManagerService.getBackupHandler()).thenReturn(backupHandler);
         when(backupManagerService.getCurrentOpLock()).thenReturn(new Object());
         when(backupManagerService.getQueueLock()).thenReturn(new Object());
-        when(backupManagerService.getCurrentOperations()).thenReturn(operations);
         when(backupManagerService.getActivityManager()).thenReturn(mock(IActivityManager.class));
         when(backupManagerService.getWakelock()).thenReturn(wakeLock);
         when(backupManagerService.getAgentTimeoutParameters()).thenReturn(agentTimeoutParameters);
@@ -119,22 +117,6 @@ public class BackupManagerServiceTestUtils {
         AccessorMock backupRunning = mockAccessor(false);
         doAnswer(backupEnabled.getter).when(backupManagerService).isBackupRunning();
         doAnswer(backupRunning.setter).when(backupManagerService).setBackupRunning(anyBoolean());
-
-        doAnswer(
-                        invocation -> {
-                            operations.put(invocation.getArgument(0), invocation.getArgument(1));
-                            return null;
-                        })
-                .when(backupManagerService)
-                .putOperation(anyInt(), any());
-        doAnswer(
-                        invocation -> {
-                            int token = invocation.getArgument(0);
-                            operations.remove(token);
-                            return null;
-                        })
-                .when(backupManagerService)
-                .removeOperation(anyInt());
     }
 
     public static void setUpBinderCallerAndApplicationAsSystem(Application application) {
