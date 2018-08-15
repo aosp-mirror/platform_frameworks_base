@@ -6338,6 +6338,10 @@ public class Activity extends ContextThemeWrapper
     }
 
     void dumpInner(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+        if (args != null && args.length > 0 && args[0].equals("--autofill")) {
+            dumpAutofillManager(prefix, writer);
+            return;
+        }
         writer.print(prefix); writer.print("Local Activity ");
                 writer.print(Integer.toHexString(System.identityHashCode(this)));
                 writer.println(" State:");
@@ -6365,16 +6369,20 @@ public class Activity extends ContextThemeWrapper
 
         mHandler.getLooper().dump(new PrintWriterPrinter(writer), prefix);
 
+        dumpAutofillManager(prefix, writer);
+
+        ResourcesManager.getInstance().dump(prefix, writer);
+    }
+
+    void dumpAutofillManager(String prefix, PrintWriter writer) {
         final AutofillManager afm = getAutofillManager();
         if (afm != null) {
+            afm.dump(prefix, writer);
             writer.print(prefix); writer.print("Autofill Compat Mode: ");
             writer.println(isAutofillCompatibilityEnabled());
-            afm.dump(prefix, writer);
         } else {
             writer.print(prefix); writer.println("No AutofillManager");
         }
-
-        ResourcesManager.getInstance().dump(prefix, writer);
     }
 
     /**
