@@ -538,8 +538,13 @@ public class MtpDatabase implements AutoCloseable {
         MtpPropertyGroup propertyGroup;
         for (MtpStorageManager.MtpObject obj : objs) {
             if (property == 0xffffffff) {
+                if (format == 0 && handle != 0 && handle != 0xffffffff) {
+                    // return properties based on the object's format
+                    format = obj.getFormat();
+                }
                 // Get all properties supported by this object
-                propertyGroup = mPropertyGroupsByFormat.get(obj.getFormat());
+                // format should be the same between get & put
+                propertyGroup = mPropertyGroupsByFormat.get(format);
                 if (propertyGroup == null) {
                     int[] propertyList = getSupportedObjectProperties(format);
                     propertyGroup = new MtpPropertyGroup(mMediaProvider, mVolumeName,
