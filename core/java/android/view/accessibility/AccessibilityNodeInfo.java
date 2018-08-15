@@ -1159,7 +1159,13 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     private boolean hasActionWithId(int actionId) {
-        return getActionList().stream().anyMatch(action -> action.getId() == actionId);
+        List<AccessibilityAction> actions = getActionList();
+        for (int i = 0; i < actions.size(); i++) {
+            if (actions.get(i).getId() == actionId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -1761,7 +1767,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if the node is focusable.
      */
     public boolean isFocusable() {
-        return hasActionWithId(ACTION_FOCUS);
+        return hasActionWithId(ACTION_FOCUS) || hasActionWithId(ACTION_CLEAR_FOCUS);
     }
 
     /**
