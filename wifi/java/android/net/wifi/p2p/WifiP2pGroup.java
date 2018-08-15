@@ -16,6 +16,7 @@
 
 package android.net.wifi.p2p;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcelable;
 import android.os.Parcel;
 
@@ -37,6 +38,7 @@ public class WifiP2pGroup implements Parcelable {
 
     /** The temporary network id.
      * {@hide} */
+    @UnsupportedAppUsage
     public static final int TEMPORARY_NET_ID = -1;
 
     /** The persistent network id.
@@ -95,6 +97,7 @@ public class WifiP2pGroup implements Parcelable {
      *  Note: The events formats can be looked up in the wpa_supplicant code
      *  @hide
      */
+    @UnsupportedAppUsage
     public WifiP2pGroup(String supplicantEvent) throws IllegalArgumentException {
 
         String[] tokens = supplicantEvent.split(" ");
@@ -169,6 +172,7 @@ public class WifiP2pGroup implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setIsGroupOwner(boolean isGo) {
         mIsGroupOwner = isGo;
     }
@@ -212,6 +216,7 @@ public class WifiP2pGroup implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public boolean isClientListEmpty() {
         return mClients.size() == 0;
     }
@@ -242,6 +247,7 @@ public class WifiP2pGroup implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setInterface(String intf) {
         mInterface = intf;
     }
@@ -252,11 +258,13 @@ public class WifiP2pGroup implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getNetworkId() {
         return mNetId;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setNetworkId(int netId) {
         this.mNetId = netId;
     }

@@ -25,6 +25,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.net.ConnectivityManager;
@@ -774,6 +775,7 @@ public class WifiManager {
      * changed on wifi.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String LINK_CONFIGURATION_CHANGED_ACTION =
         "android.net.wifi.LINK_CONFIGURATION_CHANGED";
 
@@ -889,9 +891,11 @@ public class WifiManager {
     public static final int WIFI_MODE_FULL_HIGH_PERF = 3;
 
     /** Anything worse than or equal to this will show 0 bars. */
+    @UnsupportedAppUsage
     private static final int MIN_RSSI = -100;
 
     /** Anything better than or equal to this will show the max bars. */
+    @UnsupportedAppUsage
     private static final int MAX_RSSI = -55;
 
     /**
@@ -899,6 +903,7 @@ public class WifiManager {
      * {@link #RSSI_CHANGED_ACTION} broadcast
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int RSSI_LEVELS = 5;
 
     /**
@@ -906,18 +911,21 @@ public class WifiManager {
      * 2.4 GHz and 5 GHz or make a dynamic decision on selecting the band.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int WIFI_FREQUENCY_BAND_AUTO = 0;
 
     /**
      * Operation on 5 GHz alone
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int WIFI_FREQUENCY_BAND_5GHZ = 1;
 
     /**
      * Operation on 2.4 GHz alone
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int WIFI_FREQUENCY_BAND_2GHZ = 2;
 
     /** List of asyncronous notifications
@@ -946,9 +954,11 @@ public class WifiManager {
     private static final int MAX_ACTIVE_LOCKS = 50;
 
     /* Number of currently active WifiLocks and MulticastLocks */
+    @UnsupportedAppUsage
     private int mActiveLockCount;
 
     private Context mContext;
+    @UnsupportedAppUsage
     IWifiManager mService;
     private final int mTargetSdkVersion;
 
@@ -1050,6 +1060,7 @@ public class WifiManager {
      * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      * @hide
      */
+    @UnsupportedAppUsage
     public WifiConfiguration getMatchingWifiConfig(ScanResult scanResult) {
         try {
             return mService.getMatchingWifiConfig(scanResult);
@@ -1740,6 +1751,7 @@ public class WifiManager {
     *
     * @hide
     */
+    @UnsupportedAppUsage
     public String getCountryCode() {
        try {
            String country = mService.getCountryCode();
@@ -1754,6 +1766,7 @@ public class WifiManager {
      * @return {@code true} if supported, {@code false} otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isDualBandSupported() {
         try {
             return mService.isDualBandSupported();
@@ -2019,6 +2032,7 @@ public class WifiManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void cancelLocalOnlyHotspotRequest() {
         synchronized (mLock) {
             stopLocalOnlyHotspot();
@@ -2992,6 +3006,7 @@ public class WifiManager {
      * initialized again
      * @hide
      */
+    @UnsupportedAppUsage
     public void connect(int networkId, ActionListener listener) {
         if (networkId < 0) throw new IllegalArgumentException("Network id cannot be negative");
         getChannel().sendMessage(CONNECT_NETWORK, networkId, putListener(listener));
@@ -3017,6 +3032,7 @@ public class WifiManager {
      * initialized again
      * @hide
      */
+    @UnsupportedAppUsage
     public void save(WifiConfiguration config, ActionListener listener) {
         if (config == null) throw new IllegalArgumentException("config cannot be null");
         getChannel().sendMessage(SAVE_NETWORK, 0, putListener(listener), config);
@@ -3035,6 +3051,7 @@ public class WifiManager {
      * initialized again
      * @hide
      */
+    @UnsupportedAppUsage
     public void forget(int netId, ActionListener listener) {
         if (netId < 0) throw new IllegalArgumentException("Network id cannot be negative");
         getChannel().sendMessage(FORGET_NETWORK, netId, putListener(listener));
@@ -3049,6 +3066,7 @@ public class WifiManager {
      * initialized again
      * @hide
      */
+    @UnsupportedAppUsage
     public void disable(int netId, ActionListener listener) {
         if (netId < 0) throw new IllegalArgumentException("Network id cannot be negative");
         getChannel().sendMessage(DISABLE_NETWORK, netId, putListener(listener));
@@ -3105,6 +3123,7 @@ public class WifiManager {
      * @return Messenger pointing to the WifiService handler
      * @hide
      */
+    @UnsupportedAppUsage
     public Messenger getWifiServiceMessenger() {
         try {
             return mService.getWifiServiceMessenger(mContext.getOpPackageName());
@@ -3535,6 +3554,7 @@ public class WifiManager {
      * Initialize the multicast filtering to 'on'
      * @hide no intent to publish
      */
+    @UnsupportedAppUsage
     public boolean initializeMulticastFiltering() {
         try {
             mService.initializeMulticastFiltering();
@@ -3559,6 +3579,7 @@ public class WifiManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    @UnsupportedAppUsage
     public void enableVerboseLogging (int verbose) {
         try {
             mService.enableVerboseLogging(verbose);
@@ -3573,6 +3594,7 @@ public class WifiManager {
      * to decide what to show within the picker.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getVerboseLoggingLevel() {
         try {
             return mService.getVerboseLoggingLevel();
@@ -3599,6 +3621,7 @@ public class WifiManager {
      * @return Get Network object of current wifi network
      * @hide
      */
+    @UnsupportedAppUsage
     public Network getCurrentNetwork() {
         try {
             return mService.getCurrentNetwork();

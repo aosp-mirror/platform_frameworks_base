@@ -19,6 +19,7 @@ package android.net.wifi.p2p;
 import android.annotation.SdkConstant;
 import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
@@ -325,6 +326,7 @@ public class WifiP2pManager {
     public static final int CANCEL_CONNECT_SUCCEEDED                = BASE + 12;
 
     /** @hide */
+    @UnsupportedAppUsage
     public static final int CREATE_GROUP                            = BASE + 13;
     /** @hide */
     public static final int CREATE_GROUP_FAILED                     = BASE + 14;
@@ -486,6 +488,7 @@ public class WifiP2pManager {
      * @hide - hide this because it takes in a parameter of type IWifiP2pManager, which
      * is a system private class.
      */
+    @UnsupportedAppUsage
     public WifiP2pManager(IWifiP2pManager service) {
         mService = service;
     }
@@ -731,6 +734,7 @@ public class WifiP2pManager {
 
         /* package */ final Binder mBinder;
 
+        @UnsupportedAppUsage
         private AsyncChannel mAsyncChannel;
         private P2pHandler mHandler;
         Context mContext;
@@ -887,6 +891,7 @@ public class WifiP2pManager {
             }
         }
 
+        @UnsupportedAppUsage
         private int putListener(Object listener) {
             if (listener == null) return INVALID_LISTENER_KEY;
             int key;
@@ -1099,6 +1104,7 @@ public class WifiP2pManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setWifiP2pChannels(Channel c, int lc, int oc, ActionListener listener) {
         checkChannel(c);
         Bundle p2pChannels = new Bundle();
@@ -1117,6 +1123,7 @@ public class WifiP2pManager {
      * {@link ActionListener#onSuccess} or {@link ActionListener#onFailure}.
      * @hide
      */
+    @UnsupportedAppUsage
     public void startWps(Channel c, WpsInfo wps, ActionListener listener) {
         checkChannel(c);
         c.mAsyncChannel.sendMessage(START_WPS, 0, c.putListener(listener), wps);
@@ -1363,6 +1370,7 @@ public class WifiP2pManager {
      * @param c is the channel created at {@link #initialize}
      * @param listener for callback when group info is available. Can be null.
      */
+    @UnsupportedAppUsage
     public void setDeviceName(Channel c, String devName, ActionListener listener) {
         checkChannel(c);
         WifiP2pDevice d = new WifiP2pDevice();
@@ -1371,6 +1379,7 @@ public class WifiP2pManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setWFDInfo(
             Channel c, WifiP2pWfdInfo wfdInfo,
             ActionListener listener) {
@@ -1401,6 +1410,7 @@ public class WifiP2pManager {
      * @param listener for callbacks on success or failure. Can be null.
      * @hide
      */
+    @UnsupportedAppUsage
     public void deletePersistentGroup(Channel c, int netId, ActionListener listener) {
         checkChannel(c);
         c.mAsyncChannel.sendMessage(DELETE_PERSISTENT_GROUP, netId, c.putListener(listener));
@@ -1413,6 +1423,7 @@ public class WifiP2pManager {
      * @param listener for callback when persistent group info list is available. Can be null.
      * @hide
      */
+    @UnsupportedAppUsage
     public void requestPersistentGroupInfo(Channel c, PersistentGroupInfoListener listener) {
         checkChannel(c);
         c.mAsyncChannel.sendMessage(REQUEST_PERSISTENT_GROUP_INFO, 0, c.putListener(listener));
@@ -1425,6 +1436,7 @@ public class WifiP2pManager {
     /** @hide */
     public static final int MIRACAST_SINK     = 2;
     /** Internal use only @hide */
+    @UnsupportedAppUsage
     public void setMiracastMode(int mode) {
         try {
             mService.setMiracastMode(mode);

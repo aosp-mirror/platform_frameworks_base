@@ -17,6 +17,7 @@
 package android.net.metrics;
 
 import android.annotation.IntDef;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseArray;
@@ -53,6 +54,7 @@ public final class IpManagerEvent implements Parcelable {
     public final @EventType int eventType;
     public final long durationMs;
 
+    @UnsupportedAppUsage
     public IpManagerEvent(@EventType int eventType, long duration) {
         this.eventType = eventType;
         this.durationMs = duration;

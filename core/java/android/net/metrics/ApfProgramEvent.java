@@ -17,6 +17,7 @@
 package android.net.metrics;
 
 import android.annotation.IntDef;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -47,13 +48,20 @@ public final class ApfProgramEvent implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flags {}
 
+    @UnsupportedAppUsage
     public long lifetime;       // Maximum computed lifetime of the program in seconds
+    @UnsupportedAppUsage
     public long actualLifetime; // Effective program lifetime in seconds
+    @UnsupportedAppUsage
     public int filteredRas;     // Number of RAs filtered by the APF program
+    @UnsupportedAppUsage
     public int currentRas;      // Total number of current RAs at generation time
+    @UnsupportedAppUsage
     public int programLength;   // Length of the APF program in bytes
+    @UnsupportedAppUsage
     public int flags;           // Bitfield compound of FLAG_* constants
 
+    @UnsupportedAppUsage
     public ApfProgramEvent() {
     }
 
@@ -99,6 +107,7 @@ public final class ApfProgramEvent implements Parcelable {
         }
     };
 
+    @UnsupportedAppUsage
     public static @Flags int flagsFor(boolean hasIPv4, boolean multicastFilterOn) {
         int bitfield = 0;
         if (hasIPv4) {

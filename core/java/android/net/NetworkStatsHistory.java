@@ -30,6 +30,7 @@ import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
 import static com.android.internal.util.ArrayUtils.total;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.NetworkStatsHistoryBucketProto;
@@ -89,16 +90,23 @@ public class NetworkStatsHistory implements Parcelable {
     public static class Entry {
         public static final long UNKNOWN = -1;
 
+        @UnsupportedAppUsage
         public long bucketDuration;
+        @UnsupportedAppUsage
         public long bucketStart;
         public long activeTime;
+        @UnsupportedAppUsage
         public long rxBytes;
+        @UnsupportedAppUsage
         public long rxPackets;
+        @UnsupportedAppUsage
         public long txBytes;
+        @UnsupportedAppUsage
         public long txPackets;
         public long operations;
     }
 
+    @UnsupportedAppUsage
     public NetworkStatsHistory(long bucketDuration) {
         this(bucketDuration, 10, FIELD_ALL);
     }
@@ -125,6 +133,7 @@ public class NetworkStatsHistory implements Parcelable {
         recordEntireHistory(existing);
     }
 
+    @UnsupportedAppUsage
     public NetworkStatsHistory(Parcel in) {
         bucketDuration = in.readLong();
         bucketStart = readLongArray(in);
@@ -210,6 +219,7 @@ public class NetworkStatsHistory implements Parcelable {
         return 0;
     }
 
+    @UnsupportedAppUsage
     public int size() {
         return bucketCount;
     }
@@ -218,6 +228,7 @@ public class NetworkStatsHistory implements Parcelable {
         return bucketDuration;
     }
 
+    @UnsupportedAppUsage
     public long getStart() {
         if (bucketCount > 0) {
             return bucketStart[0];
@@ -226,6 +237,7 @@ public class NetworkStatsHistory implements Parcelable {
         }
     }
 
+    @UnsupportedAppUsage
     public long getEnd() {
         if (bucketCount > 0) {
             return bucketStart[bucketCount - 1] + bucketDuration;
@@ -245,6 +257,7 @@ public class NetworkStatsHistory implements Parcelable {
      * Return index of bucket that contains or is immediately before the
      * requested time.
      */
+    @UnsupportedAppUsage
     public int getIndexBefore(long time) {
         int index = Arrays.binarySearch(bucketStart, 0, bucketCount, time);
         if (index < 0) {
@@ -272,6 +285,7 @@ public class NetworkStatsHistory implements Parcelable {
     /**
      * Return specific stats entry.
      */
+    @UnsupportedAppUsage
     public Entry getValues(int i, Entry recycle) {
         final Entry entry = recycle != null ? recycle : new Entry();
         entry.bucketStart = bucketStart[i];
@@ -373,6 +387,7 @@ public class NetworkStatsHistory implements Parcelable {
      * Record an entire {@link NetworkStatsHistory} into this history. Usually
      * for combining together stats for external reporting.
      */
+    @UnsupportedAppUsage
     public void recordEntireHistory(NetworkStatsHistory input) {
         recordHistory(input, Long.MIN_VALUE, Long.MAX_VALUE);
     }
@@ -509,6 +524,7 @@ public class NetworkStatsHistory implements Parcelable {
      * Return interpolated data usage across the requested range. Interpolates
      * across buckets, so values may be rounded slightly.
      */
+    @UnsupportedAppUsage
     public Entry getValues(long start, long end, Entry recycle) {
         return getValues(start, end, Long.MAX_VALUE, recycle);
     }
@@ -517,6 +533,7 @@ public class NetworkStatsHistory implements Parcelable {
      * Return interpolated data usage across the requested range. Interpolates
      * across buckets, so values may be rounded slightly.
      */
+    @UnsupportedAppUsage
     public Entry getValues(long start, long end, long now, Entry recycle) {
         final Entry entry = recycle != null ? recycle : new Entry();
         entry.bucketDuration = end - start;
@@ -701,6 +718,7 @@ public class NetworkStatsHistory implements Parcelable {
         return writer.toString();
     }
 
+    @UnsupportedAppUsage
     public static final Creator<NetworkStatsHistory> CREATOR = new Creator<NetworkStatsHistory>() {
         @Override
         public NetworkStatsHistory createFromParcel(Parcel in) {

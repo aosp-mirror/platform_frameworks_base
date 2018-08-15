@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.system.ErrnoException;
@@ -59,6 +60,7 @@ public class Network implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public final int netId;
 
     // Objects used to perform per-network operations such as getSocketFactory
@@ -103,6 +105,7 @@ public class Network implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public Network(int netId) {
         this.netId = netId;
     }

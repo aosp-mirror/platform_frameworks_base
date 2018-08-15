@@ -16,6 +16,7 @@
 package android.net.wifi;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.security.Credentials;
@@ -139,6 +140,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      */
     private static final List<String> UNQUOTED_KEYS = Arrays.asList(ENGINE_KEY, OPP_KEY_CACHING);
 
+    @UnsupportedAppUsage
     private HashMap<String, String> mFields = new HashMap<String, String>();
     private X509Certificate[] mCaCerts;
     private PrivateKey mClientPrivateKey;
@@ -574,6 +576,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @param alias identifies the certificate
      * @hide
      */
+    @UnsupportedAppUsage
     public void setCaCertificateAlias(String alias) {
         setFieldValue(CA_CERT_KEY, alias, CA_CERT_PREFIX);
     }
@@ -612,6 +615,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @return alias to the CA certificate
      * @hide
      */
+    @UnsupportedAppUsage
     public String getCaCertificateAlias() {
         return getFieldValue(CA_CERT_KEY, CA_CERT_PREFIX);
     }
@@ -760,6 +764,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @param alias identifies the certificate
      * @hide
      */
+    @UnsupportedAppUsage
     public void setClientCertificateAlias(String alias) {
         setFieldValue(CLIENT_CERT_KEY, alias, CLIENT_CERT_PREFIX);
         setFieldValue(PRIVATE_KEY_ID_KEY, alias, Credentials.USER_PRIVATE_KEY);
@@ -778,6 +783,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @return alias to the client certificate
      * @hide
      */
+    @UnsupportedAppUsage
     public String getClientCertificateAlias() {
         return getFieldValue(CLIENT_CERT_KEY, CLIENT_CERT_PREFIX);
     }
