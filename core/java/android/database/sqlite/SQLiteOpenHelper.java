@@ -19,6 +19,7 @@ package android.database.sqlite;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.database.DatabaseErrorHandler;
 import android.database.SQLException;
@@ -52,6 +53,7 @@ public abstract class SQLiteOpenHelper {
     private static final String TAG = SQLiteOpenHelper.class.getSimpleName();
 
     private final Context mContext;
+    @UnsupportedAppUsage
     private final String mName;
     private final int mNewVersion;
     private final int mMinimumSupportedVersion;

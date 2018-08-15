@@ -16,6 +16,7 @@
 
 package android.database.sqlite;
 
+import android.annotation.UnsupportedAppUsage;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -67,6 +68,7 @@ public final class SQLiteDatabaseConfiguration {
      *
      * Default is 25.
      */
+    @UnsupportedAppUsage
     public int maxSqlCacheSize;
 
     /**
