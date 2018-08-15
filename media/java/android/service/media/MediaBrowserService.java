@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -89,6 +90,7 @@ public abstract class MediaBrowserService extends Service {
      * A key for passing the MediaItem to the ResultReceiver in getItem.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String KEY_MEDIA_ITEM = "media_item";
 
     private static final int RESULT_FLAG_OPTION_NOT_HANDLED = 1 << 0;
@@ -149,6 +151,7 @@ public abstract class MediaBrowserService extends Service {
         private Object mDebug;
         private boolean mDetachCalled;
         private boolean mSendResultCalled;
+        @UnsupportedAppUsage
         private int mFlags;
 
         Result(Object debug) {

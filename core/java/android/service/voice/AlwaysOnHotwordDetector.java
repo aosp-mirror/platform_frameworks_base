@@ -19,6 +19,7 @@ package android.service.voice;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.content.Intent;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
@@ -266,6 +267,7 @@ public class AlwaysOnHotwordDetector {
          * @hide
          */
         @Nullable
+        @UnsupportedAppUsage
         public Integer getCaptureSession() {
             if (mCaptureAvailable) {
                 return mCaptureSession;
