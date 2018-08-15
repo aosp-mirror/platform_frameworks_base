@@ -45,6 +45,9 @@ message GnssLog {
 
   // Power metrics
   optional PowerMetrics power_metrics = 12;
+
+  // Hardware revision (EVT, DVT, PVT etc.)
+  optional string hardware_revision = 13;
 }
 
 // Power metrics
