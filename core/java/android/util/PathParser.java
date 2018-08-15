@@ -14,6 +14,7 @@
 
 package android.util;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Path;
 
 import dalvik.annotation.optimization.FastNative;
@@ -28,6 +29,7 @@ public class PathParser {
      * @param pathString The string representing a path, the same as "d" string in svg file.
      * @return the generated Path object.
      */
+    @UnsupportedAppUsage
     public static Path createPathFromPathData(String pathString) {
         if (pathString == null) {
             throw new IllegalArgumentException("Path string can not be null.");
