@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.net.NetworkInfo.DetailedState;
@@ -48,6 +49,7 @@ public class WifiInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String DEFAULT_MAC_ADDRESS = "02:00:00:00:00:00";
 
     static {
@@ -67,11 +69,14 @@ public class WifiInfo implements Parcelable {
     }
 
     private SupplicantState mSupplicantState;
+    @UnsupportedAppUsage
     private String mBSSID;
+    @UnsupportedAppUsage
     private WifiSsid mWifiSsid;
     private int mNetworkId;
 
     /** @hide **/
+    @UnsupportedAppUsage
     public static final int INVALID_RSSI = -127;
 
     /** @hide **/
@@ -98,7 +103,9 @@ public class WifiInfo implements Parcelable {
     public static final String FREQUENCY_UNITS = "MHz";
     private int mFrequency;
 
+    @UnsupportedAppUsage
     private InetAddress mIpAddress;
+    @UnsupportedAppUsage
     private String mMacAddress = DEFAULT_MAC_ADDRESS;
 
     private boolean mEphemeral;
@@ -148,6 +155,7 @@ public class WifiInfo implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public int score;
 
     /**
@@ -157,6 +165,7 @@ public class WifiInfo implements Parcelable {
     private boolean mMeteredHint;
 
     /** @hide */
+    @UnsupportedAppUsage
     public WifiInfo() {
         mWifiSsid = null;
         mBSSID = null;
@@ -248,11 +257,13 @@ public class WifiInfo implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public WifiSsid getWifiSsid() {
         return mWifiSsid;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setBSSID(String BSSID) {
         mBSSID = BSSID;
     }
@@ -280,6 +291,7 @@ public class WifiInfo implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setRssi(int rssi) {
         if (rssi < INVALID_RSSI)
             rssi = INVALID_RSSI;
@@ -298,6 +310,7 @@ public class WifiInfo implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setLinkSpeed(int linkSpeed) {
         this.mLinkSpeed = linkSpeed;
     }
@@ -328,6 +341,7 @@ public class WifiInfo implements Parcelable {
      * @hide
      * TODO: makes real freq boundaries
      */
+    @UnsupportedAppUsage
     public boolean is5GHz() {
         return ScanResult.is5GHz(mFrequency);
     }
@@ -337,6 +351,7 @@ public class WifiInfo implements Parcelable {
      * @param macAddress the MAC address in {@code XX:XX:XX:XX:XX:XX} form
      * @hide
      */
+    @UnsupportedAppUsage
     public void setMacAddress(String macAddress) {
         this.mMacAddress = macAddress;
     }
@@ -366,6 +381,7 @@ public class WifiInfo implements Parcelable {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public boolean getMeteredHint() {
         return mMeteredHint;
     }
@@ -376,11 +392,13 @@ public class WifiInfo implements Parcelable {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public boolean isEphemeral() {
         return mEphemeral;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setNetworkId(int id) {
         mNetworkId = id;
     }
@@ -405,6 +423,7 @@ public class WifiInfo implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setSupplicantState(SupplicantState state) {
         mSupplicantState = state;
     }
@@ -446,6 +465,7 @@ public class WifiInfo implements Parcelable {
      * @param stateName the name of the state, as a <code>String</code> returned
      * in an event sent by {@code wpa_supplicant}.
      */
+    @UnsupportedAppUsage
     void setSupplicantState(String stateName) {
         mSupplicantState = valueOf(stateName);
     }
@@ -463,6 +483,7 @@ public class WifiInfo implements Parcelable {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static String removeDoubleQuotes(String string) {
         if (string == null) return null;
         final int length = string.length();
@@ -527,6 +548,7 @@ public class WifiInfo implements Parcelable {
     }
 
     /** Implement the Parcelable interface {@hide} */
+    @UnsupportedAppUsage
     public static final Creator<WifiInfo> CREATOR =
         new Creator<WifiInfo>() {
             public WifiInfo createFromParcel(Parcel in) {

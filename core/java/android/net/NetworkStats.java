@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -110,25 +111,43 @@ public class NetworkStats implements Parcelable {
      * generated.
      */
     private long elapsedRealtime;
+    @UnsupportedAppUsage
     private int size;
+    @UnsupportedAppUsage
     private int capacity;
+    @UnsupportedAppUsage
     private String[] iface;
+    @UnsupportedAppUsage
     private int[] uid;
+    @UnsupportedAppUsage
     private int[] set;
+    @UnsupportedAppUsage
     private int[] tag;
+    @UnsupportedAppUsage
     private int[] metered;
+    @UnsupportedAppUsage
     private int[] roaming;
+    @UnsupportedAppUsage
     private int[] defaultNetwork;
+    @UnsupportedAppUsage
     private long[] rxBytes;
+    @UnsupportedAppUsage
     private long[] rxPackets;
+    @UnsupportedAppUsage
     private long[] txBytes;
+    @UnsupportedAppUsage
     private long[] txPackets;
+    @UnsupportedAppUsage
     private long[] operations;
 
     public static class Entry {
+        @UnsupportedAppUsage
         public String iface;
+        @UnsupportedAppUsage
         public int uid;
+        @UnsupportedAppUsage
         public int set;
+        @UnsupportedAppUsage
         public int tag;
         /**
          * Note that this is only populated w/ the default value when read from /proc or written
@@ -148,12 +167,17 @@ public class NetworkStats implements Parcelable {
          * getSummary().
          */
         public int defaultNetwork;
+        @UnsupportedAppUsage
         public long rxBytes;
+        @UnsupportedAppUsage
         public long rxPackets;
+        @UnsupportedAppUsage
         public long txBytes;
+        @UnsupportedAppUsage
         public long txPackets;
         public long operations;
 
+        @UnsupportedAppUsage
         public Entry() {
             this(IFACE_ALL, UID_ALL, SET_DEFAULT, TAG_NONE, 0L, 0L, 0L, 0L, 0L);
         }
@@ -240,6 +264,7 @@ public class NetworkStats implements Parcelable {
         }
     }
 
+    @UnsupportedAppUsage
     public NetworkStats(long elapsedRealtime, int initialSize) {
         this.elapsedRealtime = elapsedRealtime;
         this.size = 0;
@@ -263,6 +288,7 @@ public class NetworkStats implements Parcelable {
         }
     }
 
+    @UnsupportedAppUsage
     public NetworkStats(Parcel parcel) {
         elapsedRealtime = parcel.readLong();
         size = parcel.readInt();
@@ -399,6 +425,7 @@ public class NetworkStats implements Parcelable {
     /**
      * Return specific stats entry.
      */
+    @UnsupportedAppUsage
     public Entry getValues(int i, Entry recycle) {
         final Entry entry = recycle != null ? recycle : new Entry();
         entry.iface = iface[i];
@@ -432,6 +459,7 @@ public class NetworkStats implements Parcelable {
         return SystemClock.elapsedRealtime() - elapsedRealtime;
     }
 
+    @UnsupportedAppUsage
     public int size() {
         return size;
     }
@@ -460,6 +488,7 @@ public class NetworkStats implements Parcelable {
      * {@link #findIndex(String, int, int, int, int)} is unable to find match. Can
      * also be used to subtract values from existing rows.
      */
+    @UnsupportedAppUsage
     public NetworkStats combineValues(Entry entry) {
         final int i = findIndex(entry.iface, entry.uid, entry.set, entry.tag, entry.metered,
                 entry.roaming, entry.defaultNetwork);
@@ -479,6 +508,7 @@ public class NetworkStats implements Parcelable {
     /**
      * Combine all values from another {@link NetworkStats} into this object.
      */
+    @UnsupportedAppUsage
     public void combineAllValues(NetworkStats another) {
         NetworkStats.Entry entry = null;
         for (int i = 0; i < another.size; i++) {
@@ -564,6 +594,7 @@ public class NetworkStats implements Parcelable {
     /**
      * Return list of unique UIDs known by this data structure.
      */
+    @UnsupportedAppUsage
     public int[] getUniqueUids() {
         final SparseBooleanArray uids = new SparseBooleanArray();
         for (int uid : this.uid) {
@@ -582,6 +613,7 @@ public class NetworkStats implements Parcelable {
      * Return total bytes represented by this snapshot object, usually used when
      * checking if a {@link #subtract(NetworkStats)} delta passes a threshold.
      */
+    @UnsupportedAppUsage
     public long getTotalBytes() {
         final Entry entry = getTotal(null);
         return entry.rxBytes + entry.txBytes;
@@ -590,6 +622,7 @@ public class NetworkStats implements Parcelable {
     /**
      * Return total of all fields represented by this snapshot object.
      */
+    @UnsupportedAppUsage
     public Entry getTotal(Entry recycle) {
         return getTotal(recycle, null, UID_ALL, false);
     }
@@ -598,6 +631,7 @@ public class NetworkStats implements Parcelable {
      * Return total of all fields represented by this snapshot object matching
      * the requested {@link #uid}.
      */
+    @UnsupportedAppUsage
     public Entry getTotal(Entry recycle, int limitUid) {
         return getTotal(recycle, null, limitUid, false);
     }
@@ -610,6 +644,7 @@ public class NetworkStats implements Parcelable {
         return getTotal(recycle, limitIface, UID_ALL, false);
     }
 
+    @UnsupportedAppUsage
     public Entry getTotalIncludingTags(Entry recycle) {
         return getTotal(recycle, null, UID_ALL, true);
     }
@@ -1085,6 +1120,7 @@ public class NetworkStats implements Parcelable {
         return 0;
     }
 
+    @UnsupportedAppUsage
     public static final Creator<NetworkStats> CREATOR = new Creator<NetworkStats>() {
         @Override
         public NetworkStats createFromParcel(Parcel in) {

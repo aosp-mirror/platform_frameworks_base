@@ -16,6 +16,7 @@
 
 package android.net.metrics;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -101,39 +102,47 @@ public final class RaEvent implements Parcelable {
         long rdnssLifetime           = NO_LIFETIME;
         long dnsslLifetime           = NO_LIFETIME;
 
+        @UnsupportedAppUsage
         public Builder() {
         }
 
+        @UnsupportedAppUsage
         public RaEvent build() {
             return new RaEvent(routerLifetime, prefixValidLifetime, prefixPreferredLifetime,
                     routeInfoLifetime, rdnssLifetime, dnsslLifetime);
         }
 
+        @UnsupportedAppUsage
         public Builder updateRouterLifetime(long lifetime) {
             routerLifetime = updateLifetime(routerLifetime, lifetime);
             return this;
         }
 
+        @UnsupportedAppUsage
         public Builder updatePrefixValidLifetime(long lifetime) {
             prefixValidLifetime = updateLifetime(prefixValidLifetime, lifetime);
             return this;
         }
 
+        @UnsupportedAppUsage
         public Builder updatePrefixPreferredLifetime(long lifetime) {
             prefixPreferredLifetime = updateLifetime(prefixPreferredLifetime, lifetime);
             return this;
         }
 
+        @UnsupportedAppUsage
         public Builder updateRouteInfoLifetime(long lifetime) {
             routeInfoLifetime = updateLifetime(routeInfoLifetime, lifetime);
             return this;
         }
 
+        @UnsupportedAppUsage
         public Builder updateRdnssLifetime(long lifetime) {
             rdnssLifetime = updateLifetime(rdnssLifetime, lifetime);
             return this;
         }
 
+        @UnsupportedAppUsage
         public Builder updateDnsslLifetime(long lifetime) {
             dnsslLifetime = updateLifetime(dnsslLifetime, lifetime);
             return this;
