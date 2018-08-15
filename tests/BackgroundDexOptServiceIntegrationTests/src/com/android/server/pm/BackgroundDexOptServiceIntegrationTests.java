@@ -17,8 +17,10 @@
 package com.android.server.pm;
 
 import android.app.AlarmManager;
+import android.app.UiAutomation;
 import android.content.Context;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.os.SystemProperties;
 import android.os.storage.StorageManager;
 import android.support.test.InstrumentationRegistry;
@@ -34,6 +36,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -141,27 +144,17 @@ public final class BackgroundDexOptServiceIntegrationTests {
     // Run the command and return the stdout.
     private static String runShellCommand(String cmd) throws IOException {
         Log.i(TAG, String.format("running command: '%s'", cmd));
-        long startTime = System.nanoTime();
-        Process p = Runtime.getRuntime().exec(cmd);
-        int res;
-        try {
-            res = p.waitFor();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        ParcelFileDescriptor pfd = InstrumentationRegistry.getInstrumentation().getUiAutomation()
+                .executeShellCommand(cmd);
+        byte[] buf = new byte[512];
+        int bytesRead;
+        FileInputStream fis = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+        StringBuilder stdout = new StringBuilder();
+        while ((bytesRead = fis.read(buf)) != -1) {
+            stdout.append(new String(buf, 0, bytesRead));
         }
-        String stdout = inputStreamToString(p.getInputStream());
-        String stderr = inputStreamToString(p.getErrorStream());
-        long elapsedTime = System.nanoTime() - startTime;
-        Log.i(TAG, String.format("ran command: '%s' in %d ms with return code %d", cmd,
-                TimeUnit.NANOSECONDS.toMillis(elapsedTime), res));
-        Log.i(TAG, "stdout");
-        Log.i(TAG, stdout);
-        Log.i(TAG, "stderr");
-        Log.i(TAG, stderr);
-        if (res != 0) {
-            throw new RuntimeException(String.format("failed command: '%s'", cmd));
-        }
-        return stdout;
+        fis.close();
+        return stdout.toString();
     }
 
     // Run the command and return the stdout split by lines.
