@@ -1348,7 +1348,8 @@ public abstract class Layout {
         }
 
         float get(final int offset) {
-            if (mHorizontals == null) {
+            if (mHorizontals == null || offset < mLineStartOffset
+                    || offset >= mLineStartOffset + mHorizontals.length) {
                 return getPrimaryHorizontal(offset);
             } else {
                 return mHorizontals[offset - mLineStartOffset];
