@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -41,6 +42,7 @@ public final class Vr2dDisplayProperties implements Parcelable {
     private final int mAddedFlags;
     private final int mRemovedFlags;
 
+    @UnsupportedAppUsage
     public Vr2dDisplayProperties(int width, int height, int dpi) {
         this(width, height, dpi, 0, 0);
     }
@@ -165,6 +167,7 @@ public final class Vr2dDisplayProperties implements Parcelable {
         private int mHeight = -1;
         private int mDpi = -1;
 
+        @UnsupportedAppUsage
         public Builder() {
         }
 
@@ -181,6 +184,7 @@ public final class Vr2dDisplayProperties implements Parcelable {
         /**
          * Toggles the virtual display functionality for 2D activities in VR.
          */
+        @UnsupportedAppUsage
         public Builder setEnabled(boolean enabled) {
             if (enabled) {
                 addFlags(FLAG_VIRTUAL_DISPLAY_ENABLED);
@@ -211,6 +215,7 @@ public final class Vr2dDisplayProperties implements Parcelable {
         /**
          * Builds the Vr2dDisplayProperty instance.
          */
+        @UnsupportedAppUsage
         public Vr2dDisplayProperties build() {
             return new Vr2dDisplayProperties(mWidth, mHeight, mDpi, mAddedFlags, mRemovedFlags);
         }

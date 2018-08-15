@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -182,11 +183,15 @@ public class DialogFragment extends Fragment
     int mTheme = 0;
     boolean mCancelable = true;
     boolean mShowsDialog = true;
+    @UnsupportedAppUsage
     int mBackStackId = -1;
 
     Dialog mDialog;
+    @UnsupportedAppUsage
     boolean mViewDestroyed;
+    @UnsupportedAppUsage
     boolean mDismissed;
+    @UnsupportedAppUsage
     boolean mShownByMe;
 
     public DialogFragment() {
@@ -236,6 +241,7 @@ public class DialogFragment extends Fragment
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public void showAllowingStateLoss(FragmentManager manager, String tag) {
         mDismissed = false;
         mShownByMe = true;

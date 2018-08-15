@@ -17,6 +17,7 @@ package android.app.usage;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -177,27 +178,32 @@ public final class UsageEvents implements Parcelable {
         /**
          * {@hide}
          */
+        @UnsupportedAppUsage
         public String mPackage;
 
         /**
          * {@hide}
          */
+        @UnsupportedAppUsage
         public String mClass;
 
         /**
          * {@hide}
          */
+        @UnsupportedAppUsage
         public long mTimeStamp;
 
         /**
          * {@hide}
          */
+        @UnsupportedAppUsage
         public int mEventType;
 
         /**
          * Only present for {@link #CONFIGURATION_CHANGE} event types.
          * {@hide}
          */
+        @UnsupportedAppUsage
         public Configuration mConfiguration;
 
         /**
@@ -380,24 +386,30 @@ public final class UsageEvents implements Parcelable {
     }
 
     // Only used when creating the resulting events. Not used for reading/unparceling.
+    @UnsupportedAppUsage
     private List<Event> mEventsToWrite = null;
 
     // Only used for reading/unparceling events.
+    @UnsupportedAppUsage
     private Parcel mParcel = null;
+    @UnsupportedAppUsage
     private final int mEventCount;
 
+    @UnsupportedAppUsage
     private int mIndex = 0;
 
     /*
      * In order to save space, since ComponentNames will be duplicated everywhere,
      * we use a map and index into it.
      */
+    @UnsupportedAppUsage
     private String[] mStringPool;
 
     /**
      * Construct the iterator from a parcel.
      * {@hide}
      */
+    @UnsupportedAppUsage
     public UsageEvents(Parcel in) {
         byte[] bytes = in.readBlob();
         Parcel data = Parcel.obtain();
@@ -482,6 +494,7 @@ public final class UsageEvents implements Parcelable {
         }
     }
 
+    @UnsupportedAppUsage
     private int findStringIndex(String str) {
         final int index = Arrays.binarySearch(mStringPool, str);
         if (index < 0) {
@@ -493,6 +506,7 @@ public final class UsageEvents implements Parcelable {
     /**
      * Writes a single event to the parcel. Modify this when updating {@link Event}.
      */
+    @UnsupportedAppUsage
     private void writeEventToParcel(Event event, Parcel p, int flags) {
         final int packageIndex;
         if (event.mPackage != null) {
@@ -536,6 +550,7 @@ public final class UsageEvents implements Parcelable {
     /**
      * Reads a single event from the parcel. Modify this when updating {@link Event}.
      */
+    @UnsupportedAppUsage
     private void readEventFromParcel(Parcel p, Event eventOut) {
         final int packageIndex = p.readInt();
         if (packageIndex >= 0) {

@@ -5,6 +5,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Handler;
@@ -48,6 +49,7 @@ public class VrManager {
         }
     }
 
+    @UnsupportedAppUsage
     private final IVrManager mService;
     private Map<VrStateCallback, CallbackEntry> mCallbackMap = new ArrayMap<>();
 
@@ -68,6 +70,7 @@ public class VrManager {
             android.Manifest.permission.RESTRICTED_VR_ACCESS,
             android.Manifest.permission.ACCESS_VR_STATE
     })
+    @UnsupportedAppUsage
     public void registerVrStateCallback(VrStateCallback callback, @NonNull Handler handler) {
         if (callback == null || mCallbackMap.containsKey(callback)) {
             return;
@@ -97,6 +100,7 @@ public class VrManager {
             android.Manifest.permission.RESTRICTED_VR_ACCESS,
             android.Manifest.permission.ACCESS_VR_STATE
     })
+    @UnsupportedAppUsage
     public void unregisterVrStateCallback(VrStateCallback callback) {
         CallbackEntry entry = mCallbackMap.remove(callback);
         if (entry != null) {
@@ -139,6 +143,7 @@ public class VrManager {
             android.Manifest.permission.RESTRICTED_VR_ACCESS,
             android.Manifest.permission.ACCESS_VR_STATE
     })
+    @UnsupportedAppUsage
     public boolean getPersistentVrModeEnabled() {
         try {
             return mService.getPersistentVrModeEnabled();
@@ -175,6 +180,7 @@ public class VrManager {
      * {@hide}
      */
     @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
+    @UnsupportedAppUsage
     public void setVr2dDisplayProperties(
             Vr2dDisplayProperties vr2dDisplayProp) {
         try {

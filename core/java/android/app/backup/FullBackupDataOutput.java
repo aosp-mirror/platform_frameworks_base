@@ -1,5 +1,6 @@
 package android.app.backup;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.ParcelFileDescriptor;
 
 /**
@@ -9,6 +10,7 @@ import android.os.ParcelFileDescriptor;
  */
 public class FullBackupDataOutput {
     // Currently a name-scoping shim around BackupDataOutput
+    @UnsupportedAppUsage
     private final BackupDataOutput mData;
     private final long mQuota;
     private final int mTransportFlags;
@@ -65,14 +67,17 @@ public class FullBackupDataOutput {
     }
 
     /** @hide - used only internally to the backup manager service's stream construction */
+    @UnsupportedAppUsage
     public FullBackupDataOutput(ParcelFileDescriptor fd) {
         this(fd, /*quota=*/ -1, /*transportFlags=*/ 0);
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public BackupDataOutput getData() { return mData; }
 
     /** @hide - used for measurement pass */
+    @UnsupportedAppUsage
     public void addSize(long size) {
         if (size > 0) {
             mSize += size;

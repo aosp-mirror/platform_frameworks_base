@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -137,6 +138,7 @@ public final class PictureInPictureArgs implements Parcelable {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public PictureInPictureArgs() {
     }
 
@@ -173,6 +175,7 @@ public final class PictureInPictureArgs implements Parcelable {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void setAspectRatio(float aspectRatio) {
         // Temporary workaround
         mAspectRatio = new Rational((int) (aspectRatio * 1000000000), 1000000000);
@@ -182,6 +185,7 @@ public final class PictureInPictureArgs implements Parcelable {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void setActions(List<RemoteAction> actions) {
         if (mUserActions != null) {
             mUserActions = null;
