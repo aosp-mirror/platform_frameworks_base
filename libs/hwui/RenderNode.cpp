@@ -272,6 +272,20 @@ void RenderNode::syncDisplayList(TreeObserver& observer, TreeInfo* info) {
     mStagingDisplayList = nullptr;
     if (mDisplayList) {
         mDisplayList->syncContents();
+        if (CC_UNLIKELY(Properties::forceDarkMode)) {
+            auto usage = usageHint();
+            if (usage == UsageHint::Unknown) {
+                if (mDisplayList->mChildNodes.size() > 1) {
+                    usage = UsageHint::Background;
+                } else if (mDisplayList->mChildNodes.size() == 1 &&
+                           mDisplayList->mChildNodes.front().getRenderNode()->usageHint() !=
+                                   UsageHint::Background) {
+                    usage = UsageHint::Background;
+                }
+            }
+            mDisplayList->mDisplayList.applyColorTransform(
+                    usage == UsageHint::Background ? ColorTransform::Dark : ColorTransform::Light);
+        }
     }
 }
 

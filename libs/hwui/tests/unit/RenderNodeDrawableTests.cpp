@@ -18,13 +18,13 @@
 #include <gtest/gtest.h>
 
 #include <SkClipStack.h>
-#include <SkLiteRecorder.h>
 #include <SkSurface_Base.h>
 #include <string.h>
 #include "AnimationContext.h"
 #include "DamageAccumulator.h"
 #include "FatalTestCanvas.h"
 #include "IContextFactory.h"
+#include "RecordingCanvas.h"
 #include "SkiaCanvas.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
@@ -44,8 +44,8 @@ TEST(RenderNodeDrawable, create) {
                 canvas.drawColor(Color::Red_500, SkBlendMode::kSrcOver);
             });
 
-    SkLiteDL skLiteDL;
-    SkLiteRecorder canvas;
+    DisplayListData skLiteDL;
+    RecordingCanvas canvas;
     canvas.reset(&skLiteDL, SkIRect::MakeWH(1, 1));
     canvas.translate(100, 100);
     RenderNodeDrawable drawable(rootNode.get(), &canvas);
