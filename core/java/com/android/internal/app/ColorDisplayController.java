@@ -112,8 +112,8 @@ public final class ColorDisplayController {
 
     private final Context mContext;
     private final int mUserId;
-    private final ContentObserver mContentObserver;
 
+    private ContentObserver mContentObserver;
     private Callback mCallback;
     private MetricsLogger mMetricsLogger;
 
@@ -124,18 +124,6 @@ public final class ColorDisplayController {
     public ColorDisplayController(@NonNull Context context, int userId) {
         mContext = context.getApplicationContext();
         mUserId = userId;
-
-        mContentObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {
-            @Override
-            public void onChange(boolean selfChange, Uri uri) {
-                super.onChange(selfChange, uri);
-
-                final String setting = uri == null ? null : uri.getLastPathSegment();
-                if (setting != null) {
-                    onSettingChanged(setting);
-                }
-            }
-        };
     }
 
     /**
@@ -521,6 +509,20 @@ public final class ColorDisplayController {
         final Callback oldCallback = mCallback;
         if (oldCallback != callback) {
             mCallback = callback;
+
+            if (mContentObserver == null) {
+                mContentObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {
+                    @Override
+                    public void onChange(boolean selfChange, Uri uri) {
+                        super.onChange(selfChange, uri);
+
+                        final String setting = uri == null ? null : uri.getLastPathSegment();
+                        if (setting != null) {
+                            onSettingChanged(setting);
+                        }
+                    }
+                };
+            }
 
             if (callback == null) {
                 // Stop listening for changes now that there IS NOT a listener.

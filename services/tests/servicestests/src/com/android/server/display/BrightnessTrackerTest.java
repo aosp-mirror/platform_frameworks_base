@@ -52,6 +52,8 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.R;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,6 +84,8 @@ public class BrightnessTrackerTest {
     private static HandlerThread sThread =
             new HandlerThread("brightness.test", android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
+    private int mDefaultNightModeColorTemperature;
+
     private static Handler ensureHandler() {
         synchronized (sHandlerLock) {
             if (sHandler == null) {
@@ -98,6 +102,9 @@ public class BrightnessTrackerTest {
         mInjector = new TestInjector(ensureHandler());
 
         mTracker = new BrightnessTracker(InstrumentationRegistry.getContext(), mInjector);
+        mDefaultNightModeColorTemperature =
+                InstrumentationRegistry.getContext().getResources().getInteger(
+                R.integer.config_nightDisplayColorTemperatureDefault);
     }
 
     @Test
@@ -188,7 +195,7 @@ public class BrightnessTrackerTest {
         // System had no data so these should all be at defaults.
         assertEquals(Float.NaN, event.batteryLevel, 0.0);
         assertFalse(event.nightMode);
-        assertEquals(0, event.colorTemperature);
+        assertEquals(mDefaultNightModeColorTemperature, event.colorTemperature);
     }
 
     @Test
@@ -862,6 +869,18 @@ public class BrightnessTrackerTest {
         @Override
         public boolean isInteractive(Context context) {
             return mInteractive;
+        }
+
+        @Override
+        public int getColorTemperature(Context context, int userId) {
+          return mSecureIntSettings.getOrDefault(Settings.Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE,
+                  mDefaultNightModeColorTemperature);
+        }
+
+        @Override
+        public boolean isNightModeActive(Context context, int userId) {
+            return mSecureIntSettings.getOrDefault(Settings.Secure.NIGHT_DISPLAY_ACTIVATED,
+                    0) == 1;
         }
     }
 }
