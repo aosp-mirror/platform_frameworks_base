@@ -29,7 +29,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.hardware.fingerprint.FingerprintManager;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -189,12 +188,10 @@ public class AccessibilityServiceInfo implements Parcelable {
      * content and also the accessibility service will receive accessibility events from
      * them.
      * <p>
-     * <strong>Note:</strong> For accessibility services targeting API version
-     * {@link Build.VERSION_CODES#JELLY_BEAN} or higher this flag has to be explicitly
-     * set for the system to regard views that are not important for accessibility. For
-     * accessibility services targeting API version lower than
-     * {@link Build.VERSION_CODES#JELLY_BEAN} this flag is ignored and all views are
-     * regarded for accessibility purposes.
+     * <strong>Note:</strong> For accessibility services targeting Android 4.1 (API level 16) or
+     * higher, this flag has to be explicitly set for the system to regard views that are not
+     * important for accessibility. For accessibility services targeting Android 4.0.4 (API level
+     * 15) or lower, this flag is ignored and all views are regarded for accessibility purposes.
      * </p>
      * <p>
      * Usually views not important for accessibility are layout managers that do not
@@ -219,19 +216,19 @@ public class AccessibilityServiceInfo implements Parcelable {
      * flag does not guarantee that the device will not be in touch exploration
      * mode since there may be another enabled service that requested it.
      * <p>
-     * For accessibility services targeting API version higher than
-     * {@link Build.VERSION_CODES#JELLY_BEAN_MR1} that want to set
-     * this flag have to declare this capability in their meta-data by setting
-     * the attribute {@link android.R.attr#canRequestTouchExplorationMode
-     * canRequestTouchExplorationMode} to true, otherwise this flag will
+     * For accessibility services targeting Android 4.3 (API level 18) or higher
+     * that want to set this flag have to declare this capability in their
+     * meta-data by setting the attribute
+     * {@link android.R.attr#canRequestTouchExplorationMode
+     * canRequestTouchExplorationMode} to true. Otherwise, this flag will
      * be ignored. For how to declare the meta-data of a service refer to
      * {@value AccessibilityService#SERVICE_META_DATA}.
      * </p>
      * <p>
-     * Services targeting API version equal to or lower than
-     * {@link Build.VERSION_CODES#JELLY_BEAN_MR1} will work normally, i.e.
-     * the first time they are run, if this flag is specified, a dialog is
-     * shown to the user to confirm enabling explore by touch.
+     * Services targeting Android 4.2.2 (API level 17) or lower will work
+     * normally. In other words, the first time they are run, if this flag is
+     * specified, a dialog is shown to the user to confirm enabling explore by
+     * touch.
      * </p>
      * @see android.R.styleable#AccessibilityService_canRequestTouchExplorationMode
      */
@@ -387,10 +384,10 @@ public class AccessibilityServiceInfo implements Parcelable {
     public int feedbackType;
 
     /**
-     * The timeout after the most recent event of a given type before an
+     * The timeout, in milliseconds, after the most recent event of a given type before an
      * {@link AccessibilityService} is notified.
      * <p>
-     *   <strong>Can be dynamically set at runtime.</strong>.
+     *   <strong>Can be dynamically set at runtime.</strong>
      * </p>
      * <p>
      * <strong>Note:</strong> The event notification timeout is useful to avoid propagating
