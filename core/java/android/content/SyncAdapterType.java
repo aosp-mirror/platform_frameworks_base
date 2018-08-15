@@ -17,6 +17,7 @@
 package android.content;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.text.TextUtils;
 import android.os.Parcelable;
 import android.os.Parcel;
@@ -29,10 +30,15 @@ public class SyncAdapterType implements Parcelable {
     public final String authority;
     public final String accountType;
     public final boolean isKey;
+    @UnsupportedAppUsage
     private final boolean userVisible;
+    @UnsupportedAppUsage
     private final boolean supportsUploading;
+    @UnsupportedAppUsage
     private final boolean isAlwaysSyncable;
+    @UnsupportedAppUsage
     private final boolean allowParallelSyncs;
+    @UnsupportedAppUsage
     private final String settingsActivity;
     private final String packageName;
 
@@ -79,6 +85,7 @@ public class SyncAdapterType implements Parcelable {
         this.packageName = packageName;
     }
 
+    @UnsupportedAppUsage
     private SyncAdapterType(String authority, String accountType) {
         if (TextUtils.isEmpty(authority)) {
             throw new IllegalArgumentException("the authority must not be empty: " + authority);

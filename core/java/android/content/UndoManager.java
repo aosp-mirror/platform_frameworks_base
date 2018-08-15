@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ParcelableParcel;
@@ -86,6 +87,7 @@ public class UndoManager {
      */
     public static final int MERGE_MODE_ANY = 2;
 
+    @UnsupportedAppUsage
     public UndoOwner getOwner(String tag, Object data) {
         if (tag == null) {
             throw new NullPointerException("tag can't be null");
@@ -122,6 +124,7 @@ public class UndoManager {
      * Flatten the current undo state into a Parcel object, which can later be restored
      * with {@link #restoreInstanceState(android.os.Parcel, java.lang.ClassLoader)}.
      */
+    @UnsupportedAppUsage
     public void saveInstanceState(Parcel p) {
         if (mUpdateCount > 0) {
             throw new IllegalStateException("Can't save state while updating");
@@ -170,6 +173,7 @@ public class UndoManager {
      * associated with each {@link UndoOwner}, which requires separate calls to
      * {@link #getOwner(String, Object)} to re-associate the owner with its data.
      */
+    @UnsupportedAppUsage
     public void restoreInstanceState(Parcel p, ClassLoader loader) {
         if (mUpdateCount > 0) {
             throw new IllegalStateException("Can't save state while updating");
@@ -230,6 +234,7 @@ public class UndoManager {
      * @param count Number of undo states to pop.
      * @return Returns the number of undo states that were actually popped.
      */
+    @UnsupportedAppUsage
     public int undo(UndoOwner[] owners, int count) {
         if (mWorking != null) {
             throw new IllegalStateException("Can't be called during an update");
@@ -267,6 +272,7 @@ public class UndoManager {
      * @param count Number of undo states to pop.
      * @return Returns the number of undo states that were actually redone.
      */
+    @UnsupportedAppUsage
     public int redo(UndoOwner[] owners, int count) {
         if (mWorking != null) {
             throw new IllegalStateException("Can't be called during an update");
@@ -295,10 +301,12 @@ public class UndoManager {
      * useful for editors to know whether they should be generating new undo state
      * when they see edit operations happening.
      */
+    @UnsupportedAppUsage
     public boolean isInUndo() {
         return mInUndo;
     }
 
+    @UnsupportedAppUsage
     public int forgetUndos(UndoOwner[] owners, int count) {
         if (count < 0) {
             count = mUndos.size();
@@ -320,6 +328,7 @@ public class UndoManager {
         return removed;
     }
 
+    @UnsupportedAppUsage
     public int forgetRedos(UndoOwner[] owners, int count) {
         if (count < 0) {
             count = mRedos.size();
@@ -346,6 +355,7 @@ public class UndoManager {
      * @param owners If non-null, only those states containing an operation with one of
      * the owners supplied here will be counted.
      */
+    @UnsupportedAppUsage
     public int countUndos(UndoOwner[] owners) {
         if (owners == null) {
             return mUndos.size();
@@ -365,6 +375,7 @@ public class UndoManager {
      * @param owners If non-null, only those states containing an operation with one of
      * the owners supplied here will be counted.
      */
+    @UnsupportedAppUsage
     public int countRedos(UndoOwner[] owners) {
         if (owners == null) {
             return mRedos.size();
@@ -404,6 +415,7 @@ public class UndoManager {
      * they are all matched by a later call to {@link #endUpdate}.
      * @param label Optional user-visible label for this new undo state.
      */
+    @UnsupportedAppUsage
     public void beginUpdate(CharSequence label) {
         if (mInUndo) {
             throw new IllegalStateException("Can't being update while performing undo/redo");
@@ -436,6 +448,7 @@ public class UndoManager {
      * Forcibly set a new for the new undo state being built within a {@link #beginUpdate}.
      * Any existing label will be replaced with this one.
      */
+    @UnsupportedAppUsage
     public void setUndoLabel(CharSequence label) {
         if (mWorking == null) {
             throw new IllegalStateException("Must be called during an update");
@@ -510,6 +523,7 @@ public class UndoManager {
      * @param mergeMode May be either {@link #MERGE_MODE_NONE}, {@link #MERGE_MODE_UNIQUE},
      * or {@link #MERGE_MODE_ANY}.
      */
+    @UnsupportedAppUsage
     public <T extends UndoOperation> T getLastOperation(Class<T> clazz, UndoOwner owner,
             int mergeMode) {
         if (mWorking == null) {
@@ -539,6 +553,7 @@ public class UndoManager {
      * @param mergeMode May be either {@link #MERGE_MODE_NONE}, {@link #MERGE_MODE_UNIQUE},
      * or {@link #MERGE_MODE_ANY}.
      */
+    @UnsupportedAppUsage
     public void addOperation(UndoOperation<?> op, int mergeMode) {
         if (mWorking == null) {
             throw new IllegalStateException("Must be called during an update");
@@ -565,6 +580,7 @@ public class UndoManager {
      * Finish the creation of an undo state, matching a previous call to
      * {@link #beginUpdate}.
      */
+    @UnsupportedAppUsage
     public void endUpdate() {
         if (mWorking == null) {
             throw new IllegalStateException("Must be called during an update");
@@ -613,6 +629,7 @@ public class UndoManager {
      * @return Returns an integer identifier for the committed undo state, which
      * can later be used to try to uncommit the state to perform further edits on it.
      */
+    @UnsupportedAppUsage
     public int commitState(UndoOwner owner) {
         if (mWorking != null && mWorking.hasData()) {
             if (owner == null || mWorking.hasOperation(owner)) {

@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -35,6 +36,7 @@ public class LauncherActivityInfo {
 
     private final PackageManager mPm;
 
+    @UnsupportedAppUsage
     private ActivityInfo mActivityInfo;
     private ComponentName mComponentName;
     private UserHandle mUser;

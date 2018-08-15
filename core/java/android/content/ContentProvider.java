@@ -25,6 +25,7 @@ import static android.os.Trace.TRACE_TAG_DATABASE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.AppOpsManager;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
@@ -107,15 +108,21 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *       MockContentProvider.
      */
 
+    @UnsupportedAppUsage
     private Context mContext = null;
     private int mMyUid;
 
     // Since most Providers have only one authority, we keep both a String and a String[] to improve
     // performance.
+    @UnsupportedAppUsage
     private String mAuthority;
+    @UnsupportedAppUsage
     private String[] mAuthorities;
+    @UnsupportedAppUsage
     private String mReadPermission;
+    @UnsupportedAppUsage
     private String mWritePermission;
+    @UnsupportedAppUsage
     private PathPermission[] mPathPermissions;
     private boolean mExported;
     private boolean mNoPerms;
@@ -156,6 +163,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * in the test, which is available via {@link #getPathPermissions()}.
      * @hide
      */
+    @UnsupportedAppUsage
     public ContentProvider(
             Context context,
             String readPermission,
@@ -180,6 +188,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * ContentProvider instance.  Otherwise returns {@code null}.
      * @hide
      */
+    @UnsupportedAppUsage
     public static ContentProvider coerceToLocalContentProvider(
             IContentProvider abstractInterface) {
         if (abstractInterface instanceof Transport) {
@@ -887,6 +896,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public final void setAppOps(int readOp, int writeOp) {
         if (!mNoPerms) {
             mTransport.mReadOp = readOp;
@@ -1906,6 +1916,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @return the Binder object for this provider
      * @hide
      */
+    @UnsupportedAppUsage
     public IContentProvider getIContentProvider() {
         return mTransport;
     }
@@ -1915,6 +1926,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * when directly instantiating the provider for testing.
      * @hide
      */
+    @UnsupportedAppUsage
     public void attachInfoForTesting(Context context, ProviderInfo info) {
         attachInfo(context, info, true);
     }
@@ -2134,6 +2146,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static Uri maybeAddUserId(Uri uri, int userId) {
         if (uri == null) return null;
         if (userId != UserHandle.USER_CURRENT

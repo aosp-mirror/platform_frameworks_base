@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
@@ -127,6 +128,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int fullBackupContent = 0;
 
     /**
@@ -704,8 +706,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public UUID storageUuid;
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public String scanSourceDir;
     /** {@hide} */
+    @UnsupportedAppUsage
     public String scanPublicSourceDir;
 
     /**
@@ -771,6 +775,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public String[] resourceDirs;
 
     /**
@@ -847,6 +852,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public String secondaryNativeLibraryDir;
 
     /**
@@ -858,6 +864,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public String nativeLibraryRootDir;
 
     /**
@@ -877,6 +884,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public String primaryCpuAbi;
 
     /**
@@ -886,6 +894,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public String secondaryCpuAbi;
 
     /**
@@ -925,6 +934,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public int versionCode;
 
     /**
@@ -960,12 +970,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * For convenient access to the current enabled setting of this app.
      * @hide
      */
+    @UnsupportedAppUsage
     public int enabledSetting = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 
     /**
      * For convenient access to package's install location.
      * @hide
      */
+    @UnsupportedAppUsage
     public int installLocation = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
 
     /**
@@ -1374,6 +1386,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * @return true if "supportsRtl" has been set to true in the AndroidManifest
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean hasRtlSupport() {
         return (flags & FLAG_SUPPORTS_RTL) == FLAG_SUPPORTS_RTL;
     }
@@ -1402,7 +1415,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             return sCollator.compare(sa.toString(), sb.toString());
         }
 
+        @UnsupportedAppUsage
         private final Collator   sCollator = Collator.getInstance();
+        @UnsupportedAppUsage
         private PackageManager   mPM;
     }
 
@@ -1641,6 +1656,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * 
      * @hide
      */
+    @UnsupportedAppUsage
     public void disableCompatibilityMode() {
         flags |= (FLAG_SUPPORTS_LARGE_SCREENS | FLAG_SUPPORTS_NORMAL_SCREENS |
                 FLAG_SUPPORTS_SMALL_SCREENS | FLAG_RESIZEABLE_FOR_SCREENS |
@@ -1765,6 +1781,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         return pm.getDefaultActivityIcon();
     }
     
+    @UnsupportedAppUsage
     private boolean isPackageUnavailable(PackageManager pm) {
         try {
             return pm.getPackageInfo(packageName, 0) == null;
@@ -1800,6 +1817,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public boolean isForwardLocked() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0;
     }
@@ -1900,10 +1918,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** {@hide} */ public void setBaseResourcePath(String baseResourcePath) { publicSourceDir = baseResourcePath; }
     /** {@hide} */ public void setSplitResourcePaths(String[] splitResourcePaths) { splitPublicSourceDirs = splitResourcePaths; }
 
-    /** {@hide} */ public String getCodePath() { return scanSourceDir; }
+    /** {@hide} */
+    @UnsupportedAppUsage
+    public String getCodePath() { return scanSourceDir; }
     /** {@hide} */ public String getBaseCodePath() { return sourceDir; }
     /** {@hide} */ public String[] getSplitCodePaths() { return splitSourceDirs; }
     /** {@hide} */ public String getResourcePath() { return scanPublicSourceDir; }
-    /** {@hide} */ public String getBaseResourcePath() { return publicSourceDir; }
+    /** {@hide} */
+    @UnsupportedAppUsage
+    public String getBaseResourcePath() { return publicSourceDir; }
     /** {@hide} */ public String[] getSplitResourcePaths() { return splitPublicSourceDirs; }
 }

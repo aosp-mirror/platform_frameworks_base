@@ -16,6 +16,7 @@
 package android.content.res;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
@@ -125,6 +126,7 @@ public final class ApkAssets {
         mStringBlock = new StringBlock(nativeGetStringBlock(mNativePtr), true /*useSparse*/);
     }
 
+    @UnsupportedAppUsage
     public @NonNull String getAssetPath() {
         synchronized (this) {
             return nativeGetAssetPath(mNativePtr);

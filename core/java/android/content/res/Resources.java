@@ -39,6 +39,7 @@ import android.annotation.RawRes;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.XmlRes;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
@@ -102,22 +103,28 @@ public class Resources {
     private static final Object sSync = new Object();
 
     // Used by BridgeResources in layoutlib
+    @UnsupportedAppUsage
     static Resources mSystem = null;
 
+    @UnsupportedAppUsage
     private ResourcesImpl mResourcesImpl;
 
     // Pool of TypedArrays targeted to this Resources object.
+    @UnsupportedAppUsage
     final SynchronizedPool<TypedArray> mTypedArrayPool = new SynchronizedPool<>(5);
 
     /** Used to inflate drawable objects from XML. */
+    @UnsupportedAppUsage
     private DrawableInflater mDrawableInflater;
 
     /** Lock object used to protect access to {@link #mTmpValue}. */
     private final Object mTmpValueLock = new Object();
 
     /** Single-item pool used to minimize TypedValue allocations. */
+    @UnsupportedAppUsage
     private TypedValue mTmpValue = new TypedValue();
 
+    @UnsupportedAppUsage
     final ClassLoader mClassLoader;
 
     /**
@@ -149,6 +156,7 @@ public class Resources {
      * @return A theme resource identifier
      * @hide
      */
+    @UnsupportedAppUsage
     public static int selectDefaultTheme(int curTheme, int targetSdkVersion) {
         return selectSystemTheme(curTheme, targetSdkVersion,
                 com.android.internal.R.style.Theme,
@@ -236,6 +244,7 @@ public class Resources {
      *                    class loader
      * @hide
      */
+    @UnsupportedAppUsage
     public Resources(@Nullable ClassLoader classLoader) {
         mClassLoader = classLoader == null ? ClassLoader.getSystemClassLoader() : classLoader;
     }
@@ -243,6 +252,7 @@ public class Resources {
     /**
      * Only for creating the System resources.
      */
+    @UnsupportedAppUsage
     private Resources() {
         this(null);
 
@@ -261,6 +271,7 @@ public class Resources {
      * and updates all Theme references to new implementations as well.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setImpl(ResourcesImpl impl) {
         if (impl == mResourcesImpl) {
             return;
@@ -284,6 +295,7 @@ public class Resources {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public ResourcesImpl getImpl() {
         return mResourcesImpl;
     }
@@ -299,6 +311,7 @@ public class Resources {
      * @return the inflater used to create drawable objects
      * @hide Pending API finalization.
      */
+    @UnsupportedAppUsage
     public final DrawableInflater getDrawableInflater() {
         if (mDrawableInflater == null) {
             mDrawableInflater = new DrawableInflater(this, mClassLoader);
@@ -891,6 +904,7 @@ public class Resources {
     }
 
     @NonNull
+    @UnsupportedAppUsage
     Drawable loadDrawable(@NonNull TypedValue value, int id, int density, @Nullable Theme theme)
             throws NotFoundException {
         return mResourcesImpl.loadDrawable(this, value, id, density, theme);
@@ -1115,6 +1129,7 @@ public class Resources {
      *         not exist or is not a floating-point value.
      * @hide Pending API council approval.
      */
+    @UnsupportedAppUsage
     public float getFloat(int id) {
         final TypedValue value = obtainTempTypedValue();
         try {
@@ -1389,6 +1404,7 @@ public class Resources {
      * retrieve XML attributes with style and theme information applied.
      */
     public final class Theme {
+        @UnsupportedAppUsage
         private ResourcesImpl.ThemeImpl mThemeImpl;
 
         private Theme() {
@@ -1552,6 +1568,7 @@ public class Resources {
          * @hide
          */
         @NonNull
+        @UnsupportedAppUsage
         public TypedArray resolveAttributes(@NonNull int[] values, @NonNull int[] attrs) {
             return mThemeImpl.resolveAttributes(this, values, attrs);
         }
@@ -1841,6 +1858,7 @@ public class Resources {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static void updateSystemConfiguration(Configuration config, DisplayMetrics metrics,
             CompatibilityInfo compat) {
         if (mSystem != null) {
@@ -1861,6 +1879,7 @@ public class Resources {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public DisplayAdjustments getDisplayAdjustments() {
         return mResourcesImpl.getDisplayAdjustments();
     }
@@ -1887,6 +1906,7 @@ public class Resources {
      * @return compatibility info.
      * @hide
      */
+    @UnsupportedAppUsage
     public CompatibilityInfo getCompatibilityInfo() {
         return mResourcesImpl.getCompatibilityInfo();
     }
@@ -1896,6 +1916,7 @@ public class Resources {
      * @hide
      */
     @VisibleForTesting
+    @UnsupportedAppUsage
     public void setCompatibilityInfo(CompatibilityInfo ci) {
         if (ci != null) {
             mResourcesImpl.updateConfiguration(null, null, ci);
@@ -2133,6 +2154,7 @@ public class Resources {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public LongSparseArray<ConstantState> getPreloadedDrawables() {
         return mResourcesImpl.getPreloadedDrawables();
     }
@@ -2146,6 +2168,7 @@ public class Resources {
      * @throws NotFoundException if the file could not be loaded
      */
     @NonNull
+    @UnsupportedAppUsage
     XmlResourceParser loadXmlResourceParser(@AnyRes int id, @NonNull String type)
             throws NotFoundException {
         final TypedValue value = obtainTempTypedValue();
@@ -2174,6 +2197,7 @@ public class Resources {
      * @throws NotFoundException if the file could not be loaded
      */
     @NonNull
+    @UnsupportedAppUsage
     XmlResourceParser loadXmlResourceParser(String file, int id, int assetCookie,
                                             String type) throws NotFoundException {
         return mResourcesImpl.loadXmlResourceParser(file, id, assetCookie, type);
