@@ -18,6 +18,7 @@ package android.net;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -50,6 +51,7 @@ public final class MacAddress implements Parcelable {
      * The MacAddress zero MAC address.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final MacAddress ALL_ZEROS_ADDRESS = new MacAddress(0);
 
     /** @hide */

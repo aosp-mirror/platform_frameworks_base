@@ -25,6 +25,7 @@ import static android.system.OsConstants.RT_SCOPE_LINK;
 import static android.system.OsConstants.RT_SCOPE_SITE;
 import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Pair;
@@ -54,11 +55,13 @@ public class LinkAddress implements Parcelable {
     /**
      * IPv4 or IPv6 address.
      */
+    @UnsupportedAppUsage
     private InetAddress address;
 
     /**
      * Prefix length.
      */
+    @UnsupportedAppUsage
     private int prefixLength;
 
     /**
@@ -112,6 +115,7 @@ public class LinkAddress implements Parcelable {
      * @return true if the address is IPv6.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isIPv6() {
         return address instanceof Inet6Address;
     }
@@ -163,6 +167,7 @@ public class LinkAddress implements Parcelable {
      * @param prefixLength The prefix length.
      * @hide
      */
+    @UnsupportedAppUsage
     public LinkAddress(InetAddress address, int prefixLength) {
         this(address, prefixLength, 0, 0);
         this.scope = scopeForUnicastAddress(address);
@@ -185,6 +190,7 @@ public class LinkAddress implements Parcelable {
      * @param string The string to parse.
      * @hide
      */
+    @UnsupportedAppUsage
     public LinkAddress(String address) {
         this(address, 0, 0);
         this.scope = scopeForUnicastAddress(this.address);
@@ -255,6 +261,7 @@ public class LinkAddress implements Parcelable {
      * otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isSameAddressAs(LinkAddress other) {
         return address.equals(other.address) && prefixLength == other.prefixLength;
     }
@@ -278,6 +285,7 @@ public class LinkAddress implements Parcelable {
      * TODO: Delete all callers and remove in favour of getPrefixLength().
      * @hide
      */
+    @UnsupportedAppUsage
     public int getNetworkPrefixLength() {
         return getPrefixLength();
     }
