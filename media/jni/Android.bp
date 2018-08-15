@@ -101,7 +101,6 @@ cc_library_shared {
         "libandroid_runtime",  // ???
         "libaudioclient",  // for use of AudioTrack, AudioSystem. to be removed
         "libbinder",
-        "libdrmframework",  // for FileSource, MediaHTTP
         "libgui",  // for VideoFrameScheduler
         "libhidlallocatorutils",
         "libhidlbase",  // VNDK???
