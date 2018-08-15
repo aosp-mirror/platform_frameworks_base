@@ -745,6 +745,22 @@
     <string name="permgrouprequest_sensors">Allow
         &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access sensor data about your vital signs?</string>
 
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgrouplab_aural">Music</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgroupdesc_aural">access your music</string>
+    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
+    <string name="permgrouprequest_aural">Allow
+        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your music?</string>
+
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgrouplab_visual">Photos &amp; Videos</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgroupdesc_visual">access your photos &amp; videos</string>
+    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
+    <string name="permgrouprequest_visual">Allow
+        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your photos &amp; videos?</string>
+
     <!-- Title for the capability of an accessibility service to retrieve window content. -->
     <string name="capability_title_canRetrieveWindowContent">Retrieve window content</string>
     <!-- Description for the capability of an accessibility service to retrieve window content. -->
@@ -1348,6 +1364,38 @@
     <string name="permlab_useFingerprint">use fingerprint hardware</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_useFingerprint">Allows the app to use fingerprint hardware for authentication</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_audioRead">read your music collection</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_audioRead">Allows the app to read your music collection.</string>
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_audioWrite">modify your music collection</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_audioWrite">Allows the app to modify your music collection.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_videoRead">read your video collection</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_videoRead">Allows the app to read your video collection.</string>
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_videoWrite">modify your video collection</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_videoWrite">Allows the app to modify your video collection.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_imagesRead">read your photo collection</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_imagesRead">Allows the app to read your photo collection.</string>
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_imagesWrite">modify your photo collection</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_imagesWrite">Allows the app to modify your photo collection.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_mediaLocation">read locations from your media collection</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_mediaLocation">Allows the app to read locations from your media collection.</string>
 
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_partial">Partial fingerprint detected. Please try again.</string>
@@ -4936,10 +4984,29 @@
          by an autofill service, and the service does knows what the activity represents, and it represents 3 types of
          data (for example, username, password and credit card info) [CHAR LIMIT=NONE] -->
     <string name="autofill_save_title_with_3types">Save <xliff:g id="type" example="Username">%1$s</xliff:g>, <xliff:g id="type" example="Password">%2$s</xliff:g>, and <xliff:g id="type" example="Credit Card">%3$s</xliff:g> to &lt;b><xliff:g id="label" example="MyPass">%4$s</xliff:g>&lt;/b>?</string>
+
+    <!-- Title for the autofill update dialog shown when the the contents of the activity can be updated
+         by an autofill service, but the service does not know what the activity represents [CHAR LIMIT=NONE] -->
+    <string name="autofill_update_title">Update to &lt;b><xliff:g id="label" example="MyPass">%1$s</xliff:g>&lt;/b>?</string>
+    <!-- Title for the autofill update dialog shown when the the contents of the activity can be updated
+         by an autofill service, and the service does knows what the activity represents (for example, credit card info) [CHAR LIMIT=NONE] -->
+    <string name="autofill_update_title_with_type">Update <xliff:g id="type" example="Credit Card">%1$s</xliff:g> to &lt;b><xliff:g id="label" example="MyPass">%2$s</xliff:g>&lt;/b>?</string>
+    <!-- Title for the autofill update dialog shown when the the contents of the activity can be updated
+         by an autofill service, and the service does knows what the activity represents, and it represents 2 types of
+         data (for example, password and credit card info) [CHAR LIMIT=NONE] -->
+    <string name="autofill_update_title_with_2types">Update <xliff:g id="type" example="Password">%1$s</xliff:g> and <xliff:g id="type" example="Credit Card">%2$s</xliff:g> to &lt;b><xliff:g id="label" example="MyPass">%3$s</xliff:g>&lt;/b>?</string>
+    <!-- Title for the autofill update dialog shown when the the contents of the activity can be updated
+         by an autofill service, and the service does knows what the activity represents, and it represents 3 types of
+         data (for example, username, password and credit card info) [CHAR LIMIT=NONE] -->
+    <string name="autofill_update_title_with_3types">Update <xliff:g id="type" example="Username">%1$s</xliff:g>, <xliff:g id="type" example="Password">%2$s</xliff:g>, and <xliff:g id="type" example="Credit Card">%3$s</xliff:g> to &lt;b><xliff:g id="label" example="MyPass">%4$s</xliff:g>&lt;/b>?</string>
+
+
     <!-- Label for the autofill save button [CHAR LIMIT=NONE] -->
     <string name="autofill_save_yes">Save</string>
     <!-- Label for the autofill cancel button [CHAR LIMIT=NONE] -->
     <string name="autofill_save_no">No thanks</string>
+    <!-- Label for the autofill update button [CHAR LIMIT=NONE] -->
+    <string name="autofill_update_yes">Update</string>
 
     <!-- Label for the type of data being saved for autofill when it represent user credentials with a password [CHAR LIMIT=NONE] -->
     <string name="autofill_save_type_password">password</string>

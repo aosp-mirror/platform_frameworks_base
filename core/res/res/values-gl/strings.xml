@@ -130,7 +130,7 @@
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Chamadas wifi de %s"</item>
+    <item msgid="4397097370387921767">"Chamadas por wifi de %s"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivado"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wifi preferida"</string>

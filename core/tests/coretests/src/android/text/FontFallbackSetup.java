@@ -19,8 +19,9 @@ package android.text;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.graphics.FontFamily;
 import android.graphics.Typeface;
+import android.graphics.fonts.FontFamily;
+import android.graphics.fonts.SystemFonts;
 import android.support.test.InstrumentationRegistry;
 import android.util.ArrayMap;
 
@@ -73,7 +74,9 @@ public class FontFallbackSetup implements AutoCloseable {
         }
 
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        Typeface.buildSystemFallback(testFontsXml, mTestFontsDir, mFontMap, fallbackMap);
+        final FontConfig.Alias[] aliases = SystemFonts.buildSystemFallback(testFontsXml,
+                mTestFontsDir, fallbackMap);
+        Typeface.initSystemDefaultTypefaces(mFontMap, fallbackMap, aliases);
     }
 
     @NonNull

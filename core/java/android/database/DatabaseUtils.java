@@ -17,6 +17,7 @@
 package android.database;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
@@ -321,6 +322,7 @@ public class DatabaseUtils {
      * @return object value type
      * @hide
      */
+    @UnsupportedAppUsage
     public static int getTypeOfObject(Object obj) {
         if (obj == null) {
             return Cursor.FIELD_TYPE_NULL;
@@ -849,6 +851,7 @@ public class DatabaseUtils {
      * the requested row.
      * @hide
      */
+    @UnsupportedAppUsage
     public static int cursorPickFillWindowStartPosition(
             int cursorPosition, int cursorWindowCapacity) {
         return Math.max(cursorPosition - cursorWindowCapacity / 3, 0);

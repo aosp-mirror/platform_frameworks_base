@@ -7860,8 +7860,8 @@ public class Notification implements Parcelable
             final int N = mActionsToShowInCompact == null
                     ? 0
                     : Math.min(mActionsToShowInCompact.length, MAX_MEDIA_BUTTONS_IN_COMPACT);
+            view.removeAllViews(com.android.internal.R.id.media_actions);
             if (N > 0) {
-                view.removeAllViews(com.android.internal.R.id.media_actions);
                 for (int i = 0; i < N; i++) {
                     if (i >= numActions) {
                         throw new IllegalArgumentException(String.format(

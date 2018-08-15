@@ -63,7 +63,6 @@ import com.android.internal.R;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.UiServiceTestCase;
-import android.util.Slog;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -615,7 +614,37 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testReadXml() throws Exception {
+    public void testReadXmlRestore() throws Exception {
+        setupZenConfig();
+
+        // one enabled automatic rule
+        ArrayMap<String, ZenModeConfig.ZenRule> automaticRules = new ArrayMap<>();
+        ZenModeConfig.ZenRule customRule = new ZenModeConfig.ZenRule();
+        final ScheduleInfo customRuleInfo = new ScheduleInfo();
+        customRule.enabled = true;
+        customRule.creationTime = 0;
+        customRule.id = "customRule";
+        customRule.name = "Custom Rule";
+        customRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        customRule.component = new ComponentName("test", "test");
+        customRule.conditionId = ZenModeConfig.toScheduleConditionId(customRuleInfo);
+        automaticRules.put("customRule", customRule);
+        mZenModeHelperSpy.mConfig.automaticRules = automaticRules;
+
+        ZenModeConfig original = mZenModeHelperSpy.mConfig.copy();
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(false, null);
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray())), null);
+        parser.nextTag();
+        mZenModeHelperSpy.readXml(parser, true);
+        assertEquals(original.hashCode(), mZenModeHelperSpy.mConfig.hashCode());
+        assertEquals(original, mZenModeHelperSpy.mConfig);
+    }
+
+    @Test
+    public void testReadXmlRulesNotOverriden() throws Exception {
         setupZenConfig();
 
         // automatic zen rule is enabled on upgrade so rules should not be overriden to default
@@ -628,8 +657,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         customRule.conditionId = ZenModeConfig.toScheduleConditionId(weeknights);
         enabledAutoRule.put("customRule", customRule);
         mZenModeHelperSpy.mConfig.automaticRules = enabledAutoRule;
-
-        ZenModeConfig expected = mZenModeHelperSpy.mConfig.copy();
 
         // set previous version
         ByteArrayOutputStream baos = writeXmlAndPurge(false, 5);
@@ -783,17 +810,17 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     public void testReadXmlAllDisabledRulesResetDefaultRules() throws Exception {
         setupZenConfig();
 
-        // all automatic zen rules are diabled on upgrade (and default rules don't already exist)
+        // all automatic zen rules are disabled on upgrade (and default rules don't already exist)
         // so rules should be overriden by default rules
-        ArrayMap<String, ZenModeConfig.ZenRule> enabledAutoRule = new ArrayMap<>();
+        ArrayMap<String, ZenModeConfig.ZenRule> disabledAutoRule = new ArrayMap<>();
         ZenModeConfig.ZenRule customRule = new ZenModeConfig.ZenRule();
         final ScheduleInfo weeknights = new ScheduleInfo();
         customRule.enabled = false;
         customRule.name = "Custom Rule";
         customRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         customRule.conditionId = ZenModeConfig.toScheduleConditionId(weeknights);
-        enabledAutoRule.put("customRule", customRule);
-        mZenModeHelperSpy.mConfig.automaticRules = enabledAutoRule;
+        disabledAutoRule.put("customRule", customRule);
+        mZenModeHelperSpy.mConfig.automaticRules = disabledAutoRule;
 
         // set previous version
         ByteArrayOutputStream baos = writeXmlAndPurge(false, 5);
@@ -927,12 +954,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.mConfig.allowEvents = true;
         mZenModeHelperSpy.mConfig.allowRepeatCallers= true;
         mZenModeHelperSpy.mConfig.suppressedVisualEffects = SUPPRESSED_EFFECT_BADGE;
-        mZenModeHelperSpy.mConfig.manualRule = new ZenModeConfig.ZenRule();
-        mZenModeHelperSpy.mConfig.manualRule.zenMode =
-                Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConfig.manualRule.component = new ComponentName("a", "a");
-        mZenModeHelperSpy.mConfig.manualRule.enabled = true;
-        mZenModeHelperSpy.mConfig.manualRule.snoozing = true;
+        mZenModeHelperSpy.mConfig.manualRule = null;
     }
 
     private void setupZenConfigMaintained() {

@@ -48,12 +48,12 @@ message WindowManagerServiceDumpProto {
     optional AppTransitionProto app_transition = 9;
 }
 
-/* represents DisplayContent */
+/* represents RootWindowContainer object */
 message RootWindowContainerProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional WindowContainerProto window_container = 1;
-    repeated DisplayProto displays = 2;
+    repeated DisplayContentProto displays = 2;
     /* window references in top down z order */
     repeated IdentifierProto windows = 3;
 }
@@ -139,8 +139,8 @@ message AppTransitionProto {
     optional .android.view.TransitionTypeEnum last_used_app_transition = 2;
 }
 
-/* represents DisplayContent */
-message DisplayProto {
+/* represents DisplayContent object */
+message DisplayContentProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional WindowContainerProto window_container = 1;
@@ -261,7 +261,9 @@ message WindowStateProto {
 
     optional WindowContainerProto window_container = 1;
     optional IdentifierProto identifier = 2;
+    // Unique identifier of a DisplayContent stack.
     optional int32 display_id = 3;
+    // Unique identifier for the task stack.
     optional int32 stack_id = 4;
     optional .android.view.WindowLayoutParamsProto attributes = 5;
     optional .android.graphics.RectProto given_content_insets = 6;
@@ -306,6 +308,8 @@ message IdentifierProto {
 
     optional int32 hash_code = 1;
     optional int32 user_id = 2;
+    // Either a component name/string (eg: "com.android.settings/.FallbackHome")
+    // or a window title ("NavigationBar").
     optional string title = 3 [ (.android.privacy).dest = DEST_EXPLICIT ];
 }
 

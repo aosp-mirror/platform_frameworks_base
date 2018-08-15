@@ -16,16 +16,16 @@
 
 package android.view;
 
-import static android.app.RemoteAnimationTargetProto.CLIP_RECT;
-import static android.app.RemoteAnimationTargetProto.CONTENT_INSETS;
-import static android.app.RemoteAnimationTargetProto.IS_TRANSLUCENT;
-import static android.app.RemoteAnimationTargetProto.LEASH;
-import static android.app.RemoteAnimationTargetProto.MODE;
-import static android.app.RemoteAnimationTargetProto.POSITION;
-import static android.app.RemoteAnimationTargetProto.PREFIX_ORDER_INDEX;
-import static android.app.RemoteAnimationTargetProto.SOURCE_CONTAINER_BOUNDS;
-import static android.app.RemoteAnimationTargetProto.TASK_ID;
-import static android.app.RemoteAnimationTargetProto.WINDOW_CONFIGURATION;
+import static android.view.RemoteAnimationTargetProto.CLIP_RECT;
+import static android.view.RemoteAnimationTargetProto.CONTENT_INSETS;
+import static android.view.RemoteAnimationTargetProto.IS_TRANSLUCENT;
+import static android.view.RemoteAnimationTargetProto.LEASH;
+import static android.view.RemoteAnimationTargetProto.MODE;
+import static android.view.RemoteAnimationTargetProto.POSITION;
+import static android.view.RemoteAnimationTargetProto.PREFIX_ORDER_INDEX;
+import static android.view.RemoteAnimationTargetProto.SOURCE_CONTAINER_BOUNDS;
+import static android.view.RemoteAnimationTargetProto.TASK_ID;
+import static android.view.RemoteAnimationTargetProto.WINDOW_CONFIGURATION;
 
 import android.annotation.IntDef;
 import android.app.WindowConfiguration;

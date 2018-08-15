@@ -781,7 +781,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
          * @param firstVisibleItem the index of the first visible cell (ignore if
          *        visibleItemCount == 0)
          * @param visibleItemCount the number of visible cells
-         * @param totalItemCount the number of items in the list adaptor
+         * @param totalItemCount the number of items in the list adapter
          */
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
                 int totalItemCount);

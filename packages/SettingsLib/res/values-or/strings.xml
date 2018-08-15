@@ -449,7 +449,6 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g> ବେଳେ"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"ଅବଧି"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ପ୍ରତ୍ୟେକ ଥର ପଚାରନ୍ତୁ"</string>
-    <!-- no translation found for zen_mode_forever (2704305038191592967) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="2704305038191592967">"ଆପଣ ବନ୍ଦ ନକରିବା ପର୍ଯ୍ୟନ୍ତ DND ଅନ୍‌ ରହିବ"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"ଏହିକ୍ଷଣି"</string>
 </resources>

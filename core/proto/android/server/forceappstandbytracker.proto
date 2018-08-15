@@ -71,7 +71,7 @@ message ForceAppStandbyTrackerProto {
     message ExemptedPackage {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        optional int32 userId = 1;
+        optional int32 user_id = 1;
         optional string package_name = 2;
     }
 

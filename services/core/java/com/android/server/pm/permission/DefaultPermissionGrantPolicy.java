@@ -45,6 +45,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.print.PrintManager;
@@ -169,10 +170,31 @@ public final class DefaultPermissionGrantPolicy {
         SENSORS_PERMISSIONS.add(Manifest.permission.BODY_SENSORS);
     }
 
+    @Deprecated
     private static final Set<String> STORAGE_PERMISSIONS = new ArraySet<>();
     static {
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+    }
+
+    private static final Set<String> MEDIA_AURAL_PERMISSIONS = new ArraySet<>();
+    static {
+        // STOPSHIP(b/112545973): remove once feature enabled by default
+        if (SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+            MEDIA_AURAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
+            MEDIA_AURAL_PERMISSIONS.add(Manifest.permission.WRITE_MEDIA_AUDIO);
+        }
+    }
+
+    private static final Set<String> MEDIA_VISUAL_PERMISSIONS = new ArraySet<>();
+    static {
+        // STOPSHIP(b/112545973): remove once feature enabled by default
+        if (SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
+            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.WRITE_MEDIA_IMAGES);
+            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
+            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.WRITE_MEDIA_VIDEO);
+        }
     }
 
     private static final int MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS = 1;
@@ -404,6 +426,8 @@ public final class DefaultPermissionGrantPolicy {
                 MediaStore.AUTHORITY, userId);
         if (mediaStorePackage != null) {
             grantRuntimePermissions(mediaStorePackage, STORAGE_PERMISSIONS, true, userId);
+            grantRuntimePermissions(mediaStorePackage, MEDIA_AURAL_PERMISSIONS, true, userId);
+            grantRuntimePermissions(mediaStorePackage, MEDIA_VISUAL_PERMISSIONS, true, userId);
             grantRuntimePermissions(mediaStorePackage, PHONE_PERMISSIONS, true, userId);
         }
 
@@ -615,6 +639,7 @@ public final class DefaultPermissionGrantPolicy {
         if (galleryPackage != null
                 && doesPackageSupportRuntimePermissions(galleryPackage)) {
             grantRuntimePermissions(galleryPackage, STORAGE_PERMISSIONS, userId);
+            grantRuntimePermissions(galleryPackage, MEDIA_VISUAL_PERMISSIONS, userId);
         }
 
         // Email
@@ -724,6 +749,7 @@ public final class DefaultPermissionGrantPolicy {
         if (musicPackage != null
                 && doesPackageSupportRuntimePermissions(musicPackage)) {
             grantRuntimePermissions(musicPackage, STORAGE_PERMISSIONS, userId);
+            grantRuntimePermissions(musicPackage, MEDIA_AURAL_PERMISSIONS, userId);
         }
 
         // Home

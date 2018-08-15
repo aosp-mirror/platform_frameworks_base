@@ -124,7 +124,7 @@ static bool TryDumpFile(IAaptContext* context, const std::string& file_path,
   std::string err;
   std::unique_ptr<io::ZipFileCollection> zip = io::ZipFileCollection::Create(file_path, &err);
   if (zip) {
-    ResourceTable table;
+    ResourceTable table(/** validate_resources **/ false);
     bool proto = false;
     if (io::IFile* file = zip->FindFile("resources.pb")) {
       proto = true;

@@ -487,7 +487,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     public void removeNotification(String key, NotificationListenerService.RankingMap ranking) {
         boolean deferRemoval = false;
         abortExistingInflation(key);
-        if (mHeadsUpManager.isHeadsUp(key)) {
+        if (mHeadsUpManager.contains(key)) {
             // A cancel() in response to a remote input shouldn't be delayed, as it makes the
             // sending look longer than it takes.
             // Also we should not defer the removal if reordering isn't allowed since otherwise
@@ -1060,7 +1060,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 // We don't want this to be interrupting anymore, lets remove it
                 mHeadsUpManager.removeNotification(key, false /* ignoreEarliestRemovalTime */);
             } else {
-                mHeadsUpManager.updateNotification(entry, alertAgain);
+                mHeadsUpManager.updateNotification(entry.key, alertAgain);
             }
         } else if (shouldPeek && alertAgain) {
             // This notification was updated to be a heads-up, show it!
@@ -1069,7 +1069,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     }
 
     protected boolean isHeadsUp(String key) {
-        return mHeadsUpManager.isHeadsUp(key);
+        return mHeadsUpManager.contains(key);
     }
 
     public boolean isNotificationKeptForRemoteInput(String key) {

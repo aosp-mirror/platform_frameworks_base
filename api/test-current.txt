@@ -1064,7 +1064,8 @@ package android.service.notification {
     method public final void adjustNotification(android.service.notification.Adjustment);
     method public final void adjustNotifications(java.util.List<android.service.notification.Adjustment>);
     method public final android.os.IBinder onBind(android.content.Intent);
-    method public abstract android.service.notification.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification);
+    method public android.service.notification.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification);
+    method public android.service.notification.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification, android.app.NotificationChannel);
     method public abstract void onNotificationSnoozedUntilContext(android.service.notification.StatusBarNotification, java.lang.String);
     method public final void unsnoozeNotification(java.lang.String);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.notification.NotificationAssistantService";
@@ -1461,13 +1462,21 @@ package android.view {
     method public android.view.View getTooltipView();
     method public static boolean isDefaultFocusHighlightEnabled();
     method public boolean isDefaultFocusHighlightNeeded(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
+    method protected void resetResolvedDrawables();
+    method public void resetResolvedLayoutDirection();
+    method public void resetResolvedPadding();
+    method public void resetResolvedTextAlignment();
+    method public void resetResolvedTextDirection();
+    method public void resetRtlProperties();
     method public boolean restoreFocusInCluster(int);
     method public boolean restoreFocusNotInCluster();
     method public void setAutofilled(boolean);
     method public final void setFocusedInCluster();
+    method public void setIsRootNamespace(boolean);
   }
 
   public class ViewConfiguration {
+    method public long getDeviceGlobalActionKeyTimeout();
     method public static int getHoverTooltipHideShortTimeout();
     method public static int getHoverTooltipHideTimeout();
     method public static int getHoverTooltipShowTimeout();

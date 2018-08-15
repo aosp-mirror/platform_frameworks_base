@@ -46,10 +46,10 @@ message GraphicsStatsProto {
     optional int64 stats_start = 3;
     optional int64 stats_end = 4;
 
-    // The aggregated statistics for the package
+    // The aggregated statistics for the package.
     optional GraphicsStatsJankSummaryProto summary = 5;
 
-    // The frame time histogram for the package
+    // The frame time histogram for the package.
     repeated GraphicsStatsHistogramBucketProto histogram = 6;
 }
 

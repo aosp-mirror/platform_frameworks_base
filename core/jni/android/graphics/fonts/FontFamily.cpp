@@ -17,11 +17,13 @@
 #define LOG_TAG "Minikin"
 
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <core_jni_helpers.h>
 
 #include "FontUtils.h"
 
 #include <minikin/FontFamily.h>
+#include <minikin/LocaleList.h>
 
 #include <memory>
 
@@ -54,10 +56,18 @@ static void FontFamily_Builder_addFont(jlong builderPtr, jlong fontPtr) {
 }
 
 // Regular JNI
-static jlong FontFamily_Builder_build(JNIEnv* env, jobject clazz, jlong builderPtr) {
+static jlong FontFamily_Builder_build(JNIEnv* env, jobject clazz, jlong builderPtr,
+            jstring langTags, jint variant) {
     std::unique_ptr<NativeFamilyBuilder> builder(toBuilder(builderPtr));
-    std::shared_ptr<minikin::FontFamily> family =
-            std::make_shared<minikin::FontFamily>(std::move(builder->fonts));
+    uint32_t localeId;
+    if (langTags == nullptr) {
+        localeId = minikin::registerLocaleList("");
+    } else {
+        ScopedUtfChars str(env, langTags);
+        localeId = minikin::registerLocaleList(str.c_str());
+    }
+    std::shared_ptr<minikin::FontFamily> family = std::make_shared<minikin::FontFamily>(
+            localeId, static_cast<minikin::FamilyVariant>(variant), std::move(builder->fonts));
     if (family->getCoverage().length() == 0) {
         // No coverage means minikin rejected given font for some reasons.
         jniThrowException(env, "java/lang/IllegalArgumentException",
@@ -77,7 +87,7 @@ static jlong FontFamily_Builder_GetReleaseFunc() {
 static const JNINativeMethod gFontFamilyBuilderMethods[] = {
     { "nInitBuilder", "()J", (void*) FontFamily_Builder_initBuilder },
     { "nAddFont", "(JJ)V", (void*) FontFamily_Builder_addFont },
-    { "nBuild", "(J)J", (void*) FontFamily_Builder_build },
+    { "nBuild", "(JLjava/lang/String;I)J", (void*) FontFamily_Builder_build },
 
     { "nGetReleaseNativeFamily", "()J", (void*) FontFamily_Builder_GetReleaseFunc },
 };

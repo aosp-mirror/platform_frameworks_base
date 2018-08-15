@@ -71,6 +71,17 @@ const hidl_string *EphemeralStorage::allocTemporaryString(
     return s;
 }
 
+native_handle_t *EphemeralStorage::allocTemporaryNativeHandle(
+        int numFds, int numInts) {
+    Item item;
+    item.mType = TYPE_NATIVE_HANDLE;
+    item.mObj = nullptr;
+    item.mPtr = native_handle_create(numFds, numInts);
+    mItems.push_back(item);
+
+    return static_cast<native_handle_t*>(item.mPtr);
+}
+
 #define DEFINE_ALLOC_VECTOR_METHODS(Suffix,Type,NewType)                       \
 const hidl_vec<Type> *EphemeralStorage::allocTemporary ## Suffix ## Vector(    \
         JNIEnv *env, Type ## Array arrayObj) {                                 \
@@ -144,6 +155,13 @@ void EphemeralStorage::release(JNIEnv *env) {
             DEFINE_RELEASE_ARRAY_CASE(Int64,jlong,Long)
             DEFINE_RELEASE_ARRAY_CASE(Float,jfloat,Float)
             DEFINE_RELEASE_ARRAY_CASE(Double,jdouble,Double)
+
+            case TYPE_NATIVE_HANDLE:
+            {
+                int err = native_handle_delete(static_cast<native_handle_t *>(item.mPtr));
+                CHECK(err == 0);
+                break;
+            }
 
             default:
                 CHECK(!"Should not be here");

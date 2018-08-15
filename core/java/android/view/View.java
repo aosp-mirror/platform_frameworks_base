@@ -17871,6 +17871,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @TestApi
     public void resetRtlProperties() {
         resetResolvedLayoutDirection();
         resetResolvedTextDirection();
@@ -18052,6 +18053,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @TestApi
     public void resetResolvedLayoutDirection() {
         // Reset the current resolved bits
         mPrivateFlags2 &= ~PFLAG2_LAYOUT_DIRECTION_RESOLVED_MASK;
@@ -18151,6 +18153,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @TestApi
     public void resetResolvedPadding() {
         resetResolvedPaddingInternal();
     }
@@ -21021,6 +21024,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
+    @TestApi
     protected void resetResolvedDrawables() {
         resetResolvedDrawablesInternal();
     }
@@ -22802,6 +22806,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param isRoot true if the view belongs to the root namespace, false
      *        otherwise
      */
+    @TestApi
     public void setIsRootNamespace(boolean isRoot) {
         if (isRoot) {
             mPrivateFlags |= PFLAG_IS_ROOT_NAMESPACE;
@@ -25023,6 +25028,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @TestApi
     public void resetResolvedTextDirection() {
         // Reset any previous text direction resolution
         mPrivateFlags2 &= ~(PFLAG2_TEXT_DIRECTION_RESOLVED | PFLAG2_TEXT_DIRECTION_RESOLVED_MASK);
@@ -25260,6 +25266,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @TestApi
     public void resetResolvedTextAlignment() {
         // Reset any previous text alignment resolution
         mPrivateFlags2 &= ~(PFLAG2_TEXT_ALIGNMENT_RESOLVED | PFLAG2_TEXT_ALIGNMENT_RESOLVED_MASK);

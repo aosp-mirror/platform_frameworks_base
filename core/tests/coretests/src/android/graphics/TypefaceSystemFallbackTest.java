@@ -23,9 +23,12 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.graphics.fonts.FontFamily;
+import android.graphics.fonts.SystemFonts;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.text.FontConfig;
 import android.util.ArrayMap;
 
 import org.junit.After;
@@ -112,7 +115,9 @@ public class TypefaceSystemFallbackTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        Typeface.buildSystemFallback(TEST_FONTS_XML, TEST_FONT_DIR, fontMap, fallbackMap);
+        final FontConfig.Alias[] aliases = SystemFonts.buildSystemFallback(TEST_FONTS_XML,
+                TEST_FONT_DIR, fallbackMap);
+        Typeface.initSystemDefaultTypefaces(fontMap, fallbackMap, aliases);
     }
 
     @Test
@@ -120,10 +125,14 @@ public class TypefaceSystemFallbackTest {
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
 
-        Typeface.buildSystemFallback(SYSTEM_FONTS_XML, SYSTEM_FONT_DIR, fontMap, fallbackMap);
+        final FontConfig.Alias[] aliases = SystemFonts.buildSystemFallback(SYSTEM_FONTS_XML,
+                SYSTEM_FONT_DIR, fallbackMap);
 
-        assertFalse(fontMap.isEmpty());
+        assertNotNull(aliases);
         assertFalse(fallbackMap.isEmpty());
+
+        Typeface.initSystemDefaultTypefaces(fontMap, fallbackMap, aliases);
+        assertFalse(fontMap.isEmpty());
     }
 
     @Test

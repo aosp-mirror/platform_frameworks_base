@@ -65,8 +65,8 @@ public class SmartActionsHelper {
      */
     @NonNull
     ArrayList<Notification.Action> suggestActions(
-            @Nullable Context context, @NonNull StatusBarNotification sbn) {
-        if (!isEligibleForActionAdjustment(sbn)) {
+            @Nullable Context context, @NonNull NotificationEntry entry) {
+        if (!isEligibleForActionAdjustment(entry)) {
             return EMPTY_ACTION_LIST;
         }
         if (context == null) {
@@ -76,17 +76,17 @@ public class SmartActionsHelper {
         if (tcm == null) {
             return EMPTY_ACTION_LIST;
         }
-        Notification.Action[] actions = sbn.getNotification().actions;
+        Notification.Action[] actions = entry.getNotification().actions;
         int numOfExistingActions = actions == null ? 0: actions.length;
         int maxSmartActions = MAX_SMART_ACTIONS - numOfExistingActions;
         return suggestActionsFromText(
                 tcm,
-                getMostSalientActionText(sbn.getNotification()), maxSmartActions);
+                getMostSalientActionText(entry.getNotification()), maxSmartActions);
     }
 
     ArrayList<CharSequence> suggestReplies(
-            @Nullable Context context, @NonNull StatusBarNotification sbn) {
-        if (!isEligibleForReplyAdjustment(sbn)) {
+            @Nullable Context context, @NonNull NotificationEntry entry) {
+        if (!isEligibleForReplyAdjustment(entry)) {
             return EMPTY_REPLY_LIST;
         }
         if (context == null) {
@@ -103,56 +103,35 @@ public class SmartActionsHelper {
      * to fundamental phone functionality where any error would result in a very negative user
      * experience.
      */
-    private boolean isEligibleForActionAdjustment(@NonNull StatusBarNotification sbn) {
-        Notification notification = sbn.getNotification();
-        String pkg = sbn.getPackageName();
-        if (!Process.myUserHandle().equals(sbn.getUser())) {
+    private boolean isEligibleForActionAdjustment(@NonNull NotificationEntry entry) {
+        Notification notification = entry.getNotification();
+        String pkg = entry.getSbn().getPackageName();
+        if (!Process.myUserHandle().equals(entry.getSbn().getUser())) {
             return false;
         }
         if (notification.actions != null
                 && notification.actions.length >= Notification.MAX_ACTION_BUTTONS) {
             return false;
         }
-        if (0 != (notification.flags & FLAG_MASK_INELGIBILE_FOR_ACTIONS)) {
+        if ((notification.flags & FLAG_MASK_INELGIBILE_FOR_ACTIONS) != 0) {
             return false;
         }
         if (TextUtils.isEmpty(pkg) || pkg.equals("android")) {
             return false;
         }
         // For now, we are only interested in messages.
-        return Notification.CATEGORY_MESSAGE.equals(notification.category)
-                || Notification.MessagingStyle.class.equals(notification.getNotificationStyle())
-                || hasInlineReply(notification);
+        return entry.isMessaging();
     }
 
-    private boolean isEligibleForReplyAdjustment(@NonNull StatusBarNotification sbn) {
+    private boolean isEligibleForReplyAdjustment(@NonNull NotificationEntry entry) {
         if (!SystemProperties.getBoolean(SYS_PROP_SMART_REPLIES_EXPERIMENT, false)) {
             return false;
         }
-        Notification notification = sbn.getNotification();
+        Notification notification = entry.getNotification();
         if (notification.actions == null) {
             return false;
         }
-        return hasInlineReply(sbn.getNotification());
-    }
-
-    private boolean hasInlineReply(Notification notification) {
-        Notification.Action[] actions = notification.actions;
-        if (actions == null) {
-            return false;
-        }
-        for (Notification.Action action : actions) {
-            RemoteInput[] remoteInputs = action.getRemoteInputs();
-            if (remoteInputs == null) {
-                continue;
-            }
-            for (RemoteInput remoteInput : remoteInputs) {
-                if (remoteInput.getAllowFreeFormInput()) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return entry.hasInlineReply();
     }
 
     /** Returns the text most salient for action extraction in a notification. */

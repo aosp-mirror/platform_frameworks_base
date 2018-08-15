@@ -31,6 +31,7 @@ import android.util.SparseArray;
 
 import com.android.internal.util.function.TriFunction;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
@@ -680,4 +681,20 @@ public abstract class PackageManagerInternal {
      * @return a SparseArray mapping from appId to it's sharedUserId.
      */
     public abstract SparseArray<String> getAppsWithSharedUserIds();
+
+    /**
+     * Return if device is currently in a "core" boot environment, typically
+     * used to support full-disk encryption. Only apps marked with
+     * {@code coreApp} attribute are available.
+     */
+    public abstract boolean isOnlyCoreApps();
+
+    /**
+     * Make a best-effort attempt to provide the requested free disk space by
+     * deleting cached files.
+     *
+     * @throws IOException if the request was unable to be fulfilled.
+     */
+    public abstract void freeStorage(String volumeUuid, long bytes, int storageFlags)
+            throws IOException;
 }

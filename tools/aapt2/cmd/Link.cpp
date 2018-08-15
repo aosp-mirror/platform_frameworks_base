@@ -470,6 +470,10 @@ ResourceFile::Type XmlFileTypeForOutputFormat(OutputFormat format) {
   return ResourceFile::Type::kUnknown;
 }
 
+static auto kDrawableVersions = std::map<std::string, ApiVersion>{
+    { "adaptive-icon" , SDK_O },
+};
+
 bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archive_writer) {
   bool error = false;
   std::map<std::pair<ConfigDescription, StringPiece>, FileOperation> config_sorted_files;
@@ -567,6 +571,20 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
         FileOperation& file_op = map_entry.second;
 
         if (file_op.xml_to_flatten) {
+          // Check minimum sdk versions supported for drawables
+          auto drawable_entry = kDrawableVersions.find(file_op.xml_to_flatten->root->name);
+          if (drawable_entry != kDrawableVersions.end()) {
+            if (drawable_entry->second > context_->GetMinSdkVersion()
+                && drawable_entry->second > config.sdkVersion) {
+              context_->GetDiagnostics()->Error(DiagMessage(file_op.xml_to_flatten->file.source)
+                                                    << "<" << drawable_entry->first << "> elements "
+                                                    << "require a sdk version of at least "
+                                                    << (int16_t) drawable_entry->second);
+              error = true;
+              continue;
+            }
+          }
+
           std::vector<std::unique_ptr<xml::XmlResource>> versioned_docs =
               LinkAndVersionXmlFile(table, &file_op);
           if (versioned_docs.empty()) {

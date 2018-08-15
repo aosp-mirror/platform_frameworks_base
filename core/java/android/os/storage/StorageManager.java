@@ -124,6 +124,8 @@ public class StorageManager {
     public static final String PROP_SDCARDFS = "persist.sys.sdcardfs";
     /** {@hide} */
     public static final String PROP_VIRTUAL_DISK = "persist.sys.virtual_disk";
+    /** {@hide} */
+    public static final String PROP_ISOLATED_STORAGE = "persist.sys.isolated_storage";
 
     /** {@hide} */
     public static final String UUID_PRIVATE_INTERNAL = null;
@@ -1482,6 +1484,36 @@ public class StorageManager {
     public static File maybeTranslateEmulatedPathToInternal(File path) {
         // Disabled now that FUSE has been replaced by sdcardfs
         return path;
+    }
+
+    /**
+     * Translate given shared storage path from a path in an app sandbox
+     * namespace to a path in the system namespace.
+     *
+     * @hide
+     */
+    public File translateAppToSystem(File file, String packageName) {
+        try {
+            return new File(mStorageManager.translateAppToSystem(file.getAbsolutePath(),
+                    packageName, mContext.getUserId()));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Translate given shared storage path from a path in the system namespace
+     * to a path in an app sandbox namespace.
+     *
+     * @hide
+     */
+    public File translateSystemToApp(File file, String packageName) {
+        try {
+            return new File(mStorageManager.translateSystemToApp(file.getAbsolutePath(),
+                    packageName, mContext.getUserId()));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /** {@hide} */

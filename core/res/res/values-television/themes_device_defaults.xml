@@ -18,4 +18,5 @@
     <style name="Theme.DeviceDefault.Light.Dialog.Alert" parent="Theme.Leanback.Light.Dialog.Alert" />
     <style name="Theme.DeviceDefault.Autofill" parent="Theme.Material.Autofill" />
     <style name="Theme.DeviceDefault.Autofill.Save" parent="Theme.Material.Autofill.Save" />
+    <style name="Theme.DeviceDefault.Resolver" parent="Theme.Leanback.Resolver" />
 </resources>

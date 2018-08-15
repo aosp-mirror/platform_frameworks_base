@@ -2507,6 +2507,49 @@ public class PackageParser {
         if (pkg.applicationInfo.usesCompatibilityMode()) {
             adjustPackageToBeUnresizeableAndUnpipable(pkg);
         }
+
+        // If the storage model feature flag is disabled, we need to fiddle
+        // around with permission definitions to return us to pre-Q behavior.
+        // STOPSHIP(b/112545973): remove once feature enabled by default
+        if (!SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+            if ("android".equals(pkg.packageName)) {
+                final ArraySet<String> newGroups = new ArraySet<>();
+                newGroups.add(android.Manifest.permission_group.MEDIA_AURAL);
+                newGroups.add(android.Manifest.permission_group.MEDIA_VISUAL);
+
+                for (int i = pkg.permissionGroups.size() - 1; i >= 0; i--) {
+                    final PermissionGroup pg = pkg.permissionGroups.get(i);
+                    if (newGroups.contains(pg.info.name)) {
+                        pkg.permissionGroups.remove(i);
+                    }
+                }
+
+                final ArraySet<String> newPermissions = new ArraySet<>();
+                newPermissions.add(android.Manifest.permission.READ_MEDIA_AUDIO);
+                newPermissions.add(android.Manifest.permission.WRITE_MEDIA_AUDIO);
+                newPermissions.add(android.Manifest.permission.READ_MEDIA_VIDEO);
+                newPermissions.add(android.Manifest.permission.WRITE_MEDIA_VIDEO);
+                newPermissions.add(android.Manifest.permission.READ_MEDIA_IMAGES);
+                newPermissions.add(android.Manifest.permission.WRITE_MEDIA_IMAGES);
+                newPermissions.add(android.Manifest.permission.ACCESS_MEDIA_LOCATION);
+                newPermissions.add(android.Manifest.permission.WRITE_OBB);
+
+                final ArraySet<String> dangerousPermissions = new ArraySet<>();
+                dangerousPermissions.add(android.Manifest.permission.READ_EXTERNAL_STORAGE);
+                dangerousPermissions.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+                for (int i = pkg.permissions.size() - 1; i >= 0; i--) {
+                    final Permission p = pkg.permissions.get(i);
+                    if (newPermissions.contains(p.info.name)) {
+                        pkg.permissions.remove(i);
+                    } else if (dangerousPermissions.contains(p.info.name)) {
+                        p.info.protectionLevel &= ~PermissionInfo.PROTECTION_MASK_BASE;
+                        p.info.protectionLevel |= PermissionInfo.PROTECTION_DANGEROUS;
+                    }
+                }
+            }
+        }
+
         return pkg;
     }
 

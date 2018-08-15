@@ -1100,7 +1100,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Utilitza-ho de manera predeterminada per a aquesta acció."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Fes servir una altra aplicació"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Esborra els paràmetres predeterminats a Configuració del sistema &gt; Aplicacions &gt; Baixades."</string>
-    <string name="chooseActivity" msgid="7486876147751803333">"Tria una acció"</string>
+    <string name="chooseActivity" msgid="7486876147751803333">"Selecciona una acció"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Tria una aplicació per al dispositiu USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"No hi ha cap aplicació que pugui dur a terme aquesta acció."</string>
     <string name="aerr_application" msgid="250320989337856518">"S\'ha aturat <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>

@@ -1971,8 +1971,14 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         tagsToMove.add(TAG_DEFAULTSCALE);
         tagsToMove.add(TAG_DEFAULTCROPORIGIN);
         tagsToMove.add(TAG_DEFAULTCROPSIZE);
-        tagsToMove.add(TAG_OPCODELIST2);
-        tagsToMove.add(TAG_OPCODELIST3);
+
+        if (nullptr != writer->getEntry(TAG_OPCODELIST2, TIFF_IFD_0).get()) {
+            tagsToMove.add(TAG_OPCODELIST2);
+        }
+
+        if (nullptr != writer->getEntry(TAG_OPCODELIST3, TIFF_IFD_0).get()) {
+            tagsToMove.add(TAG_OPCODELIST3);
+        }
 
         if (moveEntries(writer, TIFF_IFD_0, TIFF_IFD_SUB1, tagsToMove) != OK) {
             jniThrowException(env, "java/lang/IllegalStateException", "Failed to move entries");

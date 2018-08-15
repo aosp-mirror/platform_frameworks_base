@@ -7345,6 +7345,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * @hide
      */
+    @TestApi
     @Override
     public void resetResolvedLayoutDirection() {
         super.resetResolvedLayoutDirection();
@@ -7361,6 +7362,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * @hide
      */
+    @TestApi
     @Override
     public void resetResolvedTextDirection() {
         super.resetResolvedTextDirection();
@@ -7377,6 +7379,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * @hide
      */
+    @TestApi
     @Override
     public void resetResolvedTextAlignment() {
         super.resetResolvedTextAlignment();
@@ -7393,6 +7396,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * @hide
      */
+    @TestApi
     @Override
     public void resetResolvedPadding() {
         super.resetResolvedPadding();
@@ -7409,6 +7413,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * @hide
      */
+    @TestApi
     @Override
     protected void resetResolvedDrawables() {
         super.resetResolvedDrawables();

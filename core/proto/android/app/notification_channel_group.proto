@@ -15,7 +15,6 @@
  */
 
 syntax = "proto2";
-option java_package = "android.app";
 option java_multiple_files = true;
 
 package android.app;
@@ -29,9 +28,12 @@ import "frameworks/base/libs/incident/proto/android/privacy.proto";
 message NotificationChannelGroupProto {
     option (.android.msg_privacy).dest = DEST_EXPLICIT;
 
+    // Notification Channel Group ID. Provided by the app.
     optional string id = 1;
+    // User-visible Notification Channel Group name.
     optional string name = 2;
+    // User-visible Notification Channel Group description.
     optional string description = 3;
     optional bool is_blocked = 4;
-    repeated android.app.NotificationChannelProto channels = 5;
+    repeated NotificationChannelProto channels = 5;
 }
