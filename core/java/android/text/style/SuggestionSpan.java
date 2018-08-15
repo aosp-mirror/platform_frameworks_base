@@ -18,6 +18,7 @@ package android.text.style;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -99,7 +100,9 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     private final String mNotificationTargetPackageName;
     private final int mHashCode;
 
+    @UnsupportedAppUsage
     private float mEasyCorrectUnderlineThickness;
+    @UnsupportedAppUsage
     private int mEasyCorrectUnderlineColor;
 
     private float mMisspelledUnderlineThickness;
@@ -264,6 +267,7 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public String getNotificationTargetClassName() {
         return mNotificationTargetClassName;
     }
@@ -368,6 +372,7 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getUnderlineColor() {
         // The order here should match what is used in updateDrawState
         final boolean misspelled = (mFlags & FLAG_MISSPELLED) != 0;
@@ -390,6 +395,7 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void notifySelection(Context context, String original, int index) {
         final Intent intent = new Intent();
 
