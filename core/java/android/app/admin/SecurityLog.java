@@ -18,6 +18,7 @@ package android.app.admin;
 
 import android.annotation.IntDef;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -476,6 +477,7 @@ public class SecurityLog {
          * Constructor used by native classes to generate SecurityEvent instances.
          * @hide
          */
+        @UnsupportedAppUsage
         /* package */ SecurityEvent(byte[] data) {
             this(0, data);
         }

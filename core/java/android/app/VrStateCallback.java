@@ -15,6 +15,8 @@
  */
 package android.app;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * Listens to VR Mode state changes. Use with methods in {@link VrManager}.
  *
@@ -27,6 +29,7 @@ public abstract class VrStateCallback {
      *
      * @param enabled True when VR State is in persistent mode, false otherwise.
      */
+    @UnsupportedAppUsage
     public void onPersistentVrStateChanged(boolean enabled) {}
 
     /**

@@ -16,6 +16,7 @@
 
 package android.app.backup;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
@@ -90,6 +91,7 @@ public class FullBackup {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     static public native int backupToTar(String packageName, String domain,
             String linkdomain, String rootpath, String path, FullBackupDataOutput output);
 

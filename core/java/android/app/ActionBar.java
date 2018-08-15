@@ -22,6 +22,7 @@ import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -210,6 +211,7 @@ public abstract class ActionBar {
      * Allow the title to wrap onto multiple lines if space is available
      * @hide pending API approval
      */
+    @UnsupportedAppUsage
     public static final int DISPLAY_TITLE_MULTIPLE_LINES = 0x20;
 
     /**
@@ -1050,6 +1052,7 @@ public abstract class ActionBar {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setShowHideAnimationEnabled(boolean enabled) {
     }
 
@@ -1092,6 +1095,7 @@ public abstract class ActionBar {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public boolean collapseActionView() {
         return false;
     }

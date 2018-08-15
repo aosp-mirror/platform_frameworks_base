@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -228,6 +229,7 @@ public final class WallpaperColors implements Parcelable {
      * @see WallpaperColors#fromDrawable(Drawable)
      * @hide
      */
+    @UnsupportedAppUsage
     public WallpaperColors(@NonNull Color primaryColor, @Nullable Color secondaryColor,
             @Nullable Color tertiaryColor, int colorHints) {
 
@@ -342,6 +344,7 @@ public final class WallpaperColors implements Parcelable {
      * @return True if dark text is supported.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getColorHints() {
         return mColorHints;
     }

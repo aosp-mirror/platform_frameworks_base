@@ -22,6 +22,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.media.AudioAttributes.AttributeUsage;
@@ -75,6 +76,7 @@ public class AppOpsManager {
      */
 
     final Context mContext;
+    @UnsupportedAppUsage
     final IAppOpsService mService;
     final ArrayMap<OnOpChangedListener, IAppOpsCallback> mModeWatchers = new ArrayMap<>();
     final ArrayMap<OnOpActiveChangedListener, IAppOpsActiveCallback> mActiveWatchers =
@@ -116,6 +118,7 @@ public class AppOpsManager {
      * checked is currently in the foreground, otherwise {@link #MODE_IGNORED}.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int MODE_FOREGROUND = 4;
 
     /**
@@ -124,6 +127,7 @@ public class AppOpsManager {
      * when watching a particular op, not when watching a package.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int WATCH_FOREGROUND_CHANGES = 1 << 0;
 
     /**
@@ -193,166 +197,244 @@ public class AppOpsManager {
     //  - add the op to the appropriate template in AppOpsState.OpsTemplate (settings app)
 
     /** @hide No operation specified. */
+    @UnsupportedAppUsage
     public static final int OP_NONE = -1;
     /** @hide Access to coarse location information. */
+    @UnsupportedAppUsage
     public static final int OP_COARSE_LOCATION = 0;
     /** @hide Access to fine location information. */
+    @UnsupportedAppUsage
     public static final int OP_FINE_LOCATION = 1;
     /** @hide Causing GPS to run. */
+    @UnsupportedAppUsage
     public static final int OP_GPS = 2;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_VIBRATE = 3;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_READ_CONTACTS = 4;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_WRITE_CONTACTS = 5;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_READ_CALL_LOG = 6;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_WRITE_CALL_LOG = 7;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_READ_CALENDAR = 8;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_WRITE_CALENDAR = 9;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_WIFI_SCAN = 10;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_POST_NOTIFICATION = 11;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_NEIGHBORING_CELLS = 12;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_CALL_PHONE = 13;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_READ_SMS = 14;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_WRITE_SMS = 15;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_RECEIVE_SMS = 16;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_RECEIVE_EMERGECY_SMS = 17;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_RECEIVE_MMS = 18;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_RECEIVE_WAP_PUSH = 19;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_SEND_SMS = 20;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_READ_ICC_SMS = 21;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_WRITE_ICC_SMS = 22;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_WRITE_SETTINGS = 23;
     /** @hide Required to draw on top of other apps. */
     @TestApi
     public static final int OP_SYSTEM_ALERT_WINDOW = 24;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_ACCESS_NOTIFICATIONS = 25;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_CAMERA = 26;
     /** @hide */
     @TestApi
     public static final int OP_RECORD_AUDIO = 27;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_PLAY_AUDIO = 28;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_READ_CLIPBOARD = 29;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_WRITE_CLIPBOARD = 30;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_TAKE_MEDIA_BUTTONS = 31;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_TAKE_AUDIO_FOCUS = 32;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_AUDIO_MASTER_VOLUME = 33;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_AUDIO_VOICE_VOLUME = 34;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_AUDIO_RING_VOLUME = 35;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_AUDIO_MEDIA_VOLUME = 36;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_AUDIO_ALARM_VOLUME = 37;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_AUDIO_NOTIFICATION_VOLUME = 38;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_AUDIO_BLUETOOTH_VOLUME = 39;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_WAKE_LOCK = 40;
     /** @hide Continually monitoring location data. */
+    @UnsupportedAppUsage
     public static final int OP_MONITOR_LOCATION = 41;
     /** @hide Continually monitoring location data with a relatively high power request. */
+    @UnsupportedAppUsage
     public static final int OP_MONITOR_HIGH_POWER_LOCATION = 42;
     /** @hide Retrieve current usage stats via {@link UsageStatsManager}. */
+    @UnsupportedAppUsage
     public static final int OP_GET_USAGE_STATS = 43;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_MUTE_MICROPHONE = 44;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_TOAST_WINDOW = 45;
     /** @hide Capture the device's display contents and/or audio */
+    @UnsupportedAppUsage
     public static final int OP_PROJECT_MEDIA = 46;
     /** @hide Activate a VPN connection without user intervention. */
+    @UnsupportedAppUsage
     public static final int OP_ACTIVATE_VPN = 47;
     /** @hide Access the WallpaperManagerAPI to write wallpapers. */
+    @UnsupportedAppUsage
     public static final int OP_WRITE_WALLPAPER = 48;
     /** @hide Received the assist structure from an app. */
+    @UnsupportedAppUsage
     public static final int OP_ASSIST_STRUCTURE = 49;
     /** @hide Received a screenshot from assist. */
+    @UnsupportedAppUsage
     public static final int OP_ASSIST_SCREENSHOT = 50;
     /** @hide Read the phone state. */
+    @UnsupportedAppUsage
     public static final int OP_READ_PHONE_STATE = 51;
     /** @hide Add voicemail messages to the voicemail content provider. */
+    @UnsupportedAppUsage
     public static final int OP_ADD_VOICEMAIL = 52;
     /** @hide Access APIs for SIP calling over VOIP or WiFi. */
+    @UnsupportedAppUsage
     public static final int OP_USE_SIP = 53;
     /** @hide Intercept outgoing calls. */
+    @UnsupportedAppUsage
     public static final int OP_PROCESS_OUTGOING_CALLS = 54;
     /** @hide User the fingerprint API. */
+    @UnsupportedAppUsage
     public static final int OP_USE_FINGERPRINT = 55;
     /** @hide Access to body sensors such as heart rate, etc. */
+    @UnsupportedAppUsage
     public static final int OP_BODY_SENSORS = 56;
     /** @hide Read previously received cell broadcast messages. */
+    @UnsupportedAppUsage
     public static final int OP_READ_CELL_BROADCASTS = 57;
     /** @hide Inject mock location into the system. */
+    @UnsupportedAppUsage
     public static final int OP_MOCK_LOCATION = 58;
     /** @hide Read external storage. */
+    @UnsupportedAppUsage
     public static final int OP_READ_EXTERNAL_STORAGE = 59;
     /** @hide Write external storage. */
+    @UnsupportedAppUsage
     public static final int OP_WRITE_EXTERNAL_STORAGE = 60;
     /** @hide Turned on the screen. */
+    @UnsupportedAppUsage
     public static final int OP_TURN_SCREEN_ON = 61;
     /** @hide Get device accounts. */
+    @UnsupportedAppUsage
     public static final int OP_GET_ACCOUNTS = 62;
     /** @hide Control whether an application is allowed to run in the background. */
+    @UnsupportedAppUsage
     public static final int OP_RUN_IN_BACKGROUND = 63;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_AUDIO_ACCESSIBILITY_VOLUME = 64;
     /** @hide Read the phone number. */
+    @UnsupportedAppUsage
     public static final int OP_READ_PHONE_NUMBERS = 65;
     /** @hide Request package installs through package installer */
+    @UnsupportedAppUsage
     public static final int OP_REQUEST_INSTALL_PACKAGES = 66;
     /** @hide Enter picture-in-picture. */
+    @UnsupportedAppUsage
     public static final int OP_PICTURE_IN_PICTURE = 67;
     /** @hide Instant app start foreground service. */
+    @UnsupportedAppUsage
     public static final int OP_INSTANT_APP_START_FOREGROUND = 68;
     /** @hide Answer incoming phone calls */
+    @UnsupportedAppUsage
     public static final int OP_ANSWER_PHONE_CALLS = 69;
     /** @hide Run jobs when in background */
+    @UnsupportedAppUsage
     public static final int OP_RUN_ANY_IN_BACKGROUND = 70;
     /** @hide Change Wi-Fi connectivity state */
+    @UnsupportedAppUsage
     public static final int OP_CHANGE_WIFI_STATE = 71;
     /** @hide Request package deletion through package installer */
+    @UnsupportedAppUsage
     public static final int OP_REQUEST_DELETE_PACKAGES = 72;
     /** @hide Bind an accessibility service. */
+    @UnsupportedAppUsage
     public static final int OP_BIND_ACCESSIBILITY_SERVICE = 73;
     /** @hide Continue handover of a call from another app */
+    @UnsupportedAppUsage
     public static final int OP_ACCEPT_HANDOVER = 74;
     /** @hide Create and Manage IPsec Tunnels */
+    @UnsupportedAppUsage
     public static final int OP_MANAGE_IPSEC_TUNNELS = 75;
     /** @hide Any app start foreground service. */
+    @UnsupportedAppUsage
     public static final int OP_START_FOREGROUND = 76;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int OP_BLUETOOTH_SCAN = 77;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int _NUM_OP = 78;
 
     /** Access to coarse location information. */
@@ -910,6 +992,7 @@ public class AppOpsManager {
      * This optionally maps a permission to an operation.  If there
      * is no permission associated with an operation, it is null.
      */
+    @UnsupportedAppUsage
     private static String[] sOpPerms = new String[] {
             android.Manifest.permission.ACCESS_COARSE_LOCATION,
             android.Manifest.permission.ACCESS_FINE_LOCATION,
@@ -1393,6 +1476,7 @@ public class AppOpsManager {
      * Retrieve the op switch that controls the given operation.
      * @hide
      */
+    @UnsupportedAppUsage
     public static int opToSwitch(int op) {
         return sOpToSwitch[op];
     }
@@ -1401,6 +1485,7 @@ public class AppOpsManager {
      * Retrieve a non-localized name for the operation, for debugging output.
      * @hide
      */
+    @UnsupportedAppUsage
     public static String opToName(int op) {
         if (op == OP_NONE) return "NONE";
         return op < sOpNames.length ? sOpNames[op] : ("Unknown(" + op + ")");
@@ -1422,6 +1507,7 @@ public class AppOpsManager {
      * Retrieve the permission associated with an operation, or null if there is not one.
      * @hide
      */
+    @UnsupportedAppUsage
     public static String opToPermission(int op) {
         return sOpPerms[op];
     }
@@ -1440,6 +1526,7 @@ public class AppOpsManager {
      * to the corresponding app op.
      * @hide
      */
+    @UnsupportedAppUsage
     public static int permissionToOpCode(String permission) {
         Integer boxedOpCode = sPermToOp.get(permission);
         return boxedOpCode != null ? boxedOpCode : OP_NONE;
@@ -1490,20 +1577,24 @@ public class AppOpsManager {
         private final int mUid;
         private final List<OpEntry> mEntries;
 
+        @UnsupportedAppUsage
         public PackageOps(String packageName, int uid, List<OpEntry> entries) {
             mPackageName = packageName;
             mUid = uid;
             mEntries = entries;
         }
 
+        @UnsupportedAppUsage
         public String getPackageName() {
             return mPackageName;
         }
 
+        @UnsupportedAppUsage
         public int getUid() {
             return mUid;
         }
 
+        @UnsupportedAppUsage
         public List<OpEntry> getOps() {
             return mEntries;
         }
@@ -1533,6 +1624,7 @@ public class AppOpsManager {
             }
         }
 
+        @UnsupportedAppUsage
         public static final Creator<PackageOps> CREATOR = new Creator<PackageOps>() {
             @Override public PackageOps createFromParcel(Parcel source) {
                 return new PackageOps(source);
@@ -1591,26 +1683,32 @@ public class AppOpsManager {
             this(op, mode, times, rejectTimes, duration, duration == -1, proxyUid, proxyPackage);
         }
 
+        @UnsupportedAppUsage
         public int getOp() {
             return mOp;
         }
 
+        @UnsupportedAppUsage
         public int getMode() {
             return mMode;
         }
 
+        @UnsupportedAppUsage
         public long getTime() {
             return maxTime(mTimes, 0, _NUM_UID_STATE);
         }
 
+        @UnsupportedAppUsage
         public long getLastAccessTime() {
             return maxTime(mTimes, 0, _NUM_UID_STATE);
         }
 
+        @UnsupportedAppUsage
         public long getLastAccessForegroundTime() {
             return maxTime(mTimes, UID_STATE_PERSISTENT, UID_STATE_LAST_NON_RESTRICTED + 1);
         }
 
+        @UnsupportedAppUsage
         public long getLastAccessBackgroundTime() {
             return maxTime(mTimes, UID_STATE_LAST_NON_RESTRICTED + 1, _NUM_UID_STATE);
         }
@@ -1619,18 +1717,22 @@ public class AppOpsManager {
             return mTimes[uidState];
         }
 
+        @UnsupportedAppUsage
         public long getRejectTime() {
             return maxTime(mRejectTimes, 0, _NUM_UID_STATE);
         }
 
+        @UnsupportedAppUsage
         public long getLastRejectTime() {
             return maxTime(mRejectTimes, 0, _NUM_UID_STATE);
         }
 
+        @UnsupportedAppUsage
         public long getLastRejectForegroundTime() {
             return maxTime(mRejectTimes, UID_STATE_PERSISTENT, UID_STATE_LAST_NON_RESTRICTED + 1);
         }
 
+        @UnsupportedAppUsage
         public long getLastRejectBackgroundTime() {
             return maxTime(mRejectTimes, UID_STATE_LAST_NON_RESTRICTED + 1, _NUM_UID_STATE);
         }
@@ -1639,10 +1741,12 @@ public class AppOpsManager {
             return mRejectTimes[uidState];
         }
 
+        @UnsupportedAppUsage
         public boolean isRunning() {
             return mRunning;
         }
 
+        @UnsupportedAppUsage
         public int getDuration() {
             return mDuration;
         }
@@ -1741,6 +1845,7 @@ public class AppOpsManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
+    @UnsupportedAppUsage
     public List<AppOpsManager.PackageOps> getPackagesForOps(int[] ops) {
         try {
             return mService.getPackagesForOps(ops);
@@ -1758,6 +1863,7 @@ public class AppOpsManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
+    @UnsupportedAppUsage
     public List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, int[] ops) {
         try {
             return mService.getOpsForPackage(uid, packageName, ops);
@@ -1870,6 +1976,7 @@ public class AppOpsManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
+    @UnsupportedAppUsage
     public void setRestriction(int code, @AttributeUsage int usage, int mode,
             String[] exceptionPackages) {
         try {
@@ -1882,6 +1989,7 @@ public class AppOpsManager {
 
     /** @hide */
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
+    @UnsupportedAppUsage
     public void resetAllModes() {
         try {
             mService.resetAllModes(mContext.getUserId(), null);
@@ -1931,6 +2039,7 @@ public class AppOpsManager {
      * @param callback Where to report changes.
      * @hide
      */
+    @UnsupportedAppUsage
     public void startWatchingMode(String op, String packageName, int flags,
             final OnOpChangedListener callback) {
         startWatchingMode(strOpToOp(op), packageName, flags, callback);
@@ -2088,6 +2197,7 @@ public class AppOpsManager {
     /**
      * {@hide}
      */
+    @UnsupportedAppUsage
     public static int strOpToOp(String op) {
         Integer val = sOpStrToOp.get(op);
         if (val == null) {
@@ -2140,6 +2250,7 @@ public class AppOpsManager {
      * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
      * @hide
      */
+    @UnsupportedAppUsage
     public int unsafeCheckOpRaw(String op, int uid, String packageName) {
         try {
             return mService.checkOperation(strOpToOp(op), uid, packageName);
@@ -2267,6 +2378,7 @@ public class AppOpsManager {
      * @throws SecurityException If the app has been configured to crash on this op.
      * @hide
      */
+    @UnsupportedAppUsage
     public int checkOp(int op, int uid, String packageName) {
         try {
             int mode = mService.checkOperation(op, uid, packageName);
@@ -2284,6 +2396,7 @@ public class AppOpsManager {
      * returns {@link #MODE_ERRORED}.
      * @hide
      */
+    @UnsupportedAppUsage
     public int checkOpNoThrow(int op, int uid, String packageName) {
         try {
             int mode = mService.checkOperation(op, uid, packageName);
@@ -2354,6 +2467,7 @@ public class AppOpsManager {
      * @throws SecurityException If the app has been configured to crash on this op.
      * @hide
      */
+    @UnsupportedAppUsage
     public int noteOp(int op, int uid, String packageName) {
         final int mode = noteOpNoThrow(op, uid, packageName);
         if (mode == MODE_ERRORED) {
@@ -2380,6 +2494,7 @@ public class AppOpsManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int noteProxyOp(int op, String proxiedPackageName) {
         int mode = noteProxyOpNoThrow(op, proxiedPackageName);
         if (mode == MODE_ERRORED) {
@@ -2410,6 +2525,7 @@ public class AppOpsManager {
      * returns {@link #MODE_ERRORED}.
      * @hide
      */
+    @UnsupportedAppUsage
     public int noteOpNoThrow(int op, int uid, String packageName) {
         try {
             return mService.noteOperation(op, uid, packageName);
@@ -2419,11 +2535,13 @@ public class AppOpsManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int noteOp(int op) {
         return noteOp(op, Process.myUid(), mContext.getOpPackageName());
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static IBinder getToken(IAppOpsService service) {
         synchronized (AppOpsManager.class) {
             if (sToken != null) {

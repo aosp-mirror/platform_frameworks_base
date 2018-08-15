@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -73,12 +74,14 @@ import java.util.List;
 import java.util.Objects;
 
 final class IntentReceiverLeaked extends AndroidRuntimeException {
+    @UnsupportedAppUsage
     public IntentReceiverLeaked(String msg) {
         super(msg);
     }
 }
 
 final class ServiceConnectionLeaked extends AndroidRuntimeException {
+    @UnsupportedAppUsage
     public ServiceConnectionLeaked(String msg) {
         super(msg);
     }
@@ -93,36 +96,52 @@ public final class LoadedApk {
     static final boolean DEBUG = false;
     private static final String PROPERTY_NAME_APPEND_NATIVE = "pi.append_native_lib_paths";
 
+    @UnsupportedAppUsage
     private final ActivityThread mActivityThread;
+    @UnsupportedAppUsage
     final String mPackageName;
+    @UnsupportedAppUsage
     private ApplicationInfo mApplicationInfo;
+    @UnsupportedAppUsage
     private String mAppDir;
+    @UnsupportedAppUsage
     private String mResDir;
     private String[] mOverlayDirs;
+    @UnsupportedAppUsage
     private String mDataDir;
+    @UnsupportedAppUsage
     private String mLibDir;
+    @UnsupportedAppUsage
     private File mDataDirFile;
     private File mDeviceProtectedDataDirFile;
     private File mCredentialProtectedDataDirFile;
+    @UnsupportedAppUsage
     private final ClassLoader mBaseClassLoader;
     private final boolean mSecurityViolation;
     private final boolean mIncludeCode;
     private final boolean mRegisterPackage;
+    @UnsupportedAppUsage
     private final DisplayAdjustments mDisplayAdjustments = new DisplayAdjustments();
     /** WARNING: This may change. Don't hold external references to it. */
+    @UnsupportedAppUsage
     Resources mResources;
+    @UnsupportedAppUsage
     private ClassLoader mClassLoader;
+    @UnsupportedAppUsage
     private Application mApplication;
 
     private String[] mSplitNames;
     private String[] mSplitAppDirs;
+    @UnsupportedAppUsage
     private String[] mSplitResDirs;
     private String[] mSplitClassLoaderNames;
 
+    @UnsupportedAppUsage
     private final ArrayMap<Context, ArrayMap<BroadcastReceiver, ReceiverDispatcher>> mReceivers
         = new ArrayMap<>();
     private final ArrayMap<Context, ArrayMap<BroadcastReceiver, LoadedApk.ReceiverDispatcher>> mUnregisteredReceivers
         = new ArrayMap<>();
+    @UnsupportedAppUsage
     private final ArrayMap<Context, ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher>> mServices
         = new ArrayMap<>();
     private final ArrayMap<Context, ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher>> mUnboundServices
@@ -236,10 +255,12 @@ public final class LoadedApk {
         return mAppComponentFactory;
     }
 
+    @UnsupportedAppUsage
     public String getPackageName() {
         return mPackageName;
     }
 
+    @UnsupportedAppUsage
     public ApplicationInfo getApplicationInfo() {
         return mApplicationInfo;
     }
@@ -252,6 +273,7 @@ public final class LoadedApk {
         return mSecurityViolation;
     }
 
+    @UnsupportedAppUsage
     public CompatibilityInfo getCompatibilityInfo() {
         return mDisplayAdjustments.getCompatibilityInfo();
     }
@@ -804,6 +826,7 @@ public final class LoadedApk {
         }
     }
 
+    @UnsupportedAppUsage
     public ClassLoader getClassLoader() {
         synchronized (this) {
             if (mClassLoader == null) {
@@ -972,6 +995,7 @@ public final class LoadedApk {
         }
     }
 
+    @UnsupportedAppUsage
     public String getAppDir() {
         return mAppDir;
     }
@@ -980,6 +1004,7 @@ public final class LoadedApk {
         return mLibDir;
     }
 
+    @UnsupportedAppUsage
     public String getResDir() {
         return mResDir;
     }
@@ -988,10 +1013,12 @@ public final class LoadedApk {
         return mSplitAppDirs;
     }
 
+    @UnsupportedAppUsage
     public String[] getSplitResDirs() {
         return mSplitResDirs;
     }
 
+    @UnsupportedAppUsage
     public String[] getOverlayDirs() {
         return mOverlayDirs;
     }
@@ -1000,6 +1027,7 @@ public final class LoadedApk {
         return mDataDir;
     }
 
+    @UnsupportedAppUsage
     public File getDataDirFile() {
         return mDataDirFile;
     }
@@ -1012,10 +1040,12 @@ public final class LoadedApk {
         return mCredentialProtectedDataDirFile;
     }
 
+    @UnsupportedAppUsage
     public AssetManager getAssets() {
         return getResources().getAssets();
     }
 
+    @UnsupportedAppUsage
     public Resources getResources() {
         if (mResources == null) {
             final String[] splitPaths;
@@ -1034,6 +1064,7 @@ public final class LoadedApk {
         return mResources;
     }
 
+    @UnsupportedAppUsage
     public Application makeApplication(boolean forceDefaultAppClass,
             Instrumentation instrumentation) {
         if (mApplication != null) {
@@ -1102,6 +1133,7 @@ public final class LoadedApk {
         return app;
     }
 
+    @UnsupportedAppUsage
     private void rewriteRValues(ClassLoader cl, String packageName, int id) {
         final Class<?> rClazz;
         try {
@@ -1324,7 +1356,9 @@ public final class LoadedApk {
         }
 
         final IIntentReceiver.Stub mIIntentReceiver;
+        @UnsupportedAppUsage
         final BroadcastReceiver mReceiver;
+        @UnsupportedAppUsage
         final Context mContext;
         final Handler mActivityThread;
         final Instrumentation mInstrumentation;
@@ -1448,10 +1482,12 @@ public final class LoadedApk {
             return mLocation;
         }
 
+        @UnsupportedAppUsage
         BroadcastReceiver getIntentReceiver() {
             return mReceiver;
         }
 
+        @UnsupportedAppUsage
         IIntentReceiver getIIntentReceiver() {
             return mIIntentReceiver;
         }
@@ -1489,6 +1525,7 @@ public final class LoadedApk {
 
     }
 
+    @UnsupportedAppUsage
     public final IServiceConnection getServiceDispatcher(ServiceConnection c,
             Context context, Handler handler, int flags) {
         synchronized (mServices) {
@@ -1566,7 +1603,9 @@ public final class LoadedApk {
 
     static final class ServiceDispatcher {
         private final ServiceDispatcher.InnerConnection mIServiceConnection;
+        @UnsupportedAppUsage
         private final ServiceConnection mConnection;
+        @UnsupportedAppUsage
         private final Context mContext;
         private final Handler mActivityThread;
         private final ServiceConnectionLeaked mLocation;
@@ -1582,6 +1621,7 @@ public final class LoadedApk {
         }
 
         private static class InnerConnection extends IServiceConnection.Stub {
+            @UnsupportedAppUsage
             final WeakReference<LoadedApk.ServiceDispatcher> mDispatcher;
 
             InnerConnection(LoadedApk.ServiceDispatcher sd) {
@@ -1600,6 +1640,7 @@ public final class LoadedApk {
         private final ArrayMap<ComponentName, ServiceDispatcher.ConnectionInfo> mActiveConnections
             = new ArrayMap<ComponentName, ServiceDispatcher.ConnectionInfo>();
 
+        @UnsupportedAppUsage
         ServiceDispatcher(ServiceConnection conn,
                 Context context, Handler activityThread, int flags) {
             mIServiceConnection = new InnerConnection(this);
@@ -1645,6 +1686,7 @@ public final class LoadedApk {
             return mConnection;
         }
 
+        @UnsupportedAppUsage
         IServiceConnection getIServiceConnection() {
             return mIServiceConnection;
         }

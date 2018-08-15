@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -47,6 +48,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
     private static final String MONTH = "month";
     private static final String DAY = "day";
 
+    @UnsupportedAppUsage
     private final DatePicker mDatePicker;
 
     private OnDateSetListener mDateSetListener;
