@@ -18,6 +18,7 @@ package android.text.format;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.icu.text.MeasureFormat;
@@ -114,6 +115,7 @@ public final class Formatter {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static BytesResult formatBytes(Resources res, long sizeBytes, int flags) {
         final int unit = ((flags & FLAG_IEC_UNITS) != 0) ? 1024 : 1000;
         final boolean isNegative = (sizeBytes < 0);
@@ -216,6 +218,7 @@ public final class Formatter {
      * @return the formatted elapsed time
      * @hide
      */
+    @UnsupportedAppUsage
     public static String formatShortElapsedTime(Context context, long millis) {
         long secondsLong = millis / 1000;
 
@@ -271,6 +274,7 @@ public final class Formatter {
      * @return the formatted elapsed time
      * @hide
      */
+    @UnsupportedAppUsage
     public static String formatShortElapsedTimeRoundingUpToMinutes(Context context, long millis) {
         long minutesRoundedUp = (millis + MILLIS_PER_MINUTE - 1) / MILLIS_PER_MINUTE;
 

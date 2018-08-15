@@ -21,6 +21,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -70,12 +71,15 @@ public class BulletSpan implements LeadingMarginSpan, ParcelableSpan {
     private static final int STANDARD_COLOR = 0;
 
     @Px
+    @UnsupportedAppUsage
     private final int mGapWidth;
     @Px
     private final int mBulletRadius;
     private Path mBulletPath = null;
     @ColorInt
+    @UnsupportedAppUsage
     private final int mColor;
+    @UnsupportedAppUsage
     private final boolean mWantColor;
 
     /**

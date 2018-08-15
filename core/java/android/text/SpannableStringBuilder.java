@@ -17,6 +17,7 @@
 package android.text;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.BaseCanvas;
 import android.graphics.Paint;
 import android.util.Log;
@@ -595,6 +596,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         return false;
     }
 
+    @UnsupportedAppUsage
     private void sendToSpanWatchers(int replaceStart, int replaceEnd, int nbNewChars) {
         for (int i = 0; i < mSpanCount; i++) {
             int spanFlags = mSpanFlags[i];
@@ -861,6 +863,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public <T> T[] getSpans(int queryStart, int queryEnd, @Nullable Class<T> kind,
             boolean sortByInsertionOrder) {
         if (kind == null) return (T[]) ArrayUtils.emptyArray(Object.class);
@@ -1230,6 +1233,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * [start, end[ range.
      * @hide
      */
+    @UnsupportedAppUsage
     public String substring(int start, int end) {
         char[] buf = new char[end - start];
         getChars(start, end, buf, 0);
@@ -1765,18 +1769,26 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
     private InputFilter[] mFilters = NO_FILTERS;
 
+    @UnsupportedAppUsage
     private char[] mText;
+    @UnsupportedAppUsage
     private int mGapStart;
+    @UnsupportedAppUsage
     private int mGapLength;
 
+    @UnsupportedAppUsage
     private Object[] mSpans;
+    @UnsupportedAppUsage
     private int[] mSpanStarts;
+    @UnsupportedAppUsage
     private int[] mSpanEnds;
     private int[] mSpanMax;  // see calcMax() for an explanation of what this array stores
+    @UnsupportedAppUsage
     private int[] mSpanFlags;
     private int[] mSpanOrder;  // store the order of span insertion
     private int mSpanInsertCount;  // counter for the span insertion
 
+    @UnsupportedAppUsage
     private int mSpanCount;
     private IdentityHashMap<Object, Integer> mIndexOfSpan;
     private int mLowWaterMark;  // indices below this have not been touched
