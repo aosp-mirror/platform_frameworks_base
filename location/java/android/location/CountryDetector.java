@@ -19,6 +19,7 @@ package android.location;
 import java.util.HashMap;
 
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -87,6 +88,7 @@ public class CountryDetector {
      *       create an instance of this class is using the factory
      *       Context.getSystemService.
      */
+    @UnsupportedAppUsage
     public CountryDetector(ICountryDetector service) {
         mService = service;
         mListeners = new HashMap<CountryListener, ListenerTransport>();
@@ -98,6 +100,7 @@ public class CountryDetector {
      * @return the country if it is available immediately, otherwise null will
      *         be returned.
      */
+    @UnsupportedAppUsage
     public Country detectCountry() {
         try {
             return mService.detectCountry();
@@ -116,6 +119,7 @@ public class CountryDetector {
      *        implement the callback mechanism. If looper is null then the
      *        callbacks will be called on the main thread.
      */
+    @UnsupportedAppUsage
     public void addCountryListener(CountryListener listener, Looper looper) {
         synchronized (mListeners) {
             if (!mListeners.containsKey(listener)) {
@@ -133,6 +137,7 @@ public class CountryDetector {
     /**
      * Remove the listener
      */
+    @UnsupportedAppUsage
     public void removeCountryListener(CountryListener listener) {
         synchronized (mListeners) {
             ListenerTransport transport = mListeners.get(listener);

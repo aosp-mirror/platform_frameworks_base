@@ -95,7 +95,6 @@ Landroid/location/ILocationManager;->getNetworkProviderPackage()Ljava/lang/Strin
 Landroid/location/ILocationManager;->reportLocation(Landroid/location/Location;Z)V
 Landroid/location/INetInitiatedListener$Stub;-><init>()V
 Landroid/location/INetInitiatedListener;->sendNiResponse(II)Z
-Landroid/location/Location;->setExtraLocation(Ljava/lang/String;Landroid/location/Location;)V
 Landroid/media/AudioManager;->registerAudioPortUpdateListener(Landroid/media/AudioManager$OnAudioPortUpdateListener;)V
 Landroid/media/AudioManager;->unregisterAudioPortUpdateListener(Landroid/media/AudioManager$OnAudioPortUpdateListener;)V
 Landroid/media/AudioSystem;->checkAudioFlinger()I
