@@ -17,6 +17,7 @@
 package android.util;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
@@ -44,6 +45,7 @@ public class LongArray implements Cloneable {
     /**
      * Creates an empty LongArray with the default initial capacity.
      */
+    @UnsupportedAppUsage
     public LongArray() {
         this(10);
     }
@@ -102,6 +104,7 @@ public class LongArray implements Cloneable {
      *
      * @throws IndexOutOfBoundsException when index &lt; 0 || index &gt; size()
      */
+    @UnsupportedAppUsage
     public void add(int index, long value) {
         ensureCapacity(1);
         int rightSegment = mSize - index;
@@ -165,6 +168,7 @@ public class LongArray implements Cloneable {
     /**
      * Returns the value at the specified position in this array.
      */
+    @UnsupportedAppUsage
     public long get(int index) {
         ArrayUtils.checkBounds(mSize, index);
         return mValues[index];
@@ -204,6 +208,7 @@ public class LongArray implements Cloneable {
     /**
      * Returns the number of values in this array.
      */
+    @UnsupportedAppUsage
     public int size() {
         return mSize;
     }
