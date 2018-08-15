@@ -15466,12 +15466,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized(this) {
             // !!! TODO: currently no check here that we're already bound
-            BatteryStatsImpl.Uid.Pkg.Serv ss = null;
-            BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
-            synchronized (stats) {
-                ss = stats.getServiceStatsLocked(app.uid, app.packageName, app.name);
-            }
-
             // Backup agent is now in use, its package can't be stopped.
             try {
                 AppGlobals.getPackageManager().setPackageStoppedState(
@@ -15482,7 +15476,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + app.packageName + ": " + e);
             }
 
-            BackupRecord r = new BackupRecord(ss, app, backupMode);
+            BackupRecord r = new BackupRecord(app, backupMode);
             ComponentName hostingName =
                     (backupMode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL)
                             ? new ComponentName(app.packageName, app.backupAgentName)
