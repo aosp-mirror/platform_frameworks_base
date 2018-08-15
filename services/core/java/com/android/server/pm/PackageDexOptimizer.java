@@ -417,7 +417,7 @@ public class PackageDexOptimizer {
                 // TODO(calin): maybe add a separate call.
                 mInstaller.dexopt(path, info.uid, info.packageName, isa, /*dexoptNeeded*/ 0,
                         /*oatDir*/ null, dexoptFlags,
-                        compilerFilter, info.volumeUuid, classLoaderContext, info.seInfoUser,
+                        compilerFilter, info.volumeUuid, classLoaderContext, info.seInfo,
                         options.isDowngrade(), info.targetSdkVersion, /*profileName*/ null,
                         /*dexMetadataPath*/ null, getReasonName(reason));
             }
