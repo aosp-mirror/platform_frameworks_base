@@ -21,10 +21,11 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricPromptReceiver;
-import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Slog;
 
@@ -35,6 +36,7 @@ import com.android.internal.statusbar.IStatusBarService;
  */
 public abstract class AuthenticationClient extends ClientMonitor {
     private long mOpId;
+    private Handler mHandler;
 
     public abstract int handleFailedAttempt();
     public abstract void resetFailedAttempts();
@@ -97,6 +99,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
         mStatusBarService = statusBarService;
         mFingerprintManager = (FingerprintManager) getContext()
                 .getSystemService(Context.FINGERPRINT_SERVICE);
+        mHandler = new Handler(Looper.getMainLooper());
     }
 
     @Override
@@ -217,15 +220,19 @@ public abstract class AuthenticationClient extends ClientMonitor {
                             BiometricConstants.BIOMETRIC_ERROR_LOCKOUT :
                             BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
 
-                    // TODO: if the dialog is showing, this error should be delayed. On a similar
-                    // note, AuthenticationClient should override onError and delay all other errors
-                    // as well, if the dialog is showing
-                    listener.onError(getHalDeviceId(), errorCode, 0 /* vendorCode */);
-
                     // Send the lockout message to the system dialog
                     if (mBundle != null) {
                         mStatusBarService.onBiometricError(
                                 mFingerprintManager.getErrorString(errorCode, 0 /* vendorCode */));
+                        mHandler.postDelayed(() -> {
+                            try {
+                                listener.onError(getHalDeviceId(), errorCode, 0 /* vendorCode */);
+                            } catch (RemoteException e) {
+                                Slog.w(getLogTag(), "RemoteException while sending error");
+                            }
+                        }, BiometricPrompt.HIDE_DIALOG_DELAY);
+                    } else {
+                        listener.onError(getHalDeviceId(), errorCode, 0 /* vendorCode */);
                     }
                 } catch (RemoteException e) {
                     Slog.w(getLogTag(), "Failed to notify lockout:", e);

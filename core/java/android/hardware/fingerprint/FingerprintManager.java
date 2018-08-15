@@ -1162,24 +1162,9 @@ public class FingerprintManager implements BiometricFingerprintConstants {
         @Override // binder call
         public void onError(long deviceId, int error, int vendorCode) {
             if (mExecutor != null) {
-                // BiometricPrompt case
-                if (error == FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED
-                        || error == FingerprintManager.FINGERPRINT_ERROR_CANCELED) {
-                    // User tapped somewhere to cancel, or authentication was cancelled by the app
-                    // or got kicked out. The prompt is already gone, so send the error immediately.
-                    mExecutor.execute(() -> {
-                        sendErrorResult(deviceId, error, vendorCode);
-                    });
-                } else {
-                    // User got an error that needs to be displayed on the dialog, post a delayed
-                    // runnable on the FingerprintManager handler that sends the error message after
-                    // FingerprintDialog.HIDE_DIALOG_DELAY to send the error to the application.
-                    mHandler.postDelayed(() -> {
-                        mExecutor.execute(() -> {
-                            sendErrorResult(deviceId, error, vendorCode);
-                        });
-                    }, BiometricPrompt.HIDE_DIALOG_DELAY);
-                }
+                mExecutor.execute(() -> {
+                    sendErrorResult(deviceId, error, vendorCode);
+                });
             } else {
                 mHandler.obtainMessage(MSG_ERROR, error, vendorCode, deviceId).sendToTarget();
             }

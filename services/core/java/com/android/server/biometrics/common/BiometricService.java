@@ -58,7 +58,6 @@ import android.util.SparseIntArray;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.server.SystemService;
-import com.android.server.biometrics.face.FaceService;
 import com.android.server.biometrics.fingerprint.FingerprintService;
 
 import java.util.ArrayList;
