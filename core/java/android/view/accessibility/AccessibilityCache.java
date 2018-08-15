@@ -306,17 +306,17 @@ public class AccessibilityCache {
 
                 final int oldChildCount = oldInfo.getChildCount();
                 for (int i = 0; i < oldChildCount; i++) {
+                    final long oldChildId = oldInfo.getChildId(i);
+                    // If the child is no longer present, remove the sub-tree.
+                    if (newChildrenIds == null || newChildrenIds.indexOf(oldChildId) < 0) {
+                        clearSubTreeLocked(windowId, oldChildId);
+                    }
                     if (nodes.get(sourceId) == null) {
                         // We've removed (and thus recycled) this node because it was its own
                         // ancestor (the app gave us bad data), we can't continue using it.
                         // Clear the cache for this window and give up on adding the node.
                         clearNodesForWindowLocked(windowId);
                         return;
-                    }
-                    final long oldChildId = oldInfo.getChildId(i);
-                    // If the child is no longer present, remove the sub-tree.
-                    if (newChildrenIds == null || newChildrenIds.indexOf(oldChildId) < 0) {
-                        clearSubTreeLocked(windowId, oldChildId);
                     }
                 }
 
