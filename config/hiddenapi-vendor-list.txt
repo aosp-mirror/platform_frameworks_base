@@ -356,14 +356,6 @@ Landroid/provider/Telephony$Mms;->isEmailAddress(Ljava/lang/String;)Z
 Landroid/provider/Telephony$Sms$Draft;->addMessage(Landroid/content/ContentResolver;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;)Landroid/net/Uri;
 Landroid/provider/Telephony$Sms$Outbox;->addMessage(Landroid/content/ContentResolver;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;ZJ)Landroid/net/Uri;
 Landroid/R$styleable;->CheckBoxPreference:[I
-Landroid/service/dreams/DreamService;->canDoze()Z
-Landroid/service/dreams/DreamService;->isDozing()Z
-Landroid/service/dreams/DreamService;->startDozing()V
-Landroid/service/dreams/DreamService;->stopDozing()V
-Landroid/service/euicc/EuiccProfileInfo;-><init>(Ljava/lang/String;[Landroid/telephony/UiccAccessRule;Ljava/lang/String;)V
-Landroid/service/euicc/GetDefaultDownloadableSubscriptionListResult;->result:I
-Landroid/service/euicc/GetDownloadableSubscriptionMetadataResult;->result:I
-Landroid/service/vr/VrListenerService;->onCurrentVrActivityChanged(Landroid/content/ComponentName;ZI)V
 Landroid/system/NetlinkSocketAddress;-><init>(II)V
 Landroid/system/Os;->bind(Ljava/io/FileDescriptor;Ljava/net/SocketAddress;)V
 Landroid/system/Os;->connect(Ljava/io/FileDescriptor;Ljava/net/SocketAddress;)V

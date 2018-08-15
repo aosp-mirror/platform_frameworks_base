@@ -17,6 +17,7 @@
 package android.service.voice;
 
 import android.annotation.SdkConstant;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -294,6 +295,7 @@ public class VoiceInteractionService extends Service {
       * @return true if the keyphrase and locale combination is supported, false otherwise.
       * @hide
       */
+    @UnsupportedAppUsage
     public final boolean isKeyphraseAndLocaleSupportedForHotword(String keyphrase, Locale locale) {
         if (mKeyphraseEnrollmentInfo == null) {
             return false;

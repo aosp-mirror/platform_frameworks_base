@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.INotificationManager;
 import android.app.Notification;
@@ -93,6 +94,7 @@ import java.util.List;
  */
 public abstract class NotificationListenerService extends Service {
 
+    @UnsupportedAppUsage
     private final String TAG = getClass().getSimpleName();
 
     /**
@@ -274,9 +276,11 @@ public abstract class NotificationListenerService extends Service {
 
     private final Object mLock = new Object();
 
+    @UnsupportedAppUsage
     private Handler mHandler;
 
     /** @hide */
+    @UnsupportedAppUsage
     protected NotificationListenerWrapper mWrapper = null;
     private boolean isConnected = false;
 
@@ -286,6 +290,7 @@ public abstract class NotificationListenerService extends Service {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     protected INotificationManager mNoMan;
 
     /**
@@ -507,6 +512,7 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     protected final INotificationManager getNotificationInterface() {
         if (mNoMan == null) {
             mNoMan = INotificationManager.Stub.asInterface(
@@ -1065,6 +1071,7 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     protected boolean isBound() {
         if (mWrapper == null) {
             Log.w(TAG, "Notification listener service not yet bound.");
@@ -1464,6 +1471,7 @@ public abstract class NotificationListenerService extends Service {
          * no such preference has been expressed.
          * @hide
          */
+        @UnsupportedAppUsage
         public int getVisibilityOverride() {
             return mVisibilityOverride;
         }
