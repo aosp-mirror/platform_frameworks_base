@@ -19,6 +19,8 @@
 
 package android.opengl;
 
+import android.annotation.UnsupportedAppUsage;
+
 /** OpenGL ES 2.0
  */
 public class GLES20 {
@@ -824,6 +826,7 @@ public class GLES20 {
     // C function void glGetActiveAttrib ( GLuint program, GLuint index, GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type, char *name )
 
     /** @hide Method is broken, but used to be public (b/6006380) */
+    @UnsupportedAppUsage
     public static native void glGetActiveAttrib(
         int program,
         int index,
@@ -872,6 +875,7 @@ public class GLES20 {
     // C function void glGetActiveUniform ( GLuint program, GLuint index, GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type, char *name )
 
     /** @hide Method is broken, but used to be public (b/6006380) */
+    @UnsupportedAppUsage
     public static native void glGetActiveUniform(
         int program,
         int index,

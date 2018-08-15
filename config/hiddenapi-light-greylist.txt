@@ -2815,13 +2815,6 @@ Landroid/nfc/INfcAdapterExtras;->getDriverName(Ljava/lang/String;)Ljava/lang/Str
 Landroid/nfc/INfcAdapterExtras;->open(Ljava/lang/String;Landroid/os/IBinder;)Landroid/os/Bundle;
 Landroid/nfc/INfcAdapterExtras;->setCardEmulationRoute(Ljava/lang/String;I)V
 Landroid/nfc/INfcAdapterExtras;->transceive(Ljava/lang/String;[B)Landroid/os/Bundle;
-Landroid/opengl/EGL14;->eglGetDisplay(J)Landroid/opengl/EGLDisplay;
-Landroid/opengl/GLES20;->glGetActiveAttrib(IIILjava/nio/IntBuffer;Ljava/nio/IntBuffer;Ljava/nio/IntBuffer;B)V
-Landroid/opengl/GLES20;->glGetActiveUniform(IIILjava/nio/IntBuffer;Ljava/nio/IntBuffer;Ljava/nio/IntBuffer;B)V
-Landroid/opengl/GLSurfaceView$EglHelper;->mEglContext:Ljavax/microedition/khronos/egl/EGLContext;
-Landroid/opengl/GLSurfaceView$GLThread;->mEglHelper:Landroid/opengl/GLSurfaceView$EglHelper;
-Landroid/opengl/GLSurfaceView;->mGLThread:Landroid/opengl/GLSurfaceView$GLThread;
-Landroid/opengl/GLSurfaceView;->mRenderer:Landroid/opengl/GLSurfaceView$Renderer;
 Landroid/os/AsyncResult;->forMessage(Landroid/os/Message;)Landroid/os/AsyncResult;
 Landroid/os/AsyncTask;->mFuture:Ljava/util/concurrent/FutureTask;
 Landroid/os/AsyncTask;->mStatus:Landroid/os/AsyncTask$Status;
