@@ -29,6 +29,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.ComponentName;
 import android.net.NetworkRequest;
@@ -202,6 +203,7 @@ public class JobInfo implements Parcelable {
      * JobInfo priority if it is smaller).
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int PRIORITY_FOREGROUND_APP = 30;
 
     /**
@@ -240,6 +242,7 @@ public class JobInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int FLAG_WILL_BE_FOREGROUND = 1 << 0;
 
     /**
@@ -282,11 +285,13 @@ public class JobInfo implements Parcelable {
      */
     public static final int CONSTRAINT_FLAG_STORAGE_NOT_LOW = 1 << 3;
 
+    @UnsupportedAppUsage
     private final int jobId;
     private final PersistableBundle extras;
     private final Bundle transientExtras;
     private final ClipData clipData;
     private final int clipGrantFlags;
+    @UnsupportedAppUsage
     private final ComponentName service;
     private final int constraintFlags;
     private final TriggerContentUri[] triggerContentUris;
@@ -306,6 +311,7 @@ public class JobInfo implements Parcelable {
     private final long initialBackoffMillis;
     private final int backoffPolicy;
     private final int priority;
+    @UnsupportedAppUsage
     private final int flags;
 
     /**
@@ -1009,12 +1015,14 @@ public class JobInfo implements Parcelable {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public Builder setPriority(int priority) {
             mPriority = priority;
             return this;
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public Builder setFlags(int flags) {
             mFlags = flags;
             return this;

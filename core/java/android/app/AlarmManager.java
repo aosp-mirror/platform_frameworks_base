@@ -21,6 +21,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -129,8 +130,10 @@ public class AlarmManager {
             "android.app.action.NEXT_ALARM_CLOCK_CHANGED";
 
     /** @hide */
+    @UnsupportedAppUsage
     public static final long WINDOW_EXACT = 0;
     /** @hide */
+    @UnsupportedAppUsage
     public static final long WINDOW_HEURISTIC = -1;
 
     /**
@@ -138,6 +141,7 @@ public class AlarmManager {
      * other alarms.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int FLAG_STANDALONE = 1<<0;
 
     /**
@@ -145,6 +149,7 @@ public class AlarmManager {
      * is, for example, an alarm for an alarm clock.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int FLAG_WAKE_FROM_IDLE = 1<<1;
 
     /**
@@ -165,6 +170,7 @@ public class AlarmManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED = 1<<3;
 
     /**
@@ -174,8 +180,10 @@ public class AlarmManager {
      * avoids scheduling any further alarms until the marker alarm is executed.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int FLAG_IDLE_UNTIL = 1<<4;
 
+    @UnsupportedAppUsage
     private final IAlarmManager mService;
     private final Context mContext;
     private final String mPackageName;
@@ -628,6 +636,7 @@ public class AlarmManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void set(@AlarmType int type, long triggerAtMillis, long windowMillis,
             long intervalMillis, String tag, OnAlarmListener listener, Handler targetHandler,
             WorkSource workSource) {

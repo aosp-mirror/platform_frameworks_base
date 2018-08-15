@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.IntDef;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.RemoteException;
@@ -126,6 +127,7 @@ public class UiModeManager {
 
     private IUiModeManager mService;
 
+    @UnsupportedAppUsage
     /*package*/ UiModeManager() throws ServiceNotFoundException {
         mService = IUiModeManager.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.UI_MODE_SERVICE));

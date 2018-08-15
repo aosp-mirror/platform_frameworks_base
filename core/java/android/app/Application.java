@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentCallbacks;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
@@ -50,13 +51,17 @@ import java.util.ArrayList;
  */
 public class Application extends ContextWrapper implements ComponentCallbacks2 {
     private static final String TAG = "Application";
+    @UnsupportedAppUsage
     private ArrayList<ComponentCallbacks> mComponentCallbacks =
             new ArrayList<ComponentCallbacks>();
+    @UnsupportedAppUsage
     private ArrayList<ActivityLifecycleCallbacks> mActivityLifecycleCallbacks =
             new ArrayList<ActivityLifecycleCallbacks>();
+    @UnsupportedAppUsage
     private ArrayList<OnProvideAssistDataListener> mAssistCallbacks = null;
 
     /** @hide */
+    @UnsupportedAppUsage
     public LoadedApk mLoadedApk;
 
     public interface ActivityLifecycleCallbacks {
@@ -210,11 +215,13 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     /* package */ final void attach(Context context) {
         attachBaseContext(context);
         mLoadedApk = ContextImpl.getImpl(context).mPackageInfo;
     }
 
+    @UnsupportedAppUsage
     /* package */ void dispatchActivityCreated(@NonNull Activity activity,
             @Nullable Bundle savedInstanceState) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
@@ -226,6 +233,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
+    @UnsupportedAppUsage
     /* package */ void dispatchActivityStarted(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -235,6 +243,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
+    @UnsupportedAppUsage
     /* package */ void dispatchActivityResumed(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -244,6 +253,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
+    @UnsupportedAppUsage
     /* package */ void dispatchActivityPaused(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -253,6 +263,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
+    @UnsupportedAppUsage
     /* package */ void dispatchActivityStopped(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -262,6 +273,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
+    @UnsupportedAppUsage
     /* package */ void dispatchActivitySaveInstanceState(@NonNull Activity activity,
             @NonNull Bundle outState) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
@@ -273,6 +285,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
+    @UnsupportedAppUsage
     /* package */ void dispatchActivityDestroyed(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -292,6 +305,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         return callbacks;
     }
 
+    @UnsupportedAppUsage
     private Object[] collectActivityLifecycleCallbacks() {
         Object[] callbacks = null;
         synchronized (mActivityLifecycleCallbacks) {

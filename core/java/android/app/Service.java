@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -658,6 +659,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public final void setForeground(boolean isForeground) {
         Log.w(TAG, "setForeground: ignoring old API call on " + getClass().getName());
     }
@@ -750,6 +752,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public final void attach(
             Context context,
             ActivityThread thread, String className, IBinder token,
@@ -777,10 +780,16 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     }
 
     // set by the thread after the constructor and before onCreate(Bundle icicle) is called.
+    @UnsupportedAppUsage
     private ActivityThread mThread = null;
+    @UnsupportedAppUsage
     private String mClassName = null;
+    @UnsupportedAppUsage
     private IBinder mToken = null;
+    @UnsupportedAppUsage
     private Application mApplication = null;
+    @UnsupportedAppUsage
     private IActivityManager mActivityManager = null;
+    @UnsupportedAppUsage
     private boolean mStartCompatibility = false;
 }

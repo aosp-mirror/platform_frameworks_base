@@ -17,6 +17,7 @@ package android.app;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.NotificationManager.Importance;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -133,6 +134,7 @@ public final class NotificationChannel implements Parcelable {
     private static final boolean DEFAULT_DELETED = false;
     private static final boolean DEFAULT_SHOW_BADGE = true;
 
+    @UnsupportedAppUsage
     private final String mId;
     private String mName;
     private String mDesc;
@@ -300,6 +302,7 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setBlockableSystem(boolean blockableSystem) {
         mBlockableSystem = blockableSystem;
     }

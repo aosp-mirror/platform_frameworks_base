@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -33,12 +34,14 @@ public class TaskInfo {
      * The id of the user the task was running as.
      * @hide
      */
+    @UnsupportedAppUsage
     public int userId;
 
     /**
      * The id of the ActivityStack that currently contains this task.
      * @hide
      */
+    @UnsupportedAppUsage
     public int stackId;
 
     /**
@@ -90,6 +93,7 @@ public class TaskInfo {
      * The last time this task was active since boot (including time spent in sleep).
      * @hide
      */
+    @UnsupportedAppUsage
     public long lastActiveTime;
 
     /**
@@ -102,18 +106,21 @@ public class TaskInfo {
      * True if the task can go in the split-screen primary stack.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean supportsSplitScreenMultiWindow;
 
     /**
      * The resize mode of the task. See {@link ActivityInfo#resizeMode}.
      * @hide
      */
+    @UnsupportedAppUsage
     public int resizeMode;
 
     /**
      * The current configuration of the task.
      * @hide
      */
+    @UnsupportedAppUsage
     public final Configuration configuration = new Configuration();
 
     TaskInfo() {

@@ -17,6 +17,7 @@
 package android.app.usage;
 
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -31,32 +32,38 @@ public final class UsageStats implements Parcelable {
     /**
      * {@hide}
      */
+    @UnsupportedAppUsage
     public String mPackageName;
 
     /**
      * {@hide}
      */
+    @UnsupportedAppUsage
     public long mBeginTimeStamp;
 
     /**
      * {@hide}
      */
+    @UnsupportedAppUsage
     public long mEndTimeStamp;
 
     /**
      * Last time used by the user with an explicit action (notification, activity launch).
      * {@hide}
      */
+    @UnsupportedAppUsage
     public long mLastTimeUsed;
 
     /**
      * {@hide}
      */
+    @UnsupportedAppUsage
     public long mTotalTimeInForeground;
 
     /**
      * {@hide}
      */
+    @UnsupportedAppUsage
     public int mLaunchCount;
 
     /**
@@ -67,6 +74,7 @@ public final class UsageStats implements Parcelable {
     /**
      * {@hide}
      */
+    @UnsupportedAppUsage
     public int mLastEvent;
 
     /**
