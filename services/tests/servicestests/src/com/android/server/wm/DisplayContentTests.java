@@ -51,6 +51,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.util.SparseIntArray;
 import android.view.DisplayCutout;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.Surface;
 
@@ -573,6 +574,31 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(dc.mShouldOverrideDisplayConfiguration);
         verify(sWm.mDisplayManagerInternal, times(1))
                 .setDisplayInfoOverrideFromWindowManager(dc.getDisplayId(), null);
+    }
+
+    @Test
+    public void testGetPreferredOptionsPanelGravityFromDifferentDisplays() {
+        final DisplayContent portraitDisplay = createNewDisplay();
+        portraitDisplay.mInitialDisplayHeight = 2000;
+        portraitDisplay.mInitialDisplayWidth = 1000;
+
+        portraitDisplay.setRotation(Surface.ROTATION_0);
+        assertFalse(isOptionsPanelAtRight(portraitDisplay.getDisplayId()));
+        portraitDisplay.setRotation(Surface.ROTATION_90);
+        assertTrue(isOptionsPanelAtRight(portraitDisplay.getDisplayId()));
+
+        final DisplayContent landscapeDisplay = createNewDisplay();
+        landscapeDisplay.mInitialDisplayHeight = 1000;
+        landscapeDisplay.mInitialDisplayWidth = 2000;
+
+        landscapeDisplay.setRotation(Surface.ROTATION_0);
+        assertTrue(isOptionsPanelAtRight(landscapeDisplay.getDisplayId()));
+        landscapeDisplay.setRotation(Surface.ROTATION_90);
+        assertFalse(isOptionsPanelAtRight(landscapeDisplay.getDisplayId()));
+    }
+
+    private boolean isOptionsPanelAtRight(int displayId) {
+        return (sWm.getPreferredOptionsPanelGravity(displayId) & Gravity.RIGHT) == Gravity.RIGHT;
     }
 
     private static void verifySizes(DisplayContent displayContent, int expectedBaseWidth,
