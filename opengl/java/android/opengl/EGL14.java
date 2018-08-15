@@ -18,6 +18,7 @@
 
 package android.opengl;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.SurfaceTexture;
 import android.view.Surface;
 import android.view.SurfaceView;
@@ -163,6 +164,7 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
     /**
      * {@hide}
      */
+    @UnsupportedAppUsage
     public static native EGLDisplay eglGetDisplay(
         long display_id
     );
