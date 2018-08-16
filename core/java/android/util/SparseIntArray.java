@@ -21,6 +21,7 @@ import com.android.internal.util.GrowingArrayUtils;
 
 import java.util.Arrays;
 
+import android.annotation.UnsupportedAppUsage;
 import libcore.util.EmptyArray;
 
 /**
@@ -45,8 +46,11 @@ import libcore.util.EmptyArray;
  * order in the case of <code>valueAt(int)</code>.</p>
  */
 public class SparseIntArray implements Cloneable {
+    @UnsupportedAppUsage
     private int[] mKeys;
+    @UnsupportedAppUsage
     private int[] mValues;
+    @UnsupportedAppUsage
     private int mSize;
 
     /**

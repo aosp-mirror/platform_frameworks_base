@@ -18,6 +18,7 @@ package android.util;
 
 import libcore.util.EmptyArray;
 
+import android.annotation.UnsupportedAppUsage;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Map;
@@ -70,16 +71,19 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     /**
      * Maximum number of entries to have in array caches.
      */
+    @UnsupportedAppUsage
     private static final int CACHE_SIZE = 10;
 
     /**
      * Special hash array value that indicates the container is immutable.
      */
+    @UnsupportedAppUsage
     static final int[] EMPTY_IMMUTABLE_INTS = new int[0];
 
     /**
      * @hide Special immutable empty ArrayMap.
      */
+    @UnsupportedAppUsage
     public static final ArrayMap EMPTY = new ArrayMap<>(-1);
 
     /**
@@ -88,14 +92,21 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      * The first entry in the array is a pointer to the next array in the
      * list; the second entry is a pointer to the int[] hash code array for it.
      */
+    @UnsupportedAppUsage
     static Object[] mBaseCache;
+    @UnsupportedAppUsage
     static int mBaseCacheSize;
+    @UnsupportedAppUsage
     static Object[] mTwiceBaseCache;
+    @UnsupportedAppUsage
     static int mTwiceBaseCacheSize;
 
     final boolean mIdentityHashCode;
+    @UnsupportedAppUsage
     int[] mHashes;
+    @UnsupportedAppUsage
     Object[] mArray;
+    @UnsupportedAppUsage
     int mSize;
     MapCollections<K, V> mCollections;
 
@@ -111,6 +122,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         }
     }
 
+    @UnsupportedAppUsage
     int indexOf(Object key, int hash) {
         final int N = mSize;
 
@@ -149,6 +161,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         return ~end;
     }
 
+    @UnsupportedAppUsage
     int indexOfNull() {
         final int N = mSize;
 
@@ -187,6 +200,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         return ~end;
     }
 
+    @UnsupportedAppUsage
     private void allocArrays(final int size) {
         if (mHashes == EMPTY_IMMUTABLE_INTS) {
             throw new UnsupportedOperationException("ArrayMap is immutable");
@@ -225,6 +239,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         mArray = new Object[size<<1];
     }
 
+    @UnsupportedAppUsage
     private static void freeArrays(final int[] hashes, final Object[] array, final int size) {
         if (hashes.length == (BASE_SIZE*2)) {
             synchronized (ArrayMap.class) {
@@ -378,6 +393,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
                 : indexOf(key, mIdentityHashCode ? System.identityHashCode(key) : key.hashCode());
     }
 
+    @UnsupportedAppUsage
     int indexOfValue(Object value) {
         final int N = mSize*2;
         final Object[] array = mArray;
@@ -535,6 +551,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      * The array must already be large enough to contain the item.
      * @hide
      */
+    @UnsupportedAppUsage
     public void append(K key, V value) {
         int index = mSize;
         final int hash = key == null ? 0
