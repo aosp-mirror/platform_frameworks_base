@@ -301,7 +301,7 @@ public class SubscriptionManager {
      * <P>Type: TEXT (String)</P>
      * @hide
      */
-     public static final String CARD_ID = "card_id";
+    public static final String CARD_ID = "card_id";
 
     /**
      * TelephonyProvider column name for the encoded {@link UiccAccessRule}s from
@@ -1051,24 +1051,9 @@ public class SubscriptionManager {
      */
     public int setIconTint(int tint, int subId) {
         if (VDBG) logd("[setIconTint]+ tint:" + tint + " subId:" + subId);
-        if (!isValidSubscriptionId(subId)) {
-            logd("[setIconTint]- fail");
-            return -1;
-        }
-
-        int result = 0;
-
-        try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            if (iSub != null) {
-                result = iSub.setIconTint(tint, subId);
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        return result;
-
+        return setSubscriptionPropertyHelper(subId, "setIconTint",
+                (iSub)-> iSub.setIconTint(tint, subId)
+        );
     }
 
     /**
@@ -1096,24 +1081,9 @@ public class SubscriptionManager {
             logd("[setDisplayName]+  displayName:" + displayName + " subId:" + subId
                     + " nameSource:" + nameSource);
         }
-        if (!isValidSubscriptionId(subId)) {
-            logd("[setDisplayName]- fail");
-            return -1;
-        }
-
-        int result = 0;
-
-        try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            if (iSub != null) {
-                result = iSub.setDisplayNameUsingSrc(displayName, subId, nameSource);
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        return result;
-
+        return setSubscriptionPropertyHelper(subId, "setDisplayName",
+                (iSub)-> iSub.setDisplayNameUsingSrc(displayName, subId, nameSource)
+        );
     }
 
     /**
@@ -1124,24 +1094,13 @@ public class SubscriptionManager {
      * @hide
      */
     public int setDisplayNumber(String number, int subId) {
-        if (number == null || !isValidSubscriptionId(subId)) {
+        if (number == null) {
             logd("[setDisplayNumber]- fail");
             return -1;
         }
-
-        int result = 0;
-
-        try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            if (iSub != null) {
-                result = iSub.setDisplayNumber(number, subId);
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        return result;
-
+        return setSubscriptionPropertyHelper(subId, "setDisplayNumber",
+                (iSub)-> iSub.setDisplayNumber(number, subId)
+        );
     }
 
     /**
@@ -1153,23 +1112,9 @@ public class SubscriptionManager {
      */
     public int setDataRoaming(int roaming, int subId) {
         if (VDBG) logd("[setDataRoaming]+ roaming:" + roaming + " subId:" + subId);
-        if (roaming < 0 || !isValidSubscriptionId(subId)) {
-            logd("[setDataRoaming]- fail");
-            return -1;
-        }
-
-        int result = 0;
-
-        try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            if (iSub != null) {
-                result = iSub.setDataRoaming(roaming, subId);
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        return result;
+        return setSubscriptionPropertyHelper(subId, "setDataRoaming",
+                (iSub)->iSub.setDataRoaming(roaming, subId)
+        );
     }
 
     /**
@@ -1993,5 +1938,30 @@ public class SubscriptionManager {
             }
         }
         return false;
+    }
+
+    private interface CallISubMethodHelper {
+        int callMethod(ISub iSub) throws RemoteException;
+    }
+
+    private int setSubscriptionPropertyHelper(int subId, String methodName,
+            CallISubMethodHelper helper) {
+        if (!isValidSubscriptionId(subId)) {
+            logd("[" + methodName + "]" + "- fail");
+            return -1;
+        }
+
+        int result = 0;
+
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            if (iSub != null) {
+                result = helper.callMethod(iSub);
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+
+        return result;
     }
 }
