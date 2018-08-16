@@ -54,8 +54,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private long mHiSyncId;
     // Need this since there is no method for getting RSSI
     private short mRssi;
-    //TODO: consider remove, BluetoothDevice.getBluetoothClass() is already cached
-    private BluetoothClass mBtClass;
     private HashMap<LocalBluetoothProfile, Integer> mProfileConnectionState;
 
     private final List<LocalBluetoothProfile> mProfiles =
@@ -374,7 +372,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     // TODO: do any of these need to run async on a background thread?
     private void fillData() {
-        fetchBtClass();
         updateProfiles();
         fetchActiveDevices();
         migratePhonebookPermissionChoice();
@@ -587,13 +584,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         return getBondState() == BluetoothDevice.BOND_BONDING;
     }
 
-    /**
-     * Fetches a new value for the cached BT class.
-     */
-    private void fetchBtClass() {
-        mBtClass = mDevice.getBluetoothClass();
-    }
-
     private boolean updateProfiles() {
         ParcelUuid[] uuids = mDevice.getUuids();
         if (uuids == null) return false;
@@ -635,15 +625,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         if (hearingAidProfile != null) {
             mIsActiveDeviceHearingAid = hearingAidProfile.getActiveDevices().contains(mDevice);
         }
-    }
-
-    /**
-     * Refreshes the UI for the BT class, including fetching the latest value
-     * for the class.
-     */
-    void refreshBtClass() {
-        fetchBtClass();
-        dispatchAttributesChanged();
     }
 
     /**
@@ -696,15 +677,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
     }
 
-    void setBtClass(BluetoothClass btClass) {
-        if (btClass != null && mBtClass != btClass) {
-            mBtClass = btClass;
-            dispatchAttributesChanged();
-        }
-    }
-
     public BluetoothClass getBtClass() {
-        return mBtClass;
+        return mDevice.getBluetoothClass();
     }
 
     public List<LocalBluetoothProfile> getProfiles() {
@@ -738,7 +712,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
     }
 
-    private void dispatchAttributesChanged() {
+    void dispatchAttributesChanged() {
         synchronized (mCallbacks) {
             for (Callback callback : mCallbacks) {
                 callback.onDeviceAttributesChanged();

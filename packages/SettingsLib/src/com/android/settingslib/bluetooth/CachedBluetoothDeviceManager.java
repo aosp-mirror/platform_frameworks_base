@@ -260,7 +260,7 @@ public class CachedBluetoothDeviceManager {
     public synchronized void onBtClassChanged(BluetoothDevice device) {
         CachedBluetoothDevice cachedDevice = findDevice(device);
         if (cachedDevice != null) {
-            cachedDevice.refreshBtClass();
+            cachedDevice.dispatchAttributesChanged();
         }
     }
 
