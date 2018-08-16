@@ -16,6 +16,7 @@
 
 package android.security.keymaster;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -28,6 +29,7 @@ public class KeymasterBlob implements Parcelable {
     public KeymasterBlob(byte[] blob) {
         this.blob = blob;
     }
+    @UnsupportedAppUsage
     public static final Parcelable.Creator<KeymasterBlob> CREATOR = new
             Parcelable.Creator<KeymasterBlob>() {
                 public KeymasterBlob createFromParcel(Parcel in) {

@@ -16,6 +16,7 @@
 
 package android.security.keymaster;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,6 +28,7 @@ public class ExportResult implements Parcelable {
     public final int resultCode;
     public final byte[] exportData;
 
+    @UnsupportedAppUsage
     public static final Parcelable.Creator<ExportResult> CREATOR = new
             Parcelable.Creator<ExportResult>() {
                 public ExportResult createFromParcel(Parcel in) {
