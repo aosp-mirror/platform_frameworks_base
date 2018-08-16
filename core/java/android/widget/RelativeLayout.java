@@ -1247,7 +1247,10 @@ public class RelativeLayout extends ViewGroup {
         private int[] mRules = new int[VERB_COUNT];
         private int[] mInitialRules = new int[VERB_COUNT];
 
-        private int mLeft, mTop, mRight, mBottom;
+        private int mLeft;
+        private int mTop;
+        private int mRight;
+        private int mBottom;
 
         /**
          * Whether this view had any relative rules modified following the most
