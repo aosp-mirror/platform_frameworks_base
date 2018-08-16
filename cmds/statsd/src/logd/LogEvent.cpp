@@ -175,6 +175,56 @@ bool LogEvent::write(float value) {
     return false;
 }
 
+
+
+bool LogEvent::writeKeyValuePairs(const std::map<int32_t, int64_t>& int_map,
+                                  const std::map<int32_t, std::string>& string_map,
+                                  const std::map<int32_t, float>& float_map) {
+    if (mContext) {
+         if (android_log_write_list_begin(mContext) < 0) {
+            return false;
+         }
+         for (const auto& itr : int_map) {
+             if (android_log_write_list_begin(mContext) < 0) {
+                return false;
+             }
+             write(itr.first);
+             write(itr.second);
+             if (android_log_write_list_end(mContext) < 0) {
+                return false;
+             }
+         }
+
+         for (const auto& itr : string_map) {
+             if (android_log_write_list_begin(mContext) < 0) {
+                return false;
+             }
+             write(itr.first);
+             write(itr.second.c_str());
+             if (android_log_write_list_end(mContext) < 0) {
+                return false;
+             }
+         }
+
+         for (const auto& itr : float_map) {
+             if (android_log_write_list_begin(mContext) < 0) {
+                return false;
+             }
+             write(itr.first);
+             write(itr.second);
+             if (android_log_write_list_end(mContext) < 0) {
+                return false;
+             }
+         }
+
+         if (android_log_write_list_end(mContext) < 0) {
+            return false;
+         }
+         return true;
+    }
+    return false;
+}
+
 bool LogEvent::write(const std::vector<AttributionNodeInternal>& nodes) {
     if (mContext) {
          if (android_log_write_list_begin(mContext) < 0) {
@@ -225,6 +275,7 @@ void LogEvent::init(android_log_context context) {
     int i = 0;
     int depth = -1;
     int pos[] = {1, 1, 1};
+    bool isKeyValuePairAtom = false;
     do {
         elem = android_log_read_next(context);
         switch ((int)elem.type) {
@@ -232,6 +283,7 @@ void LogEvent::init(android_log_context context) {
                 // elem at [0] is EVENT_TYPE_LIST, [1] is the timestamp, [2] is tag id.
                 if (i == 2) {
                     mTagId = elem.data.int32;
+                    isKeyValuePairAtom = (mTagId == android::util::KEY_VALUE_PAIRS_ATOM);
                 } else {
                     if (depth < 0 || depth > 2) {
                         return;
@@ -249,6 +301,11 @@ void LogEvent::init(android_log_context context) {
                     return;
                 }
 
+                // Handles the oneof field in KeyValuePair atom.
+                if (isKeyValuePairAtom && depth == 2) {
+                    pos[depth] = 4;
+                }
+
                 mValues.push_back(FieldValue(Field(mTagId, pos, depth), Value(elem.data.float32)));
 
                 pos[depth]++;
@@ -260,6 +317,10 @@ void LogEvent::init(android_log_context context) {
                     return;
                 }
 
+                // Handles the oneof field in KeyValuePair atom.
+                if (isKeyValuePairAtom && depth == 2) {
+                    pos[depth] = 3;
+                }
                 mValues.push_back(FieldValue(Field(mTagId, pos, depth),
                                              Value(string(elem.data.string, elem.len))));
 
@@ -273,6 +334,10 @@ void LogEvent::init(android_log_context context) {
                     if (depth < 0 || depth > 2) {
                         ALOGE("Depth > 2. Not supported!");
                         return;
+                    }
+                    // Handles the oneof field in KeyValuePair atom.
+                    if (isKeyValuePairAtom && depth == 2) {
+                        pos[depth] = 2;
                     }
                     mValues.push_back(
                             FieldValue(Field(mTagId, pos, depth), Value((int64_t)elem.data.int64)));

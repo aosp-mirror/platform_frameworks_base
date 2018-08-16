@@ -89,6 +89,89 @@ TEST(LogEventTest, TestLogParsing) {
     EXPECT_EQ((float)1.1, item7.mValue.float_value);
 }
 
+TEST(LogEventTest, TestKeyValuePairsAtomParsing) {
+    LogEvent event1(83, 2000);
+    std::map<int32_t, int64_t> int_map;
+    std::map<int32_t, std::string> string_map;
+    std::map<int32_t, float> float_map;
+
+    int_map[11] = 123L;
+    int_map[22] = 345L;
+
+    string_map[1] = "test2";
+    string_map[2] = "test1";
+
+    float_map[111] = 2.2f;
+    float_map[222] = 1.1f;
+
+    EXPECT_TRUE(event1.writeKeyValuePairs(int_map, string_map, float_map));
+    event1.init();
+
+    EXPECT_EQ(83, event1.GetTagId());
+    const auto& items = event1.getValues();
+    EXPECT_EQ((size_t)12, items.size());
+
+    const FieldValue& item0 = event1.getValues()[0];
+    EXPECT_EQ(0x2010101, item0.mField.getField());
+    EXPECT_EQ(Type::INT, item0.mValue.getType());
+    EXPECT_EQ(11, item0.mValue.int_value);
+
+    const FieldValue& item1 = event1.getValues()[1];
+    EXPECT_EQ(0x2010182, item1.mField.getField());
+    EXPECT_EQ(Type::LONG, item1.mValue.getType());
+    EXPECT_EQ(123L, item1.mValue.long_value);
+
+    const FieldValue& item2 = event1.getValues()[2];
+    EXPECT_EQ(0x2010201, item2.mField.getField());
+    EXPECT_EQ(Type::INT, item2.mValue.getType());
+    EXPECT_EQ(22, item2.mValue.int_value);
+
+    const FieldValue& item3 = event1.getValues()[3];
+    EXPECT_EQ(0x2010282, item3.mField.getField());
+    EXPECT_EQ(Type::LONG, item3.mValue.getType());
+    EXPECT_EQ(345L, item3.mValue.long_value);
+
+    const FieldValue& item4 = event1.getValues()[4];
+    EXPECT_EQ(0x2010301, item4.mField.getField());
+    EXPECT_EQ(Type::INT, item4.mValue.getType());
+    EXPECT_EQ(1, item4.mValue.int_value);
+
+    const FieldValue& item5 = event1.getValues()[5];
+    EXPECT_EQ(0x2010383, item5.mField.getField());
+    EXPECT_EQ(Type::STRING, item5.mValue.getType());
+    EXPECT_EQ("test2", item5.mValue.str_value);
+
+    const FieldValue& item6 = event1.getValues()[6];
+    EXPECT_EQ(0x2010401, item6.mField.getField());
+    EXPECT_EQ(Type::INT, item6.mValue.getType());
+    EXPECT_EQ(2, item6.mValue.int_value);
+
+    const FieldValue& item7 = event1.getValues()[7];
+    EXPECT_EQ(0x2010483, item7.mField.getField());
+    EXPECT_EQ(Type::STRING, item7.mValue.getType());
+    EXPECT_EQ("test1", item7.mValue.str_value);
+
+    const FieldValue& item8 = event1.getValues()[8];
+    EXPECT_EQ(0x2010501, item8.mField.getField());
+    EXPECT_EQ(Type::INT, item8.mValue.getType());
+    EXPECT_EQ(111, item8.mValue.int_value);
+
+    const FieldValue& item9 = event1.getValues()[9];
+    EXPECT_EQ(0x2010584, item9.mField.getField());
+    EXPECT_EQ(Type::FLOAT, item9.mValue.getType());
+    EXPECT_EQ(2.2f, item9.mValue.float_value);
+
+    const FieldValue& item10 = event1.getValues()[10];
+    EXPECT_EQ(0x2018601, item10.mField.getField());
+    EXPECT_EQ(Type::INT, item10.mValue.getType());
+    EXPECT_EQ(222, item10.mValue.int_value);
+
+    const FieldValue& item11 = event1.getValues()[11];
+    EXPECT_EQ(0x2018684, item11.mField.getField());
+    EXPECT_EQ(Type::FLOAT, item11.mValue.getType());
+    EXPECT_EQ(1.1f, item11.mValue.float_value);
+}
+
 TEST(LogEventTest, TestLogParsing2) {
     LogEvent event1(1, 2000);
 
@@ -158,7 +241,7 @@ TEST(LogEventTest, TestLogParsing2) {
     EXPECT_EQ((float)1.1, item7.mValue.float_value);
 }
 
-TEST(LogEventTest, TestKeyValuePairsAtomParsing) {
+TEST(LogEventTest, TestKeyValuePairsEvent) {
     std::map<int32_t, int64_t> int_map;
     std::map<int32_t, std::string> string_map;
     std::map<int32_t, float> float_map;

@@ -184,16 +184,6 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
     expectedNumber++;
   }
 
-  // Skips the key value pair atom.
-  for (map<int, const FieldDescriptor *>::const_iterator it = fields.begin();
-       it != fields.end(); it++) {
-    const FieldDescriptor *field = it->second;
-    java_type_t javaType = java_type(field);
-    if (javaType == JAVA_TYPE_KEY_VALUE_PAIR) {
-      return 0;
-    }
-  }
-
   // Check that only allowed types are present. Remove any invalid ones.
   for (map<int, const FieldDescriptor *>::const_iterator it = fields.begin();
        it != fields.end(); it++) {
