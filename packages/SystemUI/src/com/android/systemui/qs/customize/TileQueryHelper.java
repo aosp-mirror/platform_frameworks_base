@@ -95,7 +95,6 @@ public class TileQueryHelper {
                 continue;
             }
             tile.setListening(this, true);
-            tile.clearState();
             tile.refreshState();
             tile.setListening(this, false);
             tile.setTileSpec(spec);
