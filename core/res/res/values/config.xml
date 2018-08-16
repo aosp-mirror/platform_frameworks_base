@@ -2609,6 +2609,7 @@
          "silent" = silent mode
          "users" = list of users
          "restart" = restart device
+         "emergency" = Launch emergency dialer
          "lockdown" = Lock down device until the user authenticates
          "logout" =  Logout the current user
          -->
@@ -2619,6 +2620,7 @@
         <item>logout</item>
         <item>bugreport</item>
         <item>screenshot</item>
+        <item>emergency</item>
     </string-array>
 
     <!-- Number of milliseconds to hold a wake lock to ensure that drawing is fully
