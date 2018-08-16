@@ -904,6 +904,21 @@ static jint android_os_Binder_getThreadStrictModePolicy(JNIEnv* env, jobject cla
     return IPCThreadState::self()->getStrictModePolicy();
 }
 
+static jint android_os_Binder_setThreadWorkSource(jint workSource)
+{
+    return IPCThreadState::self()->setWorkSource(workSource);
+}
+
+static jint android_os_Binder_getThreadWorkSource()
+{
+    return IPCThreadState::self()->getWorkSource();
+}
+
+static jint android_os_Binder_clearThreadWorkSource()
+{
+    return IPCThreadState::self()->clearWorkSource();
+}
+
 static void android_os_Binder_flushPendingCommands(JNIEnv* env, jobject clazz)
 {
     IPCThreadState::self()->flushCommands();
@@ -941,6 +956,12 @@ static const JNINativeMethod gBinderMethods[] = {
     { "restoreCallingIdentity", "(J)V", (void*)android_os_Binder_restoreCallingIdentity },
     { "setThreadStrictModePolicy", "(I)V", (void*)android_os_Binder_setThreadStrictModePolicy },
     { "getThreadStrictModePolicy", "()I", (void*)android_os_Binder_getThreadStrictModePolicy },
+    // @CriticalNative
+    { "setThreadWorkSource", "(I)I", (void*)android_os_Binder_setThreadWorkSource },
+    // @CriticalNative
+    { "getThreadWorkSource", "()I", (void*)android_os_Binder_getThreadWorkSource },
+    // @CriticalNative
+    { "clearThreadWorkSource", "()I", (void*)android_os_Binder_clearThreadWorkSource },
     { "flushPendingCommands", "()V", (void*)android_os_Binder_flushPendingCommands },
     { "getNativeBBinderHolder", "()J", (void*)android_os_Binder_getNativeBBinderHolder },
     { "getNativeFinalizer", "()J", (void*)android_os_Binder_getNativeFinalizer },
