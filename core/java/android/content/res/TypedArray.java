@@ -20,6 +20,7 @@ import android.annotation.AnyRes;
 import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.annotation.StyleableRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
 import android.graphics.Typeface;
@@ -70,19 +71,29 @@ public class TypedArray {
     static final int STYLE_CHANGING_CONFIGURATIONS = 4;
     static final int STYLE_DENSITY = 5;
 
+    @UnsupportedAppUsage
     private final Resources mResources;
+    @UnsupportedAppUsage
     private DisplayMetrics mMetrics;
+    @UnsupportedAppUsage
     private AssetManager mAssets;
 
+    @UnsupportedAppUsage
     private boolean mRecycled;
 
+    @UnsupportedAppUsage
     /*package*/ XmlBlock.Parser mXml;
+    @UnsupportedAppUsage
     /*package*/ Resources.Theme mTheme;
+    @UnsupportedAppUsage
     /*package*/ int[] mData;
     /*package*/ long mDataAddress;
+    @UnsupportedAppUsage
     /*package*/ int[] mIndices;
     /*package*/ long mIndicesAddress;
+    @UnsupportedAppUsage
     /*package*/ int mLength;
+    @UnsupportedAppUsage
     /*package*/ TypedValue mValue = new TypedValue();
 
     private void resize(int len) {
@@ -276,6 +287,7 @@ public class TypedArray {
      * @throws RuntimeException if the TypedArray has already been recycled.
      * @hide
      */
+    @UnsupportedAppUsage
     public String getNonConfigurationString(@StyleableRes int index,
             @Config int allowedChangingConfigs) {
         if (mRecycled) {
@@ -1165,6 +1177,7 @@ public class TypedArray {
      * @hide
      */
     @Nullable
+    @UnsupportedAppUsage
     public int[] extractThemeAttrs() {
         return extractThemeAttrs(null);
     }
@@ -1173,6 +1186,7 @@ public class TypedArray {
      * @hide
      */
     @Nullable
+    @UnsupportedAppUsage
     public int[] extractThemeAttrs(@Nullable int[] scrap) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
@@ -1244,6 +1258,7 @@ public class TypedArray {
         return changingConfig;
     }
 
+    @UnsupportedAppUsage
     private boolean getValueAt(int index, TypedValue outValue) {
         final int[] data = mData;
         final int type = data[index + STYLE_TYPE];

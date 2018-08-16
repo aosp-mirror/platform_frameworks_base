@@ -23,6 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.Intent;
@@ -788,6 +789,7 @@ public class PackageInstaller {
         }
 
         /** {@hide} */
+        @UnsupportedAppUsage
         public void addProgress(float progress) {
             try {
                 mSession.addClientProgress(progress);
@@ -1090,26 +1092,33 @@ public class PackageInstaller {
         public static final int UID_UNKNOWN = -1;
 
         /** {@hide} */
+        @UnsupportedAppUsage
         public int mode = MODE_INVALID;
         /** {@hide} */
+        @UnsupportedAppUsage
         public int installFlags;
         /** {@hide} */
         public int installLocation = PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
         /** {@hide} */
         public @InstallReason int installReason = PackageManager.INSTALL_REASON_UNKNOWN;
         /** {@hide} */
+        @UnsupportedAppUsage
         public long sizeBytes = -1;
         /** {@hide} */
+        @UnsupportedAppUsage
         public String appPackageName;
         /** {@hide} */
+        @UnsupportedAppUsage
         public Bitmap appIcon;
         /** {@hide} */
+        @UnsupportedAppUsage
         public String appLabel;
         /** {@hide} */
         public long appIconLastModified = -1;
         /** {@hide} */
         public Uri originatingUri;
         /** {@hide} */
+        @UnsupportedAppUsage
         public int originatingUid = UID_UNKNOWN;
         /** {@hide} */
         public Uri referrerUri;
@@ -1420,29 +1429,40 @@ public class PackageInstaller {
     public static class SessionInfo implements Parcelable {
 
         /** {@hide} */
+        @UnsupportedAppUsage
         public int sessionId;
         /** {@hide} */
+        @UnsupportedAppUsage
         public String installerPackageName;
         /** {@hide} */
+        @UnsupportedAppUsage
         public String resolvedBaseCodePath;
         /** {@hide} */
+        @UnsupportedAppUsage
         public float progress;
         /** {@hide} */
+        @UnsupportedAppUsage
         public boolean sealed;
         /** {@hide} */
+        @UnsupportedAppUsage
         public boolean active;
 
         /** {@hide} */
+        @UnsupportedAppUsage
         public int mode;
         /** {@hide} */
         public @InstallReason int installReason;
         /** {@hide} */
+        @UnsupportedAppUsage
         public long sizeBytes;
         /** {@hide} */
+        @UnsupportedAppUsage
         public String appPackageName;
         /** {@hide} */
+        @UnsupportedAppUsage
         public Bitmap appIcon;
         /** {@hide} */
+        @UnsupportedAppUsage
         public CharSequence appLabel;
 
         /** {@hide} */
@@ -1459,6 +1479,7 @@ public class PackageInstaller {
         public int installFlags;
 
         /** {@hide} */
+        @UnsupportedAppUsage
         public SessionInfo() {
         }
 

@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.IActivityManager;
@@ -43,6 +44,7 @@ import android.util.Slog;
  *
  */
 public abstract class BroadcastReceiver {
+    @UnsupportedAppUsage
     private PendingResult mPendingResult;
     private boolean mDebugUnregister;
 
@@ -69,20 +71,32 @@ public abstract class BroadcastReceiver {
         /** @hide */
         public static final int TYPE_UNREGISTERED = 2;
 
+        @UnsupportedAppUsage
         final int mType;
+        @UnsupportedAppUsage
         final boolean mOrderedHint;
+        @UnsupportedAppUsage
         final boolean mInitialStickyHint;
+        @UnsupportedAppUsage
         final IBinder mToken;
+        @UnsupportedAppUsage
         final int mSendingUser;
+        @UnsupportedAppUsage
         final int mFlags;
 
+        @UnsupportedAppUsage
         int mResultCode;
+        @UnsupportedAppUsage
         String mResultData;
+        @UnsupportedAppUsage
         Bundle mResultExtras;
+        @UnsupportedAppUsage
         boolean mAbortBroadcast;
+        @UnsupportedAppUsage
         boolean mFinished;
 
         /** @hide */
+        @UnsupportedAppUsage
         public PendingResult(int resultCode, String resultData, Bundle resultExtras, int type,
                 boolean ordered, boolean sticky, IBinder token, int userId, int flags) {
             mResultCode = resultCode;
@@ -595,6 +609,7 @@ public abstract class BroadcastReceiver {
     /**
      * For internal use to set the result data that is active. @hide
      */
+    @UnsupportedAppUsage
     public final void setPendingResult(PendingResult result) {
         mPendingResult = result;
     }
@@ -602,6 +617,7 @@ public abstract class BroadcastReceiver {
     /**
      * For internal use to set the result data that is active. @hide
      */
+    @UnsupportedAppUsage
     public final PendingResult getPendingResult() {
         return mPendingResult;
     }

@@ -18,6 +18,7 @@ package android.content.res;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.Resources.Theme;
 import android.content.res.Resources.ThemeKey;
@@ -32,6 +33,7 @@ import java.lang.ref.WeakReference;
  * @param <T> type of data to cache
  */
 abstract class ThemedResourceCache<T> {
+    @UnsupportedAppUsage
     private ArrayMap<ThemeKey, LongSparseArray<WeakReference<T>>> mThemedEntries;
     private LongSparseArray<WeakReference<T>> mUnthemedEntries;
     private LongSparseArray<WeakReference<T>> mNullThemedEntries;
@@ -116,6 +118,7 @@ abstract class ThemedResourceCache<T> {
      *
      * @param configChanges a bitmask of configuration changes
      */
+    @UnsupportedAppUsage
     public void onConfigurationChange(@Config int configChanges) {
         prune(configChanges);
     }

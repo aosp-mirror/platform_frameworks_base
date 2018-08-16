@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -31,6 +32,7 @@ import java.util.List;
  * @hide
  */
 public class ParceledListSlice<T extends Parcelable> extends BaseParceledListSlice<T> {
+    @UnsupportedAppUsage
     public ParceledListSlice(List<T> list) {
         super(list);
     }
@@ -59,6 +61,7 @@ public class ParceledListSlice<T extends Parcelable> extends BaseParceledListSli
     }
 
     @Override
+    @UnsupportedAppUsage
     protected void writeParcelableCreator(T parcelable, Parcel dest) {
         dest.writeParcelableCreator((Parcelable) parcelable);
     }
@@ -69,6 +72,7 @@ public class ParceledListSlice<T extends Parcelable> extends BaseParceledListSli
     }
 
     @SuppressWarnings("unchecked")
+    @UnsupportedAppUsage
     public static final Parcelable.ClassLoaderCreator<ParceledListSlice> CREATOR =
             new Parcelable.ClassLoaderCreator<ParceledListSlice>() {
         public ParceledListSlice createFromParcel(Parcel in) {

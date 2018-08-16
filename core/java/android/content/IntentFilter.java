@@ -18,6 +18,7 @@ package android.content;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -271,7 +272,9 @@ public class IntentFilter implements Parcelable {
     public static final String SCHEME_HTTPS = "https";
 
     private int mPriority;
+    @UnsupportedAppUsage
     private int mOrder;
+    @UnsupportedAppUsage
     private final ArrayList<String> mActions;
     private ArrayList<String> mCategories = null;
     private ArrayList<String> mDataSchemes = null;
@@ -536,6 +539,7 @@ public class IntentFilter implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public final void setAutoVerify(boolean autoVerify) {
         mVerifyState &= ~STATE_VERIFY_AUTO;
         if (autoVerify) mVerifyState |= STATE_VERIFY_AUTO;
@@ -651,6 +655,7 @@ public class IntentFilter implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public final boolean isVerified() {
         if ((mVerifyState & STATE_NEED_VERIFY_CHECKED) == STATE_NEED_VERIFY_CHECKED) {
             return ((mVerifyState & STATE_NEED_VERIFY) == STATE_NEED_VERIFY);
@@ -806,6 +811,7 @@ public class IntentFilter implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public final boolean hasExactDataType(String type) {
         return mDataTypes != null && mDataTypes.contains(type);
     }
@@ -1071,6 +1077,7 @@ public class IntentFilter implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public final boolean hasDataSchemeSpecificPart(PatternMatcher ssp) {
         if (mDataSchemeSpecificParts == null) {
             return false;
@@ -1154,6 +1161,7 @@ public class IntentFilter implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public final boolean hasDataAuthority(AuthorityEntry auth) {
         if (mDataAuthorities == null) {
             return false;
@@ -1250,6 +1258,7 @@ public class IntentFilter implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public final boolean hasDataPath(PatternMatcher path) {
         if (mDataPaths == null) {
             return false;

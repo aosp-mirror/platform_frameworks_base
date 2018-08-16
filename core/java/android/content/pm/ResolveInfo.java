@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
@@ -149,6 +150,7 @@ public class ResolveInfo implements Parcelable {
      * If not equal to UserHandle.USER_CURRENT, then the intent will be forwarded to this user.
      * @hide
      */
+    @UnsupportedAppUsage
     public int targetUserId;
 
     /**
@@ -169,14 +171,17 @@ public class ResolveInfo implements Parcelable {
     /**
      * @hide Target comes from system process?
      */
+    @UnsupportedAppUsage
     public boolean system;
 
     /**
      * @hide Does the associated IntentFilter comes from a Browser ?
      */
+    @UnsupportedAppUsage
     public boolean handleAllWebDataURI;
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public ComponentInfo getComponentInfo() {
         if (activityInfo != null) return activityInfo;
         if (serviceInfo != null) return serviceInfo;
