@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.TelephonyManager;
@@ -53,6 +54,7 @@ public class PreciseDataConnectionState implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public PreciseDataConnectionState(int state, int networkType,
             String apnType, String apn, String reason,
             LinkProperties linkProperties, String failCause) {
@@ -95,6 +97,7 @@ public class PreciseDataConnectionState implements Parcelable {
      * @see TelephonyManager#DATA_CONNECTED
      * @see TelephonyManager#DATA_SUSPENDED
      */
+    @UnsupportedAppUsage
     public int getDataConnectionState() {
         return mState;
     }
@@ -119,6 +122,7 @@ public class PreciseDataConnectionState implements Parcelable {
      * @see TelephonyManager#NETWORK_TYPE_EHRPD
      * @see TelephonyManager#NETWORK_TYPE_HSPAP
      */
+    @UnsupportedAppUsage
     public int getDataConnectionNetworkType() {
         return mNetworkType;
     }
@@ -126,6 +130,7 @@ public class PreciseDataConnectionState implements Parcelable {
     /**
      * Get data connection APN type
      */
+    @UnsupportedAppUsage
     public String getDataConnectionAPNType() {
         return mAPNType;
     }
@@ -133,6 +138,7 @@ public class PreciseDataConnectionState implements Parcelable {
     /**
      * Get data connection APN.
      */
+    @UnsupportedAppUsage
     public String getDataConnectionAPN() {
         return mAPN;
     }
@@ -140,6 +146,7 @@ public class PreciseDataConnectionState implements Parcelable {
     /**
      * Get data connection change reason.
      */
+    @UnsupportedAppUsage
     public String getDataConnectionChangeReason() {
         return mReason;
     }
@@ -147,6 +154,7 @@ public class PreciseDataConnectionState implements Parcelable {
     /**
      * Get the properties of the network link.
      */
+    @UnsupportedAppUsage
     public LinkProperties getDataConnectionLinkProperties() {
         return mLinkProperties;
     }
@@ -154,6 +162,7 @@ public class PreciseDataConnectionState implements Parcelable {
     /**
      * Get data connection fail cause, in case there was a failure.
      */
+    @UnsupportedAppUsage
     public String getDataConnectionFailCause() {
         return mFailCause;
     }

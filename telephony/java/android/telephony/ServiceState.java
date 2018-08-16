@@ -19,6 +19,7 @@ package android.telephony;
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -169,6 +170,7 @@ public class ServiceState implements Parcelable {
      * IWLAN
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int RIL_RADIO_TECHNOLOGY_IWLAN = 18;
 
     /**
@@ -233,6 +235,7 @@ public class ServiceState implements Parcelable {
     private String mDataOperatorAlphaLong;
     private String mDataOperatorAlphaShort;
     private String mDataOperatorNumeric;
+    @UnsupportedAppUsage
     private boolean mIsManualNetworkSelection;
 
     private boolean mIsEmergencyOnly;
@@ -240,16 +243,24 @@ public class ServiceState implements Parcelable {
     private int mRilVoiceRadioTechnology;
     private int mRilDataRadioTechnology;
 
+    @UnsupportedAppUsage
     private boolean mCssIndicator;
+    @UnsupportedAppUsage
     private int mNetworkId;
+    @UnsupportedAppUsage
     private int mSystemId;
+    @UnsupportedAppUsage
     private int mCdmaRoamingIndicator;
+    @UnsupportedAppUsage
     private int mCdmaDefaultRoamingIndicator;
+    @UnsupportedAppUsage
     private int mCdmaEriIconIndex;
+    @UnsupportedAppUsage
     private int mCdmaEriIconMode;
 
     private boolean mIsDataRoamingFromRegistration;
 
+    @UnsupportedAppUsage
     private boolean mIsUsingCarrierAggregation;
 
     private int mChannelNumber;
@@ -294,6 +305,7 @@ public class ServiceState implements Parcelable {
      * @return newly created ServiceState
      * @hide
      */
+    @UnsupportedAppUsage
     public static ServiceState newFromBundle(Bundle m) {
         ServiceState ret;
         ret = new ServiceState();
@@ -442,6 +454,7 @@ public class ServiceState implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getVoiceRegState() {
         return mVoiceRegState;
     }
@@ -456,6 +469,7 @@ public class ServiceState implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getDataRegState() {
         return mDataRegState;
     }
@@ -516,6 +530,7 @@ public class ServiceState implements Parcelable {
      * @return roaming status
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean getVoiceRoaming() {
         return mVoiceRoamingType != ROAMING_TYPE_NOT_ROAMING;
     }
@@ -525,6 +540,7 @@ public class ServiceState implements Parcelable {
      * @return roaming type
      * @hide
      */
+    @UnsupportedAppUsage
     public int getVoiceRoamingType() {
         return mVoiceRoamingType;
     }
@@ -534,6 +550,7 @@ public class ServiceState implements Parcelable {
      * @return roaming type
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean getDataRoaming() {
         return mDataRoamingType != ROAMING_TYPE_NOT_ROAMING;
     }
@@ -545,6 +562,7 @@ public class ServiceState implements Parcelable {
      * once the data registration phase has completed.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setDataRoamingFromRegistration(boolean dataRoaming) {
         mIsDataRoamingFromRegistration = dataRoaming;
     }
@@ -563,6 +581,7 @@ public class ServiceState implements Parcelable {
      * @return roaming type
      * @hide
      */
+    @UnsupportedAppUsage
     public int getDataRoamingType() {
         return mDataRoamingType;
     }
@@ -570,6 +589,7 @@ public class ServiceState implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isEmergencyOnly() {
         return mIsEmergencyOnly;
     }
@@ -577,6 +597,7 @@ public class ServiceState implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public int getCdmaRoamingIndicator(){
         return this.mCdmaRoamingIndicator;
     }
@@ -584,6 +605,7 @@ public class ServiceState implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public int getCdmaDefaultRoamingIndicator(){
         return this.mCdmaDefaultRoamingIndicator;
     }
@@ -591,6 +613,7 @@ public class ServiceState implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public int getCdmaEriIconIndex() {
         return this.mCdmaEriIconIndex;
     }
@@ -598,6 +621,7 @@ public class ServiceState implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public int getCdmaEriIconMode() {
         return this.mCdmaEriIconMode;
     }
@@ -619,6 +643,7 @@ public class ServiceState implements Parcelable {
      * @return long name of operator
      * @hide
      */
+    @UnsupportedAppUsage
     public String getVoiceOperatorAlphaLong() {
         return mVoiceOperatorAlphaLong;
     }
@@ -648,6 +673,7 @@ public class ServiceState implements Parcelable {
      * @return short name of operator, null if unregistered or unknown
      * @hide
      */
+    @UnsupportedAppUsage
     public String getVoiceOperatorAlphaShort() {
         return mVoiceOperatorAlphaShort;
     }
@@ -657,6 +683,7 @@ public class ServiceState implements Parcelable {
      * @return short name of operator, null if unregistered or unknown
      * @hide
      */
+    @UnsupportedAppUsage
     public String getDataOperatorAlphaShort() {
         return mDataOperatorAlphaShort;
     }
@@ -700,6 +727,7 @@ public class ServiceState implements Parcelable {
      * @return numeric format of operator, null if unregistered or unknown
      * @hide
      */
+    @UnsupportedAppUsage
     public String getVoiceOperatorNumeric() {
         return mVoiceOperatorNumeric;
     }
@@ -709,6 +737,7 @@ public class ServiceState implements Parcelable {
      * @return numeric format of operator, null if unregistered or unknown
      * @hide
      */
+    @UnsupportedAppUsage
     public String getDataOperatorNumeric() {
         return mDataOperatorNumeric;
     }
@@ -794,6 +823,7 @@ public class ServiceState implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static String rilRadioTechnologyToString(int rt) {
         String rtString;
 
@@ -968,12 +998,14 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setVoiceRegState(int state) {
         mVoiceRegState = state;
         if (DBG) Rlog.d(LOG_TAG, "[ServiceState] setVoiceRegState=" + mVoiceRegState);
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setDataRegState(int state) {
         mDataRegState = state;
         if (VDBG) Rlog.d(LOG_TAG, "[ServiceState] setDataRegState=" + mDataRegState);
@@ -997,21 +1029,25 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setVoiceRoaming(boolean roaming) {
         mVoiceRoamingType = (roaming ? ROAMING_TYPE_UNKNOWN : ROAMING_TYPE_NOT_ROAMING);
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setVoiceRoamingType(int type) {
         mVoiceRoamingType = type;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setDataRoaming(boolean dataRoaming) {
         mDataRoamingType = (dataRoaming ? ROAMING_TYPE_UNKNOWN : ROAMING_TYPE_NOT_ROAMING);
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setDataRoamingType(int type) {
         mDataRoamingType = type;
     }
@@ -1019,6 +1055,7 @@ public class ServiceState implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setEmergencyOnly(boolean emergencyOnly) {
         mIsEmergencyOnly = emergencyOnly;
     }
@@ -1026,6 +1063,7 @@ public class ServiceState implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setCdmaRoamingIndicator(int roaming) {
         this.mCdmaRoamingIndicator = roaming;
     }
@@ -1033,6 +1071,7 @@ public class ServiceState implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setCdmaDefaultRoamingIndicator (int roaming) {
         this.mCdmaDefaultRoamingIndicator = roaming;
     }
@@ -1040,6 +1079,7 @@ public class ServiceState implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setCdmaEriIconIndex(int index) {
         this.mCdmaEriIconIndex = index;
     }
@@ -1047,6 +1087,7 @@ public class ServiceState implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setCdmaEriIconMode(int mode) {
         this.mCdmaEriIconMode = mode;
     }
@@ -1080,6 +1121,7 @@ public class ServiceState implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setOperatorAlphaLong(String longName) {
         mVoiceOperatorAlphaLong = longName;
         mDataOperatorAlphaLong = longName;
@@ -1106,6 +1148,7 @@ public class ServiceState implements Parcelable {
      * @param b second obj
      * @return true if two objects equal or both are null
      */
+    @UnsupportedAppUsage
     private static boolean equalsHandlesNulls (Object a, Object b) {
         return (a == null) ? (b == null) : a.equals (b);
     }
@@ -1116,6 +1159,7 @@ public class ServiceState implements Parcelable {
      * @param m intent notifier map
      * @hide
      */
+    @UnsupportedAppUsage
     private void setFromNotifierBundle(Bundle m) {
         mVoiceRegState = m.getInt("voiceRegState");
         mDataRegState = m.getInt("dataRegState");
@@ -1149,6 +1193,7 @@ public class ServiceState implements Parcelable {
      * @param m intent notifier Bundle
      * @hide
      */
+    @UnsupportedAppUsage
     public void fillInNotifierBundle(Bundle m) {
         m.putInt("voiceRegState", mVoiceRegState);
         m.putInt("dataRegState", mDataRegState);
@@ -1221,6 +1266,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setCssIndicator(int css) {
         this.mCssIndicator = (css != 0);
     }
@@ -1233,10 +1279,12 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getRilVoiceRadioTechnology() {
         return this.mRilVoiceRadioTechnology;
     }
     /** @hide */
+    @UnsupportedAppUsage
     public int getRilDataRadioTechnology() {
         return this.mRilDataRadioTechnology;
     }
@@ -1245,6 +1293,7 @@ public class ServiceState implements Parcelable {
      * @Deprecated to be removed Q3 2013 use {@link #getRilDataRadioTechnology} or
      * {@link #getRilVoiceRadioTechnology}
      */
+    @UnsupportedAppUsage
     public int getRadioTechnology() {
         Rlog.e(LOG_TAG, "ServiceState.getRadioTechnology() DEPRECATED will be removed *******");
         return getRilDataRadioTechnology();
@@ -1374,16 +1423,19 @@ public class ServiceState implements Parcelable {
 
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getDataNetworkType() {
         return rilRadioTechnologyToNetworkType(mRilDataRadioTechnology);
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getVoiceNetworkType() {
         return rilRadioTechnologyToNetworkType(mRilVoiceRadioTechnology);
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getCssIndicator() {
         return this.mCssIndicator ? 1 : 0;
     }
@@ -1407,6 +1459,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static boolean isGsm(int radioTechnology) {
         return radioTechnology == RIL_RADIO_TECHNOLOGY_GPRS
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_EDGE
@@ -1424,6 +1477,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static boolean isCdma(int radioTechnology) {
         return radioTechnology == RIL_RADIO_TECHNOLOGY_IS95A
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_IS95B
@@ -1441,11 +1495,13 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static boolean bearerBitmapHasCdma(int radioTechnologyBitmap) {
         return (RIL_RADIO_CDMA_TECHNOLOGY_BITMASK & radioTechnologyBitmap) != 0;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static boolean bitmaskHasTech(int bearerBitmask, int radioTech) {
         if (bearerBitmask == 0) {
             return true;
@@ -1517,6 +1573,7 @@ public class ServiceState implements Parcelable {
      * voice SS. The voice SS is only used if it is IN_SERVICE (otherwise the base SS is returned).
      * @hide
      * */
+    @UnsupportedAppUsage
     public static ServiceState mergeServiceStates(ServiceState baseSs, ServiceState voiceSs) {
         if (voiceSs.mVoiceRegState != STATE_IN_SERVICE) {
             return baseSs;

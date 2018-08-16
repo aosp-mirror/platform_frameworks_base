@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -77,6 +78,7 @@ public class RadioAccessFamily implements Parcelable {
      *        in RadioAccessFamily. It's a bit mask value to represent
      *        the support type.
      */
+    @UnsupportedAppUsage
     public RadioAccessFamily(int phoneId, int radioAccessFamily) {
         mPhoneId = phoneId;
         mRadioAccessFamily = radioAccessFamily;
@@ -87,6 +89,7 @@ public class RadioAccessFamily implements Parcelable {
      *
      * @return phone ID
      */
+    @UnsupportedAppUsage
     public int getPhoneId() {
         return mPhoneId;
     }
@@ -96,6 +99,7 @@ public class RadioAccessFamily implements Parcelable {
      *
      * @return radio access family
      */
+    @UnsupportedAppUsage
     public int getRadioAccessFamily() {
         return mRadioAccessFamily;
     }
@@ -150,6 +154,7 @@ public class RadioAccessFamily implements Parcelable {
         }
     };
 
+    @UnsupportedAppUsage
     public static int getRafFromNetworkType(int type) {
         int raf;
 
@@ -263,6 +268,7 @@ public class RadioAccessFamily implements Parcelable {
         return TelephonyManager.NETWORK_CLASS_UNKNOWN;
     }
 
+    @UnsupportedAppUsage
     public static int getNetworkTypeFromRaf(int raf) {
         int type;
 
