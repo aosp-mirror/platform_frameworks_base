@@ -50,7 +50,6 @@ public class CachedBluetoothDeviceManagerTest {
     private final static String DEVICE_ADDRESS_3 = "AA:BB:CC:DD:EE:33";
     private final static String DEVICE_SUMMARY_1 = "summary 1";
     private final static String DEVICE_SUMMARY_2 = "summary 2";
-    private final static String DEVICE_SUMMARY_3 = "summary 3";
     private final static long HISYNCID1 = 10;
     private final static long HISYNCID2 = 11;
     private final BluetoothClass DEVICE_CLASS_1 =
@@ -82,11 +81,6 @@ public class CachedBluetoothDeviceManagerTest {
     private CachedBluetoothDevice mCachedDevice3;
     private CachedBluetoothDeviceManager mCachedDeviceManager;
     private Context mContext;
-    private String[] mActiveDeviceStringsArray;
-    private String mActiveDeviceStringNone;
-    private String mActiveDeviceStringAll;
-    private String mActiveDeviceStringMedia;
-    private String mActiveDeviceStringPhone;
 
     @Before
     public void setUp() {
