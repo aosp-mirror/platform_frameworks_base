@@ -16,6 +16,7 @@
 
 package android.text.method;
 
+import android.annotation.UnsupportedAppUsage;
 import android.text.Editable;
 import android.text.NoCopySpan;
 import android.text.Spannable;
@@ -361,6 +362,7 @@ public abstract class MetaKeyKeyListener {
      * Start selecting text.
      * @hide pending API review
      */
+    @UnsupportedAppUsage
     public static void startSelecting(View view, Spannable content) {
         content.setSpan(SELECTING, 0, 0, PRESSED);
     }
@@ -370,6 +372,7 @@ public abstract class MetaKeyKeyListener {
      * call {@link android.text.Selection#setSelection} too.
      * @hide pending API review
      */
+    @UnsupportedAppUsage
     public static void stopSelecting(View view, Spannable content) {
         content.removeSpan(SELECTING);
     }

@@ -17,6 +17,7 @@
 package android.text.format;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -178,6 +179,7 @@ public class DateFormat {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean is24HourFormat(Context context, int userHandle) {
         final String value = Settings.System.getStringForUser(context.getContentResolver(),
                 Settings.System.TIME_12_24, userHandle);
@@ -270,6 +272,7 @@ public class DateFormat {
      * @param context the application context
      * @hide
      */
+    @UnsupportedAppUsage
     public static String getTimeFormatString(Context context) {
         return getTimeFormatString(context, context.getUserId());
     }
@@ -281,6 +284,7 @@ public class DateFormat {
      * @param userHandle the user handle of the user to query the format for
      * @hide
      */
+    @UnsupportedAppUsage
     public static String getTimeFormatString(Context context, int userHandle) {
         final LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
         return is24HourFormat(context, userHandle) ? d.timeFormat_Hm : d.timeFormat_hm;
@@ -379,6 +383,7 @@ public class DateFormat {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean hasSeconds(CharSequence inFormat) {
         return hasDesignator(inFormat, SECONDS);
     }
@@ -392,6 +397,7 @@ public class DateFormat {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean hasDesignator(CharSequence inFormat, char designator) {
         if (inFormat == null) return false;
 

@@ -17,6 +17,7 @@
 package android.text;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 
 import com.android.internal.util.Preconditions;
 
@@ -164,6 +165,7 @@ public interface InputFilter
      * greater than the specified length.
      */
     public static class LengthFilter implements InputFilter {
+        @UnsupportedAppUsage
         private final int mMax;
 
         public LengthFilter(int max) {

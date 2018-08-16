@@ -16,6 +16,7 @@
 
 package android.text;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.content.res.Resources;
@@ -628,6 +629,7 @@ public class Html {
         }
     }
 
+    @UnsupportedAppUsage
     private static void withinStyle(StringBuilder out, CharSequence text,
                                     int start, int end) {
         for (int i = start; i < end; i++) {

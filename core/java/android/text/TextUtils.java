@@ -21,6 +21,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.PluralsRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.icu.lang.UCharacter;
@@ -1193,6 +1194,7 @@ public class TextUtils {
         /**
          * @hide
          */
+        @UnsupportedAppUsage
         END_SMALL
     }
 
@@ -1732,6 +1734,7 @@ public class TextUtils {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean isPrintableAsciiOnly(final CharSequence str) {
         final int len = str.length();
         for (int i = 0; i < len; i++) {
@@ -1957,6 +1960,7 @@ public class TextUtils {
      * @see #unpackRangeEndFromLong(long)
      * @hide
      */
+    @UnsupportedAppUsage
     public static long packRangeInLong(int start, int end) {
         return (((long) start) << 32) | end;
     }
@@ -1967,6 +1971,7 @@ public class TextUtils {
      * @see #packRangeInLong(int, int)
      * @hide
      */
+    @UnsupportedAppUsage
     public static int unpackRangeStartFromLong(long range) {
         return (int) (range >>> 32);
     }
@@ -1977,6 +1982,7 @@ public class TextUtils {
      * @see #packRangeInLong(int, int)
      * @hide
      */
+    @UnsupportedAppUsage
     public static int unpackRangeEndFromLong(long range) {
         return (int) (range & 0x00000000FFFFFFFFL);
     }
