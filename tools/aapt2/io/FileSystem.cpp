@@ -16,6 +16,9 @@
 
 #include "io/FileSystem.h"
 
+#include <dirent.h>
+
+#include "android-base/errors.h"
 #include "androidfw/StringPiece.h"
 #include "utils/FileMap.h"
 
@@ -26,6 +29,7 @@
 #include "util/Util.h"
 
 using ::android::StringPiece;
+using ::android::base::SystemErrorCodeToString;
 
 namespace aapt {
 namespace io {
@@ -62,6 +66,50 @@ IFile* FileCollectionIterator::Next() {
   IFile* result = current_->second.get();
   ++current_;
   return result;
+}
+
+std::unique_ptr<FileCollection> FileCollection::Create(const android::StringPiece& root,
+                                                        std::string* outError) {
+  std::unique_ptr<FileCollection> collection =
+      std::unique_ptr<FileCollection>(new FileCollection());
+
+  std::unique_ptr<DIR, decltype(closedir) *> d(opendir(root.data()), closedir);
+  if (!d) {
+    *outError = "failed to open directory: " + SystemErrorCodeToString(errno);
+    return nullptr;
+  }
+
+  while (struct dirent *entry = readdir(d.get())) {
+    std::string prefix_path = root.to_string();
+    file::AppendPath(&prefix_path, entry->d_name);
+
+    // The directory to iterate over looking for files
+    if (file::GetFileType(prefix_path) != file::FileType::kDirectory
+        || file::IsHidden(prefix_path)) {
+      continue;
+    }
+
+    std::unique_ptr<DIR, decltype(closedir)*> subdir(opendir(prefix_path.data()), closedir);
+    if (!subdir) {
+      *outError = "failed to open directory: " + SystemErrorCodeToString(errno);
+      return nullptr;
+    }
+
+    while (struct dirent* leaf_entry = readdir(subdir.get())) {
+      std::string full_path = prefix_path;
+      file::AppendPath(&full_path, leaf_entry->d_name);
+
+      // Do not add folders to the file collection
+      if (file::GetFileType(full_path) == file::FileType::kDirectory
+          || file::IsHidden(full_path)) {
+        continue;
+      }
+
+      collection->InsertFile(full_path);
+    }
+  }
+
+  return collection;
 }
 
 IFile* FileCollection::InsertFile(const StringPiece& path) {

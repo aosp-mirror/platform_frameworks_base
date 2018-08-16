@@ -20,6 +20,7 @@
 #include "ziparchive/zip_archive.h"
 
 #include "Source.h"
+#include "util/Files.h"
 #include "util/Util.h"
 
 using ::android::StringPiece;
@@ -121,9 +122,14 @@ std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(
     std::string zip_entry_path =
         std::string(reinterpret_cast<const char*>(zip_entry_name.name),
                     zip_entry_name.name_length);
-    std::string nested_path = path.to_string() + "@" + zip_entry_path;
-    std::unique_ptr<IFile> file =
-        util::make_unique<ZipFile>(collection->handle_, zip_data, Source(nested_path));
+
+    // Do not add folders to the file collection
+    if (util::EndsWith(zip_entry_path, "/")) {
+      continue;
+    }
+
+    std::unique_ptr<IFile> file = util::make_unique<ZipFile>(collection->handle_, zip_data,
+        Source(zip_entry_path, path.to_string()));
     collection->files_by_name_[zip_entry_path] = file.get();
     collection->files_.push_back(std::move(file));
   }
@@ -132,6 +138,7 @@ std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(
     if (out_error) *out_error = ErrorCodeString(result);
     return {};
   }
+
   return collection;
 }
 

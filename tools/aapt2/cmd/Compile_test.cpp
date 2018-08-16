@@ -18,6 +18,7 @@
 
 #include "android-base/file.h"
 #include "io/StringStream.h"
+#include "io/ZipArchive.h"
 #include "java/AnnotationProcessor.h"
 #include "test/Test.h"
 
@@ -29,7 +30,6 @@ int TestCompile(const std::string& path, const std::string& outDir, bool legacy,
   args.push_back(path);
   args.push_back("-o");
   args.push_back(outDir);
-  args.push_back("-v");
   if (legacy) {
     args.push_back("--legacy");
   }
@@ -94,4 +94,56 @@ TEST(CompilerTest, MultiplePeriods) {
   ASSERT_EQ(remove(path5_out.c_str()), 0);
 }
 
+TEST(CompilerTest, DirInput) {
+  StdErrDiagnostics diag;
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  const std::string kResDir = android::base::Dirname(android::base::GetExecutablePath())
+                            + "/integration-tests/CompileTest/DirInput/res";
+  const std::string kOutputFlata = android::base::Dirname(android::base::GetExecutablePath())
+                                 + "/integration-tests/CompileTest/DirInput/compiled.flata";
+  remove(kOutputFlata.c_str());
+
+  std::vector<android::StringPiece> args;
+  args.push_back("--dir");
+  args.push_back(kResDir);
+  args.push_back("-o");
+  args.push_back(kOutputFlata);
+  ASSERT_EQ(CompileCommand(&diag).Execute(args, &std::cerr), 0);
+
+  // Check for the presence of the compiled files
+  std::string err;
+  std::unique_ptr<io::ZipFileCollection> zip = io::ZipFileCollection::Create(kOutputFlata, &err);
+  ASSERT_NE(zip, nullptr) << err;
+  ASSERT_NE(zip->FindFile("drawable_image.png.flat"), nullptr);
+  ASSERT_NE(zip->FindFile("layout_layout.xml.flat"), nullptr);
+  ASSERT_NE(zip->FindFile("values_values.arsc.flat"), nullptr);
+  ASSERT_EQ(remove(kOutputFlata.c_str()), 0);
 }
+
+TEST(CompilerTest, ZipInput) {
+  StdErrDiagnostics diag;
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  const std::string kResZip = android::base::Dirname(android::base::GetExecutablePath())
+                            + "/integration-tests/CompileTest/ZipInput/res.zip";
+  const std::string kOutputFlata = android::base::Dirname(android::base::GetExecutablePath())
+                                 + "/integration-tests/CompileTest/ZipInput/compiled.flata";
+  remove(kOutputFlata.c_str());
+
+  std::vector<android::StringPiece> args;
+  args.push_back("--zip");
+  args.push_back(kResZip);
+  args.push_back("-o");
+  args.push_back(kOutputFlata);
+  ASSERT_EQ(CompileCommand(&diag).Execute(args, &std::cerr), 0);
+
+  // Check for the presence of the compiled files
+  std::string err;
+  std::unique_ptr<io::ZipFileCollection> zip = io::ZipFileCollection::Create(kOutputFlata, &err);
+  ASSERT_NE(zip, nullptr) << err;
+  ASSERT_NE(zip->FindFile("drawable_image.png.flat"), nullptr);
+  ASSERT_NE(zip->FindFile("layout_layout.xml.flat"), nullptr);
+  ASSERT_NE(zip->FindFile("values_values.arsc.flat"), nullptr);
+  ASSERT_EQ(remove(kOutputFlata.c_str()), 0);
+}
+
+} // namespace aapt

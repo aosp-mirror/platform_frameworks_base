@@ -184,10 +184,7 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
   std::unique_ptr<io::IFileCollectionIterator> iterator = apk_->Iterator();
   while (iterator->HasNext()) {
     io::IFile* file = iterator->Next();
-
     std::string path = file->GetSource().path;
-    // The name of the path has the format "<zip-file-name>@<path-to-file>".
-    path = path.substr(path.find('@') + 1);
 
     // Skip resources that are not referenced if requested.
     if (path.find("res/") == 0 && referenced_resources.find(path) == referenced_resources.end()) {
