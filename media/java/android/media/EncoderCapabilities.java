@@ -42,11 +42,15 @@ public class EncoderCapabilities
      */
     static public class VideoEncoderCap {
         // These are not modifiable externally, thus are public accessible
-        public final int mCodec;                                 // @see android.media.MediaRecorder.VideoEncoder
-        public final int mMinBitRate, mMaxBitRate;               // min and max bit rate (bps)
-        public final int mMinFrameRate, mMaxFrameRate;           // min and max frame rate (fps)
-        public final int mMinFrameWidth, mMaxFrameWidth;         // min and max frame width (pixel)
-        public final int mMinFrameHeight, mMaxFrameHeight;       // minn and max frame height (pixel)
+        public final int mCodec;                // @see android.media.MediaRecorder.VideoEncoder
+        public final int mMinBitRate;           // min bit rate (bps)
+        public final int mMaxBitRate;           // max bit rate (bps)
+        public final int mMinFrameRate;         // min frame rate (fps)
+        public final int mMaxFrameRate;         // max frame rate (fps)
+        public final int mMinFrameWidth;        // min frame width (pixel)
+        public final int mMaxFrameWidth;        // max frame width (pixel)
+        public final int mMinFrameHeight;       // min frame height (pixel)
+        public final int mMaxFrameHeight;       // max frame height (pixel)
 
         // Private constructor called by JNI
         private VideoEncoderCap(int codec,
