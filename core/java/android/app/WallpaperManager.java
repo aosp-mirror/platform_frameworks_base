@@ -25,6 +25,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -493,6 +494,7 @@ public class WallpaperManager {
     }
 
     private static final Object sSync = new Object[0];
+    @UnsupportedAppUsage
     private static Globals sGlobals;
 
     static void initGlobals(IWallpaperManager service, Looper looper) {
@@ -517,6 +519,7 @@ public class WallpaperManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public IWallpaperManager getIWallpaperManager() {
         return sGlobals.mService;
     }
@@ -820,6 +823,7 @@ public class WallpaperManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public Bitmap getBitmap() {
         return getBitmap(false);
     }
@@ -831,6 +835,7 @@ public class WallpaperManager {
      * @see Bitmap.Config#HARDWARE
      * @hide
      */
+    @UnsupportedAppUsage
     public Bitmap getBitmap(boolean hardware) {
         return getBitmapAsUser(mContext.getUserId(), hardware);
     }
@@ -886,6 +891,7 @@ public class WallpaperManager {
      * @param userId Owner of the wallpaper or UserHandle.USER_ALL.
      * @hide
      */
+    @UnsupportedAppUsage
     public void addOnColorsChangedListener(@NonNull OnColorsChangedListener listener,
             @NonNull Handler handler, int userId) {
         sGlobals.addOnColorsChangedListener(listener, handler, userId);
@@ -939,6 +945,7 @@ public class WallpaperManager {
      * @return {@link WallpaperColors} or null if colors are unknown.
      * @hide
      */
+    @UnsupportedAppUsage
     public @Nullable WallpaperColors getWallpaperColors(int which, int userId) {
         return sGlobals.getWallpaperColors(which, userId);
     }
@@ -958,6 +965,7 @@ public class WallpaperManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public ParcelFileDescriptor getWallpaperFile(@SetWallpaperFlags int which, int userId) {
         if (which != FLAG_SYSTEM && which != FLAG_LOCK) {
             throw new IllegalArgumentException("Must request exactly one kind of wallpaper");
@@ -1268,6 +1276,7 @@ public class WallpaperManager {
      * requires permission {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
      * @hide
      */
+    @UnsupportedAppUsage
     public int setBitmap(Bitmap fullImage, Rect visibleCropHint,
             boolean allowBackup, @SetWallpaperFlags int which, int userId)
             throws IOException {
@@ -1658,6 +1667,7 @@ public class WallpaperManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT)
+    @UnsupportedAppUsage
     public boolean setWallpaperComponent(ComponentName name, int userId) {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
@@ -1835,6 +1845,7 @@ public class WallpaperManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static InputStream openDefaultWallpaper(Context context, @SetWallpaperFlags int which) {
         final String whichProp;
         final int defaultResId;

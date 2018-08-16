@@ -17,6 +17,7 @@ package android.app;
 
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -49,6 +50,7 @@ public final class NotificationChannelGroup implements Parcelable {
     private static final String ATT_ID = "id";
     private static final String ATT_BLOCKED = "blocked";
 
+    @UnsupportedAppUsage
     private final String mId;
     private CharSequence mName;
     private String mDescription;

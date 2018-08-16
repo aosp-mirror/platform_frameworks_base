@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.servertransaction.PendingTransactionActions;
 import android.content.Intent;
@@ -73,18 +74,23 @@ public class LocalActivityManager {
     /** Thread our activities are running in. */
     private final ActivityThread mActivityThread;
     /** The containing activity that owns the activities we create. */
+    @UnsupportedAppUsage
     private final Activity mParent;
 
     /** The activity that is currently resumed. */
+    @UnsupportedAppUsage
     private LocalActivityRecord mResumed;
     /** id -> record of all known activities. */
+    @UnsupportedAppUsage
     private final Map<String, LocalActivityRecord> mActivities
             = new HashMap<String, LocalActivityRecord>();
     /** array of all known activities for easy iterating. */
+    @UnsupportedAppUsage
     private final ArrayList<LocalActivityRecord> mActivityArray
             = new ArrayList<LocalActivityRecord>();
 
     /** True if only one activity can be resumed at a time */
+    @UnsupportedAppUsage
     private boolean mSingleMode;
     
     /** Set to true once we find out the container is finishing. */
@@ -111,6 +117,7 @@ public class LocalActivityManager {
         mSingleMode = singleMode;
     }
 
+    @UnsupportedAppUsage
     private void moveToState(LocalActivityRecord r, int desiredState) {
         if (r.curState == RESTORED || r.curState == DESTROYED) {
             // startActivity() has not yet been called, so nothing to do.

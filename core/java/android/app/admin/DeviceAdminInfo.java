@@ -17,6 +17,7 @@
 package android.app.admin;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -180,6 +181,7 @@ public final class DeviceAdminInfo implements Parcelable {
     /** @hide */
     public static class PolicyInfo {
         public final int ident;
+        @UnsupportedAppUsage
         public final String tag;
         public final int label;
         public final int description;
@@ -479,6 +481,7 @@ public final class DeviceAdminInfo implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public ArrayList<PolicyInfo> getUsedPolicies() {
         ArrayList<PolicyInfo> res = new ArrayList<PolicyInfo>();
         for (int i=0; i<sPoliciesDisplayOrder.size(); i++) {

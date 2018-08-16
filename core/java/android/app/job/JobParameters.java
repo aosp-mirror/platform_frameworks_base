@@ -18,6 +18,7 @@ package android.app.job;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.job.IJobCallback;
 import android.content.ClipData;
 import android.net.Network;
@@ -59,11 +60,13 @@ public class JobParameters implements Parcelable {
         }
     }
 
+    @UnsupportedAppUsage
     private final int jobId;
     private final PersistableBundle extras;
     private final Bundle transientExtras;
     private final ClipData clipData;
     private final int clipGrantFlags;
+    @UnsupportedAppUsage
     private final IBinder callback;
     private final boolean overrideDeadlineExpired;
     private final Uri[] mTriggeredContentUris;
@@ -273,6 +276,7 @@ public class JobParameters implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public IJobCallback getCallback() {
         return IJobCallback.Stub.asInterface(callback);
     }
