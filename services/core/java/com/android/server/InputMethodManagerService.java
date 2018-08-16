@@ -1714,10 +1714,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public void addClient(IInputMethodClient client,
-            IInputContext inputContext, int uid, int pid) {
-        if (!calledFromValidUser()) {
-            return;
+    public void addClient(IInputMethodClient client, IInputContext inputContext, int uid, int pid) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Only system process can call this method.");
         }
         synchronized (mMethodMap) {
             mClients.put(client.asBinder(), new ClientState(client,
@@ -1727,8 +1726,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public void removeClient(IInputMethodClient client) {
-        if (!calledFromValidUser()) {
-            return;
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Only system process can call this method.");
         }
         synchronized (mMethodMap) {
             ClientState cs = mClients.remove(client.asBinder());
