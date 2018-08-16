@@ -4688,11 +4688,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mSleeping;
     }
 
-    /**
-     * Update AMS states when an activity is resumed. This should only be called by
-     * {@link ActivityStack#onActivityStateChanged(
-     * ActivityRecord, ActivityStack.ActivityState, String)} when an activity is resumed.
-     */
+    /** Update AMS states when an activity is resumed. */
     void setResumedActivityUncheckLocked(ActivityRecord r, String reason) {
         final TaskRecord task = r.getTask();
         if (task.isActivityTypeStandard()) {
