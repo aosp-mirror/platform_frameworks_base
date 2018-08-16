@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.IntDef;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -39,11 +40,13 @@ import java.lang.annotation.RetentionPolicy;
 @SystemService(Context.STATUS_BAR_SERVICE)
 public class StatusBarManager {
 
+    @UnsupportedAppUsage
     public static final int DISABLE_EXPAND = View.STATUS_BAR_DISABLE_EXPAND;
     public static final int DISABLE_NOTIFICATION_ICONS = View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS;
     public static final int DISABLE_NOTIFICATION_ALERTS
             = View.STATUS_BAR_DISABLE_NOTIFICATION_ALERTS;
     @Deprecated
+    @UnsupportedAppUsage
     public static final int DISABLE_NOTIFICATION_TICKER
             = View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER;
     public static final int DISABLE_SYSTEM_INFO = View.STATUS_BAR_DISABLE_SYSTEM_INFO;
@@ -57,6 +60,7 @@ public class StatusBarManager {
     public static final int DISABLE_NAVIGATION = 
             View.STATUS_BAR_DISABLE_HOME | View.STATUS_BAR_DISABLE_RECENT;
 
+    @UnsupportedAppUsage
     public static final int DISABLE_NONE = 0x00000000;
 
     public static final int DISABLE_MASK = DISABLE_EXPAND | DISABLE_NOTIFICATION_ICONS
@@ -107,14 +111,18 @@ public class StatusBarManager {
     public static final int CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP = 1;
     public static final int CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER = 2;
 
+    @UnsupportedAppUsage
     private Context mContext;
     private IStatusBarService mService;
+    @UnsupportedAppUsage
     private IBinder mToken = new Binder();
 
+    @UnsupportedAppUsage
     StatusBarManager(Context context) {
         mContext = context;
     }
 
+    @UnsupportedAppUsage
     private synchronized IStatusBarService getService() {
         if (mService == null) {
             mService = IStatusBarService.Stub.asInterface(
@@ -130,6 +138,7 @@ public class StatusBarManager {
      * Disable some features in the status bar.  Pass the bitwise-or of the DISABLE_* flags.
      * To re-enable everything, pass {@link #DISABLE_NONE}.
      */
+    @UnsupportedAppUsage
     public void disable(int what) {
         try {
             final int userId = Binder.getCallingUserHandle().getIdentifier();
@@ -163,6 +172,7 @@ public class StatusBarManager {
     /**
      * Expand the notifications panel.
      */
+    @UnsupportedAppUsage
     public void expandNotificationsPanel() {
         try {
             final IStatusBarService svc = getService();
@@ -177,6 +187,7 @@ public class StatusBarManager {
     /**
      * Collapse the notifications and settings panels.
      */
+    @UnsupportedAppUsage
     public void collapsePanels() {
         try {
             final IStatusBarService svc = getService();
@@ -191,6 +202,7 @@ public class StatusBarManager {
     /**
      * Expand the settings panel.
      */
+    @UnsupportedAppUsage
     public void expandSettingsPanel() {
         expandSettingsPanel(null);
     }
@@ -198,6 +210,7 @@ public class StatusBarManager {
     /**
      * Expand the settings panel and open a subPanel, pass null to just open the settings panel.
      */
+    @UnsupportedAppUsage
     public void expandSettingsPanel(String subPanel) {
         try {
             final IStatusBarService svc = getService();
@@ -209,6 +222,7 @@ public class StatusBarManager {
         }
     }
 
+    @UnsupportedAppUsage
     public void setIcon(String slot, int iconId, int iconLevel, String contentDescription) {
         try {
             final IStatusBarService svc = getService();
@@ -221,6 +235,7 @@ public class StatusBarManager {
         }
     }
 
+    @UnsupportedAppUsage
     public void removeIcon(String slot) {
         try {
             final IStatusBarService svc = getService();
@@ -232,6 +247,7 @@ public class StatusBarManager {
         }
     }
 
+    @UnsupportedAppUsage
     public void setIconVisibility(String slot, boolean visible) {
         try {
             final IStatusBarService svc = getService();

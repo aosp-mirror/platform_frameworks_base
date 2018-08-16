@@ -19,6 +19,7 @@ package android.util;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.os.DeadSystemException;
 
 import com.android.internal.os.RuntimeInit;
@@ -302,6 +303,7 @@ public final class Log {
         return wtf(LOG_ID_MAIN, tag, msg, tr, false, false);
     }
 
+    @UnsupportedAppUsage
     static int wtf(int logId, @Nullable String tag, @Nullable String msg, @Nullable Throwable tr,
             boolean localStack, boolean system) {
         TerribleFailure what = new TerribleFailure(msg, tr);
@@ -381,6 +383,7 @@ public final class Log {
     /** @hide */ public static final int LOG_ID_CRASH = 4;
 
     /** @hide */
+    @UnsupportedAppUsage
     public static native int println_native(int bufID, int priority, String tag, String msg);
 
     /**

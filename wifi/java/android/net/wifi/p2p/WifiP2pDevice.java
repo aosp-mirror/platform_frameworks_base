@@ -16,6 +16,7 @@
 
 package android.net.wifi.p2p;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.util.Log;
@@ -96,18 +97,21 @@ public class WifiP2pDevice implements Parcelable {
      * WPS config methods supported
      * @hide
      */
+    @UnsupportedAppUsage
     public int wpsConfigMethodsSupported;
 
     /**
      * Device capability
      * @hide
      */
+    @UnsupportedAppUsage
     public int deviceCapability;
 
     /**
      * Group capability
      * @hide
      */
+    @UnsupportedAppUsage
     public int groupCapability;
 
     public static final int CONNECTED   = 0;
@@ -120,6 +124,7 @@ public class WifiP2pDevice implements Parcelable {
     public int status = UNAVAILABLE;
 
     /** @hide */
+    @UnsupportedAppUsage
     public WifiP2pWfdInfo wfdInfo;
 
     /** Detailed device string pattern with WFD info
@@ -179,6 +184,7 @@ public class WifiP2pDevice implements Parcelable {
      *  Note: The events formats can be looked up in the wpa_supplicant code
      * @hide
      */
+    @UnsupportedAppUsage
     public WifiP2pDevice(String string) throws IllegalArgumentException {
         String[] tokens = string.split("[ \n]");
         Matcher match;
@@ -279,6 +285,7 @@ public class WifiP2pDevice implements Parcelable {
      * @throws IllegalArgumentException if the device is null or device address does not match
      * @hide
      */
+    @UnsupportedAppUsage
     public void update(WifiP2pDevice device) {
         updateSupplicantDetails(device);
         status = device.status;

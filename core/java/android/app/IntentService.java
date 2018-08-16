@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.annotation.Nullable;
 import android.content.Intent;
@@ -62,6 +63,7 @@ import android.os.Message;
  */
 public abstract class IntentService extends Service {
     private volatile Looper mServiceLooper;
+    @UnsupportedAppUsage
     private volatile ServiceHandler mServiceHandler;
     private String mName;
     private boolean mRedelivery;

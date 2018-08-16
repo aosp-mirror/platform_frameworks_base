@@ -17,6 +17,7 @@
 package android.content;
 
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
 import android.content.pm.ApplicationInfo;
@@ -402,6 +403,7 @@ public class RestrictionsManager {
     private static final String TAG_RESTRICTION = "restriction";
 
     private final Context mContext;
+    @UnsupportedAppUsage
     private final IRestrictionsManager mService;
 
     /**

@@ -57,6 +57,7 @@ import com.android.server.backup.transport.TransportClient;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Asynchronous backup/restore handler thread.
@@ -121,8 +122,8 @@ public class BackupHandler extends Handler {
                     break;
                 }
 
-                // snapshot the pending-backup set and work on that
-                ArrayList<BackupRequest> queue = new ArrayList<>();
+                // Snapshot the pending-backup set and work on that.
+                List<String> queue = new ArrayList<>();
                 DataChangedJournal oldJournal = backupManagerService.getJournal();
                 synchronized (backupManagerService.getQueueLock()) {
                     // Do we have any work to do?  Construct the work queue
@@ -130,7 +131,7 @@ public class BackupHandler extends Handler {
                     // the backup.
                     if (backupManagerService.getPendingBackups().size() > 0) {
                         for (BackupRequest b : backupManagerService.getPendingBackups().values()) {
-                            queue.add(b);
+                            queue.add(b.packageName);
                         }
                         if (DEBUG) {
                             Slog.v(TAG, "clearing pending backups");
@@ -405,10 +406,6 @@ public class BackupHandler extends Handler {
                 if (MORE_DEBUG) {
                     Slog.d(TAG, "MSG_REQUEST_BACKUP observer=" + params.observer);
                 }
-                ArrayList<BackupRequest> kvQueue = new ArrayList<>();
-                for (String packageName : params.kvPackages) {
-                    kvQueue.add(new BackupRequest(packageName));
-                }
                 backupManagerService.setBackupRunning(true);
                 backupManagerService.getWakelock().acquire();
 
@@ -416,7 +413,7 @@ public class BackupHandler extends Handler {
                         backupManagerService,
                         params.transportClient,
                         params.dirName,
-                        kvQueue,
+                        params.kvPackages,
                         /* dataChangedJournal */ null,
                         params.observer,
                         params.monitor,

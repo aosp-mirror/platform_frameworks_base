@@ -83,13 +83,7 @@ class KeyValueBackupReporter {
         Slog.w(TAG, "Backup begun with an empty queue, nothing to do");
     }
 
-    void onPmFoundInQueue() {
-        if (MORE_DEBUG) {
-            Slog.i(TAG, "PM metadata in queue, removing");
-        }
-    }
-
-    void onQueueReady(List<BackupRequest> queue) {
+    void onQueueReady(List<String> queue) {
         if (DEBUG) {
             Slog.v(TAG, "Beginning backup of " + queue.size() + " targets");
         }
@@ -120,7 +114,7 @@ class KeyValueBackupReporter {
         Slog.d(TAG, "Skipping backup of PM metadata");
     }
 
-    void onInvokePmAgentError(Exception e) {
+    void onExtractPmAgentDataError(Exception e) {
         Slog.e(TAG, "Error during PM metadata backup", e);
     }
 
@@ -171,7 +165,7 @@ class KeyValueBackupReporter {
                 mObserver, packageName, BackupManager.ERROR_AGENT_FAILURE);
     }
 
-    void onInvokeAgent(String packageName) {
+    void onExtractAgentData(String packageName) {
         if (DEBUG) {
             Slog.d(TAG, "Invoking agent on " + packageName);
         }

@@ -16,6 +16,7 @@
 
 package android.net.metrics;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -26,26 +27,37 @@ import android.os.Parcelable;
 public final class ApfStats implements Parcelable {
 
     /** time interval in milliseconds these stastistics covers. */
+    @UnsupportedAppUsage
     public long durationMs;
     /** number of received RAs. */
+    @UnsupportedAppUsage
     public int receivedRas;
     /** number of received RAs matching a known RA. */
+    @UnsupportedAppUsage
     public int matchingRas;
     /** number of received RAs ignored due to the MAX_RAS limit. */
+    @UnsupportedAppUsage
     public int droppedRas;
     /** number of received RAs with a minimum lifetime of 0. */
+    @UnsupportedAppUsage
     public int zeroLifetimeRas;
     /** number of received RAs that could not be parsed. */
+    @UnsupportedAppUsage
     public int parseErrors;
     /** number of APF program updates from receiving RAs.. */
+    @UnsupportedAppUsage
     public int programUpdates;
     /** total number of APF program updates. */
+    @UnsupportedAppUsage
     public int programUpdatesAll;
     /** number of APF program updates from allowing multicast traffic. */
+    @UnsupportedAppUsage
     public int programUpdatesAllowingMulticast;
     /** maximum APF program size advertised by hardware. */
+    @UnsupportedAppUsage
     public int maxProgramSize;
 
+    @UnsupportedAppUsage
     public ApfStats() {
     }
 

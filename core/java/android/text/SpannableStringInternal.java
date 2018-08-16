@@ -21,6 +21,7 @@ import com.android.internal.util.GrowingArrayUtils;
 
 import libcore.util.EmptyArray;
 
+import android.annotation.UnsupportedAppUsage;
 import java.lang.reflect.Array;
 
 /* package */ abstract class SpannableStringInternal
@@ -50,6 +51,7 @@ import java.lang.reflect.Array;
      *
      * Due to backward compatibility reasons, we copy even NoCopySpan by default
      */
+    @UnsupportedAppUsage
     /* package */ SpannableStringInternal(CharSequence source, int start, int end) {
         this(source, start, end, false /* ignoreNoCopySpan */);
     }
@@ -148,6 +150,7 @@ import java.lang.reflect.Array;
      *
      * @return True if excluded, false if included.
      */
+    @UnsupportedAppUsage
     private final boolean isOutOfCopyRange(int start, int end, int spanStart, int spanEnd) {
         if (spanStart > end || spanEnd < start) return true;
         if (spanStart != spanEnd && start != end) {
@@ -174,14 +177,17 @@ import java.lang.reflect.Array;
         mText.getChars(start, end, dest, off);
     }
 
+    @UnsupportedAppUsage
     /* package */ void setSpan(Object what, int start, int end, int flags) {
         setSpan(what, start, end, flags, true/*enforceParagraph*/);
     }
 
+    @UnsupportedAppUsage
     private boolean isIndexFollowsNextLine(int index) {
         return index != 0 && index != length() && charAt(index - 1) != '\n';
     }
 
+    @UnsupportedAppUsage
     private void setSpan(Object what, int start, int end, int flags, boolean enforceParagraph) {
         int nstart = start;
         int nend = end;
@@ -248,6 +254,7 @@ import java.lang.reflect.Array;
             sendSpanAdded(what, nstart, nend);
     }
 
+    @UnsupportedAppUsage
     /* package */ void removeSpan(Object what) {
         removeSpan(what, 0 /* flags */);
     }
@@ -281,6 +288,7 @@ import java.lang.reflect.Array;
         }
     }
 
+    @UnsupportedAppUsage
     public int getSpanStart(Object what) {
         int count = mSpanCount;
         Object[] spans = mSpans;
@@ -295,6 +303,7 @@ import java.lang.reflect.Array;
         return -1;
     }
 
+    @UnsupportedAppUsage
     public int getSpanEnd(Object what) {
         int count = mSpanCount;
         Object[] spans = mSpans;
@@ -309,6 +318,7 @@ import java.lang.reflect.Array;
         return -1;
     }
 
+    @UnsupportedAppUsage
     public int getSpanFlags(Object what) {
         int count = mSpanCount;
         Object[] spans = mSpans;
@@ -323,6 +333,7 @@ import java.lang.reflect.Array;
         return 0; 
     }
 
+    @UnsupportedAppUsage
     public <T> T[] getSpans(int queryStart, int queryEnd, Class<T> kind) {
         int count = 0;
 
@@ -404,6 +415,7 @@ import java.lang.reflect.Array;
         return (T[]) nret;
     }
 
+    @UnsupportedAppUsage
     public int nextSpanTransition(int start, int limit, Class kind) {
         int count = mSpanCount;
         Object[] spans = mSpans;
@@ -426,6 +438,7 @@ import java.lang.reflect.Array;
         return limit;
     }
 
+    @UnsupportedAppUsage
     private void sendSpanAdded(Object what, int start, int end) {
         SpanWatcher[] recip = getSpans(start, end, SpanWatcher.class);
         int n = recip.length;
@@ -435,6 +448,7 @@ import java.lang.reflect.Array;
         }
     }
 
+    @UnsupportedAppUsage
     private void sendSpanRemoved(Object what, int start, int end) {
         SpanWatcher[] recip = getSpans(start, end, SpanWatcher.class);
         int n = recip.length;
@@ -444,6 +458,7 @@ import java.lang.reflect.Array;
         }
     }
 
+    @UnsupportedAppUsage
     private void sendSpanChanged(Object what, int s, int e, int st, int en) {
         SpanWatcher[] recip = getSpans(Math.min(s, st), Math.max(e, en),
                                        SpanWatcher.class);
@@ -454,10 +469,12 @@ import java.lang.reflect.Array;
         }
     }
 
+    @UnsupportedAppUsage
     private static String region(int start, int end) {
         return "(" + start + " ... " + end + ")";
     }
 
+    @UnsupportedAppUsage
     private void checkRange(final String operation, int start, int end) {
         if (end < start) {
             throw new IndexOutOfBoundsException(operation + " " +
@@ -534,25 +551,36 @@ import java.lang.reflect.Array;
      *
      * Due to backward compatibility reasons, we copy even NoCopySpan by default
      */
+    @UnsupportedAppUsage
     private void copySpans(Spanned src, int start, int end) {
         copySpans(src, start, end, false);
     }
 
+    @UnsupportedAppUsage
     private void copySpans(SpannableStringInternal src, int start, int end) {
         copySpans(src, start, end, false);
     }
 
 
 
+    @UnsupportedAppUsage
     private String mText;
+    @UnsupportedAppUsage
     private Object[] mSpans;
+    @UnsupportedAppUsage
     private int[] mSpanData;
+    @UnsupportedAppUsage
     private int mSpanCount;
 
+    @UnsupportedAppUsage
     /* package */ static final Object[] EMPTY = new Object[0];
 
+    @UnsupportedAppUsage
     private static final int START = 0;
+    @UnsupportedAppUsage
     private static final int END = 1;
+    @UnsupportedAppUsage
     private static final int FLAGS = 2;
+    @UnsupportedAppUsage
     private static final int COLUMNS = 3;
 }

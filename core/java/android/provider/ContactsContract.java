@@ -21,6 +21,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -1519,6 +1520,7 @@ public final class ContactsContract {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final Uri CORP_CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI,
                 "contacts_corp");
 
@@ -2013,6 +2015,7 @@ public final class ContactsContract {
             /**
              * @hide
              */
+            @UnsupportedAppUsage
             public static final Builder builder() {
                 return new Builder();
             }
@@ -6101,6 +6104,7 @@ public final class ContactsContract {
              * @hide
              */
             @Deprecated
+            @UnsupportedAppUsage
             public static final CharSequence getDisplayLabel(Context context, int type,
                     CharSequence label) {
                 return getTypeLabel(context.getResources(), type, label);
@@ -8483,6 +8487,7 @@ public final class ContactsContract {
          * Constructs the QuickContacts intent.
          * @hide
          */
+        @UnsupportedAppUsage
         public static Intent composeQuickContactsIntent(Context context, Rect target,
                 Uri lookupUri, int mode, String[] excludeMimes) {
             // When launching from an Activiy, we don't want to start a new task, but otherwise

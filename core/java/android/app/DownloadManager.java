@@ -21,6 +21,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -329,6 +330,7 @@ public class DownloadManager {
      * columns to request from DownloadProvider.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String[] UNDERLYING_COLUMNS = new String[] {
         Downloads.Impl._ID,
         Downloads.Impl._DATA + " AS " + COLUMN_LOCAL_FILENAME,
@@ -381,6 +383,7 @@ public class DownloadManager {
         @Deprecated
         public static final int NETWORK_BLUETOOTH = 1 << 2;
 
+        @UnsupportedAppUsage
         private Uri mUri;
         private Uri mDestinationUri;
         private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
@@ -860,6 +863,7 @@ public class DownloadManager {
          * @return this object
          * @hide
          */
+        @UnsupportedAppUsage
         public Query setOnlyIncludeVisibleInDownloadsUi(boolean value) {
             mOnlyIncludeVisibleInDownloadsUi = value;
             return this;
@@ -875,6 +879,7 @@ public class DownloadManager {
          * @return this object
          * @hide
          */
+        @UnsupportedAppUsage
         public Query orderBy(String column, int direction) {
             if (direction != ORDER_ASCENDING && direction != ORDER_DESCENDING) {
                 throw new IllegalArgumentException("Invalid direction: " + direction);
@@ -996,6 +1001,7 @@ public class DownloadManager {
      * /my_downloads URIs, for clients that have permission to do so.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setAccessAllDownloads(boolean accessAllDownloads) {
         if (accessAllDownloads) {
             mBaseUri = Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI;
@@ -1005,6 +1011,7 @@ public class DownloadManager {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public void setAccessFilename(boolean accessFilename) {
         mAccessFilename = accessFilename;
     }
@@ -1439,6 +1446,7 @@ public class DownloadManager {
     /**
      * Get a parameterized SQL WHERE clause to select a bunch of IDs.
      */
+    @UnsupportedAppUsage
     static String getWhereClauseForIds(long[] ids) {
         StringBuilder whereClause = new StringBuilder();
         whereClause.append("(");
@@ -1456,6 +1464,7 @@ public class DownloadManager {
     /**
      * Get the selection args for a clause returned by {@link #getWhereClauseForIds(long[])}.
      */
+    @UnsupportedAppUsage
     static String[] getWhereArgsForIds(long[] ids) {
         String[] whereArgs = new String[ids.length];
         return getWhereArgsForIds(ids, whereArgs);

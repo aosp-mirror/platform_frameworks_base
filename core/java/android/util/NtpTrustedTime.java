@@ -16,6 +16,7 @@
 
 package android.util;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
@@ -56,6 +57,7 @@ public class NtpTrustedTime implements TrustedTime {
         mTimeout = timeout;
     }
 
+    @UnsupportedAppUsage
     public static synchronized NtpTrustedTime getInstance(Context context) {
         if (sSingleton == null) {
             final Resources res = context.getResources();
@@ -80,6 +82,7 @@ public class NtpTrustedTime implements TrustedTime {
     }
 
     @Override
+    @UnsupportedAppUsage
     public boolean forceRefresh() {
         // We can't do this at initialization time: ConnectivityService might not be running yet.
         synchronized (this) {
@@ -126,6 +129,7 @@ public class NtpTrustedTime implements TrustedTime {
     }
 
     @Override
+    @UnsupportedAppUsage
     public boolean hasCache() {
         return mHasCache;
     }
@@ -149,6 +153,7 @@ public class NtpTrustedTime implements TrustedTime {
     }
 
     @Override
+    @UnsupportedAppUsage
     public long currentTimeMillis() {
         if (!mHasCache) {
             throw new IllegalStateException("Missing authoritative time source");
@@ -160,11 +165,13 @@ public class NtpTrustedTime implements TrustedTime {
         return mCachedNtpTime + getCacheAge();
     }
 
+    @UnsupportedAppUsage
     public long getCachedNtpTime() {
         if (LOGD) Log.d(TAG, "getCachedNtpTime() cache hit");
         return mCachedNtpTime;
     }
 
+    @UnsupportedAppUsage
     public long getCachedNtpTimeReference() {
         return mCachedNtpElapsedRealtime;
     }

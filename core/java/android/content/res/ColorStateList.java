@@ -30,6 +30,7 @@ import com.android.internal.util.GrowingArrayUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.UnsupportedAppUsage;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
@@ -132,16 +133,21 @@ public class ColorStateList extends ComplexColor implements Parcelable {
     private static final SparseArray<WeakReference<ColorStateList>> sCache = new SparseArray<>();
 
     /** Lazily-created factory for this color state list. */
+    @UnsupportedAppUsage
     private ColorStateListFactory mFactory;
 
     private int[][] mThemeAttrs;
     private @Config int mChangingConfigurations;
 
+    @UnsupportedAppUsage
     private int[][] mStateSpecs;
+    @UnsupportedAppUsage
     private int[] mColors;
+    @UnsupportedAppUsage
     private int mDefaultColor;
     private boolean mIsOpaque;
 
+    @UnsupportedAppUsage
     private ColorStateList() {
         // Not publicly instantiable.
     }
@@ -394,6 +400,7 @@ public class ColorStateList extends ComplexColor implements Parcelable {
      * @hide only for resource preloading
      */
     @Override
+    @UnsupportedAppUsage
     public boolean canApplyTheme() {
         return mThemeAttrs != null;
     }
@@ -474,6 +481,7 @@ public class ColorStateList extends ComplexColor implements Parcelable {
      * @hide only for resource preloading
      */
     @Override
+    @UnsupportedAppUsage
     public ColorStateList obtainForTheme(Theme t) {
         if (t == null || !canApplyTheme()) {
             return this;
@@ -579,6 +587,7 @@ public class ColorStateList extends ComplexColor implements Parcelable {
      * @return the states in this {@link ColorStateList}
      * @hide
      */
+    @UnsupportedAppUsage
     public int[][] getStates() {
         return mStateSpecs;
     }
@@ -590,6 +599,7 @@ public class ColorStateList extends ComplexColor implements Parcelable {
      * @return the colors in this {@link ColorStateList}
      * @hide
      */
+    @UnsupportedAppUsage
     public int[] getColors() {
         return mColors;
     }
@@ -634,6 +644,7 @@ public class ColorStateList extends ComplexColor implements Parcelable {
     /**
      * Updates the default color and opacity.
      */
+    @UnsupportedAppUsage
     private void onColorsChanged() {
         int defaultColor = DEFAULT_COLOR;
         boolean isOpaque = true;
@@ -677,6 +688,7 @@ public class ColorStateList extends ComplexColor implements Parcelable {
     private static class ColorStateListFactory extends ConstantState<ComplexColor> {
         private final ColorStateList mSrc;
 
+        @UnsupportedAppUsage
         public ColorStateListFactory(ColorStateList src) {
             mSrc = src;
         }

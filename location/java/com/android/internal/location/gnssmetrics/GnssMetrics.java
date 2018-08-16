@@ -18,6 +18,7 @@ package com.android.internal.location.gnssmetrics;
 
 import android.os.SystemClock;
 import android.os.connectivity.GpsBatteryStats;
+import android.os.SystemProperties;
 
 import android.text.format.DateUtils;
 import android.util.Base64;
@@ -175,6 +176,7 @@ public class GnssMetrics {
           = topFourAverageCn0Statistics.getStandardDeviation();
     }
     msg.powerMetrics = mGnssPowerMetrics.buildProto();
+    msg.hardwareRevision = SystemProperties.get("ro.boot.revision", "");
     String s = Base64.encodeToString(GnssLog.toByteArray(msg), Base64.DEFAULT);
     reset();
     return s;
@@ -239,6 +241,7 @@ public class GnssMetrics {
       s.append("  Energy consumed while on battery (mAh): ").append(
           stats.getEnergyConsumedMaMs() / ((double) DateUtils.HOUR_IN_MILLIS)).append("\n");
     }
+    s.append("Hardware Version: " + SystemProperties.get("ro.boot.revision", "")).append("\n");
     return s.toString();
   }
 

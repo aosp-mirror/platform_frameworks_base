@@ -17,6 +17,7 @@
 package android.app;
 
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -312,6 +313,7 @@ public class SearchDialog extends Dialog {
      * 
      * @param working true to show spinner, false to hide spinner
      */
+    @UnsupportedAppUsage
     public void setWorking(boolean working) {
         mWorkingSpinner.setAlpha(working ? 255 : 0);
         mWorkingSpinner.setVisible(working, false);
@@ -373,6 +375,7 @@ public class SearchDialog extends Dialog {
         }
     }
 
+    @UnsupportedAppUsage
     static boolean isLandscapeMode(Context context) {
         return context.getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE;
@@ -517,6 +520,7 @@ public class SearchDialog extends Dialog {
     /**
      * Launch a search for the text in the query text field.
      */
+    @UnsupportedAppUsage
     public void launchQuerySearch() {
         launchQuerySearch(KeyEvent.KEYCODE_UNKNOWN, null);
     }
@@ -529,6 +533,7 @@ public class SearchDialog extends Dialog {
      * @param actionMsg The message for the action key that was pressed,
      *        or <code>null</code> if none.
      */
+    @UnsupportedAppUsage
     protected void launchQuerySearch(int actionKey, String actionMsg) {
         String query = mSearchAutoComplete.getText().toString();
         String action = Intent.ACTION_SEARCH;

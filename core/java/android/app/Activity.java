@@ -31,6 +31,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.StyleRes;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.VoiceInteractor.Request;
 import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
@@ -735,6 +736,7 @@ public class Activity extends ContextThemeWrapper
      */
     public static final int FINISH_TASK_WITH_ACTIVITY = 2;
 
+    @UnsupportedAppUsage
     static final String FRAGMENTS_TAG = "android:fragments";
     private static final String LAST_AUTOFILL_ID = "android:lastAutofillId";
 
@@ -768,22 +770,38 @@ public class Activity extends ContextThemeWrapper
     private SparseArray<ManagedDialog> mManagedDialogs;
 
     // set by the thread after the constructor and before onCreate(Bundle savedInstanceState) is called.
+    @UnsupportedAppUsage
     private Instrumentation mInstrumentation;
+    @UnsupportedAppUsage
     private IBinder mToken;
+    @UnsupportedAppUsage
     private int mIdent;
+    @UnsupportedAppUsage
     /*package*/ String mEmbeddedID;
+    @UnsupportedAppUsage
     private Application mApplication;
+    @UnsupportedAppUsage
     /*package*/ Intent mIntent;
+    @UnsupportedAppUsage
     /*package*/ String mReferrer;
+    @UnsupportedAppUsage
     private ComponentName mComponent;
+    @UnsupportedAppUsage
     /*package*/ ActivityInfo mActivityInfo;
+    @UnsupportedAppUsage
     /*package*/ ActivityThread mMainThread;
+    @UnsupportedAppUsage
     Activity mParent;
+    @UnsupportedAppUsage
     boolean mCalled;
+    @UnsupportedAppUsage
     /*package*/ boolean mResumed;
+    @UnsupportedAppUsage
     /*package*/ boolean mStopped;
+    @UnsupportedAppUsage
     boolean mFinished;
     boolean mStartedActivity;
+    @UnsupportedAppUsage
     private boolean mDestroyed;
     private boolean mDoReportFullyDrawn = true;
     private boolean mRestoredFromBundle;
@@ -795,7 +813,9 @@ public class Activity extends ContextThemeWrapper
     /*package*/ boolean mTemporaryPause = false;
     /** true if the activity is being destroyed in order to recreate it with a new configuration */
     /*package*/ boolean mChangingConfigurations = false;
+    @UnsupportedAppUsage
     /*package*/ int mConfigChangeFlags;
+    @UnsupportedAppUsage
     /*package*/ Configuration mCurrentConfig;
     private SearchManager mSearchManager;
     private MenuInflater mMenuInflater;
@@ -810,25 +830,34 @@ public class Activity extends ContextThemeWrapper
         ArrayMap<String, LoaderManager> loaders;
         VoiceInteractor voiceInteractor;
     }
+    @UnsupportedAppUsage
     /* package */ NonConfigurationInstances mLastNonConfigurationInstances;
 
+    @UnsupportedAppUsage
     private Window mWindow;
 
+    @UnsupportedAppUsage
     private WindowManager mWindowManager;
     /*package*/ View mDecor = null;
+    @UnsupportedAppUsage
     /*package*/ boolean mWindowAdded = false;
     /*package*/ boolean mVisibleFromServer = false;
+    @UnsupportedAppUsage
     /*package*/ boolean mVisibleFromClient = true;
     /*package*/ ActionBar mActionBar = null;
     private boolean mEnableDefaultActionBarUp;
 
+    @UnsupportedAppUsage
     private VoiceInteractor mVoiceInteractor;
 
+    @UnsupportedAppUsage
     private CharSequence mTitle;
     private int mTitleColor = 0;
 
     // we must have a handler before the FragmentController is constructed
+    @UnsupportedAppUsage
     final Handler mHandler = new Handler();
+    @UnsupportedAppUsage
     final FragmentController mFragments = FragmentController.createController(new HostCallbacks());
 
     private static final class ManagedCursor {
@@ -847,8 +876,10 @@ public class Activity extends ContextThemeWrapper
     private final ArrayList<ManagedCursor> mManagedCursors = new ArrayList<>();
 
     @GuardedBy("this")
+    @UnsupportedAppUsage
     int mResultCode = RESULT_CANCELED;
     @GuardedBy("this")
+    @UnsupportedAppUsage
     Intent mResultData = null;
 
     private TranslucentConversionListener mTranslucentCallback;
@@ -872,6 +903,7 @@ public class Activity extends ContextThemeWrapper
 
     private Thread mUiThread;
 
+    @UnsupportedAppUsage
     ActivityTransitionState mActivityTransitionState = new ActivityTransitionState();
     SharedElementCallback mEnterTransitionListener = SharedElementCallback.NULL_CALLBACK;
     SharedElementCallback mExitTransitionListener = SharedElementCallback.NULL_CALLBACK;
@@ -1663,6 +1695,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @param outState place to store the saved state.
      */
+    @UnsupportedAppUsage
     private void saveManagedDialogs(Bundle outState) {
         if (mManagedDialogs == null) {
             return;
@@ -2521,6 +2554,7 @@ public class Activity extends ContextThemeWrapper
      * @deprecated Use {@link CursorLoader} instead.
      */
     @Deprecated
+    @UnsupportedAppUsage
     public final Cursor managedQuery(Uri uri, String[] projection, String selection,
             String sortOrder) {
         Cursor c = getContentResolver().query(uri, projection, selection, null, sortOrder);
@@ -2641,6 +2675,7 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void setPersistent(boolean isPersistent) {
     }
 
@@ -4663,6 +4698,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * @hide Implement to provide correct calling token.
      */
+    @UnsupportedAppUsage
     public void startActivityForResultAsUser(Intent intent, int requestCode, UserHandle user) {
         startActivityForResultAsUser(intent, requestCode, null, user);
     }
@@ -4708,6 +4744,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * @hide Implement to provide correct calling token.
      */
+    @UnsupportedAppUsage
     public void startActivityAsUser(Intent intent, UserHandle user) {
         startActivityAsUser(intent, null, user);
     }
@@ -5271,6 +5308,7 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     @Override
+    @UnsupportedAppUsage
     public void startActivityForResult(
             String who, Intent intent, int requestCode, @Nullable Bundle options) {
         Uri referrer = onProvideReferrer();
@@ -5597,6 +5635,7 @@ public class Activity extends ContextThemeWrapper
      * Finishes the current activity and specifies whether to remove the task associated with this
      * activity.
      */
+    @UnsupportedAppUsage
     private void finish(int finishTask) {
         if (mParent == null) {
             int resultCode;
@@ -6521,6 +6560,7 @@ public class Activity extends ContextThemeWrapper
      * @return The ActivityOptions passed to {@link #convertToTranslucent}.
      * @hide
      */
+    @UnsupportedAppUsage
     ActivityOptions getActivityOptions() {
         try {
             return ActivityOptions.fromBundle(
@@ -7041,10 +7081,12 @@ public class Activity extends ContextThemeWrapper
 
     // ------------------ Internal API ------------------
 
+    @UnsupportedAppUsage
     final void setParent(Activity parent) {
         mParent = parent;
     }
 
+    @UnsupportedAppUsage
     final void attach(Context context, ActivityThread aThread,
             Instrumentation instr, IBinder token, int ident,
             Application application, Intent intent, ActivityInfo info,
@@ -7117,6 +7159,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public final IBinder getActivityToken() {
         return mParent != null ? mParent.getActivityToken() : mToken;
     }
@@ -7131,6 +7174,7 @@ public class Activity extends ContextThemeWrapper
         performCreate(icicle, null);
     }
 
+    @UnsupportedAppUsage
     final void performCreate(Bundle icicle, PersistableBundle persistentState) {
         mCanEnterPictureInPicture = true;
         restoreHasCurrentPermissionRequest(icicle);
@@ -7431,6 +7475,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public final boolean isResumed() {
         return mResumed;
     }
@@ -7448,6 +7493,7 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    @UnsupportedAppUsage
     void dispatchActivityResult(String who, int requestCode, int resultCode, Intent data,
             String reason) {
         if (false) Log.v(
@@ -7815,6 +7861,7 @@ public class Activity extends ContextThemeWrapper
      * @param disable {@code true} to disable preview screenshots; {@code false} otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setDisablePreviewScreenshots(boolean disable) {
         try {
             ActivityTaskManager.getService().setDisablePreviewScreenshots(mToken, disable);
@@ -7878,6 +7925,7 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
+    @UnsupportedAppUsage
     public void registerRemoteAnimations(RemoteAnimationDefinition definition) {
         try {
             ActivityTaskManager.getService().registerRemoteAnimations(mToken, definition);

@@ -6435,6 +6435,11 @@ message MetricsEvent {
     // Field used to indicate whether a save request was used to update existing user data.
     FIELD_AUTOFILL_UPDATE = 1555;
 
+    // OPEN: Settings > Network & Internet > Wi-Fi > Add network
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_WIFI_ADD_NETWORK = 1556;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.

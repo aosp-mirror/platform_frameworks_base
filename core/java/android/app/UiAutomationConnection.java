@@ -18,6 +18,7 @@ package android.app;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.graphics.Bitmap;

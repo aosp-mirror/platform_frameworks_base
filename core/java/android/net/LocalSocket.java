@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.UnsupportedAppUsage;
 import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -30,6 +31,7 @@ import java.net.SocketOptions;
  */
 public class LocalSocket implements Closeable {
 
+    @UnsupportedAppUsage
     private final LocalSocketImpl impl;
     /** false if impl.create() needs to be called */
     private volatile boolean implCreated;

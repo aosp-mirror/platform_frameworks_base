@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.UnsupportedAppUsage;
 import android.net.NetworkUtils;
 import android.os.Parcel;
 import android.text.TextUtils;
@@ -33,25 +34,32 @@ import java.util.Objects;
 public class DhcpResults extends StaticIpConfiguration {
     private static final String TAG = "DhcpResults";
 
+    @UnsupportedAppUsage
     public Inet4Address serverAddress;
 
     /** Vendor specific information (from RFC 2132). */
+    @UnsupportedAppUsage
     public String vendorInfo;
 
+    @UnsupportedAppUsage
     public int leaseDuration;
 
     /** Link MTU option. 0 means unset. */
+    @UnsupportedAppUsage
     public int mtu;
 
+    @UnsupportedAppUsage
     public DhcpResults() {
         super();
     }
 
+    @UnsupportedAppUsage
     public DhcpResults(StaticIpConfiguration source) {
         super(source);
     }
 
     /** copy constructor */
+    @UnsupportedAppUsage
     public DhcpResults(DhcpResults source) {
         super(source);
 

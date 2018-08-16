@@ -16,6 +16,7 @@
 
 package android.net.metrics;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseArray;
@@ -48,6 +49,7 @@ public final class IpReachabilityEvent implements Parcelable {
     // byte 3: when byte 2 == PROBE, errno code from RTNetlink or IpReachabilityMonitor.
     public final int eventType;
 
+    @UnsupportedAppUsage
     public IpReachabilityEvent(int eventType) {
         this.eventType = eventType;
     }
@@ -80,6 +82,7 @@ public final class IpReachabilityEvent implements Parcelable {
     /**
      * Returns the NUD failure event type code corresponding to the given conditions.
      */
+    @UnsupportedAppUsage
     public static int nudFailureEventType(boolean isFromProbe, boolean isProvisioningLost) {
         if (isFromProbe) {
             return isProvisioningLost ? PROVISIONING_LOST : NUD_FAILED;

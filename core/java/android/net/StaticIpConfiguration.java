@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.UnsupportedAppUsage;
 import android.net.LinkAddress;
 import android.os.Parcelable;
 import android.os.Parcel;
@@ -46,11 +47,16 @@ import java.util.Objects;
  * @hide
  */
 public class StaticIpConfiguration implements Parcelable {
+    @UnsupportedAppUsage
     public LinkAddress ipAddress;
+    @UnsupportedAppUsage
     public InetAddress gateway;
+    @UnsupportedAppUsage
     public final ArrayList<InetAddress> dnsServers;
+    @UnsupportedAppUsage
     public String domains;
 
+    @UnsupportedAppUsage
     public StaticIpConfiguration() {
         dnsServers = new ArrayList<InetAddress>();
     }
@@ -80,6 +86,7 @@ public class StaticIpConfiguration implements Parcelable {
      * route to the gateway as well. This configuration is arguably invalid, but it used to work
      * in K and earlier, and other OSes appear to accept it.
      */
+    @UnsupportedAppUsage
     public List<RouteInfo> getRoutes(String iface) {
         List<RouteInfo> routes = new ArrayList<RouteInfo>(3);
         if (ipAddress != null) {

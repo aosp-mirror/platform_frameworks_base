@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.INotificationManager;
 import android.app.Notification;
@@ -93,6 +94,7 @@ import java.util.List;
  */
 public abstract class NotificationListenerService extends Service {
 
+    @UnsupportedAppUsage
     private final String TAG = getClass().getSimpleName();
 
     /**
@@ -274,9 +276,11 @@ public abstract class NotificationListenerService extends Service {
 
     private final Object mLock = new Object();
 
+    @UnsupportedAppUsage
     private Handler mHandler;
 
     /** @hide */
+    @UnsupportedAppUsage
     protected NotificationListenerWrapper mWrapper = null;
     private boolean isConnected = false;
 
@@ -286,6 +290,7 @@ public abstract class NotificationListenerService extends Service {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     protected INotificationManager mNoMan;
 
     /**
@@ -507,6 +512,7 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     protected final INotificationManager getNotificationInterface() {
         if (mNoMan == null) {
             mNoMan = INotificationManager.Stub.asInterface(
@@ -1065,6 +1071,7 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     protected boolean isBound() {
         if (mWrapper == null) {
             Log.w(TAG, "Notification listener service not yet bound.");
@@ -1464,6 +1471,7 @@ public abstract class NotificationListenerService extends Service {
          * no such preference has been expressed.
          * @hide
          */
+        @UnsupportedAppUsage
         public int getVisibilityOverride() {
             return mVisibilityOverride;
         }
@@ -1872,23 +1880,41 @@ public abstract class NotificationListenerService extends Service {
             Collections.addAll(mIntercepted, dndInterceptedKeys);
         }
 
+        private ArrayMap<String, Integer> buildIntMapFromBundle(Bundle bundle) {
+            ArrayMap<String, Integer> newMap = new ArrayMap<>(bundle.size());
+            for (String key : bundle.keySet()) {
+                newMap.put(key, bundle.getInt(key));
+            }
+            return newMap;
+        }
+
+        private ArrayMap<String, String> buildStringMapFromBundle(Bundle bundle) {
+            ArrayMap<String, String> newMap = new ArrayMap<>(bundle.size());
+            for (String key : bundle.keySet()) {
+                newMap.put(key, bundle.getString(key));
+            }
+            return newMap;
+        }
+
+        private ArrayMap<String, Boolean> buildBooleanMapFromBundle(Bundle bundle) {
+            ArrayMap<String, Boolean> newMap = new ArrayMap<>(bundle.size());
+            for (String key : bundle.keySet()) {
+                newMap.put(key, bundle.getBoolean(key));
+            }
+            return newMap;
+        }
+
         // Locked by 'this'
         private void buildVisibilityOverridesLocked() {
-            Bundle visibilityBundle = mRankingUpdate.getVisibilityOverrides();
-            mVisibilityOverrides = new ArrayMap<>(visibilityBundle.size());
-            for (String key: visibilityBundle.keySet()) {
-               mVisibilityOverrides.put(key, visibilityBundle.getInt(key));
-            }
+            mVisibilityOverrides = buildIntMapFromBundle(mRankingUpdate.getVisibilityOverrides());
         }
 
         // Locked by 'this'
         private void buildSuppressedVisualEffectsLocked() {
-            Bundle suppressedBundle = mRankingUpdate.getSuppressedVisualEffects();
-            mSuppressedVisualEffects = new ArrayMap<>(suppressedBundle.size());
-            for (String key: suppressedBundle.keySet()) {
-                mSuppressedVisualEffects.put(key, suppressedBundle.getInt(key));
-            }
+            mSuppressedVisualEffects =
+                buildIntMapFromBundle(mRankingUpdate.getSuppressedVisualEffects());
         }
+
         // Locked by 'this'
         private void buildImportanceLocked() {
             String[] orderedKeys = mRankingUpdate.getOrderedKeys();
@@ -1902,20 +1928,13 @@ public abstract class NotificationListenerService extends Service {
 
         // Locked by 'this'
         private void buildImportanceExplanationLocked() {
-            Bundle explanationBundle = mRankingUpdate.getImportanceExplanation();
-            mImportanceExplanation = new ArrayMap<>(explanationBundle.size());
-            for (String key: explanationBundle.keySet()) {
-                mImportanceExplanation.put(key, explanationBundle.getString(key));
-            }
+            mImportanceExplanation =
+                buildStringMapFromBundle(mRankingUpdate.getImportanceExplanation());
         }
 
         // Locked by 'this'
         private void buildOverrideGroupKeys() {
-            Bundle overrideGroupKeys = mRankingUpdate.getOverrideGroupKeys();
-            mOverrideGroupKeys = new ArrayMap<>(overrideGroupKeys.size());
-            for (String key: overrideGroupKeys.keySet()) {
-                mOverrideGroupKeys.put(key, overrideGroupKeys.getString(key));
-            }
+            mOverrideGroupKeys = buildStringMapFromBundle(mRankingUpdate.getOverrideGroupKeys());
         }
 
         // Locked by 'this'
@@ -1947,29 +1966,17 @@ public abstract class NotificationListenerService extends Service {
 
         // Locked by 'this'
         private void buildShowBadgeLocked() {
-            Bundle showBadge = mRankingUpdate.getShowBadge();
-            mShowBadge = new ArrayMap<>(showBadge.size());
-            for (String key : showBadge.keySet()) {
-                mShowBadge.put(key, showBadge.getBoolean(key));
-            }
+            mShowBadge = buildBooleanMapFromBundle(mRankingUpdate.getShowBadge());
         }
 
         // Locked by 'this'
         private void buildUserSentimentLocked() {
-            Bundle userSentiment = mRankingUpdate.getUserSentiment();
-            mUserSentiment = new ArrayMap<>(userSentiment.size());
-            for (String key : userSentiment.keySet()) {
-                mUserSentiment.put(key, userSentiment.getInt(key));
-            }
+            mUserSentiment = buildIntMapFromBundle(mRankingUpdate.getUserSentiment());
         }
 
         // Locked by 'this'
         private void buildHiddenLocked() {
-            Bundle hidden = mRankingUpdate.getHidden();
-            mHidden = new ArrayMap<>(hidden.size());
-            for (String key : hidden.keySet()) {
-                mHidden.put(key, hidden.getBoolean(key));
-            }
+            mHidden = buildBooleanMapFromBundle(mRankingUpdate.getHidden());
         }
 
         // Locked by 'this'

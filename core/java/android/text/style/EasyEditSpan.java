@@ -17,6 +17,7 @@
 package android.text.style;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.os.Parcel;
 import android.text.ParcelableSpan;
@@ -115,6 +116,7 @@ public class EasyEditSpan implements ParcelableSpan {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isDeleteEnabled() {
         return mDeleteEnabled;
     }
@@ -124,6 +126,7 @@ public class EasyEditSpan implements ParcelableSpan {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setDeleteEnabled(boolean value) {
         mDeleteEnabled = value;
     }
@@ -133,6 +136,7 @@ public class EasyEditSpan implements ParcelableSpan {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public PendingIntent getPendingIntent() {
         return mPendingIntent;
     }

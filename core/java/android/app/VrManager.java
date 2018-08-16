@@ -6,6 +6,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.RemoteException;
@@ -50,6 +51,7 @@ public class VrManager {
         }
     }
 
+    @UnsupportedAppUsage
     private final IVrManager mService;
     private Map<VrStateCallback, CallbackEntry> mCallbackMap = new ArrayMap<>();
 

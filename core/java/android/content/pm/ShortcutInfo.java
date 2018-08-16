@@ -19,6 +19,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.app.TaskStackBuilder;
 import android.content.ComponentName;
@@ -1242,6 +1243,7 @@ public final class ShortcutInfo implements Parcelable {
      * @hide
      */
     @Nullable
+    @UnsupportedAppUsage
     public Icon getIcon() {
         return mIcon;
     }

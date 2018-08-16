@@ -21,6 +21,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.usage.NetworkStats.Bucket;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -121,6 +122,7 @@ public class NetworkStatsManager {
     /**
      * {@hide}
      */
+    @UnsupportedAppUsage
     public NetworkStatsManager(Context context) throws ServiceNotFoundException {
         this(context, INetworkStatsService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.NETWORK_STATS_SERVICE)));

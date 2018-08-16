@@ -16,6 +16,7 @@
 
 package android.util;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.SystemProperties;
 
 
@@ -172,6 +173,7 @@ public class DisplayMetrics {
      *             density for a specific display.
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static int DENSITY_DEVICE = getDeviceDensity();
 
     /**
@@ -234,12 +236,14 @@ public class DisplayMetrics {
      * being applied.
      * @hide
      */
+    @UnsupportedAppUsage
     public int noncompatWidthPixels;
     /**
      * The reported display height prior to any compatibility mode scaling
      * being applied.
      * @hide
      */
+    @UnsupportedAppUsage
     public int noncompatHeightPixels;
     /**
      * The reported display density prior to any compatibility mode scaling
@@ -252,6 +256,7 @@ public class DisplayMetrics {
      * being applied.
      * @hide
      */
+    @UnsupportedAppUsage
     public int noncompatDensityDpi;
     /**
      * The reported scaled density prior to any compatibility mode scaling

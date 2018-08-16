@@ -21,6 +21,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.os.Looper;
+import android.os.Message;
+import android.os.MessageQueue;
 
 import com.android.server.testing.shadows.ShadowEventLog;
 
@@ -30,9 +32,49 @@ import org.robolectric.shadows.ShadowSystemClock;
 
 import java.util.Arrays;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class TestUtils {
+    private static final long TIMEOUT_MS = 3000;
+    private static final long STEP_MS = 50;
+
+    /**
+     * Counts the number of messages in the looper {@code looper} that satisfy {@code
+     * messageFilter}.
+     */
+    public static int messagesInLooper(Looper looper, Predicate<Message> messageFilter) {
+        MessageQueue queue = looper.getQueue();
+        int i = 0;
+        for (Message m = shadowOf(queue).getHead(); m != null; m = shadowOf(m).getNext()) {
+            if (messageFilter.test(m)) {
+                i += 1;
+            }
+        }
+        return i;
+    }
+
+    public static void waitUntil(Supplier<Boolean> condition)
+            throws InterruptedException, TimeoutException {
+        waitUntil(condition, STEP_MS, TIMEOUT_MS);
+    }
+
+    public static void waitUntil(Supplier<Boolean> condition, long stepMs, long timeoutMs)
+            throws InterruptedException, TimeoutException {
+        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMs);
+        while (true) {
+            if (condition.get()) {
+                return;
+            }
+            if (System.nanoTime() > deadline) {
+                throw new TimeoutException("Test timed-out waiting for condition");
+            }
+            Thread.sleep(stepMs);
+        }
+    }
+
     /** Version of {@link ShadowLooper#runToEndOfTasks()} that also advances the system clock. */
     public static void runToEndOfTasks(Looper looper) {
         ShadowLooper shadowLooper = shadowOf(looper);

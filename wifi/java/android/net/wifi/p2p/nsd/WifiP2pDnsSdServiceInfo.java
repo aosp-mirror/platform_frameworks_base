@@ -16,6 +16,7 @@
 
 package android.net.wifi.p2p.nsd;
 
+import android.annotation.UnsupportedAppUsage;
 import android.net.nsd.DnsSdTxtRecord;
 import android.text.TextUtils;
 
@@ -173,6 +174,7 @@ public class WifiP2pDnsSdServiceInfo extends WifiP2pServiceInfo {
      * @param version version number
      * @hide
      */
+    @UnsupportedAppUsage
     static String createRequest(String dnsName, int dnsType, int version) {
         StringBuffer sb = new StringBuffer();
 

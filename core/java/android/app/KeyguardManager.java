@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.app.trust.ITrustManager;
 import android.content.Context;
 import android.content.Intent;
@@ -414,6 +415,7 @@ public class KeyguardManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isDeviceLocked(int userId) {
         try {
             return mTrustManager.isDeviceLocked(userId);
@@ -439,6 +441,7 @@ public class KeyguardManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isDeviceSecure(int userId) {
         try {
             return mTrustManager.isDeviceSecure(userId);

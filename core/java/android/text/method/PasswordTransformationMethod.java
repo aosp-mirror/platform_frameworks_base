@@ -16,6 +16,7 @@
 
 package android.text.method;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -261,6 +262,8 @@ implements TransformationMethod, TextWatcher
         }
     }
 
+    @UnsupportedAppUsage
     private static PasswordTransformationMethod sInstance;
+    @UnsupportedAppUsage
     private static char DOT = '\u2022';
 }

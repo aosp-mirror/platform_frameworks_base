@@ -29,6 +29,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.StringRes;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.annotation.XmlRes;
 import android.app.ActivityManager;
@@ -724,6 +725,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int INSTALL_REPLACE_EXISTING = 0x00000002;
 
     /**
@@ -1317,6 +1319,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int NO_NATIVE_LIBRARIES = -114;
 
     /** {@hide} */
@@ -1541,6 +1544,7 @@ public abstract class PackageManager {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static final int MOVE_INTERNAL = 0x00000001;
 
     /**
@@ -1549,6 +1553,7 @@ public abstract class PackageManager {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static final int MOVE_EXTERNAL_MEDIA = 0x00000002;
 
     /** {@hide} */
@@ -3090,6 +3095,7 @@ public abstract class PackageManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    @UnsupportedAppUsage
     public abstract PackageInfo getPackageInfoAsUser(String packageName,
             @PackageInfoFlags int flags, @UserIdInt int userId) throws NameNotFoundException;
 
@@ -3219,6 +3225,7 @@ public abstract class PackageManager {
      *             found on the system.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract int getPackageUidAsUser(String packageName, @UserIdInt int userId)
             throws NameNotFoundException;
 
@@ -3236,6 +3243,7 @@ public abstract class PackageManager {
      *             found on the system.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract int getPackageUidAsUser(String packageName, @PackageInfoFlags int flags,
             @UserIdInt int userId) throws NameNotFoundException;
 
@@ -3330,6 +3338,7 @@ public abstract class PackageManager {
             @ApplicationInfoFlags int flags) throws NameNotFoundException;
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public abstract ApplicationInfo getApplicationInfoAsUser(String packageName,
             @ApplicationInfoFlags int flags, @UserIdInt int userId) throws NameNotFoundException;
 
@@ -3672,6 +3681,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract boolean shouldShowRequestPermissionRationale(String permission);
 
     /**
@@ -3683,6 +3693,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public Intent buildRequestPermissionsIntent(@NonNull String[] permissions) {
         if (ArrayUtils.isEmpty(permissions)) {
            throw new IllegalArgumentException("permission cannot be null or empty");
@@ -3783,6 +3794,7 @@ public abstract class PackageManager {
      *             found on the system.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract int getUidForSharedUser(String sharedUserName)
             throws NameNotFoundException;
 
@@ -4110,6 +4122,7 @@ public abstract class PackageManager {
      *         containing something else, such as the activity resolver.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract ResolveInfo resolveActivityAsUser(Intent intent, @ResolveInfoFlags int flags,
             @UserIdInt int userId);
 
@@ -4148,6 +4161,7 @@ public abstract class PackageManager {
      *         empty list is returned.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent,
             @ResolveInfoFlags int flags, @UserIdInt int userId);
 
@@ -4213,12 +4227,14 @@ public abstract class PackageManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract List<ResolveInfo> queryBroadcastReceiversAsUser(Intent intent,
             @ResolveInfoFlags int flags, @UserIdInt int userId);
 
 
     /** {@hide} */
     @Deprecated
+    @UnsupportedAppUsage
     public List<ResolveInfo> queryBroadcastReceivers(Intent intent,
             @ResolveInfoFlags int flags, @UserIdInt int userId) {
         final String msg = "Shame on you for calling the hidden API "
@@ -4276,6 +4292,7 @@ public abstract class PackageManager {
      *         empty list or null is returned.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract List<ResolveInfo> queryIntentServicesAsUser(Intent intent,
             @ResolveInfoFlags int flags, @UserIdInt int userId);
 
@@ -4291,6 +4308,7 @@ public abstract class PackageManager {
      *         no matching services, an empty list or null is returned.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract List<ResolveInfo> queryIntentContentProvidersAsUser(
             Intent intent, @ResolveInfoFlags int flags, @UserIdInt int userId);
 
@@ -4334,6 +4352,7 @@ public abstract class PackageManager {
      *         provider. If a provider was not found, returns null.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract ProviderInfo resolveContentProviderAsUser(String name,
             @ComponentInfoFlags int flags, @UserIdInt int userId);
 
@@ -4695,6 +4714,7 @@ public abstract class PackageManager {
      * @return the drawable or null if no drawable is required.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract Drawable getUserBadgeForDensity(UserHandle user, int density);
 
     /**
@@ -4711,6 +4731,7 @@ public abstract class PackageManager {
      * @return the drawable or null if no drawable is required.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract Drawable getUserBadgeForDensityNoBackground(UserHandle user, int density);
 
     /**
@@ -4824,6 +4845,7 @@ public abstract class PackageManager {
             throws NameNotFoundException;
 
     /** @hide */
+    @UnsupportedAppUsage
     public abstract Resources getResourcesForApplicationAsUser(String appPackageName,
             @UserIdInt int userId) throws NameNotFoundException;
 
@@ -4887,6 +4909,7 @@ public abstract class PackageManager {
             Manifest.permission.INSTALL_EXISTING_PACKAGES,
             Manifest.permission.INSTALL_PACKAGES,
             Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+    @UnsupportedAppUsage
     public abstract int installExistingPackageAsUser(String packageName, @UserIdInt int userId)
             throws NameNotFoundException;
 
@@ -5119,6 +5142,7 @@ public abstract class PackageManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.DELETE_PACKAGES)
+    @UnsupportedAppUsage
     public abstract void deletePackage(String packageName, IPackageDeleteObserver observer,
             @DeleteFlags int flags);
 
@@ -5140,6 +5164,7 @@ public abstract class PackageManager {
     @RequiresPermission(anyOf = {
             Manifest.permission.DELETE_PACKAGES,
             Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+    @UnsupportedAppUsage
     public abstract void deletePackageAsUser(@NonNull String packageName,
             IPackageDeleteObserver observer, @DeleteFlags int flags, @UserIdInt int userId);
 
@@ -5166,6 +5191,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract void clearApplicationUserData(String packageName,
             IPackageDataObserver observer);
     /**
@@ -5184,6 +5210,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract void deleteApplicationCacheFiles(String packageName,
             IPackageDataObserver observer);
 
@@ -5205,6 +5232,7 @@ public abstract class PackageManager {
      *            callback is desired.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract void deleteApplicationCacheFilesAsUser(String packageName, int userId,
             IPackageDataObserver observer);
 
@@ -5230,11 +5258,13 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void freeStorageAndNotify(long freeStorageSize, IPackageDataObserver observer) {
         freeStorageAndNotify(null, freeStorageSize, observer);
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public abstract void freeStorageAndNotify(String volumeUuid, long freeStorageSize,
             IPackageDataObserver observer);
 
@@ -5261,11 +5291,13 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void freeStorage(long freeStorageSize, IntentSender pi) {
         freeStorage(null, freeStorageSize, pi);
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public abstract void freeStorage(String volumeUuid, long freeStorageSize, IntentSender pi);
 
     /**
@@ -5288,6 +5320,7 @@ public abstract class PackageManager {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public abstract void getPackageSizeInfoAsUser(String packageName, @UserIdInt int userId,
             IPackageStatsObserver observer);
 
@@ -5299,6 +5332,7 @@ public abstract class PackageManager {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void getPackageSizeInfo(String packageName, IPackageStatsObserver observer) {
         getPackageSizeInfoAsUser(packageName, getUserId(), observer);
     }
@@ -5359,6 +5393,7 @@ public abstract class PackageManager {
             to.
      * @hide
      */
+    @UnsupportedAppUsage
     public void addPreferredActivityAsUser(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity, @UserIdInt int userId) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
@@ -5386,6 +5421,7 @@ public abstract class PackageManager {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public abstract void replacePreferredActivity(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity);
 
@@ -5393,6 +5429,7 @@ public abstract class PackageManager {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void replacePreferredActivityAsUser(IntentFilter filter, int match,
            ComponentName[] set, ComponentName activity, @UserIdInt int userId) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
@@ -5434,6 +5471,7 @@ public abstract class PackageManager {
      * default, if any.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract ComponentName getHomeActivities(List<ResolveInfo> outActivities);
 
     /**
@@ -5500,6 +5538,7 @@ public abstract class PackageManager {
      * @param userId Ther userId of the user whose restrictions are to be flushed.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract void flushPackageRestrictionsAsUser(int userId);
 
     /**
@@ -5509,6 +5548,7 @@ public abstract class PackageManager {
      * or by installing it, such as with {@link #installExistingPackage(String)}
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract boolean setApplicationHiddenSettingAsUser(String packageName, boolean hidden,
             UserHandle userHandle);
 
@@ -5517,6 +5557,7 @@ public abstract class PackageManager {
      * @see #setApplicationHiddenSettingAsUser(String, boolean, UserHandle)
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract boolean getApplicationHiddenSettingAsUser(String packageName,
             UserHandle userHandle);
 
@@ -5555,11 +5596,13 @@ public abstract class PackageManager {
      *        application's AndroidManifest.xml.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract KeySet getKeySetByAlias(String packageName, String alias);
 
     /** Return the signing {@link KeySet} for this application.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract KeySet getSigningKeySet(String packageName);
 
     /**
@@ -5569,6 +5612,7 @@ public abstract class PackageManager {
      * Compare to {@link #isSignedByExactly(String packageName, KeySet ks)}.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract boolean isSignedBy(String packageName, KeySet ks);
 
     /**
@@ -5577,6 +5621,7 @@ public abstract class PackageManager {
      * {@link #isSignedBy(String packageName, KeySet ks)}.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract boolean isSignedByExactly(String packageName, KeySet ks);
 
     /**
@@ -5639,6 +5684,7 @@ public abstract class PackageManager {
      * @throws IllegalArgumentException if the package was not found.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract boolean isPackageSuspendedForUser(String packageName, int userId);
 
     /**
@@ -5728,18 +5774,24 @@ public abstract class PackageManager {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public abstract int getMoveStatus(int moveId);
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public abstract void registerMoveCallback(MoveCallback callback, Handler handler);
     /** {@hide} */
+    @UnsupportedAppUsage
     public abstract void unregisterMoveCallback(MoveCallback callback);
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public abstract int movePackage(String packageName, VolumeInfo vol);
     /** {@hide} */
+    @UnsupportedAppUsage
     public abstract @Nullable VolumeInfo getPackageCurrentVolume(ApplicationInfo app);
     /** {@hide} */
+    @UnsupportedAppUsage
     public abstract @NonNull List<VolumeInfo> getPackageCandidateVolumes(ApplicationInfo app);
 
     /** {@hide} */
@@ -5763,6 +5815,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract boolean isUpgrade();
 
     /**
@@ -5784,6 +5837,7 @@ public abstract class PackageManager {
      *            {@link #ONLY_IF_NO_MATCH_FOUND}.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract void addCrossProfileIntentFilter(IntentFilter filter, int sourceUserId,
             int targetUserId, int flags);
 
@@ -5794,22 +5848,27 @@ public abstract class PackageManager {
      * @param sourceUserId The source user id.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract void clearCrossProfileIntentFilters(int sourceUserId);
 
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract Drawable loadItemIcon(PackageItemInfo itemInfo, ApplicationInfo appInfo);
 
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract Drawable loadUnbadgedItemIcon(PackageItemInfo itemInfo, ApplicationInfo appInfo);
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public abstract boolean isPackageAvailable(String packageName);
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static String installStatusToString(int status, String msg) {
         final String str = installStatusToString(status);
         if (msg != null) {
@@ -5820,6 +5879,7 @@ public abstract class PackageManager {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static String installStatusToString(int status) {
         switch (status) {
             case INSTALL_SUCCEEDED: return "INSTALL_SUCCEEDED";
@@ -5930,6 +5990,7 @@ public abstract class PackageManager {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static String deleteStatusToString(int status) {
         switch (status) {
             case DELETE_SUCCEEDED: return "DELETE_SUCCEEDED";

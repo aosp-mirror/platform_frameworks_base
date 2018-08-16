@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Color;
 import android.text.*;
 import android.text.style.*;
@@ -59,6 +60,7 @@ final class StringBlock {
                 + ": " + nativeGetSize(mNative));
     }
 
+    @UnsupportedAppUsage
     public CharSequence get(int idx) {
         synchronized (this) {
             if (mStrings != null) {
@@ -478,6 +480,7 @@ final class StringBlock {
      *  are doing!  The given native object must exist for the entire lifetime
      *  of this newly creating StringBlock.
      */
+    @UnsupportedAppUsage
     StringBlock(long obj, boolean useSparse) {
         mNative = obj;
         mUseSparse = useSparse;

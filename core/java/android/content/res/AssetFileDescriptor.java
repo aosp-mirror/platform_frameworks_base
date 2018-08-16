@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
@@ -40,8 +41,11 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
      */
     public static final long UNKNOWN_LENGTH = -1;
     
+    @UnsupportedAppUsage
     private final ParcelFileDescriptor mFd;
+    @UnsupportedAppUsage
     private final long mStartOffset;
+    @UnsupportedAppUsage
     private final long mLength;
     private final Bundle mExtras;
 

@@ -21,6 +21,7 @@ import static android.system.OsConstants.AF_INET6;
 
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -440,7 +441,9 @@ public class VpnService extends Service {
     public class Builder {
 
         private final VpnConfig mConfig = new VpnConfig();
+        @UnsupportedAppUsage
         private final List<LinkAddress> mAddresses = new ArrayList<LinkAddress>();
+        @UnsupportedAppUsage
         private final List<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
 
         public Builder() {

@@ -20,6 +20,7 @@ import static android.content.Context.DISPLAY_SERVICE;
 import static android.content.Context.WINDOW_SERVICE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.display.DisplayManager;
@@ -300,6 +301,7 @@ public class Presentation extends Dialog {
         return dm.equalsPhysical(getResources().getDisplayMetrics());
     }
 
+    @UnsupportedAppUsage
     private static Context createPresentationContext(
             Context outerContext, Display display, int theme) {
         if (outerContext == null) {

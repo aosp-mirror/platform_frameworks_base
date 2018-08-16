@@ -16,6 +16,7 @@
 
 package android.util;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.SystemClock;
 
 import libcore.util.TimeZoneFinder;
@@ -248,6 +249,7 @@ public class TimeUtils {
     }
 
     /** @hide Just for debugging; not internationalized. */
+    @UnsupportedAppUsage
     public static void formatDuration(long duration, PrintWriter pw, int fieldLen) {
         synchronized (sFormatSync) {
             int len = formatDurationLocked(duration, fieldLen);
@@ -264,6 +266,7 @@ public class TimeUtils {
     }
 
     /** @hide Just for debugging; not internationalized. */
+    @UnsupportedAppUsage
     public static void formatDuration(long duration, PrintWriter pw) {
         formatDuration(duration, pw, 0);
     }
@@ -297,6 +300,7 @@ public class TimeUtils {
      * @return String representation of the time.
      * @hide
      */
+    @UnsupportedAppUsage
     public static String logTimeOfDay(long millis) {
         Calendar c = Calendar.getInstance();
         if (millis >= 0) {

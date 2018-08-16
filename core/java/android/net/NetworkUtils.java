@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.util.Log;
 import android.util.Pair;
@@ -43,6 +44,7 @@ public class NetworkUtils {
     /**
      * Attaches a socket filter that accepts DHCP packets to the given socket.
      */
+    @UnsupportedAppUsage
     public native static void attachDhcpFilter(FileDescriptor fd) throws SocketException;
 
     /**
@@ -50,6 +52,7 @@ public class NetworkUtils {
      * @param fd the socket's {@link FileDescriptor}.
      * @param packetType the hardware address type, one of ARPHRD_*.
      */
+    @UnsupportedAppUsage
     public native static void attachRaFilter(FileDescriptor fd, int packetType) throws SocketException;
 
     /**
@@ -60,6 +63,7 @@ public class NetworkUtils {
      * @param fd the socket's {@link FileDescriptor}.
      * @param packetType the hardware address type, one of ARPHRD_*.
      */
+    @UnsupportedAppUsage
     public native static void attachControlPacketFilter(FileDescriptor fd, int packetType)
             throws SocketException;
 
@@ -108,6 +112,7 @@ public class NetworkUtils {
      * this socket will go directly to the underlying network, so its traffic will not be
      * forwarded through the VPN.
      */
+    @UnsupportedAppUsage
     public static boolean protectFromVpn(FileDescriptor fd) {
         return protectFromVpn(fd.getInt$());
     }
@@ -131,6 +136,7 @@ public class NetworkUtils {
      *             or {@link #intToInet4AddressHTL(int)}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static InetAddress intToInetAddress(int hostAddress) {
         return intToInet4AddressHTL(hostAddress);
     }
@@ -209,6 +215,7 @@ public class NetworkUtils {
      *             or {@link #prefixLengthToV4NetmaskIntHTL(int)}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static int prefixLengthToNetmaskInt(int prefixLength)
             throws IllegalArgumentException {
         return prefixLengthToV4NetmaskIntHTL(prefixLength);
@@ -255,6 +262,7 @@ public class NetworkUtils {
      * @throws IllegalArgumentException the specified netmask was not contiguous.
      * @hide
      */
+    @UnsupportedAppUsage
     public static int netmaskToPrefixLength(Inet4Address netmask) {
         // inetAddressToInt returns an int in *network* byte order.
         int i = Integer.reverseBytes(inetAddressToInt(netmask));
@@ -275,6 +283,7 @@ public class NetworkUtils {
      * @return the InetAddress
      * @hide
      */
+    @UnsupportedAppUsage
     public static InetAddress numericToInetAddress(String addrString)
             throws IllegalArgumentException {
         return InetAddress.parseNumericAddress(addrString);
@@ -349,6 +358,7 @@ public class NetworkUtils {
     /**
      * Returns the implicit netmask of an IPv4 address, as was the custom before 1993.
      */
+    @UnsupportedAppUsage
     public static int getImplicitNetmask(Inet4Address address) {
         int firstByte = address.getAddress()[0] & 0xff;  // Convert to an unsigned value.
         if (firstByte < 128) {
@@ -439,6 +449,7 @@ public class NetworkUtils {
      * @param addr a string representing an ip addr
      * @return a string propertly trimmed
      */
+    @UnsupportedAppUsage
     public static String trimV4AddrZeros(String addr) {
         if (addr == null) return null;
         String[] octets = addr.split("\\.");

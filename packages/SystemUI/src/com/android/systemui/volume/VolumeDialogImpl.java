@@ -1195,7 +1195,7 @@ public class VolumeDialogImpl implements VolumeDialog {
 
         @Override
         public boolean onTouchEvent(MotionEvent event) {
-            if (isShowing()) {
+            if (mShowing) {
                 if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
                     dismissH(Events.DISMISS_REASON_TOUCH_OUTSIDE);
                     return true;

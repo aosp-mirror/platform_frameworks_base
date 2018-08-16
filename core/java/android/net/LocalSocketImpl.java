@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.UnsupportedAppUsage;
 import android.system.ErrnoException;
 import android.system.Int32Ref;
 import android.system.Os;
@@ -47,8 +48,10 @@ class LocalSocketImpl
 
     // These fields are accessed by native code;
     /** file descriptor array received during a previous read */
+    @UnsupportedAppUsage
     FileDescriptor[] inboundFileDescriptors;
     /** file descriptor array that should be written during next write */
+    @UnsupportedAppUsage
     FileDescriptor[] outboundFileDescriptors;
 
     /**
@@ -207,6 +210,7 @@ class LocalSocketImpl
     /**
      * Create a new instance.
      */
+    @UnsupportedAppUsage
     /*package*/ LocalSocketImpl()
     {
     }

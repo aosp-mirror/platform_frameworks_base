@@ -158,7 +158,11 @@ class WindowTestsBase {
         // If @After throws an exception, the error isn't logged. This will make sure any failures
         // in the tear down are clear. This can be removed when b/37850063 is fixed.
         try {
-            final LinkedList<WindowState> nonCommonWindows = new LinkedList();
+            // Test may schedule to perform surface placement or other messages. Wait until a
+            // stable state to clean up for consistency.
+            waitUntilHandlersIdle();
+
+            final LinkedList<WindowState> nonCommonWindows = new LinkedList<>();
 
             synchronized (sWm.mWindowMap) {
                 sWm.mRoot.forAllWindows(w -> {
@@ -171,7 +175,12 @@ class WindowTestsBase {
                     nonCommonWindows.pollLast().removeImmediately();
                 }
 
-                mDisplayContent.removeImmediately();
+                for (int i = sWm.mRoot.mChildren.size() - 1; i >= 0; --i) {
+                    final DisplayContent displayContent = sWm.mRoot.mChildren.get(i);
+                    if (!displayContent.isDefaultDisplay) {
+                        displayContent.removeImmediately();
+                    }
+                }
                 sWm.mInputMethodTarget = null;
                 sWm.mClosingApps.clear();
                 sWm.mOpeningApps.clear();

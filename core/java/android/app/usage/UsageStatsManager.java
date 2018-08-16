@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -231,9 +232,12 @@ public final class UsageStatsManager {
     @SystemApi
     public static final String EXTRA_TIME_USED = "android.app.usage.extra.TIME_USED";
 
+    @UnsupportedAppUsage
     private static final UsageEvents sEmptyResults = new UsageEvents();
 
+    @UnsupportedAppUsage
     private final Context mContext;
+    @UnsupportedAppUsage
     private final IUsageStatsManager mService;
 
     /**
