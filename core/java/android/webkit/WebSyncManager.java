@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 
 /**
@@ -65,5 +66,6 @@ abstract class WebSyncManager implements Runnable {
     protected void onSyncInit() {
     }
 
+    @UnsupportedAppUsage
     abstract void syncFromRamToFlash();
 }

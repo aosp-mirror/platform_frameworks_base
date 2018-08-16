@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.webkit.CacheManager.CacheResult;
 import android.webkit.PluginData;
 
@@ -44,6 +45,7 @@ public interface UrlInterceptHandler {
      */
     @Deprecated
     @Nullable
+    @UnsupportedAppUsage
     CacheResult service(String url, @Nullable Map<String, String> headers);
 
     /**
@@ -60,5 +62,6 @@ public interface UrlInterceptHandler {
      */
     @Deprecated
     @Nullable
+    @UnsupportedAppUsage
     PluginData getPluginData(String url, @Nullable Map<String, String> headers);
 }
