@@ -309,6 +309,7 @@
   <java-symbol type="bool" name="config_allowAnimationsInLowPowerMode" />
   <java-symbol type="bool" name="config_useDevInputEventForAudioJack" />
   <java-symbol type="bool" name="config_safe_media_volume_enabled" />
+  <java-symbol type="bool" name="config_safe_media_disable_on_volume_up" />
   <java-symbol type="bool" name="config_camera_sound_forced" />
   <java-symbol type="bool" name="config_dontPreferApn" />
   <java-symbol type="bool" name="config_restartRadioAfterProvisioning" />

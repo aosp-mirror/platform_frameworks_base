@@ -2361,6 +2361,9 @@
     <!-- Whether safe headphone volume is enabled or not (country specific). -->
     <bool name="config_safe_media_volume_enabled">true</bool>
 
+    <!-- Whether safe headphone volume warning dialog is disabled on Vol+ (operator specific). -->
+    <bool name="config_safe_media_disable_on_volume_up">true</bool>
+
     <!-- Set to true if the wifi display supports compositing content stored
          in gralloc protected buffers.  For this to be true, there must exist
          a protected hardware path for surface flinger to composite and send
