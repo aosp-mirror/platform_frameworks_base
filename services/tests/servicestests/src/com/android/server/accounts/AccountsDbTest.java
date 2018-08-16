@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 import android.accounts.Account;
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Build;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Pair;
 
@@ -86,6 +87,12 @@ public class AccountsDbTest {
 
     @Test
     public void testCeNotAvailableInitially() {
+        // If the CE database is not attached to the DE database then any calls that modify the CE
+        // database will result in a Log.wtf call that will crash this process on eng builds. To
+        // allow the test to run through to completion skip this test on eng builds.
+        if (Build.IS_ENG) {
+            return;
+        }
         Account account = new Account("name", "example.com");
         long id = mAccountsDb.insertCeAccount(account, "");
         assertEquals("Insert into CE should fail until CE database is attached", -1, id);
