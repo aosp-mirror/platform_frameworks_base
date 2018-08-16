@@ -77,8 +77,6 @@ import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.AppOpsListener;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
@@ -105,7 +103,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -593,85 +590,7 @@ public class StatusBarTest extends SysuiTestCase {
     }
 
     @Test
-    public void testInflateFooterView() {
-        mStatusBar.inflateFooterView();
-        ArgumentCaptor<FooterView> captor = ArgumentCaptor.forClass(FooterView.class);
-        verify(mStackScroller).setFooterView(captor.capture());
 
-        assertNotNull(captor.getValue().findViewById(R.id.manage_text).hasOnClickListeners());
-        assertNotNull(captor.getValue().findViewById(R.id.dismiss_text).hasOnClickListeners());
-    }
-
-    @Test
-    public void testUpdateFooter_noNotifications() {
-        mStatusBar.setBarStateForTest(StatusBarState.SHADE);
-        assertEquals(0, mEntryManager.getNotificationData().getActiveNotifications().size());
-
-        mStatusBar.updateFooter();
-        verify(mStackScroller).updateFooterView(false, false);
-    }
-
-    @Test
-    public void testUpdateFooter_remoteInput() {
-        mStatusBar.setBarStateForTest(StatusBarState.SHADE);
-        ArrayList<Entry> entries = new ArrayList<>();
-        entries.add(mock(Entry.class));
-        when(mNotificationData.getActiveNotifications()).thenReturn(entries);
-
-        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
-        when(row.canViewBeDismissed()).thenReturn(true);
-        when(mStackScroller.getChildCount()).thenReturn(1);
-        when(mStackScroller.getChildAt(anyInt())).thenReturn(row);
-        when(mRemoteInputController.isRemoteInputActive()).thenReturn(true);
-
-        mStatusBar.updateFooter();
-        verify(mStackScroller).updateFooterView(false, true);
-    }
-
-    @Test
-    public void testUpdateFooter_oneClearableNotification() {
-        mStatusBar.setBarStateForTest(StatusBarState.SHADE);
-        ArrayList<Entry> entries = new ArrayList<>();
-        entries.add(mock(Entry.class));
-        when(mNotificationData.getActiveNotifications()).thenReturn(entries);
-
-        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
-        when(row.canViewBeDismissed()).thenReturn(true);
-        when(mStackScroller.getChildCount()).thenReturn(1);
-        when(mStackScroller.getChildAt(anyInt())).thenReturn(row);
-
-        mStatusBar.updateFooter();
-        verify(mStackScroller).updateFooterView(true, true);
-    }
-
-    @Test
-    public void testUpdateFooter_oneNonClearableNotification() {
-        mStatusBar.setBarStateForTest(StatusBarState.SHADE);
-        ArrayList<Entry> entries = new ArrayList<>();
-        entries.add(mock(Entry.class));
-        when(mNotificationData.getActiveNotifications()).thenReturn(entries);
-
-        mStatusBar.updateFooter();
-        verify(mStackScroller).updateFooterView(true, false);
-    }
-
-    @Test
-    public void testUpdateFooter_atEnd() {
-        // add footer
-        mStatusBar.inflateFooterView();
-
-        // add notification
-        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
-        when(row.isClearable()).thenReturn(true);
-        mStackScroller.addContainerView(row);
-
-        mStatusBar.onUpdateRowStates();
-
-        // move footer to end
-        verify(mStackScroller).changeViewPosition(any(FooterView.class), eq(-1 /* end */));
-    }
-
-    @Test
     public void testSetState_changesIsFullScreenUserSwitcherState() {
         mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
         assertFalse(mStatusBar.isFullScreenUserSwitcherState());
@@ -695,13 +614,6 @@ public class StatusBarTest extends SysuiTestCase {
         when(mStatusBar.mUserSwitcherController.useFullscreenUserSwitcher()).thenReturn(true);
         mStatusBar.showKeyguardImpl();
         verify(mStatusBarStateController).setState(eq(StatusBarState.FULLSCREEN_USER_SWITCHER));
-    }
-
-    @Test
-    public void testOnDensityOrFontScaleChanged_reInflatesFooterViews() {
-        mStatusBar.onDensityOrFontScaleChanged();
-        verify(mStackScroller).setFooterView(any());
-        verify(mStackScroller).setEmptyShadeView(any());
     }
 
     static class TestableStatusBar extends StatusBar {
@@ -743,7 +655,6 @@ public class StatusBarTest extends SysuiTestCase {
             mBiometricUnlockController = biometricUnlockController;
             mActivityLaunchAnimator = launchAnimator;
             mKeyguardViewMediator = keyguardViewMediator;
-            mClearAllEnabled = true;
             mRemoteInputManager = notificationRemoteInputManager;
             mGroupManager = notificationGroupManager;
             mFalsingManager = falsingManager;
@@ -777,7 +688,7 @@ public class StatusBarTest extends SysuiTestCase {
 
     }
 
-    private class TestableNotificationEntryManager extends NotificationEntryManager {
+    public static class TestableNotificationEntryManager extends NotificationEntryManager {
 
         public TestableNotificationEntryManager(SystemServicesProxy systemServicesProxy,
                 PowerManager powerManager, Context context) {

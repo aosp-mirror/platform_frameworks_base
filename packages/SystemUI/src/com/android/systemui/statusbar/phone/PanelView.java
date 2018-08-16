@@ -236,7 +236,7 @@ public abstract class PanelView extends FrameLayout {
         event.offsetLocation(-deltaX, -deltaY);
     }
 
-    public void setTouchDisabled(boolean disabled) {
+    public void setTouchAndAnimationDisabled(boolean disabled) {
         mTouchDisabled = disabled;
         if (mTouchDisabled) {
             cancelHeightAnimator();

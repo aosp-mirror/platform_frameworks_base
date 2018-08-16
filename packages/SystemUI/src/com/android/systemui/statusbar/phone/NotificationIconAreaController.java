@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.collection.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.android.internal.statusbar.StatusBarIcon;
@@ -45,7 +46,7 @@ public class NotificationIconAreaController implements DarkReceiver {
     private NotificationIconContainer mNotificationIcons;
     private NotificationIconContainer mShelfIcons;
     private final Rect mTintArea = new Rect();
-    private NotificationStackScrollLayout mNotificationScrollLayout;
+    private ViewGroup mNotificationScrollLayout;
     private Context mContext;
     private boolean mFullyDark;
     private boolean mHasShelfIconsWhenFullyDark;
@@ -71,8 +72,7 @@ public class NotificationIconAreaController implements DarkReceiver {
 
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         mNotificationIconArea = inflateIconArea(layoutInflater);
-        mNotificationIcons = (NotificationIconContainer) mNotificationIconArea.findViewById(
-                R.id.notificationIcons);
+        mNotificationIcons = mNotificationIconArea.findViewById(R.id.notificationIcons);
 
         mNotificationScrollLayout = mStatusBar.getNotificationScrollLayout();
     }

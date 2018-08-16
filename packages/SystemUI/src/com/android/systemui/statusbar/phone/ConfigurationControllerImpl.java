@@ -52,6 +52,17 @@ public class ConfigurationControllerImpl implements ConfigurationController,
     }
 
     @Override
+    public void notifyThemeChanged() {
+        ArrayList<ConfigurationListener> listeners = new ArrayList<>(mListeners);
+
+        listeners.forEach(l -> {
+            if (mListeners.contains(l)) {
+                l.onThemeChanged();
+            }
+        });
+    }
+
+    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         // Avoid concurrent modification exception
         ArrayList<ConfigurationListener> listeners = new ArrayList<>(mListeners);

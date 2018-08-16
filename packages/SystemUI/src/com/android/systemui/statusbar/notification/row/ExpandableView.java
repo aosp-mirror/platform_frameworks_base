@@ -417,6 +417,7 @@ public abstract class ExpandableView extends FrameLayout {
 
     public void setWillBeGone(boolean willBeGone) {
         mWillBeGone = willBeGone;
+        invalidate();
     }
 
     public int getMinClipTopAmount() {

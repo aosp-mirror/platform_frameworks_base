@@ -80,6 +80,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     private int mStatusBarState;
 
     private final StateListener mStateListener = this::setStatusBarState;
+    private AnimationStateHandler mAnimationStateHandler;
 
     private final Pools.Pool<HeadsUpEntryPhone> mEntryPool = new Pools.Pool<HeadsUpEntryPhone>() {
         private Stack<HeadsUpEntryPhone> mPoolObjects = new Stack<>();
@@ -124,6 +125,10 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             }
         });
         Dependency.get(StatusBarStateController.class).addListener(mStateListener);
+    }
+
+    public void setAnimationStateHandler(AnimationStateHandler handler) {
+        mAnimationStateHandler = handler;
     }
 
     public void destroy() {
@@ -350,7 +355,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
     @Override
     public void onReorderingAllowed() {
-        mBar.getNotificationScrollLayout().setHeadsUpGoingAwayAnimationsAllowed(false);
+        mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(false);
         for (NotificationData.Entry entry : mEntriesToRemoveWhenReorderingAllowed) {
             if (contains(entry.key)) {
                 // Maybe the heads-up was removed already
@@ -358,7 +363,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             }
         }
         mEntriesToRemoveWhenReorderingAllowed.clear();
-        mBar.getNotificationScrollLayout().setHeadsUpGoingAwayAnimationsAllowed(true);
+        mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(true);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -493,5 +498,9 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
                 updateEntry(false /* updatePostTime */);
             }
         }
+    }
+
+    public interface AnimationStateHandler {
+        void setHeadsUpGoingAwayAnimationsAllowed(boolean allowed);
     }
 }
