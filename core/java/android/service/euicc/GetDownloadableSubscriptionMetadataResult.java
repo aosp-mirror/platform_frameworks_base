@@ -17,6 +17,7 @@ package android.service.euicc;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.euicc.DownloadableSubscription;
@@ -46,6 +47,7 @@ public final class GetDownloadableSubscriptionMetadataResult implements Parcelab
      * @deprecated - Do no use. Use getResult() instead.
      */
     @Deprecated
+    @UnsupportedAppUsage
     public final int result;
 
     @Nullable
