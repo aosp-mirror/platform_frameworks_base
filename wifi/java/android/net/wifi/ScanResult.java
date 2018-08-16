@@ -17,6 +17,7 @@
 package android.net.wifi;
 
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -40,6 +41,7 @@ public class ScanResult implements Parcelable {
     /**
      * Ascii encoded SSID. This will replace SSID when we deprecate it. @hide
      */
+    @UnsupportedAppUsage
     public WifiSsid wifiSsid;
 
     /**
@@ -51,12 +53,14 @@ public class ScanResult implements Parcelable {
      * The HESSID from the beacon.
      * @hide
      */
+    @UnsupportedAppUsage
     public long hessid;
 
     /**
      * The ANQP Domain ID from the Hotspot 2.0 Indication element, if present.
      * @hide
      */
+    @UnsupportedAppUsage
     public int anqpDomainId;
 
     /*
@@ -214,6 +218,7 @@ public class ScanResult implements Parcelable {
      * @deprecated use is80211mcResponder() instead
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean is80211McRTTResponder;
 
     /**
@@ -226,6 +231,7 @@ public class ScanResult implements Parcelable {
      * Timestamp representing date when this result was last seen, in milliseconds from 1970
      * {@hide}
      */
+    @UnsupportedAppUsage
     public long seen;
 
     /**
@@ -284,6 +290,7 @@ public class ScanResult implements Parcelable {
      * Number of time autojoin used it
      * @hide
      */
+    @UnsupportedAppUsage
     public int numUsage;
 
     /**
@@ -291,6 +298,7 @@ public class ScanResult implements Parcelable {
      * {@link UNSPECIFIED}.
      * {@hide}
      */
+    @UnsupportedAppUsage
     public int distanceCm;
 
     /**
@@ -298,6 +306,7 @@ public class ScanResult implements Parcelable {
      * Else {@link UNSPECIFIED}.
      * {@hide}
      */
+    @UnsupportedAppUsage
     public int distanceSdCm;
 
     /** {@hide} */
@@ -314,6 +323,7 @@ public class ScanResult implements Parcelable {
      * Defines flags; such as {@link #FLAG_PASSPOINT_NETWORK}.
      * {@hide}
      */
+    @UnsupportedAppUsage
     public long flags;
 
     /**
@@ -391,29 +401,45 @@ public class ScanResult implements Parcelable {
      *  @hide
      * anqp lines from supplicant BSS response
      */
+    @UnsupportedAppUsage
     public List<String> anqpLines;
 
     /** information elements from beacon
      * @hide
      */
     public static class InformationElement {
+        @UnsupportedAppUsage
         public static final int EID_SSID = 0;
+        @UnsupportedAppUsage
         public static final int EID_SUPPORTED_RATES = 1;
+        @UnsupportedAppUsage
         public static final int EID_TIM = 5;
+        @UnsupportedAppUsage
         public static final int EID_BSS_LOAD = 11;
+        @UnsupportedAppUsage
         public static final int EID_ERP = 42;
         public static final int EID_HT_CAPABILITIES = 45;
+        @UnsupportedAppUsage
         public static final int EID_RSN = 48;
+        @UnsupportedAppUsage
         public static final int EID_EXTENDED_SUPPORTED_RATES = 50;
+        @UnsupportedAppUsage
         public static final int EID_HT_OPERATION = 61;
+        @UnsupportedAppUsage
         public static final int EID_INTERWORKING = 107;
+        @UnsupportedAppUsage
         public static final int EID_ROAMING_CONSORTIUM = 111;
+        @UnsupportedAppUsage
         public static final int EID_EXTENDED_CAPS = 127;
         public static final int EID_VHT_CAPABILITIES = 191;
+        @UnsupportedAppUsage
         public static final int EID_VHT_OPERATION = 192;
+        @UnsupportedAppUsage
         public static final int EID_VSA = 221;
 
+        @UnsupportedAppUsage
         public int id;
+        @UnsupportedAppUsage
         public byte[] bytes;
 
         public InformationElement() {
@@ -428,6 +454,7 @@ public class ScanResult implements Parcelable {
     /** information elements found in the beacon
      * @hide
      */
+    @UnsupportedAppUsage
     public InformationElement[] informationElements;
 
     /** ANQP response elements.
@@ -704,6 +731,7 @@ public class ScanResult implements Parcelable {
     }
 
     /** Implement the Parcelable interface {@hide} */
+    @UnsupportedAppUsage
     public static final Creator<ScanResult> CREATOR =
         new Creator<ScanResult>() {
             public ScanResult createFromParcel(Parcel in) {

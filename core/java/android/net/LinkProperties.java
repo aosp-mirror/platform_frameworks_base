@@ -18,6 +18,7 @@ package android.net;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -48,6 +49,7 @@ import java.util.StringJoiner;
  */
 public final class LinkProperties implements Parcelable {
     // The interface described by the network link.
+    @UnsupportedAppUsage
     private String mIfaceName;
     private ArrayList<LinkAddress> mLinkAddresses = new ArrayList<>();
     private ArrayList<InetAddress> mDnses = new ArrayList<>();
@@ -103,9 +105,13 @@ public final class LinkProperties implements Parcelable {
      * @hide
      */
     public enum ProvisioningChange {
+        @UnsupportedAppUsage
         STILL_NOT_PROVISIONED,
+        @UnsupportedAppUsage
         LOST_PROVISIONING,
+        @UnsupportedAppUsage
         GAINED_PROVISIONING,
+        @UnsupportedAppUsage
         STILL_PROVISIONED,
     }
 
@@ -114,6 +120,7 @@ public final class LinkProperties implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static ProvisioningChange compareProvisioning(
             LinkProperties before, LinkProperties after) {
         if (before.isProvisioned() && after.isProvisioned()) {
@@ -154,12 +161,14 @@ public final class LinkProperties implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public LinkProperties() {
     }
 
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public LinkProperties(LinkProperties source) {
         if (source != null) {
             mIfaceName = source.mIfaceName;
@@ -186,6 +195,7 @@ public final class LinkProperties implements Parcelable {
      * @param iface The name of the network interface used for this link.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setInterfaceName(String iface) {
         mIfaceName = iface;
         ArrayList<RouteInfo> newRoutes = new ArrayList<>(mRoutes.size());
@@ -207,6 +217,7 @@ public final class LinkProperties implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public List<String> getAllInterfaceNames() {
         List<String> interfaceNames = new ArrayList<>(mStackedLinks.size() + 1);
         if (mIfaceName != null) interfaceNames.add(mIfaceName);
@@ -226,6 +237,7 @@ public final class LinkProperties implements Parcelable {
      * @return An unmodifiable {@link List} of {@link InetAddress} for this link.
      * @hide
      */
+    @UnsupportedAppUsage
     public List<InetAddress> getAddresses() {
         List<InetAddress> addresses = new ArrayList<>();
         for (LinkAddress linkAddress : mLinkAddresses) {
@@ -238,6 +250,7 @@ public final class LinkProperties implements Parcelable {
      * Returns all the addresses on this link and all the links stacked above it.
      * @hide
      */
+    @UnsupportedAppUsage
     public List<InetAddress> getAllAddresses() {
         List<InetAddress> addresses = new ArrayList<>();
         for (LinkAddress linkAddress : mLinkAddresses) {
@@ -265,6 +278,7 @@ public final class LinkProperties implements Parcelable {
      * @return true if {@code address} was added or updated, false otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean addLinkAddress(LinkAddress address) {
         if (address == null) {
             return false;
@@ -315,6 +329,7 @@ public final class LinkProperties implements Parcelable {
      * Returns all the addresses on this link and all the links stacked above it.
      * @hide
      */
+    @UnsupportedAppUsage
     public List<LinkAddress> getAllLinkAddresses() {
         List<LinkAddress> addresses = new ArrayList<>(mLinkAddresses);
         for (LinkProperties stacked: mStackedLinks.values()) {
@@ -331,6 +346,7 @@ public final class LinkProperties implements Parcelable {
      *                  object.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setLinkAddresses(Collection<LinkAddress> addresses) {
         mLinkAddresses.clear();
         for (LinkAddress address: addresses) {
@@ -345,6 +361,7 @@ public final class LinkProperties implements Parcelable {
      * @return true if the DNS server was added, false if it was already present.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean addDnsServer(InetAddress dnsServer) {
         if (dnsServer != null && !mDnses.contains(dnsServer)) {
             mDnses.add(dnsServer);
@@ -360,6 +377,7 @@ public final class LinkProperties implements Parcelable {
      * @return true if the DNS server was removed, false if it did not exist.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean removeDnsServer(InetAddress dnsServer) {
         if (dnsServer != null) {
             return mDnses.remove(dnsServer);
@@ -374,6 +392,7 @@ public final class LinkProperties implements Parcelable {
      * @param dnsServers The {@link Collection} of DNS servers to set in this object.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setDnsServers(Collection<InetAddress> dnsServers) {
         mDnses.clear();
         for (InetAddress dnsServer: dnsServers) {
@@ -510,6 +529,7 @@ public final class LinkProperties implements Parcelable {
      *                domains to search when resolving host names on this link.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setDomains(String domains) {
         mDomains = domains;
     }
@@ -532,6 +552,7 @@ public final class LinkProperties implements Parcelable {
      * @param mtu The MTU to use for this link.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setMtu(int mtu) {
         mMtu = mtu;
     }
@@ -543,6 +564,7 @@ public final class LinkProperties implements Parcelable {
      * @return The mtu value set for this link.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getMtu() {
         return mMtu;
     }
@@ -555,6 +577,7 @@ public final class LinkProperties implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setTcpBufferSizes(String tcpBufferSizes) {
         mTcpBufferSizes = tcpBufferSizes;
     }
@@ -566,6 +589,7 @@ public final class LinkProperties implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public String getTcpBufferSizes() {
         return mTcpBufferSizes;
     }
@@ -589,6 +613,7 @@ public final class LinkProperties implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean addRoute(RouteInfo route) {
         if (route != null) {
             String routeIface = route.getInterface();
@@ -615,6 +640,7 @@ public final class LinkProperties implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean removeRoute(RouteInfo route) {
         return route != null &&
                 Objects.equals(mIfaceName, route.getInterface()) &&
@@ -645,6 +671,7 @@ public final class LinkProperties implements Parcelable {
      * Returns all the routes on this link and all the links stacked above it.
      * @hide
      */
+    @UnsupportedAppUsage
     public List<RouteInfo> getAllRoutes() {
         List<RouteInfo> routes = new ArrayList<>(mRoutes);
         for (LinkProperties stacked: mStackedLinks.values()) {
@@ -661,6 +688,7 @@ public final class LinkProperties implements Parcelable {
      * @param proxy A {@link ProxyInfo} defining the HTTP Proxy to use on this link.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setHttpProxy(ProxyInfo proxy) {
         mHttpProxy = proxy;
     }
@@ -685,6 +713,7 @@ public final class LinkProperties implements Parcelable {
      * @return true if the link was stacked, false otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean addStackedLink(LinkProperties link) {
         if (link != null && link.getInterfaceName() != null) {
             mStackedLinks.put(link.getInterfaceName(), link);
@@ -715,6 +744,7 @@ public final class LinkProperties implements Parcelable {
      * Returns all the links stacked on top of this link.
      * @hide
      */
+    @UnsupportedAppUsage
     public @NonNull List<LinkProperties> getStackedLinks() {
         if (mStackedLinks.isEmpty()) {
             return Collections.emptyList();
@@ -730,6 +760,7 @@ public final class LinkProperties implements Parcelable {
      * Clears this object to its initial state.
      * @hide
      */
+    @UnsupportedAppUsage
     public void clear() {
         mIfaceName = null;
         mLinkAddresses.clear();
@@ -831,6 +862,7 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if there is an IPv4 address, {@code false} otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean hasIPv4Address() {
         for (LinkAddress address : mLinkAddresses) {
             if (address.getAddress() instanceof Inet4Address) {
@@ -858,6 +890,7 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if there is a global preferred IPv6 address, {@code false} otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean hasGlobalIPv6Address() {
         for (LinkAddress address : mLinkAddresses) {
           if (address.getAddress() instanceof Inet6Address && address.isGlobalPreferred()) {
@@ -873,6 +906,7 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if there is an IPv4 default route, {@code false} otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean hasIPv4DefaultRoute() {
         for (RouteInfo r : mRoutes) {
             if (r.isIPv4Default()) {
@@ -888,6 +922,7 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if there is an IPv6 default route, {@code false} otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean hasIPv6DefaultRoute() {
         for (RouteInfo r : mRoutes) {
             if (r.isIPv6Default()) {
@@ -903,6 +938,7 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if there is an IPv4 DNS server, {@code false} otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean hasIPv4DnsServer() {
         for (InetAddress ia : mDnses) {
             if (ia instanceof Inet4Address) {
@@ -918,6 +954,7 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if there is an IPv6 DNS server, {@code false} otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean hasIPv6DnsServer() {
         for (InetAddress ia : mDnses) {
             if (ia instanceof Inet6Address) {
@@ -947,6 +984,7 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if the link is provisioned, {@code false} otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isIPv6Provisioned() {
         return (hasGlobalIPv6Address() &&
                 hasIPv6DefaultRoute() &&
@@ -960,6 +998,7 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if the link is provisioned, {@code false} otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isProvisioned() {
         return (isIPv4Provisioned() || isIPv6Provisioned());
     }
@@ -971,6 +1010,7 @@ public final class LinkProperties implements Parcelable {
      *         {@code false} otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isReachable(InetAddress ip) {
         final List<RouteInfo> allRoutes = getAllRoutes();
         // If we don't have a route to this IP address, it's not reachable.
@@ -1008,6 +1048,7 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if both are identical, {@code false} otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isIdenticalInterfaceName(LinkProperties target) {
         return TextUtils.equals(getInterfaceName(), target.getInterfaceName());
     }
@@ -1019,6 +1060,7 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if both are identical, {@code false} otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isIdenticalAddresses(LinkProperties target) {
         Collection<InetAddress> targetAddresses = target.getAddresses();
         Collection<InetAddress> sourceAddresses = getAddresses();
@@ -1033,6 +1075,7 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if both are identical, {@code false} otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isIdenticalDnses(LinkProperties target) {
         Collection<InetAddress> targetDnses = target.getDnsServers();
         String targetDomains = target.getDomains();
@@ -1080,6 +1123,7 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if both are identical, {@code false} otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isIdenticalRoutes(LinkProperties target) {
         Collection<RouteInfo> targetRoutes = target.getRoutes();
         return (mRoutes.size() == targetRoutes.size()) ?
@@ -1093,6 +1137,7 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if both are identical, {@code false} otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isIdenticalHttpProxy(LinkProperties target) {
         return getHttpProxy() == null ? target.getHttpProxy() == null :
                 getHttpProxy().equals(target.getHttpProxy());
@@ -1105,6 +1150,7 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if both are identical, {@code false} otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isIdenticalStackedLinks(LinkProperties target) {
         if (!mStackedLinks.keySet().equals(target.mStackedLinks.keySet())) {
             return false;

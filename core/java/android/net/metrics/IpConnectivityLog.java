@@ -16,6 +16,7 @@
 
 package android.net.metrics;
 
+import android.annotation.UnsupportedAppUsage;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
 import android.os.Parcelable;
@@ -37,6 +38,7 @@ public class IpConnectivityLog {
 
     private IIpConnectivityMetrics mService;
 
+    @UnsupportedAppUsage
     public IpConnectivityLog() {
     }
 
@@ -104,6 +106,7 @@ public class IpConnectivityLog {
      * @param data is a Parcelable instance representing the event.
      * @return true if the event was successfully logged.
      */
+    @UnsupportedAppUsage
     public boolean log(String ifname, Parcelable data) {
         ConnectivityMetricsEvent ev = makeEv(data);
         ev.ifname = ifname;
@@ -130,6 +133,7 @@ public class IpConnectivityLog {
      * @param data is a Parcelable instance representing the event.
      * @return true if the event was successfully logged.
      */
+    @UnsupportedAppUsage
     public boolean log(Parcelable data) {
         return log(makeEv(data));
     }

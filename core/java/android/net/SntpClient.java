@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -175,6 +176,7 @@ public class SntpClient {
     }
 
     @Deprecated
+    @UnsupportedAppUsage
     public boolean requestTime(String host, int timeout) {
         Log.w(TAG, "Shame on you for calling the hidden API requestTime()!");
         return false;
@@ -185,6 +187,7 @@ public class SntpClient {
      *
      * @return time value computed from NTP server response.
      */
+    @UnsupportedAppUsage
     public long getNtpTime() {
         return mNtpTime;
     }
@@ -195,6 +198,7 @@ public class SntpClient {
      *
      * @return reference clock corresponding to the NTP time.
      */
+    @UnsupportedAppUsage
     public long getNtpTimeReference() {
         return mNtpTimeReference;
     }
@@ -204,6 +208,7 @@ public class SntpClient {
      *
      * @return round trip time in milliseconds.
      */
+    @UnsupportedAppUsage
     public long getRoundTripTime() {
         return mRoundTripTime;
     }
