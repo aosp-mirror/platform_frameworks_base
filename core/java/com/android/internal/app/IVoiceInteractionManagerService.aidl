@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.IVoiceInteractionSessionListener;
@@ -143,4 +144,11 @@ interface IVoiceInteractionManagerService {
      * Register a voice interaction listener.
      */
     void registerVoiceInteractionSessionListener(IVoiceInteractionSessionListener listener);
+
+    /**
+     * Checks the availability of a set of voice actions for the current active voice service.
+     * Returns all supported voice actions.
+     */
+    void getActiveServiceSupportedActions(in List<String> voiceActions,
+     in IVoiceActionCheckCallback callback);
 }

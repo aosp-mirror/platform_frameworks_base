@@ -16,8 +16,7 @@
 
 package com.android.internal.app;
 
-import com.android.internal.R;
-
+import android.annotation.NonNull;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -31,6 +30,9 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Utility method for dealing with the assistant aspects of
@@ -60,6 +62,30 @@ public class AssistUtils {
             Log.w(TAG, "Failed to call showSessionForActiveService", e);
         }
         return false;
+    }
+
+    /**
+     * Checks the availability of a set of voice actions for the current active voice service.
+     *
+     * @param voiceActions A set of supported voice actions to be checked.
+     * @param callback     The callback which will deliver a set of supported voice actions. If
+     *                     no voice actions are supported for the given voice action set, then null
+     *                     or empty set is provided.
+     */
+    public void getActiveServiceSupportedActions(@NonNull Set<String> voiceActions,
+            @NonNull IVoiceActionCheckCallback callback) {
+        try {
+            if (mVoiceInteractionManagerService != null) {
+                mVoiceInteractionManagerService
+                        .getActiveServiceSupportedActions(new ArrayList<>(voiceActions), callback);
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to call activeServiceSupportedActions", e);
+            try {
+                callback.onComplete(null);
+            } catch (RemoteException re) {
+            }
+        }
     }
 
     public void launchVoiceAssistFromKeyguard() {
@@ -157,7 +183,7 @@ public class AssistUtils {
             return getActiveServiceComponentName();
         }
         final SearchManager searchManager =
-            (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
+                (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
         if (searchManager == null) {
             return null;
         }

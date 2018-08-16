@@ -366,6 +366,7 @@ java_library {
         "core/java/com/android/internal/app/IAppOpsService.aidl",
         "core/java/com/android/internal/app/IBatteryStats.aidl",
         "core/java/com/android/internal/app/ISoundTriggerService.aidl",
+        "core/java/com/android/internal/app/IVoiceActionCheckCallback.aidl",
         "core/java/com/android/internal/app/IVoiceInteractionManagerService.aidl",
         "core/java/com/android/internal/app/IVoiceInteractionSessionListener.aidl",
         "core/java/com/android/internal/app/IVoiceInteractionSessionShowCallback.aidl",
