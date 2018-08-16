@@ -3446,4 +3446,7 @@
 
   <java-symbol type="array" name="config_disableApksUnlessMatchedSku_apk_list" />
   <java-symbol type="array" name="config_disableApkUnlessMatchedSku_skus_list" />
+
+  <java-symbol type="string" name="config_misprovisionedDeviceModel" />
+  <java-symbol type="string" name="config_misprovisionedBrandValue" />
 </resources>
