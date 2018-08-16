@@ -18,6 +18,7 @@ package android.database.sqlite;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -49,8 +50,11 @@ public class SQLiteQueryBuilder
             Pattern.compile("\\s*\\d+\\s*(,\\s*\\d+\\s*)?");
 
     private Map<String, String> mProjectionMap = null;
+    @UnsupportedAppUsage
     private String mTables = "";
+    @UnsupportedAppUsage
     private StringBuilder mWhereClause = null;  // lazily created
+    @UnsupportedAppUsage
     private boolean mDistinct;
     private SQLiteDatabase.CursorFactory mFactory;
     private boolean mStrict;
@@ -763,6 +767,7 @@ public class SQLiteQueryBuilder
         return query.toString();
     }
 
+    @UnsupportedAppUsage
     private String[] computeProjection(String[] projectionIn) {
         if (projectionIn != null && projectionIn.length > 0) {
             if (mProjectionMap != null) {

@@ -16,13 +16,17 @@
 
 package android.database.sqlite;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * Describes a custom SQL function.
  *
  * @hide
  */
 public final class SQLiteCustomFunction {
+    @UnsupportedAppUsage
     public final String name;
+    @UnsupportedAppUsage
     public final int numArgs;
     public final SQLiteDatabase.CustomFunction callback;
 
@@ -47,6 +51,7 @@ public final class SQLiteCustomFunction {
 
     // Called from native.
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private void dispatchCallback(String[] args) {
         callback.callback(args);
     }

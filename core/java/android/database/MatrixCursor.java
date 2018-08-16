@@ -16,6 +16,7 @@
 
 package android.database;
 
+import android.annotation.UnsupportedAppUsage;
 import java.util.ArrayList;
 
 /**
@@ -26,7 +27,9 @@ import java.util.ArrayList;
 public class MatrixCursor extends AbstractCursor {
 
     private final String[] columnNames;
+    @UnsupportedAppUsage
     private Object[] data;
+    @UnsupportedAppUsage
     private int rowCount = 0;
     private final int columnCount;
 
@@ -61,6 +64,7 @@ public class MatrixCursor extends AbstractCursor {
     /**
      * Gets value at the given column for the current row.
      */
+    @UnsupportedAppUsage
     private Object get(int column) {
         if (column < 0 || column >= columnCount) {
             throw new CursorIndexOutOfBoundsException("Requested column: "
