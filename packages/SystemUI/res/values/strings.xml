@@ -1929,23 +1929,17 @@
     <!-- Accessibility description of a QS tile while editing positions [CHAR LIMIT=NONE] -->
     <string name="accessibility_qs_edit_add_tile_label"><xliff:g id="tile_name" example="Wi-Fi">%1$s</xliff:g>. Double tap to add.</string>
 
-    <!-- Accessibility description of a place to drop a tile while editing positions [CHAR LIMIT=NONE] -->
-    <string name="accessibility_qs_edit_position_label">Position <xliff:g id="position" example="2">%1$d</xliff:g>. Double tap to select.</string>
-
     <!-- Accessibility description of option to move QS tile [CHAR LIMIT=NONE] -->
     <string name="accessibility_qs_edit_move_tile">Move <xliff:g id="tile_name" example="Wi-Fi">%1$s</xliff:g></string>
 
     <!-- Accessibility description of option to remove QS tile [CHAR LIMIT=NONE] -->
     <string name="accessibility_qs_edit_remove_tile">Remove <xliff:g id="tile_name" example="Wi-Fi">%1$s</xliff:g></string>
 
-    <!-- Accessibility action when QS tile is added [CHAR LIMIT=NONE] -->
-    <string name="accessibility_qs_edit_tile_added"><xliff:g id="tile_name" example="Wi-Fi">%1$s</xliff:g> is added to position <xliff:g id="position" example="5">%2$d</xliff:g></string>
+    <!-- Accessibility action when QS tile is to be added [CHAR LIMIT=NONE] -->
+    <string name="accessibility_qs_edit_tile_add">Add <xliff:g id="tile_name" example="Wi-Fi">%1$s</xliff:g> to position <xliff:g id="position" example="5">%2$d</xliff:g></string>
 
-    <!-- Accessibility action when QS tile is removed [CHAR LIMIT=NONE] -->
-    <string name="accessibility_qs_edit_tile_removed"><xliff:g id="tile_name" example="Wi-Fi">%1$s</xliff:g> is removed</string>
-
-    <!-- Accessibility action when QS tile is moved [CHAR LIMIT=NONE] -->
-    <string name="accessibility_qs_edit_tile_moved"><xliff:g id="tile_name" example="Wi-Fi">%1$s</xliff:g> moved to position <xliff:g id="position" example="5">%2$d</xliff:g></string>
+    <!-- Accessibility action when QS tile is to be moved [CHAR LIMIT=NONE] -->
+    <string name="accessibility_qs_edit_tile_move">Move <xliff:g id="tile_name" example="Wi-Fi">%1$s</xliff:g> to position <xliff:g id="position" example="5">%2$d</xliff:g></string>
 
     <!-- Accessibility label for window when QS editing is happening [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_quick_settings_edit">Quick settings editor.</string>
