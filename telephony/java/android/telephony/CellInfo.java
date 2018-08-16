@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -70,14 +71,19 @@ public abstract class CellInfo implements Parcelable {
     // Type to distinguish where time stamp gets recorded.
 
     /** @hide */
+    @UnsupportedAppUsage
     public static final int TIMESTAMP_TYPE_UNKNOWN = 0;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int TIMESTAMP_TYPE_ANTENNA = 1;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int TIMESTAMP_TYPE_MODEM = 2;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int TIMESTAMP_TYPE_OEM_RIL = 3;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int TIMESTAMP_TYPE_JAVA_RIL = 4;
 
     /** @hide */
@@ -184,6 +190,7 @@ public abstract class CellInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getTimeStampType() {
         return mTimeStampType;
     }
@@ -223,6 +230,7 @@ public abstract class CellInfo implements Parcelable {
         }
     }
 
+    @UnsupportedAppUsage
     private static String timeStampTypeToString(int type) {
         switch (type) {
             case 1:

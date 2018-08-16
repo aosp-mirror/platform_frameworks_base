@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.text.TextUtils;
 
@@ -36,6 +37,7 @@ public final class CellIdentityLte extends CellIdentity {
     // 16-bit tracking area code
     private final int mTac;
     // 18-bit Absolute RF Channel Number
+    @UnsupportedAppUsage
     private final int mEarfcn;
     // cell bandwidth, in kHz
     private final int mBandwidth;
@@ -43,6 +45,7 @@ public final class CellIdentityLte extends CellIdentity {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public CellIdentityLte() {
         super(TAG, CellInfo.TYPE_LTE, null, null, null, null);
         mCi = Integer.MAX_VALUE;
@@ -62,6 +65,7 @@ public final class CellIdentityLte extends CellIdentity {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public CellIdentityLte(int mcc, int mnc, int ci, int pci, int tac) {
         this(ci, pci, tac, Integer.MAX_VALUE, Integer.MAX_VALUE, String.valueOf(mcc),
                 String.valueOf(mnc), null, null);

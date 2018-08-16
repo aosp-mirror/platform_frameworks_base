@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -36,21 +37,27 @@ public class SignalStrength implements Parcelable {
     private static final boolean DBG = false;
 
     /** @hide */
+    @UnsupportedAppUsage
     public static final int SIGNAL_STRENGTH_NONE_OR_UNKNOWN
             = TelephonyProtoEnums.SIGNAL_STRENGTH_NONE_OR_UNKNOWN; // = 0
     /** @hide */
+    @UnsupportedAppUsage
     public static final int SIGNAL_STRENGTH_POOR
             = TelephonyProtoEnums.SIGNAL_STRENGTH_POOR; // = 1
     /** @hide */
+    @UnsupportedAppUsage
     public static final int SIGNAL_STRENGTH_MODERATE
             = TelephonyProtoEnums.SIGNAL_STRENGTH_MODERATE; // = 2
     /** @hide */
+    @UnsupportedAppUsage
     public static final int SIGNAL_STRENGTH_GOOD
             = TelephonyProtoEnums.SIGNAL_STRENGTH_GOOD; // = 3
     /** @hide */
+    @UnsupportedAppUsage
     public static final int SIGNAL_STRENGTH_GREAT
             = TelephonyProtoEnums.SIGNAL_STRENGTH_GREAT; // = 4
     /** @hide */
+    @UnsupportedAppUsage
     public static final int NUM_SIGNAL_STRENGTH_BINS = 5;
     /** @hide */
     public static final String[] SIGNAL_STRENGTH_NAMES = {
@@ -75,24 +82,39 @@ public class SignalStrength implements Parcelable {
     private static final String MEASUMENT_TYPE_RSCP = "rscp";
 
     /** Parameters reported by the Radio */
+    @UnsupportedAppUsage
     private int mGsmSignalStrength; // Valid values are (0-31, 99) as defined in TS 27.007 8.5
+    @UnsupportedAppUsage
     private int mGsmBitErrorRate;   // bit error rate (0-7, 99) as defined in TS 27.007 8.5
+    @UnsupportedAppUsage
     private int mCdmaDbm;   // This value is the RSSI value
+    @UnsupportedAppUsage
     private int mCdmaEcio;  // This value is the Ec/Io
+    @UnsupportedAppUsage
     private int mEvdoDbm;   // This value is the EVDO RSSI value
+    @UnsupportedAppUsage
     private int mEvdoEcio;  // This value is the EVDO Ec/Io
+    @UnsupportedAppUsage
     private int mEvdoSnr;   // Valid values are 0-8.  8 is the highest signal to noise ratio
+    @UnsupportedAppUsage
     private int mLteSignalStrength;
+    @UnsupportedAppUsage
     private int mLteRsrp;
+    @UnsupportedAppUsage
     private int mLteRsrq;
+    @UnsupportedAppUsage
     private int mLteRssnr;
+    @UnsupportedAppUsage
     private int mLteCqi;
+    @UnsupportedAppUsage
     private int mTdScdmaRscp; // Valid values are -24...-120dBm or INVALID if unknown
     private int mWcdmaSignalStrength;
     private int mWcdmaRscpAsu;  // the WCDMA RSCP in ASU as reported from the HAL
+    @UnsupportedAppUsage
     private int mWcdmaRscp;     // the WCDMA RSCP in dBm
 
     /** Parameters from the framework */
+    @UnsupportedAppUsage
     private int mLteRsrpBoost; // offset to be reduced from the rsrp threshold while calculating
                                 // signal strength level
     private boolean mIsGsm; // This value is set by the ServiceStateTracker
@@ -121,6 +143,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static SignalStrength newFromBundle(Bundle m) {
         SignalStrength ret;
         ret = new SignalStrength();
@@ -133,6 +156,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public SignalStrength() {
         this(true);
     }
@@ -145,6 +169,7 @@ public class SignalStrength implements Parcelable {
      * @return newly created SignalStrength
      * @hide
      */
+    @UnsupportedAppUsage
     public SignalStrength(boolean gsmFlag) {
         mGsmSignalStrength = 99;
         mGsmBitErrorRate = -1;
@@ -247,6 +272,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public SignalStrength(SignalStrength s) {
         copyFrom(s);
     }
@@ -254,6 +280,7 @@ public class SignalStrength implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     protected void copyFrom(SignalStrength s) {
         mGsmSignalStrength = s.mGsmSignalStrength;
         mGsmBitErrorRate = s.mGsmBitErrorRate;
@@ -284,6 +311,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public SignalStrength(Parcel in) {
         if (DBG) log("Size of signalstrength parcel:" + in.dataSize());
 
@@ -351,6 +379,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final Parcelable.Creator<SignalStrength> CREATOR = new Parcelable.Creator() {
         public SignalStrength createFromParcel(Parcel in) {
             return new SignalStrength(in);
@@ -372,6 +401,7 @@ public class SignalStrength implements Parcelable {
      *      Valid values for all signalstrength fields
      * @hide
      */
+    @UnsupportedAppUsage
     public void validateInput() {
         if (DBG) log("Signal before validate=" + this);
         // TS 27.007 8.5
@@ -546,26 +576,31 @@ public class SignalStrength implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getLteSignalStrength() {
         return mLteSignalStrength;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getLteRsrp() {
         return mLteRsrp;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getLteRsrq() {
         return mLteRsrq;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getLteRssnr() {
         return mLteRssnr;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getLteCqi() {
         return mLteCqi;
     }
@@ -594,6 +629,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getAsuLevel() {
         int asuLevel = 0;
         if (mIsGsm) {
@@ -629,6 +665,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getDbm() {
         int dBm = INVALID;
 
@@ -661,6 +698,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getGsmDbm() {
         int dBm;
 
@@ -680,6 +718,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getGsmLevel() {
         int level;
 
@@ -702,6 +741,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getGsmAsuLevel() {
         // ASU ranges from 0 to 31 - TS 27.007 Sec 8.5
         // asu = 0 (-113dB or less) is very weak
@@ -717,6 +757,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getCdmaLevel() {
         final int cdmaDbm = getCdmaDbm();
         final int cdmaEcio = getCdmaEcio();
@@ -746,6 +787,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getCdmaAsuLevel() {
         final int cdmaDbm = getCdmaDbm();
         final int cdmaEcio = getCdmaEcio();
@@ -777,6 +819,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getEvdoLevel() {
         int evdoDbm = getEvdoDbm();
         int evdoSnr = getEvdoSnr();
@@ -805,6 +848,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getEvdoAsuLevel() {
         int evdoDbm = getEvdoDbm();
         int evdoSnr = getEvdoSnr();
@@ -835,6 +879,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getLteDbm() {
         return mLteRsrp;
     }
@@ -844,6 +889,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getLteLevel() {
         /*
          * TS 36.214 Physical Layer Section 5.1.3
@@ -930,6 +976,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getLteAsuLevel() {
         int lteAsuLevel = 99;
         int lteDbm = getLteDbm();
@@ -973,6 +1020,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getTdScdmaDbm() {
         return this.mTdScdmaRscp;
     }
@@ -985,6 +1033,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getTdScdmaLevel() {
         final int tdScdmaDbm = getTdScdmaDbm();
         int level;
@@ -1006,6 +1055,7 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getTdScdmaAsuLevel() {
         final int tdScdmaDbm = getTdScdmaDbm();
         int tdScdmaAsuLevel;
@@ -1245,6 +1295,7 @@ public class SignalStrength implements Parcelable {
      * @param m intent notifier map
      * @hide
      */
+    @UnsupportedAppUsage
     private void setFromNotifierBundle(Bundle m) {
         mGsmSignalStrength = m.getInt("GsmSignalStrength");
         mGsmBitErrorRate = m.getInt("GsmBitErrorRate");
@@ -1282,6 +1333,7 @@ public class SignalStrength implements Parcelable {
      * @param m intent notifier Bundle
      * @hide
      */
+    @UnsupportedAppUsage
     public void fillInNotifierBundle(Bundle m) {
         m.putInt("GsmSignalStrength", mGsmSignalStrength);
         m.putInt("GsmBitErrorRate", mGsmBitErrorRate);

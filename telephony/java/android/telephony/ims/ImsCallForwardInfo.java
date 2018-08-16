@@ -17,6 +17,7 @@
 package android.telephony.ims;
 
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -30,30 +31,37 @@ public final class ImsCallForwardInfo implements Parcelable {
     // Refer to ImsUtInterface#CDIV_CF_XXX
     /** @hide */
     // TODO: Make private, do not modify this field directly, use getter.
+    @UnsupportedAppUsage
     public int mCondition;
     // 0: disabled, 1: enabled
     /** @hide */
     // TODO: Make private, do not modify this field directly, use getter.
+    @UnsupportedAppUsage
     public int mStatus;
     // 0x91: International, 0x81: Unknown
     /** @hide */
     // TODO: Make private, do not modify this field directly, use getter.
+    @UnsupportedAppUsage
     public int mToA;
     // Service class
     /** @hide */
     // TODO: Make private, do not modify this field directly, use getter.
+    @UnsupportedAppUsage
     public int mServiceClass;
     // Number (it will not include the "sip" or "tel" URI scheme)
     /** @hide */
     // TODO: Make private, do not modify this field directly, use getter.
+    @UnsupportedAppUsage
     public String mNumber;
     // No reply timer for CF
     /** @hide */
     // TODO: Make private, do not modify this field directly, use getter.
+    @UnsupportedAppUsage
     public int mTimeSeconds;
 
     /** @hide */
     // TODO: Will be removed in the future, use public constructor instead.
+    @UnsupportedAppUsage
     public ImsCallForwardInfo() {
     }
 

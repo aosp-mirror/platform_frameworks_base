@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.text.TextUtils;
 
@@ -36,6 +37,7 @@ public final class CellIdentityWcdma extends CellIdentity {
     // 9-bit UMTS Primary Scrambling Code described in TS 25.331, 0..511
     private final int mPsc;
     // 16-bit UMTS Absolute RF Channel Number described in TS 25.101 sec. 5.4.4
+    @UnsupportedAppUsage
     private final int mUarfcn;
 
     /**
