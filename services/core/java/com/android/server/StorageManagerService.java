@@ -3830,7 +3830,7 @@ class StorageManagerService extends IStorageManager.Stub
         @Override
         public void onExternalStoragePolicyChanged(int uid, String packageName) {
             // No runtime storage permissions in isolated storage world, so nothing to do here.
-            if (!ENABLE_ISOLATED_STORAGE) return;
+            if (ENABLE_ISOLATED_STORAGE) return;
             final int mountMode = getExternalStorageMountMode(uid, packageName);
             remountUidExternalStorage(uid, mountMode);
         }
