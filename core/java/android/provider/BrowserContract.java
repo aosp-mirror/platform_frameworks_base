@@ -17,6 +17,7 @@
 package android.provider;
 
 import android.accounts.Account;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
@@ -46,6 +47,7 @@ public class BrowserContract {
     public static final String AUTHORITY = "com.android.browser";
 
     /** A content:// style uri to the authority for the browser provider */
+    @UnsupportedAppUsage
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
     /**
@@ -251,6 +253,7 @@ public class BrowserContract {
         /**
          * The content:// style URI for this table
          */
+        @UnsupportedAppUsage
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "bookmarks");
 
         /**
@@ -300,6 +303,7 @@ public class BrowserContract {
          * The content:// style URI for the default folder
          * @hide
          */
+        @UnsupportedAppUsage
         public static final Uri CONTENT_URI_DEFAULT_FOLDER =
                 Uri.withAppendedPath(CONTENT_URI, "folder");
 
@@ -320,6 +324,7 @@ public class BrowserContract {
          * @param folderId the ID of the folder to point to
          * @hide
          */
+        @UnsupportedAppUsage
         public static final Uri buildFolderUri(long folderId) {
             return ContentUris.withAppendedId(CONTENT_URI_DEFAULT_FOLDER, folderId);
         }
@@ -407,6 +412,7 @@ public class BrowserContract {
         /**
          * Directory under {@link Bookmarks#CONTENT_URI}
          */
+        @UnsupportedAppUsage
         public static final Uri CONTENT_URI =
                 AUTHORITY_URI.buildUpon().appendPath("accounts").build();
 
@@ -444,6 +450,7 @@ public class BrowserContract {
         /**
          * The content:// style URI for this table
          */
+        @UnsupportedAppUsage
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "history");
 
         /**
@@ -573,6 +580,7 @@ public class BrowserContract {
         /**
          * The content:// style URI for this table
          */
+        @UnsupportedAppUsage
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "images");
 
         /**
@@ -673,6 +681,7 @@ public class BrowserContract {
         /**
          * The content:// style URI for this table
          */
+        @UnsupportedAppUsage
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "combined");
 
         /**
