@@ -133,11 +133,10 @@ class MapFlattenVisitor : public ValueVisitor {
   }
 
   void Visit(Array* array) override {
-    for (auto& item : array->elements) {
-      ResTable_map* out_entry = buffer_->NextBlock<ResTable_map>();
-      FlattenValue(item.get(), out_entry);
-      out_entry->value.size = util::HostToDevice16(sizeof(out_entry->value));
-      entry_count_++;
+    const size_t count = array->elements.size();
+    for (size_t i = 0; i < count; i++) {
+      Reference key(android::ResTable_map::ATTR_MIN + i);
+      FlattenEntry(&key, array->elements[i].get());
     }
   }
 
