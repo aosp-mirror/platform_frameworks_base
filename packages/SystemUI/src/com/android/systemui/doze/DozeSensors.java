@@ -110,6 +110,13 @@ public class DozeSensors {
                         DozeLog.PULSE_REASON_SENSOR_LONG_PRESS,
                         true /* reports touch coordinates */,
                         true /* touchscreen */),
+                new TriggerSensor(
+                        findSensorWithType(config.reachSensorType()),
+                        Settings.Secure.DOZE_REACH_GESTURE,
+                        true /* configured */,
+                        DozeLog.PULSE_REASON_SENSOR_REACH,
+                        false /* reports touch coordinates */,
+                        false /* touchscreen */),
         };
 
         mProxSensor = new ProxSensor(policy);
