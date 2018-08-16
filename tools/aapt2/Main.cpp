@@ -71,7 +71,7 @@ class MainCommand : public Command {
   explicit MainCommand(IDiagnostics* diagnostics) : Command("aapt2"), diagnostics_(diagnostics) {
     AddOptionalSubcommand(util::make_unique<CompileCommand>(diagnostics));
     AddOptionalSubcommand(util::make_unique<LinkCommand>(diagnostics));
-    AddOptionalSubcommand(util::make_unique<DumpCommand>());
+    AddOptionalSubcommand(util::make_unique<DumpCommand>(diagnostics));
     AddOptionalSubcommand(util::make_unique<DiffCommand>());
     AddOptionalSubcommand(util::make_unique<OptimizeCommand>());
     AddOptionalSubcommand(util::make_unique<ConvertCommand>());

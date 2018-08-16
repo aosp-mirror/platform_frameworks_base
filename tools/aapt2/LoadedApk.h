@@ -70,6 +70,10 @@ class LoadedApk {
     return apk_.get();
   }
 
+  ApkFormat GetApkFormat() {
+    return format_;
+  }
+
   const ResourceTable* GetResourceTable() const {
     return table_.get();
   }
@@ -106,6 +110,8 @@ class LoadedApk {
                               const TableFlattenerOptions& options, FilterChain* filters,
                               IArchiveWriter* writer, xml::XmlResource* manifest = nullptr);
 
+  /** Loads the file as an xml document. */
+  std::unique_ptr<xml::XmlResource> LoadXml(const std::string& file_path, IDiagnostics* diag);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedApk);

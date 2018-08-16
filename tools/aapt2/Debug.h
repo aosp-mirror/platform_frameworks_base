@@ -38,6 +38,7 @@ struct Debug {
   static void PrintStyleGraph(ResourceTable* table, const ResourceName& target_style);
   static void DumpHex(const void* data, size_t len);
   static void DumpXml(const xml::XmlResource& doc, text::Printer* printer);
+  static void DumpResStringPool(const android::ResStringPool* pool, text::Printer* printer);
 };
 
 }  // namespace aapt
