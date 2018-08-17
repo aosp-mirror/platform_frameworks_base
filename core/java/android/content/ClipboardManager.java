@@ -95,6 +95,9 @@ public class ClipboardManager extends android.text.ClipboardManager {
      * Sets the current primary clip on the clipboard.  This is the clip that
      * is involved in normal cut and paste operations.
      *
+     * <em>If the application is not the default IME or does not have input focus this will have
+     * no effect.</em>
+     *
      * @param clip The clipped data item to set.
      * @see #getPrimaryClip()
      * @see #clearPrimaryClip()
@@ -112,6 +115,9 @@ public class ClipboardManager extends android.text.ClipboardManager {
     /**
      * Clears any current primary clip on the clipboard.
      *
+     * <em>If the application is not the default IME or does not have input focus this will have
+     * no effect.</em>
+     *
      * @see #setPrimaryClip(ClipData)
      */
     public void clearPrimaryClip() {
@@ -124,6 +130,9 @@ public class ClipboardManager extends android.text.ClipboardManager {
 
     /**
      * Returns the current primary clip on the clipboard.
+     *
+     * <em>If the application is not the default IME or does not have input focus this return
+     * {@code null}.</em>
      *
      * @see #setPrimaryClip(ClipData)
      */
@@ -139,6 +148,9 @@ public class ClipboardManager extends android.text.ClipboardManager {
      * Returns a description of the current primary clip on the clipboard
      * but not a copy of its data.
      *
+     * <em>If the application is not the default IME or does not have input focus this return
+     * {@code null}.</em>
+     *
      * @see #setPrimaryClip(ClipData)
      */
     public @Nullable ClipDescription getPrimaryClipDescription() {
@@ -151,6 +163,9 @@ public class ClipboardManager extends android.text.ClipboardManager {
 
     /**
      * Returns true if there is currently a primary clip on the clipboard.
+     *
+     * <em>If the application is not the default IME or the does not have input focus this will
+     * return {@code false}.</em>
      */
     public boolean hasPrimaryClip() {
         try {

@@ -47,12 +47,14 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.wm.WindowManagerInternal;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -149,6 +151,7 @@ public class ClipboardService extends SystemService {
     private final IActivityManager mAm;
     private final IUriGrantsManager mUgm;
     private final UriGrantsManagerInternal mUgmInternal;
+    private final WindowManagerInternal mWm;
     private final IUserManager mUm;
     private final PackageManager mPm;
     private final AppOpsManager mAppOps;
@@ -167,6 +170,7 @@ public class ClipboardService extends SystemService {
         mAm = ActivityManager.getService();
         mUgm = UriGrantsManager.getService();
         mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
+        mWm = LocalServices.getService(WindowManagerInternal.class);
         mPm = getContext().getPackageManager();
         mUm = (IUserManager) ServiceManager.getService(Context.USER_SERVICE);
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
@@ -623,18 +627,19 @@ public class ClipboardService extends SystemService {
         if (mAppOps.noteOp(op, callingUid, callingPackage) != AppOpsManager.MODE_ALLOWED) {
             return false;
         }
-        try {
-            // Installed apps can access the clipboard at any time.
-            if (!AppGlobals.getPackageManager().isInstantApp(callingPackage,
-                        UserHandle.getUserId(callingUid))) {
-                return true;
-            }
-            // Instant apps can only access the clipboard if they are in the foreground.
-            return mAm.isAppForeground(callingUid);
-        } catch (RemoteException e) {
-            Slog.e("clipboard", "Failed to get Instant App status for package " + callingPackage,
-                    e);
-            return false;
+        // The default IME is always allowed to access the clipboard.
+        String defaultIme = Settings.Secure.getStringForUser(getContext().getContentResolver(),
+                Settings.Secure.DEFAULT_INPUT_METHOD, UserHandle.getUserId(callingUid));
+        if (defaultIme != null && defaultIme.equals(callingPackage)) {
+            return true;
         }
+
+        // Otherwise only focused applications can access the clipboard.
+        boolean uidFocused = mWm.isUidFocused(callingUid);
+        if (!uidFocused) {
+            Slog.e(TAG, "Denying clipboard access to " + callingPackage
+                    + ", application is not in focus.");
+        }
+        return uidFocused;
     }
 }
