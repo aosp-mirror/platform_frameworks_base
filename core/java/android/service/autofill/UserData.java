@@ -145,6 +145,9 @@ public final class UserData implements Parcelable {
 
         // Non-persistent array used to limit the number of unique ids.
         private final ArraySet<String> mUniqueCategoryIds;
+        // Non-persistent array used to ignore duplaicated value/category pairs.
+        private final ArraySet<String> mUniqueValueCategoryPairs;
+
 
         /**
          * Creates a new builder for the user data used for <a href="#FieldClassification">field
@@ -185,6 +188,7 @@ public final class UserData implements Parcelable {
             final int maxUserDataSize = getMaxUserDataSize();
             mCategoryIds = new ArrayList<>(maxUserDataSize);
             mValues = new ArrayList<>(maxUserDataSize);
+            mUniqueValueCategoryPairs = new ArraySet<>(maxUserDataSize);
             mUniqueCategoryIds = new ArraySet<>(getMaxCategoryCount());
 
             addMapping(value, categoryId);
@@ -222,7 +226,8 @@ public final class UserData implements Parcelable {
          * @throws IllegalStateException if:
          * <ul>
          *   <li>{@link #build()} already called</li>
-         *   <li>the {@code value} has already been added</li>
+         *   <li>the {@code value} has already been added (<b>Note: </b> this restriction was
+         *   lifted on Android {@link android.os.Build.VERSION_CODES#Q} and later)</li>
          *   <li>the number of unique {@code categoryId} values added so far is more than
          *       {@link UserData#getMaxCategoryCount()}</li>
          *   <li>the number of {@code values} added so far is is more than
@@ -248,12 +253,8 @@ public final class UserData implements Parcelable {
                 // New category - check size
                 Preconditions.checkState(mUniqueCategoryIds.size() < getMaxCategoryCount(),
                         "already added " + mUniqueCategoryIds.size() + " unique category ids");
-
             }
 
-            Preconditions.checkState(!mValues.contains(value),
-                    // Don't include value on message because it could contain PII
-                    "already has entry with same value");
             Preconditions.checkState(mValues.size() < getMaxUserDataSize(),
                     "already added " + mValues.size() + " elements");
             addMapping(value, categoryId);
@@ -262,9 +263,16 @@ public final class UserData implements Parcelable {
         }
 
         private void addMapping(@NonNull String value, @NonNull String categoryId) {
+            final String pair = value + ":" + categoryId;
+            if (mUniqueValueCategoryPairs.contains(pair)) {
+                // Don't include value on message because it could contain PII
+                Log.w(TAG, "Ignoring entry with same value / category");
+                return;
+            }
             mCategoryIds.add(categoryId);
             mValues.add(value);
             mUniqueCategoryIds.add(categoryId);
+            mUniqueValueCategoryPairs.add(pair);
         }
 
         private String checkNotEmpty(@NonNull String name, @Nullable String value) {
