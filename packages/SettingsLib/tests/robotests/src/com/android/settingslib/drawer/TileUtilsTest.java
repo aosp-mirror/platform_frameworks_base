@@ -214,7 +214,7 @@ public class TileUtilsTest {
                 null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles.size()).isEqualTo(1);
-        assertThat(outTiles.get(0).title).isEqualTo("my title");
+        assertThat(outTiles.get(0).getTitle(mContext)).isEqualTo("my title");
     }
 
     @Test
@@ -236,7 +236,7 @@ public class TileUtilsTest {
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */);
         assertThat(outTiles.size()).isEqualTo(1);
-        assertThat(outTiles.get(0).title).isEqualTo("my localized title");
+        assertThat(outTiles.get(0).getTitle(mContext)).isEqualTo("my localized title");
 
         // Icon should be tintable because the tile is not from settings package, and
         // "forceTintExternalIcon" is set

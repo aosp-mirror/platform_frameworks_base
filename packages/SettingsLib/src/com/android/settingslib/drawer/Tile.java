@@ -21,6 +21,7 @@ import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON_URI;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_TITLE;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
 
@@ -29,16 +30,19 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Description of a single dashboard tile that the user can select.
@@ -47,12 +51,6 @@ public class Tile implements Parcelable {
 
     private static final String TAG = "Tile";
 
-    /**
-     * Title of the tile that is shown to the user.
-     *
-     * @attr ref android.R.styleable#PreferenceHeader_title
-     */
-    public CharSequence title;
 
     /**
      * Optional summary describing what this tile controls.
@@ -90,7 +88,6 @@ public class Tile implements Parcelable {
         mActivityPackage = in.readString();
         mActivityName = in.readString();
         mIntent = new Intent().setClassName(mActivityPackage, mActivityName);
-        title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         summary = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         final int N = in.readInt();
         for (int i = 0; i < N; i++) {
@@ -109,7 +106,6 @@ public class Tile implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mActivityPackage);
         dest.writeString(mActivityName);
-        TextUtils.writeToParcel(title, dest, flags);
         TextUtils.writeToParcel(summary, dest, flags);
         final int N = userHandle.size();
         dest.writeInt(N);
@@ -118,6 +114,14 @@ public class Tile implements Parcelable {
         }
         dest.writeString(mCategory);
         dest.writeBundle(mMetaData);
+    }
+
+    public int getId() {
+        return Objects.hash(mActivityPackage, mActivityName);
+    }
+
+    public String getDescription() {
+        return mActivityPackage + "/" + mActivityName;
     }
 
     public String getPackageName() {
@@ -156,6 +160,33 @@ public class Tile implements Parcelable {
     public boolean hasOrder() {
         return mMetaData.containsKey(META_DATA_KEY_ORDER)
                 && mMetaData.get(META_DATA_KEY_ORDER) instanceof Integer;
+    }
+
+    /**
+     * Title of the tile that is shown to the user.
+     */
+    public CharSequence getTitle(Context context) {
+        CharSequence title = null;
+        final PackageManager packageManager = context.getPackageManager();
+        if (mMetaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
+            if (mMetaData.get(META_DATA_PREFERENCE_TITLE) instanceof Integer) {
+                try {
+                    final Resources res =
+                            packageManager.getResourcesForApplication(mActivityPackage);
+                    title = res.getString(mMetaData.getInt(META_DATA_PREFERENCE_TITLE));
+                } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
+                    Log.d(TAG, "Couldn't find info", e);
+                }
+            } else {
+                title = mMetaData.getString(META_DATA_PREFERENCE_TITLE);
+            }
+        }
+        // Set the preference title to the activity's label if no
+        // meta-data is found
+        if (title == null) {
+            title = getActivityInfo(context).loadLabel(packageManager);
+        }
+        return title;
     }
 
     public Bundle getMetaData() {

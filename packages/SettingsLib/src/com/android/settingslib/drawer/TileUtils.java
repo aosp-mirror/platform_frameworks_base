@@ -313,7 +313,6 @@ public class TileUtils {
             if (tile == null) {
                 tile = new Tile(activityInfo, categoryKey);
                 updateTileData(context, tile, activityInfo, activityInfo.applicationInfo, pm);
-                if (DEBUG) Log.d(LOG_TAG, "Adding tile " + tile.title);
                 addedCache.put(key, tile);
             }
 
@@ -329,7 +328,6 @@ public class TileUtils {
     private static boolean updateTileData(Context context, Tile tile,
             ActivityInfo activityInfo, ApplicationInfo applicationInfo, PackageManager pm) {
         if (applicationInfo.isSystemApp()) {
-            CharSequence title = null;
             String summary = null;
 
             // Get the activity's meta-data
@@ -338,13 +336,6 @@ public class TileUtils {
                 Bundle metaData = activityInfo.metaData;
 
                 if (res != null && metaData != null) {
-                    if (metaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
-                        if (metaData.get(META_DATA_PREFERENCE_TITLE) instanceof Integer) {
-                            title = res.getString(metaData.getInt(META_DATA_PREFERENCE_TITLE));
-                        } else {
-                            title = metaData.getString(META_DATA_PREFERENCE_TITLE);
-                        }
-                    }
                     if (metaData.containsKey(META_DATA_PREFERENCE_SUMMARY)) {
                         if (metaData.get(META_DATA_PREFERENCE_SUMMARY) instanceof Integer) {
                             summary = res.getString(metaData.getInt(META_DATA_PREFERENCE_SUMMARY));
@@ -357,14 +348,7 @@ public class TileUtils {
                 if (DEBUG) Log.d(LOG_TAG, "Couldn't find info", e);
             }
 
-            // Set the preference title to the activity's label if no
-            // meta-data is found
-            if (TextUtils.isEmpty(title)) {
-                title = activityInfo.loadLabel(pm).toString();
-            }
-
             // Set title and summary for the preference
-            tile.title = title;
             tile.summary = summary;
             return true;
         }
