@@ -300,6 +300,18 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"शरीर सेन्सर"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"आपल्‍या महत्त्वाच्या मापनांविषयी सेंसर डेटा अॅक्सेस करा"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमच्या महत्त्वाच्या लक्षणांविषयीचा सेन्सर डेटा अॅक्सेस करू द्यायचे?"</string>
+    <!-- no translation found for permgrouplab_aural (965607064083134896) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_aural (4870189506255958055) -->
+    <skip />
+    <!-- no translation found for permgrouprequest_aural (6787926123071735620) -->
+    <skip />
+    <!-- no translation found for permgrouplab_visual (8030190588123857921) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_visual (3415827902566663546) -->
+    <skip />
+    <!-- no translation found for permgrouprequest_visual (6907523945030290376) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विंडो सामग्री पुनर्प्राप्त करा"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"तुम्ही परस्‍परसंवाद करीत असलेल्‍या विंडोची सामग्री तपासा."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"स्पर्श करून अन्वेषण चालू करा"</string>
@@ -494,6 +506,34 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"वापर करण्याकरिता फिंगरप्रिंट टेम्पलेट जोडण्यासाठी आणि हटविण्यासाठी पद्धती रद्द करण्यास अॅपला अनुमती देते."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"फिंगरप्रिंट हार्डवेअर वापरा"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"प्रमाणीकरणाकरिता फिंगरप्रिंट हार्डवेअरचा वापर करण्यासाठी अॅपला अनुमती देते"</string>
+    <!-- no translation found for permlab_audioRead (6617225220728465565) -->
+    <skip />
+    <!-- no translation found for permdesc_audioRead (5034032570243484805) -->
+    <skip />
+    <!-- no translation found for permlab_audioWrite (2661772059799779292) -->
+    <skip />
+    <!-- no translation found for permdesc_audioWrite (8888544708166230494) -->
+    <skip />
+    <!-- no translation found for permlab_videoRead (9182618678674737229) -->
+    <skip />
+    <!-- no translation found for permdesc_videoRead (7045676429859396194) -->
+    <skip />
+    <!-- no translation found for permlab_videoWrite (128769316366746446) -->
+    <skip />
+    <!-- no translation found for permdesc_videoWrite (5448565757490640841) -->
+    <skip />
+    <!-- no translation found for permlab_imagesRead (3015078545742665304) -->
+    <skip />
+    <!-- no translation found for permdesc_imagesRead (3144263806038695580) -->
+    <skip />
+    <!-- no translation found for permlab_imagesWrite (3391306186247235510) -->
+    <skip />
+    <!-- no translation found for permdesc_imagesWrite (7073662756617474375) -->
+    <skip />
+    <!-- no translation found for permlab_mediaLocation (8675148183726247864) -->
+    <skip />
+    <!-- no translation found for permdesc_mediaLocation (2237023389178865130) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"आंशिक फिंगरप्रिंट आढळली. कृपया पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"फिंगरप्रिंटवर प्रक्रिया करणे शक्य झाले नाही. कृपया पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"फिंगरप्रिंट सेन्सर खराब आहे. कृपया साफ करा आणि पुन्हा प्रयत्न करा."</string>
@@ -1873,8 +1913,18 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"&lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;मध्ये <xliff:g id="TYPE">%1$s</xliff:g> सेव्ह करायची?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"&lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;मध्ये <xliff:g id="TYPE_0">%1$s</xliff:g> आणि <xliff:g id="TYPE_1">%2$s</xliff:g> सेव्ह करायची?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"&lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;मध्ये <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> आणि <xliff:g id="TYPE_2">%3$s</xliff:g> सेव्ह करायची?"</string>
+    <!-- no translation found for autofill_update_title (4879673117448810818) -->
+    <skip />
+    <!-- no translation found for autofill_update_title_with_type (339733442087186755) -->
+    <skip />
+    <!-- no translation found for autofill_update_title_with_2types (6321714204167424745) -->
+    <skip />
+    <!-- no translation found for autofill_update_title_with_3types (5866735124066629287) -->
+    <skip />
     <string name="autofill_save_yes" msgid="6398026094049005921">"सेव्ह करा"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"नाही, नको"</string>
+    <!-- no translation found for autofill_update_yes (310358413273276958) -->
+    <skip />
     <string name="autofill_save_type_password" msgid="5288448918465971568">"पासवर्ड"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"पत्ता"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"क्रेडिट कार्ड"</string>

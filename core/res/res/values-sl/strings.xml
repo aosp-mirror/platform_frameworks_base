@@ -306,6 +306,12 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Tipala telesnih funkcij"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"dostop do podatkov tipala o vaših vitalnih znakih"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti dostop do podatkov tipala o vitalnih znakih?"</string>
+    <string name="permgrouplab_aural" msgid="965607064083134896">"Glasba"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"dostop do glasbe"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti dostop do glasbe?"</string>
+    <string name="permgrouplab_visual" msgid="8030190588123857921">"Fotografije in videoposnetki"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"dostop do fotografij in videoposnetkov"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti dostop do fotografij in videoposnetkov?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pridobiti vsebino okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Preverjanje vsebine okna, ki ga uporabljate."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Vklopiti raziskovanje z dotikom"</string>
@@ -500,6 +506,20 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Aplikaciji omogoča sprožanje načinov za dodajanje in brisanje predlog s prstnimi odtisi za uporabo."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"uporaba strojne opreme za prstne odtise"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Aplikaciji omogoča uporabo strojne opreme za prstne odtise za preverjanje pristnosti"</string>
+    <string name="permlab_audioRead" msgid="6617225220728465565">"branje glasbene zbirke"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"Aplikaciji omogoča branje glasbene zbirke."</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"spreminjanje glasbene zbirke"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"Aplikaciji omogoča spreminjanje glasbene zbirke."</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"branje zbirke videoposnetkov"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"Aplikaciji omogoča branje zbirke videoposnetkov."</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"spreminjanje zbirke videoposnetkov"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"Aplikaciji omogoča spreminjanje zbirke videoposnetkov."</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"branje zbirke fotografij"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"Aplikaciji omogoča branje zbirke fotografij."</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"spreminjanje zbirke fotografij"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Aplikaciji omogoča spreminjanje zbirke fotografij."</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"branje lokacij v predstavnostni zbirki"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Aplikaciji omogoča branje lokacij v predstavnostni zbirki."</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Zaznan delni prstni odtis. Poskusite znova."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Prstnega odtisa ni bilo mogoče obdelati. Poskusite znova."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Tipalo prstnih odtisov je umazano. Očistite ga in poskusite znova."</string>
@@ -1942,8 +1962,13 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Želite <xliff:g id="TYPE">%1$s</xliff:g> shraniti pod oznako &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Želite <xliff:g id="TYPE_0">%1$s</xliff:g> in <xliff:g id="TYPE_1">%2$s</xliff:g> shraniti pod oznako &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Želite <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> in <xliff:g id="TYPE_2">%3$s</xliff:g> shraniti pod oznako &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title" msgid="4879673117448810818">"Želite posodobiti na oznako &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Želite <xliff:g id="TYPE">%1$s</xliff:g> posodobiti na oznako &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Želite <xliff:g id="TYPE_0">%1$s</xliff:g> in <xliff:g id="TYPE_1">%2$s</xliff:g> posodobiti na oznako &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Želite <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> in <xliff:g id="TYPE_2">%3$s</xliff:g> posodobiti na oznako &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Shrani"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ne, hvala"</string>
+    <string name="autofill_update_yes" msgid="310358413273276958">"Posodobi"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"geslo"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"naslov"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"kreditno kartico"</string>

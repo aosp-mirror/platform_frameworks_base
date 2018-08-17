@@ -300,6 +300,12 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ခန္ဓာကိုယ် အာရုံခံကိရိယာများ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"သင်၏ အဓိကကျသော လက္ခဏာများအကြောင်း အာရုံခံကိရိယာဒေတာကို ရယူသုံးစွဲရန်"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင်၏ အရေးကြီးသောလက္ခဏာ အာရုံခံကိရိယာ ဒေတာများကို သုံးခွင့်ပေးလိုပါသလား။"</string>
+    <string name="permgrouplab_aural" msgid="965607064083134896">"တေးဂီတ"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"သင့်တေးဂီတကို ဝင်သုံးသည်"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင့်တေးဂီတကို ဝင်သုံးခွင့်ပေးလိုပါသလား။"</string>
+    <string name="permgrouplab_visual" msgid="8030190588123857921">"ဓာတ်ပုံနှင့် ဗီဒီယိုများ"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"သင့်ဓာတ်ပုံနှင့် ဗီဒီယိုများကို ဝင်သုံးသည်"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင့်ဓာတ်ပုံနှင့် ဗီဒီယိုများကို ဝင်သုံးခွင့်ပေးလိုပါသလား။"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ဝင်းဒိုးတွင် ပါရှိသည်များကို ပြန်လည်ရယူရန်"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"သင်အသုံးပြုနေသော ဝင်းဒိုးတွင် ပါရှိသည်များကို ကြည့်ရှုစစ်ဆေးသည်။"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"တို့ထိခြင်းဖြင့် ရှာဖွေမှုကို ဖွင့်ရန်"</string>
@@ -494,6 +500,20 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"အသုံးပြုရန်အတွက် လက်ဗွေရာပုံစံများကို ပေါင်းထည့်ရန် သို့မဟုတ် ဖျက်ရန်နည်းလမ်းများကို အပ်ဖ်အား အသုံးပြုခွင့်ပြုသည်။"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"လက်ဗွေရာပစ္စည်းကို အသုံးပြုမည်"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"စစ်မှန်ကြောင်းအထောက်အထားပြသခြင်းအတွက် လက်ဗွေရာပစ္စည်းကို အသုံးပြုရန် အပ်ဖ်အားခွင့်ပြုသည်။"</string>
+    <string name="permlab_audioRead" msgid="6617225220728465565">"သင့်တေးဂီတ စုစည်းမှုကို ဖတ်ခြင်း"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"အက်ပ်အား သင့်တေးဂီတစုစည်းမှုကို ဖတ်ခွင့်ပေးသည်။"</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"သင့်တေးဂီတ စုစည်းမှုကို ပြုပြင်ခြင်း"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"အက်ပ်အား သင့်တေးဂီတစုစည်းမှုကို ပြုပြင်ခွင့်ပေးသည်။"</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"သင့်ဗီဒီယို စုစည်းမှုကို ဖတ်ခြင်း"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"အက်ပ်အား သင့်ဗီဒီယိုစုစည်းမှုကို ဖတ်ခွင့်ပေးသည်။"</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"သင့်ဗီဒီယို စုစည်းမှုကို ပြုပြင်ခြင်း"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"အက်ပ်အား သင့်ဗီဒီယိုစုစည်းမှုကို ပြုပြင်ခွင့်ပေးသည်။"</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"သင့်ဓာတ်ပုံ စုစည်းမှုကို ဖတ်ခြင်း"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"အက်ပ်အား သင့်ဓာတ်ပုံစုစည်းမှုကို ဖတ်ခွင့်ပေးသည်။"</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"သင့်ဓာတ်ပုံ စုစည်းမှုကို ပြုပြင်ခြင်း"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"အက်ပ်အား သင့်ဓာတ်ပုံစုစည်းမှုကို ပြုပြင်ခွင့်ပေးသည်။"</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"သင့်မီဒီယာစုစည်းမှုမှ တည်နေရာများကို ဖတ်ခြင်း"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"အက်ပ်အား သင့်မီဒီယာစုစည်းမှုမှ တည်နေရာများကို ဖတ်ခွင့်ပေးသည်။"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"လက်ဗွေရဦ တစ်ပိုင်းတစ်စ တွေ့ရှိသည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"လက်ဗွေရာယူခြင်း မဆောင်ရွက်နိုင်ပါ။ ထပ်မံကြိုးစားပါ။"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"လက်ဗွေရာဖတ်ကိရိယာ ညစ်ပေနေသည်။ ကျေးဇူးပြု၍ ရှင်းလင်းကာ ထပ်မံကြိုးစားပါ။"</string>
@@ -1873,8 +1893,13 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> ကို &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; တွင် သိမ်းဆည်းလိုပါသလား။"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> နှင့် <xliff:g id="TYPE_1">%2$s</xliff:g> ကို &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; တွင် သိမ်းဆည်းလိုပါသလား။"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>၊ <xliff:g id="TYPE_1">%2$s</xliff:g>  နှင့် <xliff:g id="TYPE_2">%3$s</xliff:g> ကို &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; တွင် သိမ်းဆည်းလိုပါသလား။"</string>
+    <string name="autofill_update_title" msgid="4879673117448810818">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; သို့ အပ်ဒိတ်လုပ်လိုပါသလား။"</string>
+    <string name="autofill_update_title_with_type" msgid="339733442087186755">"<xliff:g id="TYPE">%1$s</xliff:g> ကို &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; သို့ အပ်ဒိတ်လုပ်လိုပါသလား။"</string>
+    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"<xliff:g id="TYPE_0">%1$s</xliff:g> နှင့် <xliff:g id="TYPE_1">%2$s</xliff:g> ကို &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; သို့ အပ်ဒိတ်လုပ်လိုပါသလား။"</string>
+    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"<xliff:g id="TYPE_0">%1$s</xliff:g>၊ <xliff:g id="TYPE_1">%2$s</xliff:g> နှင့် <xliff:g id="TYPE_2">%3$s</xliff:g> ကို &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; သို့ အပ်ဒိတ်လုပ်လိုပါသလား။"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"သိမ်းရန်"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"မလိုပါ"</string>
+    <string name="autofill_update_yes" msgid="310358413273276958">"အပ်ဒိတ်လုပ်ရန်"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"စကားဝှက်"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"လိပ်စာ"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"ခရက်တစ်ကတ်"</string>

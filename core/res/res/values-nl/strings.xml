@@ -300,6 +300,12 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Lichaamssensoren"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"toegang krijgen tot sensorgegevens over je vitale functies"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang geven tot sensorgegevens over je vitale functies?"</string>
+    <string name="permgrouplab_aural" msgid="965607064083134896">"Muziek"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"toegang tot je muziek"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang geven tot je muziek?"</string>
+    <string name="permgrouplab_visual" msgid="8030190588123857921">"Foto\'s en video\'s"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"toegang tot je foto\'s en video\'s"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"Wil je &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang geven tot je foto\'s en video\'s?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Content van vensters ophalen"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"De content inspecteren van een venster waarmee je interactie hebt."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\'Verkennen via aanraking\' inschakelen"</string>
@@ -494,6 +500,20 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Hiermee kan de app methoden aanroepen om vingerafdruksjablonen toe te voegen en te verwijderen voor gebruik."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"Vingerafdrukhardware gebruiken"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Hiermee kan de app vingerafdrukhardware gebruiken voor verificatie"</string>
+    <string name="permlab_audioRead" msgid="6617225220728465565">"je muziekcollectie bekijken"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"Hiermee sta je de app toe je muziekcollectie te bekijken."</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"je muziekcollectie aanpassen"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"Hiermee sta je de app toe je muziekcollectie aan te passen."</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"je videocollectie bekijken"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"Hiermee sta je de app toe je videocollectie te bekijken."</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"je videocollectie aanpassen"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"Hiermee sta je de app toe je videocollectie aan te passen."</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"je fotocollectie bekijken"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"Hiermee sta je de app toe je fotocollectie te bekijken."</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"je fotocollectie aanpassen"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Hiermee sta je de app toe je fotocollectie aan te passen."</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"locaties van je mediacollecties bekijken"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Hiermee sta je de app toe locaties van je mediacollectie te bekijken."</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Gedeeltelijke vingerafdruk gedetecteerd. Probeer het opnieuw."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Kan vingerafdruk niet verwerken. Probeer het opnieuw."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"De vingerafdruksensor moet worden schoongemaakt. Probeer het daarna opnieuw."</string>
@@ -1872,8 +1892,13 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> opslaan in &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> en <xliff:g id="TYPE_1">%2$s</xliff:g> opslaan in &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> en <xliff:g id="TYPE_2">%3$s</xliff:g> opslaan in &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title" msgid="4879673117448810818">"Updaten naar &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_type" msgid="339733442087186755">"<xliff:g id="TYPE">%1$s</xliff:g> updaten naar &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"<xliff:g id="TYPE_0">%1$s</xliff:g> en <xliff:g id="TYPE_1">%2$s</xliff:g> updaten naar &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> en <xliff:g id="TYPE_2">%3$s</xliff:g> updaten naar &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Opslaan"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Nee, bedankt"</string>
+    <string name="autofill_update_yes" msgid="310358413273276958">"Updaten"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"Wachtwoord"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"Adres"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"Creditcard"</string>
