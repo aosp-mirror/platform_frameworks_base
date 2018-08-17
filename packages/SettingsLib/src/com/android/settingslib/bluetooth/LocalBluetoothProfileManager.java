@@ -18,6 +18,7 @@ package com.android.settingslib.bluetooth;
 
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothA2dpSink;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothHeadsetClient;
@@ -79,7 +80,6 @@ public class LocalBluetoothProfileManager {
     }
 
     private final Context mContext;
-    private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
     private final BluetoothEventManager mEventManager;
 
@@ -111,14 +111,13 @@ public class LocalBluetoothProfileManager {
             BluetoothEventManager eventManager) {
         mContext = context;
 
-        mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mEventManager = eventManager;
         mUsePbapPce = mContext.getResources().getBoolean(R.bool.enable_pbap_pce_profile);
         // MAP Client is typically used in the same situations as PBAP Client
         mUseMapClient = mContext.getResources().getBoolean(R.bool.enable_pbap_pce_profile);
         // pass this reference to adapter and event manager (circular dependency)
-        mLocalAdapter.setProfileManager(this);
+        adapter.setProfileManager(this);
 
         updateLocalProfiles();
         if (DEBUG) Log.d(TAG, "LocalBluetoothProfileManager construction complete");
@@ -128,26 +127,26 @@ public class LocalBluetoothProfileManager {
      * create profile instance according to bluetooth supported profile list
      */
     void updateLocalProfiles() {
-        List<Integer> supportedList = mLocalAdapter.getSupportedProfiles();
+        List<Integer> supportedList = BluetoothAdapter.getDefaultAdapter().getSupportedProfiles();
         if (CollectionUtils.isEmpty(supportedList)) {
             if(DEBUG) Log.d(TAG, "supportedList is null");
             return;
         }
         if (mA2dpProfile == null && supportedList.contains(BluetoothProfile.A2DP)) {
             if(DEBUG) Log.d(TAG, "Adding local A2DP profile");
-            mA2dpProfile = new A2dpProfile(mContext, mLocalAdapter, mDeviceManager, this);
+            mA2dpProfile = new A2dpProfile(mContext, mDeviceManager, this);
             addProfile(mA2dpProfile, A2dpProfile.NAME,
                     BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
         }
         if (mA2dpSinkProfile == null && supportedList.contains(BluetoothProfile.A2DP_SINK)) {
             if(DEBUG) Log.d(TAG, "Adding local A2DP SINK profile");
-            mA2dpSinkProfile = new A2dpSinkProfile(mContext, mLocalAdapter, mDeviceManager, this);
+            mA2dpSinkProfile = new A2dpSinkProfile(mContext, mDeviceManager, this);
             addProfile(mA2dpSinkProfile, A2dpSinkProfile.NAME,
                     BluetoothA2dpSink.ACTION_CONNECTION_STATE_CHANGED);
         }
         if (mHeadsetProfile == null && supportedList.contains(BluetoothProfile.HEADSET)) {
             if (DEBUG) Log.d(TAG, "Adding local HEADSET profile");
-            mHeadsetProfile = new HeadsetProfile(mContext, mLocalAdapter, mDeviceManager, this);
+            mHeadsetProfile = new HeadsetProfile(mContext, mDeviceManager, this);
             addHeadsetProfile(mHeadsetProfile, HeadsetProfile.NAME,
                     BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED,
                     BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED,
@@ -155,7 +154,7 @@ public class LocalBluetoothProfileManager {
         }
         if (mHfpClientProfile == null && supportedList.contains(BluetoothProfile.HEADSET_CLIENT)) {
             if(DEBUG) Log.d(TAG, "Adding local HfpClient profile");
-            mHfpClientProfile = new HfpClientProfile(mContext, mLocalAdapter, mDeviceManager, this);
+            mHfpClientProfile = new HfpClientProfile(mContext, mDeviceManager, this);
             addHeadsetProfile(mHfpClientProfile, HfpClientProfile.NAME,
                     BluetoothHeadsetClient.ACTION_CONNECTION_STATE_CHANGED,
                     BluetoothHeadsetClient.ACTION_AUDIO_STATE_CHANGED,
@@ -165,13 +164,13 @@ public class LocalBluetoothProfileManager {
             if (mMapClientProfile == null && supportedList.contains(BluetoothProfile.MAP_CLIENT)) {
                 if(DEBUG) Log.d(TAG, "Adding local MAP CLIENT profile");
                 mMapClientProfile =
-                        new MapClientProfile(mContext, mLocalAdapter, mDeviceManager,this);
+                        new MapClientProfile(mContext, mDeviceManager,this);
                 addProfile(mMapClientProfile, MapClientProfile.NAME,
                         BluetoothMapClient.ACTION_CONNECTION_STATE_CHANGED);
             }
         } else if (mMapProfile == null && supportedList.contains(BluetoothProfile.MAP)) {
             if(DEBUG) Log.d(TAG, "Adding local MAP profile");
-            mMapProfile = new MapProfile(mContext, mLocalAdapter, mDeviceManager, this);
+            mMapProfile = new MapProfile(mContext, mDeviceManager, this);
             addProfile(mMapProfile, MapProfile.NAME, BluetoothMap.ACTION_CONNECTION_STATE_CHANGED);
         }
         if (mOppProfile == null && supportedList.contains(BluetoothProfile.OPP)) {
@@ -182,26 +181,26 @@ public class LocalBluetoothProfileManager {
         }
         if (mHearingAidProfile == null && supportedList.contains(BluetoothProfile.HEARING_AID)) {
             if(DEBUG) Log.d(TAG, "Adding local Hearing Aid profile");
-            mHearingAidProfile = new HearingAidProfile(mContext, mLocalAdapter, mDeviceManager,
+            mHearingAidProfile = new HearingAidProfile(mContext, mDeviceManager,
                     this);
             addProfile(mHearingAidProfile, HearingAidProfile.NAME,
                     BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED);
         }
         if (mHidProfile == null && supportedList.contains(BluetoothProfile.HID_HOST)) {
             if(DEBUG) Log.d(TAG, "Adding local HID_HOST profile");
-            mHidProfile = new HidProfile(mContext, mLocalAdapter, mDeviceManager, this);
+            mHidProfile = new HidProfile(mContext, mDeviceManager, this);
             addProfile(mHidProfile, HidProfile.NAME,
                     BluetoothHidHost.ACTION_CONNECTION_STATE_CHANGED);
         }
         if (mHidDeviceProfile == null && supportedList.contains(BluetoothProfile.HID_DEVICE)) {
             if(DEBUG) Log.d(TAG, "Adding local HID_DEVICE profile");
-            mHidDeviceProfile = new HidDeviceProfile(mContext, mLocalAdapter, mDeviceManager, this);
+            mHidDeviceProfile = new HidDeviceProfile(mContext, mDeviceManager, this);
             addProfile(mHidDeviceProfile, HidDeviceProfile.NAME,
                     BluetoothHidDevice.ACTION_CONNECTION_STATE_CHANGED);
         }
         if (mPanProfile == null && supportedList.contains(BluetoothProfile.PAN)) {
             if(DEBUG) Log.d(TAG, "Adding local PAN profile");
-            mPanProfile = new PanProfile(mContext, mLocalAdapter);
+            mPanProfile = new PanProfile(mContext);
             addPanProfile(mPanProfile, PanProfile.NAME,
                     BluetoothPan.ACTION_CONNECTION_STATE_CHANGED);
         }
@@ -214,8 +213,7 @@ public class LocalBluetoothProfileManager {
         if (mUsePbapPce && mPbapClientProfile == null && supportedList.contains(
                 BluetoothProfile.PBAP_CLIENT)) {
             if(DEBUG) Log.d(TAG, "Adding local PBAP Client profile");
-            mPbapClientProfile = new PbapClientProfile(mContext, mLocalAdapter, mDeviceManager,
-                    this);
+            mPbapClientProfile = new PbapClientProfile(mContext, mDeviceManager,this);
             addProfile(mPbapClientProfile, PbapClientProfile.NAME,
                     BluetoothPbapClient.ACTION_CONNECTION_STATE_CHANGED);
         }
@@ -271,7 +269,7 @@ public class LocalBluetoothProfileManager {
             CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
             if (cachedDevice == null) {
                 Log.w(TAG, "StateChangedHandler found new device: " + device);
-                cachedDevice = mDeviceManager.addDevice(mLocalAdapter, device);
+                cachedDevice = mDeviceManager.addDevice(device);
             }
             onReceiveInternal(intent, cachedDevice);
         }

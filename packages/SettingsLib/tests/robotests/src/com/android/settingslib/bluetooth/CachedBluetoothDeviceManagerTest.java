@@ -21,7 +21,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
@@ -58,8 +57,6 @@ public class CachedBluetoothDeviceManagerTest {
         new BluetoothClass(BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES);
     private final BluetoothClass DEVICE_CLASS_2 =
         new BluetoothClass(BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE);
-    @Mock
-    private LocalBluetoothAdapter mLocalAdapter;
     @Mock
     private LocalBluetoothProfileManager mLocalProfileManager;
     @Mock
@@ -110,18 +107,17 @@ public class CachedBluetoothDeviceManagerTest {
 
         when(mLocalBluetoothManager.getEventManager()).thenReturn(mBluetoothEventManager);
         when(mLocalBluetoothManager.getProfileManager()).thenReturn(mLocalProfileManager);
-        when(mLocalAdapter.getBluetoothState()).thenReturn(BluetoothAdapter.STATE_ON);
         when(mHfpProfile.isProfileReady()).thenReturn(true);
         when(mA2dpProfile.isProfileReady()).thenReturn(true);
         when(mPanProfile.isProfileReady()).thenReturn(true);
         when(mHearingAidProfile.isProfileReady()).thenReturn(true);
         mCachedDeviceManager = new CachedBluetoothDeviceManager(mContext, mLocalBluetoothManager);
         mCachedDevice1 = spy(
-            new CachedBluetoothDevice(mContext, mLocalAdapter, mLocalProfileManager, mDevice1));
+            new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice1));
         mCachedDevice2 = spy(
-            new CachedBluetoothDevice(mContext, mLocalAdapter, mLocalProfileManager, mDevice2));
+            new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice2));
         mCachedDevice3 = spy(
-            new CachedBluetoothDevice(mContext, mLocalAdapter, mLocalProfileManager, mDevice3));
+            new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice3));
     }
 
     /**
@@ -129,11 +125,9 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void testAddDevice_validCachedDevices_devicesAdded() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-                mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
-        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mLocalAdapter,
-                mDevice2);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         assertThat(cachedDevice2).isNotNull();
 
         Collection<CachedBluetoothDevice> devices = mCachedDeviceManager.getCachedDevicesCopy();
@@ -149,8 +143,7 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void testGetName_validCachedDevice_nameFound() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-                mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         assertThat(mCachedDeviceManager.getName(mDevice1)).isEqualTo(DEVICE_ALIAS_1);
     }
@@ -160,8 +153,7 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void testOnDeviceNameUpdated_validName_nameUpdated() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-                mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         assertThat(cachedDevice1.getName()).isEqualTo(DEVICE_ALIAS_1);
 
@@ -176,11 +168,9 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void testClearNonBondedDevices_bondedAndNonBondedDevices_nonBondedDevicesCleared() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-                mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
-        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mLocalAdapter,
-                mDevice2);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         assertThat(cachedDevice2).isNotNull();
 
         when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
@@ -231,11 +221,9 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void testOnHiSyncIdChanged_sameHiSyncId_populateInDifferentLists() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
-        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice2);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         assertThat(cachedDevice2).isNotNull();
 
         // Since both devices do not have hiSyncId, they should be added in mCachedDevices.
@@ -266,11 +254,9 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void testOnHiSyncIdChanged_sameHiSyncIdAndOneConnected_chooseConnectedDevice() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
-        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice2);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         assertThat(cachedDevice2).isNotNull();
         cachedDevice1.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
         cachedDevice2.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
@@ -303,11 +289,9 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void testOnHiSyncIdChanged_differentHiSyncId_populateInSameList() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
-        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice2);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         assertThat(cachedDevice2).isNotNull();
 
         // Since both devices do not have hiSyncId, they should be added in mCachedDevices.
@@ -339,8 +323,7 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void testOnProfileConnectionStateChanged_singleDeviceConnected_visible() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         cachedDevice1.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
 
@@ -377,11 +360,9 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void testOnProfileConnectionStateChanged_twoDevicesConnected_oneDeviceVisible() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
-        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice2);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         assertThat(cachedDevice2).isNotNull();
         cachedDevice1.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
         cachedDevice2.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
@@ -431,11 +412,9 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void testOnProfileConnectionStateChanged_twoDevicesDisconnected_oneDeviceVisible() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
-        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice2);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         assertThat(cachedDevice2).isNotNull();
         cachedDevice1.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
         cachedDevice2.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
@@ -486,11 +465,9 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void testOnDeviceUnpaired_bothHearingAidsPaired_removesItsPairFromList() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
-        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice2);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         assertThat(cachedDevice2).isNotNull();
 
         cachedDevice1.setHiSyncId(HISYNCID1);
@@ -518,14 +495,11 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void testOnDeviceUnpaired_bothHearingAidsNotPaired_doesNotRemoveAnyDeviceFromList() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
-        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice2);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         assertThat(cachedDevice2).isNotNull();
-        CachedBluetoothDevice cachedDevice3 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice3);
+        CachedBluetoothDevice cachedDevice3 = mCachedDeviceManager.addDevice(mDevice3);
         assertThat(cachedDevice2).isNotNull();
 
         cachedDevice1.setHiSyncId(HISYNCID1);
@@ -570,8 +544,7 @@ public class CachedBluetoothDeviceManagerTest {
         doAnswer((invocation) -> HISYNCID1).when(mHearingAidProfile).getHiSyncId(mDevice1);
         doAnswer((invocation) -> HISYNCID1).when(mHearingAidProfile).getHiSyncId(mDevice2);
 
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         // The first hearing aid device should be populated in mCachedDevice and
         // mCachedDevicesMapForHearingAids.
@@ -581,8 +554,7 @@ public class CachedBluetoothDeviceManagerTest {
         assertThat(mCachedDeviceManager.mCachedDevicesMapForHearingAids.values())
             .contains(cachedDevice1);
 
-        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice2);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         assertThat(cachedDevice2).isNotNull();
         // The second hearing aid device should be populated in mHearingAidDevicesNotAddedInCache.
         assertThat(mCachedDeviceManager.getCachedDevicesCopy()).hasSize(1);
@@ -599,8 +571,7 @@ public class CachedBluetoothDeviceManagerTest {
             .getHearingAidProfile();
         doAnswer((invocation) -> HISYNCID1).when(mHearingAidProfile).getHiSyncId(mDevice1);
         doAnswer((invocation) -> HISYNCID2).when(mHearingAidProfile).getHiSyncId(mDevice2);
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         // The first hearing aid device should be populated in mCachedDevice and
         // mCachedDevicesMapForHearingAids.
@@ -610,8 +581,7 @@ public class CachedBluetoothDeviceManagerTest {
         assertThat(mCachedDeviceManager.mCachedDevicesMapForHearingAids.values())
             .contains(cachedDevice1);
 
-        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mLocalAdapter,
-            mDevice2);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         assertThat(cachedDevice2).isNotNull();
         // The second hearing aid device should also be populated in mCachedDevice
         // and mCachedDevicesMapForHearingAids as its not a pair of the first one.
@@ -680,8 +650,7 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void testOnBtClassChanged_validBtClass_classChanged() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-                mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         assertThat(cachedDevice1.getBtClass()).isEqualTo(DEVICE_CLASS_1);
 
@@ -696,8 +665,7 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void testOnDeviceDisappeared_deviceBondedUnbonded_unbondedDeviceDisappeared() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-                mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
 
         when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
@@ -712,11 +680,9 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void testOnActiveDeviceChanged_connectedDevices_activeDeviceChanged() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-                mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
-        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mLocalAdapter,
-                mDevice2);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         assertThat(cachedDevice2).isNotNull();
 
         when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
@@ -777,11 +743,9 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void testOnActiveDeviceChanged_withA2dpAndHearingAid() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
-                mDevice1);
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
-        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mLocalAdapter,
-                mDevice2);
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         assertThat(cachedDevice2).isNotNull();
 
         when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
