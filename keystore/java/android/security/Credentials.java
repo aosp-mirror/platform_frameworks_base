@@ -16,6 +16,7 @@
 
 package android.security;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -172,6 +173,7 @@ public class Credentials {
 
     private static Credentials singleton;
 
+    @UnsupportedAppUsage
     public static Credentials getInstance() {
         if (singleton == null) {
             singleton = new Credentials();
@@ -179,6 +181,7 @@ public class Credentials {
         return singleton;
     }
 
+    @UnsupportedAppUsage
     public void unlock(Context context) {
         try {
             Intent intent = new Intent(UNLOCK_ACTION);
@@ -197,6 +200,7 @@ public class Credentials {
         }
     }
 
+    @UnsupportedAppUsage
     public void install(Context context, KeyPair pair) {
         try {
             Intent intent = KeyChain.createInstallIntent();
@@ -208,6 +212,7 @@ public class Credentials {
         }
     }
 
+    @UnsupportedAppUsage
     public void install(Context context, String type, byte[] value) {
         try {
             Intent intent = KeyChain.createInstallIntent();

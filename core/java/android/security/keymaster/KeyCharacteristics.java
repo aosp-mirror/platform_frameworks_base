@@ -16,6 +16,7 @@
 
 package android.security.keymaster;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -44,6 +45,7 @@ public class KeyCharacteristics implements Parcelable {
                 }
             };
 
+    @UnsupportedAppUsage
     public KeyCharacteristics() {}
 
     protected KeyCharacteristics(Parcel in) {
@@ -61,6 +63,7 @@ public class KeyCharacteristics implements Parcelable {
         hwEnforced.writeToParcel(out, flags);
     }
 
+    @UnsupportedAppUsage
     public void readFromParcel(Parcel in) {
         swEnforced = KeymasterArguments.CREATOR.createFromParcel(in);
         hwEnforced = KeymasterArguments.CREATOR.createFromParcel(in);
