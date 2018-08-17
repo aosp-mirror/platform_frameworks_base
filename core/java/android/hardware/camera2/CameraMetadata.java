@@ -819,11 +819,11 @@ public abstract class CameraMetadata<TKey> {
      * camera in the list of supported camera devices.</p>
      * <p>This capability requires the camera device to support the following:</p>
      * <ul>
-     * <li>This camera device must list the following static metadata entries in {@link android.hardware.camera2.CameraCharacteristics }:<ul>
-     * <li>android.logicalMultiCamera.physicalIds</li>
-     * <li>{@link CameraCharacteristics#LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE android.logicalMultiCamera.sensorSyncType}</li>
-     * </ul>
-     * </li>
+     * <li>The IDs of underlying physical cameras are returned via
+     *   {@link android.hardware.camera2.CameraCharacteristics#getPhysicalCameraIds }.</li>
+     * <li>This camera device must list static metadata
+     *   {@link CameraCharacteristics#LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE android.logicalMultiCamera.sensorSyncType} in
+     *   {@link android.hardware.camera2.CameraCharacteristics }.</li>
      * <li>The underlying physical cameras' static metadata must list the following entries,
      *   so that the application can correlate pixels from the physical streams:<ul>
      * <li>{@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference}</li>
