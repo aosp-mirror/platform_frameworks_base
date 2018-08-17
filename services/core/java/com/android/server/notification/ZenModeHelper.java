@@ -1199,7 +1199,9 @@ public class ZenModeHelper {
                 && zen != Global.ZEN_MODE_OFF
                 && !isWatch
                 && Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0;
+                Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0
+                && Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Secure.ZEN_SETTINGS_UPDATED, 0) != 1;
 
         if (isWatch) {
             Settings.Global.putInt(mContext.getContentResolver(),
