@@ -296,23 +296,39 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
     @Test
     public void testZenUpgradeNotification() {
-        // shows zen upgrade notification if stored settings says to shows, boot is completed
+        // shows zen upgrade notification if stored settings says to shows,
+        // zen has not been updated, boot is completed
         // and we're setting zen mode on
-        Settings.Global.putInt(mContentResolver, Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 1);
+        Settings.Secure.putInt(mContentResolver, Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 1);
+        Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_SETTINGS_UPDATED, 0);
         mZenModeHelperSpy.mIsBootComplete = true;
         mZenModeHelperSpy.setZenModeSetting(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
 
         verify(mZenModeHelperSpy, times(1)).createZenUpgradeNotification();
         verify(mNotificationManager, times(1)).notify(eq(ZenModeHelper.TAG),
                 eq(SystemMessage.NOTE_ZEN_UPGRADE), any());
-        assertEquals(0, Settings.Global.getInt(mContentResolver,
-                Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION, -1));
+        assertEquals(0, Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, -1));
     }
 
     @Test
     public void testNoZenUpgradeNotification() {
         // doesn't show upgrade notification if stored settings says don't show
-        Settings.Global.putInt(mContentResolver, Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
+        Settings.Secure.putInt(mContentResolver, Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
+        Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_SETTINGS_UPDATED, 0);
+        mZenModeHelperSpy.mIsBootComplete = true;
+        mZenModeHelperSpy.setZenModeSetting(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+
+        verify(mZenModeHelperSpy, never()).createZenUpgradeNotification();
+        verify(mNotificationManager, never()).notify(eq(ZenModeHelper.TAG),
+                eq(SystemMessage.NOTE_ZEN_UPGRADE), any());
+    }
+
+    @Test
+    public void testNoZenUpgradeNotificationZenUpdated() {
+        // doesn't show upgrade notification since zen was already updated
+        Settings.Secure.putInt(mContentResolver, Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
+        Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_SETTINGS_UPDATED, 1);
         mZenModeHelperSpy.mIsBootComplete = true;
         mZenModeHelperSpy.setZenModeSetting(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
 

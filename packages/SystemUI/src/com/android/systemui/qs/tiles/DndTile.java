@@ -145,7 +145,9 @@ public class DndTile extends QSTileImpl<BooleanState> {
         int zenDuration = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.ZEN_DURATION, 0);
         boolean showOnboarding = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0;
+                Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0
+                && Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.ZEN_SETTINGS_UPDATED, 0) != 1;
         if (showOnboarding) {
             // don't show on-boarding again or notification ever
             Settings.Secure.putInt(mContext.getContentResolver(),
