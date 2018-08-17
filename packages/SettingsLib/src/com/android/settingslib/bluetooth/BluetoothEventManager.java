@@ -285,6 +285,9 @@ public class BluetoothEventManager {
                 cachedDevice = mDeviceManager.addDevice(mLocalAdapter, device);
                 Log.d(TAG, "DeviceFoundHandler created new CachedBluetoothDevice: "
                         + cachedDevice);
+            } else if (cachedDevice.getBondState() == BluetoothDevice.BOND_BONDED) {
+                // Dispatch device add callback to show bonded BT device in discovery mode
+                dispatchDeviceAdded(cachedDevice);
             }
             cachedDevice.setRssi(rssi);
             cachedDevice.setBtClass(btClass);
