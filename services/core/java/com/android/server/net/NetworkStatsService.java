@@ -324,6 +324,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 wakeLock, getDefaultClock(), TelephonyManager.getDefault(),
                 new DefaultNetworkStatsSettings(context), new NetworkStatsObservers(),
                 getDefaultSystemDir(), getDefaultBaseDir());
+        service.registerLocalService();
 
         HandlerThread handlerThread = new HandlerThread(TAG);
         Handler.Callback callback = new HandlerCallback(service);
@@ -333,6 +334,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         return service;
     }
 
+    // This must not be called outside of tests, even within the same package, as this constructor
+    // does not register the local service. Use the create() helper above.
     @VisibleForTesting
     NetworkStatsService(Context context, INetworkManagementService networkManager,
             AlarmManager alarmManager, PowerManager.WakeLock wakeLock, Clock clock,
@@ -349,7 +352,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mSystemDir = checkNotNull(systemDir, "missing systemDir");
         mBaseDir = checkNotNull(baseDir, "missing baseDir");
         mUseBpfTrafficStats = new File("/sys/fs/bpf/traffic_uid_stats_map").exists();
+    }
 
+    private void registerLocalService() {
         LocalServices.addService(NetworkStatsManagerInternal.class,
                 new NetworkStatsManagerInternalImpl());
     }
