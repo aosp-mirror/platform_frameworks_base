@@ -115,16 +115,6 @@
                     android:scaleType="centerInside"
                     android:tint="?android:attr/colorForeground"/>
 
-                <com.android.systemui.statusbar.AlphaOptimizedImageView
-                    android:id="@+id/tuner_icon"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:paddingStart="36dp"
-                    android:paddingEnd="4dp"
-                    android:src="@drawable/tuner"
-                    android:tint="?android:attr/textColorTertiary"
-                    android:visibility="invisible"/>
-
             </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
         </com.android.keyguard.AlphaOptimizedLinearLayout>
     </LinearLayout>
