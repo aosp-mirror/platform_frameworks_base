@@ -77,11 +77,16 @@ import java.util.Objects;
 import sun.misc.Cleaner;
 
 /**
- * The {@link AutofillManager} provides ways for apps and custom views to integrate with the
- * Autofill Framework lifecycle.
+ * <p>The {@link AutofillManager} class provides ways for apps and custom views to
+ * integrate with the Autofill Framework lifecycle.
+ *
+ * <p>To learn about using Autofill in your app, read
+ * the <a href="/guide/topics/text/autofill">Autofill Framework</a> guides.
+ *
+ * <h3 id="autofill-lifecycle">Autofill lifecycle</h3>
  *
  * <p>The autofill lifecycle starts with the creation of an autofill context associated with an
- * activity context; the autofill context is created when one of the following methods is called for
+ * activity context. The autofill context is created when one of the following methods is called for
  * the first time in an activity context, and the current user has an enabled autofill service:
  *
  * <ul>
@@ -90,7 +95,7 @@ import sun.misc.Cleaner;
  *   <li>{@link #requestAutofill(View)}
  * </ul>
  *
- * <p>Tipically, the context is automatically created when the first view of the activity is
+ * <p>Typically, the context is automatically created when the first view of the activity is
  * focused because {@code View.onFocusChanged()} indirectly calls
  * {@link #notifyViewEntered(View)}. App developers can call {@link #requestAutofill(View)} to
  * explicitly create it (for example, a custom view developer could offer a contextual menu action
@@ -134,7 +139,9 @@ import sun.misc.Cleaner;
  * shows an autofill save UI if the value of savable views have changed. If the user selects the
  * option to Save, the current value of the views is then sent to the autofill service.
  *
- * <p>It is safe to call into its methods from any thread.
+ * <h3 id="additional-notes">Additional notes</h3>
+ *
+ * <p>It is safe to call <code>AutofillManager</code> methods from any thread.
  */
 @SystemService(Context.AUTOFILL_MANAGER_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_AUTOFILL)
