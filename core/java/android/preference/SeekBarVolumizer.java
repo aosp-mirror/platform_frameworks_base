@@ -16,6 +16,7 @@
 
 package android.preference;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -54,12 +55,15 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         void onMuted(boolean muted, boolean zenMuted);
     }
 
+    @UnsupportedAppUsage
     private final Context mContext;
     private final H mUiHandler = new H();
     private final Callback mCallback;
     private final Uri mDefaultUri;
+    @UnsupportedAppUsage
     private final AudioManager mAudioManager;
     private final NotificationManager mNotificationManager;
+    @UnsupportedAppUsage
     private final int mStreamType;
     private final int mMaxStreamVolume;
     private boolean mAffectedByRingerMode;
@@ -68,15 +72,19 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
 
     private Handler mHandler;
     private Observer mVolumeObserver;
+    @UnsupportedAppUsage
     private int mOriginalStreamVolume;
     private int mLastAudibleStreamVolume;
     // When the old handler is destroyed and a new one is created, there could be a situation where
     // this is accessed at the same time in different handlers. So, access to this field needs to be
     // synchronized.
     @GuardedBy("this")
+    @UnsupportedAppUsage
     private Ringtone mRingtone;
+    @UnsupportedAppUsage
     private int mLastProgress = -1;
     private boolean mMuted;
+    @UnsupportedAppUsage
     private SeekBar mSeekBar;
     private int mVolumeBeforeMute = -1;
     private int mRingerMode;
@@ -93,6 +101,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
     private boolean mAllowMedia;
     private boolean mAllowRinger;
 
+    @UnsupportedAppUsage
     public SeekBarVolumizer(Context context, int streamType, Uri defaultUri, Callback callback) {
         mContext = context;
         mAudioManager = context.getSystemService(AudioManager.class);
@@ -258,6 +267,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         }
     }
 
+    @UnsupportedAppUsage
     public void stop() {
         if (mHandler == null) return;  // already stopped
         postStopSample();
