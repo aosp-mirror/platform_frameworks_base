@@ -46,6 +46,7 @@ import java.util.Locale;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import android.annotation.UnsupportedAppUsage;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
@@ -76,6 +77,7 @@ public abstract class AbstractVerifier implements X509HostnameVerifier {
      * Looks like we're the only implementation guarding against this.
      * Firefox, Curl, Sun Java 1.4, 5, 6 don't bother with this check.
      */
+    @UnsupportedAppUsage
     private final static String[] BAD_COUNTRY_2LDS =
           { "ac", "co", "com", "ed", "edu", "go", "gouv", "gov", "info",
             "lg", "ne", "net", "or", "org" };
