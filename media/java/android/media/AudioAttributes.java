@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -372,11 +373,16 @@ public final class AudioAttributes implements Parcelable {
     private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED |
             FLAG_HW_AV_SYNC | FLAG_LOW_LATENCY;
 
+    @UnsupportedAppUsage
     private int mUsage = USAGE_UNKNOWN;
+    @UnsupportedAppUsage
     private int mContentType = CONTENT_TYPE_UNKNOWN;
+    @UnsupportedAppUsage
     private int mSource = MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID;
+    @UnsupportedAppUsage
     private int mFlags = 0x0;
     private HashSet<String> mTags;
+    @UnsupportedAppUsage
     private String mFormattedTags;
     private Bundle mBundle; // lazy-initialized, may be null
 
@@ -646,6 +652,7 @@ public final class AudioAttributes implements Parcelable {
          * @param tag
          * @return the same Builder instance.
          */
+        @UnsupportedAppUsage
         public Builder addTag(String tag) {
             mTags.add(tag);
             return this;
@@ -675,6 +682,7 @@ public final class AudioAttributes implements Parcelable {
          * @param streamType
          * @return the same Builder instance.
          */
+        @UnsupportedAppUsage
         public Builder setInternalLegacyStreamType(int streamType) {
             switch(streamType) {
                 case AudioSystem.STREAM_VOICE_CALL:
@@ -1016,6 +1024,7 @@ public final class AudioAttributes implements Parcelable {
      * @param aa non-null AudioAttributes.
      * @return a valid stream type for volume control that matches the attributes.
      */
+    @UnsupportedAppUsage
     public static int toLegacyStreamType(@NonNull AudioAttributes aa) {
         return toVolumeStreamType(false /*fromGetVolumeControlStream*/, aa);
     }

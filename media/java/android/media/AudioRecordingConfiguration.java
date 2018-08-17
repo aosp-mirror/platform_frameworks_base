@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -173,6 +174,7 @@ public final class AudioRecordingConfiguration implements Parcelable {
      * <br>When called without the permission, the result is an empty string.
      * @return the package name
      */
+    @UnsupportedAppUsage
     public String getClientPackageName() { return mClientPackageName; }
 
     /**
@@ -184,6 +186,7 @@ public final class AudioRecordingConfiguration implements Parcelable {
      * <br>The result is -1 without the permission.
      * @return the user id
      */
+    @UnsupportedAppUsage
     public int getClientUid() { return mClientUid; }
 
     /**

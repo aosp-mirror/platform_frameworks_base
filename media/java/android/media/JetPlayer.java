@@ -21,6 +21,7 @@ import java.io.FileDescriptor;
 import java.lang.ref.WeakReference;
 import java.lang.CloneNotSupportedException;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetFileDescriptor;
 import android.os.Looper;
 import android.os.Handler;
@@ -127,6 +128,7 @@ public class JetPlayer
      * Accessed by native methods: provides access to C++ JetPlayer object 
      */
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private long mNativePlayerInJavaObj;
 
     
@@ -560,6 +562,7 @@ public class JetPlayer
     // Called exclusively by native code
     //--------------------
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private static void postEventFromNative(Object jetplayer_ref,
             int what, int arg1, int arg2) {
         //logd("Event posted from the native side: event="+ what + " args="+ arg1+" "+arg2);

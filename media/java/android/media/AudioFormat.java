@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -663,6 +664,7 @@ public final class AudioFormat implements Parcelable {
      */
     // Update sound trigger JNI in core/jni/android_hardware_SoundTrigger.cpp when modifying this
     // constructor
+    @UnsupportedAppUsage
     private AudioFormat(int encoding, int sampleRate, int channelMask, int channelIndexMask) {
         mEncoding = encoding;
         mSampleRate = sampleRate;
@@ -685,8 +687,11 @@ public final class AudioFormat implements Parcelable {
     /** @hide */
     public final static int AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_INDEX_MASK = 0x1 << 3;
 
+    @UnsupportedAppUsage
     private int mEncoding;
+    @UnsupportedAppUsage
     private int mSampleRate;
+    @UnsupportedAppUsage
     private int mChannelMask;
     private int mChannelIndexMask;
     private int mPropertySetMask;

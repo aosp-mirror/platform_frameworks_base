@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
@@ -59,6 +60,7 @@ public class MiniThumbFile {
      * We store different types of thumbnails in different files. To remain backward compatibility,
      * we should hashcode of content://media/external/images/media remains the same.
      */
+    @UnsupportedAppUsage
     public static synchronized void reset() {
         for (MiniThumbFile file : sThumbFiles.values()) {
             file.deactivate();

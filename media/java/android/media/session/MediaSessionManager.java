@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.media.AudioManager;
@@ -144,6 +145,7 @@ public final class MediaSessionManager {
      * @return A list of controllers for ongoing sessions.
      * @hide
      */
+    @UnsupportedAppUsage
     public @NonNull List<MediaController> getActiveSessionsForUser(
             @Nullable ComponentName notificationListener, int userId) {
         ArrayList<MediaController> controllers = new ArrayList<MediaController>();

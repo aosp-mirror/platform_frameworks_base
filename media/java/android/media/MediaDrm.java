@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.os.Handler;
 import android.os.Looper;
@@ -1473,6 +1474,7 @@ public final class MediaDrm implements AutoCloseable {
          * Get the opaque message data
          */
         @NonNull
+        @UnsupportedAppUsage
         public byte[] getData() { return mData; }
 
         /**
@@ -1481,6 +1483,7 @@ public final class MediaDrm implements AutoCloseable {
          * certificate server URL obtained from other sources.
          */
         @NonNull
+        @UnsupportedAppUsage
         public String getDefaultUrl() { return mDefaultUrl; }
     }
 
@@ -1497,6 +1500,7 @@ public final class MediaDrm implements AutoCloseable {
      * @hide - not part of the public API at this time
      */
     @NonNull
+    @UnsupportedAppUsage
     public CertificateRequest getCertificateRequest(
             @CertificateType int certType, @NonNull String certAuthority)
     {
@@ -1518,6 +1522,7 @@ public final class MediaDrm implements AutoCloseable {
          * Get the wrapped private key data
          */
         @NonNull
+        @UnsupportedAppUsage
         public byte[] getWrappedPrivateKey() {
             if (mWrappedKey == null) {
                 // this should never happen as mWrappedKey is initialized in
@@ -1532,6 +1537,7 @@ public final class MediaDrm implements AutoCloseable {
          * Get the PEM-encoded certificate chain
          */
         @NonNull
+        @UnsupportedAppUsage
         public byte[] getContent() {
             if (mCertificateData == null) {
                 // this should never happen as mCertificateData is initialized in
@@ -1565,6 +1571,7 @@ public final class MediaDrm implements AutoCloseable {
      * @hide - not part of the public API at this time
      */
     @NonNull
+    @UnsupportedAppUsage
     public Certificate provideCertificateResponse(@NonNull byte[] response)
             throws DeniedByServerException {
         return provideProvisionResponseNative(response);
@@ -1587,6 +1594,7 @@ public final class MediaDrm implements AutoCloseable {
      * @hide - not part of the public API at this time
      */
     @NonNull
+    @UnsupportedAppUsage
     public byte[] signRSA(
             @NonNull byte[] sessionId, @NonNull String algorithm,
             @NonNull byte[] wrappedKey, @NonNull byte[] message) {

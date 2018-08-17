@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.media.MediaPlayer.TrackInfo;
 import android.os.Handler;
@@ -677,6 +678,7 @@ public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeList
          *
          * @param callback update callback
          */
+        @UnsupportedAppUsage
         public void setOnChangedListener(OnChangedListener callback);
 
         /**
@@ -685,6 +687,7 @@ public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeList
          * @param width width in pixels
          * @param height height in pixels
          */
+        @UnsupportedAppUsage
         public void setSize(int width, int height);
 
         /**
@@ -699,16 +702,19 @@ public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeList
          *
          * @param c canvas on which to render subtitles
          */
+        @UnsupportedAppUsage
         public void draw(Canvas c);
 
         /**
          * Called when the widget is attached to a window.
          */
+        @UnsupportedAppUsage
         public void onAttachedToWindow();
 
         /**
          * Called when the widget is detached from a window.
          */
+        @UnsupportedAppUsage
         public void onDetachedFromWindow();
 
         /**

@@ -16,6 +16,8 @@
 
 package android.media;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * The AudioHandle is used by the audio framework implementation to
  * uniquely identify a particular component of the routing topology
@@ -23,8 +25,10 @@ package android.media;
  * It is not visible or used at the API.
  */
 class AudioHandle {
+    @UnsupportedAppUsage
     private final int mId;
 
+    @UnsupportedAppUsage
     AudioHandle(int id) {
         mId = id;
     }

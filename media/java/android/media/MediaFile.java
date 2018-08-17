@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.UnsupportedAppUsage;
 import android.media.DecoderCapabilities;
 import android.media.DecoderCapabilities.VideoDecoder;
 import android.media.DecoderCapabilities.AudioDecoder;
@@ -43,7 +44,9 @@ public class MediaFile {
     public static final int FILE_TYPE_AAC     = 8;
     public static final int FILE_TYPE_MKA     = 9;
     public static final int FILE_TYPE_FLAC    = 10;
+    @UnsupportedAppUsage
     private static final int FIRST_AUDIO_FILE_TYPE = FILE_TYPE_MP3;
+    @UnsupportedAppUsage
     private static final int LAST_AUDIO_FILE_TYPE = FILE_TYPE_FLAC;
 
     // MIDI file types
@@ -123,7 +126,9 @@ public class MediaFile {
     public static final int FILE_TYPE_ZIP           = 107;
 
     public static class MediaFileType {
+        @UnsupportedAppUsage
         public final int fileType;
+        @UnsupportedAppUsage
         public final String mimeType;
 
         MediaFileType(int fileType, String mimeType) {
@@ -132,20 +137,25 @@ public class MediaFile {
         }
     }
 
+    @UnsupportedAppUsage
     private static final HashMap<String, MediaFileType> sFileTypeMap
             = new HashMap<String, MediaFileType>();
     private static final HashMap<String, Integer> sMimeTypeMap
             = new HashMap<String, Integer>();
     // maps file extension to MTP format code
+    @UnsupportedAppUsage
     private static final HashMap<String, Integer> sFileTypeToFormatMap
             = new HashMap<String, Integer>();
     // maps mime type to MTP format code
+    @UnsupportedAppUsage
     private static final HashMap<String, Integer> sMimeTypeToFormatMap
             = new HashMap<String, Integer>();
     // maps MTP format code to mime type
+    @UnsupportedAppUsage
     private static final HashMap<Integer, String> sFormatToMimeTypeMap
             = new HashMap<Integer, String>();
 
+    @UnsupportedAppUsage
     static void addFileType(String extension, int fileType, String mimeType) {
         sFileTypeMap.put(extension, new MediaFileType(fileType, mimeType));
         sMimeTypeMap.put(mimeType, Integer.valueOf(fileType));
@@ -277,6 +287,7 @@ public class MediaFile {
         addFileType("MPEG", FILE_TYPE_MP2PS, "video/mp2p");
     }
 
+    @UnsupportedAppUsage
     public static boolean isAudioFileType(int fileType) {
         return ((fileType >= FIRST_AUDIO_FILE_TYPE &&
                 fileType <= LAST_AUDIO_FILE_TYPE) ||
@@ -284,6 +295,7 @@ public class MediaFile {
                 fileType <= LAST_MIDI_FILE_TYPE));
     }
 
+    @UnsupportedAppUsage
     public static boolean isVideoFileType(int fileType) {
         return (fileType >= FIRST_VIDEO_FILE_TYPE &&
                 fileType <= LAST_VIDEO_FILE_TYPE)
@@ -291,6 +303,7 @@ public class MediaFile {
                 fileType <= LAST_VIDEO_FILE_TYPE2);
     }
 
+    @UnsupportedAppUsage
     public static boolean isImageFileType(int fileType) {
         return (fileType >= FIRST_IMAGE_FILE_TYPE &&
                 fileType <= LAST_IMAGE_FILE_TYPE)
@@ -303,16 +316,19 @@ public class MediaFile {
                 fileType <= LAST_RAW_IMAGE_FILE_TYPE);
     }
 
+    @UnsupportedAppUsage
     public static boolean isPlayListFileType(int fileType) {
         return (fileType >= FIRST_PLAYLIST_FILE_TYPE &&
                 fileType <= LAST_PLAYLIST_FILE_TYPE);
     }
 
+    @UnsupportedAppUsage
     public static boolean isDrmFileType(int fileType) {
         return (fileType >= FIRST_DRM_FILE_TYPE &&
                 fileType <= LAST_DRM_FILE_TYPE);
     }
 
+    @UnsupportedAppUsage
     public static MediaFileType getFileType(String path) {
         int lastDot = path.lastIndexOf('.');
         if (lastDot < 0)
@@ -327,6 +343,7 @@ public class MediaFile {
     }
 
     // generates a title based on file name
+    @UnsupportedAppUsage
     public static String getFileTitle(String path) {
         // extract file name after last slash
         int lastSlash = path.lastIndexOf('/');
@@ -344,11 +361,13 @@ public class MediaFile {
         return path;
     }
 
+    @UnsupportedAppUsage
     public static int getFileTypeForMimeType(String mimeType) {
         Integer value = sMimeTypeMap.get(mimeType);
         return (value == null ? 0 : value.intValue());
     }
 
+    @UnsupportedAppUsage
     public static String getMimeTypeForFile(String path) {
         MediaFileType mediaFileType = getFileType(path);
         return (mediaFileType == null ? null : mediaFileType.mimeType);

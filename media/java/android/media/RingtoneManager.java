@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.content.ContentProvider;
@@ -244,6 +245,7 @@ public class RingtoneManager {
     private final Activity mActivity;
     private final Context mContext;
 
+    @UnsupportedAppUsage
     private Cursor mCursor;
 
     private int mType = TYPE_RINGTONE;
@@ -602,6 +604,7 @@ public class RingtoneManager {
         }
     }
 
+    @UnsupportedAppUsage
     private Cursor getInternalRingtones() {
         return query(
                 MediaStore.Audio.Media.INTERNAL_CONTENT_URI, INTERNAL_COLUMNS,
@@ -613,6 +616,7 @@ public class RingtoneManager {
         return getMediaRingtones(mContext);
     }
 
+    @UnsupportedAppUsage
     private Cursor getMediaRingtones(Context context) {
         if (PackageManager.PERMISSION_GRANTED != context.checkPermission(
                 android.Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -727,6 +731,7 @@ public class RingtoneManager {
      *            not be set (and the default used instead).
      * @see #getRingtone(Context, Uri)
      */
+    @UnsupportedAppUsage
     private static Ringtone getRingtone(final Context context, Uri ringtoneUri, int streamType) {
         try {
             final Ringtone r = new Ringtone(context, true);
