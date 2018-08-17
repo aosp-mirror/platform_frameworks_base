@@ -19,13 +19,14 @@ package com.android.server.notification;
 import android.content.ComponentName;
 import android.net.Uri;
 import android.service.notification.Condition;
-import android.service.notification.IConditionListener;
 import android.service.notification.IConditionProvider;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -36,7 +37,9 @@ public class ZenModeConditions implements ConditionProviders.Callback {
 
     private final ZenModeHelper mHelper;
     private final ConditionProviders mConditionProviders;
-    private final ArrayMap<Uri, ComponentName> mSubscriptions = new ArrayMap<>();
+
+    @VisibleForTesting
+    protected final ArrayMap<Uri, ComponentName> mSubscriptions = new ArrayMap<>();
 
     private boolean mFirstEvaluation = true;
 
@@ -152,7 +155,8 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         if (current != null) {
             current.add(id);
         }
-        if (processSubscriptions && trigger != null && trigger.equals(rule.component)) {
+        if (processSubscriptions && ((trigger != null && trigger.equals(rule.component))
+                || isSystemCondition)) {
             if (DEBUG) Log.d(TAG, "Subscribing to " + rule.component);
             if (mConditionProviders.subscribeIfNecessary(rule.component, rule.conditionId)) {
                 synchronized (mSubscriptions) {
