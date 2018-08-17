@@ -1489,6 +1489,12 @@ droiddoc {
         "core/res/AndroidManifest.xml",
     ],
     args: metalava_framework_docs_args,
+    check_api: {
+        current: {
+            api_file: "api/current.txt",
+            removed_api_file: "api/removed.txt",
+        },
+    },
 }
 
 droiddoc {
@@ -1503,6 +1509,12 @@ droiddoc {
         "core/res/AndroidManifest.xml",
     ],
     args: metalava_framework_docs_args + " --show-annotation android.annotation.SystemApi",
+    check_api: {
+        current: {
+            api_file: "api/system-current.txt",
+            removed_api_file: "api/system-removed.txt",
+        },
+    },
 }
 
 droiddoc {
@@ -1515,4 +1527,10 @@ droiddoc {
         "core/res/AndroidManifest.xml",
     ],
     args: metalava_framework_docs_args + " --show-annotation android.annotation.TestApi",
+    check_api: {
+        current: {
+            api_file: "api/test-current.txt",
+            removed_api_file: "api/test-removed.txt",
+        },
+    },
 }
