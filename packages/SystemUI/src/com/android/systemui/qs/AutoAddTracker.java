@@ -72,6 +72,12 @@ public class AutoAddTracker {
         }
     }
 
+    public void setTileRemoved(String tile) {
+        if (mAutoAdded.remove(tile)) {
+            saveTiles();
+        }
+    }
+
     public void destroy() {
         mContext.getContentResolver().unregisterContentObserver(mObserver);
     }

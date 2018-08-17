@@ -96,6 +96,10 @@ public class AutoTileManager {
         Dependency.get(ColorDisplayController.class).setListener(null);
     }
 
+    public void unmarkTileAsAutoAdded(String tabSpec) {
+        mAutoTracker.setTileRemoved(tabSpec);
+    }
+
     private final ManagedProfileController.Callback mProfileCallback =
             new ManagedProfileController.Callback() {
                 @Override
@@ -104,8 +108,6 @@ public class AutoTileManager {
                     if (Dependency.get(ManagedProfileController.class).hasActiveProfile()) {
                         mHost.addTile(WORK);
                         mAutoTracker.setTileAdded(WORK);
-                        mHandler.post(() -> Dependency.get(ManagedProfileController.class)
-                                .removeCallback(mProfileCallback));
                     }
                 }
 
