@@ -57,7 +57,7 @@ import java.util.HashSet;
  * </p>
  *
  */
-public class FontFamily {
+public final class FontFamily {
     private static final String TAG = "FontFamily";
 
     /**
@@ -170,7 +170,7 @@ public class FontFamily {
      *
      * @return the number of fonts registered in this family.
      */
-    public int getFontCount() {
+    public int getSize() {
         return mFonts.size();
     }
 
