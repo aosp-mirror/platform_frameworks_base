@@ -16,6 +16,14 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
+import static android.app.ActivityTaskManager.RESIZE_MODE_USER;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.Display.INVALID_DISPLAY;
+
+import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
+
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
@@ -101,15 +109,6 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
-
-import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
-import static android.app.ActivityTaskManager.RESIZE_MODE_USER;
-import static android.app.ActivityTaskManager.INVALID_STACK_ID;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.view.Display.INVALID_DISPLAY;
-
-import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 
 final class ActivityManagerShellCommand extends ShellCommand {
     public static final String NO_CLASS_ERROR_CODE = "Error type 3";
@@ -2850,6 +2849,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  --checkin: output checkin format, resetting data.");
             pw.println("  --C: output checkin format, not resetting data.");
             pw.println("  --proto: output dump in protocol buffer format.");
+            pw.println("  --autofill: dump just the autofill-related state of an activity");
         } else {
             pw.println("Activity manager (activity) commands:");
             pw.println("  help");
