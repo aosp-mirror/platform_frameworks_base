@@ -890,6 +890,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public static final int ACTION_UP               = 1;
     /**
+     * @deprecated No longer used by the input system.
      * {@link #getAction} value: multiple duplicate key events have
      * occurred in a row, or a complex string is being delivered.  If the
      * key code is not {#link {@link #KEYCODE_UNKNOWN} then the
@@ -898,6 +899,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * Otherwise, if the key code is {@link #KEYCODE_UNKNOWN}, then
      * this is a sequence of characters as returned by {@link #getCharacters}.
      */
+    @Deprecated
     public static final int ACTION_MULTIPLE         = 2;
 
     /**
@@ -2474,7 +2476,10 @@ public class KeyEvent extends InputEvent implements Parcelable {
      *
      * @return Returns a String of 1 or more characters associated with
      * the event.
+     *
+     * @deprecated no longer used by the input system.
      */
+    @Deprecated
     public final String getCharacters() {
         return mCharacters;
     }
@@ -3032,6 +3037,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         mFlags = in.readInt();
         mDownTime = in.readLong();
         mEventTime = in.readLong();
+        mCharacters = in.readString();
     }
 
     @Override
@@ -3049,5 +3055,6 @@ public class KeyEvent extends InputEvent implements Parcelable {
         out.writeInt(mFlags);
         out.writeLong(mDownTime);
         out.writeLong(mEventTime);
+        out.writeString(mCharacters);
     }
 }
