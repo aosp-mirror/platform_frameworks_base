@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Looper;
 import android.os.MessageQueue;
 
@@ -31,10 +32,12 @@ import java.lang.ref.WeakReference;
  * @hide
  */
 public class FrameMetricsObserver {
+    @UnsupportedAppUsage
     private MessageQueue mMessageQueue;
 
     private WeakReference<Window> mWindow;
 
+    @UnsupportedAppUsage
     private FrameMetrics mFrameMetrics;
 
     /* package */ Window.OnFrameMetricsAvailableListener mListener;
@@ -63,6 +66,7 @@ public class FrameMetricsObserver {
 
     // Called by native on the provided Handler
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private void notifyDataAvailable(int dropCount) {
         final Window window = mWindow.get();
         if (window != null) {

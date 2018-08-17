@@ -21,6 +21,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.os.LocaleList;
 import android.os.Looper;
@@ -213,6 +214,7 @@ public interface TextClassifier {
 
     // TODO: Remove once apps can build against the latest sdk.
     /** @hide */
+    @UnsupportedAppUsage
     default TextSelection suggestSelection(
             @NonNull CharSequence text,
             @IntRange(from = 0) int selectionStartIndex,
@@ -292,6 +294,7 @@ public interface TextClassifier {
 
     // TODO: Remove once apps can build against the latest sdk.
     /** @hide */
+    @UnsupportedAppUsage
     default TextClassification classifyText(
             @NonNull CharSequence text,
             @IntRange(from = 0) int startIndex,
@@ -333,6 +336,7 @@ public interface TextClassifier {
 
     // TODO: Remove once apps can build against the latest sdk.
     /** @hide */
+    @UnsupportedAppUsage
     default TextLinks generateLinks(
             @NonNull CharSequence text, @Nullable TextLinks.Options options) {
         if (options == null) {

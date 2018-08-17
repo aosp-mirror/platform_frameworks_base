@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -227,6 +228,7 @@ public abstract class InputEvent implements Parcelable {
      * @return The unique sequence number of this event.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getSequenceNumber() {
         return mSeq;
     }

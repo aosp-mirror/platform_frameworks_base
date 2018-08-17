@@ -19,6 +19,7 @@ package android.view.textclassifier;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.ServiceManager;
@@ -108,6 +109,7 @@ public final class TextClassificationManager {
      * @see TextClassifier#SYSTEM
      * @hide
      */
+    @UnsupportedAppUsage
     public TextClassifier getTextClassifier(@TextClassifierType int type) {
         switch (type) {
             case TextClassifier.LOCAL:

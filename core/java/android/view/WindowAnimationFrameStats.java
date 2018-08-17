@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -47,6 +48,7 @@ public final class WindowAnimationFrameStats extends FrameStats implements Parce
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void init(long refreshPeriodNano, long[] framesPresentedTimeNano) {
         mRefreshPeriodNano = refreshPeriodNano;
         mFramesPresentedTimeNano = framesPresentedTimeNano;

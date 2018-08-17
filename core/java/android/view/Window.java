@@ -25,6 +25,7 @@ import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
+import android.annotation.UnsupportedAppUsage;
 import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -150,6 +151,7 @@ public abstract class Window {
      * Max value used as a feature ID
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int FEATURE_MAX = FEATURE_ACTIVITY_TRANSITIONS;
 
     /**
@@ -267,18 +269,25 @@ public abstract class Window {
      */
     public static final int DECOR_CAPTION_SHADE_DARK = 2;
 
+    @UnsupportedAppUsage
     private final Context mContext;
 
+    @UnsupportedAppUsage
     private TypedArray mWindowStyle;
+    @UnsupportedAppUsage
     private Callback mCallback;
     private OnWindowDismissedCallback mOnWindowDismissedCallback;
     private OnWindowSwipeDismissedCallback mOnWindowSwipeDismissedCallback;
     private WindowControllerCallback mWindowControllerCallback;
     private OnRestrictedCaptionAreaChangedListener mOnRestrictedCaptionAreaChangedListener;
     private Rect mRestrictedCaptionAreaRect;
+    @UnsupportedAppUsage
     private WindowManager mWindowManager;
+    @UnsupportedAppUsage
     private IBinder mAppToken;
+    @UnsupportedAppUsage
     private String mAppName;
+    @UnsupportedAppUsage
     private boolean mHardwareAccelerated;
     private Window mContainer;
     private Window mActiveChild;
@@ -288,7 +297,9 @@ public abstract class Window {
     private boolean mSetCloseOnTouchOutside = false;
     private int mForcedWindowFlags = 0;
 
+    @UnsupportedAppUsage
     private int mFeatures;
+    @UnsupportedAppUsage
     private int mLocalFeatures;
 
     private boolean mHaveWindowFormat = false;
@@ -297,12 +308,14 @@ public abstract class Window {
 
     private boolean mHasSoftInputMode = false;
 
+    @UnsupportedAppUsage
     private boolean mDestroyed;
 
     private boolean mOverlayWithDecorCaptionEnabled = false;
     private boolean mCloseOnSwipeEnabled = false;
 
     // The current window attributes.
+    @UnsupportedAppUsage
     private final WindowManager.LayoutParams mWindowAttributes =
         new WindowManager.LayoutParams();
 
@@ -729,6 +742,7 @@ public abstract class Window {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public final boolean isDestroyed() {
         return mDestroyed;
     }
@@ -1066,6 +1080,7 @@ public abstract class Window {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void addPrivateFlags(int flags) {
         setPrivateFlags(flags, flags);
     }
@@ -1116,6 +1131,7 @@ public abstract class Window {
     /**
      * {@hide}
      */
+    @UnsupportedAppUsage
     protected void setNeedsMenuKey(int value) {
         final WindowManager.LayoutParams attrs = getAttributes();
         attrs.needsMenuKey = value;
@@ -1236,12 +1252,14 @@ public abstract class Window {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setCloseOnTouchOutside(boolean close) {
         mCloseOnTouchOutside = close;
         mSetCloseOnTouchOutside = true;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setCloseOnTouchOutsideIfNotSet(boolean close) {
         if (!mSetCloseOnTouchOutside) {
             mCloseOnTouchOutside = close;
@@ -1250,9 +1268,11 @@ public abstract class Window {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public abstract void alwaysReadCloseOnTouchAttr();
 
     /** @hide */
+    @UnsupportedAppUsage
     public boolean shouldCloseOnTouch(Context context, MotionEvent event) {
         final boolean isOutside =
                 event.getAction() == MotionEvent.ACTION_DOWN && isOutOfBounds(context, event)

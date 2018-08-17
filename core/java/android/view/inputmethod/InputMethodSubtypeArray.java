@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.util.Slog;
 
@@ -49,6 +50,7 @@ public class InputMethodSubtypeArray {
      * @param subtypes A list of {@link InputMethodSubtype} from which
      * {@link InputMethodSubtypeArray} will be created.
      */
+    @UnsupportedAppUsage
     public InputMethodSubtypeArray(final List<InputMethodSubtype> subtypes) {
         if (subtypes == null) {
             mCount = 0;

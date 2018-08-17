@@ -35,6 +35,7 @@ import android.annotation.Nullable;
 import android.annotation.Size;
 import android.annotation.TestApi;
 import android.annotation.UiThread;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -777,6 +778,7 @@ import java.util.function.Predicate;
 @UiThread
 public class View implements Drawable.Callback, KeyEvent.Callback,
         AccessibilityEventSource {
+    @UnsupportedAppUsage
     private static final boolean DBG = false;
 
     /** @hide */
@@ -799,6 +801,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String DEBUG_LAYOUT_PROPERTY = "debug.layout";
 
     /**
@@ -2157,6 +2160,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Map used to store views' tags.
      */
+    @UnsupportedAppUsage
     private SparseArray<Object> mKeyedTags;
 
     /**
@@ -2175,6 +2179,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "measurement")
+    @UnsupportedAppUsage
     int mMeasuredWidth;
 
     /**
@@ -2182,6 +2187,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "measurement")
+    @UnsupportedAppUsage
     int mMeasuredHeight;
 
     /**
@@ -2193,6 +2199,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     boolean mRecreateDisplayList = false;
 
     /**
@@ -2219,6 +2226,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private int mAutofillViewId = NO_ID;
 
     // ID for accessibility purposes. This ID must be unique for every window
+    @UnsupportedAppUsage
     private int mAccessibilityViewId = NO_ID;
 
     private int mAccessibilityCursorPosition = ACCESSIBILITY_CURSOR_POSITION_UNDEFINED;
@@ -2230,6 +2238,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setTag(Object)
      * @see #getTag()
      */
+    @UnsupportedAppUsage
     protected Object mTag = null;
 
     // for mPrivateFlags:
@@ -3522,6 +3531,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Flag to make the status bar not expandable.  Unless you also
      * set {@link #STATUS_BAR_DISABLE_NOTIFICATION_ICONS}, new notifications will continue to show.
      */
+    @UnsupportedAppUsage
     public static final int STATUS_BAR_DISABLE_EXPAND = 0x00010000;
 
     /**
@@ -3576,6 +3586,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Flag to hide only the home button.  Don't use this
      * unless you're a special part of the system UI (i.e., setup wizard, keyguard).
      */
+    @UnsupportedAppUsage
     public static final int STATUS_BAR_DISABLE_HOME = 0x00200000;
 
     /**
@@ -3587,6 +3598,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Flag to hide only the back button. Don't use this
      * unless you're a special part of the system UI (i.e., setup wizard, keyguard).
      */
+    @UnsupportedAppUsage
     public static final int STATUS_BAR_DISABLE_BACK = 0x00400000;
 
     /**
@@ -3609,6 +3621,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Flag to hide only the recent apps button. Don't use this
      * unless you're a special part of the system UI (i.e., setup wizard, keyguard).
      */
+    @UnsupportedAppUsage
     public static final int STATUS_BAR_DISABLE_RECENT = 0x01000000;
 
     /**
@@ -3640,6 +3653,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * Flag to specify that the navigation bar is displayed in transient mode.
      */
+    @UnsupportedAppUsage
     public static final int NAVIGATION_BAR_TRANSIENT = 0x08000000;
 
     /**
@@ -3813,11 +3827,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #getParent()
      */
+    @UnsupportedAppUsage
     protected ViewParent mParent;
 
     /**
      * {@hide}
      */
+    @UnsupportedAppUsage
     AttachInfo mAttachInfo;
 
     /**
@@ -3836,8 +3852,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }, formatToHexString = true)
 
     /* @hide */
+    @UnsupportedAppUsage
     public int mPrivateFlags;
+    @UnsupportedAppUsage
     int mPrivateFlags2;
+    @UnsupportedAppUsage
     int mPrivateFlags3;
 
     /**
@@ -3949,6 +3968,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * laid out.
      * {@hide}
      */
+    @UnsupportedAppUsage
     protected ViewGroup.LayoutParams mLayoutParams;
 
     /**
@@ -3956,6 +3976,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(formatToHexString = true)
+    @UnsupportedAppUsage
     int mViewFlags;
 
     static class TransformationInfo {
@@ -3993,6 +4014,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public TransformationInfo mTransformationInfo;
 
     /**
@@ -4009,6 +4031,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "layout")
+    @UnsupportedAppUsage
     protected int mLeft;
     /**
      * The distance in pixels from the left edge of this view's parent
@@ -4016,6 +4039,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "layout")
+    @UnsupportedAppUsage
     protected int mRight;
     /**
      * The distance in pixels from the top edge of this view's parent
@@ -4023,6 +4047,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "layout")
+    @UnsupportedAppUsage
     protected int mTop;
     /**
      * The distance in pixels from the top edge of this view's parent
@@ -4030,6 +4055,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "layout")
+    @UnsupportedAppUsage
     protected int mBottom;
 
     /**
@@ -4038,6 +4064,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "scrolling")
+    @UnsupportedAppUsage
     protected int mScrollX;
     /**
      * The offset, in pixels, by which the content of this view is scrolled
@@ -4045,6 +4072,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "scrolling")
+    @UnsupportedAppUsage
     protected int mScrollY;
 
     /**
@@ -4053,6 +4081,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "padding")
+    @UnsupportedAppUsage
     protected int mPaddingLeft = 0;
     /**
      * The right padding in pixels, that is the distance in pixels between the
@@ -4060,6 +4089,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "padding")
+    @UnsupportedAppUsage
     protected int mPaddingRight = 0;
     /**
      * The top padding in pixels, that is the distance in pixels between the
@@ -4067,6 +4097,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "padding")
+    @UnsupportedAppUsage
     protected int mPaddingTop;
     /**
      * The bottom padding in pixels, that is the distance in pixels between the
@@ -4074,6 +4105,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "padding")
+    @UnsupportedAppUsage
     protected int mPaddingBottom;
 
     /**
@@ -4199,6 +4231,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private LongSparseLongArray mMeasureCache;
 
     @ViewDebug.ExportedProperty(deepExport = true, prefix = "bg_")
+    @UnsupportedAppUsage
     private Drawable mBackground;
     private TintInfo mBackgroundTint;
 
@@ -4216,6 +4249,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private RenderNode mBackgroundRenderNode;
 
+    @UnsupportedAppUsage
     private int mBackgroundResource;
     private boolean mBackgroundSizeChanged;
 
@@ -4266,6 +4300,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * This field should be made private, so it is hidden from the SDK.
          * {@hide}
          */
+        @UnsupportedAppUsage
         protected OnFocusChangeListener mOnFocusChangeListener;
 
         /**
@@ -4285,6 +4320,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * This field should be made private, so it is hidden from the SDK.
          * {@hide}
          */
+        @UnsupportedAppUsage
         public OnClickListener mOnClickListener;
 
         /**
@@ -4292,6 +4328,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * This field should be made private, so it is hidden from the SDK.
          * {@hide}
          */
+        @UnsupportedAppUsage
         protected OnLongClickListener mOnLongClickListener;
 
         /**
@@ -4306,16 +4343,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * This field should be made private, so it is hidden from the SDK.
          * {@hide}
          */
+        @UnsupportedAppUsage
         protected OnCreateContextMenuListener mOnCreateContextMenuListener;
 
+        @UnsupportedAppUsage
         private OnKeyListener mOnKeyListener;
 
+        @UnsupportedAppUsage
         private OnTouchListener mOnTouchListener;
 
+        @UnsupportedAppUsage
         private OnHoverListener mOnHoverListener;
 
+        @UnsupportedAppUsage
         private OnGenericMotionListener mOnGenericMotionListener;
 
+        @UnsupportedAppUsage
         private OnDragListener mOnDragListener;
 
         private OnSystemUiVisibilityChangeListener mOnSystemUiVisibilityChangeListener;
@@ -4327,6 +4370,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         private ArrayList<OnUnhandledKeyEventListener> mUnhandledKeyListeners;
     }
 
+    @UnsupportedAppUsage
     ListenerInfo mListenerInfo;
 
     private static class TooltipInfo {
@@ -4405,10 +4449,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(deepExport = true)
+    @UnsupportedAppUsage
     protected Context mContext;
 
+    @UnsupportedAppUsage
     private final Resources mResources;
 
+    @UnsupportedAppUsage
     private ScrollabilityCache mScrollCache;
 
     private int[] mDrawableState = null;
@@ -4464,6 +4511,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     boolean mDefaultFocusHighlightEnabled = true;
 
     private CheckForLongPress mPendingCheckForLongPress;
+    @UnsupportedAppUsage
     private CheckForTap mPendingCheckForTap = null;
     private PerformClick mPerformClick;
     private SendViewScrolledAccessibilityEvent mSendViewScrolledAccessibilityEvent;
@@ -4476,6 +4524,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * a long press could be performed before the tap is checked, in which case the tap's action
      * should not be invoked.
      */
+    @UnsupportedAppUsage
     private boolean mHasPerformedLongPress;
 
     /**
@@ -4497,6 +4546,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * of this view to at least this amount.
      */
     @ViewDebug.ExportedProperty(category = "measurement")
+    @UnsupportedAppUsage
     private int mMinHeight;
 
     /**
@@ -4504,6 +4554,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * of this view to at least this amount.
      */
     @ViewDebug.ExportedProperty(category = "measurement")
+    @UnsupportedAppUsage
     private int mMinWidth;
 
     /**
@@ -4531,6 +4582,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Object that handles automatic animation of view properties.
      */
+    @UnsupportedAppUsage
     private ViewPropertyAnimator mAnimator = null;
 
     /**
@@ -4599,6 +4651,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Position of the vertical scroll bar.
      */
+    @UnsupportedAppUsage
     private int mVerticalScrollbarPosition;
 
     /**
@@ -4692,8 +4745,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean mCachingFailed;
+    @UnsupportedAppUsage
     private Bitmap mDrawingCache;
+    @UnsupportedAppUsage
     private Bitmap mUnscaledDrawingCache;
 
     /**
@@ -4703,6 +4759,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * of the View content. Its DisplayList content is cleared on temporary detach and reset on
      * cleanup.
      */
+    @UnsupportedAppUsage
     final RenderNode mRenderNode;
 
     /**
@@ -4714,6 +4771,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Delegate for injecting accessibility functionality.
      */
+    @UnsupportedAppUsage
     AccessibilityDelegate mAccessibilityDelegate;
 
     /**
@@ -4775,6 +4833,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     String mStartActivityRequestWho;
 
     @Nullable
@@ -5670,6 +5729,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Non-public constructor for use in testing
      */
+    @UnsupportedAppUsage
     View() {
         mResources = null;
         mRenderNode = RenderNode.create(getClass().getName(), this);
@@ -5993,6 +6053,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param a the styled attributes set to initialize the scrollbars from
      * @hide
      */
+    @UnsupportedAppUsage
     protected void initializeScrollbarsInternal(TypedArray a) {
         initScrollCache();
 
@@ -6085,6 +6146,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    @UnsupportedAppUsage
     private ScrollabilityCache getScrollCache() {
         initScrollCache();
         return mScrollCache;
@@ -6140,6 +6202,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return false;
     }
 
+    @UnsupportedAppUsage
     boolean isOnScrollbarThumb(float x, float y) {
         return isOnVerticalScrollbarThumb(x, y) || isOnHorizontalScrollbarThumb(x, y);
     }
@@ -6199,6 +6262,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return false;
     }
 
+    @UnsupportedAppUsage
     boolean isDraggingScrollBar() {
         return mScrollCache != null
                 && mScrollCache.mScrollBarDraggingState != ScrollabilityCache.NOT_DRAGGING;
@@ -6287,6 +6351,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 >>> SCROLL_INDICATORS_TO_PFLAGS3_LSHIFT;
     }
 
+    @UnsupportedAppUsage
     ListenerInfo getListenerInfo() {
         if (mListenerInfo != null) {
             return mListenerInfo;
@@ -6811,6 +6876,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param requestCode The request code to use.
      * @hide
      */
+    @UnsupportedAppUsage
     public void startActivityForResult(Intent intent, int requestCode) {
         mStartActivityRequestWho = "@android:view:" + System.identityHashCode(this);
         getContext().startActivityForResult(mStartActivityRequestWho, intent, requestCode, null);
@@ -7594,6 +7660,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         event.setSource(this);
         event.setClassName(getAccessibilityClassName());
@@ -7709,6 +7776,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param outRect The output location
      * @hide
      */
+    @UnsupportedAppUsage
     public void getBoundsOnScreen(Rect outRect) {
         getBoundsOnScreen(outRect, false);
     }
@@ -7720,6 +7788,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param clipToParent Whether to clip child bounds to the parent ones.
      * @hide
      */
+    @UnsupportedAppUsage
     public void getBoundsOnScreen(Rect outRect, boolean clipToParent) {
         if (mAttachInfo == null) {
             return;
@@ -8943,6 +9012,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isVisibleToUser() {
         return isVisibleToUser(null);
     }
@@ -8964,6 +9034,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     protected boolean isVisibleToUser(Rect boundInView) {
         if (mAttachInfo != null) {
             // Attached to invisible window means this view is not visible.
@@ -9071,6 +9142,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getAccessibilityViewId() {
         if (mAccessibilityViewId == NO_ID) {
             mAccessibilityViewId = sNextAccessibilityViewId++;
@@ -9290,6 +9362,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide pending API council approval
      */
     @CallSuper
+    @UnsupportedAppUsage
     protected void onFocusLost() {
         resetPressedState();
     }
@@ -9815,6 +9888,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      * @param location an array of two integers in which to hold the coordinates
      */
+    @UnsupportedAppUsage
     public void getLocationInSurface(@Size(2) int[] location) {
         getLocationInWindow(location);
         if (mAttachInfo != null && mAttachInfo.mViewRootImpl != null) {
@@ -9848,6 +9922,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return
      */
     @Deprecated
+    @UnsupportedAppUsage
     protected boolean computeFitSystemWindows(Rect inoutInsets, Rect outLocalInsets) {
         WindowInsets innerInsets = computeSystemWindowInsets(new WindowInsets(inoutInsets),
                 outLocalInsets);
@@ -9923,6 +9998,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public boolean fitsSystemWindows() {
         return getFitsSystemWindows();
     }
@@ -9949,6 +10025,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * For use by PhoneWindow to make its own system window fitting optional.
      * @hide
      */
+    @UnsupportedAppUsage
     public void makeOptionalFitsSystemWindows() {
         setFlags(OPTIONAL_FITS_SYSTEM_WINDOWS, OPTIONAL_FITS_SYSTEM_WINDOWS);
     }
@@ -10293,6 +10370,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     @ViewDebug.ExportedProperty(category = "layout")
+    @UnsupportedAppUsage
     public boolean isLayoutRtl() {
         return (getLayoutDirection() == LAYOUT_DIRECTION_RTL);
     }
@@ -10623,6 +10701,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #onProvideVirtualStructure
      * @attr ref android.R.styleable#View_assistBlocked
      */
+    @UnsupportedAppUsage
     public void setAssistBlocked(boolean enabled) {
         if (enabled) {
             mPrivateFlags3 |= PFLAG3_ASSIST_BLOCKED;
@@ -11312,6 +11391,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean requestAccessibilityFocus() {
         AccessibilityManager manager = AccessibilityManager.getInstance(mContext);
         if (!manager.isEnabled() || !manager.isTouchExplorationEnabled()) {
@@ -11341,6 +11421,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void clearAccessibilityFocus() {
         clearAccessibilityFocusNoCallbacks(0);
 
@@ -11855,6 +11936,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean includeForAccessibility() {
         if (mAttachInfo != null) {
             return (mAttachInfo.mAccessibilityFetchFlags
@@ -11901,6 +11983,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void notifyViewAccessibilityStateChangedIfNeeded(int changeType) {
         if (!AccessibilityManager.getInstance(mContext).isEnabled() || mAttachInfo == null) {
             return;
@@ -11960,6 +12043,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void notifySubtreeAccessibilityStateChangedIfNeeded() {
         if (!AccessibilityManager.getInstance(mContext).isEnabled() || mAttachInfo == null) {
             return;
@@ -12063,6 +12147,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     *
     * @hide
     */
+    @UnsupportedAppUsage
     public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
         if (isNestedScrollingEnabled()
                 && (action == AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
@@ -12240,6 +12325,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public CharSequence getIterableTextForAccessibility() {
         return getContentDescription();
     }
@@ -12303,6 +12389,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public TextSegmentIterator getIteratorForGranularity(int granularity) {
         switch (granularity) {
             case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER: {
@@ -12749,6 +12836,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return True if the event was handled by the view, false otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     public final boolean dispatchPointerEvent(MotionEvent event) {
         if (event.isTouchEvent()) {
             return dispatchTouchEvent(event);
@@ -13022,6 +13110,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void getWindowDisplayFrame(Rect outRect) {
         if (mAttachInfo != null) {
             try {
@@ -13884,6 +13973,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isInScrollingContainer() {
         ViewParent p = getParent();
         while (p != null && p instanceof ViewGroup) {
@@ -13907,6 +13997,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Remove the pending click action
      */
+    @UnsupportedAppUsage
     private void removePerformClickCallback() {
         if (mPerformClick != null) {
             removeCallbacks(mPerformClick);
@@ -14005,6 +14096,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param flags Constant indicating the value which should be set
      * @param mask Constant indicating the bit range that should be changed
      */
+    @UnsupportedAppUsage
     void setFlags(int flags, int mask) {
         final boolean accessibilityEnabled =
                 AccessibilityManager.getInstance(mContext).isEnabled();
@@ -14543,10 +14635,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return True if the transform matrix is the identity matrix, false otherwise.
      */
+    @UnsupportedAppUsage
     final boolean hasIdentityMatrix() {
         return mRenderNode.hasIdentityMatrix();
     }
 
+    @UnsupportedAppUsage
     void ensureTransformationInfo() {
         if (mTransformationInfo == null) {
             mTransformationInfo = new TransformationInfo();
@@ -14561,6 +14655,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The inverse of the current matrix of this view.
      * @hide
      */
+    @UnsupportedAppUsage
     public final Matrix getInverseMatrix() {
         ensureTransformationInfo();
         if (mTransformationInfo.mInverseMatrix == null) {
@@ -15073,6 +15168,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return true if the View subclass handles alpha (the return value for onSetAlpha()) and
      *         the new value for the alpha property is different from the old value
      */
+    @UnsupportedAppUsage
     boolean setAlphaNoInvalidation(float alpha) {
         ensureTransformationInfo();
         if (mTransformationInfo.mAlpha != alpha) {
@@ -15107,6 +15203,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setTransitionAlpha(float alpha) {
         ensureTransformationInfo();
         if (mTransformationInfo.mTransitionAlpha != alpha) {
@@ -15138,6 +15235,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     @ViewDebug.ExportedProperty(category = "drawing")
+    @UnsupportedAppUsage
     public float getTransitionAlpha() {
         return mTransformationInfo != null ? mTransformationInfo.mTransitionAlpha : 1;
     }
@@ -15623,6 +15721,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setAnimationMatrix(Matrix matrix) {
         invalidateViewProperty(true, false);
         mRenderNode.setAnimationMatrix(matrix);
@@ -15897,6 +15996,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean pointInView(float localX, float localY, float slop) {
         return localX >= -slop && localY >= -slop && localX < ((mRight - mLeft) + slop) &&
                 localY < ((mBottom - mTop) + slop);
@@ -16396,6 +16496,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *            dimensions have not changed.
      * @hide
      */
+    @UnsupportedAppUsage
     public void invalidate(boolean invalidateCache) {
         invalidateInternal(0, 0, mRight - mLeft, mBottom - mTop, invalidateCache, true);
     }
@@ -16485,6 +16586,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param forceRedraw Mark the view as DRAWN to force the invalidation to propagate, if display
      * list properties are not being used in this view
      */
+    @UnsupportedAppUsage
     void invalidateViewProperty(boolean invalidateParent, boolean forceRedraw) {
         if (!isHardwareAccelerated()
                 || !mRenderNode.isValid()
@@ -16536,6 +16638,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     protected void invalidateParentCaches() {
         if (mParent instanceof View) {
             ((View) mParent).mPrivateFlags |= PFLAG_INVALIDATED;
@@ -16551,6 +16654,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     protected void invalidateParentIfNeeded() {
         if (isHardwareAccelerated() && mParent instanceof View) {
             ((View) mParent).invalidate(true);
@@ -16587,6 +16691,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     protected void computeOpaqueFlags() {
         // Opaque if:
         //   - Has a background
@@ -16645,6 +16750,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The view root, or null if none.
      * @hide
      */
+    @UnsupportedAppUsage
     public ViewRootImpl getViewRootImpl() {
         if (mAttachInfo != null) {
             return mAttachInfo.mViewRootImpl;
@@ -16655,6 +16761,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public ThreadedRenderer getThreadedRenderer() {
         return mAttachInfo != null ? mAttachInfo.mThreadedRenderer : null;
     }
@@ -17145,6 +17252,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     protected void recomputePadding() {
         internalSetPadding(mUserPaddingLeft, mPaddingTop, mUserPaddingRight, mUserPaddingBottom);
     }
@@ -17748,6 +17856,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #computeHorizontalScrollOffset()
      * @hide
      */
+    @UnsupportedAppUsage
     protected void onDrawHorizontalScrollBar(Canvas canvas, Drawable scrollBar,
             int l, int t, int r, int b) {
         scrollBar.setBounds(l, t, r, b);
@@ -17767,6 +17876,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #computeVerticalScrollOffset()
      * @hide
      */
+    @UnsupportedAppUsage
     protected void onDrawVerticalScrollBar(Canvas canvas, Drawable scrollBar,
             int l, int t, int r, int b) {
         scrollBar.setBounds(l, t, r, b);
@@ -17785,6 +17895,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Caller is responsible for calling requestLayout if necessary.
      * (This allows addViewInLayout to not request a new layout.)
      */
+    @UnsupportedAppUsage
     void assignParent(ViewParent parent) {
         if (mParent == null) {
             mParent = parent;
@@ -17930,6 +18041,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Return true if the application tag in the AndroidManifest has set "supportRtl" to true
      */
+    @UnsupportedAppUsage
     private boolean hasRtlSupport() {
         return mContext.getApplicationInfo().hasRtlSupport();
     }
@@ -18076,6 +18188,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     boolean isPaddingResolved() {
         return (mPrivateFlags2 & PFLAG2_PADDING_RESOLVED) == PFLAG2_PADDING_RESOLVED;
     }
@@ -18086,6 +18199,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void resolvePadding() {
         final int resolvedLayoutDirection = getLayoutDirection();
 
@@ -18183,6 +18297,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     @CallSuper
+    @UnsupportedAppUsage
     protected void onDetachedFromWindowInternal() {
         mPrivateFlags &= ~PFLAG_CANCEL_NEXT_UP_EVENT;
         mPrivateFlags3 &= ~PFLAG3_IS_LAID_OUT;
@@ -18291,6 +18406,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * communicate with the window manager.
      * @return the session object to communicate with the window manager
      */
+    @UnsupportedAppUsage
     /*package*/ IWindowSession getWindowSession() {
         return mAttachInfo != null ? mAttachInfo.mSession : null;
     }
@@ -18316,6 +18432,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param info the {@link android.view.View.AttachInfo} to associated with
      *        this view
      */
+    @UnsupportedAppUsage
     void dispatchAttachedToWindow(AttachInfo info, int visibility) {
         mAttachInfo = info;
         if (mOverlay != null) {
@@ -18380,6 +18497,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         notifyEnterOrExitForAutoFillIfNeeded(true);
     }
 
+    @UnsupportedAppUsage
     void dispatchDetachedFromWindow() {
         AttachInfo info = mAttachInfo;
         if (info != null) {
@@ -18885,6 +19003,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     @CallSuper
+    @UnsupportedAppUsage
     protected void destroyHardwareResources() {
         if (mOverlay != null) {
             mOverlay.getOverlayView().destroyHardwareResources();
@@ -19020,6 +19139,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     @NonNull
+    @UnsupportedAppUsage
     public RenderNode updateDisplayListIfDirty() {
         final RenderNode renderNode = mRenderNode;
         if (!canHaveDisplayList()) {
@@ -19090,6 +19210,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return renderNode;
     }
 
+    @UnsupportedAppUsage
     private void resetDisplayList() {
         mRenderNode.discardDisplayList();
         if (mBackgroundRenderNode != null) {
@@ -19490,6 +19611,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public Bitmap createSnapshot(ViewDebug.CanvasProvider canvasProvider, boolean skipChildren) {
         int width = mRight - mLeft;
         int height = mBottom - mTop;
@@ -20378,6 +20500,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param canvas Canvas on which to draw the background
      */
+    @UnsupportedAppUsage
     private void drawBackground(Canvas canvas) {
         final Drawable background = mBackground;
         if (background == null) {
@@ -20767,6 +20890,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         previous ones
      * {@hide}
      */
+    @UnsupportedAppUsage
     protected boolean setFrame(int left, int top, int right, int bottom) {
         boolean changed = false;
 
@@ -20834,6 +20958,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Same as setFrame, but public and hidden. For use in {@link android.transition.ChangeBounds}.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setLeftTopRightBottom(int left, int top, int right, int bottom) {
         setFrame(left, top, right, bottom);
     }
@@ -22020,6 +22145,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     protected void internalSetPadding(int left, int top, int right, int bottom) {
         mUserPaddingLeft = left;
         mUserPaddingRight = right;
@@ -22214,6 +22340,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void resetPaddingToInitialValues() {
         if (isRtlCompatibilityMode()) {
             mPaddingLeft = mUserPaddingLeftInitial;
@@ -22393,6 +22520,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return false if the transformation could not be applied
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean toGlobalMotionEvent(MotionEvent ev) {
         final AttachInfo info = mAttachInfo;
         if (info == null) {
@@ -22414,6 +22542,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return false if the transformation could not be applied
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean toLocalMotionEvent(MotionEvent ev) {
         final AttachInfo info = mAttachInfo;
         if (info == null) {
@@ -22434,6 +22563,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param m input matrix to modify
      * @hide
      */
+    @UnsupportedAppUsage
     public void transformMatrixToGlobal(Matrix m) {
         final ViewParent parent = mParent;
         if (parent instanceof View) {
@@ -22460,6 +22590,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param m input matrix to modify
      * @hide
      */
+    @UnsupportedAppUsage
     public void transformMatrixToLocal(Matrix m) {
         final ViewParent parent = mParent;
         if (parent instanceof View) {
@@ -22486,6 +22617,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = 0, to = "x"),
             @ViewDebug.IntToString(from = 1, to = "y")
     })
+    @UnsupportedAppUsage
     public int[] getLocationOnScreen() {
         int[] location = new int[2];
         getLocationOnScreen(location);
@@ -22666,6 +22798,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param accessibilityId The searched accessibility id.
      * @return The found view.
      */
+    @UnsupportedAppUsage
     final <T extends View> T findViewByAccessibilityId(int accessibilityId) {
         if (accessibilityId < 0) {
             return null;
@@ -22816,6 +22949,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return true if the view belongs to the root namespace, false otherwise
      */
+    @UnsupportedAppUsage
     public boolean isRootNamespace() {
         return (mPrivateFlags&PFLAG_IS_ROOT_NAMESPACE) != 0;
     }
@@ -22919,6 +23053,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setTagInternal(int key, Object tag) {
         if ((key >>> 24) != 0x1) {
             throw new IllegalArgumentException("The key must be a framework-specific "
@@ -22942,6 +23077,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void debug() {
         debug(0);
     }
@@ -22955,6 +23091,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @UnsupportedAppUsage
     protected void debug(int depth) {
         String output = debugIndent(depth - 1);
 
@@ -23577,6 +23714,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public boolean gatherTransparentRegion(Region region) {
         final AttachInfo attachInfo = mAttachInfo;
         if (region != null && attachInfo != null) {
@@ -23804,6 +23942,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setDisabledSystemUiVisibility(int flags) {
         if (mAttachInfo != null) {
             if (mAttachInfo.mDisabledSystemUiVisibility != flags) {
@@ -23844,6 +23983,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </div>
      */
     public static class DragShadowBuilder {
+        @UnsupportedAppUsage
         private final WeakReference<View> mView;
 
         /**
@@ -24271,6 +24411,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * it is ever exposed at all.
      * @hide
      */
+    @UnsupportedAppUsage
     public void onCloseSystemDialogs(String reason) {
     }
 
@@ -24289,6 +24430,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Drawable that are not transparent.
      * {@hide}
      */
+    @UnsupportedAppUsage
     public void applyDrawableToTransparentRegion(Drawable dr, Region region) {
         if (DBG) {
             Log.i("View", "Getting transparent region for: " + this);
@@ -24784,6 +24926,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The vertical scroll scale factor.
      * @hide
      */
+    @UnsupportedAppUsage
     protected float getVerticalScrollFactor() {
         if (mVerticalScrollFactor == 0) {
             TypedValue outValue = new TypedValue();
@@ -24804,6 +24947,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The horizontal scroll scale factor.
      * @hide
      */
+    @UnsupportedAppUsage
     protected float getHorizontalScrollFactor() {
         // TODO: Should use something else.
         return getVerticalScrollFactor();
@@ -24838,6 +24982,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = TEXT_DIRECTION_FIRST_STRONG_LTR, to = "FIRST_STRONG_LTR"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_FIRST_STRONG_RTL, to = "FIRST_STRONG_RTL")
     })
+    @UnsupportedAppUsage
     public int getRawTextDirection() {
         return (mPrivateFlags2 & PFLAG2_TEXT_DIRECTION_MASK) >> PFLAG2_TEXT_DIRECTION_MASK_SHIFT;
     }
@@ -25076,6 +25221,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = TEXT_ALIGNMENT_VIEW_END, to = "VIEW_END")
     })
     @TextAlignment
+    @UnsupportedAppUsage
     public int getRawTextAlignment() {
         return (mPrivateFlags2 & PFLAG2_TEXT_ALIGNMENT_MASK) >> PFLAG2_TEXT_ALIGNMENT_MASK_SHIFT;
     }
@@ -25765,6 +25911,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          *
          * @hide internal use only for compatibility with system widgets and older apps
          */
+        @UnsupportedAppUsage
         public static int makeSafeMeasureSpec(int size, int mode) {
             if (sUseZeroUnspecifiedMeasureSpec && mode == UNSPECIFIED) {
                 return 0;
@@ -26316,11 +26463,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             private static final SynchronizedPool<InvalidateInfo> sPool =
                     new SynchronizedPool<InvalidateInfo>(POOL_LIMIT);
 
+            @UnsupportedAppUsage
             View target;
 
+            @UnsupportedAppUsage
             int left;
+            @UnsupportedAppUsage
             int top;
+            @UnsupportedAppUsage
             int right;
+            @UnsupportedAppUsage
             int bottom;
 
             public static InvalidateInfo obtain() {
@@ -26334,8 +26486,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
+        @UnsupportedAppUsage
         final IWindowSession mSession;
 
+        @UnsupportedAppUsage
         final IWindow mWindow;
 
         final IBinder mWindowToken;
@@ -26366,16 +26520,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * constants declared by {@link View} (there are more display states than
          * screen states).
          */
+        @UnsupportedAppUsage
         int mDisplayState = Display.STATE_UNKNOWN;
 
         /**
          * Scale factor used by the compatibility mode
          */
+        @UnsupportedAppUsage
         float mApplicationScale;
 
         /**
          * Indicates whether the application is in compatibility mode
          */
+        @UnsupportedAppUsage
         boolean mScalingRequired;
 
         /**
@@ -26405,6 +26562,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * of the screen decorations, these are the current insets for the
          * content of the window.
          */
+        @UnsupportedAppUsage
         final Rect mContentInsets = new Rect();
 
         /**
@@ -26412,6 +26570,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * of the screen decorations, these are the current insets for the
          * actual visible parts of the window.
          */
+        @UnsupportedAppUsage
         final Rect mVisibleInsets = new Rect();
 
         /**
@@ -26419,6 +26578,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * of the screen decorations, these are the current insets for the
          * stable system windows.
          */
+        @UnsupportedAppUsage
         final Rect mStableInsets = new Rect();
 
         final DisplayCutout.ParcelableWrapper mDisplayCutout =
@@ -26444,6 +26604,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * be given to the window manager when changed to be used in laying
          * out windows behind it.
          */
+        @UnsupportedAppUsage
         final ViewTreeObserver.InternalInsetsInfo mGivenInternalInsets
                 = new ViewTreeObserver.InternalInsetsInfo();
 
@@ -26457,14 +26618,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * used to determine if the window can be resized or must be panned
          * to adjust for a soft input area.
          */
+        @UnsupportedAppUsage
         final ArrayList<View> mScrollContainers = new ArrayList<View>();
 
+        @UnsupportedAppUsage
         final KeyEvent.DispatcherState mKeyDispatchState
                 = new KeyEvent.DispatcherState();
 
         /**
          * Indicates whether the view's window currently has the focus.
          */
+        @UnsupportedAppUsage
         boolean mHasWindowFocus;
 
         /**
@@ -26475,11 +26639,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         /**
          * Indicates the time at which drawing started to occur.
          */
+        @UnsupportedAppUsage
         long mDrawingTime;
 
         /**
          * Indicates whether the view's window is currently in touch mode.
          */
+        @UnsupportedAppUsage
         boolean mInTouchMode;
 
         /**
@@ -26492,6 +26658,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Indicates that ViewAncestor should trigger a global layout change
          * the next time it performs a traversal
          */
+        @UnsupportedAppUsage
         boolean mRecomputeGlobalAttributes;
 
         /**
@@ -26502,6 +26669,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         /**
          * Set during a traveral if any views want to keep the screen on.
          */
+        @UnsupportedAppUsage
         boolean mKeepScreenOn;
 
         /**
@@ -26539,11 +26707,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         /**
          * Set if the visibility of any views has changed.
          */
+        @UnsupportedAppUsage
         boolean mViewVisibilityChanged;
 
         /**
          * Set to true if a view has been scrolled.
          */
+        @UnsupportedAppUsage
         boolean mViewScrollChanged;
 
         /**
@@ -26579,6 +26749,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * The view tree observer used to dispatch global events like
          * layout, pre-draw, touch mode change, etc.
          */
+        @UnsupportedAppUsage
         final ViewTreeObserver mTreeObserver;
 
         /**
@@ -26595,6 +26766,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * A Handler supplied by a view's {@link android.view.ViewRootImpl}. This
          * handler can be used to pump events in the UI events queue.
          */
+        @UnsupportedAppUsage
         final Handler mHandler;
 
         /**
@@ -26757,8 +26929,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         public int scrollBarSize;
         public int scrollBarMinTouchTarget;
+        @UnsupportedAppUsage
         public ScrollBarDrawable scrollBar;
         public float[] interpolatorValues;
+        @UnsupportedAppUsage
         public View host;
 
         public final Paint paint;
@@ -26780,6 +26954,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         /**
          * The current state of the scrollbars: ON, OFF, or FADING
          */
+        @UnsupportedAppUsage
         public int state = OFF;
 
         private int mLastColor;
@@ -26898,6 +27073,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Remove the pending callback for sending a
      * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} accessibility event.
      */
+    @UnsupportedAppUsage
     private void cancel(@Nullable SendViewScrolledAccessibilityEvent callback) {
         if (callback == null || !callback.mIsPending) return;
         removeCallbacks(callback);
@@ -27212,6 +27388,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public AccessibilityNodeInfo createAccessibilityNodeInfo(View host) {
             return host.createAccessibilityNodeInfoInternal();
         }
@@ -27480,6 +27657,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide Binary compatibility stub. To be removed when we finalize O APIs.
      */
+    @UnsupportedAppUsage
     public void setTooltip(@Nullable CharSequence tooltipText) {
         setTooltipText(tooltipText);
     }
@@ -27529,6 +27707,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return true;
     }
 
+    @UnsupportedAppUsage
     void hideTooltip() {
         if (mTooltipInfo == null) {
             return;

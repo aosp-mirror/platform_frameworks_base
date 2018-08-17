@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -276,6 +277,7 @@ public final class ThreadedRenderer {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static void setupDiskCache(File cacheDir) {
         ThreadedRenderer.setupShadersDiskCache(
                 new File(cacheDir, CACHE_PATH_SHADERS).getAbsolutePath(),
@@ -719,6 +721,7 @@ public final class ThreadedRenderer {
      * @param placeFront If true, the render node will be placed in front of the content node,
      *                   otherwise behind the content node.
      */
+    @UnsupportedAppUsage
     public void addRenderNode(RenderNode node, boolean placeFront) {
         nAddRenderNode(mNativeProxy, node.mNativeRenderNode, placeFront);
     }
@@ -727,6 +730,7 @@ public final class ThreadedRenderer {
      * Only especially added render nodes can be removed.
      * @param node The node which was added via addRenderNode which should get removed again.
      */
+    @UnsupportedAppUsage
     public void removeRenderNode(RenderNode node) {
         nRemoveRenderNode(mNativeProxy, node.mNativeRenderNode);
     }
@@ -736,6 +740,7 @@ public final class ThreadedRenderer {
      * nodes will get drawn and the content remains untouched.
      * @param node The node to be drawn.
      */
+    @UnsupportedAppUsage
     public void drawRenderNode(RenderNode node) {
         nDrawRenderNode(mNativeProxy, node.mNativeRenderNode);
     }
@@ -749,6 +754,7 @@ public final class ThreadedRenderer {
      * @param right The right side of the protected bounds.
      * @param bottom The bottom side of the protected bounds.
      */
+    @UnsupportedAppUsage
     public void setContentDrawBounds(int left, int top, int right, int bottom) {
         nSetContentDrawBounds(mNativeProxy, left, top, right, bottom);
     }
@@ -929,6 +935,7 @@ public final class ThreadedRenderer {
      * RenderNode. Note that the RenderNode should be created as a root node (so x/y of 0,0), and
      * not the RenderNode from a View.
      **/
+    @UnsupportedAppUsage
     public static Bitmap createHardwareBitmap(RenderNode node, int width, int height) {
         return nCreateHardwareBitmap(node.mNativeRenderNode, width, height);
     }
