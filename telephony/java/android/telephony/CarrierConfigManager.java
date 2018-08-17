@@ -1489,6 +1489,15 @@ public class CarrierConfigManager {
             "always_play_remote_hold_tone_bool";
 
     /**
+     * When true, the Telephony stack will automatically turn off airplane mode and retry a wifi
+     * emergency call over the cell network if the initial attempt at dialing was met with a SIP 308
+     * error.
+     * @hide
+     */
+    public static final String KEY_AUTO_RETRY_FAILED_WIFI_EMERGENCY_CALL =
+            "auto_retry_failed_wifi_emergency_call";
+
+    /**
      * When true, indicates that adding a call is disabled when there is an ongoing video call
      * or when there is an ongoing call on wifi which was downgraded from video and VoWifi is
      * turned off.
@@ -2016,6 +2025,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_ALLOW_DEFLECT_IMS_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_PLAY_REMOTE_HOLD_TONE_BOOL, false);
+        sDefaults.putBoolean(KEY_AUTO_RETRY_FAILED_WIFI_EMERGENCY_CALL, false);
         sDefaults.putBoolean(KEY_ADDITIONAL_CALL_SETTING_BOOL, true);
         sDefaults.putBoolean(KEY_ALLOW_EMERGENCY_NUMBERS_IN_CALL_LOG_BOOL, false);
         sDefaults.putStringArray(KEY_UNLOGGABLE_NUMBERS_STRING_ARRAY, null);
