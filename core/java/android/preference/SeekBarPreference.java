@@ -16,6 +16,7 @@
 
 package android.preference;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Parcel;
@@ -55,14 +56,17 @@ public class SeekBarPreference extends Preference
         setLayoutResource(layoutResId);
     }
 
+    @UnsupportedAppUsage
     public SeekBarPreference(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
+    @UnsupportedAppUsage
     public SeekBarPreference(Context context, AttributeSet attrs) {
         this(context, attrs, com.android.internal.R.attr.seekBarPreferenceStyle);
     }
 
+    @UnsupportedAppUsage
     public SeekBarPreference(Context context) {
         this(context, null);
     }

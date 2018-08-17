@@ -17,6 +17,7 @@
 package android.preference;
 
 import android.annotation.ArrayRes;
+import android.annotation.UnsupportedAppUsage;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -41,6 +42,7 @@ public class ListPreference extends DialogPreference {
     private CharSequence[] mEntryValues;
     private String mValue;
     private String mSummary;
+    @UnsupportedAppUsage
     private int mClickedDialogEntryIndex;
     private boolean mValueSet;
 
