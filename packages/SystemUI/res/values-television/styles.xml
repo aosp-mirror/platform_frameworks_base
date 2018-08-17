@@ -15,5 +15,6 @@
 -->
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Dialog" />
     <style name="Theme.SystemUI.Dialog.Alert" parent="@*android:style/Theme.DeviceDefault.Dialog.Alert" />
 </resources>
