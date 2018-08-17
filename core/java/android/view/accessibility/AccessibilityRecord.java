@@ -19,6 +19,7 @@ package android.view.accessibility;
 import static com.android.internal.util.CollectionUtils.isEmpty;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcelable;
 import android.view.View;
 
@@ -82,6 +83,7 @@ public class AccessibilityRecord {
     private AccessibilityRecord mNext;
     private boolean mIsInPool;
 
+    @UnsupportedAppUsage
     boolean mSealed;
     int mBooleanProperties = 0;
     int mCurrentItemIndex = UNDEFINED;
@@ -98,6 +100,7 @@ public class AccessibilityRecord {
 
     int mAddedCount= UNDEFINED;
     int mRemovedCount = UNDEFINED;
+    @UnsupportedAppUsage
     long mSourceNodeId = AccessibilityNodeInfo.UNDEFINED_NODE_ID;
     int mSourceWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
 
@@ -696,6 +699,7 @@ public class AccessibilityRecord {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public long getSourceNodeId() {
         return mSourceNodeId;
     }

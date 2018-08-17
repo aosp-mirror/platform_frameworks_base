@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Build;
@@ -123,6 +124,7 @@ public class ScaleGestureDetector {
     }
 
     private final Context mContext;
+    @UnsupportedAppUsage
     private final OnScaleGestureListener mListener;
 
     private float mFocusX;
@@ -141,7 +143,9 @@ public class ScaleGestureDetector {
     private long mCurrTime;
     private long mPrevTime;
     private boolean mInProgress;
+    @UnsupportedAppUsage
     private int mSpanSlop;
+    @UnsupportedAppUsage
     private int mMinSpan;
 
     private final Handler mHandler;

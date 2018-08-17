@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
@@ -53,6 +54,7 @@ public final class InputDevice implements Parcelable {
     private final int mProductId;
     private final String mDescriptor;
     private final InputDeviceIdentifier mIdentifier;
+    @UnsupportedAppUsage
     private final boolean mIsExternal;
     private final int mSources;
     private final int mKeyboardType;
@@ -405,6 +407,7 @@ public final class InputDevice implements Parcelable {
     };
 
     // Called by native code.
+    @UnsupportedAppUsage
     private InputDevice(int id, int generation, int controllerNumber, String name, int vendorId,
             int productId, String descriptor, boolean isExternal, int sources, int keyboardType,
             KeyCharacterMap keyCharacterMap, boolean hasVibrator, boolean hasMicrophone,
@@ -608,6 +611,7 @@ public final class InputDevice implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isExternal() {
         return mIsExternal;
     }
@@ -739,6 +743,7 @@ public final class InputDevice implements Parcelable {
     }
 
     // Called from native code.
+    @UnsupportedAppUsage
     private void addMotionRange(int axis, int source,
             float min, float max, float flat, float fuzz, float resolution) {
         mMotionRanges.add(new MotionRange(axis, source, min, max, flat, fuzz, resolution));

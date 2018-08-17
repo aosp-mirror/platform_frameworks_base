@@ -24,6 +24,7 @@ import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
@@ -223,6 +224,7 @@ public final class InputMethodManager {
 
     static final String PENDING_EVENT_COUNTER = "aq:imm";
 
+    @UnsupportedAppUsage
     static InputMethodManager sInstance;
 
     /**
@@ -270,11 +272,13 @@ public final class InputMethodManager {
     /** @hide */
     public static final int SHOW_IM_PICKER_MODE_EXCLUDE_AUXILIARY_SUBTYPES = 2;
 
+    @UnsupportedAppUsage
     final IInputMethodManager mService;
     final Looper mMainLooper;
 
     // For scheduling work on the main thread.  This also serves as our
     // global lock.
+    @UnsupportedAppUsage
     final H mH;
 
     // Our generic input connection if the current target does not have its own.
@@ -302,16 +306,19 @@ public final class InputMethodManager {
      * This is the root view of the overall window that currently has input
      * method focus.
      */
+    @UnsupportedAppUsage
     View mCurRootView;
     /**
      * This is the view that should currently be served by an input method,
      * regardless of the state of setting that up.
      */
+    @UnsupportedAppUsage
     View mServedView;
     /**
      * This is then next view that will be served by the input method, when
      * we get around to updating things.
      */
+    @UnsupportedAppUsage
     View mNextServedView;
     /**
      * This is set when we are in the process of connecting, to determine
@@ -327,6 +334,7 @@ public final class InputMethodManager {
     /**
      * The InputConnection that was last retrieved from the served view.
      */
+    @UnsupportedAppUsage
     ControlledInputConnectionWrapper mServedInputConnectionWrapper;
     /**
      * The completions that were last provided by the served view.
@@ -334,7 +342,9 @@ public final class InputMethodManager {
     CompletionInfo[] mCompletions;
 
     // Cursor position on the screen.
+    @UnsupportedAppUsage
     Rect mTmpCursorRect = new Rect();
+    @UnsupportedAppUsage
     Rect mCursorRect = new Rect();
     int mCursorSelStart;
     int mCursorSelEnd;
@@ -377,10 +387,12 @@ public final class InputMethodManager {
     /**
      * ID of the method we are bound to.
      */
+    @UnsupportedAppUsage
     String mCurId;
     /**
      * The actual instance of the method to make calls on it.
      */
+    @UnsupportedAppUsage
     IInputMethodSession mCurMethod;
     InputChannel mCurChannel;
     ImeInputEventSender mCurSender;
@@ -677,6 +689,7 @@ public final class InputMethodManager {
      * doesn't already exist.
      * @hide
      */
+    @UnsupportedAppUsage
     public static InputMethodManager getInstance() {
         synchronized (InputMethodManager.class) {
             if (sInstance == null) {
@@ -695,16 +708,19 @@ public final class InputMethodManager {
      * if it exists.
      * @hide
      */
+    @UnsupportedAppUsage
     public static InputMethodManager peekInstance() {
         return sInstance;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public IInputMethodClient getClient() {
         return mClient;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public IInputContext getInputContext() {
         return mIInputContext;
     }
@@ -808,6 +824,7 @@ public final class InputMethodManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void registerSuggestionSpansForNotification(SuggestionSpan[] spans) {
         try {
             mService.registerSuggestionSpansForNotification(spans);
@@ -817,6 +834,7 @@ public final class InputMethodManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void notifySuggestionPicked(SuggestionSpan span, String originalString, int index) {
         try {
             mService.notifySuggestionPicked(span, originalString, index);
@@ -922,6 +940,7 @@ public final class InputMethodManager {
     /**
      * Disconnect any existing input connection, clearing the served view.
      */
+    @UnsupportedAppUsage
     void finishInputLocked() {
         mNextServedView = null;
         if (mServedView != null) {
@@ -1086,6 +1105,7 @@ public final class InputMethodManager {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void showSoftInputUnchecked(int flags, ResultReceiver resultReceiver) {
         try {
             Log.w(TAG, "showSoftInputUnchecked() is a hidden method, which will be removed "
@@ -1392,6 +1412,7 @@ public final class InputMethodManager {
      * input method started before.
      * @hide
      */
+    @UnsupportedAppUsage
     public void windowDismissed(IBinder appWindowToken) {
         checkFocus();
         synchronized (mH) {
@@ -1406,6 +1427,7 @@ public final class InputMethodManager {
      * Call this when a view receives focus.
      * @hide
      */
+    @UnsupportedAppUsage
     public void focusIn(View view) {
         synchronized (mH) {
             focusInLocked(view);
@@ -1436,6 +1458,7 @@ public final class InputMethodManager {
      * Call this when a view loses focus.
      * @hide
      */
+    @UnsupportedAppUsage
     public void focusOut(View view) {
         synchronized (mH) {
             if (DEBUG) Log.v(TAG, "focusOut: view=" + dumpViewInfo(view)
@@ -1480,6 +1503,7 @@ public final class InputMethodManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void checkFocus() {
         if (checkFocusNoStartInput(false)) {
             startInputInner(InputMethodClient.START_INPUT_REASON_CHECK_FOCUS, null, 0, 0, 0);
@@ -1527,6 +1551,7 @@ public final class InputMethodManager {
         return true;
     }
 
+    @UnsupportedAppUsage
     void closeCurrentInput() {
         try {
             mService.hideSoftInput(mClient, HIDE_NOT_ALWAYS, null);
@@ -1594,6 +1619,7 @@ public final class InputMethodManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void onPreWindowFocus(View rootView, boolean hasWindowFocus) {
         synchronized (mH) {
             if (rootView == null) {
@@ -1697,6 +1723,7 @@ public final class InputMethodManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isCursorAnchorInfoEnabled() {
         synchronized (mH) {
             final boolean isImmediate = (mRequestUpdateCursorAnchorInfoMonitorMode &
@@ -1712,6 +1739,7 @@ public final class InputMethodManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setUpdateCursorAnchorInfoMode(int flags) {
         synchronized (mH) {
             mRequestUpdateCursorAnchorInfoMonitorMode = flags;
@@ -2221,6 +2249,7 @@ public final class InputMethodManager {
      * Notify that a user took some action with this input method.
      * @hide
      */
+    @UnsupportedAppUsage
     public void notifyUserAction() {
         synchronized (mH) {
             if (mLastSentUserActionNotificationSequenceNumber ==
@@ -2289,6 +2318,7 @@ public final class InputMethodManager {
      * @return The current height of the input method window.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getInputMethodWindowVisibleHeight() {
         synchronized (mH) {
             try {

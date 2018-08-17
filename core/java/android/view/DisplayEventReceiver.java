@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
@@ -56,6 +57,7 @@ public abstract class DisplayEventReceiver {
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
+    @UnsupportedAppUsage
     private long mReceiverPtr;
 
     // We keep a reference message queue object here so that it is not
@@ -73,6 +75,7 @@ public abstract class DisplayEventReceiver {
      *
      * @param looper The looper to use when invoking callbacks.
      */
+    @UnsupportedAppUsage
     public DisplayEventReceiver(Looper looper) {
         this(looper, VSYNC_SOURCE_APP);
     }
@@ -137,6 +140,7 @@ public abstract class DisplayEventReceiver {
      * {@link SurfaceControl#BUILT_IN_DISPLAY_ID_MAIN}.
      * @param frame The frame number.  Increases by one for each vertical sync interval.
      */
+    @UnsupportedAppUsage
     public void onVsync(long timestampNanos, int builtInDisplayId, int frame) {
     }
 
@@ -149,6 +153,7 @@ public abstract class DisplayEventReceiver {
      * {@link SurfaceControl#BUILT_IN_DISPLAY_ID_HDMI}.
      * @param connected True if the display is connected, false if it disconnected.
      */
+    @UnsupportedAppUsage
     public void onHotplug(long timestampNanos, int builtInDisplayId, boolean connected) {
     }
 
@@ -156,6 +161,7 @@ public abstract class DisplayEventReceiver {
      * Schedules a single vertical sync pulse to be delivered when the next
      * display frame begins.
      */
+    @UnsupportedAppUsage
     public void scheduleVsync() {
         if (mReceiverPtr == 0) {
             Log.w(TAG, "Attempted to schedule a vertical sync pulse but the display event "
@@ -167,12 +173,14 @@ public abstract class DisplayEventReceiver {
 
     // Called from native code.
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private void dispatchVsync(long timestampNanos, int builtInDisplayId, int frame) {
         onVsync(timestampNanos, builtInDisplayId, frame);
     }
 
     // Called from native code.
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private void dispatchHotplug(long timestampNanos, int builtInDisplayId, boolean connected) {
         onHotplug(timestampNanos, builtInDisplayId, connected);
     }

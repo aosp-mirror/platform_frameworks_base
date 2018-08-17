@@ -20,6 +20,7 @@ import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 
 import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
+import android.annotation.UnsupportedAppUsage;
 import android.app.KeyguardManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -78,6 +79,7 @@ public final class Display {
     private final Resources mResources;
     private DisplayAdjustments mDisplayAdjustments;
 
+    @UnsupportedAppUsage
     private DisplayInfo mDisplayInfo; // never null
     private boolean mIsValid;
 
@@ -230,6 +232,7 @@ public final class Display {
      * Display type: Unknown display type.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int TYPE_UNKNOWN = 0;
 
     /**
@@ -242,12 +245,14 @@ public final class Display {
      * Display type: HDMI display.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int TYPE_HDMI = 2;
 
     /**
      * Display type: WiFi display.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int TYPE_WIFI = 3;
 
     /**
@@ -260,6 +265,7 @@ public final class Display {
      * Display type: Virtual display.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int TYPE_VIRTUAL = 5;
 
     /**
@@ -458,6 +464,7 @@ public final class Display {
      * @return True if the display is still valid.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean getDisplayInfo(DisplayInfo outDisplayInfo) {
         synchronized (this) {
             updateDisplayInfoLocked();
@@ -505,6 +512,7 @@ public final class Display {
      * @see #TYPE_VIRTUAL
      * @hide
      */
+    @UnsupportedAppUsage
     public int getType() {
         return mType;
     }
@@ -516,6 +524,7 @@ public final class Display {
      * @return The display address.
      * @hide
      */
+    @UnsupportedAppUsage
     public String getAddress() {
         return mAddress;
     }
@@ -542,6 +551,7 @@ public final class Display {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public String getOwnerPackageName() {
         return mOwnerPackageName;
     }
@@ -552,6 +562,7 @@ public final class Display {
      * @return The display adjustments holder, or null if none is required.
      * @hide
      */
+    @UnsupportedAppUsage
     public DisplayAdjustments getDisplayAdjustments() {
         if (mResources != null) {
             final DisplayAdjustments currentAdjustements = mResources.getDisplayAdjustments();
@@ -675,6 +686,7 @@ public final class Display {
      * mostly for wallpapers.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getMaximumSizeDimension() {
         synchronized (this) {
             updateDisplayInfoLocked();
@@ -1169,6 +1181,7 @@ public final class Display {
         /**
          * @hide
          */
+        @UnsupportedAppUsage
         public Mode(int modeId, int width, int height, float refreshRate) {
             mModeId = modeId;
             mWidth = width;
@@ -1345,6 +1358,7 @@ public final class Display {
         /**
          * @hide
          */
+        @UnsupportedAppUsage
         public HdrCapabilities(int[] supportedHdrTypes, float maxLuminance,
                 float maxAverageLuminance, float minLuminance) {
             mSupportedHdrTypes = supportedHdrTypes;

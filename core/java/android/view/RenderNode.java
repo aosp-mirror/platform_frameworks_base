@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Matrix;
 import android.graphics.Outline;
 import android.graphics.Paint;
@@ -175,6 +176,7 @@ public class RenderNode {
      *
      * @return A new RenderNode.
      */
+    @UnsupportedAppUsage
     public static RenderNode create(String name, @Nullable View owningView) {
         return new RenderNode(name, owningView);
     }
@@ -214,6 +216,7 @@ public class RenderNode {
      * @see #end(DisplayListCanvas)
      * @see #isValid()
      */
+    @UnsupportedAppUsage
     public DisplayListCanvas start(int width, int height) {
         return DisplayListCanvas.obtain(this, width, height);
     }
@@ -226,6 +229,7 @@ public class RenderNode {
      * @see #start(int, int)
      * @see #isValid()
      */
+    @UnsupportedAppUsage
     public void end(DisplayListCanvas canvas) {
         long displayList = canvas.finishRecording();
         nSetDisplayList(mNativeRenderNode, displayList);
@@ -237,6 +241,7 @@ public class RenderNode {
      * during destruction of hardware resources, to ensure that we do not hold onto
      * obsolete resources after related resources are gone.
      */
+    @UnsupportedAppUsage
     public void discardDisplayList() {
         nSetDisplayList(mNativeRenderNode, 0);
     }
@@ -247,6 +252,7 @@ public class RenderNode {
      *
      * @return boolean true if the display list is able to be replayed, false otherwise.
      */
+    @UnsupportedAppUsage
     public boolean isValid() {
         return nIsValid(mNativeRenderNode);
     }
@@ -300,6 +306,7 @@ public class RenderNode {
      *
      * @param clipToBounds true if the display list should clip to its bounds
      */
+    @UnsupportedAppUsage
     public boolean setClipToBounds(boolean clipToBounds) {
         return nSetClipToBounds(mNativeRenderNode, clipToBounds);
     }
@@ -311,6 +318,7 @@ public class RenderNode {
      * @param shouldProject true if the display list should be projected onto a
      *            containing volume.
      */
+    @UnsupportedAppUsage
     public boolean setProjectBackwards(boolean shouldProject) {
         return nSetProjectBackwards(mNativeRenderNode, shouldProject);
     }
@@ -451,6 +459,7 @@ public class RenderNode {
      * @see android.view.View#hasOverlappingRendering()
      * @see #hasOverlappingRendering()
      */
+    @UnsupportedAppUsage
     public boolean setHasOverlappingRendering(boolean hasOverlappingRendering) {
         return nSetHasOverlappingRendering(mNativeRenderNode, hasOverlappingRendering);
     }
@@ -772,6 +781,7 @@ public class RenderNode {
      * @see View#setRight(int)
      * @see View#setBottom(int)
      */
+    @UnsupportedAppUsage
     public boolean setLeftTopRightBottom(int left, int top, int right, int bottom) {
         return nSetLeftTopRightBottom(mNativeRenderNode, left, top, right, bottom);
     }
@@ -784,6 +794,7 @@ public class RenderNode {
      *
      * @see View#offsetLeftAndRight(int)
      */
+    @UnsupportedAppUsage
     public boolean offsetLeftAndRight(int offset) {
         return nOffsetLeftAndRight(mNativeRenderNode, offset);
     }
@@ -804,6 +815,7 @@ public class RenderNode {
      * Outputs the display list to the log. This method exists for use by
      * tools to output display lists for selected nodes to the log.
      */
+    @UnsupportedAppUsage
     public void output() {
         nOutput(mNativeRenderNode);
     }

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
@@ -137,6 +138,7 @@ public abstract class InputEventSender {
 
     // Called from native code.
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private void dispatchInputEventFinished(int seq, boolean handled) {
         onInputEventFinished(seq, handled);
     }

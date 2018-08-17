@@ -50,6 +50,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.KeyguardManager;
 import android.app.Presentation;
 import android.content.Context;
@@ -675,6 +676,7 @@ public interface WindowManager extends ViewManager {
          * is a big ugly hack so:
          * @hide
          */
+        @UnsupportedAppUsage
         public static final int TYPE_APPLICATION_MEDIA_OVERLAY  = FIRST_SUB_WINDOW + 4;
 
         /**
@@ -827,6 +829,7 @@ public interface WindowManager extends ViewManager {
          * In multiuser systems shows only on the owning user's window.
          * @hide
          */
+        @UnsupportedAppUsage
         public static final int TYPE_SECURE_SYSTEM_OVERLAY = FIRST_SYSTEM_WINDOW+15;
 
         /**
@@ -902,6 +905,7 @@ public interface WindowManager extends ViewManager {
          * In multiuser systems shows on all users' windows.
          * @hide
          */
+        @UnsupportedAppUsage
         public static final int TYPE_DISPLAY_OVERLAY = FIRST_SYSTEM_WINDOW+26;
 
         /**
@@ -1392,6 +1396,7 @@ public interface WindowManager extends ViewManager {
          *
          * {@hide}
          */
+        @UnsupportedAppUsage
         public static final int FLAG_SLIPPERY = 0x20000000;
 
         /**
@@ -1555,6 +1560,7 @@ public interface WindowManager extends ViewManager {
          * to determine its default behavior.
          *
          * {@hide} */
+        @UnsupportedAppUsage
         public static final int PRIVATE_FLAG_SHOW_FOR_ALL_USERS = 0x00000010;
 
         /**
@@ -1801,6 +1807,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final int NEEDS_MENU_SET_TRUE = 1;
 
         /**
@@ -1809,6 +1816,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final int NEEDS_MENU_SET_FALSE = 2;
 
         /**
@@ -1822,6 +1830,7 @@ public interface WindowManager extends ViewManager {
          *
          * {@hide}
          */
+        @UnsupportedAppUsage
         public int needsMenuKey = NEEDS_MENU_UNSET;
 
         /**
@@ -2226,6 +2235,7 @@ public interface WindowManager extends ViewManager {
          * The ui visibility as requested by the views in this hierarchy.
          * the combined value should be systemUiVisibility | subtreeSystemUiVisibility.
          */
+        @UnsupportedAppUsage
         public int subtreeSystemUiVisibility;
 
         /**
@@ -2235,6 +2245,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public boolean hasSystemUiListeners;
 
 
@@ -2386,6 +2397,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY = 0x00000004;
 
         /**
@@ -2396,6 +2408,7 @@ public interface WindowManager extends ViewManager {
          * @see #INPUT_FEATURE_DISABLE_USER_ACTIVITY
          * @hide
          */
+        @UnsupportedAppUsage
         public int inputFeatures;
 
         /**
@@ -2411,6 +2424,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public long userActivityTimeout = -1;
 
         /**
@@ -2442,6 +2456,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public long hideTimeoutMilliseconds = -1;
 
         /**
@@ -3112,6 +3127,7 @@ public interface WindowManager extends ViewManager {
          * Backup the layout parameters used in compatibility mode.
          * @see LayoutParams#restore()
          */
+        @UnsupportedAppUsage
         void backup() {
             int[] backup = mCompatibilityParamsBackup;
             if (backup == null) {
@@ -3128,6 +3144,7 @@ public interface WindowManager extends ViewManager {
          * Restore the layout params' coordinates, size and gravity
          * @see LayoutParams#backup()
          */
+        @UnsupportedAppUsage
         void restore() {
             int[] backup = mCompatibilityParamsBackup;
             if (backup != null) {

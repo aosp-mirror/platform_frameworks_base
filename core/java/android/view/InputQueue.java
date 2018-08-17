@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.LongSparseArray;
@@ -100,6 +101,7 @@ public final class InputQueue {
         mActiveEventArray.put(id, event);
     }
 
+    @UnsupportedAppUsage
     private void finishInputEvent(long id, boolean handled) {
         int index = mActiveEventArray.indexOfKey(id);
         if (index >= 0) {
