@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -170,6 +171,7 @@ public class Signature implements Parcelable {
      *             certificate; shouldn't happen.
      * @hide
      */
+    @UnsupportedAppUsage
     public PublicKey getPublicKey() throws CertificateException {
         final CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
         final ByteArrayInputStream bais = new ByteArrayInputStream(mSignature);

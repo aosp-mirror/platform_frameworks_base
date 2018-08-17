@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.OperationCanceledException;
@@ -128,6 +129,7 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
         }
     }
 
+    @UnsupportedAppUsage
     private final Executor mExecutor;
 
     volatile LoadTask mTask;
@@ -354,6 +356,7 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void waitForLoader() {
         LoadTask task = mTask;
         if (task != null) {

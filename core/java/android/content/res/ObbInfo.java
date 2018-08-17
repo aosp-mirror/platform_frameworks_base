@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -53,6 +54,7 @@ public class ObbInfo implements Parcelable {
      * 
      * @hide
      */
+    @UnsupportedAppUsage
     public byte[] salt;
 
     // Only allow things in this package to instantiate.
