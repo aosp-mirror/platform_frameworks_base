@@ -20,6 +20,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.KeyguardManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.security.GateKeeper;
@@ -371,6 +372,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getUid() {
         return mUid;
     }
@@ -645,6 +647,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
      *
      * Returns {@code true} if the attestation certificate will contain a unique ID field.
      */
+    @UnsupportedAppUsage
     public boolean isUniqueIdIncluded() {
         return mUniqueIdIncluded;
     }

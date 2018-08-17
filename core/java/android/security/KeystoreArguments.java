@@ -16,6 +16,7 @@
 
 package android.security;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,6 +28,7 @@ import android.os.Parcelable;
 public class KeystoreArguments implements Parcelable {
     public byte[][] args;
 
+    @UnsupportedAppUsage
     public static final Parcelable.Creator<KeystoreArguments> CREATOR = new
             Parcelable.Creator<KeystoreArguments>() {
                 public KeystoreArguments createFromParcel(Parcel in) {
@@ -41,6 +43,7 @@ public class KeystoreArguments implements Parcelable {
         args = null;
     }
 
+    @UnsupportedAppUsage
     public KeystoreArguments(byte[][] args) {
         this.args = args;
     }
