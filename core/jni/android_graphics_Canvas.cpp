@@ -462,7 +462,7 @@ static void drawBitmapArray(JNIEnv* env, jobject, jlong canvasHandle,
         return;
     }
 
-    if (!GraphicsJNI::SetPixels(env, jcolors, offset, stride, 0, 0, width, height, bitmap)) {
+    if (!GraphicsJNI::SetPixels(env, jcolors, offset, stride, 0, 0, width, height, &bitmap)) {
         return;
     }
 
