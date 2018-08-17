@@ -280,6 +280,7 @@ public class NotificationGutsManager implements Dumpable {
                     mCheckSaveListener,
                     onSettingsClick,
                     onAppSettingsClick,
+                    mPresenter.isDeviceProvisioned(),
                     row.getIsNonblockable(),
                     isForBlockingHelper,
                     row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE);

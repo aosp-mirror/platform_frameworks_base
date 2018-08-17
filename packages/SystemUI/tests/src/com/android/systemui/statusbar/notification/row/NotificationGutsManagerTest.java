@@ -286,6 +286,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
                 eq(false),
+                eq(false),
                 eq(true) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */);
     }
@@ -311,6 +312,35 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(NotificationInfo.CheckSaveListener.class),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
+                eq(false),
+                eq(false),
+                eq(false) /* isForBlockingHelper */,
+                eq(true) /* isUserSentimentNegative */);
+    }
+
+    @Test
+    public void testInitializeNotificationInfoView_PassesAlongProvisionedState() throws Exception {
+        NotificationInfo notificationInfoView = mock(NotificationInfo.class);
+        ExpandableNotificationRow row = spy(mHelper.createRow());
+        row.setBlockingHelperShowing(false);
+        row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        when(row.getIsNonblockable()).thenReturn(false);
+        StatusBarNotification statusBarNotification = row.getStatusBarNotification();
+        when(mPresenter.isDeviceProvisioned()).thenReturn(true);
+
+        mGutsManager.initializeNotificationInfo(row, notificationInfoView);
+
+        verify(notificationInfoView).bindNotification(
+                any(PackageManager.class),
+                any(INotificationManager.class),
+                eq(statusBarNotification.getPackageName()),
+                any(NotificationChannel.class),
+                anyInt(),
+                eq(statusBarNotification),
+                any(NotificationInfo.CheckSaveListener.class),
+                any(NotificationInfo.OnSettingsClickListener.class),
+                any(NotificationInfo.OnAppSettingsClickListener.class),
+                eq(true),
                 eq(false),
                 eq(false) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */);
