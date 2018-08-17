@@ -19,6 +19,7 @@ package android.content;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -82,6 +83,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public ClipboardManager(Context context, Handler handler) throws ServiceNotFoundException {
         mContext = context;
         mHandler = handler;
@@ -221,6 +223,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
         }
     }
 
+    @UnsupportedAppUsage
     void reportPrimaryClipChanged() {
         Object[] listeners;
 

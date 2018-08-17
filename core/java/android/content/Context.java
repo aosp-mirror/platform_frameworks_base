@@ -31,6 +31,7 @@ import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.IApplicationThread;
@@ -654,6 +655,7 @@ public abstract class Context {
 
     /** @hide Needed for some internal implementation...  not public because
      * you can't assume this actually means anything. */
+    @UnsupportedAppUsage
     public int getThemeResId() {
         return 0;
     }
@@ -722,6 +724,7 @@ public abstract class Context {
     public abstract String getPackageName();
 
     /** @hide Return the name of the base context this context is derived from. */
+    @UnsupportedAppUsage
     public abstract String getBasePackageName();
 
     /** @hide Return the package name that should be used for app ops calls from
@@ -729,6 +732,7 @@ public abstract class Context {
      * cases where system components are loaded into other app processes, in which
      * case this will be the name of the primary package in that process (so that app
      * ops uid verification will work with the name). */
+    @UnsupportedAppUsage
     public abstract String getOpPackageName();
 
     /** Return the full application info for this context's package. */
@@ -763,6 +767,7 @@ public abstract class Context {
      * @deprecated use {@link #getSharedPreferencesPath(String)}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public File getSharedPrefsFile(String name) {
         return getSharedPreferencesPath(name);
     }
@@ -1696,6 +1701,7 @@ public abstract class Context {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @UnsupportedAppUsage
     public void startActivityAsUser(@RequiresPermission Intent intent, UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
@@ -1742,6 +1748,7 @@ public abstract class Context {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @UnsupportedAppUsage
     public void startActivityAsUser(@RequiresPermission Intent intent, @Nullable Bundle options,
             UserHandle userId) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
@@ -1760,6 +1767,7 @@ public abstract class Context {
      *          for building it manually.
      * @hide
      */
+    @UnsupportedAppUsage
     public void startActivityForResult(
             @NonNull String who, Intent intent, int requestCode, @Nullable Bundle options) {
         throw new RuntimeException("This method is only implemented for Activity-based Contexts. "
@@ -1771,6 +1779,7 @@ public abstract class Context {
      * {@link #startActivityForResult(String, Intent, int, Bundle)}.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean canStartActivityForResult() {
         return false;
     }
@@ -2038,6 +2047,7 @@ public abstract class Context {
      * of an associated app op as per {@link android.app.AppOpsManager}.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract void sendBroadcast(Intent intent,
             String receiverPermission, int appOp);
 
@@ -2164,6 +2174,7 @@ public abstract class Context {
      * of an associated app op as per {@link android.app.AppOpsManager}.
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract void sendOrderedBroadcast(Intent intent,
             String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
             Handler scheduler, int initialCode, String initialData,
@@ -2239,6 +2250,7 @@ public abstract class Context {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+    @UnsupportedAppUsage
     public abstract void sendBroadcastAsUser(@RequiresPermission Intent intent,
             UserHandle user, @Nullable String receiverPermission, int appOp);
 
@@ -2284,6 +2296,7 @@ public abstract class Context {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+    @UnsupportedAppUsage
     public abstract void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             @Nullable String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
@@ -2296,6 +2309,7 @@ public abstract class Context {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+    @UnsupportedAppUsage
     public abstract void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             @Nullable String receiverPermission, int appOp, @Nullable Bundle options,
             BroadcastReceiver resultReceiver, @Nullable Handler scheduler, int initialCode,
@@ -2688,6 +2702,7 @@ public abstract class Context {
      */
     @Nullable
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @UnsupportedAppUsage
     public abstract Intent registerReceiverAsUser(BroadcastReceiver receiver,
             UserHandle user, IntentFilter filter, @Nullable String broadcastPermission,
             @Nullable Handler scheduler);
@@ -2835,6 +2850,7 @@ public abstract class Context {
      */
     @Nullable
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+    @UnsupportedAppUsage
     public abstract ComponentName startServiceAsUser(Intent service, UserHandle user);
 
     /**
@@ -2922,6 +2938,7 @@ public abstract class Context {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+    @UnsupportedAppUsage
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             Handler handler, UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
@@ -3393,6 +3410,7 @@ public abstract class Context {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String COUNTRY_DETECTOR = "country_detector";
 
     /**
@@ -3462,6 +3480,7 @@ public abstract class Context {
      * @see android.app.StatusBarManager
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String STATUS_BAR_SERVICE = "statusbar";
 
     /**
@@ -3608,6 +3627,7 @@ public abstract class Context {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String ETHERNET_SERVICE = "ethernet";
 
     /**
@@ -4251,6 +4271,7 @@ public abstract class Context {
 
     /** @hide */
     @PackageManager.PermissionResult
+    @UnsupportedAppUsage
     public abstract int checkPermission(@NonNull String permission, int pid, int uid,
             IBinder callerToken);
 
@@ -4743,6 +4764,7 @@ public abstract class Context {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract Context createApplicationContext(ApplicationInfo application,
             @CreatePackageOptions int flags) throws PackageManager.NameNotFoundException;
 
@@ -4888,6 +4910,7 @@ public abstract class Context {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public abstract Display getDisplay();
 
     /**
