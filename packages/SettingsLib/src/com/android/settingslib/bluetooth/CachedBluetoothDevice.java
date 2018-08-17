@@ -48,7 +48,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private static final String TAG = "CachedBluetoothDevice";
 
     private final Context mContext;
-    private final LocalBluetoothAdapter mLocalAdapter;
+    private final BluetoothAdapter mLocalAdapter;
     private final LocalBluetoothProfileManager mProfileManager;
     private final BluetoothDevice mDevice;
     //TODO: consider remove, BluetoothDevice.getName() is already cached
@@ -143,7 +143,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             Log.d(TAG, "onProfileStateChanged: profile " + profile +
                     " newProfileState " + newProfileState);
         }
-        if (mLocalAdapter.getBluetoothState() == BluetoothAdapter.STATE_TURNING_OFF)
+        if (mLocalAdapter.getState() == BluetoothAdapter.STATE_TURNING_OFF)
         {
             if (BluetoothUtils.D) {
                 Log.d(TAG, " BT Turninig Off...Profile conn state change ignored...");
@@ -179,11 +179,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     CachedBluetoothDevice(Context context,
-                          LocalBluetoothAdapter adapter,
                           LocalBluetoothProfileManager profileManager,
                           BluetoothDevice device) {
         mContext = context;
-        mLocalAdapter = adapter;
+        mLocalAdapter = BluetoothAdapter.getDefaultAdapter();
         mProfileManager = profileManager;
         mDevice = device;
         mProfileConnectionState = new HashMap<LocalBluetoothProfile, Integer>();

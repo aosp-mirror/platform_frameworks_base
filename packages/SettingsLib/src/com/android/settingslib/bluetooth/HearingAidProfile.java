@@ -38,7 +38,6 @@ public class HearingAidProfile implements LocalBluetoothProfile {
     private BluetoothHearingAid mService;
     private boolean mIsProfileReady;
 
-    private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
 
     static final String NAME = "HearingAid";
@@ -64,7 +63,7 @@ public class HearingAidProfile implements LocalBluetoothProfile {
                     if (V) {
                         Log.d(TAG, "HearingAidProfile found new device: " + nextDevice);
                     }
-                    device = mDeviceManager.addDevice(mLocalAdapter, nextDevice);
+                    device = mDeviceManager.addDevice(nextDevice);
                 }
                 device.onProfileStateChanged(HearingAidProfile.this,
                         BluetoothProfile.STATE_CONNECTED);
@@ -92,15 +91,13 @@ public class HearingAidProfile implements LocalBluetoothProfile {
         return BluetoothProfile.HEARING_AID;
     }
 
-    HearingAidProfile(Context context, LocalBluetoothAdapter adapter,
-            CachedBluetoothDeviceManager deviceManager,
+    HearingAidProfile(Context context, CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {
         mContext = context;
-        mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        mLocalAdapter.getProfileProxy(context, new HearingAidServiceListener(),
-                BluetoothProfile.HEARING_AID);
+        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context,
+                new HearingAidServiceListener(), BluetoothProfile.HEARING_AID);
     }
 
     public boolean isConnectable() {

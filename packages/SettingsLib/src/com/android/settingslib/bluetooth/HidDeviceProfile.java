@@ -39,7 +39,6 @@ public class HidDeviceProfile implements LocalBluetoothProfile {
     private static final int PREFERRED_VALUE = -1;
     private static final boolean DEBUG = true;
 
-    private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
     private final LocalBluetoothProfileManager mProfileManager;
     static final String NAME = "HID DEVICE";
@@ -47,14 +46,12 @@ public class HidDeviceProfile implements LocalBluetoothProfile {
     private BluetoothHidDevice mService;
     private boolean mIsProfileReady;
 
-    HidDeviceProfile(Context context, LocalBluetoothAdapter adapter,
-            CachedBluetoothDeviceManager deviceManager,
+    HidDeviceProfile(Context context,CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {
-        mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        adapter.getProfileProxy(context, new HidDeviceServiceListener(),
-                BluetoothProfile.HID_DEVICE);
+        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context,
+                new HidDeviceServiceListener(), BluetoothProfile.HID_DEVICE);
     }
 
     // These callbacks run on the main thread.
@@ -73,7 +70,7 @@ public class HidDeviceProfile implements LocalBluetoothProfile {
                 // we may add a new device here, but generally this should not happen
                 if (device == null) {
                     Log.w(TAG, "HidProfile found new device: " + nextDevice);
-                    device = mDeviceManager.addDevice(mLocalAdapter, nextDevice);
+                    device = mDeviceManager.addDevice(nextDevice);
                 }
                 Log.d(TAG, "Connection status changed: " + device);
                 device.onProfileStateChanged(HidDeviceProfile.this,

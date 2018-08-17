@@ -39,7 +39,6 @@ public final class PbapClientProfile implements LocalBluetoothProfile {
     private BluetoothPbapClient mService;
     private boolean mIsProfileReady;
 
-    private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
 
     static final ParcelUuid[] SRC_UUIDS = {
@@ -69,7 +68,7 @@ public final class PbapClientProfile implements LocalBluetoothProfile {
                 // we may add a new device here, but generally this should not happen
                 if (device == null) {
                     Log.w(TAG, "PbapClientProfile found new device: " + nextDevice);
-                    device = mDeviceManager.addDevice(mLocalAdapter, nextDevice);
+                    device = mDeviceManager.addDevice(nextDevice);
                 }
                 device.onProfileStateChanged(PbapClientProfile.this, BluetoothProfile.STATE_CONNECTED);
                 device.refresh();
@@ -105,14 +104,12 @@ public final class PbapClientProfile implements LocalBluetoothProfile {
         return BluetoothProfile.PBAP_CLIENT;
     }
 
-    PbapClientProfile(Context context, LocalBluetoothAdapter adapter,
-            CachedBluetoothDeviceManager deviceManager,
+    PbapClientProfile(Context context, CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {
-        mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        mLocalAdapter.getProfileProxy(context, new PbapClientServiceListener(),
-                BluetoothProfile.PBAP_CLIENT);
+        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context,
+                new PbapClientServiceListener(), BluetoothProfile.PBAP_CLIENT);
     }
 
     public boolean isConnectable() {
