@@ -300,6 +300,12 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"የሰውነት ዳሳሾች"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ስለአስፈላጊ ምልክቶችዎ ያሉ የዳሳሽ ውሂብ ይድረሱ"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; የሰውነትዎ መሠረታዊ ምልክቶች የዳሳሽ ውሂብ እንዲደርስ ይፈቀድለት?"</string>
+    <string name="permgrouplab_aural" msgid="965607064083134896">"ሙዚቃ"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"ሙዚቃዎን መድረስ"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ቀን ሙዚቃዎን እንዲደርስ ይፈቀድለት?"</string>
+    <string name="permgrouplab_visual" msgid="8030190588123857921">"ፎቶዎች እና ቪዲዮዎች"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"የእርስዎን ፎቶዎች እና ቪዲዮዎች መድረስ"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; የእርስዎን ፎቶዎች እና ቪዲዮዎች እንዲደርስ ይፈቀድለት?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"የመስኮት ይዘት ሰርስረው ያውጡ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"መስተጋበር የሚፈጥሩት የመስኮት ይዘት ይመርምሩ።"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"በመንካት ያስሱን ያብሩ"</string>
@@ -494,6 +500,20 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"መተግበሪያው ጥቅም ላይ እንዲውሉ የጣት አሻራ ቅንብር ደንቦችን ለማከል እና ለመሰረዝ የሚያስችሉ ስልቶችን እንዲያስጀምር ያስችለዋል።"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"የጣት አሻራ ሃርድዌርን ተጠቀም"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"መተግበሪያው የጣት አሻራ ሃርድዌር ለማረጋገጥ ስራ እንዲጠቀም ያስችለዋል"</string>
+    <string name="permlab_audioRead" msgid="6617225220728465565">"የሙዚቃ ስብስብዎን ማንበብ"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"መተግበሪያው የሙዚቃ ስብስብዎን እንዲያነብብ ያስችለዋል።"</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"የሙዚቃ ስብስብዎን መቀየር"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"መተግበሪያው የሙዚቃ ስብስብዎን እንዲቀይረው ያስችለዋል።"</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"የቪዲዮ ስብስብዎን ማንበብ"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"መተግበሪያው የቪዲዮ ስብስብዎን እንዲያነብብ ያስችለዋል።"</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"የቪዲዮ ስብስብዎን መቀየር"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"መተግበሪያው የፎቶ ስብስብዎን እንዲቀይረው ያስችለዋል።"</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"የፎቶ ስብስብዎን ማንበብ"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"መተግበሪያው የፎቶ ስብስብዎን እንዲያነብብ ያስችለዋል።"</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"የፎቶ ስብስብዎን መቀየር"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"መተግበሪያው የፎቶ ስብስብዎን እንዲቀይረው ያስችለዋል።"</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"አካባቢዎችን ከሚዲያ ስብስብዎ ማንበብ"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"መተግበሪያው አካባቢዎችን ከሚዲያ ስብስብዎ እንዲያነብብ ያስችለዋል።"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ከፊል የጣት አሻራ ተገኝቷል። እባክዎ እንደገና ይሞክሩ።"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ጣት አሻራን መስራት አልተቻለም። እባክዎ እንደገና ይሞክሩ።"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"የጣት አሻራ ዳሳሽ ቆሽሿል። እባክዎ ያጽዱት እና እንደገና ይሞክሩ።"</string>
@@ -1872,8 +1892,13 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> ወደ &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; ይቀመጥ?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> እና <xliff:g id="TYPE_1">%2$s</xliff:g> ወደ &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; ይቀመጡ?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>፣ <xliff:g id="TYPE_1">%2$s</xliff:g> እና <xliff:g id="TYPE_2">%3$s</xliff:g> ወደ &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; ይቀመጡ?"</string>
+    <string name="autofill_update_title" msgid="4879673117448810818">"ወደ &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; ይዘመን?"</string>
+    <string name="autofill_update_title_with_type" msgid="339733442087186755">"<xliff:g id="TYPE">%1$s</xliff:g> ወደ &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; ይዘመን?"</string>
+    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"<xliff:g id="TYPE_0">%1$s</xliff:g> እና <xliff:g id="TYPE_1">%2$s</xliff:g> ወደ &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; ይዘመኑ?"</string>
+    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"<xliff:g id="TYPE_0">%1$s</xliff:g>፣ <xliff:g id="TYPE_1">%2$s</xliff:g> እና <xliff:g id="TYPE_2">%3$s</xliff:g> ወደ &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; ይዘመኑ?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"አስቀምጥ"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"አይ፣ አመሰግናለሁ"</string>
+    <string name="autofill_update_yes" msgid="310358413273276958">"አዘምን"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"የይለፍ ቃል"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"አድራሻ"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"ክሬዲት ካርድ"</string>

@@ -300,6 +300,12 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensores de corpo"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"aceder a dados do sensor acerca dos seus sinais vitais"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda aos dados do sensor acerca dos seus sinais vitais?"</string>
+    <string name="permgrouplab_aural" msgid="965607064083134896">"Música"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"aceder à sua música"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda à sua música?"</string>
+    <string name="permgrouplab_visual" msgid="8030190588123857921">"Fotos e vídeos"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"aceder aos seus vídeos e fotos"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda às suas fotos e vídeos?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Obter conteúdo da janela"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecionar o conteúdo de uma janela com a qual está a interagir."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ativar Explorar Através do Toque"</string>
@@ -494,6 +500,20 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Permite que a aplicação invoque métodos para adicionar e eliminar modelos de impressão digital para utilização."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"utilizar o hardware de impressão digital"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Permite que a aplicação utilize o hardware de impressão digital para autenticação"</string>
+    <string name="permlab_audioRead" msgid="6617225220728465565">"ler a sua coleção de música"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"Permite que a aplicação leia a sua coleção de música."</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"modificar a sua coleção de música"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"Permite que a aplicação modifique a sua coleção de música."</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"ler a sua coleção de vídeos"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"Permite que a aplicação leia a sua coleção de vídeos."</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"modificar a sua coleção de vídeos"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"Permite que a aplicação modifique a sua coleção de vídeos."</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"ler a sua coleção de fotos"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"Permite que a aplicação leia a sua coleção de fotos."</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"modificar a sua coleção de fotos"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Permite que a aplicação modifique a sua coleção de fotos."</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"ler as localizações a partir da sua coleção de multimédia"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Permite que a aplicação leia as localizações a partir da sua coleção de multimédia."</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Impressão digital detetada. Tente novamente."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Não foi possível processar a impressão digital. Tente novamente."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"O sensor de impressões digitais está sujo. Limpe-o e tente novamente."</string>
@@ -1872,8 +1892,13 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Pretende guardar <xliff:g id="TYPE">%1$s</xliff:g> no &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Pretende guardar <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> no &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Pretende guardar <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g> no &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title" msgid="4879673117448810818">"Pretende atualizar para o &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Pretende atualizar <xliff:g id="TYPE">%1$s</xliff:g> para o &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Pretende atualizar <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> para o &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Pretende atualizar <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g> para o &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Guardar"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Não, obrigado"</string>
+    <string name="autofill_update_yes" msgid="310358413273276958">"Atualizar"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"palavra-passe"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"endereço"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"cartão de crédito"</string>

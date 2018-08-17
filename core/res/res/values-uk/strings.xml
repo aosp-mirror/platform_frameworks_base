@@ -306,6 +306,12 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Датчики на тілі"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"отримувати доступ до інформації датчиків про ваші життєві показники"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Надати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до життєвих показників із датчиків?"</string>
+    <string name="permgrouplab_aural" msgid="965607064083134896">"Музика"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"доступ до музики"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"Надати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до музики?"</string>
+    <string name="permgrouplab_visual" msgid="8030190588123857921">"Фото й відео"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"доступ до фото й відео"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"Надати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до фото й відео?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Отримувати вміст вікна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Перевіряти вміст вікна, з яким ви взаємодієте."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Увімкнути функцію дослідження дотиком"</string>
@@ -500,6 +506,20 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Увімкнути в додатку функції для додавання й видалення шаблонів цифрових відбитків."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"використання сканера цифрових відбитків"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Дозволити додатку використовувати апаратне забезпечення для автентифікації"</string>
+    <string name="permlab_audioRead" msgid="6617225220728465565">"розпізнавати колекцію музики"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"Додаток зможе розпізнавати вашу колекцію музики."</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"змінювати колекцію музики"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"Додаток зможе змінювати вашу колекцію музики."</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"розпізнавати колекцію відео"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"Додаток зможе розпізнавати вашу колекцію відео."</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"змінювати колекцію відео"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"Додаток зможе змінювати вашу колекцію відео."</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"розпізнавати колекцію фотографій"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"Додаток зможе розпізнавати вашу колекцію фотографій."</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"змінювати колекцію фотографій"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Додаток зможе змінювати вашу колекцію фотографій."</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"розпізнавати геодані з колекції медіа-вмісту"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Додаток зможе розпізнавати геодані з вашої колекції медіа-вмісту."</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Відбиток розпізнано частково. Повторіть спробу."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Не вдалось обробити відбиток. Повторіть спробу."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Датчик відбитків забруднився. Очистьте його та повторіть спробу."</string>
@@ -1942,8 +1962,13 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Зберегти дані (<xliff:g id="TYPE">%1$s</xliff:g>) у службі &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Зберегти дані (<xliff:g id="TYPE_0">%1$s</xliff:g> і <xliff:g id="TYPE_1">%2$s</xliff:g>) у службі &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Зберегти дані (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> і <xliff:g id="TYPE_2">%3$s</xliff:g>) у службі &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title" msgid="4879673117448810818">"Оновити дані в сервісі &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Оновити дані (<xliff:g id="TYPE">%1$s</xliff:g>) у сервісі &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Оновити дані (<xliff:g id="TYPE_0">%1$s</xliff:g> і <xliff:g id="TYPE_1">%2$s</xliff:g>) у сервісі &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Оновити дані (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> і <xliff:g id="TYPE_2">%3$s</xliff:g>) у сервісі &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Зберегти"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ні, дякую"</string>
+    <string name="autofill_update_yes" msgid="310358413273276958">"Оновити"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"пароль"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"адреса"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"кредитна картка"</string>

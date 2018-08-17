@@ -300,6 +300,18 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ബോഡി സെൻസറുകൾ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"നിങ്ങളുടെ ജീവാധാര ലക്ഷണങ്ങളെ കുറിച്ചുള്ള സെൻസർ വിവരങ്ങൾ ആക്സസ് ചെയ്യുക"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"നിങ്ങളുടെ ജീവധാരണ ലക്ഷണങ്ങളെ കുറിച്ചുള്ള സെൻസർ ഡാറ്റ ആക്‌സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
+    <!-- no translation found for permgrouplab_aural (965607064083134896) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_aural (4870189506255958055) -->
+    <skip />
+    <!-- no translation found for permgrouprequest_aural (6787926123071735620) -->
+    <skip />
+    <!-- no translation found for permgrouplab_visual (8030190588123857921) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_visual (3415827902566663546) -->
+    <skip />
+    <!-- no translation found for permgrouprequest_visual (6907523945030290376) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"വിൻഡോ ഉള്ളടക്കം വീണ്ടെടുക്കുക"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"നിങ്ങൾ സംവദിക്കുന്ന ഒരു വിൻഡോയുടെ ഉള്ളടക്കം പരിശോധിക്കുക."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"സ്‌പർശനം വഴി പര്യവേക്ഷണം ചെയ്യുക, ഓണാക്കുക"</string>
@@ -494,6 +506,34 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ഉപയോഗിക്കാനായി വിരലടയാള ടെംപ്ലേറ്റുകൾ ചേർക്കാനും ഇല്ലാതാക്കാനുമുള്ള രീതികൾ അഭ്യർത്ഥിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"പ്രാമാണീകരണത്തിനായി വിരലടയാളം ഉപയോഗിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു"</string>
+    <!-- no translation found for permlab_audioRead (6617225220728465565) -->
+    <skip />
+    <!-- no translation found for permdesc_audioRead (5034032570243484805) -->
+    <skip />
+    <!-- no translation found for permlab_audioWrite (2661772059799779292) -->
+    <skip />
+    <!-- no translation found for permdesc_audioWrite (8888544708166230494) -->
+    <skip />
+    <!-- no translation found for permlab_videoRead (9182618678674737229) -->
+    <skip />
+    <!-- no translation found for permdesc_videoRead (7045676429859396194) -->
+    <skip />
+    <!-- no translation found for permlab_videoWrite (128769316366746446) -->
+    <skip />
+    <!-- no translation found for permdesc_videoWrite (5448565757490640841) -->
+    <skip />
+    <!-- no translation found for permlab_imagesRead (3015078545742665304) -->
+    <skip />
+    <!-- no translation found for permdesc_imagesRead (3144263806038695580) -->
+    <skip />
+    <!-- no translation found for permlab_imagesWrite (3391306186247235510) -->
+    <skip />
+    <!-- no translation found for permdesc_imagesWrite (7073662756617474375) -->
+    <skip />
+    <!-- no translation found for permlab_mediaLocation (8675148183726247864) -->
+    <skip />
+    <!-- no translation found for permdesc_mediaLocation (2237023389178865130) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"വിരലടയാളം ഭാഗികമായി തിരിച്ചറിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"വിരലടയാളം പ്രോസസ്സ് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"വിരലടയാള സെൻസറിന് വൃത്തിയില്ല. അത് ശുചിയാക്കി വീണ്ടും ശ്രമിക്കുക."</string>
@@ -1873,8 +1913,18 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> എന്നതിനെ &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> എന്നിവ&lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> എന്നിവ&lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;എന്നതിലേക്ക് സംരക്ഷിക്കണോ?"</string>
+    <!-- no translation found for autofill_update_title (4879673117448810818) -->
+    <skip />
+    <!-- no translation found for autofill_update_title_with_type (339733442087186755) -->
+    <skip />
+    <!-- no translation found for autofill_update_title_with_2types (6321714204167424745) -->
+    <skip />
+    <!-- no translation found for autofill_update_title_with_3types (5866735124066629287) -->
+    <skip />
     <string name="autofill_save_yes" msgid="6398026094049005921">"സംരക്ഷിക്കുക"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"വേണ്ട, നന്ദി"</string>
+    <!-- no translation found for autofill_update_yes (310358413273276958) -->
+    <skip />
     <string name="autofill_save_type_password" msgid="5288448918465971568">"പാസ്‌വേഡ്"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"വിലാസം"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"ക്രെഡിറ്റ് കാർഡ്"</string>
