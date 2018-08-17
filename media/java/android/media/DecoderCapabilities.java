@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.UnsupportedAppUsage;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -32,6 +33,7 @@ public class DecoderCapabilities
      *
      */
     public enum VideoDecoder {
+        @UnsupportedAppUsage
         VIDEO_DECODER_WMV,
     };
 
@@ -39,6 +41,7 @@ public class DecoderCapabilities
      * The AudioDecoder class represents the type of an audio decoder
      */
     public enum AudioDecoder {
+        @UnsupportedAppUsage
         AUDIO_DECODER_WMA,
     };
 
@@ -51,6 +54,7 @@ public class DecoderCapabilities
      * Returns the list of video decoder types
      * @see android.media.DecoderCapabilities.VideoDecoder
      */
+    @UnsupportedAppUsage
     public static List<VideoDecoder> getVideoDecoders() {
         List<VideoDecoder> decoderList = new ArrayList<VideoDecoder>();
         int nDecoders = native_get_num_video_decoders();
@@ -64,6 +68,7 @@ public class DecoderCapabilities
      * Returns the list of audio decoder types
      * @see android.media.DecoderCapabilities.AudioDecoder
      */
+    @UnsupportedAppUsage
     public static List<AudioDecoder> getAudioDecoders() {
         List<AudioDecoder> decoderList = new ArrayList<AudioDecoder>();
         int nDecoders = native_get_num_audio_decoders();

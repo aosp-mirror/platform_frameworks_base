@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.media.MediaCodec;
 import android.media.MediaCodec.BufferInfo;
 import dalvik.system.CloseGuard;
@@ -283,8 +284,10 @@ final public class MediaMuxer {
     public @interface Format {}
 
     // All the native functions are listed here.
+    @UnsupportedAppUsage
     private static native long nativeSetup(@NonNull FileDescriptor fd, int format)
             throws IllegalArgumentException, IOException;
+    @UnsupportedAppUsage
     private static native void nativeRelease(long nativeObject);
     private static native void nativeStart(long nativeObject);
     private static native void nativeStop(long nativeObject);
@@ -298,16 +301,22 @@ final public class MediaMuxer {
             int offset, int size, long presentationTimeUs, @MediaCodec.BufferFlag int flags);
 
     // Muxer internal states.
+    @UnsupportedAppUsage
     private static final int MUXER_STATE_UNINITIALIZED  = -1;
     private static final int MUXER_STATE_INITIALIZED    = 0;
+    @UnsupportedAppUsage
     private static final int MUXER_STATE_STARTED        = 1;
+    @UnsupportedAppUsage
     private static final int MUXER_STATE_STOPPED        = 2;
 
+    @UnsupportedAppUsage
     private int mState = MUXER_STATE_UNINITIALIZED;
 
+    @UnsupportedAppUsage
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private int mLastTrackIndex = -1;
 
+    @UnsupportedAppUsage
     private long mNativeObject;
 
     /**
