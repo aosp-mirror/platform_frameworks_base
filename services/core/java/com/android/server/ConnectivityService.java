@@ -910,7 +910,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         registerPrivateDnsSettingsCallbacks();
     }
 
-    private Tethering makeTethering() {
+    @VisibleForTesting
+    protected Tethering makeTethering() {
         // TODO: Move other elements into @Overridden getters.
         final TetheringDependencies deps = new TetheringDependencies() {
             @Override
