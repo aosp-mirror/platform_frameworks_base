@@ -355,7 +355,8 @@ public class Toast {
         final Handler mHandler;
 
         int mGravity;
-        int mX, mY;
+        int mX;
+        int mY;
         float mHorizontalMargin;
         float mVerticalMargin;
 
