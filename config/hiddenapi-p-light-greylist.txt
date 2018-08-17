@@ -534,7 +534,7 @@ Landroid/app/INotificationManager$Stub;->asInterface(Landroid/os/IBinder;)Landro
 Landroid/app/INotificationManager;->cancelAllNotifications(Ljava/lang/String;I)V
 Landroid/app/INotificationManager;->cancelNotificationWithTag(Ljava/lang/String;Ljava/lang/String;II)V
 Landroid/app/INotificationManager;->cancelToast(Ljava/lang/String;Landroid/app/ITransientNotification;)V
-Landroid/app/INotificationManager;->enqueueToast(Ljava/lang/String;Landroid/app/ITransientNotification;I)V
+Landroid/app/INotificationManager;->enqueueToast(Ljava/lang/String;Landroid/app/ITransientNotification;II)V
 Landroid/app/IProcessObserver$Stub;-><init>()V
 Landroid/app/ISearchManager$Stub$Proxy;->getGlobalSearchActivity()Landroid/content/ComponentName;
 Landroid/app/ISearchManager$Stub$Proxy;->getWebSearchActivity()Landroid/content/ComponentName;
