@@ -25,7 +25,6 @@ import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.app.admin.DevicePolicyManager;
 import android.companion.CompanionDeviceManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -54,7 +53,6 @@ import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.provider.Telephony.Sms.Intents;
 import android.security.Credentials;
-import android.service.textclassifier.TextClassifierService;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -1396,6 +1394,11 @@ public final class DefaultPermissionGrantPolicy {
             Collections.addAll(ret, dir.listFiles());
         }
         dir = new File(Environment.getProductDirectory(), "etc/default-permissions");
+        if (dir.isDirectory() && dir.canRead()) {
+            Collections.addAll(ret, dir.listFiles());
+        }
+        dir = new File(Environment.getProductServicesDirectory(),
+                "etc/default-permissions");
         if (dir.isDirectory() && dir.canRead()) {
             Collections.addAll(ret, dir.listFiles());
         }
