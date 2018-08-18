@@ -69,6 +69,15 @@ public:
     // For testing. The timestamp is used as both elapsed real time and logd timestamp.
     explicit LogEvent(int32_t tagId, int64_t timestampNs);
 
+    /**
+     * Constructs a KeyValuePairsAtom LogEvent from value maps.
+     */
+    explicit LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                      int32_t uid,
+                      const std::map<int32_t, int64_t>& int_map,
+                      const std::map<int32_t, std::string>& string_map,
+                      const std::map<int32_t, float>& float_map);
+
     ~LogEvent();
 
     /**
