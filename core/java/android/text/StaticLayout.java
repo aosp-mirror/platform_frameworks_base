@@ -626,11 +626,16 @@ public class StaticLayout extends Layout {
             indents = null;
         }
 
-        final NativeLineBreaker lineBreaker = new NativeLineBreaker(
-                b.mBreakStrategy, b.mHyphenationFrequency,
+        final NativeLineBreaker lineBreaker = new NativeLineBreaker.Builder()
+                .setBreakStrategy(b.mBreakStrategy)
+                .setHyphenationFrequency(b.mHyphenationFrequency)
                 // TODO: Support more justification mode, e.g. letter spacing, stretching.
-                b.mJustificationMode != Layout.JUSTIFICATION_MODE_NONE,
-                indents);
+                .setJustified(b.mJustificationMode)
+                .setIndents(indents)
+                .build();
+
+        NativeLineBreaker.ParagraphConstraints constraints =
+                new NativeLineBreaker.ParagraphConstraints();
 
         PrecomputedText.ParagraphInfo[] paragraphInfo = null;
         final Spanned spanned = (source instanceof Spanned) ? (Spanned) source : null;
@@ -721,18 +726,14 @@ public class StaticLayout extends Layout {
             final char[] chs = measuredPara.getChars();
             final int[] spanEndCache = measuredPara.getSpanEndCache().getRawArray();
             final int[] fmCache = measuredPara.getFontMetrics().getRawArray();
-            int breakCount = lineBreaker.computeLineBreaks(
-                    measuredPara.getChars(),
-                    measuredPara.getNativeMeasuredParagraph(),
-                    paraEnd - paraStart,
-                    firstWidth,
-                    firstWidthLineCount,
-                    restWidth,
-                    variableTabStops,
-                    TAB_INCREMENT,
-                    mLineCount,
-                    lineBreaks);
 
+            constraints.setWidth(restWidth);
+            constraints.setIndent(firstWidth, firstWidthLineCount);
+            constraints.setTabStops(variableTabStops, TAB_INCREMENT);
+
+            lineBreaker.computeLineBreaks(measuredPara.getNativeMeasuredParagraph(),
+                    constraints, mLineCount, lineBreaks);
+            int breakCount = lineBreaks.breakCount;
             final int[] breaks = lineBreaks.breaks;
             final float[] lineWidths = lineBreaks.widths;
             final float[] ascents = lineBreaks.ascents;
