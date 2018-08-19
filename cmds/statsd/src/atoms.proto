@@ -127,6 +127,7 @@ message Atom {
         WTFOccurred wtf_occurred = 80;
         LowMemReported low_mem_reported = 81;
         GenericAtom generic_atom = 82;
+        KeyValuePairsAtom key_value_pairs_atom = 83;
     }
 
     // Pulled events will start at field 10000.
@@ -175,6 +176,20 @@ message AttributionNode {
     // The (optional) string tag for an element in the attribution chain. If the
     // element has no tag, it is encoded as an empty string.
     optional string tag = 2;
+}
+
+message KeyValuePair {
+    optional int32 key = 1;
+    oneof value {
+        int64 value_int = 2;
+        string value_str = 3;
+        float value_float = 4;
+    }
+}
+
+message KeyValuePairsAtom {
+    optional int32 uid = 1;
+    repeated KeyValuePair pairs = 2;
 }
 
 /*
