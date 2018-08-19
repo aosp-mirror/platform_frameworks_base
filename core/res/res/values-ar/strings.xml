@@ -312,6 +312,12 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"أجهزة استشعار الجسم"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"الوصول إلى بيانات المستشعر حول علاماتك الحيوية"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالدخول إلى بيانات المستشعر حول علاماتك الحيوية؟"</string>
+    <string name="permgrouplab_aural" msgid="965607064083134896">"الموسيقى"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"الوصول إلى الموسيقى"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى الموسيقى؟"</string>
+    <string name="permgrouplab_visual" msgid="8030190588123857921">"الصور والفيديوهات"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"الوصول إلى صورك وفيديوهاتك"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى صورك وفيديوهاتك؟"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"استرداد محتوى النافذة"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"فحص محتوى نافذة يتم التفاعل معها"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"تشغيل الاستكشاف باللمس"</string>
@@ -506,6 +512,20 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"للسماح للتطبيق باستدعاء طرق لإضافة نماذج من بصمات الأصابع وحذفها."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"لاستخدام أجهزة بصمة الإصبع"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"للسماح للتطبيق باستخدام أجهزة بصمة الإصبع للمصادقة"</string>
+    <string name="permlab_audioRead" msgid="6617225220728465565">"قراءة مجموعتك الموسيقية"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"للسماح للتطبيق بقراءة مجموعتك الموسيقية."</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"تعديل مجموعتك الموسيقية"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"للسماح للتطبيق بتعديل مجموعتك الموسيقية."</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"قراءة مجموعة الفيديو التابعة لك"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"للسماح للتطبيق بقراءة مجموعة الفيديوهات التابعة لك."</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"تعديل مجموعة الفيديو التابعة لك"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"يسمح للتطبيق بتعديل مجموعة الفيديوهات التابعة لك."</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"قراءة مجموعة صورك"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"للسماح للتطبيق بقراءة مجموعة صورك."</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"تعديل مجموعة صورك"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"للسماح للتطبيق بتعديل مجموعة صورك."</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"قراءة المواقع من مجموعة الوسائط التابعة لك"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"للسماح للتطبيق بقراءة المواقع من مجموعة الوسائط التابعة لك."</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"تم اكتشاف بصمة الإصبع بشكل جزئي؛ يرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"تعذرت معالجة بصمة الإصبع. يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"جهاز استشعار بصمات الأصابع متسخ، يرجى تنظيفه وإعادة المحاولة."</string>
@@ -2012,8 +2032,13 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"‏هل تريد حفظ <xliff:g id="TYPE">%1$s</xliff:g> في &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;؟"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"‏هل تريد حفظ <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> في &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;؟"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"‏هل تريد حفظ <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> و<xliff:g id="TYPE_2">%3$s</xliff:g> في &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;؟"</string>
+    <string name="autofill_update_title" msgid="4879673117448810818">"‏هل تريد التعديل إلى &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;؟"</string>
+    <string name="autofill_update_title_with_type" msgid="339733442087186755">"‏هل تريد تعديل <xliff:g id="TYPE">%1$s</xliff:g> إلى &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;؟"</string>
+    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"‏هل تريد تعديل <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> إلى &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;؟"</string>
+    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"‏هل تريد تعديل <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> و<xliff:g id="TYPE_2">%3$s</xliff:g> إلى &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;؟"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"حفظ"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"لا، شكرًا"</string>
+    <string name="autofill_update_yes" msgid="310358413273276958">"تعديل"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"كلمة مرور"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"عنوان"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"بطاقة ائتمان"</string>

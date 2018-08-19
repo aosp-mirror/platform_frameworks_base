@@ -300,6 +300,12 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Tana sezgichlari"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"organizm holati haqidagi sezgich ma’lumotlariga kirish"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun organizm holati haqidagi sezgichlar axborotlariga ruxsat berilsinmi?"</string>
+    <string name="permgrouplab_aural" msgid="965607064083134896">"Musiqa"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"musiqaga kirish"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun musiqangizga kirishga ruxsat berilsinmi?"</string>
+    <string name="permgrouplab_visual" msgid="8030190588123857921">"Surat va videolar"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"surat va videolarga kirish"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun surat va videolaringizga kirishga ruxsat berilsinmi?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Oynadagi kontentni o‘qiydi"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Joriy oynadagi kontent mazmunini aniqlaydi."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Teginib o‘rganish xizmatini yoqadi"</string>
@@ -494,6 +500,20 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Ilova foydalanish uchun barmoq izi namunalarini qo‘shish va o‘chirish usullarini qo‘llashi mumkin."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"barmoq izi sensoridan foydalanish"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Ilova haqiqiylikni tekshirish uchun barmoq izi sensoridan foydalanishi mumkin"</string>
+    <string name="permlab_audioRead" msgid="6617225220728465565">"musiqiy to‘plamni o‘qish"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"Ilovaga musiqiy to‘plamingizni o‘qishga ruxsat beradi."</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"musiqiy to‘plamni o‘zgartirish"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"Ilovaga musiqiy to‘plamni o‘zgartirishga ruxsat beradi."</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"video to‘plamni o‘qish"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"Ilovaga video to‘plamingizni o‘qishga ruxsat beradi."</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"video to‘plamni o‘zgartirish"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"Ilovaga video to‘plamingizni o‘zgartirishga ruxsat beradi."</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"suratlar to‘plamini o‘qish"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"Ilovaga suratlar to‘plamingizni o‘qishga ruxsat beradi."</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"suratlar to‘plamini o‘zgartirish"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Ilovaga suratlar to‘plamingizni o‘zgartirishga ruxsat beradi."</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"multimedia to‘plamidan joylashuv axborotini o‘qish"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Ilovaga multimedia to‘plamingizdan joylashuv axborotini o‘qishga ruxsat beradi."</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Barmoq izi qisman aniqlandi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Barmoq izi aniqlanmadi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Barmoq izi skaneri kirlangan. Uni tozalab, keyin qayta urinib ko‘ring."</string>
@@ -1873,8 +1893,13 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; xizmatiga saqlansinmi?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> va <xliff:g id="TYPE_1">%2$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; xizmatiga saqlansinmi?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> va <xliff:g id="TYPE_2">%3$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; xizmatiga saqlansinmi?"</string>
+    <string name="autofill_update_title" msgid="4879673117448810818">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; xizmatidagi ma’lumot yangilansinmi?"</string>
+    <string name="autofill_update_title_with_type" msgid="339733442087186755">"&lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; xizmatida <xliff:g id="TYPE">%1$s</xliff:g> ma’lumotlari yangilansinmi?"</string>
+    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"&lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; xizmatidagi <xliff:g id="TYPE_0">%1$s</xliff:g> va <xliff:g id="TYPE_1">%2$s</xliff:g> ma’lumotlari yangilansinmi?"</string>
+    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"&lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; xizmatidagi <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> va <xliff:g id="TYPE_2">%3$s</xliff:g> ma’lumotlari yangilansinmi?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Saqlash"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Kerak emas"</string>
+    <string name="autofill_update_yes" msgid="310358413273276958">"Yangilash"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"parol"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"manzil"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"kredit karta"</string>

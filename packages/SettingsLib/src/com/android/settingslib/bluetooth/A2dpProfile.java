@@ -42,7 +42,6 @@ public class A2dpProfile implements LocalBluetoothProfile {
     private BluetoothA2dp mService;
     private boolean mIsProfileReady;
 
-    private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
 
     static final ParcelUuid[] SINK_UUIDS = {
@@ -71,7 +70,7 @@ public class A2dpProfile implements LocalBluetoothProfile {
                 // we may add a new device here, but generally this should not happen
                 if (device == null) {
                     Log.w(TAG, "A2dpProfile found new device: " + nextDevice);
-                    device = mDeviceManager.addDevice(mLocalAdapter, nextDevice);
+                    device = mDeviceManager.addDevice(nextDevice);
                 }
                 device.onProfileStateChanged(A2dpProfile.this, BluetoothProfile.STATE_CONNECTED);
                 device.refresh();
@@ -94,14 +93,12 @@ public class A2dpProfile implements LocalBluetoothProfile {
         return BluetoothProfile.A2DP;
     }
 
-    A2dpProfile(Context context, LocalBluetoothAdapter adapter,
-            CachedBluetoothDeviceManager deviceManager,
+    A2dpProfile(Context context, CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {
         mContext = context;
-        mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        mLocalAdapter.getProfileProxy(context, new A2dpServiceListener(),
+        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, new A2dpServiceListener(),
                 BluetoothProfile.A2DP);
     }
 
@@ -123,20 +120,6 @@ public class A2dpProfile implements LocalBluetoothProfile {
 
     public boolean connect(BluetoothDevice device) {
         if (mService == null) return false;
-        int max_connected_devices = mLocalAdapter.getMaxConnectedAudioDevices();
-        if (max_connected_devices == 1) {
-            // Original behavior: disconnect currently connected device
-            List<BluetoothDevice> sinks = getConnectedDevices();
-            if (sinks != null) {
-                for (BluetoothDevice sink : sinks) {
-                    if (sink.equals(device)) {
-                        Log.w(TAG, "Connecting to device " + device + " : disconnect skipped");
-                        continue;
-                    }
-                    mService.disconnect(sink);
-                }
-            }
-        }
         return mService.connect(device);
     }
 

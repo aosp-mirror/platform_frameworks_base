@@ -38,7 +38,6 @@ public class HidProfile implements LocalBluetoothProfile {
     private BluetoothHidHost mService;
     private boolean mIsProfileReady;
 
-    private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
     private final LocalBluetoothProfileManager mProfileManager;
 
@@ -62,7 +61,7 @@ public class HidProfile implements LocalBluetoothProfile {
                 // we may add a new device here, but generally this should not happen
                 if (device == null) {
                     Log.w(TAG, "HidProfile found new device: " + nextDevice);
-                    device = mDeviceManager.addDevice(mLocalAdapter, nextDevice);
+                    device = mDeviceManager.addDevice(nextDevice);
                 }
                 device.onProfileStateChanged(HidProfile.this, BluetoothProfile.STATE_CONNECTED);
                 device.refresh();
@@ -85,13 +84,12 @@ public class HidProfile implements LocalBluetoothProfile {
         return BluetoothProfile.HID_HOST;
     }
 
-    HidProfile(Context context, LocalBluetoothAdapter adapter,
+    HidProfile(Context context,
         CachedBluetoothDeviceManager deviceManager,
         LocalBluetoothProfileManager profileManager) {
-        mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        adapter.getProfileProxy(context, new HidHostServiceListener(),
+        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, new HidHostServiceListener(),
                 BluetoothProfile.HID_HOST);
     }
 

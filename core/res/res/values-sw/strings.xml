@@ -298,6 +298,12 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Vihisi vya Mwili"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"fikia data ya kitambuzi kuhusu alama zako muhimu"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie data ya vitambuzi kuhusu viashiria muhimu vya mwili wako?"</string>
+    <string name="permgrouplab_aural" msgid="965607064083134896">"Muziki"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"kufikia muziki wako"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie muziki wako?"</string>
+    <string name="permgrouplab_visual" msgid="8030190588123857921">"Picha na Video"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"kufikia picha na video zako"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"Ungependa kuruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie picha na video zako?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Kufikia maudhui ya dirisha"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Kuchunguza maudhui ya dirisha unalotumia."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Kuwasha \'Chunguza kwa Kugusa\'"</string>
@@ -492,6 +498,20 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Huruhusu programu kuomba njia za kuongeza na kufuta violezo vya kitambulisho kwa matumizi."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"tumia maunzi ya kitambulisho"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Huruhusu programu kutumia maunzi ya kitambulisho kwa uthibitisho"</string>
+    <string name="permlab_audioRead" msgid="6617225220728465565">"kusoma mkusanyiko muziki wako"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"Inaruhusu programu kusoma mkusanyiko wa muziki wako."</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"kubadilisha mkusanyiko wa muziki wako"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"Inaruhusu programu kubadilisha mkusanyiko wa muziki wako."</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"kusoma mkusanyiko wa video zako"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"Inaruhusu programu kusoma mkusanyiko wa video zako."</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"kubadilisha mkusanyiko wa video zako"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"Inaruhusu programu kubadilisha mkusanyiko wa video zako."</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"kusoma mkusanyiko wa picha zako"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"Inaruhusu programu kusoma mkusanyiko wa picha zako."</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"kubadilisha mkusanyiko wa picha zako"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Inaruhusu programu kubadilisha mkusanyiko wa picha zako."</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"kusoma maeneo kwenye mkusanyiko wa vipengee vyako"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Inaruhusu programu kusoma maeneo kwenye mkusanyiko wa vipengee vyako."</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Kitambuzi kimegundua sehemu ya kitambulisho. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Haikuweza kuchakata kitambulisho. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Kitambuzi alama ya kidole ni kichafu. Tafadhali kisafishe na ujaribu tena."</string>
@@ -1870,8 +1890,13 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Ungependa kuhifadhi <xliff:g id="TYPE">%1$s</xliff:g> kwenye &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Ungependa kuhifadhi <xliff:g id="TYPE_0">%1$s</xliff:g> na <xliff:g id="TYPE_1">%2$s</xliff:g> kwenye &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Ungependa kuhifadhi <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, na <xliff:g id="TYPE_2">%3$s</xliff:g> kwenye &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title" msgid="4879673117448810818">"Ungependa kusasisha kuwa &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Ungependa kusasisha <xliff:g id="TYPE">%1$s</xliff:g> kuwa &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Ungependa kusasisha <xliff:g id="TYPE_0">%1$s</xliff:g> na <xliff:g id="TYPE_1">%2$s</xliff:g> kuwa &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Ungependa kusasisha <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> na <xliff:g id="TYPE_2">%3$s</xliff:g> kuwa &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Hifadhi"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Hapana, asante"</string>
+    <string name="autofill_update_yes" msgid="310358413273276958">"Sasisha"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"nenosiri"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"anwani"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"kadi ya mikopo"</string>

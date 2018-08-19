@@ -171,4 +171,17 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
 
         assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_OFF, config, r));
     }
+
+    @Test
+    public void testSuppressAnything_bypass_ZenModeOn() {
+        NotificationRecord r = getNotificationRecord();
+        r.setCriticality(CriticalNotificationExtractor.CRITICAL);
+        when(r.sbn.getPackageName()).thenReturn("bananas");
+        ZenModeConfig config = mock(ZenModeConfig.class);
+
+        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_NO_INTERRUPTIONS, config, r));
+
+        r.setCriticality(CriticalNotificationExtractor.CRITICAL_LOW);
+        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_NO_INTERRUPTIONS, config, r));
+    }
 }

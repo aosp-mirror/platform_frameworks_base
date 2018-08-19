@@ -133,9 +133,10 @@ public class Toast {
         String pkg = mContext.getOpPackageName();
         TN tn = mTN;
         tn.mNextView = mNextView;
+        final int displayId = mContext.getDisplay().getDisplayId();
 
         try {
-            service.enqueueToast(pkg, tn, mDuration);
+            service.enqueueToast(pkg, tn, mDuration, displayId);
         } catch (RemoteException e) {
             // Empty
         }
@@ -354,7 +355,8 @@ public class Toast {
         final Handler mHandler;
 
         int mGravity;
-        int mX, mY;
+        int mX;
+        int mY;
         float mHorizontalMargin;
         float mVerticalMargin;
 

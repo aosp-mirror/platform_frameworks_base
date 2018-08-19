@@ -300,6 +300,18 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Αισθητήρες σώματος"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"πρόσβαση στα δεδομένα αισθητήρα σχετικά με τις ζωτικές ενδείξεις σας"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Να επιτρέπεται στην εφαρμογή &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; να έχει πρόσβαση στα δεδομένα αισθητήρα σχετικά με τις ζωτικές ενδείξεις σας;"</string>
+    <!-- no translation found for permgrouplab_aural (965607064083134896) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_aural (4870189506255958055) -->
+    <skip />
+    <!-- no translation found for permgrouprequest_aural (6787926123071735620) -->
+    <skip />
+    <!-- no translation found for permgrouplab_visual (8030190588123857921) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_visual (3415827902566663546) -->
+    <skip />
+    <!-- no translation found for permgrouprequest_visual (6907523945030290376) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Ανάκτηση του περιεχομένου του παραθύρου"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Έλεγχος του περιεχομένου ενός παραθύρου με το οποίο αλληλεπιδράτε."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ενεργοποίηση της \"Εξερεύνησης με άγγιγμα\""</string>
@@ -320,7 +332,7 @@
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Επιτρέπει στην εφαρμογή να αναπτύξει ή να συμπτύξει τη γραμμή κατάστασης."</string>
     <string name="permlab_install_shortcut" msgid="4279070216371564234">"εγκαθιστά συντομεύσεις"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Επιτρέπει σε μια εφαρμογή την προσθήκη συντομεύσεων στην Αρχική οθόνη χωρίς την παρέμβαση του χρήστη."</string>
-    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"καταργεί την εγκατάσταση συντομεύσεων"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"απεγκατάσταση συντομεύσεων"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Επιτρέπει στην εφαρμογή την κατάργηση συντομεύσεων από την Αρχική οθόνη χωρίς την παρέμβαση του χρήστη."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"αναδρομολογεί τις εξερχόμενες κλήσεις"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Επιτρέπει στην εφαρμογή να βλέπει τον αριθμό που καλέσατε κατά τη διάρκεια μιας εξερχόμενης κλήσης με επιλογή ανακατεύθυνσης της κλήσης σε έναν διαφορετικό αριθμό ή διακοπής της κλήσης."</string>
@@ -494,6 +506,34 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Επιτρέπει στην εφαρμογή να επικαλείται μεθόδους για την προσθήκη και τη διαγραφή προτύπων μοναδικού χαρακτηριστικού για χρήση."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"χρησιμοποιεί τον εξοπλισμό δακτυλικού αποτυπώματος"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Επιτρέπει στην εφαρμογή να χρησιμοποιεί εξοπλισμό μοναδικού χαρακτηριστικού για έλεγχο ταυτότητας"</string>
+    <!-- no translation found for permlab_audioRead (6617225220728465565) -->
+    <skip />
+    <!-- no translation found for permdesc_audioRead (5034032570243484805) -->
+    <skip />
+    <!-- no translation found for permlab_audioWrite (2661772059799779292) -->
+    <skip />
+    <!-- no translation found for permdesc_audioWrite (8888544708166230494) -->
+    <skip />
+    <!-- no translation found for permlab_videoRead (9182618678674737229) -->
+    <skip />
+    <!-- no translation found for permdesc_videoRead (7045676429859396194) -->
+    <skip />
+    <!-- no translation found for permlab_videoWrite (128769316366746446) -->
+    <skip />
+    <!-- no translation found for permdesc_videoWrite (5448565757490640841) -->
+    <skip />
+    <!-- no translation found for permlab_imagesRead (3015078545742665304) -->
+    <skip />
+    <!-- no translation found for permdesc_imagesRead (3144263806038695580) -->
+    <skip />
+    <!-- no translation found for permlab_imagesWrite (3391306186247235510) -->
+    <skip />
+    <!-- no translation found for permdesc_imagesWrite (7073662756617474375) -->
+    <skip />
+    <!-- no translation found for permlab_mediaLocation (8675148183726247864) -->
+    <skip />
+    <!-- no translation found for permdesc_mediaLocation (2237023389178865130) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Εντοπίστηκε μερικό μοναδικό χαρακτηριστικό. Δοκιμάστε ξανά."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Δεν ήταν δυνατή η επεξεργασία του μοναδικού χαρακτηριστικού. Δοκιμάστε ξανά."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Ο αισθητήρας μοναδικού χαρακτηριστικού δεν είναι καθαρός. Καθαρίστε τον και δοκιμάστε ξανά."</string>
@@ -1872,8 +1912,18 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Αποθήκευση <xliff:g id="TYPE">%1$s</xliff:g> σε &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;;"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Αποθήκευση <xliff:g id="TYPE_0">%1$s</xliff:g> και <xliff:g id="TYPE_1">%2$s</xliff:g> σε &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;;"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Αποθήκευση <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> και <xliff:g id="TYPE_2">%3$s</xliff:g> σε &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;;"</string>
+    <!-- no translation found for autofill_update_title (4879673117448810818) -->
+    <skip />
+    <!-- no translation found for autofill_update_title_with_type (339733442087186755) -->
+    <skip />
+    <!-- no translation found for autofill_update_title_with_2types (6321714204167424745) -->
+    <skip />
+    <!-- no translation found for autofill_update_title_with_3types (5866735124066629287) -->
+    <skip />
     <string name="autofill_save_yes" msgid="6398026094049005921">"Αποθήκευση"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Όχι, ευχαριστώ"</string>
+    <!-- no translation found for autofill_update_yes (310358413273276958) -->
+    <skip />
     <string name="autofill_save_type_password" msgid="5288448918465971568">"κωδικός πρόσβασης"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"διεύθυνση"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"πιστωτική κάρτα"</string>

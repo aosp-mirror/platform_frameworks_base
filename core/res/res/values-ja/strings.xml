@@ -300,6 +300,12 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ボディーセンサー"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"バイタルサインに関するセンサーデータへのアクセス"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"バイタルサインに関するセンサーデータへのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
+    <string name="permgrouplab_aural" msgid="965607064083134896">"音楽"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"音楽へのアクセス"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"音楽へのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
+    <string name="permgrouplab_visual" msgid="8030190588123857921">"写真と動画"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"写真と動画へのアクセス"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"写真と動画へのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ウィンドウコンテンツの取得"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ユーザーがアクセスしているウィンドウのコンテンツを検査します。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"タッチガイドの有効化"</string>
@@ -494,6 +500,20 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"使用する指紋テンプレートの追加や削除を行う方法の呼び出しをアプリに許可します。"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"指紋ハードウェアの使用"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"指紋ハードウェアを認証に使用することをアプリに許可します"</string>
+    <string name="permlab_audioRead" msgid="6617225220728465565">"音楽コレクションの読み取り"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"音楽コレクションの読み取りをアプリに許可します。"</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"音楽コレクションの変更"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"音楽コレクションの変更をアプリに許可します。"</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"動画コレクションの読み取り"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"動画コレクションの読み取りをアプリに許可します。"</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"動画コレクションの変更"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"動画コレクションの変更をアプリに許可します。"</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"写真コレクションの読み取り"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"写真コレクションの読み取りをアプリに許可します。"</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"写真コレクションの変更"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"写真コレクションの変更をアプリに許可します。"</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"メディア コレクションの位置情報の読み取り"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"メディア コレクションの位置情報の読み取りをアプリに許可します。"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"指紋を一部しか検出できませんでした。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"指紋を処理できませんでした。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"指紋認証センサーに汚れがあります。汚れを落としてもう一度お試しください。"</string>
@@ -1872,8 +1892,13 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>を &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; に保存しますか？"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>を &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; に保存しますか？"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>、<xliff:g id="TYPE_2">%3$s</xliff:g>を &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; に保存しますか？"</string>
+    <string name="autofill_update_title" msgid="4879673117448810818">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; に更新しますか？"</string>
+    <string name="autofill_update_title_with_type" msgid="339733442087186755">"<xliff:g id="TYPE">%1$s</xliff:g>を &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; に更新しますか？"</string>
+    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"<xliff:g id="TYPE_0">%1$s</xliff:g>と<xliff:g id="TYPE_1">%2$s</xliff:g>を &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; に更新しますか？"</string>
+    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>、<xliff:g id="TYPE_2">%3$s</xliff:g>を &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; に更新しますか？"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"はい"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"いいえ"</string>
+    <string name="autofill_update_yes" msgid="310358413273276958">"更新"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"パスワード"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"住所"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"クレジット カード"</string>

@@ -41,7 +41,6 @@ final class HfpClientProfile implements LocalBluetoothProfile {
     private BluetoothHeadsetClient mService;
     private boolean mIsProfileReady;
 
-    private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
 
     static final ParcelUuid[] SRC_UUIDS = {
@@ -71,7 +70,7 @@ final class HfpClientProfile implements LocalBluetoothProfile {
                 // we may add a new device here, but generally this should not happen
                 if (device == null) {
                     Log.w(TAG, "HfpClient profile found new device: " + nextDevice);
-                    device = mDeviceManager.addDevice(mLocalAdapter, nextDevice);
+                    device = mDeviceManager.addDevice(nextDevice);
                 }
                 device.onProfileStateChanged(
                     HfpClientProfile.this, BluetoothProfile.STATE_CONNECTED);
@@ -97,14 +96,12 @@ final class HfpClientProfile implements LocalBluetoothProfile {
         return BluetoothProfile.HEADSET_CLIENT;
     }
 
-    HfpClientProfile(Context context, LocalBluetoothAdapter adapter,
-            CachedBluetoothDeviceManager deviceManager,
+    HfpClientProfile(Context context, CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {
-        mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        mLocalAdapter.getProfileProxy(context, new HfpClientServiceListener(),
-                BluetoothProfile.HEADSET_CLIENT);
+        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context,
+                new HfpClientServiceListener(), BluetoothProfile.HEADSET_CLIENT);
     }
 
     @Override

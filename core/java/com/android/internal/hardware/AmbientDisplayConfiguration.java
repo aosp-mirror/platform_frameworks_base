@@ -66,12 +66,25 @@ public class AmbientDisplayConfiguration {
         return !TextUtils.isEmpty(doubleTapSensorType());
     }
 
+    public boolean reachGestureEnabled(int user) {
+        return boolSettingDefaultOn(Settings.Secure.DOZE_REACH_GESTURE, user)
+                && reachGestureAvailable();
+    }
+
+    public boolean reachGestureAvailable() {
+        return !TextUtils.isEmpty(reachSensorType());
+    }
+
     public String doubleTapSensorType() {
         return mContext.getResources().getString(R.string.config_dozeDoubleTapSensorType);
     }
 
     public String longPressSensorType() {
         return mContext.getResources().getString(R.string.config_dozeLongPressSensorType);
+    }
+
+    public String reachSensorType() {
+        return mContext.getResources().getString(R.string.config_dozeReachSensorType);
     }
 
     public boolean pulseOnLongPressEnabled(int user) {

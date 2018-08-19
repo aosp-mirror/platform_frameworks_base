@@ -296,6 +296,7 @@ please see themes_device_defaults.xml.
         <item name="quickContactBadgeStyleSmallWindowLarge">@style/Widget.Holo.QuickContactBadgeSmall.WindowLarge</item>
         <item name="listPopupWindowStyle">@style/Widget.Holo.ListPopupWindow</item>
         <item name="popupMenuStyle">@style/Widget.Holo.PopupMenu</item>
+        <item name="popupTheme">@null</item>
         <item name="stackViewStyle">@style/Widget.Holo.StackView</item>
         <item name="activityChooserViewStyle">@style/Widget.Holo.ActivityChooserView</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.Holo.FragmentBreadCrumbs</item>
@@ -658,9 +659,11 @@ please see themes_device_defaults.xml.
         <item name="quickContactBadgeStyleSmallWindowLarge">@style/Widget.Holo.QuickContactBadgeSmall.WindowLarge</item>
         <item name="listPopupWindowStyle">@style/Widget.Holo.Light.ListPopupWindow</item>
         <item name="popupMenuStyle">@style/Widget.Holo.Light.PopupMenu</item>
+        <item name="popupTheme">@null</item>
         <item name="stackViewStyle">@style/Widget.Holo.StackView</item>
         <item name="activityChooserViewStyle">@style/Widget.Holo.Light.ActivityChooserView</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.Holo.Light.FragmentBreadCrumbs</item>
+        <item name="contextPopupMenuStyle">?attr/popupMenuStyle</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Holo.PreferenceScreen</item>

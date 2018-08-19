@@ -117,7 +117,8 @@ public class ZenModeFiltering {
     }
 
     public boolean shouldIntercept(int zen, ZenModeConfig config, NotificationRecord record) {
-        if (zen == ZEN_MODE_OFF) {
+        // Zen mode is ignored for critical notifications.
+        if (zen == ZEN_MODE_OFF || isCritical(record)) {
             return false;
         }
         // Make an exception to policy for the notification saying that policy has changed
@@ -205,6 +206,19 @@ public class ZenModeFiltering {
             default:
                 return false;
         }
+    }
+
+    /**
+     * Check if the notification is too critical to be suppressed.
+     *
+     * @param record the record to test for criticality
+     * @return {@code true} if notification is considered critical
+     *
+     * @see CriticalNotificationExtractor for criteria
+     */
+    private boolean isCritical(NotificationRecord record) {
+        // 0 is the most critical
+        return record.getCriticality() < CriticalNotificationExtractor.NORMAL;
     }
 
     private static boolean shouldInterceptAudience(int source, NotificationRecord record) {

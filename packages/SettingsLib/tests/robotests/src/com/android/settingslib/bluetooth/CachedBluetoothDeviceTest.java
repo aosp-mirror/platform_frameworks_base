@@ -26,7 +26,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
@@ -48,8 +47,6 @@ public class CachedBluetoothDeviceTest {
     private final static String DEVICE_ALIAS = "TestAlias";
     private final static String DEVICE_ADDRESS = "AA:BB:CC:DD:EE:FF";
     private final static String DEVICE_ALIAS_NEW = "TestAliasNew";
-    @Mock
-    private LocalBluetoothAdapter mAdapter;
     @Mock
     private LocalBluetoothProfileManager mProfileManager;
     @Mock
@@ -73,13 +70,11 @@ public class CachedBluetoothDeviceTest {
         mContext = RuntimeEnvironment.application;
         mShadowAudioManager = shadowOf(mContext.getSystemService(AudioManager.class));
         when(mDevice.getAddress()).thenReturn(DEVICE_ADDRESS);
-        when(mAdapter.getBluetoothState()).thenReturn(BluetoothAdapter.STATE_ON);
         when(mHfpProfile.isProfileReady()).thenReturn(true);
         when(mA2dpProfile.isProfileReady()).thenReturn(true);
         when(mPanProfile.isProfileReady()).thenReturn(true);
         when(mHearingAidProfile.isProfileReady()).thenReturn(true);
-        mCachedDevice = spy(
-                new CachedBluetoothDevice(mContext, mAdapter, mProfileManager, mDevice));
+        mCachedDevice = spy(new CachedBluetoothDevice(mContext, mProfileManager, mDevice));
         doAnswer((invocation) -> mBatteryLevel).when(mCachedDevice).getBatteryLevel();
     }
 
@@ -477,7 +472,7 @@ public class CachedBluetoothDeviceTest {
         when(mDevice.getAliasName()).thenReturn(DEVICE_ALIAS);
         when(mDevice.getName()).thenReturn(DEVICE_NAME);
         CachedBluetoothDevice cachedBluetoothDevice =
-                new CachedBluetoothDevice(mContext, mAdapter, mProfileManager, mDevice);
+                new CachedBluetoothDevice(mContext, mProfileManager, mDevice);
         // Verify alias is returned on getName
         assertThat(cachedBluetoothDevice.getName()).isEqualTo(DEVICE_ALIAS);
         // Verify device is visible
@@ -487,7 +482,7 @@ public class CachedBluetoothDeviceTest {
     @Test
     public void testDeviceName_testNameNotAvailable() {
         CachedBluetoothDevice cachedBluetoothDevice =
-                new CachedBluetoothDevice(mContext, mAdapter, mProfileManager, mDevice);
+                new CachedBluetoothDevice(mContext, mProfileManager, mDevice);
         // Verify device address is returned on getName
         assertThat(cachedBluetoothDevice.getName()).isEqualTo(DEVICE_ADDRESS);
         // Verify device is not visible
@@ -504,7 +499,7 @@ public class CachedBluetoothDeviceTest {
         }).when(mDevice).setAlias(anyString());
         when(mDevice.getName()).thenReturn(DEVICE_NAME);
         CachedBluetoothDevice cachedBluetoothDevice =
-                new CachedBluetoothDevice(mContext, mAdapter, mProfileManager, mDevice);
+                new CachedBluetoothDevice(mContext, mProfileManager, mDevice);
         // Verify alias is returned on getName
         assertThat(cachedBluetoothDevice.getName()).isEqualTo(DEVICE_ALIAS);
         // Verify null name does not get set

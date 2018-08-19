@@ -24,7 +24,6 @@ import android.util.Log;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.util.Preconditions;
 
 import com.android.printservice.recommendation.PrintServicePlugin;
 

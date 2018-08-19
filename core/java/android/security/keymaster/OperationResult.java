@@ -16,6 +16,7 @@
 
 package android.security.keymaster;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -33,6 +34,7 @@ public class OperationResult implements Parcelable {
     public final byte[] output;
     public final KeymasterArguments outParams;
 
+    @UnsupportedAppUsage
     public static final Parcelable.Creator<OperationResult> CREATOR = new
             Parcelable.Creator<OperationResult>() {
                 @Override

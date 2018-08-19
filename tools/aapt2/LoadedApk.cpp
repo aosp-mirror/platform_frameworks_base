@@ -184,10 +184,7 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
   std::unique_ptr<io::IFileCollectionIterator> iterator = apk_->Iterator();
   while (iterator->HasNext()) {
     io::IFile* file = iterator->Next();
-
     std::string path = file->GetSource().path;
-    // The name of the path has the format "<zip-file-name>@<path-to-file>".
-    path = path.substr(path.find('@') + 1);
 
     // Skip resources that are not referenced if requested.
     if (path.find("res/") == 0 && referenced_resources.find(path) == referenced_resources.end()) {
@@ -255,6 +252,53 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
     }
   }
   return true;
+}
+
+std::unique_ptr<xml::XmlResource> LoadedApk::LoadXml(const std::string& file_path,
+                                                     IDiagnostics* diag) {
+  io::IFile* file = apk_->FindFile(file_path);
+  if (file == nullptr) {
+    diag->Error(DiagMessage() << "failed to find file");
+    return nullptr;
+  }
+
+  std::unique_ptr<xml::XmlResource> doc;
+  if (format_ == ApkFormat::kProto) {
+    std::unique_ptr<io::InputStream> in = file->OpenInputStream();
+    if (!in) {
+      diag->Error(DiagMessage() << "failed to open file");
+      return nullptr;
+    }
+
+    io::ZeroCopyInputAdaptor adaptor(in.get());
+    pb::XmlNode pb_node;
+    if (!pb_node.ParseFromZeroCopyStream(&adaptor)) {
+      diag->Error(DiagMessage() << "failed to parse file as proto XML");
+      return nullptr;
+    }
+
+    std::string err;
+    doc = DeserializeXmlResourceFromPb(pb_node, &err);
+    if (!doc) {
+      diag->Error(DiagMessage() << "failed to deserialize proto XML: " << err);
+      return nullptr;
+    }
+  } else if (format_ == ApkFormat::kBinary) {
+    std::unique_ptr<io::IData> data = file->OpenAsData();
+    if (!data) {
+      diag->Error(DiagMessage() << "failed to open file");
+      return nullptr;
+    }
+
+    std::string err;
+    doc = xml::Inflate(data->data(), data->size(), &err);
+    if (!doc) {
+      diag->Error(DiagMessage() << "failed to parse file as binary XML: " << err);
+      return nullptr;
+    }
+  }
+
+  return doc;
 }
 
 ApkFormat LoadedApk::DetermineApkFormat(io::IFileCollection* apk) {

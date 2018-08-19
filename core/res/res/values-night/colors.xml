@@ -19,12 +19,12 @@
 <resources>
     <!-- The primary text color if the text is on top of a dark background.
     This is also affects colorized notifications with dark backgrounds. -->
-    <color name="notification_primary_text_color_dark">#dadada</color>
+    <color name="notification_primary_text_color_dark">#ddffffff</color>
 
     <!-- The secondary text color if the text is on top of a dark background. -->
-    <color name="notification_secondary_text_color_dark">#dadada</color>
+    <color name="notification_secondary_text_color_dark">#ddffffff</color>
 
-    <color name="notification_default_color_dark">#dadada</color>
+    <color name="notification_default_color_dark">#ddffffff</color>
 
     <!-- The background color of a notification card. -->
     <color name="notification_material_background_color">@*android:color/material_grey_900</color>

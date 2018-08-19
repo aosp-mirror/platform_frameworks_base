@@ -421,7 +421,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private Editable.Factory mEditableFactory = Editable.Factory.getInstance();
     private Spannable.Factory mSpannableFactory = Spannable.Factory.getInstance();
 
-    private float mShadowRadius, mShadowDx, mShadowDy;
+    private float mShadowRadius;
+    private float mShadowDx;
+    private float mShadowDy;
     private int mShadowColor;
 
     private boolean mPreDrawRegistered;
@@ -717,8 +719,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private Scroller mScroller;
     private TextPaint mTempTextPaint;
 
-    private BoringLayout.Metrics mBoring, mHintBoring;
-    private BoringLayout mSavedLayout, mSavedHintLayout;
+    private BoringLayout.Metrics mBoring;
+    private BoringLayout.Metrics mHintBoring;
+    private BoringLayout mSavedLayout;
+    private BoringLayout mSavedHintLayout;
 
     private TextDirectionHeuristic mTextDir;
 

@@ -300,6 +300,12 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Телесни сензори"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"пристапува до податоците од сензорите за виталните знаци"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Дали да се дозволи &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да пристапува до податоците на сензорот за витални знаци?"</string>
+    <string name="permgrouplab_aural" msgid="965607064083134896">"Музика"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"пристапува до музиката"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"Дали да се дозволи &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да пристапува до музиката?"</string>
+    <string name="permgrouplab_visual" msgid="8030190588123857921">"Фотографии и видеа"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"пристапува до фотографиите и видеата"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"Дали да се дозволи &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да пристапува до фотографиите и видеата?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Преземе содржина на прозорец"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ја следи содржината на прозорецот со кој се комуницира."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Вклучи „Истражувај со допир“"</string>
@@ -494,6 +500,20 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Дозволува апликацијата да повика начини за додавање и бришење шаблони на отпечатоци за користење."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"користи хардвер за отпечатоци"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Дозволува апликацијата да користи хардвер за отпечатоци за проверка"</string>
+    <string name="permlab_audioRead" msgid="6617225220728465565">"да ја чита вашата музичка збирка"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"Дозволува апликацијата да ја чита вашата музичка збирка."</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"да ја менува вашата музичка збирка"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"Дозволува апликацијата да ја менува вашата музичка збирка."</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"да ја чита вашата збирка на видеа"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"Дозволува апликацијата да ја чита вашата збирка на видеа."</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"да ја менува вашата збирка на видеа"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"Дозволува апликацијата да ја менува вашата збирка на видеа."</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"да ја чита вашата збирка на фотографии"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"Дозволува апликацијата да ја чита вашата збирка на фотографии."</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"да ја менува вашата збирка на фотографии"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Дозволува апликацијата да ја менува вашата збирка на фотографии."</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"да чита локации од вашата збирка на аудиовизуелни содржини"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Дозволува апликацијата да чита локации од вашата збирка на аудиовизуелни содржини."</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Откриен е делумен отпечаток. Обидете се повторно."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Отпечатокот не можеше да се обработи. Обидете се повторно."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Сензорот за отпечатоци е валкан. Исчистете го и обидете се повторно."</string>
@@ -1875,8 +1895,13 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Да се зачува <xliff:g id="TYPE">%1$s</xliff:g> во &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Да се зачуваат <xliff:g id="TYPE_0">%1$s</xliff:g> и <xliff:g id="TYPE_1">%2$s</xliff:g> во &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Да се зачуваат <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> и <xliff:g id="TYPE_2">%3$s</xliff:g> во &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title" msgid="4879673117448810818">"Дали да се ажурира на &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Дали да се ажурира <xliff:g id="TYPE">%1$s</xliff:g> на &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Дали да се ажурираат <xliff:g id="TYPE_0">%1$s</xliff:g> и <xliff:g id="TYPE_1">%2$s</xliff:g> на &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Дали да се ажурираат <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> и <xliff:g id="TYPE_2">%3$s</xliff:g> на &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Зачувај"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Не, фала"</string>
+    <string name="autofill_update_yes" msgid="310358413273276958">"Ажурирај"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"лозинка"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"адреса"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"кредитна картичка"</string>

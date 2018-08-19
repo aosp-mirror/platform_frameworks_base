@@ -169,12 +169,17 @@ public class SystemFonts {
                 }
             }
 
-            final Font font = new Font.Builder(buffer)
-                    .setWeight(fontConfig.getWeight())
-                    .setItalic(fontConfig.isItalic())
-                    .setTtcIndex(fontConfig.getTtcIndex())
-                    .setFontVariationSettings(fontConfig.getAxes())
-                    .build();
+            final Font font;
+            try {
+                font = new Font.Builder(buffer)
+                        .setWeight(fontConfig.getWeight())
+                        .setItalic(fontConfig.isItalic())
+                        .setTtcIndex(fontConfig.getTtcIndex())
+                        .setFontVariationSettings(fontConfig.getAxes())
+                        .build();
+            } catch (IOException e) {
+                throw new RuntimeException(e);  // Never reaches here
+            }
 
             if (b == null) {
                 b = new FontFamily.Builder(font);

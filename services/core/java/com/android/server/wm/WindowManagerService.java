@@ -1365,7 +1365,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // UID, otherwise we allow unlimited duration. When a UID looses focus we
             // schedule hiding all of its toast windows.
             if (type == TYPE_TOAST) {
-                if (!getDefaultDisplayContentLocked().canAddToastWindowForUid(callingUid)) {
+                if (!displayContent.canAddToastWindowForUid(callingUid)) {
                     Slog.w(TAG_WM, "Adding more than one toast window for UID at a time.");
                     return WindowManagerGlobal.ADD_DUPLICATE_ADD;
                 }
@@ -7420,6 +7420,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     return UserHandle.getUserId(window.mOwnerUid);
                 }
                 return UserHandle.USER_NULL;
+            }
+        }
+
+        @Override
+        public boolean isUidFocused(int uid) {
+            synchronized (mWindowMap) {
+                return mCurrentFocus != null ? uid == mCurrentFocus.getOwningUid() : false;
             }
         }
     }

@@ -1039,7 +1039,7 @@ doc_defaults {
         "ext",
         "framework",
         "voip-common",
-        "android.test.mock",
+        "android.test.mock.impl",
     ],
     local_sourcepaths: frameworks_base_subdirs,
     html_dirs: [
@@ -1474,13 +1474,13 @@ doc_defaults {
         "ext",
         "framework",
         "voip-common",
-        "android.test.mock",
+        "android.test.mock.impl",
     ],
     local_sourcepaths: frameworks_base_subdirs,
     installable: false,
     metalava_enabled: true,
     metalava_annotations_enabled: true,
-    metalava_previous_api: ":public-api-for-metalava-annotations",
+    metalava_previous_api: ":last-released-public-api",
     metalava_merge_annotations_dirs: [
         "metalava-manual",
         "ojluni-annotated-stubs",
@@ -1497,6 +1497,12 @@ droiddoc {
         "core/res/AndroidManifest.xml",
     ],
     args: metalava_framework_docs_args,
+    check_api: {
+        current: {
+            api_file: "api/current.txt",
+            removed_api_file: "api/removed.txt",
+        },
+    },
 }
 
 droiddoc {
@@ -1511,6 +1517,12 @@ droiddoc {
         "core/res/AndroidManifest.xml",
     ],
     args: metalava_framework_docs_args + " --show-annotation android.annotation.SystemApi",
+    check_api: {
+        current: {
+            api_file: "api/system-current.txt",
+            removed_api_file: "api/system-removed.txt",
+        },
+    },
 }
 
 droiddoc {
@@ -1523,4 +1535,10 @@ droiddoc {
         "core/res/AndroidManifest.xml",
     ],
     args: metalava_framework_docs_args + " --show-annotation android.annotation.TestApi",
+    check_api: {
+        current: {
+            api_file: "api/test-current.txt",
+            removed_api_file: "api/test-removed.txt",
+        },
+    },
 }

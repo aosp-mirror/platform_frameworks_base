@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static android.app.slice.Slice.HINT_LIST_ITEM;
+
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
@@ -27,6 +29,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Trace;
 import android.provider.Settings;
 import android.text.Layout;
 import android.text.TextUtils;
@@ -63,6 +66,7 @@ import androidx.slice.SliceViewManager;
 import androidx.slice.core.SliceQuery;
 import androidx.slice.widget.ListContent;
 import androidx.slice.widget.RowContent;
+import androidx.slice.widget.SliceContent;
 import androidx.slice.widget.SliceLiveData;
 
 /**
@@ -148,6 +152,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     }
 
     private void showSlice() {
+        Trace.beginSection("KeyguardSliceView#showSlice");
         if (mPulsing || mSlice == null) {
             mTitle.setVisibility(GONE);
             mRow.setVisibility(GONE);
@@ -157,12 +162,13 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             return;
         }
 
-        ListContent lc = new ListContent(getContext(), mSlice, null, 0, 0);
-        mHasHeader = lc.hasHeader();
-        List<SliceItem> subItems = new ArrayList<SliceItem>();
+        ListContent lc = new ListContent(getContext(), mSlice);
+        SliceContent headerContent = lc.getHeader();
+        mHasHeader = headerContent != null && !headerContent.getSliceItem().hasHint(HINT_LIST_ITEM);
+        List<SliceContent> subItems = new ArrayList<SliceContent>();
         for (int i = 0; i < lc.getRowItems().size(); i++) {
-            SliceItem subItem = lc.getRowItems().get(i);
-            String itemUri = subItem.getSlice().getUri().toString();
+            SliceContent subItem = lc.getRowItems().get(i);
+            String itemUri = subItem.getSliceItem().getSlice().getUri().toString();
             // Filter out the action row
             if (!KeyguardSliceProvider.KEYGUARD_ACTION_URI.equals(itemUri)) {
                 subItems.add(subItem);
@@ -173,9 +179,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         } else {
             mTitle.setVisibility(VISIBLE);
 
-            // If there's a header it'll be the first subitem
-            RowContent header = new RowContent(getContext(), subItems.get(0),
-                    true /* showStartItem */);
+            RowContent header = lc.getHeader();
             SliceItem mainTitle = header.getTitleItem();
             CharSequence title = mainTitle != null ? mainTitle.getText() : null;
             mTitle.setText(title);
@@ -187,8 +191,8 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         final int startIndex = mHasHeader ? 1 : 0; // First item is header; skip it
         mRow.setVisibility(subItemsCount > 0 ? VISIBLE : GONE);
         for (int i = startIndex; i < subItemsCount; i++) {
-            SliceItem item = subItems.get(i);
-            RowContent rc = new RowContent(getContext(), item, true /* showStartItem */);
+            RowContent rc = (RowContent) subItems.get(i);
+            SliceItem item = rc.getSliceItem();
             final Uri itemTag = item.getSlice().getUri();
             // Try to reuse the view if already exists in the layout
             KeyguardSliceButton button = mRow.findViewWithTag(itemTag);
@@ -236,6 +240,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         if (mContentChangeListener != null) {
             mContentChangeListener.run();
         }
+        Trace.endSection();
     }
 
     public void setPulsing(boolean pulsing, boolean animate) {
@@ -383,8 +388,23 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     }
 
     public void refresh() {
-        Slice slice = SliceViewManager.getInstance(getContext()).bindSlice(mKeyguardSliceUri);
+        Slice slice;
+        Trace.beginSection("KeyguardSliceView#refresh");
+        // We can optimize performance and avoid binder calls when we know that we're bound
+        // to a Slice on the same process.
+        if (KeyguardSliceProvider.KEYGUARD_SLICE_URI.equals(mKeyguardSliceUri.toString())) {
+            KeyguardSliceProvider instance = KeyguardSliceProvider.getAttachedInstance();
+            if (instance != null) {
+                slice = instance.onBindSlice(mKeyguardSliceUri);
+            } else {
+                Log.w(TAG, "Keyguard slice not bound yet?");
+                slice = null;
+            }
+        } else {
+            slice = SliceViewManager.getInstance(getContext()).bindSlice(mKeyguardSliceUri);
+        }
         onChanged(slice);
+        Trace.endSection();
     }
 
     public static class Row extends LinearLayout {

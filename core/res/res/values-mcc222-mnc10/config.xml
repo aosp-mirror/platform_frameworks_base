@@ -28,4 +28,8 @@
     <string-array translatable="false" name="config_tether_apndata">
       <item>Tethering Internet,web.omnitel.it,,,,,,,,,222,10,,DUN</item>
     </string-array>
+
+    <!-- Whether safe headphone volume warning dialog is disabled on Vol+ (operator specific). -->
+    <bool name="config_safe_media_disable_on_volume_up">false</bool>
+
 </resources>

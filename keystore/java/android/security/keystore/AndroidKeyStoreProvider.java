@@ -17,6 +17,7 @@
 package android.security.keystore;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.security.KeyStore;
 import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
@@ -156,6 +157,7 @@ public class AndroidKeyStoreProvider extends Provider {
      *         by AndroidKeyStore provider.
      * @throws IllegalStateException if the provided primitive is not initialized.
      */
+    @UnsupportedAppUsage
     public static long getKeyStoreOperationHandle(Object cryptoPrimitive) {
         if (cryptoPrimitive == null) {
             throw new NullPointerException();

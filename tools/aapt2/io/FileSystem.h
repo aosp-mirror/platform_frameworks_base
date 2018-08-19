@@ -59,6 +59,10 @@ class FileCollection : public IFileCollection {
  public:
   FileCollection() = default;
 
+  /** Creates a file collection containing all files contained in the specified root directory. */
+  static std::unique_ptr<FileCollection> Create(const android::StringPiece& path,
+                                                std::string* outError);
+
   // Adds a file located at path. Returns the IFile representation of that file.
   IFile* InsertFile(const android::StringPiece& path);
   IFile* FindFile(const android::StringPiece& path) override;

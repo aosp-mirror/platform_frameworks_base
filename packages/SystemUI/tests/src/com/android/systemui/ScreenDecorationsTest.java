@@ -34,8 +34,10 @@ import static org.mockito.Mockito.when;
 
 import android.app.Fragment;
 import android.content.res.Configuration;
+import android.os.Handler;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
 import android.view.View;
@@ -60,6 +62,7 @@ import org.junit.runner.RunWith;
 @SmallTest
 public class ScreenDecorationsTest extends SysuiTestCase {
 
+    private TestableLooper mTestableLooper;
     private ScreenDecorations mScreenDecorations;
     private StatusBar mStatusBar;
     private WindowManager mWindowManager;
@@ -71,6 +74,10 @@ public class ScreenDecorationsTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        mTestableLooper = TestableLooper.get(this);
+        mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
+                new Handler(mTestableLooper.getLooper()));
+
         mStatusBar = mock(StatusBar.class);
         mWindowManager = mock(WindowManager.class);
         mView = spy(new StatusBarWindowView(mContext, null));
@@ -88,7 +95,31 @@ public class ScreenDecorationsTest extends SysuiTestCase {
 
         mTunerService = mDependency.injectMockDependency(TunerService.class);
 
-        mScreenDecorations = new ScreenDecorations();
+
+        mScreenDecorations = new ScreenDecorations() {
+            @Override
+            public void start() {
+                super.start();
+                mTestableLooper.processAllMessages();
+            }
+
+            @Override
+            Handler startHandlerThread() {
+                return new Handler(mTestableLooper.getLooper());
+            }
+
+            @Override
+            protected void onConfigurationChanged(Configuration newConfig) {
+                super.onConfigurationChanged(newConfig);
+                mTestableLooper.processAllMessages();
+            }
+
+            @Override
+            public void onTuningChanged(String key, String newValue) {
+                super.onTuningChanged(key, newValue);
+                mTestableLooper.processAllMessages();
+            }
+        };
         mScreenDecorations.mContext = mContext;
         mScreenDecorations.mComponents = mContext.getComponents();
 

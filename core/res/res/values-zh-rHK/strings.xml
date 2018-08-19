@@ -300,6 +300,12 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"人體感應器"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"存取與您生命體徵相關的感應器資料"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;存取與您身體機能相關的感應器資料嗎？"</string>
+    <string name="permgrouplab_aural" msgid="965607064083134896">"音樂"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"存取你的音樂"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"要允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;存取你的音樂嗎？"</string>
+    <string name="permgrouplab_visual" msgid="8030190588123857921">"相片和影片"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"存取你的相片和影片"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"要允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;存取你的相片和影片嗎？"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"擷取視窗內容"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"檢查您使用中的視窗內容。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"開啟「輕觸探索」功能"</string>
@@ -494,6 +500,20 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"允許應用程式調用加入和刪除指紋模板的方法以供使用。"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"使用指紋硬件"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"允許應用程式使用指紋硬件驗證"</string>
+    <string name="permlab_audioRead" msgid="6617225220728465565">"讀取你的音樂收藏"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"允許應用程式讀取你的音樂收藏。"</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"修改你的音樂收藏"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"允許應用程式修改你的音樂收藏。"</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"讀取你的影片收藏"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"允許應用程式讀取你的影片收藏。"</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"修改你的影片收藏"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"允許應用程式修改你的影片收藏。"</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"讀取你的相片收藏"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"允許應用程式讀取你的相片收藏。"</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"修改你的相片收藏"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"允許應用程式修改你的相片收藏。"</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"讀取你的媒體收藏的位置資訊"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"允許應用程式讀取你的媒體收藏的位置資訊。"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"只偵測到部分指紋。請再試一次。"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"無法處理指紋。請再試一次。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"指紋感應器不乾淨。請清潔後再試一次。"</string>
@@ -1872,8 +1892,13 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"要將<xliff:g id="TYPE">%1$s</xliff:g>儲存至「&lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;」嗎？"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"要將<xliff:g id="TYPE_0">%1$s</xliff:g>和<xliff:g id="TYPE_1">%2$s</xliff:g>儲存至「&lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;」嗎？"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"要將<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>和<xliff:g id="TYPE_2">%3$s</xliff:g>儲存至「&lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;」嗎？"</string>
+    <string name="autofill_update_title" msgid="4879673117448810818">"要更新為「<xliff:g id="LABEL">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;嗎？"</string>
+    <string name="autofill_update_title_with_type" msgid="339733442087186755">"要將<xliff:g id="TYPE">%1$s</xliff:g>更新為「<xliff:g id="LABEL">%2$s</xliff:g>」&lt;b&gt;&lt;/b&gt;嗎？"</string>
+    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"要將<xliff:g id="TYPE_0">%1$s</xliff:g>和<xliff:g id="TYPE_1">%2$s</xliff:g>更新為「<xliff:g id="LABEL">%3$s</xliff:g>」&lt;b&gt;&lt;/b&gt;嗎？"</string>
+    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"要將<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>和<xliff:g id="TYPE_2">%3$s</xliff:g>更新為「<xliff:g id="LABEL">%4$s</xliff:g>」&lt;b&gt;&lt;/b&gt;嗎？"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"儲存"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"不用了，謝謝"</string>
+    <string name="autofill_update_yes" msgid="310358413273276958">"更新"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"密碼"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"地址"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"信用卡"</string>

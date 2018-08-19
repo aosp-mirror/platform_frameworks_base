@@ -22,31 +22,115 @@
 
 namespace aapt {
 
-struct DumpOptions {
-  DebugPrintTableOptions print_options;
-
-  // The path to a file within an APK to dump.
-  Maybe<std::string> file_to_dump_path;
-};
-
-class DumpCommand : public Command {
+/** Command the contents of files generated from the compilation stage. */
+class DumpAPCCommand : public Command {
  public:
-  DumpCommand() : Command("dump", "d") {
-    SetDescription("Prints resource and manifest information.");
+  explicit DumpAPCCommand(IDiagnostics* diag) : Command("apc"), diag_(diag) {
+    SetDescription("Print the contents of the AAPT2 Container (APC) generated fom compilation.");
     AddOptionalSwitch("--no-values", "Suppresses output of values when displaying resource tables.",
-        &no_values_);
-    AddOptionalFlag("--file", "Dumps the specified file from the APK passed as arg.",
-        &options_.file_to_dump_path);
-    AddOptionalSwitch("-v", "increase verbosity of output", &verbose_);
+                      &no_values_);
+    AddOptionalSwitch("-v", "Enables verbose logging.", &verbose_);
   }
 
   int Action(const std::vector<std::string>& args) override;
 
  private:
-  DumpOptions options_;
-
+  IDiagnostics* diag_;
   bool verbose_ = false;
   bool no_values_ = false;
+};
+
+/** Prints every configuration used by a resource in an APK. */
+class DumpConfigsCommand : public Command {
+ public:
+  explicit DumpConfigsCommand(IDiagnostics* diag) : Command("configurations"), diag_(diag) {
+    SetDescription("Print every configuration used by a resource in the APK.");
+  }
+
+  int Action(const std::vector<std::string>& args) override;
+
+ private:
+  IDiagnostics* diag_;
+};
+
+/** Prints the contents of the resource table string pool in the APK. */
+class DumpStringsCommand : public Command {
+  public:
+    explicit DumpStringsCommand(IDiagnostics* diag) : Command("strings"), diag_(diag) {
+      SetDescription("Print the contents of the resource table string pool in the APK.");
+    }
+
+    int Action(const std::vector<std::string>& args) override;
+
+  private:
+    IDiagnostics* diag_;
+};
+
+/** Prints the contents of the resource table from the APK. */
+class DumpTableCommand : public Command {
+ public:
+  explicit DumpTableCommand(IDiagnostics* diag) : Command("resources"), diag_(diag) {
+    SetDescription("Print the contents of the resource table from the APK.");
+    AddOptionalSwitch("--no-values", "Suppresses output of values when displaying resource tables.",
+                      &no_values_);
+    AddOptionalSwitch("-v", "Enables verbose logging.", &verbose_);
+  }
+
+  int Action(const std::vector<std::string>& args) override;
+
+ private:
+  IDiagnostics* diag_;
+  bool verbose_ = false;
+  bool no_values_ = false;
+};
+
+/** Prints the string pool of a compiled xml in an APK. */
+class DumpXmlStringsCommand : public Command {
+public:
+    explicit DumpXmlStringsCommand(IDiagnostics* diag) : Command("xmlstrings"), diag_(diag) {
+      SetDescription("Print the string pool of a compiled xml in an APK.");
+      AddRequiredFlagList("--file", "A compiled xml file to print", &files_);
+    }
+
+    int Action(const std::vector<std::string>& args) override;
+
+private:
+    IDiagnostics* diag_;
+    std::vector<std::string> files_;
+};
+
+
+/** Prints the tree of a compiled xml in an APK. */
+class DumpXmlTreeCommand : public Command {
+ public:
+  explicit DumpXmlTreeCommand(IDiagnostics* diag) : Command("xmltree"), diag_(diag) {
+    SetDescription("Print the tree of a compiled xml in an APK.");
+    AddRequiredFlagList("--file", "A compiled xml file to print", &files_);
+  }
+
+  int Action(const std::vector<std::string>& args) override;
+
+ private:
+  IDiagnostics* diag_;
+  std::vector<std::string> files_;
+};
+
+/** The default dump command. Preforms no action because a subcommand is required. */
+class DumpCommand : public Command {
+ public:
+  explicit DumpCommand(IDiagnostics* diag) : Command("dump", "d"), diag_(diag) {
+    AddOptionalSubcommand(util::make_unique<DumpAPCCommand>(diag_));
+    AddOptionalSubcommand(util::make_unique<DumpConfigsCommand>(diag_));
+    AddOptionalSubcommand(util::make_unique<DumpStringsCommand>(diag_));
+    AddOptionalSubcommand(util::make_unique<DumpTableCommand>(diag_));
+    AddOptionalSubcommand(util::make_unique<DumpXmlStringsCommand>(diag_));
+    AddOptionalSubcommand(util::make_unique<DumpXmlTreeCommand>(diag_));
+  }
+
+  int Action(const std::vector<std::string>& args) override;
+
+ private:
+  IDiagnostics* diag_;
 };
 
 }// namespace aapt

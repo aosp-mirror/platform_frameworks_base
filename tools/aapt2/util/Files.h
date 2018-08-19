@@ -70,6 +70,9 @@ android::StringPiece GetFilename(const android::StringPiece& path);
 // of the path.
 android::StringPiece GetExtension(const android::StringPiece& path);
 
+// Returns whether or not the name of the file or directory is a hidden file name
+bool IsHidden(const android::StringPiece& path);
+
 // Converts a package name (com.android.app) to a path: com/android/app
 std::string PackageToPath(const android::StringPiece& package);
 

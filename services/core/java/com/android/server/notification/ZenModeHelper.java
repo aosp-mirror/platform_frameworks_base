@@ -102,7 +102,7 @@ public class ZenModeHelper {
     private final ZenModeFiltering mFiltering;
     protected final RingerModeDelegate mRingerModeDelegate = new
             RingerModeDelegate();
-    private final ZenModeConditions mConditions;
+    @VisibleForTesting protected final ZenModeConditions mConditions;
     private final SparseArray<ZenModeConfig> mConfigs = new SparseArray<>();
     private final Metrics mMetrics = new Metrics();
     private final ConditionProviders.Config mServiceConfig;
@@ -1199,7 +1199,9 @@ public class ZenModeHelper {
                 && zen != Global.ZEN_MODE_OFF
                 && !isWatch
                 && Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0;
+                Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0
+                && Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Secure.ZEN_SETTINGS_UPDATED, 0) != 1;
 
         if (isWatch) {
             Settings.Global.putInt(mContext.getContentResolver(),

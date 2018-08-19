@@ -81,6 +81,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private StatusBarNotification mSbn;
     private AnimatorSet mExpandAnimation;
     private boolean mIsForeground;
+    private boolean mIsDeviceProvisioned;
 
     private CheckSaveListener mCheckSaveListener;
     private OnSettingsClickListener mOnSettingsClickListener;
@@ -143,12 +144,13 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             final CheckSaveListener checkSaveListener,
             final OnSettingsClickListener onSettingsClick,
             final OnAppSettingsClickListener onAppSettingsClick,
+            boolean isDeviceProvisioned,
             boolean isNonblockable)
             throws RemoteException {
         bindNotification(pm, iNotificationManager, pkg, notificationChannel,
                 numUniqueChannelsInRow, sbn, checkSaveListener, onSettingsClick,
-                onAppSettingsClick, isNonblockable, false /* isBlockingHelper */,
-                false /* isUserSentimentNegative */);
+                onAppSettingsClick, isDeviceProvisioned, isNonblockable,
+                false /* isBlockingHelper */, false /* isUserSentimentNegative */);
     }
 
     public void bindNotification(
@@ -161,6 +163,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             CheckSaveListener checkSaveListener,
             OnSettingsClickListener onSettingsClick,
             OnAppSettingsClickListener onAppSettingsClick,
+            boolean isDeviceProvisioned,
             boolean isNonblockable,
             boolean isForBlockingHelper,
             boolean isUserSentimentNegative)
@@ -183,6 +186,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                 (mSbn.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
         mIsForBlockingHelper = isForBlockingHelper;
         mAppUid = mSbn.getUid();
+        mIsDeviceProvisioned = isDeviceProvisioned;
 
         int numTotalChannels = mINotificationManager.getNumNotificationChannelsForPackage(
                 pkg, mAppUid, false /* includeDeleted */);
@@ -246,7 +250,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
         // Settings button.
         final View settingsButton = findViewById(R.id.info);
-        if (mAppUid >= 0 && mOnSettingsClickListener != null) {
+        if (mAppUid >= 0 && mOnSettingsClickListener != null && mIsDeviceProvisioned) {
             settingsButton.setVisibility(View.VISIBLE);
             final int appUidF = mAppUid;
             settingsButton.setOnClickListener(
