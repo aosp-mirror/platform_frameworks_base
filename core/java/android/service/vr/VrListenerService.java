@@ -18,6 +18,7 @@ package android.service.vr;
 
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.Service;
 import android.content.ComponentName;
@@ -139,6 +140,7 @@ public abstract class VrListenerService extends Service {
      * @see android.R.attr#enableVrMode
      * @hide
      */
+    @UnsupportedAppUsage
     public void onCurrentVrActivityChanged(
             ComponentName component, boolean running2dInVr, int pid) {
         // Override to implement. Default to old behaviour of sending null for 2D.

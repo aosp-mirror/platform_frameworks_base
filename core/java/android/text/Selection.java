@@ -17,6 +17,7 @@
 package android.text;
 
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 
 import java.text.BreakIterator;
 
@@ -448,6 +449,7 @@ public class Selection {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static boolean moveToPreceding(
             Spannable text, PositionIterator iter, boolean extendSelection) {
         final int offset = iter.preceding(getSelectionEnd(text));
@@ -462,6 +464,7 @@ public class Selection {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static boolean moveToFollowing(
             Spannable text, PositionIterator iter, boolean extendSelection) {
         final int offset = iter.following(getSelectionEnd(text));

@@ -16,6 +16,7 @@
 
 package android.database.sqlite;
 
+import android.annotation.UnsupportedAppUsage;
 import android.database.DatabaseUtils;
 import android.os.CancellationSignal;
 
@@ -31,10 +32,12 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     private final SQLiteDatabase mDatabase;
+    @UnsupportedAppUsage
     private final String mSql;
     private final boolean mReadOnly;
     private final String[] mColumnNames;
     private final int mNumParameters;
+    @UnsupportedAppUsage
     private final Object[] mBindArgs;
 
     SQLiteProgram(SQLiteDatabase db, String sql, Object[] bindArgs,

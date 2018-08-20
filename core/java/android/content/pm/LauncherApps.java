@@ -23,6 +23,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
@@ -135,7 +136,9 @@ public class LauncherApps {
             "android.content.pm.extra.PIN_ITEM_REQUEST";
 
     private final Context mContext;
+    @UnsupportedAppUsage
     private final ILauncherApps mService;
+    @UnsupportedAppUsage
     private final PackageManager mPm;
     private final UserManager mUserManager;
 
@@ -1055,6 +1058,7 @@ public class LauncherApps {
                 shortcut.getUserId());
     }
 
+    @UnsupportedAppUsage
     private void startShortcut(@NonNull String packageName, @NonNull String shortcutId,
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions,
             int userId) {

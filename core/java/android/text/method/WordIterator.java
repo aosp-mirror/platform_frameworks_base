@@ -17,6 +17,7 @@
 package android.text.method;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.icu.lang.UCharacter;
 import android.icu.lang.UProperty;
 import android.icu.text.BreakIterator;
@@ -52,10 +53,12 @@ public class WordIterator implements Selection.PositionIterator {
      * Constructs a new WordIterator for the specified locale.
      * @param locale The locale to be used for analyzing the text.
      */
+    @UnsupportedAppUsage
     public WordIterator(Locale locale) {
         mIterator = BreakIterator.getWordInstance(locale);
     }
 
+    @UnsupportedAppUsage
     public void setCharSequence(@NonNull CharSequence charSequence, int start, int end) {
         if (0 <= start && end <= charSequence.length()) {
             mCharSeq = charSequence;
@@ -68,6 +71,7 @@ public class WordIterator implements Selection.PositionIterator {
     }
 
     /** {@inheritDoc} */
+    @UnsupportedAppUsage
     public int preceding(int offset) {
         checkOffsetIsValid(offset);
         while (true) {
@@ -79,6 +83,7 @@ public class WordIterator implements Selection.PositionIterator {
     }
 
     /** {@inheritDoc} */
+    @UnsupportedAppUsage
     public int following(int offset) {
         checkOffsetIsValid(offset);
         while (true) {
@@ -90,6 +95,7 @@ public class WordIterator implements Selection.PositionIterator {
     }
 
     /** {@inheritDoc} */
+    @UnsupportedAppUsage
     public boolean isBoundary(int offset) {
         checkOffsetIsValid(offset);
         return mIterator.isBoundary(offset);
@@ -102,6 +108,7 @@ public class WordIterator implements Selection.PositionIterator {
      * @param offset the given start position to search from.
      * @return the position of the last boundary preceding the given offset.
      */
+    @UnsupportedAppUsage
     public int nextBoundary(int offset) {
         checkOffsetIsValid(offset);
         return mIterator.following(offset);
@@ -114,6 +121,7 @@ public class WordIterator implements Selection.PositionIterator {
      * @param offset the given start position to search from.
      * @return the position of the last boundary preceding the given offset.
      */
+    @UnsupportedAppUsage
     public int prevBoundary(int offset) {
         checkOffsetIsValid(offset);
         return mIterator.preceding(offset);
@@ -131,6 +139,7 @@ public class WordIterator implements Selection.PositionIterator {
      *
      * @throws IllegalArgumentException is offset is not valid.
      */
+    @UnsupportedAppUsage
     public int getBeginning(int offset) {
         // TODO: Check if usage of this can be updated to getBeginning(offset, true) if
         // so this method can be removed.
@@ -150,6 +159,7 @@ public class WordIterator implements Selection.PositionIterator {
      *
      * @throws IllegalArgumentException is offset is not valid.
      */
+    @UnsupportedAppUsage
     public int getEnd(int offset) {
         // TODO: Check if usage of this can be updated to getEnd(offset, true), if
         // so this method can be removed.
@@ -170,6 +180,7 @@ public class WordIterator implements Selection.PositionIterator {
      *
      * @throws IllegalArgumentException is offset is not valid.
      */
+    @UnsupportedAppUsage
     public int getPrevWordBeginningOnTwoWordsBoundary(int offset) {
         return getBeginning(offset, true);
     }
@@ -188,6 +199,7 @@ public class WordIterator implements Selection.PositionIterator {
      *
      * @throws IllegalArgumentException is offset is not valid.
      */
+    @UnsupportedAppUsage
     public int getNextWordEndOnTwoWordBoundary(int offset) {
         return getEnd(offset, true);
     }
@@ -268,6 +280,7 @@ public class WordIterator implements Selection.PositionIterator {
      *
      * @param offset the offset to search from.
      */
+    @UnsupportedAppUsage
     public int getPunctuationBeginning(int offset) {
         checkOffsetIsValid(offset);
         while (offset != BreakIterator.DONE && !isPunctuationStartBoundary(offset)) {
@@ -284,6 +297,7 @@ public class WordIterator implements Selection.PositionIterator {
      *
      * @param offset the offset to search from.
      */
+    @UnsupportedAppUsage
     public int getPunctuationEnd(int offset) {
         checkOffsetIsValid(offset);
         while (offset != BreakIterator.DONE && !isPunctuationEndBoundary(offset)) {
@@ -300,6 +314,7 @@ public class WordIterator implements Selection.PositionIterator {
      * @param offset the offset to check from.
      * @return Whether the offset is after a punctuation character.
      */
+    @UnsupportedAppUsage
     public boolean isAfterPunctuation(int offset) {
         if (mStart < offset && offset <= mEnd) {
             final int codePoint = Character.codePointBefore(mCharSeq, offset);
@@ -315,6 +330,7 @@ public class WordIterator implements Selection.PositionIterator {
      * @param offset the offset to check from.
      * @return Whether the offset is at a punctuation character.
      */
+    @UnsupportedAppUsage
     public boolean isOnPunctuation(int offset) {
         if (mStart <= offset && offset < mEnd) {
             final int codePoint = Character.codePointAt(mCharSeq, offset);

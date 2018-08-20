@@ -18,6 +18,7 @@ package android.content;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetFileDescriptor;
 import android.database.CrossProcessCursorWrapper;
 import android.database.Cursor;
@@ -68,7 +69,9 @@ public class ContentProviderClient implements AutoCloseable {
     private static Handler sAnrHandler;
 
     private final ContentResolver mContentResolver;
+    @UnsupportedAppUsage
     private final IContentProvider mContentProvider;
+    @UnsupportedAppUsage
     private final String mPackageName;
     private final boolean mStable;
 

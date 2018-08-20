@@ -19,6 +19,7 @@ package android.media.audiofx;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.os.Handler;
 import android.os.Looper;
@@ -400,6 +401,7 @@ public class AudioEffect {
      * @hide
      */
 
+    @UnsupportedAppUsage
     public AudioEffect(UUID type, UUID uuid, int priority, int audioSession)
             throws IllegalArgumentException, UnsupportedOperationException,
             RuntimeException {
@@ -629,6 +631,7 @@ public class AudioEffect {
      * @see #setParameter(byte[], byte[])
      * @hide
      */
+    @UnsupportedAppUsage
     public int setParameter(int[] param, short[] value)
             throws IllegalStateException {
         if (param.length > 2 || value.length > 2) {
@@ -778,6 +781,7 @@ public class AudioEffect {
      * In case of success, the returns the number of meaningful integers in value array.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getParameter(int[] param, int[] value)
             throws IllegalStateException {
         if (param.length > 2 || value.length > 2) {
@@ -846,6 +850,7 @@ public class AudioEffect {
      * @see #getParameter(byte[], byte[])
      * @hide
      */
+    @UnsupportedAppUsage
     public int getParameter(int[] param, byte[] value)
             throws IllegalStateException {
         if (param.length > 2) {
@@ -867,6 +872,7 @@ public class AudioEffect {
      * In case of failure, the returned value is negative and implementation specific.
      * @hide
      */
+    @UnsupportedAppUsage
     public int command(int cmdCode, byte[] command, byte[] reply)
             throws IllegalStateException {
         checkState("command()");
@@ -1277,6 +1283,7 @@ public class AudioEffect {
     /**
     * @hide
     */
+    @UnsupportedAppUsage
     public void checkState(String methodName) throws IllegalStateException {
         synchronized (mStateLock) {
             if (mState != STATE_INITIALIZED) {

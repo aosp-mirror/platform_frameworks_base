@@ -30,6 +30,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.Activity;
@@ -1136,6 +1137,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
             = "android.app.action.DEVICE_POLICY_MANAGER_STATE_CHANGED";
 
@@ -1859,6 +1861,7 @@ public class DevicePolicyManager {
      * @see #getActiveAdmins()
      * @hide
      */
+    @UnsupportedAppUsage
     public @Nullable List<ComponentName> getActiveAdminsAsUser(int userId) {
         if (mService != null) {
             try {
@@ -1886,6 +1889,7 @@ public class DevicePolicyManager {
      * or uninstalled.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean packageHasActiveAdmins(String packageName, int userId) {
         if (mService != null) {
             try {
@@ -2121,6 +2125,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
+    @UnsupportedAppUsage
     public int getPasswordQuality(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
@@ -2186,6 +2191,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
+    @UnsupportedAppUsage
     public int getPasswordMinimumLength(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
@@ -2255,6 +2261,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
+    @UnsupportedAppUsage
     public int getPasswordMinimumUpperCase(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
@@ -2324,6 +2331,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
+    @UnsupportedAppUsage
     public int getPasswordMinimumLowerCase(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
@@ -2392,6 +2400,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
+    @UnsupportedAppUsage
     public int getPasswordMinimumLetters(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
@@ -2460,6 +2469,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
+    @UnsupportedAppUsage
     public int getPasswordMinimumNumeric(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
@@ -2527,6 +2537,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
+    @UnsupportedAppUsage
     public int getPasswordMinimumSymbols(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
@@ -2595,6 +2606,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
+    @UnsupportedAppUsage
     public int getPasswordMinimumNonLetter(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
@@ -2746,6 +2758,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
+    @UnsupportedAppUsage
     public int getPasswordHistoryLength(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
@@ -2872,6 +2885,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getCurrentFailedPasswordAttempts(int userHandle) {
         if (mService != null) {
             try {
@@ -2952,6 +2966,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
+    @UnsupportedAppUsage
     public int getMaximumFailedPasswordsForWipe(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
@@ -3224,6 +3239,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
+    @UnsupportedAppUsage
     public long getMaximumTimeToLock(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
@@ -3297,6 +3313,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
+    @UnsupportedAppUsage
     public long getRequiredStrongAuthTimeout(@Nullable ComponentName admin, @UserIdInt int userId) {
         if (mService != null) {
             try {
@@ -3485,6 +3502,7 @@ public class DevicePolicyManager {
      *            of the device admin that sets the proxy.
      * @hide
      */
+    @UnsupportedAppUsage
     public @Nullable ComponentName setGlobalProxy(@NonNull ComponentName admin, Proxy proxySpec,
             List<String> exclusionList ) {
         throwIfParentInstance("setGlobalProxy");
@@ -3820,6 +3838,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
+    @UnsupportedAppUsage
     public int getStorageEncryptionStatus(int userHandle) {
         if (mService != null) {
             try {
@@ -4543,6 +4562,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
+    @UnsupportedAppUsage
     public boolean getCameraDisabled(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
@@ -4798,6 +4818,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
+    @UnsupportedAppUsage
     public int getKeyguardDisabledFeatures(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
@@ -4812,6 +4833,7 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setActiveAdmin(@NonNull ComponentName policyReceiver, boolean refreshing,
             int userHandle) {
         if (mService != null) {
@@ -4826,6 +4848,7 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setActiveAdmin(@NonNull ComponentName policyReceiver, boolean refreshing) {
         setActiveAdmin(policyReceiver, refreshing, myUserId());
     }
@@ -4846,6 +4869,7 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setActivePasswordState(PasswordMetrics metrics, int userHandle) {
         if (mService != null) {
             try {
@@ -4872,6 +4896,7 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void reportFailedPasswordAttempt(int userHandle) {
         if (mService != null) {
             try {
@@ -4885,6 +4910,7 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void reportSuccessfulPasswordAttempt(int userHandle) {
         if (mService != null) {
             try {
@@ -5513,6 +5539,7 @@ public class DevicePolicyManager {
      * @see #getProfileOwner()
      * @hide
      */
+    @UnsupportedAppUsage
     public @Nullable ComponentName getProfileOwnerAsUser(final int userId)
             throws IllegalArgumentException {
         if (mService != null) {
@@ -5631,6 +5658,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setDefaultSmsApplication(@NonNull ComponentName admin, String packageName) {
         throwIfParentInstance("setDefaultSmsApplication");
         if (mService != null) {
@@ -5846,6 +5874,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
+    @UnsupportedAppUsage
     public @Nullable List<PersistableBundle> getTrustAgentConfiguration(
             @Nullable ComponentName admin, @NonNull ComponentName agent, int userHandle) {
         if (mService != null) {
@@ -8796,6 +8825,7 @@ public class DevicePolicyManager {
         }
     }
 
+    @UnsupportedAppUsage
     private void throwIfParentInstance(String functionName) {
         if (mParentInstance) {
             throw new SecurityException(functionName + " cannot be called on the parent instance");
@@ -8878,6 +8908,7 @@ public class DevicePolicyManager {
      *         mandatory or {@code null} if backups are not mandatory.
      * @hide
      */
+    @UnsupportedAppUsage
     public ComponentName getMandatoryBackupTransport() {
         throwIfParentInstance("getMandatoryBackupTransport");
         try {

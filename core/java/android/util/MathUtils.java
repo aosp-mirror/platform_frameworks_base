@@ -16,6 +16,8 @@
 
 package android.util;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * A class that contains utility methods related to numbers.
  *
@@ -28,10 +30,12 @@ public final class MathUtils {
     private MathUtils() {
     }
 
+    @UnsupportedAppUsage
     public static float abs(float v) {
         return v > 0 ? v : -v;
     }
 
+    @UnsupportedAppUsage
     public static int constrain(int amount, int low, int high) {
         return amount < low ? low : (amount > high ? high : amount);
     }
@@ -40,6 +44,7 @@ public final class MathUtils {
         return amount < low ? low : (amount > high ? high : amount);
     }
 
+    @UnsupportedAppUsage
     public static float constrain(float amount, float low, float high) {
         return amount < low ? low : (amount > high ? high : amount);
     }
@@ -64,6 +69,7 @@ public final class MathUtils {
         return a > b ? a : b;
     }
 
+    @UnsupportedAppUsage
     public static float max(int a, int b) {
         return a > b ? a : b;
     }
@@ -153,6 +159,7 @@ public final class MathUtils {
         return (float) Math.tan(angle);
     }
 
+    @UnsupportedAppUsage
     public static float lerp(float start, float stop, float amount) {
         return start + (stop - start) * amount;
     }

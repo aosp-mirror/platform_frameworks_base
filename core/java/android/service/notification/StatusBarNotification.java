@@ -16,6 +16,7 @@
 
 package android.service.notification;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.Context;
@@ -30,18 +31,26 @@ import android.os.UserHandle;
  * the status bar and any {@link android.service.notification.NotificationListenerService}s.
  */
 public class StatusBarNotification implements Parcelable {
+    @UnsupportedAppUsage
     private final String pkg;
+    @UnsupportedAppUsage
     private final int id;
+    @UnsupportedAppUsage
     private final String tag;
     private final String key;
     private String groupKey;
     private String overrideGroupKey;
 
+    @UnsupportedAppUsage
     private final int uid;
     private final String opPkg;
+    @UnsupportedAppUsage
     private final int initialPid;
+    @UnsupportedAppUsage
     private final Notification notification;
+    @UnsupportedAppUsage
     private final UserHandle user;
+    @UnsupportedAppUsage
     private final long postTime;
 
     private Context mContext; // used for inflation & icon expansion
@@ -269,16 +278,19 @@ public class StatusBarNotification implements Parcelable {
     }
 
     /** The notifying app's calling uid. @hide */
+    @UnsupportedAppUsage
     public int getUid() {
         return uid;
     }
 
     /** The package used for AppOps tracking. @hide */
+    @UnsupportedAppUsage
     public String getOpPkg() {
         return opPkg;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getInitialPid() {
         return initialPid;
     }
@@ -346,6 +358,7 @@ public class StatusBarNotification implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public Context getPackageContext(Context context) {
         if (mContext == null) {
             try {

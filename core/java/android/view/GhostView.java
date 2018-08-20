@@ -15,6 +15,7 @@
  */
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.widget.FrameLayout;
@@ -91,6 +92,7 @@ public class GhostView extends View {
         host.transformMatrixToLocal(matrix);
     }
 
+    @UnsupportedAppUsage
     public static GhostView addGhost(View view, ViewGroup viewGroup, Matrix matrix) {
         if (!(view.getParent() instanceof ViewGroup)) {
             throw new IllegalArgumentException("Ghosted views must be parented by a ViewGroup");
@@ -131,10 +133,12 @@ public class GhostView extends View {
         return ghostView;
     }
 
+    @UnsupportedAppUsage
     public static GhostView addGhost(View view, ViewGroup viewGroup) {
         return addGhost(view, viewGroup, null);
     }
 
+    @UnsupportedAppUsage
     public static void removeGhost(View view) {
         GhostView ghostView = view.mGhostView;
         if (ghostView != null) {

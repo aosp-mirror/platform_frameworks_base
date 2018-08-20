@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -37,6 +38,7 @@ public class ActivityGroup extends Activity {
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
+    @UnsupportedAppUsage
     protected LocalActivityManager mLocalActivityManager;
     
     public ActivityGroup() {

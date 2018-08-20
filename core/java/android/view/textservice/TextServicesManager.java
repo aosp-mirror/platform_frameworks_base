@@ -17,6 +17,7 @@
 package android.view.textservice;
 
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -85,6 +86,7 @@ public final class TextServicesManager {
      * Retrieve the global TextServicesManager instance, creating it if it doesn't already exist.
      * @hide
      */
+    @UnsupportedAppUsage
     public static TextServicesManager getInstance() {
         synchronized (TextServicesManager.class) {
             if (sInstance == null) {
@@ -192,6 +194,7 @@ public final class TextServicesManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public SpellCheckerInfo[] getEnabledSpellCheckers() {
         try {
             final SpellCheckerInfo[] retval = mService.getEnabledSpellCheckers();
@@ -207,6 +210,7 @@ public final class TextServicesManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public SpellCheckerInfo getCurrentSpellChecker() {
         try {
             // Passing null as a locale for ICS
@@ -219,6 +223,7 @@ public final class TextServicesManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public SpellCheckerSubtype getCurrentSpellCheckerSubtype(
             boolean allowImplicitlySelectedSubtype) {
         try {
@@ -232,6 +237,7 @@ public final class TextServicesManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isSpellCheckerEnabled() {
         try {
             return mService.isSpellCheckerEnabled();

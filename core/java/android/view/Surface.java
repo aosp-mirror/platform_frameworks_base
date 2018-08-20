@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.IntDef;
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.Canvas;
 import android.graphics.GraphicBuffer;
@@ -60,6 +61,7 @@ public class Surface implements Parcelable {
             throws OutOfResourcesException;
     private static native void nativeUnlockCanvasAndPost(long nativeObject, Canvas canvas);
 
+    @UnsupportedAppUsage
     private static native void nativeRelease(long nativeObject);
     private static native boolean nativeIsValid(long nativeObject);
     private static native boolean nativeIsConsumerRunningBehind(long nativeObject);
@@ -102,9 +104,13 @@ public class Surface implements Parcelable {
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
     // Guarded state.
+    @UnsupportedAppUsage
     final Object mLock = new Object(); // protects the native state
+    @UnsupportedAppUsage
     private String mName;
+    @UnsupportedAppUsage
     long mNativeObject; // package scope only for SurfaceControl access
+    @UnsupportedAppUsage
     private long mLockedObject;
     private int mGenerationId; // incremented each time mNativeObject changes
     private final Canvas mCanvas = new CompatibleCanvas();
@@ -172,6 +178,7 @@ public class Surface implements Parcelable {
      * Create an empty surface, which will later be filled in by readFromParcel().
      * @hide
      */
+    @UnsupportedAppUsage
     public Surface() {
     }
 
@@ -203,6 +210,7 @@ public class Surface implements Parcelable {
     }
 
     /* called from android_view_Surface_createFromIGraphicBufferProducer() */
+    @UnsupportedAppUsage
     private Surface(long nativeObject) {
         synchronized (mLock) {
             setNativeObjectLocked(nativeObject);
@@ -245,6 +253,7 @@ public class Surface implements Parcelable {
      * called from the process that created the service.
      * @hide
      */
+    @UnsupportedAppUsage
     public void destroy() {
         release();
     }
@@ -293,6 +302,7 @@ public class Surface implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public long getNextFrameNumber() {
         synchronized (mLock) {
             checkNotReleasedLocked();
@@ -485,6 +495,7 @@ public class Surface implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void copyFrom(SurfaceControl other) {
         if (other == null) {
             throw new IllegalArgumentException("other must not be null");
@@ -544,6 +555,7 @@ public class Surface implements Parcelable {
      * @deprecated
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void transferFrom(Surface other) {
         if (other == null) {
             throw new IllegalArgumentException("other must not be null");

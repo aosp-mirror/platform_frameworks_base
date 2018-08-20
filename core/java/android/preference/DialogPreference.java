@@ -20,6 +20,7 @@ package android.preference;
 import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
 import android.annotation.StringRes;
+import android.annotation.UnsupportedAppUsage;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -53,19 +54,27 @@ import android.widget.TextView;
 public abstract class DialogPreference extends Preference implements
         DialogInterface.OnClickListener, DialogInterface.OnDismissListener,
         PreferenceManager.OnActivityDestroyListener {
+    @UnsupportedAppUsage
     private AlertDialog.Builder mBuilder;
     
+    @UnsupportedAppUsage
     private CharSequence mDialogTitle;
+    @UnsupportedAppUsage
     private CharSequence mDialogMessage;
+    @UnsupportedAppUsage
     private Drawable mDialogIcon;
+    @UnsupportedAppUsage
     private CharSequence mPositiveButtonText;
+    @UnsupportedAppUsage
     private CharSequence mNegativeButtonText;
     private int mDialogLayoutResId;
 
     /** The dialog, if it is showing. */
+    @UnsupportedAppUsage
     private Dialog mDialog;
 
     /** Which button was clicked. */
+    @UnsupportedAppUsage
     private int mWhichButtonClicked;
 
     public DialogPreference(

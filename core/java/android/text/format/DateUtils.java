@@ -16,6 +16,7 @@
 
 package android.text.format;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -361,6 +362,7 @@ public class DateUtils
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static CharSequence formatDuration(long millis) {
         return formatDuration(millis, LENGTH_LONG);
     }
@@ -376,6 +378,7 @@ public class DateUtils
      * the briefest form available (e.g. "2h").
      * @hide
      */
+    @UnsupportedAppUsage
     public static CharSequence formatDuration(long millis, int abbrev) {
         final FormatWidth width;
         switch (abbrev) {

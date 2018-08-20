@@ -19,6 +19,7 @@ package android.webkit;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 
 import java.lang.annotation.ElementType;
@@ -92,6 +93,7 @@ public abstract class WebSettings {
         TextSize(int size) {
             value = size;
         }
+        @UnsupportedAppUsage
         int value;
     }
 
@@ -579,6 +581,7 @@ public abstract class WebSettings {
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void setUseDoubleTree(boolean use) {
         // Specified to do nothing, so no need for derived classes to override.
     }
@@ -591,6 +594,7 @@ public abstract class WebSettings {
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public boolean getUseDoubleTree() {
         // Returns false unconditionally, so no need for derived classes to override.
         return false;
@@ -1002,6 +1006,7 @@ public abstract class WebSettings {
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void setPluginsPath(String pluginsPath) {
         // Specified to do nothing, so no need for derived classes to override.
     }
@@ -1197,6 +1202,7 @@ public abstract class WebSettings {
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public String getPluginsPath() {
         // Unconditionally returns empty string, so no need for derived classes to override.
         return "";

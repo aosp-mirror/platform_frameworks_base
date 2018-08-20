@@ -17,6 +17,7 @@
 package android.location;
 
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -122,8 +123,10 @@ public class Location implements Parcelable {
         }
     };
 
+    @UnsupportedAppUsage
     private String mProvider;
     private long mTime = 0;
+    @UnsupportedAppUsage
     private long mElapsedRealtimeNanos = 0;
     private double mLatitude = 0.0;
     private double mLongitude = 0.0;
@@ -1151,6 +1154,7 @@ public class Location implements Parcelable {
      * @param value the Location to attach
      * @hide
      */
+    @UnsupportedAppUsage
     public void setExtraLocation(String key, Location value) {
         if (mExtras == null) {
             mExtras = new Bundle();

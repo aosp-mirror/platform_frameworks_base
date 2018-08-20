@@ -17,6 +17,7 @@
 package android.preference;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.XmlRes;
 import android.app.Activity;
 import android.app.Fragment;
@@ -113,6 +114,7 @@ public abstract class PreferenceFragment extends Fragment implements
 
     private static final String PREFERENCES_TAG = "android:preferences";
 
+    @UnsupportedAppUsage
     private PreferenceManager mPreferenceManager;
     private ListView mList;
     private boolean mHavePrefs;
@@ -402,6 +404,7 @@ public abstract class PreferenceFragment extends Fragment implements
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public ListView getListView() {
         ensureList();
         return mList;

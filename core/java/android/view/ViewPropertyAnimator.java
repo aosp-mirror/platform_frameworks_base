@@ -19,6 +19,7 @@ package android.view;
 import android.animation.Animator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
+import android.annotation.UnsupportedAppUsage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -111,6 +112,7 @@ public class ViewPropertyAnimator {
     /**
      * A RenderThread-driven backend that may intercept startAnimation
      */
+    @UnsupportedAppUsage
     private ViewPropertyAnimatorRT mRTBackend;
 
     /**

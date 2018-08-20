@@ -19,6 +19,7 @@ package android.net;
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -56,6 +57,7 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public NetworkCapabilities() {
         clearAll();
         mNetworkCapabilities = DEFAULT_CAPABILITIES;
@@ -103,6 +105,7 @@ public final class NetworkCapabilities implements Parcelable {
      * Represents the network's capabilities.  If any are specified they will be satisfied
      * by any Network that matches all of them.
      */
+    @UnsupportedAppUsage
     private long mNetworkCapabilities;
 
     /**
@@ -371,6 +374,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
+    @UnsupportedAppUsage
     public NetworkCapabilities addCapability(@NetCapability int capability) {
         checkValidCapability(capability);
         mNetworkCapabilities |= 1 << capability;
@@ -407,6 +411,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
+    @UnsupportedAppUsage
     public NetworkCapabilities removeCapability(@NetCapability int capability) {
         checkValidCapability(capability);
         final long mask = ~(1 << capability);
@@ -659,6 +664,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
+    @UnsupportedAppUsage
     public NetworkCapabilities addTransportType(@Transport int transportType) {
         checkValidTransportType(transportType);
         mTransportTypes |= 1 << transportType;
@@ -898,6 +904,7 @@ public final class NetworkCapabilities implements Parcelable {
      *         specifier. See {@link #setNetworkSpecifier}.
      * @hide
      */
+    @UnsupportedAppUsage
     public NetworkSpecifier getNetworkSpecifier() {
         return mNetworkSpecifier;
     }
@@ -930,6 +937,7 @@ public final class NetworkCapabilities implements Parcelable {
      * Signal strength. This is a signed integer, and higher values indicate better signal.
      * The exact units are bearer-dependent. For example, Wi-Fi uses RSSI.
      */
+    @UnsupportedAppUsage
     private int mSignalStrength = SIGNAL_STRENGTH_UNSPECIFIED;
 
     /**
@@ -945,6 +953,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @param signalStrength the bearer-specific signal strength.
      * @hide
      */
+    @UnsupportedAppUsage
     public NetworkCapabilities setSignalStrength(int signalStrength) {
         mSignalStrength = signalStrength;
         return this;
@@ -955,6 +964,7 @@ public final class NetworkCapabilities implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean hasSignalStrength() {
         return mSignalStrength > SIGNAL_STRENGTH_UNSPECIFIED;
     }
@@ -965,6 +975,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @return The bearer-specific signal strength.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getSignalStrength() {
         return mSignalStrength;
     }
@@ -1544,6 +1555,7 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public static String transportNamesOf(@Transport int[] types) {
         StringJoiner joiner = new StringJoiner("|");
         if (types != null) {

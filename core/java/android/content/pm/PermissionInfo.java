@@ -19,6 +19,7 @@ package android.content.pm;
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -307,6 +308,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static String protectionToString(int level) {
         String protLevel = "????";
         switch (level & PROTECTION_MASK_BASE) {

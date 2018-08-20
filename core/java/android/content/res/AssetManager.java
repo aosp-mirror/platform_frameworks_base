@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration.NativeConfig;
 import android.os.ParcelFileDescriptor;
@@ -65,6 +66,7 @@ public final class AssetManager implements AutoCloseable {
     private static final ApkAssets[] sEmptyApkAssets = new ApkAssets[0];
 
     // Not private for LayoutLib's BridgeAssetManager.
+    @UnsupportedAppUsage
     @GuardedBy("sSync") static AssetManager sSystem = null;
 
     @GuardedBy("sSync") private static ApkAssets[] sSystemApkAssets = new ApkAssets[0];
@@ -95,6 +97,7 @@ public final class AssetManager implements AutoCloseable {
     @GuardedBy("this") private final long[] mOffsets = new long[2];
 
     // Pointer to native implementation, stuffed inside a long.
+    @UnsupportedAppUsage
     @GuardedBy("this") private long mObject;
 
     // The loaded asset paths.
@@ -152,6 +155,7 @@ public final class AssetManager implements AutoCloseable {
      * use by applications.
      * @hide
      */
+    @UnsupportedAppUsage
     public AssetManager() {
         final ApkAssets[] assets;
         synchronized (sSync) {
@@ -249,6 +253,7 @@ public final class AssetManager implements AutoCloseable {
      * system assets (no application assets).
      * @hide
      */
+    @UnsupportedAppUsage
     public static AssetManager getSystem() {
         synchronized (sSync) {
             createSystemAssetsInZygoteLocked();
@@ -362,6 +367,7 @@ public final class AssetManager implements AutoCloseable {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public int addAssetPath(String path) {
         return addAssetPathInternal(path, false /*overlay*/, false /*appAsLib*/);
     }
@@ -371,6 +377,7 @@ public final class AssetManager implements AutoCloseable {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public int addAssetPathAsSharedLibrary(String path) {
         return addAssetPathInternal(path, false /*overlay*/, true /*appAsLib*/);
     }
@@ -380,6 +387,7 @@ public final class AssetManager implements AutoCloseable {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public int addOverlayPath(String path) {
         return addAssetPathInternal(path, true /*overlay*/, false /*appAsLib*/);
     }
@@ -457,6 +465,7 @@ public final class AssetManager implements AutoCloseable {
      * @return {@code true} if the data was loaded into {@code outValue},
      *         {@code false} otherwise
      */
+    @UnsupportedAppUsage
     boolean getResourceValue(@AnyRes int resId, int densityDpi, @NonNull TypedValue outValue,
             boolean resolveRefs) {
         Preconditions.checkNotNull(outValue, "outValue");
@@ -486,6 +495,7 @@ public final class AssetManager implements AutoCloseable {
      * @param resId the resource identifier to load
      * @return the string value, or {@code null}
      */
+    @UnsupportedAppUsage
     @Nullable CharSequence getResourceText(@StringRes int resId) {
         synchronized (this) {
             final TypedValue outValue = mValue;
@@ -504,6 +514,7 @@ public final class AssetManager implements AutoCloseable {
      * @param bagEntryId the index into the bag to load
      * @return the string value, or {@code null}
      */
+    @UnsupportedAppUsage
     @Nullable CharSequence getResourceBagText(@StringRes int resId, int bagEntryId) {
         synchronized (this) {
             ensureValidLocked();
@@ -665,6 +676,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    @UnsupportedAppUsage
     @Nullable String getResourceName(@AnyRes int resId) {
         synchronized (this) {
             ensureValidLocked();
@@ -672,6 +684,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    @UnsupportedAppUsage
     @Nullable String getResourcePackageName(@AnyRes int resId) {
         synchronized (this) {
             ensureValidLocked();
@@ -679,6 +692,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    @UnsupportedAppUsage
     @Nullable String getResourceTypeName(@AnyRes int resId) {
         synchronized (this) {
             ensureValidLocked();
@@ -686,6 +700,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    @UnsupportedAppUsage
     @Nullable String getResourceEntryName(@AnyRes int resId) {
         synchronized (this) {
             ensureValidLocked();
@@ -693,6 +708,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    @UnsupportedAppUsage
     @AnyRes int getResourceIdentifier(@NonNull String name, @Nullable String defType,
             @Nullable String defPackage) {
         synchronized (this) {
@@ -804,6 +820,7 @@ public final class AssetManager implements AutoCloseable {
      * @see #open(String)
      * @hide
      */
+    @UnsupportedAppUsage
     public @NonNull InputStream openNonAsset(@NonNull String fileName) throws IOException {
         return openNonAsset(0, fileName, ACCESS_STREAMING);
     }
@@ -824,6 +841,7 @@ public final class AssetManager implements AutoCloseable {
      * @see #open(String, int)
      * @hide
      */
+    @UnsupportedAppUsage
     public @NonNull InputStream openNonAsset(@NonNull String fileName, int accessMode)
             throws IOException {
         return openNonAsset(0, fileName, accessMode);
@@ -836,6 +854,7 @@ public final class AssetManager implements AutoCloseable {
      * @param fileName Name of the asset to retrieve.
      * @hide
      */
+    @UnsupportedAppUsage
     public @NonNull InputStream openNonAsset(int cookie, @NonNull String fileName)
             throws IOException {
         return openNonAsset(cookie, fileName, ACCESS_STREAMING);
@@ -849,6 +868,7 @@ public final class AssetManager implements AutoCloseable {
      * @param accessMode Desired access mode for retrieving the data.
      * @hide
      */
+    @UnsupportedAppUsage
     public @NonNull InputStream openNonAsset(int cookie, @NonNull String fileName, int accessMode)
             throws IOException {
         Preconditions.checkNotNull(fileName, "fileName");
@@ -970,6 +990,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    @UnsupportedAppUsage
     void applyStyle(long themePtr, @AttrRes int defStyleAttr, @StyleRes int defStyleRes,
             @Nullable XmlBlock.Parser parser, @NonNull int[] inAttrs, long outValuesAddress,
             long outIndicesAddress) {
@@ -984,6 +1005,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    @UnsupportedAppUsage
     boolean resolveAttrs(long themePtr, @AttrRes int defStyleAttr, @StyleRes int defStyleRes,
             @Nullable int[] inValues, @NonNull int[] inAttrs, @NonNull int[] outValues,
             @NonNull int[] outIndices) {
@@ -999,6 +1021,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    @UnsupportedAppUsage
     boolean retrieveAttributes(@NonNull XmlBlock.Parser parser, @NonNull int[] inAttrs,
             @NonNull int[] outValues, @NonNull int[] outIndices) {
         Preconditions.checkNotNull(parser, "parser");
@@ -1014,6 +1037,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    @UnsupportedAppUsage
     long createTheme() {
         synchronized (this) {
             ensureValidLocked();
@@ -1066,6 +1090,7 @@ public final class AssetManager implements AutoCloseable {
         /**
          * @hide
          */
+        @UnsupportedAppUsage
         public final int getAssetInt() {
             throw new UnsupportedOperationException();
         }
@@ -1073,6 +1098,7 @@ public final class AssetManager implements AutoCloseable {
         /**
          * @hide
          */
+        @UnsupportedAppUsage
         public final long getNativeAsset() {
             return mAssetNativePtr;
         }
@@ -1169,6 +1195,7 @@ public final class AssetManager implements AutoCloseable {
      * instantiate a new AssetManager class to see the new data.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isUpToDate() {
         for (ApkAssets apkAssets : getApkAssets()) {
             if (!apkAssets.isUpToDate()) {
@@ -1228,6 +1255,7 @@ public final class AssetManager implements AutoCloseable {
      * applications.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setConfiguration(int mcc, int mnc, @Nullable String locale, int orientation,
             int touchscreen, int density, int keyboard, int keyboardHidden, int navigation,
             int screenWidth, int screenHeight, int smallestScreenWidthDp, int screenWidthDp,
@@ -1244,6 +1272,7 @@ public final class AssetManager implements AutoCloseable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public SparseArray<String> getAssignedPackageIdentifiers() {
         synchronized (this) {
             ensureValidLocked();
@@ -1367,6 +1396,7 @@ public final class AssetManager implements AutoCloseable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public static native int getGlobalAssetCount();
 
     /**
@@ -1377,5 +1407,6 @@ public final class AssetManager implements AutoCloseable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public static native int getGlobalAssetManagerCount();
 }

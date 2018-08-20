@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -37,6 +38,7 @@ public class SyncStatusInfo implements Parcelable {
      */
     private static final int SOURCE_COUNT = 6;
 
+    @UnsupportedAppUsage
     public final int authorityId;
 
     /**
@@ -117,13 +119,21 @@ public class SyncStatusInfo implements Parcelable {
     public final Stats todayStats = new Stats();
     public final Stats yesterdayStats = new Stats();
 
+    @UnsupportedAppUsage
     public long lastSuccessTime;
+    @UnsupportedAppUsage
     public int lastSuccessSource;
+    @UnsupportedAppUsage
     public long lastFailureTime;
+    @UnsupportedAppUsage
     public int lastFailureSource;
+    @UnsupportedAppUsage
     public String lastFailureMesg;
+    @UnsupportedAppUsage
     public long initialFailureTime;
+    @UnsupportedAppUsage
     public boolean pending;
+    @UnsupportedAppUsage
     public boolean initialize;
 
     public final long[] perSourceLastSuccessTimes = new long[SOURCE_COUNT];
@@ -131,15 +141,18 @@ public class SyncStatusInfo implements Parcelable {
 
   // Warning: It is up to the external caller to ensure there are
   // no race conditions when accessing this list
+  @UnsupportedAppUsage
   private ArrayList<Long> periodicSyncTimes;
 
     private final ArrayList<Long> mLastEventTimes = new ArrayList<>();
     private final ArrayList<String> mLastEvents = new ArrayList<>();
 
+    @UnsupportedAppUsage
     public SyncStatusInfo(int authorityId) {
         this.authorityId = authorityId;
     }
 
+    @UnsupportedAppUsage
     public int getLastFailureMesgAsInt(int def) {
         final int i = ContentResolver.syncErrorStringToInt(lastFailureMesg);
         if (i > 0) {
@@ -205,6 +218,7 @@ public class SyncStatusInfo implements Parcelable {
         parcel.writeLongArray(perSourceLastFailureTimes);
     }
 
+    @UnsupportedAppUsage
     public SyncStatusInfo(Parcel parcel) {
         int version = parcel.readInt();
         if (version != VERSION && version != 1) {
@@ -309,6 +323,7 @@ public class SyncStatusInfo implements Parcelable {
         System.arraycopy(from, 0, to, 0, to.length);
     }
 
+    @UnsupportedAppUsage
     public void setPeriodicSyncTime(int index, long when) {
         // The list is initialized lazily when scheduling occurs so we need to make sure
         // we initialize elements < index to zero (zero is ignore for scheduling purposes)
@@ -316,6 +331,7 @@ public class SyncStatusInfo implements Parcelable {
         periodicSyncTimes.set(index, when);
     }
 
+    @UnsupportedAppUsage
     public long getPeriodicSyncTime(int index) {
         if (periodicSyncTimes != null && index < periodicSyncTimes.size()) {
             return periodicSyncTimes.get(index);
@@ -324,6 +340,7 @@ public class SyncStatusInfo implements Parcelable {
         }
     }
 
+    @UnsupportedAppUsage
     public void removePeriodicSyncTime(int index) {
         if (periodicSyncTimes != null && index < periodicSyncTimes.size()) {
             periodicSyncTimes.remove(index);
@@ -383,6 +400,7 @@ public class SyncStatusInfo implements Parcelable {
         }
     }
 
+    @UnsupportedAppUsage
     public static final Creator<SyncStatusInfo> CREATOR = new Creator<SyncStatusInfo>() {
         public SyncStatusInfo createFromParcel(Parcel in) {
             return new SyncStatusInfo(in);
@@ -393,6 +411,7 @@ public class SyncStatusInfo implements Parcelable {
         }
     };
 
+    @UnsupportedAppUsage
     private void ensurePeriodicSyncTimeSize(int index) {
         if (periodicSyncTimes == null) {
             periodicSyncTimes = new ArrayList<Long>(0);

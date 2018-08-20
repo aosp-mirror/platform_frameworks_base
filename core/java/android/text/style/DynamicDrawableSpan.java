@@ -19,6 +19,7 @@ package android.text.style;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -78,6 +79,7 @@ public abstract class DynamicDrawableSpan extends ReplacementSpan {
 
     protected final int mVerticalAlignment;
 
+    @UnsupportedAppUsage
     private WeakReference<Drawable> mDrawableRef;
 
     /**

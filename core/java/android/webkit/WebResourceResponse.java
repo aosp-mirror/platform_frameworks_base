@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 
 import java.io.InputStream;
 import java.io.StringBufferInputStream;
@@ -29,9 +30,11 @@ import java.util.Map;
  * response when the WebView requests a particular resource.
  */
 public class WebResourceResponse {
+    @UnsupportedAppUsage
     private boolean mImmutable;
     private String mMimeType;
     private String mEncoding;
+    @UnsupportedAppUsage
     private int mStatusCode;
     private String mReasonPhrase;
     private Map<String, String> mResponseHeaders;

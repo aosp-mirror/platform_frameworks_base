@@ -811,7 +811,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
 
         int errorCode = mKeyStore.importWrappedKey(
-            Credentials.USER_SECRET_KEY + alias,
+            Credentials.USER_PRIVATE_KEY + alias,
             entry.getWrappedKeyBytes(),
             Credentials.USER_PRIVATE_KEY + entry.getWrappingKeyAlias(),
             maskingKey,

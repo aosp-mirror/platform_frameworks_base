@@ -25,6 +25,7 @@ import android.annotation.PluralsRes;
 import android.annotation.RawRes;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.AssetManager.AssetInputStream;
@@ -79,7 +80,9 @@ public class ResourcesImpl {
 
     static final String TAG_PRELOAD = TAG + ".preload";
 
+    @UnsupportedAppUsage
     private static final boolean TRACE_FOR_PRELOAD = false; // Do we still need it?
+    @UnsupportedAppUsage
     private static final boolean TRACE_FOR_MISS_PRELOAD = false; // Do we still need it?
 
     public static final boolean TRACE_FOR_DETAILED_PRELOAD =
@@ -96,28 +99,37 @@ public class ResourcesImpl {
     private static final Object sSync = new Object();
 
     private static boolean sPreloaded;
+    @UnsupportedAppUsage
     private boolean mPreloading;
 
     // Information about preloaded resources.  Note that they are not
     // protected by a lock, because while preloading in zygote we are all
     // single-threaded, and after that these are immutable.
+    @UnsupportedAppUsage
     private static final LongSparseArray<Drawable.ConstantState>[] sPreloadedDrawables;
+    @UnsupportedAppUsage
     private static final LongSparseArray<Drawable.ConstantState> sPreloadedColorDrawables
             = new LongSparseArray<>();
+    @UnsupportedAppUsage
     private static final LongSparseArray<android.content.res.ConstantState<ComplexColor>>
             sPreloadedComplexColors = new LongSparseArray<>();
 
     /** Lock object used to protect access to caches and configuration. */
+    @UnsupportedAppUsage
     private final Object mAccessLock = new Object();
 
     // These are protected by mAccessLock.
     private final Configuration mTmpConfig = new Configuration();
+    @UnsupportedAppUsage
     private final DrawableCache mDrawableCache = new DrawableCache();
+    @UnsupportedAppUsage
     private final DrawableCache mColorDrawableCache = new DrawableCache();
     private final ConfigurationBoundResourceCache<ComplexColor> mComplexColorCache =
             new ConfigurationBoundResourceCache<>();
+    @UnsupportedAppUsage
     private final ConfigurationBoundResourceCache<Animator> mAnimatorCache =
             new ConfigurationBoundResourceCache<>();
+    @UnsupportedAppUsage
     private final ConfigurationBoundResourceCache<StateListAnimator> mStateListAnimatorCache =
             new ConfigurationBoundResourceCache<>();
 
@@ -138,12 +150,14 @@ public class ResourcesImpl {
     private final XmlBlock[] mCachedXmlBlocks = new XmlBlock[XML_BLOCK_CACHE_SIZE];
 
 
+    @UnsupportedAppUsage
     final AssetManager mAssets;
     private final DisplayMetrics mMetrics = new DisplayMetrics();
     private final DisplayAdjustments mDisplayAdjustments;
 
     private PluralRules mPluralRule;
 
+    @UnsupportedAppUsage
     private final Configuration mConfiguration = new Configuration();
 
     static {
@@ -163,6 +177,7 @@ public class ResourcesImpl {
      * @param displayAdjustments this resource's Display override and compatibility info.
      *                           Must not be null.
      */
+    @UnsupportedAppUsage
     public ResourcesImpl(@NonNull AssetManager assets, @Nullable DisplayMetrics metrics,
             @Nullable Configuration config, @NonNull DisplayAdjustments displayAdjustments) {
         mAssets = assets;
@@ -176,10 +191,12 @@ public class ResourcesImpl {
         return mDisplayAdjustments;
     }
 
+    @UnsupportedAppUsage
     public AssetManager getAssets() {
         return mAssets;
     }
 
+    @UnsupportedAppUsage
     DisplayMetrics getDisplayMetrics() {
         if (DEBUG_CONFIG) Slog.v(TAG, "Returning DisplayMetrics: " + mMetrics.widthPixels
                 + "x" + mMetrics.heightPixels + " " + mMetrics.density);
@@ -207,6 +224,7 @@ public class ResourcesImpl {
         }
     }
 
+    @UnsupportedAppUsage
     void getValue(@AnyRes int id, TypedValue outValue, boolean resolveRefs)
             throws NotFoundException {
         boolean found = mAssets.getResourceValue(id, 0, outValue, resolveRefs);

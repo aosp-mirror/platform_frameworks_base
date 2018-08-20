@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.UnsupportedAppUsage;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 
@@ -495,7 +496,9 @@ public class CamcorderProfile
     }
 
     // Methods implemented by JNI
+    @UnsupportedAppUsage
     private static native final void native_init();
+    @UnsupportedAppUsage
     private static native final CamcorderProfile native_get_camcorder_profile(
             int cameraId, int quality);
     private static native final boolean native_has_camcorder_profile(

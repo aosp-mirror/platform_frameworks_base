@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.UnsupportedAppUsage;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
@@ -44,6 +45,7 @@ import java.util.Arrays;
  */
 @Deprecated
 public class CursorLoader extends AsyncTaskLoader<Cursor> {
+    @UnsupportedAppUsage
     final ForceLoadContentObserver mObserver;
 
     Uri mUri;
@@ -53,6 +55,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     String mSortOrder;
 
     Cursor mCursor;
+    @UnsupportedAppUsage
     CancellationSignal mCancellationSignal;
 
     /* Runs on a worker thread */

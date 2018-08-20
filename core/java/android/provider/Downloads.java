@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.net.NetworkPolicyManager;
@@ -88,6 +89,7 @@ public final class Downloads {
         /**
          * The content:// URI to access downloads owned by the caller's UID.
          */
+        @UnsupportedAppUsage
         public static final Uri CONTENT_URI =
                 Uri.parse("content://downloads/my_downloads");
 
@@ -95,6 +97,7 @@ public final class Downloads {
          * The content URI for accessing all downloads across all UIDs (requires the
          * ACCESS_ALL_DOWNLOADS permission).
          */
+        @UnsupportedAppUsage
         public static final Uri ALL_DOWNLOADS_CONTENT_URI =
                 Uri.parse("content://downloads/all_downloads");
 
@@ -105,6 +108,7 @@ public final class Downloads {
          * The content URI for accessing publicly accessible downloads (i.e., it requires no
          * permissions to access this downloaded file)
          */
+        @UnsupportedAppUsage
         public static final Uri PUBLICLY_ACCESSIBLE_DOWNLOADS_URI =
                 Uri.parse("content://downloads/" + PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
 
@@ -134,6 +138,7 @@ public final class Downloads {
          * <P>Type: TEXT</P>
          * <P>Owner can Init/Read</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_URI = "uri";
 
         /**
@@ -163,6 +168,7 @@ public final class Downloads {
          * <P>Type: TEXT</P>
          * <P>Owner can Init</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_FILE_NAME_HINT = "hint";
 
         /**
@@ -178,6 +184,7 @@ public final class Downloads {
          * <P>Type: TEXT</P>
          * <P>Owner can Init/Read</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_MIME_TYPE = "mimetype";
 
         /**
@@ -186,6 +193,7 @@ public final class Downloads {
          * <P>Type: INTEGER</P>
          * <P>Owner can Init</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_DESTINATION = "destination";
 
         /**
@@ -195,6 +203,7 @@ public final class Downloads {
          * <P>Type: INTEGER</P>
          * <P>Owner can Init/Read/Write</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_VISIBILITY = "visibility";
 
         /**
@@ -231,6 +240,7 @@ public final class Downloads {
          * <P>Type: TEXT</P>
          * <P>Owner can Init/Read</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_NOTIFICATION_PACKAGE = "notificationpackage";
 
         /**
@@ -241,6 +251,7 @@ public final class Downloads {
          * <P>Type: TEXT</P>
          * <P>Owner can Init/Read</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_NOTIFICATION_CLASS = "notificationclass";
 
         /**
@@ -249,6 +260,7 @@ public final class Downloads {
          * <P>Type: TEXT</P>
          * <P>Owner can Init</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_NOTIFICATION_EXTRAS = "notificationextras";
 
         /**
@@ -258,6 +270,7 @@ public final class Downloads {
          * <P>Type: TEXT</P>
          * <P>Owner can Init</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_COOKIE_DATA = "cookiedata";
 
         /**
@@ -274,6 +287,7 @@ public final class Downloads {
          * <P>Type: TEXT</P>
          * <P>Owner can Init</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_REFERER = "referer";
 
         /**
@@ -311,6 +325,7 @@ public final class Downloads {
          * <P>Type: TEXT</P>
          * <P>Owner can Init/Read/Write</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_TITLE = "title";
 
         /**
@@ -320,6 +335,7 @@ public final class Downloads {
          * <P>Type: TEXT</P>
          * <P>Owner can Init/Read/Write</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_DESCRIPTION = "description";
 
         /**
@@ -328,6 +344,7 @@ public final class Downloads {
          * <P>Type: BOOLEAN</P>
          * <P>Owner can Init/Read</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_IS_PUBLIC_API = "is_public_api";
 
         /**
@@ -336,6 +353,7 @@ public final class Downloads {
          * <P>Type: INTEGER</P>
          * <P>Owner can Init/Read</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_ALLOWED_NETWORK_TYPES = "allowed_network_types";
 
         /**
@@ -344,6 +362,7 @@ public final class Downloads {
          * <P>Type: BOOLEAN</P>
          * <P>Owner can Init/Read</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_ALLOW_ROAMING = "allow_roaming";
 
         /**
@@ -360,6 +379,7 @@ public final class Downloads {
          * <P>Type: INTEGER</P>
          * <P>Owner can Init/Read</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI = "is_visible_in_downloads_ui";
 
         /**
@@ -376,6 +396,7 @@ public final class Downloads {
          * <P>Type: BOOLEAN</P>
          * <P>Owner can Read</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_DELETED = "deleted";
 
         /**
@@ -392,6 +413,7 @@ public final class Downloads {
          * It can take the values: null or 0(not scanned), 1(scanned), 2 (not scannable).
          * <P>Type: TEXT</P>
          */
+        @UnsupportedAppUsage
         public static final String COLUMN_MEDIA_SCANNED = "scanned";
 
         /**
@@ -465,6 +487,7 @@ public final class Downloads {
          * immediately after they are used, and are kept around by the download
          * manager as long as space is available.
          */
+        @UnsupportedAppUsage
         public static final int DESTINATION_CACHE_PARTITION_PURGEABLE = 2;
 
         /**
@@ -478,6 +501,7 @@ public final class Downloads {
          * This download will be saved to the location given by the file URI in
          * {@link #COLUMN_FILE_NAME_HINT}.
          */
+        @UnsupportedAppUsage
         public static final int DESTINATION_FILE_URI = 4;
 
         /**
@@ -525,6 +549,7 @@ public final class Downloads {
         /**
          * Returns whether the status is a success (i.e. 2xx).
          */
+        @UnsupportedAppUsage
         public static boolean isStatusSuccess(int status) {
             return (status >= 200 && status < 300);
         }
@@ -532,6 +557,7 @@ public final class Downloads {
         /**
          * Returns whether the status is an error (i.e. 4xx or 5xx).
          */
+        @UnsupportedAppUsage
         public static boolean isStatusError(int status) {
             return (status >= 400 && status < 600);
         }
@@ -556,6 +582,7 @@ public final class Downloads {
          * @param visibility the value of {@link #COLUMN_VISIBILITY}.
          * @return true if the notification should be displayed. false otherwise.
          */
+        @UnsupportedAppUsage
         public static boolean isNotificationToBeDisplayed(int visibility) {
             return visibility == DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED ||
                     visibility == DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION;
@@ -565,6 +592,7 @@ public final class Downloads {
          * Returns whether the download has completed (either with success or
          * error).
          */
+        @UnsupportedAppUsage
         public static boolean isStatusCompleted(int status) {
             return (status >= 200 && status < 300) || (status >= 400 && status < 600);
         }
@@ -795,6 +823,7 @@ public final class Downloads {
              * Prefix for ContentValues keys that contain HTTP header lines, to be passed to
              * DownloadProvider.insert().
              */
+            @UnsupportedAppUsage
             public static final String INSERT_KEY_PREFIX = "http_header_";
         }
     }

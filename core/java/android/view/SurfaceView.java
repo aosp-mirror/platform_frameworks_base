@@ -20,6 +20,7 @@ import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_OVERLA
 import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_SUBLAYER;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_PANEL_SUBLAYER;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.CompatibilityInfo.Translator;
 import android.content.res.Configuration;
@@ -98,13 +99,17 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     private static final String TAG = "SurfaceView";
     private static final boolean DEBUG = false;
 
+    @UnsupportedAppUsage
     final ArrayList<SurfaceHolder.Callback> mCallbacks
             = new ArrayList<SurfaceHolder.Callback>();
 
     final int[] mLocation = new int[2];
 
+    @UnsupportedAppUsage
     final ReentrantLock mSurfaceLock = new ReentrantLock();
+    @UnsupportedAppUsage
     final Surface mSurface = new Surface();       // Current surface in use
+    @UnsupportedAppUsage
     boolean mDrawingStopped = true;
     // We use this to track if the application has produced a frame
     // in to the Surface. Up until that point, we should be careful not to punch
@@ -123,6 +128,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
 
     int mSubLayer = APPLICATION_MEDIA_SUBLAYER;
 
+    @UnsupportedAppUsage
     boolean mIsCreating = false;
     private volatile boolean mRtHandlingPositionUpdates = false;
 
@@ -134,6 +140,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                     }
             };
 
+    @UnsupportedAppUsage
     private final ViewTreeObserver.OnPreDrawListener mDrawListener =
             new ViewTreeObserver.OnPreDrawListener() {
                 @Override
@@ -151,15 +158,20 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     boolean mViewVisibility = false;
     boolean mWindowStopped = false;
 
+    @UnsupportedAppUsage
     int mRequestedWidth = -1;
+    @UnsupportedAppUsage
     int mRequestedHeight = -1;
     /* Set SurfaceView's format to 565 by default to maintain backward
      * compatibility with applications assuming this format.
      */
+    @UnsupportedAppUsage
     int mRequestedFormat = PixelFormat.RGB_565;
 
+    @UnsupportedAppUsage
     boolean mHaveFrame = false;
     boolean mSurfaceCreated = false;
+    @UnsupportedAppUsage
     long mLastLockTime = 0;
 
     boolean mVisible = false;
@@ -167,7 +179,9 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     int mWindowSpaceTop = -1;
     int mSurfaceWidth = -1;
     int mSurfaceHeight = -1;
+    @UnsupportedAppUsage
     int mFormat = -1;
+    @UnsupportedAppUsage
     final Rect mSurfaceFrame = new Rect();
     int mLastSurfaceWidth = -1, mLastSurfaceHeight = -1;
     private Translator mTranslator;
@@ -340,6 +354,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
 
     /** @hide */
     @Override
+    @UnsupportedAppUsage
     protected boolean setFrame(int left, int top, int right, int bottom) {
         boolean result = super.setFrame(left, top, right, bottom);
         updateSurface();
@@ -814,6 +829,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
      * Called by native by a Rendering Worker thread to update the window position
      * @hide
      */
+    @UnsupportedAppUsage
     public final void updateSurfacePosition_renderWorker(long frameNumber,
             int left, int top, int right, int bottom) {
         if (mSurfaceControl == null) {
@@ -854,6 +870,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
      * draw tree. UI thread is blocked at this point.
      * @hide
      */
+    @UnsupportedAppUsage
     public final void surfacePositionLost_uiRtSync(long frameNumber) {
         if (DEBUG) {
             Log.d(TAG, String.format("%d windowPositionLost, frameNr = %d",
@@ -909,6 +926,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
      * @return true if the surface has dimensions that are fixed in size
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isFixedSize() {
         return (mRequestedWidth != -1 || mRequestedHeight != -1);
     }
@@ -928,6 +946,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         mSurfaceControl.setBackgroundColor(bgColor);
     }
 
+    @UnsupportedAppUsage
     private final SurfaceHolder mSurfaceHolder = new SurfaceHolder() {
         private static final String LOG_TAG = "SurfaceHolder";
 

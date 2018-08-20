@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -36,14 +37,17 @@ public class NetworkQuotaInfo implements Parcelable {
     public NetworkQuotaInfo(Parcel in) {
     }
 
+    @UnsupportedAppUsage
     public long getEstimatedBytes() {
         return 0;
     }
 
+    @UnsupportedAppUsage
     public long getSoftLimitBytes() {
         return NO_LIMIT;
     }
 
+    @UnsupportedAppUsage
     public long getHardLimitBytes() {
         return NO_LIMIT;
     }
@@ -57,6 +61,7 @@ public class NetworkQuotaInfo implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
     }
 
+    @UnsupportedAppUsage
     public static final Creator<NetworkQuotaInfo> CREATOR = new Creator<NetworkQuotaInfo>() {
         @Override
         public NetworkQuotaInfo createFromParcel(Parcel in) {

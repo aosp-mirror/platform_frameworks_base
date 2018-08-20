@@ -19,6 +19,7 @@ package android.net;
 import static android.content.pm.PackageManager.GET_SIGNATURES;
 
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -121,6 +122,7 @@ public class NetworkPolicyManager {
     public static final int OVERRIDE_CONGESTED = 1 << 1;
 
     private final Context mContext;
+    @UnsupportedAppUsage
     private INetworkPolicyManager mService;
 
     public NetworkPolicyManager(Context context, INetworkPolicyManager service) {
@@ -131,6 +133,7 @@ public class NetworkPolicyManager {
         mService = service;
     }
 
+    @UnsupportedAppUsage
     public static NetworkPolicyManager from(Context context) {
         return (NetworkPolicyManager) context.getSystemService(Context.NETWORK_POLICY_SERVICE);
     }
@@ -141,6 +144,7 @@ public class NetworkPolicyManager {
      * @param policy should be {@link #POLICY_NONE} or any combination of {@code POLICY_} flags,
      *     although it is not validated.
      */
+    @UnsupportedAppUsage
     public void setUidPolicy(int uid, int policy) {
         try {
             mService.setUidPolicy(uid, policy);
@@ -181,6 +185,7 @@ public class NetworkPolicyManager {
         }
     }
 
+    @UnsupportedAppUsage
     public int getUidPolicy(int uid) {
         try {
             return mService.getUidPolicy(uid);
@@ -189,6 +194,7 @@ public class NetworkPolicyManager {
         }
     }
 
+    @UnsupportedAppUsage
     public int[] getUidsWithPolicy(int policy) {
         try {
             return mService.getUidsWithPolicy(policy);
@@ -197,6 +203,7 @@ public class NetworkPolicyManager {
         }
     }
 
+    @UnsupportedAppUsage
     public void registerListener(INetworkPolicyListener listener) {
         try {
             mService.registerListener(listener);
@@ -205,6 +212,7 @@ public class NetworkPolicyManager {
         }
     }
 
+    @UnsupportedAppUsage
     public void unregisterListener(INetworkPolicyListener listener) {
         try {
             mService.unregisterListener(listener);
@@ -221,6 +229,7 @@ public class NetworkPolicyManager {
         }
     }
 
+    @UnsupportedAppUsage
     public NetworkPolicy[] getNetworkPolicies() {
         try {
             return mService.getNetworkPolicies(mContext.getOpPackageName());
@@ -229,6 +238,7 @@ public class NetworkPolicyManager {
         }
     }
 
+    @UnsupportedAppUsage
     public void setRestrictBackground(boolean restrictBackground) {
         try {
             mService.setRestrictBackground(restrictBackground);
@@ -237,6 +247,7 @@ public class NetworkPolicyManager {
         }
     }
 
+    @UnsupportedAppUsage
     public boolean getRestrictBackground() {
         try {
             return mService.getRestrictBackground();

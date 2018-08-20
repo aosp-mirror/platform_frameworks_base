@@ -17,6 +17,7 @@
 package android.database;
 
 import android.annotation.BytesLong;
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteClosable;
 import android.database.sqlite.SQLiteException;
@@ -45,12 +46,14 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     private static final String STATS_TAG = "CursorWindowStats";
 
     // This static member will be evaluated when first used.
+    @UnsupportedAppUsage
     private static int sCursorWindowSize = -1;
 
     /**
      * The native CursorWindow object pointer.  (FOR INTERNAL USE ONLY)
      * @hide
      */
+    @UnsupportedAppUsage
     public long mWindowPtr;
 
     private int mStartPos;
@@ -744,6 +747,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         dispose();
     }
 
+    @UnsupportedAppUsage
     private static final LongSparseArray<Integer> sWindowToPidMap = new LongSparseArray<Integer>();
 
     private void recordNewWindow(int pid, long window) {
@@ -765,6 +769,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         }
     }
 
+    @UnsupportedAppUsage
     private String printStats() {
         StringBuilder buff = new StringBuilder();
         int myPid = Process.myPid();

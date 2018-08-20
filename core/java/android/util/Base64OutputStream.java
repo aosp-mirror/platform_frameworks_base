@@ -16,6 +16,7 @@
 
 package android.util;
 
+import android.annotation.UnsupportedAppUsage;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -57,6 +58,7 @@ public class Base64OutputStream extends FilterOutputStream {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public Base64OutputStream(OutputStream out, int flags, boolean encode) {
         super(out);
         this.flags = flags;

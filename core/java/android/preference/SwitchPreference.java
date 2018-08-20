@@ -17,6 +17,7 @@
 package android.preference;
 
 import android.annotation.StringRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -37,6 +38,7 @@ import android.widget.Switch;
  * @attr ref android.R.styleable#SwitchPreference_disableDependentsState
  */
 public class SwitchPreference extends TwoStatePreference {
+    @UnsupportedAppUsage
     private final Listener mListener = new Listener();
 
     // Switch text for on and off states

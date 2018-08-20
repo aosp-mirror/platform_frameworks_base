@@ -19,6 +19,7 @@ package android.net;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.DownloadManager;
 import android.app.backup.BackupManager;
 import android.app.usage.NetworkStatsManager;
@@ -141,6 +142,7 @@ public class TrafficStats {
 
     private static INetworkStatsService sStatsService;
 
+    @UnsupportedAppUsage
     private synchronized static INetworkStatsService getStatsService() {
         if (sStatsService == null) {
             sStatsService = INetworkStatsService.Stub.asInterface(
@@ -528,6 +530,7 @@ public class TrafficStats {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static long getMobileTcpRxPackets() {
         long total = 0;
         for (String iface : getMobileIfaces()) {
@@ -543,6 +546,7 @@ public class TrafficStats {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static long getMobileTcpTxPackets() {
         long total = 0;
         for (String iface : getMobileIfaces()) {
@@ -576,6 +580,7 @@ public class TrafficStats {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static long getTxBytes(String iface) {
         try {
             return getStatsService().getIfaceStats(iface, TYPE_TX_BYTES);
@@ -585,6 +590,7 @@ public class TrafficStats {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static long getRxBytes(String iface) {
         try {
             return getStatsService().getIfaceStats(iface, TYPE_RX_BYTES);
@@ -940,6 +946,7 @@ public class TrafficStats {
      * Interfaces are never removed from this list, so counters should always be
      * monotonic.
      */
+    @UnsupportedAppUsage
     private static String[] getMobileIfaces() {
         try {
             return getStatsService().getMobileIfaces();

@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.webkit.CacheManager.CacheResult;
 import android.webkit.PluginData;
 import android.webkit.UrlInterceptHandler;
@@ -55,6 +56,7 @@ public final class UrlInterceptRegistry {
      * deprecated, so is this class.
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static synchronized void setUrlInterceptDisabled(boolean disabled) {
         mDisabled = disabled;
     }
@@ -85,6 +87,7 @@ public final class UrlInterceptRegistry {
      * deprecated, so is this class.
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static synchronized boolean registerHandler(
             UrlInterceptHandler handler) {
         if (!getHandlers().contains(handler)) {
@@ -106,6 +109,7 @@ public final class UrlInterceptRegistry {
      * deprecated, so is this class.
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static synchronized boolean unregisterHandler(
             UrlInterceptHandler handler) {
         return getHandlers().remove(handler);
@@ -152,6 +156,7 @@ public final class UrlInterceptRegistry {
      */
     @Deprecated
     @Nullable
+    @UnsupportedAppUsage
     public static synchronized PluginData getPluginData(
             String url, Map<String, String> headers) {
         if (urlInterceptDisabled()) {

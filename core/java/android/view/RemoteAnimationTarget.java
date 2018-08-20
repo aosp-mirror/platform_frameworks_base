@@ -28,6 +28,7 @@ import static android.app.RemoteAnimationTargetProto.TASK_ID;
 import static android.app.RemoteAnimationTargetProto.WINDOW_CONFIGURATION;
 
 import android.annotation.IntDef;
+import android.annotation.UnsupportedAppUsage;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -66,21 +67,25 @@ public class RemoteAnimationTarget implements Parcelable {
     /**
      * The {@link Mode} to describe whether this app is opening or closing.
      */
+    @UnsupportedAppUsage
     public final @Mode int mode;
 
     /**
      * The id of the task this app belongs to.
      */
+    @UnsupportedAppUsage
     public final int taskId;
 
     /**
      * The {@link SurfaceControl} object to actually control the transform of the app.
      */
+    @UnsupportedAppUsage
     public final SurfaceControl leash;
 
     /**
      * Whether the app is translucent and may reveal apps behind.
      */
+    @UnsupportedAppUsage
     public final boolean isTranslucent;
 
     /**
@@ -89,11 +94,13 @@ public class RemoteAnimationTarget implements Parcelable {
      * anything that extends beyond these bounds will not have any effect. This implies that any
      * clip-rect animation should likely stop at these bounds.
      */
+    @UnsupportedAppUsage
     public final Rect clipRect;
 
     /**
      * The insets of the main app window.
      */
+    @UnsupportedAppUsage
     public final Rect contentInsets;
 
     /**
@@ -101,6 +108,7 @@ public class RemoteAnimationTarget implements Parcelable {
      * to preserve original z-layer order in the hierarchy tree assuming no "boosting" needs to
      * happen.
      */
+    @UnsupportedAppUsage
     public final int prefixOrderIndex;
 
     /**
@@ -108,6 +116,7 @@ public class RemoteAnimationTarget implements Parcelable {
      * is modified from the controlling app, any animation transform needs to be offset by this
      * amount.
      */
+    @UnsupportedAppUsage
     public final Point position;
 
     /**
@@ -115,16 +124,19 @@ public class RemoteAnimationTarget implements Parcelable {
      * of the leash is modified from the controlling app, it needs to take the source container
      * bounds into account when calculating the crop.
      */
+    @UnsupportedAppUsage
     public final Rect sourceContainerBounds;
 
     /**
      * The window configuration for the target.
      */
+    @UnsupportedAppUsage
     public final WindowConfiguration windowConfiguration;
 
     /**
      * Whether the task is not presented in Recents UI.
      */
+    @UnsupportedAppUsage
     public boolean isNotInRecents;
 
     public RemoteAnimationTarget(int taskId, int mode, SurfaceControl leash, boolean isTranslucent,

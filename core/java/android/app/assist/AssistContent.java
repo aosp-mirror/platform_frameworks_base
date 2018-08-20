@@ -1,5 +1,6 @@
 package android.app.assist;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
@@ -13,12 +14,18 @@ import android.os.Parcelable;
  * {@link android.app.Activity#onProvideAssistContent Activity.onProvideAssistContent}.
  */
 public class AssistContent implements Parcelable {
+    @UnsupportedAppUsage
     private boolean mIsAppProvidedIntent = false;
     private boolean mIsAppProvidedWebUri = false;
+    @UnsupportedAppUsage
     private Intent mIntent;
+    @UnsupportedAppUsage
     private String mStructuredData;
+    @UnsupportedAppUsage
     private ClipData mClipData;
+    @UnsupportedAppUsage
     private Uri mUri;
+    @UnsupportedAppUsage
     private final Bundle mExtras;
 
     public AssistContent() {
@@ -148,6 +155,7 @@ public class AssistContent implements Parcelable {
         return mExtras;
     }
 
+    @UnsupportedAppUsage
     AssistContent(Parcel in) {
         if (in.readInt() != 0) {
             mIntent = Intent.CREATOR.createFromParcel(in);
@@ -166,6 +174,7 @@ public class AssistContent implements Parcelable {
         mIsAppProvidedWebUri = in.readInt() == 1;
     }
 
+    @UnsupportedAppUsage
     void writeToParcelInternal(Parcel dest, int flags) {
         if (mIntent != null) {
             dest.writeInt(1);

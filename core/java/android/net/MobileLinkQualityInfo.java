@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 
 /**
@@ -93,6 +94,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
      * returns mobile network type as defined by {@link android.telephony.TelephonyManager}
      * @return network type or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
      */
+    @UnsupportedAppUsage
     public int getMobileNetworkType() {
         return mMobileNetworkType;
     }
@@ -100,6 +102,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setMobileNetworkType(int mobileNetworkType) {
         mMobileNetworkType = mobileNetworkType;
     }
@@ -115,6 +118,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setRssi(int Rssi) {
         mRssi = Rssi;
     }
@@ -130,6 +134,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setGsmErrorRate(int gsmErrorRate) {
         mGsmErrorRate = gsmErrorRate;
     }
@@ -145,6 +150,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setCdmaDbm(int cdmaDbm) {
         mCdmaDbm = cdmaDbm;
     }
@@ -160,6 +166,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setCdmaEcio(int cdmaEcio) {
         mCdmaEcio = cdmaEcio;
     }
@@ -175,6 +182,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setEvdoDbm(int evdoDbm) {
         mEvdoDbm = evdoDbm;
     }
@@ -190,6 +198,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setEvdoEcio(int evdoEcio) {
         mEvdoEcio = evdoEcio;
     }
@@ -205,6 +214,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setEvdoSnr(int evdoSnr) {
         mEvdoSnr = evdoSnr;
     }
@@ -220,6 +230,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setLteSignalStrength(int lteSignalStrength) {
         mLteSignalStrength = lteSignalStrength;
     }
@@ -235,6 +246,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setLteRsrp(int lteRsrp) {
         mLteRsrp = lteRsrp;
     }
@@ -250,6 +262,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setLteRsrq(int lteRsrq) {
         mLteRsrq = lteRsrq;
     }
@@ -265,6 +278,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setLteRssnr(int lteRssnr) {
         mLteRssnr = lteRssnr;
     }
@@ -280,6 +294,7 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void setLteCqi(int lteCqi) {
         mLteCqi = lteCqi;
     }

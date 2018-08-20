@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.UnsupportedAppUsage;
 import android.net.NetworkUtils;
 import android.os.IBinder;
 import android.os.StrictMode;
@@ -46,20 +47,28 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     // connection timeout - 30 sec
     private static final int CONNECT_TIMEOUT_MS = 30 * 1000;
 
+    @UnsupportedAppUsage
     private long mCurrentOffset = -1;
+    @UnsupportedAppUsage
     private URL mURL = null;
+    @UnsupportedAppUsage
     private Map<String, String> mHeaders = null;
+    @UnsupportedAppUsage
     private HttpURLConnection mConnection = null;
+    @UnsupportedAppUsage
     private long mTotalSize = -1;
     private InputStream mInputStream = null;
 
+    @UnsupportedAppUsage
     private boolean mAllowCrossDomainRedirect = true;
+    @UnsupportedAppUsage
     private boolean mAllowCrossProtocolRedirect = true;
 
     // from com.squareup.okhttp.internal.http
     private final static int HTTP_TEMP_REDIRECT = 307;
     private final static int MAX_REDIRECTS = 20;
 
+    @UnsupportedAppUsage
     public MediaHTTPConnection() {
         CookieHandler cookieHandler = CookieHandler.getDefault();
         if (cookieHandler == null) {
@@ -70,6 +79,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     }
 
     @Override
+    @UnsupportedAppUsage
     public IBinder connect(String uri, String headers) {
         if (VERBOSE) {
             Log.d(TAG, "connect: uri=" + uri + ", headers=" + headers);
@@ -128,6 +138,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     }
 
     @Override
+    @UnsupportedAppUsage
     public void disconnect() {
         teardownConnection();
         mHeaders = null;
@@ -312,6 +323,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     }
 
     @Override
+    @UnsupportedAppUsage
     public int readAt(long offset, int size) {
         return native_readAt(offset, size);
     }
@@ -379,6 +391,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     }
 
     @Override
+    @UnsupportedAppUsage
     public String getMIMEType() {
         if (mConnection == null) {
             try {
@@ -392,6 +405,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     }
 
     @Override
+    @UnsupportedAppUsage
     public String getUri() {
         return mURL.toString();
     }

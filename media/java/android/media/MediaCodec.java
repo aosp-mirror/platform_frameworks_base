@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -2137,6 +2138,7 @@ final public class MediaCodec {
      * Thrown when an internal codec error occurs.
      */
     public final static class CodecException extends IllegalStateException {
+        @UnsupportedAppUsage
         CodecException(int errorCode, int actionCode, @Nullable String detailMessage) {
             super(detailMessage);
             mErrorCode = errorCode;
@@ -2805,6 +2807,7 @@ final public class MediaCodec {
                 index, true /* render */, true /* updatePTS */, renderTimestampNs);
     }
 
+    @UnsupportedAppUsage
     private native final void releaseOutputBuffer(
             int index, boolean render, boolean updatePTS, long timeNs);
 
@@ -3525,6 +3528,7 @@ final public class MediaCodec {
         }
     }
 
+    @UnsupportedAppUsage
     private native final void setParameters(@NonNull String[] keys, @NonNull Object[] values);
 
     /**
@@ -3555,6 +3559,7 @@ final public class MediaCodec {
     private native final MediaCodecInfo getOwnCodecInfo();
 
     @NonNull
+    @UnsupportedAppUsage
     private native final ByteBuffer[] getBuffers(boolean input);
 
     @Nullable
@@ -3575,6 +3580,7 @@ final public class MediaCodec {
         native_init();
     }
 
+    @UnsupportedAppUsage
     private long mNativeContext;
 
     /** @hide */

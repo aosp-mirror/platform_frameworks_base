@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager.TaskSnapshot;
 import android.content.ComponentName;
 import android.os.RemoteException;
@@ -27,40 +28,49 @@ import android.os.RemoteException;
  */
 public abstract class TaskStackListener extends ITaskStackListener.Stub {
     @Override
+    @UnsupportedAppUsage
     public void onTaskStackChanged() throws RemoteException {
     }
 
     @Override
+    @UnsupportedAppUsage
     public void onActivityPinned(String packageName, int userId, int taskId, int stackId)
             throws RemoteException {
     }
 
     @Override
+    @UnsupportedAppUsage
     public void onActivityUnpinned() throws RemoteException {
     }
 
     @Override
+    @UnsupportedAppUsage
     public void onPinnedActivityRestartAttempt(boolean clearedTask) throws RemoteException {
     }
 
     @Override
+    @UnsupportedAppUsage
     public void onPinnedStackAnimationStarted() throws RemoteException {
     }
 
     @Override
+    @UnsupportedAppUsage
     public void onPinnedStackAnimationEnded() throws RemoteException {
     }
 
     @Override
+    @UnsupportedAppUsage
     public void onActivityForcedResizable(String packageName, int taskId, int reason)
             throws RemoteException {
     }
 
     @Override
+    @UnsupportedAppUsage
     public void onActivityDismissingDockedStack() throws RemoteException {
     }
 
     @Override
+    @UnsupportedAppUsage
     public void onActivityLaunchOnSecondaryDisplayFailed() throws RemoteException {
     }
 
@@ -69,10 +79,12 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
+    @UnsupportedAppUsage
     public void onTaskRemoved(int taskId) throws RemoteException {
     }
 
     @Override
+    @UnsupportedAppUsage
     public void onTaskMovedToFront(int taskId) throws RemoteException {
     }
 
@@ -86,15 +98,18 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
+    @UnsupportedAppUsage
     public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation)
             throws RemoteException {
     }
 
     @Override
+    @UnsupportedAppUsage
     public void onTaskProfileLocked(int taskId, int userId) throws RemoteException {
     }
 
     @Override
+    @UnsupportedAppUsage
     public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) throws RemoteException {
     }
 }

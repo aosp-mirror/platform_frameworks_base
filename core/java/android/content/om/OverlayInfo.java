@@ -18,6 +18,7 @@ package android.content.om;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -107,11 +108,13 @@ public final class OverlayInfo implements Parcelable {
     /**
      * Package name of the overlay package
      */
+    @UnsupportedAppUsage
     public final String packageName;
 
     /**
      * Package name of the target package
      */
+    @UnsupportedAppUsage
     public final String targetPackageName;
 
     /**
@@ -127,6 +130,7 @@ public final class OverlayInfo implements Parcelable {
     /**
      * The state of this OverlayInfo as defined by the STATE_* constants in this class.
      */
+    @UnsupportedAppUsage
     public final @State int state;
 
     /**
@@ -251,6 +255,7 @@ public final class OverlayInfo implements Parcelable {
      *
      * @return true if the overlay is enabled, else false.
      */
+    @UnsupportedAppUsage
     public boolean isEnabled() {
         switch (state) {
             case STATE_ENABLED:

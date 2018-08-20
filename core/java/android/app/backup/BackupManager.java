@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -192,8 +193,10 @@ public class BackupManager {
     public static final int ERROR_TRANSPORT_INVALID = -2;
 
     private Context mContext;
+    @UnsupportedAppUsage
     private static IBackupManager sService;
 
+    @UnsupportedAppUsage
     private static void checkServiceBinder() {
         if (sService == null) {
             sService = IBackupManager.Stub.asInterface(
