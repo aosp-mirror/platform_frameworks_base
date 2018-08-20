@@ -17,6 +17,7 @@
 package android.preference;
 
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
@@ -46,6 +47,7 @@ public class EditTextPreference extends DialogPreference {
     /**
      * The edit text shown in the dialog.
      */
+    @UnsupportedAppUsage
     private EditText mEditText;
     
     private String mText;

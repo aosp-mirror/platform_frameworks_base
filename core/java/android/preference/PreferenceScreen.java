@@ -16,6 +16,7 @@
 
 package android.preference;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -89,10 +90,12 @@ import android.widget.TextView;
 public final class PreferenceScreen extends PreferenceGroup implements AdapterView.OnItemClickListener,
         DialogInterface.OnDismissListener {
 
+    @UnsupportedAppUsage
     private ListAdapter mRootAdapter;
     
     private Dialog mDialog;
 
+    @UnsupportedAppUsage
     private ListView mListView;
 
     private int mLayoutResId = com.android.internal.R.layout.preference_list_fragment;
@@ -103,6 +106,7 @@ public final class PreferenceScreen extends PreferenceGroup implements AdapterVi
      * Do NOT use this constructor, use {@link PreferenceManager#createPreferenceScreen(Context)}.
      * @hide-
      */
+    @UnsupportedAppUsage
     public PreferenceScreen(Context context, AttributeSet attrs) {
         super(context, attrs, com.android.internal.R.attr.preferenceScreenStyle);
 

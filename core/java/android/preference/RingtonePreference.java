@@ -16,6 +16,7 @@
 
 package android.preference;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -49,6 +50,7 @@ public class RingtonePreference extends Preference implements
     private boolean mShowDefault;
     private boolean mShowSilent;
     
+    @UnsupportedAppUsage
     private int mRequestCode;
 
     public RingtonePreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
