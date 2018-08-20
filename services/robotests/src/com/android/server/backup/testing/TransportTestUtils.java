@@ -164,18 +164,18 @@ public class TransportTestUtils {
                 when(transportClientMock.connectOrThrow(any())).thenReturn(transportMock);
                 when(transportClientMock.connect(any())).thenReturn(transportMock);
 
-                return new TransportMock(transportClientMock, transportMock);
+                return new TransportMock(transport, transportClientMock, transportMock);
             } else {
                 // Transport registered but unavailable
                 when(transportClientMock.connectOrThrow(any()))
                         .thenThrow(TransportNotAvailableException.class);
                 when(transportClientMock.connect(any())).thenReturn(null);
 
-                return new TransportMock(transportClientMock, null);
+                return new TransportMock(transport, transportClientMock, null);
             }
         } else {
             // Transport not registered
-            return new TransportMock(null, null);
+            return new TransportMock(transport, null, null);
         }
     }
 
@@ -196,11 +196,15 @@ public class TransportTestUtils {
     }
 
     public static class TransportMock {
+        public final TransportData transportData;
         @Nullable public final TransportClient transportClient;
         @Nullable public final IBackupTransport transport;
 
         private TransportMock(
-                @Nullable TransportClient transportClient, @Nullable IBackupTransport transport) {
+                TransportData transportData,
+                @Nullable TransportClient transportClient,
+                @Nullable IBackupTransport transport) {
+            this.transportData = transportData;
             this.transportClient = transportClient;
             this.transport = transport;
         }

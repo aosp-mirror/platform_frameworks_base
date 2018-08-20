@@ -20,6 +20,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.robolectric.Shadows.shadowOf;
 
+import static java.util.stream.Collectors.toSet;
+
 import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
@@ -36,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 public class TestUtils {
     private static final long TIMEOUT_MS = 3000;
@@ -87,18 +90,43 @@ public class TestUtils {
         ShadowSystemClock.setCurrentTimeMillis(shadowLooper.getScheduler().getCurrentTime());
     }
 
-    /** Reset logcat with {@link ShadowLog#reset()} before the test case. */
+    /**
+     * Reset logcat with {@link ShadowLog#reset()} before the test case if you do anything that uses
+     * logcat before that.
+     */
     public static void assertLogcatAtMost(String tag, int level) {
         assertThat(ShadowLog.getLogsForTag(tag).stream().allMatch(logItem -> logItem.type <= level))
                 .named("All logs <= " + level)
                 .isTrue();
     }
 
-    /** Reset logcat with {@link ShadowLog#reset()} before the test case. */
+    /**
+     * Reset logcat with {@link ShadowLog#reset()} before the test case if you do anything that uses
+     * logcat before that.
+     */
     public static void assertLogcatAtLeast(String tag, int level) {
         assertThat(ShadowLog.getLogsForTag(tag).stream().anyMatch(logItem -> logItem.type >= level))
                 .named("Any log >= " + level)
                 .isTrue();
+    }
+
+    /**
+     * Verifies that logcat has produced log items as specified per level in {@code logs} (with
+     * repetition).
+     *
+     * <p>So, if you call {@code assertLogcat(TAG, Log.ERROR, Log.ERROR)}, you assert that there are
+     * exactly 2 log items, each with level ERROR.
+     *
+     * <p>Reset logcat with {@link ShadowLog#reset()} before the test case if you do anything
+     * that uses logcat before that.
+     */
+    public static void assertLogcat(String tag, int... logs) {
+        assertThat(
+                        ShadowLog.getLogsForTag(tag).stream()
+                                .map(logItem -> logItem.type)
+                                .collect(toSet()))
+                .named("Log items (specified per level)")
+                .containsExactly(IntStream.of(logs).boxed().toArray());
     }
 
     public static void assertLogcatContains(String tag, Predicate<ShadowLog.LogItem> predicate) {

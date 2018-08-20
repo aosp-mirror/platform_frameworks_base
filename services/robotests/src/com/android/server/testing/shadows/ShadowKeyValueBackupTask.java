@@ -17,12 +17,11 @@
 package com.android.server.testing.shadows;
 
 import android.annotation.Nullable;
-import android.app.backup.IBackupManagerMonitor;
-import android.app.backup.IBackupObserver;
 
 import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.internal.OnTaskFinishedListener;
+import com.android.server.backup.keyvalue.KeyValueBackupReporter;
 import com.android.server.backup.keyvalue.KeyValueBackupTask;
 import com.android.server.backup.transport.TransportClient;
 
@@ -57,12 +56,11 @@ public class ShadowKeyValueBackupTask {
     public void __constructor__(
             BackupManagerService backupManagerService,
             TransportClient transportClient,
-            String dirName,
+            String transportDirName,
             List<String> queue,
-            @Nullable DataChangedJournal journal,
-            IBackupObserver observer,
-            IBackupManagerMonitor monitor,
-            @Nullable OnTaskFinishedListener listener,
+            @Nullable DataChangedJournal dataChangedJournal,
+            KeyValueBackupReporter reporter,
+            OnTaskFinishedListener listener,
             List<String> pendingFullBackups,
             boolean userInitiated,
             boolean nonIncremental) {
