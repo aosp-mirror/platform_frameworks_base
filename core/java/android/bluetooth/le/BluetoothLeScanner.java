@@ -275,7 +275,9 @@ public final class BluetoothLeScanner {
     }
 
     /**
-     * Stops an ongoing Bluetooth LE scan started using a PendingIntent.
+     * Stops an ongoing Bluetooth LE scan started using a PendingIntent. When creating the
+     * PendingIntent parameter, please do not use the FLAG_CANCEL_CURRENT flag. Otherwise, the stop
+     * scan may have no effect.
      *
      * @param callbackIntent The PendingIntent that was used to start the scan.
      * @see #startScan(List, ScanSettings, PendingIntent)
