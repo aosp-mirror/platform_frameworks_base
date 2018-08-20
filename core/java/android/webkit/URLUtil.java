@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.net.ParseException;
 import android.net.Uri;
 import android.net.WebAddress;
@@ -139,6 +140,7 @@ public final class URLUtil {
     /**
      * @return {@code true} if the url is correctly URL encoded
      */
+    @UnsupportedAppUsage
     static boolean verifyURLEncoding(String url) {
         int count = url.length();
         if (count == 0) {
@@ -181,6 +183,7 @@ public final class URLUtil {
      * @return {@code true} if the url is a resource file.
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean isResourceUrl(String url) {
         return (null != url) && url.startsWith(RESOURCE_BASE);
     }
@@ -398,6 +401,7 @@ public final class URLUtil {
      * Unfortunately some servers do not quote the value so to maintain
      * consistent behaviour with other browsers, we allow unquoted values too.
      */
+    @UnsupportedAppUsage
     static String parseContentDisposition(String contentDisposition) {
         try {
             Matcher m = CONTENT_DISPOSITION_PATTERN.matcher(contentDisposition);
