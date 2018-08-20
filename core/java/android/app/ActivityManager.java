@@ -3360,7 +3360,7 @@ public class ActivityManager {
      * @see #forceStopPackageAsUser(String, int)
      * @hide
      */
-    @SystemApi
+    @SystemApi @TestApi
     @RequiresPermission(Manifest.permission.FORCE_STOP_PACKAGES)
     public void forceStopPackage(String packageName) {
         forceStopPackageAsUser(packageName, mContext.getUserId());
@@ -3983,6 +3983,19 @@ public class ActivityManager {
             getService().setPersistentVrThread(tid);
         } catch (RemoteException e) {
             // pass
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.CHANGE_CONFIGURATION)
+    public void scheduleApplicationInfoChanged(List<String> packages, int userId) {
+        try {
+            getService().scheduleApplicationInfoChanged(packages, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

@@ -2150,11 +2150,11 @@
 
     <!-- @SystemApi @TestApi @hide Allows an application to create/manage/remove stacks -->
     <permission android:name="android.permission.MANAGE_ACTIVITY_STACKS"
-        android:protectionLevel="signature|privileged|development" />
+        android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi @TestApi @hide Allows an application to embed other activities -->
     <permission android:name="android.permission.ACTIVITY_EMBEDDING"
-                android:protectionLevel="signature|privileged|development" />
+                android:protectionLevel="signature|privileged" />
 
     <!-- Allows an application to start any activity, regardless of permission
          protection or exported state.
@@ -2387,7 +2387,7 @@
     <permission android:name="android.permission.SET_SCREEN_COMPATIBILITY"
         android:protectionLevel="signature" />
 
-    <!-- @SystemApi Allows an application to modify the current configuration, such
+    <!-- @SystemApi @TestApi Allows an application to modify the current configuration, such
          as locale. -->
     <permission android:name="android.permission.CHANGE_CONFIGURATION"
         android:protectionLevel="signature|privileged|development" />
@@ -2414,7 +2414,7 @@
     <permission android:name="android.permission.WRITE_GSERVICES"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @SystemApi Allows an application to call
+    <!-- @SystemApi @TestApi Allows an application to call
         {@link android.app.ActivityManager#forceStopPackage}.
         @hide -->
     <permission android:name="android.permission.FORCE_STOP_PACKAGES"

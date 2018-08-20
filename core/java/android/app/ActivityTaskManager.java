@@ -29,6 +29,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Singleton;
 
+import java.util.List;
+
 /**
  * This class gives information about, and interacts with activities and their containers like task,
  * stacks, and displays.
@@ -262,5 +264,141 @@ public class ActivityTaskManager {
         return supportsMultiWindow(context)
                 && Resources.getSystem().getBoolean(
                 com.android.internal.R.bool.config_supportsSplitScreenMultiWindow);
+    }
+
+    /**
+     * Moves the top activity in the input stackId to the pinned stack.
+     * @param stackId Id of stack to move the top activity to pinned stack.
+     * @param bounds Bounds to use for pinned stack.
+     * @return True if the top activity of stack was successfully moved to the pinned stack.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    public boolean moveTopActivityToPinnedStack(int stackId, Rect bounds) {
+        try {
+            return getService().moveTopActivityToPinnedStack(stackId, bounds);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Start to enter lock task mode for given task by system(UI).
+     * @param taskId Id of task to lock.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    public void startSystemLockTaskMode(int taskId) {
+        try {
+            getService().startSystemLockTaskMode(taskId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Stop lock task mode by system(UI).
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    public void stopSystemLockTaskMode() {
+        try {
+            getService().stopSystemLockTaskMode();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Move task to stack with given id.
+     * @param taskId Id of the task to move.
+     * @param stackId Id of the stack for task moving.
+     * @param toTop Whether the given task should shown to top of stack.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
+        try {
+            getService().moveTaskToStack(taskId, stackId, toTop);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Resize the input stack id to the given bounds with animate setting.
+     * @param stackId Id of the stack to resize.
+     * @param bounds Bounds to resize the stack to or {@code null} for fullscreen.
+     * @param animate Whether we should play an animation for resizing stack.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    public void resizeStack(int stackId, Rect bounds, boolean animate) {
+        try {
+            getService().resizeStack(stackId, bounds, false, false, animate /* animate */,
+                    -1 /* animationDuration */);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Resize task to given bounds.
+     * @param taskId Id of task to resize.
+     * @param bounds Bounds to resize task.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    public void resizeTask(int taskId, Rect bounds) {
+        try {
+            getService().resizeTask(taskId, bounds, RESIZE_MODE_SYSTEM);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Resize docked stack & its task to given stack & task bounds.
+     * @param stackBounds Bounds to resize stack.
+     * @param taskBounds Bounds to resize task.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    public void resizeDockedStack(Rect stackBounds, Rect taskBounds) {
+        try {
+            getService().resizeDockedStack(stackBounds, taskBounds, null, null, null);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * List all activity stacks information.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    public String listAllStacks() {
+        final List<ActivityManager.StackInfo> stacks;
+        try {
+            stacks = getService().getAllStackInfos();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        if (stacks != null) {
+            for (ActivityManager.StackInfo info : stacks) {
+                sb.append(info).append("\n");
+            }
+        }
+        return sb.toString();
     }
 }
