@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import android.annotation.UnsupportedAppUsage;
 import android.media.MediaCodec.BufferInfo;
 import android.util.Log;
 
@@ -53,6 +54,7 @@ public final class AmrInputStream extends InputStream {
     /**
      * DO NOT USE - use MediaCodec instead
      */
+    @UnsupportedAppUsage
     public AmrInputStream(InputStream inputStream) {
         Log.w(TAG, "@@@@ AmrInputStream is not a public API @@@@");
         mInputStream = inputStream;

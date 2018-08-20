@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -820,6 +821,7 @@ import java.lang.IllegalArgumentException;
      * position updates. The playback position being "readable" is considered from the application's
      * point of view.
      */
+    @UnsupportedAppUsage
     public static int MEDIA_POSITION_READABLE = 1 << 0;
     /**
      * @hide
@@ -827,6 +829,7 @@ import java.lang.IllegalArgumentException;
      * playback position updates. The playback position being "writable"
      * is considered from the application's point of view.
      */
+    @UnsupportedAppUsage
     public static int MEDIA_POSITION_WRITABLE = 1 << 1;
 
     /** @hide */

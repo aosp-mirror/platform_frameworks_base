@@ -25,6 +25,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
@@ -154,6 +155,7 @@ public class AudioManager {
      * @see #EXTRA_PREV_VOLUME_STREAM_VALUE
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @UnsupportedAppUsage
     public static final String VOLUME_CHANGED_ACTION = "android.media.VOLUME_CHANGED_ACTION";
 
     /**
@@ -220,6 +222,7 @@ public class AudioManager {
     /**
      * @hide The stream type for the volume changed intent.
      */
+    @UnsupportedAppUsage
     public static final String EXTRA_VOLUME_STREAM_TYPE = "android.media.EXTRA_VOLUME_STREAM_TYPE";
 
     /**
@@ -236,6 +239,7 @@ public class AudioManager {
     /**
      * @hide The volume associated with the stream for the volume changed intent.
      */
+    @UnsupportedAppUsage
     public static final String EXTRA_VOLUME_STREAM_VALUE =
         "android.media.EXTRA_VOLUME_STREAM_VALUE";
 
@@ -342,14 +346,17 @@ public class AudioManager {
     public static final int STREAM_NOTIFICATION = AudioSystem.STREAM_NOTIFICATION;
     /** @hide Used to identify the volume of audio streams for phone calls when connected
      *        to bluetooth */
+    @UnsupportedAppUsage
     public static final int STREAM_BLUETOOTH_SCO = AudioSystem.STREAM_BLUETOOTH_SCO;
     /** @hide Used to identify the volume of audio streams for enforced system sounds
      *        in certain countries (e.g camera in Japan) */
+    @UnsupportedAppUsage
     public static final int STREAM_SYSTEM_ENFORCED = AudioSystem.STREAM_SYSTEM_ENFORCED;
     /** Used to identify the volume of audio streams for DTMF Tones */
     public static final int STREAM_DTMF = AudioSystem.STREAM_DTMF;
     /** @hide Used to identify the volume of audio streams exclusively transmitted through the
      *        speaker (TTS) of the device */
+    @UnsupportedAppUsage
     public static final int STREAM_TTS = AudioSystem.STREAM_TTS;
     /** Used to identify the volume of audio streams for accessibility prompts */
     public static final int STREAM_ACCESSIBILITY = AudioSystem.STREAM_ACCESSIBILITY;
@@ -675,6 +682,7 @@ public class AudioManager {
      * @hide
      * For test purposes only, will throw NPE with some methods that require a Context.
      */
+    @UnsupportedAppUsage
     public AudioManager() {
         mUseVolumeKeySounds = true;
         mUseFixedVolume = false;
@@ -683,6 +691,7 @@ public class AudioManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public AudioManager(Context context) {
         setContext(context);
         mUseVolumeKeySounds = getContext().getResources().getBoolean(
@@ -710,6 +719,7 @@ public class AudioManager {
         }
     }
 
+    @UnsupportedAppUsage
     private static IAudioService getService()
     {
         if (sService != null) {
@@ -880,6 +890,7 @@ public class AudioManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setMasterMute(boolean mute, int flags) {
         final IAudioService service = getService();
         try {
@@ -914,6 +925,7 @@ public class AudioManager {
      * @see #setRingerMode(int)
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean isValidRingerMode(int ringerMode) {
         if (ringerMode < 0 || ringerMode > RINGER_MODE_MAX) {
             return false;
@@ -1062,6 +1074,7 @@ public class AudioManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getLastAudibleStreamVolume(int streamType) {
         final IAudioService service = getService();
         try {
@@ -1222,6 +1235,7 @@ public class AudioManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isMasterMute() {
         final IAudioService service = getService();
         try {
@@ -1239,6 +1253,7 @@ public class AudioManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @UnsupportedAppUsage
     public void forceVolumeControlStream(int streamType) {
         final IAudioService service = getService();
         try {
@@ -1531,6 +1546,7 @@ public class AudioManager {
      * @see #stopBluetoothSco()
      * @see #ACTION_SCO_AUDIO_STATE_UPDATED
      */
+    @UnsupportedAppUsage
     public void startBluetoothScoVirtualCall() {
         final IAudioService service = getService();
         try {
@@ -1854,6 +1870,7 @@ public class AudioManager {
      *   display). Note that BT audio sinks are not considered remote devices.
      * @return true if {@link AudioManager#STREAM_MUSIC} is active on a remote device
      */
+    @UnsupportedAppUsage
     public boolean isMusicActiveRemotely() {
         return AudioSystem.isStreamActiveRemotely(STREAM_MUSIC, 0);
     }
@@ -2004,6 +2021,7 @@ public class AudioManager {
     /**
      * @hide Number of sound effects
      */
+    @UnsupportedAppUsage
     public static final int NUM_SOUND_EFFECTS = 10;
 
     /**
@@ -2234,6 +2252,7 @@ public class AudioManager {
      * Map to convert focus event listener IDs, as used in the AudioService audio focus stack,
      * to actual listener objects.
      */
+    @UnsupportedAppUsage
     private final ConcurrentHashMap<String, FocusRequestInfo> mAudioFocusIdListenerMap =
             new ConcurrentHashMap<String, FocusRequestInfo>();
 
@@ -2810,6 +2829,7 @@ public class AudioManager {
      * @param durationHint the type of focus request. AUDIOFOCUS_GAIN_TRANSIENT is recommended so
      *    media applications resume after a call
      */
+    @UnsupportedAppUsage
     public void requestAudioFocusForCall(int streamType, int durationHint) {
         final IAudioService service = getService();
         try {
@@ -2913,6 +2933,7 @@ public class AudioManager {
      * when ringing ends and the call is rejected or not answered.
      * Should match one or more calls to {@link #requestAudioFocusForCall(int, int)}.
      */
+    @UnsupportedAppUsage
     public void abandonAudioFocusForCall() {
         final IAudioService service = getService();
         try {
@@ -3582,6 +3603,7 @@ public class AudioManager {
      *  agent when audio settings are restored and causes the AudioService
      *  to read and apply restored settings.
      */
+    @UnsupportedAppUsage
     public void reloadAudioSettings() {
         final IAudioService service = getService();
         try {
@@ -3620,6 +3642,7 @@ public class AudioManager {
      *
      * @hide pending API Council approval
      */
+    @UnsupportedAppUsage
     public boolean isSilentMode() {
         int ringerMode = getRingerMode();
         boolean silentMode =
@@ -3641,15 +3664,19 @@ public class AudioManager {
      *  such as earbuds, earphones, or in-ear monitors (IEM). Those would be handled as a
      *  {@link #DEVICE_OUT_WIRED_HEADPHONE}.
      */
+    @UnsupportedAppUsage
     public static final int DEVICE_OUT_EARPIECE = AudioSystem.DEVICE_OUT_EARPIECE;
     /** @hide
      *  The audio output device code for the built-in speaker */
+    @UnsupportedAppUsage
     public static final int DEVICE_OUT_SPEAKER = AudioSystem.DEVICE_OUT_SPEAKER;
     /** @hide
      * The audio output device code for a wired headset with attached microphone */
+    @UnsupportedAppUsage
     public static final int DEVICE_OUT_WIRED_HEADSET = AudioSystem.DEVICE_OUT_WIRED_HEADSET;
     /** @hide
      * The audio output device code for a wired headphone without attached microphone */
+    @UnsupportedAppUsage
     public static final int DEVICE_OUT_WIRED_HEADPHONE = AudioSystem.DEVICE_OUT_WIRED_HEADPHONE;
     /** @hide
      * The audio output device code for a USB headphone with attached microphone */
@@ -3661,6 +3688,7 @@ public class AudioManager {
      * The audio output device code for Bluetooth SCO Headset Profile (HSP) and
      * Hands-Free Profile (HFP), for voice
      */
+    @UnsupportedAppUsage
     public static final int DEVICE_OUT_BLUETOOTH_SCO_HEADSET =
             AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_HEADSET;
     /** @hide
@@ -3669,13 +3697,16 @@ public class AudioManager {
             AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
     /** @hide
      * The audio output device code for generic Bluetooth A2DP, for music */
+    @UnsupportedAppUsage
     public static final int DEVICE_OUT_BLUETOOTH_A2DP = AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP;
     /** @hide
      * The audio output device code for Bluetooth A2DP headphones, for music */
+    @UnsupportedAppUsage
     public static final int DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES =
             AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES;
     /** @hide
      * The audio output device code for Bluetooth A2DP external speaker, for music */
+    @UnsupportedAppUsage
     public static final int DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER =
             AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER;
     /** @hide
@@ -3684,16 +3715,19 @@ public class AudioManager {
     public static final int DEVICE_OUT_AUX_DIGITAL = AudioSystem.DEVICE_OUT_AUX_DIGITAL;
     /** @hide
      * The audio output device code for HDMI */
+    @UnsupportedAppUsage
     public static final int DEVICE_OUT_HDMI = AudioSystem.DEVICE_OUT_HDMI;
     /** @hide
      * The audio output device code for an analog wired headset attached via a
      *  docking station
      */
+    @UnsupportedAppUsage
     public static final int DEVICE_OUT_ANLG_DOCK_HEADSET = AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET;
     /** @hide
      * The audio output device code for a digital wired headset attached via a
      *  docking station
      */
+    @UnsupportedAppUsage
     public static final int DEVICE_OUT_DGTL_DOCK_HEADSET = AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET;
     /** @hide
      * The audio output device code for a USB audio accessory. The accessory is in USB host
@@ -3872,6 +3906,7 @@ public class AudioManager {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public int getDevicesForStream(int streamType) {
         switch (streamType) {
         case STREAM_VOICE_CALL:
@@ -3895,6 +3930,7 @@ public class AudioManager {
      * @param name   device name
      * {@hide}
      */
+    @UnsupportedAppUsage
     public void setWiredDeviceConnectionState(int type, int state, String address, String name) {
         final IAudioService service = getService();
         try {
@@ -4079,6 +4115,7 @@ public class AudioManager {
      * a better solution.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getOutputLatency(int streamType) {
         return AudioSystem.getOutputLatency(streamType);
     }
@@ -4150,6 +4187,7 @@ public class AudioManager {
      * Only useful for volume controllers.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setRingerModeInternal(int ringerMode) {
         try {
             getService().setRingerModeInternal(ringerMode, getContext().getOpPackageName());
@@ -4162,6 +4200,7 @@ public class AudioManager {
      * Only useful for volume controllers.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getRingerModeInternal() {
         try {
             return getService().getRingerModeInternal();
@@ -4251,6 +4290,7 @@ public class AudioManager {
      * @param ports An AudioPort ArrayList where the list will be returned.
      * @hide
      */
+    @UnsupportedAppUsage
     public static int listAudioPorts(ArrayList<AudioPort> ports) {
         return updateAudioPortCache(ports, null, null);
     }
@@ -4332,6 +4372,7 @@ public class AudioManager {
      *         patch[0] contains the newly created patch
      * @hide
      */
+    @UnsupportedAppUsage
     public static int createAudioPatch(AudioPatch[] patch,
                                  AudioPortConfig[] sources,
                                  AudioPortConfig[] sinks) {
@@ -4349,6 +4390,7 @@ public class AudioManager {
      *         - {@link #ERROR} if patch cannot be released for any other reason.
      * @hide
      */
+    @UnsupportedAppUsage
     public static int releaseAudioPatch(AudioPatch patch) {
         return AudioSystem.releaseAudioPatch(patch);
     }
@@ -4358,6 +4400,7 @@ public class AudioManager {
      * @param patches An AudioPatch array where the list will be returned.
      * @hide
      */
+    @UnsupportedAppUsage
     public static int listAudioPatches(ArrayList<AudioPatch> patches) {
         return updateAudioPortCache(null, patches, null);
     }
@@ -4406,6 +4449,7 @@ public class AudioManager {
      * Register an audio port list update listener.
      * @hide
      */
+    @UnsupportedAppUsage
     public void registerAudioPortUpdateListener(OnAudioPortUpdateListener l) {
         sAudioPortEventHandler.init();
         sAudioPortEventHandler.registerListener(l);
@@ -4415,6 +4459,7 @@ public class AudioManager {
      * Unregister an audio port list update listener.
      * @hide
      */
+    @UnsupportedAppUsage
     public void unregisterAudioPortUpdateListener(OnAudioPortUpdateListener l) {
         sAudioPortEventHandler.unregisterListener(l);
     }

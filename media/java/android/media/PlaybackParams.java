@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -85,16 +86,25 @@ public final class PlaybackParams implements Parcelable {
     public static final int AUDIO_STRETCH_MODE_VOICE = 1;
 
     // flags to indicate which params are actually set
+    @UnsupportedAppUsage
     private static final int SET_SPEED               = 1 << 0;
+    @UnsupportedAppUsage
     private static final int SET_PITCH               = 1 << 1;
+    @UnsupportedAppUsage
     private static final int SET_AUDIO_FALLBACK_MODE = 1 << 2;
+    @UnsupportedAppUsage
     private static final int SET_AUDIO_STRETCH_MODE  = 1 << 3;
+    @UnsupportedAppUsage
     private int mSet = 0;
 
     // params
+    @UnsupportedAppUsage
     private int mAudioFallbackMode = AUDIO_FALLBACK_MODE_DEFAULT;
+    @UnsupportedAppUsage
     private int mAudioStretchMode = AUDIO_STRETCH_MODE_DEFAULT;
+    @UnsupportedAppUsage
     private float mPitch = 1.0f;
+    @UnsupportedAppUsage
     private float mSpeed = 1.0f;
 
     public PlaybackParams() {

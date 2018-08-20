@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.util.Pair;
 
 import java.lang.annotation.Retention;
@@ -163,6 +164,7 @@ public final class MicrophoneInfo {
     private int mType;
     private int mDirectionality;
 
+    @UnsupportedAppUsage
     MicrophoneInfo(String deviceId, int type, String address, int location,
             int group, int indexInTheGroup, Coordinate3F position,
             Coordinate3F orientation, List<Pair<Float, Float>> frequencyResponse,

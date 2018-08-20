@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -83,6 +84,7 @@ public class MediaHTTPService extends IMediaHTTPService.Stub {
         return new MediaHTTPConnection();
     }
 
+    @UnsupportedAppUsage
     /* package private */static IBinder createHttpServiceBinderIfNecessary(
             String path) {
         return createHttpServiceBinderIfNecessary(path, null);

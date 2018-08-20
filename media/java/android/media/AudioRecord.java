@@ -29,6 +29,7 @@ import java.util.List;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.os.Binder;
 import android.os.Handler;
@@ -157,18 +158,21 @@ public class AudioRecord implements AudioRouting
      * Accessed by native methods: provides access to C++ AudioRecord object
      */
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private long mNativeRecorderInJavaObj;
 
     /**
      * Accessed by native methods: provides access to the callback data.
      */
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private long mNativeCallbackCookie;
 
     /**
      * Accessed by native methods: provides access to the JNIDeviceCallback instance.
      */
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private long mNativeDeviceCallback;
 
 
@@ -233,6 +237,7 @@ public class AudioRecord implements AudioRouting
     /**
      * Looper associated with the thread that creates the AudioRecord instance
      */
+    @UnsupportedAppUsage
     private Looper mInitializationLooper = null;
     /**
      * Size of the native audio buffer.
@@ -245,6 +250,7 @@ public class AudioRecord implements AudioRouting
     /**
      * AudioAttributes
      */
+    @UnsupportedAppUsage
     private AudioAttributes mAudioAttributes;
     private boolean mIsSubmixFullVolume = false;
 
@@ -1720,6 +1726,7 @@ public class AudioRecord implements AudioRouting
     // Java methods called from the native side
     //--------------------
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private static void postEventFromNative(Object audiorecord_ref,
             int what, int arg1, int arg2, Object obj) {
         //logd("Event posted from the native side: event="+ what + " args="+ arg1+" "+arg2);
@@ -1746,6 +1753,7 @@ public class AudioRecord implements AudioRouting
     // Native methods called from the Java side
     //--------------------
 
+    @UnsupportedAppUsage
     private native final int native_setup(Object audiorecord_this,
             Object /*AudioAttributes*/ attributes,
             int[] sampleRate, int channelMask, int channelIndexMask, int audioFormat,
@@ -1758,6 +1766,7 @@ public class AudioRecord implements AudioRouting
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public native final void native_release();
 
     private native final int native_start(int syncEvent, int sessionId);

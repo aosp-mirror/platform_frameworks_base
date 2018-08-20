@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.UnsupportedAppUsage;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -188,6 +189,7 @@ public final class MediaFormat {
      */
     public static final String MIMETYPE_TEXT_CEA_708 = "text/cea-708";
 
+    @UnsupportedAppUsage
     private Map<String, Object> mMap;
 
     /**
@@ -946,6 +948,7 @@ public final class MediaFormat {
         mMap = new HashMap();
     }
 
+    @UnsupportedAppUsage
     /* package private */ Map<String, Object> getMap() {
         return mMap;
     }

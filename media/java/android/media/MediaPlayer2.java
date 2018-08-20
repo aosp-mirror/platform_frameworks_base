@@ -20,6 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.net.Uri;
@@ -1385,6 +1386,7 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
          * Gets the track type.
          * @return TrackType which indicates if the track is video, audio, timed text.
          */
+        @UnsupportedAppUsage
         public abstract int getTrackType();
 
         /**
@@ -1393,6 +1395,7 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
          * When the language is unknown or could not be determined,
          * ISO-639-2 language code, "und", is returned.
          */
+        @UnsupportedAppUsage
         public abstract String getLanguage();
 
         /**
