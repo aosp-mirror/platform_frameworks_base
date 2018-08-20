@@ -80,6 +80,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     private int mDisabled2 = 0;
 
     private final Object mLock = new Object();
+    private final DeathRecipient mDeathRecipient = new DeathRecipient();
     // encompasses lights-out mode and other flags defined on View
     private int mSystemUiVisibility = 0;
     private int mFullscreenStackSysUiVisibility;
@@ -92,6 +93,23 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     private boolean mShowImeSwitcher;
     private IBinder mImeToken = null;
     private int mCurrentUserId;
+
+    private class DeathRecipient implements IBinder.DeathRecipient {
+        public void binderDied() {
+            mBar.asBinder().unlinkToDeath(this,0);
+            mBar = null;
+            notifyBarAttachChanged();
+        }
+
+        public void linkToDeath() {
+            try {
+                mBar.asBinder().linkToDeath(mDeathRecipient,0);
+            } catch (RemoteException e) {
+                Slog.e(TAG,"Unable to register Death Recipient for status bar", e);
+            }
+        }
+
+    }
 
     private class DisableRecord implements IBinder.DeathRecipient {
         int userId;
@@ -859,16 +877,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
         Slog.i(TAG, "registerStatusBar bar=" + bar);
         mBar = bar;
-        try {
-            mBar.asBinder().linkToDeath(new DeathRecipient() {
-                @Override
-                public void binderDied() {
-                    mBar = null;
-                    notifyBarAttachChanged();
-                }
-            }, 0);
-        } catch (RemoteException e) {
-        }
+        mDeathRecipient.linkToDeath();
         notifyBarAttachChanged();
         synchronized (mIcons) {
             for (String slot : mIcons.keySet()) {
