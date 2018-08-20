@@ -474,6 +474,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA capability. If the camera device
      * doesn't have the capability, the return value will be an empty set. </p>
      *
+     * <p>Prior to API level 29, all returned IDs are guaranteed to be returned by {@link
+     * CameraManager#getCameraIdList}, and can be opened directly by
+     * {@link CameraManager#openCamera}. Starting from API level 29, for each of the returned ID,
+     * if it's also returned by {@link CameraManager#getCameraIdList}, it can be used as a
+     * standalone camera by {@link CameraManager#openCamera}. Otherwise, the camera ID can only be
+     * used as part of the current logical camera.</p>
+     *
      * <p>The set returned is not modifiable, so any attempts to modify it will throw
      * a {@code UnsupportedOperationException}.</p>
      *

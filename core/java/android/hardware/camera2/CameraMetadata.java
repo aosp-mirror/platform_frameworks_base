@@ -811,8 +811,14 @@ public abstract class CameraMetadata<TKey> {
     public static final int REQUEST_AVAILABLE_CAPABILITIES_MOTION_TRACKING = 10;
 
     /**
-     * <p>The camera device is a logical camera backed by two or more physical cameras that are
-     * also exposed to the application.</p>
+     * <p>The camera device is a logical camera backed by two or more physical cameras. In
+     * API level 28, the physical cameras must also be exposed to the application via
+     * {@link android.hardware.camera2.CameraManager#getCameraIdList }. Starting from API
+     * level 29, some or all physical cameras may not be independently exposed to the
+     * application, in which case the physical camera IDs will not be available in
+     * {@link android.hardware.camera2.CameraManager#getCameraIdList }. But the application
+     * can still query the physical cameras' characteristics by calling
+     * {@link android.hardware.camera2.CameraManager#getCameraCharacteristics }.</p>
      * <p>Camera application shouldn't assume that there are at most 1 rear camera and 1 front
      * camera in the system. For an application that switches between front and back cameras,
      * the recommendation is to switch between the first rear camera and the first front
