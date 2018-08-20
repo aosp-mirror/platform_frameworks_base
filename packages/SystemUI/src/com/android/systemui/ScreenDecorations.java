@@ -89,9 +89,9 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private DisplayManager mDisplayManager;
     private DisplayManager.DisplayListener mDisplayListener;
 
-    private int mRoundedDefault;
-    private int mRoundedDefaultTop;
-    private int mRoundedDefaultBottom;
+    @VisibleForTesting protected int mRoundedDefault;
+    @VisibleForTesting protected int mRoundedDefaultTop;
+    @VisibleForTesting protected int mRoundedDefaultBottom;
     private View mOverlay;
     private View mBottomOverlay;
     private float mDensity;
@@ -119,12 +119,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private void startOnScreenDecorationsThread() {
         mRotation = RotationUtils.getExactRotation(mContext);
         mWindowManager = mContext.getSystemService(WindowManager.class);
-        mRoundedDefault = mContext.getResources().getDimensionPixelSize(
-                R.dimen.rounded_corner_radius);
-        mRoundedDefaultTop = mContext.getResources().getDimensionPixelSize(
-                R.dimen.rounded_corner_radius_top);
-        mRoundedDefaultBottom = mContext.getResources().getDimensionPixelSize(
-                R.dimen.rounded_corner_radius_bottom);
+        updateRoundedCornerRadii();
         if (hasRoundedCorners() || shouldDrawCutout()) {
             setupDecorations();
         }
@@ -249,6 +244,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             int oldRotation = mRotation;
             mPendingRotationChange = false;
             updateOrientation();
+            updateRoundedCornerRadii();
             if (DEBUG) Log.i(TAG, "onConfigChanged from rot " + oldRotation + " to " + mRotation);
             if (shouldDrawCutout() && mOverlay == null) {
                 setupDecorations();
@@ -278,6 +274,26 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 updateLayoutParams();
                 updateViews();
             }
+        }
+    }
+
+    private void updateRoundedCornerRadii() {
+        final int newRoundedDefault = mContext.getResources().getDimensionPixelSize(
+                R.dimen.rounded_corner_radius);
+        final int newRoundedDefaultTop = mContext.getResources().getDimensionPixelSize(
+                R.dimen.rounded_corner_radius_top);
+        final int newRoundedDefaultBottom = mContext.getResources().getDimensionPixelSize(
+                R.dimen.rounded_corner_radius_bottom);
+
+        final boolean roundedCornersChanged = mRoundedDefault != newRoundedDefault
+                || mRoundedDefaultBottom != newRoundedDefaultBottom
+                || mRoundedDefaultTop != newRoundedDefaultTop;
+
+        if (roundedCornersChanged) {
+            mRoundedDefault = newRoundedDefault;
+            mRoundedDefaultTop = newRoundedDefaultTop;
+            mRoundedDefaultBottom = newRoundedDefaultBottom;
+            onTuningChanged(SIZE, null);
         }
     }
 
