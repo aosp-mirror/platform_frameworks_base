@@ -17,6 +17,7 @@
 package com.android.server.wm.utils;
 
 import android.graphics.Rect;
+import android.view.Surface;
 
 /**
  * Utility methods to handle insets represented as rects.
@@ -24,6 +25,32 @@ import android.graphics.Rect;
 public class InsetUtils {
 
     private InsetUtils() {
+    }
+
+    /**
+     * Transforms insets given in one rotation into insets in a different rotation.
+     *
+     * @param inOutInsets the insets to transform, is set to the transformed insets
+     * @param rotationDelta the delta between the new and old rotation.
+     *                      Must be one of Surface.ROTATION_0/90/180/270.
+     */
+    public static void rotateInsets(Rect inOutInsets, int rotationDelta) {
+        final Rect r = inOutInsets;
+        switch (rotationDelta) {
+            case Surface.ROTATION_0:
+                return;
+            case Surface.ROTATION_90:
+                r.set(r.top, r.right, r.bottom, r.left);
+                break;
+            case Surface.ROTATION_180:
+                r.set(r.right, r.bottom, r.left, r.top);
+                break;
+            case Surface.ROTATION_270:
+                r.set(r.bottom, r.left, r.top, r.right);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown rotation: " + rotationDelta);
+        }
     }
 
     /**
