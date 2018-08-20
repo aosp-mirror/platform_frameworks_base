@@ -19,6 +19,7 @@ package android.preference;
 import android.animation.LayoutTransition;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.XmlRes;
 import android.app.Fragment;
 import android.app.FragmentBreadCrumbs;
@@ -198,6 +199,7 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     private FrameLayout mListFooter;
 
+    @UnsupportedAppUsage
     private ViewGroup mPrefsContainer;
 
     // Backup of the original activity title. This is used when navigating back to the headers list
@@ -215,6 +217,7 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     // --- State for old mode when showing a single preference list
 
+    @UnsupportedAppUsage
     private PreferenceManager mPreferenceManager;
 
     private Bundle mSavedInstanceState;
@@ -739,6 +742,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      * Returns the Header list
      * @hide
      */
+    @UnsupportedAppUsage
     public List<Header> getHeaders() {
         return mHeaders;
     }
@@ -1441,6 +1445,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      * Binding late is preferred as any custom preference types created in
      * {@link #onCreate(Bundle)} are able to have their views recycled.
      */
+    @UnsupportedAppUsage
     private void postBindPreferences() {
         if (mHandler.hasMessages(MSG_BIND_PREFERENCES)) return;
         mHandler.obtainMessage(MSG_BIND_PREFERENCES).sendToTarget();
@@ -1469,6 +1474,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         return mPreferenceManager;
     }
 
+    @UnsupportedAppUsage
     private void requirePreferenceManager() {
         if (mPreferenceManager == null) {
             if (mAdapter == null) {

@@ -21,6 +21,7 @@ import android.annotation.DrawableRes;
 import android.annotation.LayoutRes;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -116,6 +117,7 @@ public class Preference implements Comparable<Preference> {
     private int mOrder = DEFAULT_ORDER;
     private CharSequence mTitle;
     private int mTitleRes;
+    @UnsupportedAppUsage
     private CharSequence mSummary;
     /**
      * mIconResId is overridden by mIcon, if mIcon is specified.
@@ -144,7 +146,9 @@ public class Preference implements Comparable<Preference> {
      */
     private boolean mShouldDisableView = true;
 
+    @UnsupportedAppUsage
     private int mLayoutResId = com.android.internal.R.layout.preference;
+    @UnsupportedAppUsage
     private int mWidgetLayoutResId;
 
     private OnPreferenceChangeInternalListener mListener;
@@ -974,6 +978,7 @@ public class Preference implements Comparable<Preference> {
      *
      * @return A unique ID for this Preference.
      */
+    @UnsupportedAppUsage
     long getId() {
         return mId;
     }
@@ -1126,6 +1131,7 @@ public class Preference implements Comparable<Preference> {
      *            processing). May be {@code null}.
      * @hide
      */
+    @UnsupportedAppUsage
     public void performClick(PreferenceScreen preferenceScreen) {
 
         if (!isEnabled()) {
@@ -1161,6 +1167,7 @@ public class Preference implements Comparable<Preference> {
      * @return True if the Preference handled the key. Returns false by default.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean onKey(View v, int keyCode, KeyEvent event) {
         return false;
     }
@@ -1281,6 +1288,7 @@ public class Preference implements Comparable<Preference> {
      * @param listener The listener.
      * @see #notifyChanged()
      */
+    @UnsupportedAppUsage
     final void setOnPreferenceChangeInternalListener(OnPreferenceChangeInternalListener listener) {
         mListener = listener;
     }
@@ -1399,6 +1407,7 @@ public class Preference implements Comparable<Preference> {
      * @param dependent The dependent Preference that will be enabled/disabled
      *            according to the state of this Preference.
      */
+    @UnsupportedAppUsage
     private void registerDependent(Preference dependent) {
         if (mDependents == null) {
             mDependents = new ArrayList<Preference>();
