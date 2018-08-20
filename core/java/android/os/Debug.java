@@ -1752,13 +1752,13 @@ public final class Debug
     public static native long getPss();
 
     /**
-     * Retrieves the PSS memory used by the process as given by the
-     * smaps.  Optionally supply a long array of 2 entries to also
-     * receive the Uss and SwapPss of the process, and another array to also
-     * retrieve the separate memtrack size.
+     * Retrieves the PSS memory used by the process as given by the smaps. Optionally supply a long
+     * array of up to 3 entries to also receive (up to 3 values in order): the Uss and SwapPss and
+     * Rss (only filled in as of {@link android.os.Build.VERSION_CODES#P}) of the process, and
+     * another array to also retrieve the separate memtrack size.
      * @hide
      */
-    public static native long getPss(int pid, long[] outUssSwapPss, long[] outMemtrack);
+    public static native long getPss(int pid, long[] outUssSwapPssRss, long[] outMemtrack);
 
     /** @hide */
     public static final int MEMINFO_TOTAL = 0;
