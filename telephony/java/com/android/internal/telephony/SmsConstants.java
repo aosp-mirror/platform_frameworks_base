@@ -58,7 +58,11 @@ public class SmsConstants {
      * See TS 23.038.
      */
     public enum MessageClass{
-        UNKNOWN, CLASS_0, CLASS_1, CLASS_2, CLASS_3;
+        UNKNOWN,
+        CLASS_0,
+        CLASS_1,
+        CLASS_2,
+        CLASS_3;
     }
 
     /**
