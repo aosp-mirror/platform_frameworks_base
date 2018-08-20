@@ -16,6 +16,7 @@
 
 package javax.microedition.khronos.egl;
 
+import android.annotation.UnsupportedAppUsage;
 import java.lang.String;
 
 public interface EGL10 extends EGL {
@@ -116,6 +117,7 @@ public interface EGL10 extends EGL {
     String      eglQueryString(EGLDisplay display, int name);
     boolean     eglQuerySurface(EGLDisplay display, EGLSurface surface, int attribute, int[] value);
     /** @hide **/
+    @UnsupportedAppUsage
     boolean     eglReleaseThread();
     boolean     eglSwapBuffers(EGLDisplay display, EGLSurface surface);
     boolean     eglTerminate(EGLDisplay display);
