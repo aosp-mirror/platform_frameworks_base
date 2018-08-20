@@ -19,6 +19,7 @@ package android.view;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Matrix;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1441,6 +1442,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     // Private value for history pos that obtains the current sample.
+    @UnsupportedAppUsage
     private static final int HISTORY_CURRENT = -0x80000000;
 
     private static final int MAX_RECYCLED = 10;
@@ -1469,6 +1471,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     // Pointer to the native MotionEvent object that contains the actual data.
+    @UnsupportedAppUsage
     private long mNativePtr;
 
     private MotionEvent mNext;
@@ -1502,6 +1505,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     @FastNative
     private static native long nativeGetEventTimeNanos(long nativePtr, int historyPos);
     @FastNative
+    @UnsupportedAppUsage
     private static native float nativeGetRawAxisValue(long nativePtr,
             int axis, int pointerIndex, int historyPos);
     @FastNative
@@ -1590,6 +1594,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         }
     }
 
+    @UnsupportedAppUsage
     static private MotionEvent obtain() {
         final MotionEvent ev;
         synchronized (gRecyclerLock) {
@@ -1886,6 +1891,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
     /** @hide */
     @Override
+    @UnsupportedAppUsage
     public MotionEvent copy() {
         return obtain(this);
     }
@@ -1918,6 +1924,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @param scale The scale factor to apply.
      * @hide
      */
+    @UnsupportedAppUsage
     public final void scale(float scale) {
         if (scale != 1.0f) {
             nativeScale(mNativePtr, scale);
@@ -2068,6 +2075,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public final void setDownTime(long downTime) {
         nativeSetDownTimeNanos(mNativePtr, downTime * NS_PER_MS);
     }
@@ -2099,6 +2107,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @hide
      */
     @Override
+    @UnsupportedAppUsage
     public final long getEventTimeNano() {
         return nativeGetEventTimeNanos(mNativePtr, HISTORY_CURRENT);
     }
@@ -3098,6 +3107,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @return True if batching was performed or false if batching was not possible.
      * @hide
      */
+    @UnsupportedAppUsage
     public final boolean addBatch(MotionEvent event) {
         final int action = nativeGetAction(mNativePtr);
         if (action != ACTION_MOVE && action != ACTION_HOVER_MOVE) {
@@ -3212,6 +3222,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * Gets an integer where each pointer id present in the event is marked as a bit.
      * @hide
      */
+    @UnsupportedAppUsage
     public final int getPointerIdBits() {
         int idBits = 0;
         final int pointerCount = nativeGetPointerCount(mNativePtr);
@@ -3225,6 +3236,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * Splits a motion event such that it includes only a subset of pointer ids.
      * @hide
      */
+    @UnsupportedAppUsage
     public final MotionEvent split(int idBits) {
         MotionEvent ev = obtain();
         synchronized (gSharedTempLock) {
@@ -3535,7 +3547,9 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      */
     public static final class PointerCoords {
         private static final int INITIAL_PACKED_AXIS_VALUES = 8;
+        @UnsupportedAppUsage
         private long mPackedAxisBits;
+        @UnsupportedAppUsage
         private float[] mPackedAxisValues;
 
         /**
@@ -3555,6 +3569,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public static PointerCoords[] createArray(int size) {
             PointerCoords[] array = new PointerCoords[size];
             for (int i = 0; i < size; i++) {
@@ -3848,6 +3863,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public static PointerProperties[] createArray(int size) {
             PointerProperties[] array = new PointerProperties[size];
             for (int i = 0; i < size; i++) {

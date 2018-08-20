@@ -18,6 +18,7 @@
 package android.view;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
 
 import com.android.internal.util.Preconditions;
@@ -69,6 +70,7 @@ public final class WindowInsets {
      * since it would allow them to inadvertently consume unknown insets by returning it.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final WindowInsets CONSUMED;
 
     static {
@@ -115,6 +117,7 @@ public final class WindowInsets {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public WindowInsets(Rect systemWindowInsets) {
         this(systemWindowInsets, null, null, false, false, null);
     }
@@ -124,6 +127,7 @@ public final class WindowInsets {
      * to the existing fitSystemWindows method and other similar internals.
      * @hide
      */
+    @UnsupportedAppUsage
     public Rect getSystemWindowInsets() {
         if (mTempRect == null) {
             mTempRect = new Rect();
@@ -578,6 +582,7 @@ public final class WindowInsets {
      *
      * @hide pending API
      */
+    @UnsupportedAppUsage
     public WindowInsets inset(int left, int top, int right, int bottom) {
         Preconditions.checkArgumentNonnegative(left);
         Preconditions.checkArgumentNonnegative(top);

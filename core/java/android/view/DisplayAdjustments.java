@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 
@@ -28,6 +29,7 @@ public class DisplayAdjustments {
     private volatile CompatibilityInfo mCompatInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
     private Configuration mConfiguration;
 
+    @UnsupportedAppUsage
     public DisplayAdjustments() {
     }
 
@@ -42,6 +44,7 @@ public class DisplayAdjustments {
                 ? daj.mConfiguration : Configuration.EMPTY);
     }
 
+    @UnsupportedAppUsage
     public void setCompatibilityInfo(CompatibilityInfo compatInfo) {
         if (this == DEFAULT_DISPLAY_ADJUSTMENTS) {
             throw new IllegalArgumentException(
@@ -67,6 +70,7 @@ public class DisplayAdjustments {
         mConfiguration.setTo(configuration != null ? configuration : Configuration.EMPTY);
     }
 
+    @UnsupportedAppUsage
     public Configuration getConfiguration() {
         return mConfiguration;
     }

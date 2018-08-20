@@ -19,6 +19,7 @@ package android.view;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -42,14 +43,18 @@ public final class ViewTreeObserver {
     private CopyOnWriteArrayList<OnWindowFocusChangeListener> mOnWindowFocusListeners;
     private CopyOnWriteArrayList<OnWindowAttachListener> mOnWindowAttachListeners;
     private CopyOnWriteArrayList<OnGlobalFocusChangeListener> mOnGlobalFocusListeners;
+    @UnsupportedAppUsage
     private CopyOnWriteArrayList<OnTouchModeChangeListener> mOnTouchModeChangeListeners;
     private CopyOnWriteArrayList<OnEnterAnimationCompleteListener>
             mOnEnterAnimationCompleteListeners;
 
     // Non-recursive listeners use CopyOnWriteArray
     // Any listener invoked from ViewRootImpl.performTraversals() should not be recursive
+    @UnsupportedAppUsage
     private CopyOnWriteArray<OnGlobalLayoutListener> mOnGlobalLayoutListeners;
+    @UnsupportedAppUsage
     private CopyOnWriteArray<OnComputeInternalInsetsListener> mOnComputeInternalInsetsListeners;
+    @UnsupportedAppUsage
     private CopyOnWriteArray<OnScrollChangedListener> mOnScrollChangedListeners;
     private CopyOnWriteArray<OnPreDrawListener> mOnPreDrawListeners;
     private CopyOnWriteArray<OnWindowShownListener> mOnWindowShownListeners;
@@ -215,12 +220,14 @@ public final class ViewTreeObserver {
          * Offsets from the frame of the window at which the content of
          * windows behind it should be placed.
          */
+        @UnsupportedAppUsage
         public final Rect contentInsets = new Rect();
 
         /**
          * Offsets from the frame of the window at which windows behind it
          * are visible.
          */
+        @UnsupportedAppUsage
         public final Rect visibleInsets = new Rect();
 
         /**
@@ -228,6 +235,7 @@ public final class ViewTreeObserver {
          * Only used when {@link #setTouchableInsets(int)} is called with
          * the option {@link #TOUCHABLE_INSETS_REGION}.
          */
+        @UnsupportedAppUsage
         public final Region touchableRegion = new Region();
 
         /**
@@ -252,6 +260,7 @@ public final class ViewTreeObserver {
          * Option for {@link #setTouchableInsets(int)}: the area inside of
          * the provided touchable region in {@link #touchableRegion} can be touched.
          */
+        @UnsupportedAppUsage
         public static final int TOUCHABLE_INSETS_REGION = 3;
 
         /**
@@ -259,10 +268,12 @@ public final class ViewTreeObserver {
          * {@link #TOUCHABLE_INSETS_FRAME}, {@link #TOUCHABLE_INSETS_CONTENT},
          * {@link #TOUCHABLE_INSETS_VISIBLE}, or {@link #TOUCHABLE_INSETS_REGION}.
          */
+        @UnsupportedAppUsage
         public void setTouchableInsets(int val) {
             mTouchableInsets = val;
         }
 
+        @UnsupportedAppUsage
         int mTouchableInsets;
 
         void reset() {
@@ -300,6 +311,7 @@ public final class ViewTreeObserver {
                     touchableRegion.equals(other.touchableRegion);
         }
 
+        @UnsupportedAppUsage
         void set(InternalInsetsInfo other) {
             contentInsets.set(other.contentInsets);
             visibleInsets.set(other.visibleInsets);
@@ -848,6 +860,7 @@ public final class ViewTreeObserver {
      * We are not yet ready to commit to this API and support it, so
      * @hide
      */
+    @UnsupportedAppUsage
     public void addOnComputeInternalInsetsListener(OnComputeInternalInsetsListener listener) {
         checkIsAlive();
 
@@ -871,6 +884,7 @@ public final class ViewTreeObserver {
      * We are not yet ready to commit to this API and support it, so
      * @hide
      */
+    @UnsupportedAppUsage
     public void removeOnComputeInternalInsetsListener(OnComputeInternalInsetsListener victim) {
         checkIsAlive();
         if (mOnComputeInternalInsetsListeners == null) {
@@ -970,6 +984,7 @@ public final class ViewTreeObserver {
     /**
      * Notifies registered listeners that focus has changed.
      */
+    @UnsupportedAppUsage
     final void dispatchOnGlobalFocusChange(View oldFocus, View newFocus) {
         // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
         // perform the dispatching. The iterator is a safe guard against listeners that
@@ -1081,6 +1096,7 @@ public final class ViewTreeObserver {
      *
      * @param inTouchMode True if the touch mode is now enabled, false otherwise.
      */
+    @UnsupportedAppUsage
     final void dispatchOnTouchModeChanged(boolean inTouchMode) {
         final CopyOnWriteArrayList<OnTouchModeChangeListener> listeners =
                 mOnTouchModeChangeListeners;
@@ -1094,6 +1110,7 @@ public final class ViewTreeObserver {
     /**
      * Notifies registered listeners that something has scrolled.
      */
+    @UnsupportedAppUsage
     final void dispatchOnScrollChanged() {
         // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
         // perform the dispatching. The iterator is a safe guard against listeners that
@@ -1116,6 +1133,7 @@ public final class ViewTreeObserver {
     /**
      * Returns whether there are listeners for computing internal insets.
      */
+    @UnsupportedAppUsage
     final boolean hasComputeInternalInsetsListeners() {
         final CopyOnWriteArray<OnComputeInternalInsetsListener> listeners =
                 mOnComputeInternalInsetsListeners;
@@ -1125,6 +1143,7 @@ public final class ViewTreeObserver {
     /**
      * Calls all listeners to compute the current insets.
      */
+    @UnsupportedAppUsage
     final void dispatchOnComputeInternalInsets(InternalInsetsInfo inoutInfo) {
         // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
         // perform the dispatching. The iterator is a safe guard against listeners that

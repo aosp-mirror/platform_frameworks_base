@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.hardware.input.InputManager;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -307,6 +308,7 @@ public class KeyCharacterMap implements Parcelable {
     }
 
     // Called from native
+    @UnsupportedAppUsage
     private KeyCharacterMap(long ptr) {
         mPtr = ptr;
     }
@@ -748,7 +750,9 @@ public class KeyCharacterMap implements Parcelable {
 
         private FallbackAction next;
 
+        @UnsupportedAppUsage
         public int keyCode;
+        @UnsupportedAppUsage
         public int metaState;
 
         private FallbackAction() {

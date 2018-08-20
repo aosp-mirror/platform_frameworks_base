@@ -17,6 +17,7 @@
 package android.view.accessibility;
 
 import android.annotation.IntDef;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -755,10 +756,12 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     private static final SynchronizedPool<AccessibilityEvent> sPool =
             new SynchronizedPool<>(MAX_POOL_SIZE);
 
+    @UnsupportedAppUsage
     private @EventType int mEventType;
     private CharSequence mPackageName;
     private long mEventTime;
     int mMovementGranularity;
+    @UnsupportedAppUsage
     int mAction;
     int mContentChangeTypes;
     int mWindowChangeTypes;
