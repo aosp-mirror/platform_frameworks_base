@@ -18,23 +18,28 @@ package android.ext.services.notification;
 
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
+import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.NotificationListenerService.Ranking
         .USER_SENTIMENT_NEGATIVE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
+import android.app.AlarmManager;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.IPackageManager;
 import android.database.ContentObserver;
+import android.ext.services.notification.AgingHelper.Callback;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
@@ -64,6 +69,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -89,15 +95,17 @@ public class Assistant extends NotificationAssistantService {
     private int mStreakLimit;
     private SmartActionsHelper mSmartActionsHelper;
     private NotificationCategorizer mNotificationCategorizer;
+    private AgingHelper mAgingHelper;
 
     // key : impressions tracker
     // TODO: prune deleted channels and apps
-    final ArrayMap<String, ChannelImpressions> mkeyToImpressions = new ArrayMap<>();
-    // SBN key : channel id
-    ArrayMap<String, String> mLiveNotifications = new ArrayMap<>();
+    private final ArrayMap<String, ChannelImpressions> mkeyToImpressions = new ArrayMap<>();
+    // SBN key : entry
+    protected ArrayMap<String, NotificationEntry> mLiveNotifications = new ArrayMap<>();
 
     private Ranking mFakeRanking = null;
     private AtomicFile mFile = null;
+    private IPackageManager mPackageManager;
     protected SettingsObserver mSettingsObserver;
 
     public Assistant() {
@@ -108,9 +116,13 @@ public class Assistant extends NotificationAssistantService {
         super.onCreate();
         // Contexts are correctly hooked up by the creation step, which is required for the observer
         // to be hooked up/initialized.
+        mPackageManager = ActivityThread.getPackageManager();
         mSettingsObserver = new SettingsObserver(mHandler);
         mSmartActionsHelper = new SmartActionsHelper();
         mNotificationCategorizer = new NotificationCategorizer();
+        mAgingHelper = new AgingHelper(getContext(),
+                mNotificationCategorizer,
+                new AgingCallback());
     }
 
     private void loadFile() {
@@ -157,7 +169,7 @@ public class Assistant extends NotificationAssistantService {
         }
     }
 
-    private void saveFile() throws IOException {
+    private void saveFile() {
         AsyncTask.execute(() -> {
             final FileOutputStream stream;
             try {
@@ -200,6 +212,9 @@ public class Assistant extends NotificationAssistantService {
     public Adjustment onNotificationEnqueued(StatusBarNotification sbn,
             NotificationChannel channel) {
         if (DEBUG) Log.i(TAG, "ENQUEUED " + sbn.getKey() + " on " + channel.getId());
+        if (!isForCurrentUser(sbn)) {
+            return null;
+        }
         NotificationEntry entry = new NotificationEntry(
                 ActivityThread.getPackageManager(), sbn, channel);
         ArrayList<Notification.Action> actions =
@@ -222,7 +237,7 @@ public class Assistant extends NotificationAssistantService {
             signals.putCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES, smartReplies);
         }
         if (mNotificationCategorizer.shouldSilence(entry)) {
-            signals.putInt(Adjustment.KEY_IMPORTANCE, IMPORTANCE_LOW);
+            signals.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
         }
 
         return new Adjustment(
@@ -237,8 +252,13 @@ public class Assistant extends NotificationAssistantService {
     public void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap) {
         if (DEBUG) Log.i(TAG, "POSTED " + sbn.getKey());
         try {
+            if (!isForCurrentUser(sbn)) {
+                return;
+            }
             Ranking ranking = getRanking(sbn.getKey(), rankingMap);
             if (ranking != null && ranking.getChannel() != null) {
+                NotificationEntry entry = new NotificationEntry(mPackageManager,
+                        sbn, ranking.getChannel());
                 String key = getKey(
                         sbn.getPackageName(), sbn.getUserId(), ranking.getChannel().getId());
                 ChannelImpressions ci = mkeyToImpressions.getOrDefault(key,
@@ -248,7 +268,8 @@ public class Assistant extends NotificationAssistantService {
                             sbn.getPackageName(), sbn.getKey(), sbn.getUserId()));
                 }
                 mkeyToImpressions.put(key, ci);
-                mLiveNotifications.put(sbn.getKey(), ranking.getChannel().getId());
+                mLiveNotifications.put(sbn.getKey(), entry);
+                mAgingHelper.onNotificationPosted(entry);
             }
         } catch (Throwable e) {
             Log.e(TAG, "Error occurred processing post", e);
@@ -259,8 +280,11 @@ public class Assistant extends NotificationAssistantService {
     public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap,
             NotificationStats stats, int reason) {
         try {
+            if (!isForCurrentUser(sbn)) {
+                return;
+            }
             boolean updatedImpressions = false;
-            String channelId = mLiveNotifications.remove(sbn.getKey());
+            String channelId = mLiveNotifications.remove(sbn.getKey()).getChannel().getId();
             String key = getKey(sbn.getPackageName(), sbn.getUserId(), channelId);
             synchronized (mkeyToImpressions) {
                 ChannelImpressions ci = mkeyToImpressions.getOrDefault(key,
@@ -302,6 +326,22 @@ public class Assistant extends NotificationAssistantService {
     }
 
     @Override
+    public void onNotificationsSeen(List<String> keys) {
+        if (keys == null) {
+            return;
+        }
+
+        for (String key : keys) {
+            NotificationEntry entry = mLiveNotifications.get(key);
+
+            if (entry != null) {
+                entry.setSeen();
+                mAgingHelper.onNotificationSeen(entry);
+            }
+        }
+    }
+
+    @Override
     public void onListenerConnected() {
         if (DEBUG) Log.i(TAG, "CONNECTED");
         try {
@@ -316,6 +356,17 @@ public class Assistant extends NotificationAssistantService {
         } catch (Throwable e) {
             Log.e(TAG, "Error occurred on connection", e);
         }
+    }
+
+    @Override
+    public void onListenerDisconnected() {
+        if (mAgingHelper != null) {
+            mAgingHelper.onDestroy();
+        }
+    }
+
+    private boolean isForCurrentUser(StatusBarNotification sbn) {
+        return sbn != null && sbn.getUserId() == UserHandle.myUserId();
     }
 
     protected String getKey(String pkg, int userId, String channelId) {
@@ -361,6 +412,11 @@ public class Assistant extends NotificationAssistantService {
     }
 
     @VisibleForTesting
+    public void setPackageManager(IPackageManager pm) {
+        mPackageManager = pm;
+    }
+
+    @VisibleForTesting
     public ChannelImpressions getImpressions(String key) {
         synchronized (mkeyToImpressions) {
             return mkeyToImpressions.get(key);
@@ -378,6 +434,20 @@ public class Assistant extends NotificationAssistantService {
         ChannelImpressions impressions = new ChannelImpressions();
         impressions.updateThresholds(mDismissToViewRatioLimit, mStreakLimit);
         return impressions;
+    }
+
+    protected final class AgingCallback implements Callback {
+        @Override
+        public void sendAdjustment(String key, int newImportance) {
+            NotificationEntry entry = mLiveNotifications.get(key);
+            if (entry != null) {
+                Bundle bundle = new Bundle();
+                bundle.putInt(KEY_IMPORTANCE, newImportance);
+                Adjustment adjustment = new Adjustment(entry.getSbn().getPackageName(), key, bundle,
+                        "aging", entry.getSbn().getUserId());
+                adjustNotification(adjustment);
+            }
+        }
     }
 
     /**

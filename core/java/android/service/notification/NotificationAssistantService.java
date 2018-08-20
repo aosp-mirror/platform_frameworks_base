@@ -149,6 +149,14 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     }
 
     /**
+     * Implement this to know when a user has seen notifications, as triggered by
+     * {@link #setNotificationsShown(String[])}.
+     */
+    public void onNotificationsSeen(List<String> keys) {
+
+    }
+
+    /**
      * Updates a notification.  N.B. this won’t cause
      * an existing notification to alert, but might allow a future update to
      * this notification to alert.
@@ -236,11 +244,20 @@ public abstract class NotificationAssistantService extends NotificationListenerS
             mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_SNOOZED,
                     args).sendToTarget();
         }
+
+        @Override
+        public void onNotificationsSeen(List<String> keys) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = keys;
+            mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATIONS_SEEN,
+                    args).sendToTarget();
+        }
     }
 
     private final class MyHandler extends Handler {
         public static final int MSG_ON_NOTIFICATION_ENQUEUED = 1;
         public static final int MSG_ON_NOTIFICATION_SNOOZED = 2;
+        public static final int MSG_ON_NOTIFICATIONS_SEEN = 3;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
@@ -273,6 +290,13 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                     String snoozeCriterionId = (String) args.arg2;
                     args.recycle();
                     onNotificationSnoozedUntilContext(sbn, snoozeCriterionId);
+                    break;
+                }
+                case MSG_ON_NOTIFICATIONS_SEEN: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    List<String> keys = (List<String>) args.arg1;
+                    args.recycle();
+                    onNotificationsSeen(keys);
                     break;
                 }
             }

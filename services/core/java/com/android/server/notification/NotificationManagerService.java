@@ -72,7 +72,6 @@ import static android.service.notification.NotificationListenerService.REASON_UN
 import static android.service.notification.NotificationListenerService.REASON_USER_STOPPED;
 import static android.service.notification.NotificationListenerService.TRIM_FULL;
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static com.android.server.utils.PriorityDump.PRIORITY_ARG;
@@ -2694,24 +2693,30 @@ public class NotificationManagerService extends SystemService {
             try {
                 synchronized (mNotificationLock) {
                     final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-                    if (keys != null) {
-                        final int N = keys.length;
-                        for (int i = 0; i < N; i++) {
-                            NotificationRecord r = mNotificationsByKey.get(keys[i]);
-                            if (r == null) continue;
-                            final int userId = r.sbn.getUserId();
-                            if (userId != info.userid && userId != UserHandle.USER_ALL &&
-                                    !mUserProfiles.isCurrentProfile(userId)) {
-                                throw new SecurityException("Disallowed call from listener: "
-                                        + info.service);
-                            }
-                            if (!r.isSeen()) {
-                                if (DBG) Slog.d(TAG, "Marking notification as seen " + keys[i]);
-                                reportSeen(r);
-                                r.setSeen();
-                                maybeRecordInterruptionLocked(r);
-                            }
+                    if (keys == null) {
+                        return;
+                    }
+                    ArrayList<NotificationRecord> seen = new ArrayList<>();
+                    final int n = keys.length;
+                    for (int i = 0; i < n; i++) {
+                        NotificationRecord r = mNotificationsByKey.get(keys[i]);
+                        if (r == null) continue;
+                        final int userId = r.sbn.getUserId();
+                        if (userId != info.userid && userId != UserHandle.USER_ALL
+                                && !mUserProfiles.isCurrentProfile(userId)) {
+                            throw new SecurityException("Disallowed call from listener: "
+                                    + info.service);
                         }
+                        seen.add(r);
+                        if (!r.isSeen()) {
+                            if (DBG) Slog.d(TAG, "Marking notification as seen " + keys[i]);
+                            reportSeen(r);
+                            r.setSeen();
+                            maybeRecordInterruptionLocked(r);
+                        }
+                    }
+                    if (!seen.isEmpty()) {
+                        mAssistants.onNotificationsSeenLocked(seen);
                     }
                 }
             } finally {
@@ -6554,6 +6559,35 @@ public class NotificationManagerService extends SystemService {
         public void onUserUnlocked(int user) {
             if (DEBUG) Slog.d(TAG, "onUserUnlocked u=" + user);
             rebindServices(true);
+        }
+
+        protected void onNotificationsSeenLocked(ArrayList<NotificationRecord> records) {
+            // There should be only one, but it's a list, so while we enforce
+            // singularity elsewhere, we keep it general here, to avoid surprises.
+            for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
+                ArrayList<String> keys = new ArrayList<>(records.size());
+                for (NotificationRecord r : records) {
+                    boolean sbnVisible = isVisibleToListener(r.sbn, info)
+                            && info.isSameUser(r.getUserId());
+                    if (sbnVisible) {
+                        keys.add(r.getKey());
+                    }
+                }
+
+                if (!keys.isEmpty()) {
+                    mHandler.post(() -> notifySeen(info, keys));
+                }
+            }
+        }
+
+        private void notifySeen(final ManagedServiceInfo info,
+                final ArrayList<String> keys) {
+            final INotificationListener assistant = (INotificationListener) info.service;
+            try {
+                assistant.onNotificationsSeen(keys);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "unable to notify assistant (seen): " + assistant, ex);
+            }
         }
 
         public void onNotificationEnqueued(final NotificationRecord r) {

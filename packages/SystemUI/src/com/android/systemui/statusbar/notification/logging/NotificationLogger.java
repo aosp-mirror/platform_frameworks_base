@@ -62,6 +62,8 @@ public class NotificationLogger {
     protected IStatusBarService mBarService;
     private long mLastVisibilityReportUptimeMs;
     private NotificationListContainer mListContainer;
+    private Object mDozingLock = new Object();
+    private boolean mDozing;
 
     protected final OnChildLocationsChangedListener mNotificationLocationsChangedListener =
             new OnChildLocationsChangedListener() {
@@ -174,6 +176,12 @@ public class NotificationLogger {
         mNotificationLocationsChangedListener.onChildLocationsChanged();
     }
 
+    public void setDozing(boolean dozing) {
+        synchronized (mDozingLock) {
+            mDozing = dozing;
+        }
+    }
+
     private void logNotificationVisibilityChanges(
             Collection<NotificationVisibility> newlyVisible,
             Collection<NotificationVisibility> noLongerVisible) {
@@ -190,19 +198,25 @@ public class NotificationLogger {
                 // Ignore.
             }
 
-            final int N = newlyVisible.size();
+            final int N = newlyVisibleAr.length;
             if (N > 0) {
                 String[] newlyVisibleKeyAr = new String[N];
                 for (int i = 0; i < N; i++) {
                     newlyVisibleKeyAr[i] = newlyVisibleAr[i].key;
                 }
 
-                // TODO: Call NotificationEntryManager to do this, once it exists.
-                // TODO: Consider not catching all runtime exceptions here.
-                try {
-                    mNotificationListener.setNotificationsShown(newlyVisibleKeyAr);
-                } catch (RuntimeException e) {
-                    Log.d(TAG, "failed setNotificationsShown: ", e);
+                synchronized (mDozingLock) {
+                    // setNotificationsShown should only be called if we are confident that
+                    // the user has seen the notification, aka not when ambient display is on
+                    if (!mDozing) {
+                        // TODO: Call NotificationEntryManager to do this, once it exists.
+                        // TODO: Consider not catching all runtime exceptions here.
+                        try {
+                            mNotificationListener.setNotificationsShown(newlyVisibleKeyAr);
+                        } catch (RuntimeException e) {
+                            Log.d(TAG, "failed setNotificationsShown: ", e);
+                        }
+                    }
                 }
             }
             recycleAllVisibilityObjects(newlyVisibleAr);

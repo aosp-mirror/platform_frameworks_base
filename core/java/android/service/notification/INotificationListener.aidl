@@ -18,6 +18,7 @@ package android.service.notification;
 
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
+import android.content.pm.ParceledListSlice;
 import android.os.UserHandle;
 import android.service.notification.NotificationStats;
 import android.service.notification.IStatusBarNotificationHolder;
@@ -45,4 +46,5 @@ oneway interface INotificationListener
     // assistants only
     void onNotificationEnqueuedWithChannel(in IStatusBarNotificationHolder notificationHolder, in NotificationChannel channel);
     void onNotificationSnoozedUntilContext(in IStatusBarNotificationHolder notificationHolder, String snoozeCriterionId);
+    void onNotificationsSeen(in List<String> keys);
 }

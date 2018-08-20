@@ -50,6 +50,7 @@ public class NotificationEntry {
     private AudioAttributes mAttributes;
     private NotificationChannel mChannel;
     private int mImportance;
+    private boolean mSeen;
 
     public NotificationEntry(IPackageManager packageManager, StatusBarNotification sbn,
             NotificationChannel channel) {
@@ -196,6 +197,14 @@ public class NotificationEntry {
             }
         }
         return false;
+    }
+
+    public void setSeen() {
+        mSeen = true;
+    }
+
+    public boolean hasSeen() {
+        return mSeen;
     }
 
     public StatusBarNotification getSbn() {
