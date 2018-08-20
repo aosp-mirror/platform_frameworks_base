@@ -28,6 +28,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -86,6 +87,7 @@ public class SubscriptionManager {
 
     /** Indicates the caller wants the default sub id. */
     /** @hide */
+    @UnsupportedAppUsage
     public static final int DEFAULT_SUBSCRIPTION_ID = Integer.MAX_VALUE;
 
     /**
@@ -108,6 +110,7 @@ public class SubscriptionManager {
     public static final int MAX_SUBSCRIPTION_ID_VALUE = DEFAULT_SUBSCRIPTION_ID - 1;
 
     /** @hide */
+    @UnsupportedAppUsage
     public static final Uri CONTENT_URI = Uri.parse("content://telephony/siminfo");
 
     /**
@@ -185,6 +188,7 @@ public class SubscriptionManager {
      * The name_source is from the user
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int NAME_SOURCE_USER_INPUT = 2;
 
     /**
@@ -615,6 +619,7 @@ public class SubscriptionManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public SubscriptionManager(Context context) {
         if (DBG) logd("SubscriptionManager created");
         mContext = context;
@@ -793,6 +798,7 @@ public class SubscriptionManager {
      * include those that were inserted before, maybe empty but not null.
      * @hide
      */
+    @UnsupportedAppUsage
     public List<SubscriptionInfo> getAllSubscriptionInfoList() {
         if (VDBG) logd("[getAllSubscriptionInfoList]+");
 
@@ -964,6 +970,7 @@ public class SubscriptionManager {
      * all subscriptions that have been seen.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getAllSubscriptionInfoCount() {
         if (VDBG) logd("[getAllSubscriptionInfoCount]+");
 
@@ -1069,6 +1076,7 @@ public class SubscriptionManager {
      * @return the number of records updated
      * @hide
      */
+    @UnsupportedAppUsage
     public int setIconTint(int tint, int subId) {
         if (VDBG) logd("[setIconTint]+ tint:" + tint + " subId:" + subId);
         return setSubscriptionPropertyHelper(subId, "setIconTint",
@@ -1096,6 +1104,7 @@ public class SubscriptionManager {
      * @return the number of records updated or < 0 if invalid subId
      * @hide
      */
+    @UnsupportedAppUsage
     public int setDisplayName(String displayName, int subId, long nameSource) {
         if (VDBG) {
             logd("[setDisplayName]+  displayName:" + displayName + " subId:" + subId
@@ -1113,6 +1122,7 @@ public class SubscriptionManager {
      * @return the number of records updated
      * @hide
      */
+    @UnsupportedAppUsage
     public int setDisplayNumber(String number, int subId) {
         if (number == null) {
             logd("[setDisplayNumber]- fail");
@@ -1130,6 +1140,7 @@ public class SubscriptionManager {
      * @return the number of records updated
      * @hide
      */
+    @UnsupportedAppUsage
     public int setDataRoaming(int roaming, int subId) {
         if (VDBG) logd("[setDataRoaming]+ roaming:" + roaming + " subId:" + subId);
         return setSubscriptionPropertyHelper(subId, "setDataRoaming",
@@ -1143,6 +1154,7 @@ public class SubscriptionManager {
      * SIM_NOT_INSERTED or < 0 if an invalid slot index
      * @hide
      */
+    @UnsupportedAppUsage
     public static int getSlotIndex(int subId) {
         if (!isValidSubscriptionId(subId)) {
             if (DBG) {
@@ -1166,6 +1178,7 @@ public class SubscriptionManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static int[] getSubId(int slotIndex) {
         if (!isValidSlotIndex(slotIndex)) {
             logd("[getSubId]- fail");
@@ -1187,6 +1200,7 @@ public class SubscriptionManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static int getPhoneId(int subId) {
         if (!isValidSubscriptionId(subId)) {
             if (DBG) {
@@ -1284,11 +1298,13 @@ public class SubscriptionManager {
      * @return the SubscriptionInfo for the default voice subscription.
      * @hide
      */
+    @UnsupportedAppUsage
     public SubscriptionInfo getDefaultVoiceSubscriptionInfo() {
         return getActiveSubscriptionInfo(getDefaultVoiceSubscriptionId());
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static int getDefaultVoicePhoneId() {
         return getPhoneId(getDefaultVoiceSubscriptionId());
     }
@@ -1317,6 +1333,7 @@ public class SubscriptionManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setDefaultSmsSubId(int subId) {
         if (VDBG) logd("setDefaultSmsSubId sub id = " + subId);
         try {
@@ -1342,6 +1359,7 @@ public class SubscriptionManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getDefaultSmsPhoneId() {
         return getPhoneId(getDefaultSmsSubscriptionId());
     }
@@ -1370,6 +1388,7 @@ public class SubscriptionManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setDefaultDataSubId(int subId) {
         if (VDBG) logd("setDataSubscription sub id = " + subId);
         try {
@@ -1390,11 +1409,13 @@ public class SubscriptionManager {
      * @return the SubscriptionInfo for the default data subscription.
      * @hide
      */
+    @UnsupportedAppUsage
     public SubscriptionInfo getDefaultDataSubscriptionInfo() {
         return getActiveSubscriptionInfo(getDefaultDataSubscriptionId());
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int getDefaultDataPhoneId() {
         return getPhoneId(getDefaultDataSubscriptionId());
     }
@@ -1433,6 +1454,7 @@ public class SubscriptionManager {
      * an invalid subscription id, i.e. < 0.
      * @hide
      */
+    @UnsupportedAppUsage
     public void clearDefaultsForInactiveSubIds() {
         if (VDBG) logd("clearDefaultsForInactiveSubIds");
         try {
@@ -1449,6 +1471,7 @@ public class SubscriptionManager {
      * @return true if a valid subId else false
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean isValidSubscriptionId(int subId) {
         return subId > INVALID_SUBSCRIPTION_ID ;
     }
@@ -1458,21 +1481,25 @@ public class SubscriptionManager {
      * usable subId means its neither a INVALID_SUBSCRIPTION_ID nor a DEFAULT_SUB_ID.
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean isUsableSubIdValue(int subId) {
         return subId >= MIN_SUBSCRIPTION_ID_VALUE && subId <= MAX_SUBSCRIPTION_ID_VALUE;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static boolean isValidSlotIndex(int slotIndex) {
         return slotIndex >= 0 && slotIndex < TelephonyManager.getDefault().getSimCount();
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static boolean isValidPhoneId(int phoneId) {
         return phoneId >= 0 && phoneId < TelephonyManager.getDefault().getPhoneCount();
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId) {
         int[] subIds = SubscriptionManager.getSubId(phoneId);
         if (subIds != null && subIds.length > 0) {
@@ -1483,6 +1510,7 @@ public class SubscriptionManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId, int subId) {
         if (VDBG) logd("putPhoneIdAndSubIdExtra: phoneId=" + phoneId + " subId=" + subId);
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
@@ -1498,6 +1526,7 @@ public class SubscriptionManager {
      *         is never null but the length maybe 0.
      * @hide
      */
+    @UnsupportedAppUsage
     public @NonNull int[] getActiveSubscriptionIdList() {
         int[] subId = null;
 
@@ -1656,6 +1685,7 @@ public class SubscriptionManager {
      * @return Resources associated with Subscription.
      * @hide
      */
+    @UnsupportedAppUsage
     public static Resources getResourcesForSubId(Context context, int subId) {
         final SubscriptionInfo subInfo =
                 SubscriptionManager.from(context).getActiveSubscriptionInfo(subId);
@@ -1679,6 +1709,7 @@ public class SubscriptionManager {
      * and the SIM providing the subscription is present in a slot and in "LOADED" state.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isActiveSubId(int subId) {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));

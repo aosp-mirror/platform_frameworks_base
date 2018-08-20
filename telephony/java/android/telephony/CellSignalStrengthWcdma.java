@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Rlog;
@@ -34,8 +35,10 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
     private static final int WCDMA_SIGNAL_STRENGTH_GOOD = 8;
     private static final int WCDMA_SIGNAL_STRENGTH_MODERATE = 5;
 
+    @UnsupportedAppUsage
     private int mSignalStrength; // in ASU; Valid values are (0-31, 99) as defined in TS 27.007 8.5
                                  // or Integer.MAX_VALUE if unknown
+    @UnsupportedAppUsage
     private int mBitErrorRate; // bit error rate (0-7, 99) as defined in TS 27.007 8.5 or
                                // Integer.MAX_VALUE if unknown
     private int mRscp; // bit error rate (0-96, 255) as defined in TS 27.007 8.69 or

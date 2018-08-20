@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.text.TextUtils;
 
@@ -34,13 +35,16 @@ public final class CellIdentityGsm extends CellIdentity {
     // 16-bit GSM Cell Identity described in TS 27.007, 0..65535
     private final int mCid;
     // 16-bit GSM Absolute RF Channel Number
+    @UnsupportedAppUsage
     private final int mArfcn;
     // 6-bit Base Station Identity Code
+    @UnsupportedAppUsage
     private final int mBsic;
 
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public CellIdentityGsm() {
         super(TAG, CellInfo.TYPE_GSM, null, null, null, null);
         mLac = Integer.MAX_VALUE;

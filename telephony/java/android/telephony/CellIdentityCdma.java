@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.text.TextUtils;
 
@@ -74,6 +75,7 @@ public final class CellIdentityCdma extends CellIdentity {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public CellIdentityCdma(int nid, int sid, int bid, int lon, int lat) {
         this(nid, sid, bid, lon, lat, null, null);
     }
