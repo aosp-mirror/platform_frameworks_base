@@ -8075,4 +8075,23 @@ public class TelephonyManager {
         }
         return UNKNOWN_CARRIER_ID_LIST_VERSION;
     }
+
+
+    /**
+     * How many modems can have simultaneous data connections.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    public int getNumberOfModemsWithSimultaneousDataConnections() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getNumberOfModemsWithSimultaneousDataConnections(
+                        getSubId(), mContext.getOpPackageName());
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+        return 0;
+    }
 }
