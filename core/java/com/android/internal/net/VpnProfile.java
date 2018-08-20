@@ -16,6 +16,7 @@
 
 package com.android.internal.net;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -45,10 +46,15 @@ public class VpnProfile implements Cloneable, Parcelable {
     public static final int TYPE_MAX = 5;
 
     // Entity fields.
+    @UnsupportedAppUsage
     public final String key;           // -1
+    @UnsupportedAppUsage
     public String name = "";           // 0
+    @UnsupportedAppUsage
     public int type = TYPE_PPTP;       // 1
+    @UnsupportedAppUsage
     public String server = "";         // 2
+    @UnsupportedAppUsage
     public String username = "";       // 3
     public String password = "";       // 4
     public String dnsServers = "";     // 5
@@ -63,12 +69,14 @@ public class VpnProfile implements Cloneable, Parcelable {
     public String ipsecServerCert = "";// 14
 
     // Helper fields.
+    @UnsupportedAppUsage
     public boolean saveLogin = false;
 
     public VpnProfile(String key) {
         this.key = key;
     }
 
+    @UnsupportedAppUsage
     public VpnProfile(Parcel in) {
         key = in.readString();
         name = in.readString();
@@ -110,6 +118,7 @@ public class VpnProfile implements Cloneable, Parcelable {
         out.writeInt(saveLogin ? 1 : 0);
     }
 
+    @UnsupportedAppUsage
     public static VpnProfile decode(String key, byte[] value) {
         try {
             if (key == null) {
