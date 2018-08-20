@@ -157,6 +157,7 @@ message DisplayContentProto {
     optional int32 rotation = 11;
     optional ScreenRotationAnimationProto screen_rotation_animation = 12;
     optional DisplayFramesProto display_frames = 13;
+    optional int32 surface_size = 14;
 }
 
 /* represents DisplayFrames */
@@ -211,6 +212,8 @@ message TaskProto {
     optional .android.graphics.RectProto bounds = 5;
     optional .android.graphics.RectProto temp_inset_bounds = 6;
     optional bool defer_removal = 7;
+    optional int32 surface_width = 8;
+    optional int32 surface_height = 9;
 }
 
 /* represents AppWindowToken */

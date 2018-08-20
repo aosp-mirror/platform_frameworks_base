@@ -20,13 +20,14 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.SurfaceControl.Transaction;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+
 import static com.android.server.wm.WindowContainerProto.CONFIGURATION_CONTAINER;
 import static com.android.server.wm.WindowContainerProto.ORIENTATION;
 import static com.android.server.wm.WindowContainerProto.SURFACE_ANIMATOR;
 import static com.android.server.wm.WindowContainerProto.VISIBLE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
@@ -500,6 +501,24 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer child = mChildren.get(i);
             child.onDisplayChanged(dc);
+        }
+    }
+
+    /**
+     * Update the surface size when display changed in order to avoid children being bound by the
+     * old display size.
+     *
+     * Note that we don't want to apply this to all layers, but only limiting this to layers that
+     * don't set their own size ({@link Task}, {@link WindowState} and {@link WindowToken}).
+     */
+    void updateSurfaceSize(DisplayContent dc) {
+        if (mSurfaceControl == null) {
+            return;
+        }
+
+        final int newSurfaceSize = dc.getSurfaceSize();
+        if (mSurfaceControl.getWidth() != newSurfaceSize) {
+            getPendingTransaction().setSize(mSurfaceControl, newSurfaceSize, newSurfaceSize);
         }
     }
 

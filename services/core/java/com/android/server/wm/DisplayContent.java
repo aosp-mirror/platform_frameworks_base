@@ -76,6 +76,7 @@ import static com.android.server.wm.DisplayContentProto.PINNED_STACK_CONTROLLER;
 import static com.android.server.wm.DisplayContentProto.ROTATION;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.DisplayContentProto.STACKS;
+import static com.android.server.wm.DisplayContentProto.SURFACE_SIZE;
 import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
@@ -2409,6 +2410,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             screenRotationAnimation.writeToProto(proto, SCREEN_ROTATION_ANIMATION);
         }
         mDisplayFrames.writeToProto(proto, DISPLAY_FRAMES);
+        proto.write(SURFACE_SIZE, mSurfaceSize);
         proto.end(token);
     }
 
@@ -3149,6 +3151,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mTmpMatrix.mapRect(mTmpRectF);
             mTmpRectF.round(out);
         }
+    }
+
+    int getSurfaceSize() {
+        return mSurfaceSize;
     }
 
     void performLayout(boolean initial, boolean updateInputWindows) {
