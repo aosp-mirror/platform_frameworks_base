@@ -16,6 +16,7 @@
 
 package android.media.session;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.content.ComponentName;
@@ -65,6 +66,7 @@ public class MediaSessionLegacyHelper {
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
     }
 
+    @UnsupportedAppUsage
     public static MediaSessionLegacyHelper getHelper(Context context) {
         synchronized (sLock) {
             if (sInstance == null) {

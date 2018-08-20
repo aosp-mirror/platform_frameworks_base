@@ -19,6 +19,7 @@ package android.webkit;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.app.ResourcesManager;
@@ -45,6 +46,7 @@ import com.android.internal.util.ArrayUtils;
 @SystemApi
 public final class WebViewDelegate {
 
+    @UnsupportedAppUsage
     /* package */ WebViewDelegate() { }
 
     /**

@@ -19,6 +19,7 @@ package android.text.style;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -57,6 +58,7 @@ import java.io.InputStream;
 public class ImageSpan extends DynamicDrawableSpan {
 
     @Nullable
+    @UnsupportedAppUsage
     private Drawable mDrawable;
     @Nullable
     private Uri mContentUri;

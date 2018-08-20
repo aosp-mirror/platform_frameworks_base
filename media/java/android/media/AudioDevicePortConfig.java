@@ -16,6 +16,8 @@
 
 package android.media;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * An AudioDevicePortConfig describes a possible configuration of an output or input device
  * (speaker, headphone, microphone ...).
@@ -26,6 +28,7 @@ package android.media;
  */
 
 public class AudioDevicePortConfig extends AudioPortConfig {
+    @UnsupportedAppUsage
     AudioDevicePortConfig(AudioDevicePort devicePort, int samplingRate, int channelMask,
             int format, AudioGainConfig gain) {
         super((AudioPort)devicePort, samplingRate, channelMask, format, gain);

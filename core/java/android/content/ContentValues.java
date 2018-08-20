@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -33,6 +34,7 @@ public final class ContentValues implements Parcelable {
     public static final String TAG = "ContentValues";
 
     /** Holds the actual values */
+    @UnsupportedAppUsage
     private HashMap<String, Object> mValues;
 
     /**
@@ -69,6 +71,7 @@ public final class ContentValues implements Parcelable {
      * @param values the values to start with
      * {@hide}
      */
+    @UnsupportedAppUsage
     private ContentValues(HashMap<String, Object> values) {
         mValues = values;
     }
@@ -502,6 +505,7 @@ public final class ContentValues implements Parcelable {
      * {@hide}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void putStringArrayList(String key, ArrayList<String> value) {
         mValues.put(key, value);
     }
@@ -512,6 +516,7 @@ public final class ContentValues implements Parcelable {
      */
     @SuppressWarnings("unchecked")
     @Deprecated
+    @UnsupportedAppUsage
     public ArrayList<String> getStringArrayList(String key) {
         return (ArrayList<String>) mValues.get(key);
     }

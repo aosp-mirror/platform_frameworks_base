@@ -15,7 +15,6 @@
  */
 
 package com.android.internal.telephony;
-import android.content.Intent;
 
 import android.content.Intent;
 import android.telephony.SubscriptionManager;

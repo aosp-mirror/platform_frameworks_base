@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -71,9 +72,11 @@ public class Ringtone {
     private final IRingtonePlayer mRemotePlayer;
     private final Binder mRemoteToken;
 
+    @UnsupportedAppUsage
     private MediaPlayer mLocalPlayer;
     private final MyOnCompletionListener mCompletionListener = new MyOnCompletionListener();
 
+    @UnsupportedAppUsage
     private Uri mUri;
     private String mTitle;
 
@@ -87,6 +90,7 @@ public class Ringtone {
     private final Object mPlaybackSettingsLock = new Object();
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public Ringtone(Context context, boolean allowRemote) {
         mContext = context;
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
@@ -298,6 +302,7 @@ public class Ringtone {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setUri(Uri uri) {
         destroyLocalPlayer();
 
@@ -335,6 +340,7 @@ public class Ringtone {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public Uri getUri() {
         return mUri;
     }

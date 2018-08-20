@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.Application;
@@ -59,8 +60,10 @@ public final class WebViewFactory {
 
     // Cache the factory both for efficiency, and ensure any one process gets all webviews from the
     // same provider.
+    @UnsupportedAppUsage
     private static WebViewFactoryProvider sProviderInstance;
     private static final Object sProviderLock = new Object();
+    @UnsupportedAppUsage
     private static PackageInfo sPackageInfo;
     private static Boolean sWebViewSupported;
     private static boolean sWebViewDisabled;
@@ -222,6 +225,7 @@ public final class WebViewFactory {
         return loadNativeRet;
     }
 
+    @UnsupportedAppUsage
     static WebViewFactoryProvider getProvider() {
         synchronized (sProviderLock) {
             // For now the main purpose of this function (and the factory abstraction) is to keep
@@ -359,6 +363,7 @@ public final class WebViewFactory {
         }
     }
 
+    @UnsupportedAppUsage
     private static Context getWebViewContextAndSetProvider() throws MissingWebViewPackageException {
         Application initialApplication = AppGlobals.getInitialApplication();
         try {
@@ -428,6 +433,7 @@ public final class WebViewFactory {
         }
     }
 
+    @UnsupportedAppUsage
     private static Class<WebViewFactoryProvider> getProviderClass() {
         Context webViewContext = null;
         Application initialApplication = AppGlobals.getInitialApplication();
@@ -509,6 +515,7 @@ public final class WebViewFactory {
     private static String WEBVIEW_UPDATE_SERVICE_NAME = "webviewupdate";
 
     /** @hide */
+    @UnsupportedAppUsage
     public static IWebViewUpdateService getUpdateService() {
         if (isWebViewSupported()) {
             return getUpdateServiceUnchecked();

@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.SharedPreferences;
 import android.os.FileUtils;
 import android.os.Looper;
@@ -63,6 +64,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
     //  - acquire SharedPreferencesImpl.mLock before EditorImpl.mLock
     //  - acquire mWritingToDiskLock before EditorImpl.mLock
 
+    @UnsupportedAppUsage
     private final File mFile;
     private final File mBackupFile;
     private final int mMode;
@@ -103,6 +105,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
     private final ExponentiallyBucketedHistogram mSyncTimes = new ExponentiallyBucketedHistogram(16);
     private int mNumSync = 0;
 
+    @UnsupportedAppUsage
     SharedPreferencesImpl(File file, int mode) {
         mFile = file;
         mBackupFile = makeBackupFile(file);
@@ -113,6 +116,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         startLoadFromDisk();
     }
 
+    @UnsupportedAppUsage
     private void startLoadFromDisk() {
         synchronized (mLock) {
             mLoaded = false;
@@ -195,6 +199,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         return new File(prefsFile.getPath() + ".bak");
     }
 
+    @UnsupportedAppUsage
     void startReloadIfChangedUnexpectedly() {
         synchronized (mLock) {
             // TODO: wait for any pending writes to disk?

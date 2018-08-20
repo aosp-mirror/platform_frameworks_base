@@ -16,6 +16,8 @@
 
 package android.media;
 
+import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -28,10 +30,10 @@ import java.util.List;
 /** @hide */
 public class MediaHTTPService extends IMediaHTTPService.Stub {
     private static final String TAG = "MediaHTTPService";
-    private List<HttpCookie> mCookies;
+    @Nullable private List<HttpCookie> mCookies;
     private Boolean mCookieStoreInitialized = new Boolean(false);
 
-    public MediaHTTPService(List<HttpCookie> cookies) {
+    public MediaHTTPService(@Nullable List<HttpCookie> cookies) {
         mCookies = cookies;
         Log.v(TAG, "MediaHTTPService(" + this + "): Cookies: " + cookies);
     }
@@ -82,6 +84,7 @@ public class MediaHTTPService extends IMediaHTTPService.Stub {
         return new MediaHTTPConnection();
     }
 
+    @UnsupportedAppUsage
     /* package private */static IBinder createHttpServiceBinderIfNecessary(
             String path) {
         return createHttpServiceBinderIfNecessary(path, null);

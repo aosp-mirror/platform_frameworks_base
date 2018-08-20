@@ -21,6 +21,7 @@ import static android.content.ContentResolver.SCHEME_ANDROID_RESOURCE;
 import static android.content.ContentResolver.SCHEME_CONTENT;
 import static android.content.ContentResolver.SCHEME_FILE;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -197,6 +198,7 @@ public class ClipData implements Parcelable {
         final CharSequence mText;
         final String mHtmlText;
         final Intent mIntent;
+        @UnsupportedAppUsage
         Uri mUri;
 
         /** @hide */
@@ -912,6 +914,7 @@ public class ClipData implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public Bitmap getIcon() {
         return mIcon;
     }

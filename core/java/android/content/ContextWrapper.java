@@ -18,6 +18,7 @@ package android.content;
 
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.content.pm.ApplicationInfo;
@@ -54,6 +55,7 @@ import java.util.concurrent.Executor;
  * the original Context.
  */
 public class ContextWrapper extends Context {
+    @UnsupportedAppUsage
     Context mBase;
 
     public ContextWrapper(Context base) {
@@ -123,6 +125,7 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
+    @UnsupportedAppUsage
     public int getThemeResId() {
         return mBase.getThemeResId();
     }
@@ -144,12 +147,14 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
+    @UnsupportedAppUsage
     public String getBasePackageName() {
         return mBase.getBasePackageName();
     }
 
     /** @hide */
     @Override
+    @UnsupportedAppUsage
     public String getOpPackageName() {
         return mBase.getOpPackageName();
     }
@@ -381,6 +386,7 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
+    @UnsupportedAppUsage
     public void startActivityAsUser(Intent intent, UserHandle user) {
         mBase.startActivityAsUser(intent, user);
     }
@@ -647,6 +653,7 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
+    @UnsupportedAppUsage
     public Intent registerReceiverAsUser(
         BroadcastReceiver receiver, UserHandle user, IntentFilter filter,
         String broadcastPermission, Handler scheduler) {
@@ -676,12 +683,14 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
+    @UnsupportedAppUsage
     public ComponentName startServiceAsUser(Intent service, UserHandle user) {
         return mBase.startServiceAsUser(service, user);
     }
 
     /** @hide */
     @Override
+    @UnsupportedAppUsage
     public ComponentName startForegroundServiceAsUser(Intent service, UserHandle user) {
         return mBase.startForegroundServiceAsUser(service, user);
     }
@@ -861,6 +870,7 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
+    @UnsupportedAppUsage
     public Context createApplicationContext(ApplicationInfo application,
             int flags) throws PackageManager.NameNotFoundException {
         return mBase.createApplicationContext(application, flags);
@@ -904,6 +914,7 @@ public class ContextWrapper extends Context {
      * @hide
      */
     @Override
+    @UnsupportedAppUsage
     public Display getDisplay() {
         return mBase.getDisplay();
     }

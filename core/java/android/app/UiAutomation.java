@@ -23,6 +23,7 @@ import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -190,6 +191,7 @@ public final class UiAutomation {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public UiAutomation(Looper looper, IUiAutomationConnection connection) {
         if (looper == null) {
             throw new IllegalArgumentException("Looper cannot be null!");
@@ -206,6 +208,7 @@ public final class UiAutomation {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void connect() {
         connect(0);
     }
@@ -277,6 +280,7 @@ public final class UiAutomation {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void disconnect() {
         synchronized (mLock) {
             if (mIsConnecting) {

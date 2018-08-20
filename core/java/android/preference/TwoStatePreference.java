@@ -17,6 +17,7 @@
 package android.preference;
 
 import android.annotation.StringRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
@@ -193,6 +194,7 @@ public abstract class TwoStatePreference extends Preference {
      * Sync a summary view contained within view's subhierarchy with the correct summary text.
      * @param view View where a summary should be located
      */
+    @UnsupportedAppUsage
     void syncSummaryView(View view) {
         // Sync the summary view
         TextView summaryView = (TextView) view.findViewById(com.android.internal.R.id.summary);

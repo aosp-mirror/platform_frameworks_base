@@ -793,6 +793,40 @@ java_library_host {
     },
 }
 
+// ====  java proto device library (for test only)  ==============================
+java_library {
+    name: "platformprotosnano",
+    proto: {
+        type: "nano",
+        output_params: ["store_unknown_fields=true"],
+        include_dirs: ["external/protobuf/src"],
+    },
+
+    sdk_version: "current",
+    srcs: [
+        "core/proto/**/*.proto",
+        "libs/incident/proto/android/os/**/*.proto",
+    ],
+}
+
+// ====  java proto device library (for test only)  ==============================
+java_library {
+    name: "platformprotoslite",
+    proto: {
+        type: "lite",
+        include_dirs: ["external/protobuf/src"],
+    },
+
+    srcs: [
+        "core/proto/**/*.proto",
+        "libs/incident/proto/android/os/**/*.proto",
+    ],
+    // Protos have lots of MissingOverride and similar.
+    errorprone: {
+        javacflags: ["-XepDisableAllChecks"],
+    },
+}
+
 // ====  c++ proto device library  ==============================
 cc_library {
     name: "libplatformprotos",
@@ -1053,100 +1087,6 @@ doc_defaults {
     resourcesdir: "docs/html/reference/images",
     resourcesoutdir: "reference/android/images",
     installable: false,
-}
-
-droiddoc {
-    name: "api-stubs-docs",
-    defaults: ["api-stubs-default"],
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-        ":api-version-xml",
-        "core/java/overview.html",
-        ":current-support-api",
-        "api/current.txt",
-    ],
-    api_filename: "public_api.txt",
-    private_api_filename: "private.txt",
-    removed_api_filename: "removed.txt",
-    args: framework_docs_args + " -referenceonly -nodocs",
-    check_api: {
-        last_released: {
-            api_file: ":last-released-public-api",
-            removed_api_file: "api/removed.txt",
-            args: "-hide 2 -hide 3 -hide 4 -hide 5 -hide 6 -hide 24 -hide 25 -hide 26 -hide 27 " +
-                  "-error 7 -error 8 -error 9 -error 10 -error 11 -error 12 -error 13 -error 14 -error 15 " +
-                  "-error 16 -error 17 -error 18 -error 31",
-        },
-        current: {
-            api_file: "api/current.txt",
-            removed_api_file: "api/removed.txt",
-            args: "-error 2 -error 3 -error 4 -error 5 -error 6 " +
-                  "-error 7 -error 8 -error 9 -error 10 -error 11 -error 12 -error 13 -error 14 -error 15 " +
-                  "-error 16 -error 17 -error 18 -error 19 -error 20 -error 21 -error 23 -error 24 " +
-                  "-error 25 -error 26 -error 27",
-        },
-    },
-}
-
-droiddoc {
-    name: "system-api-stubs-docs",
-    defaults: ["api-stubs-default"],
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-        ":api-version-xml",
-        "core/java/overview.html",
-        ":current-support-api",
-        "api/current.txt",
-    ],
-    api_tag_name: "SYSTEM",
-    api_filename: "system-api.txt",
-    removed_api_filename: "system-removed.txt",
-    exact_api_filename: "system-exact.txt",
-    args: framework_docs_args + " -referenceonly -showAnnotation android.annotation.SystemApi -nodocs",
-    check_api: {
-        last_released: {
-            api_file: ":last-released-system-api",
-            removed_api_file: "api/system-removed.txt",
-            args: "-hide 2 -hide 3 -hide 4 -hide 5 -hide 6 -hide 24 -hide 25 -hide 26 -hide 27 " +
-                  "-error 7 -error 8 -error 9 -error 10 -error 11 -error 12 -error 13 -error 14 -error 15 " +
-                  "-error 16 -error 17 -error 18 -error 31",
-        },
-        current: {
-            api_file: "api/system-current.txt",
-            removed_api_file: "api/system-removed.txt",
-            args: "-error 2 -error 3 -error 4 -error 5 -error 6 " +
-                  "-error 7 -error 8 -error 9 -error 10 -error 11 -error 12 -error 13 -error 14 -error 15 " +
-                  "-error 16 -error 17 -error 18 -error 19 -error 20 -error 21 -error 23 -error 24 " +
-                  "-error 25 -error 26 -error 27",
-        },
-    },
-}
-
-droiddoc {
-    name: "test-api-stubs-docs",
-    defaults: ["api-stubs-default"],
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-        ":api-version-xml",
-        "core/java/overview.html",
-        ":current-support-api",
-        "api/current.txt",
-    ],
-    api_tag_name: "TEST",
-    api_filename: "test-api.txt",
-    removed_api_filename: "test-removed.txt",
-    exact_api_filename: "test-exact.txt",
-    args: framework_docs_args + " -referenceonly -showAnnotation android.annotation.TestApi -nodocs",
-    check_api: {
-        current: {
-            api_file: "api/test-current.txt",
-            removed_api_file: "api/test-removed.txt",
-            args: "-error 2 -error 3 -error 4 -error 5 -error 6 " +
-                  "-error 7 -error 8 -error 9 -error 10 -error 11 -error 12 -error 13 -error 14 -error 15 " +
-                  "-error 16 -error 17 -error 18 -error 19 -error 20 -error 21 -error 23 -error 24 " +
-                  "-error 25 -error 26 -error 27",
-        },
-    },
 }
 
 doc_defaults {
@@ -1538,11 +1478,6 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
 doc_defaults {
     name: "metalava-api-stubs-default",
     srcs: [
-        // test mock src files.
-        "test-mock/src/android/test/mock/**/*.java",
-        // test runner excluding mock src files.
-        "test-runner/src/**/*.java",
-        "test-base/src/**/*.java",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
         ":openjdk_javadoc_files",
@@ -1571,7 +1506,7 @@ doc_defaults {
     installable: false,
     metalava_enabled: true,
     metalava_annotations_enabled: true,
-    metalava_previous_api: ":public-api-for-metalava-annotations",
+    metalava_previous_api: ":last-released-public-api",
     metalava_merge_annotations_dirs: [
         "metalava-manual",
         "ojluni-annotated-stubs",
@@ -1579,9 +1514,8 @@ doc_defaults {
 }
 
 droiddoc {
-    name: "metalava-api-stubs-docs",
+    name: "api-stubs-docs",
     defaults: ["metalava-api-stubs-default"],
-    api_tag_name: "METALAVA_PUBLIC",
     api_filename: "public_api.txt",
     private_api_filename: "private.txt",
     removed_api_filename: "removed.txt",
@@ -1589,12 +1523,18 @@ droiddoc {
         "core/res/AndroidManifest.xml",
     ],
     args: metalava_framework_docs_args,
+    check_api: {
+        current: {
+            api_file: "api/current.txt",
+            removed_api_file: "api/removed.txt",
+        },
+    },
 }
 
 droiddoc {
-    name: "metalava-system-api-stubs-docs",
+    name: "system-api-stubs-docs",
     defaults: ["metalava-api-stubs-default"],
-    api_tag_name: "METALAVA_SYSTEM",
+    api_tag_name: "SYSTEM",
     api_filename: "system-api.txt",
     private_api_filename: "system-private.txt",
     private_dex_api_filename: "system-private-dex.txt",
@@ -1603,16 +1543,28 @@ droiddoc {
         "core/res/AndroidManifest.xml",
     ],
     args: metalava_framework_docs_args + " --show-annotation android.annotation.SystemApi",
+    check_api: {
+        current: {
+            api_file: "api/system-current.txt",
+            removed_api_file: "api/system-removed.txt",
+        },
+    },
 }
 
 droiddoc {
-    name: "metalava-test-api-stubs-docs",
+    name: "test-api-stubs-docs",
     defaults: ["metalava-api-stubs-default"],
-    api_tag_name: "METALAVA_TEST",
+    api_tag_name: "TEST",
     api_filename: "test-api.txt",
     removed_api_filename: "test-removed.txt",
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
     args: metalava_framework_docs_args + " --show-annotation android.annotation.TestApi",
+    check_api: {
+        current: {
+            api_file: "api/test-current.txt",
+            removed_api_file: "api/test-removed.txt",
+        },
+    },
 }

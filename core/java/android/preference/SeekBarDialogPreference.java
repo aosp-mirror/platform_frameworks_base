@@ -16,6 +16,7 @@
 
 package android.preference;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -47,6 +48,7 @@ public class SeekBarDialogPreference extends DialogPreference {
         this(context, attrs, defStyleAttr, 0);
     }
 
+    @UnsupportedAppUsage
     public SeekBarDialogPreference(Context context, AttributeSet attrs) {
         this(context, attrs, R.attr.seekBarDialogPreferenceStyle);
     }

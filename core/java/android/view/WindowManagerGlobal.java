@@ -17,6 +17,7 @@
 package android.view;
 
 import android.animation.ValueAnimator;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
@@ -131,14 +132,21 @@ public final class WindowManagerGlobal {
     public static final int ADD_INVALID_DISPLAY = -9;
     public static final int ADD_INVALID_TYPE = -10;
 
+    @UnsupportedAppUsage
     private static WindowManagerGlobal sDefaultWindowManager;
+    @UnsupportedAppUsage
     private static IWindowManager sWindowManagerService;
+    @UnsupportedAppUsage
     private static IWindowSession sWindowSession;
 
+    @UnsupportedAppUsage
     private final Object mLock = new Object();
 
+    @UnsupportedAppUsage
     private final ArrayList<View> mViews = new ArrayList<View>();
+    @UnsupportedAppUsage
     private final ArrayList<ViewRootImpl> mRoots = new ArrayList<ViewRootImpl>();
+    @UnsupportedAppUsage
     private final ArrayList<WindowManager.LayoutParams> mParams =
             new ArrayList<WindowManager.LayoutParams>();
     private final ArraySet<View> mDyingViews = new ArraySet<View>();
@@ -148,10 +156,12 @@ public final class WindowManagerGlobal {
     private WindowManagerGlobal() {
     }
 
+    @UnsupportedAppUsage
     public static void initialize() {
         getWindowManagerService();
     }
 
+    @UnsupportedAppUsage
     public static WindowManagerGlobal getInstance() {
         synchronized (WindowManagerGlobal.class) {
             if (sDefaultWindowManager == null) {
@@ -161,6 +171,7 @@ public final class WindowManagerGlobal {
         }
     }
 
+    @UnsupportedAppUsage
     public static IWindowManager getWindowManagerService() {
         synchronized (WindowManagerGlobal.class) {
             if (sWindowManagerService == null) {
@@ -179,6 +190,7 @@ public final class WindowManagerGlobal {
         }
     }
 
+    @UnsupportedAppUsage
     public static IWindowSession getWindowSession() {
         synchronized (WindowManagerGlobal.class) {
             if (sWindowSession == null) {
@@ -201,12 +213,14 @@ public final class WindowManagerGlobal {
         }
     }
 
+    @UnsupportedAppUsage
     public static IWindowSession peekWindowSession() {
         synchronized (WindowManagerGlobal.class) {
             return sWindowSession;
         }
     }
 
+    @UnsupportedAppUsage
     public String[] getViewRootNames() {
         synchronized (mLock) {
             final int numRoots = mRoots.size();
@@ -218,6 +232,7 @@ public final class WindowManagerGlobal {
         }
     }
 
+    @UnsupportedAppUsage
     public ArrayList<ViewRootImpl> getRootViews(IBinder token) {
         ArrayList<ViewRootImpl> views = new ArrayList<>();
         synchronized (mLock) {
@@ -264,6 +279,7 @@ public final class WindowManagerGlobal {
         return null;
     }
 
+    @UnsupportedAppUsage
     public View getRootView(String name) {
         synchronized (mLock) {
             for (int i = mRoots.size() - 1; i >= 0; --i) {
@@ -385,6 +401,7 @@ public final class WindowManagerGlobal {
         }
     }
 
+    @UnsupportedAppUsage
     public void removeView(View view, boolean immediate) {
         if (view == null) {
             throw new IllegalArgumentException("view must not be null");
@@ -500,6 +517,7 @@ public final class WindowManagerGlobal {
         return false;
     }
 
+    @UnsupportedAppUsage
     public void trimMemory(int level) {
         if (ThreadedRenderer.isAvailable()) {
             if (shouldDestroyEglContext(level)) {
@@ -647,6 +665,7 @@ public final class WindowManagerGlobal {
 }
 
 final class WindowLeaked extends AndroidRuntimeException {
+    @UnsupportedAppUsage
     public WindowLeaked(String msg) {
         super(msg);
     }

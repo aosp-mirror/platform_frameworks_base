@@ -17,6 +17,7 @@ package android.view;
 
 import android.animation.LayoutTransition;
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -55,6 +56,7 @@ public class ViewOverlay {
      * of the overlay
      * @return
      */
+    @UnsupportedAppUsage
     ViewGroup getOverlayView() {
         return mOverlayViewGroup;
     }
@@ -94,6 +96,7 @@ public class ViewOverlay {
         mOverlayViewGroup.clear();
     }
 
+    @UnsupportedAppUsage
     boolean isEmpty() {
         return mOverlayViewGroup.isEmpty();
     }

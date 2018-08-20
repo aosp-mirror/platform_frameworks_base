@@ -16,6 +16,8 @@
 
 package android.net.wifi.p2p;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * A class representing a Wi-Fi p2p provisional discovery request/response
  * See {@link #WifiP2pProvDiscEvent} for supported types
@@ -32,13 +34,17 @@ public class WifiP2pProvDiscEvent {
     public static final int SHOW_PIN    = 4;
 
     /* One of PBC_REQ, PBC_RSP, ENTER_PIN or SHOW_PIN */
+    @UnsupportedAppUsage
     public int event;
 
+    @UnsupportedAppUsage
     public WifiP2pDevice device;
 
     /* Valid when event = SHOW_PIN */
+    @UnsupportedAppUsage
     public String pin;
 
+    @UnsupportedAppUsage
     public WifiP2pProvDiscEvent() {
         device = new WifiP2pDevice();
     }

@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.annotation.UnsupportedAppUsage;
 import android.util.SparseArray;
 
 import java.util.Iterator;
@@ -206,6 +207,7 @@ public final class GpsStatus {
                 status.mAzimuths);
     }
 
+    @UnsupportedAppUsage
     void setTimeToFirstFix(int ttff) {
         mTimeToFirstFix = ttff;
     }

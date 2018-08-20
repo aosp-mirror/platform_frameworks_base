@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -97,13 +98,19 @@ public class MediaRecorder implements AudioRouting
     private long mNativeContext;
 
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private Surface mSurface;
 
+    @UnsupportedAppUsage
     private String mPath;
+    @UnsupportedAppUsage
     private FileDescriptor mFd;
     private File mFile;
+    @UnsupportedAppUsage
     private EventHandler mEventHandler;
+    @UnsupportedAppUsage
     private OnErrorListener mOnErrorListener;
+    @UnsupportedAppUsage
     private OnInfoListener mOnInfoListener;
 
     private int mChannelCount;
@@ -942,6 +949,7 @@ public class MediaRecorder implements AudioRouting
     // native implementation
     private native void _setOutputFile(FileDescriptor fd) throws IllegalStateException, IOException;
     private native void _setNextOutputFile(FileDescriptor fd) throws IllegalStateException, IOException;
+    @UnsupportedAppUsage
     private native void _prepare() throws IllegalStateException, IOException;
 
     /**
@@ -1043,6 +1051,7 @@ public class MediaRecorder implements AudioRouting
         mEventHandler.removeCallbacksAndMessages(null);
     }
 
+    @UnsupportedAppUsage
     private native void native_reset();
 
     /**
@@ -1500,13 +1509,17 @@ public class MediaRecorder implements AudioRouting
      */
     public native void release();
 
+    @UnsupportedAppUsage
     private static native final void native_init();
 
+    @UnsupportedAppUsage
     private native final void native_setup(Object mediarecorder_this,
             String clientName, String opPackageName) throws IllegalStateException;
 
+    @UnsupportedAppUsage
     private native final void native_finalize();
 
+    @UnsupportedAppUsage
     private native void setParameter(String nameValuePair);
 
     /**

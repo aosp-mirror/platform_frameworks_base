@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -668,6 +669,7 @@ public class MediaMetadataRetriever
         return getEmbeddedPicture(EMBEDDED_PICTURE_TYPE_ANY);
     }
 
+    @UnsupportedAppUsage
     private native byte[] getEmbeddedPicture(int pictureType);
 
     /**
@@ -675,9 +677,12 @@ public class MediaMetadataRetriever
      * allocated internally.
      */
     public native void release();
+    @UnsupportedAppUsage
     private native void native_setup();
+    @UnsupportedAppUsage
     private static native void native_init();
 
+    @UnsupportedAppUsage
     private native final void native_finalize();
 
     @Override

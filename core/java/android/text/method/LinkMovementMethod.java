@@ -16,6 +16,7 @@
 
 package android.text.method;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.text.Layout;
 import android.text.NoCopySpan;
@@ -274,6 +275,7 @@ public class LinkMovementMethod extends ScrollingMovementMethod {
         return sInstance;
     }
 
+    @UnsupportedAppUsage
     private static LinkMovementMethod sInstance;
     private static Object FROM_BELOW = new NoCopySpan.Concrete();
 }

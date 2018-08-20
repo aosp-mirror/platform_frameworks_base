@@ -15,6 +15,7 @@
  */
 package android.util;
 
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -52,6 +53,7 @@ public class IconDrawableFactory {
         return appInfo.isInstantApp() || mUm.isManagedProfile(userId);
     }
 
+    @UnsupportedAppUsage
     public Drawable getBadgedIcon(ApplicationInfo appInfo) {
         return getBadgedIcon(appInfo, UserHandle.getUserId(appInfo.uid));
     }
@@ -60,6 +62,7 @@ public class IconDrawableFactory {
         return getBadgedIcon(appInfo, appInfo, userId);
     }
 
+    @UnsupportedAppUsage
     public Drawable getBadgedIcon(PackageItemInfo itemInfo, ApplicationInfo appInfo,
             @UserIdInt int userId) {
         Drawable icon = mPm.loadUnbadgedItemIcon(itemInfo, appInfo);
@@ -107,6 +110,7 @@ public class IconDrawableFactory {
         return Resources.getSystem().getColor(resourceId, null);
     }
 
+    @UnsupportedAppUsage
     public static IconDrawableFactory newInstance(Context context) {
         return new IconDrawableFactory(context, true);
     }

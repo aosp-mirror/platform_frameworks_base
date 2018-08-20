@@ -16,6 +16,7 @@
 
 package android.preference;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -33,6 +34,7 @@ import com.android.internal.R;
  */
 public class VolumePreference extends SeekBarDialogPreference implements
         PreferenceManager.OnActivityStopListener, View.OnKeyListener, SeekBarVolumizer.Callback {
+    @UnsupportedAppUsage
     private int mStreamType;
 
     /** May be null if the dialog isn't visible. */
@@ -52,6 +54,7 @@ public class VolumePreference extends SeekBarDialogPreference implements
         this(context, attrs, defStyleAttr, 0);
     }
 
+    @UnsupportedAppUsage
     public VolumePreference(Context context, AttributeSet attrs) {
         this(context, attrs, R.attr.seekBarDialogPreferenceStyle);
     }
@@ -196,7 +199,9 @@ public class VolumePreference extends SeekBarDialogPreference implements
     }
 
     public static class VolumeStore {
+        @UnsupportedAppUsage
         public int volume = -1;
+        @UnsupportedAppUsage
         public int originalVolume = -1;
     }
 

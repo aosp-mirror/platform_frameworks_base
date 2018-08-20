@@ -19,6 +19,7 @@ package android.util;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
+import android.annotation.UnsupportedAppUsage;
 import libcore.util.EmptyArray;
 
 /**
@@ -303,7 +304,10 @@ public class SparseBooleanArray implements Cloneable {
         return buffer.toString();
     }
 
+    @UnsupportedAppUsage
     private int[] mKeys;
+    @UnsupportedAppUsage
     private boolean[] mValues;
+    @UnsupportedAppUsage
     private int mSize;
 }

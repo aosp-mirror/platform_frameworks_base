@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -597,6 +598,7 @@ public class MediaPlayer extends PlayerBase
        // FIXME: add link to getMetadata(boolean, boolean)
        {@hide}
      */
+    @UnsupportedAppUsage
     public static final boolean METADATA_ALL = false;
 
     /**
@@ -613,6 +615,7 @@ public class MediaPlayer extends PlayerBase
        // FIXME: add link to getMetadata(boolean, boolean)
        {@hide}
      */
+    @UnsupportedAppUsage
     public static final boolean BYPASS_METADATA_FILTER = false;
 
     static {
@@ -630,6 +633,7 @@ public class MediaPlayer extends PlayerBase
     private long mNativeSurfaceTexture;  // accessed by native methods
     private int mListenerContext; // accessed by native methods
     private SurfaceHolder mSurfaceHolder;
+    @UnsupportedAppUsage
     private EventHandler mEventHandler;
     private PowerManager.WakeLock mWakeLock = null;
     private boolean mScreenOnWhilePlaying;
@@ -710,6 +714,7 @@ public class MediaPlayer extends PlayerBase
      * player.
      * {@hide}
      */
+    @UnsupportedAppUsage
     public Parcel newRequest() {
         Parcel parcel = Parcel.obtain();
         parcel.writeInterfaceToken(IMEDIA_PLAYER);
@@ -730,6 +735,7 @@ public class MediaPlayer extends PlayerBase
      * native player.
      * {@hide}
      */
+    @UnsupportedAppUsage
     public void invoke(Parcel request, Parcel reply) {
         int retcode = native_invoke(request, reply);
         reply.setDataPosition(0);
@@ -1139,11 +1145,13 @@ public class MediaPlayer extends PlayerBase
      * @throws IllegalStateException if it is called in an invalid state
      * @hide pending API council
      */
+    @UnsupportedAppUsage
     public void setDataSource(String path, Map<String, String> headers)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
         setDataSource(path, headers, null);
     }
 
+    @UnsupportedAppUsage
     private void setDataSource(String path, Map<String, String> headers, List<HttpCookie> cookies)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException
     {
@@ -1164,6 +1172,7 @@ public class MediaPlayer extends PlayerBase
         setDataSource(path, keys, values, cookies);
     }
 
+    @UnsupportedAppUsage
     private void setDataSource(String path, String[] keys, String[] values,
             List<HttpCookie> cookies)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
@@ -2010,6 +2019,7 @@ public class MediaPlayer extends PlayerBase
      // FIXME: unhide.
      * {@hide}
      */
+    @UnsupportedAppUsage
     public Metadata getMetadata(final boolean update_only,
                                 final boolean apply_filter) {
         Parcel reply = Parcel.obtain();
@@ -2234,6 +2244,7 @@ public class MediaPlayer extends PlayerBase
      * @return true if the parameter is set successfully, false otherwise
      * {@hide}
      */
+    @UnsupportedAppUsage
     private native boolean setParameter(int key, Parcel value);
 
     /**
@@ -2550,6 +2561,7 @@ public class MediaPlayer extends PlayerBase
         /**
          * Used to read a TrackInfo from a Parcel.
          */
+        @UnsupportedAppUsage
         static final Parcelable.Creator<TrackInfo> CREATOR
                 = new Parcelable.Creator<TrackInfo>() {
                     @Override
@@ -2660,6 +2672,7 @@ public class MediaPlayer extends PlayerBase
     private SubtitleController mSubtitleController;
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setSubtitleAnchor(
             SubtitleController controller,
             SubtitleController.Anchor anchor) {
@@ -2764,6 +2777,7 @@ public class MediaPlayer extends PlayerBase
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void addSubtitleSource(InputStream is, MediaFormat format)
             throws IllegalStateException
     {
@@ -3276,6 +3290,7 @@ public class MediaPlayer extends PlayerBase
      *
      * {@hide} pending API council
      */
+    @UnsupportedAppUsage
     public void setRetransmitEndpoint(InetSocketAddress endpoint)
             throws IllegalStateException, IllegalArgumentException
     {
@@ -3327,6 +3342,7 @@ public class MediaPlayer extends PlayerBase
     private TimeProvider mTimeProvider;
 
     /** @hide */
+    @UnsupportedAppUsage
     public MediaTimeProvider getMediaTimeProvider() {
         if (mTimeProvider == null) {
             mTimeProvider = new TimeProvider(this);
@@ -3723,6 +3739,7 @@ public class MediaPlayer extends PlayerBase
         mOnPreparedListener = listener;
     }
 
+    @UnsupportedAppUsage
     private OnPreparedListener mOnPreparedListener;
 
     /**
@@ -3750,6 +3767,7 @@ public class MediaPlayer extends PlayerBase
         mOnCompletionListener = listener;
     }
 
+    @UnsupportedAppUsage
     private OnCompletionListener mOnCompletionListener;
 
     /**
@@ -3822,6 +3840,7 @@ public class MediaPlayer extends PlayerBase
         mOnSeekCompleteListener = listener;
     }
 
+    @UnsupportedAppUsage
     private OnSeekCompleteListener mOnSeekCompleteListener;
 
     /**
@@ -3883,6 +3902,7 @@ public class MediaPlayer extends PlayerBase
         mOnTimedTextListener = listener;
     }
 
+    @UnsupportedAppUsage
     private OnTimedTextListener mOnTimedTextListener;
 
     /**
@@ -4162,6 +4182,7 @@ public class MediaPlayer extends PlayerBase
         mOnErrorListener = listener;
     }
 
+    @UnsupportedAppUsage
     private OnErrorListener mOnErrorListener;
 
 
@@ -4231,6 +4252,7 @@ public class MediaPlayer extends PlayerBase
      *  JAVA framework to avoid triggering track scanning.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int MEDIA_INFO_EXTERNAL_METADATA_UPDATE = 803;
 
     /** Informs that audio is not playing. Note that playback of the video
@@ -4250,6 +4272,7 @@ public class MediaPlayer extends PlayerBase
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public static final int MEDIA_INFO_TIMED_TEXT_ERROR = 900;
 
     /** Subtitle track was not supported by the media framework.
@@ -4306,6 +4329,7 @@ public class MediaPlayer extends PlayerBase
         mOnInfoListener = listener;
     }
 
+    @UnsupportedAppUsage
     private OnInfoListener mOnInfoListener;
 
     // Modular DRM begin

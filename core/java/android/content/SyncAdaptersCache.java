@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.RegisteredServicesCache;
 import android.content.pm.XmlSerializerAndParser;
 import android.content.res.Resources;
@@ -51,6 +52,7 @@ public class SyncAdaptersCache extends RegisteredServicesCache<SyncAdapterType> 
     private SparseArray<ArrayMap<String,String[]>> mAuthorityToSyncAdapters
             = new SparseArray<>();
 
+    @UnsupportedAppUsage
     public SyncAdaptersCache(Context context) {
         super(context, SERVICE_INTERFACE, SERVICE_META_DATA, ATTRIBUTES_NAME, sSerializer);
     }

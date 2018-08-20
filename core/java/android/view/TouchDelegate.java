@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
 
 /**
@@ -51,6 +52,7 @@ public class TouchDelegate {
     /**
      * True if the delegate had been targeted on a down event (intersected mBounds).
      */
+    @UnsupportedAppUsage
     private boolean mDelegateTargeted;
 
     /**

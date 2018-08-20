@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.GraphicsEnvironment;
 import android.os.Trace;
@@ -29,6 +30,7 @@ import java.util.Collection;
 
 /** @hide */
 public class ApplicationLoaders {
+    @UnsupportedAppUsage
     public static ApplicationLoaders getDefault() {
         return gApplicationLoaders;
     }
@@ -134,6 +136,7 @@ public class ApplicationLoaders {
         baseDexClassLoader.addNativePath(libPaths);
     }
 
+    @UnsupportedAppUsage
     private final ArrayMap<String, ClassLoader> mLoaders = new ArrayMap<>();
 
     private static final ApplicationLoaders gApplicationLoaders = new ApplicationLoaders();

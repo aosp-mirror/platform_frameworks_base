@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
@@ -2027,6 +2028,7 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @UnsupportedAppUsage
     public static final String ACTION_ALARM_CHANGED = "android.intent.action.ALARM_CHANGED";
 
     /**
@@ -3254,6 +3256,7 @@ public class Intent implements Parcelable, Cloneable {
      * {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String ACTION_USER_SWITCHED =
             "android.intent.action.USER_SWITCHED";
 
@@ -5772,6 +5775,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT = 0x04000000;
     /**
      * Set when this broadcast is for a boot upgrade, a special mode that
@@ -5938,6 +5942,7 @@ public class Intent implements Parcelable, Cloneable {
     private ComponentName mComponent;
     private int mFlags;
     private ArraySet<String> mCategories;
+    @UnsupportedAppUsage
     private Bundle mExtras;
     private Rect mSourceBounds;
     private Intent mSelector;
@@ -6605,6 +6610,7 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static Intent parseCommandArgs(ShellCommand cmd, CommandOptionHandler optionHandler)
             throws URISyntaxException {
         Intent intent = new Intent();
@@ -6989,6 +6995,7 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static void printIntentArgsHelp(PrintWriter pw, String prefix) {
         final String[] lines = new String[] {
                 "<INTENT> specifications include these flags and arguments:",
@@ -7266,6 +7273,7 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public void setAllowFds(boolean allowFds) {
         if (mExtras != null) {
             mExtras.setAllowFds(allowFds);
@@ -7291,6 +7299,7 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public Object getExtra(String name) {
         return getExtra(name, null);
     }
@@ -7729,6 +7738,7 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public IBinder getIBinderExtra(String name) {
         return mExtras == null ? null : mExtras.getIBinder(name);
     }
@@ -7749,6 +7759,7 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public Object getExtra(String name, Object defaultValue) {
         Object result = defaultValue;
         if (mExtras != null) {
@@ -7821,6 +7832,7 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public boolean isExcludingStopped() {
         return (mFlags&(FLAG_EXCLUDE_STOPPED_PACKAGES|FLAG_INCLUDE_STOPPED_PACKAGES))
                 == FLAG_EXCLUDE_STOPPED_PACKAGES;
@@ -7970,6 +7982,7 @@ public class Intent implements Parcelable, Cloneable {
      * there are no matches.
      * @hide
      */
+    @UnsupportedAppUsage
     public @Nullable ComponentName resolveSystemService(@NonNull PackageManager pm,
             @PackageManager.ComponentInfoFlags int flags) {
         if (mComponent != null) {
@@ -8979,6 +8992,7 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public @NonNull Intent putExtra(String name, IBinder value) {
         if (mExtras == null) {
             mExtras = new Bundle();
@@ -9546,6 +9560,7 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public String toInsecureString() {
         StringBuilder b = new StringBuilder(128);
 
@@ -10195,6 +10210,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void prepareToLeaveProcess(Context context) {
         final boolean leavingPackage = (mComponent == null)
                 || !Objects.equals(mComponent.getPackageName(), context.getPackageName());

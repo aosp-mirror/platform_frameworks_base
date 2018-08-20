@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Region;
 import android.os.Bundle;
@@ -54,6 +55,7 @@ import java.util.List;
  * @hide
  */
 public final class WindowManagerImpl implements WindowManager {
+    @UnsupportedAppUsage
     private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();
     private final Context mContext;
     private final Window mParentWindow;

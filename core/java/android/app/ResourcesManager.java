@@ -20,6 +20,7 @@ import static android.app.ActivityThread.DEBUG_CONFIGURATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
@@ -76,18 +77,21 @@ public class ResourcesManager {
      * The global configuration upon which all Resources are based. Multi-window Resources
      * apply their overrides to this configuration.
      */
+    @UnsupportedAppUsage
     private final Configuration mResConfiguration = new Configuration();
 
     /**
      * A mapping of ResourceImpls and their configurations. These are heavy weight objects
      * which should be reused as much as possible.
      */
+    @UnsupportedAppUsage
     private final ArrayMap<ResourcesKey, WeakReference<ResourcesImpl>> mResourceImpls =
             new ArrayMap<>();
 
     /**
      * A list of Resource references that can be reused.
      */
+    @UnsupportedAppUsage
     private final ArrayList<WeakReference<Resources>> mResourceReferences = new ArrayList<>();
 
     private static class ApkKey {
@@ -144,6 +148,7 @@ public class ResourcesManager {
      * Each Activity may has a base override configuration that is applied to each Resources object,
      * which in turn may have their own override configuration specified.
      */
+    @UnsupportedAppUsage
     private final WeakHashMap<IBinder, ActivityResources> mActivityResourceReferences =
             new WeakHashMap<>();
 
@@ -153,6 +158,7 @@ public class ResourcesManager {
     private final ArrayMap<Pair<Integer, DisplayAdjustments>, WeakReference<Display>>
             mAdjustedDisplays = new ArrayMap<>();
 
+    @UnsupportedAppUsage
     public static ResourcesManager getInstance() {
         synchronized (ResourcesManager.class) {
             if (sResourcesManager == null) {
@@ -349,6 +355,7 @@ public class ResourcesManager {
      * @return a new AssetManager.
     */
     @VisibleForTesting
+    @UnsupportedAppUsage
     protected @Nullable AssetManager createAssetManager(@NonNull final ResourcesKey key) {
         final AssetManager.Builder builder = new AssetManager.Builder();
 
@@ -1065,6 +1072,7 @@ public class ResourcesManager {
      * @param assetPath The main asset path for which to add the library asset path.
      * @param libAsset The library asset path to add.
      */
+    @UnsupportedAppUsage
     public void appendLibAssetForMainAssetPath(String assetPath, String libAsset) {
         synchronized (this) {
             // Record which ResourcesImpl need updating

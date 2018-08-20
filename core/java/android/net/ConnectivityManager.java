@@ -22,6 +22,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -311,6 +312,7 @@ public class ConnectivityManager {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @UnsupportedAppUsage
     public static final String INET_CONDITION_ACTION =
             "android.net.conn.INET_CONDITION_ACTION";
 
@@ -325,6 +327,7 @@ public class ConnectivityManager {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @UnsupportedAppUsage
     public static final String ACTION_TETHER_STATE_CHANGED =
             "android.net.conn.TETHER_STATE_CHANGED";
 
@@ -333,6 +336,7 @@ public class ConnectivityManager {
      * gives a String[] listing all the interfaces configured for
      * tethering and currently available for tethering.
      */
+    @UnsupportedAppUsage
     public static final String EXTRA_AVAILABLE_TETHER = "availableArray";
 
     /**
@@ -347,6 +351,7 @@ public class ConnectivityManager {
      * gives a String[] listing all the interfaces currently tethered
      * (ie, has DHCPv4 support and packets potentially forwarded/NATed)
      */
+    @UnsupportedAppUsage
     public static final String EXTRA_ACTIVE_TETHER = "tetherArray";
 
     /**
@@ -355,6 +360,7 @@ public class ConnectivityManager {
      * failed.  Use {@link #getLastTetherError} to find the error code
      * for any interfaces listed here.
      */
+    @UnsupportedAppUsage
     public static final String EXTRA_ERRORED_TETHER = "erroredArray";
 
     /**
@@ -459,6 +465,7 @@ public class ConnectivityManager {
      * The absence of a connection type.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int TYPE_NONE        = -1;
 
     /**
@@ -575,6 +582,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static final int TYPE_MOBILE_FOTA = 10;
 
     /**
@@ -583,6 +591,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static final int TYPE_MOBILE_IMS  = 11;
 
     /**
@@ -591,6 +600,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static final int TYPE_MOBILE_CBS  = 12;
 
     /**
@@ -600,6 +610,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static final int TYPE_WIFI_P2P    = 13;
 
     /**
@@ -608,6 +619,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static final int TYPE_MOBILE_IA = 14;
 
     /**
@@ -617,6 +629,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static final int TYPE_MOBILE_EMERGENCY = 15;
 
     /**
@@ -625,6 +638,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static final int TYPE_PROXY = 16;
 
     /**
@@ -707,6 +721,7 @@ public class ConnectivityManager {
      */
     public static final String PRIVATE_DNS_DEFAULT_MODE_FALLBACK = PRIVATE_DNS_MODE_OPPORTUNISTIC;
 
+    @UnsupportedAppUsage
     private final IConnectivityManager mService;
     /**
      * A kludge to facilitate static access where a Context pointer isn't available, like in the
@@ -743,6 +758,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static String getNetworkTypeName(int type) {
         switch (type) {
           case TYPE_NONE:
@@ -797,6 +813,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static boolean isNetworkTypeMobile(int networkType) {
         switch (networkType) {
             case TYPE_MOBILE:
@@ -1010,6 +1027,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    @UnsupportedAppUsage
     public NetworkInfo getActiveNetworkInfoForUid(int uid) {
         return getActiveNetworkInfoForUid(uid, false);
     }
@@ -1107,6 +1125,7 @@ public class ConnectivityManager {
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @UnsupportedAppUsage
     public Network getNetworkForType(int networkType) {
         try {
             return mService.getNetworkForType(networkType);
@@ -1135,6 +1154,7 @@ public class ConnectivityManager {
      * the Networks that applications run by the given user will use by default.
      * @hide
      */
+    @UnsupportedAppUsage
     public NetworkCapabilities[] getDefaultNetworkCapabilitiesForUser(int userId) {
         try {
             return mService.getDefaultNetworkCapabilitiesForUser(userId);
@@ -1153,6 +1173,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @UnsupportedAppUsage
     public LinkProperties getActiveLinkProperties() {
         try {
             return mService.getActiveLinkProperties();
@@ -1177,6 +1198,7 @@ public class ConnectivityManager {
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @UnsupportedAppUsage
     public LinkProperties getLinkProperties(int networkType) {
         try {
             return mService.getLinkPropertiesForType(networkType);
@@ -1332,6 +1354,7 @@ public class ConnectivityManager {
         return 1;
     }
 
+    @UnsupportedAppUsage
     private NetworkCapabilities networkCapabilitiesForFeature(int networkType, String feature) {
         if (networkType == TYPE_MOBILE) {
             switch (feature) {
@@ -1495,6 +1518,7 @@ public class ConnectivityManager {
         };
     }
 
+    @UnsupportedAppUsage
     private static final HashMap<NetworkCapabilities, LegacyRequest> sLegacyRequests =
             new HashMap<>();
 
@@ -1523,6 +1547,7 @@ public class ConnectivityManager {
         Log.d(TAG, "expireRequest with " + ourSeqNum + ", " + sequenceNum);
     }
 
+    @UnsupportedAppUsage
     private NetworkRequest requestNetworkForFeatureLocked(NetworkCapabilities netCap) {
         int delay = -1;
         int type = legacyTypeForNetworkCapabilities(netCap);
@@ -1552,6 +1577,7 @@ public class ConnectivityManager {
         }
     }
 
+    @UnsupportedAppUsage
     private boolean removeRequestForFeature(NetworkCapabilities netCap) {
         final LegacyRequest l;
         synchronized (sLegacyRequests) {
@@ -1619,10 +1645,13 @@ public class ConnectivityManager {
     /** @hide */
     public static class PacketKeepaliveCallback {
         /** The requested keepalive was successfully started. */
+        @UnsupportedAppUsage
         public void onStarted() {}
         /** The keepalive was successfully stopped. */
+        @UnsupportedAppUsage
         public void onStopped() {}
         /** An error occurred. */
+        @UnsupportedAppUsage
         public void onError(int error) {}
     }
 
@@ -1689,6 +1718,7 @@ public class ConnectivityManager {
             mLooper.quit();
         }
 
+        @UnsupportedAppUsage
         public void stop() {
             try {
                 mService.stopKeepalive(mNetwork, mSlot);
@@ -1744,6 +1774,7 @@ public class ConnectivityManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public PacketKeepalive startNattKeepalive(
             Network network, int intervalSeconds, PacketKeepaliveCallback callback,
             InetAddress srcAddr, int srcPort, InetAddress dstAddr) {
@@ -1805,6 +1836,7 @@ public class ConnectivityManager {
      *             {@link #bindProcessToNetwork} API.
      */
     @Deprecated
+    @UnsupportedAppUsage
     public boolean requestRouteToHostAddress(int networkType, InetAddress hostAddress) {
         checkLegacyRoutingApiAccess();
         try {
@@ -1848,12 +1880,14 @@ public class ConnectivityManager {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void setBackgroundDataSetting(boolean allowBackgroundData) {
         // ignored
     }
 
     /** {@hide} */
     @Deprecated
+    @UnsupportedAppUsage
     public NetworkQuotaInfo getActiveNetworkQuotaInfo() {
         try {
             return mService.getActiveNetworkQuotaInfo();
@@ -1867,6 +1901,7 @@ public class ConnectivityManager {
      * @deprecated Talk to TelephonyManager directly
      */
     @Deprecated
+    @UnsupportedAppUsage
     public boolean getMobileDataEnabled() {
         IBinder b = ServiceManager.getService(Context.TELEPHONY_SERVICE);
         if (b != null) {
@@ -1986,6 +2021,7 @@ public class ConnectivityManager {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static ConnectivityManager from(Context context) {
         return (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     }
@@ -2036,6 +2072,7 @@ public class ConnectivityManager {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     private static ConnectivityManager getInstance() {
         if (getInstanceOrNull() == null) {
             throw new IllegalStateException("No ConnectivityManager yet constructed");
@@ -2052,6 +2089,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @UnsupportedAppUsage
     public String[] getTetherableIfaces() {
         try {
             return mService.getTetherableIfaces();
@@ -2068,6 +2106,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @UnsupportedAppUsage
     public String[] getTetheredIfaces() {
         try {
             return mService.getTetheredIfaces();
@@ -2090,6 +2129,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @UnsupportedAppUsage
     public String[] getTetheringErroredIfaces() {
         try {
             return mService.getTetheringErroredIfaces();
@@ -2136,6 +2176,7 @@ public class ConnectivityManager {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public int tether(String iface) {
         try {
             String pkgName = mContext.getOpPackageName();
@@ -2164,6 +2205,7 @@ public class ConnectivityManager {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public int untether(String iface) {
         try {
             String pkgName = mContext.getOpPackageName();
@@ -2317,6 +2359,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @UnsupportedAppUsage
     public String[] getTetherableUsbRegexs() {
         try {
             return mService.getTetherableUsbRegexs();
@@ -2336,6 +2379,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @UnsupportedAppUsage
     public String[] getTetherableWifiRegexs() {
         try {
             return mService.getTetherableWifiRegexs();
@@ -2355,6 +2399,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @UnsupportedAppUsage
     public String[] getTetherableBluetoothRegexs() {
         try {
             return mService.getTetherableBluetoothRegexs();
@@ -2380,6 +2425,7 @@ public class ConnectivityManager {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public int setUsbTethering(boolean enable) {
         try {
             String pkgName = mContext.getOpPackageName();
@@ -2426,6 +2472,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @UnsupportedAppUsage
     public int getLastTetherError(String iface) {
         try {
             return mService.getLastTetherError(iface);
@@ -2579,6 +2626,7 @@ public class ConnectivityManager {
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @UnsupportedAppUsage
     public boolean isNetworkSupported(int networkType) {
         try {
             return mService.isNetworkSupported(networkType);
@@ -2680,6 +2728,7 @@ public class ConnectivityManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    @UnsupportedAppUsage
     public void setAirplaneMode(boolean enable) {
         try {
             mService.setAirplaneMode(enable);
@@ -2689,6 +2738,7 @@ public class ConnectivityManager {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public void registerNetworkFactory(Messenger messenger, String name) {
         try {
             mService.registerNetworkFactory(messenger, name);
@@ -2698,6 +2748,7 @@ public class ConnectivityManager {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public void unregisterNetworkFactory(Messenger messenger) {
         try {
             mService.unregisterNetworkFactory(messenger);
@@ -3786,6 +3837,7 @@ public class ConnectivityManager {
      * @deprecated This is strictly for legacy usage to support {@link #startUsingNetworkFeature}.
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static boolean setProcessDefaultNetworkForHostResolution(Network network) {
         return NetworkUtils.bindProcessToNetworkForHostResolution(
                 network == null ? NETID_UNSET : network.netId);

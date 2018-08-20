@@ -19,6 +19,7 @@ package android.app.job;
 import static android.app.job.JobInfo.NETWORK_BYTES_UNKNOWN;
 
 import android.annotation.BytesLong;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,11 +30,15 @@ import android.os.Parcelable;
  * {@link JobParameters#dequeueWork() JobParameters.dequeueWork} for more details.
  */
 final public class JobWorkItem implements Parcelable {
+    @UnsupportedAppUsage
     final Intent mIntent;
     final long mNetworkDownloadBytes;
     final long mNetworkUploadBytes;
+    @UnsupportedAppUsage
     int mDeliveryCount;
+    @UnsupportedAppUsage
     int mWorkId;
+    @UnsupportedAppUsage
     Object mGrants;
 
     /**
@@ -219,6 +224,7 @@ final public class JobWorkItem implements Parcelable {
         }
     };
 
+    @UnsupportedAppUsage
     JobWorkItem(Parcel in) {
         if (in.readInt() != 0) {
             mIntent = Intent.CREATOR.createFromParcel(in);

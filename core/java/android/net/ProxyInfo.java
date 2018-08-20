@@ -17,6 +17,7 @@
 package android.net;
 
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -91,6 +92,7 @@ public class ProxyInfo implements Parcelable {
      * Create a ProxyProperties that points at a HTTP Proxy.
      * @hide
      */
+    @UnsupportedAppUsage
     public ProxyInfo(String host, int port, String exclList) {
         mHost = host;
         mPort = port;

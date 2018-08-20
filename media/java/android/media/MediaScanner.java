@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -125,6 +126,7 @@ public class MediaScanner implements AutoCloseable {
 
     private final static String TAG = "MediaScanner";
 
+    @UnsupportedAppUsage
     private static final String[] FILES_PRESCAN_PROJECTION = new String[] {
             Files.FileColumns._ID, // 0
             Files.FileColumns.DATA, // 1
@@ -317,14 +319,18 @@ public class MediaScanner implements AutoCloseable {
     };
 
     private long mNativeContext;
+    @UnsupportedAppUsage
     private final Context mContext;
+    @UnsupportedAppUsage
     private final String mPackageName;
     private final String mVolumeName;
     private final ContentProviderClient mMediaProvider;
+    @UnsupportedAppUsage
     private final Uri mAudioUri;
     private final Uri mVideoUri;
     private final Uri mImagesUri;
     private final Uri mPlaylistsUri;
+    @UnsupportedAppUsage
     private final Uri mFilesUri;
     private final Uri mFilesUriNoNotify;
     private final boolean mProcessPlaylists;
@@ -347,10 +353,13 @@ public class MediaScanner implements AutoCloseable {
     /** Whether the scanner has set a default sound for the alarm ringtone. */
     private boolean mDefaultAlarmSet;
     /** The filename for the default sound for the ringer ringtone. */
+    @UnsupportedAppUsage
     private String mDefaultRingtoneFilename;
     /** The filename for the default sound for the notification ringtone. */
+    @UnsupportedAppUsage
     private String mDefaultNotificationFilename;
     /** The filename for the default sound for the alarm ringtone. */
+    @UnsupportedAppUsage
     private String mDefaultAlarmAlertFilename;
     /**
      * The prefix for system properties that define the default sound for
@@ -362,12 +371,15 @@ public class MediaScanner implements AutoCloseable {
     private final BitmapFactory.Options mBitmapOptions = new BitmapFactory.Options();
 
     private static class FileEntry {
+        @UnsupportedAppUsage
         long mRowId;
         String mPath;
         long mLastModified;
         int mFormat;
+        @UnsupportedAppUsage
         boolean mLastModifiedChanged;
 
+        @UnsupportedAppUsage
         FileEntry(long rowId, String path, long lastModified, int format) {
             mRowId = rowId;
             mPath = path;
@@ -391,10 +403,12 @@ public class MediaScanner implements AutoCloseable {
     private final ArrayList<PlaylistEntry> mPlaylistEntries = new ArrayList<>();
     private final ArrayList<FileEntry> mPlayLists = new ArrayList<>();
 
+    @UnsupportedAppUsage
     private MediaInserter mMediaInserter;
 
     private DrmManagerClient mDrmManagerClient = null;
 
+    @UnsupportedAppUsage
     public MediaScanner(Context c, String volumeName) {
         native_setup();
         mContext = c;
@@ -458,8 +472,10 @@ public class MediaScanner implements AutoCloseable {
                 + Settings.System.ALARM_ALERT);
     }
 
+    @UnsupportedAppUsage
     private final MyMediaScannerClient mClient = new MyMediaScannerClient();
 
+    @UnsupportedAppUsage
     private boolean isDrmEnabled() {
         String prop = SystemProperties.get("drm.service.enabled");
         return prop != null && prop.equals("true");
@@ -475,18 +491,23 @@ public class MediaScanner implements AutoCloseable {
         private String mTitle;
         private String mComposer;
         private String mGenre;
+        @UnsupportedAppUsage
         private String mMimeType;
+        @UnsupportedAppUsage
         private int mFileType;
         private int mTrack;
         private int mYear;
         private int mDuration;
+        @UnsupportedAppUsage
         private String mPath;
         private long mDate;
         private long mLastModified;
         private long mFileSize;
         private String mWriter;
         private int mCompilation;
+        @UnsupportedAppUsage
         private boolean mIsDrm;
+        @UnsupportedAppUsage
         private boolean mNoMedia;   // flag to suppress file from appearing in media tables
         private boolean mScanSuccess;
         private int mWidth;
@@ -497,6 +518,7 @@ public class MediaScanner implements AutoCloseable {
             mDateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         }
 
+        @UnsupportedAppUsage
         public FileEntry beginFile(String path, String mimeType, long lastModified,
                 long fileSize, boolean isDirectory, boolean noMedia) {
             mMimeType = mimeType;
@@ -574,6 +596,7 @@ public class MediaScanner implements AutoCloseable {
         }
 
         @Override
+        @UnsupportedAppUsage
         public void scanFile(String path, long lastModified, long fileSize,
                 boolean isDirectory, boolean noMedia) {
             // This is the callback funtion from native codes.
@@ -581,6 +604,7 @@ public class MediaScanner implements AutoCloseable {
             doScanFile(path, null, lastModified, fileSize, isDirectory, false, noMedia);
         }
 
+        @UnsupportedAppUsage
         public Uri doScanFile(String path, String mimeType, long lastModified,
                 long fileSize, boolean isDirectory, boolean scanAlways, boolean noMedia) {
             Uri result = null;
@@ -689,6 +713,7 @@ public class MediaScanner implements AutoCloseable {
             return result;
         }
 
+        @UnsupportedAppUsage
         public void handleStringTag(String name, String value) {
             if (name.equalsIgnoreCase("title") || name.startsWith("title;")) {
                 // Don't trim() here, to preserve the special \001 character
@@ -833,6 +858,7 @@ public class MediaScanner implements AutoCloseable {
             return false;
         }
 
+        @UnsupportedAppUsage
         public void setMimeType(String mimeType) {
             if ("audio/mp4".equals(mMimeType) &&
                     mimeType.startsWith("video")) {
@@ -851,6 +877,7 @@ public class MediaScanner implements AutoCloseable {
          *
          * @return a map of values
          */
+        @UnsupportedAppUsage
         private ContentValues toValues() {
             ContentValues map = new ContentValues();
 
@@ -907,6 +934,7 @@ public class MediaScanner implements AutoCloseable {
             return map;
         }
 
+        @UnsupportedAppUsage
         private Uri endFile(FileEntry entry, boolean ringtones, boolean notifications,
                 boolean alarms, boolean music, boolean podcasts)
                 throws RemoteException {
@@ -1135,6 +1163,7 @@ public class MediaScanner implements AutoCloseable {
             Settings.System.putInt(cr, settingSetIndicatorName(settingName), 1);
         }
 
+        @UnsupportedAppUsage
         private int getFileTypeFromDrm(String path) {
             if (!isDrmEnabled()) {
                 return 0;
@@ -1185,6 +1214,7 @@ public class MediaScanner implements AutoCloseable {
         }
     }
 
+    @UnsupportedAppUsage
     private void prescan(String filePath, boolean prescanFiles) throws RemoteException {
         Cursor c = null;
         String where = null;
@@ -1331,6 +1361,7 @@ public class MediaScanner implements AutoCloseable {
         }
     }
 
+    @UnsupportedAppUsage
     private void postscan(final String[] directories) throws RemoteException {
 
         // handle playlists last, after we know what media files are on the storage.
@@ -1395,6 +1426,7 @@ public class MediaScanner implements AutoCloseable {
     }
 
     // this function is used to scan a single file
+    @UnsupportedAppUsage
     public Uri scanSingleFile(String path, String mimeType) {
         try {
             prescan(path, true);
@@ -1467,6 +1499,7 @@ public class MediaScanner implements AutoCloseable {
         }
     }
 
+    @UnsupportedAppUsage
     public static boolean isNoMediaPath(String path) {
         if (path == null) {
             return false;
@@ -1565,6 +1598,7 @@ public class MediaScanner implements AutoCloseable {
         }
     }
 
+    @UnsupportedAppUsage
     FileEntry makeEntryFor(String path) {
         String where;
         String[] selectionArgs;
@@ -1900,6 +1934,7 @@ public class MediaScanner implements AutoCloseable {
 
     private native void processDirectory(String path, MediaScannerClient client);
     private native boolean processFile(String path, String mimeType, MediaScannerClient client);
+    @UnsupportedAppUsage
     private native void setLocale(String locale);
 
     public native byte[] extractAlbumArt(FileDescriptor fd);

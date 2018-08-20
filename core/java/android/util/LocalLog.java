@@ -16,6 +16,7 @@
 
 package android.util;
 
+import android.annotation.UnsupportedAppUsage;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
@@ -31,11 +32,13 @@ public final class LocalLog {
     private final Deque<String> mLog;
     private final int mMaxLines;
 
+    @UnsupportedAppUsage
     public LocalLog(int maxLines) {
         mMaxLines = Math.max(0, maxLines);
         mLog = new ArrayDeque<>(mMaxLines);
     }
 
+    @UnsupportedAppUsage
     public void log(String msg) {
         if (mMaxLines <= 0) {
             return;
@@ -50,6 +53,7 @@ public final class LocalLog {
         mLog.add(logLine);
     }
 
+    @UnsupportedAppUsage
     public synchronized void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         Iterator<String> itr = mLog.iterator();
         while (itr.hasNext()) {
@@ -69,6 +73,7 @@ public final class LocalLog {
         ReadOnlyLocalLog(LocalLog log) {
             mLog = log;
         }
+        @UnsupportedAppUsage
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             mLog.dump(fd, pw, args);
         }
@@ -77,6 +82,7 @@ public final class LocalLog {
         }
     }
 
+    @UnsupportedAppUsage
     public ReadOnlyLocalLog readOnlyLocalLog() {
         return new ReadOnlyLocalLog(this);
     }

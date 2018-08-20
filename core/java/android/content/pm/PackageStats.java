@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.usage.StorageStatsManager;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -37,6 +38,7 @@ public class PackageStats implements Parcelable {
     public String packageName;
 
     /** @hide */
+    @UnsupportedAppUsage
     public int userHandle;
 
     /** Size of the code (e.g., APK) */

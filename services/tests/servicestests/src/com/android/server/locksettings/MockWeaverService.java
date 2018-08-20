@@ -15,7 +15,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class MockWeaverService implements IWeaver {
+public class MockWeaverService extends IWeaver.Stub {
 
     private static final int MAX_SLOTS = 8;
     private static final int KEY_LENGTH = 256 / 8;
@@ -54,55 +54,5 @@ public class MockWeaverService implements IWeaver {
         } else {
             cb.onValues(WeaverStatus.FAILED, response);
         }
-    }
-
-    @Override
-    public IHwBinder asBinder() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ArrayList<String> interfaceChain() throws RemoteException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String interfaceDescriptor() throws RemoteException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setHALInstrumentation() throws RemoteException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean linkToDeath(DeathRecipient recipient, long cookie) throws RemoteException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void ping() throws RemoteException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public DebugInfo getDebugInfo() throws RemoteException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void notifySyspropsChanged() throws RemoteException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean unlinkToDeath(DeathRecipient recipient) throws RemoteException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ArrayList<byte[]> getHashChain() throws RemoteException {
-        throw new UnsupportedOperationException();
     }
 }

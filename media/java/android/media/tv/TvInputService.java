@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.Service;
 import android.content.Context;
@@ -283,6 +284,7 @@ public abstract class TvInputService extends Service {
         private OverlayViewCleanUpTask mOverlayViewCleanUpTask;
         private boolean mOverlayViewEnabled;
         private IBinder mWindowToken;
+        @UnsupportedAppUsage
         private Rect mOverlayFrame;
         private long mStartPositionMs = TvInputManager.TIME_SHIFT_INVALID_TIME;
         private long mCurrentPositionMs = TvInputManager.TIME_SHIFT_INVALID_TIME;

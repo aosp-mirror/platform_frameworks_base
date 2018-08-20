@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.PlayerBase;
 import android.net.Uri;
@@ -248,6 +249,7 @@ public class AsyncPlayer {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setUsesWakeLock(Context context) {
         if (mWakeLock != null || mThread != null) {
             // if either of these has happened, we've already played something.
