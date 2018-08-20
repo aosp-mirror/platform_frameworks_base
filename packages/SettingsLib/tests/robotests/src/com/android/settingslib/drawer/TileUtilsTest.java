@@ -24,7 +24,6 @@ import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMM
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -39,7 +38,6 @@ import static org.robolectric.RuntimeEnvironment.application;
 import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -47,9 +45,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings.Global;
@@ -79,8 +75,6 @@ public class TileUtilsTest {
     private Resources mResources;
     @Mock
     private UserManager mUserManager;
-    @Mock
-    private IContentProvider mIContentProvider;
     @Mock
     private ContentResolver mContentResolver;
 
@@ -283,45 +277,6 @@ public class TileUtilsTest {
                 null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles.get(0).isIconTintable(mContext)).isTrue();
-    }
-
-    @Test
-    public void getTilesForIntent_shouldNotProcessInvalidUriContentSystemApp()
-            throws RemoteException {
-        Intent intent = new Intent();
-        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
-        List<Tile> outTiles = new ArrayList<>();
-        List<ResolveInfo> info = new ArrayList<>();
-        ResolveInfo resolveInfo = newInfo(true, null /* category */, null, null, URI_GET_SUMMARY);
-        info.add(resolveInfo);
-
-        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
-                .thenReturn(info);
-
-        // Case 1: No provider associated with the uri specified.
-        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */);
-
-        assertThat(outTiles.size()).isEqualTo(1);
-        assertThat(outTiles.get(0).getIcon(mContext).getResId()).isEqualTo(314159);
-        assertThat(outTiles.get(0).summary).isEqualTo("static-summary");
-
-        // Case 2: Empty bundle.
-        Bundle bundle = new Bundle();
-        when(mIContentProvider.call(anyString(),
-                eq(TileUtils.getMethodFromUri(Uri.parse(URI_GET_SUMMARY))), eq(URI_GET_SUMMARY),
-                any())).thenReturn(bundle);
-        when(mContentResolver.acquireUnstableProvider(anyString()))
-                .thenReturn(mIContentProvider);
-        when(mContentResolver.acquireUnstableProvider(any(Uri.class)))
-                .thenReturn(mIContentProvider);
-
-        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */);
-
-        assertThat(outTiles.size()).isEqualTo(1);
-        assertThat(outTiles.get(0).getIcon(mContext).getResId()).isEqualTo(314159);
-        assertThat(outTiles.get(0).summary).isEqualTo("static-summary");
     }
 
     @Test

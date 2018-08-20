@@ -21,6 +21,8 @@ import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON_URI;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY_URI;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_TITLE;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
@@ -51,14 +53,6 @@ public class Tile implements Parcelable {
 
     private static final String TAG = "Tile";
 
-
-    /**
-     * Optional summary describing what this tile controls.
-     *
-     * @attr ref android.R.styleable#PreferenceHeader_summary
-     */
-    public CharSequence summary;
-
     /**
      * Optional list of user handles which the intent should be launched on.
      */
@@ -68,11 +62,13 @@ public class Tile implements Parcelable {
      * The metaData from the activity that defines this tile.
      */
     private final Bundle mMetaData;
+
     private final String mActivityPackage;
     private final String mActivityName;
     private final Intent mIntent;
-
     private ActivityInfo mActivityInfo;
+    private CharSequence mSummaryOverride;
+
     private String mCategory;
 
     public Tile(ActivityInfo activityInfo, String category) {
@@ -88,7 +84,6 @@ public class Tile implements Parcelable {
         mActivityPackage = in.readString();
         mActivityName = in.readString();
         mIntent = new Intent().setClassName(mActivityPackage, mActivityName);
-        summary = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         final int N = in.readInt();
         for (int i = 0; i < N; i++) {
             userHandle.add(UserHandle.CREATOR.createFromParcel(in));
@@ -106,7 +101,6 @@ public class Tile implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mActivityPackage);
         dest.writeString(mActivityName);
-        TextUtils.writeToParcel(summary, dest, flags);
         final int N = userHandle.size();
         dest.writeInt(N);
         for (int i = 0; i < N; i++) {
@@ -187,6 +181,57 @@ public class Tile implements Parcelable {
             title = getActivityInfo(context).loadLabel(packageManager);
         }
         return title;
+    }
+
+    /**
+     * Returns the raw metadata for summary, this is used for comparing 2 summary text without
+     * loading the real string.
+     */
+    public String getSummaryReference() {
+        if (mSummaryOverride != null) {
+            return mSummaryOverride.toString();
+        }
+        if (mMetaData != null && mMetaData.containsKey(META_DATA_PREFERENCE_SUMMARY)) {
+            return mMetaData.get(META_DATA_PREFERENCE_SUMMARY).toString();
+        }
+        return null;
+    }
+
+    /**
+     * Overrides the summary. This can happen when injected tile wants to provide dynamic summary.
+     */
+    public void overrideSummary(CharSequence summaryOverride) {
+        mSummaryOverride = summaryOverride;
+    }
+
+    /**
+     * Optional summary describing what this tile controls.
+     */
+    public CharSequence getSummary(Context context) {
+        if (mSummaryOverride != null) {
+            return mSummaryOverride;
+        }
+        CharSequence summary = null;
+        final PackageManager packageManager = context.getPackageManager();
+        if (mMetaData != null) {
+            if (mMetaData.containsKey(META_DATA_PREFERENCE_SUMMARY_URI)) {
+                return null;
+            }
+            if (mMetaData.containsKey(META_DATA_PREFERENCE_SUMMARY)) {
+                if (mMetaData.get(META_DATA_PREFERENCE_SUMMARY) instanceof Integer) {
+                    try {
+                        final Resources res =
+                                packageManager.getResourcesForApplication(mActivityPackage);
+                        summary = res.getString(mMetaData.getInt(META_DATA_PREFERENCE_SUMMARY));
+                    } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
+                        Log.d(TAG, "Couldn't find info", e);
+                    }
+                } else {
+                    summary = mMetaData.getString(META_DATA_PREFERENCE_SUMMARY);
+                }
+            }
+        }
+        return summary;
     }
 
     public Bundle getMetaData() {

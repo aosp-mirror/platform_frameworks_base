@@ -347,9 +347,6 @@ public class TileUtils {
             } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
                 if (DEBUG) Log.d(LOG_TAG, "Couldn't find info", e);
             }
-
-            // Set title and summary for the preference
-            tile.summary = summary;
             return true;
         }
 
