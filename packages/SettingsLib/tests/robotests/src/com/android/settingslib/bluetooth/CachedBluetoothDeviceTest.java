@@ -556,7 +556,7 @@ public class CachedBluetoothDeviceTest {
         when(mHfpProfile.getConnectionStatus(mDevice)).
                 thenReturn(BluetoothProfile.STATE_CONNECTED);
 
-        assertThat(mCachedDevice.isHfpDevice()).isTrue();
+        assertThat(mCachedDevice.isConnectedHfpDevice()).isTrue();
     }
 
     @Test
@@ -565,7 +565,7 @@ public class CachedBluetoothDeviceTest {
         when(mHfpProfile.getConnectionStatus(mDevice)).
                 thenReturn(BluetoothProfile.STATE_DISCONNECTING);
 
-        assertThat(mCachedDevice.isHfpDevice()).isFalse();
+        assertThat(mCachedDevice.isConnectedHfpDevice()).isFalse();
     }
 
     @Test
@@ -590,7 +590,7 @@ public class CachedBluetoothDeviceTest {
     public void isConnectedHfpDevice_profileIsNull_returnFalse() {
         when(mProfileManager.getHeadsetProfile()).thenReturn(null);
 
-        assertThat(mCachedDevice.isHfpDevice()).isFalse();
+        assertThat(mCachedDevice.isConnectedHfpDevice()).isFalse();
     }
 
     @Test

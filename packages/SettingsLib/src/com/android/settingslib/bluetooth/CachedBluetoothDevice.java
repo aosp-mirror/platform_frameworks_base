@@ -1198,7 +1198,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     /**
      * @return {@code true} if {@code cachedBluetoothDevice} is HFP device
      */
-    public boolean isHfpDevice() {
+    public boolean isConnectedHfpDevice() {
         HeadsetProfile headsetProfile = mProfileManager.getHeadsetProfile();
         return headsetProfile != null && headsetProfile.getConnectionStatus(mDevice) ==
                 BluetoothProfile.STATE_CONNECTED;
