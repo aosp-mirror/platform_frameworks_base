@@ -288,6 +288,9 @@ public final class PowerManagerService extends SystemService
     private long mLastWakeTime;
     private long mLastSleepTime;
 
+    // Last reason the device went to sleep.
+    private int mLastSleepReason;
+
     // Timestamp of the last call to user activity.
     private long mLastUserActivityTime;
     private long mLastUserActivityTimeNoChangeLights;
@@ -1433,6 +1436,7 @@ public final class PowerManagerService extends SystemService
             }
 
             mLastSleepTime = eventTime;
+            mLastSleepReason = reason;
             mSandmanSummoned = true;
             setWakefulnessLocked(WAKEFULNESS_DOZING, reason);
 
@@ -3266,6 +3270,7 @@ public final class PowerManagerService extends SystemService
             pw.println("  mDeviceIdleTempWhitelist=" + Arrays.toString(mDeviceIdleTempWhitelist));
             pw.println("  mLastWakeTime=" + TimeUtils.formatUptime(mLastWakeTime));
             pw.println("  mLastSleepTime=" + TimeUtils.formatUptime(mLastSleepTime));
+            pw.println("  mLastSleepReason=" + PowerManager.sleepReasonToString(mLastSleepReason));
             pw.println("  mLastUserActivityTime=" + TimeUtils.formatUptime(mLastUserActivityTime));
             pw.println("  mLastUserActivityTimeNoChangeLights="
                     + TimeUtils.formatUptime(mLastUserActivityTimeNoChangeLights));
@@ -4404,6 +4409,19 @@ public final class PowerManagerService extends SystemService
             }
         }
 
+        @Override // Binder call
+        public int getLastSleepReason() {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return getLastSleepReasonInternal();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
         /**
          * Reboots the device.
          *
@@ -4616,6 +4634,12 @@ public final class PowerManagerService extends SystemService
                 return PowerManager.SHUTDOWN_REASON_BATTERY_THERMAL;
             default:
                 return PowerManager.SHUTDOWN_REASON_UNKNOWN;
+        }
+    }
+
+    private int getLastSleepReasonInternal() {
+        synchronized (mLock) {
+            return mLastSleepReason;
         }
     }
 
