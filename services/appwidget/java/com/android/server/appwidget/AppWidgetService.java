@@ -48,11 +48,6 @@ public class AppWidgetService extends SystemService {
     }
 
     @Override
-    public void onUnlockUser(int userHandle) {
-        FgThread.getHandler().post(() -> mImpl.onUserUnlocked(userHandle));
-    }
-
-    @Override
     public void onStopUser(int userHandle) {
         mImpl.onUserStopped(userHandle);
     }
