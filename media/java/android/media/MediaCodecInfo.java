@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Range;
@@ -1588,6 +1589,7 @@ public final class MediaCodecInfo {
         private VideoCapabilities() { }
 
         /** @hide */
+        @UnsupportedAppUsage
         public static VideoCapabilities create(
                 MediaFormat info, CodecCapabilities parent) {
             VideoCapabilities caps = new VideoCapabilities();

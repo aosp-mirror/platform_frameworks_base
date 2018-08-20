@@ -30,6 +30,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.os.Handler;
@@ -351,6 +352,7 @@ public class AudioTrack extends PlayerBase
      *   {@link AudioManager#STREAM_ALARM}, {@link AudioManager#STREAM_NOTIFICATION}, and
      *   {@link AudioManager#STREAM_DTMF}.
      */
+    @UnsupportedAppUsage
     private int mStreamType = AudioManager.STREAM_MUSIC;
 
     /**
@@ -399,12 +401,14 @@ public class AudioTrack extends PlayerBase
      * Accessed by native methods: provides access to C++ AudioTrack object.
      */
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     protected long mNativeTrackInJavaObj;
     /**
      * Accessed by native methods: provides access to the JNI data (i.e. resources used by
      * the native AudioTrack object, but not stored in it).
      */
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private long mJniData;
 
 
@@ -692,6 +696,7 @@ public class AudioTrack extends PlayerBase
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     /* package */ void deferred_connect(long nativeTrackInJavaObj) {
         if (mState != STATE_INITIALIZED) {
             // Note that for this native_setup, we are providing an already created/initialized
@@ -1501,6 +1506,7 @@ public class AudioTrack extends PlayerBase
      * a better solution.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getLatency() {
         return native_get_latency();
     }
@@ -3125,6 +3131,7 @@ public class AudioTrack extends PlayerBase
     // Java methods called from the native side
     //--------------------
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private static void postEventFromNative(Object audiotrack_ref,
             int what, int arg1, int arg2, Object obj) {
         //logd("Event posted from the native side: event="+ what + " args="+ arg1+" "+arg2);
@@ -3192,6 +3199,7 @@ public class AudioTrack extends PlayerBase
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public native final void native_release();
 
     private native final void native_start();
