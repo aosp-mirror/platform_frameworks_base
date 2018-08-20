@@ -21,7 +21,8 @@
 
 #include <SkPicture.h>
 #include <SkRefCnt.h>
-#include <SkTLazy.h>
+
+#include <optional>
 
 namespace android {
 
@@ -126,13 +127,13 @@ AnimatedImageDrawable::Snapshot AnimatedImageDrawable::reset() {
 
 // Only called on the RenderThread.
 void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
-    SkTLazy<SkPaint> lazyPaint;
+    std::optional<SkPaint> lazyPaint;
     SkAutoCanvasRestore acr(canvas, false);
     if (mProperties.mAlpha != SK_AlphaOPAQUE || mProperties.mColorFilter.get()) {
-        lazyPaint.init();
-        lazyPaint.get()->setAlpha(mProperties.mAlpha);
-        lazyPaint.get()->setColorFilter(mProperties.mColorFilter);
-        lazyPaint.get()->setFilterQuality(kLow_SkFilterQuality);
+        lazyPaint.emplace();
+        lazyPaint->setAlpha(mProperties.mAlpha);
+        lazyPaint->setColorFilter(mProperties.mColorFilter);
+        lazyPaint->setFilterQuality(kLow_SkFilterQuality);
     }
     if (mProperties.mMirrored) {
         canvas->save();
@@ -147,8 +148,8 @@ void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
     if (drawDirectly) {
         // The image is not animating, and never was. Draw directly from
         // mSkAnimatedImage.
-        if (lazyPaint.isValid()) {
-            canvas->saveLayer(mSkAnimatedImage->getBounds(), lazyPaint.get());
+        if (lazyPaint) {
+            canvas->saveLayer(mSkAnimatedImage->getBounds(), &*lazyPaint);
         }
 
         std::unique_lock lock{mImageLock};
@@ -193,7 +194,7 @@ void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
     if (!drawDirectly) {
         // No other thread will modify mCurrentSnap so this should be safe to
         // use without locking.
-        canvas->drawPicture(mSnapshot.mPic, nullptr, lazyPaint.getMaybeNull());
+        canvas->drawPicture(mSnapshot.mPic, nullptr, lazyPaint ? &*lazyPaint : nullptr);
     }
 
     if (finalFrame) {
