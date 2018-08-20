@@ -4572,10 +4572,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         enforceFullCrossUsersPermission(userHandle);
         synchronized (getLockObject()) {
             if (!isCallerWithSystemUid()) {
-                // This API can only be called by an active device admin,
-                // so try to retrieve it to check that the caller is one.
-                getActiveAdminForCallerLocked(
-                        null, DeviceAdminInfo.USES_POLICY_WATCH_LOGIN, parent);
+                // This API can be called by an active device admin or by keyguard code.
+                if (mContext.checkCallingPermission(permission.ACCESS_KEYGUARD_SECURE_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    getActiveAdminForCallerLocked(
+                            null, DeviceAdminInfo.USES_POLICY_WATCH_LOGIN, parent);
+                }
             }
 
             DevicePolicyData policy = getUserDataUnchecked(getCredentialOwner(userHandle, parent));

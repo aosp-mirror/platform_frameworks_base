@@ -33,8 +33,13 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 /**
- * A dataset object represents a group of fields (key / value pairs) used to autofill parts of a
- * screen.
+ * <p>A <code>Dataset</code> object represents a group of fields (key / value pairs) used
+ * to autofill parts of a screen.
+ *
+ * <p>For more information about the role of datasets in the autofill workflow, read
+ * <a href="/guide/topics/text/autofill-services">Build autofill services</a> and the
+ * <code><a href="/reference/android/service/autofill/AutofillService">AutofillService</a></code>
+ * documentation.
  *
  * <a name="BasicUsage"></a>
  * <h3>Basic usage</h3>
@@ -88,10 +93,6 @@ import java.util.regex.Pattern;
  *   <li>All other datasets are hidden.
  * </ol>
  *
- * <a name="MoreInfo"></a>
- * <h3>More information</h3>
- * <p>See {@link android.service.autofill.AutofillService} for more information and examples about
- * the role of datasets in the autofill workflow.
  */
 public final class Dataset implements Parcelable {
 
