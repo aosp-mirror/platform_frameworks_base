@@ -24,6 +24,7 @@ import android.annotation.IdRes;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.annotation.UiThread;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
@@ -120,6 +121,7 @@ import java.util.function.Predicate;
 public abstract class ViewGroup extends View implements ViewParent, ViewManager {
     private static final String TAG = "ViewGroup";
 
+    @UnsupportedAppUsage
     private static final boolean DBG = false;
 
     /**
@@ -128,6 +130,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
+    @UnsupportedAppUsage
     protected ArrayList<View> mDisappearingChildren;
 
     /**
@@ -136,9 +139,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
+    @UnsupportedAppUsage
     protected OnHierarchyChangeListener mOnHierarchyChangeListener;
 
     // The view contained within this ViewGroup that has or contains focus.
+    @UnsupportedAppUsage
     private View mFocused;
     // The view contained within this ViewGroup (excluding nested keyboard navigation clusters)
     // that is or contains a default-focus view.
@@ -183,6 +188,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private Animation.AnimationListener mAnimationListener;
 
     // First touch target in the linked list of touch targets.
+    @UnsupportedAppUsage
     private TouchTarget mFirstTouchTarget;
 
     // For debugging only.  You can see these in hierarchyviewer.
@@ -230,6 +236,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             @ViewDebug.FlagToString(mask = FLAG_PADDING_NOT_NULL, equals = FLAG_PADDING_NOT_NULL,
                     name = "PADDING_NOT_NULL")
     }, formatToHexString = true)
+    @UnsupportedAppUsage
     protected int mGroupFlags;
 
     /**
@@ -290,6 +297,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @hide
      */
+    @UnsupportedAppUsage
     protected static final int FLAG_USE_CHILD_DRAWING_ORDER = 0x400;
 
     /**
@@ -303,6 +311,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     protected static final int FLAG_SUPPORT_STATIC_TRANSFORMATIONS = 0x800;
 
     // UNUSED FLAG VALUE: 0x1000;
@@ -356,6 +365,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * When set, this ViewGroup should not intercept touch events.
      * {@hide}
      */
+    @UnsupportedAppUsage
     protected static final int FLAG_DISALLOW_INTERCEPT = 0x80000;
 
     /**
@@ -418,6 +428,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
+    @UnsupportedAppUsage
     protected int mPersistentDrawingCache;
 
     /**
@@ -530,9 +541,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private static final int CHILD_TOP_INDEX = 1;
 
     // Child views of this ViewGroup
+    @UnsupportedAppUsage
     private View[] mChildren;
     // Number of valid children in the mChildren array, the rest should be null or not
     // considered as children
+    @UnsupportedAppUsage
     private int mChildrenCount;
 
     // Whether layout calls are currently being suppressed, controlled by calls to
@@ -1480,6 +1493,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     @Override
+    @UnsupportedAppUsage
     public void makeOptionalFitsSystemWindows() {
         super.makeOptionalFitsSystemWindows();
         final int count = mChildrenCount;
@@ -1508,6 +1522,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @param newVisibility The new visibility value (GONE, INVISIBLE, or VISIBLE).
      * @hide
      */
+    @UnsupportedAppUsage
     protected void onChildVisibilityChanged(View child, int oldVisibility, int newVisibility) {
         if (mTransition != null) {
             if (newVisibility == VISIBLE) {
@@ -2907,6 +2922,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    @UnsupportedAppUsage
     private void cancelTouchTarget(View view) {
         TouchTarget predecessor = null;
         TouchTarget target = mFirstTouchTarget;
@@ -2955,6 +2971,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Child must not be null.
      * @hide
      */
+    @UnsupportedAppUsage
     protected boolean isTransformedTouchPointInView(float x, float y, View child,
             PointF outLocalPoint) {
         final float[] point = getTempPoint();
@@ -2971,6 +2988,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void transformPointToViewLocal(float[] point, View child) {
         point[0] += mScrollX - child.mLeft;
         point[1] += mScrollY - child.mTop;
@@ -3392,6 +3410,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
+    @UnsupportedAppUsage
     void dispatchAttachedToWindow(AttachInfo info, int visibility) {
         mGroupFlags |= FLAG_PREVENT_DISPATCH_ATTACHED_TO_WINDOW;
         super.dispatchAttachedToWindow(info, visibility);
@@ -3634,6 +3653,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /** @hide */
     @Override
+    @UnsupportedAppUsage
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
         if (getAccessibilityNodeProvider() != null) {
@@ -3740,6 +3760,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
+    @UnsupportedAppUsage
     void dispatchDetachedFromWindow() {
         // If we still have a touch target, we are still in the process of
         // dispatching motion events to a child; we need to get rid of that
@@ -4281,6 +4302,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     @Override
+    @UnsupportedAppUsage
     protected void dispatchGetDisplayList() {
         final int count = mChildrenCount;
         final View[] children = mChildren;
@@ -4660,6 +4682,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void addTransientView(View view, int index) {
         if (index < 0) {
             return;
@@ -4695,6 +4718,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void removeTransientView(View view) {
         if (mTransientViews == null) {
             return;
@@ -4722,6 +4746,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getTransientViewCount() {
         return mTransientIndices == null ? 0 : mTransientIndices.size();
     }
@@ -4755,6 +4780,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public View getTransientView(int position) {
         if (mTransientViews == null || position >= mTransientViews.size()) {
             return null;
@@ -4913,6 +4939,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         mOnHierarchyChangeListener = listener;
     }
 
+    @UnsupportedAppUsage
     void dispatchViewAdded(View child) {
         onViewAdded(child);
         if (mOnHierarchyChangeListener != null) {
@@ -4929,6 +4956,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     public void onViewAdded(View child) {
     }
 
+    @UnsupportedAppUsage
     void dispatchViewRemoved(View child) {
         onViewRemoved(child);
         if (mOnHierarchyChangeListener != null) {
@@ -6086,6 +6114,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void offsetChildrenTopAndBottom(int offset) {
         final int count = mChildrenCount;
         final View[] children = mChildren;
@@ -7004,6 +7033,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void suppressLayout(boolean suppress) {
         mSuppressLayout = suppress;
         if (!suppress) {
@@ -7301,6 +7331,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     @Override
+    @UnsupportedAppUsage
     public void resolvePadding() {
         super.resolvePadding();
         int count = getChildCount();
@@ -7344,6 +7375,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     @Override
+    @UnsupportedAppUsage
     public void resetResolvedLayoutDirection() {
         super.resetResolvedLayoutDirection();
 
@@ -7360,6 +7392,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     @Override
+    @UnsupportedAppUsage
     public void resetResolvedTextDirection() {
         super.resetResolvedTextDirection();
 
@@ -7376,6 +7409,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     @Override
+    @UnsupportedAppUsage
     public void resetResolvedTextAlignment() {
         super.resetResolvedTextAlignment();
 
@@ -7392,6 +7426,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     @Override
+    @UnsupportedAppUsage
     public void resetResolvedPadding() {
         super.resetResolvedPadding();
 
@@ -7408,6 +7443,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     @Override
+    @UnsupportedAppUsage
     protected void resetResolvedDrawables() {
         super.resetResolvedDrawables();
 
@@ -7743,6 +7779,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * Used internally by MarginLayoutParams.
          * @hide
          */
+        @UnsupportedAppUsage
         LayoutParams() {
         }
 
@@ -7883,6 +7920,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * to this field.
          */
         @ViewDebug.ExportedProperty(category = "layout")
+        @UnsupportedAppUsage
         private int startMargin = DEFAULT_MARGIN_RELATIVE;
 
         /**
@@ -7891,6 +7929,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * to this field.
          */
         @ViewDebug.ExportedProperty(category = "layout")
+        @UnsupportedAppUsage
         private int endMargin = DEFAULT_MARGIN_RELATIVE;
 
         /**
@@ -8120,6 +8159,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public void setMarginsRelative(int start, int top, int end, int bottom) {
             startMargin = start;
             topMargin = top;
@@ -8343,6 +8383,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         public static final int ALL_POINTER_IDS = -1; // all ones
 
         // The touched child view.
+        @UnsupportedAppUsage
         public View child;
 
         // The combined bit mask of pointer ids for all pointers captured by the target.
@@ -8351,6 +8392,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // The next target in the target list.
         public TouchTarget next;
 
+        @UnsupportedAppUsage
         private TouchTarget() {
         }
 
@@ -8747,6 +8789,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /** @hide */
     @Override
+    @UnsupportedAppUsage
     protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
         super.encodeProperties(encoder);
 

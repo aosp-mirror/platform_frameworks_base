@@ -19,6 +19,7 @@ package android.view.textclassifier.logging;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.metrics.LogMaker;
 import android.util.Log;
@@ -99,6 +100,7 @@ public final class SmartSelectionEventTracker {
     private boolean mSmartSelectionTriggered;
     private String mModelName;
 
+    @UnsupportedAppUsage
     public SmartSelectionEventTracker(@NonNull Context context, @WidgetType int widgetType) {
         mWidgetType = widgetType;
         mWidgetVersion = null;
@@ -117,6 +119,7 @@ public final class SmartSelectionEventTracker {
      *
      * @param event the selection event
      */
+    @UnsupportedAppUsage
     public void logEvent(@NonNull SelectionEvent event) {
         Preconditions.checkNotNull(event);
 
@@ -440,6 +443,7 @@ public final class SmartSelectionEventTracker {
          *
          * @param start  the word index of the selected word
          */
+        @UnsupportedAppUsage
         public static SelectionEvent selectionStarted(int start) {
             return new SelectionEvent(
                     start, start + 1, EventType.SELECTION_STARTED,
@@ -453,6 +457,7 @@ public final class SmartSelectionEventTracker {
          * @param start  the start word (inclusive) index of the selection
          * @param end  the end word (exclusive) index of the selection
          */
+        @UnsupportedAppUsage
         public static SelectionEvent selectionModified(int start, int end) {
             return new SelectionEvent(
                     start, end, EventType.SELECTION_MODIFIED,
@@ -468,6 +473,7 @@ public final class SmartSelectionEventTracker {
          * @param classification  the TextClassification object returned by the TextClassifier that
          *      classified the selected text
          */
+        @UnsupportedAppUsage
         public static SelectionEvent selectionModified(
                 int start, int end, @NonNull TextClassification classification) {
             final String entityType = classification.getEntityCount() > 0
@@ -487,6 +493,7 @@ public final class SmartSelectionEventTracker {
          * @param selection  the TextSelection object returned by the TextClassifier for the
          *      specified selection
          */
+        @UnsupportedAppUsage
         public static SelectionEvent selectionModified(
                 int start, int end, @NonNull TextSelection selection) {
             final boolean smartSelection = getSourceClassifier(selection.getId())
@@ -515,6 +522,7 @@ public final class SmartSelectionEventTracker {
          * @param end  the end word (exclusive) index of the selection
          * @param actionType  the action that was performed on the selection
          */
+        @UnsupportedAppUsage
         public static SelectionEvent selectionAction(
                 int start, int end, @ActionType int actionType) {
             return new SelectionEvent(
@@ -532,6 +540,7 @@ public final class SmartSelectionEventTracker {
          * @param classification  the TextClassification object returned by the TextClassifier that
          *      classified the selected text
          */
+        @UnsupportedAppUsage
         public static SelectionEvent selectionAction(
                 int start, int end, @ActionType int actionType,
                 @NonNull TextClassification classification) {

@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -224,6 +225,7 @@ public class ViewConfiguration {
     /**
      * The coefficient of friction applied to flings/scrolls.
      */
+    @UnsupportedAppUsage
     private static final float SCROLL_FRICTION = 0.015f;
 
     /**
@@ -299,15 +301,19 @@ public class ViewConfiguration {
     private final int mMaximumDrawingCacheSize;
     private final int mOverscrollDistance;
     private final int mOverflingDistance;
+    @UnsupportedAppUsage
     private final boolean mFadingMarqueeEnabled;
     private final long mGlobalActionsKeyTimeout;
     private final float mVerticalScrollFactor;
     private final float mHorizontalScrollFactor;
     private final boolean mShowMenuShortcutsWhenKeyboardPresent;
 
+    @UnsupportedAppUsage
     private boolean sHasPermanentMenuKey;
+    @UnsupportedAppUsage
     private boolean sHasPermanentMenuKeySet;
 
+    @UnsupportedAppUsage
     static final SparseArray<ViewConfiguration> sConfigurations =
             new SparseArray<ViewConfiguration>(2);
 
@@ -589,6 +595,7 @@ public class ViewConfiguration {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static int getDoubleTapMinTime() {
         return DOUBLE_TAP_MIN_TIME;
     }
@@ -609,6 +616,7 @@ public class ViewConfiguration {
      * to a hover movement gesture.
      * @hide
      */
+    @UnsupportedAppUsage
     public static int getHoverTapSlop() {
         return HOVER_TAP_SLOP;
     }
@@ -662,6 +670,7 @@ public class ViewConfiguration {
      * potential double tap event
      * @hide
      */
+    @UnsupportedAppUsage
     public int getScaledDoubleTapTouchSlop() {
         return mDoubleTapTouchSlop;
     }
@@ -682,6 +691,7 @@ public class ViewConfiguration {
      *       for clients that still use its deprecated constructor.
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static int getDoubleTapSlop() {
         return DOUBLE_TAP_SLOP;
     }
@@ -857,6 +867,7 @@ public class ViewConfiguration {
      *   the global actions dialog.
      * @hide
      */
+    @UnsupportedAppUsage
     public long getDeviceGlobalActionKeyTimeout() {
         return mGlobalActionsKeyTimeout;
     }
@@ -928,6 +939,7 @@ public class ViewConfiguration {
      * @hide
      * @return Whether or not marquee should use fading edges.
      */
+    @UnsupportedAppUsage
     public boolean isFadingMarqueeEnabled() {
         return mFadingMarqueeEnabled;
     }

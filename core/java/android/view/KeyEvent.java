@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.method.MetaKeyKeyListener;
@@ -828,6 +829,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
 
     // Symbolic names of all metakeys in bit order from least significant to most significant.
     // Accordingly there are exactly 32 values in this table.
+    @UnsupportedAppUsage
     private static final String[] META_SYMBOLIC_NAMES = new String[] {
         "META_SHIFT_ON",
         "META_ALT_ON",
@@ -896,6 +898,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * Reserved for use by {@link MetaKeyKeyListener} for a published constant in its API.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int META_CAP_LOCKED = 0x100;
 
     /**
@@ -903,6 +906,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * Reserved for use by {@link MetaKeyKeyListener} for a published constant in its API.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int META_ALT_LOCKED = 0x200;
 
     /**
@@ -910,6 +914,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * Reserved for use by {@link MetaKeyKeyListener} for a published constant in its API.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int META_SYM_LOCKED = 0x400;
 
     /**
@@ -918,6 +923,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * in its API that is currently being retained for legacy reasons.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int META_SELECTING = 0x800;
 
     /**
@@ -1237,16 +1243,27 @@ public class KeyEvent extends InputEvent implements Parcelable {
 
     private KeyEvent mNext;
 
+    @UnsupportedAppUsage
     private int mDeviceId;
+    @UnsupportedAppUsage
     private int mSource;
+    @UnsupportedAppUsage
     private int mMetaState;
+    @UnsupportedAppUsage
     private int mAction;
+    @UnsupportedAppUsage
     private int mKeyCode;
+    @UnsupportedAppUsage
     private int mScanCode;
+    @UnsupportedAppUsage
     private int mRepeatCount;
+    @UnsupportedAppUsage
     private int mFlags;
+    @UnsupportedAppUsage
     private long mDownTime;
+    @UnsupportedAppUsage
     private long mEventTime;
+    @UnsupportedAppUsage
     private String mCharacters;
 
     public interface Callback {
@@ -1555,6 +1572,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static KeyEvent obtain(long downTime, long eventTime, int action,
                     int code, int repeat, int metaState,
                     int deviceId, int scancode, int flags, int source, String characters) {
@@ -1608,6 +1626,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @hide
      */
     @Override
+    @UnsupportedAppUsage
     public final void recycle() {
         super.recycle();
         mCharacters = null;
@@ -1727,6 +1746,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @deprecated
      * @hide
      */
+    @UnsupportedAppUsage
     @Deprecated public final boolean isDown() {
         return mAction == ACTION_DOWN;
     }
@@ -1788,6 +1808,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Whether key will, by default, trigger a click on the focused view.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final boolean isConfirmKey(int keyCode) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
@@ -1978,6 +1999,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     }
 
     // Mask of all modifier key meta states.  Specifically excludes locked keys like caps lock.
+    @UnsupportedAppUsage
     private static final int META_MODIFIER_MASK =
             META_SHIFT_ON | META_SHIFT_LEFT_ON | META_SHIFT_RIGHT_ON
             | META_ALT_ON | META_ALT_LEFT_ON | META_ALT_RIGHT_ON
@@ -1986,19 +2008,23 @@ public class KeyEvent extends InputEvent implements Parcelable {
             | META_SYM_ON | META_FUNCTION_ON;
 
     // Mask of all lock key meta states.
+    @UnsupportedAppUsage
     private static final int META_LOCK_MASK =
             META_CAPS_LOCK_ON | META_NUM_LOCK_ON | META_SCROLL_LOCK_ON;
 
     // Mask of all valid meta states.
+    @UnsupportedAppUsage
     private static final int META_ALL_MASK = META_MODIFIER_MASK | META_LOCK_MASK;
 
     // Mask of all synthetic meta states that are reserved for API compatibility with
     // historical uses in MetaKeyKeyListener.
+    @UnsupportedAppUsage
     private static final int META_SYNTHETIC_MASK =
             META_CAP_LOCKED | META_ALT_LOCKED | META_SYM_LOCKED | META_SELECTING;
 
     // Mask of all meta states that are not valid use in specifying a modifier key.
     // These bits are known to be used for purposes other than specifying modifiers.
+    @UnsupportedAppUsage
     private static final int META_INVALID_MODIFIER_MASK =
             META_LOCK_MASK | META_SYNTHETIC_MASK;
 
@@ -2857,6 +2883,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @return The symbolic name of the specified action.
      * @hide
      */
+    @UnsupportedAppUsage
     public static String actionToString(int action) {
         switch (action) {
             case ACTION_DOWN:
