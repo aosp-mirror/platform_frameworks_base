@@ -25,6 +25,8 @@
 #include <GrBackendSurface.h>
 #include <GrContext.h>
 #include <GrTypes.h>
+#include <GrTypes.h>
+#include <vk/GrVkExtensions.h>
 #include <vk/GrVkTypes.h>
 
 namespace android {
@@ -62,7 +64,7 @@ void VulkanManager::destroy() {
     mInstance = VK_NULL_HANDLE;
 }
 
-bool VulkanManager::setupDevice(VkPhysicalDeviceFeatures& deviceFeatures) {
+bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFeatures2& features) {
     VkResult err;
 
     constexpr VkApplicationInfo app_info = {
@@ -128,7 +130,7 @@ bool VulkanManager::setupDevice(VkPhysicalDeviceFeatures& deviceFeatures) {
     GET_INST_PROC(DestroyInstance);
     GET_INST_PROC(EnumeratePhysicalDevices);
     GET_INST_PROC(GetPhysicalDeviceQueueFamilyProperties);
-    GET_INST_PROC(GetPhysicalDeviceFeatures);
+    GET_INST_PROC(GetPhysicalDeviceFeatures2);
     GET_INST_PROC(CreateDevice);
     GET_INST_PROC(EnumerateDeviceExtensionProperties);
     GET_INST_PROC(CreateAndroidSurfaceKHR);
@@ -217,11 +219,38 @@ bool VulkanManager::setupDevice(VkPhysicalDeviceFeatures& deviceFeatures) {
         }
     }
 
-    // query to get the physical device properties
-    mGetPhysicalDeviceFeatures(mPhysicalDevice, &deviceFeatures);
+    auto getProc = [] (const char* proc_name, VkInstance instance, VkDevice device) {
+        if (device != VK_NULL_HANDLE) {
+            return vkGetDeviceProcAddr(device, proc_name);
+        }
+        return vkGetInstanceProcAddr(instance, proc_name);
+    };
+    grExtensions.init(getProc, mInstance, mPhysicalDevice, instanceExtensions.size(),
+            instanceExtensions.data(), deviceExtensions.size(), deviceExtensions.data());
+
+    memset(&features, 0, sizeof(VkPhysicalDeviceFeatures2));
+    features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    features.pNext = nullptr;
+
+    // Setup all extension feature structs we may want to use.
+    void** tailPNext = &features.pNext;
+
+    if (grExtensions.hasExtension(VK_EXT_BLEND_OPERATION_ADVANCED_EXTENSION_NAME, 2)) {
+        VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT* blend;
+        blend = (VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT*) malloc(
+                sizeof(VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT));
+        LOG_ALWAYS_FATAL_IF(!blend);
+        blend->sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BLEND_OPERATION_ADVANCED_FEATURES_EXT;
+        blend->pNext = nullptr;
+        *tailPNext = blend;
+        tailPNext = &blend->pNext;
+    }
+
+    // query to get the physical device features
+    mGetPhysicalDeviceFeatures2(mPhysicalDevice, &features);
     // this looks like it would slow things down,
     // and we can't depend on it on all platforms
-    deviceFeatures.robustBufferAccess = VK_FALSE;
+    features.features.robustBufferAccess = VK_FALSE;
 
     float queuePriorities[1] = { 0.0 };
 
@@ -247,7 +276,7 @@ bool VulkanManager::setupDevice(VkPhysicalDeviceFeatures& deviceFeatures) {
 
     const VkDeviceCreateInfo deviceInfo = {
         VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,    // sType
-        nullptr,                                 // pNext
+        &features,                               // pNext
         0,                                       // VkDeviceCreateFlags
         queueInfoCount,                          // queueCreateInfoCount
         queueInfo,                               // pQueueCreateInfos
@@ -255,7 +284,7 @@ bool VulkanManager::setupDevice(VkPhysicalDeviceFeatures& deviceFeatures) {
         nullptr,                                 // ppEnabledLayerNames
         (uint32_t) deviceExtensions.size(),      // extensionCount
         deviceExtensions.data(),                 // ppEnabledExtensionNames
-        &deviceFeatures                          // ppEnabledFeatures
+        nullptr,                                 // ppEnabledFeatures
     };
 
     err = mCreateDevice(mPhysicalDevice, &deviceInfo, nullptr, &mDevice);
@@ -294,32 +323,38 @@ bool VulkanManager::setupDevice(VkPhysicalDeviceFeatures& deviceFeatures) {
     return true;
 }
 
+static void free_features_extensions_structs(const VkPhysicalDeviceFeatures2& features) {
+    // All Vulkan structs that could be part of the features chain will start with the
+    // structure type followed by the pNext pointer. We cast to the CommonVulkanHeader
+    // so we can get access to the pNext for the next struct.
+    struct CommonVulkanHeader {
+        VkStructureType sType;
+        void*           pNext;
+    };
+
+    void* pNext = features.pNext;
+    while (pNext) {
+        void* current = pNext;
+        pNext = static_cast<CommonVulkanHeader*>(current)->pNext;
+        free(current);
+    }
+}
+
 void VulkanManager::initialize() {
     if (mDevice != VK_NULL_HANDLE) {
         return;
     }
 
-    std::vector<const char*> instanceExtensions;
-    std::vector<const char*> deviceExtensions;
-    VkPhysicalDeviceFeatures deviceFeatures;
-    LOG_ALWAYS_FATAL_IF(!this->setupDevice(deviceFeatures));
+    GET_PROC(EnumerateInstanceVersion);
+    uint32_t instanceVersion = 0;
+    LOG_ALWAYS_FATAL_IF(mEnumerateInstanceVersion(&instanceVersion));
+    LOG_ALWAYS_FATAL_IF(instanceVersion < VK_MAKE_VERSION(1, 1, 0));
+
+    GrVkExtensions extensions;
+    VkPhysicalDeviceFeatures2 features;
+    LOG_ALWAYS_FATAL_IF(!this->setupDevice(extensions, features));
 
     mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 0, &mGraphicsQueue);
-
-    uint32_t extensionFlags = kKHR_surface_GrVkExtensionFlag |
-                              kKHR_android_surface_GrVkExtensionFlag |
-                              kKHR_swapchain_GrVkExtensionFlag;
-
-    uint32_t featureFlags = 0;
-    if (deviceFeatures.geometryShader) {
-        featureFlags |= kGeometryShader_GrVkFeatureFlag;
-    }
-    if (deviceFeatures.dualSrcBlend) {
-        featureFlags |= kDualSrcBlend_GrVkFeatureFlag;
-    }
-    if (deviceFeatures.sampleRateShading) {
-        featureFlags |= kSampleRateShading_GrVkFeatureFlag;
-    }
 
     auto getProc = [] (const char* proc_name, VkInstance instance, VkDevice device) {
         if (device != VK_NULL_HANDLE) {
@@ -334,11 +369,10 @@ void VulkanManager::initialize() {
     backendContext.fDevice = mDevice;
     backendContext.fQueue = mGraphicsQueue;
     backendContext.fGraphicsQueueIndex = mGraphicsQueueIndex;
-    backendContext.fMinAPIVersion = VK_MAKE_VERSION(1, 0, 0);
-    backendContext.fExtensions = extensionFlags;
-    backendContext.fFeatures = featureFlags;
+    backendContext.fInstanceVersion = instanceVersion;
+    backendContext.fVkExtensions = &extensions;
+    backendContext.fDeviceFeatures2 = &features;
     backendContext.fGetProc = std::move(getProc);
-    backendContext.fOwnsInstanceAndDevice = false;
 
     // create the command pool for the command buffers
     if (VK_NULL_HANDLE == mCommandPool) {
@@ -361,6 +395,9 @@ void VulkanManager::initialize() {
     sk_sp<GrContext> grContext(GrContext::MakeVulkan(backendContext, options));
     LOG_ALWAYS_FATAL_IF(!grContext.get());
     mRenderThread.setGrContext(grContext);
+
+    free_features_extensions_structs(features);
+
     DeviceInfo::initialize(mRenderThread.getGrContext()->maxRenderTargetSize());
 
     if (Properties::enablePartialUpdates && Properties::useBufferAge) {
