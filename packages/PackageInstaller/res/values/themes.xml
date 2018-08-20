@@ -17,25 +17,11 @@
 
 <resources>
 
-    <style name="DialogWhenLarge"
-            parent="@android:style/Theme.DeviceDefault.Light.NoActionBar">
-        <item name="android:textAppearanceMedium">@style/MediumText</item>
-        <item name="android:textAppearanceSmall">@style/SmallText</item>
-        <item name="android:titleTextStyle">@style/TitleText</item>
-    </style>
-
-    <style name="DialogWhenLargeNoAnimation" parent="DialogWhenLarge">
+    <style name="Theme.AlertDialogActivity.NoAnimation">
         <item name="android:windowAnimationStyle">@null</item>
     </style>
 
-    <style name="AlertDialogActivity"
-            parent="@android:style/Theme.DeviceDefault.Light.Panel">
-        <item name="android:backgroundDimEnabled">true</item>
-    </style>
-
-    <style name="Header.Settings"
-            parent="@android:style/Theme.DeviceDefault.Settings">
-    </style>
-
+    <style name="Theme.AlertDialogActivity"
+            parent="@android:style/Theme.DeviceDefault.Light.Dialog.Alert" />
 
 </resources>

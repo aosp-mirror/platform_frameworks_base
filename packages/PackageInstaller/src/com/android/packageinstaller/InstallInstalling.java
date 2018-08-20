@@ -19,8 +19,8 @@ package com.android.packageinstaller;
 import static android.content.pm.PackageInstaller.SessionParams.UID_UNKNOWN;
 
 import android.annotation.Nullable;
-import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInstaller;
@@ -30,9 +30,11 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 
+import com.android.internal.app.AlertActivity;
 import com.android.internal.content.PackageHelper;
 
 import java.io.File;
@@ -47,7 +49,7 @@ import java.io.OutputStream;
  * <p>This has two phases: First send the data to the package manager, then wait until the package
  * manager processed the result.</p>
  */
-public class InstallInstalling extends Activity {
+public class InstallInstalling extends AlertActivity {
     private static final String LOG_TAG = InstallInstalling.class.getSimpleName();
 
     private static final String SESSION_ID = "com.android.packageinstaller.SESSION_ID";
@@ -78,11 +80,31 @@ public class InstallInstalling extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.install_installing);
-
         ApplicationInfo appInfo = getIntent()
                 .getParcelableExtra(PackageUtil.INTENT_ATTR_APPLICATION_INFO);
         mPackageURI = getIntent().getData();
+        final File sourceFile = new File(mPackageURI.getPath());
+        PackageUtil.AppSnippet as = PackageUtil.getAppSnippet(this, appInfo, sourceFile);
+
+        mAlert.setIcon(as.icon);
+        mAlert.setTitle(as.label);
+        mAlert.setView(R.layout.install_content_view);
+        mAlert.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel),
+                (ignored, ignored2) -> {
+                    if (mInstallingTask != null) {
+                        mInstallingTask.cancel(true);
+                    }
+
+                    if (mSessionId > 0) {
+                        getPackageManager().getPackageInstaller().abandonSession(mSessionId);
+                        mSessionId = 0;
+                    }
+
+                    setResult(RESULT_CANCELED);
+                    finish();
+                }, null);
+        setupAlert();
+        requireViewById(R.id.installing).setVisibility(View.VISIBLE);
 
         if ("package".equals(mPackageURI.getScheme())) {
             try {
@@ -92,10 +114,6 @@ public class InstallInstalling extends Activity {
                 launchFailure(PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
             }
         } else {
-            final File sourceFile = new File(mPackageURI.getPath());
-            PackageUtil.initSnippetForNewApp(this, PackageUtil.getAppSnippet(this, appInfo,
-                    sourceFile), R.id.app_snippet);
-
             if (savedInstanceState != null) {
                 mSessionId = savedInstanceState.getInt(SESSION_ID);
                 mInstallId = savedInstanceState.getInt(INSTALL_ID);
@@ -153,21 +171,7 @@ public class InstallInstalling extends Activity {
                 }
             }
 
-            mCancelButton = (Button) findViewById(R.id.cancel_button);
-
-            mCancelButton.setOnClickListener(view -> {
-                if (mInstallingTask != null) {
-                    mInstallingTask.cancel(true);
-                }
-
-                if (mSessionId > 0) {
-                    getPackageManager().getPackageInstaller().abandonSession(mSessionId);
-                    mSessionId = 0;
-                }
-
-                setResult(RESULT_CANCELED);
-                finish();
-            });
+            mCancelButton = mAlert.getButton(DialogInterface.BUTTON_NEGATIVE);
 
             mSessionCallback = new InstallSessionCallback();
         }
@@ -307,7 +311,7 @@ public class InstallInstalling extends Activity {
         @Override
         public void onProgressChanged(int sessionId, float progress) {
             if (sessionId == mSessionId) {
-                ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
+                ProgressBar progressBar = requireViewById(R.id.progress);
                 progressBar.setMax(Integer.MAX_VALUE);
                 progressBar.setProgress((int) (Integer.MAX_VALUE * progress));
             }
