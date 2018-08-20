@@ -18,6 +18,7 @@ package android.preference;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.XmlRes;
 import android.app.Activity;
 import android.content.Context;
@@ -67,6 +68,7 @@ public class PreferenceManager {
      * Fragment that owns this instance.
      */
     @Nullable
+    @UnsupportedAppUsage
     private PreferenceFragment mFragment;
 
     /**
@@ -90,6 +92,7 @@ public class PreferenceManager {
      * Cached shared preferences.
      */
     @Nullable
+    @UnsupportedAppUsage
     private SharedPreferences mSharedPreferences;
 
     /**
@@ -152,6 +155,7 @@ public class PreferenceManager {
      * List of activity destroy listeners.
      */
     @Nullable
+    @UnsupportedAppUsage
     private List<OnActivityDestroyListener> mActivityDestroyListeners;
 
     /**
@@ -161,11 +165,13 @@ public class PreferenceManager {
     @Nullable
     private List<DialogInterface> mPreferencesScreens;
 
+    @UnsupportedAppUsage
     private OnPreferenceTreeClickListener mOnPreferenceTreeClickListener;
 
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public PreferenceManager(Activity activity, int firstRequestCode) {
         mActivity = activity;
         mNextRequestCode = firstRequestCode;
@@ -181,6 +187,7 @@ public class PreferenceManager {
      * should be used ANY time a preference will be displayed, since some preference
      * types need an Activity for managed queries.
      */
+    @UnsupportedAppUsage
     /*package*/ PreferenceManager(Context context) {
         init(context);
     }
@@ -194,6 +201,7 @@ public class PreferenceManager {
     /**
      * Sets the owning preference fragment
      */
+    @UnsupportedAppUsage
     void setFragment(PreferenceFragment fragment) {
         mFragment = fragment;
     }
@@ -202,6 +210,7 @@ public class PreferenceManager {
      * Returns the owning preference fragment, if any.
      */
     @Nullable
+    @UnsupportedAppUsage
     PreferenceFragment getFragment() {
         return mFragment;
     }
@@ -260,6 +269,7 @@ public class PreferenceManager {
      * @return The root hierarchy (if one was not provided, the new hierarchy's
      *         root).
      */
+    @UnsupportedAppUsage
     PreferenceScreen inflateFromIntent(Intent queryIntent, PreferenceScreen rootPreferences) {
         final List<ResolveInfo> activities = queryIntentActivities(queryIntent);
         final HashSet<String> inflatedRes = new HashSet<String>();
@@ -315,6 +325,7 @@ public class PreferenceManager {
      *         root).
      * @hide
      */
+    @UnsupportedAppUsage
     public PreferenceScreen inflateFromResource(Context context, @XmlRes int resId,
             PreferenceScreen rootPreferences) {
         // Block commits
@@ -547,6 +558,7 @@ public class PreferenceManager {
      * @return The {@link PreferenceScreen} object that is at the root of the hierarchy.
      */
     @Nullable
+    @UnsupportedAppUsage
     PreferenceScreen getPreferenceScreen() {
         return mPreferenceScreen;
     }
@@ -557,6 +569,7 @@ public class PreferenceManager {
      * @param preferenceScreen The root {@link PreferenceScreen} of the preference hierarchy.
      * @return Whether the {@link PreferenceScreen} given is different than the previous.
      */
+    @UnsupportedAppUsage
     boolean setPreferences(PreferenceScreen preferenceScreen) {
         if (preferenceScreen != mPreferenceScreen) {
             mPreferenceScreen = preferenceScreen;
@@ -671,6 +684,7 @@ public class PreferenceManager {
      *         has been set, this method returns {@code null}.
      * @see #shouldCommit()
      */
+    @UnsupportedAppUsage
     SharedPreferences.Editor getEditor() {
         if (mPreferenceDataStore != null) {
             return null;
@@ -696,10 +710,12 @@ public class PreferenceManager {
      *
      * @return Whether the client should commit.
      */
+    @UnsupportedAppUsage
     boolean shouldCommit() {
         return !mNoCommit;
     }
 
+    @UnsupportedAppUsage
     private void setNoCommit(boolean noCommit) {
         if (!noCommit && mEditor != null) {
             try {
@@ -726,6 +742,7 @@ public class PreferenceManager {
      * @see #mContext
      */
     @Nullable
+    @UnsupportedAppUsage
     Activity getActivity() {
         return mActivity;
     }
@@ -745,6 +762,7 @@ public class PreferenceManager {
      *
      * @see OnActivityResultListener
      */
+    @UnsupportedAppUsage
     void registerOnActivityResultListener(OnActivityResultListener listener) {
         synchronized (this) {
             if (mActivityResultListeners == null) {
@@ -762,6 +780,7 @@ public class PreferenceManager {
      *
      * @see OnActivityResultListener
      */
+    @UnsupportedAppUsage
     void unregisterOnActivityResultListener(OnActivityResultListener listener) {
         synchronized (this) {
             if (mActivityResultListeners != null) {
@@ -773,6 +792,7 @@ public class PreferenceManager {
     /**
      * Called by the {@link PreferenceManager} to dispatch a subactivity result.
      */
+    @UnsupportedAppUsage
     void dispatchActivityResult(int requestCode, int resultCode, Intent data) {
         List<OnActivityResultListener> list;
 
@@ -795,6 +815,7 @@ public class PreferenceManager {
      * @see OnActivityStopListener
      * @hide
      */
+    @UnsupportedAppUsage
     public void registerOnActivityStopListener(OnActivityStopListener listener) {
         synchronized (this) {
             if (mActivityStopListeners == null) {
@@ -813,6 +834,7 @@ public class PreferenceManager {
      * @see OnActivityStopListener
      * @hide
      */
+    @UnsupportedAppUsage
     public void unregisterOnActivityStopListener(OnActivityStopListener listener) {
         synchronized (this) {
             if (mActivityStopListeners != null) {
@@ -825,6 +847,7 @@ public class PreferenceManager {
      * Called by the {@link PreferenceManager} to dispatch the activity stop
      * event.
      */
+    @UnsupportedAppUsage
     void dispatchActivityStop() {
         List<OnActivityStopListener> list;
 
@@ -844,6 +867,7 @@ public class PreferenceManager {
      *
      * @see OnActivityDestroyListener
      */
+    @UnsupportedAppUsage
     void registerOnActivityDestroyListener(OnActivityDestroyListener listener) {
         synchronized (this) {
             if (mActivityDestroyListeners == null) {
@@ -861,6 +885,7 @@ public class PreferenceManager {
      *
      * @see OnActivityDestroyListener
      */
+    @UnsupportedAppUsage
     void unregisterOnActivityDestroyListener(OnActivityDestroyListener listener) {
         synchronized (this) {
             if (mActivityDestroyListeners != null) {
@@ -873,6 +898,7 @@ public class PreferenceManager {
      * Called by the {@link PreferenceManager} to dispatch the activity destroy
      * event.
      */
+    @UnsupportedAppUsage
     void dispatchActivityDestroy() {
         List<OnActivityDestroyListener> list = null;
 
@@ -900,6 +926,7 @@ public class PreferenceManager {
      * @return A unique request code that will never be used by anyone other
      *         than the caller of this method.
      */
+    @UnsupportedAppUsage
     int getNextRequestCode() {
         synchronized (this) {
             return mNextRequestCode++;
