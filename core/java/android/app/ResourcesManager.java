@@ -121,7 +121,7 @@ public class ResourcesManager {
         }
     }
 
-    private static final boolean ENABLE_APK_ASSETS_CACHE = true;
+    private static final boolean ENABLE_APK_ASSETS_CACHE = false;
 
     /**
      * The ApkAssets we are caching and intend to hold strong references to.
