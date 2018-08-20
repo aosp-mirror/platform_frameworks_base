@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.PackageInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -56,6 +57,7 @@ public final class WebViewProviderResponse implements Parcelable {
         out.writeInt(status);
     }
 
+    @UnsupportedAppUsage
     public final PackageInfo packageInfo;
     public final int status;
 }
