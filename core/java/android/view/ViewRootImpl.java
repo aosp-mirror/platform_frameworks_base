@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.WindowCallbacks.RESIZE_MODE_DOCKED_DIVIDER;
@@ -1212,11 +1213,28 @@ public final class ViewRootImpl implements ViewParent,
 
         // Get new instance of display based on current display adjustments. It may be updated later
         // if moving between the displays also involved a configuration change.
-        mDisplay = ResourcesManager.getInstance().getAdjustedDisplay(displayId,
-            mView.getResources());
+        updateInternalDisplay(displayId, mView.getResources());
         mAttachInfo.mDisplayState = mDisplay.getState();
         // Internal state updated, now notify the view hierarchy.
         mView.dispatchMovedToDisplay(mDisplay, config);
+    }
+
+    /**
+     * Updates {@link #mDisplay} to the display object corresponding to {@param displayId}.
+     * Uses DEFAULT_DISPLAY if there isn't a display object in the system corresponding
+     * to {@param displayId}.
+     */
+    private void updateInternalDisplay(int displayId, Resources resources) {
+        final Display preferredDisplay =
+                ResourcesManager.getInstance().getAdjustedDisplay(displayId, resources);
+        if (preferredDisplay == null) {
+            // Fallback to use default display.
+            Slog.w(TAG, "Cannot get desired display with Id: " + displayId);
+            mDisplay = ResourcesManager.getInstance()
+                    .getAdjustedDisplay(DEFAULT_DISPLAY, resources);
+        } else {
+            mDisplay = preferredDisplay;
+        }
     }
 
     void pokeDrawLockIfNeeded() {
@@ -3944,8 +3962,7 @@ public final class ViewRootImpl implements ViewParent,
         // Handle configuration change.
         if (mForceNextConfigUpdate || mLastConfigurationFromResources.diff(config) != 0) {
             // Update the display with new DisplayAdjustments.
-            mDisplay = ResourcesManager.getInstance().getAdjustedDisplay(
-                    mDisplay.getDisplayId(), localResources);
+            updateInternalDisplay(mDisplay.getDisplayId(), localResources);
 
             final int lastLayoutDirection = mLastConfigurationFromResources.getLayoutDirection();
             final int currentLayoutDirection = config.getLayoutDirection();
