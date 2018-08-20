@@ -24,6 +24,8 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
+import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -454,7 +456,7 @@ public class DisplayContentTests extends WindowTestsBase {
             dc.mInitialDisplayHeight = 400;
             Rect r = new Rect(80, 0, 120, 10);
             final DisplayCutout cutout = new WmDisplayCutout(
-                    fromBoundingRect(r.left, r.top, r.right, r.bottom), null)
+                    fromBoundingRect(r.left, r.top, r.right, r.bottom, BOUNDS_POSITION_TOP), null)
                     .computeSafeInsets(200, 400).getDisplayCutout();
 
             dc.mInitialDisplayCutout = cutout;
@@ -484,7 +486,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
             final Rect r1 = new Rect(left, top, right, bottom);
             final DisplayCutout cutout = new WmDisplayCutout(
-                    fromBoundingRect(r1.left, r1.top, r1.right, r1.bottom), null)
+                    fromBoundingRect(r1.left, r1.top, r1.right, r1.bottom, BOUNDS_POSITION_TOP), null)
                     .computeSafeInsets(displayWidth, displayHeight).getDisplayCutout();
 
             dc.mInitialDisplayCutout = cutout;
@@ -501,7 +503,7 @@ public class DisplayContentTests extends WindowTestsBase {
             // |             |      -------------
             final Rect r = new Rect(top, left, bottom, right);
             assertEquals(new WmDisplayCutout(
-                    fromBoundingRect(r.left, r.top, r.right, r.bottom), null)
+                    fromBoundingRect(r.left, r.top, r.right, r.bottom, BOUNDS_POSITION_LEFT), null)
                     .computeSafeInsets(displayHeight, displayWidth)
                     .getDisplayCutout(), dc.getDisplayInfo().displayCutout);
         }

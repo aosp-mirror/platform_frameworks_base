@@ -114,7 +114,6 @@ import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE;
-import static com.android.server.wm.utils.CoordinateTransforms.transformPhysicalToLogicalCoordinates;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
@@ -152,6 +151,7 @@ import android.view.SurfaceSession;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.wm.utils.DisplayRotationUtil;
 import com.android.server.wm.utils.RotationCache;
 import com.android.server.wm.utils.WmDisplayCutout;
 
@@ -334,6 +334,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final Matrix mTmpMatrix = new Matrix();
     private final Region mTmpRegion = new Region();
 
+
     /** Used for handing back size of display */
     private final Rect mTmpBounds = new Rect();
 
@@ -411,6 +412,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     /** Caches the value whether told display manager that we have content. */
     private boolean mLastHasContent;
+
+    private DisplayRotationUtil mRotationUtil = new DisplayRotationUtil();
 
     /**
      * The input method window for this display.
@@ -1367,21 +1370,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     cutout, mInitialDisplayWidth, mInitialDisplayHeight);
         }
         final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
-        final List<Rect> bounds = WmDisplayCutout.computeSafeInsets(
+        final Rect[] newBounds = mRotationUtil.getRotatedBounds(
+                WmDisplayCutout.computeSafeInsets(
                         cutout, mInitialDisplayWidth, mInitialDisplayHeight)
-                .getDisplayCutout().getBoundingRects();
-        transformPhysicalToLogicalCoordinates(rotation, mInitialDisplayWidth, mInitialDisplayHeight,
-                mTmpMatrix);
-        final Region region = Region.obtain();
-        for (int i = 0; i < bounds.size(); i++) {
-            final Rect rect = bounds.get(i);
-            final RectF rectF = new RectF(bounds.get(i));
-            mTmpMatrix.mapRect(rectF);
-            rectF.round(rect);
-            region.op(rect, Op.UNION);
-        }
-
-        return WmDisplayCutout.computeSafeInsets(DisplayCutout.fromBounds(region),
+                        .getDisplayCutout().getBoundingRectsAll(),
+                rotation, mInitialDisplayWidth, mInitialDisplayHeight);
+        return WmDisplayCutout.computeSafeInsets(DisplayCutout.fromBounds(newBounds),
                 rotated ? mInitialDisplayHeight : mInitialDisplayWidth,
                 rotated ? mInitialDisplayWidth : mInitialDisplayHeight);
     }
