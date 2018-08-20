@@ -4299,7 +4299,7 @@
         </activity>
 
         <activity android:name="com.android.internal.app.NetInitiatedActivity"
-                android:theme="@style/Theme.DeviceDefault.Light.Dialog.Alert"
+                android:theme="@style/Theme.Dialog.Confirmation"
                 android:excludeFromRecents="true"
                 android:process=":ui">
         </activity>
@@ -4320,7 +4320,7 @@
         <activity android:name="com.android.internal.app.ConfirmUserCreationActivity"
                 android:excludeFromRecents="true"
                 android:process=":ui"
-                android:theme="@style/Theme.DeviceDefault.Light.Dialog.Alert">
+                android:theme="@style/Theme.Dialog.Confirmation">
             <intent-filter android:priority="1000">
                 <action android:name="android.os.action.CREATE_USER" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -4328,24 +4328,24 @@
         </activity>
 
         <activity android:name="com.android.internal.app.SuspendedAppActivity"
-                  android:theme="@style/Theme.DeviceDefault.Light.Dialog.Alert"
+                  android:theme="@style/Theme.Dialog.Confirmation"
                   android:excludeFromRecents="true"
                   android:process=":ui">
         </activity>
 
         <activity android:name="com.android.internal.app.UnlaunchableAppActivity"
-                android:theme="@style/Theme.DeviceDefault.Light.Dialog.Alert"
+                android:theme="@style/Theme.Dialog.Confirmation"
                 android:excludeFromRecents="true"
                 android:process=":ui">
         </activity>
 
         <activity android:name="com.android.settings.notification.NotificationAccessConfirmationActivity"
-                  android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.Alert"
+                  android:theme="@style/Theme.Dialog.Confirmation"
                   android:excludeFromRecents="true">
         </activity>
 
         <activity android:name="com.android.internal.app.HarmfulAppWarningActivity"
-                  android:theme="@style/Theme.DeviceDefault.Light.Dialog.Alert"
+                  android:theme="@style/Theme.Dialog.Confirmation"
                   android:excludeFromRecents="true"
                   android:process=":ui"
                   android:label="@string/harmful_app_warning_title"

@@ -130,4 +130,7 @@
         <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
       </style>
 
+    <!-- @hide Special theme for the default system Activity-based Alert dialogs. -->
+    <style name="Theme.Leanback.Dialog.Confirmation" parent="Theme.DeviceDefault.Dialog.Alert" />
+
 </resources>
