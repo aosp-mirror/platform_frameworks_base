@@ -681,6 +681,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void forceSeamlesslyRotateIfAllowed(int oldRotation, int rotation) {
         if (mForceSeamlesslyRotate) {
+            if (mPendingForcedSeamlessRotate != null) {
+                oldRotation = mPendingForcedSeamlessRotate.getOldRotation();
+            }
+
             mPendingForcedSeamlessRotate = new ForcedSeamlessRotator(
                     oldRotation, rotation, getDisplayInfo());
             mPendingForcedSeamlessRotate.unrotate(this.mToken);
