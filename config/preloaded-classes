@@ -6236,9 +6236,9 @@ org.json.JSONObject$1
 org.json.JSONStringer
 org.json.JSONStringer$Scope
 org.json.JSONTokener
-org.kxml2.io.KXmlParser
-org.kxml2.io.KXmlParser$ValueContext
-org.kxml2.io.KXmlSerializer
+com.android.org.kxml2.io.KXmlParser
+com.android.org.kxml2.io.KXmlParser$ValueContext
+com.android.org.kxml2.io.KXmlSerializer
 org.w3c.dom.CharacterData
 org.w3c.dom.DOMImplementation
 org.w3c.dom.Document
