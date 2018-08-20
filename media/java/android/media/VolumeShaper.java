@@ -19,6 +19,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -413,16 +414,23 @@ public final class VolumeShaper implements AutoCloseable {
          */
 
         // type of VolumeShaper
+        @UnsupportedAppUsage
         private final int mType;
 
         // valid when mType is TYPE_ID
+        @UnsupportedAppUsage
         private final int mId;
 
         // valid when mType is TYPE_SCALE
+        @UnsupportedAppUsage
         private final int mOptionFlags;
+        @UnsupportedAppUsage
         private final double mDurationMs;
+        @UnsupportedAppUsage
         private final int mInterpolatorType;
+        @UnsupportedAppUsage
         private final float[] mTimes;
+        @UnsupportedAppUsage
         private final float[] mVolumes;
 
         @Override
@@ -565,6 +573,7 @@ public final class VolumeShaper implements AutoCloseable {
          * Direct constructor for VolumeShaper.
          * Use the Builder instead.
          */
+        @UnsupportedAppUsage
         private Configuration(@Type int type,
                 int id,
                 @OptionFlag int optionFlags,
@@ -1124,8 +1133,11 @@ public final class VolumeShaper implements AutoCloseable {
 
         private static final int FLAG_PUBLIC_ALL = FLAG_REVERSE | FLAG_TERMINATE;
 
+        @UnsupportedAppUsage
         private final int mFlags;
+        @UnsupportedAppUsage
         private final int mReplaceId;
+        @UnsupportedAppUsage
         private final float mXOffset;
 
         @Override
@@ -1187,6 +1199,7 @@ public final class VolumeShaper implements AutoCloseable {
             }
         };
 
+        @UnsupportedAppUsage
         private Operation(@Flag int flags, int replaceId, float xOffset) {
             mFlags = flags;
             mReplaceId = replaceId;
@@ -1346,7 +1359,9 @@ public final class VolumeShaper implements AutoCloseable {
      *  Not for public use.
      */
     public static final class State implements Parcelable {
+        @UnsupportedAppUsage
         private float mVolume;
+        @UnsupportedAppUsage
         private float mXOffset;
 
         @Override
@@ -1397,6 +1412,7 @@ public final class VolumeShaper implements AutoCloseable {
             }
         };
 
+        @UnsupportedAppUsage
         /* package */ State(float volume, float xOffset) {
             mVolume = volume;
             mXOffset = xOffset;

@@ -17,6 +17,7 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.StringDef;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -626,6 +627,7 @@ public final class MediaMetadata implements Parcelable {
      * @return The key used by this class or null if no mapping exists
      * @hide
      */
+    @UnsupportedAppUsage
     public static String getKeyFromMetadataEditorKey(int editorKey) {
         return EDITOR_KEY_MAPPING.get(editorKey, null);
     }

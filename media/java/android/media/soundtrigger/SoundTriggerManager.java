@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -239,6 +240,7 @@ public final class SoundTriggerManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    @UnsupportedAppUsage
     public int loadSoundModel(SoundModel soundModel) {
         if (soundModel == null) {
             return STATUS_ERROR;
@@ -267,6 +269,7 @@ public final class SoundTriggerManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    @UnsupportedAppUsage
     public int startRecognition(UUID soundModelId, PendingIntent callbackIntent,
             RecognitionConfig config) {
         if (soundModelId == null || callbackIntent == null || config == null) {
@@ -300,6 +303,7 @@ public final class SoundTriggerManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    @UnsupportedAppUsage
     public int startRecognition(@NonNull UUID soundModelId, @Nullable Bundle params,
         @NonNull ComponentName detectionService, @NonNull RecognitionConfig config) {
         Preconditions.checkNotNull(soundModelId);
@@ -319,6 +323,7 @@ public final class SoundTriggerManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    @UnsupportedAppUsage
     public int stopRecognition(UUID soundModelId) {
         if (soundModelId == null) {
             return STATUS_ERROR;
@@ -335,6 +340,7 @@ public final class SoundTriggerManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    @UnsupportedAppUsage
     public int unloadSoundModel(UUID soundModelId) {
         if (soundModelId == null) {
             return STATUS_ERROR;
@@ -352,6 +358,7 @@ public final class SoundTriggerManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    @UnsupportedAppUsage
     public boolean isRecognitionActive(UUID soundModelId) {
         if (soundModelId == null) {
             return false;

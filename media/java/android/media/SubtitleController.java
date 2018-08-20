@@ -19,6 +19,7 @@ package android.media;
 import java.util.Locale;
 import java.util.Vector;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.MediaPlayer.TrackInfo;
 import android.media.SubtitleTrack.RenderingWidget;
@@ -41,6 +42,7 @@ public class SubtitleController {
     private SubtitleTrack mSelectedTrack;
     private boolean mShowing;
     private CaptioningManager mCaptioningManager;
+    @UnsupportedAppUsage
     private Handler mHandler;
 
     private static final int WHAT_SHOW = 1;
@@ -91,6 +93,7 @@ public class SubtitleController {
      *
      * @param timeProvider
      */
+    @UnsupportedAppUsage
     public SubtitleController(
             Context context,
             MediaTimeProvider timeProvider,
@@ -300,6 +303,7 @@ public class SubtitleController {
     }
 
     /** @hide - must be called from anchor thread */
+    @UnsupportedAppUsage
     public void reset() {
         checkAnchorLooper();
         hide();
@@ -344,6 +348,7 @@ public class SubtitleController {
      *
      * Should be called from the anchor's (UI) thread. {@see #Anchor.getSubtitleLooper}
      */
+    @UnsupportedAppUsage
     public void show() {
         processOnAnchor(mHandler.obtainMessage(WHAT_SHOW));
     }
@@ -361,6 +366,7 @@ public class SubtitleController {
      *
      * Should be called from the anchor's (UI) thread. {@see #Anchor.getSubtitleLooper}
      */
+    @UnsupportedAppUsage
     public void hide() {
         processOnAnchor(mHandler.obtainMessage(WHAT_HIDE));
     }
@@ -412,6 +418,7 @@ public class SubtitleController {
      * @param renderer a {@link SubtitleController.Renderer} object that adds
      *                 support for a subtitle format.
      */
+    @UnsupportedAppUsage
     public void registerRenderer(Renderer renderer) {
         synchronized(mRenderers) {
             // TODO how to get available renderers in the system
