@@ -284,13 +284,6 @@ Landroid/view/SurfaceControl$Transaction;->show(Landroid/view/SurfaceControl;)La
 Landroid/view/ThreadedRenderer;->createHardwareBitmap(Landroid/view/RenderNode;II)Landroid/graphics/Bitmap;
 Landroid/view/View;->hideTooltip()V
 Landroid/view/View;->setTooltip(Ljava/lang/CharSequence;)V
-Landroid/webkit/WebSettings;->getPluginsPath()Ljava/lang/String;
-Landroid/webkit/WebSettings;->getUseDoubleTree()Z
-Landroid/webkit/WebSettings;->setPluginsPath(Ljava/lang/String;)V
-Landroid/webkit/WebSettings;->setUseDoubleTree(Z)V
-Landroid/webkit/WebView;->getPluginList()Landroid/webkit/PluginList;
-Landroid/webkit/WebView;->getZoomControls()Landroid/view/View;
-Landroid/webkit/WebView;->refreshPlugins(Z)V
 Landroid/widget/ListView;->lookForSelectablePosition(IZ)I
 Lcom/android/ims/ImsConfigListener;->onSetFeatureResponse(IIII)V
 Lcom/android/ims/internal/IImsCallSessionListener;->callSessionConferenceStateUpdated(Lcom/android/ims/internal/IImsCallSession;Landroid/telephony/ims/ImsConferenceState;)V

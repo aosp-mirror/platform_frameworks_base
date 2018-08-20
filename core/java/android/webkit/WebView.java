@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.Intent;
@@ -363,6 +364,7 @@ public class WebView extends AbsoluteLayout
     // Throwing an exception for incorrect thread usage if the
     // build target is JB MR2 or newer. Defaults to false, and is
     // set in the WebView constructor.
+    @UnsupportedAppUsage
     private static volatile boolean sEnforceThreadChecking = false;
 
     /**
@@ -645,6 +647,7 @@ public class WebView extends AbsoluteLayout
      * @hide This is used internally by dumprendertree, as it requires the JavaScript interfaces to
      *       be added synchronously, before a subsequent loadUrl call takes effect.
      */
+    @UnsupportedAppUsage
     protected WebView(Context context, AttributeSet attrs, int defStyleAttr,
             Map<String, Object> javaScriptInterfaces, boolean privateBrowsing) {
         this(context, attrs, defStyleAttr, 0, javaScriptInterfaces, privateBrowsing);
@@ -654,6 +657,7 @@ public class WebView extends AbsoluteLayout
      * @hide
      */
     @SuppressWarnings("deprecation")  // for super() call into deprecated base class constructor.
+    @UnsupportedAppUsage
     protected WebView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes,
             Map<String, Object> javaScriptInterfaces, boolean privateBrowsing) {
         super(context, attrs, defStyleAttr, defStyleRes);
@@ -731,6 +735,7 @@ public class WebView extends AbsoluteLayout
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public int getVisibleTitleHeight() {
         checkThread();
         return mProvider.getVisibleTitleHeight();
@@ -835,6 +840,7 @@ public class WebView extends AbsoluteLayout
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static void enablePlatformNotifications() {
         // noop
     }
@@ -847,6 +853,7 @@ public class WebView extends AbsoluteLayout
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static void disablePlatformNotifications() {
         // noop
     }
@@ -856,6 +863,7 @@ public class WebView extends AbsoluteLayout
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static void freeMemoryForTests() {
         getFactory().getStatics().freeMemoryForTests();
     }
@@ -900,6 +908,7 @@ public class WebView extends AbsoluteLayout
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public boolean savePicture(Bundle b, final File dest) {
         checkThread();
         return mProvider.savePicture(b, dest);
@@ -917,6 +926,7 @@ public class WebView extends AbsoluteLayout
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public boolean restorePicture(Bundle b, File src) {
         checkThread();
         return mProvider.restorePicture(b, src);
@@ -1534,6 +1544,7 @@ public class WebView extends AbsoluteLayout
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public String getTouchIconUrl() {
         return mProvider.getTouchIconUrl();
     }
@@ -1566,6 +1577,7 @@ public class WebView extends AbsoluteLayout
      * @hide
      */
     @ViewDebug.ExportedProperty(category = "webview")
+    @UnsupportedAppUsage
     public int getContentWidth() {
         return mProvider.getContentWidth();
     }
@@ -1616,6 +1628,7 @@ public class WebView extends AbsoluteLayout
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isPaused() {
         return mProvider.isPaused();
     }
@@ -2126,6 +2139,7 @@ public class WebView extends AbsoluteLayout
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static synchronized PluginList getPluginList() {
         return new PluginList();
     }
@@ -2193,6 +2207,7 @@ public class WebView extends AbsoluteLayout
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void refreshPlugins(boolean reloadOpenPages) {
         checkThread();
     }
@@ -2205,6 +2220,7 @@ public class WebView extends AbsoluteLayout
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void emulateShiftHeld() {
         checkThread();
     }
@@ -2265,6 +2281,7 @@ public class WebView extends AbsoluteLayout
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public View getZoomControls() {
         checkThread();
         return mProvider.getZoomControls();
@@ -2340,6 +2357,7 @@ public class WebView extends AbsoluteLayout
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void debugDump() {
         checkThread();
     }
@@ -2625,6 +2643,7 @@ public class WebView extends AbsoluteLayout
     }
 
     // Only used by android.webkit.FindActionModeCallback.
+    @UnsupportedAppUsage
     void notifyFindDialogDismissed() {
         checkThread();
         mProvider.notifyFindDialogDismissed();
@@ -2634,6 +2653,7 @@ public class WebView extends AbsoluteLayout
     // Private internal stuff
     //-------------------------------------------------------------------------
 
+    @UnsupportedAppUsage
     private WebViewProvider mProvider;
 
     /**
@@ -2677,12 +2697,15 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    @UnsupportedAppUsage
     private static WebViewFactoryProvider getFactory() {
         return WebViewFactory.getProvider();
     }
 
+    @UnsupportedAppUsage
     private final Looper mWebViewThread = Looper.myLooper();
 
+    @UnsupportedAppUsage
     private void checkThread() {
         // Ignore mWebViewThread == null because this can be called during in the super class
         // constructor, before this class's own constructor has even started.
@@ -2963,6 +2986,7 @@ public class WebView extends AbsoluteLayout
 
     /** @hide */
     @Override
+    @UnsupportedAppUsage
     protected void onDrawVerticalScrollBar(Canvas canvas, Drawable scrollBar,
             int l, int t, int r, int b) {
         mProvider.getViewDelegate().onDrawVerticalScrollBar(canvas, scrollBar, l, t, r, b);
@@ -3034,6 +3058,7 @@ public class WebView extends AbsoluteLayout
 
     /** @hide */
     @Override
+    @UnsupportedAppUsage
     protected boolean setFrame(int left, int top, int right, int bottom) {
         return mProvider.getViewDelegate().setFrame(left, top, right, bottom);
     }

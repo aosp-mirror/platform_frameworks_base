@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 
 /**
  * An instance of this class is passed as a parameter in various {@link WebChromeClient} action
@@ -34,6 +35,7 @@ public class JsResult {
         public void onJsResultComplete(JsResult result);
     }
     // This is the caller of the prompt and is the object that is waiting.
+    @UnsupportedAppUsage
     private final ResultReceiver mReceiver;
     // This is a basic result of a confirm or prompt dialog.
     private boolean mResult;
