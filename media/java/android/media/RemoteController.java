@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -79,6 +80,7 @@ import java.util.List;
     private int mArtworkHeight = -1;
     private boolean mEnabled = true;
     // synchronized on mInfoLock, for USE_SESSION apis.
+    @UnsupportedAppUsage
     private MediaController mCurrentSession;
 
     /**
@@ -292,6 +294,7 @@ import java.util.List;
      * @return true if successful
      * @throws IllegalArgumentException
      */
+    @UnsupportedAppUsage
     public boolean setArtworkConfiguration(boolean wantBitmap, int width, int height)
             throws IllegalArgumentException {
         synchronized (mInfoLock) {
@@ -689,6 +692,7 @@ import java.util.List;
      * Used by AudioManager to access user listener receiving the client update notifications
      * @return
      */
+    @UnsupportedAppUsage
     OnClientUpdateListener getUpdateListener() {
         return mOnClientUpdateListener;
     }

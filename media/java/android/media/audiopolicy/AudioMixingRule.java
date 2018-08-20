@@ -17,6 +17,7 @@
 package android.media.audiopolicy;
 
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.media.AudioAttributes;
 import android.os.Parcel;
 import android.util.Log;
@@ -92,8 +93,11 @@ public class AudioMixingRule {
             RULE_EXCLUSION_MASK | RULE_MATCH_UID;
 
     static final class AudioMixMatchCriterion {
+        @UnsupportedAppUsage
         final AudioAttributes mAttr;
+        @UnsupportedAppUsage
         final int mIntProp;
+        @UnsupportedAppUsage
         final int mRule;
 
         /** input parameters must be valid */
@@ -157,6 +161,7 @@ public class AudioMixingRule {
 
     private final int mTargetMixType;
     int getTargetMixType() { return mTargetMixType; }
+    @UnsupportedAppUsage
     private final ArrayList<AudioMixMatchCriterion> mCriteria;
     ArrayList<AudioMixMatchCriterion> getCriteria() { return mCriteria; }
 

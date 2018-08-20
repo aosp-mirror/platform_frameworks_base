@@ -19,6 +19,7 @@ package android.media.audiopolicy;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.media.AudioDeviceInfo;
 import android.media.AudioFormat;
 import android.media.AudioSystem;
@@ -33,17 +34,24 @@ import java.util.Objects;
 @SystemApi
 public class AudioMix {
 
+    @UnsupportedAppUsage
     private AudioMixingRule mRule;
+    @UnsupportedAppUsage
     private AudioFormat mFormat;
+    @UnsupportedAppUsage
     private int mRouteFlags;
+    @UnsupportedAppUsage
     private int mMixType = MIX_TYPE_INVALID;
 
     // written by AudioPolicy
     int mMixState = MIX_STATE_DISABLED;
+    @UnsupportedAppUsage
     int mCallbackFlags;
+    @UnsupportedAppUsage
     String mDeviceAddress;
 
     // initialized in constructor, read by AudioPolicyConfig
+    @UnsupportedAppUsage
     final int mDeviceSystemType; // an AudioSystem.DEVICE_* value, not AudioDeviceInfo.TYPE_*
 
     /**

@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
@@ -164,6 +165,7 @@ public final class SoundTriggerDetector {
          * @hide
          */
         @Nullable
+        @UnsupportedAppUsage
         public byte[] getData() {
             if (!mTriggerAvailable) {
                 return mData;
@@ -191,6 +193,7 @@ public final class SoundTriggerDetector {
          * @hide
          */
         @Nullable
+        @UnsupportedAppUsage
         public Integer getCaptureSession() {
             if (mCaptureAvailable) {
                 return mCaptureSession;

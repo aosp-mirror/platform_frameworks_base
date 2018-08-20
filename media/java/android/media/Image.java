@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.lang.AutoCloseable;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 
@@ -57,6 +58,7 @@ public abstract class Image implements AutoCloseable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     protected Image() {
     }
 
@@ -378,6 +380,7 @@ public abstract class Image implements AutoCloseable {
         /**
          * @hide
          */
+        @UnsupportedAppUsage
         protected Plane() {
         }
 

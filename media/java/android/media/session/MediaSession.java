@@ -19,6 +19,7 @@ package android.media.session;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -132,6 +133,7 @@ public final class MediaSession {
     private final CallbackStub mCbStub;
 
     // Do not change the name of mCallback. Support lib accesses this by using reflection.
+    @UnsupportedAppUsage
     private CallbackMessageHandler mCallback;
     private VolumeProvider mVolumeProvider;
     private PlaybackState mPlaybackState;
@@ -555,6 +557,7 @@ public final class MediaSession {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public String getCallingPackage() {
         if (mCallback != null && mCallback.mCurrentControllerInfo != null) {
             return mCallback.mCurrentControllerInfo.getPackageName();
@@ -1304,6 +1307,7 @@ public final class MediaSession {
         public static final int UNKNOWN_ID = -1;
 
         private final MediaDescription mDescription;
+        @UnsupportedAppUsage
         private final long mId;
 
         /**

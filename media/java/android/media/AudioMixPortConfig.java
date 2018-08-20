@@ -16,6 +16,8 @@
 
 package android.media;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * An AudioMixPortConfig describes a possible configuration of an output or input mixer.
  * It is used to specify a sink or source when creating a connection with
@@ -26,6 +28,7 @@ package android.media;
 
 public class AudioMixPortConfig extends AudioPortConfig {
 
+    @UnsupportedAppUsage
     AudioMixPortConfig(AudioMixPort mixPort, int samplingRate, int channelMask, int format,
                 AudioGainConfig gain) {
         super((AudioPort)mixPort, samplingRate, channelMask, format, gain);

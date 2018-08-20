@@ -16,6 +16,7 @@
 
 package android.media.audiofx;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.util.Log;
 import java.lang.ref.WeakReference;
@@ -164,6 +165,7 @@ public class Visualizer {
     /**
      * System wide unique Identifier of the visualizer engine used by this Visualizer instance
      */
+    @UnsupportedAppUsage
     private int mId;
 
     /**
