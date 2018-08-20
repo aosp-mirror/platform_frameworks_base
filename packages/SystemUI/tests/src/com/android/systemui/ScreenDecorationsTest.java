@@ -21,6 +21,7 @@ import static com.android.systemui.tuner.TunablePadding.FLAG_START;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -195,4 +196,17 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         verify(padding).destroy();
     }
 
+    @Test
+    public void testUpdateRoundedCorners() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
+        mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 20);
+
+        mScreenDecorations.start();
+        assertEquals(mScreenDecorations.mRoundedDefault, 20);
+
+        mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 5);
+        mScreenDecorations.onConfigurationChanged(null);
+        assertEquals(mScreenDecorations.mRoundedDefault, 5);
+    }
 }
