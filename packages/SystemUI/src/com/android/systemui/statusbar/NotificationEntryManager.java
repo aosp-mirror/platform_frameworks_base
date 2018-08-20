@@ -667,9 +667,15 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                     entry.row.getNotificationChildren();
             for (int i = 0; i < notificationChildren.size(); i++) {
                 ExpandableNotificationRow row = notificationChildren.get(i);
-                if ((row.getStatusBarNotification().getNotification().flags
-                        & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
-                    // the child is a foreground service notification which we can't remove!
+                NotificationData.Entry childEntry = row.getEntry();
+                boolean isForeground = (row.getStatusBarNotification().getNotification().flags
+                        & Notification.FLAG_FOREGROUND_SERVICE) != 0;
+                boolean keepForReply = FORCE_REMOTE_INPUT_HISTORY
+                        && (shouldKeepForRemoteInput(childEntry)
+                                || shouldKeepForSmartReply(childEntry));
+                if (isForeground || keepForReply) {
+                    // the child is a foreground service notification which we can't remove or it's
+                    // a child we're keeping around for reply!
                     continue;
                 }
                 row.setKeepInParent(true);
