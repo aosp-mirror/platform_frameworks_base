@@ -152,27 +152,6 @@ public class TileUtilsTest {
     }
 
     @Test
-    public void getCategories_shouldHandleExtraIntentAction() {
-        final String testCategory = "category1";
-        final String testAction = "action1";
-        Map<Pair<String, String>, Tile> cache = new ArrayMap<>();
-        List<ResolveInfo> info = new ArrayList<>();
-        info.add(newInfo(true, testCategory));
-        Global.putInt(mContext.getContentResolver(), Global.DEVICE_PROVISIONED, 1);
-        when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
-        List<UserHandle> userHandleList = new ArrayList<>();
-        userHandleList.add(UserHandle.CURRENT);
-        when(mUserManager.getUserProfiles()).thenReturn(userHandleList);
-
-        when(mPackageManager.queryIntentActivitiesAsUser(argThat(
-                event -> testAction.equals(event.getAction())), anyInt(), anyInt()))
-                .thenReturn(info);
-
-        List<DashboardCategory> categoryList = TileUtils.getCategories(mContext, cache, testAction);
-        assertThat(categoryList.get(0).getTile(0).getCategory()).isEqualTo(testCategory);
-    }
-
-    @Test
     public void getCategories_withPackageName() {
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         Map<Pair<String, String>, Tile> cache = new ArrayMap<>();
@@ -183,7 +162,7 @@ public class TileUtilsTest {
         userHandleList.add(new UserHandle(ActivityManager.getCurrentUser()));
         when(mUserManager.getUserProfiles()).thenReturn(userHandleList);
 
-        TileUtils.getCategories(mContext, cache, null /* action */);
+        TileUtils.getCategories(mContext, cache);
         verify(mPackageManager, atLeastOnce()).queryIntentActivitiesAsUser(
                 intentCaptor.capture(), anyInt(), anyInt());
 

@@ -205,12 +205,9 @@ public class TileUtils {
 
     /**
      * Build a list of DashboardCategory.
-     *
-     * @param extraAction additional intent filter action to be usetileutild to build the dashboard
-     *                    categories
      */
     public static List<DashboardCategory> getCategories(Context context,
-            Map<Pair<String, String>, Tile> cache, String extraAction) {
+            Map<Pair<String, String>, Tile> cache) {
         final long startTime = System.currentTimeMillis();
         boolean setup = Global.getInt(context.getContentResolver(), Global.DEVICE_PROVISIONED, 0)
                 != 0;
@@ -229,9 +226,6 @@ public class TileUtils {
             if (setup) {
                 getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false);
                 getTilesForAction(context, user, IA_SETTINGS_ACTION, cache, null, tiles, false);
-                if (extraAction != null) {
-                    getTilesForAction(context, user, extraAction, cache, null, tiles, false);
-                }
             }
         }
 
