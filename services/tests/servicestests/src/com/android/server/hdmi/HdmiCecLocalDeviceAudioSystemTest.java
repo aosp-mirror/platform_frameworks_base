@@ -34,7 +34,6 @@ import androidx.test.filters.SmallTest;
 import com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -149,6 +148,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mAvrPhysicalAddress  = 0x2000;
         mNativeWrapper.setPhysicalAddress(mAvrPhysicalAddress);
         SystemProperties.set(Constants.PROPERTY_ARC_SUPPORT, "true");
+        SystemProperties.set(Constants.PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE, "true");
     }
 
     @Test
@@ -179,7 +179,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
 
-    @Ignore("b/80297700")
     @Test
     public void handleRequestShortAudioDescriptor_featureDisabled() throws Exception {
         HdmiCecMessage expectedMessage =
@@ -261,7 +260,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mMusicMute).isFalse();
     }
 
-    @Ignore("b/80297700")
     @Test
     public void handleSystemAudioModeRequest_turnOffByTv() throws Exception {
         assertThat(mMusicMute).isFalse();
@@ -289,9 +287,10 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mMusicMute).isTrue();
     }
 
-    @Ignore("b/80297700")
     @Test
     public void onStandbyAudioSystem_currentSystemAudioControlOn() throws Exception {
+        mHdmiCecLocalDeviceAudioSystem.setAutoDeviceOff(false);
+        mHdmiCecLocalDeviceAudioSystem.setAutoTvOff(false);
         // Set system audio control on first
         mHdmiCecLocalDeviceAudioSystem.setSystemAudioMode(true);
         // Check if standby correctly turns off the feature
@@ -372,7 +371,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mNativeWrapper.getResultMessages()).isEmpty();
     }
 
-    @Ignore("b/80297700")
     @Test
     public void terminateSystemAudioMode_systemAudioModeOn() throws Exception {
         mHdmiCecLocalDeviceAudioSystem.setSystemAudioMode(true);
