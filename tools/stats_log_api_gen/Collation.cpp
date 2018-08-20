@@ -116,6 +116,9 @@ java_type(const FieldDescriptor* field)
             if (field->message_type()->full_name() ==
                 "android.os.statsd.AttributionNode") {
               return JAVA_TYPE_ATTRIBUTION_CHAIN;
+            } else if (field->message_type()->full_name() ==
+                       "android.os.statsd.KeyValuePair") {
+              return JAVA_TYPE_KEY_VALUE_PAIR;
             } else {
                 return JAVA_TYPE_OBJECT;
             }
@@ -179,6 +182,16 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
       continue;
     }
     expectedNumber++;
+  }
+
+  // Skips the key value pair atom.
+  for (map<int, const FieldDescriptor *>::const_iterator it = fields.begin();
+       it != fields.end(); it++) {
+    const FieldDescriptor *field = it->second;
+    java_type_t javaType = java_type(field);
+    if (javaType == JAVA_TYPE_KEY_VALUE_PAIR) {
+      return 0;
+    }
   }
 
   // Check that only allowed types are present. Remove any invalid ones.

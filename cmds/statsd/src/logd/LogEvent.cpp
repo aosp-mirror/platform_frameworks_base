@@ -18,6 +18,7 @@
 #include "logd/LogEvent.h"
 
 #include "stats_log_util.h"
+#include "statslog.h"
 
 namespace android {
 namespace os {
@@ -48,6 +49,52 @@ LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedT
     if (mContext) {
         android_log_write_int64(mContext, elapsedTimestampNs);
         android_log_write_int32(mContext, tagId);
+    }
+}
+
+LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                   int32_t uid,
+                   const std::map<int32_t, int64_t>& int_map,
+                   const std::map<int32_t, std::string>& string_map,
+                   const std::map<int32_t, float>& float_map) {
+    mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
+    mTagId = android::util::KEY_VALUE_PAIRS_ATOM;
+    mLogUid = uid;
+
+    int pos[] = {1, 1, 1};
+
+    mValues.push_back(FieldValue(Field(mTagId, pos, 0 /* depth */), Value(uid)));
+    pos[0]++;
+    for (const auto&itr : int_map) {
+        pos[2] = 1;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
+        pos[2] = 2;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
+        mValues.back().mField.decorateLastPos(2);
+        pos[1]++;
+    }
+
+    for (const auto&itr : string_map) {
+        pos[2] = 1;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
+        pos[2] = 3;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
+        mValues.back().mField.decorateLastPos(2);
+        pos[1]++;
+    }
+
+    for (const auto&itr : float_map) {
+        pos[2] = 1;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
+        pos[2] = 4;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
+        mValues.back().mField.decorateLastPos(2);
+        pos[1]++;
+    }
+    if (!mValues.empty()) {
+        mValues.back().mField.decorateLastPos(1);
+        mValues.at(mValues.size() - 2).mField.decorateLastPos(1);
     }
 }
 
