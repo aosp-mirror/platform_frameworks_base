@@ -1,3 +1,1 @@
 -keep class com.android.systemui.CarSystemUIFactory
-
--include ../SystemUI/proguard.flags
