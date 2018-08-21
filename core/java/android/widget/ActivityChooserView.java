@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.StringRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -323,6 +324,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
      *
      * @param drawable The drawable.
      */
+    @UnsupportedAppUsage
     public void setExpandActivityOverflowButtonDrawable(Drawable drawable) {
         mExpandActivityOverflowButtonImage.setImageDrawable(drawable);
     }

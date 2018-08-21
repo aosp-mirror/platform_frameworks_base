@@ -34,6 +34,7 @@ import android.annotation.Px;
 import android.annotation.Size;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.XmlRes;
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -364,6 +365,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     private static final int MARQUEE_FADE_SWITCH_SHOW_FADE = 2;
 
+    @UnsupportedAppUsage
     private static final int LINES = 1;
     private static final int EMS = LINES;
     private static final int PIXELS = 2;
@@ -413,15 +415,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private ColorStateList mHintTextColor;
     private ColorStateList mLinkTextColor;
     @ViewDebug.ExportedProperty(category = "text")
+    @UnsupportedAppUsage
     private int mCurTextColor;
+    @UnsupportedAppUsage
     private int mCurHintTextColor;
     private boolean mFreezesText;
 
+    @UnsupportedAppUsage
     private Editable.Factory mEditableFactory = Editable.Factory.getInstance();
+    @UnsupportedAppUsage
     private Spannable.Factory mSpannableFactory = Spannable.Factory.getInstance();
 
+    @UnsupportedAppUsage
     private float mShadowRadius;
+    @UnsupportedAppUsage
     private float mShadowDx;
+    @UnsupportedAppUsage
     private float mShadowDy;
     private int mShadowColor;
 
@@ -623,11 +632,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    @UnsupportedAppUsage
     Drawables mDrawables;
 
+    @UnsupportedAppUsage
     private CharWrapper mCharWrapper;
 
+    @UnsupportedAppUsage
     private Marquee mMarquee;
+    @UnsupportedAppUsage
     private boolean mRestartMarquee;
 
     private int mMarqueeRepeatLimit = 3;
@@ -639,37 +652,49 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * extensively in the same layout. This mode indicates how the marquee
      * is currently being shown, if applicable. (mEllipsize will == MARQUEE)
      */
+    @UnsupportedAppUsage
     private int mMarqueeFadeMode = MARQUEE_FADE_NORMAL;
 
     /**
      * When mMarqueeFadeMode is not MARQUEE_FADE_NORMAL, this stores
      * the layout that should be used when the mode switches.
      */
+    @UnsupportedAppUsage
     private Layout mSavedMarqueeModeLayout;
 
     // Do not update following mText/mSpannable/mPrecomputed except for setTextInternal()
     @ViewDebug.ExportedProperty(category = "text")
+    @UnsupportedAppUsage
     private @Nullable CharSequence mText;
     private @Nullable Spannable mSpannable;
     private @Nullable PrecomputedText mPrecomputed;
 
+    @UnsupportedAppUsage
     private CharSequence mTransformed;
+    @UnsupportedAppUsage
     private BufferType mBufferType = BufferType.NORMAL;
 
     private CharSequence mHint;
+    @UnsupportedAppUsage
     private Layout mHintLayout;
 
     private MovementMethod mMovement;
 
     private TransformationMethod mTransformation;
+    @UnsupportedAppUsage
     private boolean mAllowTransformationLengthChange;
+    @UnsupportedAppUsage
     private ChangeWatcher mChangeWatcher;
 
+    @UnsupportedAppUsage
     private ArrayList<TextWatcher> mListeners;
 
     // display attributes
+    @UnsupportedAppUsage
     private final TextPaint mTextPaint;
+    @UnsupportedAppUsage
     private boolean mUserSetTextScaleX;
+    @UnsupportedAppUsage
     private Layout mLayout;
     private boolean mLocalesChanged = false;
 
@@ -681,34 +706,51 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /* package */ boolean mUseFallbackLineSpacing;
 
     @ViewDebug.ExportedProperty(category = "text")
+    @UnsupportedAppUsage
     private int mGravity = Gravity.TOP | Gravity.START;
+    @UnsupportedAppUsage
     private boolean mHorizontallyScrolling;
 
     private int mAutoLinkMask;
     private boolean mLinksClickable = true;
 
+    @UnsupportedAppUsage
     private float mSpacingMult = 1.0f;
+    @UnsupportedAppUsage
     private float mSpacingAdd = 0.0f;
 
     private int mBreakStrategy;
     private int mHyphenationFrequency;
     private int mJustificationMode;
 
+    @UnsupportedAppUsage
     private int mMaximum = Integer.MAX_VALUE;
+    @UnsupportedAppUsage
     private int mMaxMode = LINES;
+    @UnsupportedAppUsage
     private int mMinimum = 0;
+    @UnsupportedAppUsage
     private int mMinMode = LINES;
 
+    @UnsupportedAppUsage
     private int mOldMaximum = mMaximum;
+    @UnsupportedAppUsage
     private int mOldMaxMode = mMaxMode;
 
+    @UnsupportedAppUsage
     private int mMaxWidth = Integer.MAX_VALUE;
+    @UnsupportedAppUsage
     private int mMaxWidthMode = PIXELS;
+    @UnsupportedAppUsage
     private int mMinWidth = 0;
+    @UnsupportedAppUsage
     private int mMinWidthMode = PIXELS;
 
+    @UnsupportedAppUsage
     private boolean mSingleLine;
+    @UnsupportedAppUsage
     private int mDesiredHeightAtMeasure = -1;
+    @UnsupportedAppUsage
     private boolean mIncludePad = true;
     private int mDeferScroll = -1;
 
@@ -718,11 +760,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private Scroller mScroller;
     private TextPaint mTempTextPaint;
 
+    @UnsupportedAppUsage
     private BoringLayout.Metrics mBoring;
+    @UnsupportedAppUsage
     private BoringLayout.Metrics mHintBoring;
+    @UnsupportedAppUsage
     private BoringLayout mSavedLayout;
+    @UnsupportedAppUsage
     private BoringLayout mSavedHintLayout;
 
+    @UnsupportedAppUsage
     private TextDirectionHeuristic mTextDir;
 
     private InputFilter[] mFilters = NO_FILTERS;
@@ -731,21 +778,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     // It is possible to have a selection even when mEditor is null (programmatically set, like when
     // a link is pressed). These highlight-related fields do not go in mEditor.
+    @UnsupportedAppUsage
     int mHighlightColor = 0x6633B5E5;
     private Path mHighlightPath;
+    @UnsupportedAppUsage
     private final Paint mHighlightPaint;
+    @UnsupportedAppUsage
     private boolean mHighlightPathBogus = true;
 
     // Although these fields are specific to editable text, they are not added to Editor because
     // they are defined by the TextView's style and are theme-dependent.
+    @UnsupportedAppUsage
     int mCursorDrawableRes;
     // These six fields, could be moved to Editor, since we know their default values and we
     // could condition the creation of the Editor to a non standard value. This is however
     // brittle since the hardcoded values here (such as
     // com.android.internal.R.drawable.text_select_handle_left) would have to be updated if the
     // default style is modified.
+    @UnsupportedAppUsage
     int mTextSelectHandleLeftRes;
+    @UnsupportedAppUsage
     int mTextSelectHandleRightRes;
+    @UnsupportedAppUsage
     int mTextSelectHandleRes;
     int mTextEditSuggestionItemLayout;
     int mTextEditSuggestionContainerLayout;
@@ -755,6 +809,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * {@link EditText} specific data, created on demand when one of the Editor fields is used.
      * See {@link #createEditorIfNeeded()}.
      */
+    @UnsupportedAppUsage
     private Editor mEditor;
 
     private static final int DEVICE_PROVISIONED_UNKNOWN = 0;
@@ -2219,6 +2274,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @return the {@link android.text.Layout} that is currently being used to
      * display the hint text. This can be null.
      */
+    @UnsupportedAppUsage
     final Layout getHintLayout() {
         return mHintLayout;
     }
@@ -3852,6 +3908,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 shouldRequestLayout);
     }
 
+    @UnsupportedAppUsage
     private void setRawTextSize(float size, boolean shouldRequestLayout) {
         if (size != mTextPaint.getTextSize()) {
             mTextPaint.setTextSize(size);
@@ -4723,6 +4780,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_scrollHorizontally
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean getHorizontallyScrolling() {
         return mHorizontallyScrolling;
     }
@@ -5579,6 +5637,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    @UnsupportedAppUsage
     private void setText(CharSequence text, BufferType type,
                          boolean notifyBefore, int oldlen) {
         mTextSetFromXmlOrResourceId = false;
@@ -5920,6 +5979,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mHint;
     }
 
+    @UnsupportedAppUsage
     boolean isSingleLine() {
         return mSingleLine;
     }
@@ -6088,6 +6148,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return locales.get(0);
     }
 
+    @UnsupportedAppUsage
     private void setInputType(int type, boolean direct) {
         final int cls = type & EditorInfo.TYPE_MASK_CLASS;
         KeyListener input;
@@ -6564,6 +6625,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return getMeasuredHeight() - padding + opticalInsets.top + opticalInsets.bottom;
     }
 
+    @UnsupportedAppUsage
     int getVerticalOffset(boolean forceNormal) {
         int voffset = 0;
         final int gravity = mGravity & Gravity.VERTICAL_GRAVITY_MASK;
@@ -7030,6 +7092,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return drawableState;
     }
 
+    @UnsupportedAppUsage
     private Path getUpdatedHighlightPath() {
         Path highlight = null;
         Paint highlightPaint = mHighlightPaint;
@@ -8072,6 +8135,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /** @hide */
     @VisibleForTesting
+    @UnsupportedAppUsage
     public void nullLayouts() {
         if (mLayout instanceof BoringLayout && mSavedLayout == null) {
             mSavedLayout = (BoringLayout) mLayout;
@@ -8092,6 +8156,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Make a new Layout based on the already-measured size of the view,
      * on the assumption that it was measured correctly at some point.
      */
+    @UnsupportedAppUsage
     private void assumeLayout() {
         int width = mRight - mLeft - getCompoundPaddingLeft() - getCompoundPaddingRight();
 
@@ -8109,6 +8174,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                       physicalWidth, false);
     }
 
+    @UnsupportedAppUsage
     private Layout.Alignment getLayoutAlignment() {
         Layout.Alignment alignment;
         switch (getTextAlignment()) {
@@ -8167,6 +8233,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * {@hide}
      */
     @VisibleForTesting
+    @UnsupportedAppUsage
     public void makeNewLayout(int wantWidth, int hintWidth,
                                  BoringLayout.Metrics boring,
                                  BoringLayout.Metrics hintBoring,
@@ -8391,6 +8458,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return result;
     }
 
+    @UnsupportedAppUsage
     private boolean compressText(float width) {
         if (isHardwareAccelerated()) return false;
 
@@ -8859,6 +8927,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Check whether entirely new text requires a new view layout
      * or merely a new text layout.
      */
+    @UnsupportedAppUsage
     private void checkForRelayout() {
         // If we have a fixed width, we can just swap in a new text layout
         // if the text height stays the same or if the view height is fixed.
@@ -8933,6 +9002,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Returns true if anything changed.
      */
+    @UnsupportedAppUsage
     private boolean bringTextIntoView() {
         Layout layout = isShowingHint() ? mHintLayout : mLayout;
         int line = 0;
@@ -9301,6 +9371,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return getCompoundPaddingLeft() - mScrollX;
     }
 
+    @UnsupportedAppUsage
     int viewportToContentVerticalOffset() {
         int offset = getExtendedPaddingTop() - mScrollY;
         if ((mGravity & Gravity.VERTICAL_GRAVITY_MASK) != Gravity.TOP) {
@@ -9586,6 +9657,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         && mSavedMarqueeModeLayout.getLineWidth(0) > width));
     }
 
+    @UnsupportedAppUsage
     private void startMarquee() {
         // Do not ellipsize EditText
         if (getKeyListener() != null) return;
@@ -9628,6 +9700,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    @UnsupportedAppUsage
     private void startStopMarquee(boolean start) {
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
             if (start) {
@@ -10172,6 +10245,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @return True iff this TextView contains a text that can be edited, or if this is
      * a selectable TextView.
      */
+    @UnsupportedAppUsage
     boolean isTextEditable() {
         return mText instanceof Editable && onCheckIsTextEditor() && isEnabled();
     }
@@ -10434,6 +10508,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 || (isTextSelectable() && mText instanceof Spannable && isEnabled());
     }
 
+    @UnsupportedAppUsage
     private Locale getTextServicesLocale(boolean allowNullLocale) {
         // Start fetching the text services locale asynchronously.
         updateTextServicesLocaleAsync();
@@ -10513,6 +10588,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         });
     }
 
+    @UnsupportedAppUsage
     private void updateTextServicesLocaleLocked() {
         final TextServicesManager textServicesManager = (TextServicesManager)
                 mContext.getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
@@ -11191,6 +11267,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *         be {@code null} if no text is set
      */
     @Nullable
+    @UnsupportedAppUsage
     private CharSequence getTextForAccessibility() {
         // If the text is empty, we must be showing the hint text.
         if (TextUtils.isEmpty(mText)) {
@@ -11328,6 +11405,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return false;
     }
 
+    @UnsupportedAppUsage
     CharSequence getTransformedText(int start, int end) {
         return removeSuggestionSpans(mTransformed.subSequence(start, end));
     }
@@ -11629,6 +11707,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     protected void stopTextActionMode() {
         if (mEditor != null) {
             mEditor.stopTextActionMode();
@@ -11692,6 +11771,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mDeviceProvisionedState == DEVICE_PROVISIONED_YES;
     }
 
+    @UnsupportedAppUsage
     boolean canPaste() {
         return (mText instanceof Editable
                 && mEditor != null && mEditor.mKeyListener != null
@@ -11831,6 +11911,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return x;
     }
 
+    @UnsupportedAppUsage
     int getLineAtCoordinate(float y) {
         y -= getTotalPaddingTop();
         // Clamp the position to inside of the view.
@@ -11907,6 +11988,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @return the current {@link TextDirectionHeuristic}.
      * @hide
      */
+    @UnsupportedAppUsage
     protected TextDirectionHeuristic getTextDirectionHeuristic() {
         if (hasPasswordTransformationMethod()) {
             // passwords fields should be LTR
@@ -12018,6 +12100,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Deletes the range of text [start, end[.
      * @hide
      */
+    @UnsupportedAppUsage
     protected void deleteText_internal(int start, int end) {
         ((Editable) mText).delete(start, end);
     }
@@ -12058,6 +12141,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Also note that for performance reasons, the mEditor is created when needed, but not
      * reset when no more edit-specific fields are needed.
      */
+    @UnsupportedAppUsage
     private void createEditorIfNeeded() {
         if (mEditor == null) {
             mEditor = new Editor(this);
@@ -12068,6 +12152,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @hide
      */
     @Override
+    @UnsupportedAppUsage
     public CharSequence getIterableTextForAccessibility() {
         return mText;
     }
@@ -12177,6 +12262,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public static class SavedState extends BaseSavedState {
         int selStart = -1;
         int selEnd = -1;
+        @UnsupportedAppUsage
         CharSequence text;
         boolean frozenWithFocus;
         CharSequence error;

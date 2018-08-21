@@ -19,6 +19,7 @@ package android.widget;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -114,6 +115,7 @@ public class DatePicker extends FrameLayout {
     @Retention(RetentionPolicy.SOURCE)
     public @interface DatePickerMode {}
 
+    @UnsupportedAppUsage
     private final DatePickerDelegate mDelegate;
 
     @DatePickerMode
@@ -329,6 +331,7 @@ public class DatePicker extends FrameLayout {
      * @param callback the callback, may be null
      * @hide
      */
+    @UnsupportedAppUsage
     public void setValidationCallback(@Nullable ValidationCallback callback) {
         mDelegate.setValidationCallback(callback);
     }
