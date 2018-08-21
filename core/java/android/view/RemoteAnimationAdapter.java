@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityOptions;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -61,6 +62,7 @@ public class RemoteAnimationAdapter implements Parcelable {
      * @param statusBarTransitionDelay The desired delay for all visual animations in the
      *        status bar caused by this app animation in millis.
      */
+    @UnsupportedAppUsage
     public RemoteAnimationAdapter(IRemoteAnimationRunner runner, long duration,
             long statusBarTransitionDelay) {
         mRunner = runner;

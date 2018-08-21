@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
@@ -114,6 +115,7 @@ public abstract class InputEventReceiver {
      * @param displayId The display id on which input event triggered.
      * @param event The input event that was received.
      */
+    @UnsupportedAppUsage
     public void onInputEvent(InputEvent event, int displayId) {
         finishInputEvent(event, false);
     }
@@ -181,6 +183,7 @@ public abstract class InputEventReceiver {
 
     // Called from native code.
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private void dispatchInputEvent(int seq, InputEvent event, int displayId) {
         mSeqMap.put(event.getSequenceNumber(), seq);
         onInputEvent(event, displayId);
@@ -188,6 +191,7 @@ public abstract class InputEventReceiver {
 
     // Called from native code.
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private void dispatchBatchedInputEventPending() {
         onBatchedInputEventPending();
     }
