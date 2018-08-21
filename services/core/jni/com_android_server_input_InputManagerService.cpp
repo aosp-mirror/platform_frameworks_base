@@ -86,6 +86,7 @@ static struct {
     jmethodID notifySwitch;
     jmethodID notifyInputChannelBroken;
     jmethodID notifyANR;
+    jmethodID notifyFocusChanged;
     jmethodID filterInputEvent;
     jmethodID interceptKeyBeforeQueueing;
     jmethodID interceptMotionBeforeQueueingNonInteractive;
@@ -240,6 +241,7 @@ public:
             const sp<IBinder>& token,
             const std::string& reason);
     virtual void notifyInputChannelBroken(const sp<IBinder>& token);
+    virtual void notifyFocusChanged(const sp<IBinder>& token);
     virtual bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags);
     virtual void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig);
     virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags);
@@ -678,6 +680,22 @@ void NativeInputManager::notifyInputChannelBroken(const sp<IBinder>& token) {
         env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyInputChannelBroken,
                 tokenObj);
         checkAndClearExceptionFromCallback(env, "notifyInputChannelBroken");
+    }
+}
+
+void NativeInputManager::notifyFocusChanged(const sp<IBinder>& token) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    ALOGD("notifyFocusChanged");
+#endif
+    ATRACE_CALL();
+
+    JNIEnv* env = jniEnv();
+
+    jobject tokenObj = javaObjectForIBinder(env, token);
+    if (tokenObj) {
+        env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyFocusChanged,
+                tokenObj);
+        checkAndClearExceptionFromCallback(env, "notifyFocusChanged");
     }
 }
 
@@ -1705,6 +1723,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.notifyInputChannelBroken, clazz,
             "notifyInputChannelBroken", "(Landroid/os/IBinder;)V");
+    
+    GET_METHOD_ID(gServiceClassInfo.notifyFocusChanged, clazz,
+            "notifyFocusChanged", "(Landroid/os/IBinder;)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyANR, clazz,
             "notifyANR",

@@ -189,9 +189,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 mService.mH.sendMessage(msg);
             }
         });
-        final WindowState topFocusedWindow = getTopFocusedDisplayContent().mCurrentFocus;
-        mService.mInputManager.setFocusedWindow(
-                topFocusedWindow != null ? topFocusedWindow.mInputWindowHandle : null);
+
         return changed;
     }
 

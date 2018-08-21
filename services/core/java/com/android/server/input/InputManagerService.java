@@ -1443,23 +1443,8 @@ public class InputManagerService extends IInputManager.Stub
         }
     }
 
-    public void setInputWindows(InputWindowHandle[] windowHandles, int displayId) {
-        nativeSetInputWindows(mPtr, windowHandles, displayId);
-    }
-
     public void setFocusedApplication(int displayId, InputApplicationHandle application) {
         nativeSetFocusedApplication(mPtr, displayId, application);
-    }
-
-    public void setFocusedWindow(InputWindowHandle focusedWindowHandle) {
-        final IWindow newFocusedWindow =
-            focusedWindowHandle != null ? focusedWindowHandle.clientWindow : null;
-        if (mFocusedWindow != newFocusedWindow) {
-            if (mFocusedWindowHasCapture) {
-                setPointerCapture(false);
-            }
-            mFocusedWindow = newFocusedWindow;
-        }
     }
 
     public void setFocusedDisplay(int displayId) {
@@ -1797,6 +1782,18 @@ public class InputManagerService extends IInputManager.Stub
     // Native callback.
     private void notifyInputChannelBroken(IBinder token) {
         mWindowManagerCallbacks.notifyInputChannelBroken(token);
+    }
+
+    // Native callback
+    private void notifyFocusChanged(IBinder token) {
+        if (mFocusedWindow != token) {
+            if (mFocusedWindowHasCapture) {
+                setPointerCapture(false);
+            }
+            if (token instanceof IWindow) {
+                mFocusedWindow = (IWindow) token;
+            }
+        }
     }
 
     // Native callback.
