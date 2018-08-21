@@ -793,6 +793,40 @@ java_library_host {
     },
 }
 
+// ====  java proto device library (for test only)  ==============================
+java_library {
+    name: "platformprotosnano",
+    proto: {
+        type: "nano",
+        output_params: ["store_unknown_fields=true"],
+        include_dirs: ["external/protobuf/src"],
+    },
+
+    sdk_version: "current",
+    srcs: [
+        "core/proto/**/*.proto",
+        "libs/incident/proto/android/os/**/*.proto",
+    ],
+}
+
+// ====  java proto device library (for test only)  ==============================
+java_library {
+    name: "platformprotoslite",
+    proto: {
+        type: "lite",
+        include_dirs: ["external/protobuf/src"],
+    },
+
+    srcs: [
+        "core/proto/**/*.proto",
+        "libs/incident/proto/android/os/**/*.proto",
+    ],
+    // Protos have lots of MissingOverride and similar.
+    errorprone: {
+        javacflags: ["-XepDisableAllChecks"],
+    },
+}
+
 // ====  c++ proto device library  ==============================
 cc_library {
     name: "libplatformprotos",
