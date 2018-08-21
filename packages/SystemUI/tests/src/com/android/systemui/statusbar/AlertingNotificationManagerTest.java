@@ -91,7 +91,7 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
         return new TestableAlertingNotificationManager();
     }
 
-    private StatusBarNotification createNewNotification(int id) {
+    protected StatusBarNotification createNewNotification(int id) {
         Notification.Builder n = new Notification.Builder(mContext, "")
                 .setSmallIcon(R.drawable.ic_person)
                 .setContentTitle("Title")
@@ -154,7 +154,7 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     public void testRemoveNotification_forceRemove() {
         mAlertingNotificationManager.showNotification(mEntry);
 
-        //Remove forcibly with releaseImmediately = true.
+        // Remove forcibly with releaseImmediately = true.
         mAlertingNotificationManager.removeNotification(mEntry.key, true /* releaseImmediately */);
 
         assertFalse(mAlertingNotificationManager.contains(mEntry.key));
@@ -172,5 +172,31 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
         mAlertingNotificationManager.releaseAllImmediately();
 
         assertEquals(0, mAlertingNotificationManager.getAllEntries().count());
+    }
+
+    @Test
+    public void testShouldExtendLifetime_notShownLongEnough() {
+        mAlertingNotificationManager.showNotification(mEntry);
+
+        // The entry has just been added so the lifetime should be extended
+        assertTrue(mAlertingNotificationManager.shouldExtendLifetime(mEntry));
+    }
+
+    @Test
+    public void testSetShouldExtendLifetime_setShouldExtend() {
+        mAlertingNotificationManager.showNotification(mEntry);
+
+        mAlertingNotificationManager.setShouldExtendLifetime(mEntry, true /* shouldExtend */);
+
+        assertTrue(mAlertingNotificationManager.mExtendedLifetimeAlertEntries.contains(mEntry));
+    }
+
+    @Test
+    public void testSetShouldExtendLifetime_setShouldNotExtend() {
+        mAlertingNotificationManager.mExtendedLifetimeAlertEntries.add(mEntry);
+
+        mAlertingNotificationManager.setShouldExtendLifetime(mEntry, false /* shouldExtend */);
+
+        assertFalse(mAlertingNotificationManager.mExtendedLifetimeAlertEntries.contains(mEntry));
     }
 }

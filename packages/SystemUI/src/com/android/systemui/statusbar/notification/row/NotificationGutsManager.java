@@ -38,27 +38,27 @@ import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.statusbar.NotificationLifetimeExtender;
+import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-import androidx.annotation.VisibleForTesting;
-
 /**
  * Handles various NotificationGuts related tasks, such as binding guts to a row, opening and
  * closing guts, and keeping track of the currently exposed notification guts.
  */
-public class NotificationGutsManager implements Dumpable {
+public class NotificationGutsManager implements Dumpable, NotificationLifetimeExtender {
     private static final String TAG = "NotificationGutsManager";
 
     // Must match constant in Settings. Used to highlight preferences when linking to Settings.
@@ -75,12 +75,13 @@ public class NotificationGutsManager implements Dumpable {
     // which notification is currently being longpress-examined by the user
     private NotificationGuts mNotificationGutsExposed;
     private NotificationMenuRowPlugin.MenuItem mGutsMenuItem;
-    protected NotificationPresenter mPresenter;
-    protected NotificationEntryManager mEntryManager;
+    private NotificationPresenter mPresenter;
+    private NotificationSafeToRemoveCallback mNotificationLifetimeFinishedCallback;
     private NotificationListContainer mListContainer;
     private NotificationInfo.CheckSaveListener mCheckSaveListener;
     private OnSettingsClickListener mOnSettingsClickListener;
-    private String mKeyToRemoveOnGutsClosed;
+    @VisibleForTesting
+    protected String mKeyToRemoveOnGutsClosed;
 
     public NotificationGutsManager(Context context) {
         mContext = context;
@@ -91,22 +92,13 @@ public class NotificationGutsManager implements Dumpable {
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
-            NotificationEntryManager entryManager, NotificationListContainer listContainer,
+            NotificationListContainer listContainer,
             NotificationInfo.CheckSaveListener checkSaveListener,
             OnSettingsClickListener onSettingsClickListener) {
         mPresenter = presenter;
-        mEntryManager = entryManager;
         mListContainer = listContainer;
         mCheckSaveListener = checkSaveListener;
         mOnSettingsClickListener = onSettingsClickListener;
-    }
-
-    public String getKeyToRemoveOnGutsClosed() {
-        return mKeyToRemoveOnGutsClosed;
-    }
-
-    public void setKeyToRemoveOnGutsClosed(String keyToRemoveOnGutsClosed) {
-        mKeyToRemoveOnGutsClosed = keyToRemoveOnGutsClosed;
     }
 
     public void onDensityOrFontScaleChanged(ExpandableNotificationRow row) {
@@ -171,7 +163,9 @@ public class NotificationGutsManager implements Dumpable {
             String key = sbn.getKey();
             if (key.equals(mKeyToRemoveOnGutsClosed)) {
                 mKeyToRemoveOnGutsClosed = null;
-                mEntryManager.removeNotification(key, mEntryManager.getLatestRankingMap());
+                if (mNotificationLifetimeFinishedCallback != null) {
+                    mNotificationLifetimeFinishedCallback.onSafeToRemove(key);
+                }
             }
         });
 
@@ -407,6 +401,37 @@ public class NotificationGutsManager implements Dumpable {
             }
         });
         return true;
+    }
+
+    @Override
+    public void setCallback(NotificationSafeToRemoveCallback callback) {
+        mNotificationLifetimeFinishedCallback = callback;
+    }
+
+    @Override
+    public boolean shouldExtendLifetime(NotificationData.Entry entry) {
+        return entry != null
+                &&(mNotificationGutsExposed != null
+                    && entry.row.getGuts() != null
+                    && mNotificationGutsExposed == entry.row.getGuts()
+                    && !mNotificationGutsExposed.isLeavebehind());
+    }
+
+    @Override
+    public void setShouldExtendLifetime(NotificationData.Entry entry, boolean shouldExtend) {
+        if (shouldExtend) {
+            mKeyToRemoveOnGutsClosed = entry.key;
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Keeping notification because it's showing guts. " + entry.key);
+            }
+        } else {
+            if (mKeyToRemoveOnGutsClosed != null && mKeyToRemoveOnGutsClosed.equals(entry.key)) {
+                mKeyToRemoveOnGutsClosed = null;
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Notification that was kept for guts was updated. " + entry.key);
+                }
+            }
+        }
     }
 
     @Override

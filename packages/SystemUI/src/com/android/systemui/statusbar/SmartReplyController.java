@@ -33,20 +33,19 @@ import java.util.Set;
 public class SmartReplyController {
     private IStatusBarService mBarService;
     private Set<String> mSendingKeys = new ArraySet<>();
+    private Callback mCallback;
 
     public SmartReplyController() {
         mBarService = Dependency.get(IStatusBarService.class);
     }
 
-    public void smartReplySent(NotificationData.Entry entry, int replyIndex, CharSequence reply) {
-        NotificationEntryManager notificationEntryManager
-                = Dependency.get(NotificationEntryManager.class);
-        StatusBarNotification newSbn =
-                notificationEntryManager.rebuildNotificationWithRemoteInput(entry, reply,
-                        true /* showSpinner */);
-        notificationEntryManager.updateNotification(newSbn, null /* ranking */);
-        mSendingKeys.add(entry.key);
+    public void setCallback(Callback callback) {
+        mCallback = callback;
+    }
 
+    public void smartReplySent(NotificationData.Entry entry, int replyIndex, CharSequence reply) {
+        mCallback.onSmartReplySent(entry, reply);
+        mSendingKeys.add(entry.key);
         try {
             mBarService.onNotificationSmartReplySent(entry.notification.getKey(),
                     replyIndex);
@@ -76,5 +75,18 @@ public class SmartReplyController {
         if (entry != null) {
             mSendingKeys.remove(entry.notification.getKey());
         }
+    }
+
+    /**
+     * Callback for any class that needs to do something in response to a smart reply being sent.
+     */
+    public interface Callback {
+        /**
+         * A smart reply has just been sent for a notification
+         *
+         * @param entry the entry for the notification
+         * @param reply the reply that was sent
+         */
+        void onSmartReplySent(NotificationData.Entry entry, CharSequence reply);
     }
 }

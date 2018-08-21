@@ -76,7 +76,6 @@ public class NotificationListener extends NotificationListenerWithPlugins {
             mPresenter.getHandler().post(() -> {
                 processForRemoteInput(sbn.getNotification(), mContext);
                 String key = sbn.getKey();
-                mEntryManager.removeKeyKeptForRemoteInput(key);
                 boolean isUpdate =
                         mEntryManager.getNotificationData().get(key) != null;
                 // In case we don't allow child notifications, we ignore children of

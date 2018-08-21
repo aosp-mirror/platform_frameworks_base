@@ -112,7 +112,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         mEntryManager = new TestableNotificationEntryManager(mSystemServicesProxy, mPowerManager,
                 mContext);
-        mEntryManager.setUpForTest(mock(NotificationPresenter.class), null, null, null, mNotificationData);
+        mEntryManager.setUpForTest(mock(NotificationPresenter.class), null, null, mHeadsUpManager,
+                mNotificationData);
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
 
         NotificationShelf notificationShelf = spy(new NotificationShelf(getContext(), null));
