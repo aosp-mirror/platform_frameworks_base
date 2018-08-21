@@ -30,6 +30,7 @@ public interface NotificationDelegate {
     void onNotificationClear(int callingUid, int callingPid,
             String pkg, String tag, int id, int userId, String key,
             @NotificationStats.DismissalSurface int dismissalSurface,
+            @NotificationStats.DismissalSentiment int dismissalSentiment,
             NotificationVisibility nv);
     void onNotificationError(int callingUid, int callingPid,
             String pkg, String tag, int id,

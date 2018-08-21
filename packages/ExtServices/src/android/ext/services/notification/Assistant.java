@@ -316,7 +316,7 @@ public class Assistant extends NotificationAssistantService {
                 saveFile();
             }
         } catch (Throwable e) {
-            Slog.e(TAG, "Error occurred processing removal", e);
+            Slog.e(TAG, "Error occurred processing removal of " + sbn, e);
         }
     }
 
@@ -327,17 +327,21 @@ public class Assistant extends NotificationAssistantService {
 
     @Override
     public void onNotificationsSeen(List<String> keys) {
-        if (keys == null) {
-            return;
-        }
-
-        for (String key : keys) {
-            NotificationEntry entry = mLiveNotifications.get(key);
-
-            if (entry != null) {
-                entry.setSeen();
-                mAgingHelper.onNotificationSeen(entry);
+        try {
+            if (keys == null) {
+                return;
             }
+
+            for (String key : keys) {
+                NotificationEntry entry = mLiveNotifications.get(key);
+
+                if (entry != null) {
+                    entry.setSeen();
+                    mAgingHelper.onNotificationSeen(entry);
+                }
+            }
+        } catch (Throwable e) {
+            Slog.e(TAG, "Error occurred processing seen", e);
         }
     }
 
