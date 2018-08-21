@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -46,8 +47,11 @@ import java.util.TimeZone;
 public class AnalogClock extends View {
     private Time mCalendar;
 
+    @UnsupportedAppUsage
     private Drawable mHourHand;
+    @UnsupportedAppUsage
     private Drawable mMinuteHand;
+    @UnsupportedAppUsage
     private Drawable mDial;
 
     private int mDialWidth;

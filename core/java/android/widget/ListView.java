@@ -19,6 +19,7 @@ package android.widget;
 import android.annotation.IdRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -181,10 +182,14 @@ public class ListView extends AbsListView {
         public boolean isSelectable;
     }
 
+    @UnsupportedAppUsage
     ArrayList<FixedViewInfo> mHeaderViewInfos = Lists.newArrayList();
+    @UnsupportedAppUsage
     ArrayList<FixedViewInfo> mFooterViewInfos = Lists.newArrayList();
 
+    @UnsupportedAppUsage
     Drawable mDivider;
+    @UnsupportedAppUsage
     int mDividerHeight;
 
     Drawable mOverScrollHeader;
@@ -196,6 +201,7 @@ public class ListView extends AbsListView {
     private boolean mHeaderDividersEnabled;
     private boolean mFooterDividersEnabled;
 
+    @UnsupportedAppUsage
     private boolean mAreAllItemsSelectable = true;
 
     private boolean mItemsCanFocus = false;
@@ -772,6 +778,7 @@ public class ListView extends AbsListView {
      * @return The view that is currently selected, if it happens to be in the
      *         range that we draw.
      */
+    @UnsupportedAppUsage
     private View fillDown(int pos, int nextTop) {
         View selectedView = null;
 
@@ -806,6 +813,7 @@ public class ListView extends AbsListView {
      *
      * @return The view that is currently selected
      */
+    @UnsupportedAppUsage
     private View fillUp(int pos, int nextBottom) {
         View selectedView = null;
 
@@ -1382,6 +1390,7 @@ public class ListView extends AbsListView {
      *            startPosition is 0).
      * @return The height of this ListView with the given children.
      */
+    @UnsupportedAppUsage
     final int measureHeightOfChildren(int widthMeasureSpec, int startPosition, int endPosition,
             int maxHeight, int disallowPartialChildPosition) {
         final ListAdapter adapter = mAdapter;
@@ -1477,6 +1486,7 @@ public class ListView extends AbsListView {
      * @return The selected view, or null if the selected view is outside the
      *         visible area.
      */
+    @UnsupportedAppUsage
     private View fillSpecific(int position, int top) {
         boolean tempIsSelected = position == mSelectedPosition;
         View temp = makeAndAddView(position, top, true, mListPadding.left, tempIsSelected);
@@ -1523,6 +1533,7 @@ public class ListView extends AbsListView {
      *
      * @param childCount Number of children
      */
+    @UnsupportedAppUsage
     private void correctTooHigh(int childCount) {
         // First see if the last item is visible. If it is not, it is OK for the
         // top of the list to be pushed up.
@@ -1572,6 +1583,7 @@ public class ListView extends AbsListView {
      *
      * @param childCount Number of children
      */
+    @UnsupportedAppUsage
     private void correctTooLow(int childCount) {
         // First see if the first item is visible. If it is not, it is OK for the
         // bottom of the list to be pushed down.
@@ -1967,6 +1979,7 @@ public class ListView extends AbsListView {
     }
 
     @Override
+    @UnsupportedAppUsage
     boolean trackMotionScroll(int deltaY, int incrementalDeltaY) {
         final boolean result = super.trackMotionScroll(deltaY, incrementalDeltaY);
         removeUnusedFixedViews(mHeaderViewInfos);
@@ -2000,6 +2013,7 @@ public class ListView extends AbsListView {
      * @param child a direct child of this list.
      * @return Whether child is a header or footer view.
      */
+    @UnsupportedAppUsage
     private boolean isDirectChildHeaderOrFooter(View child) {
         final ArrayList<FixedViewInfo> headers = mHeaderViewInfos;
         final int numHeaders = headers.size();
@@ -2034,6 +2048,7 @@ public class ListView extends AbsListView {
      *                 otherwise
      * @return the view that was added
      */
+    @UnsupportedAppUsage
     private View makeAndAddView(int position, int y, boolean flow, int childrenLeft,
             boolean selected) {
         if (!mDataChanged) {
@@ -2195,6 +2210,7 @@ public class ListView extends AbsListView {
      * @param position the position of the item to select
      */
     @Override
+    @UnsupportedAppUsage
     void setSelectionInt(int position) {
         setNextSelectedPositionInt(position);
         boolean awakeScrollbars = false;
@@ -2229,6 +2245,7 @@ public class ListView extends AbsListView {
      *         down. Returns {@link #INVALID_POSITION} if nothing can be found.
      */
     @Override
+    @UnsupportedAppUsage
     int lookForSelectablePosition(int position, boolean lookDown) {
         final ListAdapter adapter = mAdapter;
         if (adapter == null || isInTouchMode()) {
@@ -2636,6 +2653,7 @@ public class ListView extends AbsListView {
      *
      * @return whether selection was moved
      */
+    @UnsupportedAppUsage
     boolean arrowScroll(int direction) {
         try {
             mInLayout = true;
@@ -3235,6 +3253,7 @@ public class ListView extends AbsListView {
      *
      * @param amount The amount (positive or negative) to scroll.
      */
+    @UnsupportedAppUsage
     private void scrollListItemsBy(int amount) {
         offsetChildrenTopAndBottom(amount);
 
@@ -4001,6 +4020,7 @@ public class ListView extends AbsListView {
     }
 
     @Override
+    @UnsupportedAppUsage
     int getHeightForPosition(int position) {
         final int height = super.getHeightForPosition(position);
         if (shouldAdjustHeightForDivider(position)) {
