@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPL
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
@@ -141,7 +142,9 @@ public class PopupWindow {
     private final int[] mTmpAppLocation = new int[2];
     private final Rect mTempRect = new Rect();
 
+    @UnsupportedAppUsage
     private Context mContext;
+    @UnsupportedAppUsage
     private WindowManager mWindowManager;
 
     /**
@@ -150,17 +153,22 @@ public class PopupWindow {
      */
     private WeakReference<View> mParentRootView;
 
+    @UnsupportedAppUsage
     private boolean mIsShowing;
     private boolean mIsTransitioningToDismiss;
+    @UnsupportedAppUsage
     private boolean mIsDropdown;
 
     /** View that handles event dispatch and content transitions. */
+    @UnsupportedAppUsage
     private PopupDecorView mDecorView;
 
     /** View that holds the background and may animate during a transition. */
+    @UnsupportedAppUsage
     private View mBackgroundView;
 
     /** The contents of the popup. May be identical to the background view. */
+    @UnsupportedAppUsage
     private View mContentView;
 
     private boolean mFocusable;
@@ -171,39 +179,52 @@ public class PopupWindow {
     private boolean mOutsideTouchable = false;
     private boolean mClippingEnabled = true;
     private int mSplitTouchEnabled = -1;
+    @UnsupportedAppUsage
     private boolean mLayoutInScreen;
     private boolean mClipToScreen;
     private boolean mAllowScrollingAnchorParent = true;
     private boolean mLayoutInsetDecor = false;
+    @UnsupportedAppUsage
     private boolean mNotTouchModal;
     private boolean mAttachedInDecor = true;
     private boolean mAttachedInDecorSet = false;
 
+    @UnsupportedAppUsage
     private OnTouchListener mTouchInterceptor;
 
+    @UnsupportedAppUsage
     private int mWidthMode;
     private int mWidth = LayoutParams.WRAP_CONTENT;
+    @UnsupportedAppUsage
     private int mLastWidth;
+    @UnsupportedAppUsage
     private int mHeightMode;
     private int mHeight = LayoutParams.WRAP_CONTENT;
+    @UnsupportedAppUsage
     private int mLastHeight;
 
     private float mElevation;
 
     private Drawable mBackground;
+    @UnsupportedAppUsage
     private Drawable mAboveAnchorBackgroundDrawable;
+    @UnsupportedAppUsage
     private Drawable mBelowAnchorBackgroundDrawable;
 
     private Transition mEnterTransition;
     private Transition mExitTransition;
     private Rect mEpicenterBounds;
 
+    @UnsupportedAppUsage
     private boolean mAboveAnchor;
+    @UnsupportedAppUsage
     private int mWindowLayoutType = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
 
+    @UnsupportedAppUsage
     private OnDismissListener mOnDismissListener;
     private boolean mIgnoreCheekPress = false;
 
+    @UnsupportedAppUsage
     private int mAnimationStyle = ANIMATION_STYLE_DEFAULT;
 
     private int mGravity = Gravity.NO_GRAVITY;
@@ -238,10 +259,12 @@ public class PopupWindow {
                 }
             };
 
+    @UnsupportedAppUsage
     private WeakReference<View> mAnchor;
     private WeakReference<View> mAnchorRoot;
     private boolean mIsAnchorRootAttached;
 
+    @UnsupportedAppUsage
     private final OnScrollChangedListener mOnScrollChangedListener = this::alignToAnchor;
 
     private final View.OnLayoutChangeListener mOnLayoutChangeListener =
@@ -250,6 +273,7 @@ public class PopupWindow {
     private int mAnchorXoff;
     private int mAnchorYoff;
     private int mAnchoredGravity;
+    @UnsupportedAppUsage
     private boolean mOverlapAnchor;
 
     private boolean mPopupViewInitialLayoutDirectionInherited;
@@ -466,6 +490,7 @@ public class PopupWindow {
      * @see #getTransitionEpicenter()
      * @hide
      */
+    @UnsupportedAppUsage
     public void setEpicenterBounds(Rect bounds) {
         mEpicenterBounds = bounds;
     }
@@ -845,6 +870,7 @@ public class PopupWindow {
      * @param enabled True to clip to the screen.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setClipToScreenEnabled(boolean enabled) {
         mClipToScreen = enabled;
     }
@@ -855,6 +881,7 @@ public class PopupWindow {
      *
      * @param enabled True to scroll the anchor's parent when more room is desired by the popup.
      */
+    @UnsupportedAppUsage
     void setAllowScrollingAnchorParent(boolean enabled) {
         mAllowScrollingAnchorParent = enabled;
     }
@@ -914,6 +941,7 @@ public class PopupWindow {
      * @param enabled true if the popup should always be positioned in screen coordinates
      * @hide
      */
+    @UnsupportedAppUsage
     public void setLayoutInScreenEnabled(boolean enabled) {
         mLayoutInScreen = enabled;
     }
@@ -960,6 +988,7 @@ public class PopupWindow {
      *                the way that decor views behave for full-screen windows.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setLayoutInsetDecor(boolean enabled) {
         mLayoutInsetDecor = enabled;
     }
@@ -996,6 +1025,7 @@ public class PopupWindow {
      * other windows behind it.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setTouchModal(boolean touchModal) {
         mNotTouchModal = !touchModal;
     }
@@ -1181,6 +1211,7 @@ public class PopupWindow {
      * @hide Internal use only. Applications should use
      *       {@link #showAtLocation(View, int, int, int)} instead.
      */
+    @UnsupportedAppUsage
     public void showAtLocation(IBinder token, int gravity, int x, int y) {
         if (isShowing() || mContentView == null) {
             return;
@@ -1285,6 +1316,7 @@ public class PopupWindow {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     protected final void updateAboveAnchor(boolean aboveAnchor) {
         if (aboveAnchor != mAboveAnchor) {
             mAboveAnchor = aboveAnchor;
@@ -1328,6 +1360,7 @@ public class PopupWindow {
      *
      * @param p the layout parameters of the popup's content view
      */
+    @UnsupportedAppUsage
     private void preparePopup(WindowManager.LayoutParams p) {
         if (mContentView == null || mContext == null || mWindowManager == null) {
             throw new IllegalStateException("You must specify a valid content view by "
@@ -1421,6 +1454,7 @@ public class PopupWindow {
      *
      * @param p the layout parameters of the popup's content view
      */
+    @UnsupportedAppUsage
     private void invokePopup(WindowManager.LayoutParams p) {
         if (mContext != null) {
             p.packageName = mContext.getPackageName();
@@ -1464,6 +1498,7 @@ public class PopupWindow {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     protected final WindowManager.LayoutParams createPopupLayoutParams(IBinder token) {
         final WindowManager.LayoutParams p = new WindowManager.LayoutParams();
 
@@ -1552,6 +1587,7 @@ public class PopupWindow {
         return curFlags;
     }
 
+    @UnsupportedAppUsage
     private int computeAnimationResource() {
         if (mAnimationStyle == ANIMATION_STYLE_DEFAULT) {
             if (mIsDropdown) {

@@ -18,6 +18,7 @@ package android.widget;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
@@ -564,6 +565,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public boolean isOverflowReserved() {
         return mReserveOverflow;
     }
@@ -655,6 +657,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
      * Must be called before the first call to getMenu()
      * @hide
      */
+    @UnsupportedAppUsage
     public void setMenuCallbacks(MenuPresenter.Callback pcb, MenuBuilder.Callback mcb) {
         mActionMenuPresenterCallback = pcb;
         mMenuBuilderCallback = mcb;
@@ -664,6 +667,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
      * Returns the current menu or null if one has not yet been configured.
      * @hide Internal use only for action bar integration
      */
+    @UnsupportedAppUsage
     public MenuBuilder peekMenu() {
         return mMenu;
     }
@@ -697,6 +701,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public boolean isOverflowMenuShowPending() {
         return mPresenter != null && mPresenter.isOverflowMenuShowPending();
     }
@@ -714,6 +719,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
      * @hide Private LinearLayout (superclass) API. Un-hide if LinearLayout API is made public.
      */
     @Override
+    @UnsupportedAppUsage
     protected boolean hasDividerBeforeChildAt(int childIndex) {
         if (childIndex == 0) {
             return false;
@@ -736,6 +742,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setExpandedActionViewsExclusive(boolean exclusive) {
         mPresenter.setExpandedActionViewsExclusive(exclusive);
     }
@@ -783,6 +790,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
     /** @hide */
     public interface ActionMenuChildView {
+        @UnsupportedAppUsage
         public boolean needsDividerBefore();
         public boolean needsDividerAfter();
     }
@@ -790,25 +798,31 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     public static class LayoutParams extends LinearLayout.LayoutParams {
         /** @hide */
         @ViewDebug.ExportedProperty(category = "layout")
+        @UnsupportedAppUsage
         public boolean isOverflowButton;
 
         /** @hide */
         @ViewDebug.ExportedProperty(category = "layout")
+        @UnsupportedAppUsage
         public int cellsUsed;
 
         /** @hide */
         @ViewDebug.ExportedProperty(category = "layout")
+        @UnsupportedAppUsage
         public int extraPixels;
 
         /** @hide */
         @ViewDebug.ExportedProperty(category = "layout")
+        @UnsupportedAppUsage
         public boolean expandable;
 
         /** @hide */
         @ViewDebug.ExportedProperty(category = "layout")
+        @UnsupportedAppUsage
         public boolean preventEdgeOffset;
 
         /** @hide */
+        @UnsupportedAppUsage
         public boolean expanded;
 
         public LayoutParams(Context c, AttributeSet attrs) {

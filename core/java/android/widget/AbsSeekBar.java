@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -43,6 +44,7 @@ import com.android.internal.R;
 public abstract class AbsSeekBar extends ProgressBar {
     private final Rect mTempRect = new Rect();
 
+    @UnsupportedAppUsage
     private Drawable mThumb;
     private ColorStateList mThumbTintList = null;
     private PorterDuff.Mode mThumbTintMode = null;
@@ -56,17 +58,20 @@ public abstract class AbsSeekBar extends ProgressBar {
     private boolean mHasTickMarkTintMode = false;
 
     private int mThumbOffset;
+    @UnsupportedAppUsage
     private boolean mSplitTrack;
 
     /**
      * On touch, this offset plus the scaled value from the position of the
      * touch will form the progress value. Usually 0.
      */
+    @UnsupportedAppUsage
     float mTouchProgressOffset;
 
     /**
      * Whether this is user seekable.
      */
+    @UnsupportedAppUsage
     boolean mIsUserSeekable = true;
 
     /**
@@ -76,10 +81,12 @@ public abstract class AbsSeekBar extends ProgressBar {
     private int mKeyProgressIncrement = 1;
 
     private static final int NO_ALPHA = 0xFF;
+    @UnsupportedAppUsage
     private float mDisabledAlpha;
 
     private int mScaledTouchSlop;
     private float mTouchDownX;
+    @UnsupportedAppUsage
     private boolean mIsDragging;
 
     public AbsSeekBar(Context context) {
@@ -729,6 +736,7 @@ public abstract class AbsSeekBar extends ProgressBar {
     /**
      * Draw the thumb.
      */
+    @UnsupportedAppUsage
     void drawThumb(Canvas canvas) {
         if (mThumb != null) {
             final int saveCount = canvas.save();
@@ -834,6 +842,7 @@ public abstract class AbsSeekBar extends ProgressBar {
         }
     }
 
+    @UnsupportedAppUsage
     private void trackTouchEvent(MotionEvent event) {
         final int x = Math.round(event.getX());
         final int y = Math.round(event.getY());

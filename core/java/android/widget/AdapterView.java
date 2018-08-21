@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.os.Parcelable;
@@ -68,6 +69,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      * The position of the first child displayed
      */
     @ViewDebug.ExportedProperty(category = "scrolling")
+    @UnsupportedAppUsage
     int mFirstPosition = 0;
 
     /**
@@ -79,6 +81,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     /**
      * Position from which to start looking for mSyncRowId
      */
+    @UnsupportedAppUsage
     int mSyncPosition;
 
     /**
@@ -94,6 +97,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     /**
      * True if we need to sync to mSyncRowId
      */
+    @UnsupportedAppUsage
     boolean mNeedSync = false;
 
     /**
@@ -131,11 +135,13 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     /**
      * The listener that receives notifications when an item is selected.
      */
+    @UnsupportedAppUsage
     OnItemSelectedListener mOnItemSelectedListener;
 
     /**
      * The listener that receives notifications when an item is clicked.
      */
+    @UnsupportedAppUsage
     OnItemClickListener mOnItemClickListener;
 
     /**
@@ -146,6 +152,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     /**
      * True if the data has changed since the last layout
      */
+    @UnsupportedAppUsage
     boolean mDataChanged;
 
     /**
@@ -153,17 +160,20 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      * during the next layout.
      */
     @ViewDebug.ExportedProperty(category = "list")
+    @UnsupportedAppUsage
     int mNextSelectedPosition = INVALID_POSITION;
 
     /**
      * The item id of the item to select during the next layout.
      */
+    @UnsupportedAppUsage
     long mNextSelectedRowId = INVALID_ROW_ID;
 
     /**
      * The position within the adapter's data set of the currently selected item.
      */
     @ViewDebug.ExportedProperty(category = "list")
+    @UnsupportedAppUsage
     int mSelectedPosition = INVALID_POSITION;
 
     /**
@@ -201,6 +211,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     /**
      * The last selected position we used when notifying
      */
+    @UnsupportedAppUsage
     int mOldSelectedPosition = INVALID_POSITION;
 
     /**
@@ -900,6 +911,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         }
     }
 
+    @UnsupportedAppUsage
     void selectionChanged() {
         // We're about to post or run the selection notifier, so we don't need
         // a pending notifier.
@@ -1217,6 +1229,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      * Utility to keep mSelectedPosition and mSelectedRowId in sync
      * @param position Our current position
      */
+    @UnsupportedAppUsage
     void setSelectedPositionInt(int position) {
         mSelectedPosition = position;
         mSelectedRowId = getItemIdAtPosition(position);
@@ -1227,6 +1240,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      * @param position Intended value for mSelectedPosition the next time we go
      * through layout
      */
+    @UnsupportedAppUsage
     void setNextSelectedPositionInt(int position) {
         mNextSelectedPosition = position;
         mNextSelectedRowId = getItemIdAtPosition(position);

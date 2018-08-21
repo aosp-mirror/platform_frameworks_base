@@ -20,6 +20,7 @@ import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
@@ -67,6 +68,7 @@ public class ListPopupWindow implements ShowableListMenu {
 
     private Context mContext;
     private ListAdapter mAdapter;
+    @UnsupportedAppUsage
     private DropDownListView mDropDownList;
 
     private int mDropDownHeight = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -115,6 +117,7 @@ public class ListPopupWindow implements ShowableListMenu {
 
     private boolean mModal;
 
+    @UnsupportedAppUsage
     PopupWindow mPopup;
 
     /**
@@ -310,6 +313,7 @@ public class ListPopupWindow implements ShowableListMenu {
      *
      * @hide Used only by AutoCompleteTextView to handle some internal special cases.
      */
+    @UnsupportedAppUsage
     public void setForceIgnoreOutsideTouch(boolean forceIgnoreOutsideTouch) {
         mForceIgnoreOutsideTouch = forceIgnoreOutsideTouch;
     }
@@ -325,6 +329,7 @@ public class ListPopupWindow implements ShowableListMenu {
      *
      * @hide Only used by AutoCompleteTextView under special conditions.
      */
+    @UnsupportedAppUsage
     public void setDropDownAlwaysVisible(boolean dropDownAlwaysVisible) {
         mDropDownAlwaysVisible = dropDownAlwaysVisible;
     }
@@ -334,6 +339,7 @@ public class ListPopupWindow implements ShowableListMenu {
      *
      * @hide Only used by AutoCompleteTextView under special conditions.
      */
+    @UnsupportedAppUsage
     public boolean isDropDownAlwaysVisible() {
         return mDropDownAlwaysVisible;
     }
@@ -898,6 +904,7 @@ public class ListPopupWindow implements ShowableListMenu {
      *
      * @param max Max number of items that can be visible and still allow the list to expand.
      */
+    @UnsupportedAppUsage
     void setListItemExpandMax(int max) {
         mListItemExpandMaximum = max;
     }
@@ -1093,6 +1100,7 @@ public class ListPopupWindow implements ShowableListMenu {
      *
      * @return the content's height or -1 if content already exists
      */
+    @UnsupportedAppUsage
     private int buildDropDown() {
         ViewGroup dropDownView;
         int otherHeights = 0;

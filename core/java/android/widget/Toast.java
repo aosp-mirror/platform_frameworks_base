@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
+import android.annotation.UnsupportedAppUsage;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
 import android.content.Context;
@@ -93,7 +94,9 @@ public class Toast {
     public static final int LENGTH_LONG = 1;
 
     final Context mContext;
+    @UnsupportedAppUsage
     final TN mTN;
+    @UnsupportedAppUsage
     int mDuration;
     View mNextView;
 
@@ -253,6 +256,7 @@ public class Toast {
      * Gets the LayoutParams for the Toast window.
      * @hide
      */
+    @UnsupportedAppUsage
     public WindowManager.LayoutParams getWindowParams() {
         return mTN.mParams;
     }
@@ -336,8 +340,10 @@ public class Toast {
     // the proper ordering of these system-wide.
     // =======================================================================================
 
+    @UnsupportedAppUsage
     private static INotificationManager sService;
 
+    @UnsupportedAppUsage
     static private INotificationManager getService() {
         if (sService != null) {
             return sService;
@@ -347,6 +353,7 @@ public class Toast {
     }
 
     private static class TN extends ITransientNotification.Stub {
+        @UnsupportedAppUsage
         private final WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
 
         private static final int SHOW = 0;
@@ -354,14 +361,18 @@ public class Toast {
         private static final int CANCEL = 2;
         final Handler mHandler;
 
+        @UnsupportedAppUsage
         int mGravity;
         int mX;
+        @UnsupportedAppUsage
         int mY;
         float mHorizontalMargin;
         float mVerticalMargin;
 
 
+        @UnsupportedAppUsage
         View mView;
+        @UnsupportedAppUsage
         View mNextView;
         int mDuration;
 
@@ -432,6 +443,7 @@ public class Toast {
          * schedule handleShow into the right thread
          */
         @Override
+        @UnsupportedAppUsage
         public void show(IBinder windowToken) {
             if (localLOGV) Log.v(TAG, "SHOW: " + this);
             mHandler.obtainMessage(SHOW, windowToken).sendToTarget();
@@ -522,6 +534,7 @@ public class Toast {
             accessibilityManager.sendAccessibilityEvent(event);
         }
 
+        @UnsupportedAppUsage
         public void handleHide() {
             if (localLOGV) Log.v(TAG, "HANDLE HIDE: " + this + " mView=" + mView);
             if (mView != null) {
