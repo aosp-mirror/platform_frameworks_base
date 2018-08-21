@@ -77,7 +77,8 @@ public class MediaController extends FrameLayout {
     private View mDecor;
     private WindowManager.LayoutParams mDecorLayoutParams;
     private ProgressBar mProgress;
-    private TextView mEndTime, mCurrentTime;
+    private TextView mEndTime;
+    private TextView mCurrentTime;
     private boolean mShowing;
     private boolean mDragging;
     private static final int sDefaultTimeout = 3000;
