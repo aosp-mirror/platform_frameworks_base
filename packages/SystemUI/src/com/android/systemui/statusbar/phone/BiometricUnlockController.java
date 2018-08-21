@@ -101,7 +101,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
     private KeyguardUpdateMonitor mUpdateMonitor;
     private int mMode;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    private StatusBarWindowManager mStatusBarWindowManager;
+    private StatusBarWindowController mStatusBarWindowController;
     private DozeScrimController mDozeScrimController;
     private KeyguardViewMediator mKeyguardViewMediator;
     private ScrimController mScrimController;
@@ -125,7 +125,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         mUpdateMonitor.registerCallback(this);
         Dependency.get(WakefulnessLifecycle.class).addObserver(mWakefulnessObserver);
         Dependency.get(ScreenLifecycle.class).addObserver(mScreenObserver);
-        mStatusBarWindowManager = Dependency.get(StatusBarWindowManager.class);
+        mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
         mDozeScrimController = dozeScrimController;
         mKeyguardViewMediator = keyguardViewMediator;
         mScrimController = scrimController;
@@ -214,7 +214,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
             // notifications would light up first, creating an unpleasant animation.
             // Defer changing the screen brightness by forcing doze brightness on our window
             // until the clock and the notifications are faded out.
-            mStatusBarWindowManager.setForceDozeBrightness(true);
+            mStatusBarWindowController.setForceDozeBrightness(true);
         }
         // During wake and unlock, we need to draw black before waking up to avoid abrupt
         // brightness changes due to display state transitions.
@@ -269,7 +269,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
                     Trace.beginSection("MODE_WAKE_AND_UNLOCK_FROM_DREAM");
                     mUpdateMonitor.awakenFromDream();
                 }
-                mStatusBarWindowManager.setStatusBarFocusable(false);
+                mStatusBarWindowController.setStatusBarFocusable(false);
                 if (delayWakeUp) {
                     mHandler.postDelayed(wakeUp, 50);
                 } else {
@@ -384,7 +384,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                mStatusBarWindowManager.setForceDozeBrightness(false);
+                mStatusBarWindowController.setForceDozeBrightness(false);
             }
         }, StatusBar.FADE_KEYGUARD_DURATION_PULSING);
     }
@@ -395,7 +395,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
 
     private void resetMode() {
         mMode = MODE_NONE;
-        mStatusBarWindowManager.setForceDozeBrightness(false);
+        mStatusBarWindowController.setForceDozeBrightness(false);
         if (mStatusBar.getNavigationBarView() != null) {
             mStatusBar.getNavigationBarView().setWakeAndUnlocking(false);
         }

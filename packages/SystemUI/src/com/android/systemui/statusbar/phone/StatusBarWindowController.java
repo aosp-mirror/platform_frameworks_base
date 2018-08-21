@@ -49,9 +49,9 @@ import java.lang.reflect.Field;
 /**
  * Encapsulates all logic for the status bar window state management.
  */
-public class StatusBarWindowManager implements RemoteInputController.Callback, Dumpable {
+public class StatusBarWindowController implements RemoteInputController.Callback, Dumpable {
 
-    private static final String TAG = "StatusBarWindowManager";
+    private static final String TAG = "StatusBarWindowController";
 
     private final Context mContext;
     private final WindowManager mWindowManager;
@@ -68,7 +68,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
     private final State mCurrentState = new State();
     private OtherwisedCollapsedListener mListener;
 
-    public StatusBarWindowManager(Context context) {
+    public StatusBarWindowController(Context context) {
         mContext = context;
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mActivityManager = ActivityManager.getService();
@@ -433,7 +433,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("StatusBarWindowManager state:");
+        pw.println("StatusBarWindowController state:");
         pw.println(mCurrentState);
     }
 
