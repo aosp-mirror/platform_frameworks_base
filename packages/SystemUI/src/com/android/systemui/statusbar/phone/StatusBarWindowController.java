@@ -36,6 +36,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.R;
 import com.android.systemui.Dumpable;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -49,9 +50,9 @@ import java.lang.reflect.Field;
 /**
  * Encapsulates all logic for the status bar window state management.
  */
-public class StatusBarWindowManager implements RemoteInputController.Callback, Dumpable {
+public class StatusBarWindowController implements RemoteInputController.Callback, Dumpable {
 
-    private static final String TAG = "StatusBarWindowManager";
+    private static final String TAG = "StatusBarWindowController";
 
     private final Context mContext;
     private final WindowManager mWindowManager;
@@ -68,12 +69,19 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
     private final State mCurrentState = new State();
     private OtherwisedCollapsedListener mListener;
 
-    public StatusBarWindowManager(Context context) {
+    public StatusBarWindowController(Context context) {
+        this(context, context.getSystemService(WindowManager.class), ActivityManager.getService(),
+                DozeParameters.getInstance(context));
+    }
+
+    @VisibleForTesting
+    StatusBarWindowController(Context context, WindowManager windowManager,
+            IActivityManager activityManager, DozeParameters dozeParameters) {
         mContext = context;
-        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        mActivityManager = ActivityManager.getService();
+        mWindowManager = windowManager;
+        mActivityManager = activityManager;
         mKeyguardScreenRotation = shouldEnableKeyguardScreenRotation();
-        mDozeParameters = DozeParameters.getInstance(mContext);
+        mDozeParameters = dozeParameters;
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
     }
 
@@ -148,6 +156,12 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
             mLpChanged.flags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
         } else {
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+        }
+
+        if (state.dozing) {
+            mLpChanged.privateFlags |= LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+        } else {
+            mLpChanged.privateFlags &= ~LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
         }
     }
 
@@ -433,7 +447,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("StatusBarWindowManager state:");
+        pw.println("StatusBarWindowController state:");
         pw.println(mCurrentState);
     }
 

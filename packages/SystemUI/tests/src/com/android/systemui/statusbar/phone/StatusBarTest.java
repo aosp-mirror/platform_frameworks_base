@@ -204,7 +204,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mEntryManager, mScrimController, mBiometricUnlockController,
                 mock(ActivityLaunchAnimator.class), mKeyguardViewMediator,
                 mRemoteInputManager, mock(NotificationGroupManager.class),
-                mock(FalsingManager.class), mock(StatusBarWindowManager.class),
+                mock(FalsingManager.class), mock(StatusBarWindowController.class),
                 mock(NotificationIconAreaController.class), mock(DozeScrimController.class),
                 mock(NotificationShelf.class), mLockscreenUserManager,
                 mock(CommandQueue.class));
@@ -716,7 +716,7 @@ public class StatusBarTest extends SysuiTestCase {
                 NotificationRemoteInputManager notificationRemoteInputManager,
                 NotificationGroupManager notificationGroupManager,
                 FalsingManager falsingManager,
-                StatusBarWindowManager statusBarWindowManager,
+                StatusBarWindowController statusBarWindowController,
                 NotificationIconAreaController notificationIconAreaController,
                 DozeScrimController dozeScrimController,
                 NotificationShelf notificationShelf,
@@ -744,7 +744,7 @@ public class StatusBarTest extends SysuiTestCase {
             mRemoteInputManager = notificationRemoteInputManager;
             mGroupManager = notificationGroupManager;
             mFalsingManager = falsingManager;
-            mStatusBarWindowManager = statusBarWindowManager;
+            mStatusBarWindowController = statusBarWindowController;
             mNotificationIconAreaController = notificationIconAreaController;
             mDozeScrimController = dozeScrimController;
             mNotificationShelf = notificationShelf;

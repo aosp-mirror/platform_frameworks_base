@@ -36,7 +36,7 @@ import com.android.systemui.plugins.OverlayPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.StatusBarWindowManager;
+import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.util.NotificationChannels;
 
 import java.util.HashMap;
@@ -210,9 +210,9 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
                         if (mOverlays == null) mOverlays = new ArraySet<>();
                         if (plugin.holdStatusBarOpen()) {
                             mOverlays.add(plugin);
-                            Dependency.get(StatusBarWindowManager.class).setStateListener(b ->
+                            Dependency.get(StatusBarWindowController.class).setStateListener(b ->
                                     mOverlays.forEach(o -> o.setCollapseDesired(b)));
-                            Dependency.get(StatusBarWindowManager.class).setForcePluginOpen(
+                            Dependency.get(StatusBarWindowController.class).setForcePluginOpen(
                                     mOverlays.size() != 0);
 
                         }
@@ -221,7 +221,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
                     @Override
                     public void onPluginDisconnected(OverlayPlugin plugin) {
                         mOverlays.remove(plugin);
-                        Dependency.get(StatusBarWindowManager.class).setForcePluginOpen(
+                        Dependency.get(StatusBarWindowController.class).setForcePluginOpen(
                                 mOverlays.size() != 0);
                     }
                 }, OverlayPlugin.class, true /* Allow multiple plugins */);

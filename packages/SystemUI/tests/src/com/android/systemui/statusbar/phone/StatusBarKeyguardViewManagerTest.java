@@ -68,7 +68,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mDependency.injectMockDependency(StatusBarWindowManager.class);
+        mDependency.injectMockDependency(StatusBarWindowController.class);
         mStatusBarKeyguardViewManager = new TestableStatusBarKeyguardViewManager(getContext(),
                 mViewMediatorCallback, mLockPatternUtils);
         mStatusBarKeyguardViewManager.registerStatusBar(mStatusBar, mContainer,
