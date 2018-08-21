@@ -20,6 +20,7 @@ import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
@@ -58,18 +59,23 @@ public class FrameLayout extends ViewGroup {
     private static final int DEFAULT_CHILD_GRAVITY = Gravity.TOP | Gravity.START;
 
     @ViewDebug.ExportedProperty(category = "measurement")
+    @UnsupportedAppUsage
     boolean mMeasureAllChildren = false;
 
     @ViewDebug.ExportedProperty(category = "padding")
+    @UnsupportedAppUsage
     private int mForegroundPaddingLeft = 0;
 
     @ViewDebug.ExportedProperty(category = "padding")
+    @UnsupportedAppUsage
     private int mForegroundPaddingTop = 0;
 
     @ViewDebug.ExportedProperty(category = "padding")
+    @UnsupportedAppUsage
     private int mForegroundPaddingRight = 0;
 
     @ViewDebug.ExportedProperty(category = "padding")
+    @UnsupportedAppUsage
     private int mForegroundPaddingBottom = 0;
 
     private final ArrayList<View> mMatchParentChildren = new ArrayList<>(1);

@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -51,12 +52,14 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
+    @UnsupportedAppUsage
     protected int[] mFrom;
     /**
      * A list of View ids representing the views to which the data must be bound.
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
+    @UnsupportedAppUsage
     protected int[] mTo;
 
     private int mStringConversionColumn = -1;

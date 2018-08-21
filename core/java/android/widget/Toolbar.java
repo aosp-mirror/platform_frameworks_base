@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActionBar;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -133,8 +134,10 @@ public class Toolbar extends ViewGroup {
     private static final String TAG = "Toolbar";
 
     private ActionMenuView mMenuView;
+    @UnsupportedAppUsage
     private TextView mTitleTextView;
     private TextView mSubtitleTextView;
+    @UnsupportedAppUsage
     private ImageButton mNavButtonView;
     private ImageView mLogoView;
 
@@ -157,9 +160,13 @@ public class Toolbar extends ViewGroup {
 
     private int mMaxButtonHeight;
 
+    @UnsupportedAppUsage
     private int mTitleMarginStart;
+    @UnsupportedAppUsage
     private int mTitleMarginEnd;
+    @UnsupportedAppUsage
     private int mTitleMarginTop;
+    @UnsupportedAppUsage
     private int mTitleMarginBottom;
 
     private RtlSpacingHelper mContentInsets;

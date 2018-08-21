@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.IdRes;
 import android.annotation.LayoutRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -58,6 +59,7 @@ public class SimpleAdapter extends BaseAdapter implements Filterable, ThemedSpin
     private String[] mFrom;
     private ViewBinder mViewBinder;
 
+    @UnsupportedAppUsage
     private List<? extends Map<String, ?>> mData;
 
     private int mResource;

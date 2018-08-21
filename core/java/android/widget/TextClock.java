@@ -21,6 +21,7 @@ import static android.widget.RemoteViews.RemoteView;
 
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -485,6 +486,7 @@ public class TextClock extends TextView {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public CharSequence getFormat() {
         return mFormat;
     }
@@ -623,6 +625,7 @@ public class TextClock extends TextView {
     /**
      * Update the displayed time if this view and its ancestors and window is visible
      */
+    @UnsupportedAppUsage
     private void onTimeChanged() {
         // mShouldRunTicker always equals the last value passed into onVisibilityAggregated
         if (mShouldRunTicker) {

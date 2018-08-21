@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.app.IServiceConnection;
 import android.appwidget.AppWidgetHostView;
@@ -99,6 +100,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     private final Executor mAsyncViewLoadExecutor;
 
     private OnClickHandler mRemoteViewsOnClickHandler;
+    @UnsupportedAppUsage
     private final FixedSizeRemoteViewsCache mCache;
     private int mVisibleWindowLowerBound;
     private int mVisibleWindowUpperBound;
@@ -107,6 +109,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     // loaded.
     private RemoteViewsFrameLayoutRefSet mRequestedViews;
 
+    @UnsupportedAppUsage
     private final HandlerThread mWorkerThread;
     // items may be interrupted within the normally processed queues
     private final Handler mMainHandler;
@@ -869,14 +872,17 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         }
     }
 
+    @UnsupportedAppUsage
     public boolean isDataReady() {
         return mDataReady;
     }
 
+    @UnsupportedAppUsage
     public void setRemoteViewsOnClickHandler(OnClickHandler handler) {
         mRemoteViewsOnClickHandler = handler;
     }
 
+    @UnsupportedAppUsage
     public void saveRemoteViewsCache() {
         final RemoteViewsCacheKey key = new RemoteViewsCacheKey(
                 new Intent.FilterComparison(mIntent), mAppWidgetId);
@@ -1021,6 +1027,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         }
     }
 
+    @UnsupportedAppUsage
     public Intent getRemoteViewsServiceIntent() {
         return mIntent;
     }
@@ -1067,6 +1074,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
      * views are currently being displayed. This allows for certain optimizations and preloading
      * which  wouldn't otherwise be possible.
      */
+    @UnsupportedAppUsage
     public void setVisibleRangeHint(int lowerBound, int upperBound) {
         mVisibleWindowLowerBound = lowerBound;
         mVisibleWindowUpperBound = upperBound;
