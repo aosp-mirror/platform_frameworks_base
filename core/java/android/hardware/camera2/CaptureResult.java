@@ -2464,7 +2464,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>This key is available on all devices.</p>
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<double[]> JPEG_GPS_COORDINATES =
             new Key<double[]>("android.jpeg.gpsCoordinates", double[].class);
 
@@ -2475,7 +2474,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>This key is available on all devices.</p>
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<String> JPEG_GPS_PROCESSING_METHOD =
             new Key<String>("android.jpeg.gpsProcessingMethod", String.class);
 
@@ -2486,7 +2484,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>This key is available on all devices.</p>
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<Long> JPEG_GPS_TIMESTAMP =
             new Key<Long>("android.jpeg.gpsTimestamp", long.class);
 
@@ -3125,7 +3122,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage
     public static final Key<Boolean> QUIRKS_PARTIAL_RESULT =
             new Key<Boolean>("android.quirks.partialResult", boolean.class);
 
@@ -3144,7 +3140,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage
     public static final Key<Integer> REQUEST_FRAME_COUNT =
             new Key<Integer>("android.request.frameCount", int.class);
 
@@ -3158,7 +3153,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<Integer> REQUEST_ID =
             new Key<Integer>("android.request.id", int.class);
 
@@ -3720,7 +3714,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<int[]> STATISTICS_FACE_IDS =
             new Key<int[]>("android.statistics.faceIds", int[].class);
 
@@ -3747,7 +3740,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<int[]> STATISTICS_FACE_LANDMARKS =
             new Key<int[]>("android.statistics.faceLandmarks", int[].class);
 
@@ -3774,7 +3766,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<android.graphics.Rect[]> STATISTICS_FACE_RECTANGLES =
             new Key<android.graphics.Rect[]>("android.statistics.faceRectangles", android.graphics.Rect[].class);
 
@@ -3789,7 +3780,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<byte[]> STATISTICS_FACE_SCORES =
             new Key<byte[]>("android.statistics.faceScores", byte[].class);
 
@@ -3949,7 +3939,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CameraCharacteristics#SENSOR_INFO_LENS_SHADING_APPLIED
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<float[]> STATISTICS_LENS_SHADING_MAP =
             new Key<float[]>("android.statistics.lensShadingMap", float[].class);
 
@@ -3973,7 +3962,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage
     public static final Key<float[]> STATISTICS_PREDICTED_COLOR_GAINS =
             new Key<float[]>("android.statistics.predictedColorGains", float[].class);
 
@@ -4000,7 +3988,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage
     public static final Key<Rational[]> STATISTICS_PREDICTED_COLOR_TRANSFORM =
             new Key<Rational[]>("android.statistics.predictedColorTransform", Rational[].class);
 
@@ -4143,7 +4130,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureResult#SENSOR_TIMESTAMP
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<long[]> STATISTICS_OIS_TIMESTAMPS =
             new Key<long[]>("android.statistics.oisTimestamps", long[].class);
 
@@ -4163,7 +4149,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<float[]> STATISTICS_OIS_X_SHIFTS =
             new Key<float[]>("android.statistics.oisXShifts", float[].class);
 
@@ -4183,7 +4168,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<float[]> STATISTICS_OIS_Y_SHIFTS =
             new Key<float[]>("android.statistics.oisYShifts", float[].class);
 
@@ -4224,7 +4208,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#TONEMAP_MODE
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<float[]> TONEMAP_CURVE_BLUE =
             new Key<float[]>("android.tonemap.curveBlue", float[].class);
 
@@ -4242,7 +4225,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#TONEMAP_MODE
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<float[]> TONEMAP_CURVE_GREEN =
             new Key<float[]>("android.tonemap.curveGreen", float[].class);
 
@@ -4305,7 +4287,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#TONEMAP_MODE
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<float[]> TONEMAP_CURVE_RED =
             new Key<float[]>("android.tonemap.curveRed", float[].class);
 
@@ -4480,7 +4461,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<Boolean> LED_TRANSMIT =
             new Key<Boolean>("android.led.transmit", boolean.class);
 
@@ -4570,7 +4550,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #SYNC_FRAME_NUMBER_UNKNOWN
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<Long> SYNC_FRAME_NUMBER =
             new Key<Long>("android.sync.frameNumber", long.class);
 

@@ -2140,7 +2140,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>This key is available on all devices.</p>
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<double[]> JPEG_GPS_COORDINATES =
             new Key<double[]>("android.jpeg.gpsCoordinates", double[].class);
 
@@ -2151,7 +2150,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>This key is available on all devices.</p>
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<String> JPEG_GPS_PROCESSING_METHOD =
             new Key<String>("android.jpeg.gpsProcessingMethod", String.class);
 
@@ -2162,7 +2160,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>This key is available on all devices.</p>
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<Long> JPEG_GPS_TIMESTAMP =
             new Key<Long>("android.jpeg.gpsTimestamp", long.class);
 
@@ -2498,7 +2495,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<Integer> REQUEST_ID =
             new Key<Integer>("android.request.id", int.class);
 
@@ -2914,7 +2910,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @see CaptureRequest#TONEMAP_MODE
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<float[]> TONEMAP_CURVE_BLUE =
             new Key<float[]>("android.tonemap.curveBlue", float[].class);
 
@@ -2932,7 +2927,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @see CaptureRequest#TONEMAP_MODE
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<float[]> TONEMAP_CURVE_GREEN =
             new Key<float[]>("android.tonemap.curveGreen", float[].class);
 
@@ -2995,7 +2989,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @see CaptureRequest#TONEMAP_MODE
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<float[]> TONEMAP_CURVE_RED =
             new Key<float[]>("android.tonemap.curveRed", float[].class);
 
@@ -3170,7 +3163,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<Boolean> LED_TRANSMIT =
             new Key<Boolean>("android.led.transmit", boolean.class);
 
