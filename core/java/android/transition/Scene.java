@@ -35,7 +35,8 @@ public final class Scene {
     private int mLayoutId = -1;
     private ViewGroup mSceneRoot;
     private View mLayout; // alternative to layoutId
-    Runnable mEnterAction, mExitAction;
+    Runnable mEnterAction;
+    Runnable mExitAction;
 
     /**
      * Returns a Scene described by the resource file associated with the given
