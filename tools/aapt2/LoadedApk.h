@@ -111,7 +111,7 @@ class LoadedApk {
                               IArchiveWriter* writer, xml::XmlResource* manifest = nullptr);
 
   /** Loads the file as an xml document. */
-  std::unique_ptr<xml::XmlResource> LoadXml(const std::string& file_path, IDiagnostics* diag);
+  std::unique_ptr<xml::XmlResource> LoadXml(const std::string& file_path, IDiagnostics* diag) const;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedApk);
