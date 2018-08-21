@@ -254,6 +254,7 @@ import android.util.ByteStringUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.ExceptionUtils;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.LogPrinter;
 import android.util.LongSparseArray;
@@ -14169,11 +14170,12 @@ public class PackageManagerService extends IPackageManager.Stub
         info.sendPackageRemovedBroadcasts(true /*killApp*/);
     }
 
-    private void sendPackagesSuspendedForUser(String[] pkgList, int userId, boolean suspended,
-            PersistableBundle launcherExtras) {
+    private void sendPackagesSuspendedForUser(String[] pkgList, int[] uidList, int userId,
+            boolean suspended, PersistableBundle launcherExtras) {
         if (pkgList.length > 0) {
             Bundle extras = new Bundle(1);
             extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
+            extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
             if (launcherExtras != null) {
                 extras.putBundle(Intent.EXTRA_LAUNCHER_EXTRAS,
                         new Bundle(launcherExtras.deepCopy()));
@@ -14355,6 +14357,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         final List<String> changedPackagesList = new ArrayList<>(packageNames.length);
+        final IntArray changedUids = new IntArray(packageNames.length);
         final List<String> unactionedPackages = new ArrayList<>(packageNames.length);
         final long callingId = Binder.clearCallingIdentity();
         try {
@@ -14382,6 +14385,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     pkgSetting.setSuspended(suspended, callingPackage, dialogMessage, appExtras,
                             launcherExtras, userId);
                     changedPackagesList.add(packageName);
+                    changedUids.add(UserHandle.getUid(userId, pkgSetting.appId));
                 }
             }
         } finally {
@@ -14390,7 +14394,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!changedPackagesList.isEmpty()) {
             final String[] changedPackages = changedPackagesList.toArray(
                     new String[changedPackagesList.size()]);
-            sendPackagesSuspendedForUser(changedPackages, userId, suspended, launcherExtras);
+            sendPackagesSuspendedForUser(
+                    changedPackages, changedUids.toArray(), userId, suspended, launcherExtras);
             sendMyPackageSuspendedOrUnsuspended(changedPackages, suspended, appExtras, userId);
             synchronized (mPackages) {
                 scheduleWritePackageRestrictionsLocked(userId);
@@ -14505,12 +14510,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private void unsuspendForSuspendingPackages(Predicate<String> packagePredicate, int userId) {
         final List<String> affectedPackages = new ArrayList<>();
+        final IntArray affectedUids = new IntArray();
         synchronized (mPackages) {
             for (PackageSetting ps : mSettings.mPackages.values()) {
                 final PackageUserState pus = ps.readUserState(userId);
                 if (pus.suspended && packagePredicate.test(pus.suspendingPackage)) {
                     ps.setSuspended(false, null, null, null, null, userId);
                     affectedPackages.add(ps.name);
+                    affectedUids.add(UserHandle.getUid(userId, ps.getAppId()));
                 }
             }
         }
@@ -14518,7 +14525,8 @@ public class PackageManagerService extends IPackageManager.Stub
             final String[] packageArray = affectedPackages.toArray(
                     new String[affectedPackages.size()]);
             sendMyPackageSuspendedOrUnsuspended(packageArray, false, null, userId);
-            sendPackagesSuspendedForUser(packageArray, userId, false, null);
+            sendPackagesSuspendedForUser(
+                    packageArray, affectedUids.toArray(), userId, false, null);
             // Write package restrictions immediately to avoid an inconsistent state.
             mSettings.writePackageRestrictionsLPr(userId);
         }
