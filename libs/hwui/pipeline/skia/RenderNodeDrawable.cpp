@@ -21,6 +21,8 @@
 #include "SkiaPipeline.h"
 #include "utils/TraceUtils.h"
 
+#include <optional>
+
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
@@ -171,9 +173,9 @@ public:
 
 protected:
     bool onFilter(SkTCopyOnFirstWrite<SkPaint>* paint, Type t) const override {
-        SkTLazy<SkPaint> defaultPaint;
+        std::optional<SkPaint> defaultPaint;
         if (!*paint) {
-            paint->init(*defaultPaint.init());
+            paint->init(defaultPaint.emplace());
         }
         paint->writable()->setAlpha((uint8_t)(*paint)->getAlpha() * mAlpha);
         return true;
