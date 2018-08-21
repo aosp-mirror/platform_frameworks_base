@@ -1307,6 +1307,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         setDismissed(fromAccessibility);
         if (isClearable()) {
+            // TODO: track dismiss sentiment
             if (mOnDismissRunnable != null) {
                 mOnDismissRunnable.run();
             }

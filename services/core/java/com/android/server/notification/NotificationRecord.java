@@ -1065,6 +1065,10 @@ public final class NotificationRecord {
         mStats.setDismissalSurface(surface);
     }
 
+    public void recordDismissalSentiment(@NotificationStats.DismissalSentiment int sentiment) {
+        mStats.setDismissalSentiment(sentiment);
+    }
+
     public void recordSnoozed() {
         mStats.setSnoozed();
     }
