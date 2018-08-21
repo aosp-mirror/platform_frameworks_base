@@ -160,6 +160,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private static final int MAX_UID_RANGES_PER_COMMAND = 10;
 
+    private static final  String[] EMPTY_STRING_ARRAY = new String[0];
+
     /**
      * Name representing {@link #setGlobalAlert(long)} limit when delivered to
      * {@link INetworkManagementEventObserver#limitReached(String, String)}.
@@ -1247,18 +1249,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     @Override
     public void startTethering(String[] dhcpRange) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        // cmd is "tether start first_start first_stop second_start second_stop ..."
         // an odd number of addrs will fail
 
-        final Command cmd = new Command("tether", "start");
-        for (String d : dhcpRange) {
-            cmd.appendArg(d);
-        }
-
         try {
-            mConnector.execute(cmd);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            mNetdService.tetherStart(dhcpRange);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -1266,9 +1262,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void stopTethering() {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            mConnector.execute("tether", "stop");
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            mNetdService.tetherStop();
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -1276,25 +1272,21 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public boolean isTetheringStarted() {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("tether", "status");
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            final boolean isEnabled = mNetdService.tetherIsEnabled();
+            return isEnabled;
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new IllegalStateException(e);
         }
-
-        // 210 Tethering services started
-        event.checkCode(TetherStatusResult);
-        return event.getMessage().endsWith("started");
     }
 
     @Override
     public void tetherInterface(String iface) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            mConnector.execute("tether", "interface", "add", iface);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            mNetdService.tetherInterfaceAdd(iface);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new IllegalStateException(e);
         }
         List<RouteInfo> routes = new ArrayList<>();
         // The RouteInfo constructor truncates the LinkAddress to a network prefix, thus making it
@@ -1307,9 +1299,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void untetherInterface(String iface) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            mConnector.execute("tether", "interface", "remove", iface);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            mNetdService.tetherInterfaceRemove(iface);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new IllegalStateException(e);
         } finally {
             removeInterfaceFromLocalNetwork(iface);
         }
@@ -1319,11 +1311,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public String[] listTetheredInterfaces() {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            return NativeDaemonEvent.filterMessageList(
-                    mConnector.executeForList("tether", "interface", "list"),
-                    TetherInterfaceListResult);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            final List<String> result = mNetdService.tetherInterfaceList();
+            return result.toArray(EMPTY_STRING_ARRAY);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -1332,16 +1323,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         int netId = (network != null) ? network.netId : ConnectivityManager.NETID_UNSET;
-        final Command cmd = new Command("tether", "dns", "set", netId);
-
-        for (String s : dns) {
-            cmd.appendArg(NetworkUtils.numericToInetAddress(s).getHostAddress());
-        }
 
         try {
-            mConnector.execute(cmd);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            mNetdService.tetherDnsSet(netId, dns);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -1349,10 +1335,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public String[] getDnsForwarders() {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            return NativeDaemonEvent.filterMessageList(
-                    mConnector.executeForList("tether", "dns", "list"), TetherDnsFwdTgtListResult);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            final List<String> result = mNetdService.tetherDnsList();
+            return result.toArray(EMPTY_STRING_ARRAY);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new IllegalStateException(e);
         }
     }
 
