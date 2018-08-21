@@ -3620,7 +3620,7 @@ public final class ActiveServices {
                     nextTime = sr.executingStart;
                 }
             }
-            if (timeout != null && mAm.mLruProcesses.contains(proc)) {
+            if (timeout != null && mAm.mProcessList.mLruProcesses.contains(proc)) {
                 Slog.w(TAG, "Timeout executing service: " + timeout);
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new FastPrintWriter(sw, false, 1024);

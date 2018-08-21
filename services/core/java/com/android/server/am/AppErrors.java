@@ -121,7 +121,7 @@ class AppErrors {
                 proto.write(AppErrorsProto.ProcessCrashTime.PROCESS_NAME, pname);
                 for (int i = 0; i < uidCount; i++) {
                     final int puid = uids.keyAt(i);
-                    final ProcessRecord r = mService.mProcessNames.get(pname, puid);
+                    final ProcessRecord r = mService.getProcessNames().get(pname, puid);
                     if (dumpPackage != null && (r == null || !r.pkgList.containsKey(dumpPackage))) {
                         continue;
                     }
@@ -148,7 +148,7 @@ class AppErrors {
                 proto.write(AppErrorsProto.BadProcess.PROCESS_NAME, pname);
                 for (int i = 0; i < uidCount; i++) {
                     final int puid = uids.keyAt(i);
-                    final ProcessRecord r = mService.mProcessNames.get(pname, puid);
+                    final ProcessRecord r = mService.getProcessNames().get(pname, puid);
                     if (dumpPackage != null && (r == null
                             || !r.pkgList.containsKey(dumpPackage))) {
                         continue;
@@ -181,7 +181,7 @@ class AppErrors {
                 final int uidCount = uids.size();
                 for (int i = 0; i < uidCount; i++) {
                     final int puid = uids.keyAt(i);
-                    final ProcessRecord r = mService.mProcessNames.get(pname, puid);
+                    final ProcessRecord r = mService.getProcessNames().get(pname, puid);
                     if (dumpPackage != null && (r == null
                             || !r.pkgList.containsKey(dumpPackage))) {
                         continue;
@@ -211,7 +211,7 @@ class AppErrors {
                 final int uidCount = uids.size();
                 for (int i = 0; i < uidCount; i++) {
                     final int puid = uids.keyAt(i);
-                    final ProcessRecord r = mService.mProcessNames.get(pname, puid);
+                    final ProcessRecord r = mService.getProcessNames().get(pname, puid);
                     if (dumpPackage != null && (r == null
                             || !r.pkgList.containsKey(dumpPackage))) {
                         continue;
@@ -471,7 +471,7 @@ class AppErrors {
                 stopReportingCrashesLocked(r);
             }
             if (res == AppErrorDialog.RESTART) {
-                mService.removeProcessLocked(r, false, true, "crash");
+                mService.mProcessList.removeProcessLocked(r, false, true, "crash");
                 if (taskId != INVALID_TASK_ID) {
                     try {
                         mService.mActivityTaskManager.startActivityFromRecents(taskId,
@@ -489,7 +489,7 @@ class AppErrors {
                     // Kill it with fire!
                     mService.mAtmInternal.onHandleAppCrash(r.getWindowProcessController());
                     if (!r.isPersistent()) {
-                        mService.removeProcessLocked(r, false, false, "crash");
+                        mService.mProcessList.removeProcessLocked(r, false, false, "crash");
                         mService.mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
                     }
                 } finally {
@@ -551,7 +551,7 @@ class AppErrors {
                     } else {
                         // Huh.
                         Process.killProcess(pid);
-                        ActivityManagerService.killProcessGroup(uid, pid);
+                        ProcessList.killProcessGroup(uid, pid);
                     }
                 }
                 return true;
@@ -714,7 +714,7 @@ class AppErrors {
                 // Don't let services in this process be restarted and potentially
                 // annoy the user repeatedly.  Unless it is persistent, since those
                 // processes run critical code.
-                mService.removeProcessLocked(app, false, tryAgain, "crash");
+                mService.mProcessList.removeProcessLocked(app, false, tryAgain, "crash");
                 mService.mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
                 if (!showBackground) {
                     return false;

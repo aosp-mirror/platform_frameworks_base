@@ -733,7 +733,7 @@ final class ProcessRecord implements WindowProcessListener {
             if (pid > 0) {
                 EventLog.writeEvent(EventLogTags.AM_KILL, userId, pid, processName, setAdj, reason);
                 Process.killProcessQuiet(pid);
-                ActivityManagerService.killProcessGroup(uid, pid);
+                ProcessList.killProcessGroup(uid, pid);
             } else {
                 pendingStart = false;
             }
@@ -1157,7 +1157,7 @@ final class ProcessRecord implements WindowProcessListener {
                 mService.mServices.updateServiceConnectionActivitiesLocked(this);
             }
             if (updateLru) {
-                mService.updateLruProcessLocked(this, activityChange, null);
+                mService.mProcessList.updateLruProcessLocked(this, activityChange, null);
             }
             if (updateOomAdj) {
                 mService.updateOomAdjLocked();
@@ -1256,8 +1256,8 @@ final class ProcessRecord implements WindowProcessListener {
 
                 if (MY_PID != pid && MY_PID != parentPid) firstPids.add(MY_PID);
 
-                for (int i = mService.mLruProcesses.size() - 1; i >= 0; i--) {
-                    ProcessRecord r = mService.mLruProcesses.get(i);
+                for (int i = mService.mProcessList.mLruProcesses.size() - 1; i >= 0; i--) {
+                    ProcessRecord r = mService.mProcessList.mLruProcesses.get(i);
                     if (r != null && r.thread != null) {
                         int myPid = r.pid;
                         if (myPid > 0 && myPid != pid && myPid != parentPid && myPid != MY_PID) {
