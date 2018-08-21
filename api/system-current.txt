@@ -6085,6 +6085,10 @@ package android.telephony.ims.feature {
     field public static final int STATE_UNAVAILABLE = 0; // 0x0
   }
 
+  public static class ImsFeature.Capabilities {
+    field protected int mCapabilities;
+  }
+
   protected static class ImsFeature.CapabilityCallbackProxy {
     method public void onChangeCapabilityConfigurationError(int, int, int);
   }

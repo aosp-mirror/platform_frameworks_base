@@ -2462,6 +2462,24 @@ public class TelephonyManager {
             "android.telephony.action.SIM_SLOT_STATUS_CHANGED";
 
     /**
+     * Broadcast Action: A debug code has been entered in the dialer.
+     * <p>
+     * This intent is broadcast by the system and OEM telephony apps may need to receive these
+     * broadcasts. And it requires the sender to be default dialer or has carrier privileges
+     * (see {@link #hasCarrierPrivileges}).
+     * <p>
+     * These "secret codes" are used to activate developer menus by dialing certain codes.
+     * And they are of the form {@code *#*#&lt;code&gt;#*#*}. The intent will have the data
+     * URI: {@code android_secret_code://&lt;code&gt;}. It is possible that a manifest
+     * receiver would be woken up even if it is not currently running.
+     * <p>
+     * It is supposed to replace {@link Telephony#SECRET_CODE_ACTION} in the next Android version.
+     * Before that both of these two actions will be broadcast.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SECRET_CODE = "android.telephony.action.SECRET_CODE";
+
+    /**
      * @return true if a ICC card is present
      */
     public boolean hasIccCard() {

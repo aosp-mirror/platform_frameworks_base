@@ -26,8 +26,8 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.ContentObserver;
+import android.database.Cursor;
 import android.database.sqlite.SqliteWrapper;
 import android.net.Uri;
 import android.telephony.Rlog;
@@ -40,7 +40,6 @@ import android.util.Patterns;
 
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.SmsApplication;
-
 
 import java.util.HashSet;
 import java.util.Set;
@@ -1127,7 +1126,10 @@ public final class Telephony {
              *
              * <p>Requires {@code android.Manifest.permission#CONTROL_INCALL_EXPERIENCE} to
              * send and receive.</p>
+             * @deprecated it is no longer supported, use {@link
+             * TelephonyManager#ACTION_SECRET_CODE} instead
              */
+            @Deprecated
             @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
             public static final String SECRET_CODE_ACTION =
                     "android.provider.Telephony.SECRET_CODE";
