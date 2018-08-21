@@ -1896,11 +1896,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
             win.setFrameNumber(frameNumber);
 
-            // TODO(b/111504081): Consolidate seamless rotation logic.
-            if (win.mPendingForcedSeamlessRotate != null && !mWaitingForConfig) {
-                win.mPendingForcedSeamlessRotate.finish(win.mToken, win);
-                win.mFinishForcedSeamlessRotateFrameNumber = win.getFrameNumber();
-                win.mPendingForcedSeamlessRotate = null;
+            if (!mWaitingForConfig) {
+                win.finishSeamlessRotation();
             }
 
             int attrChanges = 0;
@@ -7108,7 +7105,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void markForSeamlessRotation(WindowState w, boolean seamlesslyRotated) {
-        if (seamlesslyRotated == w.mSeamlesslyRotated) {
+        if (seamlesslyRotated == w.mSeamlesslyRotated || w.mForceSeamlesslyRotate) {
             return;
         }
         w.mSeamlesslyRotated = seamlesslyRotated;

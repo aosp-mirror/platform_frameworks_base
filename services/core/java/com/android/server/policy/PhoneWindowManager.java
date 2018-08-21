@@ -7862,15 +7862,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (!displayRotation.getDisplayPolicy().navigationBarCanMove()) {
             return false;
         }
-        int delta = newRotation - oldRotation;
-        if (delta < 0) delta += 4;
-        // Likewise we don't rotate seamlessly for 180 degree rotations
-        // in this case the surfaces never resize, and our logic to
-        // revert the transformations on size change will fail. We could
-        // fix this in the future with the "tagged" frames idea.
-        if (delta == Surface.ROTATION_180) {
-            return false;
-        }
 
         final WindowState w = mTopFullscreenOpaqueWindowState;
         if (w != mFocusedWindow) {
