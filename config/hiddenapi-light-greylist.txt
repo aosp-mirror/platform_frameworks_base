@@ -4297,7 +4297,6 @@ Ljava/util/zip/ZipInputStream;->tmpbuf:[B
 Ljava/util/zip/ZipOutputStream;->method:I
 Ljava/util/zip/ZipOutputStream;->names:Ljava/util/HashSet;
 Ljava/util/zip/ZipOutputStream;->written:J
-Ljavax/microedition/khronos/egl/EGL10;->eglReleaseThread()Z
 Ljavax/net/ssl/SSLServerSocketFactory;->defaultServerSocketFactory:Ljavax/net/ssl/SSLServerSocketFactory;
 Ljavax/net/ssl/SSLSocketFactory;->createSocket(Ljava/net/Socket;Ljava/io/InputStream;Z)Ljava/net/Socket;
 Ljavax/net/ssl/SSLSocketFactory;->defaultSocketFactory:Ljavax/net/ssl/SSLSocketFactory;
