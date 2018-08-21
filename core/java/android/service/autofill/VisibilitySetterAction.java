@@ -80,7 +80,7 @@ public final class VisibilitySetterAction extends InternalOnClickAction implemen
          * @param id view resource id of the children view.
          * @param visibility one of {@link View#VISIBLE}, {@link View#INVISIBLE}, or
          *            {@link View#GONE}.
-         * @throw {@link IllegalArgumentException} if visibility is not one of {@link View#VISIBLE},
+         * @throws IllegalArgumentException if visibility is not one of {@link View#VISIBLE},
          * {@link View#INVISIBLE}, or {@link View#GONE}.
          */
         public Builder(@IdRes int id, @Visibility int visibility) {
@@ -93,7 +93,7 @@ public final class VisibilitySetterAction extends InternalOnClickAction implemen
          * @param id view resource id of the children view.
          * @param visibility one of {@link View#VISIBLE}, {@link View#INVISIBLE}, or
          *            {@link View#GONE}.
-         * @throw {@link IllegalArgumentException} if visibility is not one of {@link View#VISIBLE},
+         * @throws IllegalArgumentException if visibility is not one of {@link View#VISIBLE},
          * {@link View#INVISIBLE}, or {@link View#GONE}.
          */
         public Builder setVisibility(@IdRes int id, @Visibility int visibility) {

@@ -30,7 +30,7 @@ import android.view.ViewGroup;
 public abstract class InternalOnClickAction implements OnClickAction, Parcelable {
 
     /**
-     * Applies the action to the children of the {@rootView} when clicked.
+     * Applies the action to the children of the {@code rootView} when clicked.
      */
     public abstract void onClick(@NonNull ViewGroup rootView);
 }
