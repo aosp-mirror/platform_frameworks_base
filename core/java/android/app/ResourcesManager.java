@@ -121,10 +121,13 @@ public class ResourcesManager {
         }
     }
 
+    private static final boolean ENABLE_APK_ASSETS_CACHE = false;
+
     /**
      * The ApkAssets we are caching and intend to hold strong references to.
      */
-    private final LruCache<ApkKey, ApkAssets> mLoadedApkAssets = new LruCache<>(3);
+    private final LruCache<ApkKey, ApkAssets> mLoadedApkAssets =
+            (ENABLE_APK_ASSETS_CACHE) ? new LruCache<>(3) : null;
 
     /**
      * The ApkAssets that are being referenced in the wild that we can reuse, even if they aren't
@@ -310,9 +313,12 @@ public class ResourcesManager {
     private @NonNull ApkAssets loadApkAssets(String path, boolean sharedLib, boolean overlay)
             throws IOException {
         final ApkKey newKey = new ApkKey(path, sharedLib, overlay);
-        ApkAssets apkAssets = mLoadedApkAssets.get(newKey);
-        if (apkAssets != null) {
-            return apkAssets;
+        ApkAssets apkAssets = null;
+        if (mLoadedApkAssets != null) {
+            apkAssets = mLoadedApkAssets.get(newKey);
+            if (apkAssets != null) {
+                return apkAssets;
+            }
         }
 
         // Optimistically check if this ApkAssets exists somewhere else.
@@ -320,7 +326,10 @@ public class ResourcesManager {
         if (apkAssetsRef != null) {
             apkAssets = apkAssetsRef.get();
             if (apkAssets != null) {
-                mLoadedApkAssets.put(newKey, apkAssets);
+                if (mLoadedApkAssets != null) {
+                    mLoadedApkAssets.put(newKey, apkAssets);
+                }
+
                 return apkAssets;
             } else {
                 // Clean up the reference.
@@ -335,7 +344,11 @@ public class ResourcesManager {
         } else {
             apkAssets = ApkAssets.loadFromPath(path, false /*system*/, sharedLib);
         }
-        mLoadedApkAssets.put(newKey, apkAssets);
+
+        if (mLoadedApkAssets != null) {
+            mLoadedApkAssets.put(newKey, apkAssets);
+        }
+
         mCachedApkAssets.put(newKey, new WeakReference<>(apkAssets));
         return apkAssets;
     }
@@ -434,18 +447,22 @@ public class ResourcesManager {
 
             pw.println("ResourcesManager:");
             pw.increaseIndent();
-            pw.print("cached apks: total=");
-            pw.print(mLoadedApkAssets.size());
-            pw.print(" created=");
-            pw.print(mLoadedApkAssets.createCount());
-            pw.print(" evicted=");
-            pw.print(mLoadedApkAssets.evictionCount());
-            pw.print(" hit=");
-            pw.print(mLoadedApkAssets.hitCount());
-            pw.print(" miss=");
-            pw.print(mLoadedApkAssets.missCount());
-            pw.print(" max=");
-            pw.print(mLoadedApkAssets.maxSize());
+            if (mLoadedApkAssets != null) {
+                pw.print("cached apks: total=");
+                pw.print(mLoadedApkAssets.size());
+                pw.print(" created=");
+                pw.print(mLoadedApkAssets.createCount());
+                pw.print(" evicted=");
+                pw.print(mLoadedApkAssets.evictionCount());
+                pw.print(" hit=");
+                pw.print(mLoadedApkAssets.hitCount());
+                pw.print(" miss=");
+                pw.print(mLoadedApkAssets.missCount());
+                pw.print(" max=");
+                pw.print(mLoadedApkAssets.maxSize());
+            } else {
+                pw.print("cached apks: 0 [cache disabled]");
+            }
             pw.println();
 
             pw.print("total apks: ");

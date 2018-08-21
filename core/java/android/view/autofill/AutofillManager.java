@@ -2145,7 +2145,11 @@ public final class AutofillManager {
         pw.print(pfx); pw.print("sessionId: "); pw.println(mSessionId);
         pw.print(pfx); pw.print("state: "); pw.println(getStateAsStringLocked());
         pw.print(pfx); pw.print("context: "); pw.println(mContext);
-        pw.print(pfx); pw.print("client: "); pw.println(getClient());
+        final AutofillClient client = getClient();
+        if (client != null) {
+            pw.print(pfx); pw.print("client: "); pw.print(client);
+            pw.print(" ("); pw.print(client.autofillClientGetActivityToken()); pw.println(')');
+        }
         pw.print(pfx); pw.print("enabled: "); pw.println(mEnabled);
         pw.print(pfx); pw.print("hasService: "); pw.println(mService != null);
         pw.print(pfx); pw.print("hasCallback: "); pw.println(mCallback != null);
@@ -2164,8 +2168,24 @@ public final class AutofillManager {
         pw.print(pfx); pw.print("entered ids: "); pw.println(mEnteredIds);
         pw.print(pfx); pw.print("save trigger id: "); pw.println(mSaveTriggerId);
         pw.print(pfx); pw.print("save on finish(): "); pw.println(mSaveOnFinish);
-        pw.print(pfx); pw.print("compat mode enabled: "); pw.println(
-                isCompatibilityModeEnabledLocked());
+        pw.print(pfx); pw.print("compat mode enabled: ");
+        synchronized (mLock) {
+            if (mCompatibilityBridge != null) {
+                final String pfx2 = pfx + "  ";
+                pw.println("true");
+                pw.print(pfx2); pw.print("windowId: ");
+                pw.println(mCompatibilityBridge.mFocusedWindowId);
+                pw.print(pfx2); pw.print("nodeId: ");
+                pw.println(mCompatibilityBridge.mFocusedNodeId);
+                pw.print(pfx2); pw.print("virtualId: ");
+                pw.println(AccessibilityNodeInfo
+                        .getVirtualDescendantId(mCompatibilityBridge.mFocusedNodeId));
+                pw.print(pfx2); pw.print("focusedBounds: ");
+                pw.println(mCompatibilityBridge.mFocusedBounds);
+            } else {
+                pw.println("false");
+            }
+        }
         pw.print(pfx); pw.print("debug: "); pw.print(sDebug);
         pw.print(" verbose: "); pw.println(sVerbose);
     }
@@ -2299,7 +2319,15 @@ public final class AutofillManager {
         @Override
         public AccessibilityEvent onAccessibilityEvent(AccessibilityEvent event,
                 boolean accessibilityEnabled, int relevantEventTypes) {
-            switch (event.getEventType()) {
+            final int type = event.getEventType();
+            if (sVerbose) {
+                // NOTE: this is waaay spammy, but that's life.
+                Log.v(TAG, "onAccessibilityEvent(" + AccessibilityEvent.eventTypeToString(type)
+                        + "): virtualId="
+                        + AccessibilityNodeInfo.getVirtualDescendantId(event.getSourceNodeId())
+                        + ", client=" + getClient());
+            }
+            switch (type) {
                 case AccessibilityEvent.TYPE_VIEW_FOCUSED: {
                     synchronized (mLock) {
                         if (mFocusedWindowId == event.getWindowId()
