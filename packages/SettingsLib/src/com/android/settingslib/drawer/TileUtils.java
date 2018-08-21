@@ -20,10 +20,8 @@ import android.content.Context;
 import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -43,7 +41,6 @@ import java.util.Map;
 
 public class TileUtils {
 
-    private static final boolean DEBUG = false;
     private static final boolean DEBUG_TIMING = false;
 
     private static final String LOG_TAG = "TileUtils";
@@ -70,7 +67,7 @@ public class TileUtils {
     /**
      * @See {@link #EXTRA_SETTINGS_ACTION}.
      */
-    private static final String IA_SETTINGS_ACTION = "com.android.settings.action.IA_SETTINGS";
+    public static final String IA_SETTINGS_ACTION = "com.android.settings.action.IA_SETTINGS";
 
     /**
      * Same as #EXTRA_SETTINGS_ACTION but used for the platform Settings activities.
@@ -219,9 +216,9 @@ public class TileUtils {
                 // Only add Settings for this user.
                 getTilesForAction(context, user, SETTINGS_ACTION, cache, null, tiles, true);
                 getTilesForAction(context, user, OPERATOR_SETTINGS, cache,
-                        OPERATOR_DEFAULT_CATEGORY, tiles, false, true);
+                        OPERATOR_DEFAULT_CATEGORY, tiles, false);
                 getTilesForAction(context, user, MANUFACTURER_SETTINGS, cache,
-                        MANUFACTURER_DEFAULT_CATEGORY, tiles, false, true);
+                        MANUFACTURER_DEFAULT_CATEGORY, tiles, false);
             }
             if (setup) {
                 getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false);
@@ -256,30 +253,15 @@ public class TileUtils {
         return categories;
     }
 
-    private static void getTilesForAction(Context context,
+    @VisibleForTesting
+    static void getTilesForAction(Context context,
             UserHandle user, String action, Map<Pair<String, String>, Tile> addedCache,
-            String defaultCategory, ArrayList<Tile> outTiles, boolean requireSettings) {
-        getTilesForAction(context, user, action, addedCache, defaultCategory, outTiles,
-                requireSettings, requireSettings);
-    }
-
-    private static void getTilesForAction(Context context,
-            UserHandle user, String action, Map<Pair<String, String>, Tile> addedCache,
-            String defaultCategory, ArrayList<Tile> outTiles, boolean requireSettings,
-            boolean usePriority) {
-        Intent intent = new Intent(action);
+            String defaultCategory, List<Tile> outTiles, boolean requireSettings) {
+        final Intent intent = new Intent(action);
         if (requireSettings) {
             intent.setPackage(SETTING_PKG);
         }
-        getTilesForIntent(context, user, intent, addedCache, defaultCategory, outTiles,
-                usePriority);
-    }
-
-    public static void getTilesForIntent(
-            Context context, UserHandle user, Intent intent,
-            Map<Pair<String, String>, Tile> addedCache, String defaultCategory, List<Tile> outTiles,
-            boolean usePriority) {
-        PackageManager pm = context.getPackageManager();
+        final PackageManager pm = context.getPackageManager();
         List<ResolveInfo> results = pm.queryIntentActivitiesAsUser(intent,
                 PackageManager.GET_META_DATA, user.getIdentifier());
         for (ResolveInfo resolved : results) {
@@ -306,7 +288,6 @@ public class TileUtils {
             Tile tile = addedCache.get(key);
             if (tile == null) {
                 tile = new Tile(activityInfo, categoryKey);
-                updateTileData(context, tile, activityInfo, activityInfo.applicationInfo, pm);
                 addedCache.put(key, tile);
             }
 
@@ -317,34 +298,6 @@ public class TileUtils {
                 outTiles.add(tile);
             }
         }
-    }
-
-    private static boolean updateTileData(Context context, Tile tile,
-            ActivityInfo activityInfo, ApplicationInfo applicationInfo, PackageManager pm) {
-        if (applicationInfo.isSystemApp()) {
-            String summary = null;
-
-            // Get the activity's meta-data
-            try {
-                Resources res = pm.getResourcesForApplication(applicationInfo.packageName);
-                Bundle metaData = activityInfo.metaData;
-
-                if (res != null && metaData != null) {
-                    if (metaData.containsKey(META_DATA_PREFERENCE_SUMMARY)) {
-                        if (metaData.get(META_DATA_PREFERENCE_SUMMARY) instanceof Integer) {
-                            summary = res.getString(metaData.getInt(META_DATA_PREFERENCE_SUMMARY));
-                        } else {
-                            summary = metaData.getString(META_DATA_PREFERENCE_SUMMARY);
-                        }
-                    }
-                }
-            } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
-                if (DEBUG) Log.d(LOG_TAG, "Couldn't find info", e);
-            }
-            return true;
-        }
-
-        return false;
     }
 
     /**
