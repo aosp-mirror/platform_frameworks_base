@@ -824,21 +824,19 @@ static jobjectArray
 android_media_AudioEffect_native_queryPreProcessings(JNIEnv *env, jclass clazz __unused,
                                                      jint audioSession)
 {
-    effect_descriptor_t *descriptors = new effect_descriptor_t[AudioEffect::kMaxPreProcessing];
+    auto descriptors = std::make_unique<effect_descriptor_t[]>(AudioEffect::kMaxPreProcessing);
     uint32_t numEffects = AudioEffect::kMaxPreProcessing;
 
     status_t status = AudioEffect::queryDefaultPreProcessing((audio_session_t) audioSession,
-                                           descriptors,
+                                           descriptors.get(),
                                            &numEffects);
     if (status != NO_ERROR || numEffects == 0) {
-        delete[] descriptors;
         return NULL;
     }
     ALOGV("queryDefaultPreProcessing() got %d effects", numEffects);
 
     jobjectArray ret = env->NewObjectArray(numEffects, fields.clazzDesc, NULL);
     if (ret == NULL) {
-        delete[] descriptors;
         return ret;
     }
 
@@ -875,7 +873,7 @@ android_media_AudioEffect_native_queryPreProcessings(JNIEnv *env, jclass clazz _
         if (jdesc == NULL) {
             ALOGE("env->NewObject(fields.clazzDesc, fields.midDescCstor)");
             env->DeleteLocalRef(ret);
-            return NULL;;
+            return NULL;
         }
 
         env->SetObjectArrayElement(ret, i, jdesc);
