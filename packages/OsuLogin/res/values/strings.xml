@@ -1,0 +1,4 @@
+<resources>
+    <!-- application name [CHAR LIMIT=32] -->
+    <string name="app_name">OsuLogin</string>
+</resources>
