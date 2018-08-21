@@ -30,6 +30,7 @@ import android.service.wallpaper.WallpaperService;
 import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.DisplayListCanvas;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
@@ -366,7 +367,12 @@ public class ImageWallpaper extends WallpaperService {
                 protected Bitmap doInBackground(Void... params) {
                     Throwable exception;
                     try {
-                        return mWallpaperManager.getBitmap(true /* hardware */);
+                        Bitmap wallpaper = mWallpaperManager.getBitmap(true /* hardware */);
+                        if (wallpaper != null
+                                && wallpaper.getByteCount() > DisplayListCanvas.MAX_BITMAP_SIZE) {
+                            throw new RuntimeException("Wallpaper is too large to draw!");
+                        }
+                        return wallpaper;
                     } catch (RuntimeException | OutOfMemoryError e) {
                         exception = e;
                     }
