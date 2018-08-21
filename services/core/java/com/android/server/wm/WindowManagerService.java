@@ -2092,12 +2092,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (focusMayChange) {
-                //System.out.println("Focus may change: " + win.mAttrs.getTitle());
-                if (updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
-                        false /*updateInputWindows*/)) {
+                if (updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/)) {
                     imMayMove = false;
                 }
-                //System.out.println("Relayout " + win + ": focus=" + mCurrentFocus);
             }
 
             // updateFocusedWindowLocked() already assigned layers so we only need to
