@@ -451,6 +451,23 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     }
 
     @Override
+    public void clearNextDataSources() {
+        addTask(new Task(CALL_COMPLETED_CLEAR_NEXT_DATA_SOURCES, false) {
+            @Override
+            void process() {
+                synchronized (mSrcLock) {
+                    if (mNextDSDs != null) {
+                        mNextDSDs.clear();
+                        mNextDSDs = null;
+                    }
+                    mNextSrcId = mSrcIdGenerator++;
+                    mNextSourceState = NEXT_SOURCE_STATE_INIT;
+                }
+            }
+        });
+    }
+
+    @Override
     public @NonNull DataSourceDesc getCurrentDataSource() {
         synchronized (mSrcLock) {
             return mCurrentDSD;
@@ -1645,6 +1662,14 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }
         synchronized (mDrmEventCbLock) {
             mDrmEventCallbackRecords.clear();
+        }
+        synchronized (mSrcLock) {
+            if (mNextDSDs != null) {
+                mNextDSDs.clear();
+                mNextDSDs = null;
+            }
+            mNextSrcId = mSrcIdGenerator++;
+            mNextSourceState = NEXT_SOURCE_STATE_INIT;
         }
 
         stayAwake(false);
