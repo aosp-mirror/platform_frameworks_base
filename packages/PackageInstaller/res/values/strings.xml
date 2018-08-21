@@ -36,11 +36,11 @@
     <!-- Message for updating an existing app [CHAR LIMIT=NONE] -->
     <string name="install_confirm_question_update">Do you want to install an update
             to this existing application?  Your existing data will not
-            be lost.  The updated application will get access to:</string>
+            be lost.</string>
     <!-- Message for updating an existing system app [CHAR LIMIT=NONE] -->
     <string name="install_confirm_question_update_system">Do you want to install an update
             to this built-in application?  Your existing data will not
-            be lost.  The updated application will get access to:</string>
+            be lost.</string>
     <!-- [CHAR LIMIT=100] -->
     <string name="install_failed">App not installed.</string>
     <!-- Reason displayed when installation fails because the package was blocked

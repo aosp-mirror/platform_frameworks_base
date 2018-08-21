@@ -21,6 +21,7 @@ import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -786,6 +787,7 @@ public class MediaRouter {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public RouteInfo getSelectedRoute() {
         return getSelectedRoute(ROUTE_TYPE_ANY);
     }
@@ -939,6 +941,7 @@ public class MediaRouter {
     /**
      * @hide internal use
      */
+    @UnsupportedAppUsage
     public void selectRouteInt(int types, RouteInfo route, boolean explicit) {
         selectRouteStatic(types, route, explicit);
     }
@@ -1527,6 +1530,7 @@ public class MediaRouter {
      */
     public static class RouteInfo {
         CharSequence mName;
+        @UnsupportedAppUsage
         int mNameResId;
         CharSequence mDescription;
         private CharSequence mStatus;
@@ -1558,7 +1562,9 @@ public class MediaRouter {
 
         /** @hide */ public static final int STATUS_NONE = 0;
         /** @hide */ public static final int STATUS_SCANNING = 1;
-        /** @hide */ public static final int STATUS_CONNECTING = 2;
+        /** @hide */
+        @UnsupportedAppUsage
+        public static final int STATUS_CONNECTING = 2;
         /** @hide */ public static final int STATUS_AVAILABLE = 3;
         /** @hide */ public static final int STATUS_NOT_AVAILABLE = 4;
         /** @hide */ public static final int STATUS_IN_USE = 5;
@@ -1675,6 +1681,7 @@ public class MediaRouter {
             return getName(context.getResources());
         }
 
+        @UnsupportedAppUsage
         CharSequence getName(Resources res) {
             if (mNameResId != 0) {
                 return res.getText(mNameResId);
@@ -1770,6 +1777,7 @@ public class MediaRouter {
         /**
          * @hide
          */
+        @UnsupportedAppUsage
         public int getStatusCode() {
             return mResolvedStatusCode;
         }
@@ -1794,6 +1802,7 @@ public class MediaRouter {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public boolean matchesTypes(int types) {
             return (mSupportedTypes & types) != 0;
         }
@@ -2024,6 +2033,7 @@ public class MediaRouter {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public String getDeviceAddress() {
             return mDeviceAddress;
         }
@@ -2048,11 +2058,13 @@ public class MediaRouter {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public boolean isSelected() {
             return this == sStatic.mSelectedRoute;
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public boolean isDefault() {
             return this == sStatic.mDefaultAudioVideo;
         }
@@ -2063,6 +2075,7 @@ public class MediaRouter {
         }
 
         /** @hide */
+        @UnsupportedAppUsage
         public void select() {
             selectRouteStatic(mSupportedTypes, this, true);
         }

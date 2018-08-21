@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.XmlRes;
 import android.content.Context;
 import android.content.res.Resources;
@@ -145,14 +146,20 @@ public final class PointerIcon implements Parcelable {
     private static final SparseArray<PointerIcon> gSystemIcons = new SparseArray<PointerIcon>();
     private static boolean sUseLargeIcons = false;
 
+    @UnsupportedAppUsage
     private final int mType;
     private int mSystemIconResourceId;
+    @UnsupportedAppUsage
     private Bitmap mBitmap;
+    @UnsupportedAppUsage
     private float mHotSpotX;
+    @UnsupportedAppUsage
     private float mHotSpotY;
     // The bitmaps for the additional frame of animated pointer icon. Note that the first frame
     // will be stored in mBitmap.
+    @UnsupportedAppUsage
     private Bitmap mBitmapFrames[];
+    @UnsupportedAppUsage
     private int mDurationPerFrame;
 
     private PointerIcon(int type) {
@@ -312,6 +319,7 @@ public final class PointerIcon implements Parcelable {
      * @throws IllegalArgumentException if context is null.
      * @hide
      */
+    @UnsupportedAppUsage
     public PointerIcon load(@NonNull Context context) {
         if (context == null) {
             throw new IllegalArgumentException("context must not be null");

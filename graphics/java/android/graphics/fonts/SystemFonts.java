@@ -24,6 +24,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -251,7 +252,7 @@ public class SystemFonts {
             return fontConfig.getAliases();
         } catch (IOException | XmlPullParserException e) {
             Log.e(TAG, "Failed initialize system fallbacks.", e);
-            return null;
+            return ArrayUtils.emptyArray(FontConfig.Alias.class);
         }
     }
 

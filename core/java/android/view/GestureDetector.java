@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
@@ -216,12 +217,15 @@ public class GestureDetector {
         }
     }
 
+    @UnsupportedAppUsage
     private int mTouchSlopSquare;
     private int mDoubleTapTouchSlopSquare;
     private int mDoubleTapSlopSquare;
+    @UnsupportedAppUsage
     private int mMinimumFlingVelocity;
     private int mMaximumFlingVelocity;
 
+    @UnsupportedAppUsage
     private static final int LONGPRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
     private static final int TAP_TIMEOUT = ViewConfiguration.getTapTimeout();
     private static final int DOUBLE_TAP_TIMEOUT = ViewConfiguration.getDoubleTapTimeout();
@@ -233,6 +237,7 @@ public class GestureDetector {
     private static final int TAP = 3;
 
     private final Handler mHandler;
+    @UnsupportedAppUsage
     private final OnGestureListener mListener;
     private OnDoubleTapListener mDoubleTapListener;
     private OnContextClickListener mContextClickListener;
@@ -241,6 +246,7 @@ public class GestureDetector {
     private boolean mDeferConfirmSingleTap;
     private boolean mInLongPress;
     private boolean mInContextClick;
+    @UnsupportedAppUsage
     private boolean mAlwaysInTapRegion;
     private boolean mAlwaysInBiggerTapRegion;
     private boolean mIgnoreNextUpEvent;

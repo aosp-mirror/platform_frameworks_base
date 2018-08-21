@@ -25,6 +25,8 @@
 #include <SkSurface.h>
 #include <vk/GrVkBackendContext.h>
 
+class GrVkExtensions;
+
 namespace android {
 namespace uirenderer {
 namespace renderthread {
@@ -116,7 +118,7 @@ private:
 
     // Sets up the VkInstance and VkDevice objects. Also fills out the passed in
     // VkPhysicalDeviceFeatures struct.
-    bool setupDevice(VkPhysicalDeviceFeatures& deviceFeatures);
+    bool setupDevice(GrVkExtensions&, VkPhysicalDeviceFeatures2&);
 
     void destroyBuffers(VulkanSurface* surface);
 
@@ -156,13 +158,14 @@ private:
     VkPtr<PFN_vkCreateSharedSwapchainsKHR> mCreateSharedSwapchainsKHR;
 
     // Instance Functions
+    VkPtr<PFN_vkEnumerateInstanceVersion> mEnumerateInstanceVersion;
     VkPtr<PFN_vkEnumerateInstanceExtensionProperties> mEnumerateInstanceExtensionProperties;
     VkPtr<PFN_vkCreateInstance> mCreateInstance;
 
     VkPtr<PFN_vkDestroyInstance> mDestroyInstance;
     VkPtr<PFN_vkEnumeratePhysicalDevices> mEnumeratePhysicalDevices;
     VkPtr<PFN_vkGetPhysicalDeviceQueueFamilyProperties> mGetPhysicalDeviceQueueFamilyProperties;
-    VkPtr<PFN_vkGetPhysicalDeviceFeatures> mGetPhysicalDeviceFeatures;
+    VkPtr<PFN_vkGetPhysicalDeviceFeatures2> mGetPhysicalDeviceFeatures2;
     VkPtr<PFN_vkCreateDevice> mCreateDevice;
     VkPtr<PFN_vkEnumerateDeviceExtensionProperties> mEnumerateDeviceExtensionProperties;
 

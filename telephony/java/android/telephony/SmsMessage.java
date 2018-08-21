@@ -20,6 +20,7 @@ import static android.telephony.TelephonyManager.PHONE_TYPE_CDMA;
 
 import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.os.Binder;
 import android.text.TextUtils;
@@ -107,18 +108,21 @@ public class SmsMessage {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public SmsMessageBase mWrappedSmsMessage;
 
     /** Indicates the subId
      *
      * @hide
      */
+    @UnsupportedAppUsage
     private int mSubId = 0;
 
     /** set Subscription information
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setSubId(int subId) {
         mSubId = subId;
     }
@@ -127,6 +131,7 @@ public class SmsMessage {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getSubId() {
         return mSubId;
     }
@@ -368,6 +373,7 @@ public class SmsMessage {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static ArrayList<String> fragmentText(String text) {
         // This function is for MO SMS
         TextEncodingDetails ted = (useCdmaFormatForMoSms()) ?
@@ -822,6 +828,7 @@ public class SmsMessage {
      *
      * @return true if Cdma format should be used for MO SMS, false otherwise.
      */
+    @UnsupportedAppUsage
     private static boolean useCdmaFormatForMoSms() {
         // IMS is registered with SMS support, check the SMS format supported
         return useCdmaFormatForMoSms(SubscriptionManager.getDefaultSmsSubscriptionId());
@@ -836,6 +843,7 @@ public class SmsMessage {
      *
      * @return true if Cdma format should be used for MO SMS, false otherwise.
      */
+    @UnsupportedAppUsage
     private static boolean useCdmaFormatForMoSms(int subId) {
         SmsManager smsManager = SmsManager.getSmsManagerForSubscriptionId(subId);
         if (!smsManager.isImsSmsSupported()) {

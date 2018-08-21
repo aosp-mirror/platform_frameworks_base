@@ -397,6 +397,23 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_REASON_ACCESSIBILITY = 7;
 
     /**
+     * @hide
+     */
+    public static String sleepReasonToString(int sleepReason) {
+        switch (sleepReason) {
+            case GO_TO_SLEEP_REASON_APPLICATION: return "application";
+            case GO_TO_SLEEP_REASON_DEVICE_ADMIN: return "device_admin";
+            case GO_TO_SLEEP_REASON_TIMEOUT: return "timeout";
+            case GO_TO_SLEEP_REASON_LID_SWITCH: return "lid_switch";
+            case GO_TO_SLEEP_REASON_POWER_BUTTON: return "power_button";
+            case GO_TO_SLEEP_REASON_HDMI: return "hdmi";
+            case GO_TO_SLEEP_REASON_SLEEP_BUTTON: return "sleep_button";
+            case GO_TO_SLEEP_REASON_ACCESSIBILITY: return "accessibility";
+            default: return Integer.toString(sleepReason);
+        }
+    }
+
+    /**
      * Go to sleep flag: Skip dozing state and directly go to full sleep.
      * @hide
      */
@@ -1304,6 +1321,22 @@ public final class PowerManager {
     public int getLastShutdownReason() {
         try {
             return mService.getLastShutdownReason();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the reason the device last went to sleep (i.e. the last value of
+     * the second argument of {@link #goToSleep(long, int, int) goToSleep}).
+     *
+     * @return One of the {@code GO_TO_SLEEP_REASON_*} constants.
+     *
+     * @hide
+     */
+    public int getLastSleepReason() {
+        try {
+            return mService.getLastSleepReason();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

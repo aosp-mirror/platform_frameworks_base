@@ -25,6 +25,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -652,6 +653,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static int getAccessibilityViewId(long accessibilityNodeId) {
         return (int) accessibilityNodeId;
     }
@@ -665,6 +667,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static int getVirtualDescendantId(long accessibilityNodeId) {
         return (int) ((accessibilityNodeId & VIRTUAL_DESCENDANT_ID_MASK)
                 >> VIRTUAL_DESCENDANT_ID_SHIFT);
@@ -692,10 +695,12 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final AccessibilityNodeInfo DEFAULT = new AccessibilityNodeInfo();
 
+    @UnsupportedAppUsage
     private boolean mSealed;
 
     // Data.
     private int mWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+    @UnsupportedAppUsage
     private long mSourceNodeId = UNDEFINED_NODE_ID;
     private long mParentNodeId = UNDEFINED_NODE_ID;
     private long mLabelForId = UNDEFINED_NODE_ID;
@@ -721,6 +726,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private String mViewIdResourceName;
     private ArrayList<String> mExtraDataKeys;
 
+    @UnsupportedAppUsage
     private LongArray mChildNodeIds;
     private ArrayList<AccessibilityAction> mActions;
 
@@ -855,6 +861,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean refresh(Bundle arguments, boolean bypassCache) {
         enforceSealed();
         if (!canPerformRequestOverConnection(mSourceNodeId)) {
@@ -3021,6 +3028,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public long getSourceNodeId() {
         return mSourceNodeId;
     }
@@ -3032,6 +3040,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setSealed(boolean sealed) {
         mSealed = sealed;
     }
@@ -3043,6 +3052,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isSealed() {
         return mSealed;
     }

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.os.Parcel;
@@ -129,7 +130,9 @@ public class DragEvent implements Parcelable {
 
     int mAction;
     float mX, mY;
+    @UnsupportedAppUsage
     ClipDescription mClipDescription;
+    @UnsupportedAppUsage
     ClipData mClipData;
     IDragAndDropPermissions mDragAndDropPermissions;
 
@@ -313,6 +316,7 @@ public class DragEvent implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static DragEvent obtain(DragEvent source) {
         return obtain(source.mAction, source.mX, source.mY, source.mLocalState,
                 source.mClipDescription, source.mClipData, source.mDragAndDropPermissions,

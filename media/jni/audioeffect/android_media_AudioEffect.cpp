@@ -907,6 +907,7 @@ static const JNINativeMethod gMethods[] = {
 
 // ----------------------------------------------------------------------------
 
+extern int register_android_media_SourceDefaultEffect(JNIEnv *env);
 extern int register_android_media_StreamDefaultEffect(JNIEnv *env);
 extern int register_android_media_visualizer(JNIEnv *env);
 
@@ -929,6 +930,11 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved __unused)
 
     if (register_android_media_AudioEffect(env) < 0) {
         ALOGE("ERROR: AudioEffect native registration failed\n");
+        goto bail;
+    }
+
+    if (register_android_media_SourceDefaultEffect(env) < 0) {
+        ALOGE("ERROR: SourceDefaultEffect native registration failed\n");
         goto bail;
     }
 

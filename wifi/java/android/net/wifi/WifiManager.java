@@ -318,6 +318,31 @@ public class WifiManager {
             "android.net.wifi.extra.SUBSCRIPTION_REMEDIATION_METHOD";
 
     /**
+     * Activity Action: lunch OSU (Online Sign Up) view.
+     * Included extras:
+     *
+     * {@link #EXTRA_OSU_NETWORK}: {@link Network} instance associated with OSU AP.
+     * {@link #EXTRA_URL}: String representation of a server URL used for OSU process.
+     *
+     * <p>Note: The broadcast is only delivered to registered receivers - no manifest registered
+     * components will be launched.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PASSPOINT_LAUNCH_OSU_VIEW =
+            "android.net.wifi.action.PASSPOINT_LAUNCH_OSU_VIEW";
+
+    /**
+     * The lookup key for a {@link android.net.Network} associated with OSU server.
+     *
+     * Retrieve with {@link android.content.Intent#getParcelableExtra(String)}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_OSU_NETWORK = "android.net.wifi.extra.OSU_NETWORK";
+
+    /**
      * Broadcast intent action indicating that Wi-Fi has been enabled, disabled,
      * enabling, disabling, or unknown. One extra provides this state as an int.
      * Another extra provides the previous state, if available.
@@ -3409,7 +3434,7 @@ public class WifiManager {
                         mService.acquireMulticastLock(mBinder, mTag);
                         synchronized (WifiManager.this) {
                             if (mActiveLockCount >= MAX_ACTIVE_LOCKS) {
-                                mService.releaseMulticastLock();
+                                mService.releaseMulticastLock(mTag);
                                 throw new UnsupportedOperationException(
                                         "Exceeded maximum number of wifi locks");
                             }
@@ -3451,7 +3476,7 @@ public class WifiManager {
             synchronized (mBinder) {
                 if (mRefCounted ? (--mRefCount == 0) : (mHeld)) {
                     try {
-                        mService.releaseMulticastLock();
+                        mService.releaseMulticastLock(mTag);
                         synchronized (WifiManager.this) {
                             mActiveLockCount--;
                         }

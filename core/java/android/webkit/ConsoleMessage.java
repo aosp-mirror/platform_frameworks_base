@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * Public class representing a JavaScript console message from WebCore. This could be a issued
  * by a call to one of the <code>console</code> logging functions (e.g.
@@ -34,9 +36,13 @@ public class ConsoleMessage {
         DEBUG
     };
 
+    @UnsupportedAppUsage
     private MessageLevel mLevel;
+    @UnsupportedAppUsage
     private String mMessage;
+    @UnsupportedAppUsage
     private String mSourceId;
+    @UnsupportedAppUsage
     private int mLineNumber;
 
     public ConsoleMessage(String message, String sourceId, int lineNumber, MessageLevel msgLevel) {

@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -88,6 +89,7 @@ public final class AccessibilityManager {
     public static final int DALTONIZER_DISABLED = -1;
 
     /** @hide */
+    @UnsupportedAppUsage
     public static final int DALTONIZER_SIMULATE_MONOCHROMACY = 0;
 
     /** @hide */
@@ -112,30 +114,39 @@ public final class AccessibilityManager {
     public static final String ACTION_CHOOSE_ACCESSIBILITY_BUTTON =
             "com.android.internal.intent.action.CHOOSE_ACCESSIBILITY_BUTTON";
 
+    @UnsupportedAppUsage
     static final Object sInstanceSync = new Object();
 
+    @UnsupportedAppUsage
     private static AccessibilityManager sInstance;
 
+    @UnsupportedAppUsage
     private final Object mLock = new Object();
 
+    @UnsupportedAppUsage
     private IAccessibilityManager mService;
 
+    @UnsupportedAppUsage
     final int mUserId;
 
+    @UnsupportedAppUsage
     final Handler mHandler;
 
     final Handler.Callback mCallback;
 
+    @UnsupportedAppUsage
     boolean mIsEnabled;
 
     int mRelevantEventTypes = AccessibilityEvent.TYPES_ALL_MASK;
 
     boolean mIsTouchExplorationEnabled;
 
+    @UnsupportedAppUsage
     boolean mIsHighTextContrastEnabled;
 
     AccessibilityPolicy mAccessibilityPolicy;
 
+    @UnsupportedAppUsage
     private final ArrayMap<AccessibilityStateChangeListener, Handler>
             mAccessibilityStateChangeListeners = new ArrayMap<>();
 
@@ -318,6 +329,7 @@ public final class AccessibilityManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static AccessibilityManager getInstance(Context context) {
         synchronized (sInstanceSync) {
             if (sInstance == null) {
@@ -430,6 +442,7 @@ public final class AccessibilityManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isHighTextContrastEnabled() {
         synchronized (mLock) {
             IAccessibilityManager service = getServiceLocked();
@@ -916,6 +929,7 @@ public final class AccessibilityManager {
      *
      * @param stateFlags The state flags.
      */
+    @UnsupportedAppUsage
     private void setStateLocked(int stateFlags) {
         final boolean enabled = (stateFlags & STATE_FLAG_ACCESSIBILITY_ENABLED) != 0;
         final boolean touchExplorationEnabled =

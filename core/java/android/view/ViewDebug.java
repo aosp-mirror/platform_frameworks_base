@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -372,6 +373,7 @@ public class ViewDebug {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static long getViewInstanceCount() {
         return Debug.countInstancesOfClass(View.class);
     }
@@ -383,6 +385,7 @@ public class ViewDebug {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static long getViewRootImplCount() {
         return Debug.countInstancesOfClass(ViewRootImpl.class);
     }
@@ -434,6 +437,7 @@ public class ViewDebug {
     public static void stopHierarchyTracing() {
     }
 
+    @UnsupportedAppUsage
     static void dispatchCommand(View view, String command, String parameters,
             OutputStream clientStream) throws IOException {
 
@@ -803,6 +807,7 @@ public class ViewDebug {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     public static void dump(View root, boolean skipChildren, boolean includeProperties,
             OutputStream clientStream) throws IOException {
         BufferedWriter out = null;

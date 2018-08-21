@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.util.Pools.SynchronizedPool;
 
 /**
@@ -68,6 +69,7 @@ public final class VelocityTracker {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static VelocityTracker obtain(String strategy) {
         if (strategy == null) {
             return obtain();
@@ -235,21 +237,25 @@ public final class VelocityTracker {
         /**
          * Polynomial coefficients describing motion in X.
          */
+        @UnsupportedAppUsage
         public final float[] xCoeff = new float[MAX_DEGREE + 1];
 
         /**
          * Polynomial coefficients describing motion in Y.
          */
+        @UnsupportedAppUsage
         public final float[] yCoeff = new float[MAX_DEGREE + 1];
 
         /**
          * Polynomial degree, or zero if only position information is available.
          */
+        @UnsupportedAppUsage
         public int degree;
 
         /**
          * Confidence (coefficient of determination), between 0 (no fit) and 1 (perfect fit).
          */
+        @UnsupportedAppUsage
         public float confidence;
 
         /**

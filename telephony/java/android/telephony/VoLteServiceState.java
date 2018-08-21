@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -77,6 +78,7 @@ public final class VoLteServiceState implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public VoLteServiceState(int srvccState) {
         initialize();
 

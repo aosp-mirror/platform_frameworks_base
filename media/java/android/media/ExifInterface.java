@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -468,6 +469,7 @@ public class ExifInterface {
     // See http://www.exiv2.org/makernote.html#R11
     private static final int PEF_MAKER_NOTE_SKIP_SIZE = 6;
 
+    @UnsupportedAppUsage
     private static SimpleDateFormat sFormatter;
 
     // See Exchangeable image file format for digital still cameras: Exif version 2.2.
@@ -1293,14 +1295,17 @@ public class ExifInterface {
         sExifPointerTagMap.put(EXIF_POINTER_TAGS[5].number, IFD_TYPE_ORF_IMAGE_PROCESSING); // 8256
     }
 
+    @UnsupportedAppUsage
     private final String mFilename;
     private final FileDescriptor mSeekableFileDescriptor;
     private final AssetManager.AssetInputStream mAssetInputStream;
     private final boolean mIsInputStream;
     private int mMimeType;
+    @UnsupportedAppUsage
     private final HashMap[] mAttributes = new HashMap[EXIF_TAGS.length];
     private Set<Integer> mAttributesOffsets = new HashSet<>(EXIF_TAGS.length);
     private ByteOrder mExifByteOrder = ByteOrder.BIG_ENDIAN;
+    @UnsupportedAppUsage
     private boolean mHasThumbnail;
     // The following values used for indicating a thumbnail position.
     private int mThumbnailOffset;
@@ -2022,6 +2027,7 @@ public class ExifInterface {
      * Returns -1 if the date time information if not available.
      * @hide
      */
+    @UnsupportedAppUsage
     public long getDateTime() {
         String dateTimeString = getAttribute(TAG_DATETIME);
         if (dateTimeString == null
@@ -2058,6 +2064,7 @@ public class ExifInterface {
      * Returns -1 if the date time information if not available.
      * @hide
      */
+    @UnsupportedAppUsage
     public long getGpsDateTime() {
         String date = getAttribute(TAG_GPS_DATESTAMP);
         String time = getAttribute(TAG_GPS_TIMESTAMP);
@@ -2080,6 +2087,7 @@ public class ExifInterface {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static float convertRationalLatLonToFloat(String rationalString, String ref) {
         try {
             String [] parts = rationalString.split(",");

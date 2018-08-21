@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.util.Log;
 
@@ -115,6 +116,7 @@ public final class InputEventConsistencyVerifier {
      * @param caller The object to which the verifier is attached.
      * @param flags Flags to the verifier, or 0 if none.
      */
+    @UnsupportedAppUsage
     public InputEventConsistencyVerifier(Object caller, int flags) {
         this(caller, flags, null);
     }
@@ -135,6 +137,7 @@ public final class InputEventConsistencyVerifier {
      * Determines whether the instrumentation should be enabled.
      * @return True if it should be enabled.
      */
+    @UnsupportedAppUsage
     public static boolean isInstrumentationEnabled() {
         return IS_ENG_BUILD;
     }
@@ -319,6 +322,7 @@ public final class InputEventConsistencyVerifier {
      * where a subclass dispatching method delegates to its superclass's dispatching method
      * and both dispatching methods call into the consistency verifier.
      */
+    @UnsupportedAppUsage
     public void onTouchEvent(MotionEvent event, int nestingLevel) {
         if (!startEvent(event, nestingLevel, EVENT_TYPE_TOUCH)) {
             return;
@@ -579,6 +583,7 @@ public final class InputEventConsistencyVerifier {
      * where a subclass dispatching method delegates to its superclass's dispatching method
      * and both dispatching methods call into the consistency verifier.
      */
+    @UnsupportedAppUsage
     public void onUnhandledEvent(InputEvent event, int nestingLevel) {
         if (nestingLevel != mLastNestingLevel) {
             return;

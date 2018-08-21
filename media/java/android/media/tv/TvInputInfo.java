@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.StringRes;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -318,6 +319,7 @@ public final class TvInputInfo implements Parcelable {
      * Returns the component of the service that implements this TV input.
      * @hide
      */
+    @UnsupportedAppUsage
     public ComponentName getComponent() {
         return new ComponentName(mService.serviceInfo.packageName, mService.serviceInfo.name);
     }

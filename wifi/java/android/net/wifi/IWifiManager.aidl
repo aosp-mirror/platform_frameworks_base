@@ -126,7 +126,7 @@ interface IWifiManager
 
     void acquireMulticastLock(IBinder binder, String tag);
 
-    void releaseMulticastLock();
+    void releaseMulticastLock(String tag);
 
     void updateInterfaceIpState(String ifaceName, int mode);
 

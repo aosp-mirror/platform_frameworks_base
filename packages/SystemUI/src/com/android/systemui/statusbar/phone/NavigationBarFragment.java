@@ -181,6 +181,9 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         public void onQuickStepStarted() {
             // Use navbar dragging as a signal to hide the rotate button
             setRotateSuggestionButtonState(false);
+
+            // Hide the notifications panel when quick step starts
+            mStatusBar.collapsePanel(true /* animate */);
         }
 
         @Override

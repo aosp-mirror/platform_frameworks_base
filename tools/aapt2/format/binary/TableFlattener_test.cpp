@@ -17,7 +17,9 @@
 #include "format/binary/TableFlattener.h"
 
 #include "android-base/stringprintf.h"
+#include "androidfw/TypeWrappers.h"
 
+#include "ResChunkPullParser.h"
 #include "ResourceUtils.h"
 #include "SdkConstants.h"
 #include "format/binary/BinaryResourceParser.h"
@@ -234,6 +236,62 @@ TEST_F(TableFlattenerTest, FlattenMinMaxAttributes) {
   EXPECT_EQ(attr.type_mask, actual_attr->type_mask);
   EXPECT_EQ(attr.min_int, actual_attr->min_int);
   EXPECT_EQ(attr.max_int, actual_attr->max_int);
+}
+
+TEST_F(TableFlattenerTest, FlattenArray) {
+  auto array = util::make_unique<Array>();
+  array->elements.push_back(util::make_unique<BinaryPrimitive>(uint8_t(Res_value::TYPE_INT_DEC),
+                                                               1u));
+  array->elements.push_back(util::make_unique<BinaryPrimitive>(uint8_t(Res_value::TYPE_INT_DEC),
+                                                               2u));
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("android", 0x01)
+          .AddValue("android:array/foo", ResourceId(0x01010000), std::move(array))
+          .Build();
+
+  std::string result;
+  ASSERT_TRUE(Flatten(context_.get(), {}, table.get(), &result));
+
+  // Parse the flattened resource table
+  ResChunkPullParser parser(result.data(), result.size());
+  ASSERT_TRUE(parser.IsGoodEvent(parser.Next()));
+  ASSERT_EQ(util::DeviceToHost16(parser.chunk()->type), RES_TABLE_TYPE);
+
+  // Retrieve the package of the entry
+  ResChunkPullParser table_parser(GetChunkData(parser.chunk()), GetChunkDataLen(parser.chunk()));
+  const ResChunk_header* package_chunk = nullptr;
+  while (table_parser.IsGoodEvent(table_parser.Next())) {
+    if (util::DeviceToHost16(table_parser.chunk()->type) == RES_TABLE_PACKAGE_TYPE) {
+      package_chunk = table_parser.chunk();
+      break;
+    }
+  }
+
+  // Retrieve the type that proceeds the array entry
+  ASSERT_NE(package_chunk, nullptr);
+  ResChunkPullParser package_parser(GetChunkData(table_parser.chunk()),
+                                    GetChunkDataLen(table_parser.chunk()));
+  const ResChunk_header* type_chunk = nullptr;
+  while (package_parser.IsGoodEvent(package_parser.Next())) {
+    if (util::DeviceToHost16(package_parser.chunk()->type) == RES_TABLE_TYPE_TYPE) {
+      type_chunk = package_parser.chunk();
+      break;
+    }
+  }
+
+  // Retrieve the array entry
+  ASSERT_NE(type_chunk, nullptr);
+  TypeVariant typeVariant((const ResTable_type*) type_chunk);
+  auto entry = (const ResTable_map_entry*)*typeVariant.beginEntries();
+  ASSERT_EQ(util::DeviceToHost16(entry->count), 2u);
+
+  // Check that the value and name of the array entries are correct
+  auto values = (const ResTable_map*)(((const uint8_t *)entry) + entry->size);
+  ASSERT_EQ(values->value.data, 1u);
+  ASSERT_EQ(values->name.ident, android::ResTable_map::ATTR_MIN);
+  ASSERT_EQ((values+1)->value.data, 2u);
+  ASSERT_EQ((values+1)->name.ident, android::ResTable_map::ATTR_MIN + 1);
 }
 
 static std::unique_ptr<ResourceTable> BuildTableWithSparseEntries(

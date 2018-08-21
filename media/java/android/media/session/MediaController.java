@@ -18,6 +18,7 @@ package android.media.session;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -503,6 +504,7 @@ public final class MediaController {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean controlsSameSession(MediaController other) {
         if (other == null) return false;
         return mSessionBinder.asBinder() == other.getSessionBinder().asBinder();

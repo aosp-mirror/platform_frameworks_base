@@ -19,7 +19,7 @@
             android:label="@string/app_name"
             android:icon="@drawable/ic_app_icon"
             android:allowBackup="false"
-            android:theme="@style/DialogWhenLarge"
+            android:theme="@style/Theme.AlertDialogActivity"
             android:supportsRtl="true"
             android:defaultToDeviceProtectedStorage="true"
             android:directBootAware="true">
@@ -32,6 +32,7 @@
         </receiver>
 
         <activity android:name=".InstallStart"
+                android:theme="@android:style/Theme.Translucent.NoTitleBar"
                 android:exported="true"
                 android:excludeFromRecents="true">
             <intent-filter android:priority="1">
@@ -59,13 +60,14 @@
                 android:exported="false" />
 
         <activity android:name=".DeleteStagedFileOnResult"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:exported="false" />
 
         <activity android:name=".PackageInstallerActivity"
                 android:exported="false" />
 
         <activity android:name=".InstallInstalling"
-                android:theme="@style/DialogWhenLargeNoAnimation"
+                android:theme="@style/Theme.AlertDialogActivity.NoAnimation"
                 android:exported="false" />
 
         <receiver android:name=".InstallEventReceiver"
@@ -77,18 +79,17 @@
         </receiver>
 
         <activity android:name=".InstallSuccess"
-                android:theme="@style/DialogWhenLargeNoAnimation"
+                android:theme="@style/Theme.AlertDialogActivity.NoAnimation"
                 android:exported="false" />
 
         <activity android:name=".InstallFailed"
-                android:theme="@style/DialogWhenLargeNoAnimation"
+                android:theme="@style/Theme.AlertDialogActivity.NoAnimation"
                 android:exported="false" />
 
         <activity android:name=".UninstallerActivity"
                 android:configChanges="orientation|keyboardHidden|screenSize"
                 android:excludeFromRecents="true"
-                android:noHistory="true"
-                android:theme="@style/AlertDialogActivity">
+                android:noHistory="true">
             <intent-filter android:priority="1">
                 <action android:name="android.intent.action.DELETE" />
                 <action android:name="android.intent.action.UNINSTALL_PACKAGE" />
@@ -107,7 +108,6 @@
 
         <activity android:name=".UninstallUninstalling"
             android:excludeFromRecents="true"
-            android:theme="@style/AlertDialogActivity"
             android:exported="false" />
 
         <receiver android:name=".UninstallFinish"

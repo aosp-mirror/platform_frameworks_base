@@ -19,6 +19,7 @@ package com.android.packageinstaller;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -26,7 +27,10 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+
+import com.android.internal.app.AlertActivity;
 
 import java.io.File;
 import java.util.List;
@@ -34,7 +38,7 @@ import java.util.List;
 /**
  * Finish installation: Return status code to the caller or display "success" UI to user
  */
-public class InstallSuccess extends Activity {
+public class InstallSuccess extends AlertActivity {
     private static final String LOG_TAG = InstallSuccess.class.getSimpleName();
 
     @Override
@@ -53,8 +57,6 @@ public class InstallSuccess extends Activity {
                     intent.getParcelableExtra(PackageUtil.INTENT_ATTR_APPLICATION_INFO);
             Uri packageURI = intent.getData();
 
-            setContentView(R.layout.install_success);
-
             // Set header icon and title
             PackageUtil.AppSnippet as;
             PackageManager pm = getPackageManager();
@@ -67,16 +69,20 @@ public class InstallSuccess extends Activity {
                 as = PackageUtil.getAppSnippet(this, appInfo, sourceFile);
             }
 
-            PackageUtil.initSnippetForNewApp(this, as, R.id.app_snippet);
-
-            // Set up "done" button
-            findViewById(R.id.done_button).setOnClickListener(view -> {
-                if (appInfo.packageName != null) {
-                    Log.i(LOG_TAG, "Finished installing " + appInfo.packageName);
-                }
-                finish();
-            });
-
+            mAlert.setIcon(as.icon);
+            mAlert.setTitle(as.label);
+            mAlert.setView(R.layout.install_content_view);
+            mAlert.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.launch), null,
+                    null);
+            mAlert.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.done),
+                    (ignored, ignored2) -> {
+                        if (appInfo.packageName != null) {
+                            Log.i(LOG_TAG, "Finished installing " + appInfo.packageName);
+                        }
+                        finish();
+                    }, null);
+            setupAlert();
+            requireViewById(R.id.install_success).setVisibility(View.VISIBLE);
             // Enable or disable "launch" button
             Intent launchIntent = getPackageManager().getLaunchIntentForPackage(
                     appInfo.packageName);
@@ -89,7 +95,7 @@ public class InstallSuccess extends Activity {
                 }
             }
 
-            Button launchButton = (Button)findViewById(R.id.launch_button);
+            Button launchButton = mAlert.getButton(DialogInterface.BUTTON_POSITIVE);
             if (enabled) {
                 launchButton.setOnClickListener(view -> {
                     try {

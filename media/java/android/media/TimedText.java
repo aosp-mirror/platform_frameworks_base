@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.util.Log;
@@ -724,6 +725,7 @@ public final class TimedText
      * List of CharPos, Karaoke, Font, Style, and HyperText, or 3) an instance of
      * Justification.
      */
+    @UnsupportedAppUsage
     private Object getObject(final int key) {
         if (containsKey(key)) {
             return mKeyObjectMap.get(key);

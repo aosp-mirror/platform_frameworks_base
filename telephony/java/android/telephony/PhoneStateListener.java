@@ -17,16 +17,16 @@
 package android.telephony;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.telecom.TelecomManager;
 
 import com.android.internal.telephony.IPhoneStateListener;
 
-import java.util.List;
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 /**
  * A listener class for monitoring changes in specific telephony states
@@ -171,6 +171,7 @@ public class PhoneStateListener {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int LISTEN_PRECISE_CALL_STATE                       = 0x00000800;
 
     /**
@@ -271,11 +272,20 @@ public class PhoneStateListener {
      */
     public static final int LISTEN_PHYSICAL_CHANNEL_CONFIGURATION          = 0x00100000;
 
+    /**
+     *  Listen for changes to the phone capability.
+     *
+     *  @see #onPhoneCapabilityChanged
+     *  @hide
+     */
+    public static final int LISTEN_PHONE_CAPABILITY_CHANGE                 = 0x00200000;
+
     /*
      * Subscription used to listen to the phone state changes
      * @hide
      */
     /** @hide */
+    @UnsupportedAppUsage
     protected Integer mSubId;
 
     private final Handler mHandler;
@@ -293,6 +303,7 @@ public class PhoneStateListener {
      * using a particular non-null Looper.
      * @hide
      */
+    @UnsupportedAppUsage
     public PhoneStateListener(Looper looper) {
         this(null, looper);
     }
@@ -303,6 +314,7 @@ public class PhoneStateListener {
      * own non-null Looper use PhoneStateListener(int subId, Looper looper) below.
      * @hide
      */
+    @UnsupportedAppUsage
     public PhoneStateListener(Integer subId) {
         this(subId, Looper.myLooper());
     }
@@ -312,6 +324,7 @@ public class PhoneStateListener {
      * and non-null Looper.
      * @hide
      */
+    @UnsupportedAppUsage
     public PhoneStateListener(Integer subId, Looper looper) {
         if (DBG) log("ctor: subId=" + subId + " looper=" + looper);
         mSubId = subId;
@@ -388,6 +401,10 @@ public class PhoneStateListener {
                     case LISTEN_PHYSICAL_CHANNEL_CONFIGURATION:
                         PhoneStateListener.this.onPhysicalChannelConfigurationChanged(
                                 (List<PhysicalChannelConfig>)msg.obj);
+                        break;
+                    case LISTEN_PHONE_CAPABILITY_CHANGE:
+                        PhoneStateListener.this.onPhoneCapabilityChanged(
+                                (PhoneCapability) msg.obj);
                         break;
                 }
             }
@@ -515,6 +532,7 @@ public class PhoneStateListener {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void onOtaspChanged(int otaspMode) {
         // default implementation empty
     }
@@ -532,6 +550,7 @@ public class PhoneStateListener {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void onPreciseCallStateChanged(PreciseCallState callState) {
         // default implementation empty
     }
@@ -541,6 +560,7 @@ public class PhoneStateListener {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void onPreciseDataConnectionStateChanged(
             PreciseDataConnectionState dataConnectionState) {
         // default implementation empty
@@ -551,6 +571,7 @@ public class PhoneStateListener {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void onDataConnectionRealTimeInfoChanged(
             DataConnectionRealTimeInfo dcRtInfo) {
         // default implementation empty
@@ -562,6 +583,7 @@ public class PhoneStateListener {
      * @param stateInfo is the current LTE network information
      * @hide
      */
+    @UnsupportedAppUsage
     public void onVoLteServiceStateChanged(VoLteServiceState stateInfo) {
     }
 
@@ -608,7 +630,18 @@ public class PhoneStateListener {
      * @param rawData is the byte array of the OEM hook raw data.
      * @hide
      */
+    @UnsupportedAppUsage
     public void onOemHookRawEvent(byte[] rawData) {
+        // default implementation empty
+    }
+
+    /**
+     * Callback invoked when phone capability changes. Requires
+     * the READ_PRIVILEGED_PHONE_STATE permission.
+     * @param capability the new phone capability
+     * @hide
+     */
+    public void onPhoneCapabilityChanged(PhoneCapability capability) {
         // default implementation empty
     }
 
@@ -739,8 +772,13 @@ public class PhoneStateListener {
         public void onPhysicalChannelConfigurationChanged(List<PhysicalChannelConfig> configs) {
             send(LISTEN_PHYSICAL_CHANNEL_CONFIGURATION, 0, 0, configs);
         }
+
+        public void onPhoneCapabilityChanged(PhoneCapability capability) {
+            send(LISTEN_PHONE_CAPABILITY_CHANGE, 0, 0, capability);
+        }
     }
 
+    @UnsupportedAppUsage
     IPhoneStateListener callback = new IPhoneStateListenerStub(this);
 
     private void log(String s) {
