@@ -62,9 +62,8 @@ final class InputMonitor {
     // When true, need to call updateInputWindowsLw().
     private boolean mUpdateInputWindowsNeeded = true;
 
-    // Array of window handles to provide to the input dispatcher.
-    private InputWindowHandle[] mInputWindowHandles;
-    private int mInputWindowHandleCount;
+    // Currently focused input window handle.
+    private InputWindowHandle mFocusedInputWindowHandle;
 
     private boolean mDisableWallpaperTouchEvents;
     private final Rect mTmpRect = new Rect();
@@ -190,18 +189,7 @@ final class InputMonitor {
     }
 
 
-    private void addInputWindowHandle(final InputWindowHandle windowHandle) {
-        if (mInputWindowHandles == null) {
-            mInputWindowHandles = new InputWindowHandle[16];
-        }
-        if (mInputWindowHandleCount >= mInputWindowHandles.length) {
-            mInputWindowHandles = Arrays.copyOf(mInputWindowHandles,
-                    mInputWindowHandleCount * 2);
-        }
-        mInputWindowHandles[mInputWindowHandleCount++] = windowHandle;
-    }
-
-    void addInputWindowHandle(final InputWindowHandle inputWindowHandle,
+    void populateInputWindowHandle(final InputWindowHandle inputWindowHandle,
             final WindowState child, int flags, final int type, final boolean isVisible,
             final boolean hasFocus, final boolean hasWallpaper) {
         // Add a window to our list of input windows.
@@ -240,12 +228,9 @@ final class InputMonitor {
             Slog.d(TAG_WM, "addInputWindowHandle: "
                     + child + ", " + inputWindowHandle);
         }
-        addInputWindowHandle(inputWindowHandle);
-    }
 
-    private void clearInputWindowHandlesLw() {
-        while (mInputWindowHandleCount != 0) {
-            mInputWindowHandles[--mInputWindowHandleCount] = null;
+        if (hasFocus) {
+            mFocusedInputWindowHandle = inputWindowHandle;
         }
     }
 
@@ -404,13 +389,10 @@ final class InputMonitor {
                     true /* traverseTopToBottom */);
 
             if (mAddWallpaperInputConsumerHandle) {
-                // No visible wallpaper found, add the wallpaper input consumer at the end.
-                addInputWindowHandle(wallpaperInputConsumer.mWindowHandle);
+                wallpaperInputConsumer.show(mInputTransaction, 0);
             }
 
             mInputTransaction.apply();
-
-            clearInputWindowHandlesLw();
 
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
@@ -485,7 +467,7 @@ final class InputMonitor {
                 mService.mDragDropController.sendDragStartedIfNeededLocked(w);
             }
 
-            addInputWindowHandle(
+            populateInputWindowHandle(
                     inputWindowHandle, w, flags, type, isVisible, hasFocus, hasWallpaper);
 
             if (w.mWinAnimator.hasSurface()) {
