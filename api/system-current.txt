@@ -361,9 +361,11 @@ package android.app {
     method public final void attachBaseContext(android.content.Context);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public deprecated void onGetInstantAppIntentFilter(int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
-    method public void onGetInstantAppIntentFilter(android.content.Intent, int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public deprecated void onGetInstantAppIntentFilter(android.content.Intent, int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public void onGetInstantAppIntentFilter(android.content.Intent, int[], android.os.UserHandle, java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
     method public deprecated void onGetInstantAppResolveInfo(int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
-    method public void onGetInstantAppResolveInfo(android.content.Intent, int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public deprecated void onGetInstantAppResolveInfo(android.content.Intent, int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public void onGetInstantAppResolveInfo(android.content.Intent, int[], android.os.UserHandle, java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
   }
 
   public static final class InstantAppResolverService.InstantAppResolutionCallback {

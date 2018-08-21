@@ -132,7 +132,7 @@ public abstract class InstantAppResolver {
         try {
             final List<InstantAppResolveInfo> instantAppResolveInfoList =
                     connection.getInstantAppResolveInfoList(sanitizedIntent,
-                            requestObj.digest.getDigestPrefixSecure(), token);
+                            requestObj.digest.getDigestPrefixSecure(), requestObj.userId, token);
             if (instantAppResolveInfoList != null && instantAppResolveInfoList.size() > 0) {
                 resolveInfo = InstantAppResolver.filterInstantAppIntent(
                         instantAppResolveInfoList, origIntent, requestObj.resolvedType,
@@ -224,8 +224,8 @@ public abstract class InstantAppResolver {
         };
         try {
             connection.getInstantAppIntentFilterList(sanitizedIntent,
-                    requestObj.digest.getDigestPrefixSecure(), token, callback, callbackHandler,
-                    startTime);
+                    requestObj.digest.getDigestPrefixSecure(), requestObj.userId, token, callback,
+                    callbackHandler, startTime);
         } catch (ConnectionException e) {
             @ResolutionStatus int resolutionStatus = RESOLUTION_FAILURE;
             if (e.failure == ConnectionException.FAILURE_BIND) {
