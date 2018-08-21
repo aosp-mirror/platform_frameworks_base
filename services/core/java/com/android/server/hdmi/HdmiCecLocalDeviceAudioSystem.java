@@ -60,6 +60,17 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     // AVR as audio receiver.
     @ServiceThreadOnly private boolean mArcEstablished = false;
 
+    /**
+     * Return value of {@link #getLocalPortFromPhysicalAddress(int)}
+     */
+    private static final int TARGET_NOT_UNDER_LOCAL_DEVICE = -1;
+    private static final int TARGET_SAME_PHYSICAL_ADDRESS = 0;
+
+    // Local active port number used for Routing Control.
+    // Default 0 means HOME is the current active path. Temp solution only.
+    // TODO(amyjojo): adding system constants for Atom inputs port and TIF mapping.
+    private int mLocalActivePath = 0;
+
     protected HdmiCecLocalDeviceAudioSystem(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         mSystemAudioControlFeatureEnabled = true;
@@ -143,6 +154,20 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         ActiveSource activeSource = ActiveSource.of(logicalAddress, physicalAddress);
         if (!mActiveSource.equals(activeSource)) {
             setActiveSource(activeSource);
+        }
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleSetStreamPath(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+        // If current device is the target path, playback device should handle it.
+        // If the path is under the current device, should switch
+        int port = getLocalPortFromPhysicalAddress(physicalAddress);
+        if (port > 0) {
+            routeToPort(port);
         }
         return true;
     }
@@ -396,7 +421,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
             mService.wakeUp();
         }
         int targetPhysicalAddress = getActiveSource().physicalAddress;
-        if (newSystemAudioMode && !isPhysicalAddressMeOrBelow(targetPhysicalAddress)) {
+        int port = getLocalPortFromPhysicalAddress(targetPhysicalAddress);
+        if (newSystemAudioMode && port >= 0) {
             switchToAudioInput();
         }
         // TODO(b/80297700): Mute device when TV terminates the system audio control
@@ -411,27 +437,44 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     }
 
     /**
-     * Method to check if the target device belongs to the subtree of the current device or not.
+     * Method to parse target physical address to the port number on the current device.
      *
-     * <p>Return true if it does or if the two devices share the same physical address.
-     *
-     * <p>This check assumes both device physical address and target address are valid.
-     *
+     * <p>This check assumes target address is valid.
      * @param targetPhysicalAddress is the physical address of the target device
+     * @return
+     * <p>If the target device is under the current device, return the port number of current device
+     * that the target device is connected to.
+     *
+     * <p>If the target device has the same physical address as the current device, return
+     * {@link #TARGET_SAME_PHYSICAL_ADDRESS}.
+     *
+     * <p>If the target device is not under the current device, return
+     * {@link #TARGET_NOT_UNDER_LOCAL_DEVICE}.
      */
-    protected boolean isPhysicalAddressMeOrBelow(int targetPhysicalAddress) {
+    protected int getLocalPortFromPhysicalAddress(int targetPhysicalAddress) {
         int myPhysicalAddress = mService.getPhysicalAddress();
-        int xor = targetPhysicalAddress ^ myPhysicalAddress;
-        // Return true if two addresses are the same
-        // or if they only differs for one byte, but not the first byte,
-        // and myPhysicalAddress is 0 after that byte
-        if (xor == 0
-                || ((xor & 0x0f00) == xor && (myPhysicalAddress & 0x0fff) == 0)
-                || ((xor & 0x00f0) == xor && (myPhysicalAddress & 0x00ff) == 0)
-                || ((xor & 0x000f) == xor && (myPhysicalAddress & 0x000f) == 0)) {
-            return true;
+        if (myPhysicalAddress == targetPhysicalAddress) {
+            return TARGET_SAME_PHYSICAL_ADDRESS;
         }
-        return false;
+        int finalMask = 0xF000;
+        int mask;
+        int port = 0;
+        for (mask = 0x0F00; mask > 0x000F;  mask >>= 4) {
+            if ((myPhysicalAddress & mask) == 0)  {
+                port = mask & targetPhysicalAddress;
+                break;
+            } else {
+                finalMask |= mask;
+            }
+        }
+        if (finalMask != 0xFFFF && (finalMask & targetPhysicalAddress) == myPhysicalAddress) {
+            while (mask != 0x000F) {
+                mask >>= 4;
+                port >>= 4;
+            }
+            return port;
+        }
+        return TARGET_NOT_UNDER_LOCAL_DEVICE;
     }
 
     protected void switchToAudioInput() {
@@ -528,5 +571,15 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     void setAutoDeviceOff(boolean autoDeviceOff) {
         assertRunOnServiceThread();
         mAutoDeviceOff = autoDeviceOff;
+    }
+
+    private void routeToPort(int portId) {
+        // TODO(AMYJOJO): route to specific input of the port
+        mLocalActivePath = portId;
+    }
+
+    @VisibleForTesting
+    protected int getLocalActivePath() {
+        return mLocalActivePath;
     }
 }
