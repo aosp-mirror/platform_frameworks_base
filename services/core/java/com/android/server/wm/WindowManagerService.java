@@ -2341,6 +2341,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
         synchronized(mWindowMap) {
             final DisplayContent dc = mRoot.getDisplayContent(displayId);
+            if (dc == null) {
+                Slog.w(TAG_WM, "addWindowToken: Attempted to add token: " + binder
+                        + " for non-exiting displayId=" + displayId);
+                return;
+            }
+
             WindowToken token = dc.getWindowToken(binder);
             if (token != null) {
                 Slog.w(TAG_WM, "addWindowToken: Attempted to add binder token: " + binder
