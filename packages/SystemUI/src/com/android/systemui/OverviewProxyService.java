@@ -88,6 +88,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private @InteractionType int mInteractionFlags;
     private boolean mIsEnabled;
     private int mCurrentBoundedUserId = -1;
+    private float mBackButtonAlpha;
 
     private ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
 
@@ -193,6 +194,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
             long token = Binder.clearCallingIdentity();
             try {
+                mBackButtonAlpha = alpha;
                 mHandler.post(() -> {
                     notifyBackButtonAlphaChanged(alpha, animate);
                 });
@@ -320,6 +322,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
             mContext.registerReceiver(mLauncherStateChangedReceiver, filter);
         }
+    }
+
+    public float getBackButtonAlpha() {
+        return mBackButtonAlpha;
     }
 
     public void startConnectionToCurrentUser() {

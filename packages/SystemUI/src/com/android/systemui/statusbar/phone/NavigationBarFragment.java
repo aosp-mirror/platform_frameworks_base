@@ -195,8 +195,14 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         @Override
         public void onBackButtonAlphaChanged(float alpha, boolean animate) {
             final ButtonDispatcher backButton = mNavigationBarView.getBackButton();
-            backButton.setVisibility(alpha > 0 ? View.VISIBLE : View.INVISIBLE);
-            backButton.setAlpha(alpha, animate);
+            if (QuickStepController.shouldhideBackButton()) {
+                // If property was changed to hide/show back button, going home will trigger
+                // launcher to to change the back button alpha to reflect property change
+                backButton.setVisibility(View.GONE);
+            } else {
+                backButton.setVisibility(alpha > 0 ? View.VISIBLE : View.INVISIBLE);
+                backButton.setAlpha(alpha, animate);
+            }
         }
     };
 
