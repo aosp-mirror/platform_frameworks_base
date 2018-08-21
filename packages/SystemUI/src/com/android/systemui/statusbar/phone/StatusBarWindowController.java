@@ -36,6 +36,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.R;
 import com.android.systemui.Dumpable;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -69,11 +70,18 @@ public class StatusBarWindowController implements RemoteInputController.Callback
     private OtherwisedCollapsedListener mListener;
 
     public StatusBarWindowController(Context context) {
+        this(context, context.getSystemService(WindowManager.class), ActivityManager.getService(),
+                DozeParameters.getInstance(context));
+    }
+
+    @VisibleForTesting
+    StatusBarWindowController(Context context, WindowManager windowManager,
+            IActivityManager activityManager, DozeParameters dozeParameters) {
         mContext = context;
-        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        mActivityManager = ActivityManager.getService();
+        mWindowManager = windowManager;
+        mActivityManager = activityManager;
         mKeyguardScreenRotation = shouldEnableKeyguardScreenRotation();
-        mDozeParameters = DozeParameters.getInstance(mContext);
+        mDozeParameters = dozeParameters;
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
     }
 
@@ -148,6 +156,12 @@ public class StatusBarWindowController implements RemoteInputController.Callback
             mLpChanged.flags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
         } else {
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+        }
+
+        if (state.dozing) {
+            mLpChanged.privateFlags |= LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+        } else {
+            mLpChanged.privateFlags &= ~LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
         }
     }
 
