@@ -16,7 +16,7 @@
   -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <string name="display_cutout_emulation_overlay">Tall display cutout</string>
+    <string name="display_cutout_emulation_overlay">Tall cutout</string>
 
 </resources>
 
