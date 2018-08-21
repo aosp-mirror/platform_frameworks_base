@@ -35,6 +35,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.autofill.BatchUpdates;
 import android.service.autofill.CustomDescription;
+import android.service.autofill.InternalOnClickAction;
 import android.service.autofill.InternalTransformation;
 import android.service.autofill.InternalValidator;
 import android.service.autofill.SaveInfo;
@@ -43,6 +44,7 @@ import android.text.Html;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -337,7 +339,7 @@ final class SaveUi {
             template.setApplyTheme(THEME_ID);
             final View customSubtitleView = template.apply(context, null, handler);
 
-            // And apply batch updates (if any).
+            // Apply batch updates (if any).
             final ArrayList<Pair<InternalValidator, BatchUpdates>> updates =
                     customDescription.getUpdates();
             if (updates != null) {
@@ -372,6 +374,35 @@ final class SaveUi {
                             return false;
                         }
                         template.reapply(context, customSubtitleView);
+                    }
+                }
+            }
+
+            // Apply click actions (if any).
+            final SparseArray<InternalOnClickAction> actions = customDescription.getActions();
+            if (actions != null) {
+                final int size = actions.size();
+                if (sDebug) Slog.d(TAG, "custom description has " + size + " actions");
+                if (!(customSubtitleView instanceof ViewGroup)) {
+                    Slog.w(TAG, "cannot apply actions because custom description root is not a "
+                            + "ViewGroup: " + customSubtitleView);
+                } else {
+                    final ViewGroup rootView = (ViewGroup) customSubtitleView;
+                    for (int i = 0; i < size; i++) {
+                        final int id = actions.keyAt(i);
+                        final InternalOnClickAction action = actions.valueAt(i);
+                        final View child = rootView.findViewById(id);
+                        if (child == null) {
+                            Slog.w(TAG, "Ignoring action " + action + " for view " + id
+                                    + " because it's not on " + rootView);
+                            continue;
+                        }
+                        child.setOnClickListener((v) -> {
+                            if (sVerbose) {
+                                Slog.v(TAG, "Applying " + action + " after " + v + " was clicked");
+                            }
+                            action.onClick(rootView);
+                        });
                     }
                 }
             }

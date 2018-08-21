@@ -998,6 +998,10 @@ package android.service.autofill {
     method public void apply(android.service.autofill.ValueFinder, android.widget.RemoteViews, int) throws java.lang.Exception;
   }
 
+  public final class CustomDescription implements android.os.Parcelable {
+    method public android.util.SparseArray<android.service.autofill.InternalOnClickAction> getActions();
+  }
+
   public final class DateTransformation extends android.service.autofill.InternalTransformation implements android.os.Parcelable android.service.autofill.Transformation {
     method public void apply(android.service.autofill.ValueFinder, android.widget.RemoteViews, int) throws java.lang.Exception;
   }
@@ -1012,6 +1016,11 @@ package android.service.autofill {
 
   public final class ImageTransformation extends android.service.autofill.InternalTransformation implements android.os.Parcelable android.service.autofill.Transformation {
     method public void apply(android.service.autofill.ValueFinder, android.widget.RemoteViews, int) throws java.lang.Exception;
+  }
+
+  public abstract class InternalOnClickAction implements android.service.autofill.OnClickAction android.os.Parcelable {
+    ctor public InternalOnClickAction();
+    method public abstract void onClick(android.view.ViewGroup);
   }
 
   public abstract class InternalSanitizer implements android.os.Parcelable android.service.autofill.Sanitizer {
@@ -1042,6 +1051,10 @@ package android.service.autofill {
   public abstract interface ValueFinder {
     method public default java.lang.String findByAutofillId(android.view.autofill.AutofillId);
     method public abstract android.view.autofill.AutofillValue findRawValueByAutofillId(android.view.autofill.AutofillId);
+  }
+
+  public final class VisibilitySetterAction extends android.service.autofill.InternalOnClickAction implements android.service.autofill.OnClickAction android.os.Parcelable {
+    method public void onClick(android.view.ViewGroup);
   }
 
 }
