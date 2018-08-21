@@ -17,6 +17,7 @@
 package android.view.accessibility;
 
 import android.accessibilityservice.IAccessibilityServiceConnection;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -112,6 +113,7 @@ public final class AccessibilityInteractionClient
     /**
      * @return The client for the current thread.
      */
+    @UnsupportedAppUsage
     public static AccessibilityInteractionClient getInstance() {
         final long threadId = Thread.currentThread().getId();
         return getInstanceForThread(threadId);
@@ -190,6 +192,7 @@ public final class AccessibilityInteractionClient
      *
      * @param message The message.
      */
+    @UnsupportedAppUsage
     public void setSameThreadMessage(Message message) {
         synchronized (mInstanceLock) {
             mSameThreadMessage = message;
@@ -625,6 +628,7 @@ public final class AccessibilityInteractionClient
         return false;
     }
 
+    @UnsupportedAppUsage
     public void clearCache() {
         sAccessibilityCache.clear();
     }

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.util.Log;
 
@@ -218,6 +219,7 @@ public abstract class ActionProvider {
     /**
      * @hide Internal use only
      */
+    @UnsupportedAppUsage
     public void setSubUiVisibilityListener(SubUiVisibilityListener listener) {
         mSubUiVisibilityListener = listener;
     }
@@ -240,6 +242,7 @@ public abstract class ActionProvider {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void reset() {
         mVisibilityListener = null;
         mSubUiVisibilityListener = null;

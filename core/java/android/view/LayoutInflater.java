@@ -19,6 +19,7 @@ package android.view;
 import android.annotation.LayoutRes;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -76,20 +77,28 @@ public abstract class LayoutInflater {
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
+    @UnsupportedAppUsage
     protected final Context mContext;
 
     // these are optional, set by the caller
+    @UnsupportedAppUsage
     private boolean mFactorySet;
+    @UnsupportedAppUsage
     private Factory mFactory;
+    @UnsupportedAppUsage
     private Factory2 mFactory2;
+    @UnsupportedAppUsage
     private Factory2 mPrivateFactory;
     private Filter mFilter;
 
+    @UnsupportedAppUsage
     final Object[] mConstructorArgs = new Object[2];
 
+    @UnsupportedAppUsage
     static final Class<?>[] mConstructorSignature = new Class[] {
             Context.class, AttributeSet.class};
 
+    @UnsupportedAppUsage
     private static final HashMap<String, Constructor<? extends View>> sConstructorMap =
             new HashMap<String, Constructor<? extends View>>();
 
@@ -105,6 +114,7 @@ public abstract class LayoutInflater {
 
     private static final String ATTR_LAYOUT = "layout";
 
+    @UnsupportedAppUsage
     private static final int[] ATTRS_THEME = new int[] {
             com.android.internal.R.attr.theme };
 
@@ -327,6 +337,7 @@ public abstract class LayoutInflater {
     /**
      * @hide for use by framework
      */
+    @UnsupportedAppUsage
     public void setPrivateFactory(Factory2 factory) {
         if (mPrivateFactory == null) {
             mPrivateFactory = factory;
@@ -726,6 +737,7 @@ public abstract class LayoutInflater {
      * argument and should be used for everything except {@code &gt;include>}
      * tag parsing.
      */
+    @UnsupportedAppUsage
     private View createViewFromTag(View parent, String name, Context context, AttributeSet attrs) {
         return createViewFromTag(parent, name, context, attrs, false);
     }
@@ -745,6 +757,7 @@ public abstract class LayoutInflater {
      *                        attribute (if set) for the view being inflated,
      *                        {@code false} otherwise
      */
+    @UnsupportedAppUsage
     View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,
             boolean ignoreThemeAttr) {
         if (name.equals("view")) {
@@ -893,6 +906,7 @@ public abstract class LayoutInflater {
         consumeChildElements(parser);
     }
 
+    @UnsupportedAppUsage
     private void parseInclude(XmlPullParser parser, Context context, View parent,
             AttributeSet attrs) throws XmlPullParserException, IOException {
         int type;

@@ -20,6 +20,7 @@ import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.LocaleList;
 import android.os.Parcel;
@@ -652,6 +653,7 @@ public final class TextLinks implements Parcelable {
 
         private String mCallingPackageName;
 
+        @UnsupportedAppUsage
         public Options() {
             this(null, null);
         }

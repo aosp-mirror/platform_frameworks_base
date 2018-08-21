@@ -22,6 +22,7 @@ import static android.view.DisplayInfoProto.LOGICAL_HEIGHT;
 import static android.view.DisplayInfoProto.LOGICAL_WIDTH;
 import static android.view.DisplayInfoProto.NAME;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -115,6 +116,7 @@ public final class DisplayInfo implements Parcelable {
      * Represents the usable size of the display which may be smaller than the
      * physical size when the system is emulating a smaller display.
      */
+    @UnsupportedAppUsage
     public int logicalWidth;
 
     /**
@@ -122,6 +124,7 @@ public final class DisplayInfo implements Parcelable {
      * Represents the usable size of the display which may be smaller than the
      * physical size when the system is emulating a smaller display.
      */
+    @UnsupportedAppUsage
     public int logicalHeight;
 
     /**
@@ -153,6 +156,7 @@ public final class DisplayInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public DisplayCutout displayCutout;
 
     /**
@@ -166,6 +170,7 @@ public final class DisplayInfo implements Parcelable {
      * </p>
      */
     @Surface.Rotation
+    @UnsupportedAppUsage
     public int rotation;
 
     /**
@@ -273,6 +278,7 @@ public final class DisplayInfo implements Parcelable {
         }
     };
 
+    @UnsupportedAppUsage
     public DisplayInfo() {
     }
 

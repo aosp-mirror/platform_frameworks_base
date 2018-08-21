@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.AppOpsManager;
 import android.app.Notification;
 import android.content.Context;
@@ -85,6 +86,7 @@ public class NotificationHeaderView extends ViewGroup {
         this(context, null);
     }
 
+    @UnsupportedAppUsage
     public NotificationHeaderView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }

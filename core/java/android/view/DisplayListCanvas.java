@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
 import android.graphics.CanvasProperty;
 import android.graphics.Paint;
@@ -155,6 +156,7 @@ public final class DisplayListCanvas extends RecordingCanvas {
      *
      * @param drawGLFunction A native function pointer
      */
+    @UnsupportedAppUsage
     public void callDrawGLFunction2(long drawGLFunction) {
         nCallDrawGLFunction(mNativeCanvasWrapper, drawGLFunction, null);
     }
@@ -171,6 +173,7 @@ public final class DisplayListCanvas extends RecordingCanvas {
      * any references to the functor, just that the reference from this specific
      * canvas's display list has been released.
      */
+    @UnsupportedAppUsage
     public void drawGLFunctor2(long drawGLFunctor, @Nullable Runnable releasedCallback) {
         nCallDrawGLFunction(mNativeCanvasWrapper, drawGLFunctor, releasedCallback);
     }
@@ -185,6 +188,7 @@ public final class DisplayListCanvas extends RecordingCanvas {
      *
      * @param renderNode The RenderNode to draw.
      */
+    @UnsupportedAppUsage
     public void drawRenderNode(RenderNode renderNode) {
         nDrawRenderNode(mNativeCanvasWrapper, renderNode.getNativeDisplayList());
     }
@@ -206,6 +210,7 @@ public final class DisplayListCanvas extends RecordingCanvas {
     // Drawing
     ///////////////////////////////////////////////////////////////////////////
 
+    @UnsupportedAppUsage
     public void drawCircle(CanvasProperty<Float> cx, CanvasProperty<Float> cy,
             CanvasProperty<Float> radius, CanvasProperty<Paint> paint) {
         nDrawCircle(mNativeCanvasWrapper, cx.getNativeContainer(), cy.getNativeContainer(),

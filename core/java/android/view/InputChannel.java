@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Slog;
@@ -32,6 +33,7 @@ public final class InputChannel implements Parcelable {
     
     private static final boolean DEBUG = false;
     
+    @UnsupportedAppUsage
     public static final Parcelable.Creator<InputChannel> CREATOR
             = new Parcelable.Creator<InputChannel>() {
         public InputChannel createFromParcel(Parcel source) {
@@ -46,6 +48,7 @@ public final class InputChannel implements Parcelable {
     };
     
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private long mPtr; // used by native code
     
     private static native InputChannel[] nativeOpenInputChannelPair(String name);
@@ -63,6 +66,7 @@ public final class InputChannel implements Parcelable {
      * It can be initialized by reading from a Parcel or by transferring the state of
      * another input channel into this one.
      */
+    @UnsupportedAppUsage
     public InputChannel() {
     }
 

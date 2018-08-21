@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.IntDef;
+import android.annotation.UnsupportedAppUsage;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -249,6 +250,7 @@ public final class FrameMetrics {
         Index.INTENDED_VSYNC, Index.FRAME_COMPLETED,
     };
 
+    @UnsupportedAppUsage
     /* package */ final long[] mTimingData;
 
     /**

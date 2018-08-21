@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.StyleRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.AssetManager;
@@ -28,10 +29,14 @@ import android.content.res.Resources;
  * wrapped context.
  */
 public class ContextThemeWrapper extends ContextWrapper {
+    @UnsupportedAppUsage
     private int mThemeResource;
+    @UnsupportedAppUsage
     private Resources.Theme mTheme;
+    @UnsupportedAppUsage
     private LayoutInflater mInflater;
     private Configuration mOverrideConfiguration;
+    @UnsupportedAppUsage
     private Resources mResources;
 
     /**
@@ -143,6 +148,7 @@ public class ContextThemeWrapper extends ContextWrapper {
 
     /** @hide */
     @Override
+    @UnsupportedAppUsage
     public int getThemeResId() {
         return mThemeResource;
     }
@@ -186,6 +192,7 @@ public class ContextThemeWrapper extends ContextWrapper {
         theme.applyStyle(resId, true);
     }
 
+    @UnsupportedAppUsage
     private void initializeTheme() {
         final boolean first = mTheme == null;
         if (first) {
