@@ -321,36 +321,6 @@ $(OUT_DOCS)/offline-sdk-timestamp: $(OUT_DOCS)/offline-sdk-docs-docs.zip
 	$(hide) mkdir -p $(OUT_DOCS)/offline-sdk
 	( unzip -qo $< -d $(OUT_DOCS)/offline-sdk && touch -f $@ ) || exit 1
 
-# ====  java proto device library (for test only)  ==============================
-include $(CLEAR_VARS)
-LOCAL_MODULE := platformprotosnano
-LOCAL_MODULE_TAGS := tests
-LOCAL_PROTOC_OPTIMIZE_TYPE := nano
-LOCAL_PROTOC_FLAGS := \
-    -Iexternal/protobuf/src
-LOCAL_PROTO_JAVA_OUTPUT_PARAMS := \
-    store_unknown_fields = true
-LOCAL_SDK_VERSION := current
-LOCAL_SRC_FILES := \
-    $(call all-proto-files-under, core/proto) \
-    $(call all-proto-files-under, libs/incident/proto/android/os)
-include $(BUILD_STATIC_JAVA_LIBRARY)
-
-
-# ====  java proto device library (for test only)  ==============================
-include $(CLEAR_VARS)
-LOCAL_MODULE := platformprotoslite
-LOCAL_MODULE_TAGS := tests
-LOCAL_PROTOC_OPTIMIZE_TYPE := lite
-LOCAL_PROTOC_FLAGS := \
-    -Iexternal/protobuf/src
-LOCAL_SRC_FILES := \
-    $(call all-proto-files-under, core/proto) \
-    $(call all-proto-files-under, libs/incident/proto/android/os)
-# Protos have lots of MissingOverride and similar.
-LOCAL_ERROR_PRONE_FLAGS := -XepDisableAllChecks
-include $(BUILD_STATIC_JAVA_LIBRARY)
-
 # ==== hiddenapi lists =======================================
 include $(CLEAR_VARS)
 
