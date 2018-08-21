@@ -943,9 +943,9 @@
     <dimen name="bottom_padding">48dp</dimen>
     <dimen name="edge_margin">8dp</dimen>
 
-    <dimen name="rounded_corner_radius">0dp</dimen>
-    <dimen name="rounded_corner_radius_top">0dp</dimen>
-    <dimen name="rounded_corner_radius_bottom">0dp</dimen>
+    <dimen name="rounded_corner_radius">@*android:dimen/rounded_corner_radius</dimen>
+    <dimen name="rounded_corner_radius_top">@*android:dimen/rounded_corner_radius_top</dimen>
+    <dimen name="rounded_corner_radius_bottom">@*android:dimen/rounded_corner_radius_bottom</dimen>
     <dimen name="rounded_corner_content_padding">0dp</dimen>
     <dimen name="nav_content_padding">0dp</dimen>
     <dimen name="nav_quick_scrub_track_edge_padding">24dp</dimen>
