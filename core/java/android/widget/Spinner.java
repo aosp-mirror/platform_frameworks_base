@@ -19,6 +19,7 @@ package android.widget;
 import android.annotation.DrawableRes;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.Widget;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -93,11 +94,13 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     private final Context mPopupContext;
 
     /** Forwarding listener used to implement drag-to-open. */
+    @UnsupportedAppUsage
     private ForwardingListener mForwardingListener;
 
     /** Temporary holder for setAdapter() calls from the super constructor. */
     private SpinnerAdapter mTempAdapter;
 
+    @UnsupportedAppUsage
     private SpinnerPopup mPopup;
     int mDropDownWidth;
 
@@ -584,6 +587,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     /**
      * @hide internal use only
      */
+    @UnsupportedAppUsage
     public void setOnItemClickListenerInt(OnItemClickListener l) {
         super.setOnItemClickListener(l);
     }
@@ -1069,6 +1073,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         /**
          * @return true if the popup is showing, false otherwise.
          */
+        @UnsupportedAppUsage
         public boolean isShowing();
 
         /**
@@ -1099,6 +1104,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             }
         }
 
+        @UnsupportedAppUsage
         public boolean isShowing() {
             return mPopup != null ? mPopup.isShowing() : false;
         }

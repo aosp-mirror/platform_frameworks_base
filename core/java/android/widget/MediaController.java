@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
@@ -68,17 +69,29 @@ import java.util.Locale;
  */
 public class MediaController extends FrameLayout {
 
+    @UnsupportedAppUsage
     private MediaPlayerControl mPlayer;
+    @UnsupportedAppUsage
     private final Context mContext;
+    @UnsupportedAppUsage
     private View mAnchor;
+    @UnsupportedAppUsage
     private View mRoot;
+    @UnsupportedAppUsage
     private WindowManager mWindowManager;
+    @UnsupportedAppUsage
     private Window mWindow;
+    @UnsupportedAppUsage
     private View mDecor;
+    @UnsupportedAppUsage
     private WindowManager.LayoutParams mDecorLayoutParams;
+    @UnsupportedAppUsage
     private ProgressBar mProgress;
+    @UnsupportedAppUsage
     private TextView mEndTime;
+    @UnsupportedAppUsage
     private TextView mCurrentTime;
+    @UnsupportedAppUsage
     private boolean mShowing;
     private boolean mDragging;
     private static final int sDefaultTimeout = 3000;
@@ -88,10 +101,15 @@ public class MediaController extends FrameLayout {
     private View.OnClickListener mNextListener, mPrevListener;
     StringBuilder mFormatBuilder;
     Formatter mFormatter;
+    @UnsupportedAppUsage
     private ImageButton mPauseButton;
+    @UnsupportedAppUsage
     private ImageButton mFfwdButton;
+    @UnsupportedAppUsage
     private ImageButton mRewButton;
+    @UnsupportedAppUsage
     private ImageButton mNextButton;
+    @UnsupportedAppUsage
     private ImageButton mPrevButton;
     private CharSequence mPlayDescription;
     private CharSequence mPauseDescription;
@@ -536,6 +554,7 @@ public class MediaController extends FrameLayout {
         }
     };
 
+    @UnsupportedAppUsage
     private void updatePausePlay() {
         if (mRoot == null || mPauseButton == null)
             return;
@@ -569,6 +588,7 @@ public class MediaController extends FrameLayout {
     // The second scenario involves the user operating the scroll ball, in this
     // case there WON'T BE onStartTrackingTouch/onStopTrackingTouch notifications,
     // we will simply apply the updated position without suspending regular updates.
+    @UnsupportedAppUsage
     private final OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
         @Override
         public void onStartTrackingTouch(SeekBar bar) {
@@ -642,6 +662,7 @@ public class MediaController extends FrameLayout {
         return MediaController.class.getName();
     }
 
+    @UnsupportedAppUsage
     private final View.OnClickListener mRewListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -654,6 +675,7 @@ public class MediaController extends FrameLayout {
         }
     };
 
+    @UnsupportedAppUsage
     private final View.OnClickListener mFfwdListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {

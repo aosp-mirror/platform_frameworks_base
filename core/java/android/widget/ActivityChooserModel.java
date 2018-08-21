@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -339,6 +340,7 @@ public class ActivityChooserModel extends DataSetObservable {
      *
      * @return The model.
      */
+    @UnsupportedAppUsage
     public static ActivityChooserModel get(Context context, String historyFileName) {
         synchronized (sRegistryLock) {
             ActivityChooserModel dataModel = sDataModelRegistry.get(historyFileName);
@@ -376,6 +378,7 @@ public class ActivityChooserModel extends DataSetObservable {
      *
      * @param intent The intent.
      */
+    @UnsupportedAppUsage
     public void setIntent(Intent intent) {
         synchronized (mInstanceLock) {
             if (mIntent == intent) {
@@ -405,6 +408,7 @@ public class ActivityChooserModel extends DataSetObservable {
      *
      * @see #setIntent(Intent)
      */
+    @UnsupportedAppUsage
     public int getActivityCount() {
         synchronized (mInstanceLock) {
             ensureConsistentState();
@@ -420,6 +424,7 @@ public class ActivityChooserModel extends DataSetObservable {
      * @see ActivityResolveInfo
      * @see #setIntent(Intent)
      */
+    @UnsupportedAppUsage
     public ResolveInfo getActivity(int index) {
         synchronized (mInstanceLock) {
             ensureConsistentState();
@@ -467,6 +472,7 @@ public class ActivityChooserModel extends DataSetObservable {
      * @see HistoricalRecord
      * @see OnChooseActivityListener
      */
+    @UnsupportedAppUsage
     public Intent chooseActivity(int index) {
         synchronized (mInstanceLock) {
             if (mIntent == null) {
@@ -507,6 +513,7 @@ public class ActivityChooserModel extends DataSetObservable {
      *
      * @param listener The listener.
      */
+    @UnsupportedAppUsage
     public void setOnChooseActivityListener(OnChooseActivityListener listener) {
         synchronized (mInstanceLock) {
             mActivityChoserModelPolicy = listener;
