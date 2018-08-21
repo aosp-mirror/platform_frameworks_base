@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -84,6 +85,7 @@ public class VideoView extends SurfaceView
 
     // all possible internal states
     private static final int STATE_ERROR = -1;
+    @UnsupportedAppUsage
     private static final int STATE_IDLE = 0;
     private static final int STATE_PREPARING = 1;
     private static final int STATE_PREPARED = 2;
@@ -94,7 +96,9 @@ public class VideoView extends SurfaceView
     private final Vector<Pair<InputStream, MediaFormat>> mPendingSubtitleTracks = new Vector<>();
 
     // settable by the client
+    @UnsupportedAppUsage
     private Uri mUri;
+    @UnsupportedAppUsage
     private Map<String, String> mHeaders;
 
     // mCurrentState is a VideoView object's current state.
@@ -102,20 +106,28 @@ public class VideoView extends SurfaceView
     // For instance, regardless the VideoView object's current state,
     // calling pause() intends to bring the object to a target state
     // of STATE_PAUSED.
+    @UnsupportedAppUsage
     private int mCurrentState = STATE_IDLE;
+    @UnsupportedAppUsage
     private int mTargetState = STATE_IDLE;
 
     // All the stuff we need for playing and showing a video
+    @UnsupportedAppUsage
     private SurfaceHolder mSurfaceHolder = null;
+    @UnsupportedAppUsage
     private MediaPlayer mMediaPlayer = null;
     private int mAudioSession;
+    @UnsupportedAppUsage
     private int mVideoWidth;
+    @UnsupportedAppUsage
     private int mVideoHeight;
     private int mSurfaceWidth;
     private int mSurfaceHeight;
+    @UnsupportedAppUsage
     private MediaController mMediaController;
     private OnCompletionListener mOnCompletionListener;
     private MediaPlayer.OnPreparedListener mOnPreparedListener;
+    @UnsupportedAppUsage
     private int mCurrentBufferPercentage;
     private OnErrorListener mOnErrorListener;
     private OnInfoListener mOnInfoListener;
@@ -462,6 +474,7 @@ public class VideoView extends SurfaceView
             }
     };
 
+    @UnsupportedAppUsage
     MediaPlayer.OnPreparedListener mPreparedListener = new MediaPlayer.OnPreparedListener() {
         public void onPrepared(MediaPlayer mp) {
             mCurrentState = STATE_PREPARED;
@@ -551,6 +564,7 @@ public class VideoView extends SurfaceView
         }
     };
 
+    @UnsupportedAppUsage
     private MediaPlayer.OnErrorListener mErrorListener =
         new MediaPlayer.OnErrorListener() {
         public boolean onError(MediaPlayer mp, int framework_err, int impl_err) {
@@ -655,6 +669,7 @@ public class VideoView extends SurfaceView
         mOnInfoListener = l;
     }
 
+    @UnsupportedAppUsage
     SurfaceHolder.Callback mSHCallback = new SurfaceHolder.Callback()
     {
         public void surfaceChanged(SurfaceHolder holder, int format,
@@ -690,6 +705,7 @@ public class VideoView extends SurfaceView
     /*
      * release the media player in any state
      */
+    @UnsupportedAppUsage
     private void release(boolean cleartargetstate) {
         if (mMediaPlayer != null) {
             mMediaPlayer.reset();

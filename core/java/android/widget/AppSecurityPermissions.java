@@ -16,6 +16,7 @@
 */
 package android.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -256,6 +257,7 @@ public class AppSecurityPermissions {
         mNewPermPrefix = mContext.getText(R.string.perms_new_perm_prefix);
     }
 
+    @UnsupportedAppUsage
     public AppSecurityPermissions(Context context, String packageName) {
         this(context);
         mPackageName = packageName;
@@ -417,6 +419,7 @@ public class AppSecurityPermissions {
         }
     }
 
+    @UnsupportedAppUsage
     public int getPermissionCount() {
         return getPermissionCount(WHICH_ALL);
     }
@@ -437,6 +440,7 @@ public class AppSecurityPermissions {
         return N;
     }
 
+    @UnsupportedAppUsage
     public View getPermissionsView() {
         return getPermissionsView(WHICH_ALL, false);
     }

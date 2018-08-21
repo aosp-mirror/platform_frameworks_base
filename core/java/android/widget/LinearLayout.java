@@ -19,6 +19,7 @@ package android.widget;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -188,27 +189,35 @@ public class LinearLayout extends ViewGroup {
             @ViewDebug.FlagToString(mask = Gravity.RELATIVE_LAYOUT_DIRECTION,
                 equals = Gravity.RELATIVE_LAYOUT_DIRECTION, name = "RELATIVE")
         }, formatToHexString = true)
+    @UnsupportedAppUsage
     private int mGravity = Gravity.START | Gravity.TOP;
 
     @ViewDebug.ExportedProperty(category = "measurement")
+    @UnsupportedAppUsage
     private int mTotalLength;
 
     @ViewDebug.ExportedProperty(category = "layout")
     private float mWeightSum;
 
     @ViewDebug.ExportedProperty(category = "layout")
+    @UnsupportedAppUsage
     private boolean mUseLargestChild;
 
+    @UnsupportedAppUsage
     private int[] mMaxAscent;
+    @UnsupportedAppUsage
     private int[] mMaxDescent;
 
     private static final int VERTICAL_GRAVITY_COUNT = 4;
 
     private static final int INDEX_CENTER_VERTICAL = 0;
+    @UnsupportedAppUsage
     private static final int INDEX_TOP = 1;
+    @UnsupportedAppUsage
     private static final int INDEX_BOTTOM = 2;
     private static final int INDEX_FILL = 3;
 
+    @UnsupportedAppUsage
     private Drawable mDivider;
     private int mDividerWidth;
     private int mDividerHeight;
@@ -2062,6 +2071,7 @@ public class LinearLayout extends ViewGroup {
 
         /** @hide */
         @Override
+        @UnsupportedAppUsage
         protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
             super.encodeProperties(encoder);
 

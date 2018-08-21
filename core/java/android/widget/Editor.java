@@ -21,6 +21,7 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.app.RemoteAction;
@@ -201,7 +202,9 @@ public class Editor {
     SelectionModifierCursorController mSelectionModifierCursorController;
     // Action mode used when text is selected or when actions on an insertion cursor are triggered.
     private ActionMode mTextActionMode;
+    @UnsupportedAppUsage
     private boolean mInsertionControllerEnabled;
+    @UnsupportedAppUsage
     private boolean mSelectionControllerEnabled;
 
     private final boolean mHapticTextHandleEnabled;
@@ -268,6 +271,7 @@ public class Editor {
     boolean mDiscardNextActionUp;
     boolean mIgnoreActionUpEvent;
 
+    @UnsupportedAppUsage
     private long mShowCursor;
     private boolean mRenderCursorRegardlessTiming;
     private Blink mBlink;
@@ -289,6 +293,7 @@ public class Editor {
     private boolean mShowErrorAfterAttach;
 
     boolean mInBatchEditControllers;
+    @UnsupportedAppUsage
     boolean mShowSoftInputOnFocus = true;
     private boolean mPreserveSelection;
     private boolean mRestartActionModeOnNextRefresh;
@@ -304,8 +309,11 @@ public class Editor {
 
     Drawable mDrawableForCursor = null;
 
+    @UnsupportedAppUsage
     private Drawable mSelectHandleLeft;
+    @UnsupportedAppUsage
     private Drawable mSelectHandleRight;
+    @UnsupportedAppUsage
     private Drawable mSelectHandleCenter;
 
     // Global listener that detects changes in the global position of the TextView
@@ -318,6 +326,7 @@ public class Editor {
     Callback mCustomInsertionActionModeCallback;
 
     // Set when this TextView gained focus with some text selected. Will start selection mode.
+    @UnsupportedAppUsage
     boolean mCreatedWithASelection;
 
     // Indicates the current tap state (first tap, double tap, or triple click).
@@ -2024,6 +2033,7 @@ public class Editor {
         }
     }
 
+    @UnsupportedAppUsage
     void invalidateTextDisplayList() {
         if (mTextRenderNodes != null) {
             for (int i = 0; i < mTextRenderNodes.length; i++) {
@@ -6298,6 +6308,7 @@ public class Editor {
 
     static class InputContentType {
         int imeOptions = EditorInfo.IME_NULL;
+        @UnsupportedAppUsage
         String privateImeOptions;
         CharSequence imeActionLabel;
         int imeActionId;

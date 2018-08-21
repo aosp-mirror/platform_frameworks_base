@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -81,16 +82,21 @@ public class ScrollView extends FrameLayout {
 
     private static final String TAG = "ScrollView";
 
+    @UnsupportedAppUsage
     private long mLastScroll;
 
     private final Rect mTempRect = new Rect();
+    @UnsupportedAppUsage
     private OverScroller mScroller;
+    @UnsupportedAppUsage
     private EdgeEffect mEdgeGlowTop;
+    @UnsupportedAppUsage
     private EdgeEffect mEdgeGlowBottom;
 
     /**
      * Position of the last motion event.
      */
+    @UnsupportedAppUsage
     private int mLastMotionY;
 
     /**
@@ -104,6 +110,7 @@ public class ScrollView extends FrameLayout {
      * layout is dirty. This prevents the scroll from being wrong if the child has not been
      * laid out before requesting focus.
      */
+    @UnsupportedAppUsage
     private View mChildToScrollTo = null;
 
     /**
@@ -111,11 +118,13 @@ public class ScrollView extends FrameLayout {
      * not the same as 'is being flinged', which can be checked by
      * mScroller.isFinished() (flinging begins when the user lifts his finger).
      */
+    @UnsupportedAppUsage
     private boolean mIsBeingDragged = false;
 
     /**
      * Determines speed during touch scrolling
      */
+    @UnsupportedAppUsage
     private VelocityTracker mVelocityTracker;
 
     /**
@@ -131,10 +140,13 @@ public class ScrollView extends FrameLayout {
     private boolean mSmoothScrollingEnabled = true;
 
     private int mTouchSlop;
+    @UnsupportedAppUsage
     private int mMinimumVelocity;
     private int mMaximumVelocity;
 
+    @UnsupportedAppUsage
     private int mOverscrollDistance;
+    @UnsupportedAppUsage
     private int mOverflingDistance;
 
     private float mVerticalScrollFactor;
@@ -159,6 +171,7 @@ public class ScrollView extends FrameLayout {
      * These are no-ops on user builds.
      */
     private StrictMode.Span mScrollStrictSpan = null;  // aka "drag"
+    @UnsupportedAppUsage
     private StrictMode.Span mFlingStrictSpan = null;
 
     /**
@@ -294,6 +307,7 @@ public class ScrollView extends FrameLayout {
     /**
      * @return Returns true this ScrollView can be scrolled
      */
+    @UnsupportedAppUsage
     private boolean canScroll() {
         View child = getChildAt(0);
         if (child != null) {
@@ -1644,6 +1658,7 @@ public class ScrollView extends FrameLayout {
         }
     }
 
+    @UnsupportedAppUsage
     private void endDrag() {
         mIsBeingDragged = false;
 

@@ -19,6 +19,7 @@ package android.widget;
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
@@ -203,6 +204,7 @@ public class RelativeLayout extends ViewGroup {
 
     private View mBaselineView = null;
 
+    @UnsupportedAppUsage
     private int mGravity = Gravity.START | Gravity.TOP;
     private final Rect mContentBounds = new Rect();
     private final Rect mSelfBounds = new Rect();
@@ -1247,9 +1249,13 @@ public class RelativeLayout extends ViewGroup {
         private int[] mRules = new int[VERB_COUNT];
         private int[] mInitialRules = new int[VERB_COUNT];
 
+        @UnsupportedAppUsage
         private int mLeft;
+        @UnsupportedAppUsage
         private int mTop;
+        @UnsupportedAppUsage
         private int mRight;
+        @UnsupportedAppUsage
         private int mBottom;
 
         /**

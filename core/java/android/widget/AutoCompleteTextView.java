@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.DrawableRes;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
@@ -102,10 +103,13 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     /** Context used to inflate the popup window or dialog. */
     private final Context mPopupContext;
 
+    @UnsupportedAppUsage
     private final ListPopupWindow mPopup;
+    @UnsupportedAppUsage
     private final PassThroughClickListener mPassThroughClickListener;
 
     private CharSequence mHintText;
+    @UnsupportedAppUsage
     private TextView mHintView;
     private int mHintResource;
 
@@ -132,6 +136,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     // Set to false when the list is hidden to prevent asynchronous updates to popup the list again.
     private boolean mPopupCanBeUpdated = true;
 
+    @UnsupportedAppUsage
     private PopupDataSetObserver mObserver;
 
     /**
@@ -528,6 +533,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @hide Pending API council approval
      */
+    @UnsupportedAppUsage
     public void setDropDownAnimationStyle(int animationStyle) {
         mPopup.setAnimationStyle(animationStyle);
     }
@@ -566,6 +572,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @hide Pending API council approval
      */
+    @UnsupportedAppUsage
     public void setDropDownAlwaysVisible(boolean dropDownAlwaysVisible) {
         mPopup.setDropDownAlwaysVisible(dropDownAlwaysVisible);
     }
@@ -587,6 +594,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @hide Pending API council approval
      */
+    @UnsupportedAppUsage
     public void setDropDownDismissedOnCompletion(boolean dropDownDismissedOnCompletion) {
         mDropDownDismissedOnCompletion = dropDownDismissedOnCompletion;
     }
@@ -866,6 +874,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         }
     }
 
+    @UnsupportedAppUsage
     void doBeforeTextChanged() {
         if (mBlockCompletion) return;
 
@@ -875,6 +884,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         if (DEBUG) Log.v(TAG, "before text changed: open=" + mOpenBefore);
     }
 
+    @UnsupportedAppUsage
     void doAfterTextChanged() {
         if (mBlockCompletion) return;
 
@@ -1171,6 +1181,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @hide internal used only by SearchDialog
      */
+    @UnsupportedAppUsage
     public void showDropDownAfterLayout() {
         mPopup.postShow();
     }
@@ -1181,6 +1192,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * the background.
      * @hide internal used only here and SearchDialog
      */
+    @UnsupportedAppUsage
     public void ensureImeVisible(boolean visible) {
         mPopup.setInputMethodMode(visible
                 ? ListPopupWindow.INPUT_METHOD_NEEDED : ListPopupWindow.INPUT_METHOD_NOT_NEEDED);
@@ -1192,6 +1204,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     /**
      * @hide internal used only here and SearchDialog
      */
+    @UnsupportedAppUsage
     public boolean isInputMethodNotNeeded() {
         return mPopup.getInputMethodMode() == ListPopupWindow.INPUT_METHOD_NOT_NEEDED;
     }
@@ -1225,6 +1238,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @hide used only by SearchDialog
      */
+    @UnsupportedAppUsage
     public void setForceIgnoreOutsideTouch(boolean forceIgnoreOutsideTouch) {
         mPopup.setForceIgnoreOutsideTouch(forceIgnoreOutsideTouch);
     }
