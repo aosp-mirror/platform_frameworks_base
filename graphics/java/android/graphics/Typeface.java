@@ -1008,7 +1008,10 @@ public class Typeface {
                 SystemFonts.getAliases());
         sSystemFontMap = Collections.unmodifiableMap(systemFontMap);
 
-        setDefault(sSystemFontMap.get(DEFAULT_FAMILY));
+        // We can't assume DEFAULT_FAMILY available on Roboletric.
+        if (sSystemFontMap.containsKey(DEFAULT_FAMILY)) {
+            setDefault(sSystemFontMap.get(DEFAULT_FAMILY));
+        }
 
         // Set up defaults and typefaces exposed in public API
         DEFAULT         = create((String) null, 0);
