@@ -28,12 +28,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.Uri;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
-import androidx.annotation.VisibleForTesting;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
@@ -45,14 +43,16 @@ import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+
+import androidx.annotation.VisibleForTesting;
 
 /**
  * Handles various NotificationGuts related tasks, such as binding guts to a row, opening and
@@ -147,15 +147,15 @@ public class NotificationGutsManager implements Dumpable {
         }
     }
 
-    public void bindGuts(final ExpandableNotificationRow row) {
-        bindGuts(row, mGutsMenuItem);
+    public boolean bindGuts(final ExpandableNotificationRow row) {
+        row.inflateGuts();
+        return bindGuts(row, mGutsMenuItem);
     }
 
-    private void bindGuts(final ExpandableNotificationRow row,
+    private boolean bindGuts(final ExpandableNotificationRow row,
             NotificationMenuRowPlugin.MenuItem item) {
         StatusBarNotification sbn = row.getStatusBarNotification();
 
-        row.inflateGuts();
         row.setGutsView(item);
         row.setTag(sbn.getPackageName());
         row.getGuts().setClosedListener((NotificationGuts g) -> {
@@ -176,12 +176,18 @@ public class NotificationGutsManager implements Dumpable {
         });
 
         View gutsView = item.getGutsView();
-        if (gutsView instanceof NotificationSnooze) {
-            initializeSnoozeView(row, (NotificationSnooze) gutsView);
-        } else if (gutsView instanceof AppOpsInfo) {
-            initializeAppOpsInfo(row, (AppOpsInfo) gutsView);
-        } else if (gutsView instanceof NotificationInfo) {
-            initializeNotificationInfo(row, (NotificationInfo) gutsView);
+        try {
+            if (gutsView instanceof NotificationSnooze) {
+                initializeSnoozeView(row, (NotificationSnooze) gutsView);
+            } else if (gutsView instanceof AppOpsInfo) {
+                initializeAppOpsInfo(row, (AppOpsInfo) gutsView);
+            } else if (gutsView instanceof NotificationInfo) {
+                initializeNotificationInfo(row, (NotificationInfo) gutsView);
+            }
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "error binding guts", e);
+            return false;
         }
     }
 
@@ -240,7 +246,7 @@ public class NotificationGutsManager implements Dumpable {
     @VisibleForTesting
     void initializeNotificationInfo(
             final ExpandableNotificationRow row,
-            NotificationInfo notificationInfoView) {
+            NotificationInfo notificationInfoView) throws Exception {
         NotificationGuts guts = row.getGuts();
         StatusBarNotification sbn = row.getStatusBarNotification();
         String packageName = sbn.getPackageName();
@@ -269,24 +275,21 @@ public class NotificationGutsManager implements Dumpable {
             };
         }
 
-        try {
-            notificationInfoView.bindNotification(
-                    pmUser,
-                    iNotificationManager,
-                    packageName,
-                    row.getEntry().channel,
-                    row.getNumUniqueChannels(),
-                    sbn,
-                    mCheckSaveListener,
-                    onSettingsClick,
-                    onAppSettingsClick,
-                    mPresenter.isDeviceProvisioned(),
-                    row.getIsNonblockable(),
-                    isForBlockingHelper,
-                    row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE);
-        } catch (RemoteException e) {
-            Log.e(TAG, e.toString());
-        }
+        notificationInfoView.bindNotification(
+                pmUser,
+                iNotificationManager,
+                packageName,
+                row.getEntry().channel,
+                row.getNumUniqueChannels(),
+                sbn,
+                mCheckSaveListener,
+                onSettingsClick,
+                onAppSettingsClick,
+                mPresenter.isDeviceProvisioned(),
+                row.getIsNonblockable(),
+                isForBlockingHelper,
+                row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE);
+
     }
 
     /**
@@ -356,8 +359,15 @@ public class NotificationGutsManager implements Dumpable {
                     true /* resetMenu */);
             return false;
         }
-        bindGuts(row, menuItem);
+
+        row.inflateGuts();
         NotificationGuts guts = row.getGuts();
+        mNotificationGutsExposed = guts;
+        if (!bindGuts(row, menuItem)) {
+            // exception occurred trying to fill in all the data, bail.
+            return false;
+        }
+
 
         // Assume we are a status_bar_notification_row
         if (guts == null) {
@@ -378,9 +388,6 @@ public class NotificationGutsManager implements Dumpable {
                             + "window");
                     return;
                 }
-                closeAndSaveGuts(true /* removeLeavebehind */, true /* force */,
-                        true /* removeControls */, -1 /* x */, -1 /* y */,
-                        false /* resetMenu */);
                 guts.setVisibility(View.VISIBLE);
 
                 final boolean needsFalsingProtection =
@@ -396,7 +403,6 @@ public class NotificationGutsManager implements Dumpable {
 
                 row.closeRemoteInput();
                 mListContainer.onHeightChanged(row, true /* needsAnimation */);
-                mNotificationGutsExposed = guts;
                 mGutsMenuItem = menuItem;
             }
         });
