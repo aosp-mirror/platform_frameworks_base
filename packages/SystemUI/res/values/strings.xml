@@ -1869,6 +1869,9 @@
     <!-- Label for area where tiles can be dragged out of [CHAR LIMIT=60] -->
     <string name="drag_to_add_tiles">Hold and drag to add tiles</string>
 
+    <!-- Label for header of customize QS [CHAR LIMIT=60] -->
+    <string name="drag_to_rearrange_tiles">Hold and drag to rearrange tiles</string>
+
     <!-- Label for area where tiles can be dragged in to [CHAR LIMIT=60] -->
     <string name="drag_to_remove_tiles">Drag here to remove</string>
 
