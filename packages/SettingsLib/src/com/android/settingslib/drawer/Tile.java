@@ -58,17 +58,13 @@ public class Tile implements Parcelable {
      */
     public ArrayList<UserHandle> userHandle = new ArrayList<>();
 
-    /**
-     * The metaData from the activity that defines this tile.
-     */
-    private final Bundle mMetaData;
-
     private final String mActivityPackage;
     private final String mActivityName;
     private final Intent mIntent;
+
     private ActivityInfo mActivityInfo;
     private CharSequence mSummaryOverride;
-
+    private Bundle mMetaData;
     private String mCategory;
 
     public Tile(ActivityInfo activityInfo, String category) {
@@ -234,6 +230,13 @@ public class Tile implements Parcelable {
         return summary;
     }
 
+    public void setMetaData(Bundle metaData) {
+        mMetaData = metaData;
+    }
+
+    /**
+     * The metaData from the activity that defines this tile.
+     */
     public Bundle getMetaData() {
         return mMetaData;
     }

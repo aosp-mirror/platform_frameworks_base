@@ -289,6 +289,8 @@ public class TileUtils {
             if (tile == null) {
                 tile = new Tile(activityInfo, categoryKey);
                 addedCache.put(key, tile);
+            } else {
+                tile.setMetaData(metaData);
             }
 
             if (!tile.userHandle.contains(user)) {
