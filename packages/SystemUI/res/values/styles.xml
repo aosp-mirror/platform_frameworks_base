@@ -495,6 +495,11 @@
            parent="@*android:style/TextAppearance.Material.Notification.Info">
     </style>
 
+    <style name="TextAppearance.QSEdit.Headers"
+        parent="@*android:style/TextAppearance.Material.Body2">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+    </style>
+
     <style name="edit_theme" parent="qs_theme">
         <item name="android:colorBackground">?android:attr/colorSecondary</item>
     </style>

@@ -23,6 +23,6 @@
     android:gravity="center"
     android:paddingTop="20dp"
     android:paddingBottom="13dp"
-    android:textAppearance="@android:style/TextAppearance.Material.Body2"
+    android:textAppearance="@style/TextAppearance.QSEdit.Headers"
     android:textColor="?android:attr/colorAccent"
     android:text="@string/drag_to_add_tiles" />
