@@ -18,6 +18,7 @@ package com.android.internal.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.UidTraffic;
@@ -610,8 +611,11 @@ public class BatteryStatsImpl extends BatteryStats {
     // In order to do this, we must refresh each timer whenever the number of active timers
     // changes.
     @VisibleForTesting
+    @UnsupportedAppUsage
     protected ArrayList<StopwatchTimer> mPartialTimers = new ArrayList<>();
+    @UnsupportedAppUsage
     final ArrayList<StopwatchTimer> mFullTimers = new ArrayList<>();
+    @UnsupportedAppUsage
     final ArrayList<StopwatchTimer> mWindowTimers = new ArrayList<>();
     final ArrayList<StopwatchTimer> mDrawTimers = new ArrayList<>();
     final SparseArray<ArrayList<StopwatchTimer>> mSensorTimers = new SparseArray<>();
@@ -989,6 +993,7 @@ public class BatteryStatsImpl extends BatteryStats {
      */
     private final HashMap<String, SamplingTimer> mKernelWakelockStats = new HashMap<>();
 
+    @UnsupportedAppUsage
     public Map<String, ? extends Timer> getKernelWakelockStats() {
         return mKernelWakelockStats;
     }
@@ -1271,6 +1276,7 @@ public class BatteryStatsImpl extends BatteryStats {
      * State for keeping track of counting information.
      */
     public static class Counter extends BatteryStats.Counter implements TimeBaseObs {
+        @UnsupportedAppUsage
         final AtomicInteger mCount = new AtomicInteger();
         final TimeBase mTimeBase;
         int mLoadedCount;
@@ -1815,6 +1821,7 @@ public class BatteryStatsImpl extends BatteryStats {
          * @param out the Parcel to be written to.
          * @param timer a Timer, or null.
          */
+        @UnsupportedAppUsage
         public static void writeTimerToParcel(Parcel out, Timer timer, long elapsedRealtimeUs) {
             if (timer == null) {
                 out.writeInt(0); // indicates null
@@ -1826,6 +1833,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
+        @UnsupportedAppUsage
         public long getTotalTimeLocked(long elapsedRealtimeUs, int which) {
             long val = computeRunTimeLocked(mTimeBase.getRealtime(elapsedRealtimeUs));
             if (which == STATS_SINCE_UNPLUGGED) {
@@ -1838,6 +1846,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
+        @UnsupportedAppUsage
         public int getCountLocked(int which) {
             int val = computeCurrentCountLocked();
             if (which == STATS_SINCE_UNPLUGGED) {
@@ -2613,6 +2622,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
+        @UnsupportedAppUsage
         public void detach() {
             super.detach();
             if (mTimerPool != null) {
@@ -4973,6 +4983,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @UnsupportedAppUsage
     public void noteScreenBrightnessLocked(int brightness) {
         // Bin the brightness.
         int bin = brightness / (256/NUM_SCREEN_BRIGHTNESS_BINS);
@@ -4996,6 +5007,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @UnsupportedAppUsage
     public void noteUserActivityLocked(int uid, int event) {
         if (mOnBatteryInternal) {
             uid = mapUid(uid);
@@ -5232,6 +5244,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @UnsupportedAppUsage
     public void notePhoneOnLocked() {
         if (!mPhoneOn) {
             final long elapsedRealtime = mClocks.elapsedRealtime();
@@ -5245,6 +5258,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @UnsupportedAppUsage
     public void notePhoneOffLocked() {
         if (mPhoneOn) {
             final long elapsedRealtime = mClocks.elapsedRealtime();
@@ -5414,12 +5428,14 @@ public class BatteryStatsImpl extends BatteryStats {
         updateAllPhoneStateLocked(state, simState, mPhoneSignalStrengthBinRaw);
     }
 
+    @UnsupportedAppUsage
     public void notePhoneSignalStrengthLocked(SignalStrength signalStrength) {
         // Bin the strength.
         int bin = signalStrength.getLevel();
         updateAllPhoneStateLocked(mPhoneServiceStateRaw, mPhoneSimStateRaw, bin);
     }
 
+    @UnsupportedAppUsage
     public void notePhoneDataConnectionStateLocked(int dataType, boolean hasData) {
         // BatteryStats uses 0 to represent no network type.
         // Telephony does not have a concept of no network type, and uses 0 to represent unknown.
@@ -5478,6 +5494,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @UnsupportedAppUsage
     public void noteAudioOnLocked(int uid) {
         uid = mapUid(uid);
         final long elapsedRealtime = mClocks.elapsedRealtime();
@@ -5493,6 +5510,7 @@ public class BatteryStatsImpl extends BatteryStats {
         getUidStatsLocked(uid).noteAudioTurnedOnLocked(elapsedRealtime);
     }
 
+    @UnsupportedAppUsage
     public void noteAudioOffLocked(int uid) {
         if (mAudioOnNesting == 0) {
             return;
@@ -5510,6 +5528,7 @@ public class BatteryStatsImpl extends BatteryStats {
         getUidStatsLocked(uid).noteAudioTurnedOffLocked(elapsedRealtime);
     }
 
+    @UnsupportedAppUsage
     public void noteVideoOnLocked(int uid) {
         uid = mapUid(uid);
         final long elapsedRealtime = mClocks.elapsedRealtime();
@@ -5525,6 +5544,7 @@ public class BatteryStatsImpl extends BatteryStats {
         getUidStatsLocked(uid).noteVideoTurnedOnLocked(elapsedRealtime);
     }
 
+    @UnsupportedAppUsage
     public void noteVideoOffLocked(int uid) {
         if (mVideoOnNesting == 0) {
             return;
@@ -6002,6 +6022,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     int mWifiFullLockNesting = 0;
 
+    @UnsupportedAppUsage
     public void noteFullWifiLockAcquiredLocked(int uid) {
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
@@ -6015,6 +6036,7 @@ public class BatteryStatsImpl extends BatteryStats {
         getUidStatsLocked(uid).noteFullWifiLockAcquiredLocked(elapsedRealtime);
     }
 
+    @UnsupportedAppUsage
     public void noteFullWifiLockReleasedLocked(int uid) {
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
@@ -6070,6 +6092,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     int mWifiMulticastNesting = 0;
 
+    @UnsupportedAppUsage
     public void noteWifiMulticastEnabledLocked(int uid) {
         uid = mapUid(uid);
         final long elapsedRealtime = mClocks.elapsedRealtime();
@@ -6090,6 +6113,7 @@ public class BatteryStatsImpl extends BatteryStats {
         getUidStatsLocked(uid).noteWifiMulticastEnabledLocked(elapsedRealtime);
     }
 
+    @UnsupportedAppUsage
     public void noteWifiMulticastDisabledLocked(int uid) {
         uid = mapUid(uid);
         final long elapsedRealtime = mClocks.elapsedRealtime();
@@ -6286,6 +6310,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @UnsupportedAppUsage
     @Override public long getScreenOnTime(long elapsedRealtimeUs, int which) {
         return mScreenOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
@@ -6302,6 +6327,7 @@ public class BatteryStatsImpl extends BatteryStats {
         return mScreenDozeTimer.getCountLocked(which);
     }
 
+    @UnsupportedAppUsage
     @Override public long getScreenBrightnessTime(int brightnessBin,
             long elapsedRealtimeUs, int which) {
         return mScreenBrightnessTimer[brightnessBin].getTotalTimeLocked(
@@ -6411,6 +6437,7 @@ public class BatteryStatsImpl extends BatteryStats {
         return (long) energyUsedMaMs;
     }
 
+    @UnsupportedAppUsage
     @Override public long getPhoneOnTime(long elapsedRealtimeUs, int which) {
         return mPhoneOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
@@ -6419,12 +6446,14 @@ public class BatteryStatsImpl extends BatteryStats {
         return mPhoneOnTimer.getCountLocked(which);
     }
 
+    @UnsupportedAppUsage
     @Override public long getPhoneSignalStrengthTime(int strengthBin,
             long elapsedRealtimeUs, int which) {
         return mPhoneSignalStrengthsTimer[strengthBin].getTotalTimeLocked(
                 elapsedRealtimeUs, which);
     }
 
+    @UnsupportedAppUsage
     @Override public long getPhoneSignalScanningTime(
             long elapsedRealtimeUs, int which) {
         return mPhoneSignalScanningTimer.getTotalTimeLocked(
@@ -6435,6 +6464,7 @@ public class BatteryStatsImpl extends BatteryStats {
         return mPhoneSignalScanningTimer;
     }
 
+    @UnsupportedAppUsage
     @Override public int getPhoneSignalStrengthCount(int strengthBin, int which) {
         return mPhoneSignalStrengthsTimer[strengthBin].getCountLocked(which);
     }
@@ -6443,12 +6473,14 @@ public class BatteryStatsImpl extends BatteryStats {
         return mPhoneSignalStrengthsTimer[strengthBin];
     }
 
+    @UnsupportedAppUsage
     @Override public long getPhoneDataConnectionTime(int dataType,
             long elapsedRealtimeUs, int which) {
         return mPhoneDataConnectionsTimer[dataType].getTotalTimeLocked(
                 elapsedRealtimeUs, which);
     }
 
+    @UnsupportedAppUsage
     @Override public int getPhoneDataConnectionCount(int dataType, int which) {
         return mPhoneDataConnectionsTimer[dataType].getCountLocked(which);
     }
@@ -6457,6 +6489,7 @@ public class BatteryStatsImpl extends BatteryStats {
         return mPhoneDataConnectionsTimer[dataType];
     }
 
+    @UnsupportedAppUsage
     @Override public long getMobileRadioActiveTime(long elapsedRealtimeUs, int which) {
         return mMobileRadioActiveTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
@@ -6487,6 +6520,7 @@ public class BatteryStatsImpl extends BatteryStats {
         return mWifiMulticastWakelockTimer.getCountLocked(which);
     }
 
+    @UnsupportedAppUsage
     @Override public long getWifiOnTime(long elapsedRealtimeUs, int which) {
         return mWifiOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
@@ -6495,6 +6529,7 @@ public class BatteryStatsImpl extends BatteryStats {
         return mWifiActiveTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
 
+    @UnsupportedAppUsage
     @Override public long getGlobalWifiRunningTime(long elapsedRealtimeUs, int which) {
         return mGlobalWifiRunningTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
@@ -6592,6 +6627,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
+    @UnsupportedAppUsage
     public long getNetworkActivityBytes(int type, int which) {
         if (type >= 0 && type < mNetworkByteActivityCounters.length) {
             return mNetworkByteActivityCounters[type].getCountLocked(which);
@@ -6634,6 +6670,7 @@ public class BatteryStatsImpl extends BatteryStats {
         return mOnBattery;
     }
 
+    @UnsupportedAppUsage
     @Override public SparseArray<? extends BatteryStats.Uid> getUidStats() {
         return mUidStats;
     }
@@ -7017,6 +7054,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
+        @UnsupportedAppUsage
         public ArrayMap<String, ? extends BatteryStats.Uid.Wakelock> getWakelockStats() {
             return mWakelockStats.getMap();
         }
@@ -7042,11 +7080,13 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
+        @UnsupportedAppUsage
         public SparseArray<? extends BatteryStats.Uid.Sensor> getSensorStats() {
             return mSensorStats;
         }
 
         @Override
+        @UnsupportedAppUsage
         public ArrayMap<String, ? extends BatteryStats.Uid.Proc> getProcessStats() {
             return mProcessStats;
         }
@@ -7057,6 +7097,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
+        @UnsupportedAppUsage
         public int getUid() {
             return mUid;
         }
@@ -7444,6 +7485,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
+        @UnsupportedAppUsage
         public long getWifiRunningTime(long elapsedRealtimeUs, int which) {
             if (mWifiRunningTimer == null) {
                 return 0;
@@ -7460,6 +7502,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
+        @UnsupportedAppUsage
         public long getWifiScanTime(long elapsedRealtimeUs, int which) {
             if (mWifiScanTimer == null) {
                 return 0;
@@ -8994,6 +9037,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             @Override
+            @UnsupportedAppUsage
             public Timer getWakeTime(int type) {
                 switch (type) {
                 case WAKE_TYPE_FULL: return mTimerFull;
@@ -9056,6 +9100,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             @Override
+            @UnsupportedAppUsage
             public Timer getSensorTime() {
                 return mTimer;
             }
@@ -9069,6 +9114,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             @Override
+            @UnsupportedAppUsage
             public int getHandle() {
                 return mHandle;
             }
@@ -9312,6 +9358,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 readExcessivePowerFromParcelLocked(in);
             }
 
+            @UnsupportedAppUsage
             public void addCpuTimeLocked(int utime, int stime) {
                 addCpuTimeLocked(utime, stime, mBsi.mOnBatteryTimeBase.isRunning());
             }
@@ -9323,10 +9370,12 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
 
+            @UnsupportedAppUsage
             public void addForegroundTimeLocked(long ttime) {
                 mForegroundTime += ttime;
             }
 
+            @UnsupportedAppUsage
             public void incStartsLocked() {
                 mStarts++;
             }
@@ -9345,6 +9394,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             @Override
+            @UnsupportedAppUsage
             public long getUserTime(int which) {
                 long val = mUserTime;
                 if (which == STATS_CURRENT) {
@@ -9356,6 +9406,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             @Override
+            @UnsupportedAppUsage
             public long getSystemTime(int which) {
                 long val = mSystemTime;
                 if (which == STATS_CURRENT) {
@@ -9367,6 +9418,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             @Override
+            @UnsupportedAppUsage
             public long getForegroundTime(int which) {
                 long val = mForegroundTime;
                 if (which == STATS_CURRENT) {
@@ -9378,6 +9430,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             @Override
+            @UnsupportedAppUsage
             public int getStarts(int which) {
                 int val = mStarts;
                 if (which == STATS_CURRENT) {
@@ -9678,6 +9731,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     return mStartTime + batteryUptime - mRunningSince;
                 }
 
+                @UnsupportedAppUsage
                 public void startLaunchedLocked() {
                     if (!mLaunched) {
                         mLaunches++;
@@ -9686,6 +9740,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     }
                 }
 
+                @UnsupportedAppUsage
                 public void stopLaunchedLocked() {
                     if (mLaunched) {
                         long time = mBsi.getBatteryUptimeLocked() - mLaunchedSince;
@@ -9698,6 +9753,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     }
                 }
 
+                @UnsupportedAppUsage
                 public void startRunningLocked() {
                     if (!mRunning) {
                         mStarts++;
@@ -9706,6 +9762,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     }
                 }
 
+                @UnsupportedAppUsage
                 public void stopRunningLocked() {
                     if (mRunning) {
                         long time = mBsi.getBatteryUptimeLocked() - mRunningSince;
@@ -9718,6 +9775,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     }
                 }
 
+                @UnsupportedAppUsage
                 public BatteryStatsImpl getBatteryStats() {
                     return mBsi;
                 }
@@ -10215,6 +10273,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mUserInfoProvider = userInfoProvider;
     }
 
+    @UnsupportedAppUsage
     public BatteryStatsImpl(Parcel p) {
         this(new SystemClocks(), p);
     }
@@ -10657,6 +10716,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
+    @UnsupportedAppUsage
     public boolean startIteratingHistoryLocked() {
         if (DEBUG_HISTORY) Slog.i(TAG, "ITERATING: buff size=" + mHistoryBuffer.dataSize()
                 + " pos=" + mHistoryBuffer.dataPosition());
@@ -10702,6 +10762,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
+    @UnsupportedAppUsage
     public boolean getNextHistoryLocked(HistoryItem out) {
         final int pos = mHistoryBuffer.dataPosition();
         if (pos == 0) {
@@ -10739,6 +10800,7 @@ public class BatteryStatsImpl extends BatteryStats {
         return mStartCount;
     }
 
+    @UnsupportedAppUsage
     public boolean isOnBattery() {
         return mOnBattery;
     }
@@ -12754,10 +12816,12 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @UnsupportedAppUsage
     public long getAwakeTimeBattery() {
         return computeBatteryUptime(getBatteryUptimeLocked(), STATS_CURRENT);
     }
 
+    @UnsupportedAppUsage
     public long getAwakeTimePlugged() {
         return (mClocks.uptimeMillis() * 1000) - getAwakeTimeBattery();
     }
@@ -12783,11 +12847,13 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
+    @UnsupportedAppUsage
     public long computeBatteryUptime(long curTime, int which) {
         return mOnBatteryTimeBase.computeUptime(curTime, which);
     }
 
     @Override
+    @UnsupportedAppUsage
     public long computeBatteryRealtime(long curTime, int which) {
         return mOnBatteryTimeBase.computeRealtime(curTime, which);
     }
@@ -12841,6 +12907,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
+    @UnsupportedAppUsage
     public long computeBatteryTimeRemaining(long curTime) {
         if (!mOnBattery) {
             return -1;
@@ -13039,11 +13106,13 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
+    @UnsupportedAppUsage
     public long getBatteryRealtime(long curTime) {
         return mOnBatteryTimeBase.getRealtime(curTime);
     }
 
     @Override
+    @UnsupportedAppUsage
     public int getDischargeStartLevel() {
         synchronized(this) {
             return getDischargeStartLevelLocked();
@@ -13055,6 +13124,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
+    @UnsupportedAppUsage
     public int getDischargeCurrentLevel() {
         synchronized(this) {
             return getDischargeCurrentLevelLocked();
@@ -13088,6 +13158,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
+    @UnsupportedAppUsage
     public int getDischargeAmount(int which) {
         int dischargeAmount = which == STATS_SINCE_CHARGED
                 ? getHighDischargeAmountSinceCharge()
@@ -13099,6 +13170,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
+    @UnsupportedAppUsage
     public int getDischargeAmountScreenOn() {
         synchronized(this) {
             int val = mDischargeAmountScreenOn;
@@ -13123,6 +13195,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
+    @UnsupportedAppUsage
     public int getDischargeAmountScreenOff() {
         synchronized(this) {
             int val = mDischargeAmountScreenOff;
@@ -13175,6 +13248,7 @@ public class BatteryStatsImpl extends BatteryStats {
     /**
      * Retrieve the statistics object for a particular uid, creating if needed.
      */
+    @UnsupportedAppUsage
     public Uid getUidStatsLocked(int uid) {
         Uid u = mUidStats.get(uid);
         if (u == null) {
@@ -13213,6 +13287,7 @@ public class BatteryStatsImpl extends BatteryStats {
     /**
      * Remove the statistics object for a particular uid.
      */
+    @UnsupportedAppUsage
     public void removeUidStatsLocked(int uid) {
         mUidStats.remove(uid);
         mPendingRemovedUids.add(new UidToRemove(uid, mClocks.elapsedRealtime()));
@@ -13222,6 +13297,7 @@ public class BatteryStatsImpl extends BatteryStats {
      * Retrieve the statistics object for a particular process, creating
      * if needed.
      */
+    @UnsupportedAppUsage
     public Uid.Proc getProcessStatsLocked(int uid, String name) {
         uid = mapUid(uid);
         Uid u = getUidStatsLocked(uid);
@@ -13232,6 +13308,7 @@ public class BatteryStatsImpl extends BatteryStats {
      * Retrieve the statistics object for a particular process, creating
      * if needed.
      */
+    @UnsupportedAppUsage
     public Uid.Pkg getPackageStatsLocked(int uid, String pkg) {
         uid = mapUid(uid);
         Uid u = getUidStatsLocked(uid);
@@ -13242,6 +13319,7 @@ public class BatteryStatsImpl extends BatteryStats {
      * Retrieve the statistics object for a particular service, creating
      * if needed.
      */
+    @UnsupportedAppUsage
     public Uid.Pkg.Serv getServiceStatsLocked(int uid, String pkg, String name) {
         uid = mapUid(uid);
         Uid u = getUidStatsLocked(uid);
@@ -13493,6 +13571,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @UnsupportedAppUsage
     public void commitPendingDataToDisk() {
         final Parcel next;
         synchronized (this) {
@@ -13523,6 +13602,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @UnsupportedAppUsage
     public void readLocked() {
         if (mDailyFile != null) {
             readDailyStatsLocked();
@@ -15082,6 +15162,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @UnsupportedAppUsage
     public static final Parcelable.Creator<BatteryStatsImpl> CREATOR =
         new Parcelable.Creator<BatteryStatsImpl>() {
         public BatteryStatsImpl createFromParcel(Parcel in) {
