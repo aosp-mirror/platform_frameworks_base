@@ -52,7 +52,7 @@ public final class NotificationStats implements Parcelable {
     /**
      * Notification has not been dismissed yet.
      */
-    public static final int DISMISSAL_NOT_DISMISSED = -1000;
+    public static final int DISMISSAL_NOT_DISMISSED = -1;
     /**
      * Notification has been dismissed from a {@link NotificationListenerService} or the app
      * itself.

@@ -1125,7 +1125,7 @@ package android.service.notification {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.service.notification.NotificationStats> CREATOR;
     field public static final int DISMISSAL_AOD = 2; // 0x2
-    field public static final int DISMISSAL_NOT_DISMISSED = -1000; // 0xfffffc18
+    field public static final int DISMISSAL_NOT_DISMISSED = -1; // 0xffffffff
     field public static final int DISMISSAL_OTHER = 0; // 0x0
     field public static final int DISMISSAL_PEEK = 1; // 0x1
     field public static final int DISMISSAL_SHADE = 3; // 0x3
