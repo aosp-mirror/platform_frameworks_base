@@ -733,9 +733,14 @@ public class NotificationManager {
             List<ZenModeConfig.ZenRule> rules = service.getZenRules();
             Map<String, AutomaticZenRule> ruleMap = new HashMap<>();
             for (ZenModeConfig.ZenRule rule : rules) {
-                ruleMap.put(rule.id, new AutomaticZenRule(rule.name, rule.component,
-                        rule.conditionId, zenModeToInterruptionFilter(rule.zenMode), rule.enabled,
-                        rule.creationTime));
+                if (rule.zenPolicy == null) {
+                    ruleMap.put(rule.id, new AutomaticZenRule(rule.name, rule.component,
+                            rule.conditionId, zenModeToInterruptionFilter(rule.zenMode),
+                            rule.enabled, rule.creationTime));
+                } else {
+                    ruleMap.put(rule.id, new AutomaticZenRule(rule.name, rule.component,
+                            rule.conditionId, rule.zenPolicy, rule.enabled, rule.creationTime));
+                }
             }
             return ruleMap;
         } catch (RemoteException e) {
