@@ -19,6 +19,7 @@ package com.android.internal.location;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.UnsupportedAppUsage;
 import android.location.LocationRequest;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -27,9 +28,11 @@ import android.util.TimeUtils;
 /** @hide */
 public final class ProviderRequest implements Parcelable {
     /** Location reporting is requested (true) */
+    @UnsupportedAppUsage
     public boolean reportLocation = false;
 
     /** The smallest requested interval */
+    @UnsupportedAppUsage
     public long interval = Long.MAX_VALUE;
 
     /**
@@ -45,8 +48,10 @@ public final class ProviderRequest implements Parcelable {
      * is a high power slow interval request and a
      * low power fast interval request.
      */
+    @UnsupportedAppUsage
     public List<LocationRequest> locationRequests = new ArrayList<LocationRequest>();
 
+    @UnsupportedAppUsage
     public ProviderRequest() {
     }
 

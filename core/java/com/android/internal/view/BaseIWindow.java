@@ -16,6 +16,7 @@
 
 package com.android.internal.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.os.Bundle;
