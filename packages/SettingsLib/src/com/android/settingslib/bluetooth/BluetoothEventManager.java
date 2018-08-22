@@ -274,7 +274,6 @@ public class BluetoothEventManager {
         public void onReceive(Context context, Intent intent,
                 BluetoothDevice device) {
             short rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
-            BluetoothClass btClass = intent.getParcelableExtra(BluetoothDevice.EXTRA_CLASS);
             String name = intent.getStringExtra(BluetoothDevice.EXTRA_NAME);
             // TODO Pick up UUID. They should be available for 2.1 devices.
             // Skip for now, there's a bluez problem and we are not getting uuids even for 2.1.
@@ -285,7 +284,6 @@ public class BluetoothEventManager {
                         + cachedDevice);
             }
             cachedDevice.setRssi(rssi);
-            cachedDevice.setBtClass(btClass);
             cachedDevice.setJustDiscovered(true);
         }
     }
