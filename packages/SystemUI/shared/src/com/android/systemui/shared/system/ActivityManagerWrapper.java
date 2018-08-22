@@ -201,8 +201,8 @@ public class ActivityManagerWrapper {
     /**
      * Starts the recents activity. The caller should manage the thread on which this is called.
      */
-    public void startRecentsActivity(Intent intent, AssistDataReceiver assistDataReceiver,
-            RecentsAnimationListener animationHandler, Consumer<Boolean> resultCallback,
+    public void startRecentsActivity(Intent intent, final AssistDataReceiver assistDataReceiver,
+            final RecentsAnimationListener animationHandler, final Consumer<Boolean> resultCallback,
             Handler resultCallbackHandler) {
         try {
             IAssistDataReceiver receiver = null;
@@ -284,9 +284,9 @@ public class ActivityManagerWrapper {
      * @param resultCallback The result success callback
      * @param resultCallbackHandler The handler to receive the result callback
      */
-    public void startActivityFromRecentsAsync(Task.TaskKey taskKey, ActivityOptions options,
-            int windowingMode, int activityType, Consumer<Boolean> resultCallback,
-            Handler resultCallbackHandler) {
+    public void startActivityFromRecentsAsync(final Task.TaskKey taskKey, ActivityOptions options,
+            int windowingMode, int activityType, final Consumer<Boolean> resultCallback,
+            final Handler resultCallbackHandler) {
         if (taskKey.windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
             // We show non-visible docked tasks in Recents, but we always want to launch
             // them in the fullscreen stack.
@@ -364,7 +364,7 @@ public class ActivityManagerWrapper {
     /**
      * Requests that the system close any open system windows (including other SystemUI).
      */
-    public void closeSystemWindows(String reason) {
+    public void closeSystemWindows(final String reason) {
         mBackgroundExecutor.submit(new Runnable() {
             @Override
             public void run() {
@@ -380,7 +380,7 @@ public class ActivityManagerWrapper {
     /**
      * Removes a task by id.
      */
-    public void removeTask(int taskId) {
+    public void removeTask(final int taskId) {
         mBackgroundExecutor.submit(new Runnable() {
             @Override
             public void run() {
