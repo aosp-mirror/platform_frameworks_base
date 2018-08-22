@@ -302,6 +302,7 @@ status_t BootAnimation::readyToRun() {
     mHeight = h;
     mFlingerSurfaceControl = control;
     mFlingerSurface = s;
+    mTargetInset = -1;
 
     // If the device has encryption turned on or is in process
     // of being encrypted we show the encrypted boot animation.
@@ -942,6 +943,7 @@ bool BootAnimation::playAnimation(const Animation& animation)
                 if (mClockEnabled && mTimeIsAccurate && validClock(part)) {
                     drawClock(animation.clockFont, part.clockPosX, part.clockPosY);
                 }
+                handleViewport(frameDuration);
 
                 eglSwapBuffers(mDisplay, mSurface);
 
@@ -966,7 +968,7 @@ bool BootAnimation::playAnimation(const Animation& animation)
             usleep(part.pause * ns2us(frameDuration));
 
             // For infinite parts, we've now played them at least once, so perhaps exit
-            if(exitPending() && !part.count)
+            if(exitPending() && !part.count && mCurrentInset >= mTargetInset)
                 break;
         }
 
@@ -984,6 +986,51 @@ bool BootAnimation::playAnimation(const Animation& animation)
     }
 
     return true;
+}
+
+void BootAnimation::handleViewport(nsecs_t timestep) {
+    if (mShuttingDown || !mFlingerSurfaceControl || mTargetInset == 0) {
+        return;
+    }
+    if (mTargetInset < 0) {
+        // Poll the amount for the top display inset. This will return -1 until persistent properties
+        // have been loaded.
+        mTargetInset = android::base::GetIntProperty("persist.sys.displayinset.top",
+                -1 /* default */, -1 /* min */, mHeight / 2 /* max */);
+    }
+    if (mTargetInset <= 0) {
+        return;
+    }
+
+    if (mCurrentInset < mTargetInset) {
+        // After the device boots, the inset will effectively be cropped away. We animate this here.
+        float fraction = static_cast<float>(mCurrentInset) / mTargetInset;
+        int interpolatedInset = (cosf((fraction + 1) * M_PI) / 2.0f + 0.5f) * mTargetInset;
+
+        SurfaceComposerClient::Transaction()
+                .setCrop(mFlingerSurfaceControl, Rect(0, interpolatedInset, mWidth, mHeight))
+                .apply();
+    } else {
+        // At the end of the animation, we switch to the viewport that DisplayManager will apply
+        // later. This changes the coordinate system, and means we must move the surface up by
+        // the inset amount.
+        sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(
+                ISurfaceComposer::eDisplayIdMain));
+
+        Rect layerStackRect(0, 0, mWidth, mHeight - mTargetInset);
+        Rect displayRect(0, mTargetInset, mWidth, mHeight);
+
+        SurfaceComposerClient::Transaction t;
+        t.setPosition(mFlingerSurfaceControl, 0, -mTargetInset)
+                .setCrop(mFlingerSurfaceControl, Rect(0, mTargetInset, mWidth, mHeight));
+        t.setDisplayProjection(dtoken, 0 /* orientation */, layerStackRect, displayRect);
+        t.apply();
+
+        mTargetInset = mCurrentInset = 0;
+    }
+
+    int delta = timestep * mTargetInset / ms2ns(200);
+    mCurrentInset += delta;
 }
 
 void BootAnimation::releaseAnimation(Animation* animation) const
