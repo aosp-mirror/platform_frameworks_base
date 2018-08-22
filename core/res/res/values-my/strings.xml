@@ -301,11 +301,11 @@
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"သင်၏ အဓိကကျသော လက္ခဏာများအကြောင်း အာရုံခံကိရိယာဒေတာကို ရယူသုံးစွဲရန်"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင်၏ အရေးကြီးသောလက္ခဏာ အာရုံခံကိရိယာ ဒေတာများကို သုံးခွင့်ပေးလိုပါသလား။"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"တေးဂီတ"</string>
-    <string name="permgroupdesc_aural" msgid="4870189506255958055">"သင့်တေးဂီတကို ဝင်သုံးသည်"</string>
-    <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင့်တေးဂီတကို ဝင်သုံးခွင့်ပေးလိုပါသလား။"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"သင့်တေးဂီတသို့ ဝင်သည်"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင့်တေးဂီတကို ဝင်ခွင့်ပေးလိုပါသလား။"</string>
     <string name="permgrouplab_visual" msgid="8030190588123857921">"ဓာတ်ပုံနှင့် ဗီဒီယိုများ"</string>
-    <string name="permgroupdesc_visual" msgid="3415827902566663546">"သင့်ဓာတ်ပုံနှင့် ဗီဒီယိုများကို ဝင်သုံးသည်"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင့်ဓာတ်ပုံနှင့် ဗီဒီယိုများကို ဝင်သုံးခွင့်ပေးလိုပါသလား။"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"သင့်ဓာတ်ပုံနှင့် ဗီဒီယိုများသို့ ဝင်သည်"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင့်ဓာတ်ပုံနှင့် ဗီဒီယိုများကို ဝင်ခွင့်ပေးလိုပါသလား။"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ဝင်းဒိုးတွင် ပါရှိသည်များကို ပြန်လည်ရယူရန်"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"သင်အသုံးပြုနေသော ဝင်းဒိုးတွင် ပါရှိသည်များကို ကြည့်ရှုစစ်ဆေးသည်။"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"တို့ထိခြင်းဖြင့် ရှာဖွေမှုကို ဖွင့်ရန်"</string>

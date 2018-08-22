@@ -304,8 +304,8 @@
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"accéder à votre musique"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à votre musique?"</string>
     <string name="permgrouplab_visual" msgid="8030190588123857921">"Photos et vidéos"</string>
-    <string name="permgroupdesc_visual" msgid="3415827902566663546">"accéder à vos photos et vos vidéos"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à vos photos et vos videos?"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"accéder à vos photos et à vos vidéos"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à vos photos et à vos videos?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Récupérer le contenu d\'une fenêtre"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecter le contenu d\'une fenêtre avec laquelle vous interagissez."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activer la fonctionnalité Explorer au toucher"</string>
@@ -501,19 +501,19 @@
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"utiliser le matériel d\'empreinte digitale"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Permet à l\'application d\'utiliser du matériel d\'empreinte digitale pour l\'authentification"</string>
     <string name="permlab_audioRead" msgid="6617225220728465565">"lire votre collection de musique"</string>
-    <string name="permdesc_audioRead" msgid="5034032570243484805">"Autoriser l\'application à lire votre collection de musique."</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"Autorise l\'application à lire votre collection de musique."</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"modifier votre collection de musique"</string>
-    <string name="permdesc_audioWrite" msgid="8888544708166230494">"Autoriser l\'application à modifier votre collection de musique."</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"Autorise l\'application à modifier votre collection de musique."</string>
     <string name="permlab_videoRead" msgid="9182618678674737229">"lire votre collection de vidéos"</string>
-    <string name="permdesc_videoRead" msgid="7045676429859396194">"Autoriser l\'application à lire votre collection de vidéos."</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"Autorise l\'application à lire votre collection de vidéos."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"modifier votre collection de vidéos"</string>
-    <string name="permdesc_videoWrite" msgid="5448565757490640841">"Autoriser l\'application à modifier votre collection de vidéos."</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"Autorise l\'application à modifier votre collection de vidéos."</string>
     <string name="permlab_imagesRead" msgid="3015078545742665304">"lire votre collection de photos"</string>
-    <string name="permdesc_imagesRead" msgid="3144263806038695580">"Autoriser l\'application à lire votre collection de photos."</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"Autorise l\'application à lire votre collection de photos."</string>
     <string name="permlab_imagesWrite" msgid="3391306186247235510">"modifier votre collection de photos"</string>
-    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Autoriser l\'application à modifier votre collection de photos."</string>
-    <string name="permlab_mediaLocation" msgid="8675148183726247864">"lire les positions indiquées dans votre collection multimédia"</string>
-    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Autoriser l\'application à lire les positions indiquées dans votre collection multimédia."</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Autorise l\'application à modifier votre collection de photos."</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"lire les positions issues de votre collection multimédia"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Autorise l\'application à lire les positions indiquées dans votre collection multimédia."</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Empreinte digitale partielle détectée. Veuillez essayer de nouveau."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossible de traiter les empreintes digitales. Veuillez essayer de nouveau."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Le capteur d\'empreintes digitales est sale. Veuillez le nettoyer et essayer de nouveau."</string>
