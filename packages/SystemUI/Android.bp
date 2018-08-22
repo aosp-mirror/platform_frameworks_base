@@ -32,6 +32,7 @@ java_library {
 android_library {
     name: "SystemUI-core",
     srcs: [
+        "src/**/*.kt",
         "src/**/*.java",
         "src/**/I*.aidl",
     ],
@@ -70,6 +71,59 @@ android_library {
     aaptflags: [
         "--extra-packages",
         "com.android.keyguard",
+    ],
+}
+
+android_library {
+    name: "SystemUI-tests",
+    manifest: "tests/AndroidManifest.xml",
+    resource_dirs: [
+        "tests/res",
+        "res-keyguard",
+        "res",
+    ],
+    srcs: [
+        "tests/src/**/*.kt",
+        "tests/src/**/*.java",
+        "src/**/*.kt",
+        "src/**/*.java",
+        "src/**/I*.aidl",
+    ],
+    static_libs: [
+        "SystemUIPluginLib",
+        "SystemUISharedLib",
+        "SettingsLib",
+        "androidx.car_car",
+        "androidx.legacy_legacy-support-v4",
+        "androidx.recyclerview_recyclerview",
+        "androidx.preference_preference",
+        "androidx.appcompat_appcompat",
+        "androidx.mediarouter_mediarouter",
+        "androidx.palette_palette",
+        "androidx.legacy_legacy-preference-v14",
+        "androidx.leanback_leanback",
+        "androidx.slice_slice-core",
+        "androidx.slice_slice-view",
+        "androidx.slice_slice-builders",
+        "androidx.arch.core_core-runtime",
+        "androidx.lifecycle_lifecycle-extensions",
+        "SystemUI-tags",
+        "SystemUI-proto",
+        "metrics-helper-lib",
+        "android-support-test",
+        "mockito-target-inline-minus-junit4",
+        "testables",
+        "truth-prebuilt",
+    ],
+    libs: [
+        "android.test.runner",
+        "telephony-common",
+        "android.car",
+        "android.test.base",
+    ],
+    aaptflags: [
+        "--extra-packages",
+        "com.android.keyguard:com.android.systemui",
     ],
 }
 
