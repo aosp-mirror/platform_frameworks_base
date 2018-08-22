@@ -2383,6 +2383,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return mFirstHoverTarget != null;
     }
 
+    /** @hide */
+    @Override
+    protected boolean pointInHoveredChild(MotionEvent event) {
+        if (mFirstHoverTarget != null) {
+            return isTransformedTouchPointInView(event.getX(), event.getY(),
+                mFirstHoverTarget.child, null);
+        }
+        return false;
+    }
+
     @Override
     public void addChildrenForAccessibility(ArrayList<View> outChildren) {
         if (getAccessibilityNodeProvider() != null) {

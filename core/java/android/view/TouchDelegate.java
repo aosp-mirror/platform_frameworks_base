@@ -103,13 +103,13 @@ public class TouchDelegate {
     }
 
     /**
-     * Will forward touch events to the delegate view if the event is within the bounds
+     * Forward touch events to the delegate view if the event is within the bounds
      * specified in the constructor.
      *
      * @param event The touch event to forward
-     * @return True if the event was forwarded to the delegate, false otherwise.
+     * @return True if the event was consumed by the delegate, false otherwise.
      */
-    public boolean onTouchEvent(MotionEvent event) {
+    public boolean onTouchEvent(@NonNull MotionEvent event) {
         int x = (int)event.getX();
         int y = (int)event.getY();
         boolean sendToDelegate = false;
@@ -139,18 +139,65 @@ public class TouchDelegate {
                 break;
         }
         if (sendToDelegate) {
-            final View delegateView = mDelegateView;
-
             if (hit) {
                 // Offset event coordinates to be inside the target view
-                event.setLocation(delegateView.getWidth() / 2, delegateView.getHeight() / 2);
+                event.setLocation(mDelegateView.getWidth() / 2, mDelegateView.getHeight() / 2);
             } else {
                 // Offset event coordinates to be outside the target view (in case it does
                 // something like tracking pressed state)
                 int slop = mSlop;
                 event.setLocation(-(slop * 2), -(slop * 2));
             }
-            handled = delegateView.dispatchTouchEvent(event);
+            handled = mDelegateView.dispatchTouchEvent(event);
+        }
+        return handled;
+    }
+
+    /**
+     * Forward hover events to the delegate view if the event is within the bounds
+     * specified in the constructor and touch exploration is enabled.
+     *
+     * @param event The hover event to forward
+     * @return True if the event was consumed by the delegate, false otherwise.
+     *
+     * @see android.view.accessibility.AccessibilityManager#isTouchExplorationEnabled
+     */
+    public boolean onTouchExplorationHoverEvent(@NonNull MotionEvent event) {
+        if (mBounds == null) {
+            return false;
+        }
+
+        final int x = (int) event.getX();
+        final int y = (int) event.getY();
+        boolean hit = true;
+        boolean handled = false;
+
+        final boolean isInbound = mBounds.contains(x, y);
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_HOVER_ENTER:
+                mDelegateTargeted = isInbound;
+                break;
+            case MotionEvent.ACTION_HOVER_MOVE:
+                if (isInbound) {
+                    mDelegateTargeted = true;
+                } else {
+                    // delegated previously
+                    if (mDelegateTargeted && !mSlopBounds.contains(x, y)) {
+                        hit = false;
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_HOVER_EXIT:
+                mDelegateTargeted = true;
+                break;
+        }
+        if (mDelegateTargeted) {
+            if (hit) {
+                event.setLocation(mDelegateView.getWidth() / 2, mDelegateView.getHeight() / 2);
+            } else {
+                mDelegateTargeted = false;
+            }
+            handled = mDelegateView.dispatchHoverEvent(event);
         }
         return handled;
     }

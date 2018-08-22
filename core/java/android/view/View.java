@@ -12830,6 +12830,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Returns true if the given point, in local coordinates, is inside the hovered child.
+     *
+     * @hide
+     */
+    protected boolean pointInHoveredChild(MotionEvent event) {
+        return false;
+    }
+
+    /**
      * Dispatch a generic motion event to the view under the first pointer.
      * <p>
      * Do not call this method directly.
@@ -13584,6 +13593,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #onHoverChanged
      */
     public boolean onHoverEvent(MotionEvent event) {
+        // Explore by touch should dispatch events to children under pointer first if any before
+        // dispatching to TouchDelegate. For children non-hoverable that will not consume events,
+        // it should also not delegate when they got the pointer hovered.
+        if (mTouchDelegate != null && !pointInHoveredChild(event)) {
+            final AccessibilityManager manager = AccessibilityManager.getInstance(mContext);
+            if (manager.isEnabled() && manager.isTouchExplorationEnabled()
+                    && mTouchDelegate.onTouchExplorationHoverEvent(event)) {
+                return true;
+            }
+        }
+
         // The root view may receive hover (or touch) events that are outside the bounds of
         // the window.  This code ensures that we only send accessibility events for
         // hovers that are actually within the bounds of the root view.
@@ -13598,7 +13618,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         } else {
             if (action == MotionEvent.ACTION_HOVER_EXIT
-                    || (action == MotionEvent.ACTION_MOVE
+                    || (action == MotionEvent.ACTION_HOVER_MOVE
                             && !pointInView(event.getX(), event.getY()))) {
                 mSendingHoverAccessibilityEvents = false;
                 sendAccessibilityHoverEvent(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
