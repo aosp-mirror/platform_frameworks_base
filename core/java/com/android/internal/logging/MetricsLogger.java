@@ -15,6 +15,7 @@
  */
 package com.android.internal.logging;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.metrics.LogMaker;
 import android.os.Build;
@@ -47,6 +48,7 @@ public class MetricsLogger {
     public static final int VIEW_UNKNOWN = MetricsEvent.VIEW_UNKNOWN;
     public static final int LOGTAG = EventLogTags.SYSUI_MULTI_ACTION;
 
+    @UnsupportedAppUsage
     public void write(LogMaker content) {
         if (content.getType() == MetricsEvent.TYPE_UNKNOWN) {
             content.setType(MetricsEvent.TYPE_ACTION);
