@@ -1151,7 +1151,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 throw new IllegalStateException("Display has not been initialialized");
             }
 
-            final DisplayContent displayContent = getDisplayContentOrCreate(displayId);
+            final DisplayContent displayContent = getDisplayContentOrCreate(displayId, attrs.token);
 
             if (displayContent == null) {
                 Slog.w(TAG_WM, "Attempted to add window to a display that does not exist: "
@@ -1540,9 +1540,20 @@ public class WindowManagerService extends IWindowManager.Stub
      * that corresponds to a display just added to DisplayManager has not yet been created. This
      * usually means that the call of this method was initiated from outside of Activity or Window
      * Manager. In most cases the regular getter should be used.
+     * @param displayId The preferred display Id.
+     * @param token The window token associated with the window we are trying to get display for.
+     *              if not null then the display of the window token will be returned. Set to null
+     *              is there isn't an a token associated with the request.
      * @see RootWindowContainer#getDisplayContent(int)
      */
-    private DisplayContent getDisplayContentOrCreate(int displayId) {
+    private DisplayContent getDisplayContentOrCreate(int displayId, IBinder token) {
+        if (token != null) {
+            final WindowToken wToken = mRoot.getWindowToken(token);
+            if (wToken != null) {
+                return wToken.getDisplayContent();
+            }
+        }
+
         DisplayContent displayContent = mRoot.getDisplayContent(displayId);
 
         // Create an instance if possible instead of waiting for the ActivityManagerService to drive
@@ -7070,7 +7081,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mWindowMap) {
-                final DisplayContent dc = getDisplayContentOrCreate(displayId);
+                final DisplayContent dc = getDisplayContentOrCreate(displayId, null);
                 if (dc == null) {
                     throw new IllegalArgumentException(
                             "Trying to register a non existent display.");
