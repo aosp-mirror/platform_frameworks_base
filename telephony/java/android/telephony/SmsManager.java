@@ -274,6 +274,17 @@ public final class SmsManager {
     private static final int SMS_PICK = 2;
 
     /**
+     * 3gpp2 SMS priority is not specified
+     * @hide
+     */
+    public static final int SMS_MESSAGE_PRIORITY_NOT_SPECIFIED = -1;
+    /**
+     * 3gpp SMS period is not specified
+     * @hide
+     */
+    public static final int SMS_MESSAGE_PERIOD_NOT_SPECIFIED = -1;
+
+    /**
      * Send a text based SMS.
      *
      * <p class="note"><strong>Note:</strong> Using this method requires that your app has the
@@ -464,11 +475,11 @@ public final class SmsManager {
         }
 
         if (priority < 0x00 || priority > 0x03) {
-            throw new IllegalArgumentException("Invalid priority");
+            priority = SMS_MESSAGE_PRIORITY_NOT_SPECIFIED;
         }
 
         if (validityPeriod < 0x05 || validityPeriod > 0x09b0a0) {
-            throw new IllegalArgumentException("Invalid validity period");
+            validityPeriod = SMS_MESSAGE_PERIOD_NOT_SPECIFIED;
         }
 
         try {
@@ -728,7 +739,8 @@ public final class SmsManager {
             ArrayList<PendingIntent> sentIntents, ArrayList<PendingIntent> deliveryIntents,
             int priority, boolean expectMore, int validityPeriod) {
         sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
-                deliveryIntents, true /* persistMessage*/);
+                deliveryIntents, true /* persistMessage*/, priority, expectMore,
+                validityPeriod);
     }
 
     private void sendMultipartTextMessageInternal(
@@ -743,11 +755,11 @@ public final class SmsManager {
         }
 
         if (priority < 0x00 || priority > 0x03) {
-            throw new IllegalArgumentException("Invalid priority");
+           priority = SMS_MESSAGE_PRIORITY_NOT_SPECIFIED;
         }
 
         if (validityPeriod < 0x05 || validityPeriod > 0x09b0a0) {
-            throw new IllegalArgumentException("Invalid validity period");
+           validityPeriod = SMS_MESSAGE_PERIOD_NOT_SPECIFIED;
         }
 
         if (parts.size() > 1) {
