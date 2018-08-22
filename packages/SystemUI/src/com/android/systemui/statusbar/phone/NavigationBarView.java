@@ -123,9 +123,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private Rect mTmpRect = new Rect();
 
     private KeyButtonDrawable mBackIcon;
-    private KeyButtonDrawable mBackCarModeIcon, mBackLandCarModeIcon;
-    private KeyButtonDrawable mBackAltCarModeIcon, mBackAltLandCarModeIcon;
-    private KeyButtonDrawable mHomeDefaultIcon, mHomeCarModeIcon;
+    private KeyButtonDrawable mHomeDefaultIcon;
+    private KeyButtonDrawable mBackCarModeIcon;
+    private KeyButtonDrawable mHomeCarModeIcon;
     private KeyButtonDrawable mRecentIcon;
     private KeyButtonDrawable mDockedIcon;
     private KeyButtonDrawable mImeIcon;
@@ -461,16 +461,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 && ((mOverviewProxyService.getInteractionFlags() & FLAG_DISABLE_QUICK_SCRUB) == 0);
     }
 
-    // TODO(b/80003212): change car mode icons to vector icons.
     private void updateCarModeIcons(Context ctx) {
-        mBackCarModeIcon = getDrawable(ctx,
-                R.drawable.ic_sysbar_back_carmode, R.drawable.ic_sysbar_back_carmode);
-        mBackLandCarModeIcon = mBackCarModeIcon;
-        mBackAltCarModeIcon = getDrawable(ctx,
-                R.drawable.ic_sysbar_back_ime_carmode, R.drawable.ic_sysbar_back_ime_carmode);
-        mBackAltLandCarModeIcon = mBackAltCarModeIcon;
-        mHomeCarModeIcon = getDrawable(ctx,
-                R.drawable.ic_sysbar_home_carmode, R.drawable.ic_sysbar_home_carmode);
+        mBackCarModeIcon = getDrawable(ctx, R.drawable.ic_sysbar_back_carmode);
+        mHomeCarModeIcon = getDrawable(ctx, R.drawable.ic_sysbar_home_carmode);
     }
 
     private void reloadNavIcons() {
@@ -575,11 +568,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 darkContext.getDrawable(icon), hasShadow);
     }
 
-    private KeyButtonDrawable getDrawable(Context ctx, @DrawableRes int lightIcon,
-            @DrawableRes int darkIcon) {
-        // Legacy image icons using separate light and dark images will not support shadows
-        return KeyButtonDrawable.create(ctx, ctx.getDrawable(lightIcon),
-            ctx.getDrawable(darkIcon), false /* hasShadow */);
+    private KeyButtonDrawable getDrawable(Context ctx, @DrawableRes int icon) {
+        // Legacy image icons using a single image will not support shadows
+        return KeyButtonDrawable.create(ctx, ctx.getDrawable(icon), null, false /* hasShadow */);
     }
 
     private TintedKeyButtonDrawable getDrawable(Context ctx, @DrawableRes int icon,
@@ -594,16 +585,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         super.setLayoutDirection(layoutDirection);
     }
 
-    private KeyButtonDrawable getBackIconWithAlt(boolean carMode, boolean landscape) {
-        return landscape
-                ? carMode ? mBackAltLandCarModeIcon : mBackIcon
-                : carMode ? mBackAltCarModeIcon : mBackIcon;
-    }
-
-    private KeyButtonDrawable getBackIcon(boolean carMode, boolean landscape) {
-        return landscape
-                ? carMode ? mBackLandCarModeIcon : mBackIcon
-                : carMode ? mBackCarModeIcon : mBackIcon;
+    private KeyButtonDrawable getBackIcon(boolean carMode) {
+        return carMode ? mBackCarModeIcon : mBackIcon;
     }
 
     public void setNavigationIconHints(int hints) {
@@ -643,12 +626,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         // to recent icon is not required.
         final boolean useAltBack =
                 (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
-        KeyButtonDrawable backIcon = useAltBack
-                ? getBackIconWithAlt(mUseCarModeUi, mVertical)
-                : getBackIcon(mUseCarModeUi, mVertical);
+        KeyButtonDrawable backIcon = getBackIcon(mUseCarModeUi);
+        orientBackButton(backIcon);
         KeyButtonDrawable homeIcon = mUseCarModeUi ? mHomeCarModeIcon : mHomeDefaultIcon;
         if (!mUseCarModeUi) {
-            orientBackButton(backIcon);
             orientHomeButton(homeIcon);
         }
         getHomeButton().setImageDrawable(homeIcon);
