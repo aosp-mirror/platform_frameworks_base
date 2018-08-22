@@ -1892,10 +1892,10 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"要將<xliff:g id="TYPE">%1$s</xliff:g>儲存到「<xliff:g id="LABEL">%2$s</xliff:g>」嗎？"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"要將<xliff:g id="TYPE_0">%1$s</xliff:g>和<xliff:g id="TYPE_1">%2$s</xliff:g>儲存到「<xliff:g id="LABEL">%3$s</xliff:g>」嗎？"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"要將<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>和<xliff:g id="TYPE_2">%3$s</xliff:g>儲存到「<xliff:g id="LABEL">%4$s</xliff:g>」嗎？"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"要更新為「<xliff:g id="LABEL">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;嗎？"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"要將<xliff:g id="TYPE">%1$s</xliff:g>更新為「<xliff:g id="LABEL">%2$s</xliff:g>」&lt;b&gt;&lt;/b&gt;嗎？"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"要將<xliff:g id="TYPE_0">%1$s</xliff:g>和<xliff:g id="TYPE_1">%2$s</xliff:g>更新為「<xliff:g id="LABEL">%3$s</xliff:g>」&lt;b&gt;&lt;/b&gt;嗎？"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"要將<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>和<xliff:g id="TYPE_2">%3$s</xliff:g>更新為「<xliff:g id="LABEL">%4$s</xliff:g>」&lt;b&gt;&lt;/b&gt;嗎？"</string>
+    <string name="autofill_update_title" msgid="4879673117448810818">"要更新「<xliff:g id="LABEL">%1$s</xliff:g>」中的資料嗎？&lt;b&gt;&lt;/b&gt;"</string>
+    <string name="autofill_update_title_with_type" msgid="339733442087186755">"要更新「<xliff:g id="LABEL">%2$s</xliff:g>」中的<xliff:g id="TYPE">%1$s</xliff:g>嗎？&lt;b&gt;&lt;/b&gt;"</string>
+    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"要更新「<xliff:g id="LABEL">%3$s</xliff:g>」中的<xliff:g id="TYPE_0">%1$s</xliff:g>和<xliff:g id="TYPE_1">%2$s</xliff:g>嗎？&lt;b&gt;&lt;/b&gt;"</string>
+    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"要更新「<xliff:g id="LABEL">%4$s</xliff:g>」中的<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>和<xliff:g id="TYPE_2">%3$s</xliff:g>嗎？&lt;b&gt;&lt;/b&gt;"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"儲存"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"不用了，謝謝"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"更新"</string>

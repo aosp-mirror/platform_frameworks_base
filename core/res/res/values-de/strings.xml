@@ -300,18 +300,12 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Körpersensoren"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"auf Sensordaten zu deinen Vitaldaten zugreifen"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; erlauben, auf Sensordaten zu deinen Vitalfunktionen zuzugreifen?"</string>
-    <!-- no translation found for permgrouplab_aural (965607064083134896) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_aural (4870189506255958055) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_aural (6787926123071735620) -->
-    <skip />
-    <!-- no translation found for permgrouplab_visual (8030190588123857921) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_visual (3415827902566663546) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_visual (6907523945030290376) -->
-    <skip />
+    <string name="permgrouplab_aural" msgid="965607064083134896">"Musik"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"auf Musik zugreifen"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; Zugriff auf deine Musik gewähren?"</string>
+    <string name="permgrouplab_visual" msgid="8030190588123857921">"Fotos und Videos"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"auf meine Fotos und Videos zugreifen"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; Zugriff auf deine Fotos und Videos gewähren?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Fensterinhalte abrufen"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Die Inhalte eines Fensters, mit dem du interagierst, werden abgerufen."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\"Tippen &amp; Entdecken\" aktivieren"</string>
@@ -506,34 +500,20 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Erlaubt der App, Methoden zum Hinzufügen und Löschen zu verwendender Fingerabdruckvorlagen aufzurufen"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"Fingerabdruckhardware verwenden"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Erlaubt der App, Fingerabdruckhardware zur Authentifizierung zu verwenden"</string>
-    <!-- no translation found for permlab_audioRead (6617225220728465565) -->
-    <skip />
-    <!-- no translation found for permdesc_audioRead (5034032570243484805) -->
-    <skip />
-    <!-- no translation found for permlab_audioWrite (2661772059799779292) -->
-    <skip />
-    <!-- no translation found for permdesc_audioWrite (8888544708166230494) -->
-    <skip />
-    <!-- no translation found for permlab_videoRead (9182618678674737229) -->
-    <skip />
-    <!-- no translation found for permdesc_videoRead (7045676429859396194) -->
-    <skip />
-    <!-- no translation found for permlab_videoWrite (128769316366746446) -->
-    <skip />
-    <!-- no translation found for permdesc_videoWrite (5448565757490640841) -->
-    <skip />
-    <!-- no translation found for permlab_imagesRead (3015078545742665304) -->
-    <skip />
-    <!-- no translation found for permdesc_imagesRead (3144263806038695580) -->
-    <skip />
-    <!-- no translation found for permlab_imagesWrite (3391306186247235510) -->
-    <skip />
-    <!-- no translation found for permdesc_imagesWrite (7073662756617474375) -->
-    <skip />
-    <!-- no translation found for permlab_mediaLocation (8675148183726247864) -->
-    <skip />
-    <!-- no translation found for permdesc_mediaLocation (2237023389178865130) -->
-    <skip />
+    <string name="permlab_audioRead" msgid="6617225220728465565">"meine Musiksammlung abrufen"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"Ermöglicht der App, deine Musiksammlung abzurufen."</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"meine Musiksammlung ändern"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"Ermöglicht der App, deine Musiksammlung zu ändern."</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"meine Videosammlung abrufen"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"Ermöglicht der App, deine Videosammlung abzurufen."</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"meine Videosammlung ändern"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"Ermöglicht der App, deine Videosammlung zu ändern."</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"meine Fotosammlung abrufen"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"Ermöglicht der App, deine Fotosammlung abzurufen."</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"meine Fotosammlung ändern"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Ermöglicht der App, deine Fotosammlung zu ändern."</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"Standorte aus meiner Mediensammlung abrufen"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Ermöglicht der App, Standorte aus deiner Mediensammlung abzurufen."</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Fingerabdruck teilweise erkannt. Versuche es erneut."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Fingerabdruck konnte nicht verarbeitet werden. Versuche es erneut."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Fingerabdrucksensor ist verschmutzt. Reinige ihn und versuche es erneut."</string>
@@ -625,13 +605,13 @@
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"Auf Benachrichtigungen zugreifen"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Ermöglicht der App das Abrufen, Überprüfen und Löschen von Benachrichtigungen, einschließlich Benachrichtigungen, die von anderen Apps gepostet wurden"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"An Benachrichtigungs-Listener-Dienst binden"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ermöglicht dem Inhaber, sich an die Oberfläche der obersten Ebene eines Benachrichtigungs-Listener-Dienstes zu binden. Sollte nie für normale Apps benötigt werden."</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ermöglicht dem Eigentümer, sich an die Oberfläche der obersten Ebene eines Benachrichtigungs-Listener-Dienstes zu binden. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"An einen Bedingungsproviderdienst binden"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Ermöglicht dem Inhaber, sich an die Oberfläche eines Bedingungsproviderdienstes auf oberster Ebene zu binden. Für normale Apps sollte dies nie erforderlich sein."</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Ermöglicht dem Eigentümer, sich an die Oberfläche eines Bedingungsproviderdienstes auf oberster Ebene zu binden. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"An Dream-Dienst binden"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Ermöglicht der App, sich an die Oberfläche eines Dream-Dienstes auf oberster Ebene zu binden. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"Vom Mobilfunkanbieter bereitgestellte Konfigurations-App aufrufen"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ermöglicht dem Inhaber, die vom Mobilfunkanbieter bereitgestellte Konfigurations-App aufzurufen. Sollte für normale Apps nie benötigt werden."</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ermöglicht dem Eigentümer, die vom Mobilfunkanbieter bereitgestellte Konfigurations-App aufzurufen. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Informationen zu den Netzwerkbedingungen erfassen"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Ermöglicht der App, Informationen zu den Netzwerkbedingungen zu erfassen. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"Kalibrierung für Eingabegerät ändern"</string>
@@ -643,9 +623,9 @@
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM-Zertifikate entfernen"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Ermöglicht einer App das Entfernen von DRM-Zertifikaten. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"An einen Mobilfunkanbieter-Messaging-Dienst binden"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Ermöglicht dem Inhaber die Bindung an die Oberfläche eines Mobilfunkanbieter-Messaging-Dienstes auf oberster Ebene. Für normale Apps sollte dies nie erforderlich sein."</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Ermöglicht dem Eigentümer die Bindung an die Oberfläche eines Mobilfunkanbieter-Messaging-Dienstes auf oberster Ebene. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"An Mobilfunkanbieter-Dienste binden"</string>
-    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Ermöglicht dem Inhaber die Bindung an Mobilfunkanbieter-Dienste. Für normale Apps sollte dies nicht erforderlich sein."</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Ermöglicht dem Eigentümer die Bindung an Mobilfunkanbieter-Dienste. Für normale Apps sollte dies nicht erforderlich sein."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Auf \"Nicht stören\" zugreifen"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Ermöglicht der App Lese- und Schreibzugriff auf die \"Nicht stören\"-Konfiguration"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Passwortregeln festlegen"</string>
@@ -1912,18 +1892,13 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> in &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; speichern?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> und <xliff:g id="TYPE_1">%2$s</xliff:g> in &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; speichern?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> und <xliff:g id="TYPE_2">%3$s</xliff:g> in &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; speichern?"</string>
-    <!-- no translation found for autofill_update_title (4879673117448810818) -->
-    <skip />
-    <!-- no translation found for autofill_update_title_with_type (339733442087186755) -->
-    <skip />
-    <!-- no translation found for autofill_update_title_with_2types (6321714204167424745) -->
-    <skip />
-    <!-- no translation found for autofill_update_title_with_3types (5866735124066629287) -->
-    <skip />
+    <string name="autofill_update_title" msgid="4879673117448810818">"Über &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; aktualisieren?"</string>
+    <string name="autofill_update_title_with_type" msgid="339733442087186755">"<xliff:g id="TYPE">%1$s</xliff:g> über &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; aktualisieren?"</string>
+    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"<xliff:g id="TYPE_0">%1$s</xliff:g> und <xliff:g id="TYPE_1">%2$s</xliff:g> über &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; aktualisieren?"</string>
+    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> und <xliff:g id="TYPE_2">%3$s</xliff:g> über &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; aktualisieren?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Speichern"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Nein danke"</string>
-    <!-- no translation found for autofill_update_yes (310358413273276958) -->
-    <skip />
+    <string name="autofill_update_yes" msgid="310358413273276958">"Aktualisieren"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"Passwort"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"Adresse"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"Kreditkarte"</string>

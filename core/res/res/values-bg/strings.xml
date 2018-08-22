@@ -300,18 +300,12 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Телесни сензори"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"достъп до сензорните данни за жизнените ви показатели"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да осъществява достъп до данните от сензорите за жизнените ви показатели?"</string>
-    <!-- no translation found for permgrouplab_aural (965607064083134896) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_aural (4870189506255958055) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_aural (6787926123071735620) -->
-    <skip />
-    <!-- no translation found for permgrouplab_visual (8030190588123857921) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_visual (3415827902566663546) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_visual (6907523945030290376) -->
-    <skip />
+    <string name="permgrouplab_aural" msgid="965607064083134896">"Музика"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"достъп до музиката ви"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да осъществява достъп до музиката ви?"</string>
+    <string name="permgrouplab_visual" msgid="8030190588123857921">"Снимки и видеоклипове"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"достъп до снимките и видеоклиповете ви"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да осъществява достъп до снимките и видеоклиповете ви?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Извличане на съдържанието от прозореца"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Инспектиране на съдържанието на прозорец, с който взаимодействате."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Включване на изследването чрез докосване"</string>
@@ -506,34 +500,20 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Разрешава на приложението да извиква начини за добавяне и изтриване на шаблони за отпечатъци, които да се използват."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"използване на хардуера за отпечатъци"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Разрешава на приложението да използва хардуера за отпечатъци с цел удостоверяване"</string>
-    <!-- no translation found for permlab_audioRead (6617225220728465565) -->
-    <skip />
-    <!-- no translation found for permdesc_audioRead (5034032570243484805) -->
-    <skip />
-    <!-- no translation found for permlab_audioWrite (2661772059799779292) -->
-    <skip />
-    <!-- no translation found for permdesc_audioWrite (8888544708166230494) -->
-    <skip />
-    <!-- no translation found for permlab_videoRead (9182618678674737229) -->
-    <skip />
-    <!-- no translation found for permdesc_videoRead (7045676429859396194) -->
-    <skip />
-    <!-- no translation found for permlab_videoWrite (128769316366746446) -->
-    <skip />
-    <!-- no translation found for permdesc_videoWrite (5448565757490640841) -->
-    <skip />
-    <!-- no translation found for permlab_imagesRead (3015078545742665304) -->
-    <skip />
-    <!-- no translation found for permdesc_imagesRead (3144263806038695580) -->
-    <skip />
-    <!-- no translation found for permlab_imagesWrite (3391306186247235510) -->
-    <skip />
-    <!-- no translation found for permdesc_imagesWrite (7073662756617474375) -->
-    <skip />
-    <!-- no translation found for permlab_mediaLocation (8675148183726247864) -->
-    <skip />
-    <!-- no translation found for permdesc_mediaLocation (2237023389178865130) -->
-    <skip />
+    <string name="permlab_audioRead" msgid="6617225220728465565">"да чете музикалната ви колекция"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"Разрешава на приложението да чете музикалната ви колекция."</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"да променя музикалната ви колекция"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"Разрешава на приложението да променя музикалната ви колекция."</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"да чете видеоколекцията ви"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"Разрешава на приложението да чете видеоколекцията ви."</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"да променя видеоколекцията ви"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"Разрешава на приложението да променя видеоколекцията ви."</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"да чете колекцията ви от снимки"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"Разрешава на приложението да чете колекцията ви от снимки."</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"да променя колекцията ви от снимки"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Разрешава на приложението да променя колекцията ви от снимки."</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"да чете местоположенията от мултимедийната ви колекция"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Разрешава на приложението да чете местоположенията от мултимедийната ви колекция."</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Открит е частичен отпечатък. Моля, опитайте отново."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Отпечатъкът не можа да се обработи. Моля, опитайте отново."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Сензорът за отпечатъци е мръсен. Моля, почистете го и опитайте отново."</string>
@@ -1912,18 +1892,13 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> да се запази ли в/ъв &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> и <xliff:g id="TYPE_1">%2$s</xliff:g> да се запазят ли в/ъв &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> и <xliff:g id="TYPE_2">%3$s</xliff:g> да се запазят ли в/ъв &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <!-- no translation found for autofill_update_title (4879673117448810818) -->
-    <skip />
-    <!-- no translation found for autofill_update_title_with_type (339733442087186755) -->
-    <skip />
-    <!-- no translation found for autofill_update_title_with_2types (6321714204167424745) -->
-    <skip />
-    <!-- no translation found for autofill_update_title_with_3types (5866735124066629287) -->
-    <skip />
+    <string name="autofill_update_title" msgid="4879673117448810818">"Да се актуализира ли в(ъв) &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_type" msgid="339733442087186755">"<xliff:g id="TYPE">%1$s</xliff:g> да се актуализира ли в(ъв) &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"<xliff:g id="TYPE_0">%1$s</xliff:g> и <xliff:g id="TYPE_1">%2$s</xliff:g> да се актуализират ли в(ъв) &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> и <xliff:g id="TYPE_2">%3$s</xliff:g> да се актуализират ли в(ъв) &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Запазване"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Не, благодаря"</string>
-    <!-- no translation found for autofill_update_yes (310358413273276958) -->
-    <skip />
+    <string name="autofill_update_yes" msgid="310358413273276958">"Актуализиране"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"Паролата"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"Адресът"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"Кредитната карта"</string>
