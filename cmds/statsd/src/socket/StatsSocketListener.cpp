@@ -111,7 +111,8 @@ bool StatsSocketListener::onDataAvailable(SocketClient* cli) {
         android_log_event_int_t* int_event = reinterpret_cast<android_log_event_int_t*>(ptr);
         if (int_event->header.tag == kLibLogTag && int_event->payload.type == EVENT_TYPE_INT) {
             ALOGE("Found dropped events: %d", int_event->payload.data);
-            StatsdStats::getInstance().noteLogLost(getElapsedRealtimeNs(), int_event->payload.data);
+            StatsdStats::getInstance().noteLogLost((int32_t)getWallClockSec(),
+                                                   int_event->payload.data);
             return true;
         }
     }

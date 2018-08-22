@@ -50,7 +50,7 @@ const int FIELD_ID_ANOMALY_ALARM_STATS = 9;
 // const int FIELD_ID_PULLED_ATOM_STATS = 10; // The proto is written in stats_log_util.cpp
 const int FIELD_ID_LOGGER_ERROR_STATS = 11;
 const int FIELD_ID_PERIODIC_ALARM_STATS = 12;
-const int FIELD_ID_LOG_LOSS_STATS = 14;
+// const int FIELD_ID_LOG_LOSS_STATS = 14;
 const int FIELD_ID_SYSTEM_SERVER_RESTART = 15;
 
 const int FIELD_ID_ATOM_STATS_TAG = 1;
@@ -180,12 +180,12 @@ void StatsdStats::noteConfigReset(const ConfigKey& key) {
     noteConfigResetInternalLocked(key);
 }
 
-void StatsdStats::noteLogLost(int64_t timestampNs, int32_t count) {
+void StatsdStats::noteLogLost(int32_t wallClockTimeSec, int32_t count) {
     lock_guard<std::mutex> lock(mLock);
-    if (mLogLossTimestampNs.size() == kMaxLoggerErrors) {
-        mLogLossTimestampNs.pop_front();
+    if (mLogLossStats.size() == kMaxLoggerErrors) {
+        mLogLossStats.pop_front();
     }
-    mLogLossTimestampNs.push_back(std::make_pair(timestampNs, count));
+    mLogLossStats.push_back(std::make_pair(wallClockTimeSec, count));
 }
 
 void StatsdStats::noteBroadcastSent(const ConfigKey& key) {
@@ -365,15 +365,6 @@ void StatsdStats::noteSystemServerRestart(int32_t timeSec) {
     mSystemServerRestartSec.push_back(timeSec);
 }
 
-void StatsdStats::noteLoggerError(int error) {
-    lock_guard<std::mutex> lock(mLock);
-    // grows strictly one at a time. so it won't > kMaxLoggerErrors
-    if (mLoggerErrors.size() == kMaxLoggerErrors) {
-        mLoggerErrors.pop_front();
-    }
-    mLoggerErrors.push_back(std::make_pair(getWallClockSec(), error));
-}
-
 void StatsdStats::reset() {
     lock_guard<std::mutex> lock(mLock);
     resetInternalLocked();
@@ -386,9 +377,8 @@ void StatsdStats::resetInternalLocked() {
     std::fill(mPushedAtomStats.begin(), mPushedAtomStats.end(), 0);
     mAnomalyAlarmRegisteredStats = 0;
     mPeriodicAlarmRegisteredStats = 0;
-    mLoggerErrors.clear();
     mSystemServerRestartSec.clear();
-    mLogLossTimestampNs.clear();
+    mLogLossStats.clear();
     for (auto& config : mConfigStats) {
         config.second->broadcast_sent_time_sec.clear();
         config.second->data_drop_time_sec.clear();
@@ -515,21 +505,13 @@ void StatsdStats::dumpStats(FILE* out) const {
             mUidMapStats.bytes_used, mUidMapStats.changes, mUidMapStats.deleted_apps,
             mUidMapStats.dropped_changes);
 
-    for (const auto& error : mLoggerErrors) {
-        time_t error_time = error.first;
-        struct tm* error_tm = localtime(&error_time);
-        char buffer[80];
-        strftime(buffer, sizeof(buffer), "%Y-%m-%d %I:%M%p\n", error_tm);
-        fprintf(out, "Logger error %d at %s\n", error.second, buffer);
-    }
-
     for (const auto& restart : mSystemServerRestartSec) {
         fprintf(out, "System server restarts at %s(%lld)\n",
             buildTimeString(restart).c_str(), (long long)restart);
     }
 
-    for (const auto& loss : mLogLossTimestampNs) {
-        fprintf(out, "Log loss: %lld (elapsedRealtimeNs) - %d (count)\n", (long long)loss.first,
+    for (const auto& loss : mLogLossStats) {
+        fprintf(out, "Log loss: %lld (wall clock sec) - %d (count)\n", (long long)loss.first,
                 loss.second);
     }
 }
@@ -678,17 +660,15 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
     proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID_MAP_DELETED_APPS, mUidMapStats.deleted_apps);
     proto.end(uidMapToken);
 
-    for (const auto& error : mLoggerErrors) {
+    for (const auto& error : mLogLossStats) {
+        // The logger error stats are not used anymore since we move away from logd.
+        // Temporarily use this field to log the log loss timestamp and count
+        // TODO(b/80538532) Add a dedicated field in stats_log for this.
         uint64_t token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_LOGGER_ERROR_STATS |
                                       FIELD_COUNT_REPEATED);
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOGGER_STATS_TIME, error.first);
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOGGER_STATS_ERROR_CODE, error.second);
         proto.end(token);
-    }
-
-    for (const auto& loss : mLogLossTimestampNs) {
-        proto.write(FIELD_TYPE_INT64 | FIELD_ID_LOG_LOSS_STATS | FIELD_COUNT_REPEATED,
-                    (long long)loss.first);
     }
 
     for (const auto& restart : mSystemServerRestartSec) {
