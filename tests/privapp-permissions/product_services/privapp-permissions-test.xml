@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<permissions>
+    <privapp-permissions package="com.android.framework.permission.privapp.tests.product_services">
+        <permission name="android.permission.MANAGE_USB"/>
+    </privapp-permissions>
+</permissions>
