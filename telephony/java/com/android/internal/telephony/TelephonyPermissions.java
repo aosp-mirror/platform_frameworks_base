@@ -20,7 +20,6 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import android.Manifest;
 import android.app.AppOpsManager;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -246,6 +245,26 @@ public final class TelephonyPermissions {
         }
 
         if (DBG) Rlog.d(LOG_TAG, "No modify permission, check carrier privilege next.");
+        enforceCallingOrSelfCarrierPrivilege(subId, message);
+    }
+
+    /**
+     * Ensure the caller (or self, if not processing an IPC) has
+     * {@link android.Manifest.permission#READ_PHONE_STATE} or carrier privileges.
+     *
+     * @throws SecurityException if the caller does not have the required permission/privileges
+     */
+    public static void enforeceCallingOrSelfReadPhoneStatePermissionOrCarrierPrivilege(
+            Context context, int subId, String message) {
+        if (context.checkCallingOrSelfPermission(android.Manifest.permission.READ_PHONE_STATE)
+                == PERMISSION_GRANTED) {
+            return;
+        }
+
+        if (DBG) {
+            Rlog.d(LOG_TAG, "No READ_PHONE_STATE permission, check carrier privilege next.");
+        }
+
         enforceCallingOrSelfCarrierPrivilege(subId, message);
     }
 

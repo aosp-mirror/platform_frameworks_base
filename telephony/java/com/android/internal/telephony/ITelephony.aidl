@@ -1520,6 +1520,22 @@ interface ITelephony {
     void setRadioIndicationUpdateMode(int subId, int filters, int mode);
 
     /**
+     * Returns whether mobile data roaming is enabled on the subscription with id {@code subId}.
+     *
+     * @param subId the subscription id
+     * @return {@code true} if the data roaming is enabled on this subscription.
+     */
+    boolean isDataRoamingEnabled(int subId);
+
+    /**
+     * Enables/Disables the data roaming on the subscription with id {@code subId}.
+     *
+     * @param subId the subscription id
+     * @param isEnabled {@code true} to enable mobile data roaming, otherwise disable it.
+     */
+    void setDataRoamingEnabled(int subId, boolean isEnabled);
+
+    /**
      * A test API to override carrier information including mccmnc, imsi, iccid, gid1, gid2,
      * plmn and spn. This would be handy for, eg, forcing a particular carrier id, carrier's config
      * (also any country or carrier overlays) to be loaded when using a test SIM with a call box.
