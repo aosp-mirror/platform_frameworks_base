@@ -21,6 +21,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
 import static android.view.accessibility.AccessibilityEvent.WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS;
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_AUTO;
@@ -2549,6 +2551,38 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return -1;
     }
 
+    private void notifyOutsideTouchIfNeeded(int targetWindowId, int action, Bundle arguments,
+            int interactionId, IAccessibilityInteractionConnectionCallback callback, int fetchFlags,
+            int interrogatingPid, long interrogatingTid) {
+        if (action != ACTION_CLICK && action != ACTION_LONG_CLICK) {
+            return;
+        }
+
+        final List<Integer> outsideWindowsIds;
+        final List<RemoteAccessibilityConnection> connectionList = new ArrayList<>();
+        synchronized (mLock) {
+            outsideWindowsIds = mSecurityPolicy.getWatchOutsideTouchWindowId(targetWindowId);
+            for (int i = 0; i < outsideWindowsIds.size(); i++) {
+                connectionList.add(getConnectionLocked(outsideWindowsIds.get(i)));
+            }
+        }
+        for (int i = 0; i < connectionList.size(); i++) {
+            final RemoteAccessibilityConnection connection = connectionList.get(i);
+            if (connection != null) {
+                try {
+                    connection.mConnection.performAccessibilityAction(
+                            AccessibilityNodeInfo.ROOT_ITEM_ID,
+                            R.id.accessibilityActionOutsideTouch, arguments, interactionId,
+                            callback, fetchFlags, interrogatingPid, interrogatingTid);
+                } catch (RemoteException re) {
+                    if (DEBUG) {
+                        Slog.e(LOG_TAG, "Error calling performAccessibilityAction: " + re);
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public void ensureWindowsAvailableTimed() {
         synchronized (mLock) {
@@ -2628,6 +2662,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mPowerManager.userActivity(SystemClock.uptimeMillis(),
                     PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY, 0);
 
+            notifyOutsideTouchIfNeeded(resolvedWindowId, action, arguments, interactionId, callback,
+                    fetchFlags, interrogatingPid, interrogatingTid);
             if (activityToken != null) {
                 LocalServices.getService(ActivityTaskManagerInternal.class)
                         .setFocusedActivity(activityToken);
@@ -2955,6 +2991,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         public long mAccessibilityFocusNodeId = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
 
         private boolean mTouchInteractionInProgress;
+        private boolean mHasWatchOutsideTouchWindow;
 
         private boolean canDispatchAccessibilityEventLocked(AccessibilityEvent event) {
             final int eventType = event.getEventType();
@@ -3112,6 +3149,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mWindowInfoById.valueAt(i).recycle();
             }
             mWindowInfoById.clear();
+            mHasWatchOutsideTouchWindow = false;
 
             mFocusedWindowId = INVALID_WINDOW_ID;
             if (!mTouchInteractionInProgress) {
@@ -3155,6 +3193,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             } else if (windowId == mActiveWindowId) {
                                 activeWindowGone = false;
                             }
+                        }
+                        if (!mHasWatchOutsideTouchWindow && windowInfo.hasFlagWatchOutsideTouch) {
+                            mHasWatchOutsideTouchWindow = true;
                         }
                         mWindows.add(window);
                         mA11yWindowInfoById.put(windowId, window);
@@ -3572,6 +3613,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         private WindowInfo findWindowInfoById(int windowId) {
             return mWindowInfoById.get(windowId);
+        }
+
+        private List<Integer> getWatchOutsideTouchWindowId(int targetWindowId) {
+            if (mWindowInfoById != null && mHasWatchOutsideTouchWindow) {
+                final List<Integer> outsideWindowsId = new ArrayList<>();
+                final WindowInfo targetWindow = mWindowInfoById.get(targetWindowId);
+                for (int i = 0; i < mWindowInfoById.size(); i++) {
+                    WindowInfo window = mWindowInfoById.valueAt(i);
+                    if (window.layer < targetWindow.layer
+                            && window.hasFlagWatchOutsideTouch) {
+                        outsideWindowsId.add(mWindowInfoById.keyAt(i));
+                    }
+                }
+                return outsideWindowsId;
+            }
+            return Collections.emptyList();
         }
 
         private AccessibilityWindowInfo getPictureInPictureWindow() {
