@@ -227,13 +227,7 @@ public abstract class PanelView extends FrameLayout {
     }
 
     private void trackMovement(MotionEvent event) {
-        // Add movement to velocity tracker using raw screen X and Y coordinates instead
-        // of window coordinates because the window frame may be moving at the same time.
-        float deltaX = event.getRawX() - event.getX();
-        float deltaY = event.getRawY() - event.getY();
-        event.offsetLocation(deltaX, deltaY);
         if (mVelocityTracker != null) mVelocityTracker.addMovement(event);
-        event.offsetLocation(-deltaX, -deltaY);
     }
 
     public void setTouchDisabled(boolean disabled) {
