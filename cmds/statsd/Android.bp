@@ -43,3 +43,25 @@ cc_library_host_shared {
 }
 
 
+// ====  java proto device library (for test only)  ==============================
+java_library {
+    name: "statsdprotolite",
+    proto: {
+        type: "lite",
+        include_dirs: ["external/protobuf/src"],
+    },
+
+    srcs: [
+        "src/stats_log.proto",
+        "src/statsd_config.proto",
+        "src/atoms.proto",
+    ],
+
+    static_libs: [
+        "platformprotoslite",
+    ],
+    // Protos have lots of MissingOverride and similar.
+    errorprone: {
+        javacflags: ["-XepDisableAllChecks"],
+    },
+}
