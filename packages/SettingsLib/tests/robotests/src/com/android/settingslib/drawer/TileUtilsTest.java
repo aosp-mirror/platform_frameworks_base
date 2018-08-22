@@ -16,6 +16,7 @@
 
 package com.android.settingslib.drawer;
 
+import static com.android.settingslib.drawer.TileUtils.IA_SETTINGS_ACTION;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON_URI;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
@@ -24,6 +25,7 @@ import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMM
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -98,15 +100,14 @@ public class TileUtilsTest {
     @Test
     public void getTilesForIntent_shouldParseCategory() {
         final String testCategory = "category1";
-        Intent intent = new Intent();
         Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
         List<Tile> outTiles = new ArrayList<>();
         List<ResolveInfo> info = new ArrayList<>();
         info.add(newInfo(true, testCategory));
-        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+        when(mPackageManager.queryIntentActivitiesAsUser(any(Intent.class), anyInt(), anyInt()))
                 .thenReturn(info);
 
-        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles.size()).isEqualTo(1);
@@ -116,39 +117,37 @@ public class TileUtilsTest {
     @Test
     public void getTilesForIntent_shouldParseKeyHintForSystemApp() {
         String keyHint = "key";
-        Intent intent = new Intent();
         Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
         List<Tile> outTiles = new ArrayList<>();
         List<ResolveInfo> info = new ArrayList<>();
         ResolveInfo resolveInfo = newInfo(true, null /* category */, keyHint);
         info.add(resolveInfo);
 
-        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+        when(mPackageManager.queryIntentActivitiesAsUser(any(Intent.class), anyInt(), anyInt()))
                 .thenReturn(info);
 
-        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */);
+        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
+                null /* defaultCategory */, outTiles, false /* requiresSettings */);
 
-        assertThat(outTiles.size()).isEqualTo(1);
+        assertThat(outTiles).hasSize(1);
         assertThat(outTiles.get(0).getKey(mContext)).isEqualTo(keyHint);
     }
 
     @Test
     public void getTilesForIntent_shouldSkipNonSystemApp() {
         final String testCategory = "category1";
-        Intent intent = new Intent();
         Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
         List<Tile> outTiles = new ArrayList<>();
         List<ResolveInfo> info = new ArrayList<>();
         info.add(newInfo(false, testCategory));
 
-        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+        when(mPackageManager.queryIntentActivitiesAsUser(any(Intent.class), anyInt(), anyInt()))
                 .thenReturn(info);
 
-        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */);
+        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION,
+                addedCache, null /* defaultCategory */, outTiles, false /* requiresSettings */);
 
-        assertThat(outTiles.isEmpty()).isTrue();
+        assertThat(outTiles).isEmpty();
     }
 
     @Test
@@ -172,7 +171,6 @@ public class TileUtilsTest {
 
     @Test
     public void getTilesForIntent_shouldReadMetadataTitleAsString() {
-        Intent intent = new Intent();
         Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
         List<Tile> outTiles = new ArrayList<>();
         List<ResolveInfo> info = new ArrayList<>();
@@ -180,10 +178,10 @@ public class TileUtilsTest {
                 URI_GET_SUMMARY, "my title", 0);
         info.add(resolveInfo);
 
-        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+        when(mPackageManager.queryIntentActivitiesAsUser(any(Intent.class), anyInt(), anyInt()))
                 .thenReturn(info);
 
-        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles.size()).isEqualTo(1);
@@ -192,7 +190,6 @@ public class TileUtilsTest {
 
     @Test
     public void getTilesForIntent_shouldReadMetadataTitleFromResource() {
-        Intent intent = new Intent();
         Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
         List<Tile> outTiles = new ArrayList<>();
         List<ResolveInfo> info = new ArrayList<>();
@@ -200,13 +197,13 @@ public class TileUtilsTest {
                 URI_GET_SUMMARY, null, 123);
         info.add(resolveInfo);
 
-        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+        when(mPackageManager.queryIntentActivitiesAsUser(any(Intent.class), anyInt(), anyInt()))
                 .thenReturn(info);
 
         when(mResources.getString(eq(123)))
                 .thenReturn("my localized title");
 
-        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */);
         assertThat(outTiles.size()).isEqualTo(1);
         assertThat(outTiles.get(0).getTitle(mContext)).isEqualTo("my localized title");
@@ -218,7 +215,6 @@ public class TileUtilsTest {
 
     @Test
     public void getTilesForIntent_shouldNotTintIconIfInSettingsPackage() {
-        Intent intent = new Intent();
         Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
         List<Tile> outTiles = new ArrayList<>();
         List<ResolveInfo> info = new ArrayList<>();
@@ -228,10 +224,10 @@ public class TileUtilsTest {
         resolveInfo.activityInfo.applicationInfo.packageName = "com.android.settings";
         info.add(resolveInfo);
 
-        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+        when(mPackageManager.queryIntentActivitiesAsUser(any(Intent.class), anyInt(), anyInt()))
                 .thenReturn(info);
 
-        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles.get(0).isIconTintable(mContext)).isFalse();
@@ -239,7 +235,6 @@ public class TileUtilsTest {
 
     @Test
     public void getTilesForIntent_shouldMarkIconTintableIfMetadataSet() {
-        Intent intent = new Intent();
         Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
         List<Tile> outTiles = new ArrayList<>();
         List<ResolveInfo> info = new ArrayList<>();
@@ -249,10 +244,10 @@ public class TileUtilsTest {
                 .putBoolean(TileUtils.META_DATA_PREFERENCE_ICON_TINTABLE, true);
         info.add(resolveInfo);
 
-        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+        when(mPackageManager.queryIntentActivitiesAsUser(any(Intent.class), anyInt(), anyInt()))
                 .thenReturn(info);
 
-        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles.get(0).isIconTintable(mContext)).isTrue();
@@ -260,7 +255,6 @@ public class TileUtilsTest {
 
     @Test
     public void getTilesForIntent_shouldProcessUriContentForSystemApp() {
-        Intent intent = new Intent();
         Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
         List<Tile> outTiles = new ArrayList<>();
         List<ResolveInfo> info = new ArrayList<>();
@@ -268,10 +262,10 @@ public class TileUtilsTest {
                 URI_GET_SUMMARY);
         info.add(resolveInfo);
 
-        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+        when(mPackageManager.queryIntentActivitiesAsUser(any(Intent.class), anyInt(), anyInt()))
                 .thenReturn(info);
 
-        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles.size()).isEqualTo(1);
