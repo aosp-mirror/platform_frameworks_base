@@ -70,6 +70,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private static final long BACKOFF_MILLIS = 1000;
     private static final long DEFERRED_CALLBACK_MILLIS = 5000;
 
+    // Max backoff caps at 5 mins
+    private static final long MAX_BACKOFF_MILLIS = 10 * 60 * 1000;
+
     // Default interaction flags if swipe up is disabled before connecting to launcher
     private static final int DEFAULT_DISABLE_SWIPE_UP_STATE = FLAG_DISABLE_SWIPE_UP
             | FLAG_SHOW_OVERVIEW_BUTTON;
@@ -215,7 +218,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final Runnable mDeferredConnectionCallback = () -> {
         Log.w(TAG_OPS, "Binder supposed established connection but actual connection to service "
             + "timed out, trying again");
-        internalConnectToCurrentUser();
+        retryConnectionWithBackoff();
     };
 
     private final BroadcastReceiver mLauncherStateChangedReceiver = new BroadcastReceiver() {
@@ -260,14 +263,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         public void onNullBinding(ComponentName name) {
             Log.w(TAG_OPS, "Null binding of '" + name + "', try reconnecting");
             mCurrentBoundedUserId = -1;
-            internalConnectToCurrentUser();
+            retryConnectionWithBackoff();
         }
 
         @Override
         public void onBindingDied(ComponentName name) {
             Log.w(TAG_OPS, "Binding died of '" + name + "', try reconnecting");
             mCurrentBoundedUserId = -1;
-            internalConnectToCurrentUser();
+            retryConnectionWithBackoff();
         }
 
         @Override
@@ -357,12 +360,20 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             mHandler.postDelayed(mDeferredConnectionCallback, DEFERRED_CALLBACK_MILLIS);
         } else {
             // Retry after exponential backoff timeout
-            final long timeoutMs = (long) Math.scalb(BACKOFF_MILLIS, mConnectionBackoffAttempts);
-            mHandler.postDelayed(mConnectionRunnable, timeoutMs);
-            mConnectionBackoffAttempts++;
-            Log.w(TAG_OPS, "Failed to connect on attempt " + mConnectionBackoffAttempts
-                    + " will try again in " + timeoutMs + "ms");
+            retryConnectionWithBackoff();
         }
+    }
+
+    private void retryConnectionWithBackoff() {
+        if (mHandler.hasCallbacks(mConnectionRunnable)) {
+            return;
+        }
+        final long timeoutMs = (long) Math.min(
+                Math.scalb(BACKOFF_MILLIS, mConnectionBackoffAttempts), MAX_BACKOFF_MILLIS);
+        mHandler.postDelayed(mConnectionRunnable, timeoutMs);
+        mConnectionBackoffAttempts++;
+        Log.w(TAG_OPS, "Failed to connect on attempt " + mConnectionBackoffAttempts
+                + " will try again in " + timeoutMs + "ms");
     }
 
     @Override
