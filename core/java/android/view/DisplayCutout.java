@@ -325,6 +325,7 @@ public final class DisplayCutout {
      *
      * @hide
      */
+    @VisibleForTesting
     public static DisplayCutout fromBoundingRect(int left, int top, int right, int bottom) {
         Region r = Region.obtain();
         r.set(left, top, right, bottom);
@@ -422,8 +423,11 @@ public final class DisplayCutout {
         m.postTranslate(offsetX, 0);
         p.transform(m);
 
-        addToRegion(p, r);
+        final Rect tmpRect = new Rect();
+        toRectAndAddToRegion(p, r, tmpRect);
+        final int topInset = tmpRect.bottom;
 
+        final int bottomInset;
         if (bottomSpec != null) {
             final Path bottomPath;
             try {
@@ -436,10 +440,17 @@ public final class DisplayCutout {
             m.postTranslate(0, displayHeight);
             bottomPath.transform(m);
             p.addPath(bottomPath);
-            addToRegion(bottomPath, r);
+            toRectAndAddToRegion(bottomPath, r, tmpRect);
+            bottomInset = displayHeight - tmpRect.top;
+        } else {
+            bottomInset = 0;
         }
 
-        final Pair<Path, DisplayCutout> result = new Pair<>(p, fromBounds(r));
+        // Reuse tmpRect as the inset rect we store into the DisplayCutout instance.
+        tmpRect.set(0, topInset, 0, bottomInset);
+        final DisplayCutout cutout = new DisplayCutout(tmpRect, r, false /* copyArguments */);
+
+        final Pair<Path, DisplayCutout> result = new Pair<>(p, cutout);
         synchronized (CACHE_LOCK) {
             sCachedSpec = spec;
             sCachedDisplayWidth = displayWidth;
@@ -450,12 +461,11 @@ public final class DisplayCutout {
         return result;
     }
 
-    private static void addToRegion(Path p, Region r) {
+    private static void toRectAndAddToRegion(Path p, Region inoutRegion, Rect inoutRect) {
         final RectF rectF = new RectF();
-        final Rect rect = new Rect();
         p.computeBounds(rectF, false /* unused */);
-        rectF.round(rect);
-        r.op(rect, Op.UNION);
+        rectF.round(inoutRect);
+        inoutRegion.op(inoutRect, Op.UNION);
     }
 
     private static Region boundingRectsToRegion(List<Rect> rects) {
