@@ -18,6 +18,7 @@ package com.android.internal.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.os.ProxyFileDescriptorCallback;
 import android.os.Handler;
 import android.os.Message;
@@ -226,6 +227,7 @@ public class FuseAppLoop implements Handler.Callback {
 
     // Called by JNI.
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private void onCommand(int command, long unique, long inode, long offset, int size,
             byte[] data) {
         synchronized (mLock) {
@@ -254,6 +256,7 @@ public class FuseAppLoop implements Handler.Callback {
 
     // Called by JNI.
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private byte[] onOpen(long unique, long inode) {
         synchronized (mLock) {
             try {

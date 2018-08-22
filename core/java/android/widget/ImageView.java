@@ -20,6 +20,7 @@ import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -96,13 +97,18 @@ public class ImageView extends View {
     private static final String LOG_TAG = "ImageView";
 
     // settable by the client
+    @UnsupportedAppUsage
     private Uri mUri;
+    @UnsupportedAppUsage
     private int mResource = 0;
     private Matrix mMatrix;
     private ScaleType mScaleType;
     private boolean mHaveFrame = false;
+    @UnsupportedAppUsage
     private boolean mAdjustViewBounds = false;
+    @UnsupportedAppUsage
     private int mMaxWidth = Integer.MAX_VALUE;
+    @UnsupportedAppUsage
     private int mMaxHeight = Integer.MAX_VALUE;
 
     // these are applied to the drawable
@@ -110,11 +116,14 @@ public class ImageView extends View {
     private boolean mHasColorFilter = false;
     private Xfermode mXfermode;
     private boolean mHasXfermode = false;
+    @UnsupportedAppUsage
     private int mAlpha = 255;
     private boolean mHasAlpha = false;
     private final int mViewAlphaScale = 256;
 
+    @UnsupportedAppUsage
     private Drawable mDrawable = null;
+    @UnsupportedAppUsage
     private BitmapDrawable mRecycleableBitmapDrawable = null;
     private ColorStateList mDrawableTintList = null;
     private PorterDuff.Mode mDrawableTintMode = null;
@@ -124,14 +133,18 @@ public class ImageView extends View {
     private int[] mState = null;
     private boolean mMergeState = false;
     private int mLevel = 0;
+    @UnsupportedAppUsage
     private int mDrawableWidth;
+    @UnsupportedAppUsage
     private int mDrawableHeight;
+    @UnsupportedAppUsage
     private Matrix mDrawMatrix = null;
 
     // Avoid allocations...
     private final RectF mTempSrc = new RectF();
     private final RectF mTempDst = new RectF();
 
+    @UnsupportedAppUsage
     private boolean mCropToPadding;
 
     private int mBaseline = -1;
@@ -485,6 +498,7 @@ public class ImageView extends View {
     }
 
     /** @hide **/
+    @UnsupportedAppUsage
     public Runnable setImageResourceAsync(@DrawableRes int resId) {
         Drawable d = null;
         if (resId != 0) {
@@ -540,6 +554,7 @@ public class ImageView extends View {
     }
 
     /** @hide **/
+    @UnsupportedAppUsage
     public Runnable setImageURIAsync(@Nullable Uri uri) {
         if (mResource != 0 || (mUri != uri && (uri == null || mUri == null || !uri.equals(mUri)))) {
             Drawable d = uri == null ? null : getDrawableFromUri(uri);
@@ -899,6 +914,7 @@ public class ImageView extends View {
         }
     }
 
+    @UnsupportedAppUsage
     private void resolveUri() {
         if (mDrawable != null) {
             return;
@@ -974,6 +990,7 @@ public class ImageView extends View {
         }
     }
 
+    @UnsupportedAppUsage
     private void updateDrawable(Drawable d) {
         if (d != mRecycleableBitmapDrawable && mRecycleableBitmapDrawable != null) {
             mRecycleableBitmapDrawable.setBitmap(null);
@@ -1018,6 +1035,7 @@ public class ImageView extends View {
         }
     }
 
+    @UnsupportedAppUsage
     private void resizeFromDrawable() {
         final Drawable d = mDrawable;
         if (d != null) {
@@ -1049,6 +1067,7 @@ public class ImageView extends View {
         Matrix.ScaleToFit.END
     };
 
+    @UnsupportedAppUsage
     private static Matrix.ScaleToFit scaleTypeToScaleToFit(ScaleType st)  {
         // ScaleToFit enum to their corresponding Matrix.ScaleToFit values
         return sS2FArray[st.nativeInt - 1];
@@ -1313,6 +1332,7 @@ public class ImageView extends View {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void animateTransform(Matrix matrix) {
         if (mDrawable == null) {
             return;

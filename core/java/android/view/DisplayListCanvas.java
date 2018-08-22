@@ -40,7 +40,7 @@ public final class DisplayListCanvas extends RecordingCanvas {
     // view hierarchy because display lists are generated recursively.
     private static final int POOL_LIMIT = 25;
 
-    private static final int MAX_BITMAP_SIZE = 100 * 1024 * 1024; // 100 MB
+    public static final int MAX_BITMAP_SIZE = 100 * 1024 * 1024; // 100 MB
 
     private static final SynchronizedPool<DisplayListCanvas> sPool =
             new SynchronizedPool<>(POOL_LIMIT);

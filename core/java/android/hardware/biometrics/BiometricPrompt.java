@@ -69,6 +69,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * @hide
      */
     public static final int HIDE_DIALOG_DELAY = 2000; // ms
+
     /**
      * @hide
      */

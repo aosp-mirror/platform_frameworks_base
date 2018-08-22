@@ -1567,8 +1567,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         final long identity = Binder.clearCallingIdentity();
         try {
+            final String settingValue = builder.toString();
             Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                    settingName, builder.toString(), userId);
+                    settingName, TextUtils.isEmpty(settingValue) ? null : settingValue, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

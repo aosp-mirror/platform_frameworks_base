@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -106,14 +107,21 @@ public class GridView extends AbsListView {
      */
     public static final int AUTO_FIT = -1;
 
+    @UnsupportedAppUsage
     private int mNumColumns = AUTO_FIT;
 
+    @UnsupportedAppUsage
     private int mHorizontalSpacing = 0;
+    @UnsupportedAppUsage
     private int mRequestedHorizontalSpacing;
+    @UnsupportedAppUsage
     private int mVerticalSpacing = 0;
     private int mStretchMode = STRETCH_COLUMN_WIDTH;
+    @UnsupportedAppUsage
     private int mColumnWidth;
+    @UnsupportedAppUsage
     private int mRequestedColumnWidth;
+    @UnsupportedAppUsage
     private int mRequestedNumColumns;
 
     private View mReferenceView = null;
@@ -300,6 +308,7 @@ public class GridView extends AbsListView {
      * @return The view that is currently selected, if it happens to be in the
      *         range that we draw.
      */
+    @UnsupportedAppUsage
     private View fillDown(int pos, int nextTop) {
         View selectedView = null;
 
@@ -399,6 +408,7 @@ public class GridView extends AbsListView {
      *
      * @return The view that is currently selected
      */
+    @UnsupportedAppUsage
     private View fillUp(int pos, int nextBottom) {
         View selectedView = null;
 
@@ -965,6 +975,7 @@ public class GridView extends AbsListView {
         return sel;
     }
 
+    @UnsupportedAppUsage
     private boolean determineColumns(int availableSpace) {
         final int requestedHorizontalSpacing = mRequestedHorizontalSpacing;
         final int stretchMode = mStretchMode;
@@ -1884,6 +1895,7 @@ public class GridView extends AbsListView {
      * Goes to the next or previous item according to the order set by the
      * adapter.
      */
+    @UnsupportedAppUsage
     boolean sequenceScroll(int direction) {
         int selectedPosition = mSelectedPosition;
         int numColumns = mNumColumns;

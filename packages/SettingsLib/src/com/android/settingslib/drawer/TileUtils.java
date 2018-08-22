@@ -205,12 +205,9 @@ public class TileUtils {
 
     /**
      * Build a list of DashboardCategory.
-     *
-     * @param extraAction additional intent filter action to be usetileutild to build the dashboard
-     *                    categories
      */
     public static List<DashboardCategory> getCategories(Context context,
-            Map<Pair<String, String>, Tile> cache, String extraAction) {
+            Map<Pair<String, String>, Tile> cache) {
         final long startTime = System.currentTimeMillis();
         boolean setup = Global.getInt(context.getContentResolver(), Global.DEVICE_PROVISIONED, 0)
                 != 0;
@@ -229,9 +226,6 @@ public class TileUtils {
             if (setup) {
                 getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false);
                 getTilesForAction(context, user, IA_SETTINGS_ACTION, cache, null, tiles, false);
-                if (extraAction != null) {
-                    getTilesForAction(context, user, extraAction, cache, null, tiles, false);
-                }
             }
         }
 
@@ -313,7 +307,6 @@ public class TileUtils {
             if (tile == null) {
                 tile = new Tile(activityInfo, categoryKey);
                 updateTileData(context, tile, activityInfo, activityInfo.applicationInfo, pm);
-                if (DEBUG) Log.d(LOG_TAG, "Adding tile " + tile.title);
                 addedCache.put(key, tile);
             }
 
@@ -329,7 +322,6 @@ public class TileUtils {
     private static boolean updateTileData(Context context, Tile tile,
             ActivityInfo activityInfo, ApplicationInfo applicationInfo, PackageManager pm) {
         if (applicationInfo.isSystemApp()) {
-            CharSequence title = null;
             String summary = null;
 
             // Get the activity's meta-data
@@ -338,13 +330,6 @@ public class TileUtils {
                 Bundle metaData = activityInfo.metaData;
 
                 if (res != null && metaData != null) {
-                    if (metaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
-                        if (metaData.get(META_DATA_PREFERENCE_TITLE) instanceof Integer) {
-                            title = res.getString(metaData.getInt(META_DATA_PREFERENCE_TITLE));
-                        } else {
-                            title = metaData.getString(META_DATA_PREFERENCE_TITLE);
-                        }
-                    }
                     if (metaData.containsKey(META_DATA_PREFERENCE_SUMMARY)) {
                         if (metaData.get(META_DATA_PREFERENCE_SUMMARY) instanceof Integer) {
                             summary = res.getString(metaData.getInt(META_DATA_PREFERENCE_SUMMARY));
@@ -356,16 +341,6 @@ public class TileUtils {
             } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
                 if (DEBUG) Log.d(LOG_TAG, "Couldn't find info", e);
             }
-
-            // Set the preference title to the activity's label if no
-            // meta-data is found
-            if (TextUtils.isEmpty(title)) {
-                title = activityInfo.loadLabel(pm).toString();
-            }
-
-            // Set title and summary for the preference
-            tile.title = title;
-            tile.summary = summary;
             return true;
         }
 

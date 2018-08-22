@@ -370,7 +370,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected StatusBarWindowView mStatusBarWindow;
     protected PhoneStatusBarView mStatusBarView;
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
-    protected StatusBarWindowManager mStatusBarWindowManager;
+    protected StatusBarWindowController mStatusBarWindowController;
     protected UnlockMethodCache mUnlockMethodCache;
     private DozeServiceHost mDozeServiceHost = new DozeServiceHost();
     private boolean mWakeUpComingFromTouch;
@@ -515,7 +515,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             final boolean supportsAmbientMode = info != null &&
                     info.supportsAmbientMode();
 
-            mStatusBarWindowManager.setWallpaperSupportsAmbientMode(supportsAmbientMode);
+            mStatusBarWindowController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
             mScrimController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
         }
     };
@@ -957,8 +957,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 scrimBehind, scrimInFront, mLockscreenWallpaper,
                 (state, alpha, color) -> mLightBarController.setScrimState(state, alpha, color),
                 scrimsVisible -> {
-                    if (mStatusBarWindowManager != null) {
-                        mStatusBarWindowManager.setScrimsVisibility(scrimsVisible);
+                    if (mStatusBarWindowController != null) {
+                        mStatusBarWindowController.setScrimsVisibility(scrimsVisible);
                     }
                 }, DozeParameters.getInstance(mContext),
                 mContext.getSystemService(AlarmManager.class));
@@ -1702,7 +1702,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mBackdrop.animate().cancel();
                     mBackdrop.setAlpha(1f);
                 }
-                mStatusBarWindowManager.setBackdropShowing(true);
+                mStatusBarWindowController.setBackdropShowing(true);
                 metaDataChanged = true;
                 if (DEBUG_MEDIA) {
                     Log.v(TAG, "DEBUG_MEDIA: Fading in album artwork");
@@ -1762,9 +1762,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                     // We are unlocking directly - no animation!
                     mBackdrop.setVisibility(View.GONE);
                     mBackdropBack.setImageDrawable(null);
-                    mStatusBarWindowManager.setBackdropShowing(false);
+                    mStatusBarWindowController.setBackdropShowing(false);
                 } else {
-                    mStatusBarWindowManager.setBackdropShowing(false);
+                    mStatusBarWindowController.setBackdropShowing(false);
                     mBackdrop.animate()
                             .alpha(SRC_MIN_ALPHA)
                             .setInterpolator(Interpolators.ACCELERATE_DECELERATE)
@@ -1918,7 +1918,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void setQsExpanded(boolean expanded) {
-        mStatusBarWindowManager.setQsExpanded(expanded);
+        mStatusBarWindowController.setQsExpanded(expanded);
         mNotificationPanel.setStatusAccessibilityImportance(expanded
                 ? View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
                 : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
@@ -2001,31 +2001,31 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
         if (inPinnedMode) {
-            mStatusBarWindowManager.setHeadsUpShowing(true);
-            mStatusBarWindowManager.setForceStatusBarVisible(true);
+            mStatusBarWindowController.setHeadsUpShowing(true);
+            mStatusBarWindowController.setForceStatusBarVisible(true);
             if (mNotificationPanel.isFullyCollapsed()) {
                 // We need to ensure that the touchable region is updated before the window will be
                 // resized, in order to not catch any touches. A layout will ensure that
                 // onComputeInternalInsets will be called and after that we can resize the layout. Let's
                 // make sure that the window stays small for one frame until the touchableRegion is set.
                 mNotificationPanel.requestLayout();
-                mStatusBarWindowManager.setForceWindowCollapsed(true);
+                mStatusBarWindowController.setForceWindowCollapsed(true);
                 mNotificationPanel.post(() -> {
-                    mStatusBarWindowManager.setForceWindowCollapsed(false);
+                    mStatusBarWindowController.setForceWindowCollapsed(false);
                 });
             }
         } else {
             if (!mNotificationPanel.isFullyCollapsed() || mNotificationPanel.isTracking()) {
                 // We are currently tracking or is open and the shade doesn't need to be kept
                 // open artificially.
-                mStatusBarWindowManager.setHeadsUpShowing(false);
+                mStatusBarWindowController.setHeadsUpShowing(false);
             } else {
                 // we need to keep the panel open artificially, let's wait until the animation
                 // is finished.
                 mHeadsUpManager.setHeadsUpGoingAway(true);
                 mStackScroller.runAfterAnimationFinished(() -> {
                     if (!mHeadsUpManager.hasPinnedHeadsUp()) {
-                        mStatusBarWindowManager.setHeadsUpShowing(false);
+                        mStatusBarWindowController.setHeadsUpShowing(false);
                         mHeadsUpManager.setHeadsUpGoingAway(false);
                     }
                     mRemoteInputManager.removeRemoteInputEntriesKeptUntilCollapsed();
@@ -2065,7 +2065,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void setPanelExpanded(boolean isExpanded) {
         mPanelExpanded = isExpanded;
         updateHideIconsForBouncer(false /* animate */);
-        mStatusBarWindowManager.setPanelExpanded(isExpanded);
+        mStatusBarWindowController.setPanelExpanded(isExpanded);
         mVisualStabilityManager.setPanelExpanded(isExpanded);
         if (isExpanded && getBarState() != StatusBarState.KEYGUARD) {
             if (DEBUG) {
@@ -2274,7 +2274,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Expand the window to encompass the full screen in anticipation of the drag.
         // This is only possible to do atomically because the status bar is at the top of the screen!
-        mStatusBarWindowManager.setPanelVisible(true);
+        mStatusBarWindowController.setPanelVisible(true);
 
         visibilityChanged(true);
         recomputeDisableFlags(!force /* animate */);
@@ -2348,7 +2348,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 + mNotificationPanel.canPanelBeCollapsed());
         if (mStatusBarWindow != null && mNotificationPanel.canPanelBeCollapsed()) {
             // release focus immediately to kick off focus change transition
-            mStatusBarWindowManager.setStatusBarFocusable(false);
+            mStatusBarWindowController.setStatusBarFocusable(false);
 
             mStatusBarWindow.cancelExpandHelper();
             mStatusBarView.collapsePanel(true /* animate */, delayed, speedUpFactor);
@@ -2420,8 +2420,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         visibilityChanged(false);
 
         // Shrink the window to the size of the status bar only
-        mStatusBarWindowManager.setPanelVisible(false);
-        mStatusBarWindowManager.setForceStatusBarVisible(false);
+        mStatusBarWindowController.setPanelVisible(false);
+        mStatusBarWindowController.setForceStatusBarVisible(false);
 
         // Close any guts that might be visible
         mGutsManager.closeAndSaveGuts(true /* removeLeavebehind */, true /* force */,
@@ -2894,7 +2894,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void addStatusBarWindow() {
         makeStatusBarView();
-        mStatusBarWindowManager = Dependency.get(StatusBarWindowManager.class);
+        mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
         mRemoteInputManager.setUpWithPresenter(this, mEntryManager, this,
                 new RemoteInputController.Delegate() {
                     public void setRemoteInputActive(NotificationData.Entry entry,
@@ -2911,8 +2911,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mStackScroller.requestDisallowDismiss();
                     }
                 });
-        mRemoteInputManager.getController().addCallback(mStatusBarWindowManager);
-        mStatusBarWindowManager.add(mStatusBarWindow, getStatusBarHeight());
+        mRemoteInputManager.getController().addCallback(mStatusBarWindowController);
+        mStatusBarWindowController.add(mStatusBarWindow, getStatusBarHeight());
     }
 
     // called by makeStatusbar and also by PhoneStatusBarView
@@ -3222,8 +3222,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         int oldBarHeight = mNaturalBarHeight;
         mNaturalBarHeight = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
-        if (mStatusBarWindowManager != null && mNaturalBarHeight != oldBarHeight) {
-            mStatusBarWindowManager.setBarHeight(mNaturalBarHeight);
+        if (mStatusBarWindowController != null && mNaturalBarHeight != oldBarHeight) {
+            mStatusBarWindowController.setBarHeight(mNaturalBarHeight);
         }
         mMaxAllowedKeyguardNotifications = res.getInteger(
                 R.integer.keyguard_max_notification_count);
@@ -3881,7 +3881,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      * Switches theme from light to dark and vice-versa.
      */
     protected void updateTheme() {
-        final boolean inflated = mStackScroller != null && mStatusBarWindowManager != null;
+        final boolean inflated = mStackScroller != null && mStatusBarWindowController != null;
 
         // Lock wallpaper defines the color of the majority of the views, hence we'll use it
         // to set our default theme.
@@ -3907,7 +3907,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mStackScroller.updateDecorViews(useDarkText);
 
             // Make sure we have the correct navbar/statusbar colors.
-            mStatusBarWindowManager.setKeyguardDark(useDarkText);
+            mStatusBarWindowController.setKeyguardDark(useDarkText);
         }
     }
 
@@ -4071,7 +4071,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mGroupManager.setStatusBarState(state);
         mHeadsUpManager.setStatusBarState(state);
         mFalsingManager.setStatusBarState(state);
-        mStatusBarWindowManager.setStatusBarState(state);
+        mStatusBarWindowController.setStatusBarState(state);
         mStackScroller.setStatusBarState(state);
         updateReportRejectedTouchVisibility();
         updateDozing();
@@ -4101,7 +4101,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (!isPresenterFullyCollapsed()) {
             // if we set it not to be focusable when collapsing, we have to undo it when we aborted
             // the closing
-            mStatusBarWindowManager.setStatusBarFocusable(true);
+            mStatusBarWindowController.setStatusBarFocusable(true);
         }
     }
 
@@ -4718,7 +4718,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mDozing != dozing) {
             mDozing = dozing;
             mKeyguardViewMediator.setAodShowing(mDozing);
-            mStatusBarWindowManager.setDozing(mDozing);
+            mStatusBarWindowController.setDozing(mDozing);
             mStatusBarKeyguardViewManager.setDozing(mDozing);
             if (mAmbientIndicationContainer instanceof DozeReceiver) {
                 ((DozeReceiver) mAmbientIndicationContainer).setDozing(mDozing);
@@ -4948,7 +4948,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void setDozeScreenBrightness(int value) {
-            mStatusBarWindowManager.setDozeScreenBrightness(value);
+            mStatusBarWindowController.setDozeScreenBrightness(value);
         }
 
         @Override

@@ -30,10 +30,10 @@ LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_COMPATIBILITY_SUITE := device-tests
 
 # Add local path sources as well as shared lib sources
-LOCAL_SRC_FILES := $(call all-java-files-under, src) \
-    $(call all-java-files-under, ../src)
+LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
+	SystemUISharedLib \
     metrics-helper-lib \
     android-support-test \
     mockito-target-inline-minus-junit4 \

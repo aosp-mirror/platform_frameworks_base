@@ -1053,14 +1053,16 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
     @Override
     public void onNotificationClear(String pkg, String tag, int id, int userId, String key,
-            @NotificationStats.DismissalSurface int dismissalSurface, NotificationVisibility nv) {
+            @NotificationStats.DismissalSurface int dismissalSurface,
+            @NotificationStats.DismissalSentiment int dismissalSentiment,
+            NotificationVisibility nv) {
         enforceStatusBarService();
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
         long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onNotificationClear(callingUid, callingPid, pkg, tag, id, userId,
-                    key, dismissalSurface, nv);
+                    key, dismissalSurface, dismissalSentiment, nv);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

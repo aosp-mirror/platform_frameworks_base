@@ -414,7 +414,9 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             } else if (mListContainer.hasPulsingNotifications()) {
                 dismissalSurface = NotificationStats.DISMISSAL_AOD;
             }
-            mBarService.onNotificationClear(pkg, tag, id, userId, n.getKey(), dismissalSurface, nv);
+            int dismissalSentiment = NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
+            mBarService.onNotificationClear(pkg, tag, id, userId, n.getKey(), dismissalSurface,
+                    dismissalSentiment, nv);
             removeNotification(n.getKey(), null);
 
         } catch (RemoteException ex) {

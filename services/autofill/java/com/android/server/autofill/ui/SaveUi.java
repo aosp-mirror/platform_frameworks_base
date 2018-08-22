@@ -35,6 +35,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.autofill.BatchUpdates;
 import android.service.autofill.CustomDescription;
+import android.service.autofill.InternalOnClickAction;
 import android.service.autofill.InternalTransformation;
 import android.service.autofill.InternalValidator;
 import android.service.autofill.SaveInfo;
@@ -43,6 +44,7 @@ import android.text.Html;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -82,18 +84,19 @@ final class SaveUi {
     }
 
     /**
-     * Wrapper that guarantees that only one callback is triggered by ignoring further calls after
+     * Wrapper that guarantees that only one callback action (either {@link #onSave()} or
+     * {@link #onCancel(IntentSender)}) is triggered by ignoring further calls after
      * it's destroyed.
      *
      * <p>It's needed becase {@link #onCancel(IntentSender)} is always called when the Save UI
      * dialog is dismissed.
      */
-    private class OneTimeListener implements OnSaveListener {
+    private class OneActionThenDestroyListener implements OnSaveListener {
 
         private final OnSaveListener mRealListener;
         private boolean mDone;
 
-        OneTimeListener(OnSaveListener realListener) {
+        OneActionThenDestroyListener(OnSaveListener realListener) {
             mRealListener = realListener;
         }
 
@@ -131,7 +134,7 @@ final class SaveUi {
 
     private final @NonNull Dialog mDialog;
 
-    private final @NonNull OneTimeListener mListener;
+    private final @NonNull OneActionThenDestroyListener mListener;
 
     private final @NonNull OverlayControl mOverlayControl;
 
@@ -151,7 +154,7 @@ final class SaveUi {
            @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener,
            boolean isUpdate, boolean compatMode) {
         mPendingUi= pendingUi;
-        mListener = new OneTimeListener(listener);
+        mListener = new OneActionThenDestroyListener(listener);
         mOverlayControl = overlayControl;
         mServicePackageName = servicePackageName;
         mComponentName = componentName;
@@ -337,7 +340,7 @@ final class SaveUi {
             template.setApplyTheme(THEME_ID);
             final View customSubtitleView = template.apply(context, null, handler);
 
-            // And apply batch updates (if any).
+            // Apply batch updates (if any).
             final ArrayList<Pair<InternalValidator, BatchUpdates>> updates =
                     customDescription.getUpdates();
             if (updates != null) {
@@ -372,6 +375,35 @@ final class SaveUi {
                             return false;
                         }
                         template.reapply(context, customSubtitleView);
+                    }
+                }
+            }
+
+            // Apply click actions (if any).
+            final SparseArray<InternalOnClickAction> actions = customDescription.getActions();
+            if (actions != null) {
+                final int size = actions.size();
+                if (sDebug) Slog.d(TAG, "custom description has " + size + " actions");
+                if (!(customSubtitleView instanceof ViewGroup)) {
+                    Slog.w(TAG, "cannot apply actions because custom description root is not a "
+                            + "ViewGroup: " + customSubtitleView);
+                } else {
+                    final ViewGroup rootView = (ViewGroup) customSubtitleView;
+                    for (int i = 0; i < size; i++) {
+                        final int id = actions.keyAt(i);
+                        final InternalOnClickAction action = actions.valueAt(i);
+                        final View child = rootView.findViewById(id);
+                        if (child == null) {
+                            Slog.w(TAG, "Ignoring action " + action + " for view " + id
+                                    + " because it's not on " + rootView);
+                            continue;
+                        }
+                        child.setOnClickListener((v) -> {
+                            if (sVerbose) {
+                                Slog.v(TAG, "Applying " + action + " after " + v + " was clicked");
+                            }
+                            action.onClick(rootView);
+                        });
                     }
                 }
             }

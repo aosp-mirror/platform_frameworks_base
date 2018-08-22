@@ -30,6 +30,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.R;
 
 import java.io.FileDescriptor;
@@ -41,12 +42,16 @@ import java.util.UUID;
 
 import static android.media.MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY;
 
+import androidx.annotation.VisibleForTesting;
+
+
 /** Platform implementation of the cast controller. **/
 public class CastControllerImpl implements CastController {
     private static final String TAG = "CastController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Context mContext;
+    @GuardedBy("mCallbacks")
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final MediaRouter mMediaRouter;
     private final ArrayMap<String, RouteInfo> mRoutes = new ArrayMap<>();
@@ -72,7 +77,7 @@ public class CastControllerImpl implements CastController {
         pw.println("CastController state:");
         pw.print("  mDiscovering="); pw.println(mDiscovering);
         pw.print("  mCallbackRegistered="); pw.println(mCallbackRegistered);
-        pw.print("  mCallbacks.size="); pw.println(mCallbacks.size());
+        pw.print("  mCallbacks.size="); synchronized (mCallbacks) {pw.println(mCallbacks.size());}
         pw.print("  mRoutes.size="); pw.println(mRoutes.size());
         for (int i = 0; i < mRoutes.size(); i++) {
             final RouteInfo route = mRoutes.valueAt(i);
@@ -83,7 +88,9 @@ public class CastControllerImpl implements CastController {
 
     @Override
     public void addCallback(Callback callback) {
-        mCallbacks.add(callback);
+        synchronized (mCallbacks) {
+            mCallbacks.add(callback);
+        }
         fireOnCastDevicesChanged(callback);
         synchronized (mDiscoveringLock) {
             handleDiscoveryChangeLocked();
@@ -92,7 +99,9 @@ public class CastControllerImpl implements CastController {
 
     @Override
     public void removeCallback(Callback callback) {
-        mCallbacks.remove(callback);
+        synchronized (mCallbacks) {
+            mCallbacks.remove(callback);
+        }
         synchronized (mDiscoveringLock) {
             handleDiscoveryChangeLocked();
         }
@@ -117,10 +126,16 @@ public class CastControllerImpl implements CastController {
             mMediaRouter.addCallback(ROUTE_TYPE_REMOTE_DISPLAY, mMediaCallback,
                     MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
             mCallbackRegistered = true;
-        } else if (mCallbacks.size() != 0) {
-            mMediaRouter.addCallback(ROUTE_TYPE_REMOTE_DISPLAY, mMediaCallback,
-                    MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
-            mCallbackRegistered = true;
+        } else {
+            boolean hasCallbacks = false;
+            synchronized (mCallbacks) {
+                hasCallbacks = mCallbacks.isEmpty();
+            }
+            if (!hasCallbacks) {
+                mMediaRouter.addCallback(ROUTE_TYPE_REMOTE_DISPLAY, mMediaCallback,
+                        MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
+                mCallbackRegistered = true;
+            }
         }
     }
 
@@ -248,11 +263,16 @@ public class CastControllerImpl implements CastController {
         }
     }
 
-    private void fireOnCastDevicesChanged() {
-        for (Callback callback : mCallbacks) {
-            fireOnCastDevicesChanged(callback);
+    @VisibleForTesting
+    void fireOnCastDevicesChanged() {
+        synchronized (mCallbacks) {
+            for (Callback callback : mCallbacks) {
+                fireOnCastDevicesChanged(callback);
+            }
+
         }
     }
+
 
     private void fireOnCastDevicesChanged(Callback callback) {
         callback.onCastDevicesChanged();

@@ -16,6 +16,7 @@
 
 package com.android.internal.view.menu;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.Menu;
@@ -67,11 +68,13 @@ public class SubMenuBuilder extends MenuBuilder implements SubMenu {
     }
 
     @Override
+    @UnsupportedAppUsage
     public void setCallback(Callback callback) {
         mParentMenu.setCallback(callback);
     }
 
     @Override
+    @UnsupportedAppUsage
     public MenuBuilder getRootMenu() {
         return mParentMenu.getRootMenu();
     }

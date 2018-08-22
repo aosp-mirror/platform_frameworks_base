@@ -19,6 +19,7 @@ package android.widget;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -59,14 +60,17 @@ public abstract class CompoundButton extends Button implements Checkable {
     private static final String LOG_TAG = CompoundButton.class.getSimpleName();
 
     private boolean mChecked;
+    @UnsupportedAppUsage
     private boolean mBroadcasting;
 
+    @UnsupportedAppUsage
     private Drawable mButtonDrawable;
     private ColorStateList mButtonTintList = null;
     private PorterDuff.Mode mButtonTintMode = null;
     private boolean mHasButtonTint = false;
     private boolean mHasButtonTintMode = false;
 
+    @UnsupportedAppUsage
     private OnCheckedChangeListener mOnCheckedChangeListener;
     private OnCheckedChangeListener mOnCheckedChangeWidgetListener;
 

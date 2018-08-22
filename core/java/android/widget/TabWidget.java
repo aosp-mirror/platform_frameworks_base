@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.DrawableRes;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -59,6 +60,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     private OnTabSelectionChanged mSelectionChangedListener;
 
     // This value will be set to 0 as soon as the first tab is added to TabHost.
+    @UnsupportedAppUsage
     private int mSelectedTab = -1;
 
     @Nullable
@@ -67,6 +69,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     @Nullable
     private Drawable mRightStrip;
 
+    @UnsupportedAppUsage
     private boolean mDrawBottomStrips = true;
     private boolean mStripMoved;
 
@@ -541,6 +544,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * Provides a way for {@link TabHost} to be notified that the user clicked
      * on a tab indicator.
      */
+    @UnsupportedAppUsage
     void setTabSelectionListener(OnTabSelectionChanged listener) {
         mSelectionChangedListener = listener;
     }

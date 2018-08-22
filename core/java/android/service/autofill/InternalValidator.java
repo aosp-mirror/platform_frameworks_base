@@ -33,9 +33,6 @@ public abstract class InternalValidator implements Validator, Parcelable {
      *
      * @param finder object used to find the value of a field in the screen.
      * @return {@code true} if the contents are valid, {@code false} otherwise.
-     *
-     * @hide
      */
-    @TestApi
     public abstract boolean isValid(@NonNull ValueFinder finder);
 }

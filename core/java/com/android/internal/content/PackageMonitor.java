@@ -16,6 +16,7 @@
 
 package com.android.internal.content;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -70,10 +71,12 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
 
     String[] mTempArray = new String[1];
 
+    @UnsupportedAppUsage
     public void register(Context context, Looper thread, boolean externalStorage) {
         register(context, thread, null, externalStorage);
     }
 
+    @UnsupportedAppUsage
     public void register(Context context, Looper thread, UserHandle user,
             boolean externalStorage) {
         register(context, user, externalStorage,
@@ -107,6 +110,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         return mRegisteredHandler;
     }
 
+    @UnsupportedAppUsage
     public void unregister() {
         if (mRegisteredContext == null) {
             throw new IllegalStateException("Not registered");
@@ -134,6 +138,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     /**
      * Called when a package is really removed (and not replaced).
      */
+    @UnsupportedAppUsage
     public void onPackageRemoved(String packageName, int uid) {
     }
 
@@ -167,6 +172,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
      * default implementation returns true if this is a change to the entire
      * package.
      */
+    @UnsupportedAppUsage
     public boolean onPackageChanged(String packageName, int uid, String[] components) {
         if (components != null) {
             for (String name : components) {
@@ -246,6 +252,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         return mAppearingPackages != null;
     }
     
+    @UnsupportedAppUsage
     public int isPackageDisappearing(String packageName) {
         if (mDisappearingPackages != null) {
             for (int i=mDisappearingPackages.length-1; i>=0; i--) {
@@ -265,6 +272,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         return mChangeType == PACKAGE_UPDATING;
     }
 
+    @UnsupportedAppUsage
     public boolean isPackageModified(String packageName) {
         if (mModifiedPackages != null) {
             for (int i=mModifiedPackages.length-1; i>=0; i--) {

@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -65,6 +66,7 @@ public abstract class Filter {
      * @param delayer The delayer.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setDelayer(Delayer delayer) {
         synchronized (mLock) {
             mDelayer = delayer;

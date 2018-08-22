@@ -700,7 +700,8 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onNotificationClick(int callingUid, int callingPid, String key, NotificationVisibility nv) {
+        public void onNotificationClick(int callingUid, int callingPid, String key,
+                NotificationVisibility nv) {
             exitIdle();
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
@@ -757,11 +758,13 @@ public class NotificationManagerService extends SystemService {
         public void onNotificationClear(int callingUid, int callingPid,
                 String pkg, String tag, int id, int userId, String key,
                 @NotificationStats.DismissalSurface int dismissalSurface,
+                @NotificationStats.DismissalSentiment int dismissalSentiment,
                 NotificationVisibility nv) {
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
                     r.recordDismissalSurface(dismissalSurface);
+                    r.recordDismissalSentiment(dismissalSentiment);
                 }
             }
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
@@ -797,8 +800,8 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onNotificationError(int callingUid, int callingPid, String pkg, String tag, int id,
-                int uid, int initialPid, String message, int userId) {
+        public void onNotificationError(int callingUid, int callingPid, String pkg, String tag,
+                int id, int uid, int initialPid, String message, int userId) {
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0, 0, false, userId,
                     REASON_ERROR, null);
         }
@@ -1040,10 +1043,12 @@ public class NotificationManagerService extends SystemService {
                     uidList = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
                 } else if (action.equals(Intent.ACTION_PACKAGES_SUSPENDED)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                    uidList = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
                     cancelNotifications = false;
                     hideNotifications = true;
                 } else if (action.equals(Intent.ACTION_PACKAGES_UNSUSPENDED)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                    uidList = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
                     cancelNotifications = false;
                     unhideNotifications = true;
                 } else if (queryRestart) {
@@ -5964,6 +5969,7 @@ public class NotificationManagerService extends SystemService {
             }
             notificationList.remove(i);
             mNotificationsByKey.remove(r.getKey());
+            r.recordDismissalSentiment(NotificationStats.DISMISS_SENTIMENT_NEUTRAL);
             canceledNotifications.add(r);
             cancelNotificationLocked(r, sendDelete, reason, wasPosted, listenerName);
         }

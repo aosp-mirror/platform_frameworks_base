@@ -438,8 +438,13 @@ public final class AutofillManagerService extends SystemService {
         Slog.i(TAG, "setLogLevel(): " + level);
         mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.AUTOFILL_LOGGING_LEVEL, level);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Settings.Global.AUTOFILL_LOGGING_LEVEL, level);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private void setLogLevelFromSettings() {
@@ -492,8 +497,13 @@ public final class AutofillManagerService extends SystemService {
         mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
         Slog.i(TAG, "setMaxPartitions(): " + max);
 
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.AUTOFILL_MAX_PARTITIONS_SIZE, max);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Settings.Global.AUTOFILL_MAX_PARTITIONS_SIZE, max);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private void setMaxPartitionsFromSettings() {
@@ -521,8 +531,13 @@ public final class AutofillManagerService extends SystemService {
         mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
         Slog.i(TAG, "setMaxVisibleDatasets(): " + max);
 
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS, max);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS, max);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private void setMaxVisibleDatasetsFromSettings() {
