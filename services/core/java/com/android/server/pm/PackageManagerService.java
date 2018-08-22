@@ -18811,11 +18811,11 @@ public class PackageManagerService extends IPackageManager.Stub
             final File privilegedProductAppDir = new File(Environment.getProductDirectory(), "priv-app");
             final File privilegedProductServicesAppDir =
                     new File(Environment.getProductServicesDirectory(), "priv-app");
-            return path.startsWith(privilegedAppDir.getCanonicalPath())
-                    || path.startsWith(privilegedVendorAppDir.getCanonicalPath())
-                    || path.startsWith(privilegedOdmAppDir.getCanonicalPath())
-                    || path.startsWith(privilegedProductAppDir.getCanonicalPath())
-                    || path.startsWith(privilegedProductServicesAppDir.getCanonicalPath());
+            return path.startsWith(privilegedAppDir.getCanonicalPath() + "/")
+                    || path.startsWith(privilegedVendorAppDir.getCanonicalPath() + "/")
+                    || path.startsWith(privilegedOdmAppDir.getCanonicalPath() + "/")
+                    || path.startsWith(privilegedProductAppDir.getCanonicalPath() + "/")
+                    || path.startsWith(privilegedProductServicesAppDir.getCanonicalPath() + "/");
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
@@ -18824,7 +18824,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     static boolean locationIsOem(String path) {
         try {
-            return path.startsWith(Environment.getOemDirectory().getCanonicalPath());
+            return path.startsWith(Environment.getOemDirectory().getCanonicalPath() + "/");
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
@@ -18833,8 +18833,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     static boolean locationIsVendor(String path) {
         try {
-            return path.startsWith(Environment.getVendorDirectory().getCanonicalPath())
-                    || path.startsWith(Environment.getOdmDirectory().getCanonicalPath());
+            return path.startsWith(Environment.getVendorDirectory().getCanonicalPath() + "/")
+                    || path.startsWith(Environment.getOdmDirectory().getCanonicalPath() + "/");
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
@@ -18843,7 +18843,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     static boolean locationIsProduct(String path) {
         try {
-            return path.startsWith(Environment.getProductDirectory().getCanonicalPath());
+            return path.startsWith(Environment.getProductDirectory().getCanonicalPath() + "/");
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
@@ -18852,7 +18852,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     static boolean locationIsProductServices(String path) {
         try {
-            return path.startsWith(Environment.getProductServicesDirectory().getCanonicalPath());
+            return path.startsWith(
+              Environment.getProductServicesDirectory().getCanonicalPath() + "/");
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
