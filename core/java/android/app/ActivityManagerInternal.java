@@ -413,4 +413,9 @@ public abstract class ActivityManagerInternal {
      * @return The intent used to launch the home activity.
      */
     public abstract Intent getHomeIntent();
+
+    /**
+     * WindowManager notifies AM when display size of the default display changes.
+     */
+    public abstract void notifyDefaultDisplaySizeChanged();
 }
