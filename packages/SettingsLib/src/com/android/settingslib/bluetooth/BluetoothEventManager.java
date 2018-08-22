@@ -286,7 +286,6 @@ public class BluetoothEventManager {
             }
             cachedDevice.setRssi(rssi);
             cachedDevice.setBtClass(btClass);
-            cachedDevice.setNewName(name);
             cachedDevice.setJustDiscovered(true);
         }
     }

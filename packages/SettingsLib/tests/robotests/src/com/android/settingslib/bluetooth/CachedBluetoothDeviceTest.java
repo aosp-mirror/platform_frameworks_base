@@ -606,4 +606,35 @@ public class CachedBluetoothDeviceTest {
 
         assertThat(mCachedDevice.isConnectedHearingAidDevice()).isFalse();
     }
+
+    @Test
+    public void getName_aliasNameNotNull_returnAliasName() {
+        when(mDevice.getAliasName()).thenReturn(DEVICE_NAME);
+
+        assertThat(mCachedDevice.getName()).isEqualTo(DEVICE_NAME);
+    }
+
+    @Test
+    public void getName_aliasNameIsNull_returnAddress() {
+        when(mDevice.getAliasName()).thenReturn(null);
+
+        assertThat(mCachedDevice.getName()).isEqualTo(DEVICE_ADDRESS);
+    }
+
+    @Test
+    public void setName_setDeviceNameIsNotNull() {
+        final String name = "test name";
+        when(mDevice.getAliasName()).thenReturn(DEVICE_NAME);
+
+        mCachedDevice.setName(name);
+
+        verify(mDevice).setAlias(name);
+    }
+
+    @Test
+    public void setName_setDeviceNameIsNull() {
+        mCachedDevice.setName(null);
+
+        verify(mDevice, never()).setAlias(any());
+    }
 }
