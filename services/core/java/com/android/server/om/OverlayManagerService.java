@@ -22,11 +22,14 @@ import static android.content.Intent.ACTION_PACKAGE_CHANGED;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.ACTION_USER_ADDED;
 import static android.content.Intent.ACTION_USER_REMOVED;
+import static android.content.pm.PackageManager.GET_SHARED_LIBRARY_FILES;
+import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.SIGNATURE_MATCH;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityThread;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,6 +37,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.om.IOverlayManager;
 import android.content.om.OverlayInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManagerInternal;
@@ -269,11 +273,28 @@ public final class OverlayManagerService extends SystemService {
 
     @Override
     public void onBootPhase(int phase) {
-        if (phase == PHASE_SYSTEM_SERVICES_READY) {
+        if (phase == PHASE_SYSTEM_SERVICES_READY && mInitCompleteSignal != null) {
             ConcurrentUtils.waitForFutureNoInterrupt(mInitCompleteSignal,
                     "Wait for OverlayManagerService init");
             mInitCompleteSignal = null;
         }
+    }
+
+    public void updateSystemUiContext() {
+        if (mInitCompleteSignal != null) {
+            ConcurrentUtils.waitForFutureNoInterrupt(mInitCompleteSignal,
+                    "Wait for OverlayManagerService init");
+            mInitCompleteSignal = null;
+        }
+
+        final ApplicationInfo ai;
+        try {
+            ai = mPackageManager.mPackageManager.getApplicationInfo("android",
+                    GET_SHARED_LIBRARY_FILES, UserHandle.USER_SYSTEM);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+        ActivityThread.currentActivityThread().handleSystemApplicationInfoChanged(ai);
     }
 
     private void initIfNeeded() {

@@ -157,11 +157,15 @@ private:
 
     void checkExit();
 
+    void handleViewport(nsecs_t timestep);
+
     sp<SurfaceComposerClient>       mSession;
     AssetManager mAssets;
     Texture     mAndroid[2];
     int         mWidth;
     int         mHeight;
+    int         mCurrentInset;
+    int         mTargetInset;
     bool        mUseNpotTextures = false;
     EGLDisplay  mDisplay;
     EGLDisplay  mContext;
