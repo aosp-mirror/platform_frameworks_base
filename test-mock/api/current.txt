@@ -292,6 +292,7 @@ package android.test.mock {
     method public int getColor(int) throws android.content.res.Resources.NotFoundException;
     method public android.content.res.ColorStateList getColorStateList(int) throws android.content.res.Resources.NotFoundException;
     method public android.graphics.drawable.Drawable getDrawable(int) throws android.content.res.Resources.NotFoundException;
+    method public android.graphics.Movie getMovie(int) throws android.content.res.Resources.NotFoundException;
     method public void updateConfiguration(android.content.res.Configuration, android.util.DisplayMetrics);
   }
 
