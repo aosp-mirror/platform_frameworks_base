@@ -34,10 +34,11 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.EmptyShadeView;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -63,6 +64,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
     @Mock private StatusBar mBar;
+    @Mock private StatusBarStateController mBarState;
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private NotificationBlockingHelperManager mBlockingHelperManager;
     @Mock private NotificationGroupManager mGroupManager;
@@ -76,6 +78,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mDependency.injectTestDependency(
                 NotificationBlockingHelperManager.class,
                 mBlockingHelperManager);
+        mDependency.injectTestDependency(StatusBarStateController.class, mBarState);
 
         NotificationShelf notificationShelf = spy(new NotificationShelf(getContext(), null));
         mStackScroller = new NotificationStackScrollLayout(getContext());
@@ -101,7 +104,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     public void testNotDimmedOnKeyguard() {
-        when(mBar.getBarState()).thenReturn(StatusBarState.SHADE);
+        when(mBarState.getState()).thenReturn(StatusBarState.SHADE);
         mStackScroller.setDimmed(true /* dimmed */, false /* animate */);
         mStackScroller.setDimmed(true /* dimmed */, true /* animate */);
         Assert.assertFalse(mStackScroller.isDimmed());

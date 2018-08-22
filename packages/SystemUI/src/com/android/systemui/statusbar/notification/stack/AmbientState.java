@@ -21,12 +21,12 @@ import android.content.Context;
 import android.view.View;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
