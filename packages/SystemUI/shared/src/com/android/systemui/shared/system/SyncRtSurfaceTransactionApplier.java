@@ -21,6 +21,7 @@ import android.graphics.Rect;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewRootImpl;
 
@@ -47,11 +48,13 @@ public class SyncRtSurfaceTransactionApplier {
      * @param params The surface parameters to apply. DO NOT MODIFY the list after passing into
      *               this method to avoid synchronization issues.
      */
-    public void scheduleApply(SurfaceParams... params) {
+    public void scheduleApply(final SurfaceParams... params) {
         if (mTargetViewRootImpl == null) {
             return;
         }
-        mTargetViewRootImpl.registerRtFrameCallback(frame -> {
+        mTargetViewRootImpl.registerRtFrameCallback(new ThreadedRenderer.FrameDrawingCallback() {
+            @Override
+            public void onFrameDraw(long frame) {
                 if (mTargetSurface == null || !mTargetSurface.isValid()) {
                     return;
                 }
@@ -64,6 +67,7 @@ public class SyncRtSurfaceTransactionApplier {
                 }
                 t.setEarlyWakeup();
                 t.apply();
+            }
         });
 
         // Make sure a frame gets scheduled.

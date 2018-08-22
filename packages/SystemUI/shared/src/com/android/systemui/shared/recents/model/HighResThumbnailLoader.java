@@ -34,7 +34,8 @@ import java.util.ArrayList;
 /**
  * Loader class that loads full-resolution thumbnails when appropriate.
  */
-public class HighResThumbnailLoader implements TaskCallbacks {
+public class HighResThumbnailLoader implements
+        TaskCallbacks, BackgroundTaskLoader.OnIdleChangedListener {
 
     private final ActivityManagerWrapper mActivityManager;
 
@@ -78,6 +79,11 @@ public class HighResThumbnailLoader implements TaskCallbacks {
         }
         mFlingingFast = flingingFast;
         updateLoading();
+    }
+
+    @Override
+    public void onIdleChanged(boolean idle) {
+        setTaskLoadQueueIdle(idle);
     }
 
     /**
@@ -220,15 +226,18 @@ public class HighResThumbnailLoader implements TaskCallbacks {
             }
         }
 
-        private void loadTask(Task t) {
-            ThumbnailData thumbnail = mActivityManager.getTaskThumbnail(t.key.id,
+        private void loadTask(final Task t) {
+            final ThumbnailData thumbnail = mActivityManager.getTaskThumbnail(t.key.id,
                     false /* reducedResolution */);
-            mMainThreadHandler.post(() -> {
-                synchronized (mLoadQueue) {
-                    mLoadingTasks.remove(t);
-                }
-                if (mVisibleTasks.contains(t)) {
-                    t.notifyTaskDataLoaded(thumbnail, t.icon);
+            mMainThreadHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (mLoadQueue) {
+                        mLoadingTasks.remove(t);
+                    }
+                    if (mVisibleTasks.contains(t)) {
+                        t.notifyTaskDataLoaded(thumbnail, t.icon);
+                    }
                 }
             });
         }
