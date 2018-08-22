@@ -8866,15 +8866,16 @@ public class PackageManagerService extends IPackageManager.Stub
                     + " better than this " + pkg.getLongVersionCode());
         }
 
-        // Verify certificates against what was last scanned. If there was an upgrade or this is an
-        // updated priv app, we will force re-collecting certificate.
-        final boolean forceCollect = mIsUpgrade ||
-                PackageManagerServiceUtils.isApkVerificationForced(disabledPkgSetting);
+        // Verify certificates against what was last scanned. If there was an upgrade and this is an
+        // app in a system partition, or if this is an updated priv app, we will force re-collecting
+        // certificate.
+        final boolean forceCollect = (mIsUpgrade && scanSystemPartition)
+                || PackageManagerServiceUtils.isApkVerificationForced(disabledPkgSetting);
         // Full APK verification can be skipped during certificate collection, only if the file is
         // in verified partition, or can be verified on access (when apk verity is enabled). In both
         // cases, only data in Signing Block is verified instead of the whole file.
-        final boolean skipVerify = ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0) ||
-                (forceCollect && canSkipFullPackageVerification(pkg));
+        final boolean skipVerify = scanSystemPartition
+                || (forceCollect && canSkipFullPackageVerification(pkg));
         collectCertificatesLI(pkgSetting, pkg, forceCollect, skipVerify);
 
         // Reset profile if the application version is changed
