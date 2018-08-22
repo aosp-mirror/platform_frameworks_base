@@ -56,4 +56,4 @@ key 0x136    BUTTON_SELECT
 key 0x137    BUTTON_START
 
 # Xbox key
-key 0x8b    HOME
+key 0x8b    BUTTON_MODE
