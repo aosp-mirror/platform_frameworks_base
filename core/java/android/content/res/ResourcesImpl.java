@@ -1,17 +1,17 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright 2018 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package android.content.res;
 
@@ -35,6 +35,7 @@ import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.ColorStateListDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.DrawableContainer;
 import android.icu.text.PluralRules;
@@ -846,10 +847,15 @@ public class ResourcesImpl {
             stack.push(id);
             try {
                 if (file.endsWith(".xml")) {
-                    final XmlResourceParser rp = loadXmlResourceParser(
-                            file, id, value.assetCookie, "drawable");
-                    dr = Drawable.createFromXmlForDensity(wrapper, rp, density, null);
-                    rp.close();
+                    if (file.startsWith("res/color/")) {
+                        ColorStateList csl = loadColorStateList(wrapper, value, id, null);
+                        dr = (csl != null ? new ColorStateListDrawable(csl) : null);
+                    } else {
+                        final XmlResourceParser rp = loadXmlResourceParser(
+                                file, id, value.assetCookie, "drawable");
+                        dr = Drawable.createFromXmlForDensity(wrapper, rp, density, null);
+                        rp.close();
+                    }
                 } else {
                     final InputStream is = mAssets.openNonAsset(
                             value.assetCookie, file, AssetManager.ACCESS_STREAMING);
