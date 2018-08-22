@@ -773,7 +773,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_AWB_REGIONS
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<int[]> CONTROL_MAX_REGIONS =
             new Key<int[]>("android.control.maxRegions", int[].class);
 
@@ -879,7 +878,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<android.hardware.camera2.params.HighSpeedVideoConfiguration[]> CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS =
             new Key<android.hardware.camera2.params.HighSpeedVideoConfiguration[]>("android.control.availableHighSpeedVideoConfigurations", android.hardware.camera2.params.HighSpeedVideoConfiguration[].class);
 
@@ -1148,7 +1146,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<android.util.Size> LENS_INFO_SHADING_MAP_SIZE =
             new Key<android.util.Size>("android.lens.info.shadingMapSize", android.util.Size.class);
 
@@ -1488,7 +1485,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage
     public static final Key<Byte> QUIRKS_USE_PARTIAL_RESULT =
             new Key<Byte>("android.quirks.usePartialResult", byte.class);
 
@@ -1526,7 +1522,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<int[]> REQUEST_MAX_NUM_OUTPUT_STREAMS =
             new Key<int[]>("android.request.maxNumOutputStreams", int[].class);
 
@@ -1766,7 +1761,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<int[]> REQUEST_AVAILABLE_REQUEST_KEYS =
             new Key<int[]>("android.request.availableRequestKeys", int[].class);
 
@@ -1792,7 +1786,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<int[]> REQUEST_AVAILABLE_RESULT_KEYS =
             new Key<int[]>("android.request.availableResultKeys", int[].class);
 
@@ -1805,7 +1798,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>This key is available on all devices.</p>
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<int[]> REQUEST_AVAILABLE_CHARACTERISTICS_KEYS =
             new Key<int[]>("android.request.availableCharacteristicsKeys", int[].class);
 
@@ -1852,7 +1844,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>This key is available on all devices.</p>
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<int[]> REQUEST_AVAILABLE_SESSION_KEYS =
             new Key<int[]>("android.request.availableSessionKeys", int[].class);
 
@@ -1873,7 +1864,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<int[]> REQUEST_AVAILABLE_PHYSICAL_CAMERA_REQUEST_KEYS =
             new Key<int[]>("android.request.availablePhysicalCameraRequestKeys", int[].class);
 
@@ -1889,7 +1879,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage
     public static final Key<int[]> SCALER_AVAILABLE_FORMATS =
             new Key<int[]>("android.scaler.availableFormats", int[].class);
 
@@ -1912,7 +1901,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage
     public static final Key<long[]> SCALER_AVAILABLE_JPEG_MIN_DURATIONS =
             new Key<long[]>("android.scaler.availableJpegMinDurations", long[].class);
 
@@ -1931,7 +1919,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage
     public static final Key<android.util.Size[]> SCALER_AVAILABLE_JPEG_SIZES =
             new Key<android.util.Size[]>("android.scaler.availableJpegSizes", android.util.Size[].class);
 
@@ -1973,7 +1960,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage
     public static final Key<long[]> SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS =
             new Key<long[]>("android.scaler.availableProcessedMinDurations", long[].class);
 
@@ -1998,7 +1984,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage
     public static final Key<android.util.Size[]> SCALER_AVAILABLE_PROCESSED_SIZES =
             new Key<android.util.Size[]>("android.scaler.availableProcessedSizes", android.util.Size[].class);
 
@@ -2054,7 +2039,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<android.hardware.camera2.params.ReprocessFormatsMap> SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP =
             new Key<android.hardware.camera2.params.ReprocessFormatsMap>("android.scaler.availableInputOutputFormatsMap", android.hardware.camera2.params.ReprocessFormatsMap.class);
 
@@ -2147,7 +2131,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<android.hardware.camera2.params.StreamConfiguration[]> SCALER_AVAILABLE_STREAM_CONFIGURATIONS =
             new Key<android.hardware.camera2.params.StreamConfiguration[]>("android.scaler.availableStreamConfigurations", android.hardware.camera2.params.StreamConfiguration[].class);
 
@@ -2170,7 +2153,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> SCALER_AVAILABLE_MIN_FRAME_DURATIONS =
             new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.scaler.availableMinFrameDurations", android.hardware.camera2.params.StreamConfigurationDuration[].class);
 
@@ -2239,7 +2221,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> SCALER_AVAILABLE_STALL_DURATIONS =
             new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.scaler.availableStallDurations", android.hardware.camera2.params.StreamConfigurationDuration[].class);
 
@@ -3135,7 +3116,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #LED_AVAILABLE_LEDS_TRANSMIT
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<int[]> LED_AVAILABLE_LEDS =
             new Key<int[]>("android.led.availableLeds", int[].class);
 
@@ -3306,7 +3286,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<android.hardware.camera2.params.StreamConfiguration[]> DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS =
             new Key<android.hardware.camera2.params.StreamConfiguration[]>("android.depth.availableDepthStreamConfigurations", android.hardware.camera2.params.StreamConfiguration[].class);
 
@@ -3333,7 +3312,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> DEPTH_AVAILABLE_DEPTH_MIN_FRAME_DURATIONS =
             new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.depth.availableDepthMinFrameDurations", android.hardware.camera2.params.StreamConfigurationDuration[].class);
 
@@ -3357,7 +3335,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> DEPTH_AVAILABLE_DEPTH_STALL_DURATIONS =
             new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.depth.availableDepthStallDurations", android.hardware.camera2.params.StreamConfigurationDuration[].class);
 
@@ -3401,7 +3378,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<byte[]> LOGICAL_MULTI_CAMERA_PHYSICAL_IDS =
             new Key<byte[]>("android.logicalMultiCamera.physicalIds", byte[].class);
 
