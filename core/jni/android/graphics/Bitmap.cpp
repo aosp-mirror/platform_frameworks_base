@@ -310,270 +310,23 @@ bool unlockPixels(JNIEnv* env, jobject bitmap) {
 using namespace android;
 using namespace android::bitmap;
 
-///////////////////////////////////////////////////////////////////////////////
-// Conversions to/from SkColor, for get/setPixels, and the create method, which
-// is basically like setPixels
-
-typedef void (*FromColorProc)(void* dst, const SkColor src[], int width,
-                              int x, int y);
-
-static void FromColor_F16(void* dst, const SkColor src[], int width,
-                          int, int) {
-    uint64_t* d = (uint64_t*)dst;
-
-    for (int i = 0; i < width; i++) {
-        *d++ = SkColor4f::FromColor(*src++).premul().toF16();
-    }
-}
-
-static void FromColor_F16_Raw(void* dst, const SkColor src[], int width,
-                          int, int) {
-    uint64_t* d = (uint64_t*)dst;
-
-    for (int i = 0; i < width; i++) {
-        const SkColor4f color = SkColor4f::FromColor(*src++);
-        uint16_t* scratch = reinterpret_cast<uint16_t*>(d++);
-        scratch[0] = SkFloatToHalf(color.fR);
-        scratch[1] = SkFloatToHalf(color.fG);
-        scratch[2] = SkFloatToHalf(color.fB);
-        scratch[3] = SkFloatToHalf(color.fA);
-    }
-}
-
-static void FromColor_D32(void* dst, const SkColor src[], int width,
-                          int, int) {
-    SkPMColor* d = (SkPMColor*)dst;
-
-    for (int i = 0; i < width; i++) {
-        *d++ = SkPreMultiplyColor(*src++);
-    }
-}
-
-static void FromColor_D32_Raw(void* dst, const SkColor src[], int width,
-                          int, int) {
-    // Needed to thwart the unreachable code detection from clang.
-    static const bool sk_color_ne_zero = SK_COLOR_MATCHES_PMCOLOR_BYTE_ORDER;
-
-    // SkColor's ordering may be different from SkPMColor
-    if (sk_color_ne_zero) {
-        memcpy(dst, src, width * sizeof(SkColor));
-        return;
-    }
-
-    // order isn't same, repack each pixel manually
-    SkPMColor* d = (SkPMColor*)dst;
-    for (int i = 0; i < width; i++) {
-        SkColor c = *src++;
-        *d++ = SkPackARGB32NoCheck(SkColorGetA(c), SkColorGetR(c),
-                                   SkColorGetG(c), SkColorGetB(c));
-    }
-}
-
-static void FromColor_D565(void* dst, const SkColor src[], int width,
-                           int x, int y) {
-    uint16_t* d = (uint16_t*)dst;
-
-    DITHER_565_SCAN(y);
-    for (int stop = x + width; x < stop; x++) {
-        SkColor c = *src++;
-        *d++ = SkDitherRGBTo565(SkColorGetR(c), SkColorGetG(c), SkColorGetB(c),
-                                DITHER_VALUE(x));
-    }
-}
-
-static void FromColor_D4444(void* dst, const SkColor src[], int width,
-                            int x, int y) {
-    SkPMColor16* d = (SkPMColor16*)dst;
-
-    DITHER_4444_SCAN(y);
-    for (int stop = x + width; x < stop; x++) {
-        SkPMColor pmc = SkPreMultiplyColor(*src++);
-        *d++ = SkDitherARGB32To4444(pmc, DITHER_VALUE(x));
-//        *d++ = SkPixel32ToPixel4444(pmc);
-    }
-}
-
-static void FromColor_D4444_Raw(void* dst, const SkColor src[], int width,
-                            int x, int y) {
-    SkPMColor16* d = (SkPMColor16*)dst;
-
-    DITHER_4444_SCAN(y);
-    for (int stop = x + width; x < stop; x++) {
-        SkColor c = *src++;
-
-        // SkPMColor is used because the ordering is ARGB32, even though the target actually premultiplied
-        SkPMColor pmc = SkPackARGB32NoCheck(SkColorGetA(c), SkColorGetR(c),
-                                            SkColorGetG(c), SkColorGetB(c));
-        *d++ = SkDitherARGB32To4444(pmc, DITHER_VALUE(x));
-//        *d++ = SkPixel32ToPixel4444(pmc);
-    }
-}
-
-static void FromColor_DA8(void* dst, const SkColor src[], int width, int x, int y) {
-    uint8_t* d = (uint8_t*)dst;
-
-    for (int stop = x + width; x < stop; x++) {
-        *d++ = SkColorGetA(*src++);
-    }
-}
-
-// can return NULL
-static FromColorProc ChooseFromColorProc(const SkBitmap& bitmap) {
-    switch (bitmap.colorType()) {
-        case kN32_SkColorType:
-            return bitmap.alphaType() == kPremul_SkAlphaType ? FromColor_D32 : FromColor_D32_Raw;
-        case kARGB_4444_SkColorType:
-            return bitmap.alphaType() == kPremul_SkAlphaType ? FromColor_D4444 :
-                    FromColor_D4444_Raw;
-        case kRGB_565_SkColorType:
-            return FromColor_D565;
-        case kAlpha_8_SkColorType:
-            return FromColor_DA8;
-        case kRGBA_F16_SkColorType:
-            return bitmap.alphaType() == kPremul_SkAlphaType ? FromColor_F16 : FromColor_F16_Raw;
-        default:
-            break;
-    }
-    return NULL;
-}
-
-static bool IsColorSpaceSRGB(SkColorSpace* colorSpace) {
-    return colorSpace == nullptr || colorSpace->isSRGB();
-}
-
 bool GraphicsJNI::SetPixels(JNIEnv* env, jintArray srcColors, int srcOffset, int srcStride,
-        int x, int y, int width, int height, const SkBitmap& dstBitmap) {
-    void* dst = dstBitmap.getPixels();
-    FromColorProc proc = ChooseFromColorProc(dstBitmap);
-
-    if (NULL == dst || NULL == proc) {
-        return false;
-    }
-
+        int x, int y, int width, int height, SkBitmap* dstBitmap) {
     const jint* array = env->GetIntArrayElements(srcColors, NULL);
     const SkColor* src = (const SkColor*)array + srcOffset;
 
-    // reset to to actual choice from caller
-    dst = dstBitmap.getAddr(x, y);
+    auto sRGB = SkColorSpace::MakeSRGB();
+    SkImageInfo srcInfo = SkImageInfo::Make(
+            width, height, kBGRA_8888_SkColorType, kUnpremul_SkAlphaType, sRGB);
+    SkPixmap srcPM(srcInfo, src, srcStride * 4);
 
-    SkColorSpace* colorSpace = dstBitmap.colorSpace();
-    if (dstBitmap.colorType() == kRGBA_F16_SkColorType || IsColorSpaceSRGB(colorSpace)) {
-        // now copy/convert each scanline
-        for (int y = 0; y < height; y++) {
-            proc(dst, src, width, x, y);
-            src += srcStride;
-            dst = (char*)dst + dstBitmap.rowBytes();
-        }
-    } else {
-        auto sRGB = SkColorSpace::MakeSRGB();
-        auto xform = SkColorSpaceXform::New(sRGB.get(), colorSpace);
-
-        std::unique_ptr<SkColor[]> row(new SkColor[width]);
-
-        // now copy/convert each scanline
-        for (int y = 0; y < height; y++) {
-            memcpy(row.get(), src, sizeof(SkColor) * width);
-            xform->apply(SkColorSpaceXform::kBGRA_8888_ColorFormat, row.get(),
-                    SkColorSpaceXform::kBGRA_8888_ColorFormat, row.get(), width,
-                    SkAlphaType::kUnpremul_SkAlphaType);
-
-            proc(dst, row.get(), width, x, y);
-            src += srcStride;
-            dst = (char*)dst + dstBitmap.rowBytes();
-        }
-    }
-
-    dstBitmap.notifyPixelsChanged();
+    dstBitmap->writePixels(srcPM, x, y);
 
     env->ReleaseIntArrayElements(srcColors, const_cast<jint*>(array), JNI_ABORT);
     return true;
 }
 
 //////////////////// ToColor procs
-
-typedef void (*ToColorProc)(SkColor dst[], const void* src, int width);
-
-static void ToColor_F16_Alpha(SkColor dst[], const void* src, int width) {
-    SkASSERT(width > 0);
-    uint64_t* s = (uint64_t*)src;
-    do {
-        *dst++ = SkPM4f::FromF16((const uint16_t*) s++).unpremul().toSkColor();
-    } while (--width != 0);
-}
-
-static void ToColor_F16_Raw(SkColor dst[], const void* src, int width) {
-    SkASSERT(width > 0);
-    uint64_t* s = (uint64_t*)src;
-    do {
-        *dst++ = Sk4f_toS32(swizzle_rb(SkHalfToFloat_finite_ftz(*s++)));
-    } while (--width != 0);
-}
-
-static void ToColor_S32_Alpha(SkColor dst[], const void* src, int width) {
-    SkASSERT(width > 0);
-    const SkPMColor* s = (const SkPMColor*)src;
-    do {
-        *dst++ = SkUnPreMultiply::PMColorToColor(*s++);
-    } while (--width != 0);
-}
-
-static void ToColor_S32_Raw(SkColor dst[], const void* src, int width) {
-    SkASSERT(width > 0);
-    const SkPMColor* s = (const SkPMColor*)src;
-    do {
-        SkPMColor c = *s++;
-        *dst++ = SkColorSetARGB(SkGetPackedA32(c), SkGetPackedR32(c),
-                                SkGetPackedG32(c), SkGetPackedB32(c));
-    } while (--width != 0);
-}
-
-static void ToColor_S32_Opaque(SkColor dst[], const void* src, int width) {
-    SkASSERT(width > 0);
-    const SkPMColor* s = (const SkPMColor*)src;
-    do {
-        SkPMColor c = *s++;
-        *dst++ = SkColorSetRGB(SkGetPackedR32(c), SkGetPackedG32(c),
-                               SkGetPackedB32(c));
-    } while (--width != 0);
-}
-
-static void ToColor_S4444_Alpha(SkColor dst[], const void* src, int width) {
-    SkASSERT(width > 0);
-    const SkPMColor16* s = (const SkPMColor16*)src;
-    do {
-        *dst++ = SkUnPreMultiply::PMColorToColor(SkPixel4444ToPixel32(*s++));
-    } while (--width != 0);
-}
-
-static void ToColor_S4444_Raw(SkColor dst[], const void* src, int width) {
-    SkASSERT(width > 0);
-    const SkPMColor16* s = (const SkPMColor16*)src;
-    do {
-        SkPMColor c = SkPixel4444ToPixel32(*s++);
-        *dst++ = SkColorSetARGB(SkGetPackedA32(c), SkGetPackedR32(c),
-                                SkGetPackedG32(c), SkGetPackedB32(c));
-    } while (--width != 0);
-}
-
-static void ToColor_S4444_Opaque(SkColor dst[], const void* src, int width) {
-    SkASSERT(width > 0);
-    const SkPMColor16* s = (const SkPMColor16*)src;
-    do {
-        SkPMColor c = SkPixel4444ToPixel32(*s++);
-        *dst++ = SkColorSetRGB(SkGetPackedR32(c), SkGetPackedG32(c),
-                               SkGetPackedB32(c));
-    } while (--width != 0);
-}
-
-static void ToColor_S565(SkColor dst[], const void* src, int width) {
-    SkASSERT(width > 0);
-    const uint16_t* s = (const uint16_t*)src;
-    do {
-        uint16_t c = *s++;
-        *dst++ =  SkColorSetRGB(SkPacked16ToR32(c), SkPacked16ToG32(c),
-                                SkPacked16ToB32(c));
-    } while (--width != 0);
-}
 
 static void ToColor_SA8(SkColor dst[], const void* src, int width) {
     SkASSERT(width > 0);
@@ -582,52 +335,6 @@ static void ToColor_SA8(SkColor dst[], const void* src, int width) {
         uint8_t c = *s++;
         *dst++ = SkColorSetARGB(c, 0, 0, 0);
     } while (--width != 0);
-}
-
-// can return NULL
-static ToColorProc ChooseToColorProc(const SkBitmap& src) {
-    switch (src.colorType()) {
-        case kN32_SkColorType:
-            switch (src.alphaType()) {
-                case kOpaque_SkAlphaType:
-                    return ToColor_S32_Opaque;
-                case kPremul_SkAlphaType:
-                    return ToColor_S32_Alpha;
-                case kUnpremul_SkAlphaType:
-                    return ToColor_S32_Raw;
-                default:
-                    return NULL;
-            }
-        case kARGB_4444_SkColorType:
-            switch (src.alphaType()) {
-                case kOpaque_SkAlphaType:
-                    return ToColor_S4444_Opaque;
-                case kPremul_SkAlphaType:
-                    return ToColor_S4444_Alpha;
-                case kUnpremul_SkAlphaType:
-                    return ToColor_S4444_Raw;
-                default:
-                    return NULL;
-            }
-        case kRGB_565_SkColorType:
-            return ToColor_S565;
-        case kAlpha_8_SkColorType:
-            return ToColor_SA8;
-        case kRGBA_F16_SkColorType:
-            switch (src.alphaType()) {
-                case kOpaque_SkAlphaType:
-                    return ToColor_F16_Raw;
-                case kPremul_SkAlphaType:
-                    return ToColor_F16_Alpha;
-                case kUnpremul_SkAlphaType:
-                    return ToColor_F16_Raw;
-                default:
-                    return NULL;
-            }
-        default:
-            break;
-    }
-    return NULL;
 }
 
 static void ToF16_SA8(void* dst, const void* src, int width) {
@@ -694,7 +401,7 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     }
 
     if (jColors != NULL) {
-        GraphicsJNI::SetPixels(env, jColors, offset, stride, 0, 0, width, height, bitmap);
+        GraphicsJNI::SetPixels(env, jColors, offset, stride, 0, 0, width, height, &bitmap);
     }
 
     return createBitmap(env, nativeBitmap.release(), getPremulBitmapCreateFlags(isMutable));
@@ -1271,7 +978,7 @@ static jboolean Bitmap_isSRGB(JNIEnv* env, jobject, jlong bitmapHandle) {
     if (!bitmapHolder.valid()) return JNI_TRUE;
 
     SkColorSpace* colorSpace = bitmapHolder->info().colorSpace();
-    return IsColorSpaceSRGB(colorSpace);
+    return colorSpace == nullptr || colorSpace->isSRGB();
 }
 
 static jboolean Bitmap_isSRGBLinear(JNIEnv* env, jobject, jlong bitmapHandle) {
@@ -1330,28 +1037,13 @@ static jint Bitmap_getPixel(JNIEnv* env, jobject, jlong bitmapHandle,
     SkBitmap bitmap;
     reinterpret_cast<BitmapWrapper*>(bitmapHandle)->getSkBitmap(&bitmap);
 
-    ToColorProc proc = ChooseToColorProc(bitmap);
-    if (NULL == proc) {
-        return 0;
-    }
-    const void* src = bitmap.getAddr(x, y);
-    if (NULL == src) {
-        return 0;
-    }
+    auto sRGB = SkColorSpace::MakeSRGB();
+    SkImageInfo dstInfo = SkImageInfo::Make(
+            1, 1, kBGRA_8888_SkColorType, kUnpremul_SkAlphaType, sRGB);
 
-    SkColor dst[1];
-    proc(dst, src, 1);
-
-    SkColorSpace* colorSpace = bitmap.colorSpace();
-    if (bitmap.colorType() != kRGBA_F16_SkColorType &&  !IsColorSpaceSRGB(colorSpace)) {
-        auto sRGB = SkColorSpace::MakeSRGB();
-        auto xform = SkColorSpaceXform::New(colorSpace, sRGB.get());
-        xform->apply(SkColorSpaceXform::kBGRA_8888_ColorFormat, &dst[0],
-                SkColorSpaceXform::kBGRA_8888_ColorFormat, &dst[0], 1,
-                SkAlphaType::kUnpremul_SkAlphaType);
-    }
-
-    return static_cast<jint>(dst[0]);
+    SkColor dst;
+    bitmap.readPixels(dstInfo, &dst, dstInfo.minRowBytes(), x, y);
+    return static_cast<jint>(dst);
 }
 
 static void Bitmap_getPixels(JNIEnv* env, jobject, jlong bitmapHandle,
@@ -1360,41 +1052,12 @@ static void Bitmap_getPixels(JNIEnv* env, jobject, jlong bitmapHandle,
     SkBitmap bitmap;
     reinterpret_cast<BitmapWrapper*>(bitmapHandle)->getSkBitmap(&bitmap);
 
-    ToColorProc proc = ChooseToColorProc(bitmap);
-    if (NULL == proc) {
-        return;
-    }
-    const void* src = bitmap.getAddr(x, y);
-    if (NULL == src) {
-        return;
-    }
+    auto sRGB = SkColorSpace::MakeSRGB();
+    SkImageInfo dstInfo = SkImageInfo::Make(
+            width, height, kBGRA_8888_SkColorType, kUnpremul_SkAlphaType, sRGB);
 
     jint* dst = env->GetIntArrayElements(pixelArray, NULL);
-    SkColor* d = (SkColor*)dst + offset;
-
-    SkColorSpace* colorSpace = bitmap.colorSpace();
-    if (bitmap.colorType() == kRGBA_F16_SkColorType || IsColorSpaceSRGB(colorSpace)) {
-        while (--height >= 0) {
-            proc(d, src, width);
-            d += stride;
-            src = (void*)((const char*)src + bitmap.rowBytes());
-        }
-    } else {
-        auto sRGB = SkColorSpace::MakeSRGB();
-        auto xform = SkColorSpaceXform::New(colorSpace, sRGB.get());
-
-        while (--height >= 0) {
-            proc(d, src, width);
-
-            xform->apply(SkColorSpaceXform::kBGRA_8888_ColorFormat, d,
-                    SkColorSpaceXform::kBGRA_8888_ColorFormat, d, width,
-                    SkAlphaType::kUnpremul_SkAlphaType);
-
-            d += stride;
-            src = (void*)((const char*)src + bitmap.rowBytes());
-        }
-    }
-
+    bitmap.readPixels(dstInfo, dst + offset, stride * 4, x, y);
     env->ReleaseIntArrayElements(pixelArray, dst, 0);
 }
 
@@ -1405,26 +1068,13 @@ static void Bitmap_setPixel(JNIEnv* env, jobject, jlong bitmapHandle,
     SkBitmap bitmap;
     reinterpret_cast<BitmapWrapper*>(bitmapHandle)->getSkBitmap(&bitmap);
     SkColor color = static_cast<SkColor>(colorHandle);
-    if (NULL == bitmap.getPixels()) {
-        return;
-    }
 
-    FromColorProc proc = ChooseFromColorProc(bitmap);
-    if (NULL == proc) {
-        return;
-    }
+    auto sRGB = SkColorSpace::MakeSRGB();
+    SkImageInfo srcInfo = SkImageInfo::Make(
+            1, 1, kBGRA_8888_SkColorType, kUnpremul_SkAlphaType, sRGB);
+    SkPixmap srcPM(srcInfo, &color, srcInfo.minRowBytes());
 
-    SkColorSpace* colorSpace = bitmap.colorSpace();
-    if (bitmap.colorType() != kRGBA_F16_SkColorType && !IsColorSpaceSRGB(colorSpace)) {
-        auto sRGB = SkColorSpace::MakeSRGB();
-        auto xform = SkColorSpaceXform::New(sRGB.get(), colorSpace);
-        xform->apply(SkColorSpaceXform::kBGRA_8888_ColorFormat, &color,
-                SkColorSpaceXform::kBGRA_8888_ColorFormat, &color, 1,
-                SkAlphaType::kUnpremul_SkAlphaType);
-    }
-
-    proc(bitmap.getAddr(x, y), &color, 1, x, y);
-    bitmap.notifyPixelsChanged();
+    bitmap.writePixels(srcPM, x, y);
 }
 
 static void Bitmap_setPixels(JNIEnv* env, jobject, jlong bitmapHandle,
@@ -1433,7 +1083,7 @@ static void Bitmap_setPixels(JNIEnv* env, jobject, jlong bitmapHandle,
     SkBitmap bitmap;
     reinterpret_cast<BitmapWrapper*>(bitmapHandle)->getSkBitmap(&bitmap);
     GraphicsJNI::SetPixels(env, pixelArray, offset, stride,
-            x, y, width, height, bitmap);
+            x, y, width, height, &bitmap);
 }
 
 static void Bitmap_copyPixelsToBuffer(JNIEnv* env, jobject,
