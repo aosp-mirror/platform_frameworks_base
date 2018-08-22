@@ -1413,7 +1413,7 @@ public final class AutofillManager {
         try {
             mService.getAvailableFieldClassificationAlgorithms(receiver);
             final String[] algorithms = receiver
-                    .getObjectResult(SyncResultReceiver.TYPE_STRING_ARRAY);
+                .getObjectResult(SyncResultReceiver.TYPE_STRING_ARRAY);
             return algorithms != null ? Arrays.asList(algorithms) : Collections.emptyList();
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();

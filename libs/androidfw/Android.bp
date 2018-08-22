@@ -136,6 +136,7 @@ cc_test {
         "tests/ByteBucketArray_test.cpp",
         "tests/Config_test.cpp",
         "tests/ConfigLocale_test.cpp",
+        "tests/DynamicRefTable_test.cpp",
         "tests/Idmap_test.cpp",
         "tests/LoadedArsc_test.cpp",
         "tests/ResourceUtils_test.cpp",
