@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -502,6 +503,7 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
                 || mCurrentDate.get(Calendar.DAY_OF_MONTH) != dayOfMonth);
     }
 
+    @UnsupportedAppUsage
     private void setDate(int year, int month, int dayOfMonth) {
         mCurrentDate.set(year, month, dayOfMonth);
         resetAutofilledValue();
@@ -512,6 +514,7 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
         }
     }
 
+    @UnsupportedAppUsage
     private void updateSpinners() {
         // set the spinner ranges respecting the min and max dates
         if (mCurrentDate.equals(mMinDate)) {
@@ -564,6 +567,7 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
     /**
      * Updates the calendar view with the current date.
      */
+    @UnsupportedAppUsage
     private void updateCalendarView() {
         mCalendarView.setDate(mCurrentDate.getTimeInMillis(), false, false);
     }
@@ -572,6 +576,7 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
     /**
      * Notifies the listener, if such, for a change in the selected date.
      */
+    @UnsupportedAppUsage
     private void notifyDateChanged() {
         mDelegator.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
         if (mOnDateChangedListener != null) {
@@ -627,6 +632,7 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
         }
     }
 
+    @UnsupportedAppUsage
     private void updateInputState() {
         // Make sure that if the user changes the value and the IME is active
         // for one of the inputs if this widget, the IME is closed. If the user
