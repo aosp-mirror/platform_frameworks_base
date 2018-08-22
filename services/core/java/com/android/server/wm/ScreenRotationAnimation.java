@@ -38,6 +38,7 @@ import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -268,6 +269,12 @@ class ScreenRotationAnimation {
                     .setSize(mWidth, mHeight)
                     .setSecure(isSecure)
                     .build();
+
+            // In case display bounds change, screenshot buffer and surface may mismatch so set a
+            // scaling mode.
+            Transaction t2 = new Transaction();
+            t2.setOverrideScalingMode(mSurfaceControl, Surface.SCALING_MODE_SCALE_TO_WINDOW);
+            t2.apply(true /* sync */);
 
             // capture a screenshot into the surface we just created
             // TODO(multidisplay): we should use the proper display
