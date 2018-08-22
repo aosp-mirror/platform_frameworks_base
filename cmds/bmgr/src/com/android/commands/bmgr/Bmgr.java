@@ -845,6 +845,7 @@ public final class Bmgr {
         System.err.println("       bmgr fullbackup PACKAGE...");
         System.err.println("       bmgr backupnow [--monitor|--monitor-verbose] --all|PACKAGE...");
         System.err.println("       bmgr cancel backups");
+        System.err.println("       bmgr init TRANSPORT...");
         System.err.println("");
         System.err.println("The 'backup' command schedules a backup pass for the named package.");
         System.err.println("Note that the backup pass will effectively be a no-op if the package");
@@ -902,7 +903,11 @@ public final class Bmgr {
         System.err.println("For each package it will run key/value or full data backup ");
         System.err.println("depending on the package's manifest declarations.");
         System.err.println("The data is sent via the currently active transport.");
+        System.err.println("");
         System.err.println("The 'cancel backups' command cancels all running backups.");
+        System.err.println("");
+        System.err.println("The 'init' command initializes the given transports, wiping all data");
+        System.err.println("from their backing data stores.");
     }
 
     private static class BackupMonitor extends IBackupManagerMonitor.Stub {
