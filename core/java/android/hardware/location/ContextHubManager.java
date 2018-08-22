@@ -549,7 +549,7 @@ public final class ContextHubManager {
      * Set a callback to receive messages from the context hub
      *
      * @param callback Callback object
-     * @param handler Handler object
+     * @param handler Handler object, if null uses the Handler of the main Looper
      *
      * @see Callback
      *
@@ -568,7 +568,7 @@ public final class ContextHubManager {
                 return -1;
             }
             mCallback = callback;
-            mCallbackHandler = handler;
+            mCallbackHandler = (handler == null) ? new Handler(mMainLooper) : handler;
         }
         return 0;
     }
@@ -722,26 +722,31 @@ public final class ContextHubManager {
         return 0;
     }
 
+    /**
+     * Invokes the ContextHubManager.Callback callback registered with the ContextHubManager.
+     *
+     * @param hubId The ID of the Context Hub the message came from
+     * @param nanoAppId The instance ID of the nanoapp the message came from
+     * @param message The message to provide the callback
+     */
+    private synchronized void invokeOnMessageReceiptCallback(
+            int hubId, int nanoAppId, ContextHubMessage message) {
+        if (mCallback != null) {
+            mCallback.onMessageReceipt(hubId, nanoAppId, message);
+        }
+    }
+
     private final IContextHubCallback.Stub mClientCallback = new IContextHubCallback.Stub() {
         @Override
-        public void onMessageReceipt(final int hubId, final int nanoAppId,
-                final ContextHubMessage message) {
-            if (mCallback != null) {
-                synchronized(this) {
-                    final Callback callback = mCallback;
-                    Handler handler = mCallbackHandler == null ?
-                            new Handler(mMainLooper) : mCallbackHandler;
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            callback.onMessageReceipt(hubId, nanoAppId, message);
-                        }
-                    });
-                }
-            } else if (mLocalCallback != null) {
-                // we always ensure that mCallback takes precedence, because mLocalCallback is only
-                // for internal compatibility
-                synchronized (this) {
+        public void onMessageReceipt(
+                final int hubId, final int nanoAppId, final ContextHubMessage message) {
+            synchronized (ContextHubManager.this) {
+                if (mCallback != null) {
+                    mCallbackHandler.post(
+                            () -> invokeOnMessageReceiptCallback(hubId, nanoAppId, message));
+                } else if (mLocalCallback != null) {
+                    // We always ensure that mCallback takes precedence, because mLocalCallback is
+                    // only for internal compatibility
                     mLocalCallback.onMessageReceipt(hubId, nanoAppId, message);
                 }
             }
