@@ -5,11 +5,11 @@ package android {
     field public static final java.lang.String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final java.lang.String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
     field public static final java.lang.String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
+    field public static final java.lang.String CHANGE_CONFIGURATION = "android.permission.CHANGE_CONFIGURATION";
     field public static final java.lang.String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
+    field public static final java.lang.String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final java.lang.String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final java.lang.String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
-    field public static final java.lang.String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
-    field public static final java.lang.String CHANGE_CONFIGURATION = "android.permission.CHANGE_CONFIGURATION";
   }
 
 }
@@ -28,11 +28,11 @@ package android.app {
   public class ActivityManager {
     method public void addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int);
     method public void alwaysShowUnsupportedCompileSdkWarning(android.content.ComponentName);
+    method public void forceStopPackage(java.lang.String);
     method public int getPackageImportance(java.lang.String);
     method public long getTotalRam();
     method public int getUidImportance(int);
     method public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
-    method public void forceStopPackage(java.lang.String);
     method public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
   }
 
@@ -53,21 +53,21 @@ package android.app {
   }
 
   public class ActivityTaskManager {
+    method public java.lang.String listAllStacks();
+    method public void moveTaskToStack(int, int, boolean);
+    method public boolean moveTopActivityToPinnedStack(int, android.graphics.Rect);
     method public void removeStacksInWindowingModes(int[]) throws java.lang.SecurityException;
     method public void removeStacksWithActivityTypes(int[]) throws java.lang.SecurityException;
+    method public void resizeDockedStack(android.graphics.Rect, android.graphics.Rect);
     method public void resizeStack(int, android.graphics.Rect) throws java.lang.SecurityException;
-    method public void setTaskWindowingMode(int, int, boolean) throws java.lang.SecurityException;
-    method public void setTaskWindowingModeSplitScreenPrimary(int, int, boolean, boolean, android.graphics.Rect, boolean) throws java.lang.SecurityException;
-    method public static boolean supportsMultiWindow(android.content.Context);
-    method public static boolean supportsSplitScreenMultiWindow(android.content.Context);
-    method public boolean moveTopActivityToPinnedStack(int, android.graphics.Rect);
-    method public void startSystemLockTaskMode(int);
-    method public void stopSystemLockTaskMode();
-    method public void moveTaskToStack(int, int, boolean);
     method public void resizeStack(int, android.graphics.Rect, boolean);
     method public void resizeTask(int, android.graphics.Rect);
-    method public void resizeDockedStack(android.graphics.Rect,android.graphics.Rect);
-    method public java.lang.String listAllStacks();
+    method public void setTaskWindowingMode(int, int, boolean) throws java.lang.SecurityException;
+    method public void setTaskWindowingModeSplitScreenPrimary(int, int, boolean, boolean, android.graphics.Rect, boolean) throws java.lang.SecurityException;
+    method public void startSystemLockTaskMode(int);
+    method public void stopSystemLockTaskMode();
+    method public static boolean supportsMultiWindow(android.content.Context);
+    method public static boolean supportsSplitScreenMultiWindow(android.content.Context);
     field public static final int INVALID_STACK_ID = -1; // 0xffffffff
     field public static final int SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT = 1; // 0x1
     field public static final int SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT = 0; // 0x0
@@ -1025,10 +1025,12 @@ package android.service.autofill {
 
   public abstract class InternalSanitizer implements android.os.Parcelable android.service.autofill.Sanitizer {
     ctor public InternalSanitizer();
+    method public abstract android.view.autofill.AutofillValue sanitize(android.view.autofill.AutofillValue);
   }
 
   public abstract class InternalTransformation implements android.os.Parcelable android.service.autofill.Transformation {
     ctor public InternalTransformation();
+    method public static boolean batchApply(android.service.autofill.ValueFinder, android.widget.RemoteViews, java.util.ArrayList<android.util.Pair<java.lang.Integer, android.service.autofill.InternalTransformation>>);
   }
 
   public abstract class InternalValidator implements android.os.Parcelable android.service.autofill.Validator {
@@ -1092,6 +1094,7 @@ package android.service.notification {
     method public android.service.notification.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification);
     method public android.service.notification.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification, android.app.NotificationChannel);
     method public abstract void onNotificationSnoozedUntilContext(android.service.notification.StatusBarNotification, java.lang.String);
+    method public void onNotificationsSeen(java.util.List<java.lang.String>);
     method public final void unsnoozeNotification(java.lang.String);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.notification.NotificationAssistantService";
   }
@@ -1104,6 +1107,7 @@ package android.service.notification {
     ctor public NotificationStats();
     ctor protected NotificationStats(android.os.Parcel);
     method public int describeContents();
+    method public int getDismissalSentiment();
     method public int getDismissalSurface();
     method public boolean hasDirectReplied();
     method public boolean hasExpanded();
@@ -1112,6 +1116,7 @@ package android.service.notification {
     method public boolean hasSnoozed();
     method public boolean hasViewedSettings();
     method public void setDirectReplied();
+    method public void setDismissalSentiment(int);
     method public void setDismissalSurface(int);
     method public void setExpanded();
     method public void setSeen();
@@ -1120,10 +1125,14 @@ package android.service.notification {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.service.notification.NotificationStats> CREATOR;
     field public static final int DISMISSAL_AOD = 2; // 0x2
-    field public static final int DISMISSAL_NOT_DISMISSED = -1; // 0xffffffff
+    field public static final int DISMISSAL_NOT_DISMISSED = -1000; // 0xfffffc18
     field public static final int DISMISSAL_OTHER = 0; // 0x0
     field public static final int DISMISSAL_PEEK = 1; // 0x1
     field public static final int DISMISSAL_SHADE = 3; // 0x3
+    field public static final int DISMISS_SENTIMENT_NEGATIVE = 0; // 0x0
+    field public static final int DISMISS_SENTIMENT_NEUTRAL = 1; // 0x1
+    field public static final int DISMISS_SENTIMENT_POSITIVE = 2; // 0x2
+    field public static final int DISMISS_SENTIMENT_UNKNOWN = -1000; // 0xfffffc18
   }
 
   public final class SnoozeCriterion implements android.os.Parcelable {
