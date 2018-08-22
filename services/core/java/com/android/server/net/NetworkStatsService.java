@@ -159,14 +159,24 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     static final boolean LOGD = Log.isLoggable(TAG, Log.DEBUG);
     static final boolean LOGV = Log.isLoggable(TAG, Log.VERBOSE);
 
+    // Perform polling and persist all (FLAG_PERSIST_ALL).
     private static final int MSG_PERFORM_POLL = 1;
-    private static final int MSG_REGISTER_GLOBAL_ALERT = 2;
+    // Perform polling, persist network, and register the global alert again.
+    private static final int MSG_PERFORM_POLL_REGISTER_ALERT = 2;
 
     /** Flags to control detail level of poll event. */
     private static final int FLAG_PERSIST_NETWORK = 0x1;
     private static final int FLAG_PERSIST_UID = 0x2;
     private static final int FLAG_PERSIST_ALL = FLAG_PERSIST_NETWORK | FLAG_PERSIST_UID;
     private static final int FLAG_PERSIST_FORCE = 0x100;
+
+    /**
+     * When global alert quota is high, wait for this delay before processing each polling,
+     * and do not schedule further polls once there is already one queued.
+     * This avoids firing the global alert too often on devices with high transfer speeds and
+     * high quota.
+     */
+    private static final int PERFORM_POLL_DELAY_MS = 1000;
 
     private static final String TAG_NETSTATS_ERROR = "netstats_error";
 
@@ -920,7 +930,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         // Create baseline stats
-        mHandler.sendMessage(mHandler.obtainMessage(MSG_PERFORM_POLL, FLAG_PERSIST_ALL));
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_PERFORM_POLL));
 
         return normalizedRequest;
    }
@@ -1055,13 +1065,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
             if (LIMIT_GLOBAL_ALERT.equals(limitName)) {
-                // kick off background poll to collect network stats; UID stats
-                // are handled during normal polling interval.
-                final int flags = FLAG_PERSIST_NETWORK;
-                mHandler.obtainMessage(MSG_PERFORM_POLL, flags, 0).sendToTarget();
-
-                // re-arm global alert for next update
-                mHandler.obtainMessage(MSG_REGISTER_GLOBAL_ALERT).sendToTarget();
+                // kick off background poll to collect network stats unless there is already
+                // such a call pending; UID stats are handled during normal polling interval.
+                if (!mHandler.hasMessages(MSG_PERFORM_POLL_REGISTER_ALERT)) {
+                    mHandler.sendEmptyMessageDelayed(MSG_PERFORM_POLL_REGISTER_ALERT,
+                            PERFORM_POLL_DELAY_MS);
+                }
             }
         }
     };
@@ -1673,11 +1682,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_PERFORM_POLL: {
-                    final int flags = msg.arg1;
-                    mService.performPoll(flags);
+                    mService.performPoll(FLAG_PERSIST_ALL);
                     return true;
                 }
-                case MSG_REGISTER_GLOBAL_ALERT: {
+                case MSG_PERFORM_POLL_REGISTER_ALERT: {
+                    mService.performPoll(FLAG_PERSIST_NETWORK);
                     mService.registerGlobalAlert();
                     return true;
                 }
