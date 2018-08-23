@@ -18,6 +18,7 @@ package com.android.server.display;
 
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal;
+import android.os.SystemProperties;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
@@ -57,6 +58,8 @@ import java.util.Objects;
  * </p>
  */
 final class LogicalDisplay {
+    private static final String PROP_MASKING_INSET_TOP = "persist.sys.displayinset.top";
+
     private final DisplayInfo mBaseDisplayInfo = new DisplayInfo();
 
     // The layer stack we use when the display has been blanked to prevent any
@@ -294,6 +297,17 @@ final class LogicalDisplay {
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo = null;
         }
+    }
+
+    /**
+     * Return the insets currently applied to the display.
+     *
+     * Note that the base DisplayInfo already takes these insets into account, so if you want to
+     * find out the <b>true</b> size of the display, you need to add them back to the logical
+     * dimensions.
+     */
+    public Rect getInsets() {
+        return getMaskingInsets(mPrimaryDisplayDeviceInfo);
     }
 
     /**
