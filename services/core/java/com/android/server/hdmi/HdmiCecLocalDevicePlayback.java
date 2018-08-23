@@ -26,6 +26,7 @@ import android.os.SystemProperties;
 import android.provider.Settings.Global;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.LocalePicker;
 import com.android.internal.app.LocalePicker.LocaleInfo;
 import com.android.internal.util.IndentingPrintWriter;
@@ -34,8 +35,6 @@ import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Locale;
-
-import java.util.List;
 
 /**
  * Represent a logical device of type Playback residing in Android system.
@@ -61,6 +60,11 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
 
     // If true, turn off TV upon standby. False by default.
     private boolean mAutoTvOff;
+
+    // Local active port number used for Routing Control.
+    // Default 0 means HOME is the current active path. Temp solution only.
+    // TODO(amyjojo): adding system constants for input ports to TIF mapping.
+    private int mLocalActivePath = 0;
 
     HdmiCecLocalDevicePlayback(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_PLAYBACK);
@@ -254,10 +258,21 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     protected boolean handleSetStreamPath(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
-        maySetActiveSource(physicalAddress);
-        maySendActiveSource(message.getSource());
-        wakeUpIfActiveSource();
-        return true;  // Broadcast message.
+        // If current device is the target path, set to Active Source.
+        // If the path is under the current device, should switch
+        int port = getLocalPortFromPhysicalAddress(physicalAddress);
+        if (port == 0) {
+            setActiveSource(true);
+            maySendActiveSource(message.getSource());
+            wakeUpIfActiveSource();
+        } else if (port > 0) {
+            // Wake up the device if the power is in standby mode for routing
+            if (mService.isPowerStandbyOrTransient()) {
+                mService.wakeUp();
+            }
+            routeToPort(port);
+        }
+        return true;
     }
 
     // Samsung model we tested sends <Routing Change> and <Request Active Source>
@@ -381,6 +396,16 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         }
         setActiveSource(false);
         checkIfPendingActionsCleared();
+    }
+
+    private void routeToPort(int portId) {
+        // TODO(AMYJOJO): route to specific input of the port
+        mLocalActivePath = portId;
+    }
+
+    @VisibleForTesting
+    protected int getLocalActivePath() {
+        return mLocalActivePath;
     }
 
     @Override

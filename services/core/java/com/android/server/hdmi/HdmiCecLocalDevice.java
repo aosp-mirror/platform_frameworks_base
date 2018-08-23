@@ -27,10 +27,12 @@ import android.util.Slog;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -51,6 +53,11 @@ abstract class HdmiCecLocalDevice {
     // Within the timer, a received <User Control Pressed> will start "Press and Hold" behavior.
     // When it expires, we can assume <User Control Release> is received.
     private static final int FOLLOWER_SAFETY_TIMEOUT = 550;
+    /**
+     * Return value of {@link #getLocalPortFromPhysicalAddress(int)}
+     */
+    private static final int TARGET_NOT_UNDER_LOCAL_DEVICE = -1;
+    private static final int TARGET_SAME_PHYSICAL_ADDRESS = 0;
 
     protected final HdmiControlService mService;
     protected final int mDeviceType;
@@ -434,10 +441,14 @@ abstract class HdmiCecLocalDevice {
         return true;
     }
 
+    // Audio System device with no Playback device type
+    // needs to refactor this function if it's also a switch
     protected boolean handleRoutingChange(HdmiCecMessage message) {
         return false;
     }
 
+    // Audio System device with no Playback device type
+    // needs to refactor this function if it's also a switch
     protected boolean handleRoutingInformation(HdmiCecMessage message) {
         return false;
     }
@@ -1032,5 +1043,46 @@ abstract class HdmiCecLocalDevice {
         pw.println("mDeviceInfo: " + mDeviceInfo);
         pw.println("mActiveSource: " + mActiveSource);
         pw.println(String.format("mActiveRoutingPath: 0x%04x", mActiveRoutingPath));
+    }
+
+    /**
+     * Method to parse target physical address to the port number on the current device.
+     *
+     * <p>This check assumes target address is valid.
+     * @param targetPhysicalAddress is the physical address of the target device
+     * @return
+     * <p>If the target device is under the current device, return the port number of current device
+     * that the target device is connected to.
+     *
+     * <p>If the target device has the same physical address as the current device, return
+     * {@link #TARGET_SAME_PHYSICAL_ADDRESS}.
+     *
+     * <p>If the target device is not under the current device, return
+     * {@link #TARGET_NOT_UNDER_LOCAL_DEVICE}.
+     */
+    protected int getLocalPortFromPhysicalAddress(int targetPhysicalAddress) {
+        int myPhysicalAddress = mService.getPhysicalAddress();
+        if (myPhysicalAddress == targetPhysicalAddress) {
+            return TARGET_SAME_PHYSICAL_ADDRESS;
+        }
+        int finalMask = 0xF000;
+        int mask;
+        int port = 0;
+        for (mask = 0x0F00; mask > 0x000F;  mask >>= 4) {
+            if ((myPhysicalAddress & mask) == 0)  {
+                port = mask & targetPhysicalAddress;
+                break;
+            } else {
+                finalMask |= mask;
+            }
+        }
+        if (finalMask != 0xFFFF && (finalMask & targetPhysicalAddress) == myPhysicalAddress) {
+            while (mask != 0x000F) {
+                mask >>= 4;
+                port >>= 4;
+            }
+            return port;
+        }
+        return TARGET_NOT_UNDER_LOCAL_DEVICE;
     }
 }

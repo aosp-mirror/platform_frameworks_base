@@ -524,15 +524,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
 
-    @Test
-    public void handleSetStreamPath_underCurrentDevice() {
-        assertThat(mHdmiCecLocalDeviceAudioSystem.getLocalActivePath()).isEqualTo(0);
-        HdmiCecMessage message =
-                HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV, 0x2100);
-        assertThat(mHdmiCecLocalDeviceAudioSystem.handleSetStreamPath(message)).isTrue();
-        assertThat(mHdmiCecLocalDeviceAudioSystem.getLocalActivePath()).isEqualTo(1);
-    }
-
     public void handleSystemAudioModeRequest_fromNonTV_tVNotSupport() {
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildSystemAudioModeRequest(
