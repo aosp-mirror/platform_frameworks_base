@@ -17,6 +17,7 @@
 package android.telephony.ims;
 
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -58,6 +59,7 @@ public final class ImsExternalCallState implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public ImsExternalCallState(int callId, Uri address, boolean isPullable, int callState,
             int callType, boolean isCallheld) {
         mCallId = callId;

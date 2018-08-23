@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -171,6 +172,7 @@ public class PhoneStateListener {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int LISTEN_PRECISE_CALL_STATE                       = 0x00000800;
 
     /**
@@ -276,6 +278,7 @@ public class PhoneStateListener {
      * @hide
      */
     /** @hide */
+    @UnsupportedAppUsage
     protected Integer mSubId;
 
     private final Handler mHandler;
@@ -293,6 +296,7 @@ public class PhoneStateListener {
      * using a particular non-null Looper.
      * @hide
      */
+    @UnsupportedAppUsage
     public PhoneStateListener(Looper looper) {
         this(null, looper);
     }
@@ -303,6 +307,7 @@ public class PhoneStateListener {
      * own non-null Looper use PhoneStateListener(int subId, Looper looper) below.
      * @hide
      */
+    @UnsupportedAppUsage
     public PhoneStateListener(Integer subId) {
         this(subId, Looper.myLooper());
     }
@@ -312,6 +317,7 @@ public class PhoneStateListener {
      * and non-null Looper.
      * @hide
      */
+    @UnsupportedAppUsage
     public PhoneStateListener(Integer subId, Looper looper) {
         if (DBG) log("ctor: subId=" + subId + " looper=" + looper);
         mSubId = subId;
@@ -515,6 +521,7 @@ public class PhoneStateListener {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void onOtaspChanged(int otaspMode) {
         // default implementation empty
     }
@@ -532,6 +539,7 @@ public class PhoneStateListener {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void onPreciseCallStateChanged(PreciseCallState callState) {
         // default implementation empty
     }
@@ -541,6 +549,7 @@ public class PhoneStateListener {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void onPreciseDataConnectionStateChanged(
             PreciseDataConnectionState dataConnectionState) {
         // default implementation empty
@@ -551,6 +560,7 @@ public class PhoneStateListener {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void onDataConnectionRealTimeInfoChanged(
             DataConnectionRealTimeInfo dcRtInfo) {
         // default implementation empty
@@ -562,6 +572,7 @@ public class PhoneStateListener {
      * @param stateInfo is the current LTE network information
      * @hide
      */
+    @UnsupportedAppUsage
     public void onVoLteServiceStateChanged(VoLteServiceState stateInfo) {
     }
 
@@ -608,6 +619,7 @@ public class PhoneStateListener {
      * @param rawData is the byte array of the OEM hook raw data.
      * @hide
      */
+    @UnsupportedAppUsage
     public void onOemHookRawEvent(byte[] rawData) {
         // default implementation empty
     }
@@ -741,6 +753,7 @@ public class PhoneStateListener {
         }
     }
 
+    @UnsupportedAppUsage
     IPhoneStateListener callback = new IPhoneStateListenerStub(this);
 
     private void log(String s) {

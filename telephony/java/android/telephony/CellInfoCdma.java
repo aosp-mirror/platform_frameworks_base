@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Rlog;
@@ -32,6 +33,7 @@ public final class CellInfoCdma extends CellInfo implements Parcelable {
     private CellSignalStrengthCdma mCellSignalStrengthCdma;
 
     /** @hide */
+    @UnsupportedAppUsage
     public CellInfoCdma() {
         super();
         mCellIdentityCdma = new CellIdentityCdma();
@@ -39,6 +41,7 @@ public final class CellInfoCdma extends CellInfo implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public CellInfoCdma(CellInfoCdma ci) {
         super(ci);
         this.mCellIdentityCdma = ci.mCellIdentityCdma.copy();
@@ -50,6 +53,7 @@ public final class CellInfoCdma extends CellInfo implements Parcelable {
         return mCellIdentityCdma;
     }
     /** @hide */
+    @UnsupportedAppUsage
     public void setCellIdentity(CellIdentityCdma cid) {
         mCellIdentityCdma = cid;
     }

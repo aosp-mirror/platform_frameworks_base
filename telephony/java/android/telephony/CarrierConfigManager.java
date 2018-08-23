@@ -22,6 +22,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
@@ -1198,6 +1199,7 @@ public class CarrierConfigManager {
      * disable_metered_apns}
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String KEY_CARRIER_DEFAULT_ACTIONS_ON_REDIRECTION_STRING_ARRAY =
             "carrier_default_actions_on_redirection_string_array";
 
@@ -1810,6 +1812,7 @@ public class CarrierConfigManager {
      * Key identifying if voice call barring notification is required to be shown to the user.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String KEY_DISABLE_VOICE_BARRING_NOTIFICATION_BOOL =
             "disable_voice_barring_notification_bool";
 
