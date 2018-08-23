@@ -13320,6 +13320,19 @@ public final class Settings {
         public static final String BINDER_CALLS_STATS = "binder_calls_stats";
 
         /**
+         * Looper stats settings.
+         *
+         * The following strings are supported as keys:
+         * <pre>
+         *     enabled              (boolean)
+         *     sampling_interval    (int)
+         * </pre>
+         *
+         * @hide
+         */
+        public static final String LOOPER_STATS = "looper_stats";
+
+        /**
          * Default user id to boot into. They map to user ids, for example, 10, 11, 12.
          *
          * @hide

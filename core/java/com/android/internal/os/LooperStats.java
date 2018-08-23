@@ -37,8 +37,6 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class LooperStats implements Looper.Observer {
     private static final int TOKEN_POOL_SIZE = 50;
-    private static final int DEFAULT_ENTRIES_SIZE_CAP = 2000;
-    private static final int DEFAULT_SAMPLING_INTERVAL = 100;
 
     @GuardedBy("mLock")
     private final SparseArray<Entry> mEntries = new SparseArray<>(256);
@@ -47,12 +45,8 @@ public class LooperStats implements Looper.Observer {
     private final Entry mHashCollisionEntry = new Entry("HASH_COLLISION");
     private final ConcurrentLinkedQueue<DispatchSession> mSessionPool =
             new ConcurrentLinkedQueue<>();
-    private final int mSamplingInterval;
     private final int mEntriesSizeCap;
-
-    public LooperStats() {
-        this(DEFAULT_SAMPLING_INTERVAL, DEFAULT_ENTRIES_SIZE_CAP);
-    }
+    private int mSamplingInterval;
 
     public LooperStats(int samplingInterval, int entriesSizeCap) {
         this.mSamplingInterval = samplingInterval;
@@ -140,6 +134,10 @@ public class LooperStats implements Looper.Observer {
         synchronized (mOverflowEntry) {
             mOverflowEntry.reset();
         }
+    }
+
+    public void setSamplingInterval(int samplingInterval) {
+        mSamplingInterval = samplingInterval;
     }
 
     @NonNull
