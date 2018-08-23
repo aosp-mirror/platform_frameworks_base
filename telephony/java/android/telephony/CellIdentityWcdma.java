@@ -19,6 +19,7 @@ package android.telephony;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
+import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 
 import java.util.Objects;
@@ -189,6 +190,19 @@ public final class CellIdentityWcdma extends CellIdentity {
     @Override
     public int getChannelNumber() {
         return mUarfcn;
+    }
+
+    /** @hide */
+    @Override
+    public GsmCellLocation asCellLocation() {
+        GsmCellLocation cl = new GsmCellLocation();
+        int lac = mLac != Integer.MAX_VALUE ? mLac : -1;
+        int cid = mCid != Integer.MAX_VALUE ? mCid : -1;
+        int psc = mPsc != Integer.MAX_VALUE ? mPsc : -1;
+        cl.setLacAndCid(lac, cid);
+        cl.setPsc(psc);
+
+        return cl;
     }
 
     @Override

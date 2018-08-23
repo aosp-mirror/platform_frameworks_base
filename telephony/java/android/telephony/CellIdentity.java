@@ -129,6 +129,12 @@ public abstract class CellIdentity implements Parcelable {
         return mAlphaShort;
     }
 
+    /**
+     * @return a CellLocation object for this CellIdentity
+     * @hide
+     */
+    public abstract CellLocation asCellLocation();
+
     @Override
     public boolean equals(Object other) {
         if (!(other instanceof CellIdentity)) {
