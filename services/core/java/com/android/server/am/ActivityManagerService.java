@@ -26870,6 +26870,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return ActivityManagerService.this.getHomeIntent();
             }
         }
+
+        @Override
+        public void notifyDefaultDisplaySizeChanged() {
+            synchronized (this) {
+                if (mSystemServiceManager.isBootCompleted() && mHomeProcess != null) {
+
+                    // TODO: Ugly hack to unblock the release
+                    Slog.i(TAG, "Killing home process because of display size change");
+                    removeProcessLocked(mHomeProcess, false, true, "kill home screen size");
+                }
+            }
+        }
     }
 
     /**
