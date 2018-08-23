@@ -602,7 +602,7 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
 
     struct graphics_memory_pss graphics_mem;
     if (read_memtrack_memory(pid, &graphics_mem) == 0) {
-        pss = uss = memtrack = graphics_mem.graphics + graphics_mem.gl + graphics_mem.other;
+        pss = uss = rss = memtrack = graphics_mem.graphics + graphics_mem.gl + graphics_mem.other;
     }
 
     {
