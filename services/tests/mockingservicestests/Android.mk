@@ -20,22 +20,21 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    services.core \
-    services.devicepolicy \
     frameworks-base-testutils \
+    services.core \
     androidx-test \
     mockito-target-extended-minus-junit4 \
+    platform-test-annotations \
     ShortcutManagerTestUtils \
-    compatibility-device-util \
-    truth-prebuilt
+    truth-prebuilt \
 
-LOCAL_JAVA_LIBRARIES := \
-    android.test.mock
+LOCAL_JAVA_LIBRARIES := android.test.mock android.test.base android.test.runner
 
 LOCAL_JNI_SHARED_LIBRARIES := \
     libdexmakerjvmtiagent \
-    libstaticjvmtiagent
+    libstaticjvmtiagent \
 
+LOCAL_CERTIFICATE := platform
 LOCAL_PACKAGE_NAME := FrameworksMockingServicesTests
 LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_COMPATIBILITY_SUITE := device-tests
