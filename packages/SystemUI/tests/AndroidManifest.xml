@@ -72,6 +72,7 @@
             tools:replace="android:authorities"
             android:authorities="${applicationId}.lifecycle-tests"
             android:exported="false"
+            android:enabled="false"
             android:multiprocess="true" />
         <provider android:name="com.android.systemui.keyguard.KeyguardSliceProvider"
             android:authorities="com.android.systemui.test.keyguard.disabled"
@@ -83,6 +84,7 @@
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.android.systemui.test.fileprovider"
             android:exported="false"
+            android:enabled="false"
             tools:replace="android:authorities"
             android:grantUriPermissions="true" />
     </application>
