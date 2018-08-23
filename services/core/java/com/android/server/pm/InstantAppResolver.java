@@ -36,9 +36,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
-import android.content.pm.InstantAppRequest;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.InstantAppIntentFilter;
+import android.content.pm.InstantAppRequest;
 import android.content.pm.InstantAppResolveInfo;
 import android.content.pm.InstantAppResolveInfo.InstantAppDigest;
 import android.metrics.LogMaker;
@@ -458,8 +458,8 @@ public abstract class InstantAppResolver {
             }
             return Collections.emptyList();
         }
-        final PackageManagerService.InstantAppIntentResolver instantAppResolver =
-                new PackageManagerService.InstantAppIntentResolver();
+        final ComponentResolver.InstantAppIntentResolver instantAppResolver =
+                new ComponentResolver.InstantAppIntentResolver();
         for (int j = instantAppFilters.size() - 1; j >= 0; --j) {
             final InstantAppIntentFilter instantAppFilter = instantAppFilters.get(j);
             final List<IntentFilter> splitFilters = instantAppFilter.getFilters();

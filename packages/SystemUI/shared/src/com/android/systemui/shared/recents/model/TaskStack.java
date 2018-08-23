@@ -19,6 +19,7 @@ package com.android.systemui.shared.recents.model;
 import android.content.ComponentName;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.SparseArray;
 
 import com.android.systemui.shared.recents.model.Task.TaskKey;
 import com.android.systemui.shared.recents.utilities.AnimationProps;
@@ -67,7 +68,12 @@ public class TaskStack {
 
     public TaskStack() {
         // Ensure that we only show stack tasks
-        mStackTaskList.setFilter((taskIdMap, t, index) -> t.isStackTask);
+        mStackTaskList.setFilter(new TaskFilter() {
+            @Override
+            public boolean acceptTask(SparseArray<Task> taskIdMap, Task t, int index) {
+                return  t.isStackTask;
+            }
+        });
     }
 
     /** Sets the callbacks for this task stack. */

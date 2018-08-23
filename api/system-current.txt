@@ -4725,6 +4725,7 @@ package android.service.notification {
     method public android.service.notification.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification, android.app.NotificationChannel);
     method public void onNotificationRemoved(android.service.notification.StatusBarNotification, android.service.notification.NotificationListenerService.RankingMap, android.service.notification.NotificationStats, int);
     method public abstract void onNotificationSnoozedUntilContext(android.service.notification.StatusBarNotification, java.lang.String);
+    method public void onNotificationsSeen(java.util.List<java.lang.String>);
     method public final void unsnoozeNotification(java.lang.String);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.notification.NotificationAssistantService";
   }
@@ -4733,6 +4734,7 @@ package android.service.notification {
     ctor public NotificationStats();
     ctor protected NotificationStats(android.os.Parcel);
     method public int describeContents();
+    method public int getDismissalSentiment();
     method public int getDismissalSurface();
     method public boolean hasDirectReplied();
     method public boolean hasExpanded();
@@ -4741,6 +4743,7 @@ package android.service.notification {
     method public boolean hasSnoozed();
     method public boolean hasViewedSettings();
     method public void setDirectReplied();
+    method public void setDismissalSentiment(int);
     method public void setDismissalSurface(int);
     method public void setExpanded();
     method public void setSeen();
@@ -4753,6 +4756,10 @@ package android.service.notification {
     field public static final int DISMISSAL_OTHER = 0; // 0x0
     field public static final int DISMISSAL_PEEK = 1; // 0x1
     field public static final int DISMISSAL_SHADE = 3; // 0x3
+    field public static final int DISMISS_SENTIMENT_NEGATIVE = 0; // 0x0
+    field public static final int DISMISS_SENTIMENT_NEUTRAL = 1; // 0x1
+    field public static final int DISMISS_SENTIMENT_POSITIVE = 2; // 0x2
+    field public static final int DISMISS_SENTIMENT_UNKNOWN = -1000; // 0xfffffc18
   }
 
   public final class SnoozeCriterion implements android.os.Parcelable {
@@ -5546,6 +5553,19 @@ package android.telephony.data {
     field public static final int RESULT_SUCCESS = 0; // 0x0
   }
 
+  public abstract class QualifiedNetworksService extends android.app.Service {
+    ctor public QualifiedNetworksService();
+    method public abstract android.telephony.data.QualifiedNetworksService.NetworkAvailabilityUpdater createNetworkAvailabilityUpdater(int);
+    field public static final java.lang.String QUALIFIED_NETWORKS_SERVICE_INTERFACE = "android.telephony.data.QualifiedNetworksService";
+  }
+
+  public abstract class QualifiedNetworksService.NetworkAvailabilityUpdater implements java.lang.AutoCloseable {
+    ctor public QualifiedNetworksService.NetworkAvailabilityUpdater(int);
+    method public abstract void close();
+    method public final int getSlotIndex();
+    method public final void updateQualifiedNetworkTypes(int, int[]);
+  }
+
 }
 
 package android.telephony.euicc {
@@ -6204,6 +6224,10 @@ package android.telephony.ims.feature {
     field public static final int STATE_INITIALIZING = 1; // 0x1
     field public static final int STATE_READY = 2; // 0x2
     field public static final int STATE_UNAVAILABLE = 0; // 0x0
+  }
+
+  public static class ImsFeature.Capabilities {
+    field protected int mCapabilities;
   }
 
   protected static class ImsFeature.CapabilityCallbackProxy {

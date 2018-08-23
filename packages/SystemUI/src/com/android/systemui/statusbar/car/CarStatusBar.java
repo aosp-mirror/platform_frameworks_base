@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.car;
 
-import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.car.user.CarUserManagerHelper;
 import android.graphics.PixelFormat;
@@ -504,8 +503,8 @@ public class CarStatusBar extends StatusBar implements
     }
 
     @Override
-    public void updateKeyguardState(boolean goingToFullShade, boolean fromShadeLocked) {
-        super.updateKeyguardState(goingToFullShade, fromShadeLocked);
+    public void onStateChanged(int newState) {
+        super.onStateChanged(newState);
         CarUserManagerHelper helper = new CarUserManagerHelper(mContext);
         if (!helper.isHeadlessSystemUser()) {
             showUserSwitcher();

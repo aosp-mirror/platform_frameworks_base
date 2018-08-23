@@ -69,13 +69,13 @@
     <!-- A message that appears when the battery remaining estimate is low in a dialog.  This is
     appended to the subtitle of the low battery alert.  "percentage" is the percentage of battery
     remaining. "time" is the amount of time remaining before the phone runs out of battery [CHAR LIMIT=none]-->
-    <string name="battery_low_percent_format_hybrid"><xliff:g id="percentage">%s</xliff:g> remaining, about <xliff:g id="time">%s</xliff:g> left based on your usage</string>
+    <string name="battery_low_percent_format_hybrid"><xliff:g id="percentage">%1$s</xliff:g> remaining, about <xliff:g id="time">%2$s</xliff:g> left based on your usage</string>
 
     <!-- A message that appears when the battery remaining estimate is low in a dialog and insufficient
     data was present to say it is customized to the user. This is appended to the subtitle of the
     low battery alert.  "percentage" is the percentage of battery remaining. "time" is the amount
      of time remaining before the phone runs out of battery [CHAR LIMIT=none]-->
-    <string name="battery_low_percent_format_hybrid_short"><xliff:g id="percentage">%s</xliff:g> remaining, about <xliff:g id="time">%s</xliff:g> left</string>
+    <string name="battery_low_percent_format_hybrid_short"><xliff:g id="percentage">%1$s</xliff:g> remaining, about <xliff:g id="time">%2$s</xliff:g> left</string>
 
     <!-- Same as battery_low_percent_format, with a notice about battery saver if on. [CHAR LIMIT=none]-->
     <string name="battery_low_percent_format_saver_started"><xliff:g id="percentage">%s</xliff:g> remaining. Battery Saver is on.</string>
@@ -624,7 +624,7 @@
     <!-- The overflow indicator shown when a group has more notification inside the group than the visible ones. An example is "+ 3" [CHAR LIMIT=5] -->
     <string name="notification_group_overflow_indicator">+ <xliff:g id="number" example="3">%s</xliff:g></string>
     <!-- The overflow indicator shown when a group has more notification inside the group than the visible ones. An example is "New message, +3" [CHAR LIMIT=7] -->
-    <string name="notification_group_overflow_indicator_ambient"><xliff:g id="notification_title" example="New message">%s</xliff:g>, +<xliff:g id="overflow" example="+3">%s</xliff:g></string>
+    <string name="notification_group_overflow_indicator_ambient"><xliff:g id="notification_title" example="New message">%1$s</xliff:g>, +<xliff:g id="overflow" example="+3">%2$s</xliff:g></string>
 
     <!-- Content description describing how many more notifications are in a group [CHAR LIMIT=NONE] -->
     <plurals name="notification_group_overflow_description">
@@ -956,13 +956,13 @@
     <string name="interruption_level_alarms_twoline">Alarms\nonly</string>
 
     <!-- Indication on the keyguard that is shown when the device is charging. [CHAR LIMIT=50]-->
-    <string name="keyguard_indication_charging_time"><xliff:g id="percentage">%2$s</xliff:g> • Charging (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%s</xliff:g> until full)</string>
+    <string name="keyguard_indication_charging_time"><xliff:g id="percentage">%2$s</xliff:g> • Charging (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%1$s</xliff:g> until full)</string>
 
     <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=50]-->
-    <string name="keyguard_indication_charging_time_fast"><xliff:g id="percentage">%2$s</xliff:g> • Charging rapidly (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%s</xliff:g> until full)</string>
+    <string name="keyguard_indication_charging_time_fast"><xliff:g id="percentage">%2$s</xliff:g> • Charging rapidly (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%1$s</xliff:g> until full)</string>
 
     <!-- Indication on the keyguard that is shown when the device is charging slowly. Should match keyguard_plugged_in_charging_slowly [CHAR LIMIT=50]-->
-    <string name="keyguard_indication_charging_time_slowly"><xliff:g id="percentage">%2$s</xliff:g> • Charging slowly (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%s</xliff:g> until full)</string>
+    <string name="keyguard_indication_charging_time_slowly"><xliff:g id="percentage">%2$s</xliff:g> • Charging slowly (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%1$s</xliff:g> until full)</string>
 
     <!-- Related to user switcher --><skip/>
 
@@ -1869,6 +1869,9 @@
     <!-- Label for area where tiles can be dragged out of [CHAR LIMIT=60] -->
     <string name="drag_to_add_tiles">Hold and drag to add tiles</string>
 
+    <!-- Label for header of customize QS [CHAR LIMIT=60] -->
+    <string name="drag_to_rearrange_tiles">Hold and drag to rearrange tiles</string>
+
     <!-- Label for area where tiles can be dragged in to [CHAR LIMIT=60] -->
     <string name="drag_to_remove_tiles">Drag here to remove</string>
 
@@ -2133,7 +2136,7 @@
     <string name="mobile_data">Mobile data</string>
 
     <!-- Quick settings tile secondary label format combining roaming with the mobile data type. [CHAR LIMIT=NONE] -->
-    <string name="mobile_data_text_format"><xliff:g name="roaming_status" example="Roaming">%s</xliff:g> \u2014 <xliff:g name="mobile_data_type" example="LTE">%s</xliff:g></string>
+    <string name="mobile_data_text_format"><xliff:g name="roaming_status" example="Roaming">%1$s</xliff:g> \u2014 <xliff:g name="mobile_data_type" example="LTE">%2$s</xliff:g></string>
 
     <!-- Label for when wifi is off in QS detail panel [CHAR LIMIT=NONE] -->
     <string name="wifi_is_off">Wi-Fi is off</string>

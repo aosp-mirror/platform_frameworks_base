@@ -499,9 +499,9 @@
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"tumia maunzi ya kitambulisho"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Huruhusu programu kutumia maunzi ya kitambulisho kwa uthibitisho"</string>
     <string name="permlab_audioRead" msgid="6617225220728465565">"kusoma mkusanyiko muziki wako"</string>
-    <string name="permdesc_audioRead" msgid="5034032570243484805">"Inaruhusu programu kusoma mkusanyiko wa muziki wako."</string>
-    <string name="permlab_audioWrite" msgid="2661772059799779292">"kubadilisha mkusanyiko wa muziki wako"</string>
-    <string name="permdesc_audioWrite" msgid="8888544708166230494">"Inaruhusu programu kubadilisha mkusanyiko wa muziki wako."</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"Inaruhusu programu kusoma mkusanyiko wako wa muziki."</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"kubadilisha mkusanyiko wako wa muziki"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"Inaruhusu programu kubadilisha mkusanyiko wako wa muziki."</string>
     <string name="permlab_videoRead" msgid="9182618678674737229">"kusoma mkusanyiko wa video zako"</string>
     <string name="permdesc_videoRead" msgid="7045676429859396194">"Inaruhusu programu kusoma mkusanyiko wa video zako."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"kubadilisha mkusanyiko wa video zako"</string>

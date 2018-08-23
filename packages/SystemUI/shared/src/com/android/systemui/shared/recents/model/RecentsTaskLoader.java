@@ -110,8 +110,7 @@ public class RecentsTaskLoader {
         mActivityInfoCache = new LruCache<>(numRecentTasks);
 
         mIconLoader = createNewIconLoader(context, mIconCache, mActivityInfoCache);
-        mLoader = new BackgroundTaskLoader(mLoadQueue, mIconLoader,
-                mHighResThumbnailLoader::setTaskLoadQueueIdle);
+        mLoader = new BackgroundTaskLoader(mLoadQueue, mIconLoader, mHighResThumbnailLoader);
     }
 
     protected IconLoader createNewIconLoader(Context context,TaskKeyLruCache<Drawable> iconCache,

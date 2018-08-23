@@ -32,7 +32,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.SurfaceControl;
 
 import com.android.systemui.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.recents.events.EventBus;
@@ -41,7 +40,6 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.shared.system.GraphicBufferCompat;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -70,6 +68,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private static final long BACKOFF_MILLIS = 1000;
     private static final long DEFERRED_CALLBACK_MILLIS = 5000;
 
+    // Max backoff caps at 5 mins
+    private static final long MAX_BACKOFF_MILLIS = 10 * 60 * 1000;
+
     // Default interaction flags if swipe up is disabled before connecting to launcher
     private static final int DEFAULT_DISABLE_SWIPE_UP_STATE = FLAG_DISABLE_SWIPE_UP
             | FLAG_SHOW_OVERVIEW_BUTTON;
@@ -90,20 +91,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private int mCurrentBoundedUserId = -1;
 
     private ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
-
-        public GraphicBufferCompat screenshot(Rect sourceCrop, int width, int height, int minLayer,
-                int maxLayer, boolean useIdentityTransform, int rotation) {
-            if (!verifyCaller("screenshot")) {
-                return null;
-            }
-            long token = Binder.clearCallingIdentity();
-            try {
-                return new GraphicBufferCompat(SurfaceControl.screenshotToBuffer(sourceCrop, width,
-                        height, minLayer, maxLayer, useIdentityTransform, rotation));
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
 
         public void startScreenPinning(int taskId) {
             if (!verifyCaller("startScreenPinning")) {
@@ -215,7 +202,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final Runnable mDeferredConnectionCallback = () -> {
         Log.w(TAG_OPS, "Binder supposed established connection but actual connection to service "
             + "timed out, trying again");
-        internalConnectToCurrentUser();
+        retryConnectionWithBackoff();
     };
 
     private final BroadcastReceiver mLauncherStateChangedReceiver = new BroadcastReceiver() {
@@ -260,14 +247,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         public void onNullBinding(ComponentName name) {
             Log.w(TAG_OPS, "Null binding of '" + name + "', try reconnecting");
             mCurrentBoundedUserId = -1;
-            internalConnectToCurrentUser();
+            retryConnectionWithBackoff();
         }
 
         @Override
         public void onBindingDied(ComponentName name) {
             Log.w(TAG_OPS, "Binding died of '" + name + "', try reconnecting");
             mCurrentBoundedUserId = -1;
-            internalConnectToCurrentUser();
+            retryConnectionWithBackoff();
         }
 
         @Override
@@ -357,12 +344,20 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             mHandler.postDelayed(mDeferredConnectionCallback, DEFERRED_CALLBACK_MILLIS);
         } else {
             // Retry after exponential backoff timeout
-            final long timeoutMs = (long) Math.scalb(BACKOFF_MILLIS, mConnectionBackoffAttempts);
-            mHandler.postDelayed(mConnectionRunnable, timeoutMs);
-            mConnectionBackoffAttempts++;
-            Log.w(TAG_OPS, "Failed to connect on attempt " + mConnectionBackoffAttempts
-                    + " will try again in " + timeoutMs + "ms");
+            retryConnectionWithBackoff();
         }
+    }
+
+    private void retryConnectionWithBackoff() {
+        if (mHandler.hasCallbacks(mConnectionRunnable)) {
+            return;
+        }
+        final long timeoutMs = (long) Math.min(
+                Math.scalb(BACKOFF_MILLIS, mConnectionBackoffAttempts), MAX_BACKOFF_MILLIS);
+        mHandler.postDelayed(mConnectionRunnable, timeoutMs);
+        mConnectionBackoffAttempts++;
+        Log.w(TAG_OPS, "Failed to connect on attempt " + mConnectionBackoffAttempts
+                + " will try again in " + timeoutMs + "ms");
     }
 
     @Override

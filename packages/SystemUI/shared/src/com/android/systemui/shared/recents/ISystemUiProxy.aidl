@@ -17,7 +17,6 @@
 package com.android.systemui.shared.recents;
 
 import android.graphics.Rect;
-import com.android.systemui.shared.system.GraphicBufferCompat;
 
 /**
  * Temporary callbacks into SystemUI.
@@ -26,9 +25,10 @@ interface ISystemUiProxy {
 
     /**
      * Proxies SurfaceControl.screenshotToBuffer().
+     * @Removed
+     * GraphicBufferCompat screenshot(in Rect sourceCrop, int width, int height, int minLayer,
+     *             int maxLayer, boolean useIdentityTransform, int rotation) = 0;
      */
-    GraphicBufferCompat screenshot(in Rect sourceCrop, int width, int height, int minLayer,
-            int maxLayer, boolean useIdentityTransform, int rotation) = 0;
 
     /**
      * Begins screen pinning on the provided {@param taskId}.

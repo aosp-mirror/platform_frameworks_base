@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"नेटवर्क के लिए स्‍कैन नहीं कर सकता"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"कोई नहीं"</string>
-    <string name="wifi_remembered" msgid="4955746899347821096">"सहेजा गया"</string>
+    <string name="wifi_remembered" msgid="4955746899347821096">"सेव किया गया"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"अक्षम"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP कॉन्‍फ़िगरेशन की विफलता"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"खराब नेटवर्क होने के कारण कनेक्ट नहीं हुआ"</string>

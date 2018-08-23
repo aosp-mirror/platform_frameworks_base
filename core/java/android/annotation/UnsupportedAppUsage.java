@@ -51,6 +51,39 @@ public @interface UnsupportedAppUsage {
     long trackingBug() default 0;
 
     /**
+     * Indicates that usage of this API is limited to apps based on their target SDK version.
+     *
+     * Access to the API is allowed if the targetSdkVersion in the apps manifest is no greater than
+     * this value. Access checks are performed at runtime.
+     *
+     * This is used to give app developers a grace period to migrate off a non-SDK interface. When
+     * making Android version N, existing APIs can have a maxTargetSdk of N-1 added to them.
+     * Developers must then migrate off the API when their app is updated in future, but it will
+     * continue working in the meantime.
+     *
+     * Possible values are:
+     * <ul>
+     *     <li>
+     *         {@link android.os.Build.VERSION_CODES#O} or {@link android.os.Build.VERSION_CODES#P},
+     *         to limit access to apps targeting these SDKs (or earlier).
+     *     </li>
+     *     <li>
+     *         absent (default value) - All apps can access this API, but doing so may result in
+     *         warnings in the log, UI warnings (on developer builds) and/or strictmode violations.
+     *         The API is likely to be further restricted in future.
+     *     </li>
+     *
+     * </ul>
+     *
+     * Note, if this is set to {@link android.os.Build.VERSION_CODES#O}, apps targeting O
+     * maintenance releases will also be allowed to use the API, and similarly for any future
+     * maintenance releases of P.
+     *
+     * @return The maximum value for an apps targetSdkVersion in order to access this API.
+     */
+    int maxTargetSdk() default Integer.MAX_VALUE;
+
+    /**
      * For debug use only. The expected dex signature to be generated for this API, used to verify
      * parts of the build process.
      *

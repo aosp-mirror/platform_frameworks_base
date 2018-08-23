@@ -300,18 +300,12 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ឧបករណ៍ចាប់សញ្ញារាងកាយ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ចូលដំណើរការទិន្នន័យឧបករណ៍ចាប់សញ្ញាអំពីស្ថានភាពសុខភាពរបស់អ្នក"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"អនុញ្ញាតឱ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ចូលប្រើ​ទិន្នន័យឧបករណ៍ចាប់សញ្ញាអំពីស្ថានភាពសុខភាពរបស់អ្នក?"</string>
-    <!-- no translation found for permgrouplab_aural (965607064083134896) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_aural (4870189506255958055) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_aural (6787926123071735620) -->
-    <skip />
-    <!-- no translation found for permgrouplab_visual (8030190588123857921) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_visual (3415827902566663546) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_visual (6907523945030290376) -->
-    <skip />
+    <string name="permgrouplab_aural" msgid="965607064083134896">"តន្ត្រី"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"ចូលប្រើ​តន្ត្រី​របស់អ្នក"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"អនុញ្ញាត​ឱ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ចូលប្រើ​តន្រ្តី​របស់​អ្នក?"</string>
+    <string name="permgrouplab_visual" msgid="8030190588123857921">"រូបថត និង​វីដេអូ"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"ចូលប្រើ​រូបថត និង​វីដេអូ​របស់អ្នក"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"អនុញ្ញាត​ឱ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ចូលប្រើ​រូបថត និង​វីដេអូ​របស់​អ្នក?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ទាញយក​ខ្លឹមសារ​វិនដូ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ពិនិត្យ​ខ្លឹមសារវិនដូ​ដែល​អ្នក​កំពុង​ទាក់ទង​ជា​មួយ។"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"បើក​ការ​រក​មើល​​ដោយ​ប៉ះ"</string>
@@ -506,34 +500,20 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"អនុញ្ញាតឲ្យកម្មវិធីប្រើវិធីសាស្ត្របន្ថែម និងលុបពុម្ពម្រាមដៃសម្រាប់ប្រើប្រាស់។"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"ប្រើផ្នែករឹងស្នាមម្រាមដៃ"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"អនុញ្ញាតឲ្យកម្មវិធីប្រើផ្នែករឹងស្នាមម្រាមដៃសម្រាប់ការផ្ទៀងផ្ទាត់"</string>
-    <!-- no translation found for permlab_audioRead (6617225220728465565) -->
-    <skip />
-    <!-- no translation found for permdesc_audioRead (5034032570243484805) -->
-    <skip />
-    <!-- no translation found for permlab_audioWrite (2661772059799779292) -->
-    <skip />
-    <!-- no translation found for permdesc_audioWrite (8888544708166230494) -->
-    <skip />
-    <!-- no translation found for permlab_videoRead (9182618678674737229) -->
-    <skip />
-    <!-- no translation found for permdesc_videoRead (7045676429859396194) -->
-    <skip />
-    <!-- no translation found for permlab_videoWrite (128769316366746446) -->
-    <skip />
-    <!-- no translation found for permdesc_videoWrite (5448565757490640841) -->
-    <skip />
-    <!-- no translation found for permlab_imagesRead (3015078545742665304) -->
-    <skip />
-    <!-- no translation found for permdesc_imagesRead (3144263806038695580) -->
-    <skip />
-    <!-- no translation found for permlab_imagesWrite (3391306186247235510) -->
-    <skip />
-    <!-- no translation found for permdesc_imagesWrite (7073662756617474375) -->
-    <skip />
-    <!-- no translation found for permlab_mediaLocation (8675148183726247864) -->
-    <skip />
-    <!-- no translation found for permdesc_mediaLocation (2237023389178865130) -->
-    <skip />
+    <string name="permlab_audioRead" msgid="6617225220728465565">"អាន​បណ្ដុំ​តន្ត្រី​របស់​អ្នក"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"អនុញ្ញាតឱ្យ​កម្មវិធី​អាន​បណ្ដុំ​តន្រ្តី​របស់​អ្នក។"</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"កែប្រែ​បណ្ដុំ​តន្ត្រី​របស់​អ្នក"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"អនុញ្ញាតឱ្យ​កម្មវិធី​កែប្រែ​បណ្ដុំ​តន្រ្តី​របស់​អ្នក។"</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"អាន​បណ្ដុំ​វីដេអូ​របស់​អ្នក"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"អនុញ្ញាតឱ្យ​កម្មវិធី​អាន​បណ្ដុំ​វីដេអូ​របស់​អ្នក។"</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"កែប្រែ​បណ្ដុំ​វីដេអូ​របស់​អ្នក"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"អនុញ្ញាតឱ្យ​កម្មវិធី​កែប្រែ​បណ្ដុំ​វីដេអូ​របស់​អ្នក។"</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"អាន​បណ្ដុំ​រូបថត​របស់​អ្នក"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"អនុញ្ញាតឱ្យ​កម្មវិធី​អាន​បណ្ដុំ​រូបថត​របស់​អ្នក។"</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"កែប្រែ​បណ្ដុំ​រូបថត​របស់​អ្នក"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"អនុញ្ញាតឱ្យ​កម្មវិធី​កែប្រែ​បណ្ដុំ​រូបថត​របស់​អ្នក។"</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"អាន​ទីតាំង​ពី​បណ្ដុំ​មេឌៀ​របស់​អ្នក"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"អនុញ្ញាតឱ្យ​កម្មវិធី​អាន​ទីតាំង​ពីបណ្ដុំ​មេឌៀ​របស់​អ្នក។"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"បានផ្តិតយកស្នាមម្រាមដៃមិនពេញលក្ខណៈ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"មិនអាចដំណើរការស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ឧបករណ៍ផ្តិតម្រាមដៃប្រលាក់ហើយ។ សូមសម្អាត ហើយព្យាយាមម្តងទៀត។"</string>
@@ -1914,18 +1894,13 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"រក្សាទុក <xliff:g id="TYPE">%1$s</xliff:g> ទៅក្នុង &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"រក្សាទុក <xliff:g id="TYPE_0">%1$s</xliff:g> និង <xliff:g id="TYPE_1">%2$s</xliff:g> ទៅក្នុង &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"រក្សាទុក <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, និង <xliff:g id="TYPE_2">%3$s</xliff:g> ទៅក្នុង &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <!-- no translation found for autofill_update_title (4879673117448810818) -->
-    <skip />
-    <!-- no translation found for autofill_update_title_with_type (339733442087186755) -->
-    <skip />
-    <!-- no translation found for autofill_update_title_with_2types (6321714204167424745) -->
-    <skip />
-    <!-- no translation found for autofill_update_title_with_3types (5866735124066629287) -->
-    <skip />
+    <string name="autofill_update_title" msgid="4879673117448810818">"ធ្វើ​បច្ចុប្បន្នភាព​ទៅ &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_type" msgid="339733442087186755">"ធ្វើ​បច្ចុប្បន្នភាព <xliff:g id="TYPE">%1$s</xliff:g> ទៅ &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"ធ្វើ​បច្ចុប្បន្នភាព <xliff:g id="TYPE_0">%1$s</xliff:g> និង <xliff:g id="TYPE_1">%2$s</xliff:g> ទៅ &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"ធ្វើ​បច្ចុប្បន្នភាព <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> និង <xliff:g id="TYPE_2">%3$s</xliff:g> ទៅ &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"រក្សាទុក"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"ទេ អរគុណ"</string>
-    <!-- no translation found for autofill_update_yes (310358413273276958) -->
-    <skip />
+    <string name="autofill_update_yes" msgid="310358413273276958">"ធ្វើ​បច្ចុប្បន្នភាព"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"ពាក្យ​សម្ងាត់"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"អាសយដ្ឋាន"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"បណ្ណ​ឥណទាន"</string>

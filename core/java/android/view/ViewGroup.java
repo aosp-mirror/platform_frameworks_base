@@ -8663,7 +8663,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * Compare two views based on their bounds. Use the bounds of their children to break ties.
          *
          * @param holder1 Holder of first view to compare
-         * @param holder2 Holder of second view to compare. Must have the same root at holder1.
+         * @param holder2 Holder of second view to compare. Must have the same root as holder1.
          * @return The compare result, with equality if no good comparison was found.
          */
         private static int compareBoundsOfTree(
@@ -8756,6 +8756,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         private void clear() {
             mView = null;
+            mRoot = null;
             mLocation.set(0, 0, 0, 0);
         }
     }

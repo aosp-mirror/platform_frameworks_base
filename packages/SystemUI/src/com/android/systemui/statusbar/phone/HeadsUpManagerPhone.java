@@ -31,12 +31,15 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.ScreenDecorations;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.NotificationData;
-import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -75,6 +78,8 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     private boolean mWaitingOnCollapseWhenGoingAway;
     private boolean mIsObserving;
     private int mStatusBarState;
+
+    private final StateListener mStateListener = this::setStatusBarState;
 
     private final Pools.Pool<HeadsUpEntryPhone> mEntryPool = new Pools.Pool<HeadsUpEntryPhone>() {
         private Stack<HeadsUpEntryPhone> mPoolObjects = new Stack<>();
@@ -118,6 +123,11 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
                 updateTouchableRegionListener();
             }
         });
+        Dependency.get(StatusBarStateController.class).addListener(mStateListener);
+    }
+
+    public void destroy() {
+        Dependency.get(StatusBarStateController.class).removeListener(mStateListener);
     }
 
     private void initResources() {
@@ -199,7 +209,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     /**
      * Set the current state of the statusbar.
      */
-    public void setStatusBarState(int statusBarState) {
+    private void setStatusBarState(int statusBarState) {
         mStatusBarState = statusBarState;
     }
 
@@ -374,7 +384,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     @Override
     protected void dumpInternal(FileDescriptor fd, PrintWriter pw, String[] args) {
         super.dumpInternal(fd, pw, args);
-        pw.print("  mStatusBarState="); pw.println(mStatusBarState);
+        pw.print("  mBarState="); pw.println(mStatusBarState);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////

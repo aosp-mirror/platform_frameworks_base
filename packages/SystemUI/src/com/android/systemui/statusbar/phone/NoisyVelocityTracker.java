@@ -60,7 +60,7 @@ public class NoisyVelocityTracker implements VelocityTrackerInterface {
         if (mEventBuf.size() == MAX_EVENTS) {
             mEventBuf.remove();
         }
-        mEventBuf.add(new MotionEventCopy(event.getX(), event.getY(), event.getEventTime()));
+        mEventBuf.add(new MotionEventCopy(event.getRawX(), event.getRawY(), event.getEventTime()));
     }
 
     public void computeCurrentVelocity(int units) {

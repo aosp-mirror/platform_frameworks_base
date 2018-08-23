@@ -106,7 +106,6 @@ public class BluetoothEventManager {
                 new AudioModeChangedHandler());
 
         mContext.registerReceiver(mBroadcastReceiver, mAdapterIntentFilter, null, mReceiverHandler);
-        mContext.registerReceiver(mProfileBroadcastReceiver, mProfileIntentFilter, null, mReceiverHandler);
     }
 
     public void setReceiverHandler(android.os.Handler handler) {
@@ -150,8 +149,7 @@ public class BluetoothEventManager {
         for (BluetoothDevice device : bondedDevices) {
             CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
             if (cachedDevice == null) {
-                cachedDevice = mDeviceManager.addDevice(device);
-                dispatchDeviceAdded(cachedDevice);
+                mDeviceManager.addDevice(device);
                 deviceAdded = true;
             }
         }
@@ -276,7 +274,6 @@ public class BluetoothEventManager {
         public void onReceive(Context context, Intent intent,
                 BluetoothDevice device) {
             short rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
-            BluetoothClass btClass = intent.getParcelableExtra(BluetoothDevice.EXTRA_CLASS);
             String name = intent.getStringExtra(BluetoothDevice.EXTRA_NAME);
             // TODO Pick up UUID. They should be available for 2.1 devices.
             // Skip for now, there's a bluez problem and we are not getting uuids even for 2.1.
@@ -287,8 +284,6 @@ public class BluetoothEventManager {
                         + cachedDevice);
             }
             cachedDevice.setRssi(rssi);
-            cachedDevice.setBtClass(btClass);
-            cachedDevice.setNewName(name);
             cachedDevice.setJustDiscovered(true);
         }
     }
@@ -339,18 +334,9 @@ public class BluetoothEventManager {
                     BluetoothDevice.ERROR);
             CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
             if (cachedDevice == null) {
-                Log.w(TAG, "CachedBluetoothDevice for device " + device +
-                        " not found, calling readPairedDevices().");
-                if (readPairedDevices()) {
-                    cachedDevice = mDeviceManager.findDevice(device);
-                }
-
-                if (cachedDevice == null) {
-                    Log.w(TAG, "Got bonding state changed for " + device +
-                            ", but we have no record of that device.");
-                    cachedDevice = mDeviceManager.addDevice(device);
-                    dispatchDeviceAdded(cachedDevice);
-                }
+                Log.w(TAG, "Got bonding state changed for " + device +
+                        ", but we have no record of that device.");
+                cachedDevice = mDeviceManager.addDevice(device);
             }
 
             synchronized (mCallbacks) {

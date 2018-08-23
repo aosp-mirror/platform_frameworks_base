@@ -46,3 +46,19 @@ LOCAL_MODULE_CLASS := ETC
 LOCAL_MODULE_PATH := $(TARGET_OUT_PRODUCT_ETC)/permissions
 LOCAL_SRC_FILES:= product/privapp-permissions-test.xml
 include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_PACKAGE_NAME := ProductServicesPrivAppPermissionTest
+LOCAL_SDK_VERSION := current
+LOCAL_PRIVILEGED_MODULE := true
+LOCAL_MANIFEST_FILE := product_services/AndroidManifest.xml
+LOCAL_PRODUCT_SERVICES_MODULE := true
+LOCAL_REQUIRED_MODULES := product_servicesprivapp-permissions-test.xml
+include $(BUILD_PACKAGE)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := product_servicesprivapp-permissions-test.xml
+LOCAL_MODULE_CLASS := ETC
+LOCAL_MODULE_PATH := $(TARGET_OUT_PRODUCT_SERVICES_ETC)/permissions
+LOCAL_SRC_FILES:= product_services/privapp-permissions-test.xml
+include $(BUILD_PREBUILT)

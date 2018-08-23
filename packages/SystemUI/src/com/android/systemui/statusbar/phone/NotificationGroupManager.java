@@ -22,9 +22,12 @@ import android.service.notification.StatusBarNotification;
 import androidx.annotation.Nullable;
 import android.util.Log;
 
+import com.android.systemui.Dependency;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.NotificationData;
-import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
@@ -51,6 +54,12 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
     private HeadsUpManager mHeadsUpManager;
     private boolean mIsUpdatingUnchangedGroup;
     private HashMap<String, NotificationData.Entry> mPendingNotifications;
+
+    private final StateListener mStateListener = this::setStatusBarState;
+
+    public NotificationGroupManager() {
+        Dependency.get(StatusBarStateController.class).addListener(mStateListener);
+    }
 
     public void setOnGroupChangeListener(OnGroupChangeListener listener) {
         mListener = listener;
@@ -357,10 +366,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
         return group != null && group.suppressed;
     }
 
-    public void setStatusBarState(int newState) {
-        if (mBarState == newState) {
-            return;
-        }
+    private void setStatusBarState(int newState) {
         mBarState = newState;
         if (mBarState == StatusBarState.KEYGUARD) {
             collapseAllGroups();

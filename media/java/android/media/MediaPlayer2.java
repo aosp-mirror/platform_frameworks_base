@@ -712,6 +712,12 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
     public abstract void setNextDataSources(@NonNull List<DataSourceDesc> dsds);
 
     /**
+     * Removes all data sources pending to be played.
+     */
+    // This is an asynchronous call.
+    public abstract void clearNextDataSources();
+
+    /**
      * Gets the current data source as described by a DataSourceDesc.
      *
      * @return the current DataSourceDesc
@@ -2066,6 +2072,11 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
      */
     public static final int CALL_COMPLETED_SKIP_TO_NEXT = 29;
 
+    /** The player just completed a call {@link #clearNextDataSources}.
+     * @see EventCallback#onCallCompleted
+     */
+    public static final int CALL_COMPLETED_CLEAR_NEXT_DATA_SOURCES = 30;
+
     /** The player just completed a call {@link #setBufferingParams}.
      * @see EventCallback#onCallCompleted
      * @hide
@@ -2109,6 +2120,7 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
             CALL_COMPLETED_SET_SURFACE,
             CALL_COMPLETED_SET_SYNC_PARAMS,
             CALL_COMPLETED_SKIP_TO_NEXT,
+            CALL_COMPLETED_CLEAR_NEXT_DATA_SOURCES,
             CALL_COMPLETED_SET_BUFFERING_PARAMS,
             CALL_COMPLETED_SET_VIDEO_SCALING_MODE,
             CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED

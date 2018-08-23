@@ -26,6 +26,7 @@ public interface KeyguardMonitor extends CallbackController<Callback> {
     boolean isKeyguardGoingAway();
     long getKeyguardFadingAwayDuration();
     long getKeyguardFadingAwayDelay();
+    long calculateGoingToFullShadeDelay();
 
     interface Callback {
         void onKeyguardShowingChanged();

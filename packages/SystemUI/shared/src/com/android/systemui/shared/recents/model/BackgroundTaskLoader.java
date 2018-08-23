@@ -110,11 +110,19 @@ class BackgroundTaskLoader implements Runnable {
                     synchronized(mLoadQueue) {
                         try {
                             mWaitingOnLoadQueue = true;
-                            mMainThreadHandler.post(
-                                    () -> mOnIdleChangedListener.onIdleChanged(true));
+                            mMainThreadHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mOnIdleChangedListener.onIdleChanged(true);
+                                }
+                            });
                             mLoadQueue.wait();
-                            mMainThreadHandler.post(
-                                    () -> mOnIdleChangedListener.onIdleChanged(false));
+                            mMainThreadHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mOnIdleChangedListener.onIdleChanged(false);
+                                }
+                            });
                             mWaitingOnLoadQueue = false;
                         } catch (InterruptedException ie) {
                             ie.printStackTrace();
@@ -142,8 +150,12 @@ class BackgroundTaskLoader implements Runnable {
 
             if (!mCancelled) {
                 // Notify that the task data has changed
-                mMainThreadHandler.post(
-                        () -> t.notifyTaskDataLoaded(thumbnailData, icon));
+                mMainThreadHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        t.notifyTaskDataLoaded(thumbnailData, icon);
+                    }
+                });
             }
         }
     }

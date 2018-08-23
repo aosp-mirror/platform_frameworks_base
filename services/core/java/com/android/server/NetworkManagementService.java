@@ -1227,25 +1227,25 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public boolean getIpForwardingEnabled() throws IllegalStateException{
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("ipfwd", "status");
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            final boolean isEnabled = mNetdService.ipfwdEnabled();
+            return isEnabled;
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new IllegalStateException(e);
         }
-
-        // 211 Forwarding enabled
-        event.checkCode(IpFwdStatusResult);
-        return event.getMessage().endsWith("enabled");
     }
 
     @Override
     public void setIpForwardingEnabled(boolean enable) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            mConnector.execute("ipfwd", enable ? "enable" : "disable", "tethering");
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            if (enable) {
+                mNetdService.ipfwdEnableForwarding("tethering");
+            } else {
+                mNetdService.ipfwdDisableForwarding("tethering");
+            }
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -1371,11 +1371,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     private void modifyInterfaceForward(boolean add, String fromIface, String toIface) {
-        final Command cmd = new Command("ipfwd", add ? "add" : "remove", fromIface, toIface);
         try {
-            mConnector.execute(cmd);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            if (add) {
+                mNetdService.ipfwdAddInterfaceForward(fromIface, toIface);
+            } else {
+                mNetdService.ipfwdRemoveInterfaceForward(fromIface, toIface);
+            }
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new IllegalStateException(e);
         }
     }
 

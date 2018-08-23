@@ -615,6 +615,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_PRODUCT = 1 << 19;
 
     /**
+     * Value for {@link #privateFlags}: whether this app is pre-installed on the
+     * google partition of the system image.
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_PRODUCT_SERVICES = 1 << 21;
+
+    /**
      * Value for {@link #privateFlags}: whether this app is signed with the
      * platform key.
      * @hide
@@ -639,6 +646,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE,
             PRIVATE_FLAG_PRIVILEGED,
             PRIVATE_FLAG_PRODUCT,
+            PRIVATE_FLAG_PRODUCT_SERVICES,
             PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER,
             PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY,
             PRIVATE_FLAG_STATIC_SHARED_LIBRARY,
@@ -1886,6 +1894,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     public boolean isProduct() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PRODUCT) != 0;
+    }
+
+    /** @hide */
+    public boolean isProductServices() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PRODUCT_SERVICES) != 0;
     }
 
     /**
