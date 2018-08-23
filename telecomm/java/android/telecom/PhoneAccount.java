@@ -156,6 +156,18 @@ public final class PhoneAccount implements Parcelable {
             "android.telecom.extra.PLAY_CALL_RECORDING_TONE";
 
     /**
+     * Boolean {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()} which
+     * indicates whether calls for a {@link PhoneAccount} should skip call filtering.
+     * <p>
+     * If not specified, this will default to false; all calls will undergo call filtering unless
+     * specifically exempted (e.g. {@link Connection#PROPERTY_EMERGENCY_CALLBACK_MODE}.) However,
+     * this may be used to skip call filtering when it has already been performed on another device.
+     * @hide
+     */
+    public static final String EXTRA_SKIP_CALL_FILTERING =
+        "android.telecom.extra.SKIP_CALL_FILTERING";
+
+    /**
      * Flag indicating that this {@code PhoneAccount} can act as a connection manager for
      * other connections. The {@link ConnectionService} associated with this {@code PhoneAccount}
      * will be allowed to manage phone calls including using its own proprietary phone-call
