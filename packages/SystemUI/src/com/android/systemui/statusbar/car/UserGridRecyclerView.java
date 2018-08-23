@@ -164,7 +164,6 @@ public class UserGridRecyclerView extends PagedListView implements
         private final Resources mRes;
         private final String mGuestName;
         private final String mNewUserName;
-        private AlertDialog mDialog;
         // View that holds the add user button.  Used to enable/disable the view
         private View mAddUserView;
         // User record for the add user.  Need to call notifyUserSelected only if the user
@@ -221,23 +220,9 @@ public class UserGridRecyclerView extends PagedListView implements
                     // Disable button so it cannot be clicked multiple times
                     mAddUserView = holder.mView;
                     mAddUserView.setEnabled(false);
-
-                    String message = mRes.getString(R.string.user_add_user_message_setup)
-                        .concat(System.getProperty("line.separator"))
-                        .concat(System.getProperty("line.separator"))
-                        .concat(mRes.getString(R.string.user_add_user_message_update));
-
                     mAddUserRecord = userRecord;
-                    mDialog = new Builder(mContext, R.style.Theme_Car_Dark_Dialog_Alert)
-                        .setTitle(R.string.user_add_user_title)
-                        .setMessage(message)
-                        .setNegativeButton(android.R.string.cancel, this)
-                        .setPositiveButton(android.R.string.ok, this)
-                        .setOnCancelListener(this)
-                        .create();
-                    // Sets window flags for the SysUI dialog
-                    SystemUIDialog.applyFlags(mDialog);
-                    mDialog.show();
+
+                    handleAddUserClicked();
                     return;
                 }
                 // If the user doesn't want to be a guest or add a user, switch to the user selected
@@ -245,6 +230,47 @@ public class UserGridRecyclerView extends PagedListView implements
                 mCarUserManagerHelper.switchToUser(userRecord.mInfo);
             });
 
+        }
+
+        private void handleAddUserClicked() {
+            if (mCarUserManagerHelper.isUserLimitReached()) {
+                mAddUserView.setEnabled(true);
+                showMaxUserLimitReachedDialog();
+            } else {
+                showConfirmAddUserDialog();
+            }
+        }
+
+        private void showMaxUserLimitReachedDialog() {
+            AlertDialog maxUsersDialog = new Builder(mContext, R.style.Theme_Car_Dark_Dialog_Alert)
+                .setTitle(R.string.user_limit_reached_title)
+                .setMessage(getResources().getQuantityString(
+                    R.plurals.user_limit_reached_message,
+                    mCarUserManagerHelper.getMaxSupportedRealUsers(),
+                    mCarUserManagerHelper.getMaxSupportedRealUsers()))
+                .setPositiveButton(android.R.string.ok, null)
+                .create();
+            // Sets window flags for the SysUI dialog
+            SystemUIDialog.applyFlags(maxUsersDialog);
+            maxUsersDialog.show();
+        }
+
+        private void showConfirmAddUserDialog() {
+            String message = mRes.getString(R.string.user_add_user_message_setup)
+                .concat(System.getProperty("line.separator"))
+                .concat(System.getProperty("line.separator"))
+                .concat(mRes.getString(R.string.user_add_user_message_update));
+
+            AlertDialog addUserDialog = new Builder(mContext, R.style.Theme_Car_Dark_Dialog_Alert)
+                .setTitle(R.string.user_add_user_title)
+                .setMessage(message)
+                .setNegativeButton(android.R.string.cancel, this)
+                .setPositiveButton(android.R.string.ok, this)
+                .setOnCancelListener(this)
+                .create();
+            // Sets window flags for the SysUI dialog
+            SystemUIDialog.applyFlags(addUserDialog);
+            addUserDialog.show();
         }
 
         private void notifyUserSelected(UserRecord userRecord) {
