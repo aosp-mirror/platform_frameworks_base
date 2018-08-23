@@ -3606,6 +3606,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             final int targetPosition = findPositionForStack(position, child, false /* adding */);
             super.positionChildAt(targetPosition, child, includingParents);
 
+            if (includingParents) {
+                // We still want to move the display of this stack container to top because even the
+                // target position is adjusted to non-top, the intention of the condition is to have
+                // higher z-order to gain focus (e.g. moving a task of a fullscreen stack to front
+                // in a non-top display which is using picture-in-picture mode).
+                final int topChildPosition = getChildCount() - 1;
+                if (targetPosition < topChildPosition && position >= topChildPosition) {
+                    getParent().positionChildAt(POSITION_TOP, this /* child */,
+                            true /* includingParents */);
+                }
+            }
+
             setLayoutNeeded();
         }
 
