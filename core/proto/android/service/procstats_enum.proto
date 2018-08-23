@@ -1,0 +1,78 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.service.procstats;
+
+option java_multiple_files = true;
+option java_outer_classname = "ProcessStatsEnums";
+
+enum ScreenState {
+    SCREEN_STATE_UNKNOWN = 0;
+    SCREEN_STATE_OFF = 1;
+    SCREEN_STATE_ON = 2;
+}
+
+enum MemoryState {
+    MEMORY_STATE_UNKNOWN = 0;
+    MEMORY_STATE_NORMAL = 1;     // normal.
+    MEMORY_STATE_MODERATE = 2;   // moderate memory pressure.
+    MEMORY_STATE_LOW = 3;        // low memory.
+    MEMORY_STATE_CRITICAL = 4;   // critical memory.
+}
+
+// this enum list is from frameworks/base/core/java/com/android/internal/app/procstats/ProcessStats.java
+// and not frameworks/base/core/java/android/app/ActivityManager.java
+enum ProcessState {
+    PROCESS_STATE_UNKNOWN = 0;
+    // Persistent system process.
+    PROCESS_STATE_PERSISTENT = 1;
+    // Top activity; actually any visible activity.
+    PROCESS_STATE_TOP = 2;
+    // Important foreground process (ime, wallpaper, etc).
+    PROCESS_STATE_IMPORTANT_FOREGROUND = 3;
+    // Important background process.
+    PROCESS_STATE_IMPORTANT_BACKGROUND = 4;
+    // Performing backup operation.
+    PROCESS_STATE_BACKUP = 5;
+    // Background process running a service.
+    PROCESS_STATE_SERVICE = 6;
+    // Process not running, but would be if there was enough RAM.
+    PROCESS_STATE_SERVICE_RESTARTING = 7;
+    // Process running a receiver.
+    PROCESS_STATE_RECEIVER = 8;
+    // Heavy-weight process (currently not used).
+    PROCESS_STATE_HEAVY_WEIGHT = 9;
+    // Process hosting home/launcher app when not on top.
+    PROCESS_STATE_HOME = 10;
+    // Process hosting the last app the user was in.
+    PROCESS_STATE_LAST_ACTIVITY = 11;
+    // Cached process hosting a previous activity.
+    PROCESS_STATE_CACHED_ACTIVITY = 12;
+    // Cached process hosting a client activity.
+    PROCESS_STATE_CACHED_ACTIVITY_CLIENT = 13;
+    // Cached process that is empty.
+    PROCESS_STATE_CACHED_EMPTY = 14;
+}
+
+enum ServiceOperationState {
+    SERVICE_OPERATION_STATE_UNKNOWN = 0;
+    SERVICE_OPERATION_STATE_RUNNING = 1;
+    SERVICE_OPERATION_STATE_STARTED = 2;
+    SERVICE_OPERATION_STATE_FOREGROUND = 3;
+    SERVICE_OPERATION_STATE_BOUND = 4;
+    SERVICE_OPERATION_STATE_EXECUTING = 5;
+}

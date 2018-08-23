@@ -2126,12 +2126,14 @@ public final class ProcessStats implements Parcelable {
 
             for (int is = 0; is < mServices.size(); is++) {
                 final ServiceState serviceState = mServices.valueAt(is);
-                serviceState.writeToProto(proto, ProcessStatsPackageProto.PROCESS_STATS, now);
+                serviceState.writeToProto(proto, ProcessStatsPackageProto.SERVICE_STATS,
+                        now);
             }
 
             for (int ia=0; ia<mAssociations.size(); ia++) {
                 final AssociationState ascState = mAssociations.valueAt(ia);
-                ascState.writeToProto(proto, ProcessStatsPackageProto.ASSOCIATION_STATS, now);
+                ascState.writeToProto(proto, ProcessStatsPackageProto.ASSOCIATION_STATS,
+                        now);
             }
 
             proto.end(token);
