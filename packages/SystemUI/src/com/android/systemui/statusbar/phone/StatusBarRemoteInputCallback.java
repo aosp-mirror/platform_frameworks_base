@@ -33,7 +33,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.view.View;
 import android.view.ViewParent;
-import android.view.ViewTreeObserver;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ActivityStarter;
@@ -44,7 +43,6 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.Callback;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -208,8 +206,8 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks {
     }
 
     @Override
-    public boolean handleRemoteViewClick(View view, PendingIntent pendingIntent,
-            Intent fillInIntent, NotificationRemoteInputManager.ClickHandler defaultHandler) {
+    public boolean handleRemoteViewClick(PendingIntent pendingIntent,
+            NotificationRemoteInputManager.ClickHandler defaultHandler) {
         final boolean isActivity = pendingIntent.isActivity();
         if (isActivity) {
             final boolean afterKeyguardGone = PreviewInflater.wouldLaunchResolverActivity(

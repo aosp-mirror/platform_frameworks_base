@@ -167,7 +167,7 @@ public class NotificationInflaterTest extends SysuiTestCase {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         NotificationInflater.applyRemoteView(result, FLAG_CONTENT_VIEW_EXPANDED, 0,
                 new ArrayMap() /* cachedContentViews */, mRow, false /* redactAmbient */,
-                true /* isNewView */, new RemoteViews.OnClickHandler(),
+                true /* isNewView */, (v, p, r) -> true,
                 new NotificationInflater.InflationCallback() {
                     @Override
                     public void handleInflationException(StatusBarNotification notification,
