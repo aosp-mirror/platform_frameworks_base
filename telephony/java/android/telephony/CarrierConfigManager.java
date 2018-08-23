@@ -163,7 +163,7 @@ public class CarrierConfigManager {
      * Flag indicating whether radio is to be restarted on error PDP_FAIL_REGULAR_DEACTIVATION
      * This is false by default.
      *
-     * @deprecated Use {@link @KEY_RADIO_RESTART_FAILURE_CAUSES_INT_ARRAY} instead
+     * @deprecated Use {@link #KEY_RADIO_RESTART_FAILURE_CAUSES_INT_ARRAY} instead
      */
     @Deprecated
     public static final String KEY_RESTART_RADIO_ON_PDP_FAIL_REGULAR_DEACTIVATION_BOOL =
