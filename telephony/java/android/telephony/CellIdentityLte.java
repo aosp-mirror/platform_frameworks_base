@@ -19,6 +19,7 @@ package android.telephony;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
+import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 
 import java.util.Objects;
@@ -198,6 +199,28 @@ public final class CellIdentityLte extends CellIdentity {
     @Override
     public int getChannelNumber() {
         return mEarfcn;
+    }
+
+    /**
+     * A hack to allow tunneling of LTE information via GsmCellLocation
+     * so that older Network Location Providers can return some information
+     * on LTE only networks, see bug 9228974.
+     *
+     * The tunnel'd LTE information is returned as follows:
+     *   LAC = TAC field
+     *   CID = CI field
+     *   PSC = 0.
+     *
+     * @hide
+     */
+    @Override
+    public GsmCellLocation asCellLocation() {
+        GsmCellLocation cl = new GsmCellLocation();
+        int tac = mTac != Integer.MAX_VALUE ? mTac : -1;
+        int cid = mCi != Integer.MAX_VALUE ? mCi : -1;
+        cl.setLacAndCid(tac, cid);
+        cl.setPsc(0);
+        return cl;
     }
 
     @Override
