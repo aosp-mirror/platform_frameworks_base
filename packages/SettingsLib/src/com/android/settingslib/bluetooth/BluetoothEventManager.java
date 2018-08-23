@@ -106,6 +106,7 @@ public class BluetoothEventManager {
                 new AudioModeChangedHandler());
 
         mContext.registerReceiver(mBroadcastReceiver, mAdapterIntentFilter, null, mReceiverHandler);
+        mContext.registerReceiver(mProfileBroadcastReceiver, mProfileIntentFilter, null, mReceiverHandler);
     }
 
     public void setReceiverHandler(android.os.Handler handler) {

@@ -241,7 +241,6 @@ public class LocalBluetoothProfileManagerTest {
         mShadowBluetoothAdapter.setSupportedProfiles(null);
         mProfileManager = new LocalBluetoothProfileManager(mContext, mLocalBluetoothAdapter,
                 mDeviceManager, mEventManager);
-        mEventManager.registerProfileIntentReceiver();
         // Refer to BluetoothControllerImpl, it will call setReceiverHandler after
         // LocalBluetoothProfileManager created.
         mEventManager.setReceiverHandler(null);
