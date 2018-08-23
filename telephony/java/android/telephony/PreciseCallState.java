@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.DisconnectCause;
@@ -71,6 +72,7 @@ public class PreciseCallState implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public PreciseCallState(int ringingCall, int foregroundCall, int backgroundCall,
             int disconnectCause, int preciseDisconnectCause) {
         mRingingCallState = ringingCall;
@@ -113,6 +115,7 @@ public class PreciseCallState implements Parcelable {
      * @see PreciseCallState#PRECISE_CALL_STATE_DISCONNECTED
      * @see PreciseCallState#PRECISE_CALL_STATE_DISCONNECTING
      */
+    @UnsupportedAppUsage
     public int getRingingCallState() {
         return mRingingCallState;
     }
@@ -131,6 +134,7 @@ public class PreciseCallState implements Parcelable {
      * @see PreciseCallState#PRECISE_CALL_STATE_DISCONNECTED
      * @see PreciseCallState#PRECISE_CALL_STATE_DISCONNECTING
      */
+    @UnsupportedAppUsage
     public int getForegroundCallState() {
         return mForegroundCallState;
     }
@@ -149,6 +153,7 @@ public class PreciseCallState implements Parcelable {
      * @see PreciseCallState#PRECISE_CALL_STATE_DISCONNECTED
      * @see PreciseCallState#PRECISE_CALL_STATE_DISCONNECTING
      */
+    @UnsupportedAppUsage
     public int getBackgroundCallState() {
         return mBackgroundCallState;
     }
@@ -195,6 +200,7 @@ public class PreciseCallState implements Parcelable {
      * @see DisconnectCause#CDMA_ACCESS_BLOCKED
      * @see DisconnectCause#ERROR_UNSPECIFIED
      */
+    @UnsupportedAppUsage
     public int getDisconnectCause() {
         return mDisconnectCause;
     }
@@ -233,6 +239,7 @@ public class PreciseCallState implements Parcelable {
      * @see PreciseDisconnectCause#CDMA_ACCESS_BLOCKED
      * @see PreciseDisconnectCause#ERROR_UNSPECIFIED
      */
+    @UnsupportedAppUsage
     public int getPreciseDisconnectCause() {
         return mPreciseDisconnectCause;
     }

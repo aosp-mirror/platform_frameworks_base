@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -216,6 +217,7 @@ public class SubscriptionInfo implements Parcelable {
      * Sets the name displayed to the user that identifies this subscription
      * @hide
      */
+    @UnsupportedAppUsage
     public void setDisplayName(CharSequence name) {
         this.mDisplayName = name;
     }
@@ -240,6 +242,7 @@ public class SubscriptionInfo implements Parcelable {
      * NAME_SOURCE_SIM_SOURCE or NAME_SOURCE_USER_INPUT.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getNameSource() {
         return this.mNameSource;
     }
@@ -298,6 +301,7 @@ public class SubscriptionInfo implements Parcelable {
      * Sets the color displayed to the user that identifies this subscription
      * @hide
      */
+    @UnsupportedAppUsage
     public void setIconTint(int iconTint) {
         this.mIconTint = iconTint;
     }

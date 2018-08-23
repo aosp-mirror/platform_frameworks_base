@@ -24,6 +24,7 @@ import static android.telephony.TelephonyManager.NETWORK_TYPE_HSUPA;
 import static android.telephony.TelephonyManager.NETWORK_TYPE_UMTS;
 import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -47,24 +48,29 @@ public class NeighboringCellInfo implements Parcelable
      * In GSM, mRssi is the Received RSSI;
      * In UMTS, mRssi is the Level index of CPICH Received Signal Code Power
      */
+    @UnsupportedAppUsage
     private int mRssi;
     /**
      * CID in 16 bits format in GSM. Return UNKNOWN_CID in UMTS and CMDA.
      */
+    @UnsupportedAppUsage
     private int mCid;
     /**
      * LAC in 16 bits format in GSM. Return UNKNOWN_CID in UMTS and CMDA.
      */
+    @UnsupportedAppUsage
     private int mLac;
     /**
      * Primary Scrambling Code in 9 bits format in UMTS
      * Return UNKNOWN_CID in GSM and CMDA.
      */
+    @UnsupportedAppUsage
     private int mPsc;
     /**
      * Radio network type, value is one of following
      * TelephonyManager.NETWORK_TYPE_XXXXXX.
      */
+    @UnsupportedAppUsage
     private int mNetworkType;
 
     /**

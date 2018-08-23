@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Rlog;
@@ -30,14 +31,21 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     private static final String LOG_TAG = "CellSignalStrengthLte";
     private static final boolean DBG = false;
 
+    @UnsupportedAppUsage
     private int mSignalStrength;
+    @UnsupportedAppUsage
     private int mRsrp;
+    @UnsupportedAppUsage
     private int mRsrq;
+    @UnsupportedAppUsage
     private int mRssnr;
+    @UnsupportedAppUsage
     private int mCqi;
+    @UnsupportedAppUsage
     private int mTimingAdvance;
 
     /** @hide */
+    @UnsupportedAppUsage
     public CellSignalStrengthLte() {
         setDefaultValues();
     }
