@@ -274,7 +274,9 @@ public class ImageWallpaper extends WallpaperService {
                 // Sometimes a wallpaper is not large enough to cover the screen in one dimension.
                 // Call updateSurfaceSize -- it will only actually do the update if the dimensions
                 // should change
-                if (newRotation != mLastRotation) {
+                if (newRotation != mLastRotation
+                        || mDisplayWidthAtLastSurfaceSizeUpdate != displayInfo.logicalWidth
+                        || mDisplayHeightAtLastSurfaceSizeUpdate != displayInfo.logicalHeight) {
                     // Update surface size (if necessary)
                     if (!updateSurfaceSize(getSurfaceHolder(), displayInfo, true /* forDraw */)) {
                         return; // had to reload wallpaper, will retry later
