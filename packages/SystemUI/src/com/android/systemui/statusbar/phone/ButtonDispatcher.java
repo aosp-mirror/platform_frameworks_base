@@ -163,12 +163,16 @@ public class ButtonDispatcher {
     }
 
     public void setAlpha(float alpha, boolean animate) {
+        setAlpha(alpha, animate, (getAlpha() < alpha) ? FADE_DURATION_IN : FADE_DURATION_OUT);
+    }
+
+    public void setAlpha(float alpha, boolean animate, long duration) {
         if (animate) {
             if (mFadeAnimator != null) {
                 mFadeAnimator.cancel();
             }
             mFadeAnimator = ValueAnimator.ofFloat(getAlpha(), alpha);
-            mFadeAnimator.setDuration(getAlpha() < alpha? FADE_DURATION_IN : FADE_DURATION_OUT);
+            mFadeAnimator.setDuration(duration);
             mFadeAnimator.setInterpolator(getAlpha() < alpha ? ALPHA_IN : ALPHA_OUT);
             mFadeAnimator.addListener(mFadeListener);
             mFadeAnimator.addUpdateListener(mAlphaListener);
