@@ -18,6 +18,7 @@ package android.telephony.ims;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -65,15 +66,18 @@ public final class ImsSsInfo implements Parcelable {
     // 0: disabled, 1: enabled
     /** @hide */
     // TODO: Make private, do not modify this field directly, use getter!
+    @UnsupportedAppUsage
     public int mStatus;
     /** @hide */
     // TODO: Make private, do not modify this field directly, use getter!
+    @UnsupportedAppUsage
     public String mIcbNum;
     /** @hide */
     public int mProvisionStatus = SERVICE_PROVISIONING_UNKNOWN;
 
     /**@hide*/
     // TODO: Remove! Do not use this constructor, instead use public version.
+    @UnsupportedAppUsage
     public ImsSsInfo() {
     }
 

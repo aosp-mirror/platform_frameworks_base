@@ -19,6 +19,7 @@ package android.telephony;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
@@ -88,6 +89,7 @@ public final class SmsManager {
             new ArrayMap<Integer, SmsManager>();
 
     /** A concrete subscription id, or the pseudo DEFAULT_SUBSCRIPTION_ID */
+    @UnsupportedAppUsage
     private int mSubId;
 
     /*
@@ -451,6 +453,7 @@ public final class SmsManager {
      * @throws IllegalArgumentException if destinationAddress or text are empty
      * {@hide}
      */
+    @UnsupportedAppUsage
     public void sendTextMessage(
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent,
@@ -504,6 +507,7 @@ public final class SmsManager {
      * PendingIntent, int, boolean, int)
      * @hide
      */
+    @UnsupportedAppUsage
     public void sendTextMessageWithoutPersisting(
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent, int priority,
@@ -729,6 +733,7 @@ public final class SmsManager {
      * @throws IllegalArgumentException if destinationAddress or data are empty
      * {@hide}
      */
+    @UnsupportedAppUsage
     public void sendMultipartTextMessage(
             String destinationAddress, String scAddress, ArrayList<String> parts,
             ArrayList<PendingIntent> sentIntents, ArrayList<PendingIntent> deliveryIntents,
@@ -997,6 +1002,7 @@ public final class SmsManager {
      * @throws IllegalArgumentException if pdu is NULL
      * {@hide}
      */
+    @UnsupportedAppUsage
     public boolean copyMessageToIcc(byte[] smsc, byte[] pdu,int status) {
         boolean success = false;
 
@@ -1027,6 +1033,7 @@ public final class SmsManager {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public boolean
     deleteMessageFromIcc(int messageIndex) {
         boolean success = false;
@@ -1061,6 +1068,7 @@ public final class SmsManager {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public boolean updateMessageOnIcc(int messageIndex, int newStatus, byte[] pdu) {
         boolean success = false;
 
@@ -1087,6 +1095,7 @@ public final class SmsManager {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public ArrayList<SmsMessage> getAllMessagesFromIcc() {
         List<SmsRawData> records = null;
 
@@ -1199,6 +1208,7 @@ public final class SmsManager {
      * @throws IllegalArgumentException if endMessageId < startMessageId
      * {@hide}
      */
+    @UnsupportedAppUsage
     public boolean enableCellBroadcastRange(int startMessageId, int endMessageId, int ranType) {
         boolean success = false;
 
@@ -1241,6 +1251,7 @@ public final class SmsManager {
      * @throws IllegalArgumentException if endMessageId < startMessageId
      * {@hide}
      */
+    @UnsupportedAppUsage
     public boolean disableCellBroadcastRange(int startMessageId, int endMessageId, int ranType) {
         boolean success = false;
 
@@ -1358,6 +1369,7 @@ public final class SmsManager {
      * @return true if enabled, false otherwise
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isSMSPromptEnabled() {
         ISms iccISms = null;
         try {

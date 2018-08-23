@@ -16,6 +16,7 @@
 
 package android.telephony.cdma;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.telephony.CellLocation;
 
@@ -23,6 +24,7 @@ import android.telephony.CellLocation;
  * Represents the cell location on a CDMA phone.
  */
 public class CdmaCellLocation extends CellLocation {
+    @UnsupportedAppUsage
     private int mBaseStationId = -1;
 
     /**
@@ -36,6 +38,7 @@ public class CdmaCellLocation extends CellLocation {
      * to 1296000, both values inclusive (corresponding to a range of -90
      * to +90 degrees). Integer.MAX_VALUE is considered invalid value.
      */
+    @UnsupportedAppUsage
     private int mBaseStationLatitude = INVALID_LAT_LONG;
 
     /**
@@ -44,9 +47,12 @@ public class CdmaCellLocation extends CellLocation {
      * to 2592000, both values inclusive (corresponding to a range of -180
      * to +180 degrees). Integer.MAX_VALUE is considered invalid value.
      */
+    @UnsupportedAppUsage
     private int mBaseStationLongitude = INVALID_LAT_LONG;
 
+    @UnsupportedAppUsage
     private int mSystemId = -1;
+    @UnsupportedAppUsage
     private int mNetworkId = -1;
 
     /**
@@ -200,6 +206,7 @@ public class CdmaCellLocation extends CellLocation {
      * @param b second obj
      * @return true if two objects equal or both are null
      */
+    @UnsupportedAppUsage
     private static boolean equalsHandlesNulls(Object a, Object b) {
         return (a == null) ? (b == null) : a.equals (b);
     }

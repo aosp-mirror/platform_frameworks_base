@@ -17,6 +17,7 @@
 package android.telephony.ims;
 
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -581,12 +582,15 @@ public final class ImsReasonInfo implements Parcelable {
 
     // For main reason code
     /** @hide */
+    @UnsupportedAppUsage
     public int mCode;
     // For the extra code value; it depends on the code value.
     /** @hide */
+    @UnsupportedAppUsage
     public int mExtraCode;
     // For the additional message of the reason info.
     /** @hide */
+    @UnsupportedAppUsage
     public String mExtraMessage;
 
     /** @hide */
@@ -603,6 +607,7 @@ public final class ImsReasonInfo implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public ImsReasonInfo(int code, int extraCode) {
         mCode = code;
         mExtraCode = extraCode;
