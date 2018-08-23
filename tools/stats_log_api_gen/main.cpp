@@ -349,8 +349,7 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
            argIndex++;
        }
        fprintf(out, ");\n");
-       fprintf(out, "      if (ret >= 0) { return retry; }\n");
-
+       fprintf(out, "      if (ret >= 0) { break; }\n");
 
        fprintf(out, "      {\n");
        fprintf(out, "          std::lock_guard<std::mutex> lock(mLogdRetryMutex);\n");
@@ -359,6 +358,9 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
        fprintf(out, "          lastRetryTimestampNs = android::elapsedRealtimeNano();\n");
        fprintf(out, "      }\n");
        fprintf(out, "      std::this_thread::sleep_for(std::chrono::milliseconds(10));\n");
+       fprintf(out, "  }\n");
+       fprintf(out, "  if (ret < 0) {\n");
+       fprintf(out, "      note_log_drop();\n");
        fprintf(out, "  }\n");
        fprintf(out, "  return ret;\n");
        fprintf(out, "}\n");
@@ -439,7 +441,7 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
            argIndex++;
        }
        fprintf(out, ");\n");
-       fprintf(out, "      if (ret >= 0) { return retry; }\n");
+       fprintf(out, "      if (ret >= 0) { break; }\n");
 
        fprintf(out, "      {\n");
        fprintf(out, "          std::lock_guard<std::mutex> lock(mLogdRetryMutex);\n");
@@ -450,7 +452,10 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
 
        fprintf(out, "      std::this_thread::sleep_for(std::chrono::milliseconds(10));\n");
        fprintf(out, "  }\n");
-       fprintf(out, "  return ret;\n");
+       fprintf(out, "  if (ret < 0) {\n");
+       fprintf(out, "      note_log_drop();\n");
+       fprintf(out, "  }\n");
+       fprintf(out, "  return ret;\n\n");
        fprintf(out, "}\n");
 
        fprintf(out, "\n");
