@@ -230,7 +230,7 @@ public abstract class PanelView extends FrameLayout {
         if (mVelocityTracker != null) mVelocityTracker.addMovement(event);
     }
 
-    public void setTouchDisabled(boolean disabled) {
+    public void setTouchAndAnimationDisabled(boolean disabled) {
         mTouchDisabled = disabled;
         if (mTouchDisabled) {
             cancelHeightAnimator();

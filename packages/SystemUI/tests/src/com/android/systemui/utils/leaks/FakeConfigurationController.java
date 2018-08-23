@@ -23,4 +23,8 @@ public class FakeConfigurationController
     public FakeConfigurationController(LeakCheckedTest.SysuiLeakCheck sysuiLeakCheck) {
         super(sysuiLeakCheck, "config");
     }
+
+    @Override
+    public void notifyThemeChanged() {
+    }
 }

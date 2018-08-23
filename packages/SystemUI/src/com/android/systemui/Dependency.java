@@ -23,6 +23,7 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.ServiceManager;
 import android.util.ArrayMap;
+import android.util.DisplayMetrics;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
@@ -51,6 +52,7 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.DarkIconDispatcherImpl;
 import com.android.systemui.statusbar.phone.LightBarController;
+import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -327,6 +329,12 @@ public class Dependency extends SystemUI {
 
         mProviders.put(IStatusBarService.class, () -> IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE)));
+
+        // Single instance of DisplayMetrics, gets updated by StatusBar, but can be used
+        // anywhere it is needed.
+        mProviders.put(DisplayMetrics.class, () -> new DisplayMetrics());
+
+        mProviders.put(LockscreenGestureLogger.class, () -> new LockscreenGestureLogger());
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);
