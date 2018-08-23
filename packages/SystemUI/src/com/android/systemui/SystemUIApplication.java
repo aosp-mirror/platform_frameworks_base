@@ -194,6 +194,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
                 mServices[i].onBootCompleted();
             }
         }
+        Dependency.get(InitController.class).executePostInitTasks();
         log.traceEnd();
         Dependency.get(PluginManager.class).addPluginListener(
                 new PluginListener<OverlayPlugin>() {

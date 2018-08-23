@@ -22,6 +22,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Dependency.DependencyProvider;
 import com.android.systemui.SystemUIFactory;
+import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.car.CarFacetButtonController;
 import com.android.systemui.statusbar.car.CarStatusBarKeyguardViewManager;
@@ -46,5 +47,7 @@ public class CarSystemUIFactory extends SystemUIFactory {
                 () -> new CarNotificationEntryManager(context));
         providers.put(CarFacetButtonController.class, () -> new CarFacetButtonController(context));
         providers.put(HvacController.class, () -> new HvacController(context));
+        providers.put(NotificationMediaManager.class,
+                () -> new CarNotificationMediaManager(context));
     }
 }

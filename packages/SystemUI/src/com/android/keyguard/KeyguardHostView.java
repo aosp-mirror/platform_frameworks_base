@@ -29,13 +29,13 @@ import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityContainer.SecurityCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.settingslib.Utils;
+import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
 import java.io.File;
 
@@ -49,13 +49,6 @@ import java.io.File;
  * showing.
  */
 public class KeyguardHostView extends FrameLayout implements SecurityCallback {
-
-    public interface OnDismissAction {
-        /**
-         * @return true if the dismiss should be deferred
-         */
-        boolean onDismiss();
-    }
 
     private AudioManager mAudioManager;
     private TelephonyManager mTelephonyManager = null;

@@ -58,7 +58,6 @@ public abstract class SysuiTestCase {
 
     @Before
     public void SysuiSetup() throws Exception {
-        mContext.setTheme(R.style.Theme_SystemUI);
         SystemUIFactory.createFromConfig(mContext);
 
         mRealInstrumentation = InstrumentationRegistry.getInstrumentation();

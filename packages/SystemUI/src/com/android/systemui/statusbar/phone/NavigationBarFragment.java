@@ -95,6 +95,7 @@ import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.statusbar.policy.RotationLockController;
@@ -125,6 +126,9 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     /** Allow some time inbetween the long press for back and recents. */
     private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 200;
+
+    private final DeviceProvisionedController mDeviceProvisionedController =
+            Dependency.get(DeviceProvisionedController.class);
 
     protected NavigationBarView mNavigationBarView = null;
     protected AssistManager mAssistManager;
@@ -725,7 +729,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     }
 
     private boolean shouldDisableNavbarGestures() {
-        return !mStatusBar.isDeviceProvisioned()
+        return !mDeviceProvisionedController.isDeviceProvisioned()
                 || (mDisabledFlags1 & StatusBarManager.DISABLE_SEARCH) != 0;
     }
 

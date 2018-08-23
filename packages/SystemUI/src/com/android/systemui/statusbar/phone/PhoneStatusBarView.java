@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
+import static com.android.systemui.SysUiServiceProvider.getComponent;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -42,6 +43,7 @@ import android.widget.LinearLayout;
 import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 
@@ -52,6 +54,7 @@ public class PhoneStatusBarView extends PanelBar {
     private static final boolean DEBUG = StatusBar.DEBUG;
     private static final boolean DEBUG_GESTURES = false;
     private static final int NO_VALUE = Integer.MIN_VALUE;
+    private final CommandQueue mCommandQueue;
 
     StatusBar mBar;
 
@@ -82,6 +85,7 @@ public class PhoneStatusBarView extends PanelBar {
         super(context, attrs);
 
         mBarTransitions = new PhoneStatusBarTransitions(this);
+        mCommandQueue = getComponent(context, CommandQueue.class);
     }
 
     public BarTransitions getBarTransitions() {
@@ -166,7 +170,7 @@ public class PhoneStatusBarView extends PanelBar {
 
     @Override
     public boolean panelEnabled() {
-        return mBar.panelsEnabled();
+        return mCommandQueue.panelsEnabled();
     }
 
     @Override

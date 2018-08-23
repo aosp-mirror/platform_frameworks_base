@@ -202,7 +202,8 @@ public class AssistManager implements ConfigurationChangedReceiver {
 
         // Close Recent Apps if needed
         SysUiServiceProvider.getComponent(mContext, CommandQueue.class).animateCollapsePanels(
-                CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL | CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL);
+                CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL | CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
+                false /* force */);
 
         boolean structureEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.ASSIST_STRUCTURE_ENABLED, 1, UserHandle.USER_CURRENT) != 0;

@@ -29,44 +29,67 @@ public class ActivityStarterDelegate implements ActivityStarter {
 
     @Override
     public void startPendingIntentDismissingKeyguard(PendingIntent intent) {
-        if (mActualStarter == null) return;
+        if (mActualStarter == null) {
+            return;
+        }
         mActualStarter.startPendingIntentDismissingKeyguard(intent);
     }
 
     @Override
     public void startActivity(Intent intent, boolean dismissShade) {
-        if (mActualStarter == null) return;
+        if (mActualStarter == null) {
+            return;
+        }
         mActualStarter.startActivity(intent, dismissShade);
     }
 
     @Override
     public void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade) {
-        if (mActualStarter == null) return;
+        if (mActualStarter == null) {
+            return;
+        }
         mActualStarter.startActivity(intent, onlyProvisioned, dismissShade);
     }
 
     @Override
     public void startActivity(Intent intent, boolean dismissShade, Callback callback) {
-        if (mActualStarter == null) return;
+        if (mActualStarter == null) {
+            return;
+        }
         mActualStarter.startActivity(intent, dismissShade, callback);
     }
 
     @Override
     public void postStartActivityDismissingKeyguard(Intent intent, int delay) {
-        if (mActualStarter == null) return;
+        if (mActualStarter == null) {
+            return;
+        }
         mActualStarter.postStartActivityDismissingKeyguard(intent, delay);
     }
 
     @Override
     public void postStartActivityDismissingKeyguard(PendingIntent intent) {
-        if (mActualStarter == null) return;
+        if (mActualStarter == null) {
+            return;
+        }
         mActualStarter.postStartActivityDismissingKeyguard(intent);
     }
 
     @Override
     public void postQSRunnableDismissingKeyguard(Runnable runnable) {
-        if (mActualStarter == null) return;
+        if (mActualStarter == null) {
+            return;
+        }
         mActualStarter.postQSRunnableDismissingKeyguard(runnable);
+    }
+
+    @Override
+    public void dismissKeyguardThenExecute(OnDismissAction action, Runnable cancel,
+            boolean afterKeyguardGone) {
+        if (mActualStarter == null) {
+            return;
+        }
+        mActualStarter.dismissKeyguardThenExecute(action, cancel, afterKeyguardGone);
     }
 
     public void setActivityStarterImpl(ActivityStarter starter) {

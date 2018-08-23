@@ -44,7 +44,7 @@ public class CarNotificationEntryManager extends NotificationEntryManager {
         // Because space is usually constrained in the auto use-case, there should not be a
         // pinned notification when the shade has been expanded. Ensure this by not pinning any
         // notification if the shade is already opened.
-        if (!mPresenter.isPresenterFullyCollapsed()) {
+        if (!getPresenter().isPresenterFullyCollapsed()) {
             return false;
         }
 

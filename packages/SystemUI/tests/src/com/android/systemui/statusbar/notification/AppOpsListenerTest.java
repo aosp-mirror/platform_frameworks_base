@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
 import android.os.Handler;
@@ -27,6 +26,7 @@ import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -59,14 +59,15 @@ public class AppOpsListenerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mDependency.injectTestDependency(ForegroundServiceController.class, mFsc);
         getContext().addMockSystemService(AppOpsManager.class, mAppOpsManager);
-        when(mPresenter.getHandler()).thenReturn(Handler.createAsync(Looper.myLooper()));
+        mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
+                Handler.createAsync(Looper.myLooper()));
 
         mListener = new AppOpsListener(mContext);
     }
 
     @Test
     public void testOnlyListenForFewOps() {
-        mListener.setUpWithPresenter(mPresenter, mEntryManager);
+        mListener.setUpWithPresenter(mPresenter);
 
         verify(mAppOpsManager, times(1)).startWatchingActive(AppOpsListener.OPS, mListener);
     }
@@ -79,7 +80,7 @@ public class AppOpsListenerTest extends SysuiTestCase {
 
     @Test
     public void testInformEntryMgrOnAppOpsChange() {
-        mListener.setUpWithPresenter(mPresenter, mEntryManager);
+        mListener.setUpWithPresenter(mPresenter);
         mListener.onOpActiveChanged(
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
         TestableLooper.get(this).processAllMessages();
@@ -89,7 +90,7 @@ public class AppOpsListenerTest extends SysuiTestCase {
 
     @Test
     public void testInformFscOnAppOpsChange() {
-        mListener.setUpWithPresenter(mPresenter, mEntryManager);
+        mListener.setUpWithPresenter(mPresenter);
         mListener.onOpActiveChanged(
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
         TestableLooper.get(this).processAllMessages();

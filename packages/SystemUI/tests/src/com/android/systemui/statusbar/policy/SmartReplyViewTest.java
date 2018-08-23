@@ -41,7 +41,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
-import com.android.keyguard.KeyguardHostView.OnDismissAction;
+import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.NotificationData;

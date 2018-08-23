@@ -15,19 +15,46 @@
  */
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.Dependency.MAIN_HANDLER;
+import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
+import static com.android.systemui.statusbar.phone.StatusBar.DEBUG_MEDIA_FAKE_ARTWORK;
+import static com.android.systemui.statusbar.phone.StatusBar.ENABLE_LOCKSCREEN_WALLPAPER;
+import static com.android.systemui.statusbar.phone.StatusBar.SHOW_LOCKSCREEN_MEDIA_ARTWORK;
+
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
+import android.os.Handler;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
+import com.android.systemui.Interpolators;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.phone.BiometricUnlockController;
+import com.android.systemui.statusbar.phone.LockscreenWallpaper;
+import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.ScrimState;
+import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBarWindowController;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -42,14 +69,44 @@ public class NotificationMediaManager implements Dumpable {
     private static final String TAG = "NotificationMediaManager";
     public static final boolean DEBUG_MEDIA = false;
 
+    private final StatusBarStateController mStatusBarStateController
+            = Dependency.get(StatusBarStateController.class);
+    private final SysuiColorExtractor mColorExtractor = Dependency.get(SysuiColorExtractor.class);
+    private final KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+
+    // Late binding
+    private NotificationEntryManager mEntryManager;
+
+    // Late binding, also @Nullable due to being in com.android.systemui.statusbar.phone package
+    @Nullable
+    private ShadeController mShadeController;
+    @Nullable
+    private StatusBarWindowController mStatusBarWindowController;
+
+    @Nullable
+    private BiometricUnlockController mBiometricUnlockController;
+    @Nullable
+    private ScrimController mScrimController;
+    @Nullable
+    private LockscreenWallpaper mLockscreenWallpaper;
+
+    protected final PorterDuffXfermode mSrcXferMode = new PorterDuffXfermode(PorterDuff.Mode.SRC);
+    protected final PorterDuffXfermode mSrcOverXferMode =
+            new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER);
+
+    private final Handler mHandler = Dependency.get(MAIN_HANDLER);
+
     private final Context mContext;
     private final MediaSessionManager mMediaSessionManager;
 
     protected NotificationPresenter mPresenter;
-    protected NotificationEntryManager mEntryManager;
     private MediaController mMediaController;
     private String mMediaNotificationKey;
     private MediaMetadata mMediaMetadata;
+
+    private BackDropView mBackdrop;
+    private ImageView mBackdropFront;
+    private ImageView mBackdropBack;
 
     private final MediaController.Callback mMediaListener = new MediaController.Callback() {
         @Override
@@ -77,6 +134,29 @@ public class NotificationMediaManager implements Dumpable {
         }
     };
 
+    @Nullable
+    private ShadeController getShadeController() {
+        if (mShadeController == null) {
+            mShadeController = Dependency.get(ShadeController.class);
+        }
+        return mShadeController;
+    }
+
+    @Nullable
+    private StatusBarWindowController getWindowController() {
+        if (mStatusBarWindowController == null) {
+            mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
+        }
+        return mStatusBarWindowController;
+    }
+
+    private NotificationEntryManager getEntryManager() {
+        if (mEntryManager == null) {
+            mEntryManager = Dependency.get(NotificationEntryManager.class);
+        }
+        return mEntryManager;
+    }
+
     public NotificationMediaManager(Context context) {
         mContext = context;
         mMediaSessionManager
@@ -85,10 +165,8 @@ public class NotificationMediaManager implements Dumpable {
         // in session state
     }
 
-    public void setUpWithPresenter(NotificationPresenter presenter,
-            NotificationEntryManager entryManager) {
+    public void setUpWithPresenter(NotificationPresenter presenter) {
         mPresenter = presenter;
-        mEntryManager = entryManager;
     }
 
     public void onNotificationRemoved(String key) {
@@ -109,8 +187,9 @@ public class NotificationMediaManager implements Dumpable {
     public void findAndUpdateMediaNotifications() {
         boolean metaDataChanged = false;
 
-        synchronized (mEntryManager.getNotificationData()) {
-            ArrayList<NotificationData.Entry> activeNotifications = mEntryManager
+        NotificationEntryManager manager = getEntryManager();
+        synchronized (manager.getNotificationData()) {
+            ArrayList<NotificationData.Entry> activeNotifications = manager
                     .getNotificationData().getActiveNotifications();
             final int N = activeNotifications.size();
 
@@ -199,7 +278,7 @@ public class NotificationMediaManager implements Dumpable {
         }
 
         if (metaDataChanged) {
-            mEntryManager.updateNotifications();
+            getEntryManager().updateNotifications();
         }
         mPresenter.updateMediaMetaData(metaDataChanged, true);
     }
@@ -272,4 +351,202 @@ public class NotificationMediaManager implements Dumpable {
         }
         mMediaController = null;
     }
+
+    /**
+     * Refresh or remove lockscreen artwork from media metadata or the lockscreen wallpaper.
+     */
+    public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
+        Trace.beginSection("StatusBar#updateMediaMetaData");
+        if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK) {
+            Trace.endSection();
+            return;
+        }
+
+        if (mBackdrop == null) {
+            Trace.endSection();
+            return; // called too early
+        }
+
+        boolean wakeAndUnlock = mBiometricUnlockController != null
+            && mBiometricUnlockController.isWakeAndUnlock();
+        if (mKeyguardMonitor.isLaunchTransitionFadingAway() || wakeAndUnlock) {
+            mBackdrop.setVisibility(View.INVISIBLE);
+            Trace.endSection();
+            return;
+        }
+
+        MediaMetadata mediaMetadata = getMediaMetadata();
+
+        if (DEBUG_MEDIA) {
+            Log.v(TAG, "DEBUG_MEDIA: updating album art for notification "
+                    + getMediaNotificationKey()
+                    + " metadata=" + mediaMetadata
+                    + " metaDataChanged=" + metaDataChanged
+                    + " state=" + mStatusBarStateController.getState());
+        }
+
+        Drawable artworkDrawable = null;
+        if (mediaMetadata != null) {
+            Bitmap artworkBitmap = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
+            if (artworkBitmap == null) {
+                artworkBitmap = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+                // might still be null
+            }
+            if (artworkBitmap != null) {
+                artworkDrawable = new BitmapDrawable(mBackdropBack.getResources(), artworkBitmap);
+            }
+        }
+        boolean allowWhenShade = false;
+        if (ENABLE_LOCKSCREEN_WALLPAPER && artworkDrawable == null) {
+            Bitmap lockWallpaper =
+                    mLockscreenWallpaper != null ? mLockscreenWallpaper.getBitmap() : null;
+            if (lockWallpaper != null) {
+                artworkDrawable = new LockscreenWallpaper.WallpaperDrawable(
+                        mBackdropBack.getResources(), lockWallpaper);
+                // We're in the SHADE mode on the SIM screen - yet we still need to show
+                // the lockscreen wallpaper in that mode.
+                allowWhenShade = mStatusBarStateController.getState() == KEYGUARD;
+            }
+        }
+
+        boolean hideBecauseOccluded = getShadeController() != null
+                && getShadeController().isOccluded();
+
+        final boolean hasArtwork = artworkDrawable != null;
+        mColorExtractor.setHasBackdrop(hasArtwork);
+        if (mScrimController != null) {
+            mScrimController.setHasBackdrop(hasArtwork);
+        }
+
+        if ((hasArtwork || DEBUG_MEDIA_FAKE_ARTWORK)
+                && (mStatusBarStateController.getState() != StatusBarState.SHADE || allowWhenShade)
+                &&  mBiometricUnlockController != null && mBiometricUnlockController.getMode()
+                        != BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
+                && !hideBecauseOccluded) {
+            // time to show some art!
+            if (mBackdrop.getVisibility() != View.VISIBLE) {
+                mBackdrop.setVisibility(View.VISIBLE);
+                if (allowEnterAnimation) {
+                    mBackdrop.setAlpha(0);
+                    mBackdrop.animate().alpha(1f);
+                } else {
+                    mBackdrop.animate().cancel();
+                    mBackdrop.setAlpha(1f);
+                }
+                if (getWindowController() != null) {
+                    getWindowController().setBackdropShowing(true);
+                }
+                metaDataChanged = true;
+                if (DEBUG_MEDIA) {
+                    Log.v(TAG, "DEBUG_MEDIA: Fading in album artwork");
+                }
+            }
+            if (metaDataChanged) {
+                if (mBackdropBack.getDrawable() != null) {
+                    Drawable drawable =
+                            mBackdropBack.getDrawable().getConstantState()
+                                    .newDrawable(mBackdropFront.getResources()).mutate();
+                    mBackdropFront.setImageDrawable(drawable);
+                    mBackdropFront.setAlpha(1f);
+                    mBackdropFront.setVisibility(View.VISIBLE);
+                } else {
+                    mBackdropFront.setVisibility(View.INVISIBLE);
+                }
+
+                if (DEBUG_MEDIA_FAKE_ARTWORK) {
+                    final int c = 0xFF000000 | (int)(Math.random() * 0xFFFFFF);
+                    Log.v(TAG, String.format("DEBUG_MEDIA: setting new color: 0x%08x", c));
+                    mBackdropBack.setBackgroundColor(0xFFFFFFFF);
+                    mBackdropBack.setImageDrawable(new ColorDrawable(c));
+                } else {
+                    mBackdropBack.setImageDrawable(artworkDrawable);
+                }
+
+                if (mBackdropFront.getVisibility() == View.VISIBLE) {
+                    if (DEBUG_MEDIA) {
+                        Log.v(TAG, "DEBUG_MEDIA: Crossfading album artwork from "
+                                + mBackdropFront.getDrawable()
+                                + " to "
+                                + mBackdropBack.getDrawable());
+                    }
+                    mBackdropFront.animate()
+                            .setDuration(250)
+                            .alpha(0f).withEndAction(mHideBackdropFront);
+                }
+            }
+        } else {
+            // need to hide the album art, either because we are unlocked, on AOD
+            // or because the metadata isn't there to support it
+            if (mBackdrop.getVisibility() != View.GONE) {
+                if (DEBUG_MEDIA) {
+                    Log.v(TAG, "DEBUG_MEDIA: Fading out album artwork");
+                }
+                boolean cannotAnimateDoze = getShadeController() != null
+                        && getShadeController().isDozing()
+                        && !ScrimState.AOD.getAnimateChange();
+                if (mBiometricUnlockController != null && mBiometricUnlockController.getMode()
+                        == BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
+                        || hideBecauseOccluded || cannotAnimateDoze) {
+
+                    // We are unlocking directly - no animation!
+                    mBackdrop.setVisibility(View.GONE);
+                    mBackdropBack.setImageDrawable(null);
+                    if (getWindowController() != null) {
+                        getWindowController().setBackdropShowing(false);
+                    }
+                } else {
+                    if (getWindowController() != null) {
+                        getWindowController().setBackdropShowing(false);
+                    }
+                    mBackdrop.animate()
+                            .alpha(0)
+                            .setInterpolator(Interpolators.ACCELERATE_DECELERATE)
+                            .setDuration(300)
+                            .setStartDelay(0)
+                            .withEndAction(() -> {
+                                mBackdrop.setVisibility(View.GONE);
+                                mBackdropFront.animate().cancel();
+                                mBackdropBack.setImageDrawable(null);
+                                mHandler.post(mHideBackdropFront);
+                            });
+                    if (mKeyguardMonitor.isKeyguardFadingAway()) {
+                        mBackdrop.animate()
+                                // Make it disappear faster, as the focus should be on the activity
+                                // behind.
+                                .setDuration(mKeyguardMonitor.getKeyguardFadingAwayDuration() / 2)
+                                .setStartDelay(mKeyguardMonitor.getKeyguardFadingAwayDelay())
+                                .setInterpolator(Interpolators.LINEAR)
+                                .start();
+                    }
+                }
+            }
+        }
+        Trace.endSection();
+    }
+
+    public void setup(BackDropView backdrop, ImageView backdropFront, ImageView backdropBack,
+            BiometricUnlockController biometricUnlockController, ScrimController scrimController,
+            LockscreenWallpaper lockscreenWallpaper) {
+        mBackdrop = backdrop;
+        mBackdropFront = backdropFront;
+        mBackdropBack = backdropBack;
+        mBiometricUnlockController = biometricUnlockController;
+        mScrimController = scrimController;
+        mLockscreenWallpaper = lockscreenWallpaper;
+    }
+
+    /**
+     * Hide the album artwork that is fading out and release its bitmap.
+     */
+    protected final Runnable mHideBackdropFront = new Runnable() {
+        @Override
+        public void run() {
+            if (DEBUG_MEDIA) {
+                Log.v(TAG, "DEBUG_MEDIA: removing fade layer");
+            }
+            mBackdropFront.setVisibility(View.INVISIBLE);
+            mBackdropFront.animate().cancel();
+            mBackdropFront.setImageDrawable(null);
+        }
+    };
 }

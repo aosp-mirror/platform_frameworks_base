@@ -14,6 +14,7 @@
 
 package com.android.systemui.plugins;
 
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Intent;
 
@@ -36,7 +37,17 @@ public interface ActivityStarter {
     void postStartActivityDismissingKeyguard(PendingIntent intent);
     void postQSRunnableDismissingKeyguard(Runnable runnable);
 
+    void dismissKeyguardThenExecute(OnDismissAction action, @Nullable Runnable cancel,
+            boolean afterKeyguardGone);
+
     interface Callback {
         void onActivityStarted(int resultCode);
+    }
+
+    interface OnDismissAction {
+        /**
+         * @return {@code true} if the dismiss should be deferred
+         */
+        boolean onDismiss();
     }
 }

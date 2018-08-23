@@ -64,11 +64,12 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private StatusBar mStatusBarComponent;
     private DarkIconManager mDarkIconManager;
     private View mOperatorNameFrame;
+    private CommandQueue mCommandQueue;
 
     private SignalCallback mSignalCallback = new SignalCallback() {
         @Override
         public void setIsAirplaneMode(NetworkController.IconState icon) {
-            mStatusBarComponent.recomputeDisableFlags(true /* animate */);
+            mCommandQueue.recomputeDisableFlags(true /* animate */);
         }
     };
 
@@ -78,6 +79,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
         mNetworkController = Dependency.get(NetworkController.class);
         mStatusBarComponent = SysUiServiceProvider.getComponent(getContext(), StatusBar.class);
+        mCommandQueue = SysUiServiceProvider.getComponent(getContext(), CommandQueue.class);
     }
 
     @Override
@@ -116,13 +118,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     @Override
     public void onResume() {
         super.onResume();
-        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallbacks(this);
+        mCommandQueue.addCallbacks(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).removeCallbacks(this);
+        mCommandQueue.removeCallbacks(this);
     }
 
     @Override

@@ -61,7 +61,9 @@ import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -93,11 +95,14 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotificationStackScrollLayout mStackScroller;
     @Mock private NotificationInfo.CheckSaveListener mCheckSaveListener;
-    @Mock private NotificationGutsManager.OnSettingsClickListener mOnSettingsClickListener;
+    @Mock private OnSettingsClickListener mOnSettingsClickListener;
+    @Mock private DeviceProvisionedController mDeviceProvisionedController;
 
     @Before
     public void setUp() {
         mTestableLooper = TestableLooper.get(this);
+        mDependency.injectTestDependency(DeviceProvisionedController.class,
+                mDeviceProvisionedController);
         mHandler = Handler.createAsync(mTestableLooper.getLooper());
 
         mHelper = new NotificationTestHelper(mContext);
@@ -330,7 +335,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
         when(row.getIsNonblockable()).thenReturn(false);
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
-        when(mPresenter.isDeviceProvisioned()).thenReturn(true);
+        when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
 
         mGutsManager.initializeNotificationInfo(row, notificationInfoView);
 

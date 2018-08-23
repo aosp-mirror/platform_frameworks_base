@@ -44,6 +44,7 @@ public class StatusBarStateController {
     private int mState;
     private int mLastState;
     private boolean mLeaveOpenOnKeyguardHide;
+    private boolean mKeyguardRequested;
 
     // TODO: b/115739177 (remove this explicit ordering if we can)
     @Retention(SOURCE)
@@ -171,6 +172,14 @@ public class StatusBarStateController {
         synchronized (mListeners) {
             mListeners.removeIf((it) -> it.listener.equals(listener));
         }
+    }
+
+    public void setKeyguardRequested(boolean keyguardRequested) {
+        mKeyguardRequested = keyguardRequested;
+    }
+
+    public boolean isKeyguardRequested() {
+        return mKeyguardRequested;
     }
 
     public static String describe(int state) {

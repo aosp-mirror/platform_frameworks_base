@@ -34,6 +34,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -103,7 +104,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
     }
 
     @Override
-    protected void onFinishInflate() {
+    @VisibleForTesting
+    public void onFinishInflate() {
         super.onFinishInflate();
         mShelfIcons = findViewById(R.id.content);
         mShelfIcons.setClipChildren(false);

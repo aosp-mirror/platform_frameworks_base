@@ -40,6 +40,8 @@ import android.app.WallpaperColors;
 import android.util.Log;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.Dependency;
+import com.android.systemui.statusbar.NotificationMediaManager;
 
 import libcore.io.IoUtils;
 
@@ -51,6 +53,9 @@ import java.util.Objects;
 public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implements Runnable {
 
     private static final String TAG = "LockscreenWallpaper";
+
+    private final NotificationMediaManager mMediaManager =
+            Dependency.get(NotificationMediaManager.class);
 
     private final StatusBar mBar;
     private final WallpaperManager mWallpaperManager;
@@ -193,7 +198,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
                     mCached = true;
                     mCache = result.bitmap;
                     mUpdateMonitor.setHasLockscreenWallpaper(result.bitmap != null);
-                    mBar.updateMediaMetaData(
+                    mMediaManager.updateMediaMetaData(
                             true /* metaDataChanged */, true /* allowEnterAnimation */);
                 }
                 mLoader = null;

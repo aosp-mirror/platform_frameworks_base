@@ -29,6 +29,7 @@ import android.util.Log;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 
 /**
@@ -41,11 +42,14 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     // Dependencies:
     private final NotificationRemoteInputManager mRemoteInputManager =
             Dependency.get(NotificationRemoteInputManager.class);
+    private final NotificationEntryManager mEntryManager =
+            Dependency.get(NotificationEntryManager.class);
+    private final NotificationGroupManager mGroupManager =
+            Dependency.get(NotificationGroupManager.class);
 
     private final Context mContext;
 
     protected NotificationPresenter mPresenter;
-    protected NotificationEntryManager mEntryManager;
 
     public NotificationListener(Context context) {
         mContext = context;
@@ -61,7 +65,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
             return;
         }
         final RankingMap currentRanking = getCurrentRanking();
-        mPresenter.getHandler().post(() -> {
+        Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
             for (StatusBarNotification sbn : notifications) {
                 mEntryManager.addNotification(sbn, currentRanking);
             }
@@ -73,7 +77,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
             final RankingMap rankingMap) {
         if (DEBUG) Log.d(TAG, "onNotificationPosted: " + sbn);
         if (sbn != null && !onPluginNotificationPosted(sbn, rankingMap)) {
-            mPresenter.getHandler().post(() -> {
+            Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
                 processForRemoteInput(sbn.getNotification(), mContext);
                 String key = sbn.getKey();
                 boolean isUpdate =
@@ -83,7 +87,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
                 // anyway. This is true also when the summary is canceled,
                 // because children are automatically canceled by NoMan in that case.
                 if (!ENABLE_CHILD_NOTIFICATIONS
-                        && mPresenter.getGroupManager().isChildInGroupWithSummary(sbn)) {
+                        && mGroupManager.isChildInGroupWithSummary(sbn)) {
                     if (DEBUG) {
                         Log.d(TAG, "Ignoring group child due to existing summary: " + sbn);
                     }
@@ -112,7 +116,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         if (DEBUG) Log.d(TAG, "onNotificationRemoved: " + sbn);
         if (sbn != null && !onPluginNotificationRemoved(sbn, rankingMap)) {
             final String key = sbn.getKey();
-            mPresenter.getHandler().post(() -> {
+            Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
                 mEntryManager.removeNotification(key, rankingMap);
             });
         }
@@ -123,16 +127,14 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         if (DEBUG) Log.d(TAG, "onRankingUpdate");
         if (rankingMap != null) {
             RankingMap r = onPluginRankingUpdate(rankingMap);
-            mPresenter.getHandler().post(() -> {
+            Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
                 mEntryManager.updateNotificationRanking(r);
             });
         }
     }
 
-    public void setUpWithPresenter(NotificationPresenter presenter,
-            NotificationEntryManager entryManager) {
+    public void setUpWithPresenter(NotificationPresenter presenter) {
         mPresenter = presenter;
-        mEntryManager = entryManager;
 
         try {
             registerAsSystemService(mContext,
