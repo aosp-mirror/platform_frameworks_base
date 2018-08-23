@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-
 import android.annotation.ColorInt;
 import android.annotation.DimenRes;
 import android.annotation.NonNull;
@@ -364,29 +362,12 @@ public class RemoteViews implements Parcelable, Filter {
     /** @hide */
     public static class OnClickHandler {
 
-        private int mEnterAnimationId;
-
         @UnsupportedAppUsage
-        public boolean onClickHandler(View view, PendingIntent pendingIntent,
-                Intent fillInIntent) {
-            return onClickHandler(view, pendingIntent, fillInIntent, WINDOWING_MODE_UNDEFINED);
-        }
-
-        public boolean onClickHandler(View view, PendingIntent pendingIntent,
-                Intent fillInIntent, int windowingMode) {
+        public boolean onClickHandler(View view, PendingIntent pendingIntent, Intent fillInIntent) {
             try {
                 // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
                 Context context = view.getContext();
-                ActivityOptions opts;
-                if (mEnterAnimationId != 0) {
-                    opts = ActivityOptions.makeCustomAnimation(context, mEnterAnimationId, 0);
-                } else {
-                    opts = ActivityOptions.makeBasic();
-                }
-
-                if (windowingMode != WINDOWING_MODE_UNDEFINED) {
-                    opts.setLaunchWindowingMode(windowingMode);
-                }
+                ActivityOptions opts = getActivityOptions(context);
                 context.startIntentSender(
                         pendingIntent.getIntentSender(), fillInIntent,
                         Intent.FLAG_ACTIVITY_NEW_TASK,
@@ -402,8 +383,26 @@ public class RemoteViews implements Parcelable, Filter {
             return true;
         }
 
-        public void setEnterAnimationId(int enterAnimationId) {
-            mEnterAnimationId = enterAnimationId;
+        /** @hide */
+        protected ActivityOptions getActivityOptions(Context context) {
+            if (context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_overrideRemoteViewsActivityTransition)) {
+                TypedArray windowStyle = context.getTheme().obtainStyledAttributes(
+                        com.android.internal.R.styleable.Window);
+                int windowAnimations = windowStyle.getResourceId(
+                        com.android.internal.R.styleable.Window_windowAnimationStyle, 0);
+                TypedArray windowAnimationStyle = context.obtainStyledAttributes(
+                        windowAnimations, com.android.internal.R.styleable.WindowAnimation);
+                int enterAnimationId = windowAnimationStyle.getResourceId(com.android.internal.R
+                        .styleable.WindowAnimation_activityOpenRemoteViewsEnterAnimation, 0);
+                windowStyle.recycle();
+                windowAnimationStyle.recycle();
+
+                if (enterAnimationId != 0) {
+                    return ActivityOptions.makeCustomAnimation(context, enterAnimationId, 0);
+                }
+            }
+            return ActivityOptions.makeBasic();
         }
     }
 
@@ -3324,8 +3323,6 @@ public class RemoteViews implements Parcelable, Filter {
         RemoteViews rvToApply = getRemoteViewsToApply(context);
 
         View result = inflateView(context, rvToApply, parent);
-        loadTransitionOverride(context, handler);
-
         rvToApply.performApply(result, parent, handler);
 
         return result;
@@ -3353,24 +3350,6 @@ public class RemoteViews implements Parcelable, Filter {
         View v = inflater.inflate(rv.getLayoutId(), parent, false);
         v.setTagInternal(R.id.widget_frame, rv.getLayoutId());
         return v;
-    }
-
-    private static void loadTransitionOverride(Context context,
-            RemoteViews.OnClickHandler handler) {
-        if (handler != null && context.getResources().getBoolean(
-                com.android.internal.R.bool.config_overrideRemoteViewsActivityTransition)) {
-            TypedArray windowStyle = context.getTheme().obtainStyledAttributes(
-                    com.android.internal.R.styleable.Window);
-            int windowAnimations = windowStyle.getResourceId(
-                    com.android.internal.R.styleable.Window_windowAnimationStyle, 0);
-            TypedArray windowAnimationStyle = context.obtainStyledAttributes(
-                    windowAnimations, com.android.internal.R.styleable.WindowAnimation);
-            handler.setEnterAnimationId(windowAnimationStyle.getResourceId(
-                    com.android.internal.R.styleable.
-                            WindowAnimation_activityOpenRemoteViewsEnterAnimation, 0));
-            windowStyle.recycle();
-            windowAnimationStyle.recycle();
-        }
     }
 
     /**
@@ -3445,7 +3424,6 @@ public class RemoteViews implements Parcelable, Filter {
             mHandler = handler;
 
             mResult = result;
-            loadTransitionOverride(context, handler);
         }
 
         @Override

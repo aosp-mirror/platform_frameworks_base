@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.content.Context;
@@ -113,7 +114,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             } catch (RemoteException e) {
             }
             return mCallback.handleRemoteViewClick(view, pendingIntent, fillInIntent,
-                    () -> superOnClickHandler(view, pendingIntent, fillInIntent));
+                    () -> super.onClickHandler(view, pendingIntent, fillInIntent));
         }
 
         private void logActionClick(View view) {
@@ -151,10 +152,11 @@ public class NotificationRemoteInputManager implements Dumpable {
             return null;
         }
 
-        private boolean superOnClickHandler(View view, PendingIntent pendingIntent,
-                Intent fillInIntent) {
-            return super.onClickHandler(view, pendingIntent, fillInIntent,
-                    WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
+        @Override
+        protected ActivityOptions getActivityOptions(Context context) {
+            ActivityOptions options = super.getActivityOptions(context);
+            options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
+            return options;
         }
 
         private boolean handleRemoteInput(View view, PendingIntent pendingIntent) {
