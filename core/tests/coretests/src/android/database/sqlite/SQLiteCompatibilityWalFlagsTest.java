@@ -62,18 +62,24 @@ public class SQLiteCompatibilityWalFlagsTest {
         assertTrue(SQLiteCompatibilityWalFlags.areFlagsSet());
         assertFalse(SQLiteCompatibilityWalFlags.isCompatibilityWalSupported());
         assertEquals("OFF", SQLiteCompatibilityWalFlags.getWALSyncMode());
+        assertEquals(-1, SQLiteCompatibilityWalFlags.getTruncateSize());
 
         SQLiteCompatibilityWalFlags.init("wal_syncmode=VALUE");
         assertTrue(SQLiteCompatibilityWalFlags.areFlagsSet());
         assertEquals(SQLiteGlobal.isCompatibilityWalSupported(),
                 SQLiteCompatibilityWalFlags.isCompatibilityWalSupported());
         assertEquals("VALUE", SQLiteCompatibilityWalFlags.getWALSyncMode());
+        assertEquals(-1, SQLiteCompatibilityWalFlags.getTruncateSize());
 
         SQLiteCompatibilityWalFlags.init("compatibility_wal_supported=true");
         assertTrue(SQLiteCompatibilityWalFlags.areFlagsSet());
         assertEquals(SQLiteGlobal.getWALSyncMode(),
                 SQLiteCompatibilityWalFlags.getWALSyncMode());
         assertTrue(SQLiteCompatibilityWalFlags.isCompatibilityWalSupported());
+        assertEquals(-1, SQLiteCompatibilityWalFlags.getTruncateSize());
+
+        SQLiteCompatibilityWalFlags.init("truncate_size=1024");
+        assertEquals(1024, SQLiteCompatibilityWalFlags.getTruncateSize());
 
         SQLiteCompatibilityWalFlags.reset();
         SQLiteCompatibilityWalFlags.init("Invalid value");
