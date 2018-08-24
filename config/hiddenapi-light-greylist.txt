@@ -2427,7 +2427,6 @@ Lcom/android/internal/textservice/ITextServicesManager$Stub$Proxy;-><init>(Landr
 Lcom/android/internal/util/HexDump;->toHexString([BZ)Ljava/lang/String;
 Lcom/android/internal/view/BaseIWindow;-><init>()V
 Lcom/android/internal/view/IInputMethod$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/view/IInputMethod;
-Lcom/android/internal/view/IInputMethod;->attachToken(Landroid/os/IBinder;)V
 Lcom/android/internal/view/IInputMethod;->bindInput(Landroid/view/inputmethod/InputBinding;)V
 Lcom/android/internal/view/IInputMethod;->hideSoftInput(ILandroid/os/ResultReceiver;)V
 Lcom/android/internal/view/IInputMethod;->setSessionEnabled(Lcom/android/internal/view/IInputMethodSession;Z)V
