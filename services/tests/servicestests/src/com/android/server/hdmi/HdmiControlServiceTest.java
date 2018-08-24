@@ -25,9 +25,8 @@ import static junit.framework.Assert.assertTrue;
 
 import android.os.Looper;
 import android.os.test.TestLooper;
-
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -107,7 +106,7 @@ public class HdmiControlServiceTest {
     @Before
     public void SetUp() {
         mHdmiControlService =
-                new HdmiControlService(null) {
+                new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
                     @Override
                     boolean isStandbyMessageReceived() {
                         return mStandbyMessageReceived;
