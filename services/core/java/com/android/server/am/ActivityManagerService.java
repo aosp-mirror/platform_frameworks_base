@@ -5196,27 +5196,56 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public Debug.MemoryInfo[] getProcessMemoryInfo(int[] pids) {
         enforceNotIsolatedCaller("getProcessMemoryInfo");
+
+        final long now = SystemClock.uptimeMillis();
+        final long lastNow = now - mConstants.MEMORY_INFO_THROTTLE_TIME;
+
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserId(callingUid);
+        final boolean allUsers = ActivityManager.checkUidPermission(INTERACT_ACROSS_USERS_FULL,
+                callingUid) == PackageManager.PERMISSION_GRANTED;
+        // Check REAL_GET_TASKS to see if they are allowed to access other uids
+        final boolean allUids = mAtmInternal.isGetTasksAllowed(
+                "getProcessMemoryInfo", callingPid, callingUid);
+
         Debug.MemoryInfo[] infos = new Debug.MemoryInfo[pids.length];
         for (int i=pids.length-1; i>=0; i--) {
-            ProcessRecord proc;
-            int oomAdj;
+            infos[i] = new Debug.MemoryInfo();
+            final ProcessRecord proc;
+            final int oomAdj;
             synchronized (this) {
                 synchronized (mPidsSelfLocked) {
                     proc = mPidsSelfLocked.get(pids[i]);
                     oomAdj = proc != null ? proc.setAdj : 0;
                 }
             }
-            infos[i] = new Debug.MemoryInfo();
-            long startTime = SystemClock.currentThreadTimeMillis();
-            Debug.getMemoryInfo(pids[i], infos[i]);
-            long endTime = SystemClock.currentThreadTimeMillis();
+            if (!allUids || (!allUsers && (proc == null
+                    || UserHandle.getUserId(proc.uid) != userId))) {
+                // The caller is not allow to get information about this other process...
+                // just leave it empty.
+                continue;
+            }
+            if (proc != null && proc.lastMemInfoTime >= lastNow && proc.lastMemInfo != null) {
+                // It hasn't been long enough that we want to take another sample; return
+                // the last one.
+                infos[i].set(proc.lastMemInfo);
+                continue;
+            }
+            final long startTime = SystemClock.currentThreadTimeMillis();
+            final Debug.MemoryInfo memInfo = new Debug.MemoryInfo();
+            Debug.getMemoryInfo(pids[i], memInfo);
+            final long endTime = SystemClock.currentThreadTimeMillis();
+            infos[i].set(memInfo);
             if (proc != null) {
                 synchronized (this) {
+                    proc.lastMemInfo = memInfo;
+                    proc.lastMemInfoTime = SystemClock.uptimeMillis();
                     if (proc.thread != null && proc.setAdj == oomAdj) {
                         // Record this for posterity if the process has been stable.
                         proc.baseProcessTracker.addPss(infos[i].getTotalPss(),
                                 infos[i].getTotalUss(), infos[i].getTotalRss(), false,
-                                ProcessStats.ADD_PSS_EXTERNAL_SLOW, endTime-startTime,
+                                ProcessStats.ADD_PSS_EXTERNAL_SLOW, endTime - startTime,
                                 proc.pkgList.mPkgList);
                         for (int ipkg = proc.pkgList.size() - 1; ipkg >= 0; ipkg--) {
                             ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
@@ -5241,6 +5270,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public long[] getProcessPss(int[] pids) {
         enforceNotIsolatedCaller("getProcessPss");
+
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserId(callingUid);
+        final boolean allUsers = ActivityManager.checkUidPermission(INTERACT_ACROSS_USERS_FULL,
+                callingUid) == PackageManager.PERMISSION_GRANTED;
+        // Check REAL_GET_TASKS to see if they are allowed to access other uids
+        final boolean allUids = mAtmInternal.isGetTasksAllowed(
+                "getProcessPss", callingPid, callingUid);
+
         long[] pss = new long[pids.length];
         for (int i=pids.length-1; i>=0; i--) {
             ProcessRecord proc;
@@ -5250,6 +5289,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     proc = mPidsSelfLocked.get(pids[i]);
                     oomAdj = proc != null ? proc.setAdj : 0;
                 }
+            }
+            if (!allUids || (!allUsers && UserHandle.getUserId(proc.uid) != userId)) {
+                // The caller is not allow to get information about this other process...
+                // just leave it empty.
+                continue;
             }
             long[] tmpUss = new long[3];
             long startTime = SystemClock.currentThreadTimeMillis();

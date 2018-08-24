@@ -67,6 +67,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_BOUND_SERVICE_CRASH_RESTART_DURATION = "service_crash_restart_duration";
     static final String KEY_BOUND_SERVICE_CRASH_MAX_RETRY = "service_crash_max_retry";
     static final String KEY_PROCESS_START_ASYNC = "process_start_async";
+    static final String KEY_MEMORY_INFO_THROTTLE_TIME = "memory_info_throttle_time";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
     private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
@@ -95,7 +96,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_BOUND_SERVICE_CRASH_RESTART_DURATION = 30*60_000;
     private static final int DEFAULT_BOUND_SERVICE_CRASH_MAX_RETRY = 16;
     private static final boolean DEFAULT_PROCESS_START_ASYNC = true;
-
+    private static final long DEFAULT_MEMORY_INFO_THROTTLE_TIME = 5*60*1000;
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -206,6 +207,10 @@ final class ActivityManagerConstants extends ContentObserver {
 
     // Indicates if the processes need to be started asynchronously.
     public boolean FLAG_PROCESS_START_ASYNC = DEFAULT_PROCESS_START_ASYNC;
+
+    // The minimum time we allow between requests for the MemoryInfo of a process to
+    // throttle requests from apps.
+    public long MEMORY_INFO_THROTTLE_TIME = DEFAULT_MEMORY_INFO_THROTTLE_TIME;
 
     // Indicates whether the activity starts logging is enabled.
     // Controlled by Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED
@@ -348,6 +353,8 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_BOUND_SERVICE_CRASH_MAX_RETRY);
             FLAG_PROCESS_START_ASYNC = mParser.getBoolean(KEY_PROCESS_START_ASYNC,
                     DEFAULT_PROCESS_START_ASYNC);
+            MEMORY_INFO_THROTTLE_TIME = mParser.getLong(KEY_MEMORY_INFO_THROTTLE_TIME,
+                    DEFAULT_MEMORY_INFO_THROTTLE_TIME);
 
             updateMaxCachedProcesses();
         }
@@ -423,6 +430,14 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(MAX_SERVICE_INACTIVITY);
         pw.print("  "); pw.print(KEY_BG_START_TIMEOUT); pw.print("=");
         pw.println(BG_START_TIMEOUT);
+        pw.print("  "); pw.print(KEY_BOUND_SERVICE_CRASH_RESTART_DURATION); pw.print("=");
+        pw.println(BOUND_SERVICE_CRASH_RESTART_DURATION);
+        pw.print("  "); pw.print(KEY_BOUND_SERVICE_CRASH_MAX_RETRY); pw.print("=");
+        pw.println(BOUND_SERVICE_MAX_CRASH_RETRY);
+        pw.print("  "); pw.print(KEY_PROCESS_START_ASYNC); pw.print("=");
+        pw.println(FLAG_PROCESS_START_ASYNC);
+        pw.print("  "); pw.print(KEY_MEMORY_INFO_THROTTLE_TIME); pw.print("=");
+        pw.println(MEMORY_INFO_THROTTLE_TIME);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {

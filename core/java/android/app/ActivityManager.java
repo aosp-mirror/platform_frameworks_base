@@ -3266,6 +3266,15 @@ public class ActivityManager {
      * <p><b>Note: this method is only intended for debugging or building
      * a user-facing process management UI.</b></p>
      *
+     * <p>This method is different from
+     * {@link android.os.Debug#getMemoryInfo(int, Debug.MemoryInfo)} in that it will
+     * (a) include additional low-level system allocation (via memtrack), and (b)
+     * be significantly limited in the frequency at which data can be sampled.</p>
+     *
+     * As of {@link android.os.Build.VERSION_CODES#Q Android Q}, for regular apps this method
+     * will only return information about the memory info for the processes running as the
+     * caller's uid; no other process memory info is available and will be zero.
+     *
      * @param pids The pids of the processes whose memory usage is to be
      * retrieved.
      * @return Returns an array of memory information, one for each
