@@ -20026,9 +20026,9 @@ public class PackageManagerService extends IPackageManager.Stub
         mDexManager.systemReady();
         mPackageDexOptimizer.systemReady();
 
-        StorageManagerInternal StorageManagerInternal = LocalServices.getService(
+        StorageManagerInternal storageManagerInternal = LocalServices.getService(
                 StorageManagerInternal.class);
-        StorageManagerInternal.addExternalStoragePolicy(
+        storageManagerInternal.addExternalStoragePolicy(
                 new StorageManagerInternal.ExternalStorageMountPolicy() {
             @Override
             public int getMountMode(int uid, String packageName) {
@@ -21411,6 +21411,12 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         prepareAppDataContentsLeafLIF(pkg, userId, flags);
+        final StorageManagerInternal storageManagerInternal
+                = LocalServices.getService(StorageManagerInternal.class);
+        if (storageManagerInternal != null) {
+            storageManagerInternal.mountExternalStorageForApp(
+                    pkg.packageName, appId, pkg.mSharedUserId, userId);
+        }
     }
 
     private void prepareAppDataContentsLIF(PackageParser.Package pkg, int userId, int flags) {
