@@ -93,6 +93,7 @@ enum MountExternalKind {
   MOUNT_EXTERNAL_DEFAULT = 1,
   MOUNT_EXTERNAL_READ = 2,
   MOUNT_EXTERNAL_WRITE = 3,
+  MOUNT_EXTERNAL_FULL = 4,
 };
 
 static void RuntimeAbort(JNIEnv* env, int line, const char* msg) {
@@ -416,7 +417,7 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
         storageSource = "/mnt/runtime/read";
     } else if (mount_mode == MOUNT_EXTERNAL_WRITE) {
         storageSource = "/mnt/runtime/write";
-    } else if (!force_mount_namespace) {
+    } else if (mount_mode != MOUNT_EXTERNAL_FULL && !force_mount_namespace) {
         // Sane default of no storage visible
         return true;
     }
@@ -433,19 +434,44 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
     }
 
     if (GetBoolProperty(kIsolatedStorage, false)) {
-        if (package_name == nullptr) {
-            return true;
-        }
+        if (mount_mode == MOUNT_EXTERNAL_FULL) {
+            storageSource = "/mnt/runtime/write";
+            if (TEMP_FAILURE_RETRY(mount(storageSource.string(), "/storage",
+                    NULL, MS_BIND | MS_REC | MS_SLAVE, NULL)) == -1) {
+                *error_msg = CREATE_ERROR("Failed to mount %s to /storage: %s",
+                                          storageSource.string(),
+                                          strerror(errno));
+                return false;
+            }
 
-        std::string pkgSandboxDir("/mnt/user");
-        if (!createPkgSandbox(uid, package_name, pkgSandboxDir, error_msg)) {
-            return false;
-        }
-        if (TEMP_FAILURE_RETRY(mount(pkgSandboxDir.c_str(), "/storage",
-                nullptr, MS_BIND | MS_REC | MS_SLAVE, nullptr)) == -1) {
-            *error_msg = CREATE_ERROR("Failed to mount %s to /storage: %s",
-                    pkgSandboxDir.c_str(), strerror(errno));
-            return false;
+            // Mount user-specific symlink helper into place
+            userid_t user_id = multiuser_get_user_id(uid);
+            const String8 userSource(String8::format("/mnt/user/%d", user_id));
+            if (fs_prepare_dir(userSource.string(), 0751, 0, 0) == -1) {
+                *error_msg = CREATE_ERROR("fs_prepare_dir failed on %s", userSource.string());
+                return false;
+            }
+            if (TEMP_FAILURE_RETRY(mount(userSource.string(), "/storage/self",
+                    NULL, MS_BIND, NULL)) == -1) {
+                *error_msg = CREATE_ERROR("Failed to mount %s to /storage/self: %s",
+                                          userSource.string(),
+                                          strerror(errno));
+                return false;
+            }
+        } else {
+            if (package_name == nullptr) {
+                return true;
+            }
+            std::string pkgSandboxDir("/mnt/user");
+            if (!createPkgSandbox(uid, package_name, pkgSandboxDir, error_msg)) {
+                return false;
+            }
+            if (TEMP_FAILURE_RETRY(mount(pkgSandboxDir.c_str(), "/storage",
+                    nullptr, MS_BIND | MS_REC | MS_SLAVE, nullptr)) == -1) {
+                *error_msg = CREATE_ERROR("Failed to mount %s to /storage: %s",
+                        pkgSandboxDir.c_str(), strerror(errno));
+                return false;
+            }
         }
     } else {
         if (TEMP_FAILURE_RETRY(mount(storageSource.string(), "/storage",

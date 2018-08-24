@@ -384,7 +384,10 @@ public class ZygoteProcess {
             argsForZygote.add("--mount-external-read");
         } else if (mountExternal == Zygote.MOUNT_EXTERNAL_WRITE) {
             argsForZygote.add("--mount-external-write");
+        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_FULL) {
+            argsForZygote.add("--mount-external-full");
         }
+
         argsForZygote.add("--target-sdk-version=" + targetSdkVersion);
 
         // --setgroups is a comma-separated list
