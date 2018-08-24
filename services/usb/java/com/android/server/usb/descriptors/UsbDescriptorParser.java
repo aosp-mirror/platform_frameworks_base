@@ -271,13 +271,13 @@ public final class UsbDescriptorParser {
     /**
      * @hide
      */
-    public UsbDevice toAndroidUsbDevice() {
+    public UsbDevice.Builder toAndroidUsbDevice() {
         if (mDeviceDescriptor == null) {
             Log.e(TAG, "toAndroidUsbDevice() ERROR - No Device Descriptor");
             return null;
         }
 
-        UsbDevice device = mDeviceDescriptor.toAndroid(this);
+        UsbDevice.Builder device = mDeviceDescriptor.toAndroid(this);
         if (device == null) {
             Log.e(TAG, "toAndroidUsbDevice() ERROR Creating Device");
         }

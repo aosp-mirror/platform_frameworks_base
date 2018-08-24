@@ -20,8 +20,6 @@ import static com.android.internal.usb.DumpUtils.writeAccessory;
 import static com.android.internal.util.dump.DumpUtils.writeStringIfNotNull;
 
 import android.app.ActivityManager;
-
-import com.android.server.wm.ActivityTaskManagerInternal;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -52,6 +50,7 @@ import android.hardware.usb.gadget.V1_0.Status;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.hidl.manager.V1_0.IServiceNotification;
 import android.os.BatteryManager;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -82,6 +81,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -658,7 +658,19 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 // successfully entered accessory mode
                 String[] accessoryStrings = mUsbDeviceManager.getAccessoryStrings();
                 if (accessoryStrings != null) {
-                    mCurrentAccessory = new UsbAccessory(accessoryStrings);
+                    UsbSerialReader serialReader = new UsbSerialReader(mContext, mSettingsManager,
+                            accessoryStrings[UsbAccessory.SERIAL_STRING]);
+
+                    mCurrentAccessory = new UsbAccessory(
+                            accessoryStrings[UsbAccessory.MANUFACTURER_STRING],
+                            accessoryStrings[UsbAccessory.MODEL_STRING],
+                            accessoryStrings[UsbAccessory.DESCRIPTION_STRING],
+                            accessoryStrings[UsbAccessory.VERSION_STRING],
+                            accessoryStrings[UsbAccessory.URI_STRING],
+                            serialReader);
+
+                    serialReader.setDevice(mCurrentAccessory);
+
                     Slog.d(TAG, "entering USB accessory mode: " + mCurrentAccessory);
                     // defer accessoryAttached if system is not ready
                     if (mBootCompleted) {
@@ -1982,7 +1994,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     + currentAccessory;
             throw new IllegalArgumentException(error);
         }
-        settings.checkPermission(accessory);
+        settings.checkPermission(accessory, Binder.getCallingUid());
         return nativeOpenAccessory();
     }
 

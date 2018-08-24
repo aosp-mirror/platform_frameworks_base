@@ -148,11 +148,11 @@ class UsbPermissionManager {
      * Returns true if caller has permission to access the accessory.
      *
      * @param accessory to check permission for
+     * @param uid to check permission for
      * @return {@code true} if caller has permssion
      */
-    boolean hasPermission(@NonNull UsbAccessory accessory) {
+    boolean hasPermission(@NonNull UsbAccessory accessory, int uid) {
         synchronized (mLock) {
-            int uid = Binder.getCallingUid();
             if (uid == Process.SYSTEM_UID || mDisablePermissionDialogs) {
                 return true;
             }

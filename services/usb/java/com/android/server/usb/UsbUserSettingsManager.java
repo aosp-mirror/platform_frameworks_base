@@ -168,19 +168,21 @@ class UsbUserSettingsManager {
         return mUsbPermissionManager.hasPermission(device, uid);
     }
 
-    public boolean hasPermission(UsbAccessory accessory) {
-        return mUsbPermissionManager.hasPermission(accessory);
+    public boolean hasPermission(UsbAccessory accessory, int uid) {
+        return mUsbPermissionManager.hasPermission(accessory, uid);
     }
 
     public void checkPermission(UsbDevice device, String packageName, int uid) {
         if (!hasPermission(device, packageName, uid)) {
-            throw new SecurityException("User has not given permission to device " + device);
+            throw new SecurityException("User has not given " + uid + "/" + packageName
+                    + " permission to access device " + device.getDeviceName());
         }
     }
 
-    public void checkPermission(UsbAccessory accessory) {
-        if (!hasPermission(accessory)) {
-            throw new SecurityException("User has not given permission to accessory " + accessory);
+    public void checkPermission(UsbAccessory accessory, int uid) {
+        if (!hasPermission(accessory, uid)) {
+            throw new SecurityException("User has not given " + uid + " permission to accessory "
+                    + accessory);
         }
     }
 
@@ -236,9 +238,10 @@ class UsbUserSettingsManager {
         requestPermissionDialog(device, null, canBeDefault(device, packageName), packageName, pi);
     }
 
-    public void requestPermission(UsbAccessory accessory, String packageName, PendingIntent pi) {
+    public void requestPermission(UsbAccessory accessory, String packageName, PendingIntent pi,
+            int uid) {
         // respond immediately if permission has already been granted
-        if (hasPermission(accessory)) {
+        if (hasPermission(accessory, uid)) {
             Intent intent = new Intent();
             intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
             intent.putExtra(UsbManager.EXTRA_PERMISSION_GRANTED, true);

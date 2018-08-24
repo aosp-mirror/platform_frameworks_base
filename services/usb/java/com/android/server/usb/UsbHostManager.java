@@ -370,13 +370,18 @@ public class UsbHostManager {
                 return false;
             }
 
-            UsbDevice newDevice = parser.toAndroidUsbDevice();
-            if (newDevice == null) {
+            UsbDevice.Builder newDeviceBuilder = parser.toAndroidUsbDevice();
+            if (newDeviceBuilder == null) {
                 Slog.e(TAG, "Couldn't create UsbDevice object.");
                 // Tracking
                 addConnectionRecord(deviceAddress, ConnectionRecord.CONNECT_BADDEVICE,
                         parser.getRawDescriptors());
             } else {
+                UsbSerialReader serialNumberReader = new UsbSerialReader(mContext, mSettingsManager,
+                        newDeviceBuilder.serialNumber);
+                UsbDevice newDevice = newDeviceBuilder.build(serialNumberReader);
+                serialNumberReader.setDevice(newDevice);
+
                 mDevices.put(deviceAddress, newDevice);
                 Slog.d(TAG, "Added device " + newDevice);
 
