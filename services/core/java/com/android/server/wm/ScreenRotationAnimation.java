@@ -16,20 +16,18 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
+import static com.android.server.wm.ScreenRotationAnimationProto.ANIMATION_RUNNING;
+import static com.android.server.wm.ScreenRotationAnimationProto.STARTED;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowStateAnimator.WINDOW_FREEZE_LAYER;
-import static com.android.server.wm.ScreenRotationAnimationProto.ANIMATION_RUNNING;
-import static com.android.server.wm.ScreenRotationAnimationProto.STARTED;
 
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Rect;
-import android.os.IBinder;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -37,7 +35,6 @@ import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
@@ -267,6 +264,12 @@ class ScreenRotationAnimation {
                     .setSize(mWidth, mHeight)
                     .setSecure(isSecure)
                     .build();
+
+            // In case display bounds change, screenshot buffer and surface may mismatch so set a
+            // scaling mode.
+            SurfaceControl.Transaction t2 = new SurfaceControl.Transaction();
+            t2.setOverrideScalingMode(mSurfaceControl, Surface.SCALING_MODE_SCALE_TO_WINDOW);
+            t2.apply(true /* sync */);
 
             // Capture a screenshot into the surface we just created.
             final int displayId = display.getDisplayId();
