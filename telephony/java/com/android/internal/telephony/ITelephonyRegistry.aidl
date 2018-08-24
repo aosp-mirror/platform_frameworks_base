@@ -21,6 +21,7 @@ import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.telephony.CellInfo;
+import android.telephony.PhoneCapability;
 import android.telephony.PhysicalChannelConfig;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -74,4 +75,5 @@ interface ITelephonyRegistry {
     void notifySubscriptionInfoChanged();
     void notifyCarrierNetworkChange(in boolean active);
     void notifyUserMobileDataStateChangedForPhoneId(in int phoneId, in int subId, in boolean state);
+    void notifyPhoneCapabilityChanged(in PhoneCapability capability);
 }
