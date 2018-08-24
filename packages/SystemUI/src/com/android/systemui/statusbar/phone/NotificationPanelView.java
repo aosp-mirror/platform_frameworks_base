@@ -2967,7 +2967,6 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void updateNotificationViews() {
-        if (mNotificationStackScroller == null) return;
         mNotificationStackScroller.updateSpeedBumpIndex();
         mNotificationStackScroller.updateFooter();
         updateShowEmptyShadeView();
