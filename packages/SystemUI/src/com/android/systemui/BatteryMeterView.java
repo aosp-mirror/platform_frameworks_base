@@ -82,7 +82,6 @@ public class BatteryMeterView extends LinearLayout implements
 
     private int mLightModeBackgroundColor;
     private int mLightModeFillColor;
-    private float mDarkIntensity;
     private int mUser;
 
     /**
@@ -321,8 +320,6 @@ public class BatteryMeterView extends LinearLayout implements
 
     @Override
     public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        mDarkIntensity = darkIntensity;
-
         float intensity = DarkIconDispatcher.isInArea(area, this) ? darkIntensity : 0;
         mNonAdaptedForegroundColor = getColorForDarkIntensity(
                 intensity, mLightModeFillColor, mDarkModeFillColor);
@@ -340,14 +337,6 @@ public class BatteryMeterView extends LinearLayout implements
         if (mBatteryPercentView != null) {
             mBatteryPercentView.setTextColor(foregroundColor);
         }
-    }
-
-    public void setFillColor(int color) {
-        if (mLightModeFillColor == color) {
-            return;
-        }
-        mLightModeFillColor = color;
-        onDarkChanged(new Rect(), mDarkIntensity, DarkIconDispatcher.DEFAULT_ICON_TINT);
     }
 
     private int getColorForDarkIntensity(float darkIntensity, int lightColor, int darkColor) {
