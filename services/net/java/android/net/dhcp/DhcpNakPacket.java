@@ -26,11 +26,9 @@ class DhcpNakPacket extends DhcpPacket {
     /**
      * Generates a NAK packet with the specified parameters.
      */
-    DhcpNakPacket(int transId, short secs, Inet4Address clientIp, Inet4Address yourIp,
-                  Inet4Address nextIp, Inet4Address relayIp,
-                  byte[] clientMac) {
-        super(transId, secs, INADDR_ANY, INADDR_ANY, nextIp, relayIp,
-            clientMac, false);
+    DhcpNakPacket(int transId, short secs, Inet4Address nextIp, Inet4Address relayIp,
+            byte[] clientMac, boolean broadcast) {
+        super(transId, secs, INADDR_ANY, INADDR_ANY, nextIp, relayIp, clientMac, broadcast);
     }
 
     public String toString() {
@@ -43,11 +41,11 @@ class DhcpNakPacket extends DhcpPacket {
      */
     public ByteBuffer buildPacket(int encap, short destUdp, short srcUdp) {
         ByteBuffer result = ByteBuffer.allocate(MAX_LENGTH);
-        Inet4Address destIp = mClientIp;
-        Inet4Address srcIp = mYourIp;
+        // Constructor does not set values for layers <= 3: use empty values
+        Inet4Address destIp = INADDR_ANY;
+        Inet4Address srcIp = INADDR_ANY;
 
-        fillInPacket(encap, destIp, srcIp, destUdp, srcUdp, result,
-            DHCP_BOOTREPLY, mBroadcast);
+        fillInPacket(encap, destIp, srcIp, destUdp, srcUdp, result, DHCP_BOOTREPLY, mBroadcast);
         result.flip();
         return result;
     }
