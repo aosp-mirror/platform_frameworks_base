@@ -21,6 +21,7 @@ import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.settingslib.R;
 import com.android.settingslib.utils.AsyncLoader;
 
 import java.io.File;
@@ -108,6 +109,7 @@ public class LicenseHtmlLoader extends AsyncLoader<File> {
 
     @VisibleForTesting
     boolean generateHtmlFile(List<File> xmlFiles, File htmlFile) {
-        return LicenseHtmlGeneratorFromXml.generateHtml(xmlFiles, htmlFile);
+        return LicenseHtmlGeneratorFromXml.generateHtml(xmlFiles, htmlFile,
+                    mContext.getString(R.string.notice_header));
     }
 }
