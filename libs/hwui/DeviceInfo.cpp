@@ -42,6 +42,8 @@ static constexpr android::DisplayInfo sDummyDisplay{
         false,  // secure?
         0,      // appVsyncOffset
         0,      // presentationDeadline
+        1080,   // viewportW
+        1920,   // viewportH
 };
 
 static DeviceInfo* sDeviceInfo = nullptr;
