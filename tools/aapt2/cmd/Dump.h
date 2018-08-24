@@ -115,12 +115,26 @@ class DumpXmlTreeCommand : public Command {
   std::vector<std::string> files_;
 };
 
-/** The default dump command. Preforms no action because a subcommand is required. */
+/** Prints the contents of the resource table from the APK. */
+class DumpPackageNameCommand : public Command {
+ public:
+  explicit DumpPackageNameCommand(IDiagnostics* diag) : Command("packagename"), diag_(diag) {
+    SetDescription("Print the package name of the APK.");
+  }
+
+  int Action(const std::vector<std::string>& args) override;
+
+ private:
+  IDiagnostics* diag_;
+};
+
+/** The default dump command. Performs no action because a subcommand is required. */
 class DumpCommand : public Command {
  public:
   explicit DumpCommand(IDiagnostics* diag) : Command("dump", "d"), diag_(diag) {
     AddOptionalSubcommand(util::make_unique<DumpAPCCommand>(diag_));
     AddOptionalSubcommand(util::make_unique<DumpConfigsCommand>(diag_));
+    AddOptionalSubcommand(util::make_unique<DumpPackageNameCommand>(diag_));
     AddOptionalSubcommand(util::make_unique<DumpStringsCommand>(diag_));
     AddOptionalSubcommand(util::make_unique<DumpTableCommand>(diag_));
     AddOptionalSubcommand(util::make_unique<DumpXmlStringsCommand>(diag_));

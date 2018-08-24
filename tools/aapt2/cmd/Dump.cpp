@@ -398,6 +398,36 @@ int DumpXmlStringsCommand::Action(const std::vector<std::string>& args) {
   return 0;
 }
 
+int DumpPackageNameCommand::Action(const std::vector<std::string>& args) {
+  if (args.size() < 1) {
+    diag_->Error(DiagMessage() << "No dump apk specified.");
+    return 1;
+  }
+
+  auto loaded_apk = LoadedApk::LoadApkFromPath(args[0], diag_);
+  if (!loaded_apk) {
+    return 1;
+  }
+
+  io::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
+  Printer printer(&fout);
+
+  xml::Element* manifest_el = loaded_apk->GetManifest()->root.get();
+  if (!manifest_el) {
+    diag_->Error(DiagMessage() << "No AndroidManifest.");
+    return 1;
+  }
+
+  xml::Attribute* attr = manifest_el->FindAttribute({}, "package");
+  if (!attr) {
+    diag_->Error(DiagMessage() << "No package name.");
+    return 1;
+  }
+  printer.Println(StringPrintf("%s", attr->value.c_str()));
+
+  return 0;
+}
+
 /** Preform no action because a subcommand is required. */
 int DumpCommand::Action(const std::vector<std::string>& args) {
   if (args.size() == 0) {
