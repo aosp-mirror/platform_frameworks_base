@@ -16,15 +16,7 @@
 
 package com.android.server.am;
 
-import android.content.pm.IPackageManager;
-import android.content.pm.PermissionInfo;
-import android.os.Trace;
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Set;
+import static com.android.server.am.ActivityManagerDebugConfig.*;
 
 import android.app.ActivityManager;
 import android.app.AppGlobals;
@@ -37,7 +29,9 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,13 +41,19 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
-import static com.android.server.am.ActivityManagerDebugConfig.*;
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Set;
 
 /**
  * BROADCASTS
@@ -409,10 +409,12 @@ public final class BroadcastQueue {
             String resultData, Bundle resultExtras, boolean resultAbort, boolean waitForServices) {
         final int state = r.state;
         final ActivityInfo receiver = r.curReceiver;
+        final long finishTime = SystemClock.uptimeMillis();
         r.state = BroadcastRecord.IDLE;
         if (state == BroadcastRecord.IDLE) {
             Slog.w(TAG, "finishReceiver [" + mQueueName + "] called but state is IDLE");
         }
+        r.duration[r.nextReceiver - 1] = finishTime - r.receiverTime;
         r.receiver = null;
         r.intent.setComponent(null);
         if (r.curApp != null && r.curApp.curReceivers.contains(r)) {
