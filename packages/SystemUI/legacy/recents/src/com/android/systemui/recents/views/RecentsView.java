@@ -497,7 +497,7 @@ public class RecentsView extends FrameLayout {
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        mSystemInsets.set(insets.getSystemWindowInsets());
+        mSystemInsets.set(insets.getSystemWindowInsetsAsRect());
         mTaskStackView.setSystemInsets(mSystemInsets);
         requestLayout();
         return insets;
