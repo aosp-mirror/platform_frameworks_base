@@ -30,8 +30,6 @@ import com.android.internal.view.IInputMethodClient;
 /**
  * Public interface to the global input method manager, used by all client
  * applications.
- * You need to update BridgeIInputMethodManager.java as well when changing
- * this file.
  */
 interface IInputMethodManager {
     // TODO: Use ParceledListSlice instead
