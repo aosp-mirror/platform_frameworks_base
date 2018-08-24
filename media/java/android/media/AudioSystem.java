@@ -882,6 +882,10 @@ public class AudioSystem
     public static native int listAudioPatches(ArrayList<AudioPatch> patches, int[] generation);
     public static native int setAudioPortConfig(AudioPortConfig config);
 
+    public static native int startAudioSource(AudioPortConfig config,
+                                              AudioAttributes audioAttributes);
+    public static native int stopAudioSource(int handle);
+
     // declare this instance as having a dynamic policy callback handler
     private static native final void native_register_dynamic_policy_callback();
     // declare this instance as having a recording configuration update callback handler
