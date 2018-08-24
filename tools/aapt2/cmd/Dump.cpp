@@ -23,6 +23,7 @@
 #include "Debug.h"
 #include "Diagnostics.h"
 #include "Flags.h"
+#include "LoadedApk.h"
 #include "format/Container.h"
 #include "format/binary/BinaryResourceParser.h"
 #include "format/proto/ProtoDeserialize.h"
@@ -254,6 +255,32 @@ static bool TryDumpFile(IAaptContext* context, const std::string& file_path,
   return true;
 }
 
+static bool DumpPackageName(IAaptContext* context, const std::string& file_path) {
+  auto loaded_apk = LoadedApk::LoadApkFromPath(file_path, context->GetDiagnostics());
+  if (!loaded_apk) {
+    return false;
+  }
+
+  constexpr size_t kStdOutBufferSize = 1024u;
+  io::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
+  Printer printer(&fout);
+
+  xml::Element* manifest_el = loaded_apk->GetManifest()->root.get();
+  if (!manifest_el) {
+    context->GetDiagnostics()->Error(DiagMessage() << "No AndroidManifest.");
+    return false;
+  }
+
+  xml::Attribute* attr = manifest_el->FindAttribute({}, "package");
+  if (!attr) {
+    context->GetDiagnostics()->Error(DiagMessage() << "No package name.");
+    return false;
+  }
+  printer.Println(StringPrintf("%s", attr->value.c_str()));
+
+  return true;
+}
+
 namespace {
 
 class DumpContext : public IAaptContext {
@@ -324,9 +351,20 @@ int Dump(const std::vector<StringPiece>& args) {
   DumpContext context;
   context.SetVerbose(verbose);
 
+  auto parsedArgs = flags.GetArgs();
+  if (parsedArgs.size() > 1 && parsedArgs[0] == "packagename") {
+    parsedArgs.erase(parsedArgs.begin());
+    for (const std::string& arg : parsedArgs) {
+      if (!DumpPackageName(&context, arg)) {
+        return 1;
+      }
+    }
+    return 0;
+  }
+
   options.print_options.show_sources = true;
   options.print_options.show_values = !no_values;
-  for (const std::string& arg : flags.GetArgs()) {
+  for (const std::string& arg : parsedArgs) {
     if (!TryDumpFile(&context, arg, options)) {
       return 1;
     }
