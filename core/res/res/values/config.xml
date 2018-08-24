@@ -3517,4 +3517,11 @@
 
     <!-- Whether or not battery saver should be "sticky" when manually enabled. -->
     <bool name="config_batterySaverStickyBehaviourDisabled">false</bool>
+
+    <!-- Model of potentially misprovisioned devices. If none is specified in an overlay, an
+         empty string is passed in. -->
+    <string name="config_misprovisionedDeviceModel" translatable="false"></string>
+
+    <!-- Brand value for attestation of misprovisioned device. -->
+    <string name="config_misprovisionedBrandValue" translatable="false"></string>
 </resources>
