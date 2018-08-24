@@ -2438,8 +2438,6 @@ Lcom/android/internal/view/IInputMethodManager$Stub$Proxy;-><init>(Landroid/os/I
 Lcom/android/internal/view/IInputMethodManager$Stub$Proxy;->getEnabledInputMethodList()Ljava/util/List;
 Lcom/android/internal/view/IInputMethodManager$Stub;-><init>()V
 Lcom/android/internal/view/IInputMethodManager$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/view/IInputMethodManager;
-Lcom/android/internal/view/IInputMethodManager;->addClient(Lcom/android/internal/view/IInputMethodClient;Lcom/android/internal/view/IInputContext;II)V
-Lcom/android/internal/view/IInputMethodManager;->removeClient(Lcom/android/internal/view/IInputMethodClient;)V
 Lcom/android/internal/view/IInputMethodSession$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/view/IInputMethodSession;
 Lcom/android/internal/widget/ILockSettings$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/widget/ILockSettings;
 Lcom/android/internal/widget/ILockSettings;->getBoolean(Ljava/lang/String;ZI)Z
