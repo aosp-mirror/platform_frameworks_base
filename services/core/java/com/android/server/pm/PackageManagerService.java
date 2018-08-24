@@ -161,7 +161,6 @@ import android.content.pm.InstantAppRequest;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
-import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
@@ -618,12 +617,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private final ProcessLoggingHandler mProcessLoggingHandler;
 
-    /**
-     * Messages for {@link #mHandler} that need to wait for system ready before
-     * being dispatched.
-     */
-    private ArrayList<Message> mPostSystemReadyMessages;
-
     final int mSdkVersion = Build.VERSION.SDK_INT;
 
     final Context mContext;
@@ -635,10 +628,6 @@ public class PackageManagerService extends IPackageManager.Stub
     final boolean mIsUpgrade;
     final boolean mIsPreNUpgrade;
     final boolean mIsPreNMR1Upgrade;
-
-    // Have we told the Activity Manager to whitelist the default container service by uid yet?
-    @GuardedBy("mPackages")
-    boolean mDefaultContainerWhitelisted = false;
 
     @GuardedBy("mPackages")
     private boolean mDexOptDialogShown;
@@ -1257,7 +1246,6 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int MCS_BOUND = 3;
     static final int INIT_COPY = 5;
     static final int MCS_UNBIND = 6;
-    static final int START_CLEANING_PACKAGE = 7;
     static final int POST_INSTALL = 9;
     static final int MCS_RECONNECT = 10;
     static final int MCS_GIVE_UP = 11;
@@ -1601,26 +1589,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                     break;
                 }
-                case START_CLEANING_PACKAGE: {
-                    Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
-                    final String packageName = (String)msg.obj;
-                    final int userId = msg.arg1;
-                    final boolean andCode = msg.arg2 != 0;
-                    synchronized (mPackages) {
-                        if (userId == UserHandle.USER_ALL) {
-                            int[] users = sUserManager.getUserIds();
-                            for (int user : users) {
-                                mSettings.addPackageToCleanLPw(
-                                        new PackageCleanItem(user, packageName, andCode));
-                            }
-                        } else {
-                            mSettings.addPackageToCleanLPw(
-                                    new PackageCleanItem(userId, packageName, andCode));
-                        }
-                    }
-                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                    startCleaningPackages();
-                } break;
                 case POST_INSTALL: {
                     if (DEBUG_INSTALL) Log.v(TAG, "Handling post-install for " + msg.arg1);
 
@@ -11533,14 +11501,6 @@ public class PackageManagerService extends IPackageManager.Stub
             mSettings.insertPackageSettingLPw(pkgSetting, pkg);
             // Add the new setting to mPackages
             mPackages.put(pkg.applicationInfo.packageName, pkg);
-            // Make sure we don't accidentally delete its data.
-            final Iterator<PackageCleanItem> iter = mSettings.mPackagesToBeCleaned.iterator();
-            while (iter.hasNext()) {
-                PackageCleanItem item = iter.next();
-                if (pkgName.equals(item.packageName)) {
-                    iter.remove();
-                }
-            }
 
             // Add the package's KeySets to the global KeySetManagerService
             KeySetManagerService ksms = mSettings.mKeySetManagerService;
@@ -12394,75 +12354,6 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private boolean isExternalMediaAvailable() {
         return mMediaMounted || Environment.isExternalStorageEmulated();
-    }
-
-    @Override
-    public PackageCleanItem nextPackageToClean(PackageCleanItem lastPackage) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
-            return null;
-        }
-        if (!isExternalMediaAvailable()) {
-                // If the external storage is no longer mounted at this point,
-                // the caller may not have been able to delete all of this
-                // packages files and can not delete any more.  Bail.
-            return null;
-        }
-        synchronized (mPackages) {
-            final ArrayList<PackageCleanItem> pkgs = mSettings.mPackagesToBeCleaned;
-            if (lastPackage != null) {
-                pkgs.remove(lastPackage);
-            }
-            if (pkgs.size() > 0) {
-                return pkgs.get(0);
-            }
-        }
-        return null;
-    }
-
-    void schedulePackageCleaning(String packageName, int userId, boolean andCode) {
-        final Message msg = mHandler.obtainMessage(START_CLEANING_PACKAGE,
-                userId, andCode ? 1 : 0, packageName);
-        if (mSystemReady) {
-            msg.sendToTarget();
-        } else {
-            if (mPostSystemReadyMessages == null) {
-                mPostSystemReadyMessages = new ArrayList<>();
-            }
-            mPostSystemReadyMessages.add(msg);
-        }
-    }
-
-    void startCleaningPackages() {
-        // reader
-        if (!isExternalMediaAvailable()) {
-            return;
-        }
-        synchronized (mPackages) {
-            if (mSettings.mPackagesToBeCleaned.isEmpty()) {
-                return;
-            }
-        }
-        Intent intent = new Intent(PackageManager.ACTION_CLEAN_EXTERNAL_STORAGE);
-        intent.setComponent(DEFAULT_CONTAINER_COMPONENT);
-        IActivityManager am = ActivityManager.getService();
-        if (am != null) {
-            int dcsUid = -1;
-            synchronized (mPackages) {
-                if (!mDefaultContainerWhitelisted) {
-                    mDefaultContainerWhitelisted = true;
-                    PackageSetting ps = mSettings.mPackages.get(DEFAULT_CONTAINER_PACKAGE);
-                    dcsUid = UserHandle.getUid(UserHandle.USER_SYSTEM, ps.appId);
-                }
-            }
-            try {
-                if (dcsUid > 0) {
-                    am.backgroundWhitelistUid(dcsUid);
-                }
-                am.startService(null, intent, null, false, mContext.getOpPackageName(),
-                        UserHandle.USER_SYSTEM);
-            } catch (RemoteException e) {
-            }
-        }
     }
 
     /**
@@ -13932,15 +13823,6 @@ public class PackageManagerService extends IPackageManager.Stub
         abstract void handleStartCopy() throws RemoteException;
         abstract void handleServiceError();
         abstract void handleReturnCode();
-    }
-
-    private static void clearDirectory(IMediaContainerService mcs, File[] paths) {
-        for (File path : paths) {
-            try {
-                mcs.clearDirectory(path.getAbsolutePath());
-            } catch (RemoteException e) {
-            }
-        }
     }
 
     static class OriginInfo {
@@ -17268,7 +17150,6 @@ public class PackageManagerService extends IPackageManager.Stub
             if (outInfo != null) {
                 outInfo.dataRemoved = true;
             }
-            schedulePackageCleaning(packageName, UserHandle.USER_ALL, true);
         }
 
         int removedAppId = -1;
@@ -17925,7 +17806,6 @@ public class PackageManagerService extends IPackageManager.Stub
             destroyAppProfilesLIF(pkg, userId);
             clearDefaultBrowserIfNeededForUser(ps.name, userId);
             removeKeystoreDataIfNeeded(nextUserId, ps.appId);
-            schedulePackageCleaning(ps.name, nextUserId, false);
             synchronized (mPackages) {
                 if (clearPackagePreferredActivitiesLPw(ps.name, nextUserId)) {
                     scheduleWritePackageRestrictionsLocked(nextUserId);
@@ -17944,83 +17824,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         return true;
-    }
-
-    private final class ClearStorageConnection implements ServiceConnection {
-        IMediaContainerService mContainerService;
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            synchronized (this) {
-                mContainerService = IMediaContainerService.Stub
-                        .asInterface(Binder.allowBlocking(service));
-                notifyAll();
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-        }
-    }
-
-    private void clearExternalStorageDataSync(String packageName, int userId, boolean allData) {
-        if (DEFAULT_CONTAINER_PACKAGE.equals(packageName)) return;
-
-        final boolean mounted;
-        if (Environment.isExternalStorageEmulated()) {
-            mounted = true;
-        } else {
-            final String status = Environment.getExternalStorageState();
-
-            mounted = status.equals(Environment.MEDIA_MOUNTED)
-                    || status.equals(Environment.MEDIA_MOUNTED_READ_ONLY);
-        }
-
-        if (!mounted) {
-            return;
-        }
-
-        final Intent containerIntent = new Intent().setComponent(DEFAULT_CONTAINER_COMPONENT);
-        int[] users;
-        if (userId == UserHandle.USER_ALL) {
-            users = sUserManager.getUserIds();
-        } else {
-            users = new int[] { userId };
-        }
-        final ClearStorageConnection conn = new ClearStorageConnection();
-        if (mContext.bindServiceAsUser(
-                containerIntent, conn, Context.BIND_AUTO_CREATE, UserHandle.SYSTEM)) {
-            try {
-                for (int curUser : users) {
-                    long timeout = SystemClock.uptimeMillis() + 5000;
-                    synchronized (conn) {
-                        long now;
-                        while (conn.mContainerService == null &&
-                                (now = SystemClock.uptimeMillis()) < timeout) {
-                            try {
-                                conn.wait(timeout - now);
-                            } catch (InterruptedException e) {
-                            }
-                        }
-                    }
-                    if (conn.mContainerService == null) {
-                        return;
-                    }
-
-                    final UserEnvironment userEnv = new UserEnvironment(curUser);
-                    clearDirectory(conn.mContainerService,
-                            userEnv.buildExternalStorageAppCacheDirs(packageName));
-                    if (allData) {
-                        clearDirectory(conn.mContainerService,
-                                userEnv.buildExternalStorageAppDataDirs(packageName));
-                        clearDirectory(conn.mContainerService,
-                                userEnv.buildExternalStorageAppMediaDirs(packageName));
-                    }
-                }
-            } finally {
-                mContext.unbindService(conn);
-            }
-        }
     }
 
     @Override
@@ -18066,7 +17869,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         synchronized (mInstallLock) {
                             succeeded = clearApplicationUserDataLIF(packageName, userId);
                         }
-                        clearExternalStorageDataSync(packageName, userId, true);
                         synchronized (mPackages) {
                             mInstantAppRegistry.deleteInstantApplicationMetadataLPw(
                                     packageName, userId);
@@ -18359,7 +18161,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     clearAppDataLIF(pkg, userId, flags | Installer.FLAG_CLEAR_CACHE_ONLY);
                     clearAppDataLIF(pkg, userId, flags | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
                 }
-                clearExternalStorageDataSync(packageName, userId, false);
             }
             if (observer != null) {
                 try {
@@ -20007,14 +19808,6 @@ public class PackageManagerService extends IPackageManager.Stub
             mPermissionManager.updateAllPermissions(
                     StorageManager.UUID_PRIVATE_INTERNAL, false, mPackages.values(),
                     mPermissionCallback);
-        }
-
-        // Kick off any messages waiting for system ready
-        if (mPostSystemReadyMessages != null) {
-            for (Message msg : mPostSystemReadyMessages) {
-                msg.sendToTarget();
-            }
-            mPostSystemReadyMessages = null;
         }
 
         // Watch for external volumes that come and go over time

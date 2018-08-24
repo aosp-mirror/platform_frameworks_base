@@ -25,6 +25,5 @@ interface IMediaContainerService {
 
     PackageInfoLite getMinimalPackageInfo(String packagePath, int flags, String abiOverride);
     ObbInfo getObbInfo(String filename);
-    void clearDirectory(String directory);
     long calculateInstalledSize(String packagePath, String abiOverride);
 }

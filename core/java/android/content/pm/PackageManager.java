@@ -2678,13 +2678,6 @@ public abstract class PackageManager {
             "android.software.device_id_attestation";
 
     /**
-     * Action to external storage service to clean out removed apps.
-     * @hide
-     */
-    public static final String ACTION_CLEAN_EXTERNAL_STORAGE
-            = "android.content.pm.CLEAN_EXTERNAL_STORAGE";
-
-    /**
      * Extra field name for the URI to a verification file. Passed to a package
      * verifier.
      *
