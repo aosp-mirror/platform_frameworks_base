@@ -524,7 +524,7 @@ public class IpClient extends StateMachine {
                 return false;
             }
             // There no more than one IPv4 address
-            if (ipAddresses.stream().filter(Inet4Address.class::isInstance).count() > 1) {
+            if (ipAddresses.stream().filter(LinkAddress::isIPv4).count() > 1) {
                 return false;
             }
 
