@@ -164,4 +164,21 @@ public final class SQLiteGlobal {
                         com.android.internal.R.integer.db_default_idle_connection_timeout));
     }
 
+    /**
+     * When opening a database, if the WAL file is larger than this size, we'll truncate it.
+     *
+     * (If it's 0, we do not truncate.)
+     *
+     * @hide
+     */
+    public static long getWALTruncateSize() {
+        final long setting = SQLiteCompatibilityWalFlags.getTruncateSize();
+        if (setting >= 0) {
+            return setting;
+        }
+        return SystemProperties.getInt("debug.sqlite.wal.truncatesize",
+                Resources.getSystem().getInteger(
+                        com.android.internal.R.integer.db_wal_truncate_size));
+    }
+
 }
