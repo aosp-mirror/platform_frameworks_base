@@ -22,6 +22,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -131,6 +132,17 @@ public class NetworkUtils {
     public native static boolean queryUserAccess(int uid, int netId);
 
     /**
+     * Add an entry into the ARP cache.
+     */
+    public static void addArpEntry(Inet4Address ipv4Addr, MacAddress ethAddr, String ifname,
+            FileDescriptor fd) throws IOException {
+        addArpEntry(ethAddr.toByteArray(), ipv4Addr.getAddress(), ifname, fd);
+    }
+
+    private static native void addArpEntry(byte[] ethAddr, byte[] netAddr, String ifname,
+            FileDescriptor fd) throws IOException;
+
+    /**
      * @see #intToInet4AddressHTL(int)
      * @deprecated Use either {@link #intToInet4AddressHTH(int)}
      *             or {@link #intToInet4AddressHTL(int)}
@@ -149,7 +161,7 @@ public class NetworkUtils {
      * @param hostAddress an int coding for an IPv4 address, where higher-order int byte is
      *                    lower-order IPv4 address byte
      */
-    public static InetAddress intToInet4AddressHTL(int hostAddress) {
+    public static Inet4Address intToInet4AddressHTL(int hostAddress) {
         return intToInet4AddressHTH(Integer.reverseBytes(hostAddress));
     }
 
@@ -157,14 +169,14 @@ public class NetworkUtils {
      * Convert a IPv4 address from an integer to an InetAddress (0x01020304 -> 1.2.3.4)
      * @param hostAddress an int coding for an IPv4 address
      */
-    public static InetAddress intToInet4AddressHTH(int hostAddress) {
+    public static Inet4Address intToInet4AddressHTH(int hostAddress) {
         byte[] addressBytes = { (byte) (0xff & (hostAddress >> 24)),
                 (byte) (0xff & (hostAddress >> 16)),
                 (byte) (0xff & (hostAddress >> 8)),
                 (byte) (0xff & hostAddress) };
 
         try {
-            return InetAddress.getByAddress(addressBytes);
+            return (Inet4Address) InetAddress.getByAddress(addressBytes);
         } catch (UnknownHostException e) {
             throw new AssertionError();
         }
@@ -394,6 +406,28 @@ public class NetworkUtils {
         }
 
         return new Pair<InetAddress, Integer>(address, prefixLength);
+    }
+
+    /**
+     * Get a prefix mask as Inet4Address for a given prefix length.
+     *
+     * <p>For example 20 -> 255.255.240.0
+     */
+    public static Inet4Address getPrefixMaskAsInet4Address(int prefixLength)
+            throws IllegalArgumentException {
+        return intToInet4AddressHTH(prefixLengthToV4NetmaskIntHTH(prefixLength));
+    }
+
+    /**
+     * Get the broadcast address for a given prefix.
+     *
+     * <p>For example 192.168.0.1/24 -> 192.168.0.255
+     */
+    public static Inet4Address getBroadcastAddress(Inet4Address addr, int prefixLength)
+            throws IllegalArgumentException {
+        final int intBroadcastAddr = inet4AddressToIntHTH(addr)
+                | ~prefixLengthToV4NetmaskIntHTH(prefixLength);
+        return intToInet4AddressHTH(intBroadcastAddr);
     }
 
     /**

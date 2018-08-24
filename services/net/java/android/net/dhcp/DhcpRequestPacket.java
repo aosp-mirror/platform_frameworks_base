@@ -28,9 +28,9 @@ class DhcpRequestPacket extends DhcpPacket {
     /**
      * Generates a REQUEST packet with the specified parameters.
      */
-    DhcpRequestPacket(int transId, short secs, Inet4Address clientIp, byte[] clientMac,
-                      boolean broadcast) {
-        super(transId, secs, clientIp, INADDR_ANY, INADDR_ANY, INADDR_ANY, clientMac, broadcast);
+    DhcpRequestPacket(int transId, short secs, Inet4Address clientIp, Inet4Address relayIp,
+            byte[] clientMac, boolean broadcast) {
+        super(transId, secs, clientIp, INADDR_ANY, INADDR_ANY, relayIp, clientMac, broadcast);
     }
 
     public String toString() {
