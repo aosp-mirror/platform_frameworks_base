@@ -21,4 +21,8 @@
          * Right -> 53 (Gravity.TOP | Gravity.RIGHT)
     -->
     <integer name="hardware_ui_align">53</integer>
+
+    <!-- Max visible notification icons -->
+    <integer name="config_maxVisibleNotificationIcons">4</integer>
+    <integer name="config_maxVisibleNotificationIconsWhenDark">5</integer>
 </resources>
