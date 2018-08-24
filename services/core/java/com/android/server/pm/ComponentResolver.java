@@ -115,7 +115,36 @@ public class ComponentResolver {
     private static UserManagerService sUserManager;
     private static PackageManagerInternal sPackageManagerInternal;
 
-    private final Object mLock = new Object();
+    /**
+     * Locking within package manager is going to get worse before it gets better. Currently,
+     * we need to share the {@link PackageManagerService} lock to prevent deadlocks. This occurs
+     * because in order to safely query the resolvers, we need to obtain this lock. However,
+     * during resolution, we call into the {@link PackageManagerService}. This is _not_ to
+     * operate on data controlled by the service proper, but, to check the state of package
+     * settings [contained in a {@link Settings} object]. However, the {@link Settings} object
+     * happens to be protected by the main {@link PackageManagerService} lock.
+     * <p>
+     * There are a couple potential solutions.
+     * <ol>
+     * <li>Split all of our locks into reader/writer locks. This would allow multiple,
+     * simultaneous read operations and means we don't have to be as cautious about lock
+     * layering. Only when we want to perform a write operation will we ever be in a
+     * position to deadlock the system.</li>
+     * <li>Use the same lock across all classes within the {@code com.android.server.pm}
+     * package. By unifying the lock object, we remove any potential lock layering issues
+     * within the package manager. However, we already have a sense that this lock is
+     * heavily contended and merely adding more dependencies on it will have further
+     * impact.</li>
+     * <li>Implement proper lock ordering within the package manager. By defining the
+     * relative layer of the component [eg. {@link PackageManagerService} is at the top.
+     * Somewhere in the middle would be {@link ComponentResolver}. At the very bottom
+     * would be {@link Settings}.] The ordering would allow higher layers to hold their
+     * lock while calling down. Lower layers must relinquish their lock before calling up.
+     * Since {@link Settings} would live at the lowest layer, the {@link ComponentResolver}
+     * would be able to hold its lock while checking the package setting state.</li>
+     * </ol>
+     */
+    private final Object mLock;
 
     /** All available activities, for your resolving pleasure. */
     @GuardedBy("mLock")
@@ -153,9 +182,11 @@ public class ComponentResolver {
     private List<PackageParser.ActivityIntentInfo> mProtectedFilters;
 
     ComponentResolver(UserManagerService userManager,
-            PackageManagerInternal packageManagerInternal) {
+            PackageManagerInternal packageManagerInternal,
+            Object lock) {
         sPackageManagerInternal = packageManagerInternal;
         sUserManager = userManager;
+        mLock = lock;
     }
 
     /** Returns the given activity */

@@ -2369,7 +2369,8 @@ public class PackageManagerService extends IPackageManager.Stub
             sUserManager = new UserManagerService(context, this,
                     new UserDataPreparer(mInstaller, mInstallLock, mContext, mOnlyCore), mPackages);
             mComponentResolver = new ComponentResolver(sUserManager,
-                    LocalServices.getService(PackageManagerInternal.class));
+                    LocalServices.getService(PackageManagerInternal.class),
+                    mPackages);
             mPermissionManager = PermissionManagerService.create(context,
                     new DefaultPermissionGrantedCallback() {
                         @Override
