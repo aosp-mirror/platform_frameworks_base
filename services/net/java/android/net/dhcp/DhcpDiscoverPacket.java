@@ -24,10 +24,17 @@ import java.nio.ByteBuffer;
  */
 class DhcpDiscoverPacket extends DhcpPacket {
     /**
+     * The IP address of the client which sent this packet.
+     */
+    final Inet4Address mSrcIp;
+
+    /**
      * Generates a DISCOVER packet with the specified parameters.
      */
-    DhcpDiscoverPacket(int transId, short secs, byte[] clientMac, boolean broadcast) {
-        super(transId, secs, INADDR_ANY, INADDR_ANY, INADDR_ANY, INADDR_ANY, clientMac, broadcast);
+    DhcpDiscoverPacket(int transId, short secs, Inet4Address relayIp, byte[] clientMac,
+            boolean broadcast, Inet4Address srcIp) {
+        super(transId, secs, INADDR_ANY, INADDR_ANY, INADDR_ANY, relayIp, clientMac, broadcast);
+        mSrcIp = srcIp;
     }
 
     public String toString() {
@@ -41,8 +48,8 @@ class DhcpDiscoverPacket extends DhcpPacket {
      */
     public ByteBuffer buildPacket(int encap, short destUdp, short srcUdp) {
         ByteBuffer result = ByteBuffer.allocate(MAX_LENGTH);
-        fillInPacket(encap, INADDR_BROADCAST, INADDR_ANY, destUdp,
-                srcUdp, result, DHCP_BOOTREQUEST, mBroadcast);
+        fillInPacket(encap, INADDR_BROADCAST, mSrcIp, destUdp, srcUdp, result, DHCP_BOOTREQUEST,
+                mBroadcast);
         result.flip();
         return result;
     }
