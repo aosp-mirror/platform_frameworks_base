@@ -16,9 +16,10 @@
 
 package com.android.server.hdmi;
 
+import com.android.server.hdmi.Constants.AudioCodec;
+
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
-import com.android.server.hdmi.Constants.AudioCodec;
 
 /**
  * A helper class to build {@link HdmiCecMessage} from various cec commands.
@@ -449,6 +450,19 @@ public class HdmiCecMessageBuilder {
         return buildCommandWithBooleanParam(src, des, Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS,
             systemAudioStatus
         );
+    }
+
+    /**
+     * Build &lt;Report Short Audio Descriptor&gt; command.
+     *
+     * @param src source address of command
+     * @param des destination address of command
+     * @param sadBytes Short Audio Descriptor in bytes
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildReportShortAudioDescriptor(int src, int des, byte[] sadBytes) {
+        // TODO(b/80297701) validate.
+        return buildCommand(src, des, Constants.MESSAGE_REPORT_SHORT_AUDIO_DESCRIPTOR, sadBytes);
     }
 
     /**
