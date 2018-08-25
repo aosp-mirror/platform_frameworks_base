@@ -155,8 +155,6 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
     @Override
     public boolean isQuotaSupported(String volumeUuid, String callingPackage) {
-        enforcePermission(Binder.getCallingUid(), callingPackage);
-
         try {
             return mInstaller.isQuotaSupported(volumeUuid);
         } catch (InstallerException e) {
@@ -166,8 +164,6 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
     @Override
     public boolean isReservedSupported(String volumeUuid, String callingPackage) {
-        enforcePermission(Binder.getCallingUid(), callingPackage);
-
         if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
             return SystemProperties.getBoolean(StorageManager.PROP_HAS_RESERVED, false);
         } else {
