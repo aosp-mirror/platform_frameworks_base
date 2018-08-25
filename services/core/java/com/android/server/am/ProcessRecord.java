@@ -20,7 +20,6 @@ import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
-import android.os.Debug;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.EventLog;
@@ -207,11 +206,6 @@ final class ProcessRecord implements WindowProcessListener {
     int adjSourceProcState;     // Debugging: proc state of adjSource's process.
     Object adjTarget;           // Debugging: target component impacting oom_adj.
     Runnable crashHandler;      // Optional local handler to be invoked in the process crash.
-
-    // Cache of last retrieve memory info and uptime, to throttle how frequently
-    // apps can requyest it.
-    Debug.MemoryInfo lastMemInfo;
-    long lastMemInfoTime;
 
     // Controller for driving the process state on the window manager side.
     final private WindowProcessController mWindowProcessController;
