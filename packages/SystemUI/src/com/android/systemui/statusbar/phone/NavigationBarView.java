@@ -663,7 +663,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         // Always disable recents when alternate car mode UI is active.
         boolean disableRecent = mUseCarModeUi || !isOverviewEnabled();
 
-        boolean disableBack = ((mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0) && !useAltBack;
+        boolean disableBack = QuickStepController.shouldhideBackButton()
+                || (((mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0) && !useAltBack);
 
         // When screen pinning, don't hide back and home when connected service or back and
         // recents buttons when disconnected from launcher service in screen pinning mode,

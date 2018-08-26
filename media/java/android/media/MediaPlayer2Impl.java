@@ -210,22 +210,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             @Override
             void process() {
                 stayAwake(true);
-
-                // TODO: remove this block when native code sends MEDIA_INFO_DATA_SOURCE_START
-                // when pipeline is created.
-                if (getState() == PLAYER_STATE_PREPARED) {
-                    final DataSourceDesc dsd;
-                    synchronized (mSrcLock) {
-                        dsd = mCurrentDSD;
-                    }
-                    synchronized (mEventCbLock) {
-                        for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                            cb.first.execute(() -> cb.second.onInfo(
-                                    MediaPlayer2Impl.this, dsd, MEDIA_INFO_DATA_SOURCE_START, 0));
-                        }
-                    }
-                }
-
                 _start();
             }
         });

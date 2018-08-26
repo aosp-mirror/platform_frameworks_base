@@ -91,7 +91,7 @@ public class CarStatusBar extends StatusBar implements
         mActivityManagerWrapper = ActivityManagerWrapper.getInstance();
         mActivityManagerWrapper.registerTaskStackListener(mTaskStackListener);
 
-        mStackScroller.setScrollingEnabled(true);
+        mNotificationPanel.setScrollingEnabled(true);
 
         createBatteryController();
         mCarBatteryController.startListening();

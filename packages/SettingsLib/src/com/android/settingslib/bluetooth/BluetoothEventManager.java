@@ -81,7 +81,6 @@ public class BluetoothEventManager {
         addHandler(BluetoothAdapter.ACTION_DISCOVERY_STARTED, new ScanningStateChangedHandler(true));
         addHandler(BluetoothAdapter.ACTION_DISCOVERY_FINISHED, new ScanningStateChangedHandler(false));
         addHandler(BluetoothDevice.ACTION_FOUND, new DeviceFoundHandler());
-        addHandler(BluetoothDevice.ACTION_DISAPPEARED, new DeviceDisappearedHandler());
         addHandler(BluetoothDevice.ACTION_NAME_CHANGED, new NameChangedHandler());
         addHandler(BluetoothDevice.ACTION_ALIAS_CHANGED, new NameChangedHandler());
 
@@ -296,24 +295,6 @@ public class BluetoothEventManager {
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
                     BluetoothAdapter.ERROR);
             dispatchConnectionStateChanged(cachedDevice, state);
-        }
-    }
-
-    private class DeviceDisappearedHandler implements Handler {
-        public void onReceive(Context context, Intent intent,
-                BluetoothDevice device) {
-            CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
-            if (cachedDevice == null) {
-                Log.w(TAG, "received ACTION_DISAPPEARED for an unknown device: " + device);
-                return;
-            }
-            if (CachedBluetoothDeviceManager.onDeviceDisappeared(cachedDevice)) {
-                synchronized (mCallbacks) {
-                    for (BluetoothCallback callback : mCallbacks) {
-                        callback.onDeviceDeleted(cachedDevice);
-                    }
-                }
-            }
         }
     }
 

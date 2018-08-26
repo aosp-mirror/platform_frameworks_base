@@ -79,4 +79,18 @@ public abstract class StorageManagerInternal {
      * @return The mount mode.
      */
     public abstract int getExternalStorageMountMode(int uid, String packageName);
+
+    /**
+     * Mount external storage for the given package.
+     *
+     * <p> This will involve calling into vold to setup appropriate bind mounts.
+     *
+     * @param packageName The package for which external storage will be mounted.
+     * @param appId The appId for the given package.
+     * @param sharedUserId The sharedUserId for given package if it specified
+     *      {@code android:sharedUserId} in the manifest, otherwise {@code null}
+     * @param userId
+     */
+    public abstract void mountExternalStorageForApp(String packageName, int appId,
+            String sharedUserId, int userId);
 }

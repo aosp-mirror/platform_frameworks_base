@@ -24,6 +24,7 @@ import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.REQUEST_DELETE_PACKAGES;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_MEDIA_STORAGE;
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.Intent.CATEGORY_DEFAULT;
 import static android.content.Intent.CATEGORY_HOME;
@@ -2368,7 +2369,8 @@ public class PackageManagerService extends IPackageManager.Stub
             sUserManager = new UserManagerService(context, this,
                     new UserDataPreparer(mInstaller, mInstallLock, mContext, mOnlyCore), mPackages);
             mComponentResolver = new ComponentResolver(sUserManager,
-                    LocalServices.getService(PackageManagerInternal.class));
+                    LocalServices.getService(PackageManagerInternal.class),
+                    mPackages);
             mPermissionManager = PermissionManagerService.create(context,
                     new DefaultPermissionGrantedCallback() {
                         @Override
@@ -17352,11 +17354,11 @@ public class PackageManagerService extends IPackageManager.Stub
             final File privilegedProductAppDir = new File(Environment.getProductDirectory(), "priv-app");
             final File privilegedProductServicesAppDir =
                     new File(Environment.getProductServicesDirectory(), "priv-app");
-            return path.startsWith(privilegedAppDir.getCanonicalPath())
-                    || path.startsWith(privilegedVendorAppDir.getCanonicalPath())
-                    || path.startsWith(privilegedOdmAppDir.getCanonicalPath())
-                    || path.startsWith(privilegedProductAppDir.getCanonicalPath())
-                    || path.startsWith(privilegedProductServicesAppDir.getCanonicalPath());
+            return path.startsWith(privilegedAppDir.getCanonicalPath() + "/")
+                    || path.startsWith(privilegedVendorAppDir.getCanonicalPath() + "/")
+                    || path.startsWith(privilegedOdmAppDir.getCanonicalPath() + "/")
+                    || path.startsWith(privilegedProductAppDir.getCanonicalPath() + "/")
+                    || path.startsWith(privilegedProductServicesAppDir.getCanonicalPath() + "/");
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
@@ -17365,7 +17367,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     static boolean locationIsOem(String path) {
         try {
-            return path.startsWith(Environment.getOemDirectory().getCanonicalPath());
+            return path.startsWith(Environment.getOemDirectory().getCanonicalPath() + "/");
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
@@ -17374,8 +17376,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     static boolean locationIsVendor(String path) {
         try {
-            return path.startsWith(Environment.getVendorDirectory().getCanonicalPath())
-                    || path.startsWith(Environment.getOdmDirectory().getCanonicalPath());
+            return path.startsWith(Environment.getVendorDirectory().getCanonicalPath() + "/")
+                    || path.startsWith(Environment.getOdmDirectory().getCanonicalPath() + "/");
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
@@ -17384,7 +17386,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     static boolean locationIsProduct(String path) {
         try {
-            return path.startsWith(Environment.getProductDirectory().getCanonicalPath());
+            return path.startsWith(Environment.getProductDirectory().getCanonicalPath() + "/");
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
@@ -17393,7 +17395,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     static boolean locationIsProductServices(String path) {
         try {
-            return path.startsWith(Environment.getProductServicesDirectory().getCanonicalPath());
+            return path.startsWith(
+              Environment.getProductServicesDirectory().getCanonicalPath() + "/");
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
@@ -20024,14 +20027,19 @@ public class PackageManagerService extends IPackageManager.Stub
         mDexManager.systemReady();
         mPackageDexOptimizer.systemReady();
 
-        StorageManagerInternal StorageManagerInternal = LocalServices.getService(
+        StorageManagerInternal storageManagerInternal = LocalServices.getService(
                 StorageManagerInternal.class);
-        StorageManagerInternal.addExternalStoragePolicy(
+        storageManagerInternal.addExternalStoragePolicy(
                 new StorageManagerInternal.ExternalStorageMountPolicy() {
             @Override
             public int getMountMode(int uid, String packageName) {
                 if (Process.isIsolated(uid)) {
                     return Zygote.MOUNT_EXTERNAL_NONE;
+                }
+                if (SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+                    return checkUidPermission(WRITE_MEDIA_STORAGE, uid) == PERMISSION_GRANTED
+                            ? Zygote.MOUNT_EXTERNAL_FULL
+                            : Zygote.MOUNT_EXTERNAL_WRITE;
                 }
                 if (checkUidPermission(READ_EXTERNAL_STORAGE, uid) == PERMISSION_DENIED) {
                     return Zygote.MOUNT_EXTERNAL_DEFAULT;
@@ -21404,6 +21412,12 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         prepareAppDataContentsLeafLIF(pkg, userId, flags);
+        final StorageManagerInternal storageManagerInternal
+                = LocalServices.getService(StorageManagerInternal.class);
+        if (storageManagerInternal != null) {
+            storageManagerInternal.mountExternalStorageForApp(
+                    pkg.packageName, appId, pkg.mSharedUserId, userId);
+        }
     }
 
     private void prepareAppDataContentsLIF(PackageParser.Package pkg, int userId, int flags) {

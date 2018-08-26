@@ -45,8 +45,10 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.provider.Settings;
 import android.util.ArrayMap;
@@ -657,33 +659,35 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 });
 
-        StorageManagerInternal storageManagerInternal = LocalServices.getService(
-                StorageManagerInternal.class);
-        storageManagerInternal.addExternalStoragePolicy(
-                new StorageManagerInternal.ExternalStorageMountPolicy() {
-                    @Override
-                    public int getMountMode(int uid, String packageName) {
-                        if (Process.isIsolated(uid)) {
-                            return Zygote.MOUNT_EXTERNAL_NONE;
+        if (!SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+            StorageManagerInternal storageManagerInternal = LocalServices.getService(
+                    StorageManagerInternal.class);
+            storageManagerInternal.addExternalStoragePolicy(
+                    new StorageManagerInternal.ExternalStorageMountPolicy() {
+                        @Override
+                        public int getMountMode(int uid, String packageName) {
+                            if (Process.isIsolated(uid)) {
+                                return Zygote.MOUNT_EXTERNAL_NONE;
+                            }
+                            if (noteOperation(AppOpsManager.OP_READ_EXTERNAL_STORAGE, uid,
+                                    packageName) != AppOpsManager.MODE_ALLOWED) {
+                                return Zygote.MOUNT_EXTERNAL_NONE;
+                            }
+                            if (noteOperation(AppOpsManager.OP_WRITE_EXTERNAL_STORAGE, uid,
+                                    packageName) != AppOpsManager.MODE_ALLOWED) {
+                                return Zygote.MOUNT_EXTERNAL_READ;
+                            }
+                            return Zygote.MOUNT_EXTERNAL_WRITE;
                         }
-                        if (noteOperation(AppOpsManager.OP_READ_EXTERNAL_STORAGE, uid,
-                                packageName) != AppOpsManager.MODE_ALLOWED) {
-                            return Zygote.MOUNT_EXTERNAL_NONE;
-                        }
-                        if (noteOperation(AppOpsManager.OP_WRITE_EXTERNAL_STORAGE, uid,
-                                packageName) != AppOpsManager.MODE_ALLOWED) {
-                            return Zygote.MOUNT_EXTERNAL_READ;
-                        }
-                        return Zygote.MOUNT_EXTERNAL_WRITE;
-                    }
 
-                    @Override
-                    public boolean hasExternalStorage(int uid, String packageName) {
-                        final int mountMode = getMountMode(uid, packageName);
-                        return mountMode == Zygote.MOUNT_EXTERNAL_READ
-                                || mountMode == Zygote.MOUNT_EXTERNAL_WRITE;
-                    }
-                });
+                        @Override
+                        public boolean hasExternalStorage(int uid, String packageName) {
+                            final int mountMode = getMountMode(uid, packageName);
+                            return mountMode == Zygote.MOUNT_EXTERNAL_READ
+                                    || mountMode == Zygote.MOUNT_EXTERNAL_WRITE;
+                        }
+                    });
+        }
     }
 
     public void packageRemoved(int uid, String packageName) {

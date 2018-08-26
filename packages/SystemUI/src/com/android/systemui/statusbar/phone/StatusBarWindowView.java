@@ -215,7 +215,8 @@ public class StatusBarWindowView extends FrameLayout {
 
     public void setService(StatusBar service) {
         mService = service;
-        setDragDownHelper(new DragDownHelper(getContext(), this, mStackScrollLayout, mService));
+        setDragDownHelper(new DragDownHelper(getContext(), this, mStackScrollLayout,
+                mStackScrollLayout));
     }
 
     @VisibleForTesting

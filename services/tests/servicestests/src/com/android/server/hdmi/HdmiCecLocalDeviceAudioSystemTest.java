@@ -30,14 +30,13 @@ import android.media.AudioManager;
 import android.os.Looper;
 import android.os.SystemProperties;
 import android.os.test.TestLooper;
-
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-
 import com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
 
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -48,7 +47,10 @@ import java.util.ArrayList;
 /** Tests for {@link HdmiCecLocalDeviceAudioSystem} class. */
 public class HdmiCecLocalDeviceAudioSystemTest {
 
-    private static final String TAG = "HdmiCecLocalDeviceAudioSystemTest";
+    private static final HdmiCecMessage MESSAGE_REQUEST_SAD_LCPM =
+            HdmiCecMessageBuilder.buildRequestShortAudioDescriptor(
+                    ADDR_TV, ADDR_AUDIO_SYSTEM, new int[] {Constants.AUDIO_CODEC_LPCM});
+
     private HdmiControlService mHdmiControlService;
     private HdmiCecController mHdmiCecController;
     private HdmiCecLocalDeviceAudioSystem mHdmiCecLocalDeviceAudioSystem;
@@ -61,9 +63,9 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     private boolean mMusicMute;
 
     @Before
-    public void SetUp() {
+    public void setUp() {
         mHdmiControlService =
-                new HdmiControlService(null) {
+                new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
                     @Override
                     AudioManager getAudioManager() {
                         return new AudioManager() {
@@ -171,6 +173,60 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Ignore("b/80297700")
+    @Test
+    public void handleRequestShortAudioDescriptor_featureDisabled() throws Exception {
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                        ADDR_AUDIO_SYSTEM,
+                        ADDR_TV,
+                        Constants.MESSAGE_REQUEST_SHORT_AUDIO_DESCRIPTOR,
+                        Constants.ABORT_REFUSED);
+
+        mHdmiCecLocalDeviceAudioSystem.setSystemAudioControlFeatureEnabled(false);
+        assertThat(
+                        mHdmiCecLocalDeviceAudioSystem.handleRequestShortAudioDescriptor(
+                                MESSAGE_REQUEST_SAD_LCPM))
+                .isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    public void handleRequestShortAudioDescriptor_samOff() throws Exception {
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                        ADDR_AUDIO_SYSTEM,
+                        ADDR_TV,
+                        Constants.MESSAGE_REQUEST_SHORT_AUDIO_DESCRIPTOR,
+                        Constants.ABORT_NOT_IN_CORRECT_MODE);
+
+        mHdmiCecLocalDeviceAudioSystem.setSystemAudioMode(false);
+        assertThat(
+                        mHdmiCecLocalDeviceAudioSystem.handleRequestShortAudioDescriptor(
+                                MESSAGE_REQUEST_SAD_LCPM))
+                .isEqualTo(true);
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    public void handleRequestShortAudioDescriptor_noAudioDeviceInfo() throws Exception {
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                        ADDR_AUDIO_SYSTEM,
+                        ADDR_TV,
+                        Constants.MESSAGE_REQUEST_SHORT_AUDIO_DESCRIPTOR,
+                        Constants.ABORT_UNABLE_TO_DETERMINE);
+
+        mHdmiCecLocalDeviceAudioSystem.setSystemAudioMode(true);
+        assertThat(
+                        mHdmiCecLocalDeviceAudioSystem.handleRequestShortAudioDescriptor(
+                                MESSAGE_REQUEST_SAD_LCPM))
+                .isEqualTo(true);
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
+    }
+
     @Test
     public void handleSetSystemAudioMode_setOn_orignalOff() {
         mMusicMute = true;

@@ -43,12 +43,12 @@ public class StatusBarStateController {
             return;
         }
         synchronized (mListeners) {
-            for (StateListener listener : mListeners) {
+            for (StateListener listener : new ArraySet<>(mListeners)) {
                 listener.onStatePreChange(mState, state);
             }
             mLastState = mState;
             mState = state;
-            for (StateListener listener : mListeners) {
+            for (StateListener listener : new ArraySet<>(mListeners)) {
                 listener.onStateChanged(mState);
             }
         }

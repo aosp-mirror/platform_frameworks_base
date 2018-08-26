@@ -6960,6 +6960,11 @@ status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
     uint32_t res = *resId;
     size_t packageId = Res_GETPACKAGE(res) + 1;
 
+    if (!Res_VALIDID(res)) {
+        // Cannot look up a null or invalid id, so no lookup needs to be done.
+        return NO_ERROR;
+    }
+
     if (packageId == APP_PACKAGE_ID && !mAppAsLib) {
         // No lookup needs to be done, app package IDs are absolute.
         return NO_ERROR;
@@ -6993,25 +6998,17 @@ status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
 }
 
 status_t DynamicRefTable::lookupResourceValue(Res_value* value) const {
-    uint8_t resolvedType = Res_value::TYPE_REFERENCE;
-    switch (value->dataType) {
-    case Res_value::TYPE_ATTRIBUTE:
-        resolvedType = Res_value::TYPE_ATTRIBUTE;
-        // fallthrough
-    case Res_value::TYPE_REFERENCE:
-        if (!mAppAsLib) {
-            return NO_ERROR;
-        }
+    uint8_t resolvedType;
 
-        // If the package is loaded as shared library, the resource reference
-        // also need to be fixed.
-        break;
-    case Res_value::TYPE_DYNAMIC_ATTRIBUTE:
+    if (value->dataType == Res_value::TYPE_ATTRIBUTE
+        || value->dataType == Res_value::TYPE_DYNAMIC_ATTRIBUTE) {
         resolvedType = Res_value::TYPE_ATTRIBUTE;
-        // fallthrough
-    case Res_value::TYPE_DYNAMIC_REFERENCE:
-        break;
-    default:
+
+    } else if (value->dataType == Res_value::TYPE_REFERENCE
+               || value->dataType == Res_value::TYPE_DYNAMIC_REFERENCE) {
+        resolvedType = Res_value::TYPE_REFERENCE;
+
+    } else {
         return NO_ERROR;
     }
 

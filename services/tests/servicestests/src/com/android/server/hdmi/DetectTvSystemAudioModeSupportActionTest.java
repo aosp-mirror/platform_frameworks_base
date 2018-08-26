@@ -22,9 +22,8 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Looper;
 import android.os.test.TestLooper;
-
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-
 import com.android.server.hdmi.HdmiCecLocalDeviceAudioSystem.TvSystemAudioModeSupportedCallback;
 
 import org.junit.Before;
@@ -50,7 +49,7 @@ public class DetectTvSystemAudioModeSupportActionTest {
     public void SetUp() {
         mDeviceInfoForTests = new HdmiDeviceInfo(1001, 1234);
         HdmiControlService hdmiControlService =
-                new HdmiControlService(null) {
+                new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
 
                     @Override
                     void sendCecCommand(

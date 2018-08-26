@@ -321,12 +321,15 @@
         <item name="*android:isLightTheme">false</item>
     </style>
 
-    <style name="Theme.SystemUI.Light" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
+    <style name="Theme.SystemUI.Light">
         <item name="wallpaperTextColor">@*android:color/primary_text_material_light</item>
         <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_light</item>
         <item name="android:colorError">@*android:color/error_color_material_light</item>
         <item name="android:colorControlHighlight">#40000000</item>
         <item name="passwordStyle">@style/PasswordTheme.Light</item>
+
+        <!-- Needed for MediaRoute chooser dialog -->
+        <item name="*android:isLightTheme">true</item>
     </style>
 
     <style name="LockPatternStyle">
@@ -493,6 +496,11 @@
 
     <style name="TextAppearance.HeadsUpStatusBarText"
            parent="@*android:style/TextAppearance.Material.Notification.Info">
+    </style>
+
+    <style name="TextAppearance.QSEdit.Headers"
+        parent="@*android:style/TextAppearance.Material.Body2">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
     </style>
 
     <style name="edit_theme" parent="qs_theme">

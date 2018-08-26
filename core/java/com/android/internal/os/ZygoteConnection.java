@@ -644,7 +644,9 @@ class ZygoteConnection {
                     mountExternal = Zygote.MOUNT_EXTERNAL_READ;
                 } else if (arg.equals("--mount-external-write")) {
                     mountExternal = Zygote.MOUNT_EXTERNAL_WRITE;
-                } else if (arg.equals("--query-abi-list")) {
+                } else if (arg.equals("--mount-external-full")) {
+                    mountExternal = Zygote.MOUNT_EXTERNAL_FULL;
+                }  else if (arg.equals("--query-abi-list")) {
                     abiListQuery = true;
                 } else if (arg.equals("--get-pid")) {
                     pidQuery = true;

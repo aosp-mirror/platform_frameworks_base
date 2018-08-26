@@ -68,12 +68,14 @@ public class IntentForwarderActivityTest {
     private static final String TYPE_PLAIN_TEXT = "text/plain";
 
     private static UserInfo MANAGED_PROFILE_INFO = new UserInfo();
+
     static {
         MANAGED_PROFILE_INFO.id = 10;
         MANAGED_PROFILE_INFO.flags = UserInfo.FLAG_MANAGED_PROFILE;
     }
 
     private static UserInfo CURRENT_USER_INFO = new UserInfo();
+
     static {
         CURRENT_USER_INFO.id = UserHandle.myUserId();
         CURRENT_USER_INFO.flags = 0;
@@ -84,10 +86,14 @@ public class IntentForwarderActivityTest {
     private static String sActivityName;
     private static String sPackageName;
 
-    @Mock private IPackageManager mIPm;
-    @Mock private PackageManager mPm;
-    @Mock private UserManager mUserManager;
-    @Mock private ApplicationInfo mApplicationInfo;
+    @Mock
+    private IPackageManager mIPm;
+    @Mock
+    private PackageManager mPm;
+    @Mock
+    private UserManager mUserManager;
+    @Mock
+    private ApplicationInfo mApplicationInfo;
 
     @Rule
     public ActivityTestRule<IntentForwarderWrapperActivity> mActivityRule =
@@ -264,8 +270,8 @@ public class IntentForwarderActivityTest {
     public void shouldSkipDisclosure_notWhitelisted() throws RemoteException {
         setupShouldSkipDisclosureTest();
         Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
-            .setAction(Intent.ACTION_SEND)
-            .setType(TYPE_PLAIN_TEXT);
+                .setAction(Intent.ACTION_SEND)
+                .setType(TYPE_PLAIN_TEXT);
 
         mActivityRule.launchActivity(intent);
 
@@ -279,8 +285,8 @@ public class IntentForwarderActivityTest {
         sActivityName = ResolverActivity.class.getName();
         sPackageName = "android";
         Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
-            .setAction(Intent.ACTION_SEND)
-            .setType(TYPE_PLAIN_TEXT);
+                .setAction(Intent.ACTION_SEND)
+                .setType(TYPE_PLAIN_TEXT);
 
         mActivityRule.launchActivity(intent);
 
@@ -292,7 +298,31 @@ public class IntentForwarderActivityTest {
     public void shouldSkipDisclosure_callIntent_call() throws RemoteException {
         setupShouldSkipDisclosureTest();
         Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
-            .setAction(Intent.ACTION_CALL);
+                .setAction(Intent.ACTION_CALL);
+
+        mActivityRule.launchActivity(intent);
+
+        verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyInt(), anyInt());
+    }
+
+    @Test
+    public void shouldSkipDisclosure_callIntent_callPrivileged() throws RemoteException {
+        setupShouldSkipDisclosureTest();
+        Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
+                .setAction(Intent.ACTION_CALL_PRIVILEGED);
+
+        mActivityRule.launchActivity(intent);
+
+        verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyInt(), anyInt());
+    }
+
+    @Test
+    public void shouldSkipDisclosure_callIntent_callEmergency() throws RemoteException {
+        setupShouldSkipDisclosureTest();
+        Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
+                .setAction(Intent.ACTION_CALL_EMERGENCY);
 
         mActivityRule.launchActivity(intent);
 
@@ -304,7 +334,7 @@ public class IntentForwarderActivityTest {
     public void shouldSkipDisclosure_callIntent_dial() throws RemoteException {
         setupShouldSkipDisclosureTest();
         Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
-            .setAction(Intent.ACTION_DIAL);
+                .setAction(Intent.ACTION_DIAL);
 
         mActivityRule.launchActivity(intent);
 
@@ -316,7 +346,7 @@ public class IntentForwarderActivityTest {
     public void shouldSkipDisclosure_callIntent_notCallOrDial() throws RemoteException {
         setupShouldSkipDisclosureTest();
         Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
-            .setAction(Intent.ACTION_ALARM_CHANGED);
+                .setAction(Intent.ACTION_ALARM_CHANGED);
 
         mActivityRule.launchActivity(intent);
 
@@ -325,11 +355,25 @@ public class IntentForwarderActivityTest {
     }
 
     @Test
+    public void shouldSkipDisclosure_callIntent_actionViewTel() throws RemoteException {
+        setupShouldSkipDisclosureTest();
+        Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
+                .setAction(Intent.ACTION_VIEW)
+                .addCategory(Intent.CATEGORY_BROWSABLE)
+                .setData(Uri.fromParts("tel", PHONE_NUMBER, null));
+
+        mActivityRule.launchActivity(intent);
+
+        verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyInt(), anyInt());
+    }
+
+    @Test
     public void shouldSkipDisclosure_textMessageIntent_sms() throws RemoteException {
         setupShouldSkipDisclosureTest();
         Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
-            .setAction(Intent.ACTION_SENDTO)
-            .setData(Uri.fromParts("sms", PHONE_NUMBER, null));
+                .setAction(Intent.ACTION_SENDTO)
+                .setData(Uri.fromParts("sms", PHONE_NUMBER, null));
 
         mActivityRule.launchActivity(intent);
 
@@ -341,8 +385,8 @@ public class IntentForwarderActivityTest {
     public void shouldSkipDisclosure_textMessageIntent_smsto() throws RemoteException {
         setupShouldSkipDisclosureTest();
         Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
-            .setAction(Intent.ACTION_SENDTO)
-            .setData(Uri.fromParts("smsto", PHONE_NUMBER, null));
+                .setAction(Intent.ACTION_SENDTO)
+                .setData(Uri.fromParts("smsto", PHONE_NUMBER, null));
 
         mActivityRule.launchActivity(intent);
 
@@ -354,8 +398,8 @@ public class IntentForwarderActivityTest {
     public void shouldSkipDisclosure_textMessageIntent_mms() throws RemoteException {
         setupShouldSkipDisclosureTest();
         Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
-            .setAction(Intent.ACTION_SENDTO)
-            .setData(Uri.fromParts("mms", PHONE_NUMBER, null));
+                .setAction(Intent.ACTION_SENDTO)
+                .setData(Uri.fromParts("mms", PHONE_NUMBER, null));
 
         mActivityRule.launchActivity(intent);
 
@@ -367,8 +411,64 @@ public class IntentForwarderActivityTest {
     public void shouldSkipDisclosure_textMessageIntent_mmsto() throws RemoteException {
         setupShouldSkipDisclosureTest();
         Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
-            .setAction(Intent.ACTION_SENDTO)
-            .setData(Uri.fromParts("mmsto", PHONE_NUMBER, null));
+                .setAction(Intent.ACTION_SENDTO)
+                .setData(Uri.fromParts("mmsto", PHONE_NUMBER, null));
+
+        mActivityRule.launchActivity(intent);
+
+        verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyInt(), anyInt());
+    }
+
+    @Test
+    public void shouldSkipDisclosure_textMessageIntent_actionViewSms() throws RemoteException {
+        setupShouldSkipDisclosureTest();
+        Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
+                .setAction(Intent.ACTION_VIEW)
+                .addCategory(Intent.CATEGORY_BROWSABLE)
+                .setData(Uri.fromParts("sms", PHONE_NUMBER, null));
+
+        mActivityRule.launchActivity(intent);
+
+        verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyInt(), anyInt());
+    }
+
+    @Test
+    public void shouldSkipDisclosure_textMessageIntent_actionViewSmsto() throws RemoteException {
+        setupShouldSkipDisclosureTest();
+        Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
+                .setAction(Intent.ACTION_VIEW)
+                .addCategory(Intent.CATEGORY_BROWSABLE)
+                .setData(Uri.fromParts("smsto", PHONE_NUMBER, null));
+
+        mActivityRule.launchActivity(intent);
+
+        verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyInt(), anyInt());
+    }
+
+    @Test
+    public void shouldSkipDisclosure_textMessageIntent_actionViewMms() throws RemoteException {
+        setupShouldSkipDisclosureTest();
+        Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
+                .setAction(Intent.ACTION_VIEW)
+                .addCategory(Intent.CATEGORY_BROWSABLE)
+                .setData(Uri.fromParts("mms", PHONE_NUMBER, null));
+
+        mActivityRule.launchActivity(intent);
+
+        verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyInt(), anyInt());
+    }
+
+    @Test
+    public void shouldSkipDisclosure_textMessageIntent_actionViewMmsto() throws RemoteException {
+        setupShouldSkipDisclosureTest();
+        Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
+                .setAction(Intent.ACTION_VIEW)
+                .addCategory(Intent.CATEGORY_BROWSABLE)
+                .setData(Uri.fromParts("mmsto", PHONE_NUMBER, null));
 
         mActivityRule.launchActivity(intent);
 
@@ -380,8 +480,36 @@ public class IntentForwarderActivityTest {
     public void shouldSkipDisclosure_textMessageIntent_invalidUri() throws RemoteException {
         setupShouldSkipDisclosureTest();
         Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
-            .setAction(Intent.ACTION_SENDTO)
-            .setData(Uri.fromParts("invalid", PHONE_NUMBER, null));
+                .setAction(Intent.ACTION_SENDTO)
+                .setData(Uri.fromParts("invalid", PHONE_NUMBER, null));
+
+        mActivityRule.launchActivity(intent);
+
+        verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
+        verify(sInjector).showToast(anyInt(), anyInt());
+    }
+
+    @Test
+    public void shouldSkipDisclosure_viewBrowsableIntent_invalidUri() throws RemoteException {
+        setupShouldSkipDisclosureTest();
+        Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
+                .setAction(Intent.ACTION_VIEW)
+                .addCategory(Intent.CATEGORY_BROWSABLE)
+                .setData(Uri.fromParts("invalid", PHONE_NUMBER, null));
+
+        mActivityRule.launchActivity(intent);
+
+        verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
+        verify(sInjector).showToast(anyInt(), anyInt());
+    }
+
+    @Test
+    public void shouldSkipDisclosure_viewBrowsableIntent_normalUrl() throws RemoteException {
+        setupShouldSkipDisclosureTest();
+        Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
+                .setAction(Intent.ACTION_VIEW)
+                .addCategory(Intent.CATEGORY_BROWSABLE)
+                .setData(Uri.fromParts("http", "apache.org", null));
 
         mActivityRule.launchActivity(intent);
 
@@ -401,10 +529,11 @@ public class IntentForwarderActivityTest {
         when(mUserManager.getProfiles(anyInt())).thenReturn(profiles);
         // Intent can be forwarded.
         when(mIPm.canForwardTo(
-            any(Intent.class), nullable(String.class), anyInt(), anyInt())).thenReturn(true);
+                any(Intent.class), nullable(String.class), anyInt(), anyInt())).thenReturn(true);
     }
 
     public static class IntentForwarderWrapperActivity extends IntentForwarderActivity {
+
         private Intent mStartActivityIntent;
         private int mUserIdActivityLaunchedIn;
 

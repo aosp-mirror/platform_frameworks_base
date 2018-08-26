@@ -1,0 +1,10 @@
+{
+  "imports": [
+    {
+      "path": "frameworks/base/services/core/java/com/android/server/am"
+    },
+    {
+      "path": "frameworks/base/services/core/java/com/android/server/wm"
+    }
+  ]
+}

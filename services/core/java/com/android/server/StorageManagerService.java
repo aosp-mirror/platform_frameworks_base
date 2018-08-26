@@ -3867,5 +3867,29 @@ class StorageManagerService extends IStorageManager.Stub
             }
             return true;
         }
+
+        @Override
+        public void mountExternalStorageForApp(String packageName, int appId, String sharedUserId,
+                int userId) {
+            final String sandboxId;
+            synchronized (mPackagesLock) {
+                final ArraySet<String> userPackages = getPackagesForUserPL(userId);
+                // If userPackages is empty, it means the user is not started yet, so no need to
+                // do anything now.
+                if (userPackages.isEmpty() || userPackages.contains(packageName)) {
+                    return;
+                }
+                userPackages.add(packageName);
+                mAppIds.put(packageName, appId);
+                sandboxId = getSandboxId(packageName, sharedUserId);
+                mSandboxIds.put(appId, sandboxId);
+            }
+
+            try {
+                mVold.mountExternalStorageForApp(packageName, appId, sandboxId, userId);
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
+            }
+        }
     }
 }

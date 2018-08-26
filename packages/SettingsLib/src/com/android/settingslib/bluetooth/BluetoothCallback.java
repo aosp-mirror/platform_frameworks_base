@@ -57,9 +57,7 @@ public interface BluetoothCallback {
     default void onDeviceAdded(CachedBluetoothDevice cachedDevice) {}
 
     /**
-     * It will be called when a remote device that was
-     * found in the last discovery and is not found in the current discovery.
-     * It is listening {@link android.bluetooth.BluetoothDevice#ACTION_DISAPPEARED}
+     * It will be called when requiring to remove a remote device from CachedBluetoothDevice list
      *
      * @param cachedDevice the Bluetooth device.
      */

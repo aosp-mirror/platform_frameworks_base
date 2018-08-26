@@ -26,9 +26,8 @@ import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.media.AudioManager;
 import android.os.Looper;
 import android.os.test.TestLooper;
-
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,7 +54,7 @@ public class SystemAudioInitiationActionFromAvrTest {
     public void SetUp() {
         mDeviceInfoForTests = new HdmiDeviceInfo(1001, 1234);
         HdmiControlService hdmiControlService =
-                new HdmiControlService(null) {
+                new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
 
                     @Override
                     void sendCecCommand(
