@@ -34,8 +34,8 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"အကြောင်းကြားချက်များ။"</string>
     <string name="battery_low_title" msgid="9187898087363540349">"မကြာမီ ဘက်ထရီကုန်သွားနိုင်ပါသည်"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> ကျန်ရှိနေ"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> ကျန်သည်၊ သင့်အသုံးပြုမှုအရ <xliff:g id="TIME">%s</xliff:g> ခန့် ကျန်ပါသည်"</string>
-    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> ကျန်သည်၊ <xliff:g id="TIME">%s</xliff:g> ခန့် ကျန်ပါသည်"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> ကျန်သည်၊ သင့်အသုံးပြုမှုအရ <xliff:g id="TIME">%2$s</xliff:g> ခန့် ကျန်ပါသည်"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> ကျန်သည်၊ <xliff:g id="TIME">%2$s</xliff:g> ခန့် ကျန်ပါသည်"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> ကျန်ပါတယ်။ ဘက်ထရီ အားထိန်းကို ဖွင့်ထားသည်။"</string>
     <string name="invalid_charger" msgid="2741987096648693172">"USB ဖြင့် အားသွင်း၍မရပါ။ သင့်စက်ပစ္စည်းနှင့် အတူပါလာသည့် အားသွင်းကိရိယာကို အသုံးပြုပါ။"</string>
     <string name="invalid_charger_title" msgid="2836102177577255404">"USB ဖြင့် အားသွင်း၍မရပါ"</string>
@@ -257,7 +257,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"တည်နေရာပြ တောင်းဆိုချက်များ အသက်ဝင်ရန်"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"သတိပေးချက်အားလုံးအား ဖယ်ရှားခြင်း။"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>၊ +<xliff:g id="OVERFLOW">%s</xliff:g> ခု"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>၊ +<xliff:g id="OVERFLOW">%2$s</xliff:g> ခု"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other">အတွင်းတွင် အကြောင်းကြားချက် နောက်ထပ် <xliff:g id="NUMBER_1">%s</xliff:g> ခုရှိပါသည်။</item>
       <item quantity="one">အတွင်းတွင် အကြောင်းကြားချက် နောက်ထပ် <xliff:g id="NUMBER_0">%s</xliff:g> ခုရှိပါသည်။</item>
@@ -399,9 +399,9 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"လုံးဝ\nတိတ်ဆိတ်ခြင်း"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"ဦးစားပေးမှု\nသာ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"နှိုးစက်များ\nသာ"</string>
-    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • အားသွင်းနေသည် (အားပြည့်ရန် <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> လို)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • အမြန်အားသွင်းနေသည် (အားပြည့်ရန် <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> လို)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • နှေးကွေးစွာ သွင်းနေသည် (အားပြည့်ရန် <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> လို)"</string>
+    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • အားသွင်းနေသည် (အားပြည့်ရန် <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> လို)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • အမြန်အားသွင်းနေသည် (အားပြည့်ရန် <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> လို)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • နှေးကွေးစွာ သွင်းနေသည် (အားပြည့်ရန် <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> လို)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"အသုံးပြုသူကို ပြောင်းလဲရန်"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"အသုံးပြုသူကို ပြောင်းရန်၊ လက်ရှိ အသုံးပြုသူ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"လတ်တလော သုံးစွဲသူ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -426,6 +426,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"အသုံးပြုသူ ထွက်လိုက်ပါ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"အသုံးပြုသူအသစ်ကို ထည့်မလား။"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"သင်ထည့်လိုက်သော အသုံးပြုသူအသစ်သည် ၎င်း၏နေရာကို သတ်မှတ်စီစဉ်ရန် လိုအပ်သည်။\n\nမည်သည့်အသုံးပြုသူမဆို ကျန်သူများအားလုံးအတွက် အက်ပ်များကို အပ်ဒိတ်လုပ်ပေးနိုင်သည်။"</string>
+    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
+    <skip />
+    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
     <string name="user_remove_user_title" msgid="4681256956076895559">"သုံးစွဲသူကိုဖယ်ရှားမည်လား?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ဤအသုံးပြုသူ၏ ဒေတာနှင့် အပ်ဖ်များအားလုံး ဖျက်လိုက်ပါမည်"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"ဖယ်ရှားရန်"</string>
@@ -729,6 +732,8 @@
     <string name="left_icon" msgid="3096287125959387541">"လက်ဝဲသင်္ကေတ"</string>
     <string name="right_icon" msgid="3952104823293824311">"လက်ယာသင်္ကေတ"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"အကွက်များထည့်ရန် ဖိဆွဲပါ"</string>
+    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
+    <skip />
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ဖယ်ရှားရန် ဤနေရာသို့ဖိဆွဲပါ"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"အနည်းဆုံး ၆ ကွက် ရှိရမည်"</string>
     <string name="qs_edit" msgid="2232596095725105230">"တည်းဖြတ်ပါ"</string>
@@ -757,12 +762,10 @@
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"အောက်ခြေ မျက်နှာပြင်အပြည့်"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"<xliff:g id="POSITION">%1$d</xliff:g>၊ <xliff:g id="TILE_NAME">%2$s</xliff:g> နေရာ။ တည်းဖြတ်ရန် နှစ်ချက်တို့ပါ။"</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>။ ပေါင်းထည့်ရန် နှစ်ချက်တို့ပါ။"</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"<xliff:g id="POSITION">%1$d</xliff:g> နေရာ။ ရွေးချယ်ရန် နှစ်ချက်တို့ပါ။"</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ကိုရွှေ့ပါ"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ကိုဖယ်ရှားပါ"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ကို <xliff:g id="POSITION">%2$d</xliff:g> နေရာသို့ ပေါင်းထည့်ထားပါသည်"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ကိုဖယ်ရှားလိုက်ပါပြီ"</string>
-    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ကို <xliff:g id="POSITION">%2$d</xliff:g> နေရာသို့ ရွှေ့လိုက်ပါပြီ"</string>
+    <string name="accessibility_qs_edit_tile_add" msgid="3520406665865985109">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ကို အနေအထား <xliff:g id="POSITION">%2$d</xliff:g> သို့ ပေါင်းထည့်ရန်"</string>
+    <string name="accessibility_qs_edit_tile_move" msgid="3108103090006972938">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ကို အနေအထား <xliff:g id="POSITION">%2$d</xliff:g> သို့ ရွှေ့ရန်"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"မြန်ဆန်သည့် ဆက်တင်တည်းဖြတ်စနစ်"</string>
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> အကြောင်းကြားချက် − <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"မျက်နှာပြင် ခွဲခြမ်းပြသမှုဖြင့် အက်ပ်သည် အလုပ်လုပ်မည် မဟုတ်ပါ။"</string>
@@ -823,7 +826,7 @@
     <string name="app_info" msgid="6856026610594615344">"အက်ပ်အချက်အလက်"</string>
     <string name="go_to_web" msgid="2650669128861626071">"ဘရောင်ဇာသို့ သွားပါ"</string>
     <string name="mobile_data" msgid="7094582042819250762">"မိုဘိုင်းဒေတာ"</string>
-    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> —<xliff:g id="ID_2">%s</xliff:g>"</string>
+    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> —<xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi ကို ပိတ်ထားသည်"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ဘလူးတုသ်ကို ပိတ်ထားသည်"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"\"မနှောင့်ယှက်ရ\" ကို ပိတ်ထားသည်"</string>

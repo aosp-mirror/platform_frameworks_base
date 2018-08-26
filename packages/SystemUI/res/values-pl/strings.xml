@@ -36,8 +36,8 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Powiadomienia"</string>
     <string name="battery_low_title" msgid="9187898087363540349">"Bateria może się wkrótce wyczerpać"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Pozostało <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Pozostało <xliff:g id="PERCENTAGE">%s</xliff:g>, jeszcze około <xliff:g id="TIME">%s</xliff:g> (na podstawie Twojego sposobu korzystania)"</string>
-    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Pozostało <xliff:g id="PERCENTAGE">%s</xliff:g>, jeszcze około <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Pozostało <xliff:g id="PERCENTAGE">%1$s</xliff:g>, jeszcze około <xliff:g id="TIME">%2$s</xliff:g> (na podstawie Twojego sposobu korzystania)"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Pozostało <xliff:g id="PERCENTAGE">%1$s</xliff:g>, jeszcze około <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Pozostało <xliff:g id="PERCENTAGE">%s</xliff:g>. Oszczędzanie baterii jest włączone."</string>
     <string name="invalid_charger" msgid="2741987096648693172">"Nie można naładować przez USB. Użyj ładowarki dostarczonej z urządzeniem."</string>
     <string name="invalid_charger_title" msgid="2836102177577255404">"Nie można naładować przez USB"</string>
@@ -259,7 +259,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Prośby o lokalizację są aktywne"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Usuń wszystkie powiadomienia."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>, +<xliff:g id="OVERFLOW">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>, +<xliff:g id="OVERFLOW">%2$s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="few">Jeszcze <xliff:g id="NUMBER_1">%s</xliff:g> powiadomienia w grupie.</item>
       <item quantity="many">Jeszcze <xliff:g id="NUMBER_1">%s</xliff:g> powiadomień w grupie.</item>
@@ -405,9 +405,9 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Całkowita\ncisza"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Tylko\npriorytetowe"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Tylko\nalarmy"</string>
-    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ładowanie (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> do końca)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Szybkie ładowanie (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> do końca)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Wolne ładowanie (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> do końca)"</string>
+    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ładowanie (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> do końca)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Szybkie ładowanie (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> do końca)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Wolne ładowanie (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> do końca)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Przełącz użytkownika"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Przełącz użytkownika. Bieżący użytkownik: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Bieżący użytkownik: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -432,6 +432,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"WYLOGUJ UŻYTKOWNIKA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Dodać nowego użytkownika?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Gdy dodasz nowego użytkownika, musi on skonfigurować swój profil.\n\nKażdy użytkownik może aktualizować aplikacje wszystkich innych użytkowników."</string>
+    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
+    <skip />
+    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
     <string name="user_remove_user_title" msgid="4681256956076895559">"Usunąć użytkownika?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Wszystkie aplikacje i dane tego użytkownika zostaną usunięte."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Usuń"</string>
@@ -611,7 +614,7 @@
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Te powiadomienia zostaną zminimalizowane"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Zwykle odrzucasz te powiadomienia. \nNadal je pokazywać?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Nadal pokazywać te powiadomienia?"</string>
-    <string name="inline_stop_button" msgid="4172980096860941033">"Zatrzymaj powiadomienia"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Zablokuj powiadomienia"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Pokazuj nadal"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimalizuj"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Nadal pokazywać powiadomienia z tej aplikacji?"</string>
@@ -739,6 +742,8 @@
     <string name="left_icon" msgid="3096287125959387541">"Lewa ikona"</string>
     <string name="right_icon" msgid="3952104823293824311">"Prawa ikona"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Przytrzymaj i przeciągnij, by dodać kafelki"</string>
+    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
+    <skip />
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Przeciągnij tutaj, by usunąć"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Potrzebnych jest co najmniej sześć kafelków"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Edytuj"</string>
@@ -767,12 +772,10 @@
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Dolna część ekranu na pełnym ekranie"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Położenie <xliff:g id="POSITION">%1$d</xliff:g>, kafelek <xliff:g id="TILE_NAME">%2$s</xliff:g>. Kliknij dwukrotnie, by edytować."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"Kafelek <xliff:g id="TILE_NAME">%1$s</xliff:g>. Kliknij dwukrotnie, by dodać."</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Położenie <xliff:g id="POSITION">%1$d</xliff:g>. Kliknij dwukrotnie, by wybrać."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"Przenieś kafelek <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"Usuń kafelek <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"Kafelek <xliff:g id="TILE_NAME">%1$s</xliff:g> został dodany w położeniu <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"Kafelek <xliff:g id="TILE_NAME">%1$s</xliff:g> został usunięty"</string>
-    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"Kafelek <xliff:g id="TILE_NAME">%1$s</xliff:g> przeniesiony w położenie <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add" msgid="3520406665865985109">"Dodaj kafelek <xliff:g id="TILE_NAME">%1$s</xliff:g> w położeniu <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_move" msgid="3108103090006972938">"Przenieś kafelek <xliff:g id="TILE_NAME">%1$s</xliff:g> w położenie <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Edytor szybkich ustawień."</string>
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Powiadomienie z aplikacji <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Aplikacja może nie działać przy podzielonym ekranie."</string>
@@ -833,7 +836,7 @@
     <string name="app_info" msgid="6856026610594615344">"O aplikacji"</string>
     <string name="go_to_web" msgid="2650669128861626071">"Otwórz przeglądarkę"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Komórkowa transmisja danych"</string>
-    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> – <xliff:g id="ID_2">%s</xliff:g>"</string>
+    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi jest wyłączone"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth jest wyłączony"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"Tryb Nie przeszkadzać jest wyłączony"</string>
