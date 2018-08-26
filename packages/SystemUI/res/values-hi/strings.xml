@@ -34,8 +34,8 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"सूचनाएं"</string>
     <string name="battery_low_title" msgid="9187898087363540349">"बैटरी जल्दी ही खत्म हो जाएगी"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> शेष"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> बची है, आपके इस्तेमाल करने के तरीके के हिसाब से बैटरी लगभग <xliff:g id="TIME">%s</xliff:g> चलेगी"</string>
-    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> बची है, बैटरी लगभग <xliff:g id="TIME">%s</xliff:g> चलेगी"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> बची है, आपके इस्तेमाल करने के तरीके के हिसाब से बैटरी लगभग <xliff:g id="TIME">%2$s</xliff:g> चलेगी"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> बची है, बैटरी लगभग <xliff:g id="TIME">%2$s</xliff:g> चलेगी"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> बैटरी बची है. बैटरी सेवर चालू है."</string>
     <string name="invalid_charger" msgid="2741987096648693172">"यूएसबी के ज़रिए चार्ज नहीं किया जा सकता. अपने डिवाइस के साथ मिलने वाले चार्जर का इस्तेमाल करें."</string>
     <string name="invalid_charger_title" msgid="2836102177577255404">"यूएसबी के ज़रिए चार्ज नहीं किया जा सकता"</string>
@@ -257,7 +257,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"जगह का अनुरोध किया जा रहा है"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सभी सूचनाएं साफ़ करें."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>, +<xliff:g id="OVERFLOW">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>, +<xliff:g id="OVERFLOW">%2$s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="one">इसमें <xliff:g id="NUMBER_1">%s</xliff:g> और सूचनाएं हैं.</item>
       <item quantity="other">इसमें <xliff:g id="NUMBER_1">%s</xliff:g> और सूचनाएं हैं.</item>
@@ -399,9 +399,9 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"पूरी तरह\nशांत"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"केवल\nप्राथमिकता"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"केवल\nअलार्म"</string>
-    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • चार्ज हो रहा है (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> में पूरा होगा)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • तेज़ चार्ज हो रहा है (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> में पूरा होगा)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • धीरे चार्ज हो रहा है (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> में पूरा होगा)"</string>
+    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • चार्ज हो रहा है (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> में पूरा होगा)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • तेज़ चार्ज हो रहा है (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> में पूरा होगा)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • धीरे चार्ज हो रहा है (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> में पूरा होगा)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"उपयोगकर्ता बदलें"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"उपयोगकर्ता बदलें, मौजूदा उपयोगकर्ता <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"मौजूदा उपयोगकर्ता <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -426,6 +426,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"उपयोगकर्ता को प्रस्थान करवाएं"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"नया उपयोगकर्ता जोड़ें?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"जब आप कोई नया उपयोगकर्ता जोड़ते हैं तो उस व्यक्ति को अपनी जगह सेट करनी होती है.\n\nकोई भी उपयोगकर्ता बाकी सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है."</string>
+    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
+    <skip />
+    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
     <string name="user_remove_user_title" msgid="4681256956076895559">"उपयोगकर्ता निकालें?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"इस उपयोगकर्ता के सभी ऐप और डेटा को हटा दिया जाएगा."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"निकालें"</string>
@@ -729,6 +732,8 @@
     <string name="left_icon" msgid="3096287125959387541">"बायां आइकॉन"</string>
     <string name="right_icon" msgid="3952104823293824311">"दायां आइकॉन"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"टाइल जोड़ने के लिए दबाएं और खींचें"</string>
+    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
+    <skip />
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"हटाने के लिए यहां खींचें और छोड़ें"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"आपके पास कम से कम 6 टाइल होनी चाहिए"</string>
     <string name="qs_edit" msgid="2232596095725105230">"बदलाव करें"</string>
@@ -757,12 +762,10 @@
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"नीचे की स्क्रीन को पूर्ण स्क्रीन बनाएं"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"स्थिति <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. में बदलाव करने के लिए दो बार छूएं."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. जोड़ने के लिए दो बार छूएं."</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"स्थिति <xliff:g id="POSITION">%1$d</xliff:g>. चुनने के लिए दो बार छूएं."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"<xliff:g id="TILE_NAME">%1$s</xliff:g> को ले जाएं"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"<xliff:g id="TILE_NAME">%1$s</xliff:g> निकालें"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> को <xliff:g id="POSITION">%2$d</xliff:g> स्थिति में जोड़ा गया"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> निकाल दिया गया है"</string>
-    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> को <xliff:g id="POSITION">%2$d</xliff:g> स्थिति में ले जाया गया"</string>
+    <string name="accessibility_qs_edit_tile_add" msgid="3520406665865985109">"<xliff:g id="TILE_NAME">%1$s</xliff:g> काे क्रम संख्या <xliff:g id="POSITION">%2$d</xliff:g> पर जाेड़ें"</string>
+    <string name="accessibility_qs_edit_tile_move" msgid="3108103090006972938">"<xliff:g id="TILE_NAME">%1$s</xliff:g> काे क्रम संख्या <xliff:g id="POSITION">%2$d</xliff:g> पर ले जाएं"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"त्वरित सेटिंग संपादक."</string>
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> सूचना: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"हो सकता है कि ऐप्लिकेशन विभाजित स्क्रीन के साथ काम ना करे."</string>
@@ -823,7 +826,7 @@
     <string name="app_info" msgid="6856026610594615344">"ऐप की जानकारी"</string>
     <string name="go_to_web" msgid="2650669128861626071">"ब्राउज़र पर जाएं"</string>
     <string name="mobile_data" msgid="7094582042819250762">"मोबाइल डेटा"</string>
-    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> — <xliff:g id="ID_2">%s</xliff:g>"</string>
+    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"वाई-फ़ाई बंद है"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ब्लूटूथ बंद है"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"परेशान न करें बंद है"</string>

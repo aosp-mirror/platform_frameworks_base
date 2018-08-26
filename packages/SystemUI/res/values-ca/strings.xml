@@ -34,8 +34,8 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificacions"</string>
     <string name="battery_low_title" msgid="9187898087363540349">"És possible que la bateria s\'esgoti aviat"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g>."</string>
-    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g>; temps restant aproximat segons l\'ús que en fas: <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g>; temps restant aproximat: <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Queda un <xliff:g id="PERCENTAGE">%1$s</xliff:g>; temps restant aproximat segons l\'ús que en fas: <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Queda un <xliff:g id="PERCENTAGE">%1$s</xliff:g>; temps restant aproximat: <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g>. El mode d\'estalvi de bateria està activat."</string>
     <string name="invalid_charger" msgid="2741987096648693172">"No es pot carregar el dispositiu per USB. Fes servir el carregador original del dispositiu."</string>
     <string name="invalid_charger_title" msgid="2836102177577255404">"No es pot carregar per USB"</string>
@@ -63,7 +63,7 @@
     <string name="always_use_device" msgid="4015357883336738417">"Obre sempre <xliff:g id="APPLICATION">%1$s</xliff:g> quan es connecti <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"Obre sempre <xliff:g id="APPLICATION">%1$s</xliff:g> quan es connecti <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Vols permetre la depuració per USB?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"L\'empremta digital de la clau de l\'RSA de l\'equip és:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"L\'empremta digital de la clau de RSA de l\'equip és:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Dona sempre permís des d\'aquest equip"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"No es permet la depuració per USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"L\'usuari que té iniciada la sessió al dispositiu en aquest moment no pot activar la depuració per USB. Per utilitzar aquesta funció, cal canviar a l\'usuari principal."</string>
@@ -83,7 +83,7 @@
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Munta com a càmera (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"Instal·la aplic. transf. fitxers Android per a Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Enrere"</string>
-    <string name="accessibility_home" msgid="8217216074895377641">"Pàgina d\'inici"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"Inici"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menú"</string>
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"Accessibilitat"</string>
     <string name="accessibility_rotate_button" msgid="7402949513740253006">"Gira la pantalla"</string>
@@ -257,7 +257,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Sol·licituds d\'ubicació actives"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Esborra totes les notificacions."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g> i <xliff:g id="OVERFLOW">%s</xliff:g> més"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> i <xliff:g id="OVERFLOW">%2$s</xliff:g> més"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> notificacions més a l\'interior.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> notificació més a l\'interior.</item>
@@ -399,9 +399,9 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Silenci\ntotal"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Només\ninterr. prior."</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Només\nalarmes"</string>
-    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • S\'està carregant (temps restant: <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregant ràpidament (temps restant: <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregant lentament (temps restant: <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • S\'està carregant (temps restant: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregant ràpidament (temps restant: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregant lentament (temps restant: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Canvia d\'usuari"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Canvia d\'usuari. Usuari actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Usuari actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -426,6 +426,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"TANCA LA SESSIÓ DE L\'USUARI"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Vols afegir un usuari nou?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Quan s\'afegeix un usuari nou, aquest usuari ha de configurar-se l\'espai.\n\nQualsevol usuari pot actualitzar les aplicacions de la resta d\'usuaris."</string>
+    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
+    <skip />
+    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
     <string name="user_remove_user_title" msgid="4681256956076895559">"Vols suprimir l\'usuari?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Totes les aplicacions i les dades d\'aquest usuari se suprimiran."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Suprimeix"</string>
@@ -729,6 +732,8 @@
     <string name="left_icon" msgid="3096287125959387541">"Icona de l\'esquerra"</string>
     <string name="right_icon" msgid="3952104823293824311">"Icona de la dreta"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Mantén premut i arrossega per afegir funcions"</string>
+    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
+    <skip />
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrossega aquí per suprimir una funció"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Necessites com a mínim 6 mosaics"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Edita"</string>
@@ -757,12 +762,10 @@
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Pantalla inferior completa"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Posició <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Fes doble toc per editar-la."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Fes doble toc per afegir-ho."</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Posició <xliff:g id="POSITION">%1$d</xliff:g>. Fes doble toc per seleccionar-la."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"Mou <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"Suprimeix <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> s\'ha afegit a la posició <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> s\'ha suprimit"</string>
-    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> s\'ha mogut a la posició <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add" msgid="3520406665865985109">"Afegeix <xliff:g id="TILE_NAME">%1$s</xliff:g> a la posició <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_move" msgid="3108103090006972938">"Mou <xliff:g id="TILE_NAME">%1$s</xliff:g> a la posició <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Editor de configuració ràpida."</string>
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Notificació de <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"És possible que l\'aplicació no funcioni amb la pantalla dividida."</string>
@@ -823,7 +826,7 @@
     <string name="app_info" msgid="6856026610594615344">"Informació de l\'aplicació"</string>
     <string name="go_to_web" msgid="2650669128861626071">"Ves al navegador"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Dades mòbils"</string>
-    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> - <xliff:g id="ID_2">%s</xliff:g>"</string>
+    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> - <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"La Wi-Fi està desactivada"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"El Bluetooth està desactivat"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"El mode No molestis està desactivat"</string>
