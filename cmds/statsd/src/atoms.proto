@@ -121,8 +121,7 @@ message Atom {
         ANROccurred anr_occurred = 79;
         WTFOccurred wtf_occurred = 80;
         LowMemReported low_mem_reported = 81;
-
-
+        ThermalThrottlingStateChanged thermal_throttling = 86;
     }
 
     // Pulled events will start at field 10000.
@@ -196,6 +195,26 @@ message AttributionNode {
  *   - If there is a UID, it goes first. Think in an object-oriented fashion.
  * *****************************************************************************
  */
+
+/**
+ * Logs when the Thermal service HAL notifies the throttling start/stop events.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/stats/StatsCompanionService.java
+ */
+message ThermalThrottlingStateChanged {
+    optional android.os.TemperatureTypeEnum sensor_type = 1;
+
+    enum State {
+        UNKNOWN = 0;
+        START = 1;
+        STOP = 2;
+    }
+
+    optional State state = 2;
+
+    optional float temperature = 3;
+}
 
 /**
  * Logs when the screen state changes.
