@@ -46,23 +46,8 @@ public class AccessibilityGestureDetectorTest {
     private static final int PATH_STEP_PIXELS = 200;
     private static final long PATH_STEP_MILLISEC = 100;
 
-    /**
-     * AccessibilitGestureDetector that can mock double-tap detector.
-     */
-    private class AccessibilityGestureDetectorTestable extends AccessibilityGestureDetector {
-        public AccessibilityGestureDetectorTestable(Context context, Listener listener) {
-            super(context, listener);
-        }
-
-        protected void setDoubleTapDetector(GestureDetector gestureDetector) {
-            mGestureDetector = gestureDetector;
-            mGestureDetector.setOnDoubleTapListener(this);
-        }
-    }
-
-
     // Data used by all tests
-    private AccessibilityGestureDetectorTestable mDetector;
+    private AccessibilityGestureDetector mDetector;
     private AccessibilityGestureDetector.Listener mResultListener;
 
 
@@ -87,9 +72,8 @@ public class AccessibilityGestureDetectorTest {
 
         // Construct a testable AccessibilityGestureDetector.
         mResultListener = mock(AccessibilityGestureDetector.Listener.class);
-        mDetector = new AccessibilityGestureDetectorTestable(contextMock, mResultListener);
         GestureDetector doubleTapDetectorMock = mock(GestureDetector.class);
-        mDetector.setDoubleTapDetector(doubleTapDetectorMock);
+        mDetector = new AccessibilityGestureDetector(contextMock, mResultListener, doubleTapDetectorMock);
     }
 
 
