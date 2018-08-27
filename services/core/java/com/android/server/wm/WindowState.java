@@ -71,12 +71,20 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
+
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_ENTER;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_EXIT;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
+import static com.android.server.wm.AnimationSpecProto.MOVE;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
+import static com.android.server.wm.IdentifierProto.HASH_CODE;
+import static com.android.server.wm.IdentifierProto.TITLE;
+import static com.android.server.wm.IdentifierProto.USER_ID;
+import static com.android.server.wm.MoveAnimationSpecProto.DURATION_MS;
+import static com.android.server.wm.MoveAnimationSpecProto.FROM;
+import static com.android.server.wm.MoveAnimationSpecProto.TO;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
@@ -108,13 +116,6 @@ import static com.android.server.wm.WindowStateAnimator.COMMIT_DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
-import static com.android.server.wm.IdentifierProto.HASH_CODE;
-import static com.android.server.wm.IdentifierProto.TITLE;
-import static com.android.server.wm.IdentifierProto.USER_ID;
-import static com.android.server.wm.AnimationSpecProto.MOVE;
-import static com.android.server.wm.MoveAnimationSpecProto.DURATION_MS;
-import static com.android.server.wm.MoveAnimationSpecProto.FROM;
-import static com.android.server.wm.MoveAnimationSpecProto.TO;
 import static com.android.server.wm.WindowStateProto.ANIMATING_EXIT;
 import static com.android.server.wm.WindowStateProto.ANIMATOR;
 import static com.android.server.wm.WindowStateProto.ATTRIBUTES;
@@ -122,7 +123,8 @@ import static com.android.server.wm.WindowStateProto.CHILD_WINDOWS;
 import static com.android.server.wm.WindowStateProto.CONTENT_INSETS;
 import static com.android.server.wm.WindowStateProto.DESTROYING;
 import static com.android.server.wm.WindowStateProto.DISPLAY_ID;
-import static com.android.server.wm.WindowStateProto.FINISHED_FORCED_SEAMLESS_ROTATION_FRAME;
+import static com.android.server.wm.WindowStateProto.FINISHED_SEAMLESS_ROTATION_FRAME;
+import static com.android.server.wm.WindowStateProto.FORCE_SEAMLESS_ROTATION;
 import static com.android.server.wm.WindowStateProto.GIVEN_CONTENT_INSETS;
 import static com.android.server.wm.WindowStateProto.HAS_SURFACE;
 import static com.android.server.wm.WindowStateProto.IDENTIFIER;
@@ -131,7 +133,7 @@ import static com.android.server.wm.WindowStateProto.IS_READY_FOR_DISPLAY;
 import static com.android.server.wm.WindowStateProto.IS_VISIBLE;
 import static com.android.server.wm.WindowStateProto.OUTSETS;
 import static com.android.server.wm.WindowStateProto.OVERSCAN_INSETS;
-import static com.android.server.wm.WindowStateProto.PENDING_FORCED_SEAMLESS_ROTATION;
+import static com.android.server.wm.WindowStateProto.PENDING_SEAMLESS_ROTATION;
 import static com.android.server.wm.WindowStateProto.REMOVED;
 import static com.android.server.wm.WindowStateProto.REMOVE_ON_EXIT;
 import static com.android.server.wm.WindowStateProto.REQUESTED_HEIGHT;
@@ -145,8 +147,6 @@ import static com.android.server.wm.WindowStateProto.VIEW_VISIBILITY;
 import static com.android.server.wm.WindowStateProto.VISIBLE_INSETS;
 import static com.android.server.wm.WindowStateProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowStateProto.WINDOW_FRAMES;
-import static com.android.server.wm.utils.CoordinateTransforms.transformRect;
-import static com.android.server.wm.utils.CoordinateTransforms.transformToRotation;
 
 import android.annotation.CallSuper;
 import android.app.AppOpsManager;
@@ -279,11 +279,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Special mode that is intended only for the rounded corner overlay: during rotation
      * transition, we un-rotate the window token such that the window appears as it did before the
      * rotation.
-     * TODO(b/111504081): Consolidate seamless rotation logic.
      */
     final boolean mForceSeamlesslyRotate;
-    ForcedSeamlessRotator mPendingForcedSeamlessRotate;
-    long mFinishForcedSeamlessRotateFrameNumber;
+    SeamlessRotator mPendingSeamlessRotate;
+    long mFinishSeamlessRotateFrameNumber;
 
     private RemoteCallbackList<IWindowFocusObserver> mFocusCallbacks;
 
@@ -632,15 +631,30 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private static final float DEFAULT_DIM_AMOUNT_DEAD_WINDOW = 0.5f;
 
-    void forceSeamlesslyRotateIfAllowed(int oldRotation, int rotation) {
-        if (mForceSeamlesslyRotate) {
-            if (mPendingForcedSeamlessRotate != null) {
-                oldRotation = mPendingForcedSeamlessRotate.getOldRotation();
-            }
+    void seamlesslyRotateIfAllowed(Transaction transaction, int oldRotation, int rotation,
+            boolean requested) {
+        // Invisible windows and the wallpaper do not participate in the seamless rotation animation
+        if (!isVisibleNow() || mIsWallpaper) {
+            return;
+        }
 
-            mPendingForcedSeamlessRotate = new ForcedSeamlessRotator(
-                    oldRotation, rotation, getDisplayInfo());
-            mPendingForcedSeamlessRotate.unrotate(this.mToken);
+        if (mPendingSeamlessRotate != null) {
+            oldRotation = mPendingSeamlessRotate.getOldRotation();
+        }
+
+        if (mForceSeamlesslyRotate || requested) {
+            mPendingSeamlessRotate = new SeamlessRotator(oldRotation, rotation, getDisplayInfo());
+            mPendingSeamlessRotate.unrotate(transaction, this.mToken);
+            mService.markForSeamlessRotation(this, true);
+        }
+    }
+
+    void finishSeamlessRotation() {
+        if (mPendingSeamlessRotate != null) {
+            mPendingSeamlessRotate.finish(this.mToken, this);
+            mFinishSeamlessRotateFrameNumber = getFrameNumber();
+            mPendingSeamlessRotate = null;
+            mService.markForSeamlessRotation(this, false);
         }
     }
 
@@ -3301,11 +3315,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         proto.write(REMOVED, mRemoved);
         proto.write(IS_ON_SCREEN, isOnScreen());
         proto.write(IS_VISIBLE, isVisible());
-        if (mForceSeamlesslyRotate) {
-            proto.write(PENDING_FORCED_SEAMLESS_ROTATION, mPendingForcedSeamlessRotate != null);
-            proto.write(FINISHED_FORCED_SEAMLESS_ROTATION_FRAME,
-                    mFinishForcedSeamlessRotateFrameNumber);
-        }
+        proto.write(PENDING_SEAMLESS_ROTATION, mPendingSeamlessRotate != null);
+        proto.write(FINISHED_SEAMLESS_ROTATION_FRAME, mFinishSeamlessRotateFrameNumber);
+        proto.write(FORCE_SEAMLESS_ROTATION, mForceSeamlesslyRotate);
         proto.end(token);
     }
 
@@ -3461,16 +3473,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             pw.print(prefix); pw.print("mLastFreezeDuration=");
                     TimeUtils.formatDuration(mLastFreezeDuration, pw); pw.println();
         }
-        if (mForceSeamlesslyRotate) {
-            pw.print(prefix); pw.print("forceSeamlesslyRotate: pending=");
-            if (mPendingForcedSeamlessRotate != null) {
-                mPendingForcedSeamlessRotate.dump(pw);
-            } else {
-                pw.print("null");
-            }
-            pw.print(" finishedFrameNumber="); pw.print(mFinishForcedSeamlessRotateFrameNumber);
-            pw.println();
+        pw.print(prefix); pw.print("mForceSeamlesslyRotate="); pw.print(mForceSeamlesslyRotate);
+        pw.print(" seamlesslyRotate: pending=");
+        if (mPendingSeamlessRotate != null) {
+            mPendingSeamlessRotate.dump(pw);
+        } else {
+            pw.print("null");
         }
+        pw.print(" finishedFrameNumber="); pw.print(mFinishSeamlessRotateFrameNumber);
+        pw.println();
+
         if (mHScale != 1 || mVScale != 1) {
             pw.print(prefix); pw.print("mHScale="); pw.print(mHScale);
                     pw.print(" mVScale="); pw.println(mVScale);
@@ -4716,8 +4728,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         // Freeze position while we're unrotated, so the surface remains at the position it was
         // prior to the rotation.
-        if (!mSurfaceAnimator.hasLeash() && mPendingForcedSeamlessRotate == null &&
-                !mLastSurfacePosition.equals(mSurfacePosition)) {
+        if (!mSurfaceAnimator.hasLeash() && mPendingSeamlessRotate == null
+                && !mLastSurfacePosition.equals(mSurfacePosition)) {
             t.setPosition(mSurfaceControl, mSurfacePosition.x, mSurfacePosition.y);
             mLastSurfacePosition.set(mSurfacePosition.x, mSurfacePosition.y);
             if (surfaceInsetsChanging() && mWinAnimator.hasSurface()) {
@@ -4868,31 +4880,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void setFrameNumber(long frameNumber) {
         mFrameNumber = frameNumber;
-    }
-
-    @Override
-    void seamlesslyRotate(Transaction t, int oldRotation, int newRotation) {
-        // Invisible windows, the wallpaper, and force seamlessly rotated windows do not participate
-        // in the regular seamless rotation animation.
-        if (!isVisibleNow() || mIsWallpaper || mForceSeamlesslyRotate) {
-            return;
-        }
-        final Matrix transform = mTmpMatrix;
-
-        mService.markForSeamlessRotation(this, true);
-
-        // We rotated the screen, but have not performed a new layout pass yet. In the mean time,
-        // we recompute the coordinates of mFrame in the new orientation, so the surface can be
-        // properly placed.
-        transformToRotation(oldRotation, newRotation, getDisplayInfo(), transform);
-        transformRect(transform, mWindowFrames.mFrame, null /* tmpRectF */);
-
-        updateSurfacePosition(t);
-        mWinAnimator.seamlesslyRotate(t, oldRotation, newRotation);
-
-        // Dispatch to children only after mFrame has been updated, as it's needed in the
-        // child's updateSurfacePosition.
-        super.seamlesslyRotate(t, oldRotation, newRotation);
     }
 
     public void getMaxVisibleBounds(Rect out) {

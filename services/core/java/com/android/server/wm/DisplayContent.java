@@ -1199,13 +1199,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         forAllWindows(w -> {
-            w.forceSeamlesslyRotateIfAllowed(oldRotation, rotation);
+            w.seamlesslyRotateIfAllowed(getPendingTransaction(), oldRotation, rotation,
+                    rotateSeamlessly);
         }, true /* traverseTopToBottom */);
-
-        // TODO(b/111504081): Consolidate seamless rotation logic.
-        if (rotateSeamlessly) {
-            seamlesslyRotate(getPendingTransaction(), oldRotation, rotation);
-        }
 
         mService.mDisplayManagerInternal.performTraversal(getPendingTransaction());
         scheduleAnimation();

@@ -39,27 +39,29 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-import android.graphics.Rect;
+import android.graphics.Matrix;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
-
-import androidx.test.filters.FlakyTest;
-import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.LinkedList;
+
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 /**
  * Tests for the {@link WindowState} class.
@@ -361,23 +363,22 @@ public class WindowStateTests extends WindowTestsBase {
         final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
 
         app.mHasSurface = true;
-        app.mSurfaceControl = mock(SurfaceControl.class);
-        app.mWinAnimator.mSurfaceController = mock(WindowSurfaceController.class);
+        app.mToken.mSurfaceControl = mock(SurfaceControl.class);
         try {
             app.getFrameLw().set(10, 20, 60, 80);
 
-            app.seamlesslyRotate(t, ROTATION_0, ROTATION_90);
+            app.seamlesslyRotateIfAllowed(t, ROTATION_0, ROTATION_90, true);
 
             assertTrue(app.mSeamlesslyRotated);
-            assertEquals(new Rect(20, mDisplayInfo.logicalWidth - 60,
-                    80, mDisplayInfo.logicalWidth - 10), app.getFrameLw());
-
-            verify(t).setPosition(app.mSurfaceControl, app.getFrameLw().left, app.getFrameLw().top);
-            verify(app.mWinAnimator.mSurfaceController).setPosition(t, 0, 50, false);
-            verify(app.mWinAnimator.mSurfaceController).setMatrix(t, 0, -1, 1, 0, false);
+            Matrix matrix = new Matrix();
+            // Un-rotate 90 deg
+            matrix.setRotate(270);
+            // Translate it back to origin
+            matrix.postTranslate(0, mDisplayInfo.logicalWidth);
+            verify(t).setMatrix(eq(app.mToken.mSurfaceControl), eq(matrix), any(float[].class));
         } finally {
-            app.mSurfaceControl = null;
             app.mHasSurface = false;
+            app.mToken.mSurfaceControl = null;
         }
     }
 
