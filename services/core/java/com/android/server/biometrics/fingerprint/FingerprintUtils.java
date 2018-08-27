@@ -23,7 +23,7 @@ import android.text.TextUtils;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.biometrics.common.BiometricUtils;
+import com.android.server.biometrics.BiometricUtils;
 
 import java.util.List;
 

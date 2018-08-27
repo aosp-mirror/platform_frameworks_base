@@ -51,9 +51,9 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemServerInitThreadPool;
-import com.android.server.biometrics.common.BiometricService;
-import com.android.server.biometrics.common.BiometricUtils;
-import com.android.server.biometrics.common.Metrics;
+import com.android.server.biometrics.BiometricService;
+import com.android.server.biometrics.BiometricUtils;
+import com.android.server.biometrics.Metrics;
 
 import org.json.JSONArray;
 import org.json.JSONException;

@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server.biometrics.common;
+package com.android.server.biometrics;
 
 public interface Metrics {
     /** The log tag */
