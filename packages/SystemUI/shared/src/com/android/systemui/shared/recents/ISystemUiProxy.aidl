@@ -17,6 +17,7 @@
 package com.android.systemui.shared.recents;
 
 import android.graphics.Rect;
+import android.view.MotionEvent;
 
 /**
  * Temporary callbacks into SystemUI.
@@ -60,4 +61,14 @@ interface ISystemUiProxy {
      * needed from current value
      */
     void setBackButtonAlpha(float alpha, boolean animate) = 8;
+
+    /**
+     * Proxies motion events from the homescreen UI to the status bar. Only called when
+     * swipe down is detected on WORKSPACE. The sender guarantees the following order of events on
+     * the tracking pointer.
+     *
+     * Normal gesture: DOWN, MOVE/POINTER_DOWN/POINTER_UP)*, UP or CANCLE
+     */
+    void onStatusBarMotionEvent(in MotionEvent event) = 9;
+
 }

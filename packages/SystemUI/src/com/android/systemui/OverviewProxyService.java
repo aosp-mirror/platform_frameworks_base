@@ -32,6 +32,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.MotionEvent;
 
 import com.android.systemui.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.recents.events.EventBus;
@@ -104,6 +105,21 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                             StatusBar.class);
                     if (statusBar != null) {
                         statusBar.showScreenPinningRequest(taskId, false /* allowCancel */);
+                    }
+                });
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        public void onStatusBarMotionEvent(MotionEvent event) {
+            long token = Binder.clearCallingIdentity();
+            try {
+                // TODO move this logic to message queue
+                mHandler.post(()->{
+                    StatusBar bar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
+                    if (bar != null) {
+                        bar.dispatchNotificationsPanelTouchEvent(event);
                     }
                 });
             } finally {
