@@ -75,6 +75,7 @@ import android.service.autofill.ValueFinder;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LocalLog;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -329,12 +330,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     fillContextWithAllowedValuesLocked(mContexts.get(i), flags);
                 }
 
-                // Dispatch a snapshot of the current contexts list since it may change
-                // until the dispatch happens. The items in the list don't need to be cloned
-                // since we don't hold on them anywhere else. The client state is not touched
-                // by us, so no need to copy.
-                request = new FillRequest(requestId, new ArrayList<>(mContexts), mClientState,
-                        flags);
+                final ArrayList<FillContext> contexts =
+                        mergePreviousSessionLocked(/* forSave= */ false);
+                request = new FillRequest(requestId, contexts, mClientState, flags);
             }
 
             mRemoteFillService.onFillRequest(request);
@@ -1465,7 +1463,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         if ((saveInfo.getFlags() & SaveInfo.FLAG_DELAY_SAVE) != 0) {
-            // TODO(b/112051762): log metrics
+            // TODO(b/113281366): log metrics
             if (sDebug) Slog.v(TAG, "showSaveLocked(): service asked to delay save");
             return false;
         }
@@ -1890,13 +1888,38 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // Remove pending fill requests as the session is finished.
         cancelCurrentRequestLocked();
 
-        // Merge the previous sessions that the service asked to be kept alive
+        final ArrayList<FillContext> contexts = mergePreviousSessionLocked( /* forSave= */ true);
+
+        final SaveRequest saveRequest =
+                new SaveRequest(contexts, mClientState, mSelectedDatasetIds);
+        mRemoteFillService.onSaveRequest(saveRequest);
+    }
+
+    // TODO(b/113281366): rather than merge it here, it might be better to simply reuse the old
+    // session instead of creating a new one. But we need to consider what would happen on corner
+    // cases such as "Main Activity M -> activity A with username -> activity B with password"
+    // If user follows the normal workflow, than session A would be merged with session B as
+    // expected. But if when on Activity A the user taps back or somehow launches another activity,
+    // session A could be merged with the wrong session.
+    /**
+     * Gets a list of contexts that includes not only this session's contexts but also the contexts
+     * from previous sessions that were asked by the service to be delayed (if any).
+     *
+     * <p>As a side-effect:
+     * <ul>
+     *   <li>If the current {@link #mClientState} is {@code null}, sets it with the last non-
+     *   {@code null} client state from previous sessions.
+     *   <li>When {@code forSave} is {@code true}, calls {@link #updateValuesForSaveLocked()} in the
+     *   previous sessions.
+     * </ul>
+     */
+    @NonNull
+    private ArrayList<FillContext> mergePreviousSessionLocked(boolean forSave) {
         final ArrayList<Session> previousSessions = mService.getPreviousSessionsLocked(this);
         final ArrayList<FillContext> contexts;
-        final Bundle clientState;
         if (previousSessions != null) {
             if (sDebug) {
-                Slog.d(TAG, "callSaveLocked(): Merging the content of " + previousSessions.size()
+                Slog.d(TAG, "mergeSessions(): Merging the content of " + previousSessions.size()
                         + " sessions for task " + taskId);
             }
             contexts = new ArrayList<>();
@@ -1904,31 +1927,35 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 final Session previousSession = previousSessions.get(i);
                 final ArrayList<FillContext> previousContexts = previousSession.mContexts;
                 if (previousContexts == null) {
-                    Slog.w(TAG, "callSaveLocked(): Not merging null contexts from "
+                    Slog.w(TAG, "mergeSessions(): Not merging null contexts from "
                             + previousSession.id);
                     continue;
                 }
-                previousSession.updateValuesForSaveLocked();
-                if (sVerbose) {
-                    Slog.v(TAG, "callSaveLocked(): adding " + previousContexts.size()
+                if (forSave) {
+                    previousSession.updateValuesForSaveLocked();
+                }
+                if (sDebug) {
+                    Slog.d(TAG, "mergeSessions(): adding " + previousContexts.size()
                             + " context from previous session #" + previousSession.id);
                 }
                 contexts.addAll(previousContexts);
+                if (mClientState == null && previousSession.mClientState != null) {
+                    if (sDebug) {
+                        Slog.d(TAG, "mergeSessions(): setting client state from previous session"
+                                + previousSession.id);
+                    }
+                    mClientState = previousSession.mClientState;
+                }
             }
             contexts.addAll(mContexts);
-            // TODO(b/112051762): decided what to do with client state / add CTS test
-            clientState = mClientState;
         } else {
             // Dispatch a snapshot of the current contexts list since it may change
             // until the dispatch happens. The items in the list don't need to be cloned
             // since we don't hold on them anywhere else. The client state is not touched
             // by us, so no need to copy.
             contexts = new ArrayList<>(mContexts);
-            clientState = mClientState;
         }
-
-        final SaveRequest saveRequest = new SaveRequest(contexts, clientState, mSelectedDatasetIds);
-        mRemoteFillService.onSaveRequest(saveRequest);
+        return contexts;
     }
 
     /**
