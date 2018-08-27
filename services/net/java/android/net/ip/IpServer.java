@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity.tethering;
+package android.net.ip;
 
 import static android.net.NetworkUtils.numericToInetAddress;
 import static android.net.util.NetworkConstants.asByte;
@@ -31,11 +31,10 @@ import android.net.LinkProperties;
 import android.net.RouteInfo;
 import android.net.dhcp.DhcpServer;
 import android.net.dhcp.DhcpServingParams;
-import android.net.ip.InterfaceController;
-import android.net.ip.RouterAdvertisementDaemon;
 import android.net.ip.RouterAdvertisementDaemon.RaParams;
 import android.net.util.InterfaceParams;
 import android.net.util.InterfaceSet;
+import android.net.util.NetdService;
 import android.net.util.SharedLog;
 import android.os.INetworkManagementService;
 import android.os.Looper;
@@ -67,7 +66,22 @@ import java.util.Set;
  *
  * @hide
  */
-public class TetherInterfaceStateMachine extends StateMachine {
+public class IpServer extends StateMachine {
+    public static final int STATE_UNAVAILABLE = 0;
+    public static final int STATE_AVAILABLE   = 1;
+    public static final int STATE_TETHERED    = 2;
+    public static final int STATE_LOCAL_ONLY  = 3;
+
+    public static String getStateString(int state) {
+        switch (state) {
+            case STATE_UNAVAILABLE: return "UNAVAILABLE";
+            case STATE_AVAILABLE:   return "AVAILABLE";
+            case STATE_TETHERED:    return "TETHERED";
+            case STATE_LOCAL_ONLY:  return "LOCAL_ONLY";
+        }
+        return "UNKNOWN: " + state;
+    }
+
     private static final IpPrefix LINK_LOCAL_PREFIX = new IpPrefix("fe80::/64");
     private static final byte DOUG_ADAMS = (byte) 42;
 
@@ -83,14 +97,52 @@ public class TetherInterfaceStateMachine extends StateMachine {
     // TODO: have this configurable
     private static final int DHCP_LEASE_TIME_SECS = 3600;
 
-    private final static String TAG = "TetherInterfaceSM";
+    private final static String TAG = "IpServer";
     private final static boolean DBG = false;
     private final static boolean VDBG = false;
     private static final Class[] messageClasses = {
-            TetherInterfaceStateMachine.class
+            IpServer.class
     };
     private static final SparseArray<String> sMagicDecoderRing =
             MessageUtils.findMessageNames(messageClasses);
+
+    public static class Callback {
+        /**
+         * Notify that |who| has changed its tethering state.
+         *
+         * @param who the calling instance of IpServer
+         * @param state one of STATE_*
+         * @param lastError one of ConnectivityManager.TETHER_ERROR_*
+         */
+        public void updateInterfaceState(IpServer who, int state, int lastError) {}
+
+        /**
+         * Notify that |who| has new LinkProperties.
+         *
+         * @param who the calling instance of IpServer
+         * @param newLp the new LinkProperties to report
+         */
+        public void updateLinkProperties(IpServer who, LinkProperties newLp) {}
+    }
+
+    public static class Dependencies {
+        public RouterAdvertisementDaemon getRouterAdvertisementDaemon(InterfaceParams ifParams) {
+            return new RouterAdvertisementDaemon(ifParams);
+        }
+
+        public InterfaceParams getInterfaceParams(String ifName) {
+            return InterfaceParams.getByName(ifName);
+        }
+
+        public INetd getNetdService() {
+            return NetdService.getInstance();
+        }
+
+        public DhcpServer makeDhcpServer(Looper looper, InterfaceParams iface,
+                DhcpServingParams params, SharedLog log) {
+            return new DhcpServer(looper, iface, params, log);
+        }
+    }
 
     private static final int BASE_IFACE              = Protocol.BASE_TETHERING + 100;
     // request from the user that it wants to tether
@@ -123,7 +175,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
     private final INetworkManagementService mNMService;
     private final INetd mNetd;
     private final INetworkStatsService mStatsService;
-    private final IControlsTethering mTetherController;
+    private final Callback mCallback;
     private final InterfaceController mInterfaceCtrl;
 
     private final String mIfaceName;
@@ -131,7 +183,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
     private final LinkProperties mLinkProperties;
     private final boolean mUsingLegacyDhcp;
 
-    private final TetheringDependencies mDeps;
+    private final Dependencies mDeps;
 
     private int mLastError;
     private int mServingMode;
@@ -148,17 +200,16 @@ public class TetherInterfaceStateMachine extends StateMachine {
     private DhcpServer mDhcpServer;
     private RaParams mLastRaParams;
 
-    public TetherInterfaceStateMachine(
+    public IpServer(
             String ifaceName, Looper looper, int interfaceType, SharedLog log,
             INetworkManagementService nMService, INetworkStatsService statsService,
-            IControlsTethering tetherController, boolean usingLegacyDhcp,
-            TetheringDependencies deps) {
+            Callback callback, boolean usingLegacyDhcp, Dependencies deps) {
         super(ifaceName, looper);
         mLog = log.forSubComponent(ifaceName);
         mNMService = nMService;
         mNetd = deps.getNetdService();
         mStatsService = statsService;
-        mTetherController = tetherController;
+        mCallback = callback;
         mInterfaceCtrl = new InterfaceController(ifaceName, nMService, mNetd, mLog);
         mIfaceName = ifaceName;
         mInterfaceType = interfaceType;
@@ -167,7 +218,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
         mDeps = deps;
         resetLinkProperties();
         mLastError = ConnectivityManager.TETHER_ERROR_NO_ERROR;
-        mServingMode = IControlsTethering.STATE_AVAILABLE;
+        mServingMode = STATE_AVAILABLE;
 
         mInitialState = new InitialState();
         mLocalHotspotState = new LocalHotspotState();
@@ -521,14 +572,12 @@ public class TetherInterfaceStateMachine extends StateMachine {
 
     private void sendInterfaceState(int newInterfaceState) {
         mServingMode = newInterfaceState;
-        mTetherController.updateInterfaceState(
-                TetherInterfaceStateMachine.this, newInterfaceState, mLastError);
+        mCallback.updateInterfaceState(this, newInterfaceState, mLastError);
         sendLinkProperties();
     }
 
     private void sendLinkProperties() {
-        mTetherController.updateLinkProperties(
-                TetherInterfaceStateMachine.this, new LinkProperties(mLinkProperties));
+        mCallback.updateLinkProperties(this, new LinkProperties(mLinkProperties));
     }
 
     private void resetLinkProperties() {
@@ -539,7 +588,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
     class InitialState extends State {
         @Override
         public void enter() {
-            sendInterfaceState(IControlsTethering.STATE_AVAILABLE);
+            sendInterfaceState(STATE_AVAILABLE);
         }
 
         @Override
@@ -549,10 +598,10 @@ public class TetherInterfaceStateMachine extends StateMachine {
                 case CMD_TETHER_REQUESTED:
                     mLastError = ConnectivityManager.TETHER_ERROR_NO_ERROR;
                     switch (message.arg1) {
-                        case IControlsTethering.STATE_LOCAL_ONLY:
+                        case STATE_LOCAL_ONLY:
                             transitionTo(mLocalHotspotState);
                             break;
-                        case IControlsTethering.STATE_TETHERED:
+                        case STATE_TETHERED:
                             transitionTo(mTetheredState);
                             break;
                         default:
@@ -649,7 +698,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
     // problematic because transitioning during a multi-state jump yields
     // a Log.wtf(). Ultimately, there should be only one ServingState,
     // and forwarding and NAT rules should be handled by a coordinating
-    // functional element outside of TetherInterfaceStateMachine.
+    // functional element outside of IpServer.
     class LocalHotspotState extends BaseServingState {
         @Override
         public void enter() {
@@ -659,7 +708,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
             }
 
             if (DBG) Log.d(TAG, "Local hotspot " + mIfaceName);
-            sendInterfaceState(IControlsTethering.STATE_LOCAL_ONLY);
+            sendInterfaceState(STATE_LOCAL_ONLY);
         }
 
         @Override
@@ -685,7 +734,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
     // problematic because transitioning during a multi-state jump yields
     // a Log.wtf(). Ultimately, there should be only one ServingState,
     // and forwarding and NAT rules should be handled by a coordinating
-    // functional element outside of TetherInterfaceStateMachine.
+    // functional element outside of IpServer.
     class TetheredState extends BaseServingState {
         @Override
         public void enter() {
@@ -695,7 +744,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
             }
 
             if (DBG) Log.d(TAG, "Tethered " + mIfaceName);
-            sendInterfaceState(IControlsTethering.STATE_TETHERED);
+            sendInterfaceState(STATE_TETHERED);
         }
 
         @Override
@@ -817,7 +866,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
         @Override
         public void enter() {
             mLastError = ConnectivityManager.TETHER_ERROR_NO_ERROR;
-            sendInterfaceState(IControlsTethering.STATE_UNAVAILABLE);
+            sendInterfaceState(STATE_UNAVAILABLE);
         }
     }
 

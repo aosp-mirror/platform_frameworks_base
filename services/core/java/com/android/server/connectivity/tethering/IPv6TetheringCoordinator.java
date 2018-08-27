@@ -17,6 +17,7 @@
 package com.android.server.connectivity.tethering;
 
 import android.net.ConnectivityManager;
+import android.net.ip.IpServer;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -50,19 +51,19 @@ public class IPv6TetheringCoordinator {
     private static final boolean VDBG = false;
 
     private static class Downstream {
-        public final TetherInterfaceStateMachine tism;
-        public final int mode;  // IControlsTethering.STATE_*
+        public final IpServer ipServer;
+        public final int mode;  // IpServer.STATE_*
         // Used to append to a ULA /48, constructing a ULA /64 for local use.
         public final short subnetId;
 
-        Downstream(TetherInterfaceStateMachine tism, int mode, short subnetId) {
-            this.tism = tism;
+        Downstream(IpServer ipServer, int mode, short subnetId) {
+            this.ipServer = ipServer;
             this.mode = mode;
             this.subnetId = subnetId;
         }
     }
 
-    private final ArrayList<TetherInterfaceStateMachine> mNotifyList;
+    private final ArrayList<IpServer> mNotifyList;
     private final SharedLog mLog;
     // NOTE: mActiveDownstreams is a list and not a hash data structure because
     // we keep active downstreams in arrival order.  This is done so /64s can
@@ -74,8 +75,7 @@ public class IPv6TetheringCoordinator {
     private short mNextSubnetId;
     private NetworkState mUpstreamNetworkState;
 
-    public IPv6TetheringCoordinator(ArrayList<TetherInterfaceStateMachine> notifyList,
-                                    SharedLog log) {
+    public IPv6TetheringCoordinator(ArrayList<IpServer> notifyList, SharedLog log) {
         mNotifyList = notifyList;
         mLog = log.forSubComponent(TAG);
         mActiveDownstreams = new LinkedList<>();
@@ -83,7 +83,7 @@ public class IPv6TetheringCoordinator {
         mNextSubnetId = 0;
     }
 
-    public void addActiveDownstream(TetherInterfaceStateMachine downstream, int mode) {
+    public void addActiveDownstream(IpServer downstream, int mode) {
         if (findDownstream(downstream) == null) {
             // Adding a new downstream appends it to the list. Adding a
             // downstream a second time without first removing it has no effect.
@@ -98,7 +98,7 @@ public class IPv6TetheringCoordinator {
         }
     }
 
-    public void removeActiveDownstream(TetherInterfaceStateMachine downstream) {
+    public void removeActiveDownstream(IpServer downstream) {
         stopIPv6TetheringOn(downstream);
         if (mActiveDownstreams.remove(findDownstream(downstream))) {
             updateIPv6TetheringInterfaces();
@@ -133,8 +133,8 @@ public class IPv6TetheringCoordinator {
     }
 
     private void stopIPv6TetheringOnAllInterfaces() {
-        for (TetherInterfaceStateMachine sm : mNotifyList) {
-            stopIPv6TetheringOn(sm);
+        for (IpServer ipServer : mNotifyList) {
+            stopIPv6TetheringOn(ipServer);
         }
     }
 
@@ -156,28 +156,28 @@ public class IPv6TetheringCoordinator {
     }
 
     private void updateIPv6TetheringInterfaces() {
-        for (TetherInterfaceStateMachine sm : mNotifyList) {
-            final LinkProperties lp = getInterfaceIPv6LinkProperties(sm);
-            sm.sendMessage(TetherInterfaceStateMachine.CMD_IPV6_TETHER_UPDATE, 0, 0, lp);
+        for (IpServer ipServer : mNotifyList) {
+            final LinkProperties lp = getInterfaceIPv6LinkProperties(ipServer);
+            ipServer.sendMessage(IpServer.CMD_IPV6_TETHER_UPDATE, 0, 0, lp);
             break;
         }
     }
 
-    private LinkProperties getInterfaceIPv6LinkProperties(TetherInterfaceStateMachine sm) {
-        if (sm.interfaceType() == ConnectivityManager.TETHERING_BLUETOOTH) {
+    private LinkProperties getInterfaceIPv6LinkProperties(IpServer ipServer) {
+        if (ipServer.interfaceType() == ConnectivityManager.TETHERING_BLUETOOTH) {
             // TODO: Figure out IPv6 support on PAN interfaces.
             return null;
         }
 
-        final Downstream ds = findDownstream(sm);
+        final Downstream ds = findDownstream(ipServer);
         if (ds == null) return null;
 
-        if (ds.mode == IControlsTethering.STATE_LOCAL_ONLY) {
+        if (ds.mode == IpServer.STATE_LOCAL_ONLY) {
             // Build a Unique Locally-assigned Prefix configuration.
             return getUniqueLocalConfig(mUniqueLocalPrefix, ds.subnetId);
         }
 
-        // This downstream is in IControlsTethering.STATE_TETHERED mode.
+        // This downstream is in IpServer.STATE_TETHERED mode.
         if (mUpstreamNetworkState == null || mUpstreamNetworkState.linkProperties == null) {
             return null;
         }
@@ -188,7 +188,7 @@ public class IPv6TetheringCoordinator {
         // IPv6 toward the oldest (first requested) active downstream.
 
         final Downstream currentActive = mActiveDownstreams.peek();
-        if (currentActive != null && currentActive.tism == sm) {
+        if (currentActive != null && currentActive.ipServer == ipServer) {
             final LinkProperties lp = getIPv6OnlyLinkProperties(
                     mUpstreamNetworkState.linkProperties);
             if (lp.hasIPv6DefaultRoute() && lp.hasGlobalIPv6Address()) {
@@ -199,9 +199,9 @@ public class IPv6TetheringCoordinator {
         return null;
     }
 
-    Downstream findDownstream(TetherInterfaceStateMachine tism) {
+    Downstream findDownstream(IpServer ipServer) {
         for (Downstream ds : mActiveDownstreams) {
-            if (ds.tism == tism) return ds;
+            if (ds.ipServer == ipServer) return ds;
         }
         return null;
     }
@@ -304,7 +304,7 @@ public class IPv6TetheringCoordinator {
                 ns.linkProperties);
     }
 
-    private static void stopIPv6TetheringOn(TetherInterfaceStateMachine sm) {
-        sm.sendMessage(TetherInterfaceStateMachine.CMD_IPV6_TETHER_UPDATE, 0, 0, null);
+    private static void stopIPv6TetheringOn(IpServer ipServer) {
+        ipServer.sendMessage(IpServer.CMD_IPV6_TETHER_UPDATE, 0, 0, null);
     }
 }
