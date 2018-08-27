@@ -98,6 +98,13 @@ public class UserGridRecyclerView extends PagedListView implements
 
     private List<UserRecord> createUserRecords(List<UserInfo> userInfoList) {
         List<UserRecord> userRecords = new ArrayList<>();
+
+        // If the foreground user CANNOT switch to other users, only display the foreground user.
+        if (!mCarUserManagerHelper.canForegroundUserSwitchUsers()) {
+            userRecords.add(createForegroundUserRecord());
+            return userRecords;
+        }
+
         for (UserInfo userInfo : userInfoList) {
             if (userInfo.isGuest()) {
                 // Don't display guests in the switcher.
@@ -120,6 +127,11 @@ public class UserGridRecyclerView extends PagedListView implements
         }
 
         return userRecords;
+    }
+
+    private UserRecord createForegroundUserRecord() {
+        return new UserRecord(mCarUserManagerHelper.getCurrentForegroundUserInfo(),
+                false /* isStartGuestSession */, false /* isAddUser */, true /* isForeground */);
     }
 
     /**
