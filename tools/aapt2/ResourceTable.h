@@ -146,9 +146,10 @@ class ResourceTableType {
 
   explicit ResourceTableType(const ResourceType type) : type(type) {}
 
-  ResourceEntry* FindEntry(const android::StringPiece& name, Maybe<uint8_t> id = Maybe<uint8_t>());
+  ResourceEntry* FindEntry(const android::StringPiece& name,
+                           Maybe<uint16_t> id = Maybe<uint16_t>());
   ResourceEntry* FindOrCreateEntry(const android::StringPiece& name,
-                                   Maybe<uint8_t> id = Maybe<uint8_t>());
+                                   Maybe<uint16_t> id = Maybe<uint16_t>());
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceTableType);
