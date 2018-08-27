@@ -3246,6 +3246,21 @@ public class PackageManagerService extends IPackageManager.Stub
                 mRequiredPermissionControllerPackage = null;
             }
 
+            // Initialize InstantAppRegistry's Instant App list for all users.
+            final int[] userIds = UserManagerService.getInstance().getUserIds();
+            for (PackageParser.Package pkg : mPackages.values()) {
+                if (pkg.isSystem()) {
+                    continue;
+                }
+                for (int userId : userIds) {
+                    final PackageSetting ps = (PackageSetting) pkg.mExtras;
+                    if (ps == null || !ps.getInstantApp(userId) || !ps.getInstalled(userId)) {
+                        continue;
+                    }
+                    mInstantAppRegistry.addInstantAppLPw(userId, ps.appId);
+                }
+            }
+
             mInstallerService = new PackageInstallerService(context, this);
             final Pair<ComponentName, String> instantAppResolverComponent =
                     getInstantAppResolverLPr();
@@ -3273,8 +3288,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // should take a fairly small time compare to the other activities (e.g. package
             // scanning).
             final Map<Integer, List<PackageInfo>> userPackages = new HashMap<>();
-            final int[] currentUserIds = UserManagerService.getInstance().getUserIds();
-            for (int userId : currentUserIds) {
+            for (int userId : userIds) {
                 userPackages.put(userId, getInstalledPackages(/*flags*/ 0, userId).getList());
             }
             mDexManager.load(userPackages);

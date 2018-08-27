@@ -1628,7 +1628,7 @@ public final class ActiveServices {
             // Once the apps have become associated, if one of them is caller is ephemeral
             // the target app should now be able to see the calling app
             mAm.grantEphemeralAccessLocked(callerApp.userId, service,
-                    s.appInfo.uid, UserHandle.getAppId(callerApp.uid));
+                    UserHandle.getAppId(s.appInfo.uid), UserHandle.getAppId(callerApp.uid));
 
             AppBindRecord b = s.retrieveAppBindingLocked(service, callerApp);
             ConnectionRecord c = new ConnectionRecord(b, activity,
@@ -2581,8 +2581,8 @@ public final class ActiveServices {
                 mAm.mUgmInternal.grantUriPermissionUncheckedFromIntent(si.neededGrants,
                         si.getUriPermissionsLocked());
             }
-            mAm.grantEphemeralAccessLocked(r.userId, si.intent,
-                    r.appInfo.uid, UserHandle.getAppId(si.callingId));
+            mAm.grantEphemeralAccessLocked(r.userId, si.intent, UserHandle.getAppId(r.appInfo.uid),
+                    UserHandle.getAppId(si.callingId));
             bumpServiceExecutingLocked(r, execInFg, "start");
             if (!oomAdjusted) {
                 oomAdjusted = true;

@@ -1469,7 +1469,7 @@ class ActivityStarter {
         mService.mUgmInternal.grantUriPermissionFromIntent(mCallingUid, mStartActivity.packageName,
                 mIntent, mStartActivity.getUriPermissionsLocked(), mStartActivity.userId);
         mService.mAm.grantEphemeralAccessLocked(mStartActivity.userId, mIntent,
-                mStartActivity.appInfo.uid, UserHandle.getAppId(mCallingUid));
+                UserHandle.getAppId(mStartActivity.appInfo.uid), UserHandle.getAppId(mCallingUid));
         if (newTask) {
             EventLog.writeEvent(EventLogTags.AM_CREATE_TASK, mStartActivity.userId,
                     mStartActivity.getTask().taskId);
