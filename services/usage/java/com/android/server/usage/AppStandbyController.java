@@ -1433,6 +1433,8 @@ public class AppStandbyController {
                     + "): " + mCarrierPrivilegedApps);
         }
 
+        final long now = System.currentTimeMillis();
+
         pw.println();
         pw.println("Settings:");
 
@@ -1493,7 +1495,7 @@ public class AppStandbyController {
         pw.print(" mCharging="); pw.print(mCharging);
         pw.print(" mChargingStable="); pw.print(mChargingStable);
         pw.print(" mLastAppIdleParoledTime=");
-        TimeUtils.formatDuration(mLastAppIdleParoledTime, pw);
+        TimeUtils.formatDuration(now - mLastAppIdleParoledTime, pw);
         pw.println();
         pw.print("mScreenThresholds="); pw.println(Arrays.toString(mAppStandbyScreenThresholds));
         pw.print("mElapsedThresholds="); pw.println(Arrays.toString(mAppStandbyElapsedThresholds));
