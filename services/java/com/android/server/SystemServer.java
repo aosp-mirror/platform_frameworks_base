@@ -67,6 +67,7 @@ import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.ActivityTaskManagerService;
 import com.android.server.audio.AudioService;
+import com.android.server.biometrics.BiometricPromptService;
 import com.android.server.broadcastradio.BroadcastRadioService;
 import com.android.server.camera.CameraServiceProxy;
 import com.android.server.clipboard.ClipboardService;
@@ -1552,15 +1553,27 @@ public final class SystemServer {
             }
             traceEnd();
 
-            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+            final boolean hasFeatureFace
+                    = mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE);
+            final boolean hasFeatureFingerprint
+                    = mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT);
+
+            if (hasFeatureFace) {
                 traceBeginAndSlog("StartFaceSensor");
                 mSystemServiceManager.startService(FaceService.class);
                 traceEnd();
             }
 
-            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+            if (hasFeatureFingerprint) {
                 traceBeginAndSlog("StartFingerprintSensor");
                 mSystemServiceManager.startService(FingerprintService.class);
+                traceEnd();
+            }
+
+            if (hasFeatureFace || hasFeatureFingerprint) {
+                // Start this service after all biometric services.
+                traceBeginAndSlog("StartBiometricPromptService");
+                mSystemServiceManager.startService(BiometricPromptService.class);
                 traceEnd();
             }
 

@@ -3672,6 +3672,15 @@ public abstract class Context {
     public static final String AUDIO_SERVICE = "audio";
 
     /**
+     * Use with {@link #getSystemService(String)}
+     *
+     * @hide
+     * @see #getSystemService(String)
+     * @see com.android.server.biometrics.BiometricPromptService
+     */
+    public static final String BIOMETRIC_PROMPT_SERVICE = "biometric_prompt";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.hardware.fingerprint.FingerprintManager} for handling management
      * of fingerprints.

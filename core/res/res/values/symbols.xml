@@ -2392,6 +2392,9 @@
   <!-- From KeyguardServiceDelegate -->
   <java-symbol type="string" name="config_keyguardComponent" />
 
+  <!-- Biometric messages -->
+  <java-symbol type="string" name="biometric_error_hw_unavailable" />
+
   <!-- Fingerprint messages -->
   <java-symbol type="string" name="fingerprint_error_unable_to_process" />
   <java-symbol type="string" name="fingerprint_error_hw_not_available" />

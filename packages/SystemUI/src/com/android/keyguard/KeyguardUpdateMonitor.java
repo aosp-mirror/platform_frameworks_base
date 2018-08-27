@@ -1597,7 +1597,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     public boolean isUnlockWithFacePossible(int userId) {
         return mFaceAuthenticationManager != null && mFaceAuthenticationManager.isHardwareDetected()
                 && !isFaceDisabled(userId)
-                && mFaceAuthenticationManager.hasEnrolledFaces(userId);
+                && mFaceAuthenticationManager.hasEnrolledTemplates(userId);
     }
 
     private void stopListeningForFingerprint() {

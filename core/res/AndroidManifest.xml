@@ -3748,9 +3748,13 @@
     <permission android:name="android.permission.RESET_FINGERPRINT_LOCKOUT"
         android:protectionLevel="signature" />
 
-    <!-- Allows managing (adding, removing) facial templates. Reserved for the system. @hide -->
-    <permission android:name="android.permission.MANAGE_FACE"
-        android:protectionLevel="signature|privileged" />
+    <!-- Allows direct access to the <Biometric>Service interfaces. Reserved for the system. @hide -->
+    <permission android:name="android.permission.MANAGE_BIOMETRIC"
+        android:protectionLevel="signature" />
+
+    <!-- Allows direct access to the <Biometric>Service authentication methods. Reserved for the system. @hide -->
+    <permission android:name="android.permission.USE_BIOMETRIC_INTERNAL"
+        android:protectionLevel="signature" />
 
     <!-- Allows an app to reset face authentication attempt counter. Reserved for the system. @hide -->
     <permission android:name="android.permission.RESET_FACE_LOCKOUT"

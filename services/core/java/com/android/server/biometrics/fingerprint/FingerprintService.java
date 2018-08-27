@@ -17,6 +17,7 @@
 package com.android.server.biometrics.fingerprint;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+import static android.Manifest.permission.MANAGE_BIOMETRIC;
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
 import static android.Manifest.permission.RESET_FINGERPRINT_LOCKOUT;
 import static android.Manifest.permission.USE_BIOMETRIC;
@@ -30,10 +31,12 @@ import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.IBiometricPromptReceiver;
+import android.hardware.biometrics.IBiometricPromptServiceReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprintClientCallback;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
@@ -146,20 +149,43 @@ public class FingerprintService extends BiometricService {
         @Override // Binder call
         public void authenticate(final IBinder token, final long opId, final int groupId,
                 final IFingerprintServiceReceiver receiver, final int flags,
-                final String opPackageName, final Bundle bundle,
-                final IBiometricPromptReceiver dialogReceiver) {
+                final String opPackageName) {
             final boolean restricted = isRestricted();
             final AuthenticationClientImpl client = new AuthenticationClientImpl(getContext(),
                     mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver),
-                    mCurrentUserId, groupId, opId, restricted, opPackageName, bundle,
-                    dialogReceiver, mStatusBarService);
+                    mCurrentUserId, groupId, opId, restricted, opPackageName, null /* bundle */,
+                    null /* dialogReceiver */, mStatusBarService);
 
             authenticateInternal(client, opId, opPackageName);
         }
 
         @Override // Binder call
+        public void authenticateFromService(IBinder token, long opId, int groupId,
+                IBiometricPromptServiceReceiver receiver, int flags, String opPackageName,
+                Bundle bundle, IBiometricPromptReceiver dialogReceiver,
+                int callingUid, int callingPid, int callingUserId) {
+            checkPermission(MANAGE_BIOMETRIC);
+            final boolean restricted = true; // BiometricPrompt is always restricted
+            final AuthenticationClientImpl client = new AuthenticationClientImpl(getContext(),
+                    mDaemonWrapper, mHalDeviceId, token,
+                    new BiometricPromptServiceListenerImpl(receiver),
+                    mCurrentUserId, groupId, opId, restricted, opPackageName, bundle,
+                    dialogReceiver, mStatusBarService);
+            authenticateInternal(client, opId, opPackageName, callingUid, callingPid,
+                    callingUserId);
+        }
+
+        @Override // Binder call
         public void cancelAuthentication(final IBinder token, final String opPackageName) {
             cancelAuthenticationInternal(token, opPackageName);
+        }
+
+        @Override // Binder call
+        public void cancelAuthenticationFromService(final IBinder token, final String opPackageName,
+                int callingUid, int callingPid, int callingUserId) {
+            checkPermission(MANAGE_BIOMETRIC);
+            cancelAuthenticationInternal(token, opPackageName,
+                    callingUid, callingPid, callingUserId);
         }
 
         @Override // Binder call
@@ -327,6 +353,55 @@ public class FingerprintService extends BiometricService {
         public void removeClientActiveCallback(IFingerprintClientActiveCallback callback) {
             checkPermission(MANAGE_FINGERPRINT);
             mClientActiveCallbacks.remove(callback);
+        }
+    }
+
+    /**
+     * Receives callbacks from the ClientMonitor implementations. The results are forwarded to
+     * BiometricPrompt.
+     */
+    private class BiometricPromptServiceListenerImpl implements ServiceListener {
+
+        // Use FingerprintManager to get strings, so BiometricPrompt interface is cleaner
+        private FingerprintManager mFingerprintManager;
+        private IBiometricPromptServiceReceiver mBiometricPromptServiceReceiver;
+
+        public BiometricPromptServiceListenerImpl(IBiometricPromptServiceReceiver receiver) {
+            mBiometricPromptServiceReceiver = receiver;
+            mFingerprintManager = (FingerprintManager)
+                    getContext().getSystemService(Context.FINGERPRINT_SERVICE);
+        }
+
+        @Override
+        public void onAcquired(long deviceId, int acquiredInfo, int vendorCode)
+                throws RemoteException {
+            if (mBiometricPromptServiceReceiver != null) {
+                mBiometricPromptServiceReceiver.onAcquired(deviceId, acquiredInfo,
+                        mFingerprintManager.getAcquiredString(acquiredInfo, vendorCode));
+            }
+        }
+
+        @Override
+        public void onAuthenticationSucceeded(long deviceId,
+                BiometricAuthenticator.Identifier biometric, int userId) throws RemoteException {
+            if (mBiometricPromptServiceReceiver != null) {
+                mBiometricPromptServiceReceiver.onAuthenticationSucceeded(deviceId);
+            }
+        }
+
+        @Override
+        public void onAuthenticationFailed(long deviceId) throws RemoteException {
+            if (mBiometricPromptServiceReceiver != null) {
+                mBiometricPromptServiceReceiver.onAuthenticationFailed(deviceId);
+            }
+        }
+
+        @Override
+        public void onError(long deviceId, int error, int vendorCode) throws RemoteException {
+            if (mBiometricPromptServiceReceiver != null) {
+                mBiometricPromptServiceReceiver.onError(deviceId, error,
+                        mFingerprintManager.getErrorString(error, vendorCode));
+            }
         }
     }
 
