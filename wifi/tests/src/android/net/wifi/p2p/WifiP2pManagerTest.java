@@ -21,6 +21,7 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.os.test.TestLooper;
+import android.support.test.filters.SmallTest;
 
 import libcore.junit.util.ResourceLeakageDetector;
 
@@ -33,6 +34,7 @@ import org.mockito.MockitoAnnotations;
 /**
  * Unit test harness for WifiP2pManager.
  */
+@SmallTest
 public class WifiP2pManagerTest {
     private WifiP2pManager mDut;
     private TestLooper mTestLooper;

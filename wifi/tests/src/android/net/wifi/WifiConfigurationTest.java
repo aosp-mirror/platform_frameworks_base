@@ -18,14 +18,14 @@ package android.net.wifi;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
-import android.os.Parcel;
 import android.net.MacAddress;
 import android.net.wifi.WifiConfiguration.NetworkSelectionStatus;
-import android.net.wifi.WifiInfo;
+import android.os.Parcel;
+import android.support.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +33,7 @@ import org.junit.Test;
 /**
  * Unit tests for {@link android.net.wifi.WifiConfiguration}.
  */
+@SmallTest
 public class WifiConfigurationTest {
 
     @Before

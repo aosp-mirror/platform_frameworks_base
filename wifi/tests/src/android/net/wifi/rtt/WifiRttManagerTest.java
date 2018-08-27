@@ -31,6 +31,7 @@ import android.net.wifi.aware.PeerHandle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.test.TestLooper;
+import android.support.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +46,7 @@ import java.util.concurrent.Executor;
 /**
  * Unit test harness for WifiRttManager class.
  */
+@SmallTest
 public class WifiRttManagerTest {
     private WifiRttManager mDut;
     private TestLooper mMockLooper;
