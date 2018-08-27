@@ -133,6 +133,10 @@ public class Dependency extends SystemUI {
      */
     public static final DependencyKey<Looper> BG_LOOPER = new DependencyKey<>("background_looper");
     /**
+     * Key for getting a background Handler for background work.
+     */
+    public static final DependencyKey<Handler> BG_HANDLER = new DependencyKey<>("background_handler");
+    /**
      * Key for getting a Handler for receiving time tick broadcasts on.
      */
     public static final DependencyKey<Handler> TIME_TICK_HANDLER =
@@ -166,6 +170,7 @@ public class Dependency extends SystemUI {
             thread.start();
             return thread.getLooper();
         });
+        mProviders.put(BG_HANDLER, () -> new Handler(getDependency(BG_LOOPER)));
         mProviders.put(MAIN_HANDLER, () -> new Handler(Looper.getMainLooper()));
         mProviders.put(ActivityStarter.class, () -> new ActivityStarterDelegate());
         mProviders.put(ActivityStarterDelegate.class, () ->
@@ -288,7 +293,7 @@ public class Dependency extends SystemUI {
                 new PluginDependencyProvider(get(PluginManager.class)));
 
         mProviders.put(LocalBluetoothManager.class, () ->
-                LocalBluetoothManager.getInstance(mContext, null));
+                LocalBluetoothManager.create(mContext, getDependency(BG_HANDLER)));
 
         mProviders.put(VolumeDialogController.class, () ->
                 new VolumeDialogControllerImpl(mContext));

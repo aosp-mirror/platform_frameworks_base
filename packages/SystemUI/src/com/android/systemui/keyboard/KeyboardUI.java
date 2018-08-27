@@ -49,6 +49,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothAdapter;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.settingslib.bluetooth.BluetoothUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 
@@ -171,7 +172,7 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
             return;
         }
 
-        LocalBluetoothManager bluetoothManager = LocalBluetoothManager.getInstance(context, null);
+        LocalBluetoothManager bluetoothManager = Dependency.get(LocalBluetoothManager.class);
         if (bluetoothManager == null)  {
             if (DEBUG) {
                 Slog.e(TAG, "Failed to retrieve LocalBluetoothManager instance");
