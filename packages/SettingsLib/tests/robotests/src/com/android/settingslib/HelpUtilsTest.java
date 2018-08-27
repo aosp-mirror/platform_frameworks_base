@@ -36,7 +36,7 @@ import android.content.res.TypedArray;
 import android.provider.Settings;
 import android.view.MenuItem;
 
-import com.android.internal.R;
+import android.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -70,17 +70,17 @@ public class HelpUtilsTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mContext.getResources().getString(R.string.config_helpPackageNameKey))
+        when(mContext.getResources().getString(R.string.config_help_package_name_key))
                 .thenReturn(PACKAGE_NAME_KEY);
-        when(mContext.getResources().getString(R.string.config_helpPackageNameValue))
+        when(mContext.getResources().getString(R.string.config_help_package_name_value))
                 .thenReturn(PACKAGE_NAME_VALUE);
-        when(mContext.getResources().getString(R.string.config_helpIntentExtraKey))
+        when(mContext.getResources().getString(R.string.config_help_intent_extra_key))
                 .thenReturn(HELP_INTENT_EXTRA_KEY);
-        when(mContext.getResources().getString(R.string.config_helpIntentNameKey))
+        when(mContext.getResources().getString(R.string.config_help_intent_name_key))
                 .thenReturn(HELP_INTENT_NAME_KEY);
-        when(mContext.getResources().getString(R.string.config_feedbackIntentExtraKey))
+        when(mContext.getResources().getString(R.string.config_feedback_intent_extra_key))
                 .thenReturn(FEEDBACK_INTENT_EXTRA_KEY);
-        when(mContext.getResources().getString(R.string.config_feedbackIntentNameKey))
+        when(mContext.getResources().getString(R.string.config_feedback_intent_name_key))
                 .thenReturn(FEEDBACK_INTENT_NAME_KEY);
         when(mActivity.getPackageManager()).thenReturn(mPackageManager);
 

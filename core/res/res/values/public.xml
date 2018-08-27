@@ -2918,6 +2918,23 @@
     </public-group>
 
     <public-group type="string" first-id="0x0104001b">
+        <!-- @hide @SystemApi -->
+        <public name="config_help_package_name_key" />
+        <!-- @hide @SystemApi -->
+        <public name="config_help_package_name_value" />
+        <!-- @hide @SystemApi -->
+        <public name="config_help_intent_extra_key" />
+        <!-- @hide @SystemApi -->
+        <public name="config_help_intent_name_key" />
+        <!-- @hide @SystemApi -->
+        <public name="config_feedback_intent_extra_key" />
+        <!-- @hide @SystemApi -->
+        <public name="config_feedback_intent_name_key" />
+    </public-group>
+
+    <public-group type="bool" first-id="0x01110000">
+        <!-- @hide @SystemApi -->
+        <public name="config_sendPackageName" />
     </public-group>
 
   <!-- ===============================================================

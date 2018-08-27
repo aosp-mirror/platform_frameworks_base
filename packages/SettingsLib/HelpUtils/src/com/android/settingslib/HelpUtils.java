@@ -33,11 +33,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-
 import java.net.URISyntaxException;
 import java.util.Locale;
+
+import com.android.settingslib.helputils.R;
 
 /**
  * Functions to easily prepare contextual help menu option items with an intent that opens up the
@@ -115,9 +114,13 @@ public class HelpUtils {
                 helpMenuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
+                        /**
+                         * TODO: Enable metrics logger for @SystemApi (b/111552654)
+                         *
                         MetricsLogger.action(activity,
                             MetricsEvent.ACTION_SETTING_HELP_AND_FEEDBACK,
                             intent.getStringExtra(EXTRA_CONTEXT));
+                        */
                         try {
                             activity.startActivityForResult(intent, 0);
                         } catch (ActivityNotFoundException exc) {
@@ -180,23 +183,21 @@ public class HelpUtils {
 
         Resources resources = context.getResources();
         boolean includePackageName =
-                resources.getBoolean(com.android.internal.R.bool.config_sendPackageName);
+                resources.getBoolean(android.R.bool.config_sendPackageName);
 
         if (sendPackageName && includePackageName) {
             String[] packageNameKey =
-                    {resources.getString(com.android.internal.R.string.config_helpPackageNameKey)};
+                    {resources.getString(android.R.string.config_help_package_name_key)};
             String[] packageNameValue =
-                    {resources.getString(
-                            com.android.internal.R.string.config_helpPackageNameValue)};
+                    {resources.getString(android.R.string.config_help_package_name_value)};
             String helpIntentExtraKey =
-                    resources.getString(com.android.internal.R.string.config_helpIntentExtraKey);
+                    resources.getString(android.R.string.config_help_intent_extra_key);
             String helpIntentNameKey =
-                    resources.getString(com.android.internal.R.string.config_helpIntentNameKey);
+                    resources.getString(android.R.string.config_help_intent_name_key);
             String feedbackIntentExtraKey =
-                    resources.getString(
-                            com.android.internal.R.string.config_feedbackIntentExtraKey);
+                    resources.getString(android.R.string.config_feedback_intent_extra_key);
             String feedbackIntentNameKey =
-                    resources.getString(com.android.internal.R.string.config_feedbackIntentNameKey);
+                    resources.getString(android.R.string.config_feedback_intent_name_key);
             intent.putExtra(helpIntentExtraKey, packageNameKey);
             intent.putExtra(helpIntentNameKey, packageNameValue);
             intent.putExtra(feedbackIntentExtraKey, packageNameKey);
