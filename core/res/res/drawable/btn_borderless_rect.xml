@@ -22,7 +22,7 @@
 
         <item android:id="@android:id/mask">
             <shape>
-                <corners android:radius="2dp" />
+                <corners android:radius="@dimen/config_buttonCornerRadius" />
                 <solid android:color="@android:color/white" />
             </shape>
         </item>

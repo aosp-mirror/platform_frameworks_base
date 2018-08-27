@@ -522,7 +522,7 @@
     <dimen name="qs_detail_icon_overlay_size">24dp</dimen>
 
     <dimen name="segmented_button_spacing">0dp</dimen>
-    <dimen name="borderless_button_radius">2dp</dimen>
+    <dimen name="borderless_button_radius">@*android:dimen/config_buttonCornerRadius</dimen>
 
     <dimen name="restricted_padlock_pading">4dp</dimen>
 
@@ -1054,7 +1054,7 @@
     <dimen name="logout_button_layout_height">32dp</dimen>
     <dimen name="logout_button_padding_horizontal">16dp</dimen>
     <dimen name="logout_button_margin_bottom">12dp</dimen>
-    <dimen name="logout_button_corner_radius">2dp</dimen>
+    <dimen name="logout_button_corner_radius">@*android:dimen/config_buttonCornerRadius</dimen>
 
     <!-- How much into a DisplayCutout's bounds we can go, on each side -->
     <dimen name="display_cutout_margin_consumption">0px</dimen>

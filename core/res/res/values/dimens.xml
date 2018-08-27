@@ -636,7 +636,7 @@
     <!-- Top/bottom padding of the tooltip text. -->
     <dimen name="tooltip_vertical_padding">6.5dp</dimen>
     <!-- Border corner radius of the tooltip window. -->
-    <dimen name="tooltip_corner_radius">2dp</dimen>
+    <dimen name="tooltip_corner_radius">@dimen/config_buttonCornerRadius</dimen>
     <!-- View with the height equal or above this threshold will have a tooltip anchored
     to the mouse/touch position -->
     <dimen name="tooltip_precise_anchor_threshold">96dp</dimen>
@@ -720,7 +720,7 @@
     <dimen name="slice_padding">16dp</dimen>
 
     <!-- Default dialog corner radius -->
-    <dimen name="dialog_corner_radius">2dp</dimen>
+    <dimen name="dialog_corner_radius">8dp</dimen>
 
     <!-- Size of thumbnail used in the cross profile apps animation -->
     <dimen name="cross_profile_apps_thumbnail_size">72dp</dimen>

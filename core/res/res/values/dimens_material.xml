@@ -115,7 +115,7 @@
     <!-- Default inner padding within controls -->
     <dimen name="control_padding_material">4dp</dimen>
     <!-- Default rounded corner for controls -->
-    <dimen name="control_corner_material">2dp</dimen>
+    <dimen name="control_corner_material">4dp</dimen>
 
     <!-- Size of icon shown beside a preference locked by admin -->
     <dimen name="restricted_icon_size_material">16dp</dimen>
@@ -138,7 +138,7 @@
     <dimen name="seekbar_track_progress_height_material">2dp</dimen>
 
     <dimen name="progress_bar_height_material">4dp</dimen>
-    <dimen name="progress_bar_corner_material">0dp</dimen>
+    <dimen name="progress_bar_corner_material">1000dp</dimen>
 
     <!-- Material time picker dimensions. -->
     <!-- Text size for the time picker header HH:MM label. This value is large
