@@ -119,7 +119,6 @@ public class LocalBluetoothProfileManager {
         // pass this reference to adapter and event manager (circular dependency)
         adapter.setProfileManager(this);
 
-        updateLocalProfiles();
         if (DEBUG) Log.d(TAG, "LocalBluetoothProfileManager construction complete");
     }
 

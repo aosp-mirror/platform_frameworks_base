@@ -75,6 +75,8 @@ public class LocalBluetoothManager {
                 mCachedDeviceManager, context);
         mProfileManager = new LocalBluetoothProfileManager(context,
                 mLocalAdapter, mCachedDeviceManager, mEventManager);
+
+        mProfileManager.updateLocalProfiles();
         mEventManager.readPairedDevices();
     }
 
