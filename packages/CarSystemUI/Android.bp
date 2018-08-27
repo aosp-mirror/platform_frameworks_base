@@ -16,6 +16,10 @@
 android_app {
     name: "CarSystemUI",
 
+    overrides: [
+        "SystemUI",
+    ],
+
     srcs: [
         "src/**/*.java",
         "src/**/I*.aidl",
