@@ -26873,7 +26873,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void notifyDefaultDisplaySizeChanged() {
-            synchronized (this) {
+            synchronized (ActivityManagerService.this) {
                 if (mSystemServiceManager.isBootCompleted() && mHomeProcess != null) {
 
                     // TODO: Ugly hack to unblock the release
