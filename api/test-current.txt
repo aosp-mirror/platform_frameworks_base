@@ -40,6 +40,10 @@ package android.app {
     method public abstract void onUidImportance(int, int);
   }
 
+  public static class ActivityManager.RunningAppProcessInfo implements android.os.Parcelable {
+    field public static final int IMPORTANCE_CANT_SAVE_STATE_PRE_26 = 170; // 0xaa
+  }
+
   public static class ActivityManager.TaskDescription implements android.os.Parcelable {
     method public java.lang.String getIconFilename();
     method public int getIconResource();

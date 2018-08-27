@@ -2747,6 +2747,7 @@ public class ActivityManager {
          *
          * @hide
          */
+        @TestApi
         public static final int IMPORTANCE_CANT_SAVE_STATE_PRE_26 = 170;
 
         /**
