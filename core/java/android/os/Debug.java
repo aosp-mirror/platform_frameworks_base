@@ -321,6 +321,45 @@ public final class Debug
         }
 
         /**
+         * @hide Copy contents from another object.
+         */
+        public void set(MemoryInfo other) {
+            dalvikPss = other.dalvikPss;
+            dalvikSwappablePss = other.dalvikSwappablePss;
+            dalvikRss = other.dalvikRss;
+            dalvikPrivateDirty = other.dalvikPrivateDirty;
+            dalvikSharedDirty = other.dalvikSharedDirty;
+            dalvikPrivateClean = other.dalvikPrivateClean;
+            dalvikSharedClean = other.dalvikSharedClean;
+            dalvikSwappedOut = other.dalvikSwappedOut;
+            dalvikSwappedOutPss = other.dalvikSwappedOutPss;
+
+            nativePss = other.nativePss;
+            nativeSwappablePss = other.nativeSwappablePss;
+            nativeRss = other.nativeRss;
+            nativePrivateDirty = other.nativePrivateDirty;
+            nativeSharedDirty = other.nativeSharedDirty;
+            nativePrivateClean = other.nativePrivateClean;
+            nativeSharedClean = other.nativeSharedClean;
+            nativeSwappedOut = other.nativeSwappedOut;
+            nativeSwappedOutPss = other.nativeSwappedOutPss;
+
+            otherPss = other.otherPss;
+            otherSwappablePss = other.otherSwappablePss;
+            otherRss = other.otherRss;
+            otherPrivateDirty = other.otherPrivateDirty;
+            otherSharedDirty = other.otherSharedDirty;
+            otherPrivateClean = other.otherPrivateClean;
+            otherSharedClean = other.otherSharedClean;
+            otherSwappedOut = other.otherSwappedOut;
+            otherSwappedOutPss = other.otherSwappedOutPss;
+
+            hasSwappedOutPss = other.hasSwappedOutPss;
+
+            System.arraycopy(other.otherStats, 0, otherStats, 0, otherStats.length);
+        }
+
+        /**
          * Return total PSS memory usage in kB.
          */
         public int getTotalPss() {
