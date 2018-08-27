@@ -1,15 +1,4 @@
 set noparent
 
-per-file libandroid_net.map.txt=codewiz@google.com
-per-file libandroid_net.map.txt=ek@google.com
-per-file libandroid_net.map.txt=jchalard@google.com
-per-file libandroid_net.map.txt=lorenzo@google.com
-per-file libandroid_net.map.txt=reminv@google.com
-per-file libandroid_net.map.txt=satk@google.com
-
-per-file net.c=codewiz@google.com
-per-file net.c=ek@google.com
-per-file net.c=jchalard@google.com
-per-file net.c=lorenzo@google.com
-per-file net.c=reminv@google.com
-per-file net.c=satk@google.com
+per-file libandroid_net.map.txt, net.c = codewiz@google.com, ek@google.com, jchalard@google.com
+per-file libandroid_net.map.txt, net.c = lorenzo@google.com, reminv@google.com, satk@google.com
