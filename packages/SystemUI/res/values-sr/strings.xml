@@ -35,8 +35,8 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Обавештења"</string>
     <string name="battery_low_title" msgid="9187898087363540349">"Батерија ће се можда ускоро испразнити"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Још <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Још <xliff:g id="PERCENTAGE">%s</xliff:g>, на основу коришћења остало је око <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Још <xliff:g id="PERCENTAGE">%s</xliff:g>, остало је око <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Још <xliff:g id="PERCENTAGE">%1$s</xliff:g>, на основу коришћења остало је око <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Још <xliff:g id="PERCENTAGE">%1$s</xliff:g>, остало је око <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Још <xliff:g id="PERCENTAGE">%s</xliff:g>. Уштеда батерије је укључена."</string>
     <string name="invalid_charger" msgid="2741987096648693172">"Пуњење преко USB-а није успело. Користите пуњач који сте добили уз уређај."</string>
     <string name="invalid_charger_title" msgid="2836102177577255404">"Пуњење преко USB-а није успело"</string>
@@ -258,7 +258,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Има активних захтева за локацију"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Обриши сва обавештења."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"и још <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>, још <xliff:g id="OVERFLOW">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>, још <xliff:g id="OVERFLOW">%2$s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="one">Још <xliff:g id="NUMBER_1">%s</xliff:g> обавештење у групи.</item>
       <item quantity="few">Још <xliff:g id="NUMBER_1">%s</xliff:g> обавештења у групи.</item>
@@ -402,9 +402,9 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Потпуна\nтишина"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Само\nприорит. прекиди"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Само\nаларми"</string>
-    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Пуни се (напуниће се за <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Брзо се пуни (напуниће се за <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Споро се пуни (напуниће се за <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Пуни се (напуниће се за <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Брзо се пуни (напуниће се за <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Споро се пуни (напуниће се за <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Замени корисника"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Промените корисника, актуелни корисник је <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Актуелни корисник <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -429,6 +429,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ОДЈАВИ КОРИСНИКА"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Додајете новог корисника?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Када додате новог корисника, та особа треба да подеси свој простор.\n\nСваки корисник може да ажурира апликације за све остале кориснике."</string>
+    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
+    <skip />
+    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
     <string name="user_remove_user_title" msgid="4681256956076895559">"Желите ли да уклоните корисника?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Све апликације и подаци овог корисника ће бити избрисани."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Уклони"</string>
@@ -734,6 +737,8 @@
     <string name="left_icon" msgid="3096287125959387541">"Лева икона"</string>
     <string name="right_icon" msgid="3952104823293824311">"Десна икона"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Задржите и превуците да бисте додали плочице"</string>
+    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
+    <skip />
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Превуците овде да бисте уклонили"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Треба да изаберете најмање 6 плочица"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Измени"</string>
@@ -762,12 +767,10 @@
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Режим целог екрана за доњи екран"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"<xliff:g id="POSITION">%1$d</xliff:g>. позиција, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Двапут додирните да бисте изменили."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Двапут додирните да бисте додали."</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"<xliff:g id="POSITION">%1$d</xliff:g>. позиција. Двапут додирните да бисте изабрали."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"Премести плочицу <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"Уклони плочицу <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"Плочица <xliff:g id="TILE_NAME">%1$s</xliff:g> је додата на <xliff:g id="POSITION">%2$d</xliff:g>. позицију"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"Плочица <xliff:g id="TILE_NAME">%1$s</xliff:g> је уклоњена"</string>
-    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"Плочица <xliff:g id="TILE_NAME">%1$s</xliff:g> је премештена на <xliff:g id="POSITION">%2$d</xliff:g>. позицију"</string>
+    <string name="accessibility_qs_edit_tile_add" msgid="3520406665865985109">"Додајте „<xliff:g id="TILE_NAME">%1$s</xliff:g>“ на позицију <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_move" msgid="3108103090006972938">"Преместите „<xliff:g id="TILE_NAME">%1$s</xliff:g>“ на позицију <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Уређивач за Брза подешавања."</string>
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Обавештења за <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Апликација можда неће функционисати са подељеним екраном."</string>
@@ -828,7 +831,7 @@
     <string name="app_info" msgid="6856026610594615344">"Информације о апликацији"</string>
     <string name="go_to_web" msgid="2650669128861626071">"Иди на прегледач"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Мобилни подаци"</string>
-    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> – <xliff:g id="ID_2">%s</xliff:g>"</string>
+    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi је искључен"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth је искључен"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"Режим Не узнемиравај је искључен"</string>

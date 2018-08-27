@@ -34,8 +34,8 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"জাননীসমূহ"</string>
     <string name="battery_low_title" msgid="9187898087363540349">"বেটাৰি অতি সোনকালে শেষ হ\'ব পাৰে"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> বাকী আছে"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> অৱশিষ্ট আছে, আপোনাৰ ব্যৱহাৰক ভিত্তি কৰি প্ৰায় <xliff:g id="TIME">%s</xliff:g> বাকী আছে"</string>
-    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> অৱশিষ্ট আছে, প্ৰায় <xliff:g id="TIME">%s</xliff:g> বাকী"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> অৱশিষ্ট আছে, আপোনাৰ ব্যৱহাৰক ভিত্তি কৰি প্ৰায় <xliff:g id="TIME">%2$s</xliff:g> বাকী আছে"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> অৱশিষ্ট আছে, প্ৰায় <xliff:g id="TIME">%2$s</xliff:g> বাকী"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> বাকী আছে। বেটাৰি সঞ্চয়কাৰী অন হৈ আছে।"</string>
     <string name="invalid_charger" msgid="2741987096648693172">"ইউএছবি জৰিয়তে চ্চাৰ্জ কৰিব নোৱাৰি। আপোনাৰ ডিভাইচৰ লগত পোৱা চ্চাৰ্জাৰটো ব্যৱহাৰ কৰক।"</string>
     <string name="invalid_charger_title" msgid="2836102177577255404">"ইউএছবি জৰিয়তে চ্চাৰ্জ কৰিব নোৱাৰি"</string>
@@ -257,7 +257,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"অৱস্থানৰ অনুৰোধ সক্ৰিয় হৈ আছে"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"সকলো জাননী মচক৷"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>, +<xliff:g id="OVERFLOW">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>, +<xliff:g id="OVERFLOW">%2$s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="one"> ভিতৰত আৰু <xliff:g id="NUMBER_1">%s</xliff:g>টা জাননী আছে।</item>
       <item quantity="other"> ভিতৰত আৰু <xliff:g id="NUMBER_1">%s</xliff:g>টা জাননী আছে।</item>
@@ -399,9 +399,9 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"সম্পূর্ণ \n নিৰৱতা"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"কেৱল\nগুৰুত্বপূৰ্ণ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"কেৱল\nএলাৰ্মসমূহ"</string>
-    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • চ্চাৰ্জ কৰি থকা হৈছে (সম্পূৰ্ণ হ\'বলৈ <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> বাকী)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • দ্ৰুতগতিৰে চ্চাৰ্জ কৰি থকা হৈছে (সম্পূৰ্ণ হ\'বলৈ <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> বাকী)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • লাহে লাহে চ্চাৰ্জ কৰি থকা হৈছে (সম্পূৰ্ণ হ\'বলৈ <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> বাকী)"</string>
+    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • চ্চাৰ্জ কৰি থকা হৈছে (সম্পূৰ্ণ হ\'বলৈ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> বাকী)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • দ্ৰুতগতিৰে চ্চাৰ্জ কৰি থকা হৈছে (সম্পূৰ্ণ হ\'বলৈ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> বাকী)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • লাহে লাহে চ্চাৰ্জ কৰি থকা হৈছে (সম্পূৰ্ণ হ\'বলৈ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> বাকী)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ব্যৱহাৰকাৰী সলনি কৰক"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ব্যৱহাৰকাৰী সলনি কৰক, বৰ্তমানৰ ব্যৱহাৰকাৰী <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"বর্তমানৰ ব্যৱহাৰকাৰী <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -426,6 +426,9 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ব্যৱহাৰকাৰীক লগ আউট কৰক"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"নতুন ব্যৱহাৰকাৰী যোগ কৰিবনে?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"আপুনি যেতিয়া এজন নতুন ব্যৱহাৰকাৰী যোগ কৰে, তেওঁ নিজৰ স্থান ছেট আপ কৰা প্ৰয়োজন।\n\nযিকোনো ব্যৱহাৰকাৰীয়ে নিজৰ লগতে আন ব্যৱহাৰকাৰীৰো এপ্ আপডেট কৰিব পাৰে।"</string>
+    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
+    <skip />
+    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
     <string name="user_remove_user_title" msgid="4681256956076895559">"ব্যৱহাৰকাৰীক আঁতৰাবনে?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"এই ব্যৱহাৰকাৰীৰ সকলো এপ্ আৰু ডেটা মচা হ\'ব।"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"আঁতৰাওক"</string>
@@ -729,6 +732,8 @@
     <string name="left_icon" msgid="3096287125959387541">"বাওঁ আইকন"</string>
     <string name="right_icon" msgid="3952104823293824311">"সোঁ আইকন"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"টাইল যোগ কৰিবলৈ হেঁচি ধৰি টানি আনক"</string>
+    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
+    <skip />
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"আঁতৰাবৰ বাবে টানি আনি ইয়াত এৰি দিয়ক"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"আপোনাক অতি কমেও ৬খন টাইল লাগিব"</string>
     <string name="qs_edit" msgid="2232596095725105230">"সম্পাদনা কৰক"</string>
@@ -757,12 +762,10 @@
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"তলৰ স্ক্ৰীণখন সম্পূৰ্ণ স্ক্ৰীণ কৰক"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"অৱস্থান <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>। সম্পাদনা কৰিবৰ বাবে দুবাৰ টিপক।"</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>। যোগ কৰিবলৈ দুবাৰ টিপক।"</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"অৱস্থান <xliff:g id="POSITION">%1$d</xliff:g>। বাছনি কৰিবলৈ দুবাৰ টিপক।"</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"<xliff:g id="TILE_NAME">%1$s</xliff:g> স্থানান্তৰ কৰক"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"<xliff:g id="TILE_NAME">%1$s</xliff:g>ক আঁতৰাওক"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g>ক <xliff:g id="POSITION">%2$d</xliff:g> অৱস্থানত যোগ কৰা হৈছে"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g>ক আঁতৰোৱা হৈছে"</string>
-    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g>ক <xliff:g id="POSITION">%2$d</xliff:g> অৱস্থানলৈ স্থানান্তৰ কৰা হৈছে"</string>
+    <string name="accessibility_qs_edit_tile_add" msgid="3520406665865985109">"এই স্থান <xliff:g id="POSITION">%2$d</xliff:g>ত <xliff:g id="TILE_NAME">%1$s</xliff:g> যোগ কৰক"</string>
+    <string name="accessibility_qs_edit_tile_move" msgid="3108103090006972938">"<xliff:g id="TILE_NAME">%1$s</xliff:g>ক এই স্থান <xliff:g id="POSITION">%2$d</xliff:g>লৈ যাওক"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"ক্ষিপ্ৰ ছেটিংসমূহৰ সম্পাদক।"</string>
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> জাননী: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"বিভাজিত স্ক্ৰীণৰ সৈতে এপে হয়তো কাম নকৰিব।"</string>
@@ -823,7 +826,7 @@
     <string name="app_info" msgid="6856026610594615344">"এপ্ সম্পৰ্কীয় তথ্য"</string>
     <string name="go_to_web" msgid="2650669128861626071">"ব্ৰাউজাৰলৈ যাওক"</string>
     <string name="mobile_data" msgid="7094582042819250762">"ম\'বাইল ডেটা"</string>
-    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> — <xliff:g id="ID_2">%s</xliff:g>"</string>
+    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"ৱাই-ফাই অফ অৱস্থাত আছে"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ব্লুটুথ অফ অৱস্থাত আছে"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"অসুবিধা নিদিব অফ অৱস্থাত আছে"</string>
