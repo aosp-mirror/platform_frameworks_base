@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package android.view.inputmethod;
+package com.android.server.inputmethod;
 
 import android.content.ComponentName;
 
 /**
  * Input method manager local system service interface.
- *
- * @hide Only for use within the system server.
  */
 public interface InputMethodManagerInternal {
     /**

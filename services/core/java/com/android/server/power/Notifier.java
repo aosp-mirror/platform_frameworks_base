@@ -48,13 +48,13 @@ import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.StatsLog;
-import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
