@@ -34,7 +34,6 @@ import android.provider.Settings.Global;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
-import android.widget.RemoteViews;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -96,11 +95,7 @@ public class TileUtils {
     /**
      * The key used to get the category from metadata of activities of action
      * {@link #EXTRA_SETTINGS_ACTION}
-     * The value must be one of:
-     * <li>com.android.settings.category.wireless</li>
-     * <li>com.android.settings.category.device</li>
-     * <li>com.android.settings.category.personal</li>
-     * <li>com.android.settings.category.system</li>
+     * The value must be from {@link CategoryKey}.
      */
     private static final String EXTRA_CATEGORY_KEY = "com.android.settings.category";
 
@@ -170,17 +165,6 @@ public class TileUtils {
      */
     public static final String META_DATA_PREFERENCE_SUMMARY_URI =
             "com.android.settings.summary_uri";
-
-    /**
-     * Name of the meta-data item that should be set in the AndroidManifest.xml to specify the
-     * custom view which should be displayed for the preference. The custom view will be inflated
-     * as a remote view.
-     *
-     * This also can be used with {@link #META_DATA_PREFERENCE_SUMMARY_URI}, by setting the id
-     * of the summary TextView to '@android:id/summary'.
-     */
-    public static final String META_DATA_PREFERENCE_CUSTOM_VIEW =
-            "com.android.settings.custom_view";
 
     public static final String SETTING_PKG = "com.android.settings";
 
@@ -441,11 +425,6 @@ public class TileUtils {
                         } else {
                             keyHint = metaData.getString(META_DATA_PREFERENCE_KEYHINT);
                         }
-                    }
-                    if (metaData.containsKey(META_DATA_PREFERENCE_CUSTOM_VIEW)) {
-                        int layoutId = metaData.getInt(META_DATA_PREFERENCE_CUSTOM_VIEW);
-                        tile.remoteViews = new RemoteViews(applicationInfo.packageName, layoutId);
-                        updateSummaryAndTitle(context, providerMap, tile);
                     }
                 }
             } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
