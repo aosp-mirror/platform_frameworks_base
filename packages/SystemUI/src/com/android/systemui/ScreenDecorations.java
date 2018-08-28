@@ -41,7 +41,7 @@ import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.os.SystemProperties;
 import android.provider.Settings.Secure;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.util.DisplayMetrics;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;

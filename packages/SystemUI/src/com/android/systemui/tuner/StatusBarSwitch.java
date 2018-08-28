@@ -19,7 +19,7 @@ import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.provider.Settings;
-import android.support.v14.preference.SwitchPreference;
+import androidx.preference.SwitchPreference;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 
