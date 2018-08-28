@@ -1574,7 +1574,9 @@ public class AudioService extends IAudioService.Stub
 
         // For notifications/ring, show the ui before making any adjustments
         // Don't suppress mute/unmute requests
-        if (mVolumeController.suppressAdjustment(resolvedStream, flags, isMute)) {
+        // Don't suppress adjustments for single volume device
+        if (mVolumeController.suppressAdjustment(resolvedStream, flags, isMute)
+                && !mIsSingleVolume) {
             direction = 0;
             flags &= ~AudioManager.FLAG_PLAY_SOUND;
             flags &= ~AudioManager.FLAG_VIBRATE;
