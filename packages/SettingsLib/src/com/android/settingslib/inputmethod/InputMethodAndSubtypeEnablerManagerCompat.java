@@ -24,18 +24,18 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 
+import androidx.preference.Preference;
+import androidx.preference.PreferenceCategory;
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceScreen;
+import androidx.preference.TwoStatePreference;
+
 import com.android.settingslib.R;
 
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import androidx.preference.Preference;
-import androidx.preference.PreferenceCategory;
-import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceScreen;
-import androidx.preference.TwoStatePreference;
 
 public class InputMethodAndSubtypeEnablerManagerCompat implements
         Preference.OnPreferenceChangeListener {

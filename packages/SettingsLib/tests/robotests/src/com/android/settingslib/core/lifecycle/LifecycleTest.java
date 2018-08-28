@@ -16,6 +16,7 @@
 package com.android.settingslib.core.lifecycle;
 
 import static androidx.lifecycle.Lifecycle.Event.ON_START;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
@@ -24,6 +25,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
+
+import androidx.lifecycle.LifecycleOwner;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.core.lifecycle.events.OnAttach;
@@ -42,8 +45,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
-
-import androidx.lifecycle.LifecycleOwner;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 public class LifecycleTest {

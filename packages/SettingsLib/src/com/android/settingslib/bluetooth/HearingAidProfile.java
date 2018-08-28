@@ -16,10 +16,10 @@
 
 package com.android.settingslib.bluetooth;
 
-import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.util.Log;

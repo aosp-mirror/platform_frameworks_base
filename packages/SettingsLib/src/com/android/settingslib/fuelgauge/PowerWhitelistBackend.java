@@ -28,10 +28,10 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.telephony.SmsApplication;
 import com.android.internal.util.ArrayUtils;
-
-import androidx.annotation.VisibleForTesting;
 
 /**
  * Handles getting/changing the whitelist for the exceptions to battery saving features.

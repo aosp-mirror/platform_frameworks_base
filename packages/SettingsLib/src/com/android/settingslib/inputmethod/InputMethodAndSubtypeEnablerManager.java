@@ -19,15 +19,16 @@ package com.android.settingslib.inputmethod;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import androidx.preference.PreferenceFragment;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceCategory;
-import androidx.preference.PreferenceScreen;
-import androidx.preference.TwoStatePreference;
 import android.text.TextUtils;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
+
+import androidx.preference.Preference;
+import androidx.preference.PreferenceCategory;
+import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceScreen;
+import androidx.preference.TwoStatePreference;
 
 import com.android.settingslib.R;
 

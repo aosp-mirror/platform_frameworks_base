@@ -19,6 +19,7 @@ package com.android.settingslib.utils;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+
 import androidx.annotation.VisibleForTesting;
 import androidx.collection.ArrayMap;
 

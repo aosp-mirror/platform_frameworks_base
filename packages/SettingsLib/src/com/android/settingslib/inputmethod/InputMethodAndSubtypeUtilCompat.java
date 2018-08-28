@@ -30,6 +30,11 @@ import android.util.Log;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceScreen;
+import androidx.preference.TwoStatePreference;
+
 import com.android.internal.app.LocaleHelper;
 
 import java.util.HashMap;
@@ -37,11 +42,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import androidx.preference.Preference;
-import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceScreen;
-import androidx.preference.TwoStatePreference;
 
 // TODO: Consolidate this with {@link InputMethodSettingValuesWrapper}.
 public class InputMethodAndSubtypeUtilCompat {
