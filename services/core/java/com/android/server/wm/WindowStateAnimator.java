@@ -686,7 +686,6 @@ class WindowStateAnimator {
         final int displayId = mWin.getDisplayId();
         final ScreenRotationAnimation screenRotationAnimation =
                 mAnimator.getScreenRotationAnimationLocked(displayId);
-        // TODO(b/111504081): Consolidate seamless rotation logic.
         final boolean windowParticipatesInScreenRotationAnimation =
                 !mWin.mForceSeamlesslyRotate;
         final boolean screenAnimation = screenRotationAnimation != null
@@ -878,7 +877,6 @@ class WindowStateAnimator {
         mExtraVScale = (float) 1.0;
 
         boolean wasForceScaled = mForceScaleUntilResize;
-        boolean wasSeamlesslyRotated = w.mSeamlesslyRotated;
 
         // Once relayout has been called at least once, we need to make sure
         // we only resize the client surface during calls to relayout. For
@@ -898,7 +896,6 @@ class WindowStateAnimator {
         // If we are undergoing seamless rotation, the surface has already
         // been set up to persist at it's old location. We need to freeze
         // updates until a resize occurs.
-        mService.markForSeamlessRotation(w, w.mSeamlesslyRotated && !mSurfaceResized);
 
         Rect clipRect = null;
         if (calculateCrop(mTmpClipRect)) {
@@ -1069,14 +1066,14 @@ class WindowStateAnimator {
 
         // If we are ending the scaling mode. We switch to SCALING_MODE_FREEZE
         // to prevent further updates until buffer latch.
-        // When ending both force scaling, and seamless rotation, we need to freeze
-        // the Surface geometry until a buffer comes in at the new size (normally position and crop
-        // are unfrozen). setGeometryAppliesWithResizeInTransaction accomplishes this for us.
-        if ((wasForceScaled && !mForceScaleUntilResize) ||
-                (wasSeamlesslyRotated && !w.mSeamlesslyRotated)) {
+        // We also need to freeze the Surface geometry until a buffer
+        // comes in at the new size (normally position and crop are unfrozen).
+        // setGeometryAppliesWithResizeInTransaction accomplishes this for us.
+        if (wasForceScaled && !mForceScaleUntilResize) {
             mSurfaceController.setGeometryAppliesWithResizeInTransaction(true);
             mSurfaceController.forceScaleableInTransaction(false);
         }
+
 
         if (!w.mSeamlesslyRotated) {
             applyCrop(clipRect, recoveringMemory);
@@ -1507,29 +1504,6 @@ class WindowStateAnimator {
             mSurfaceController = null;
             mDrawState = NO_SURFACE;
         }
-    }
-
-    // TODO(b/111504081): Consolidate seamless rotation logic.
-    @Deprecated
-    void seamlesslyRotate(SurfaceControl.Transaction t, int oldRotation, int newRotation) {
-        final WindowState w = mWin;
-
-        // We rotated the screen, but have not received a new buffer with the correct size yet. In
-        // the mean time, we rotate the buffer we have to the new orientation.
-        final Matrix transform = mService.mTmpTransform;
-        transformToRotation(oldRotation, newRotation, w.getFrameLw().width(),
-                w.getFrameLw().height(), transform);
-        transform.getValues(mService.mTmpFloats);
-
-        float DsDx = mService.mTmpFloats[Matrix.MSCALE_X];
-        float DtDx = mService.mTmpFloats[Matrix.MSKEW_Y];
-        float DtDy = mService.mTmpFloats[Matrix.MSKEW_X];
-        float DsDy = mService.mTmpFloats[Matrix.MSCALE_Y];
-        float nx = mService.mTmpFloats[Matrix.MTRANS_X];
-        float ny = mService.mTmpFloats[Matrix.MTRANS_Y];
-        mSurfaceController.setPosition(t, nx, ny, false);
-        mSurfaceController.setMatrix(t, DsDx * w.mHScale, DtDx * w.mVScale, DtDy
-                * w.mHScale, DsDy * w.mVScale, false);
     }
 
     /** The force-scaled state for a given window can persist past

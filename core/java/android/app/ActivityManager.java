@@ -2747,6 +2747,7 @@ public class ActivityManager {
          *
          * @hide
          */
+        @TestApi
         public static final int IMPORTANCE_CANT_SAVE_STATE_PRE_26 = 170;
 
         /**
@@ -3265,6 +3266,13 @@ public class ActivityManager {
      *
      * <p><b>Note: this method is only intended for debugging or building
      * a user-facing process management UI.</b></p>
+     *
+     * <p>As of {@link android.os.Build.VERSION_CODES#Q Android Q}, for regular apps this method
+     * will only return information about the memory info for the processes running as the
+     * caller's uid; no other process memory info is available and will be zero.
+     * Also of {@link android.os.Build.VERSION_CODES#Q Android Q} the sample rate allowed
+     * by this API is significantly limited, if called faster the limit you will receive the
+     * same data as the previous call.</p>
      *
      * @param pids The pids of the processes whose memory usage is to be
      * retrieved.

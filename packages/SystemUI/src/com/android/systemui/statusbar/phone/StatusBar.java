@@ -2148,6 +2148,22 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarKeyguardViewManager.readyForKeyguardDone();
     }
 
+    public void dispatchNotificationsPanelTouchEvent(MotionEvent ev) {
+        if (!panelsEnabled()) {
+            return;
+        }
+        mNotificationPanel.dispatchTouchEvent(ev);
+
+        int action = ev.getAction();
+        if (action == MotionEvent.ACTION_DOWN) {
+            // Start ignoring all touch events coming to status bar window.
+            // TODO: handle case where ACTION_UP is not sent over the binder
+            mStatusBarWindowController.setNotTouchable(true);
+        } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            mStatusBarWindowController.setNotTouchable(false);
+        }
+    }
+
     @Override
     public void animateExpandNotificationsPanel() {
         if (SPEW) Log.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);

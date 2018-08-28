@@ -69,6 +69,7 @@ import android.os.WorkSource.WorkChain;
 import android.provider.Settings;
 import android.provider.Telephony.Carriers;
 import android.telephony.CarrierConfigManager;
+import android.telephony.ServiceState;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
@@ -2507,13 +2508,20 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
         if (apn == null) {
             return APN_INVALID;
         }
-
+        TelephonyManager phone = (TelephonyManager)
+                mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        // Carrier configuration may override framework roaming state, we need to use the actual
+        // modem roaming state instead of the framework roaming state.
+        boolean isDataRoamingFromRegistration = phone.getServiceState().
+                getDataRoamingFromRegistration();
+        String projection = isDataRoamingFromRegistration ? Carriers.ROAMING_PROTOCOL :
+                Carriers.PROTOCOL;
         String selection = String.format("current = 1 and apn = '%s' and carrier_enabled = 1", apn);
         Cursor cursor = null;
         try {
             cursor = mContext.getContentResolver().query(
                     Carriers.CONTENT_URI,
-                    new String[]{Carriers.PROTOCOL},
+                    new String[]{projection},
                     selection,
                     null,
                     Carriers.DEFAULT_SORT_ORDER);
