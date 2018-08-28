@@ -132,12 +132,6 @@ public class KeyValueBackupReporter {
         Slog.e(TAG, "Error during PM metadata backup", e);
     }
 
-    void onEmptyQueue() {
-        if (MORE_DEBUG) {
-            Slog.i(TAG, "Queue now empty");
-        }
-    }
-
     void onStartPackageBackup(String packageName) {
         Slog.d(TAG, "Starting key-value backup of " + packageName);
     }

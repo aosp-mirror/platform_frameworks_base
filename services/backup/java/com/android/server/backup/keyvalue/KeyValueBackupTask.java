@@ -331,41 +331,33 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     public void run() {
         Process.setThreadPriority(THREAD_PRIORITY);
 
-        BackupState state = startTask();
-        while (state == BackupState.RUNNING_QUEUE || state == BackupState.BACKUP_PM) {
-            if (mCancelled) {
-                state = BackupState.CANCELLED;
-            }
-            switch (state) {
-                case BACKUP_PM:
-                    state = backupPm();
-                    break;
-                case RUNNING_QUEUE:
-                    Pair<BackupState, RemoteResult> stateAndResult = extractNextAgentData();
-                    state = stateAndResult.first;
-                    if (state == null) {
-                        state = handleAgentResult(stateAndResult.second);
-                    }
-                    break;
+        boolean processQueue = startTask();
+        while (processQueue && !mQueue.isEmpty() && !mCancelled) {
+            String packageName = mQueue.remove(0);
+            if (PM_PACKAGE.equals(packageName)) {
+                processQueue = backupPm();
+            } else {
+                processQueue = backupPackage(packageName);
             }
         }
         finishTask();
     }
 
-    private BackupState handleAgentResult(RemoteResult result) {
+    /** Returns whether to consume next queue package. */
+    private boolean handleAgentResult(RemoteResult result) {
         if (result == RemoteResult.FAILED_THREAD_INTERRUPTED) {
             // Not an explicit cancel, we need to flag it.
             mCancelled = true;
             handleAgentCancelled();
-            return BackupState.CANCELLED;
+            return false;
         }
         if (result == RemoteResult.FAILED_CANCELLED) {
             handleAgentCancelled();
-            return BackupState.CANCELLED;
+            return false;
         }
         if (result == RemoteResult.FAILED_TIMED_OUT) {
             handleAgentTimeout();
-            return BackupState.RUNNING_QUEUE;
+            return true;
         }
         Preconditions.checkState(result.succeeded());
         return sendDataToTransport(result.get());
@@ -377,11 +369,12 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     @Override
     public void operationComplete(long unusedResult) {}
 
-    private BackupState startTask() {
+    /** Returns whether to consume next queue package. */
+    private boolean startTask() {
         synchronized (mBackupManagerService.getCurrentOpLock()) {
             if (mBackupManagerService.isBackupOperationInProgress()) {
                 mReporter.onSkipBackup();
-                return BackupState.FINAL;
+                return false;
             }
         }
 
@@ -404,14 +397,18 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         mAgentBinder = null;
         mStatus = BackupTransport.TRANSPORT_OK;
 
-        // Sanity check: if the queue is empty we have no work to do.
-        if (mOriginalQueue.isEmpty() && mPendingFullBackups.isEmpty()) {
+        if (mQueue.isEmpty() && mPendingFullBackups.isEmpty()) {
             mReporter.onEmptyQueueAtStart();
-            return BackupState.FINAL;
+            return false;
         }
 
         // We only backup PM if it was explicitly in the queue or if it's incremental.
         boolean backupPm = mQueue.remove(PM_PACKAGE) || !mNonIncremental;
+        if (backupPm) {
+            mQueue.add(0, PM_PACKAGE);
+        } else {
+            mReporter.onSkipPm();
+        }
 
         mReporter.onQueueReady(mQueue);
         File pmState = new File(mStateDirectory, PM_PACKAGE);
@@ -434,18 +431,14 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
 
         if (mStatus != BackupTransport.TRANSPORT_OK) {
             mBackupManagerService.resetBackupState(mStateDirectory);
-            return BackupState.FINAL;
+            return false;
         }
 
-        if (!backupPm) {
-            mReporter.onSkipPm();
-            return BackupState.RUNNING_QUEUE;
-        }
-
-        return BackupState.BACKUP_PM;
+        return true;
     }
 
-    private BackupState backupPm() {
+    /** Returns whether to consume next queue package. */
+    private boolean backupPm() {
         RemoteResult agentResult = null;
         try {
             mCurrentPackage = new PackageInfo();
@@ -466,31 +459,17 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
 
         if (mStatus != BackupTransport.TRANSPORT_OK) {
             mBackupManagerService.resetBackupState(mStateDirectory);
-            return BackupState.FINAL;
+            return false;
         }
 
         Preconditions.checkNotNull(agentResult);
         return handleAgentResult(agentResult);
     }
 
-    /**
-     * Returns either:
-     *
-     * <ul>
-     *   <li>(next state, {@code null}): In case we failed to call the agent.
-     *   <li>({@code null}, agent result): In case we successfully called the agent.
-     * </ul>
-     */
-    private Pair<BackupState, RemoteResult> extractNextAgentData() {
-        mStatus = BackupTransport.TRANSPORT_OK;
-
-        if (mQueue.isEmpty()) {
-            mReporter.onEmptyQueue();
-            return Pair.create(BackupState.FINAL, null);
-        }
-
-        String packageName = mQueue.remove(0);
+    /** Returns whether to consume next queue package. */
+    private boolean backupPackage(String packageName) {
         mReporter.onStartPackageBackup(packageName);
+        mStatus = BackupTransport.TRANSPORT_OK;
 
         // Verify that the requested app is eligible for key-value backup.
         RemoteResult agentResult = null;
@@ -502,19 +481,19 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
                 // The manifest has changed. This won't happen again because the app won't be
                 // requesting further backups.
                 mReporter.onPackageNotEligibleForBackup(packageName);
-                return Pair.create(BackupState.RUNNING_QUEUE, null);
+                return true;
             }
 
             if (AppBackupUtils.appGetsFullBackup(mCurrentPackage)) {
                 // Initially enqueued for key-value backup, but only supports full-backup now.
                 mReporter.onPackageEligibleForFullBackup(packageName);
-                return Pair.create(BackupState.RUNNING_QUEUE, null);
+                return true;
             }
 
             if (AppBackupUtils.appIsStopped(applicationInfo)) {
                 // Just as it won't receive broadcasts, we won't run it for backup.
                 mReporter.onPackageStopped(packageName);
-                return Pair.create(BackupState.RUNNING_QUEUE, null);
+                return true;
             }
 
             try {
@@ -550,22 +529,21 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
                 mReporter.onAgentError(packageName);
                 mBackupManagerService.dataChangedImpl(packageName);
                 mStatus = BackupTransport.TRANSPORT_OK;
-                return Pair.create(BackupState.RUNNING_QUEUE, null);
+                return true;
             }
 
             if (mStatus == BackupTransport.AGENT_UNKNOWN) {
                 mReporter.onAgentUnknown(packageName);
                 mStatus = BackupTransport.TRANSPORT_OK;
-                return Pair.create(BackupState.RUNNING_QUEUE, null);
+                return true;
             }
 
             // Transport-level failure, re-enqueue everything.
             revertTask();
-            return Pair.create(BackupState.FINAL, null);
+            return false;
         }
 
-        // Success: caller will figure out the state based on call result
-        return Pair.create(null, agentResult);
+        return handleAgentResult(agentResult);
     }
 
     private void finishTask() {
@@ -811,7 +789,8 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         }
     }
 
-    private BackupState sendDataToTransport(long agentResult) {
+    /** Returns whether to consume next queue package. */
+    private boolean sendDataToTransport(long agentResult) {
         Preconditions.checkState(mBackupData != null);
 
         String packageName = mCurrentPackage.packageName;
@@ -821,7 +800,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         try {
             if (!validateBackupData(applicationInfo, mBackupDataFile)) {
                 errorCleanup();
-                return BackupState.RUNNING_QUEUE;
+                return true;
             }
             writingWidgetData = true;
             writeWidgetPayloadIfAppropriate(mBackupData.getFileDescriptor(), packageName);
@@ -832,7 +811,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
                 mReporter.onReadAgentDataError(packageName, e);
             }
             revertTask();
-            return BackupState.FINAL;
+            return false;
         }
 
         clearAgentState();
@@ -892,33 +871,31 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         }
     }
 
-    private BackupState handleTransportStatus(int status, String packageName, long size) {
+    /** Returns whether to consume next queue package. */
+    private boolean handleTransportStatus(int status, String packageName, long size) {
         if (status == BackupTransport.TRANSPORT_OK) {
             mReporter.onPackageBackupComplete(packageName, size);
-            return BackupState.RUNNING_QUEUE;
+            return true;
         }
         if (status == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
             mReporter.onPackageBackupRejected(packageName);
-            return BackupState.RUNNING_QUEUE;
+            return true;
         }
         if (status == BackupTransport.TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED) {
             mReporter.onPackageBackupNonIncrementalRequired(mCurrentPackage);
             // Immediately retry the current package.
-            if (PM_PACKAGE.equals(packageName)) {
-                return BackupState.BACKUP_PM;
-            }
             mQueue.add(0, packageName);
-            return BackupState.RUNNING_QUEUE;
+            return true;
         }
         if (status == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
             mReporter.onPackageBackupQuotaExceeded(packageName);
             agentDoQuotaExceeded(mAgentBinder, packageName, size);
-            return BackupState.RUNNING_QUEUE;
+            return true;
         }
         // Any other error here indicates a transport-level failure.
         mReporter.onPackageBackupTransportFailure(packageName);
         revertTask();
-        return BackupState.FINAL;
+        return false;
     }
 
     private void agentDoQuotaExceeded(
@@ -1086,13 +1063,5 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         mReporter.onRemoteCallReturned(result);
         mPendingCall = null;
         return result;
-    }
-
-    private enum BackupState {
-        INITIAL,
-        BACKUP_PM,
-        RUNNING_QUEUE,
-        CANCELLED,
-        FINAL
     }
 }
