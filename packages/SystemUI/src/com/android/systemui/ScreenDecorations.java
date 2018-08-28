@@ -43,7 +43,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemProperties;
 import android.provider.Settings.Secure;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.DisplayCutout;

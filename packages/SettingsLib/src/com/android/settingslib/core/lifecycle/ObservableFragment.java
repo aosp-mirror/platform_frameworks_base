@@ -16,16 +16,16 @@
 
 package com.android.settingslib.core.lifecycle;
 
-import static android.arch.lifecycle.Lifecycle.Event.ON_CREATE;
-import static android.arch.lifecycle.Lifecycle.Event.ON_DESTROY;
-import static android.arch.lifecycle.Lifecycle.Event.ON_PAUSE;
-import static android.arch.lifecycle.Lifecycle.Event.ON_RESUME;
-import static android.arch.lifecycle.Lifecycle.Event.ON_START;
-import static android.arch.lifecycle.Lifecycle.Event.ON_STOP;
+import static androidx.lifecycle.Lifecycle.Event.ON_CREATE;
+import static androidx.lifecycle.Lifecycle.Event.ON_DESTROY;
+import static androidx.lifecycle.Lifecycle.Event.ON_PAUSE;
+import static androidx.lifecycle.Lifecycle.Event.ON_RESUME;
+import static androidx.lifecycle.Lifecycle.Event.ON_START;
+import static androidx.lifecycle.Lifecycle.Event.ON_STOP;
 
 import android.annotation.CallSuper;
 import android.app.Fragment;
-import android.arch.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.Menu;

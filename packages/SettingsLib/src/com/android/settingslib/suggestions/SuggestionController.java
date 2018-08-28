@@ -24,8 +24,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.settings.suggestions.ISuggestionService;
 import android.service.settings.suggestions.Suggestion;
-import android.support.annotation.Nullable;
-import android.support.annotation.WorkerThread;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 import android.util.Log;
 
 import java.util.List;

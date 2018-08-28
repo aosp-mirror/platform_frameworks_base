@@ -30,7 +30,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.UserHandle;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.text.Annotation;
 import android.text.Layout;
 import android.text.SpannableString;

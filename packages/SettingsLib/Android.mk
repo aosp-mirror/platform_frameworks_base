@@ -8,17 +8,17 @@ LOCAL_AAPT2_ONLY := true
 LOCAL_MODULE := SettingsLib
 
 LOCAL_JAVA_LIBRARIES := \
-    android-support-annotations
+    androidx.annotation_annotation
 
 LOCAL_SHARED_ANDROID_LIBRARIES := \
-    android-support-v4 \
-    android-support-v7-recyclerview \
-    android-support-v7-preference \
-    android-support-v7-appcompat \
-    android-arch-lifecycle-runtime
+    androidx.legacy_legacy-support-v4 \
+    androidx.recyclerview_recyclerview \
+    androidx.preference_preference \
+    androidx.appcompat_appcompat \
+    androidx.lifecycle_lifecycle-runtime
 
 LOCAL_SHARED_JAVA_LIBRARIES := \
-    android-arch-lifecycle-common
+    androidx.lifecycle_lifecycle-common
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
