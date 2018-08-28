@@ -40,6 +40,7 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.IInstalld;
 import android.os.IVold;
 import android.os.IVoldTaskListener;
 import android.os.Looper;
@@ -215,11 +216,10 @@ public class StorageManager {
     /** {@hide} */
     public static final int DEBUG_VIRTUAL_DISK = 1 << 5;
 
-    // NOTE: keep in sync with installd
     /** {@hide} */
-    public static final int FLAG_STORAGE_DE = 1 << 0;
+    public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
     /** {@hide} */
-    public static final int FLAG_STORAGE_CE = 1 << 1;
+    public static final int FLAG_STORAGE_CE = IInstalld.FLAG_STORAGE_CE;
 
     /** {@hide} */
     public static final int FLAG_FOR_WRITE = 1 << 8;

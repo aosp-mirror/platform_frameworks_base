@@ -42,7 +42,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
 import android.content.pm.IntentFilterVerificationInfo;
-import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
@@ -209,8 +208,6 @@ public final class Settings {
 
     public static final String ATTR_NAME = "name";
     public static final String ATTR_PACKAGE = "package";
-    private static final String ATTR_USER = "user";
-    private static final String ATTR_CODE = "code";
     private static final String ATTR_GRANTED = "granted";
     private static final String ATTR_FLAGS = "flags";
     private static final String ATTR_VERSION = "version";
@@ -387,10 +384,6 @@ public final class Settings {
             new ArrayList<Signature>();
     private final ArrayMap<Long, Integer> mKeySetRefs =
             new ArrayMap<Long, Integer>();
-
-    // Packages that have been uninstalled and still need their external
-    // storage data deleted.
-    final ArrayList<PackageCleanItem> mPackagesToBeCleaned = new ArrayList<PackageCleanItem>();
 
     // Packages that have been renamed since they were first installed.
     // Keys are the new names of the packages, values are the original
@@ -2546,17 +2539,6 @@ public final class Settings {
                 serializer.endTag(null, "shared-user");
             }
 
-            if (mPackagesToBeCleaned.size() > 0) {
-                for (PackageCleanItem item : mPackagesToBeCleaned) {
-                    final String userStr = Integer.toString(item.userId);
-                    serializer.startTag(null, "cleaning-package");
-                    serializer.attribute(null, ATTR_NAME, item.packageName);
-                    serializer.attribute(null, ATTR_CODE, item.andCode ? "true" : "false");
-                    serializer.attribute(null, ATTR_USER, userStr);
-                    serializer.endTag(null, "cleaning-package");
-                }
-            }
-
             if (mRenamedPackages.size() > 0) {
                 for (Map.Entry<String, String> e : mRenamedPackages.entrySet()) {
                     serializer.startTag(null, "renamed-package");
@@ -2972,12 +2954,6 @@ public final class Settings {
         bp.writeLPr(serializer);
     }
 
-    void addPackageToCleanLPw(PackageCleanItem pkg) {
-        if (!mPackagesToBeCleaned.contains(pkg)) {
-            mPackagesToBeCleaned.add(pkg);
-        }
-    }
-
     boolean readLPw(@NonNull List<UserInfo> users) {
         FileInputStream str = null;
         if (mBackupSettingsFilename.exists()) {
@@ -3070,24 +3046,6 @@ public final class Settings {
                     readDefaultAppsLPw(parser, 0);
                 } else if (tagName.equals("updated-package")) {
                     readDisabledSysPackageLPw(parser);
-                } else if (tagName.equals("cleaning-package")) {
-                    String name = parser.getAttributeValue(null, ATTR_NAME);
-                    String userStr = parser.getAttributeValue(null, ATTR_USER);
-                    String codeStr = parser.getAttributeValue(null, ATTR_CODE);
-                    if (name != null) {
-                        int userId = UserHandle.USER_SYSTEM;
-                        boolean andCode = true;
-                        try {
-                            if (userStr != null) {
-                                userId = Integer.parseInt(userStr);
-                            }
-                        } catch (NumberFormatException e) {
-                        }
-                        if (codeStr != null) {
-                            andCode = Boolean.parseBoolean(codeStr);
-                        }
-                        addPackageToCleanLPw(new PackageCleanItem(userId, name, andCode));
-                    }
                 } else if (tagName.equals("renamed-package")) {
                     String nname = parser.getAttributeValue(null, "new");
                     String oname = parser.getAttributeValue(null, "old");

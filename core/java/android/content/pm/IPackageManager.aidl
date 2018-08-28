@@ -37,7 +37,6 @@ import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.KeySet;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageCleanItem;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
 import android.content.pm.PermissionGroupInfo;
@@ -552,8 +551,6 @@ interface IPackageManager {
      * deleted, update the internal records and delete the generated oat files.
      */
     void reconcileSecondaryDexFiles(String packageName);
-
-    PackageCleanItem nextPackageToClean(in PackageCleanItem lastPackage);
 
     int getMoveStatus(int moveId);
 
