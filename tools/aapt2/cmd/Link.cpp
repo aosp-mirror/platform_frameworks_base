@@ -1842,9 +1842,15 @@ class Linker {
     } else {
       // Adjust the SplitConstraints so that their SDK version is stripped if it is less than or
       // equal to the minSdk.
+      const size_t origConstraintSize = options_.split_constraints.size();
       options_.split_constraints =
           AdjustSplitConstraintsForMinSdk(context_->GetMinSdkVersion(), options_.split_constraints);
 
+      if (origConstraintSize != options_.split_constraints.size()) {
+        context_->GetDiagnostics()->Warn(DiagMessage()
+                                         << "requested to split resources prior to min sdk of "
+                                         << context_->GetMinSdkVersion());
+      }
       TableSplitter table_splitter(options_.split_constraints, options_.table_splitter_options);
       if (!table_splitter.VerifySplitConstraints(context_)) {
         return 1;

@@ -30,6 +30,7 @@ namespace aapt {
 
 struct SplitConstraints {
   std::set<ConfigDescription> configs;
+  std::string name;
 };
 
 struct TableSplitterOptions {
