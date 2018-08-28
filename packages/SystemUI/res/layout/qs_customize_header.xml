@@ -20,8 +20,9 @@
     android:id="@android:id/title"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/qs_tile_margin_top_bottom_negative"
     android:gravity="center"
-    android:minHeight="28dp"
+    android:minHeight="@dimen/qs_customize_header_min_height"
     android:textAppearance="@style/TextAppearance.QSEdit.Headers"
     android:textColor="?android:attr/colorAccent"
     android:text="@string/drag_to_rearrange_tiles" />
