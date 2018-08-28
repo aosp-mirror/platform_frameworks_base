@@ -6617,9 +6617,9 @@ public class TelephonyManager {
      * subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
      *
      * <p>Requires one of the following permissions:
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE ACCESS_NETWORK_STATE},
-     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}, or that the
-     * calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE},
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE}, or that the calling app has carrier
+     * privileges (see {@link #hasCarrierPrivileges}).
      *
      * <p>Note that this does not take into account any data restrictions that may be present on the
      * calling app. Such restrictions may be inspected with
@@ -6627,8 +6627,66 @@ public class TelephonyManager {
      *
      * @return true if mobile data is enabled.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_NETWORK_STATE,
+            android.Manifest.permission.MODIFY_PHONE_STATE})
     public boolean isDataEnabled() {
         return getDataEnabled(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
+    }
+
+    /**
+     * Returns whether mobile data roaming is enabled on the subscription.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * <p>Requires one of the following permissions:
+     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE},
+     * {@link android.Manifest.permission#READ_PHONE_STATE} or that the calling app
+     * has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @return {@code true} if the data roaming is enabled on the subscription, otherwise return
+     * {@code false}.
+     */
+    @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_NETWORK_STATE,
+            android.Manifest.permission.READ_PHONE_STATE})
+    public boolean isDataRoamingEnabled() {
+        boolean isDataRoamingEnabled = false;
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                isDataRoamingEnabled = telephony.isDataRoamingEnabled(getSubId());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isDataRoamingEnabled", e);
+        }
+        return isDataRoamingEnabled;
+    }
+
+    /**
+     * Enables/Disables the data roaming on the subscription.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * <p> Requires permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE} or that the calling app has carrier
+     * privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @param isEnabled {@code true} to enable mobile data roaming, otherwise disable it.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setDataRoamingEnabled(boolean isEnabled) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setDataRoamingEnabled(getSubId(), isEnabled);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#setDataRoamingEnabled", e);
+        }
     }
 
     /**

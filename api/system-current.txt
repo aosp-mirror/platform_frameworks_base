@@ -5396,6 +5396,7 @@ package android.telephony {
     method public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
     method public void setDataActivationState(int);
     method public deprecated void setDataEnabled(int, boolean);
+    method public void setDataRoamingEnabled(boolean);
     method public boolean setRadio(boolean);
     method public boolean setRadioPower(boolean);
     method public void setSimPowerState(int);
