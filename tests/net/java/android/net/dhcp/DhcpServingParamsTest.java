@@ -37,7 +37,6 @@ import org.junit.runner.RunWith;
 
 import java.net.Inet4Address;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -150,14 +149,14 @@ public class DhcpServingParamsTest {
 
     @Test(expected = InvalidParameterException.class)
     public void testBuild_PrefixTooSmall() throws InvalidParameterException {
-        mBuilder.setDefaultRouters(Collections.singleton(parseAddr("192.168.0.254")))
+        mBuilder.setDefaultRouters(parseAddr("192.168.0.254"))
                 .setServerAddr(new LinkAddress(TEST_SERVER_ADDR, 31))
                 .build();
     }
 
     @Test(expected = InvalidParameterException.class)
     public void testBuild_RouterNotInPrefix() throws InvalidParameterException {
-        mBuilder.setDefaultRouters(Collections.singleton(parseAddr("192.168.254.254"))).build();
+        mBuilder.setDefaultRouters(parseAddr("192.168.254.254")).build();
     }
 
     private static <T> void assertContains(@NonNull Set<T> set, @NonNull Set<T> subset) {
