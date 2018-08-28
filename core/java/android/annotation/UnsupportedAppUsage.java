@@ -27,15 +27,15 @@ import java.lang.annotation.Target;
  * Indicates that a class member, that is not part of the SDK, is used by apps.
  * Since the member is not part of the SDK, such use is not supported.
  *
- * This annotation acts as a heads up that changing a given method or field
+ * <p>This annotation acts as a heads up that changing a given method or field
  * may affect apps, potentially breaking them when the next Android version is
  * released. In some cases, for members that are heavily used, this annotation
  * may imply restrictions on changes to the member.
  *
- * This annotation also results in access to the member being permitted by the
+ * <p>This annotation also results in access to the member being permitted by the
  * runtime, with a warning being generated in debug builds.
  *
- * For more details, see go/UnsupportedAppUsage.
+ * <p>For more details, see go/UnsupportedAppUsage.
  *
  * {@hide}
  */
@@ -53,15 +53,15 @@ public @interface UnsupportedAppUsage {
     /**
      * Indicates that usage of this API is limited to apps based on their target SDK version.
      *
-     * Access to the API is allowed if the targetSdkVersion in the apps manifest is no greater than
-     * this value. Access checks are performed at runtime.
+     * <p>Access to the API is allowed if the targetSdkVersion in the apps manifest is no greater
+     * than this value. Access checks are performed at runtime.
      *
-     * This is used to give app developers a grace period to migrate off a non-SDK interface. When
-     * making Android version N, existing APIs can have a maxTargetSdk of N-1 added to them.
+     * <p>This is used to give app developers a grace period to migrate off a non-SDK interface.
+     * When making Android version N, existing APIs can have a maxTargetSdk of N-1 added to them.
      * Developers must then migrate off the API when their app is updated in future, but it will
      * continue working in the meantime.
      *
-     * Possible values are:
+     * <p>Possible values are:
      * <ul>
      *     <li>
      *         {@link android.os.Build.VERSION_CODES#O} or {@link android.os.Build.VERSION_CODES#P},
