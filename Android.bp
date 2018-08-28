@@ -1171,6 +1171,48 @@ doc_defaults {
     create_stubs: false,
 }
 
+metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.xml) " +
+    "--hide-package com.android.okhttp " +
+    "--hide-package com.android.org.conscrypt --hide-package com.android.server " +
+    "--hide RequiresPermission " +
+    "--hide MissingPermission --hide BroadcastBehavior " +
+    "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
+    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo"
+
+doc_defaults {
+    name: "metalava-api-stubs-default",
+    srcs: [
+        ":opt-telephony-srcs",
+        ":opt-net-voip-srcs",
+        ":openjdk_javadoc_files",
+        ":non_openjdk_javadoc_files",
+        ":android_icu4j_src_files_for_docs",
+    ],
+    srcs_lib: "framework",
+    srcs_lib_whitelist_dirs: frameworks_base_subdirs,
+    srcs_lib_whitelist_pkgs: packages_to_document,
+    libs: [
+        "core-oj",
+        "core-libart",
+        "conscrypt",
+        "bouncycastle",
+        "okhttp",
+        "ext",
+        "framework",
+        "voip-common",
+        "android.test.mock",
+    ],
+    local_sourcepaths: frameworks_base_subdirs,
+    installable: false,
+    metalava_enabled: true,
+    metalava_annotations_enabled: true,
+    metalava_previous_api: ":last-released-public-api",
+    metalava_merge_annotations_dirs: [
+        "metalava-manual",
+        "ojluni-annotated-stubs",
+    ],
+}
+
 droiddoc {
     name: "doc-comment-check-docs",
     defaults: ["framework-docs-default"],
@@ -1398,25 +1440,20 @@ java_library_static {
 }
 
 droiddoc {
-    name: "hiddenapi-lists",
-    defaults: ["api-stubs-default"],
+    name: "hiddenapi-lists-docs",
+    defaults: ["metalava-api-stubs-default"],
     arg_files: [
         "core/res/AndroidManifest.xml",
-        ":api-version-xml",
-        "core/java/overview.html",
-        ":current-support-api",
-        "api/current.txt",
     ],
     dex_api_filename: "public-dex.txt",
     private_dex_api_filename: "private-dex.txt",
     removed_dex_api_filename: "removed-dex.txt",
-    args: framework_docs_args +
-          " -referenceonly" +
-          " -nodocs" +
-          " -showUnannotated" +
-          " -showAnnotation android.annotation.SystemApi" +
-          " -showAnnotation android.annotation.TestApi",
+    args: metalava_framework_docs_args +
+        " --show-unannotated " +
+        " --show-annotation android.annotation.SystemApi " +
+        " --show-annotation android.annotation.TestApi "
 }
+
 
 droiddoc {
     name: "hiddenapi-mappings",
@@ -1458,48 +1495,6 @@ filegroup {
         "core/java/android/net/http/SslCertificate.java",
         "core/java/android/net/http/SslError.java",
         "core/java/com/android/internal/util/HexDump.java",
-    ],
-}
-
-metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.xml) " +
-    "--hide-package com.android.okhttp " +
-    "--hide-package com.android.org.conscrypt --hide-package com.android.server " +
-    "--hide RequiresPermission " +
-    "--hide MissingPermission --hide BroadcastBehavior " +
-    "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
-    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo"
-
-doc_defaults {
-    name: "metalava-api-stubs-default",
-    srcs: [
-        ":opt-telephony-srcs",
-        ":opt-net-voip-srcs",
-        ":openjdk_javadoc_files",
-        ":non_openjdk_javadoc_files",
-        ":android_icu4j_src_files_for_docs",
-    ],
-    srcs_lib: "framework",
-    srcs_lib_whitelist_dirs: frameworks_base_subdirs,
-    srcs_lib_whitelist_pkgs: packages_to_document,
-    libs: [
-        "core-oj",
-        "core-libart",
-        "conscrypt",
-        "bouncycastle",
-        "okhttp",
-        "ext",
-        "framework",
-        "voip-common",
-        "android.test.mock",
-    ],
-    local_sourcepaths: frameworks_base_subdirs,
-    installable: false,
-    metalava_enabled: true,
-    metalava_annotations_enabled: true,
-    metalava_previous_api: ":last-released-public-api",
-    metalava_merge_annotations_dirs: [
-        "metalava-manual",
-        "ojluni-annotated-stubs",
     ],
 }
 
