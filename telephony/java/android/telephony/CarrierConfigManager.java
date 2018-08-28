@@ -2017,6 +2017,15 @@ public class CarrierConfigManager {
     public static final String KEY_UNDELIVERED_SMS_MESSAGE_EXPIRATION_TIME =
             "undelivered_sms_message_expiration_time";
 
+    /**
+     * Support for the original string display of CDMA MO call.
+     * By default, it is disabled.
+     * @hide
+     */
+    public static final String KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL =
+            "config_show_orig_dial_string_for_cdma";
+
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -2346,6 +2355,7 @@ public class CarrierConfigManager {
                         -85  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "");
+        sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
     }
 
     /**
