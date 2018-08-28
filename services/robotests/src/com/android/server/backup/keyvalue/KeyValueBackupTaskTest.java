@@ -62,6 +62,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 import static org.robolectric.shadow.api.Shadow.extract;
+import static org.testng.Assert.fail;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Collections.emptyList;
@@ -106,6 +107,7 @@ import com.android.server.backup.PackageManagerBackupAgent;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.internal.BackupHandler;
 import com.android.server.backup.internal.OnTaskFinishedListener;
+import com.android.server.backup.remote.RemoteCall;
 import com.android.server.backup.testing.PackageData;
 import com.android.server.backup.testing.TestUtils.ThrowingRunnable;
 import com.android.server.backup.testing.TransportData;
@@ -704,14 +706,13 @@ public class KeyValueBackupTaskTest {
     }
 
     /**
-     * For local agents the exception is thrown in our stack, so it hits the catch clause around
-     * invocation earlier than the {@link KeyValueBackupTask#operationComplete(long)} code-path,
-     * invalidating the latter. Note that this happens because {@link
-     * BackupManagerService#opComplete(int, long)} schedules the actual execution to the backup
-     * handler.
+     * For local agents the exception is thrown in our stack, before {@link RemoteCall} has a chance
+     * to complete cleanly.
      */
+    // TODO: When RemoteCall spins up a new thread the assertions on this method should be the same
+    // as the methods below (non-local call).
     @Test
-    public void testRunTask_whenLocalAgentOnBackupThrows() throws Exception {
+    public void testRunTask_whenLocalAgentOnBackupThrows_setsNullWorkSource() throws Exception {
         TransportMock transportMock = setUpInitializedTransport(mTransport);
         AgentMock agentMock = setUpAgent(PACKAGE_1);
         agentOnBackupDo(
@@ -724,13 +725,116 @@ public class KeyValueBackupTaskTest {
         runTask(task);
 
         verify(mBackupManagerService).setWorkSource(null);
+    }
+
+    @Test
+    public void testRunTask_whenLocalAgentOnBackupThrows_reportsCorrectly() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        AgentMock agentMock = setUpAgent(PACKAGE_1);
+        agentOnBackupDo(
+                agentMock,
+                (oldState, dataOutput, newState) -> {
+                    throw new RuntimeException();
+                });
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+
+        runTask(task);
+
         verify(mObserver).onResult(PACKAGE_1.packageName, ERROR_AGENT_FAILURE);
         verify(mObserver).backupFinished(SUCCESS);
+        verify(mReporter)
+                .onCallAgentDoBackupError(
+                        eq(PACKAGE_1.packageName), eq(true), any(RuntimeException.class));
         assertEventLogged(
                 EventLogTags.BACKUP_AGENT_FAILURE,
                 PACKAGE_1.packageName,
                 new RuntimeException().toString());
+    }
+
+    @Test
+    public void testRunTask_whenLocalAgentOnBackupThrows_doesNotUpdateBookkeping()
+            throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        AgentMock agentMock = setUpAgent(PACKAGE_1);
+        agentOnBackupDo(
+                agentMock,
+                (oldState, dataOutput, newState) -> {
+                    throw new RuntimeException();
+                });
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+
+        runTask(task);
+
         assertBackupPendingFor(PACKAGE_1);
+    }
+
+    @Test
+    public void testRunTask_whenAgentOnBackupThrows_reportsCorrectly() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        AgentMock agentMock = setUpAgent(PACKAGE_1);
+        remoteAgentOnBackupThrows(
+                agentMock,
+                (oldState, dataOutput, newState) -> {
+                    throw new RuntimeException();
+                });
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+
+        runTask(task);
+
+        verify(mReporter).onAgentResultError(argThat(packageInfo(PACKAGE_1)));
+    }
+
+    @Test
+    public void testRunTask_whenAgentOnBackupThrows_updatesBookkeeping() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        AgentMock agentMock = setUpAgent(PACKAGE_1);
+        remoteAgentOnBackupThrows(
+                agentMock,
+                (oldState, dataOutput, newState) -> {
+                    throw new RuntimeException();
+                });
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+
+        runTask(task);
+
+        assertBackupNotPendingFor(PACKAGE_1);
+    }
+
+    @Test
+    public void testRunTask_whenAgentOnBackupThrows_doesNotCallTransport() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        AgentMock agentMock = setUpAgent(PACKAGE_1);
+        remoteAgentOnBackupThrows(
+                agentMock,
+                (oldState, dataOutput, newState) -> {
+                    throw new RuntimeException();
+                });
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+
+        runTask(task);
+
+        verify(transportMock.transport, never())
+                .performBackup(argThat(packageInfo(PACKAGE_1)), any(), anyInt());
+    }
+
+    @Test
+    public void testRunTask_whenAgentOnBackupThrows_updatesAndCleansUpFiles() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        AgentMock agentMock = setUpAgent(PACKAGE_1);
+        remoteAgentOnBackupThrows(
+                agentMock,
+                (oldState, dataOutput, newState) -> {
+                    throw new RuntimeException();
+                });
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+        Files.write(getStateFile(mTransport, PACKAGE_1), "oldState".getBytes());
+
+        runTask(task);
+
+        assertThat(Files.readAllBytes(getStateFile(mTransport, PACKAGE_1)))
+                .isEqualTo("oldState".getBytes());
+        assertThat(Files.exists(getTemporaryStateFile(mTransport, PACKAGE_1))).isFalse();
+        assertThat(Files.exists(getStagingFile(PACKAGE_1))).isFalse();
     }
 
     @Test
@@ -2130,6 +2234,10 @@ public class KeyValueBackupTaskTest {
      * Implements {@code function} for {@link BackupAgent#onBackup(ParcelFileDescriptor,
      * BackupDataOutput, ParcelFileDescriptor)} of {@code agentMock} and populates {@link
      * AgentMock#oldState}.
+     *
+     * <p>Note that for throwing agents this will simulate a local agent (the exception will be
+     * thrown in our stack), use {@link #remoteAgentOnBackupThrows(AgentMock, BackupAgentOnBackup)}
+     * if you want to simulate a remote agent.
      */
     private static void agentOnBackupDo(AgentMock agentMock, BackupAgentOnBackup function)
             throws Exception {
@@ -2147,6 +2255,33 @@ public class KeyValueBackupTaskTest {
                                 })
                 .when(agentMock.agent)
                 .onBackup(any(), any(), any());
+    }
+
+    /**
+     * Use this method to simulate a remote agent throwing. We catch the exception thrown, thus
+     * simulating a one-way call. It also populates {@link AgentMock#oldState}.
+     *
+     * @param agentMock The Agent mock.
+     * @param function A function that throws, otherwise the test will fail.
+     */
+    // TODO: Remove when RemoteCall spins up a dedicated thread for calls
+    private static void remoteAgentOnBackupThrows(AgentMock agentMock, BackupAgentOnBackup function)
+            throws Exception {
+        agentOnBackupDo(agentMock, function);
+        doAnswer(
+                        invocation -> {
+                            try {
+                                invocation.callRealMethod();
+                                fail("Agent method expected to throw");
+                            } catch (RuntimeException e) {
+                                // This silences the exception just like a one-way call would, the
+                                // normal completion via IBackupCallback binder still happens, check
+                                // finally() block of IBackupAgent.doBackup().
+                            }
+                            return null;
+                        })
+                .when(agentMock.agentBinder)
+                .doBackup(any(), any(), any(), anyLong(), any(), anyInt());
     }
 
     /**

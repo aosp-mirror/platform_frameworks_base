@@ -29,7 +29,7 @@ import java.util.Objects;
  * #FAILED_CANCELLED}, {@link #FAILED_THREAD_INTERRUPTED} or a successful result, in which case
  * {@link #get()} returns its value.
  *
- * <p>Use {@link #succeeded()} to check for successful result, or direct identity comparison to
+ * <p>Use {@link #isPresent()} to check for successful result, or direct identity comparison to
  * check for specific failures, like {@code result == RemoteResult.FAILED_CANCELLED}.
  */
 public class RemoteResult {
@@ -38,7 +38,7 @@ public class RemoteResult {
     public static final RemoteResult FAILED_THREAD_INTERRUPTED =
             new RemoteResult(Type.FAILED_THREAD_INTERRUPTED, 0);
 
-    public static RemoteResult successful(long value) {
+    public static RemoteResult of(long value) {
         return new RemoteResult(Type.SUCCESS, value);
     }
 
@@ -50,7 +50,7 @@ public class RemoteResult {
         mValue = value;
     }
 
-    public boolean succeeded() {
+    public boolean isPresent() {
         return mType == Type.SUCCESS;
     }
 
@@ -60,7 +60,7 @@ public class RemoteResult {
      * @throws IllegalStateException in case this is not a successful result.
      */
     public long get() {
-        Preconditions.checkState(succeeded(), "Can't obtain value of failed result");
+        Preconditions.checkState(isPresent(), "Can't obtain value of failed result");
         return mValue;
     }
 
@@ -79,8 +79,9 @@ public class RemoteResult {
                 return "FAILED_CANCELLED";
             case Type.FAILED_THREAD_INTERRUPTED:
                 return "FAILED_THREAD_INTERRUPTED";
+            default:
+                throw new AssertionError("Unknown type");
         }
-        throw new AssertionError("Unknown type");
     }
 
     @Override

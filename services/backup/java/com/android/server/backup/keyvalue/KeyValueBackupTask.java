@@ -251,15 +251,15 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     @Nullable private final DataChangedJournal mJournal;
     @Nullable private PerformFullTransportBackupTask mFullBackupTask;
 
-    private IBackupAgent mAgentBinder;
-    private PackageInfo mCurrentPackage;
-    private File mSavedStateFile;
-    private File mBackupDataFile;
-    private File mNewStateFile;
-    private ParcelFileDescriptor mSavedState;
-    private ParcelFileDescriptor mBackupData;
-    private ParcelFileDescriptor mNewState;
     private int mStatus;
+    @Nullable private IBackupAgent mAgentBinder;
+    @Nullable private PackageInfo mCurrentPackage;
+    @Nullable private File mSavedStateFile;
+    @Nullable private File mBackupDataFile;
+    @Nullable private File mNewStateFile;
+    @Nullable private ParcelFileDescriptor mSavedState;
+    @Nullable private ParcelFileDescriptor mBackupData;
+    @Nullable private ParcelFileDescriptor mNewState;
 
     /**
      * This {@link ConditionVariable} is used to signal that the cancel operation has been
@@ -344,23 +344,32 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     }
 
     /** Returns whether to consume next queue package. */
-    private boolean handleAgentResult(RemoteResult result) {
+    private boolean handleAgentResult(@Nullable PackageInfo packageInfo, RemoteResult result) {
         if (result == RemoteResult.FAILED_THREAD_INTERRUPTED) {
             // Not an explicit cancel, we need to flag it.
             mCancelled = true;
-            handleAgentCancelled();
+            mReporter.onAgentCancelled(packageInfo);
+            errorCleanup();
             return false;
         }
         if (result == RemoteResult.FAILED_CANCELLED) {
-            handleAgentCancelled();
+            mReporter.onAgentCancelled(packageInfo);
+            errorCleanup();
             return false;
         }
         if (result == RemoteResult.FAILED_TIMED_OUT) {
-            handleAgentTimeout();
+            mReporter.onAgentTimedOut(packageInfo);
+            errorCleanup();
             return true;
         }
-        Preconditions.checkState(result.succeeded());
-        return sendDataToTransport(result.get());
+        Preconditions.checkState(result.isPresent());
+        long agentResult = result.get();
+        if (agentResult == BackupAgent.RESULT_ERROR) {
+            mReporter.onAgentResultError(packageInfo);
+            errorCleanup();
+            return true;
+        }
+        return sendDataToTransport();
     }
 
     @Override
@@ -463,7 +472,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         }
 
         Preconditions.checkNotNull(agentResult);
-        return handleAgentResult(agentResult);
+        return handleAgentResult(mCurrentPackage, agentResult);
     }
 
     /** Returns whether to consume next queue package. */
@@ -543,7 +552,8 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             return false;
         }
 
-        return handleAgentResult(agentResult);
+        Preconditions.checkNotNull(agentResult);
+        return handleAgentResult(mCurrentPackage, agentResult);
     }
 
     private void finishTask() {
@@ -790,7 +800,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     }
 
     /** Returns whether to consume next queue package. */
-    private boolean sendDataToTransport(long agentResult) {
+    private boolean sendDataToTransport() {
         Preconditions.checkState(mBackupData != null);
 
         String packageName = mCurrentPackage.packageName;
@@ -992,16 +1002,6 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     @VisibleForTesting
     public void waitCancel() {
         mCancelAcknowledged.block();
-    }
-
-    private void handleAgentTimeout() {
-        mReporter.onAgentTimedOut(mCurrentPackage);
-        errorCleanup();
-    }
-
-    private void handleAgentCancelled() {
-        mReporter.onAgentCancelled(mCurrentPackage);
-        errorCleanup();
     }
 
     private void revertTask() {

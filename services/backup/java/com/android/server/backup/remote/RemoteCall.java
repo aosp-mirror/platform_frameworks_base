@@ -83,7 +83,7 @@ public class RemoteCall {
      *
      * <ul>
      *   <li>The callback passed to {@link RemoteCallable} is called with the result. We return a
-     *       successful {@link RemoteResult} with the result.
+     *       present {@link RemoteResult} with the result.
      *   <li>Time-out happens. We return {@link RemoteResult#FAILED_TIMED_OUT}.
      *   <li>Someone calls {@link #cancel()} on this object. We return {@link
      *       RemoteResult#FAILED_CANCELLED}.

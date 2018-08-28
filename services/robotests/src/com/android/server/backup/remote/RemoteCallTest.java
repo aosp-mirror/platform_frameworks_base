@@ -161,7 +161,7 @@ public class RemoteCallTest {
     }
 
     @Test
-    public void testCall_whenCallbackIsCalledBeforeTimeOut_returnsSuccess() throws Exception {
+    public void testCall_whenCallbackIsCalledBeforeTimeOut_returnsResult() throws Exception {
         ConditionVariable scheduled = new ConditionVariable(false);
         RemoteCall remoteCall =
                 new RemoteCall(
@@ -176,11 +176,11 @@ public class RemoteCallTest {
 
         scheduled.block();
         runToEndOfTasks(Looper.getMainLooper());
-        assertThat(result.get()).isEqualTo(RemoteResult.successful(3));
+        assertThat(result.get()).isEqualTo(RemoteResult.of(3));
     }
 
     @Test
-    public void testCall_whenCallbackIsCalledBeforeCancel_returnsSuccess() throws Exception {
+    public void testCall_whenCallbackIsCalledBeforeCancel_returnsResult() throws Exception {
         CompletableFuture<IBackupCallback> callbackFuture = new CompletableFuture<>();
         RemoteCall remoteCall = new RemoteCall(callbackFuture::complete, 1000);
 
@@ -191,7 +191,7 @@ public class RemoteCallTest {
         IBackupCallback callback = callbackFuture.get();
         callback.operationComplete(3);
         remoteCall.cancel();
-        assertThat(result.get()).isEqualTo(RemoteResult.successful(3));
+        assertThat(result.get()).isEqualTo(RemoteResult.of(3));
     }
 
     @Test
