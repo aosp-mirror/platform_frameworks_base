@@ -42,10 +42,6 @@ public:
                         const SkPaint& paint) {
         ADD_FAILURE() << "onDrawPosTextH not expected in this test";
     }
-    void onDrawTextOnPath(const void* text, size_t byteLength, const SkPath& path,
-                          const SkMatrix* matrix, const SkPaint& paint) {
-        ADD_FAILURE() << "onDrawTextOnPath not expected in this test";
-    }
     void onDrawTextRSXform(const void* text, size_t byteLength, const SkRSXform[],
                            const SkRect* cullRect, const SkPaint& paint) {
         ADD_FAILURE() << "onDrawTextRSXform not expected in this test";
