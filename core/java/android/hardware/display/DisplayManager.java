@@ -167,8 +167,7 @@ public final class DisplayManager {
      * reasonable measures, such as over-the-air encryption, to prevent the contents
      * of the display from being intercepted or recorded on a persistent medium.
      * </p><p>
-     * Creating a secure virtual display requires the
-     * {@link android.Manifest.permission#CAPTURE_SECURE_VIDEO_OUTPUT} permission.
+     * Creating a secure virtual display requires the CAPTURE_SECURE_VIDEO_OUTPUT permission.
      * This permission is reserved for use by system components and is not available to
      * third-party applications.
      * </p>
@@ -228,9 +227,8 @@ public final class DisplayManager {
      * </p>
      *
      * <p>
-     * Creating an auto-mirroing virtual display requires the
-     * {@link android.Manifest.permission#CAPTURE_VIDEO_OUTPUT}
-     * or {@link android.Manifest.permission#CAPTURE_SECURE_VIDEO_OUTPUT} permission.
+     * Creating an auto-mirroing virtual display requires the CAPTURE_VIDEO_OUTPUT
+     * or CAPTURE_SECURE_VIDEO_OUTPUT permission.
      * These permissions are reserved for use by system components and are not available to
      * third-party applications.
      *
