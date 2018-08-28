@@ -1385,6 +1385,8 @@
          instantiates items without it.-->
     <attr name="appComponentFactory" format="string" />
 
+    <attr name="usesNonSdkApi" format="boolean" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -1557,6 +1559,9 @@
         <attr name="classLoader" />
 
         <attr name="appComponentFactory" />
+
+        <!-- Declares that this application should be invoked without non-SDK API enforcement -->
+        <attr name="usesNonSdkApi" />
 
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
