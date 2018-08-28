@@ -401,6 +401,12 @@ public final class ImsReasonInfo implements Parcelable {
     public static final int CODE_UNOBTAINABLE_NUMBER = 1515;
 
     /**
+     * Call failed because WiFi call could not complete and circuit switch silent redial
+     * is not allowed while roaming on another network.
+     */
+    public static final int CODE_NO_CSFB_IN_CS_ROAM = 1516;
+
+    /**
      * The rejection cause is not known.
      * <p>
      * Used with implicit call rejection.
