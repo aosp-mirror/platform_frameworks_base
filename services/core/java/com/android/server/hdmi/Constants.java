@@ -283,6 +283,15 @@ final class Constants {
     static final String PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE =
             "persist.sys.hdmi.property_system_audio_mode_muting_enable";
 
+    /**
+     * When set to true the HdmiControlService will never request a Logical Address for the
+     * playback device type. Default is false.
+     *
+     * <p> This is useful when HDMI CEC multiple device types is not supported by the cec driver
+     */
+    static final String PROPERTY_HDMI_CEC_NEVER_CLAIM_PLAYBACK_LOGICAL_ADDRESS =
+            "ro.hdmi.property_hdmi_cec_never_claim_playback_logical_address";
+
     // Set to false to allow playback device to go to suspend mode even
     // when it's an active source. True by default.
     static final String PROPERTY_KEEP_AWAKE = "persist.sys.hdmi.keep_awake";
