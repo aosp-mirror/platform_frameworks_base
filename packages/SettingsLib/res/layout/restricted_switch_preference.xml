@@ -24,7 +24,7 @@
     android:clipToPadding="false">
 
     <LinearLayout
-        android:id="@+id/icon_container"
+        android:id="@+id/icon_frame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:minWidth="56dp"
