@@ -1618,6 +1618,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 break;
             }
             case DISPATCH_UIDS_CHANGED_UI_MSG: {
+                if (false) { // DO NOT SUBMIT WITH TRUE
+                    maybeTriggerWatchdog();
+                }
                 dispatchUidsChanged();
             } break;
             case DISPATCH_OOM_ADJ_OBSERVER_MSG: {
@@ -21549,6 +21552,22 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return superImpl.apply(permName, Process.SHELL_UID);
             }
             return superImpl.apply(permName, uid);
+        }
+    }
+
+    /**
+     * If debug.trigger.watchdog is set to 1, sleep 10 minutes with the AM lock held, which would
+     * cause a watchdog kill.
+     */
+    void maybeTriggerWatchdog() {
+        if (SystemProperties.getInt("debug.trigger.watchdog", 0) == 1) {
+            Slog.w(TAG, "TRIGGERING WATCHDOG");
+            synchronized (ActivityManagerService.this) {
+                try {
+                    Thread.sleep(600 * 1000);
+                } catch (InterruptedException e) {
+                }
+            }
         }
     }
 }

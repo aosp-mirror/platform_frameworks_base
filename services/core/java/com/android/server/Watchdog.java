@@ -17,33 +17,32 @@
 package com.android.server;
 
 import android.app.IActivityController;
-import android.os.Binder;
-import android.os.Build;
-import android.os.RemoteException;
-import android.system.ErrnoException;
-import android.system.Os;
-import android.system.OsConstants;
-import android.system.StructRlimit;
-import com.android.internal.os.ZygoteConnectionConstants;
-import com.android.server.am.ActivityManagerService;
-
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hidl.manager.V1_0.IServiceManager;
+import android.os.Binder;
+import android.os.Build;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.Looper;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.SystemProperties;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
+import android.system.StructRlimit;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
+
+import com.android.internal.os.ZygoteConnectionConstants;
+import com.android.server.am.ActivityManagerService;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -61,6 +60,8 @@ import java.util.List;
 /** This class calls its monitor every minute. Killing this process if they don't return **/
 public class Watchdog extends Thread {
     static final String TAG = "Watchdog";
+
+    private static final boolean DEBUG = true; // STOPSHIP disable it (b/113252928)
 
     // Set this to true to use debug default values.
     static final boolean DB = false;
@@ -478,6 +479,7 @@ public class Watchdog extends Thread {
                         continue;
                     } else if (waitState == WAITED_HALF) {
                         if (!waitedHalf) {
+                            if (DEBUG) Slog.d(TAG, "WAITED_HALF");
                             // We've waited half the deadlock-detection interval.  Pull a stack
                             // trace and wait another half.
                             ArrayList<Integer> pids = new ArrayList<Integer>();
