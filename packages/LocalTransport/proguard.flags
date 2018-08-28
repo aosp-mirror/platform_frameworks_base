@@ -1,0 +1,5 @@
+-keep class com.android.localTransport.LocalTransport
+-keep class com.android.localTransport.LocalTransportParameters
+-keep class com.android.localTransport.LocalTransportService
+
+
