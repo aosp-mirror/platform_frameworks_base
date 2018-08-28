@@ -85,11 +85,47 @@ public class TypedArray {
     /*package*/ XmlBlock.Parser mXml;
     @UnsupportedAppUsage
     /*package*/ Resources.Theme mTheme;
+    /**
+     * mData is used to hold the value/id and other metadata about each attribute.
+     *
+     * [type, data, asset cookie, resource id, changing configuration, density]
+     *
+     * type - type of this attribute, see TypedValue#TYPE_*
+     *
+     * data - can be used in various ways:
+     *     a) actual value of the attribute if type is between #TYPE_FIRST_INT and #TYPE_LAST_INT
+     *        1) color represented by an integer (#TYPE_INT_COLOR_*)
+     *        2) boolean represented by an integer (#TYPE_INT_BOOLEAN)
+     *        3) integer number (#TYPE_TYPE_INT_DEC or #TYPE_INT_HEX)
+     *        4) float number where integer gets interpreted as float (#TYPE_FLOAT, #TYPE_FRACTION
+     *            and #TYPE_DIMENSION)
+     *     b) index into string block inside AssetManager (#TYPE_STRING)
+     *     c) attribute resource id in the current theme/style (#TYPE_ATTRIBUTE)
+     *
+     * asset cookie - used in two ways:
+     *     a) for strings, drawables, and fonts it specifies the set of apk assets to look at
+     *     (multi-apk case)
+     *     b) cookie + asset as a unique identifier for drawable caches
+     *
+     * resource id - id that was finally used to resolve this attribute
+     *
+     * changing configuration - a mask of the configuration parameters for which the values in this
+     * attribute may change
+     *
+     * density - density of drawable pointed to by this attribute
+     */
     @UnsupportedAppUsage
     /*package*/ int[] mData;
+    /**
+     * Pointer to the start of the memory address of mData. It is passed via JNI and used to write
+     * to mData array directly from native code (AttributeResolution.cpp).
+     */
     /*package*/ long mDataAddress;
     @UnsupportedAppUsage
     /*package*/ int[] mIndices;
+    /**
+     * Similar to mDataAddress, but instead it is a pointer to mIndices address.
+     */
     /*package*/ long mIndicesAddress;
     @UnsupportedAppUsage
     /*package*/ int mLength;
