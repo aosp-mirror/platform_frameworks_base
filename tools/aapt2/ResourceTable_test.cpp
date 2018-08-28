@@ -258,4 +258,44 @@ TEST(ResourceTableTest, SetOverlayable) {
   ASSERT_FALSE(table.SetOverlayable(name, overlayable, test::GetDiagnostics()));
 }
 
+TEST(ResourceTableTest, AllowDuplictaeResourcesNames) {
+  ResourceTable table(/* validate_resources */ false);
+
+  const ResourceName foo_name = test::ParseNameOrDie("android:bool/foo");
+  ASSERT_TRUE(table.AddResourceWithId(foo_name, ResourceId(0x7f0100ff), ConfigDescription{} , "",
+                                      test::BuildPrimitive(android::Res_value::TYPE_INT_BOOLEAN, 0),
+                                      test::GetDiagnostics()));
+  ASSERT_TRUE(table.AddResourceWithId(foo_name, ResourceId(0x7f010100), ConfigDescription{} , "",
+                                      test::BuildPrimitive(android::Res_value::TYPE_INT_BOOLEAN, 1),
+                                      test::GetDiagnostics()));
+
+  ASSERT_TRUE(table.SetVisibilityWithId(foo_name, Visibility{Visibility::Level::kPublic},
+                                        ResourceId(0x7f0100ff), test::GetDiagnostics()));
+  ASSERT_TRUE(table.SetVisibilityWithId(foo_name, Visibility{Visibility::Level::kPrivate},
+                                        ResourceId(0x7f010100), test::GetDiagnostics()));
+
+  auto package = table.FindPackageById(0x7f);
+  ASSERT_THAT(package, NotNull());
+  auto type = package->FindType(ResourceType::kBool);
+  ASSERT_THAT(type, NotNull());
+
+  auto entry1 = type->FindEntry("foo", 0x00ff);
+  ASSERT_THAT(entry1, NotNull());
+  ASSERT_THAT(entry1->id, Eq(0x00ff));
+  ASSERT_THAT(entry1->values[0], NotNull());
+  ASSERT_THAT(entry1->values[0]->value, NotNull());
+  ASSERT_THAT(ValueCast<BinaryPrimitive>(entry1->values[0]->value.get()), NotNull());
+  ASSERT_THAT(ValueCast<BinaryPrimitive>(entry1->values[0]->value.get())->value.data, Eq(0u));
+  ASSERT_THAT(entry1->visibility.level, Visibility::Level::kPublic);
+
+  auto entry2 = type->FindEntry("foo", 0x0100);
+  ASSERT_THAT(entry2, NotNull());
+  ASSERT_THAT(entry2->id, Eq(0x0100));
+  ASSERT_THAT(entry2->values[0], NotNull());
+  ASSERT_THAT(entry1->values[0]->value, NotNull());
+  ASSERT_THAT(ValueCast<BinaryPrimitive>(entry2->values[0]->value.get()), NotNull());
+  ASSERT_THAT(ValueCast<BinaryPrimitive>(entry2->values[0]->value.get())->value.data, Eq(1u));
+  ASSERT_THAT(entry2->visibility.level, Visibility::Level::kPrivate);
+}
+
 }  // namespace aapt
