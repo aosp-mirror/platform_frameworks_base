@@ -49,7 +49,6 @@ const int FIELD_ID_DATA = 1;
 // for EventMetricData
 const int FIELD_ID_ELAPSED_TIMESTAMP_NANOS = 1;
 const int FIELD_ID_ATOMS = 2;
-const int FIELD_ID_WALL_CLOCK_TIMESTAMP_NANOS = 3;
 
 EventMetricProducer::EventMetricProducer(const ConfigKey& key, const EventMetric& metric,
                                          const int conditionIndex,
@@ -146,13 +145,9 @@ void EventMetricProducer::onMatchedLogEventInternalLocked(
     if (truncateTimestamp) {
         mProto->write(FIELD_TYPE_INT64 | FIELD_ID_ELAPSED_TIMESTAMP_NANOS,
             (long long)truncateTimestampNsToFiveMinutes(event.GetElapsedTimestampNs()));
-        mProto->write(FIELD_TYPE_INT64 | FIELD_ID_WALL_CLOCK_TIMESTAMP_NANOS,
-            (long long)truncateTimestampNsToFiveMinutes(getWallClockNs()));
     } else {
         mProto->write(FIELD_TYPE_INT64 | FIELD_ID_ELAPSED_TIMESTAMP_NANOS,
             (long long)event.GetElapsedTimestampNs());
-        mProto->write(FIELD_TYPE_INT64 | FIELD_ID_WALL_CLOCK_TIMESTAMP_NANOS,
-            (long long)getWallClockNs());
     }
 
     uint64_t eventToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_ATOMS);

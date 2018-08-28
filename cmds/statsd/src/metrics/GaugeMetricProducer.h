@@ -33,12 +33,11 @@ namespace os {
 namespace statsd {
 
 struct GaugeAtom {
-    GaugeAtom(std::shared_ptr<vector<FieldValue>> fields, int64_t elapsedTimeNs, int64_t wallClockNs)
-        : mFields(fields), mElapsedTimestamps(elapsedTimeNs), mWallClockTimestampNs(wallClockNs) {
+    GaugeAtom(std::shared_ptr<vector<FieldValue>> fields, int64_t elapsedTimeNs)
+        : mFields(fields), mElapsedTimestamps(elapsedTimeNs) {
     }
     std::shared_ptr<vector<FieldValue>> mFields;
     int64_t mElapsedTimestamps;
-    int64_t mWallClockTimestampNs;
 };
 
 struct GaugeBucket {
