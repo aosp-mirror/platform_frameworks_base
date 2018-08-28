@@ -236,9 +236,15 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 // However, the caller may be expecting to access them my index. Hence,
                 // we have to execute the query as if allowed to get a cursor with the
                 // columns. We then use the column names to return an empty cursor.
-                Cursor cursor = ContentProvider.this.query(
-                        uri, projection, queryArgs,
-                        CancellationSignal.fromTransport(cancellationSignal));
+                Cursor cursor;
+                final String original = setCallingPackage(callingPkg);
+                try {
+                    cursor = ContentProvider.this.query(
+                            uri, projection, queryArgs,
+                            CancellationSignal.fromTransport(cancellationSignal));
+                } finally {
+                    setCallingPackage(original);
+                }
                 if (cursor == null) {
                     return null;
                 }
@@ -260,6 +266,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         @Override
         public String getType(Uri uri) {
+            // getCallingPackage() isn't available in getType(), as the javadoc states.
             validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             Trace.traceBegin(TRACE_TAG_DATABASE, "getType");
@@ -276,7 +283,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             int userId = getUserIdFromUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
-                return rejectInsert(uri, initialValues);
+                final String original = setCallingPackage(callingPkg);
+                try {
+                    return rejectInsert(uri, initialValues);
+                } finally {
+                    setCallingPackage(original);
+                }
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "insert");
             final String original = setCallingPackage(callingPkg);
@@ -440,6 +452,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         @Override
         public String[] getStreamTypes(Uri uri, String mimeTypeFilter) {
+            // getCallingPackage() isn't available in getType(), as the javadoc states.
             validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             Trace.traceBegin(TRACE_TAG_DATABASE, "getStreamTypes");
