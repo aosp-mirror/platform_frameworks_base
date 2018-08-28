@@ -50,6 +50,7 @@ import android.telephony.TelephonyManager;
 import android.telephony.VoLteServiceState;
 import android.util.LocalLog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.IPhoneStateListener;
@@ -82,7 +83,8 @@ import java.util.NoSuchElementException;
  * Eventually we may want to remove the notion of dummy value but for now this
  * looks like the best approach.
  */
-class TelephonyRegistry extends ITelephonyRegistry.Stub {
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private static final String TAG = "TelephonyRegistry";
     private static final boolean DBG = false; // STOPSHIP if true
     private static final boolean DBG_LOC = false; // STOPSHIP if true
@@ -324,7 +326,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     // calls go through a oneway interface and local calls going through a
     // handler before they get to app code.
 
-    TelephonyRegistry(Context context) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public TelephonyRegistry(Context context) {
         CellLocation  location = CellLocation.getEmpty();
 
         mContext = context;
