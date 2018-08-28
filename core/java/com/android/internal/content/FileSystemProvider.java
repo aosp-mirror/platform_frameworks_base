@@ -74,10 +74,6 @@ public abstract class FileSystemProvider extends DocumentsProvider {
 
     private Handler mHandler;
 
-    private static final String MIMETYPE_JPEG = "image/jpeg";
-    private static final String MIMETYPE_JPG = "image/jpg";
-    private static final String MIMETYPE_OCTET_STREAM = "application/octet-stream";
-
     protected abstract File getFileForDocId(String docId, boolean visible)
             throws FileNotFoundException;
 
@@ -433,7 +429,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
                     return mime;
                 }
             }
-            return MIMETYPE_OCTET_STREAM;
+            return ContentResolver.MIME_TYPE_DEFAULT;
         }
     }
 
