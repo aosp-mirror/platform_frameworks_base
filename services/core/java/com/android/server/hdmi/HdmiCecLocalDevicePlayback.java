@@ -39,7 +39,7 @@ import java.util.Locale;
 /**
  * Represent a logical device of type Playback residing in Android system.
  */
-final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
+final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     private static final String TAG = "HdmiCecLocalDevicePlayback";
 
     private static final boolean WAKE_ON_HOTPLUG =
@@ -101,25 +101,6 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         SystemProperties.set(Constants.PROPERTY_PREFERRED_ADDRESS_PLAYBACK,
                 String.valueOf(addr));
-    }
-
-    @ServiceThreadOnly
-    void oneTouchPlay(IHdmiControlCallback callback) {
-        assertRunOnServiceThread();
-        List<OneTouchPlayAction> actions = getActions(OneTouchPlayAction.class);
-        if (!actions.isEmpty()) {
-            Slog.i(TAG, "oneTouchPlay already in progress");
-            actions.get(0).addCallback(callback);
-            return;
-        }
-        OneTouchPlayAction action = OneTouchPlayAction.create(this, Constants.ADDR_TV,
-                callback);
-        if (action == null) {
-            Slog.w(TAG, "Cannot initiate oneTouchPlay");
-            invokeCallback(callback, HdmiControlManager.RESULT_EXCEPTION);
-            return;
-        }
-        addAndStartAction(action);
     }
 
     @ServiceThreadOnly
@@ -231,21 +212,6 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         return !getWakeLock().isHeld();
     }
 
-    @Override
-    @ServiceThreadOnly
-    protected boolean handleActiveSource(HdmiCecMessage message) {
-        assertRunOnServiceThread();
-        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
-        mayResetActiveSource(physicalAddress);
-        return true;  // Broadcast message.
-    }
-
-    private void mayResetActiveSource(int physicalAddress) {
-        if (physicalAddress != mService.getPhysicalAddress()) {
-            setActiveSource(false);
-        }
-    }
-
     @ServiceThreadOnly
     protected boolean handleUserControlPressed(HdmiCecMessage message) {
         assertRunOnServiceThread();
@@ -319,14 +285,6 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
             mService.sendCecCommand(HdmiCecMessageBuilder.buildReportMenuStatus(
                     mAddress, dest, Constants.MENU_STATE_ACTIVATED));
         }
-    }
-
-    @Override
-    @ServiceThreadOnly
-    protected boolean handleRequestActiveSource(HdmiCecMessage message) {
-        assertRunOnServiceThread();
-        maySendActiveSource(message.getSource());
-        return true;  // Broadcast message.
     }
 
     @ServiceThreadOnly

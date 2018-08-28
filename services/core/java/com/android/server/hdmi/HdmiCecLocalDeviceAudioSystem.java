@@ -36,7 +36,7 @@ import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
  * Represent a logical device of type {@link HdmiDeviceInfo#DEVICE_AUDIO_SYSTEM} residing in Android
  * system.
  */
-public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
+public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     private static final String TAG = "HdmiCecLocalDeviceAudioSystem";
 
@@ -146,18 +146,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
                 && lastSystemAudioControlStatus)) {
             addAndStartAction(new SystemAudioInitiationActionFromAvr(this));
         }
-    }
-
-    @ServiceThreadOnly
-    protected boolean handleActiveSource(HdmiCecMessage message) {
-        assertRunOnServiceThread();
-        int logicalAddress = message.getSource();
-        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
-        ActiveSource activeSource = ActiveSource.of(logicalAddress, physicalAddress);
-        if (!mActiveSource.equals(activeSource)) {
-            setActiveSource(activeSource);
-        }
-        return true;
     }
 
     @Override
