@@ -29,6 +29,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver;
@@ -103,7 +104,7 @@ public abstract class PanelView extends FrameLayout {
 
     private ValueAnimator mHeightAnimator;
     private ObjectAnimator mPeekAnimator;
-    private VelocityTrackerInterface mVelocityTracker;
+    private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
     private FlingAnimationUtils mFlingAnimationUtils;
     private FlingAnimationUtils mFlingAnimationUtilsClosing;
     private FlingAnimationUtils mFlingAnimationUtilsDismissing;
@@ -226,10 +227,6 @@ public abstract class PanelView extends FrameLayout {
         mUnlockFalsingThreshold = res.getDimensionPixelSize(R.dimen.unlock_falsing_threshold);
     }
 
-    private void trackMovement(MotionEvent event) {
-        if (mVelocityTracker != null) mVelocityTracker.addMovement(event);
-    }
-
     public void setTouchAndAnimationDisabled(boolean disabled) {
         mTouchDisabled = disabled;
         if (mTouchDisabled) {
@@ -310,10 +307,7 @@ public abstract class PanelView extends FrameLayout {
                 mTouchAboveFalsingThreshold = false;
                 mCollapsedAndHeadsUpOnDown = isFullyCollapsed()
                         && mHeadsUpManager.hasPinnedHeadsUp();
-                if (mVelocityTracker == null) {
-                    initVelocityTracker();
-                }
-                trackMovement(event);
+                mVelocityTracker.addMovement(event);
                 if (!mGestureWaitForTouchSlop || (mHeightAnimator != null && !mHintAnimationRunning)
                         || mPeekAnimator != null) {
                     mTouchSlopExceeded = (mHeightAnimator != null && !mHintAnimationRunning)
@@ -347,7 +341,7 @@ public abstract class PanelView extends FrameLayout {
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-                trackMovement(event);
+                mVelocityTracker.addMovement(event);
                 float h = y - mInitialTouchY;
 
                 // If the panel was collapsed when touching, we only need to check for the
@@ -392,7 +386,7 @@ public abstract class PanelView extends FrameLayout {
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                trackMovement(event);
+                mVelocityTracker.addMovement(event);
                 endMotionEvent(event, x, y, false /* forceCancel */);
                 break;
         }
@@ -458,14 +452,11 @@ public abstract class PanelView extends FrameLayout {
                 || Math.abs(y - mInitialTouchY) > mTouchSlop
                 || event.getActionMasked() == MotionEvent.ACTION_CANCEL
                 || forceCancel) {
-            float vel = 0f;
-            float vectorVel = 0f;
-            if (mVelocityTracker != null) {
-                mVelocityTracker.computeCurrentVelocity(1000);
-                vel = mVelocityTracker.getYVelocity();
-                vectorVel = (float) Math.hypot(
-                        mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
-            }
+            mVelocityTracker.computeCurrentVelocity(1000);
+            float vel = mVelocityTracker.getYVelocity();
+            float vectorVel = (float) Math.hypot(
+                    mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
+
             boolean expand = flingExpands(vel, vectorVel, x, y)
                     || event.getActionMasked() == MotionEvent.ACTION_CANCEL
                     || forceCancel;
@@ -502,17 +493,11 @@ public abstract class PanelView extends FrameLayout {
             onTrackingStopped(expands);
         }
 
-        if (mVelocityTracker != null) {
-            mVelocityTracker.recycle();
-            mVelocityTracker = null;
-        }
+        mVelocityTracker.clear();
         mPeekTouching = false;
     }
 
     protected float getCurrentExpandVelocity() {
-        if (mVelocityTracker == null) {
-            return 0;
-        }
         mVelocityTracker.computeCurrentVelocity(1000);
         return mVelocityTracker.getYVelocity();
     }
@@ -588,8 +573,7 @@ public abstract class PanelView extends FrameLayout {
                 mHasLayoutedSinceDown = false;
                 mUpdateFlingOnLayout = false;
                 mTouchAboveFalsingThreshold = false;
-                initVelocityTracker();
-                trackMovement(event);
+                mVelocityTracker.addMovement(event);
                 break;
             case MotionEvent.ACTION_POINTER_UP:
                 final int upPointer = event.getPointerId(event.getActionIndex());
@@ -604,15 +588,12 @@ public abstract class PanelView extends FrameLayout {
             case MotionEvent.ACTION_POINTER_DOWN:
                 if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                     mMotionAborted = true;
-                    if (mVelocityTracker != null) {
-                        mVelocityTracker.recycle();
-                        mVelocityTracker = null;
-                    }
+                    mVelocityTracker.clear();
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
                 final float h = y - mInitialTouchY;
-                trackMovement(event);
+                mVelocityTracker.addMovement(event);
                 if (scrolledToBottom || mTouchStartedInEmptyArea || mAnimatingOnDown) {
                     float hAbs = Math.abs(h);
                     if ((h < -mTouchSlop || (mAnimatingOnDown && hAbs > mTouchSlop))
@@ -625,10 +606,7 @@ public abstract class PanelView extends FrameLayout {
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
-                if (mVelocityTracker != null) {
-                    mVelocityTracker.recycle();
-                    mVelocityTracker = null;
-                }
+                mVelocityTracker.clear();
                 break;
         }
         return false;
@@ -654,13 +632,6 @@ public abstract class PanelView extends FrameLayout {
             mClosing = false;
             onClosingFinished();
         }
-    }
-
-    private void initVelocityTracker() {
-        if (mVelocityTracker != null) {
-            mVelocityTracker.recycle();
-        }
-        mVelocityTracker = VelocityTrackerFactory.obtain(getContext());
     }
 
     protected boolean isScrolledToBottom() {
