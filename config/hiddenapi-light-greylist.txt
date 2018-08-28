@@ -1018,7 +1018,6 @@ Landroid/os/UserHandle;->PER_USER_RANGE:I
 Landroid/os/UserHandle;->USER_ALL:I
 Landroid/os/UserHandle;->USER_CURRENT:I
 Landroid/os/UserHandle;->USER_CURRENT_OR_SELF:I
-Landroid/os/UserHandle;->USER_NULL:I
 Landroid/os/UserHandle;->USER_OWNER:I
 Landroid/os/UserHandle;->USER_SERIAL_SYSTEM:I
 Landroid/os/UserHandle;->USER_SYSTEM:I

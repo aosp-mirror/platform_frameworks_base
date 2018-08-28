@@ -7758,6 +7758,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public ComponentName getProfileOwnerAsUser(int userHandle) {
+        enforceCrossUsersPermission(userHandle);
+
+        return getProfileOwner(userHandle);
+    }
+
+    @Override
     public ComponentName getProfileOwner(int userHandle) {
         if (!mHasFeature) {
             return null;

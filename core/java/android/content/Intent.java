@@ -4440,6 +4440,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_USER_ID = "android.intent.extra.USER_ID";
 
     /**
