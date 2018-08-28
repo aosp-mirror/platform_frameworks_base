@@ -27,47 +27,46 @@ import android.database.ContentObserver;
 import android.hardware.input.InputManager;
 import android.hardware.vibrator.V1_0.EffectStrength;
 import android.icu.text.DateFormat;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
-import android.os.PowerManager.ServiceType;
-import android.os.PowerSaveState;
 import android.os.BatteryStats;
+import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.IVibratorService;
 import android.os.PowerManager;
+import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
+import android.os.PowerSaveState;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.IBinder;
-import android.os.Binder;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.os.Vibrator;
 import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.DebugUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.StatsLog;
 import android.view.InputDevice;
-import android.media.AudioAttributes;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Date;
+import java.util.LinkedList;
 
 public class VibratorService extends IVibratorService.Stub
         implements InputManager.InputDeviceListener {
@@ -1048,6 +1047,8 @@ public class VibratorService extends IVibratorService.Stub
     private void noteVibratorOnLocked(int uid, long millis) {
         try {
             mBatteryStatsService.noteVibratorOn(uid, millis);
+            StatsLog.write_non_chained(StatsLog.VIBRATOR_STATE_CHANGED, uid, null,
+                    StatsLog.VIBRATOR_STATE_CHANGED__STATE__ON, millis);
             mCurVibUid = uid;
         } catch (RemoteException e) {
         }
@@ -1057,6 +1058,8 @@ public class VibratorService extends IVibratorService.Stub
         if (mCurVibUid >= 0) {
             try {
                 mBatteryStatsService.noteVibratorOff(mCurVibUid);
+                StatsLog.write_non_chained(StatsLog.VIBRATOR_STATE_CHANGED, mCurVibUid, null,
+                        StatsLog.VIBRATOR_STATE_CHANGED__STATE__OFF, 0);
             } catch (RemoteException e) { }
             mCurVibUid = -1;
         }
