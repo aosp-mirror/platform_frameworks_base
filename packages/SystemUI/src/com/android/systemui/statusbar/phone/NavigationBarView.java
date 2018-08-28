@@ -80,7 +80,6 @@ import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
-import com.android.systemui.statusbar.policy.TintedKeyButtonDrawable;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -124,14 +123,12 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     private KeyButtonDrawable mBackIcon;
     private KeyButtonDrawable mHomeDefaultIcon;
-    private KeyButtonDrawable mBackCarModeIcon;
-    private KeyButtonDrawable mHomeCarModeIcon;
     private KeyButtonDrawable mRecentIcon;
     private KeyButtonDrawable mDockedIcon;
     private KeyButtonDrawable mImeIcon;
     private KeyButtonDrawable mMenuIcon;
     private KeyButtonDrawable mAccessibilityIcon;
-    private TintedKeyButtonDrawable mRotateSuggestionIcon;
+    private KeyButtonDrawable mRotateSuggestionIcon;
 
     private GestureHelper mGestureHelper;
     private final DeadZone mDeadZone;
@@ -461,62 +458,47 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 && ((mOverviewProxyService.getInteractionFlags() & FLAG_DISABLE_QUICK_SCRUB) == 0);
     }
 
-    private void updateCarModeIcons(Context ctx) {
-        mBackCarModeIcon = getDrawable(ctx, R.drawable.ic_sysbar_back_carmode);
-        mHomeCarModeIcon = getDrawable(ctx, R.drawable.ic_sysbar_home_carmode);
-    }
-
     private void reloadNavIcons() {
-        updateIcons(mContext, Configuration.EMPTY, mConfiguration);
+        updateIcons(Configuration.EMPTY, mConfiguration);
     }
 
-    private void updateIcons(Context ctx, Configuration oldConfig, Configuration newConfig) {
-        int dualToneDarkTheme = Utils.getThemeAttr(ctx, R.attr.darkIconTheme);
-        int dualToneLightTheme = Utils.getThemeAttr(ctx, R.attr.lightIconTheme);
-        Context lightContext = new ContextThemeWrapper(ctx, dualToneLightTheme);
-        Context darkContext = new ContextThemeWrapper(ctx, dualToneDarkTheme);
-
+    private void updateIcons(Configuration oldConfig, Configuration newConfig) {
         final boolean orientationChange = oldConfig.orientation != newConfig.orientation;
         final boolean densityChange = oldConfig.densityDpi != newConfig.densityDpi;
         final boolean dirChange = oldConfig.getLayoutDirection() != newConfig.getLayoutDirection();
 
         if (orientationChange || densityChange) {
-            mDockedIcon = getDrawable(lightContext, darkContext, R.drawable.ic_sysbar_docked);
-            mHomeDefaultIcon = getHomeDrawable(lightContext, darkContext);
+            mDockedIcon = getDrawable(R.drawable.ic_sysbar_docked);
+            mHomeDefaultIcon = getHomeDrawable();
         }
         if (densityChange || dirChange) {
-            mRecentIcon = getDrawable(lightContext, darkContext, R.drawable.ic_sysbar_recent);
-            mMenuIcon = getDrawable(lightContext, darkContext, R.drawable.ic_sysbar_menu);
+            mRecentIcon = getDrawable(R.drawable.ic_sysbar_recent);
+            mMenuIcon = getDrawable(R.drawable.ic_sysbar_menu);
 
-            mAccessibilityIcon = getDrawable(lightContext, darkContext,
-                    R.drawable.ic_sysbar_accessibility_button, false /* hasShadow */);
-
-            mImeIcon = getDrawable(lightContext, darkContext, R.drawable.ic_ime_switcher_default,
+            mAccessibilityIcon = getDrawable(R.drawable.ic_sysbar_accessibility_button,
                     false /* hasShadow */);
 
-            updateRotateSuggestionButtonStyle(mRotateBtnStyle, false);
+            mImeIcon = getDrawable(R.drawable.ic_ime_switcher_default, false /* hasShadow */);
 
-            if (ALTERNATE_CAR_MODE_UI) {
-                updateCarModeIcons(ctx);
-            }
+            updateRotateSuggestionButtonStyle(mRotateBtnStyle, false);
         }
         if (orientationChange || densityChange || dirChange) {
-            mBackIcon = getBackDrawable(lightContext, darkContext);
+            mBackIcon = getBackDrawable();
         }
     }
 
-    public KeyButtonDrawable getBackDrawable(Context lightContext, Context darkContext) {
-        KeyButtonDrawable drawable = chooseNavigationIconDrawable(lightContext, darkContext,
-                R.drawable.ic_sysbar_back, R.drawable.ic_sysbar_back_quick_step);
+    public KeyButtonDrawable getBackDrawable() {
+        KeyButtonDrawable drawable = chooseNavigationIconDrawable(R.drawable.ic_sysbar_back,
+                R.drawable.ic_sysbar_back_quick_step);
         orientBackButton(drawable);
         return drawable;
     }
 
-    public KeyButtonDrawable getHomeDrawable(Context lightContext, Context darkContext) {
+    public KeyButtonDrawable getHomeDrawable() {
         final boolean quickStepEnabled = mOverviewProxyService.shouldShowSwipeUpUI();
         KeyButtonDrawable drawable = quickStepEnabled
-                ? getDrawable(lightContext, darkContext, R.drawable.ic_sysbar_home_quick_step)
-                : getDrawable(lightContext, darkContext, R.drawable.ic_sysbar_home);
+                ? getDrawable(R.drawable.ic_sysbar_home_quick_step)
+                : getDrawable(R.drawable.ic_sysbar_home);
         orientHomeButton(drawable);
         return drawable;
     }
@@ -549,33 +531,26 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         drawable.setRotation(mVertical ? 90 : 0);
     }
 
-    private KeyButtonDrawable chooseNavigationIconDrawable(Context lightContext,
-            Context darkContext, @DrawableRes int icon, @DrawableRes int quickStepIcon) {
+    private KeyButtonDrawable chooseNavigationIconDrawable(@DrawableRes int icon,
+            @DrawableRes int quickStepIcon) {
         final boolean quickStepEnabled = mOverviewProxyService.shouldShowSwipeUpUI();
-        return quickStepEnabled
-                ? getDrawable(lightContext, darkContext, quickStepIcon)
-                : getDrawable(lightContext, darkContext, icon);
+        return quickStepEnabled ? getDrawable(quickStepIcon) : getDrawable(icon);
     }
 
-    private KeyButtonDrawable getDrawable(Context lightContext, Context darkContext,
-            @DrawableRes int icon) {
-        return getDrawable(lightContext, darkContext, icon, true /* hasShadow */);
+    private KeyButtonDrawable getDrawable(@DrawableRes int icon) {
+        return getDrawable(mContext, icon, true /* hasShadow */);
     }
 
-    private KeyButtonDrawable getDrawable(Context lightContext, Context darkContext,
-            @DrawableRes int icon, boolean hasShadow) {
-        return KeyButtonDrawable.create(lightContext, lightContext.getDrawable(icon),
-                darkContext.getDrawable(icon), hasShadow);
+    private KeyButtonDrawable getDrawable(@DrawableRes int icon, boolean hasShadow) {
+        return getDrawable(mContext, icon, hasShadow);
     }
 
-    private KeyButtonDrawable getDrawable(Context ctx, @DrawableRes int icon) {
-        // Legacy image icons using a single image will not support shadows
-        return KeyButtonDrawable.create(ctx, ctx.getDrawable(icon), null, false /* hasShadow */);
-    }
-
-    private TintedKeyButtonDrawable getDrawable(Context ctx, @DrawableRes int icon,
-            @ColorInt int lightColor, @ColorInt int darkColor) {
-        return TintedKeyButtonDrawable.create(ctx.getDrawable(icon), lightColor, darkColor);
+    private KeyButtonDrawable getDrawable(Context ctx, @DrawableRes int icon, boolean hasShadow) {
+        final int dualToneDarkTheme = Utils.getThemeAttr(ctx, R.attr.darkIconTheme);
+        final int dualToneLightTheme = Utils.getThemeAttr(ctx, R.attr.lightIconTheme);
+        Context lightContext = new ContextThemeWrapper(ctx, dualToneLightTheme);
+        Context darkContext = new ContextThemeWrapper(ctx, dualToneDarkTheme);
+        return KeyButtonDrawable.create(lightContext, darkContext, icon, hasShadow);
     }
 
     @Override
@@ -583,10 +558,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         reloadNavIcons();
 
         super.setLayoutDirection(layoutDirection);
-    }
-
-    private KeyButtonDrawable getBackIcon(boolean carMode) {
-        return carMode ? mBackCarModeIcon : mBackIcon;
     }
 
     public void setNavigationIconHints(int hints) {
@@ -626,9 +597,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         // to recent icon is not required.
         final boolean useAltBack =
                 (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
-        KeyButtonDrawable backIcon = getBackIcon(mUseCarModeUi);
+        KeyButtonDrawable backIcon = mBackIcon;
         orientBackButton(backIcon);
-        KeyButtonDrawable homeIcon = mUseCarModeUi ? mHomeCarModeIcon : mHomeDefaultIcon;
+        KeyButtonDrawable homeIcon = mHomeDefaultIcon;
         if (!mUseCarModeUi) {
             orientHomeButton(homeIcon);
         }
@@ -845,31 +816,20 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mRotateBtnStyle = style;
         final Context ctx = getContext();
 
-        // Extract the dark and light tints
-        final int dualToneDarkTheme = Utils.getThemeAttr(ctx, R.attr.darkIconTheme);
-        final int dualToneLightTheme = Utils.getThemeAttr(ctx, R.attr.lightIconTheme);
-        Context darkContext = new ContextThemeWrapper(ctx, dualToneDarkTheme);
-        Context lightContext = new ContextThemeWrapper(ctx, dualToneLightTheme);
-        final int lightColor = Utils.getColorAttrDefaultColor(lightContext, R.attr.singleToneColor);
-        final int darkColor = Utils.getColorAttrDefaultColor(darkContext, R.attr.singleToneColor);
-
         // Use the supplied style to set the icon's rotation parameters
         Context rotateContext = new ContextThemeWrapper(ctx, style);
 
         // Recreate the icon and set it if needed
-        TintedKeyButtonDrawable priorIcon = mRotateSuggestionIcon;
+        float previousIntensity = mRotateSuggestionIcon != null
+                ? mRotateSuggestionIcon.getDarkIntensity() : 0;
         mRotateSuggestionIcon = getDrawable(rotateContext, R.drawable.ic_sysbar_rotate_button,
-                lightColor, darkColor);
-
-        // Apply any prior set dark intensity
-        if (priorIcon != null && priorIcon.isDarkIntensitySet()) {
-            mRotateSuggestionIcon.setDarkIntensity(priorIcon.getDarkIntensity());
-        }
+                false /* hasShadow */);
+        mRotateSuggestionIcon.setDarkIntensity(previousIntensity);
 
         if (setIcon) getRotateSuggestionButton().setImageDrawable(mRotateSuggestionIcon);
     }
 
-    public int setRotateButtonVisibility(final boolean visible) {
+    public int setRotateButtonVisibility(boolean visible) {
         // Never show if a11y is visible
         final boolean adjVisible = visible && !mShowAccessibilityButton;
         final int vis = adjVisible ? View.VISIBLE : View.INVISIBLE;
@@ -881,13 +841,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mShowRotateButton = visible;
 
         // Stop any active animations if hidden
-        if (!visible) {
-            Drawable d = mRotateSuggestionIcon.getDrawable(0);
-            if (d instanceof AnimatedVectorDrawable) {
-                AnimatedVectorDrawable avd = (AnimatedVectorDrawable) d;
-                avd.clearAnimationCallbacks();
-                avd.reset();
-            }
+        if (!visible && mRotateSuggestionIcon.canAnimate()) {
+            mRotateSuggestionIcon.clearAnimationCallbacks();
+            mRotateSuggestionIcon.resetAnimation();
         }
 
         // Hide/restore other button visibility, if necessary
@@ -1082,7 +1038,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         super.onConfigurationChanged(newConfig);
         boolean uiCarModeChanged = updateCarMode(newConfig);
         updateTaskSwitchHelper();
-        updateIcons(getContext(), mConfiguration, newConfig);
+        updateIcons(mConfiguration, newConfig);
         updateRecentsIcon();
         mRecentsOnboarding.onConfigurationChanged(newConfig);
         if (uiCarModeChanged || mConfiguration.densityDpi != newConfig.densityDpi

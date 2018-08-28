@@ -49,7 +49,6 @@ import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.drawable.AnimatedVectorDrawable;
 import android.inputmethodservice.InputMethodService;
 import android.os.Binder;
 import android.os.Bundle;
@@ -532,12 +531,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         KeyButtonDrawable kbd = rotBtn.getImageDrawable();
         if (kbd == null) return;
 
-        // The KBD and AVD is recreated every new valid suggestion because of style changes.
-        AnimatedVectorDrawable animIcon = null;
-        if (kbd.getDrawable(0) instanceof AnimatedVectorDrawable) {
-            animIcon = (AnimatedVectorDrawable) kbd.getDrawable(0);
-        }
-
         // Clear any pending suggestion flag as it has either been nullified or is being shown
         mPendingRotationSuggestion = false;
         if (getView() != null) getView().removeCallbacks(mCancelPendingRotationProposal);
@@ -554,9 +547,9 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             view.setAlpha(1f);
 
             // Run the rotate icon's animation if it has one
-            if (animIcon != null) {
-                animIcon.reset();
-                animIcon.start();
+            if (kbd.canAnimate()) {
+                kbd.resetAnimation();
+                kbd.startAnimation();
             }
 
             if (!isRotateSuggestionIntroduced()) mViewRippler.start(view);
