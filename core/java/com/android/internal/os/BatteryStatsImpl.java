@@ -11725,7 +11725,6 @@ public class BatteryStatsImpl extends BatteryStats {
                         Slog.d(TAG, "UID=" + uid + " rx_bytes=" + rxBytes + " rx_time=" + timeRxMs);
                     }
                     counter.getRxTimeCounter().addCountLocked(timeRxMs);
-                    leftOverRxTimeMs -= timeRxMs;
                 }
 
                 if (totalTxBytes > 0 && txBytes > 0) {
@@ -11734,7 +11733,6 @@ public class BatteryStatsImpl extends BatteryStats {
                         Slog.d(TAG, "UID=" + uid + " tx_bytes=" + txBytes + " tx_time=" + timeTxMs);
                     }
                     counter.getTxTimeCounters()[0].addCountLocked(timeTxMs);
-                    leftOverTxTimeMs -= timeTxMs;
                 }
             }
         }
