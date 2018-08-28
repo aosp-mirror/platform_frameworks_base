@@ -3498,6 +3498,9 @@
          empty string is passed in -->
     <string name="config_wlan_network_service_package" translatable="false"></string>
 
+    <!-- Telephony qualified networks service package name to bind to by default. -->
+    <string name="config_qualified_networks_service_package" translatable="false"></string>
+
     <!-- Wear devices: Controls the radios affected by Activity Mode. -->
     <string-array name="config_wearActivityModeRadios">
         <item>"wifi"</item>
