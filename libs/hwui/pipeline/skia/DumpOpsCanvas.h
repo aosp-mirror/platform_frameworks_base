@@ -94,11 +94,6 @@ protected:
         mOutput << mIdent << "drawPosTextH" << std::endl;
     }
 
-    void onDrawTextOnPath(const void*, size_t, const SkPath&, const SkMatrix*,
-                          const SkPaint&) override {
-        mOutput << mIdent << "drawTextOnPath" << std::endl;
-    }
-
     void onDrawTextRSXform(const void*, size_t, const SkRSXform[], const SkRect*,
                            const SkPaint&) override {
         mOutput << mIdent << "drawTextRSXform" << std::endl;
