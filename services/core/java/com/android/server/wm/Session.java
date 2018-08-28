@@ -138,10 +138,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             // Note: it is safe to call in to the input method manager
             // here because we are not holding our lock.
             if (mService.mInputMethodManager != null) {
-                mService.mInputMethodManager.addClient(client, inputContext,
-                        mUid, mPid);
-            } else {
-                client.setUsingInputMethod(false);
+                mService.mInputMethodManager.addClient(client, inputContext, mUid, mPid);
             }
             client.asBinder().linkToDeath(this, 0);
         } catch (RemoteException e) {
