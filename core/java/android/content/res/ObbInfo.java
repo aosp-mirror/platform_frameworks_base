@@ -80,6 +80,7 @@ public class ObbInfo implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int parcelableFlags) {
+        // Keep this in sync with writeToParcel() in ObbInfo.cpp
         dest.writeString(filename);
         dest.writeString(packageName);
         dest.writeInt(version);

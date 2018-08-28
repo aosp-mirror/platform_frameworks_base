@@ -34,6 +34,8 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageManager;
+import android.content.res.ObbInfo;
+import android.content.res.ObbScanner;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -580,12 +582,22 @@ public class StorageManager {
         try {
             final String canonicalPath = new File(rawPath).getCanonicalPath();
             final int nonce = mObbActionListener.addListener(listener);
-            mStorageManager.mountObb(rawPath, canonicalPath, key, mObbActionListener, nonce);
+            mStorageManager.mountObb(rawPath, canonicalPath, key, mObbActionListener, nonce,
+                    getObbInfo(canonicalPath));
             return true;
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to resolve path: " + rawPath, e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private ObbInfo getObbInfo(String canonicalPath) {
+        try {
+            final ObbInfo obbInfo = ObbScanner.getObbInfo(canonicalPath);
+            return obbInfo;
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Couldn't get OBB info for " + canonicalPath, e);
         }
     }
 
