@@ -171,7 +171,6 @@ public class BluetoothEventManager {
                 callback.onProfileConnectionStateChanged(device, state, bluetoothProfile);
             }
         }
-        mDeviceManager.onProfileConnectionStateChanged(device, state, bluetoothProfile);
     }
 
     private void dispatchConnectionStateChanged(CachedBluetoothDevice cachedDevice, int state) {
