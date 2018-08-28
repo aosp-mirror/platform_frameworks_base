@@ -5914,6 +5914,7 @@ package android.telephony.ims {
     field public static final int CODE_NETWORK_DETACH = 1513; // 0x5e9
     field public static final int CODE_NETWORK_REJECT = 1504; // 0x5e0
     field public static final int CODE_NETWORK_RESP_TIMEOUT = 1503; // 0x5df
+    field public static final int CODE_NO_CSFB_IN_CS_ROAM = 1516; // 0x5ec
     field public static final int CODE_NO_VALID_SIM = 1501; // 0x5dd
     field public static final int CODE_OEM_CAUSE_1 = 61441; // 0xf001
     field public static final int CODE_OEM_CAUSE_10 = 61450; // 0xf00a
