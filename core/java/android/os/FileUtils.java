@@ -23,6 +23,7 @@ import static android.system.OsConstants.S_ISREG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ContentResolver;
 import android.provider.DocumentsContract.Document;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -1057,7 +1058,7 @@ public class FileUtils {
             }
 
             if (mimeTypeFromExt == null) {
-                mimeTypeFromExt = "application/octet-stream";
+                mimeTypeFromExt = ContentResolver.MIME_TYPE_DEFAULT;
             }
 
             final String extFromMimeType = MimeTypeMap.getSingleton().getExtensionFromMimeType(

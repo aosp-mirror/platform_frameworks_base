@@ -437,6 +437,12 @@ public abstract class ContentResolver {
      */
     public static final String ANY_CURSOR_ITEM_TYPE = "vnd.android.cursor.item/*";
 
+    /**
+     * Default MIME type for files whose type is otherwise unknown.
+     * @hide
+     */
+    public static final String MIME_TYPE_DEFAULT = "application/octet-stream";
+
     /** @hide */
     @UnsupportedAppUsage
     public static final int SYNC_ERROR_SYNC_ALREADY_IN_PROGRESS = 1;

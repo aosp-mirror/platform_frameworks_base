@@ -23,15 +23,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
-import android.media.MediaMetadataRetriever;
-import android.media.MediaFile.MediaFileType;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore.Images;
 import android.util.Log;
 
-import java.io.FileInputStream;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
@@ -94,15 +92,15 @@ public class ThumbnailUtils {
                 : MAX_NUM_PIXELS_MICRO_THUMBNAIL;
         SizedThumbnailBitmap sizedThumbnailBitmap = new SizedThumbnailBitmap();
         Bitmap bitmap = null;
-        MediaFileType fileType = MediaFile.getFileType(filePath);
-        if (fileType != null) {
-            if (fileType.fileType == MediaFile.FILE_TYPE_JPEG
-                    || MediaFile.isRawImageFileType(fileType.fileType)) {
-                createThumbnailFromEXIF(filePath, targetSize, maxPixels, sizedThumbnailBitmap);
-                bitmap = sizedThumbnailBitmap.mBitmap;
-            } else if (fileType.fileType == MediaFile.FILE_TYPE_HEIF) {
-                bitmap = createThumbnailFromMetadataRetriever(filePath, targetSize, maxPixels);
-            }
+        String mimeType = MediaFile.getMimeTypeForFile(filePath);
+        if (mimeType.equals("image/heif")
+                || mimeType.equals("image/heif-sequence")
+                || mimeType.equals("image/heic")
+                || mimeType.equals("image/heic-sequence")) {
+            bitmap = createThumbnailFromMetadataRetriever(filePath, targetSize, maxPixels);
+        } else if (MediaFile.isExifMimeType(mimeType)) {
+            createThumbnailFromEXIF(filePath, targetSize, maxPixels, sizedThumbnailBitmap);
+            bitmap = sizedThumbnailBitmap.mBitmap;
         }
 
         if (bitmap == null) {
