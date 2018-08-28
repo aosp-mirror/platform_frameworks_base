@@ -23,6 +23,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.print.PrintManager;
 import android.provider.Settings;
+import android.telephony.ServiceState;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.UserIcons;
@@ -390,5 +391,53 @@ public class Utils {
         return audioMode == AudioManager.MODE_RINGTONE
                 || audioMode == AudioManager.MODE_IN_CALL
                 || audioMode == AudioManager.MODE_IN_COMMUNICATION;
+    }
+
+    /**
+     * Return the service state is in-service or not.
+     * To make behavior consistent with SystemUI and Settings/AboutPhone/SIM status UI
+     *
+     * @param serviceState Service state. {@link ServiceState}
+     */
+    public static boolean isInService(ServiceState serviceState) {
+        if (serviceState == null) {
+            return false;
+        }
+        int state = getCombinedServiceState(serviceState);
+        if (state == ServiceState.STATE_POWER_OFF
+                || state == ServiceState.STATE_OUT_OF_SERVICE
+                || state == ServiceState.STATE_EMERGENCY_ONLY) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Return the combined service state.
+     * To make behavior consistent with SystemUI and Settings/AboutPhone/SIM status UI
+     *
+     * @param serviceState Service state. {@link ServiceState}
+     */
+    public static int getCombinedServiceState(ServiceState serviceState) {
+        if (serviceState == null) {
+            return ServiceState.STATE_OUT_OF_SERVICE;
+        }
+
+        // Consider the device to be in service if either voice or data
+        // service is available. Some SIM cards are marketed as data-only
+        // and do not support voice service, and on these SIM cards, we
+        // want to show signal bars for data service as well as the "no
+        // service" or "emergency calls only" text that indicates that voice
+        // is not available.
+        int state = serviceState.getState();
+        int dataState = serviceState.getDataRegState();
+        if (state == ServiceState.STATE_OUT_OF_SERVICE
+                || state == ServiceState.STATE_EMERGENCY_ONLY) {
+            if (dataState == ServiceState.STATE_IN_SERVICE) {
+                return ServiceState.STATE_IN_SERVICE;
+            }
+        }
+        return state;
     }
 }

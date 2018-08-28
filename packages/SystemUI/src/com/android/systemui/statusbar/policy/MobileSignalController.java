@@ -36,6 +36,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.settingslib.graph.SignalDrawable;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
@@ -319,28 +320,6 @@ public class MobileSignalController extends SignalController<
         return new MobileState();
     }
 
-    private boolean hasService() {
-        if (mServiceState != null) {
-            // Consider the device to be in service if either voice or data
-            // service is available. Some SIM cards are marketed as data-only
-            // and do not support voice service, and on these SIM cards, we
-            // want to show signal bars for data service as well as the "no
-            // service" or "emergency calls only" text that indicates that voice
-            // is not available.
-            switch (mServiceState.getVoiceRegState()) {
-                case ServiceState.STATE_POWER_OFF:
-                    return false;
-                case ServiceState.STATE_OUT_OF_SERVICE:
-                case ServiceState.STATE_EMERGENCY_ONLY:
-                    return mServiceState.getDataRegState() == ServiceState.STATE_IN_SERVICE;
-                default:
-                    return true;
-            }
-        } else {
-            return false;
-        }
-    }
-
     private boolean isCdma() {
         return (mSignalStrength != null) && !mSignalStrength.isGsm();
     }
@@ -446,10 +425,11 @@ public class MobileSignalController extends SignalController<
      */
     private final void updateTelephony() {
         if (DEBUG) {
-            Log.d(mTag, "updateTelephonySignalStrength: hasService=" + hasService()
-                    + " ss=" + mSignalStrength);
+            Log.d(mTag, "updateTelephonySignalStrength: hasService=" +
+                    Utils.isInService(mServiceState) + " ss=" + mSignalStrength);
         }
-        mCurrentState.connected = hasService() && mSignalStrength != null;
+        mCurrentState.connected = Utils.isInService(mServiceState)
+                && mSignalStrength != null;
         if (mCurrentState.connected) {
             if (!mSignalStrength.isGsm() && mConfig.alwaysShowCdmaRssi) {
                 mCurrentState.level = mSignalStrength.getCdmaLevel();
