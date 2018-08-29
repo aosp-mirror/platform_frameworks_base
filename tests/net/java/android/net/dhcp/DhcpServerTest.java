@@ -16,6 +16,7 @@
 
 package android.net.dhcp;
 
+import static android.net.dhcp.DhcpPacket.DHCP_CLIENT;
 import static android.net.dhcp.DhcpPacket.ENCAP_BOOTP;
 import static android.net.dhcp.DhcpPacket.INADDR_ANY;
 import static android.net.dhcp.DhcpPacket.INADDR_BROADCAST;
@@ -27,9 +28,11 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -178,7 +181,7 @@ public class DhcpServerTest {
         final DhcpDiscoverPacket discover = new DhcpDiscoverPacket(TEST_TRANSACTION_ID,
                 (short) 0 /* secs */, INADDR_ANY /* relayIp */, TEST_CLIENT_MAC_BYTES,
                 false /* broadcast */, INADDR_ANY /* srcIp */);
-        mServer.processPacket(discover);
+        mServer.processPacket(discover, DHCP_CLIENT);
 
         assertResponseSentTo(TEST_CLIENT_ADDR);
         final DhcpOfferPacket packet = assertOffer(getPacket());
@@ -194,11 +197,20 @@ public class DhcpServerTest {
         final DhcpDiscoverPacket discover = new DhcpDiscoverPacket(TEST_TRANSACTION_ID,
                 (short) 0 /* secs */, INADDR_ANY /* relayIp */, TEST_CLIENT_MAC_BYTES,
                 false /* broadcast */, INADDR_ANY /* srcIp */);
-        mServer.processPacket(discover);
+        mServer.processPacket(discover, DHCP_CLIENT);
 
         assertResponseSentTo(INADDR_BROADCAST);
         final DhcpNakPacket packet = assertNak(getPacket());
         assertMatchesClient(packet);
+    }
+
+    private DhcpRequestPacket makeRequestSelectingPacket() {
+        final DhcpRequestPacket request = new DhcpRequestPacket(TEST_TRANSACTION_ID,
+                (short) 0 /* secs */, INADDR_ANY /* clientIp */, INADDR_ANY /* relayIp */,
+                TEST_CLIENT_MAC_BYTES, false /* broadcast */);
+        request.mServerIdentifier = TEST_SERVER_ADDR;
+        request.mRequestedIp = TEST_CLIENT_ADDR;
+        return request;
     }
 
     @Test
@@ -208,12 +220,8 @@ public class DhcpServerTest {
                 eq(true) /* sidSet */, isNull() /* hostname */))
                 .thenReturn(TEST_LEASE);
 
-        final DhcpRequestPacket request = new DhcpRequestPacket(TEST_TRANSACTION_ID,
-                (short) 0 /* secs */, INADDR_ANY /* clientIp */, INADDR_ANY /* relayIp */,
-                TEST_CLIENT_MAC_BYTES, false /* broadcast */);
-        request.mServerIdentifier = TEST_SERVER_ADDR;
-        request.mRequestedIp = TEST_CLIENT_ADDR;
-        mServer.processPacket(request);
+        final DhcpRequestPacket request = makeRequestSelectingPacket();
+        mServer.processPacket(request, DHCP_CLIENT);
 
         assertResponseSentTo(TEST_CLIENT_ADDR);
         final DhcpAckPacket packet = assertAck(getPacket());
@@ -227,12 +235,8 @@ public class DhcpServerTest {
                 eq(true) /* sidSet */, isNull() /* hostname */))
                 .thenThrow(new InvalidAddressException("Test error"));
 
-        final DhcpRequestPacket request = new DhcpRequestPacket(TEST_TRANSACTION_ID,
-                (short) 0 /* secs */, INADDR_ANY /* clientIp */, INADDR_ANY /* relayIp */,
-                TEST_CLIENT_MAC_BYTES, false /* broadcast */);
-        request.mServerIdentifier = TEST_SERVER_ADDR;
-        request.mRequestedIp = TEST_CLIENT_ADDR;
-        mServer.processPacket(request);
+        final DhcpRequestPacket request = makeRequestSelectingPacket();
+        mServer.processPacket(request, DHCP_CLIENT);
 
         assertResponseSentTo(INADDR_BROADCAST);
         final DhcpNakPacket packet = assertNak(getPacket());
@@ -240,11 +244,20 @@ public class DhcpServerTest {
     }
 
     @Test
+    public void testRequest_Selecting_WrongClientPort() throws Exception {
+        final DhcpRequestPacket request = makeRequestSelectingPacket();
+        mServer.processPacket(request, 50000);
+
+        verify(mRepository, never()).requestLease(any(), any(), any(), any(), anyBoolean(), any());
+        verify(mDeps, never()).sendPacket(any(), any(), any());
+    }
+
+    @Test
     public void testRelease() throws Exception {
         final DhcpReleasePacket release = new DhcpReleasePacket(TEST_TRANSACTION_ID,
                 TEST_SERVER_ADDR, TEST_CLIENT_ADDR,
                 INADDR_ANY /* relayIp */, TEST_CLIENT_MAC_BYTES);
-        mServer.processPacket(release);
+        mServer.processPacket(release, DHCP_CLIENT);
 
         verify(mRepository, times(1))
                 .releaseLease(isNull(), eq(TEST_CLIENT_MAC), eq(TEST_CLIENT_ADDR));
