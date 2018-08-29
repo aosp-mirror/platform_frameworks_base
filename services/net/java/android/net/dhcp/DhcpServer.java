@@ -19,6 +19,7 @@ package android.net.dhcp;
 import static android.net.NetworkUtils.getBroadcastAddress;
 import static android.net.NetworkUtils.getPrefixMaskAsInet4Address;
 import static android.net.TrafficStats.TAG_SYSTEM_DHCP_SERVER;
+import static android.net.dhcp.DhcpPacket.DHCP_CLIENT;
 import static android.net.dhcp.DhcpPacket.DHCP_SERVER;
 import static android.net.dhcp.DhcpPacket.ENCAP_BOOTP;
 import static android.net.dhcp.DhcpPacket.INFINITE_LEASE;
@@ -238,8 +239,14 @@ public class DhcpServer {
     }
 
     @VisibleForTesting
-    void processPacket(@NonNull DhcpPacket packet) {
-        mLog.log("Received packet of type " + packet.getClass().getSimpleName());
+    void processPacket(@NonNull DhcpPacket packet, int srcPort) {
+        final String packetType = packet.getClass().getSimpleName();
+        if (srcPort != DHCP_CLIENT) {
+            mLog.logf("Ignored packet of type %s sent from client port %d", packetType, srcPort);
+            return;
+        }
+
+        mLog.log("Received packet of type " + packetType);
         final Inet4Address sid = packet.mServerIdentifier;
         if (sid != null && !sid.equals(mServingParams.serverAddr.getAddress())) {
             mLog.log("Packet ignored due to wrong server identifier: " + sid);
@@ -469,8 +476,8 @@ public class DhcpServer {
         }
 
         @Override
-        protected void onReceive(DhcpPacket packet, Inet4Address srcAddr) {
-            processPacket(packet);
+        protected void onReceive(DhcpPacket packet, Inet4Address srcAddr, int srcPort) {
+            processPacket(packet, srcPort);
         }
 
         @Override
