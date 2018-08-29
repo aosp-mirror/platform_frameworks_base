@@ -185,6 +185,15 @@ public final class ImsReasonInfo implements Parcelable {
     public static final int CODE_EMERGENCY_PERM_FAILURE = 364;
 
     /**
+     * Call failure code during hangup/reject if user marked the call as unwanted.
+     *
+     * Android Telephony will receive information whether ROBO call feature is supported by the
+     * network from modem and propagate the same to AOSP as new ImsCallProfile members. OEMs can
+     * check this information and provide an option to the user to mark the call as unwanted.
+     */
+    public static final int CODE_SIP_USER_MARKED_UNWANTED = 365;
+
+    /**
      * MEDIA (IMS -> Telephony)
      */
     // Media resource initialization failed

@@ -5982,6 +5982,7 @@ package android.telephony.ims {
     field public static final int CODE_SIP_SERVICE_UNAVAILABLE = 352; // 0x160
     field public static final int CODE_SIP_TEMPRARILY_UNAVAILABLE = 336; // 0x150
     field public static final int CODE_SIP_TRANSACTION_DOES_NOT_EXIST = 343; // 0x157
+    field public static final int CODE_SIP_USER_MARKED_UNWANTED = 365; // 0x16d
     field public static final int CODE_SIP_USER_REJECTED = 361; // 0x169
     field public static final int CODE_SUPP_SVC_CANCELLED = 1202; // 0x4b2
     field public static final int CODE_SUPP_SVC_FAILED = 1201; // 0x4b1
