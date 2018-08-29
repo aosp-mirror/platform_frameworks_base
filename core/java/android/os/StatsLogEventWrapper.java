@@ -120,15 +120,6 @@ public final class StatsLogEventWrapper implements Parcelable {
         mStorage.write(bytes, 0, bytes.length);
     }
 
-    /**
-     * Adds a boolean by adding either a 1 or 0 to the output.
-     */
-    public void writeBoolean(boolean val) {
-        int toWrite = val ? 1 : 0;
-        mStorage.write(EVENT_TYPE_INT);
-        write4Bytes(toWrite);
-    }
-
     private StatsLogEventWrapper(Parcel in) {
         readFromParcel(in);
     }
