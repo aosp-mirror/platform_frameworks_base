@@ -16,25 +16,6 @@
 
 package com.android.server.accessibility;
 
-import android.accessibilityservice.FingerprintGestureController;
-import android.content.res.Resources;
-import android.hardware.fingerprint.IFingerprintService;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.view.KeyEvent;
-
-import com.android.server.accessibility.FingerprintGestureDispatcher.FingerprintGestureClient;
-
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.util.Arrays;
-import java.util.Collections;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyBoolean;
@@ -43,6 +24,22 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
+import android.accessibilityservice.FingerprintGestureController;
+import android.content.res.Resources;
+import android.hardware.fingerprint.IFingerprintService;
+import android.view.KeyEvent;
+
+import com.android.server.accessibility.FingerprintGestureDispatcher.FingerprintGestureClient;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * Tests for FingerprintGestureDispatcher
@@ -57,13 +54,6 @@ public class FingerprintGestureDispatcherTest {
     private MessageCapturingHandler mMessageCapturingHandler;
     private FingerprintGestureDispatcher mFingerprintGestureDispatcher;
 
-    @BeforeClass
-    public static void oneTimeInitialization() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-    }
-
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -76,6 +66,12 @@ public class FingerprintGestureDispatcherTest {
         when(mNonGestureCapturingClient.isCapturingFingerprintGestures()).thenReturn(false);
         when(mGestureCapturingClient.isCapturingFingerprintGestures()).thenReturn(true);
     }
+
+    @After
+    public void tearDown() {
+        mMessageCapturingHandler.removeAllMessages();
+    }
+
 
     @Test
     public void testNoServices_doesNotCrashOrConsumeGestures() {
@@ -171,7 +167,7 @@ public class FingerprintGestureDispatcherTest {
     }
 
     @Test
-    public void ifGestureDectionNotSupported_neverSaysAvailable() throws Exception {
+    public void ifGestureDetectionNotSupported_neverSaysAvailable() throws Exception {
         when(mMockResources.getBoolean(anyInt())).thenReturn(false);
         // Need to create a new dispatcher, since it picks up the resource value in its
         // constructor. This is fine since hardware config values don't change dynamically.
