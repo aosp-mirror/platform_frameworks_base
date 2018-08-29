@@ -65,7 +65,9 @@ final class CarUserSwitchingDialog extends UserSwitchingDialog {
         setCancelable(false);
         Resources res = getContext().getResources();
         // Custom view due to alignment and font size requirements
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.car_user_switching_dialog,
+        getContext().setTheme(R.style.Theme_DeviceDefault_Light_Dialog_Alert_UserSwitchingDialog);
+        View view = LayoutInflater.from(getContext()).inflate(
+                R.layout.car_user_switching_dialog,
                 null);
 
         UserManager userManager =
