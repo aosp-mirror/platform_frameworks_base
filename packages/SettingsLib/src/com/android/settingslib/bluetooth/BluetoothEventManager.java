@@ -18,7 +18,6 @@ package com.android.settingslib.bluetooth;
 
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothHearingAid;
@@ -282,6 +281,9 @@ public class BluetoothEventManager {
                 cachedDevice = mDeviceManager.addDevice(device);
                 Log.d(TAG, "DeviceFoundHandler created new CachedBluetoothDevice: "
                         + cachedDevice);
+            } else if (cachedDevice.getBondState() == BluetoothDevice.BOND_BONDED) {
+                // Dispatch device add callback to show bonded BT device in discovery mode
+                dispatchDeviceAdded(cachedDevice);
             }
             cachedDevice.setRssi(rssi);
             cachedDevice.setJustDiscovered(true);

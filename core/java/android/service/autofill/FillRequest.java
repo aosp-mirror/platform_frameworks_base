@@ -123,6 +123,10 @@ public final class FillRequest implements Parcelable {
 
     /**
      * Gets the contexts associated with each previous fill request.
+     *
+     * <p><b>Note:</b> Starting on Android {@link android.os.Build.VERSION_CODES#Q}, it could also
+     * include contexts from requests whose {@link SaveInfo} had the
+     * {@link SaveInfo#FLAG_DELAY_SAVE} flag.
      */
     public @NonNull List<FillContext> getFillContexts() {
         return mContexts;

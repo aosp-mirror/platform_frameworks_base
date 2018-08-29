@@ -44,11 +44,9 @@ import android.app.KeyguardManager;
 import android.app.admin.SecurityLog;
 import android.app.usage.StorageStatsManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageManager;
@@ -115,7 +113,6 @@ import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.IMediaContainerService;
 import com.android.internal.os.AppFuseMount;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.FuseUnavailableMountException;
@@ -544,37 +541,7 @@ class StorageManagerService extends IStorageManager.Stub
 
     // OBB action handler messages
     private static final int OBB_RUN_ACTION = 1;
-    private static final int OBB_MCS_BOUND = 2;
-    private static final int OBB_MCS_UNBIND = 3;
-    private static final int OBB_MCS_RECONNECT = 4;
-    private static final int OBB_FLUSH_MOUNT_STATE = 5;
-
-    /*
-     * Default Container Service information
-     */
-    static final ComponentName DEFAULT_CONTAINER_COMPONENT = new ComponentName(
-            "com.android.defcontainer", "com.android.defcontainer.DefaultContainerService");
-
-    final private DefaultContainerConnection mDefContainerConn = new DefaultContainerConnection();
-
-    class DefaultContainerConnection implements ServiceConnection {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            if (DEBUG_OBB)
-                Slog.i(TAG, "onServiceConnected");
-            IMediaContainerService imcs = IMediaContainerService.Stub.asInterface(service);
-            mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(OBB_MCS_BOUND, imcs));
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            if (DEBUG_OBB)
-                Slog.i(TAG, "onServiceDisconnected");
-        }
-    }
-
-    // Used in the ObbActionHandler
-    private IMediaContainerService mContainerService = null;
+    private static final int OBB_FLUSH_MOUNT_STATE = 2;
 
     // Last fstrim operation tracking
     private static final String LAST_FSTRIM_FILE = "last-fstrim";
@@ -2305,16 +2272,17 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     @Override
-    public void mountObb(
-            String rawPath, String canonicalPath, String key, IObbActionListener token, int nonce) {
+    public void mountObb(String rawPath, String canonicalPath, String key,
+            IObbActionListener token, int nonce, ObbInfo obbInfo) {
         Preconditions.checkNotNull(rawPath, "rawPath cannot be null");
         Preconditions.checkNotNull(canonicalPath, "canonicalPath cannot be null");
         Preconditions.checkNotNull(token, "token cannot be null");
+        Preconditions.checkNotNull(obbInfo, "obbIfno cannot be null");
 
         final int callingUid = Binder.getCallingUid();
         final ObbState obbState = new ObbState(rawPath, canonicalPath,
                 callingUid, token, nonce, null);
-        final ObbAction action = new MountObbAction(obbState, key, callingUid);
+        final ObbAction action = new MountObbAction(obbState, key, callingUid, obbInfo);
         mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(OBB_RUN_ACTION, action));
 
         if (DEBUG_OBB)
@@ -3217,8 +3185,6 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private class ObbActionHandler extends Handler {
-        private boolean mBound = false;
-        private final List<ObbAction> mActions = new LinkedList<ObbAction>();
 
         ObbActionHandler(Looper l) {
             super(l);
@@ -3233,83 +3199,7 @@ class StorageManagerService extends IStorageManager.Stub
                     if (DEBUG_OBB)
                         Slog.i(TAG, "OBB_RUN_ACTION: " + action.toString());
 
-                    // If a bind was already initiated we don't really
-                    // need to do anything. The pending install
-                    // will be processed later on.
-                    if (!mBound) {
-                        // If this is the only one pending we might
-                        // have to bind to the service again.
-                        if (!connectToService()) {
-                            action.notifyObbStateChange(new ObbException(ERROR_INTERNAL,
-                                    "Failed to bind to media container service"));
-                            return;
-                        }
-                    }
-
-                    mActions.add(action);
-                    break;
-                }
-                case OBB_MCS_BOUND: {
-                    if (DEBUG_OBB)
-                        Slog.i(TAG, "OBB_MCS_BOUND");
-                    if (msg.obj != null) {
-                        mContainerService = (IMediaContainerService) msg.obj;
-                    }
-                    if (mContainerService == null) {
-                        // Something seriously wrong. Bail out
-                        for (ObbAction action : mActions) {
-                            // Indicate service bind error
-                            action.notifyObbStateChange(new ObbException(ERROR_INTERNAL,
-                                    "Failed to bind to media container service"));
-                        }
-                        mActions.clear();
-                    } else if (mActions.size() > 0) {
-                        final ObbAction action = mActions.get(0);
-                        if (action != null) {
-                            action.execute(this);
-                        }
-                    } else {
-                        // Should never happen ideally.
-                        Slog.w(TAG, "Empty queue");
-                    }
-                    break;
-                }
-                case OBB_MCS_RECONNECT: {
-                    if (DEBUG_OBB)
-                        Slog.i(TAG, "OBB_MCS_RECONNECT");
-                    if (mActions.size() > 0) {
-                        if (mBound) {
-                            disconnectService();
-                        }
-                        if (!connectToService()) {
-                            for (ObbAction action : mActions) {
-                                // Indicate service bind error
-                                action.notifyObbStateChange(new ObbException(ERROR_INTERNAL,
-                                        "Failed to bind to media container service"));
-                            }
-                            mActions.clear();
-                        }
-                    }
-                    break;
-                }
-                case OBB_MCS_UNBIND: {
-                    if (DEBUG_OBB)
-                        Slog.i(TAG, "OBB_MCS_UNBIND");
-
-                    // Delete pending install
-                    if (mActions.size() > 0) {
-                        mActions.remove(0);
-                    }
-                    if (mActions.size() == 0) {
-                        if (mBound) {
-                            disconnectService();
-                        }
-                    } else {
-                        // There are more pending requests in queue.
-                        // Just post MCS_BOUND message to trigger processing
-                        // of next pending install.
-                        mObbActionHandler.sendEmptyMessage(OBB_MCS_BOUND);
-                    }
+                    action.execute(this);
                     break;
                 }
                 case OBB_FLUSH_MOUNT_STATE: {
@@ -3354,25 +3244,6 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             }
         }
-
-        private boolean connectToService() {
-            if (DEBUG_OBB)
-                Slog.i(TAG, "Trying to bind to DefaultContainerService");
-
-            Intent service = new Intent().setComponent(DEFAULT_CONTAINER_COMPONENT);
-            if (mContext.bindServiceAsUser(service, mDefContainerConn, Context.BIND_AUTO_CREATE,
-                    UserHandle.SYSTEM)) {
-                mBound = true;
-                return true;
-            }
-            return false;
-        }
-
-        private void disconnectService() {
-            mContainerService = null;
-            mBound = false;
-            mContext.unbindService(mDefContainerConn);
-        }
     }
 
     private static class ObbException extends Exception {
@@ -3390,8 +3261,6 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     abstract class ObbAction {
-        private static final int MAX_RETRIES = 3;
-        private int mRetries;
 
         ObbState mObbState;
 
@@ -3403,39 +3272,13 @@ class StorageManagerService extends IStorageManager.Stub
             try {
                 if (DEBUG_OBB)
                     Slog.i(TAG, "Starting to execute action: " + toString());
-                mRetries++;
-                if (mRetries > MAX_RETRIES) {
-                    mObbActionHandler.sendEmptyMessage(OBB_MCS_UNBIND);
-                    notifyObbStateChange(new ObbException(ERROR_INTERNAL,
-                            "Failed to bind to media container service"));
-                } else {
-                    handleExecute();
-                    if (DEBUG_OBB)
-                        Slog.i(TAG, "Posting install MCS_UNBIND");
-                    mObbActionHandler.sendEmptyMessage(OBB_MCS_UNBIND);
-                }
+                handleExecute();
             } catch (ObbException e) {
                 notifyObbStateChange(e);
-                mObbActionHandler.sendEmptyMessage(OBB_MCS_UNBIND);
             }
         }
 
         abstract void handleExecute() throws ObbException;
-
-        protected ObbInfo getObbInfo() throws ObbException {
-            final ObbInfo obbInfo;
-            try {
-                obbInfo = mContainerService.getObbInfo(mObbState.canonicalPath);
-            } catch (Exception e) {
-                throw new ObbException(ERROR_PERMISSION_DENIED, e);
-            }
-            if (obbInfo != null) {
-                return obbInfo;
-            } else {
-                throw new ObbException(ERROR_INTERNAL,
-                        "Missing OBB info for: " + mObbState.canonicalPath);
-            }
-        }
 
         protected void notifyObbStateChange(ObbException e) {
             Slog.w(TAG, e);
@@ -3458,22 +3301,22 @@ class StorageManagerService extends IStorageManager.Stub
     class MountObbAction extends ObbAction {
         private final String mKey;
         private final int mCallingUid;
+        private ObbInfo mObbInfo;
 
-        MountObbAction(ObbState obbState, String key, int callingUid) {
+        MountObbAction(ObbState obbState, String key, int callingUid, ObbInfo obbInfo) {
             super(obbState);
             mKey = key;
             mCallingUid = callingUid;
+            mObbInfo = obbInfo;
         }
 
         @Override
         public void handleExecute() throws ObbException {
             warnOnNotMounted();
 
-            final ObbInfo obbInfo = getObbInfo();
-
-            if (!isUidOwnerOfPackageOrSystem(obbInfo.packageName, mCallingUid)) {
+            if (!isUidOwnerOfPackageOrSystem(mObbInfo.packageName, mCallingUid)) {
                 throw new ObbException(ERROR_PERMISSION_DENIED, "Denied attempt to mount OBB "
-                        + obbInfo.filename + " which is owned by " + obbInfo.packageName);
+                        + mObbInfo.filename + " which is owned by " + mObbInfo.packageName);
             }
 
             final boolean isMounted;
@@ -3482,7 +3325,7 @@ class StorageManagerService extends IStorageManager.Stub
             }
             if (isMounted) {
                 throw new ObbException(ERROR_ALREADY_MOUNTED,
-                        "Attempt to mount OBB which is already mounted: " + obbInfo.filename);
+                        "Attempt to mount OBB which is already mounted: " + mObbInfo.filename);
             }
 
             final String hashedKey;
@@ -3494,7 +3337,7 @@ class StorageManagerService extends IStorageManager.Stub
                 try {
                     SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 
-                    KeySpec ks = new PBEKeySpec(mKey.toCharArray(), obbInfo.salt,
+                    KeySpec ks = new PBEKeySpec(mKey.toCharArray(), mObbInfo.salt,
                             PBKDF2_HASH_ROUNDS, CRYPTO_ALGORITHM_KEY_SIZE);
                     SecretKey key = factory.generateSecret(ks);
                     BigInteger bi = new BigInteger(key.getEncoded());

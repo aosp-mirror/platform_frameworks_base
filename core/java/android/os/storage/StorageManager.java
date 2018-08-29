@@ -34,10 +34,13 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageManager;
+import android.content.res.ObbInfo;
+import android.content.res.ObbScanner;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.IInstalld;
 import android.os.IVold;
 import android.os.IVoldTaskListener;
 import android.os.Looper;
@@ -213,11 +216,10 @@ public class StorageManager {
     /** {@hide} */
     public static final int DEBUG_VIRTUAL_DISK = 1 << 5;
 
-    // NOTE: keep in sync with installd
     /** {@hide} */
-    public static final int FLAG_STORAGE_DE = 1 << 0;
+    public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
     /** {@hide} */
-    public static final int FLAG_STORAGE_CE = 1 << 1;
+    public static final int FLAG_STORAGE_CE = IInstalld.FLAG_STORAGE_CE;
 
     /** {@hide} */
     public static final int FLAG_FOR_WRITE = 1 << 8;
@@ -580,12 +582,22 @@ public class StorageManager {
         try {
             final String canonicalPath = new File(rawPath).getCanonicalPath();
             final int nonce = mObbActionListener.addListener(listener);
-            mStorageManager.mountObb(rawPath, canonicalPath, key, mObbActionListener, nonce);
+            mStorageManager.mountObb(rawPath, canonicalPath, key, mObbActionListener, nonce,
+                    getObbInfo(canonicalPath));
             return true;
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to resolve path: " + rawPath, e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private ObbInfo getObbInfo(String canonicalPath) {
+        try {
+            final ObbInfo obbInfo = ObbScanner.getObbInfo(canonicalPath);
+            return obbInfo;
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Couldn't get OBB info for " + canonicalPath, e);
         }
     }
 

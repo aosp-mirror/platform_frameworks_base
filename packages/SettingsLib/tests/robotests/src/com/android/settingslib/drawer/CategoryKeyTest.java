@@ -24,7 +24,6 @@ import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.Set;
 

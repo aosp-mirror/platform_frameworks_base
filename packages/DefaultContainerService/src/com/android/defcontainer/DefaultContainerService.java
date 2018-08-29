@@ -16,11 +16,9 @@
 
 package com.android.defcontainer;
 
-import android.app.IntentService;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.IPackageManager;
-import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
@@ -29,13 +27,10 @@ import android.content.pm.PackageParser.PackageParserException;
 import android.content.res.ObbInfo;
 import android.content.res.ObbScanner;
 import android.os.Binder;
-import android.os.Environment.UserEnvironment;
 import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
-import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.Slog;
 
 import com.android.internal.app.IMediaContainerService;
@@ -57,7 +52,7 @@ import java.io.OutputStream;
  * open files that cause the kernel to kill it when the underlying device is
  * removed.
  */
-public class DefaultContainerService extends IntentService {
+public class DefaultContainerService extends Service {
     private static final String TAG = "DefContainer";
 
     // TODO: migrate native code unpacking to always be a derivative work
@@ -159,16 +154,6 @@ public class DefaultContainerService extends IntentService {
             }
         }
 
-        @Override
-        public void clearDirectory(String path) throws RemoteException {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-
-            final File directory = new File(path);
-            if (directory.exists() && directory.isDirectory()) {
-                eraseFiles(directory);
-            }
-        }
-
         /**
          * Calculate estimated footprint of given package post-installation.
          *
@@ -190,49 +175,6 @@ public class DefaultContainerService extends IntentService {
             }
         }
     };
-
-    public DefaultContainerService() {
-        super("DefaultContainerService");
-        setIntentRedelivery(true);
-    }
-
-    @Override
-    protected void onHandleIntent(Intent intent) {
-        if (PackageManager.ACTION_CLEAN_EXTERNAL_STORAGE.equals(intent.getAction())) {
-            final IPackageManager pm = IPackageManager.Stub.asInterface(
-                    ServiceManager.getService("package"));
-            PackageCleanItem item = null;
-            try {
-                while ((item = pm.nextPackageToClean(item)) != null) {
-                    final UserEnvironment userEnv = new UserEnvironment(item.userId);
-                    eraseFiles(userEnv.buildExternalStorageAppDataDirs(item.packageName));
-                    eraseFiles(userEnv.buildExternalStorageAppMediaDirs(item.packageName));
-                    if (item.andCode) {
-                        eraseFiles(userEnv.buildExternalStorageAppObbDirs(item.packageName));
-                    }
-                }
-            } catch (RemoteException e) {
-            }
-        }
-    }
-
-    void eraseFiles(File[] paths) {
-        for (File path : paths) {
-            eraseFiles(path);
-        }
-    }
-
-    void eraseFiles(File path) {
-        if (path.isDirectory()) {
-            String[] files = path.list();
-            if (files != null) {
-                for (String file : files) {
-                    eraseFiles(new File(path, file));
-                }
-            }
-        }
-        path.delete();
-    }
 
     @Override
     public IBinder onBind(Intent intent) {

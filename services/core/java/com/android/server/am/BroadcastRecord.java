@@ -18,8 +18,8 @@ package com.android.server.am;
 
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
-import android.content.IIntentReceiver;
 import android.content.ComponentName;
+import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
@@ -62,6 +62,7 @@ final class BroadcastRecord extends Binder {
     final BroadcastOptions options; // BroadcastOptions supplied by caller
     final List receivers;   // contains BroadcastFilter and ResolveInfo
     final int[] delivery;   // delivery state of each receiver
+    final long[] duration;   // duration a receiver took to process broadcast
     IIntentReceiver resultTo; // who receives final result if non-null
     long enqueueClockTime;  // the clock time the broadcast was enqueued
     long dispatchTime;      // when dispatch started on this set of receivers
@@ -203,6 +204,7 @@ final class BroadcastRecord extends Binder {
                 case DELIVERY_TIMEOUT:   pw.print("Timeout"); break;
                 default:                 pw.print("???????"); break;
             }
+            pw.print(" "); TimeUtils.formatDuration(duration[i], pw);
             pw.print(" #"); pw.print(i); pw.print(": ");
             if (o instanceof BroadcastFilter) {
                 pw.println(o);
@@ -239,6 +241,7 @@ final class BroadcastRecord extends Binder {
         options = _options;
         receivers = _receivers;
         delivery = new int[_receivers != null ? _receivers.size() : 0];
+        duration = new long[delivery.length];
         resultTo = _resultTo;
         resultCode = _resultCode;
         resultData = _resultData;
@@ -274,6 +277,7 @@ final class BroadcastRecord extends Binder {
         options = from.options;
         receivers = from.receivers;
         delivery = from.delivery;
+        duration = from.duration;
         resultTo = from.resultTo;
         enqueueClockTime = from.enqueueClockTime;
         dispatchTime = from.dispatchTime;

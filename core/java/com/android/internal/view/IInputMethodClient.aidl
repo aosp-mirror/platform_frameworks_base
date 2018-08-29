@@ -23,7 +23,6 @@ import com.android.internal.view.InputBindResult;
  * itself and receive information about changes to the global manager state.
  */
 oneway interface IInputMethodClient {
-    void setUsingInputMethod(boolean state);
     void onBindMethod(in InputBindResult res);
     // unbindReason corresponds to InputMethodClient.UnbindReason.
     void onUnbindMethod(int sequence, int unbindReason);

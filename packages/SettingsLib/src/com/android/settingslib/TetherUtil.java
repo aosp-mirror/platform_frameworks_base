@@ -22,6 +22,7 @@ import android.net.ConnectivityManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.telephony.CarrierConfigManager;
+
 import androidx.annotation.VisibleForTesting;
 
 public class TetherUtil {

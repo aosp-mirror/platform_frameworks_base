@@ -20,6 +20,7 @@ import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static com.android.settingslib.Utils.STORAGE_MANAGER_SHOW_OPT_IN_PROPERTY;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -39,6 +40,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
+import android.telephony.ServiceState;
 import android.text.TextUtils;
 
 import org.junit.Before;
@@ -74,6 +76,8 @@ public class UtilsTest {
     private Context mContext;
     @Mock
     private LocationManager mLocationManager;
+    @Mock
+    private ServiceState mServiceState;
 
     @Before
     public void setUp() {
@@ -225,5 +229,72 @@ public class UtilsTest {
         mShadowAudioManager.setMode(AudioManager.MODE_NORMAL);
 
         assertThat(Utils.isAudioModeOngoingCall(mContext)).isFalse();
+    }
+
+    @Test
+    public void isInService_servicestateNull_returnFalse() {
+        assertThat(Utils.isInService(null)).isFalse();
+    }
+
+    @Test
+    public void isInService_voiceInService_returnTrue() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+        assertThat(Utils.isInService(mServiceState)).isTrue();
+    }
+
+    @Test
+    public void isInService_voiceOutOfServiceDataInService_returnTrue() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+        when(mServiceState.getDataRegState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+        assertThat(Utils.isInService(mServiceState)).isTrue();
+    }
+
+    @Test
+    public void isInService_voiceOutOfServiceDataOutOfService_returnFalse() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+        when(mServiceState.getDataRegState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+        assertThat(Utils.isInService(mServiceState)).isFalse();
+    }
+
+    @Test
+    public void isInService_ServiceStatePowerOff_returnFalse() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_POWER_OFF);
+        assertThat(Utils.isInService(mServiceState)).isFalse();
+    }
+
+    @Test
+    public void getCombinedServiceState_servicestateNull_returnOutOfService() {
+        assertThat(Utils.getCombinedServiceState(null)).isEqualTo(
+                ServiceState.STATE_OUT_OF_SERVICE);
+    }
+
+    @Test
+    public void getCombinedServiceState_ServiceStatePowerOff_returnPowerOff() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_POWER_OFF);
+        assertThat(Utils.getCombinedServiceState(mServiceState)).isEqualTo(
+                ServiceState.STATE_POWER_OFF);
+    }
+
+    @Test
+    public void getCombinedServiceState_voiceInService_returnInService() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+        assertThat(Utils.getCombinedServiceState(mServiceState)).isEqualTo(
+                ServiceState.STATE_IN_SERVICE);
+    }
+
+    @Test
+    public void getCombinedServiceState_voiceOutOfServiceDataInService_returnInService() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+        when(mServiceState.getDataRegState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+        assertThat(Utils.getCombinedServiceState(mServiceState)).isEqualTo(
+                ServiceState.STATE_IN_SERVICE);
+    }
+
+    @Test
+    public void getCombinedServiceState_voiceOutOfServiceDataOutOfService_returnOutOfService() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+        when(mServiceState.getDataRegState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+        assertThat(Utils.getCombinedServiceState(mServiceState)).isEqualTo(
+                ServiceState.STATE_OUT_OF_SERVICE);
     }
 }

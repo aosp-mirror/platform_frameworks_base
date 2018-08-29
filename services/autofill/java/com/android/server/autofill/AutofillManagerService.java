@@ -978,12 +978,12 @@ public final class AutofillManagerService extends SystemService {
                 throw new IllegalArgumentException(packageName + " is not a valid package", e);
             }
 
-            // TODO(b/112051762): rather than always call AM here, call it on demand on
+            // TODO(b/113281366): rather than always call AM here, call it on demand on
             // getPreviousSessionsLocked()? That way we save space / time here, and don't set
             // a callback on AM unnecessarily (see TODO below :-)
             final ActivityManagerInternal am = LocalServices
                     .getService(ActivityManagerInternal.class);
-            // TODO(b/112051762): add a callback method on AM to be notified when a task is finished
+            // TODO(b/113281366): add a callback method on AM to be notified when a task is finished
             // so we can clean up sessions kept alive
             final int taskId = am.getTaskIdForActivity(activityToken, false);
             final int sessionId;

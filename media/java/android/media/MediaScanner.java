@@ -502,6 +502,8 @@ public class MediaScanner implements AutoCloseable {
         private String mGenre;
         @UnsupportedAppUsage
         private String mMimeType;
+        /** @deprecated file types no longer exist */
+        @Deprecated
         @UnsupportedAppUsage
         private int mFileType;
         private int mTrack;
@@ -531,7 +533,6 @@ public class MediaScanner implements AutoCloseable {
         public FileEntry beginFile(String path, String mimeType, long lastModified,
                 long fileSize, boolean isDirectory, boolean noMedia) {
             mMimeType = mimeType;
-            mFileType = 0;
             mFileSize = fileSize;
             mIsDrm = false;
             mScanSuccess = true;
@@ -542,24 +543,13 @@ public class MediaScanner implements AutoCloseable {
                 }
                 mNoMedia = noMedia;
 
-                // try mimeType first, if it is specified
-                if (mimeType != null) {
-                    mFileType = MediaFile.getFileTypeForMimeType(mimeType);
-                }
-
                 // if mimeType was not specified, compute file type based on file extension.
-                if (mFileType == 0) {
-                    MediaFile.MediaFileType mediaFileType = MediaFile.getFileType(path);
-                    if (mediaFileType != null) {
-                        mFileType = mediaFileType.fileType;
-                        if (mMimeType == null) {
-                            mMimeType = mediaFileType.mimeType;
-                        }
-                    }
+                if (mMimeType == null) {
+                    mMimeType = MediaFile.getMimeTypeForFile(path);
                 }
 
-                if (isDrmEnabled() && MediaFile.isDrmFileType(mFileType)) {
-                    mFileType = getFileTypeFromDrm(path);
+                if (isDrmEnabled() && MediaFile.isDrmMimeType(mMimeType)) {
+                    getMimeTypeFromDrm(path);
                 }
             }
 
@@ -578,7 +568,7 @@ public class MediaScanner implements AutoCloseable {
                 entry.mLastModifiedChanged = true;
             }
 
-            if (mProcessPlaylists && MediaFile.isPlayListFileType(mFileType)) {
+            if (mProcessPlaylists && MediaFile.isPlayListMimeType(mMimeType)) {
                 mPlayLists.add(entry);
                 // we don't process playlists in the main scan, so return null
                 return null;
@@ -659,9 +649,9 @@ public class MediaScanner implements AutoCloseable {
                     if (noMedia) {
                         result = endFile(entry, false, false, false, false, false);
                     } else {
-                        boolean isaudio = MediaFile.isAudioFileType(mFileType);
-                        boolean isvideo = MediaFile.isVideoFileType(mFileType);
-                        boolean isimage = MediaFile.isImageFileType(mFileType);
+                        boolean isaudio = MediaFile.isAudioMimeType(mMimeType);
+                        boolean isvideo = MediaFile.isVideoMimeType(mMimeType);
+                        boolean isimage = MediaFile.isImageMimeType(mMimeType);
 
                         if (isaudio || isvideo || isimage) {
                             path = Environment.maybeTranslateEmulatedPathToInternal(new File(path))
@@ -878,7 +868,6 @@ public class MediaScanner implements AutoCloseable {
                 return;
             }
             mMimeType = mimeType;
-            mFileType = MediaFile.getFileTypeForMimeType(mimeType);
         }
 
         /**
@@ -906,7 +895,7 @@ public class MediaScanner implements AutoCloseable {
             }
 
             if (!mNoMedia) {
-                if (MediaFile.isVideoFileType(mFileType)) {
+                if (MediaFile.isVideoMimeType(mMimeType)) {
                     map.put(Video.Media.ARTIST, (mArtist != null && mArtist.length() > 0
                             ? mArtist : MediaStore.UNKNOWN_STRING));
                     map.put(Video.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0
@@ -918,9 +907,9 @@ public class MediaScanner implements AutoCloseable {
                     if (mDate > 0) {
                         map.put(Video.Media.DATE_TAKEN, mDate);
                     }
-                } else if (MediaFile.isImageFileType(mFileType)) {
+                } else if (MediaFile.isImageMimeType(mMimeType)) {
                     // FIXME - add DESCRIPTION
-                } else if (mScanSuccess && MediaFile.isAudioFileType(mFileType)) {
+                } else if (mScanSuccess && MediaFile.isAudioMimeType(mMimeType)) {
                     map.put(Audio.Media.ARTIST, (mArtist != null && mArtist.length() > 0) ?
                             mArtist : MediaStore.UNKNOWN_STRING);
                     map.put(Audio.Media.ALBUM_ARTIST, (mAlbumArtist != null &&
@@ -982,7 +971,7 @@ public class MediaScanner implements AutoCloseable {
                 }
             }
             long rowId = entry.mRowId;
-            if (MediaFile.isAudioFileType(mFileType) && (rowId == 0 || mMtpObjectHandle != 0)) {
+            if (MediaFile.isAudioMimeType(mMimeType) && (rowId == 0 || mMtpObjectHandle != 0)) {
                 // Only set these for new entries. For existing entries, they
                 // may have been modified later, and we want to keep the current
                 // values so that custom ringtones still show up in the ringtone
@@ -992,9 +981,7 @@ public class MediaScanner implements AutoCloseable {
                 values.put(Audio.Media.IS_ALARM, alarms);
                 values.put(Audio.Media.IS_MUSIC, music);
                 values.put(Audio.Media.IS_PODCAST, podcasts);
-            } else if ((mFileType == MediaFile.FILE_TYPE_JPEG
-                    || mFileType == MediaFile.FILE_TYPE_HEIF
-                    || MediaFile.isRawImageFileType(mFileType)) && !mNoMedia) {
+            } else if (MediaFile.isExifMimeType(mMimeType) && !mNoMedia) {
                 ExifInterface exif = null;
                 try {
                     exif = new ExifInterface(entry.mPath);
@@ -1050,16 +1037,16 @@ public class MediaScanner implements AutoCloseable {
             int mediaType = FileColumns.MEDIA_TYPE_NONE;
             MediaInserter inserter = mMediaInserter;
             if (mScanSuccess && !mNoMedia) {
-                if (MediaFile.isVideoFileType(mFileType)) {
+                if (MediaFile.isVideoMimeType(mMimeType)) {
                     tableUri = mVideoUri;
                     mediaType = FileColumns.MEDIA_TYPE_VIDEO;
-                } else if (MediaFile.isImageFileType(mFileType)) {
+                } else if (MediaFile.isImageMimeType(mMimeType)) {
                     tableUri = mImagesUri;
                     mediaType = FileColumns.MEDIA_TYPE_IMAGE;
-                } else if (MediaFile.isAudioFileType(mFileType)) {
+                } else if (MediaFile.isAudioMimeType(mMimeType)) {
                     tableUri = mAudioUri;
                     mediaType = FileColumns.MEDIA_TYPE_AUDIO;
-                } else if (MediaFile.isPlayListFileType(mFileType)) {
+                } else if (MediaFile.isPlayListMimeType(mMimeType)) {
                     tableUri = mPlaylistsUri;
                     mediaType = FileColumns.MEDIA_TYPE_PLAYLIST;
                 }
@@ -1176,13 +1163,15 @@ public class MediaScanner implements AutoCloseable {
             Settings.System.putInt(cr, settingSetIndicatorName(settingName), 1);
         }
 
+        /** @deprecated file types no longer exist */
+        @Deprecated
         @UnsupportedAppUsage
         private int getFileTypeFromDrm(String path) {
-            if (!isDrmEnabled()) {
-                return 0;
-            }
+            return 0;
+        }
 
-            int resultFileType = 0;
+        private void getMimeTypeFromDrm(String path) {
+            mMimeType = null;
 
             if (mDrmManagerClient == null) {
                 mDrmManagerClient = new DrmManagerClient(mContext);
@@ -1190,13 +1179,12 @@ public class MediaScanner implements AutoCloseable {
 
             if (mDrmManagerClient.canHandle(path, null)) {
                 mIsDrm = true;
-                String drmMimetype = mDrmManagerClient.getOriginalMimeType(path);
-                if (drmMimetype != null) {
-                    mMimeType = drmMimetype;
-                    resultFileType = MediaFile.getFileTypeForMimeType(drmMimetype);
-                }
+                mMimeType = mDrmManagerClient.getOriginalMimeType(path);
             }
-            return resultFileType;
+
+            if (mMimeType == null) {
+                mMimeType = ContentResolver.MIME_TYPE_DEFAULT;
+            }
         }
 
     }; // end of anonymous MediaScannerClient instance
@@ -1305,10 +1293,8 @@ public class MediaScanner implements AutoCloseable {
                                 // modified by the user.
                                 // The user can delete them in the media player instead.
                                 // instead, clear the path and lastModified fields in the row
-                                MediaFile.MediaFileType mediaFileType = MediaFile.getFileType(path);
-                                int fileType = (mediaFileType == null ? 0 : mediaFileType.fileType);
-
-                                if (!MediaFile.isPlayListFileType(fileType)) {
+                                String mimeType = MediaFile.getMimeTypeForFile(path);
+                                if (!MediaFile.isPlayListMimeType(mimeType)) {
                                     deleter.delete(rowId);
                                     if (path.toLowerCase(Locale.US).endsWith("/.nomedia")) {
                                         deleter.flush();
@@ -1556,14 +1542,13 @@ public class MediaScanner implements AutoCloseable {
     }
 
     public void scanMtpFile(String path, int objectHandle, int format) {
-        MediaFile.MediaFileType mediaFileType = MediaFile.getFileType(path);
-        int fileType = (mediaFileType == null ? 0 : mediaFileType.fileType);
+        String mimeType = MediaFile.getMimeType(path, format);
         File file = new File(path);
         long lastModifiedSeconds = file.lastModified() / 1000;
 
-        if (!MediaFile.isAudioFileType(fileType) && !MediaFile.isVideoFileType(fileType) &&
-            !MediaFile.isImageFileType(fileType) && !MediaFile.isPlayListFileType(fileType) &&
-            !MediaFile.isDrmFileType(fileType)) {
+        if (!MediaFile.isAudioMimeType(mimeType) && !MediaFile.isVideoMimeType(mimeType) &&
+            !MediaFile.isImageMimeType(mimeType) && !MediaFile.isPlayListMimeType(mimeType) &&
+            !MediaFile.isDrmMimeType(mimeType)) {
 
             // no need to use the media scanner, but we need to update last modified and file size
             ContentValues values = new ContentValues();
@@ -1582,7 +1567,7 @@ public class MediaScanner implements AutoCloseable {
         mMtpObjectHandle = objectHandle;
         Cursor fileList = null;
         try {
-            if (MediaFile.isPlayListFileType(fileType)) {
+            if (MediaFile.isPlayListMimeType(mimeType)) {
                 // build file cache so we can look up tracks in the playlist
                 prescan(null, true);
 
@@ -1597,7 +1582,7 @@ public class MediaScanner implements AutoCloseable {
                 prescan(path, false);
 
                 // always scan the file, so we can return the content://media Uri for existing files
-                mClient.doScanFile(path, mediaFileType.mimeType, lastModifiedSeconds, file.length(),
+                mClient.doScanFile(path, mimeType, lastModifiedSeconds, file.length(),
                     (format == MtpConstants.FORMAT_ASSOCIATION), true, isNoMediaPath(path));
             }
         } catch (RemoteException e) {
@@ -1911,15 +1896,17 @@ public class MediaScanner implements AutoCloseable {
         }
 
         String playListDirectory = path.substring(0, lastSlash + 1);
-        MediaFile.MediaFileType mediaFileType = MediaFile.getFileType(path);
-        int fileType = (mediaFileType == null ? 0 : mediaFileType.fileType);
-
-        if (fileType == MediaFile.FILE_TYPE_M3U) {
-            processM3uPlayList(path, playListDirectory, membersUri, values, fileList);
-        } else if (fileType == MediaFile.FILE_TYPE_PLS) {
-            processPlsPlayList(path, playListDirectory, membersUri, values, fileList);
-        } else if (fileType == MediaFile.FILE_TYPE_WPL) {
-            processWplPlayList(path, playListDirectory, membersUri, values, fileList);
+        String mimeType = MediaFile.getMimeTypeForFile(path);
+        switch (mimeType) {
+            case "application/vnd.ms-wpl":
+                processWplPlayList(path, playListDirectory, membersUri, values, fileList);
+                break;
+            case "audio/x-mpegurl":
+                processM3uPlayList(path, playListDirectory, membersUri, values, fileList);
+                break;
+            case "audio/x-scpls":
+                processPlsPlayList(path, playListDirectory, membersUri, values, fileList);
+                break;
         }
     }
 

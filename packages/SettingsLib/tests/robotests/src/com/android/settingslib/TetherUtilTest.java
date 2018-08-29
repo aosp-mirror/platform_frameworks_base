@@ -23,9 +23,9 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.net.ConnectivityManager;
 
 import org.junit.Before;
 import org.junit.Test;

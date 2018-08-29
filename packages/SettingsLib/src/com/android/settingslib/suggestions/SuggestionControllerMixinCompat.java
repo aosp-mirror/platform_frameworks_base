@@ -23,14 +23,14 @@ import android.os.Bundle;
 import android.service.settings.suggestions.Suggestion;
 import android.util.Log;
 
-import com.android.settingslib.core.lifecycle.Lifecycle;
-
-import java.util.List;
-
 import androidx.annotation.Nullable;
 import androidx.lifecycle.OnLifecycleEvent;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
+
+import com.android.settingslib.core.lifecycle.Lifecycle;
+
+import java.util.List;
 
 /**
  * Manages IPC communication to SettingsIntelligence for suggestion related services.

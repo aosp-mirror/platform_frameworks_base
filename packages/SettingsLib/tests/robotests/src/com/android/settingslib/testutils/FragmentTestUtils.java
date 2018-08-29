@@ -19,11 +19,11 @@ package com.android.settingslib.testutils;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 
-import org.robolectric.Robolectric;
-
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
+
+import org.robolectric.Robolectric;
 
 /**
  * Utilities for creating Fragments for testing.

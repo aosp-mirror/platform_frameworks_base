@@ -28,6 +28,8 @@ import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.NetworkUtils;
 
+import com.google.android.collect.Sets;
+
 import java.net.Inet4Address;
 import java.util.Collections;
 import java.util.HashSet;
@@ -155,6 +157,25 @@ public class DhcpServingParams {
         }
 
         /**
+         * Set the default routers to be advertised to DHCP clients.
+         *
+         * <p>Each router must be inside the served prefix. This may be an empty list of routers,
+         * but it must always be set explicitly before building the {@link DhcpServingParams}.
+         */
+        public Builder setDefaultRouters(@NonNull Inet4Address... defaultRouters) {
+            return setDefaultRouters(Sets.newArraySet(defaultRouters));
+        }
+
+        /**
+         * Convenience method to build the parameters with no default router.
+         *
+         * <p>Equivalent to calling {@link #setDefaultRouters(Inet4Address...)} with no address.
+         */
+        public Builder withNoDefaultRouter() {
+            return setDefaultRouters();
+        }
+
+        /**
          * Set the DNS servers to be advertised to DHCP clients.
          *
          * <p>This may be an empty set, but it must always be set explicitly before building the
@@ -166,6 +187,25 @@ public class DhcpServingParams {
         }
 
         /**
+         * Set the DNS servers to be advertised to DHCP clients.
+         *
+         * <p>This may be an empty list of servers, but it must always be set explicitly before
+         * building the {@link DhcpServingParams}.
+         */
+        public Builder setDnsServers(@NonNull Inet4Address... dnsServers) {
+            return setDnsServers(Sets.newArraySet(dnsServers));
+        }
+
+        /**
+         * Convenience method to build the parameters with no DNS server.
+         *
+         * <p>Equivalent to calling {@link #setDnsServers(Inet4Address...)} with no address.
+         */
+        public Builder withNoDnsServer() {
+            return setDnsServers();
+        }
+
+        /**
          * Set excluded addresses that the DHCP server is not allowed to assign to clients.
          *
          * <p>This parameter is optional. DNS servers and default routers are always excluded
@@ -174,6 +214,16 @@ public class DhcpServingParams {
         public Builder setExcludedAddrs(@NonNull Set<Inet4Address> excludedAddrs) {
             this.excludedAddrs = excludedAddrs;
             return this;
+        }
+
+        /**
+         * Set excluded addresses that the DHCP server is not allowed to assign to clients.
+         *
+         * <p>This parameter is optional. DNS servers and default routers are always excluded
+         * and do not need to be set here.
+         */
+        public Builder setExcludedAddrs(@NonNull Inet4Address... excludedAddrs) {
+            return setExcludedAddrs(Sets.newArraySet(excludedAddrs));
         }
 
         /**

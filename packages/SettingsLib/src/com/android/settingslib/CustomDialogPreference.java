@@ -20,10 +20,11 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import androidx.preference.PreferenceDialogFragment;
-import androidx.preference.DialogPreference;
 import android.util.AttributeSet;
 import android.view.View;
+
+import androidx.preference.DialogPreference;
+import androidx.preference.PreferenceDialogFragment;
 
 public class CustomDialogPreference extends DialogPreference {
 

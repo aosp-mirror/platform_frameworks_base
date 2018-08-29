@@ -71,14 +71,18 @@ public class Installer extends SystemService {
     /** Indicates that dexopt should generate an app image */
     public static final int DEXOPT_GENERATE_APP_IMAGE = 1 << 12;
 
-    // NOTE: keep in sync with installd
-    public static final int FLAG_CLEAR_CACHE_ONLY = 1 << 8;
-    public static final int FLAG_CLEAR_CODE_CACHE_ONLY = 1 << 9;
-    public static final int FLAG_USE_QUOTA = 1 << 12;
-    public static final int FLAG_FREE_CACHE_V2 = 1 << 13;
-    public static final int FLAG_FREE_CACHE_V2_DEFY_QUOTA = 1 << 14;
-    public static final int FLAG_FREE_CACHE_NOOP = 1 << 15;
-    public static final int FLAG_FORCE = 1 << 16;
+    public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
+    public static final int FLAG_STORAGE_CE = IInstalld.FLAG_STORAGE_CE;
+
+    public static final int FLAG_CLEAR_CACHE_ONLY = IInstalld.FLAG_CLEAR_CACHE_ONLY;
+    public static final int FLAG_CLEAR_CODE_CACHE_ONLY = IInstalld.FLAG_CLEAR_CODE_CACHE_ONLY;
+
+    public static final int FLAG_FREE_CACHE_V2 = IInstalld.FLAG_FREE_CACHE_V2;
+    public static final int FLAG_FREE_CACHE_V2_DEFY_QUOTA = IInstalld.FLAG_FREE_CACHE_V2_DEFY_QUOTA;
+    public static final int FLAG_FREE_CACHE_NOOP = IInstalld.FLAG_FREE_CACHE_NOOP;
+
+    public static final int FLAG_USE_QUOTA = IInstalld.FLAG_USE_QUOTA;
+    public static final int FLAG_FORCE = IInstalld.FLAG_FORCE;
 
     private final boolean mIsolated;
 
