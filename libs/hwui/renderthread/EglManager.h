@@ -17,8 +17,10 @@
 #define EGLMANAGER_H
 
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 #include <SkRect.h>
 #include <cutils/compiler.h>
+#include <ui/Fence.h>
 #include <ui/GraphicBuffer.h>
 #include <utils/StrongPointer.h>
 
@@ -65,6 +67,14 @@ public:
     void fence();
 
     EGLDisplay eglDisplay() const { return mEglDisplay; }
+
+    // Inserts a wait on fence command into the OpenGL ES command stream. If EGL extension
+    // support is missing, block the CPU on the fence.
+    status_t fenceWait(sp<Fence>& fence);
+
+    // Creates a fence that is signaled, when all the pending GL commands are flushed.
+    // Depending on installed extensions, the result is either Android native fence or EGL fence.
+    status_t createReleaseFence(bool useFenceSync, EGLSyncKHR* eglFence, sp<Fence>& nativeFence);
 
 private:
 
