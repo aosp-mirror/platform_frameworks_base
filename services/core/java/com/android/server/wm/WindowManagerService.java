@@ -234,7 +234,6 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
-import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.WindowManagerPolicyThread;
 import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
@@ -417,8 +416,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final Context mContext;
 
-    final boolean mHaveInputMethods;
-
     final boolean mHasPermanentDpad;
     final long mDrawLockTimeoutMillis;
     final boolean mAllowAnimationsInLowPowerMode;
@@ -520,8 +517,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** List of window currently causing non-system overlay windows to be hidden. */
     private ArrayList<WindowState> mHidingNonSystemOverlayWindows = new ArrayList<>();
-
-    IInputMethodManager mInputMethodManager;
 
     AccessibilityController mAccessibilityController;
     private RecentsAnimationController mRecentsAnimationController;
@@ -905,11 +900,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public static WindowManagerService main(final Context context, final InputManagerService im,
-            final boolean haveInputMethods, final boolean showBootMsgs, final boolean onlyCore,
-            WindowManagerPolicy policy) {
+            final boolean showBootMsgs, final boolean onlyCore, WindowManagerPolicy policy) {
         DisplayThread.getHandler().runWithScissors(() ->
-                sInstance = new WindowManagerService(context, im, haveInputMethods, showBootMsgs,
-                        onlyCore, policy), 0);
+                sInstance = new WindowManagerService(context, im, showBootMsgs, onlyCore, policy),
+                0);
         return sInstance;
     }
 
@@ -930,11 +924,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private WindowManagerService(Context context, InputManagerService inputManager,
-            boolean haveInputMethods, boolean showBootMsgs, boolean onlyCore,
-            WindowManagerPolicy policy) {
+            boolean showBootMsgs, boolean onlyCore, WindowManagerPolicy policy) {
         installLock(this, INDEX_WINDOW);
         mContext = context;
-        mHaveInputMethods = haveInputMethods;
         mAllowBootMessages = showBootMsgs;
         mOnlyCore = onlyCore;
         mLimitedAlphaCompositing = context.getResources().getBoolean(

@@ -18,23 +18,76 @@ package com.android.server.inputmethod;
 
 import android.content.ComponentName;
 
+import com.android.internal.view.IInputContext;
+import com.android.internal.view.IInputMethodClient;
+
 /**
  * Input method manager local system service interface.
  */
-public interface InputMethodManagerInternal {
+public abstract class InputMethodManagerInternal {
+    /**
+     * Called by the window manager service when a client process is being attached to the window
+     * manager service.
+     * @param client {@link android.os.Binder} proxy that is associated with the singleton instance
+     *               of {@link android.view.inputmethod.InputMethodManager} that runs on the client
+     *               process
+     * @param inputContext communication channel for the dummy
+     *                     {@link android.view.inputmethod.InputConnection}
+     * @param uid UID of the client process
+     * @param pid PID of the client process
+     */
+    public abstract void addClient(IInputMethodClient client, IInputContext inputContext, int uid,
+            int pid);
+
+    /**
+     * Called by the window manager service when a client process is being attached to the window
+     * manager service.
+     * @param client {@link android.os.Binder} proxy that is associated with the singleton instance
+     *               of {@link android.view.inputmethod.InputMethodManager} that runs on the client
+     *               process
+     */
+    public abstract void removeClient(IInputMethodClient client);
+
     /**
      * Called by the power manager to tell the input method manager whether it
      * should start watching for wake events.
      */
-    void setInteractive(boolean interactive);
+    public abstract void setInteractive(boolean interactive);
 
     /**
      * Hides the current input method, if visible.
      */
-    void hideCurrentInputMethod();
+    public abstract void hideCurrentInputMethod();
 
     /**
      * Switches to VR InputMethod defined in the packageName of {@param componentName}.
      */
-    void startVrInputMethodNoCheck(ComponentName componentName);
+    public abstract void startVrInputMethodNoCheck(ComponentName componentName);
+
+    /**
+     * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
+     */
+    public static final InputMethodManagerInternal NOP =
+            new InputMethodManagerInternal() {
+                @Override
+                public void addClient(IInputMethodClient client, IInputContext inputContext,
+                        int uid, int pid) {
+                }
+
+                @Override
+                public void removeClient(IInputMethodClient client) {
+                }
+
+                @Override
+                public void setInteractive(boolean interactive) {
+                }
+
+                @Override
+                public void hideCurrentInputMethod() {
+                }
+
+                @Override
+                public void startVrInputMethodNoCheck(ComponentName componentName) {
+                }
+            };
 }

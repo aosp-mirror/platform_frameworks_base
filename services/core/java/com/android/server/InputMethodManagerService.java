@@ -204,6 +204,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_START_INPUT = 2000;
     static final int MSG_START_VR_INPUT = 2010;
 
+    static final int MSG_ADD_CLIENT = 2980;
+    static final int MSG_REMOVE_CLIENT = 2990;
     static final int MSG_UNBIND_CLIENT = 3000;
     static final int MSG_BIND_CLIENT = 3010;
     static final int MSG_SET_ACTIVE = 3020;
@@ -1712,22 +1714,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @Override
-    public void addClient(IInputMethodClient client, IInputContext inputContext, int uid, int pid) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Only system process can call this method.");
-        }
+    void addClient(ClientState clientState) {
         synchronized (mMethodMap) {
-            mClients.put(client.asBinder(), new ClientState(client,
-                    inputContext, uid, pid));
+            mClients.put(clientState.client.asBinder(), clientState);
         }
     }
 
-    @Override
-    public void removeClient(IInputMethodClient client) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Only system process can call this method.");
-        }
+    void removeClient(IInputMethodClient client) {
         synchronized (mMethodMap) {
             ClientState cs = mClients.remove(client.asBinder());
             if (cs != null) {
@@ -3414,6 +3407,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
 
             // ---------------------------------------------------------
+            case MSG_ADD_CLIENT:
+                addClient((ClientState) msg.obj);
+                return true;
+
+            case MSG_REMOVE_CLIENT:
+                removeClient((IInputMethodClient) msg.obj);
+                return true;
+
+            // ---------------------------------------------------------
 
             case MSG_UNBIND_CLIENT:
                 try {
@@ -4404,12 +4406,24 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private static final class LocalServiceImpl implements InputMethodManagerInternal {
+    private static final class LocalServiceImpl extends InputMethodManagerInternal {
         @NonNull
         private final Handler mHandler;
 
         LocalServiceImpl(@NonNull final Handler handler) {
             mHandler = handler;
+        }
+
+        @Override
+        public void addClient(IInputMethodClient client, IInputContext inputContext, int uid,
+                int pid) {
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_ADD_CLIENT,
+                    new ClientState(client, inputContext, uid, pid)));
+        }
+
+        @Override
+        public void removeClient(IInputMethodClient client) {
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_REMOVE_CLIENT, client));
         }
 
         @Override
