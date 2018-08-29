@@ -19,6 +19,7 @@ package com.android.settingslib.development;
 import android.content.Context;
 import android.content.Intent;
 import android.os.SystemProperties;
+
 import androidx.annotation.VisibleForTesting;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.ListPreference;

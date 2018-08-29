@@ -17,14 +17,15 @@
 package com.android.settingslib.suggestions;
 
 import android.app.LoaderManager;
-import androidx.lifecycle.OnLifecycleEvent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Loader;
 import android.os.Bundle;
 import android.service.settings.suggestions.Suggestion;
-import androidx.annotation.Nullable;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
+import androidx.lifecycle.OnLifecycleEvent;
 
 import com.android.settingslib.core.lifecycle.Lifecycle;
 

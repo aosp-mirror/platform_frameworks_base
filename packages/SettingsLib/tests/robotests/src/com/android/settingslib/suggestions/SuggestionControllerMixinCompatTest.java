@@ -18,13 +18,18 @@ package com.android.settingslib.suggestions;
 
 import static androidx.lifecycle.Lifecycle.Event.ON_START;
 import static androidx.lifecycle.Lifecycle.Event.ON_STOP;
+
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
 import android.content.Context;
+
+import androidx.lifecycle.LifecycleOwner;
+import androidx.loader.app.LoaderManager;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.core.lifecycle.Lifecycle;
@@ -37,9 +42,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-
-import androidx.lifecycle.LifecycleOwner;
-import androidx.loader.app.LoaderManager;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 @Config(shadows = ShadowSuggestionController.class)

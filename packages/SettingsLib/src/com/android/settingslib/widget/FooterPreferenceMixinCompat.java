@@ -18,12 +18,12 @@ package com.android.settingslib.widget;
 
 import android.content.Context;
 
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceScreen;
+
 import com.android.settingslib.core.lifecycle.Lifecycle;
 import com.android.settingslib.core.lifecycle.LifecycleObserver;
 import com.android.settingslib.core.lifecycle.events.SetPreferenceScreen;
-
-import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceScreen;
 
 public class FooterPreferenceMixinCompat implements LifecycleObserver, SetPreferenceScreen {
 

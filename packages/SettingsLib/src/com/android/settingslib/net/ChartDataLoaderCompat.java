@@ -30,9 +30,9 @@ import android.net.NetworkTemplate;
 import android.os.Bundle;
 import android.os.RemoteException;
 
-import com.android.settingslib.AppItem;
-
 import androidx.loader.content.AsyncTaskLoader;
+
+import com.android.settingslib.AppItem;
 
 /**
  * Loader for historical chart data for both network and UID details.
