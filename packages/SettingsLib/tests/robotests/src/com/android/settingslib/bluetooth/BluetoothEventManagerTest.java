@@ -54,7 +54,7 @@ public class BluetoothEventManagerTest {
         mContext = RuntimeEnvironment.application;
 
         mBluetoothEventManager = new BluetoothEventManager(mLocalAdapter,
-                mCachedDeviceManager, mContext);
+                mCachedDeviceManager, mContext, null);
     }
 
     /**

@@ -65,7 +65,6 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         mLocalBluetoothManager = Dependency.get(LocalBluetoothManager.class);
         mBgHandler = new Handler(bgLooper);
         if (mLocalBluetoothManager != null) {
-            mLocalBluetoothManager.getEventManager().setReceiverHandler(mBgHandler);
             mLocalBluetoothManager.getEventManager().registerCallback(this);
             mLocalBluetoothManager.getProfileManager().addServiceListener(this);
             onBluetoothStateChanged(
