@@ -216,12 +216,14 @@ abstract public class ManagedServices {
         }
 
         pw.println("    Live " + getCaption() + "s (" + mServices.size() + "):");
-        for (ManagedServiceInfo info : mServices) {
-            if (filter != null && !filter.matches(info.component)) continue;
-            pw.println("      " + info.component
-                    + " (user " + info.userid + "): " + info.service
-                    + (info.isSystem?" SYSTEM":"")
-                    + (info.isGuest(this)?" GUEST":""));
+        synchronized (mMutex) {
+            for (ManagedServiceInfo info : mServices) {
+                if (filter != null && !filter.matches(info.component)) continue;
+                pw.println("      " + info.component
+                        + " (user " + info.userid + "): " + info.service
+                        + (info.isSystem ? " SYSTEM" : "")
+                        + (info.isGuest(this) ? " GUEST" : ""));
+            }
         }
 
         pw.println("    Snoozed " + getCaption() + "s (" +
@@ -260,9 +262,11 @@ abstract public class ManagedServices {
             cmpt.writeToProto(proto, ManagedServicesProto.ENABLED);
         }
 
-        for (ManagedServiceInfo info : mServices) {
-            if (filter != null && !filter.matches(info.component)) continue;
-            info.writeToProto(proto, ManagedServicesProto.LIVE_SERVICES, this);
+        synchronized (mMutex) {
+            for (ManagedServiceInfo info : mServices) {
+                if (filter != null && !filter.matches(info.component)) continue;
+                info.writeToProto(proto, ManagedServicesProto.LIVE_SERVICES, this);
+            }
         }
 
         for (ComponentName name : mSnoozingForCurrentProfiles) {
@@ -631,11 +635,13 @@ abstract public class ManagedServices {
 
     public boolean isSameUser(IInterface service, int userId) {
         checkNotNull(service);
-        ManagedServiceInfo info = getServiceFromTokenLocked(service);
-        if (info != null) {
-            return info.isSameUser(userId);
+        synchronized (mMutex) {
+            ManagedServiceInfo info = getServiceFromTokenLocked(service);
+            if (info != null) {
+                return info.isSameUser(userId);
+            }
+            return false;
         }
-        return false;
     }
 
     public void unregisterService(IInterface service, int userid) {
