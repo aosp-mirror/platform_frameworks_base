@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include <SkLiteRecorder.h>
+#include "RecordingCanvas.h"
 #include "ReorderBarrierDrawables.h"
 #include "SkiaCanvas.h"
 #include "SkiaDisplayList.h"
@@ -76,9 +76,8 @@ public:
                                     uirenderer::GlFunctorLifecycleListener* listener) override;
 
 private:
-    SkLiteRecorder mRecorder;
+    RecordingCanvas mRecorder;
     std::unique_ptr<SkiaDisplayList> mDisplayList;
-    std::unique_ptr<SkCanvas> mWrappedCanvas;
     StartReorderBarrierDrawable* mCurrentBarrier;
 
     /**

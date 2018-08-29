@@ -223,6 +223,7 @@ cc_defaults {
         "Properties.cpp",
         "PropertyValuesAnimatorSet.cpp",
         "PropertyValuesHolder.cpp",
+        "RecordingCanvas.cpp",
         "RenderNode.cpp",
         "RenderProperties.cpp",
         "ResourceCache.cpp",
