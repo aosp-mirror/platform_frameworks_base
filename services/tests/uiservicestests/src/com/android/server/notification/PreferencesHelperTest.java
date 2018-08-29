@@ -123,7 +123,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        UserHandle user = UserHandle.ALL;
 
         final ApplicationInfo legacy = new ApplicationInfo();
         legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
@@ -174,11 +173,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
                 .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
                 .build();
-    }
-
-    private NotificationChannel getDefaultChannel() {
-        return new NotificationChannel(NotificationChannel.DEFAULT_CHANNEL_ID, "name",
-                IMPORTANCE_LOW);
     }
 
     private ByteArrayOutputStream writeXmlAndPurge(String pkg, int uid, boolean forBackup,
@@ -1786,5 +1780,160 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.setEnabled(PKG_N_MR1, 1060, false);
         mHelper.setEnabled(PKG_N_MR1, 1000, true);
         assertEquals(3, mHelper.getBlockedAppCount(0));
+    }
+
+    @Test
+    public void testSetNotificationDelegate() {
+        mHelper.setNotificationDelegate(PKG_O, UID_O, "other", 53);
+        assertEquals("other", mHelper.getNotificationDelegate(PKG_O, UID_O));
+    }
+
+    @Test
+    public void testRevokeNotificationDelegate() {
+        mHelper.setNotificationDelegate(PKG_O, UID_O, "other", 53);
+        mHelper.revokeNotificationDelegate(PKG_O, UID_O);
+
+        assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
+    }
+
+    @Test
+    public void testRevokeNotificationDelegate_noDelegateExistsNoCrash() {
+        mHelper.revokeNotificationDelegate(PKG_O, UID_O);
+
+        assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
+    }
+
+    @Test
+    public void testToggleNotificationDelegate() {
+        mHelper.setNotificationDelegate(PKG_O, UID_O, "other", 53);
+        mHelper.toggleNotificationDelegate(PKG_O, UID_O, false);
+
+        assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
+
+        mHelper.toggleNotificationDelegate(PKG_O, UID_O, true);
+        assertEquals("other", mHelper.getNotificationDelegate(PKG_O, UID_O));
+    }
+
+    @Test
+    public void testToggleNotificationDelegate_noDelegateExistsNoCrash() {
+        mHelper.toggleNotificationDelegate(PKG_O, UID_O, false);
+        assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
+
+        mHelper.toggleNotificationDelegate(PKG_O, UID_O, true);
+        assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
+    }
+
+    @Test
+    public void testIsDelegateAllowed_noSource() {
+        assertFalse(mHelper.isDelegateAllowed("does not exist", -1, "whatever", 0));
+    }
+
+    @Test
+    public void testIsDelegateAllowed_noDelegate() {
+        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_UNSPECIFIED);
+
+        assertFalse(mHelper.isDelegateAllowed(PKG_O, UID_O, "whatever", 0));
+    }
+
+    @Test
+    public void testIsDelegateAllowed_delegateDisabledByApp() {
+        mHelper.setNotificationDelegate(PKG_O, UID_O, "other", 53);
+        mHelper.revokeNotificationDelegate(PKG_O, UID_O);
+
+        assertFalse(mHelper.isDelegateAllowed(PKG_O, UID_O, "other", 53));
+    }
+
+    @Test
+    public void testIsDelegateAllowed_wrongDelegate() {
+        mHelper.setNotificationDelegate(PKG_O, UID_O, "other", 53);
+        mHelper.revokeNotificationDelegate(PKG_O, UID_O);
+
+        assertFalse(mHelper.isDelegateAllowed(PKG_O, UID_O, "banana", 27));
+    }
+
+    @Test
+    public void testIsDelegateAllowed_delegateDisabledByUser() {
+        mHelper.setNotificationDelegate(PKG_O, UID_O, "other", 53);
+        mHelper.toggleNotificationDelegate(PKG_O, UID_O, false);
+
+        assertFalse(mHelper.isDelegateAllowed(PKG_O, UID_O, "other", 53));
+    }
+
+    @Test
+    public void testIsDelegateAllowed() {
+        mHelper.setNotificationDelegate(PKG_O, UID_O, "other", 53);
+
+        assertTrue(mHelper.isDelegateAllowed(PKG_O, UID_O, "other", 53));
+    }
+
+    @Test
+    public void testDelegateXml_noDelegate() throws Exception {
+        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_UNSPECIFIED);
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        loadStreamXml(baos, false);
+
+        assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
+    }
+
+    @Test
+    public void testDelegateXml_delegate() throws Exception {
+        mHelper.setNotificationDelegate(PKG_O, UID_O, "other", 53);
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        loadStreamXml(baos, false);
+
+        assertEquals("other", mHelper.getNotificationDelegate(PKG_O, UID_O));
+    }
+
+    @Test
+    public void testDelegateXml_disabledDelegate() throws Exception {
+        mHelper.setNotificationDelegate(PKG_O, UID_O, "other", 53);
+        mHelper.revokeNotificationDelegate(PKG_O, UID_O);
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        loadStreamXml(baos, false);
+
+        assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
+    }
+
+    @Test
+    public void testDelegateXml_userDisabledDelegate() throws Exception {
+        mHelper.setNotificationDelegate(PKG_O, UID_O, "other", 53);
+        mHelper.toggleNotificationDelegate(PKG_O, UID_O, false);
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        loadStreamXml(baos, false);
+
+        // appears disabled
+        assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
+
+        // but was loaded and can be toggled back on
+        mHelper.toggleNotificationDelegate(PKG_O, UID_O, true);
+        assertEquals("other", mHelper.getNotificationDelegate(PKG_O, UID_O));
+    }
+
+    @Test
+    public void testDelegateXml_entirelyDisabledDelegate() throws Exception {
+        mHelper.setNotificationDelegate(PKG_O, UID_O, "other", 53);
+        mHelper.toggleNotificationDelegate(PKG_O, UID_O, false);
+        mHelper.revokeNotificationDelegate(PKG_O, UID_O);
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        loadStreamXml(baos, false);
+
+        // appears disabled
+        assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
+
+        mHelper.setNotificationDelegate(PKG_O, UID_O, "other", 53);
+        assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
+
+        mHelper.toggleNotificationDelegate(PKG_O, UID_O, true);
+        assertEquals("other", mHelper.getNotificationDelegate(PKG_O, UID_O));
     }
 }

@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -352,7 +353,7 @@ public class NotificationManager {
     }
 
     /**
-     * Post a notification to be shown in the status bar. If a notification with
+     * Posts a notification to be shown in the status bar. If a notification with
      * the same tag and id has already been posted by your application and has not yet been
      * canceled, it will be replaced by the updated information.
      *
@@ -376,12 +377,60 @@ public class NotificationManager {
     }
 
     /**
+     * Posts a notification as a specified package to be shown in the status bar. If a notification
+     * with the same tag and id has already been posted for that package and has not yet been
+     * canceled, it will be replaced by the updated information.
+     *
+     * All {@link android.service.notification.NotificationListenerService listener services} will
+     * be granted {@link Intent#FLAG_GRANT_READ_URI_PERMISSION} access to any {@link Uri uris}
+     * provided on this notification or the
+     * {@link NotificationChannel} this notification is posted to using
+     * {@link Context#grantUriPermission(String, Uri, int)}. Permission will be revoked when the
+     * notification is canceled, or you can revoke permissions with
+     * {@link Context#revokeUriPermission(Uri, int)}.
+     *
+     * @param targetPackage The package to post the notification as. The package must have granted
+     *                      you access to post notifications on their behalf with
+     *                      {@link #setNotificationDelegate(String)}.
+     * @param tag A string identifier for this notification.  May be {@code null}.
+     * @param id An identifier for this notification.  The pair (tag, id) must be unique
+     *        within your application.
+     * @param notification A {@link Notification} object describing what to
+     *        show the user. Must not be null.
+     */
+    public void notifyAsPackage(@NonNull String targetPackage, @NonNull String tag, int id,
+            Notification notification) {
+        INotificationManager service = getService();
+        String sender = mContext.getPackageName();
+
+        try {
+            if (localLOGV) Log.v(TAG, sender + ": notify(" + id + ", " + notification + ")");
+            service.enqueueNotificationWithTag(targetPackage, sender, tag, id,
+                    fixNotification(notification), mContext.getUser().getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @hide
      */
     @UnsupportedAppUsage
     public void notifyAsUser(String tag, int id, Notification notification, UserHandle user)
     {
         INotificationManager service = getService();
+        String pkg = mContext.getPackageName();
+
+        try {
+            if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
+            service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
+                    fixNotification(notification), user.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private Notification fixNotification(Notification notification) {
         String pkg = mContext.getPackageName();
         // Fix the notification as best we can.
         Notification.addFieldsFromContext(mContext, notification);
@@ -400,19 +449,12 @@ public class NotificationManager {
                         + notification);
             }
         }
-        if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
+
         notification.reduceImageSizes(mContext);
 
         ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         boolean isLowRam = am.isLowRamDevice();
-        final Notification copy = Builder.maybeCloneStrippedForDelivery(notification, isLowRam,
-                mContext);
-        try {
-            service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
-                    copy, user.getIdentifier());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return Builder.maybeCloneStrippedForDelivery(notification, isLowRam, mContext);
     }
 
     private void fixLegacySmallIcon(Notification n, String pkg) {
@@ -468,6 +510,72 @@ public class NotificationManager {
         if (localLOGV) Log.v(TAG, pkg + ": cancelAll()");
         try {
             service.cancelAllNotifications(pkg, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Allows a package to post notifications on your behalf using
+     * {@link #notifyAsPackage(String, String, int, Notification)}.
+     *
+     * This can be used to allow persistent processes to post notifications based on messages
+     * received on your behalf from the cloud, without your process having to wake up.
+     *
+     * You can check if you have an allowed delegate with {@link #getNotificationDelegate()} and
+     * revoke your delegate with {@link #revokeNotificationDelegate()}.
+     *
+     * @param delegate Package name of the app which can send notifications on your behalf.
+     */
+    public void setNotificationDelegate(@NonNull String delegate) {
+        INotificationManager service = getService();
+        String pkg = mContext.getPackageName();
+        if (localLOGV) Log.v(TAG, pkg + ": cancelAll()");
+        try {
+            service.setNotificationDelegate(pkg, delegate);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Revokes permission for your {@link #setNotificationDelegate(String) notification delegate}
+     * to post notifications on your behalf.
+     */
+    public void revokeNotificationDelegate() {
+        INotificationManager service = getService();
+        String pkg = mContext.getPackageName();
+        try {
+            service.revokeNotificationDelegate(pkg);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the {@link #setNotificationDelegate(String) delegate} that can post notifications on
+     * your behalf, if there currently is one.
+     */
+    public @Nullable String getNotificationDelegate() {
+        INotificationManager service = getService();
+        String pkg = mContext.getPackageName();
+        try {
+            return service.getNotificationDelegate(pkg);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether you are allowed to post notifications on behalf of a given package, with
+     * {@link #notifyAsPackage(String, String, int, Notification)}.
+     *
+     * See {@link #setNotificationDelegate(String)}.
+     */
+    public boolean canNotifyAsPackage(String pkg) {
+        INotificationManager service = getService();
+        try {
+            return service.canNotifyAsPackage(mContext.getPackageName(), pkg);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
