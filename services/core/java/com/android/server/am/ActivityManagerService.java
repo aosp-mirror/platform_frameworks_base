@@ -8239,7 +8239,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             checkTime(startTime, "getContentProviderImpl: done!");
 
             grantEphemeralAccessLocked(userId, null /*intent*/,
-                    cpi.applicationInfo.uid, UserHandle.getAppId(Binder.getCallingUid()));
+                    UserHandle.getAppId(cpi.applicationInfo.uid),
+                    UserHandle.getAppId(Binder.getCallingUid()));
         }
 
         // Wait for the provider to be published...
