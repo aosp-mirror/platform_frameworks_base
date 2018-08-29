@@ -6508,6 +6508,25 @@ public final class Settings {
         public static final String MULTI_PRESS_TIMEOUT = "multi_press_timeout";
 
         /**
+         * Whether the user specifies a minimum ui timeout to override minimum ui timeout of
+         * accessibility service
+         *
+         * Type: int (0 for false, 1 for true)
+         * @hide
+         */
+        public static final String ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED =
+                "accessibility_minimum_ui_timeout_enabled";
+
+        /**
+         * Setting that specifies ui minimum timeout in milliseconds.
+         *
+         * @see #ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED
+         * @hide
+         */
+        public static final String ACCESSIBILITY_MINIMUM_UI_TIMEOUT_MS =
+                "accessibility_minimum_ui_timeout_ms";
+
+        /**
          * List of the enabled print services.
          *
          * N and beyond uses {@link #DISABLED_PRINT_SERVICES}. But this might be used in an upgrade
@@ -8186,6 +8205,8 @@ public final class Settings {
             ZEN_SETTINGS_SUGGESTION_VIEWED,
             CHARGING_SOUNDS_ENABLED,
             CHARGING_VIBRATION_ENABLED,
+            ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED,
+            ACCESSIBILITY_MINIMUM_UI_TIMEOUT_MS,
         };
 
         /**
@@ -8339,6 +8360,8 @@ public final class Settings {
             VALIDATORS.put(ZEN_SETTINGS_SUGGESTION_VIEWED, BOOLEAN_VALIDATOR);
             VALIDATORS.put(CHARGING_SOUNDS_ENABLED, BOOLEAN_VALIDATOR);
             VALIDATORS.put(CHARGING_VIBRATION_ENABLED, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(ACCESSIBILITY_MINIMUM_UI_TIMEOUT_MS, NON_NEGATIVE_INTEGER_VALIDATOR);
         }
 
         /**
