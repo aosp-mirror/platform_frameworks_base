@@ -260,17 +260,7 @@ Lcom/android/internal/location/ILocationProvider;->sendExtraCommand(Ljava/lang/S
 Lcom/android/internal/location/ILocationProvider;->setRequest(Lcom/android/internal/location/ProviderRequest;Landroid/os/WorkSource;)V
 Lcom/android/internal/R$styleable;->NumberPicker:[I
 Lcom/android/internal/R$styleable;->TwoLineListItem:[I
-Lcom/android/internal/telephony/GsmAlphabet;->gsm7BitPackedToString([BII)Ljava/lang/String;
-Lcom/android/internal/telephony/GsmAlphabet;->stringToGsm7BitPacked(Ljava/lang/String;)[B
 Lcom/android/internal/telephony/ITelephony;->getDataEnabled(I)Z
-Lcom/android/internal/telephony/OperatorInfo$State;->CURRENT:Lcom/android/internal/telephony/OperatorInfo$State;
-Lcom/android/internal/telephony/OperatorInfo$State;->FORBIDDEN:Lcom/android/internal/telephony/OperatorInfo$State;
-Lcom/android/internal/telephony/OperatorInfo;-><init>(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-Lcom/android/internal/telephony/OperatorInfo;->CREATOR:Landroid/os/Parcelable$Creator;
-Lcom/android/internal/telephony/OperatorInfo;->getOperatorAlphaLong()Ljava/lang/String;
-Lcom/android/internal/telephony/OperatorInfo;->getOperatorAlphaShort()Ljava/lang/String;
-Lcom/android/internal/telephony/OperatorInfo;->getOperatorNumeric()Ljava/lang/String;
-Lcom/android/internal/telephony/OperatorInfo;->getState()Lcom/android/internal/telephony/OperatorInfo$State;
 Ljava/lang/System;->arraycopy([BI[BII)V
 Ljava/net/Inet4Address;->ALL:Ljava/net/InetAddress;
 Ljava/net/Inet4Address;->ANY:Ljava/net/InetAddress;
