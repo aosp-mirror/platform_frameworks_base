@@ -335,6 +335,10 @@ package android.content.res {
 
 package android.database.sqlite {
 
+  public class SQLiteCompatibilityWalFlags {
+    method public static void reset();
+  }
+
   public final class SQLiteDebug {
     method public static void dump(android.util.Printer, java.lang.String[]);
     method public static android.database.sqlite.SQLiteDebug.PagerStats getDatabaseInfo();
