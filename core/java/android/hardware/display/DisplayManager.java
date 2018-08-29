@@ -297,6 +297,15 @@ public final class DisplayManager {
      */
     public static final int VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL = 1 << 8;
 
+    /**
+     * Virtual display flag: Indicates that the display should support system decorations. Virtual
+     * displays without this flag shouldn't show home, IME or any other system decorations.
+     *
+     * @see #createVirtualDisplay
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 9;
+
     /** @hide */
     public DisplayManager(Context context) {
         mContext = context;

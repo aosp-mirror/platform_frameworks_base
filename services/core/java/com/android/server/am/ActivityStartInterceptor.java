@@ -277,7 +277,7 @@ class ActivityStartInterceptor {
             mActivityOptions = ActivityOptions.makeBasic();
         }
 
-        ActivityRecord homeActivityRecord = mSupervisor.getHomeActivity();
+        ActivityRecord homeActivityRecord = mSupervisor.getDefaultDisplayHomeActivity();
         if (homeActivityRecord != null && homeActivityRecord.getTask() != null) {
             // Showing credential confirmation activity in home task to avoid stopping multi-windowed
             // mode after showing the full-screen credential confirmation activity.

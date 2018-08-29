@@ -40,6 +40,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
+import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
+import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.graphics.Rect.copyOrNull;
@@ -334,10 +336,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     /** The current user */
     int mCurrentUser;
-
-    /** The stack containing the launcher app. Assumed to always be attached to
-     * Display.DEFAULT_DISPLAY. */
-    ActivityStack mHomeStack;
 
     /** If this is the same as mFocusedStack then the activity on the top of the focused stack has
      * been resumed. If stacks are changing position this will hold the old stack until the new
@@ -693,7 +691,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         calculateDefaultMinimalSizeOfResizeableTasks();
 
         final ActivityDisplay defaultDisplay = getDefaultDisplay();
-        mHomeStack = mLastFocusedStack = defaultDisplay.getOrCreateStack(
+
+        mLastFocusedStack = defaultDisplay.getOrCreateStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
         positionChildAt(defaultDisplay, ActivityDisplay.POSITION_TOP);
     }
@@ -782,7 +781,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             if (focusCandidate == null) {
                 Slog.w(TAG,
                         "setFocusStackUnchecked: No focusable stack found, focus home as default");
-                focusCandidate = mHomeStack;
+                focusCandidate = getDefaultDisplay().getHomeStack();
             }
         }
 
@@ -803,10 +802,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    void moveHomeStackToFront(String reason) {
-        mHomeStack.moveToFront(reason);
-    }
-
     void moveRecentsStackToFront(String reason) {
         final ActivityStack recentsStack = getDefaultDisplay().getStack(
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_RECENTS);
@@ -815,34 +810,47 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    /** Returns true if the focus activity was adjusted to the home stack top activity. */
-    boolean moveHomeStackTaskToTop(String reason) {
-        mHomeStack.moveHomeStackTaskToTop();
-
-        final ActivityRecord top = getHomeActivity();
-        if (top == null) {
-            return false;
-        }
-        moveFocusableActivityStackToFrontLocked(top, reason);
-        return true;
-    }
-
-    boolean resumeHomeStackTask(ActivityRecord prev, String reason) {
+    boolean resumeHomeActivity(ActivityRecord prev, String reason, int displayId) {
         if (!mService.isBooting() && !mService.isBooted()) {
             // Not ready yet!
             return false;
         }
 
-        mHomeStack.moveHomeStackTaskToTop();
-        ActivityRecord r = getHomeActivity();
-        final String myReason = reason + " resumeHomeStackTask";
+        if (displayId == INVALID_DISPLAY) {
+            displayId = DEFAULT_DISPLAY;
+        }
+
+        final ActivityRecord r = getActivityDisplay(displayId).getHomeActivity();
+        final String myReason = reason + " resumeHomeActivity";
 
         // Only resume home activity if isn't finishing.
         if (r != null && !r.finishing) {
-            moveFocusableActivityStackToFrontLocked(r, myReason);
-            return resumeFocusedStacksTopActivitiesLocked(mHomeStack, prev, null);
+            moveFocusableActivityToTop(r, myReason);
+            return resumeFocusedStacksTopActivitiesLocked(r.getStack(), prev, null);
         }
-        return mService.mAm.startHomeActivityLocked(mCurrentUser, myReason);
+        return mService.mAm.startHomeActivityLocked(mCurrentUser, myReason, displayId);
+    }
+
+    boolean canStartHomeOnDisplay(ActivityInfo homeActivity, int displayId) {
+        if (displayId == DEFAULT_DISPLAY) {
+            // No restrictions to default display.
+            return true;
+        }
+
+        final ActivityDisplay display = getActivityDisplay(displayId);
+        if (display == null || display.isRemoved() || !display.supportsSystemDecorations()) {
+            // Can't launch home on display that doesn't support system decorations.
+            return false;
+        }
+
+        final boolean supportMultipleInstance = homeActivity.launchMode != LAUNCH_SINGLE_TASK
+                && homeActivity.launchMode != LAUNCH_SINGLE_INSTANCE;
+        if (!supportMultipleInstance) {
+            // Can't launch home on other displays if it requested to be single instance.
+            return false;
+        }
+
+        return true;
     }
 
     TaskRecord anyTaskForIdLocked(int id) {
@@ -2206,7 +2214,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      */
     void updateUserStackLocked(int userId, ActivityStack stack) {
         if (userId != mCurrentUser) {
-            mUserStackInFront.put(userId, stack != null ? stack.getStackId() : mHomeStack.mStackId);
+            mUserStackInFront.put(userId, stack != null ? stack.getStackId()
+                    : getDefaultDisplay().getHomeStack().mStackId);
         }
     }
 
@@ -2348,7 +2357,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      */
     void findTaskToMoveToFront(TaskRecord task, int flags, ActivityOptions options, String reason,
             boolean forceNonResizeable) {
-        final ActivityStack currentStack = task.getStack();
+        ActivityStack currentStack = task.getStack();
         if (currentStack == null) {
             Slog.e(TAG, "findTaskToMoveToFront: can't move task="
                     + task + " to front. Stack is null");
@@ -2359,13 +2368,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             mUserLeaving = true;
         }
 
+        // TODO(b/111363427): The moving-to-top task may not be on the top display, so it could be
+        // different from where the prev activity stays on.
         final ActivityRecord prev = topRunningActivityLocked();
 
         if ((flags & ActivityManager.MOVE_TASK_WITH_HOME) != 0
                 || (prev != null && prev.isActivityTypeRecents())) {
             // Caller wants the home activity moved with it or the previous task is recents in which
             // case we always return home from the task we are moving to the front.
-            moveHomeStackToFront("findTaskToMoveToFront");
+            currentStack.getDisplay().moveHomeStackToFront("findTaskToMoveToFront");
         }
 
         if (task.isResizeable() && canUseActivityOptionsLaunchBounds(options)) {
@@ -2377,7 +2388,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             if (stack != currentStack) {
                 task.reparent(stack, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, !ANIMATE, DEFER_RESUME,
                         "findTaskToMoveToFront");
-                stack = currentStack;
+                currentStack = stack;
                 // moveTaskToStackUncheckedLocked() should already placed the task on top,
                 // still need moveTaskToFrontLocked() below for any transition settings.
             }
@@ -2644,6 +2655,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (preferredFocusableStack != null) {
             return preferredFocusableStack;
         }
+        if (preferredDisplay.supportsSystemDecorations()) {
+            // Stop looking for focusable stack on other displays because the preferred display
+            // supports system decorations. Home activity would be launched on the same display if
+            // no focusable stack found.
+            return null;
+        }
 
         // Now look through all displays
         for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
@@ -2687,25 +2704,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return null;
     }
 
-    ActivityRecord getHomeActivity() {
-        return getHomeActivityForUser(mCurrentUser);
+    ActivityRecord getDefaultDisplayHomeActivity() {
+        return getDefaultDisplayHomeActivityForUser(mCurrentUser);
     }
 
-    ActivityRecord getHomeActivityForUser(int userId) {
-        final ArrayList<TaskRecord> tasks = mHomeStack.getAllTasks();
-        for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final TaskRecord task = tasks.get(taskNdx);
-            if (task.isActivityTypeHome()) {
-                final ArrayList<ActivityRecord> activities = task.mActivities;
-                for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                    final ActivityRecord r = activities.get(activityNdx);
-                    if (r.isActivityTypeHome()
-                            && ((userId == UserHandle.USER_ALL) || (r.userId == userId))) {
-                        return r;
-                    }
-                }
-            }
-        }
+    ActivityRecord getDefaultDisplayHomeActivityForUser(int userId) {
+        getActivityDisplay(DEFAULT_DISPLAY).getHomeActivityForUser(userId);
         return null;
     }
 
@@ -3419,7 +3423,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     /** Move activity with its stack to front and make the stack focused. */
-    boolean moveFocusableActivityStackToFrontLocked(ActivityRecord r, String reason) {
+    // TODO(b/111363427): Move this method to ActivityRecord.
+    boolean moveFocusableActivityToTop(ActivityRecord r, String reason) {
         if (r == null || !r.isFocusable()) {
             if (DEBUG_FOCUS) Slog.d(TAG_FOCUS,
                     "moveActivityStackToFront: unfocusable r=" + r);
@@ -3828,7 +3833,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         removeStacksInWindowingModes(WINDOWING_MODE_PINNED);
 
         mUserStackInFront.put(mCurrentUser, focusStackId);
-        final int restoreStackId = mUserStackInFront.get(userId, mHomeStack.mStackId);
+        final int restoreStackId =
+                mUserStackInFront.get(userId, getDefaultDisplay().getHomeStack().mStackId);
         mCurrentUser = userId;
 
         mStartingUsers.add(uss);
@@ -3846,14 +3852,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         ActivityStack stack = getStack(restoreStackId);
         if (stack == null) {
-            stack = mHomeStack;
+            stack = getDefaultDisplay().getHomeStack();
         }
         final boolean homeInFront = stack.isActivityTypeHome();
         if (stack.isOnHomeDisplay()) {
             stack.moveToFront("switchUserOnHomeDisplay");
         } else {
             // Stack was moved to another display while user was swapped out.
-            resumeHomeStackTask(null, "switchUserOnOtherDisplay");
+            resumeHomeActivity(null, "switchUserOnOtherDisplay", DEFAULT_DISPLAY);
         }
         return homeInFront;
     }
@@ -4273,6 +4279,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     private void handleDisplayAdded(int displayId) {
         synchronized (mService.mGlobalLock) {
             getActivityDisplayOrCreateLocked(displayId);
+            mService.mAm.startHomeActivityLocked(mCurrentUser, "displayAdded", displayId);
         }
     }
 
@@ -4838,7 +4845,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // We always want to return to the home activity instead of the recents activity
                 // from whatever is started from the recents activity, so move the home stack
                 // forward.
-                moveHomeStackToFront("startActivityFromRecents");
+                // TODO (b/115289124): Multi-display supports for recents.
+                getDefaultDisplay().moveHomeStackToFront("startActivityFromRecents");
             }
 
             // If the user must confirm credentials (e.g. when first launching a work app and the
@@ -4881,12 +4889,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 final ActivityStack topSecondaryStack =
                         display.getTopStackInWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
                 if (topSecondaryStack.isActivityTypeHome()) {
-                    // If the home activity if the top split-screen secondary stack, then the
+                    // If the home activity is the top split-screen secondary stack, then the
                     // primary split-screen stack is in the minimized mode which means it can't
                     // receive input keys, so we should move the focused app to the home app so that
                     // window manager can correctly calculate the focus window that can receive
                     // input keys.
-                    moveHomeStackToFront("startActivityFromRecents: homeVisibleInSplitScreen");
+                    display.moveHomeStackToFront(
+                            "startActivityFromRecents: homeVisibleInSplitScreen");
 
                     // Immediately update the minimized docked stack mode, the upcoming animation
                     // for the docked activity (WMS.overridePendingAppTransitionMultiThumbFuture)

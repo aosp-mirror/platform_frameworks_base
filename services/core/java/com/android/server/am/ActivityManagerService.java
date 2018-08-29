@@ -90,6 +90,7 @@ import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
@@ -3725,6 +3726,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     boolean startHomeActivityLocked(int userId, String reason) {
+        return startHomeActivityLocked(userId, reason, DEFAULT_DISPLAY);
+    }
+
+    /**
+     * This starts home activity on displays that can have system decorations and only if the
+     * home activity can have multiple instances.
+     */
+    boolean startHomeActivityLocked(int userId, String reason, int displayId) {
         if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL
                 && mTopAction == null) {
             // We are running in factory test mode, but unable to find
@@ -3748,7 +3757,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // For ANR debugging to verify if the user activity is the one that actually
                 // launched.
                 final String myReason = reason + ":" + userId + ":" + resolvedUserId;
-                mActivityTaskManager.getActivityStartController().startHomeActivity(intent, aInfo, myReason);
+                mActivityTaskManager.getActivityStartController().startHomeActivity(intent, aInfo,
+                        myReason, displayId);
             }
         } else {
             Slog.wtf(TAG, "No home screen found for " + intent, new Throwable());
@@ -8817,7 +8827,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         ? new ActivityOptions(options)
                         : ActivityOptions.makeBasic();
                 activityOptions.setLaunchTaskId(
-                        mStackSupervisor.getHomeActivity().getTask().taskId);
+                        mStackSupervisor.getDefaultDisplayHomeActivity().getTask().taskId);
                 mContext.startActivityAsUser(intent, activityOptions.toBundle(),
                         UserHandle.CURRENT);
             } finally {

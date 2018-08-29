@@ -17,14 +17,13 @@
 package com.android.server.display;
 
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
-import static android.hardware.display.DisplayManager
-        .VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
-import static android.hardware.display.DisplayManager
-        .VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH;
 
 import android.content.Context;
@@ -367,7 +366,10 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
                 }
                 if ((mFlags & VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL) != 0) {
-                  mInfo.flags |= DisplayDeviceInfo.FLAG_DESTROY_CONTENT_ON_REMOVAL;
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_DESTROY_CONTENT_ON_REMOVAL;
+                }
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0) {
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
                 }
 
                 mInfo.type = Display.TYPE_VIRTUAL;

@@ -17,12 +17,14 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.START_SUCCESS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 
+import android.app.ActivityOptions;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -75,7 +77,7 @@ public class ActivityStartController {
     /** Temporary array to capture start activity results */
     private ActivityRecord[] tmpOutRecord = new ActivityRecord[1];
 
-    /**The result of the last home activity we attempted to start. */
+    /** The result of the last home activity we attempted to start. */
     private int mLastHomeActivityStartResult;
 
     /** A list of activities that are waiting to launch. */
@@ -161,13 +163,20 @@ public class ActivityStartController {
         mLastStarter.postStartActivityProcessing(r, result, targetStack);
     }
 
-    void startHomeActivity(Intent intent, ActivityInfo aInfo, String reason) {
-        mSupervisor.moveHomeStackTaskToTop(reason);
+    void startHomeActivity(Intent intent, ActivityInfo aInfo, String reason, int displayId) {
+        if (!mSupervisor.canStartHomeOnDisplay(aInfo, displayId)) {
+            return;
+        }
 
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        options.setLaunchActivityType(ACTIVITY_TYPE_HOME);
+        options.setLaunchDisplayId(displayId);
         mLastHomeActivityStartResult = obtainStarter(intent, "startHomeActivity: " + reason)
                 .setOutActivity(tmpOutRecord)
                 .setCallingUid(0)
                 .setActivityInfo(aInfo)
+                .setActivityOptions(options.toBundle())
                 .execute();
         mLastHomeActivityStartRecord = tmpOutRecord[0];
         if (mSupervisor.inResumeTopActivity) {
