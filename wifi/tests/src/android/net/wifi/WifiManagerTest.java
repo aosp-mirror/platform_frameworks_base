@@ -93,6 +93,7 @@ public class WifiManagerTest {
 
         mWifiServiceMessenger = new Messenger(mHandler);
         mWifiManager = new WifiManager(mContext, mWifiService, mLooper.getLooper());
+        verify(mWifiService).getVerboseLoggingLevel();
     }
 
     /**
