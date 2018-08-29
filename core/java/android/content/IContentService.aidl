@@ -53,14 +53,14 @@ interface IContentService {
      */
     void notifyChange(in Uri uri, IContentObserver observer,
             boolean observerWantsSelfNotifications, int flags,
-            int userHandle, int targetSdkVersion);
+            int userHandle, int targetSdkVersion, String callingPackage);
 
-    void requestSync(in Account account, String authority, in Bundle extras);
+    void requestSync(in Account account, String authority, in Bundle extras, String callingPackage);
     /**
      * Start a sync given a request.
      */
-    void sync(in SyncRequest request);
-    void syncAsUser(in SyncRequest request, int userId);
+    void sync(in SyncRequest request, String callingPackage);
+    void syncAsUser(in SyncRequest request, int userId, String callingPackage);
     void cancelSync(in Account account, String authority, in ComponentName cname);
     void cancelSyncAsUser(in Account account, String authority, in ComponentName cname, int userId);
 

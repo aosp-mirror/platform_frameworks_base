@@ -584,9 +584,9 @@ public class SyncManager {
         mSyncStorageEngine.setOnSyncRequestListener(new OnSyncRequestListener() {
             @Override
             public void onSyncRequest(SyncStorageEngine.EndPoint info, int reason, Bundle extras,
-                    @SyncExemption int syncExemptionFlag) {
+                    @SyncExemption int syncExemptionFlag, int callingUid, int callingPid) {
                 scheduleSync(info.account, info.userId, reason, info.provider, extras,
-                        AuthorityInfo.UNDEFINED, syncExemptionFlag);
+                        AuthorityInfo.UNDEFINED, syncExemptionFlag, callingUid, callingPid, null);
             }
         });
 
@@ -619,7 +619,8 @@ public class SyncManager {
                     scheduleSync(null, UserHandle.USER_ALL,
                             SyncOperation.REASON_SERVICE_CHANGED,
                             type.authority, null, AuthorityInfo.UNDEFINED,
-                            ContentResolver.SYNC_EXEMPTION_NONE);
+                            ContentResolver.SYNC_EXEMPTION_NONE,
+                            Process.myUid(), -1, null);
                 }
             }
         }, mSyncHandler);
@@ -666,7 +667,8 @@ public class SyncManager {
                 scheduleSync(account, UserHandle.getUserId(uid),
                         SyncOperation.REASON_ACCOUNTS_UPDATED,
                         null, null, AuthorityInfo.SYNCABLE_NO_ACCOUNT_ACCESS,
-                        ContentResolver.SYNC_EXEMPTION_NONE);
+                        ContentResolver.SYNC_EXEMPTION_NONE,
+                        Process.myUid(), -2, null);
             }
         });
 
@@ -893,9 +895,11 @@ public class SyncManager {
      */
     public void scheduleSync(Account requestedAccount, int userId, int reason,
             String requestedAuthority, Bundle extras, int targetSyncState,
-            @SyncExemption int syncExemptionFlag) {
+            @SyncExemption int syncExemptionFlag, int callingUid, int callingPid,
+            String callingPackage) {
         scheduleSync(requestedAccount, userId, reason, requestedAuthority, extras, targetSyncState,
-                0 /* min delay */, true /* checkIfAccountReady */, syncExemptionFlag);
+                0 /* min delay */, true /* checkIfAccountReady */, syncExemptionFlag,
+                callingUid, callingPid, callingPackage);
     }
 
     /**
@@ -904,18 +908,21 @@ public class SyncManager {
     private void scheduleSync(Account requestedAccount, int userId, int reason,
             String requestedAuthority, Bundle extras, int targetSyncState,
             final long minDelayMillis, boolean checkIfAccountReady,
-            @SyncExemption int syncExemptionFlag) {
-        final boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
+            @SyncExemption int syncExemptionFlag,
+            int callingUid, int callingPid, String callingPackage) {
         if (extras == null) {
             extras = new Bundle();
         }
-        if (isLoggable) {
-            Log.d(TAG, "one-time sync for: " + requestedAccount + " " + extras.toString() + " "
-                    + requestedAuthority
-                    + " reason=" + reason
-                    + " checkIfAccountReady=" + checkIfAccountReady
-                    + " syncExemptionFlag=" + syncExemptionFlag);
-        }
+        extras.size(); // Force unpacel.
+        mLogger.log("scheduleSync: account=", requestedAccount,
+                " u", userId,
+                " authority=", requestedAuthority,
+                " reason=", reason,
+                " extras=", extras,
+                " cuid=", callingUid, " cpid=", callingPid, " cpkg=", callingPackage,
+                " mdm=", minDelayMillis,
+                " ciar=", checkIfAccountReady,
+                " sef=", syncExemptionFlag);
 
         AccountAndUser[] accounts = null;
         if (requestedAccount != null) {
@@ -934,9 +941,7 @@ public class SyncManager {
         }
 
         if (ArrayUtils.isEmpty(accounts)) {
-            if (isLoggable) {
-                Slog.v(TAG, "scheduleSync: no accounts configured, dropping");
-            }
+            mLogger.log("scheduleSync: no accounts configured, dropping");
             return;
         }
 
@@ -1007,10 +1012,8 @@ public class SyncManager {
                 final int owningUid = syncAdapterInfo.uid;
 
                 if (isSyncable == AuthorityInfo.SYNCABLE_NO_ACCOUNT_ACCESS) {
-                    if (isLoggable) {
-                        Slog.v(TAG, "    Not scheduling sync operation: "
+                    mLogger.log("scheduleSync: Not scheduling sync operation: "
                                 + "isSyncable == SYNCABLE_NO_ACCOUNT_ACCESS");
-                    }
                     Bundle finalExtras = new Bundle(extras);
                     String packageName = syncAdapterInfo.componentName.getPackageName();
                     // If the app did not run and has no account access, done
@@ -1025,7 +1028,8 @@ public class SyncManager {
                                     scheduleSync(account.account, userId, reason, authority,
                                             finalExtras, targetSyncState, minDelayMillis,
                                             true /* checkIfAccountReady */,
-                                            syncExemptionFlag);
+                                            syncExemptionFlag, callingUid, callingPid,
+                                            callingPackage);
                                 }
                             }
                         ));
@@ -1037,7 +1041,7 @@ public class SyncManager {
                 if (!checkIfAccountReady && isSyncable < 0 && isAlwaysSyncable) {
                     mSyncStorageEngine.setIsSyncable(
                             account.account, account.userId, authority, AuthorityInfo.SYNCABLE,
-                            SyncLogger.CALLING_UID_SELF);
+                            callingUid, callingPid);
                     isSyncable = AuthorityInfo.SYNCABLE;
                 }
 
@@ -1056,10 +1060,8 @@ public class SyncManager {
                                 && mSyncStorageEngine.getSyncAutomatically(account.account,
                                 account.userId, authority));
                 if (!syncAllowed) {
-                    if (isLoggable) {
-                        Log.d(TAG, "scheduleSync: sync of " + account + ", " + authority
-                                + " is not allowed, dropping request");
-                    }
+                    mLogger.log("scheduleSync: sync of ", account, " ", authority,
+                            " is not allowed, dropping request");
                     continue;
                 }
                 SyncStorageEngine.EndPoint info =
@@ -1077,21 +1079,16 @@ public class SyncManager {
                         sendOnUnsyncableAccount(mContext, syncAdapterInfo, account.userId,
                                 () -> scheduleSync(account.account, account.userId, reason,
                                         authority, finalExtras, targetSyncState, minDelayMillis,
-                                        false, syncExemptionFlag));
+                                        false, syncExemptionFlag, callingUid, callingPid,
+                                        callingPackage));
                     } else {
                         // Initialisation sync.
                         Bundle newExtras = new Bundle();
                         newExtras.putBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, true);
-                        if (isLoggable) {
-                            Slog.v(TAG, "schedule initialisation Sync:"
-                                    + ", delay until " + delayUntil
-                                    + ", run by " + 0
-                                    + ", flexMillis " + 0
-                                    + ", source " + source
-                                    + ", account " + account
-                                    + ", authority " + authority
-                                    + ", extras " + newExtras);
-                        }
+
+                        mLogger.log("scheduleSync: schedule initialisation sync ",
+                                account, " ", authority);
+
                         postScheduleSyncMessage(
                                 new SyncOperation(account.account, account.userId,
                                         owningUid, owningPackage, reason, source,
@@ -1102,20 +1099,17 @@ public class SyncManager {
                     }
                 } else if (targetSyncState == AuthorityInfo.UNDEFINED
                         || targetSyncState == isSyncable) {
-                    if (isLoggable) {
-                        Slog.v(TAG, "scheduleSync:"
-                                + " delay until " + delayUntil
-                                + ", source " + source
-                                + ", account " + account
-                                + ", authority " + authority
-                                + ", extras " + extras);
-                    }
+                    mLogger.log("scheduleSync: scheduling sync ",
+                            account, " ", authority);
                     postScheduleSyncMessage(
                             new SyncOperation(account.account, account.userId,
                                     owningUid, owningPackage, reason, source,
                                     authority, extras, allowParallelSyncs, syncExemptionFlag),
                             minDelayMillis
                     );
+                } else {
+                    mLogger.log("scheduleSync: not handling ",
+                            account, " ", authority);
                 }
             }
         }
@@ -1227,12 +1221,13 @@ public class SyncManager {
      * ms to batch syncs.
      */
     public void scheduleLocalSync(Account account, int userId, int reason, String authority,
-            @SyncExemption int syncExemptionFlag) {
+            @SyncExemption int syncExemptionFlag,
+            int callingUid, int callingPid, String callingPackage) {
         final Bundle extras = new Bundle();
         extras.putBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, true);
         scheduleSync(account, userId, reason, authority, extras,
                 AuthorityInfo.UNDEFINED, LOCAL_SYNC_DELAY, true /* checkIfAccountReady */,
-                syncExemptionFlag);
+                syncExemptionFlag, callingUid, callingPid, callingPackage);
     }
 
     public SyncAdapterType[] getSyncAdapterTypes(int userId) {
@@ -1769,7 +1764,8 @@ public class SyncManager {
                 mContext.getOpPackageName());
         for (Account account : accounts) {
             scheduleSync(account, userId, SyncOperation.REASON_USER_START, null, null,
-                    AuthorityInfo.NOT_INITIALIZED, ContentResolver.SYNC_EXEMPTION_NONE);
+                    AuthorityInfo.NOT_INITIALIZED, ContentResolver.SYNC_EXEMPTION_NONE,
+                    Process.myUid(), -3, null);
         }
     }
 
@@ -3272,7 +3268,7 @@ public class SyncManager {
                 scheduleSync(syncTargets.account, syncTargets.userId,
                         SyncOperation.REASON_ACCOUNTS_UPDATED, syncTargets.provider,
                         null, AuthorityInfo.NOT_INITIALIZED,
-                        ContentResolver.SYNC_EXEMPTION_NONE);
+                        ContentResolver.SYNC_EXEMPTION_NONE, Process.myUid(), -4, null);
             }
         }
 
