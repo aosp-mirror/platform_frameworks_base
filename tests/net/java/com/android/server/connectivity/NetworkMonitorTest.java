@@ -106,6 +106,7 @@ public class NetworkMonitorTest {
                 anyString())).thenReturn(TEST_HTTP_URL);
         when(mDependencies.getSetting(any(), eq(Settings.Global.CAPTIVE_PORTAL_HTTPS_URL),
                 anyString())).thenReturn(TEST_HTTPS_URL);
+        when(mNetwork.getPrivateDnsBypassingCopy()).thenReturn(mNetwork);
 
         when(mContext.getSystemService(Context.TELEPHONY_SERVICE)).thenReturn(mTelephony);
         when(mContext.getSystemService(Context.WIFI_SERVICE)).thenReturn(mWifi);

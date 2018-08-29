@@ -3840,7 +3840,7 @@ public class ConnectivityManager {
     @UnsupportedAppUsage
     public static boolean setProcessDefaultNetworkForHostResolution(Network network) {
         return NetworkUtils.bindProcessToNetworkForHostResolution(
-                network == null ? NETID_UNSET : network.netId);
+                (network == null) ? NETID_UNSET : network.getNetIdForResolv());
     }
 
     /**

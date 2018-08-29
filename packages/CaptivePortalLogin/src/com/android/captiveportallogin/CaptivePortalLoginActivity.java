@@ -33,7 +33,6 @@ import android.net.NetworkRequest;
 import android.net.Proxy;
 import android.net.Uri;
 import android.net.captiveportal.CaptivePortalProbeSpec;
-import android.net.dns.ResolvUtil;
 import android.net.http.SslError;
 import android.net.wifi.WifiInfo;
 import android.os.Build;
@@ -132,9 +131,9 @@ public class CaptivePortalLoginActivity extends Activity {
         }
 
         // Also initializes proxy system properties.
+        mNetwork = mNetwork.getPrivateDnsBypassingCopy();
         mCm.bindProcessToNetwork(mNetwork);
-        mCm.setProcessDefaultNetworkForHostResolution(
-                ResolvUtil.getNetworkWithUseLocalNameserversFlag(mNetwork));
+        mCm.setProcessDefaultNetworkForHostResolution(mNetwork);
 
         // Proxy system properties must be initialized before setContentView is called because
         // setContentView initializes the WebView logic which in turn reads the system properties.
@@ -334,7 +333,6 @@ public class CaptivePortalLoginActivity extends Activity {
         // TODO: reuse NetworkMonitor facilities for consistent captive portal detection.
         new Thread(new Runnable() {
             public void run() {
-                final Network network = ResolvUtil.makeNetworkWithPrivateDnsBypass(mNetwork);
                 // Give time for captive portal to open.
                 try {
                     Thread.sleep(1000);
@@ -344,7 +342,7 @@ public class CaptivePortalLoginActivity extends Activity {
                 int httpResponseCode = 500;
                 String locationHeader = null;
                 try {
-                    urlConnection = (HttpURLConnection) network.openConnection(mUrl);
+                    urlConnection = (HttpURLConnection) mNetwork.openConnection(mUrl);
                     urlConnection.setInstanceFollowRedirects(false);
                     urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
                     urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
