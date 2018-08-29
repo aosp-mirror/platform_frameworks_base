@@ -1305,14 +1305,16 @@ public final class ContentService extends IContentService.Stub {
         }
         final ActivityManagerInternal ami =
                 LocalServices.getService(ActivityManagerInternal.class);
-        final int procState = (ami != null)
-                ? ami.getUidProcessState(callingUid)
-                : ActivityManager.PROCESS_STATE_NONEXISTENT;
+        if (ami == null) {
+            return ContentResolver.SYNC_EXEMPTION_NONE;
+        }
+        final int procState = ami.getUidProcessState(callingUid);
+        final boolean isUidActive = ami.isUidActive(callingUid);
 
         if (procState <= ActivityManager.PROCESS_STATE_TOP) {
             return ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET_WITH_TEMP;
         }
-        if (procState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
+        if (procState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND || isUidActive) {
             return ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET;
         }
         return ContentResolver.SYNC_EXEMPTION_NONE;
