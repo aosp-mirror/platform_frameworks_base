@@ -16,15 +16,14 @@
 
 package android.net.dhcp;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.util.FdEventsReader;
-import android.net.util.PacketReader;
 import android.os.Handler;
 import android.system.Os;
 
 import java.io.FileDescriptor;
 import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 /**
@@ -35,19 +34,20 @@ abstract class DhcpPacketListener extends FdEventsReader<DhcpPacketListener.Payl
     static final class Payload {
         final byte[] bytes = new byte[DhcpPacket.MAX_LENGTH];
         Inet4Address srcAddr;
+        int srcPort;
     }
 
-    public DhcpPacketListener(Handler handler) {
+    public DhcpPacketListener(@NonNull Handler handler) {
         super(handler, new Payload());
     }
 
     @Override
-    protected int recvBufSize(Payload buffer) {
+    protected int recvBufSize(@NonNull Payload buffer) {
         return buffer.bytes.length;
     }
 
     @Override
-    protected final void handlePacket(Payload recvbuf, int length) {
+    protected final void handlePacket(@NonNull Payload recvbuf, int length) {
         if (recvbuf.srcAddr == null) {
             return;
         }
@@ -55,30 +55,34 @@ abstract class DhcpPacketListener extends FdEventsReader<DhcpPacketListener.Payl
         try {
             final DhcpPacket packet = DhcpPacket.decodeFullPacket(recvbuf.bytes, length,
                     DhcpPacket.ENCAP_BOOTP);
-            onReceive(packet, recvbuf.srcAddr);
+            onReceive(packet, recvbuf.srcAddr, recvbuf.srcPort);
         } catch (DhcpPacket.ParseException e) {
             logParseError(recvbuf.bytes, length, e);
         }
     }
 
     @Override
-    protected int readPacket(FileDescriptor fd, Payload packetBuffer) throws Exception {
+    protected int readPacket(@NonNull FileDescriptor fd, @NonNull Payload packetBuffer)
+            throws Exception {
         final InetSocketAddress addr = new InetSocketAddress();
         final int read = Os.recvfrom(
                 fd, packetBuffer.bytes, 0, packetBuffer.bytes.length, 0 /* flags */, addr);
 
         // Buffers with null srcAddr will be dropped in handlePacket()
         packetBuffer.srcAddr = inet4AddrOrNull(addr);
+        packetBuffer.srcPort = addr.getPort();
         return read;
     }
 
     @Nullable
-    private static Inet4Address inet4AddrOrNull(InetSocketAddress addr) {
+    private static Inet4Address inet4AddrOrNull(@NonNull InetSocketAddress addr) {
         return addr.getAddress() instanceof Inet4Address
                 ? (Inet4Address) addr.getAddress()
                 : null;
     }
 
-    protected abstract void onReceive(DhcpPacket packet, Inet4Address srcAddr);
-    protected abstract void logParseError(byte[] packet, int length, DhcpPacket.ParseException e);
+    protected abstract void onReceive(@NonNull DhcpPacket packet, @NonNull Inet4Address srcAddr,
+            int srcPort);
+    protected abstract void logParseError(@NonNull byte[] packet, int length,
+            @NonNull DhcpPacket.ParseException e);
 }
