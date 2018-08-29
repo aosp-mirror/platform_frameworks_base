@@ -29,7 +29,7 @@ import android.annotation.Nullable;
 import android.net.IpPrefix;
 import android.net.MacAddress;
 import android.net.util.SharedLog;
-import android.os.SystemClock;
+import android.net.dhcp.DhcpServer.Clock;
 import android.util.ArrayMap;
 
 import java.net.Inet4Address;
@@ -72,15 +72,6 @@ class DhcpLeaseRepository {
     private int mSubnetMask;
     private int mNumAddresses;
     private long mLeaseTimeMs;
-
-    public static class Clock {
-        /**
-         * @see SystemClock#elapsedRealtime()
-         */
-        public long elapsedRealtime() {
-            return SystemClock.elapsedRealtime();
-        }
-    }
 
     /**
      * Next timestamp when committed or declined leases should be checked for expired ones. This

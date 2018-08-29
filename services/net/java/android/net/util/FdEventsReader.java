@@ -89,7 +89,7 @@ public abstract class FdEventsReader<BufferType> {
         mBuffer = buffer;
     }
 
-    public final void start() {
+    public void start() {
         if (onCorrectThread()) {
             createAndRegisterFd();
         } else {
@@ -100,7 +100,7 @@ public abstract class FdEventsReader<BufferType> {
         }
     }
 
-    public final void stop() {
+    public void stop() {
         if (onCorrectThread()) {
             unregisterAndDestroyFd();
         } else {

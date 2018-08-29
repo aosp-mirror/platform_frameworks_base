@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.SystemProperties;
 import android.system.OsConstants;
 import android.text.TextUtils;
+
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.UnsupportedEncodingException;
@@ -348,6 +349,14 @@ public abstract class DhcpPacket {
      */
     public boolean hasExplicitClientId() {
         return mClientId != null;
+    }
+
+    /**
+     * Convenience method to return the client ID if it was set explicitly, or null otherwise.
+     */
+    @Nullable
+    public byte[] getExplicitClientIdOrNull() {
+        return hasExplicitClientId() ? getClientId() : null;
     }
 
     /**

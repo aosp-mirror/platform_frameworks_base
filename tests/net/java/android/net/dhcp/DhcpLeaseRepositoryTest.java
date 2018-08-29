@@ -34,8 +34,8 @@ import static java.net.InetAddress.parseNumericAddress;
 import android.annotation.NonNull;
 import android.net.IpPrefix;
 import android.net.MacAddress;
-import android.net.dhcp.DhcpLeaseRepository.Clock;
 import android.net.util.SharedLog;
+import android.net.dhcp.DhcpServer.Clock;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
