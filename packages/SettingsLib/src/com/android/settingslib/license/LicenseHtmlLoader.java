@@ -36,7 +36,9 @@ public class LicenseHtmlLoader extends AsyncLoader<File> {
             "/system/etc/NOTICE.xml.gz",
             "/vendor/etc/NOTICE.xml.gz",
             "/odm/etc/NOTICE.xml.gz",
-            "/oem/etc/NOTICE.xml.gz"};
+            "/oem/etc/NOTICE.xml.gz",
+            "/product/etc/NOTICE.xml.gz",
+            "/product_services/etc/NOTICE.xml.gz"};
     private static final String NOTICE_HTML_FILE_NAME = "NOTICE.html";
 
     private Context mContext;
