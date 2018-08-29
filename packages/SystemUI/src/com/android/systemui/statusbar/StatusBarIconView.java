@@ -38,7 +38,7 @@ import android.graphics.drawable.Icon;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.support.v4.graphics.ColorUtils;
+import androidx.core.graphics.ColorUtils;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.FloatProperty;

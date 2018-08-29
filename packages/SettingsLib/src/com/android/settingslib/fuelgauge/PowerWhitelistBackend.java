@@ -22,7 +22,7 @@ import android.content.pm.PackageManager;
 import android.os.IDeviceIdleController;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.telecom.DefaultDialerManager;
 import android.text.TextUtils;
 import android.util.ArraySet;

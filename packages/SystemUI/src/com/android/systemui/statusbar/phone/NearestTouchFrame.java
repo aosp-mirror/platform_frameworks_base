@@ -17,7 +17,7 @@ package com.android.systemui.statusbar.phone;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;

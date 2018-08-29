@@ -24,7 +24,7 @@ import android.content.Intent;
 import android.metrics.LogMaker;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
-import android.support.annotation.StringRes;
+import androidx.annotation.StringRes;
 import android.util.Log;
 import android.widget.Switch;
 
