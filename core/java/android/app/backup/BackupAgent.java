@@ -980,7 +980,7 @@ public abstract class BackupAgent extends ContextWrapper {
                 try {
                     callbackBinder.operationComplete(result);
                 } catch (RemoteException e) {
-                    // we'll time out anyway, so we're safe
+                    // We will time out anyway.
                 }
 
                 // Don't close the fd out from under the system service if this was local
@@ -1162,10 +1162,16 @@ public abstract class BackupAgent extends ContextWrapper {
         }
 
         @Override
-        public void doQuotaExceeded(long backupDataBytes, long quotaBytes) {
+        public void doQuotaExceeded(
+                long backupDataBytes,
+                long quotaBytes,
+                IBackupCallback callbackBinder) {
             long ident = Binder.clearCallingIdentity();
+
+            long result = RESULT_ERROR;
             try {
                 BackupAgent.this.onQuotaExceeded(backupDataBytes, quotaBytes);
+                result = RESULT_SUCCESS;
             } catch (Exception e) {
                 Log.d(TAG, "onQuotaExceeded(" + BackupAgent.this.getClass().getName() + ") threw",
                         e);
@@ -1173,6 +1179,12 @@ public abstract class BackupAgent extends ContextWrapper {
             } finally {
                 waitForSharedPrefs();
                 Binder.restoreCallingIdentity(ident);
+
+                try {
+                    callbackBinder.operationComplete(result);
+                } catch (RemoteException e) {
+                    // We will time out anyway.
+                }
             }
         }
     }

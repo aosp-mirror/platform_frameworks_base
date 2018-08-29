@@ -27,6 +27,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
 import com.android.server.backup.BackupManagerService;
+import com.android.server.backup.remote.RemoteResult;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderPackages;
 import com.android.server.testing.shadows.ShadowEventLog;
@@ -37,6 +38,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowLog;
+
+import java.lang.reflect.Field;
 
 @RunWith(FrameworkRobolectricTestRunner.class)
 @Config(
@@ -76,5 +80,40 @@ public class KeyValueBackupReporterTest {
         IBackupObserver observer = mReporter.getObserver();
 
         assertThat(observer).isEqualTo(mObserver);
+    }
+
+    @Test
+    public void testOnRevertTask_logsCorrectly() throws Exception {
+        setMoreDebug(true);
+
+        mReporter.onRevertTask();
+
+        assertLogcat(TAG, Log.INFO);
+    }
+
+    @Test
+    public void testOnRemoteCallReturned_logsCorrectly() throws Exception {
+        setMoreDebug(true);
+
+        mReporter.onRemoteCallReturned(RemoteResult.of(3), "onFoo()");
+
+        assertLogcat(TAG, Log.VERBOSE);
+        ShadowLog.LogItem log = ShadowLog.getLogsForTag(TAG).get(0);
+        assertThat(log.msg).contains("onFoo()");
+        assertThat(log.msg).contains("3");
+    }
+
+    /**
+     * HACK: We actually want {@link KeyValueBackupReporter#MORE_DEBUG} to be a constant to be able
+     * to strip those lines at build time. So, we have to do this to test :(
+     */
+    private static void setMoreDebug(boolean value)
+            throws NoSuchFieldException, IllegalAccessException {
+        if (KeyValueBackupReporter.MORE_DEBUG == value) {
+            return;
+        }
+        Field moreDebugField = KeyValueBackupReporter.class.getDeclaredField("MORE_DEBUG");
+        moreDebugField.setAccessible(true);
+        moreDebugField.set(null, value);
     }
 }

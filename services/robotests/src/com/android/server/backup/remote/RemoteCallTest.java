@@ -222,6 +222,37 @@ public class RemoteCallTest {
         assertThat(result.get()).isEqualTo(RemoteResult.FAILED_CANCELLED);
     }
 
+    @Test
+    public void testExecute_whenCallbackIsCalledBeforeTimeout_returnsResult() throws Exception {
+        RemoteResult result =
+                runInWorkerThread(
+                        () -> RemoteCall.execute(callback -> callback.operationComplete(3), 1000));
+
+        assertThat(result.get()).isEqualTo(3);
+    }
+
+    @Test
+    public void testExecute_whenTimesOutBeforeCallback_returnsTimeOut() throws Exception {
+        ConditionVariable scheduled = new ConditionVariable(false);
+
+        Future<RemoteResult> result =
+                runInWorkerThreadAsync(
+                        () ->
+                                RemoteCall.execute(
+                                        callback -> {
+                                            postDelayed(
+                                                    Handler.getMain(),
+                                                    () -> callback.operationComplete(0),
+                                                    1000);
+                                            scheduled.open();
+                                        },
+                                        500));
+
+        scheduled.block();
+        runToEndOfTasks(Looper.getMainLooper());
+        assertThat(result.get()).isEqualTo(RemoteResult.FAILED_TIMED_OUT);
+    }
+
     private static <T> Future<T> runInWorkerThreadAsync(Callable<T> supplier) {
         CompletableFuture<T> future = new CompletableFuture<>();
         new Thread(() -> future.complete(uncheck(supplier)), "test-worker-thread").start();

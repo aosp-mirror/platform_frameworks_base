@@ -44,6 +44,21 @@ import java.util.concurrent.ExecutionException;
  */
 // TODO: Kick-off callable in dedicated thread (because of local calls, which are synchronous)
 public class RemoteCall {
+    /**
+     * Creates a {@link RemoteCall} object with {@code callable} and {@code timeoutMs} and calls
+     * {@link #call()} on it immediately after.
+     *
+     * <p>Note that you won't be able to cancel the call, to do that construct an object regularly
+     * first, then use {@link #call()}.
+     *
+     * @see #RemoteCall(RemoteCallable, long)
+     * @see #call()
+     */
+    public static RemoteResult execute(RemoteCallable<IBackupCallback> callable, long timeoutMs)
+            throws RemoteException {
+        return new RemoteCall(callable, timeoutMs).call();
+    }
+
     private final RemoteCallable<IBackupCallback> mCallable;
     private final CompletableFuture<RemoteResult> mFuture;
     private final long mTimeoutMs;

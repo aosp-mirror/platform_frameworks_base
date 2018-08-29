@@ -377,9 +377,9 @@ public class KeyValueBackupReporter {
         Slog.w(TAG, "Unable to contact transport for recommended backoff: " + e);
     }
 
-    void onRemoteCallReturned(RemoteResult result) {
+    void onRemoteCallReturned(RemoteResult result, String logIdentifier) {
         if (MORE_DEBUG) {
-            Slog.v(TAG, "Agent call returned " + result);
+            Slog.v(TAG, "Agent call " + logIdentifier + " returned " + result);
         }
     }
 

@@ -694,8 +694,6 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             IBackupTransport transport = mTransportClient.connectOrThrow("KVBT.extractAgentData()");
             long quota = transport.getBackupQuota(packageName, /* isFullBackup */ false);
             int transportFlags = transport.getTransportFlags();
-            long kvBackupAgentTimeoutMillis =
-                    mAgentTimeoutParameters.getKvBackupAgentTimeoutMillis();
 
             callingAgent = true;
             agentResult =
@@ -708,7 +706,8 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
                                             quota,
                                             callback,
                                             transportFlags),
-                            kvBackupAgentTimeoutMillis);
+                            mAgentTimeoutParameters.getKvBackupAgentTimeoutMillis(),
+                            "doBackup()");
         } catch (Exception e) {
             mReporter.onCallAgentDoBackupError(packageName, callingAgent, e);
             errorCleanup();
@@ -908,14 +907,16 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         return false;
     }
 
-    private void agentDoQuotaExceeded(
-            @Nullable IBackupAgent agent, String packageName, long backupDataSize) {
+    private void agentDoQuotaExceeded(@Nullable IBackupAgent agent, String packageName, long size) {
         if (agent != null) {
             try {
                 IBackupTransport transport =
                         mTransportClient.connectOrThrow("KVBT.agentDoQuotaExceeded()");
                 long quota = transport.getBackupQuota(packageName, false);
-                agent.doQuotaExceeded(backupDataSize, quota);
+                remoteCall(
+                        callback -> agent.doQuotaExceeded(size, quota, callback),
+                        mAgentTimeoutParameters.getQuotaExceededTimeoutMillis(),
+                        "doQuotaExceeded()");
             } catch (Exception e) {
                 mReporter.onAgentDoQuotaExceededError(e);
             }
@@ -1056,11 +1057,12 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         }
     }
 
-    private RemoteResult remoteCall(RemoteCallable<IBackupCallback> remoteCallable, long timeoutMs)
+    private RemoteResult remoteCall(
+            RemoteCallable<IBackupCallback> remoteCallable, long timeoutMs, String logIdentifier)
             throws RemoteException {
         mPendingCall = new RemoteCall(mCancelled, remoteCallable, timeoutMs);
         RemoteResult result = mPendingCall.call();
-        mReporter.onRemoteCallReturned(result);
+        mReporter.onRemoteCallReturned(result, logIdentifier);
         mPendingCall = null;
         return result;
     }
