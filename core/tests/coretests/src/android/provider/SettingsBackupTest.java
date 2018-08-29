@@ -423,6 +423,7 @@ public class SettingsBackupTest {
                     Settings.Global.TETHER_DUN_REQUIRED,
                     Settings.Global.TETHER_OFFLOAD_DISABLED,
                     Settings.Global.TETHER_SUPPORTED,
+                    Settings.Global.TETHER_ENABLE_LEGACY_DHCP_SERVER,
                     Settings.Global.TEXT_CLASSIFIER_CONSTANTS,
                     Settings.Global.THEATER_MODE_ON,
                     Settings.Global.TIME_ONLY_MODE_CONSTANTS,
