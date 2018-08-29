@@ -43,7 +43,6 @@ import android.net.TrafficStats;
 import android.net.Uri;
 import android.net.captiveportal.CaptivePortalProbeResult;
 import android.net.captiveportal.CaptivePortalProbeSpec;
-import android.net.dns.ResolvUtil;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.metrics.ValidationProbeEvent;
@@ -326,7 +325,7 @@ public class NetworkMonitor extends StateMachine {
         mConnectivityServiceHandler = handler;
         mDependencies = deps;
         mNetworkAgentInfo = networkAgentInfo;
-        mNetwork = deps.getNetwork(networkAgentInfo);
+        mNetwork = deps.getNetwork(networkAgentInfo).getPrivateDnsBypassingCopy();
         mNetId = mNetwork.netId;
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -800,9 +799,7 @@ public class NetworkMonitor extends StateMachine {
         private void resolveStrictModeHostname() {
             try {
                 // Do a blocking DNS resolution using the network-assigned nameservers.
-                // Do not set AI_ADDRCONFIG in ai_flags so we get all address families in advance.
-                final InetAddress[] ips = ResolvUtil.blockingResolveAllLocally(
-                        mNetwork, mPrivateDnsProviderHostname, 0 /* aiFlags */);
+                final InetAddress[] ips = mNetwork.getAllByName(mPrivateDnsProviderHostname);
                 mPrivateDnsConfig = new PrivateDnsConfig(mPrivateDnsProviderHostname, ips);
                 validationLog("Strict mode hostname resolved: " + mPrivateDnsConfig);
             } catch (UnknownHostException uhe) {
@@ -860,14 +857,13 @@ public class NetworkMonitor extends StateMachine {
     // to complete, regardless of how many IP addresses a host has.
     private static class OneAddressPerFamilyNetwork extends Network {
         public OneAddressPerFamilyNetwork(Network network) {
-            super(network);
+            // Always bypass Private DNS.
+            super(network.getPrivateDnsBypassingCopy());
         }
 
         @Override
         public InetAddress[] getAllByName(String host) throws UnknownHostException {
-            // Always bypass Private DNS.
-            final List<InetAddress> addrs = Arrays.asList(
-                    ResolvUtil.blockingResolveAllLocally(this, host));
+            final List<InetAddress> addrs = Arrays.asList(super.getAllByName(host));
 
             // Ensure the address family of the first address is tried first.
             LinkedHashMap<Class, InetAddress> addressByFamily = new LinkedHashMap<>();
