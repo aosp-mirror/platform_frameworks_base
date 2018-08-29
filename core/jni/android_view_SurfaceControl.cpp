@@ -449,16 +449,6 @@ static void nativeSetWindowCrop(JNIEnv* env, jclass clazz, jlong transactionObj,
     transaction->setCrop_legacy(ctrl, crop);
 }
 
-static void nativeSetFinalCrop(JNIEnv* env, jclass clazz, jlong transactionObj,
-        jlong nativeObject,
-        jint l, jint t, jint r, jint b) {
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-
-    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    Rect crop(l, t, r, b);
-    transaction->setFinalCrop_legacy(ctrl, crop);
-}
-
 static void nativeSetLayerStack(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject, jint layerStack) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -967,8 +957,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetFlags },
     {"nativeSetWindowCrop", "(JJIIII)V",
             (void*)nativeSetWindowCrop },
-    {"nativeSetFinalCrop", "(JJIIII)V",
-            (void*)nativeSetFinalCrop },
     {"nativeSetLayerStack", "(JJI)V",
             (void*)nativeSetLayerStack },
     {"nativeGetBuiltInDisplay", "(I)Landroid/os/IBinder;",

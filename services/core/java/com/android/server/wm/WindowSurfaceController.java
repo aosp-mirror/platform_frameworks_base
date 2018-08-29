@@ -225,16 +225,6 @@ class WindowSurfaceController {
         }
     }
 
-    void setFinalCropInTransaction(Rect clipRect) {
-        if (SHOW_TRANSACTIONS) logSurface(
-                "FINAL CROP " + clipRect.toShortString(), null);
-        try {
-            mSurfaceControl.setFinalCrop(clipRect);
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Error disconnecting surface in: " + this, e);
-        }
-    }
-
     void setLayerStackInTransaction(int layerStack) {
         if (mSurfaceControl != null) {
             mSurfaceControl.setLayerStack(layerStack);

@@ -83,11 +83,6 @@ public class TransactionCompat {
         return this;
     }
 
-    public TransactionCompat setFinalCrop(SurfaceControlCompat surfaceControl, Rect crop) {
-        mTransaction.setFinalCrop(surfaceControl.mSurfaceControl, crop);
-        return this;
-    }
-
     public TransactionCompat deferTransactionUntil(SurfaceControlCompat surfaceControl,
             IBinder handle, long frameNumber) {
         mTransaction.deferTransactionUntil(surfaceControl.mSurfaceControl, handle, frameNumber);
