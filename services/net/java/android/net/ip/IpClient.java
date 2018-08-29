@@ -431,6 +431,7 @@ public class IpClient extends StateMachine {
         public ProvisioningConfiguration(ProvisioningConfiguration other) {
             mEnableIPv4 = other.mEnableIPv4;
             mEnableIPv6 = other.mEnableIPv6;
+            mUsingMultinetworkPolicyTracker = other.mUsingMultinetworkPolicyTracker;
             mUsingIpReachabilityMonitor = other.mUsingIpReachabilityMonitor;
             mRequestedPreDhcpActionMs = other.mRequestedPreDhcpActionMs;
             mInitialConfig = InitialConfiguration.copy(other.mInitialConfig);
