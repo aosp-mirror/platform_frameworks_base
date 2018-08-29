@@ -351,10 +351,8 @@ public class DhcpServer {
                 mServingParams.getServerInet4Addr(), mServingParams.serverAddr.getPrefixLength());
         final ByteBuffer offerPacket = DhcpPacket.buildOfferPacket(
                 ENCAP_BOOTP, request.mTransId, broadcastFlag, mServingParams.getServerInet4Addr(),
-                lease.getNetAddr(), request.mClientMac, timeout,
-                prefixMask,
-                broadcastAddr,
-                new ArrayList<>(mServingParams.defaultRouters),
+                request.mRelayIp, lease.getNetAddr(), request.mClientMac, timeout, prefixMask,
+                broadcastAddr, new ArrayList<>(mServingParams.defaultRouters),
                 new ArrayList<>(mServingParams.dnsServers),
                 mServingParams.getServerInet4Addr(), null /* domainName */);
 
@@ -368,9 +366,9 @@ public class DhcpServer {
         final boolean broadcastFlag = getBroadcastFlag(request, lease);
         final int timeout = getLeaseTimeout(lease);
         final ByteBuffer ackPacket = DhcpPacket.buildAckPacket(ENCAP_BOOTP, request.mTransId,
-                broadcastFlag, mServingParams.getServerInet4Addr(), lease.getNetAddr(),
-                request.mClientMac, timeout, mServingParams.getPrefixMaskAsAddress(),
-                mServingParams.getBroadcastAddress(),
+                broadcastFlag, mServingParams.getServerInet4Addr(), request.mRelayIp,
+                lease.getNetAddr(), request.mClientMac, timeout,
+                mServingParams.getPrefixMaskAsAddress(), mServingParams.getBroadcastAddress(),
                 new ArrayList<>(mServingParams.defaultRouters),
                 new ArrayList<>(mServingParams.dnsServers),
                 mServingParams.getServerInet4Addr(), null /* domainName */);
@@ -383,7 +381,7 @@ public class DhcpServer {
         // Always set broadcast flag for NAK: client may not have a correct IP
         final ByteBuffer nakPacket = DhcpPacket.buildNakPacket(
                 ENCAP_BOOTP, request.mTransId, mServingParams.getServerInet4Addr(),
-                request.mClientMac, true /* broadcast */, message);
+                request.mRelayIp, request.mClientMac, true /* broadcast */, message);
 
         final Inet4Address dst = isEmpty(request.mRelayIp)
                 ? (Inet4Address) Inet4Address.ALL

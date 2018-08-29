@@ -26,9 +26,10 @@ class DhcpNakPacket extends DhcpPacket {
     /**
      * Generates a NAK packet with the specified parameters.
      */
-    DhcpNakPacket(int transId, short secs, Inet4Address nextIp, Inet4Address relayIp,
-            byte[] clientMac, boolean broadcast) {
-        super(transId, secs, INADDR_ANY, INADDR_ANY, nextIp, relayIp, clientMac, broadcast);
+    DhcpNakPacket(int transId, short secs, Inet4Address relayIp, byte[] clientMac,
+            boolean broadcast) {
+        super(transId, secs, INADDR_ANY /* clientIp */, INADDR_ANY /* yourIp */,
+                INADDR_ANY /* nextIp */, relayIp, clientMac, broadcast);
     }
 
     public String toString() {

@@ -1085,7 +1085,7 @@ public abstract class DhcpPacket {
                 break;
             case DHCP_MESSAGE_TYPE_OFFER:
                 newPacket = new DhcpOfferPacket(
-                    transactionId, secs, broadcast, ipSrc, clientIp, yourIp, clientMac);
+                    transactionId, secs, broadcast, ipSrc, relayIp, clientIp, yourIp, clientMac);
                 break;
             case DHCP_MESSAGE_TYPE_REQUEST:
                 newPacket = new DhcpRequestPacket(
@@ -1098,11 +1098,11 @@ public abstract class DhcpPacket {
                 break;
             case DHCP_MESSAGE_TYPE_ACK:
                 newPacket = new DhcpAckPacket(
-                    transactionId, secs, broadcast, ipSrc, clientIp, yourIp, clientMac);
+                    transactionId, secs, broadcast, ipSrc, relayIp, clientIp, yourIp, clientMac);
                 break;
             case DHCP_MESSAGE_TYPE_NAK:
                 newPacket = new DhcpNakPacket(
-                        transactionId, secs, nextIp, relayIp, clientMac, broadcast);
+                        transactionId, secs, relayIp, clientMac, broadcast);
                 break;
             case DHCP_MESSAGE_TYPE_RELEASE:
                 if (serverIdentifier == null) {
@@ -1234,12 +1234,13 @@ public abstract class DhcpPacket {
      * parameters.
      */
     public static ByteBuffer buildOfferPacket(int encap, int transactionId,
-        boolean broadcast, Inet4Address serverIpAddr, Inet4Address clientIpAddr,
-        byte[] mac, Integer timeout, Inet4Address netMask, Inet4Address bcAddr,
-        List<Inet4Address> gateways, List<Inet4Address> dnsServers,
+        boolean broadcast, Inet4Address serverIpAddr, Inet4Address relayIp,
+        Inet4Address yourIp, byte[] mac, Integer timeout, Inet4Address netMask,
+        Inet4Address bcAddr, List<Inet4Address> gateways, List<Inet4Address> dnsServers,
         Inet4Address dhcpServerIdentifier, String domainName) {
         DhcpPacket pkt = new DhcpOfferPacket(
-            transactionId, (short) 0, broadcast, serverIpAddr, INADDR_ANY, clientIpAddr, mac);
+                transactionId, (short) 0, broadcast, serverIpAddr, relayIp,
+                INADDR_ANY /* clientIp */, yourIp, mac);
         pkt.mGateways = gateways;
         pkt.mDnsServers = dnsServers;
         pkt.mLeaseTime = timeout;
@@ -1254,12 +1255,13 @@ public abstract class DhcpPacket {
      * Builds a DHCP-ACK packet from the required specified parameters.
      */
     public static ByteBuffer buildAckPacket(int encap, int transactionId,
-        boolean broadcast, Inet4Address serverIpAddr, Inet4Address clientIpAddr,
+        boolean broadcast, Inet4Address serverIpAddr, Inet4Address relayIp, Inet4Address yourIp,
         byte[] mac, Integer timeout, Inet4Address netMask, Inet4Address bcAddr,
         List<Inet4Address> gateways, List<Inet4Address> dnsServers,
         Inet4Address dhcpServerIdentifier, String domainName) {
         DhcpPacket pkt = new DhcpAckPacket(
-            transactionId, (short) 0, broadcast, serverIpAddr, INADDR_ANY, clientIpAddr, mac);
+                transactionId, (short) 0, broadcast, serverIpAddr, relayIp,
+                INADDR_ANY /* clientIp */, yourIp, mac);
         pkt.mGateways = gateways;
         pkt.mDnsServers = dnsServers;
         pkt.mLeaseTime = timeout;
@@ -1274,10 +1276,11 @@ public abstract class DhcpPacket {
      * Builds a DHCP-NAK packet from the required specified parameters.
      */
     public static ByteBuffer buildNakPacket(int encap, int transactionId, Inet4Address serverIpAddr,
-            byte[] mac, boolean broadcast, String message) {
+            Inet4Address relayIp, byte[] mac, boolean broadcast, String message) {
         DhcpPacket pkt = new DhcpNakPacket(
-                transactionId, (short) 0, serverIpAddr, serverIpAddr, mac, broadcast);
+                transactionId, (short) 0, relayIp, mac, broadcast);
         pkt.mMessage = message;
+        pkt.mServerIdentifier = serverIpAddr;
         return pkt.buildPacket(encap, DHCP_CLIENT, DHCP_SERVER);
     }
 
