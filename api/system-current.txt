@@ -4542,11 +4542,9 @@ package android.service.autofill {
   public abstract class AutofillFieldClassificationService extends android.app.Service {
     method public android.os.IBinder onBind(android.content.Intent);
     method public float[][] onGetScores(java.lang.String, android.os.Bundle, java.util.List<android.view.autofill.AutofillValue>, java.util.List<java.lang.String>);
-    field public static final java.lang.String RESOURCE_AVAILABLE_ALGORITHMS = "autofill_field_classification_available_algorithms";
-    field public static final java.lang.String RESOURCE_DEFAULT_ALGORITHM = "autofill_field_classification_default_algorithm";
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.autofill.AutofillFieldClassificationService";
-    field public static final deprecated java.lang.String SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS = "android.autofill.field_classification.available_algorithms";
-    field public static final deprecated java.lang.String SERVICE_META_DATA_KEY_DEFAULT_ALGORITHM = "android.autofill.field_classification.default_algorithm";
+    field public static final java.lang.String SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS = "android.autofill.field_classification.available_algorithms";
+    field public static final java.lang.String SERVICE_META_DATA_KEY_DEFAULT_ALGORITHM = "android.autofill.field_classification.default_algorithm";
   }
 
 }
