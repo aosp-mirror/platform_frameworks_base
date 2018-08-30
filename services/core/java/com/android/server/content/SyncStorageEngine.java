@@ -357,7 +357,7 @@ public class SyncStorageEngine {
 
         /** Called when a sync is needed on an account(s) due to some change in state. */
         public void onSyncRequest(EndPoint info, int reason, Bundle extras,
-                @SyncExemption int syncExemptionFlag);
+                @SyncExemption int syncExemptionFlag, int callingUid, int callingPid);
     }
 
     interface PeriodicSyncAddedListener {
@@ -669,7 +669,7 @@ public class SyncStorageEngine {
     }
 
     public void setSyncAutomatically(Account account, int userId, String providerName,
-            boolean sync, @SyncExemption int syncExemptionFlag, int callingUid) {
+            boolean sync, @SyncExemption int syncExemptionFlag, int callingUid, int callingPid) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Slog.d(TAG, "setSyncAutomatically: " + /* account + */" provider " + providerName
                     + ", user " + userId + " -> " + sync);
@@ -678,7 +678,9 @@ public class SyncStorageEngine {
                 " user=", userId,
                 " authority=", providerName,
                 " value=", Boolean.toString(sync),
-                " callingUid=", callingUid);
+                " cuid=", callingUid,
+                " cpid=", callingPid
+        );
         synchronized (mAuthorities) {
             AuthorityInfo authority =
                     getOrCreateAuthorityLocked(
@@ -704,7 +706,7 @@ public class SyncStorageEngine {
         if (sync) {
             requestSync(account, userId, SyncOperation.REASON_SYNC_AUTO, providerName,
                     new Bundle(),
-                    syncExemptionFlag);
+                    syncExemptionFlag, callingUid, callingPid);
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
         queueBackup();
@@ -736,9 +738,9 @@ public class SyncStorageEngine {
     }
 
     public void setIsSyncable(Account account, int userId, String providerName, int syncable,
-            int callingUid) {
+            int callingUid, int callingPid) {
         setSyncableStateForEndPoint(new EndPoint(account, providerName, userId), syncable,
-                callingUid);
+                callingUid, callingPid);
     }
 
     /**
@@ -747,10 +749,12 @@ public class SyncStorageEngine {
      * @param target target to set value for.
      * @param syncable 0 indicates unsyncable, <0 unknown, >0 is active/syncable.
      */
-    private void setSyncableStateForEndPoint(EndPoint target, int syncable, int callingUid) {
+    private void setSyncableStateForEndPoint(EndPoint target, int syncable,
+            int callingUid, int callingPid) {
         AuthorityInfo aInfo;
         mLogger.log("Set syncable ", target, " value=", Integer.toString(syncable),
-                " callingUid=", callingUid);
+                " cuid=", callingUid,
+                " cpid=", callingPid);
         synchronized (mAuthorities) {
             aInfo = getOrCreateAuthorityLocked(target, -1, false);
             if (syncable < AuthorityInfo.NOT_INITIALIZED) {
@@ -770,7 +774,7 @@ public class SyncStorageEngine {
         }
         if (syncable == AuthorityInfo.SYNCABLE) {
             requestSync(aInfo, SyncOperation.REASON_IS_SYNCABLE, new Bundle(),
-                    ContentResolver.SYNC_EXEMPTION_NONE);
+                    ContentResolver.SYNC_EXEMPTION_NONE, callingUid, callingPid);
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
     }
@@ -932,9 +936,10 @@ public class SyncStorageEngine {
     }
 
     public void setMasterSyncAutomatically(boolean flag, int userId,
-            @SyncExemption int syncExemptionFlag, int callingUid) {
+            @SyncExemption int syncExemptionFlag, int callingUid, int callingPid) {
         mLogger.log("Set master enabled=", flag, " user=", userId,
-                " caller=" + callingUid);
+                " cuid=", callingUid,
+                " cpid=", callingPid);
         synchronized (mAuthorities) {
             Boolean auto = mMasterSyncAutomatically.get(userId);
             if (auto != null && auto.equals(flag)) {
@@ -946,7 +951,7 @@ public class SyncStorageEngine {
         if (flag) {
             requestSync(null, userId, SyncOperation.REASON_MASTER_SYNC_AUTO, null,
                     new Bundle(),
-                    syncExemptionFlag);
+                    syncExemptionFlag, callingUid, callingPid);
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
         mContext.sendBroadcast(ContentResolver.ACTION_SYNC_CONN_STATUS_CHANGED);
@@ -2064,11 +2069,11 @@ public class SyncStorageEngine {
     }
 
     private void requestSync(AuthorityInfo authorityInfo, int reason, Bundle extras,
-            @SyncExemption int syncExemptionFlag) {
+            @SyncExemption int syncExemptionFlag, int callingUid, int callingPid) {
         if (android.os.Process.myUid() == android.os.Process.SYSTEM_UID
                 && mSyncRequestListener != null) {
             mSyncRequestListener.onSyncRequest(authorityInfo.target, reason, extras,
-                    syncExemptionFlag);
+                    syncExemptionFlag, callingUid, callingPid);
         } else {
             SyncRequest.Builder req =
                     new SyncRequest.Builder()
@@ -2080,7 +2085,7 @@ public class SyncStorageEngine {
     }
 
     private void requestSync(Account account, int userId, int reason, String authority,
-            Bundle extras, @SyncExemption int syncExemptionFlag) {
+            Bundle extras, @SyncExemption int syncExemptionFlag, int callingUid, int callingPid) {
         // If this is happening in the system process, then call the syncrequest listener
         // to make a request back to the SyncManager directly.
         // If this is probably a test instance, then call back through the ContentResolver
@@ -2089,7 +2094,7 @@ public class SyncStorageEngine {
                 && mSyncRequestListener != null) {
             mSyncRequestListener.onSyncRequest(
                     new EndPoint(account, authority, userId),
-                    reason, extras, syncExemptionFlag);
+                    reason, extras, syncExemptionFlag, callingUid, callingPid);
         } else {
             ContentResolver.requestSync(account, authority, extras);
         }
