@@ -33,6 +33,7 @@ import android.util.MathUtils;
 public class ColorStateListDrawable extends Drawable implements Drawable.Callback {
     private ColorDrawable mColorDrawable;
     private ColorStateListDrawableState mState;
+    private boolean mMutated = false;
 
     public ColorStateListDrawable() {
         mState = new ColorStateListDrawableState();
@@ -139,7 +140,7 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
             int color = mState.mColor.getColorForState(state, mState.mColor.getDefaultColor());
 
             if (mState.mAlpha != -1) {
-                color = color & 0xFFFFFF | MathUtils.constrain(mState.mAlpha, 0, 255) << 24;
+                color = (color & 0xFFFFFF) | MathUtils.constrain(mState.mAlpha, 0, 255) << 24;
             }
 
             if (color != mColorDrawable.getColor()) {
@@ -183,6 +184,8 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
 
     @Override
     public ConstantState getConstantState() {
+        mState.mChangingConfigurations = mState.mChangingConfigurations
+                | (getChangingConfigurations() & ~mState.getChangingConfigurations());
         return mState;
     }
 
@@ -198,6 +201,29 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
         } else {
             return mState.mColor;
         }
+    }
+
+    @Override
+    public int getChangingConfigurations() {
+        return super.getChangingConfigurations() | mState.getChangingConfigurations();
+    }
+
+    @Override
+    public Drawable mutate() {
+        if (!mMutated && super.mutate() == this) {
+            mState = new ColorStateListDrawableState(mState);
+            mMutated = true;
+        }
+        return this;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void clearMutated() {
+        super.clearMutated();
+        mMutated = false;
     }
 
     /**
@@ -221,6 +247,13 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
         ColorStateListDrawableState() {
         }
 
+        ColorStateListDrawableState(ColorStateListDrawableState state) {
+            mColor = state.mColor;
+            mTint = state.mTint;
+            mAlpha = state.mAlpha;
+            mTintMode = state.mTintMode;
+            mChangingConfigurations = state.mChangingConfigurations;
+        }
 
         @Override
         public Drawable newDrawable() {
