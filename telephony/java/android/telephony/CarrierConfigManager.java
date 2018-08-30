@@ -3420,6 +3420,14 @@ public class CarrierConfigManager {
             "prevent_clir_activation_and_deactivation_code_bool";
 
     /**
+     * Flag specifying whether to show forwarded number on call-in-progress screen.
+     * When true, forwarded number is shown.
+     * When false, forwarded number is not shown.
+     */
+    public static final String KEY_SHOW_FORWARDED_NUMBER_BOOL =
+            "show_forwarded_number_bool";
+
+    /**
      * Configs used for epdg tunnel bring up.
      *
      * @see <a href="https://tools.ietf.org/html/rfc7296">RFC 7296, Internet Key Exchange
@@ -4273,6 +4281,7 @@ public class CarrierConfigManager {
         // Default wifi configurations.
         sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putBoolean(ENABLE_EAP_METHOD_PREFIX_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_FORWARDED_NUMBER_BOOL, false);
         sDefaults.putAll(Iwlan.getDefaults());
     }
 

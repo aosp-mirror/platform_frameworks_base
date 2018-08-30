@@ -328,6 +328,14 @@ public final class ImsCallProfile implements Parcelable {
     @Deprecated
     public static final String EXTRA_CALL_RAT_TYPE_ALT = "callRadioTech";
 
+    /**
+     * String extra property containing forwarded numbers associated with the current connection
+     * for an IMS call. The value is string array, and it can include multiple numbers, and
+     * the array values are expected E164 (e.g. +1 (650) 253-0000) format.
+     */
+    public static final String EXTRA_FORWARDED_NUMBER =
+            "android.telephony.ims.extra.FORWARDED_NUMBER";
+
     /** @hide */
     public int mServiceType;
     /** @hide */
