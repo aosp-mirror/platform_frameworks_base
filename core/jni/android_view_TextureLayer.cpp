@@ -67,7 +67,8 @@ static void TextureLayer_setTransform(JNIEnv* env, jobject clazz,
 static void TextureLayer_setSurfaceTexture(JNIEnv* env, jobject clazz,
         jlong layerUpdaterPtr, jobject surface) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
-    layer->setSurfaceTexture(SurfaceTexture_getSurfaceTexture(env, surface));
+    sp<GLConsumer> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, surface));
+    layer->setSurfaceTexture(surfaceTexture);
 }
 
 static void TextureLayer_updateSurfaceTexture(JNIEnv* env, jobject clazz,
