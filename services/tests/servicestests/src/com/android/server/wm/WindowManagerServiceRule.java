@@ -111,7 +111,7 @@ public class WindowManagerServiceRule implements TestRule {
                     doReturn(input[1]).when(ims).monitorInput(anyString());
                 }
 
-                mService = WindowManagerService.main(context, ims, true, false,
+                mService = WindowManagerService.main(context, ims, false,
                         false, mPolicy = new TestWindowManagerPolicy(
                                 WindowManagerServiceRule.this::getWindowManagerService));
 

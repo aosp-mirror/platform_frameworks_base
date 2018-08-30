@@ -888,9 +888,8 @@ public final class SystemServer {
             // WMS needs sensor service ready
             ConcurrentUtils.waitForFutureNoInterrupt(mSensorServiceStart, START_SENSOR_SERVICE);
             mSensorServiceStart = null;
-            wm = WindowManagerService.main(context, inputManager,
-                    mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL,
-                    !mFirstBoot, mOnlyCore, new PhoneWindowManager());
+            wm = WindowManagerService.main(context, inputManager, !mFirstBoot, mOnlyCore,
+                    new PhoneWindowManager());
             ServiceManager.addService(Context.WINDOW_SERVICE, wm, /* allowIsolated= */ false,
                     DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PROTO);
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager,

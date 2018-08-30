@@ -47,13 +47,13 @@ import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
-import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.google.android.collect.Sets;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.input.InputWindowHandle;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import com.android.server.wm.utils.InsetUtils;
 
