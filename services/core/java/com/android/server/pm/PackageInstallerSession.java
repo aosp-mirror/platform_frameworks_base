@@ -59,6 +59,7 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ApkLite;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
+import android.content.pm.dex.DexMetadataHelper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
@@ -99,7 +100,6 @@ import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageInstallerService.PackageInstallObserverAdapter;
 
-import android.content.pm.dex.DexMetadataHelper;
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -122,7 +122,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final boolean LOGD = true;
     private static final String REMOVE_SPLIT_MARKER_EXTENSION = ".removed";
 
-    private static final int MSG_EARLY_BIND = 0;
     private static final int MSG_COMMIT = 1;
     private static final int MSG_ON_PACKAGE_INSTALLED = 2;
 
@@ -168,7 +167,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     final int userId;
     final SessionParams params;
     final long createdMillis;
-    final int defaultContainerGid;
 
     /** Staging location where client data is written. */
     final File stageDir;
@@ -285,9 +283,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         @Override
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_EARLY_BIND:
-                    earlyBindToDefContainer();
-                    break;
                 case MSG_COMMIT:
                     synchronized (mLock) {
                         try {
@@ -322,10 +317,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return true;
         }
     };
-
-    private void earlyBindToDefContainer() {
-        mPm.earlyBindToDefContainer();
-    }
 
     /**
      * @return {@code true} iff the installing is app an device owner or affiliated profile owner.
@@ -412,19 +403,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     throw new IllegalArgumentException(e);
                 }
             }
-        }
-
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            final int uid = mPm.getPackageUid(PackageManagerService.DEFAULT_CONTAINER_PACKAGE,
-                    PackageManager.MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM);
-            defaultContainerGid = UserHandle.getSharedAppGid(uid);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-        // attempt to bind to the DefContainer as early as possible
-        if ((params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_EARLY_BIND));
         }
     }
 
