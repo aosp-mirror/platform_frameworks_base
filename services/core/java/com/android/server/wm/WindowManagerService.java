@@ -5040,30 +5040,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public boolean inputMethodClientHasFocus(IInputMethodClient client) {
-        synchronized (mWindowMap) {
-            // TODO: multi-display
-            if (getDefaultDisplayContentLocked().inputMethodClientHasFocus(client)) {
-                return true;
-            }
-
-            // Okay, how about this...  what is the current focus?
-            // It seems in some cases we may not have moved the IM
-            // target window, such as when it was in a pop-up window,
-            // so let's also look at the current focus.  (An example:
-            // go to Gmail, start searching so the keyboard goes up,
-            // press home.  Sometimes the IME won't go down.)
-            // Would be nice to fix this more correctly, but it's
-            // way at the end of a release, and this should be good enough.
-            if (mCurrentFocus != null && mCurrentFocus.mSession.mClient != null
-                    && mCurrentFocus.mSession.mClient.asBinder() == client.asBinder()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
     public void getInitialDisplaySize(int displayId, Point size) {
         synchronized (mWindowMap) {
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
@@ -7431,6 +7407,30 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mWindowMap) {
                 return mCurrentFocus != null ? uid == mCurrentFocus.getOwningUid() : false;
             }
+        }
+
+        @Override
+        public boolean inputMethodClientHasFocus(IInputMethodClient client) {
+            synchronized (mWindowMap) {
+                // TODO: multi-display
+                if (getDefaultDisplayContentLocked().inputMethodClientHasFocus(client)) {
+                    return true;
+                }
+
+                // Okay, how about this...  what is the current focus?
+                // It seems in some cases we may not have moved the IM
+                // target window, such as when it was in a pop-up window,
+                // so let's also look at the current focus.  (An example:
+                // go to Gmail, start searching so the keyboard goes up,
+                // press home.  Sometimes the IME won't go down.)
+                // Would be nice to fix this more correctly, but it's
+                // way at the end of a release, and this should be good enough.
+                if (mCurrentFocus != null && mCurrentFocus.mSession.mClient != null
+                        && mCurrentFocus.mSession.mClient.asBinder() == client.asBinder()) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 

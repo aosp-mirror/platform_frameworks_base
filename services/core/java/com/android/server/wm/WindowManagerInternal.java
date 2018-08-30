@@ -30,6 +30,7 @@ import android.view.InputChannel;
 import android.view.MagnificationSpec;
 import android.view.WindowInfo;
 
+import com.android.internal.view.IInputMethodClient;
 import com.android.server.input.InputManagerService;
 import com.android.server.policy.WindowManagerPolicy;
 
@@ -441,4 +442,9 @@ public abstract class WindowManagerInternal {
      * Returns {@code true} if a Window owned by {@code uid} has focus.
      */
     public abstract boolean isUidFocused(int uid);
+
+    /**
+     * Returns {@code true} if a process that is identified by {@code client} has IME focus.
+     */
+    public abstract boolean inputMethodClientHasFocus(IInputMethodClient client);
 }

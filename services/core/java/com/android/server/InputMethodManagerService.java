@@ -2523,19 +2523,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             synchronized (mMethodMap) {
                 if (mCurClient == null || client == null
                         || mCurClient.client.asBinder() != client.asBinder()) {
-                    try {
-                        // We need to check if this is the current client with
-                        // focus in the window manager, to allow this call to
-                        // be made before input is started in it.
-                        if (!mIWindowManager.inputMethodClientHasFocus(client)) {
-                            Slog.w(TAG, "Ignoring showSoftInput of uid " + uid + ": " + client);
-                            return false;
-                        }
-                    } catch (RemoteException e) {
+                    // We need to check if this is the current client with
+                    // focus in the window manager, to allow this call to
+                    // be made before input is started in it.
+                    if (!mWindowManagerInternal.inputMethodClientHasFocus(client)) {
+                        Slog.w(TAG, "Ignoring showSoftInput of uid " + uid + ": " + client);
                         return false;
                     }
                 }
-
                 if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
                 return showCurrentInputLocked(flags, resultReceiver);
             }
@@ -2608,16 +2603,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             synchronized (mMethodMap) {
                 if (mCurClient == null || client == null
                         || mCurClient.client.asBinder() != client.asBinder()) {
-                    try {
-                        // We need to check if this is the current client with
-                        // focus in the window manager, to allow this call to
-                        // be made before input is started in it.
-                        if (!mIWindowManager.inputMethodClientHasFocus(client)) {
-                            if (DEBUG) Slog.w(TAG, "Ignoring hideSoftInput of uid "
-                                    + uid + ": " + client);
-                            return false;
+                    // We need to check if this is the current client with
+                    // focus in the window manager, to allow this call to
+                    // be made before input is started in it.
+                    if (!mWindowManagerInternal.inputMethodClientHasFocus(client)) {
+                        if (DEBUG) {
+                            Slog.w(TAG, "Ignoring hideSoftInput of uid " + uid + ": " + client);
                         }
-                    } catch (RemoteException e) {
                         return false;
                     }
                 }
@@ -2732,20 +2724,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             + client.asBinder());
                 }
 
-                try {
-                    if (!mIWindowManager.inputMethodClientHasFocus(cs.client)) {
-                        // Check with the window manager to make sure this client actually
-                        // has a window with focus.  If not, reject.  This is thread safe
-                        // because if the focus changes some time before or after, the
-                        // next client receiving focus that has any interest in input will
-                        // be calling through here after that change happens.
-                        if (DEBUG) {
-                            Slog.w(TAG, "Focus gain on non-focused client " + cs.client
-                                    + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
-                        }
-                        return InputBindResult.NOT_IME_TARGET_WINDOW;
+                if (!mWindowManagerInternal.inputMethodClientHasFocus(cs.client)) {
+                    // Check with the window manager to make sure this client actually
+                    // has a window with focus.  If not, reject.  This is thread safe
+                    // because if the focus changes some time before or after, the
+                    // next client receiving focus that has any interest in input will
+                    // be calling through here after that change happens.
+                    if (DEBUG) {
+                        Slog.w(TAG, "Focus gain on non-focused client " + cs.client
+                                + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
                     }
-                } catch (RemoteException e) {
+                    return InputBindResult.NOT_IME_TARGET_WINDOW;
                 }
 
                 if (!calledFromValidUser) {
