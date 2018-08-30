@@ -2626,8 +2626,16 @@
   <java-symbol type="dimen" name="magnifier_width" />
   <java-symbol type="dimen" name="magnifier_height" />
   <java-symbol type="dimen" name="magnifier_elevation" />
-  <java-symbol type="dimen" name="magnifier_zoom_scale" />
-  <java-symbol type="dimen" name="magnifier_offset" />
+  <java-symbol type="dimen" name="magnifier_zoom" />
+  <java-symbol type="dimen" name="magnifier_vertical_offset" />
+  <java-symbol type="dimen" name="magnifier_horizontal_offset" />
+  <java-symbol type="attr" name="magnifierWidth" />
+  <java-symbol type="attr" name="magnifierHeight" />
+  <java-symbol type="attr" name="magnifierElevation" />
+  <java-symbol type="attr" name="magnifierZoom" />
+  <java-symbol type="attr" name="magnifierVerticalOffset" />
+  <java-symbol type="attr" name="magnifierHorizontalOffset" />
+  <java-symbol type="attr" name="magnifierStyle" />
 
   <java-symbol type="string" name="date_picker_prev_month_button" />
   <java-symbol type="string" name="date_picker_next_month_button" />

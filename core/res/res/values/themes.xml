@@ -310,6 +310,7 @@ please see themes_device_defaults.xml.
         <item name="activityChooserViewStyle">@style/Widget.ActivityChooserView</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.FragmentBreadCrumbs</item>
         <item name="contextPopupMenuStyle">?attr/popupMenuStyle</item>
+        <item name="magnifierStyle">@style/Widget.Magnifier</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.PreferenceScreen</item>

@@ -799,6 +799,15 @@ please see styles_device_defaults.xml.
         <item name="textOff">@string/capital_off</item>
     </style>
 
+    <style name="Widget.Magnifier">
+        <item name="magnifierWidth">@dimen/magnifier_width</item>
+        <item name="magnifierHeight">@dimen/magnifier_height</item>
+        <item name="magnifierZoom">@dimen/magnifier_zoom</item>
+        <item name="magnifierElevation">@dimen/magnifier_elevation</item>
+        <item name="magnifierVerticalOffset">@dimen/magnifier_vertical_offset</item>
+        <item name="magnifierHorizontalOffset">@dimen/magnifier_horizontal_offset</item>
+    </style>
+
     <!-- Text Appearances -->
     <eat-comment />
 
