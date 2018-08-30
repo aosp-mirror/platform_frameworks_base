@@ -15,11 +15,11 @@
  */
 #include "Bitmap.h"
 
-#include "Caches.h"
 #include "HardwareBitmapUploader.h"
 #include "Properties.h"
 #include "renderthread/RenderProxy.h"
 #include "utils/Color.h"
+#include <utils/Trace.h>
 
 #include <sys/mman.h>
 
@@ -34,8 +34,8 @@
 #include <SkImagePriv.h>
 #include <SkToSRGBColorFilter.h>
 
-#include <limits>
 #include <SkHighContrastFilter.h>
+#include <limits>
 
 namespace android {
 
@@ -333,17 +333,17 @@ sk_sp<SkImage> Bitmap::makeImage(sk_sp<SkColorFilter>* outputColorFilter) {
 
     // TODO: Move this to the canvas (or other?) layer where we have the target lightness
     // mode and can selectively do the right thing.
-    if (palette() != BitmapPalette::Unknown && uirenderer::Properties::forceDarkMode) {
-        SkHighContrastConfig config;
-        config.fInvertStyle = SkHighContrastConfig::InvertStyle::kInvertLightness;
-        *outputColorFilter = SkHighContrastFilter::Make(config)->makeComposed(*outputColorFilter);
-    }
+    //    if (palette() != BitmapPalette::Unknown && uirenderer::Properties::forceDarkMode) {
+    //        SkHighContrastConfig config;
+    //        config.fInvertStyle = SkHighContrastConfig::InvertStyle::kInvertLightness;
+    //        *outputColorFilter =
+    //        SkHighContrastFilter::Make(config)->makeComposed(*outputColorFilter);
+    //    }
     return image;
 }
 
 class MinMaxAverage {
 public:
-
     void add(float sample) {
         if (mCount == 0) {
             mMin = sample;
@@ -356,21 +356,13 @@ public:
         mCount++;
     }
 
-    float average() {
-        return mTotal / mCount;
-    }
+    float average() { return mTotal / mCount; }
 
-    float min() {
-        return mMin;
-    }
+    float min() { return mMin; }
 
-    float max() {
-        return mMax;
-    }
+    float max() { return mMax; }
 
-    float delta() {
-        return mMax - mMin;
-    }
+    float delta() { return mMax - mMin; }
 
 private:
     float mMin = 0.0f;
@@ -413,14 +405,15 @@ BitmapPalette Bitmap::computePalette(const SkImageInfo& info, const void* addr, 
     // TODO: Tune the coverage threshold
     if (sampledCount < 5) {
         ALOGV("Not enough samples, only found %d for image sized %dx%d, format = %d, alpha = %d",
-              sampledCount, info.width(), info.height(), (int) info.colorType(), (int) info.alphaType());
+              sampledCount, info.width(), info.height(), (int)info.colorType(),
+              (int)info.alphaType());
         return BitmapPalette::Unknown;
     }
 
-    ALOGV("samples = %d, hue [min = %f, max = %f, avg = %f]; saturation [min = %f, max = %f, avg = %f]",
-          sampledCount,
-          hue.min(), hue.max(), hue.average(),
-          saturation.min(), saturation.max(), saturation.average());
+    ALOGV("samples = %d, hue [min = %f, max = %f, avg = %f]; saturation [min = %f, max = %f, avg = "
+          "%f]",
+          sampledCount, hue.min(), hue.max(), hue.average(), saturation.min(), saturation.max(),
+          saturation.average());
 
     if (hue.delta() <= 20 && saturation.delta() <= .1f) {
         if (value.average() >= .5f) {

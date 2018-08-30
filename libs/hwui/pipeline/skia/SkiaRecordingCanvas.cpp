@@ -45,21 +45,13 @@ void SkiaRecordingCanvas::initDisplayList(uirenderer::RenderNode* renderNode, in
     }
 
     mDisplayList->attachRecorder(&mRecorder, SkIRect::MakeWH(width, height));
-    SkCanvas* canvas = &mRecorder;
-    if (renderNode) {
-        mWrappedCanvas = makeTransformCanvas(&mRecorder, renderNode->usageHint());
-        if (mWrappedCanvas) {
-            canvas = mWrappedCanvas.get();
-        }
-    }
-    SkiaCanvas::reset(canvas);
+    SkiaCanvas::reset(&mRecorder);
 }
 
 uirenderer::DisplayList* SkiaRecordingCanvas::finishRecording() {
     // close any existing chunks if necessary
     insertReorderBarrier(false);
     mRecorder.restoreToCount(1);
-    mWrappedCanvas = nullptr;
     return mDisplayList.release();
 }
 

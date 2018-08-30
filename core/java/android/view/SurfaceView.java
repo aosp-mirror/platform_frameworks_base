@@ -1168,12 +1168,6 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         }
 
         @Override
-        public void setFinalCrop(Rect crop) {
-            super.setFinalCrop(crop);
-            mBackgroundControl.setFinalCrop(crop);
-        }
-
-        @Override
         public void setLayerStack(int layerStack) {
             super.setLayerStack(layerStack);
             mBackgroundControl.setLayerStack(layerStack);

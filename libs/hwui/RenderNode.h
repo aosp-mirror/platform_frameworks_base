@@ -209,13 +209,9 @@ public:
 
     void output(std::ostream& output, uint32_t level);
 
-    void setUsageHint(UsageHint usageHint) {
-        mUsageHint = usageHint;
-    }
+    void setUsageHint(UsageHint usageHint) { mUsageHint = usageHint; }
 
-    UsageHint usageHint() const {
-        return mUsageHint;
-    }
+    UsageHint usageHint() const { return mUsageHint; }
 
 private:
     void computeOrderingImpl(RenderNodeOp* opState,

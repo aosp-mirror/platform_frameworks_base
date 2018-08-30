@@ -34,7 +34,7 @@ enum class ColorTransform {
     Dark,
 };
 
-std::unique_ptr<SkCanvas> makeTransformCanvas(SkCanvas* inCanvas, ColorTransform transform);
-std::unique_ptr<SkCanvas> makeTransformCanvas(SkCanvas* inCanvas, UsageHint usageHint);
+// True if the paint was modified, false otherwise
+bool transformPaint(ColorTransform transform, SkPaint* paint);
 
 }  // namespace android::uirenderer;

@@ -18,7 +18,6 @@
 
 #include <DeviceInfo.h>
 #include <DisplayList.h>
-#include <GlLayer.h>
 #include <Matrix.h>
 #include <Properties.h>
 #include <Rect.h>

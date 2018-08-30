@@ -18,12 +18,11 @@
 
 #include "hwui/AnimatedImageDrawable.h"
 #include "GLFunctorDrawable.h"
+#include "RecordingCanvas.h"
 #include "RenderNodeDrawable.h"
 #include "TreeInfo.h"
 #include "utils/LinearAllocator.h"
 
-#include <SkLiteDL.h>
-#include <SkLiteRecorder.h>
 #include <deque>
 
 namespace android {
@@ -140,7 +139,7 @@ public:
      */
     inline bool containsProjectionReceiver() const { return mProjectionReceiver; }
 
-    void attachRecorder(SkLiteRecorder* recorder, const SkIRect& bounds) {
+    void attachRecorder(RecordingCanvas* recorder, const SkIRect& bounds) {
         recorder->reset(&mDisplayList, bounds);
     }
 
@@ -160,7 +159,7 @@ public:
     std::vector<SkImage*> mMutableImages;
     std::vector<VectorDrawableRoot*> mVectorDrawables;
     std::vector<AnimatedImageDrawable*> mAnimatedImages;
-    SkLiteDL mDisplayList;
+    DisplayListData mDisplayList;
 
     // mProjectionReceiver points to a child node (stored in mChildNodes) that is as a projection
     // receiver. It is set at record time and used at both prepare and draw tree traversals to

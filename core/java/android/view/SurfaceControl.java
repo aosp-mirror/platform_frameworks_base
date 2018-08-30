@@ -109,8 +109,6 @@ public class SurfaceControl implements Parcelable {
             int flags, int mask);
     private static native void nativeSetWindowCrop(long transactionObj, long nativeObject,
             int l, int t, int r, int b);
-    private static native void nativeSetFinalCrop(long transactionObj, long nativeObject,
-            int l, int t, int r, int b);
     private static native void nativeSetLayerStack(long transactionObj, long nativeObject,
             int layerStack);
 
@@ -961,13 +959,6 @@ public class SurfaceControl implements Parcelable {
         }
     }
 
-    public void setFinalCrop(Rect crop) {
-        checkNotReleased();
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setFinalCrop(this, crop);
-        }
-    }
-
     public void setLayerStack(int layerStack) {
         checkNotReleased();
         synchronized(SurfaceControl.class) {
@@ -1521,18 +1512,6 @@ public class SurfaceControl implements Parcelable {
         }
 
         @UnsupportedAppUsage
-        public Transaction setFinalCrop(SurfaceControl sc, Rect crop) {
-            sc.checkNotReleased();
-            if (crop != null) {
-                nativeSetFinalCrop(mNativeObject, sc.mNativeObject,
-                        crop.left, crop.top, crop.right, crop.bottom);
-            } else {
-                nativeSetFinalCrop(mNativeObject, sc.mNativeObject, 0, 0, 0, 0);
-            }
-
-            return this;
-        }
-
         public Transaction setLayerStack(SurfaceControl sc, int layerStack) {
             sc.checkNotReleased();
             nativeSetLayerStack(mNativeObject, sc.mNativeObject, layerStack);

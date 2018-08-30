@@ -69,7 +69,8 @@ public:
     Bitmap(void* address, void* context, FreeFunc freeFunc, const SkImageInfo& info,
            size_t rowBytes);
     Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes);
-    Bitmap(GraphicBuffer* buffer, const SkImageInfo& info, BitmapPalette palette = BitmapPalette::Unknown);
+    Bitmap(GraphicBuffer* buffer, const SkImageInfo& info,
+           BitmapPalette palette = BitmapPalette::Unknown);
 
     int rowBytesAsPixels() const { return rowBytes() >> mInfo.shiftPerPixel(); }
 

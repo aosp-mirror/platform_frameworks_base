@@ -17,6 +17,7 @@
 package com.android.settingslib.bluetooth;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
 
 import java.lang.ref.WeakReference;
@@ -57,7 +58,7 @@ public class LocalBluetoothManager {
             }
             // This will be around as long as this process is
             Context appContext = context.getApplicationContext();
-            sInstance = new LocalBluetoothManager(adapter, appContext);
+            sInstance = new LocalBluetoothManager(adapter, appContext, null);
             if (onInitCallback != null) {
                 onInitCallback.onBluetoothManagerInitialized(appContext, sInstance);
             }
@@ -66,15 +67,29 @@ public class LocalBluetoothManager {
         return sInstance;
     }
 
-    private LocalBluetoothManager(LocalBluetoothAdapter adapter, Context context) {
+    /**
+     * Returns a new instance of {@link LocalBluetoothManager} or null if Bluetooth is not
+     * supported for this hardware. This instance should be globally cached by the caller.
+     */
+    public static LocalBluetoothManager create(Context context, Handler handler) {
+        LocalBluetoothAdapter adapter = LocalBluetoothAdapter.getInstance();
+        if (adapter == null) {
+            return null;
+        }
+        return new LocalBluetoothManager(adapter, context.getApplicationContext(), handler);
+    }
+
+    private LocalBluetoothManager(
+            LocalBluetoothAdapter adapter, Context context, Handler handler) {
         mContext = context;
         mLocalAdapter = adapter;
-
         mCachedDeviceManager = new CachedBluetoothDeviceManager(context, this);
         mEventManager = new BluetoothEventManager(mLocalAdapter,
-                mCachedDeviceManager, context);
+                mCachedDeviceManager, context, handler);
         mProfileManager = new LocalBluetoothProfileManager(context,
                 mLocalAdapter, mCachedDeviceManager, mEventManager);
+
+        mProfileManager.updateLocalProfiles();
         mEventManager.readPairedDevices();
     }
 

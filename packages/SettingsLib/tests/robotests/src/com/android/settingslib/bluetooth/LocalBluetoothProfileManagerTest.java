@@ -76,9 +76,11 @@ public class LocalBluetoothProfileManagerTest {
         mContext = spy(RuntimeEnvironment.application);
         mLocalBluetoothAdapter = LocalBluetoothAdapter.getInstance();
         mEventManager = spy(new BluetoothEventManager(mLocalBluetoothAdapter, mDeviceManager,
-                mContext));
+                mContext, null));
         mShadowBluetoothAdapter = Shadow.extract(BluetoothAdapter.getDefaultAdapter());
         when(mDeviceManager.findDevice(mDevice)).thenReturn(mCachedBluetoothDevice);
+        mProfileManager = new LocalBluetoothProfileManager(mContext, mLocalBluetoothAdapter,
+                mDeviceManager, mEventManager);
     }
 
     /**
@@ -88,11 +90,18 @@ public class LocalBluetoothProfileManagerTest {
     public void constructor_initiateHidAndHidDeviceProfile() {
         mShadowBluetoothAdapter.setSupportedProfiles(generateList(
                 new int[] {BluetoothProfile.HID_HOST, BluetoothProfile.HID_DEVICE}));
-        mProfileManager = new LocalBluetoothProfileManager(mContext, mLocalBluetoothAdapter,
-                mDeviceManager, mEventManager);
+        mProfileManager.updateLocalProfiles();
 
         assertThat(mProfileManager.getHidProfile()).isNotNull();
         assertThat(mProfileManager.getHidDeviceProfile()).isNotNull();
+    }
+
+    @Test
+    public void constructor_doNotUpdateProfiles() {
+        mProfileManager = spy(new LocalBluetoothProfileManager(mContext, mLocalBluetoothAdapter,
+                mDeviceManager, mEventManager));
+
+        verify(mProfileManager, never()).updateLocalProfiles();
     }
 
     /**
@@ -100,8 +109,7 @@ public class LocalBluetoothProfileManagerTest {
      */
     @Test
     public void updateLocalProfiles_addA2dpToLocalProfiles() {
-        mProfileManager = new LocalBluetoothProfileManager(mContext, mLocalBluetoothAdapter,
-                mDeviceManager, mEventManager);
+        mProfileManager.updateLocalProfiles();
         assertThat(mProfileManager.getA2dpProfile()).isNull();
         assertThat(mProfileManager.getHeadsetProfile()).isNull();
 
@@ -120,8 +128,7 @@ public class LocalBluetoothProfileManagerTest {
     public void updateProfiles_addHidProfileForRemoteDevice() {
         mShadowBluetoothAdapter.setSupportedProfiles(generateList(
                 new int[] {BluetoothProfile.HID_HOST}));
-        mProfileManager = new LocalBluetoothProfileManager(mContext, mLocalBluetoothAdapter,
-                mDeviceManager, mEventManager);
+        mProfileManager.updateLocalProfiles();
         ParcelUuid[] uuids = new ParcelUuid[]{BluetoothUuid.Hid};
         ParcelUuid[] localUuids = new ParcelUuid[]{};
         List<LocalBluetoothProfile> profiles = new ArrayList<>();
@@ -143,11 +150,8 @@ public class LocalBluetoothProfileManagerTest {
     public void stateChangedHandler_receiveA2dpConnectionStateChanged_shouldDispatchCallback() {
         mShadowBluetoothAdapter.setSupportedProfiles(generateList(
                 new int[] {BluetoothProfile.A2DP}));
-        mProfileManager = new LocalBluetoothProfileManager(mContext, mLocalBluetoothAdapter,
-                mDeviceManager, mEventManager);
-        // Refer to BluetoothControllerImpl, it will call setReceiverHandler after
-        // LocalBluetoothProfileManager created.
-        mEventManager.setReceiverHandler(null);
+        mProfileManager.updateLocalProfiles();
+
         mIntent = new Intent(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mDevice);
         mIntent.putExtra(BluetoothProfile.EXTRA_PREVIOUS_STATE, BluetoothProfile.STATE_CONNECTING);
@@ -167,11 +171,8 @@ public class LocalBluetoothProfileManagerTest {
     public void stateChangedHandler_receiveHeadsetConnectionStateChanged_shouldDispatchCallback() {
         mShadowBluetoothAdapter.setSupportedProfiles(generateList(
                 new int[] {BluetoothProfile.HEADSET}));
-        mProfileManager = new LocalBluetoothProfileManager(mContext, mLocalBluetoothAdapter,
-                mDeviceManager, mEventManager);
-        // Refer to BluetoothControllerImpl, it will call setReceiverHandler after
-        // LocalBluetoothProfileManager created.
-        mEventManager.setReceiverHandler(null);
+        mProfileManager.updateLocalProfiles();
+
         mIntent = new Intent(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mDevice);
         mIntent.putExtra(BluetoothProfile.EXTRA_PREVIOUS_STATE, BluetoothProfile.STATE_CONNECTING);
@@ -191,11 +192,8 @@ public class LocalBluetoothProfileManagerTest {
     public void stateChangedHandler_receiveHAPConnectionStateChanged_shouldDispatchCallback() {
         mShadowBluetoothAdapter.setSupportedProfiles(generateList(
                 new int[] {BluetoothProfile.HEARING_AID}));
-        mProfileManager = new LocalBluetoothProfileManager(mContext, mLocalBluetoothAdapter,
-                mDeviceManager, mEventManager);
-        // Refer to BluetoothControllerImpl, it will call setReceiverHandler after
-        // LocalBluetoothProfileManager created.
-        mEventManager.setReceiverHandler(null);
+        mProfileManager.updateLocalProfiles();
+
         mIntent = new Intent(BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mDevice);
         mIntent.putExtra(BluetoothProfile.EXTRA_PREVIOUS_STATE, BluetoothProfile.STATE_CONNECTING);
@@ -215,11 +213,8 @@ public class LocalBluetoothProfileManagerTest {
     public void stateChangedHandler_receivePanConnectionStateChanged_shouldNotDispatchCallback() {
         mShadowBluetoothAdapter.setSupportedProfiles(generateList(
                 new int[] {BluetoothProfile.PAN}));
-        mProfileManager = new LocalBluetoothProfileManager(mContext, mLocalBluetoothAdapter,
-                mDeviceManager, mEventManager);
-        // Refer to BluetoothControllerImpl, it will call setReceiverHandler after
-        // LocalBluetoothProfileManager created.
-        mEventManager.setReceiverHandler(null);
+        mProfileManager.updateLocalProfiles();
+
         mIntent = new Intent(BluetoothPan.ACTION_CONNECTION_STATE_CHANGED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mDevice);
         mIntent.putExtra(BluetoothProfile.EXTRA_PREVIOUS_STATE, BluetoothProfile.STATE_CONNECTING);
@@ -239,11 +234,8 @@ public class LocalBluetoothProfileManagerTest {
     public void stateChangedHandler_receivePanConnectionStateChangedWithoutProfile_shouldNotRefresh
     () {
         mShadowBluetoothAdapter.setSupportedProfiles(null);
-        mProfileManager = new LocalBluetoothProfileManager(mContext, mLocalBluetoothAdapter,
-                mDeviceManager, mEventManager);
-        // Refer to BluetoothControllerImpl, it will call setReceiverHandler after
-        // LocalBluetoothProfileManager created.
-        mEventManager.setReceiverHandler(null);
+        mProfileManager.updateLocalProfiles();
+
         mIntent = new Intent(BluetoothPan.ACTION_CONNECTION_STATE_CHANGED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mDevice);
         mIntent.putExtra(BluetoothProfile.EXTRA_PREVIOUS_STATE, BluetoothProfile.STATE_CONNECTING);
@@ -262,11 +254,8 @@ public class LocalBluetoothProfileManagerTest {
     public void stateChangedHandler_receivePanConnectionStateChangedWithProfile_shouldRefresh() {
         mShadowBluetoothAdapter.setSupportedProfiles(generateList(
                 new int[] {BluetoothProfile.PAN}));
-        mProfileManager = new LocalBluetoothProfileManager(mContext, mLocalBluetoothAdapter,
-                mDeviceManager, mEventManager);
-        // Refer to BluetoothControllerImpl, it will call setReceiverHandler after
-        // LocalBluetoothProfileManager created.
-        mEventManager.setReceiverHandler(null);
+        mProfileManager.updateLocalProfiles();
+
         mIntent = new Intent(BluetoothPan.ACTION_CONNECTION_STATE_CHANGED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mDevice);
         mIntent.putExtra(BluetoothProfile.EXTRA_PREVIOUS_STATE, BluetoothProfile.STATE_CONNECTING);

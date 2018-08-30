@@ -22,6 +22,7 @@ import com.android.internal.telephony.SmsHeader;
 import java.text.BreakIterator;
 import java.util.Arrays;
 
+import android.annotation.UnsupportedAppUsage;
 import android.provider.Telephony;
 import android.telephony.SmsMessage;
 import android.text.Emoji;
@@ -32,12 +33,15 @@ import android.text.Emoji;
  */
 public abstract class SmsMessageBase {
     /** {@hide} The address of the SMSC. May be null */
+    @UnsupportedAppUsage
     protected String mScAddress;
 
     /** {@hide} The address of the sender */
+    @UnsupportedAppUsage
     protected SmsAddress mOriginatingAddress;
 
     /** {@hide} The message body as a string. May be null if the message isn't text */
+    @UnsupportedAppUsage
     protected String mMessageBody;
 
     /** {@hide} */
@@ -56,23 +60,28 @@ public abstract class SmsMessageBase {
     protected long mScTimeMillis;
 
     /** {@hide} The raw PDU of the message */
+    @UnsupportedAppUsage
     protected byte[] mPdu;
 
     /** {@hide} The raw bytes for the user data section of the message */
     protected byte[] mUserData;
 
     /** {@hide} */
+    @UnsupportedAppUsage
     protected SmsHeader mUserDataHeader;
 
     // "Message Waiting Indication Group"
     // 23.038 Section 4
     /** {@hide} */
+    @UnsupportedAppUsage
     protected boolean mIsMwi;
 
     /** {@hide} */
+    @UnsupportedAppUsage
     protected boolean mMwiSense;
 
     /** {@hide} */
+    @UnsupportedAppUsage
     protected boolean mMwiDontStore;
 
     /**
@@ -86,11 +95,14 @@ public abstract class SmsMessageBase {
     protected int mIndexOnIcc = -1;
 
     /** TP-Message-Reference - Message Reference of sent message. @hide */
+    @UnsupportedAppUsage
     public int mMessageRef;
 
     // TODO(): This class is duplicated in SmsMessage.java. Refactor accordingly.
     public static abstract class SubmitPduBase  {
+        @UnsupportedAppUsage
         public byte[] encodedScAddress; // Null if not applicable.
+        @UnsupportedAppUsage
         public byte[] encodedMessage;
 
         @Override
@@ -106,6 +118,7 @@ public abstract class SmsMessageBase {
      * Returns the address of the SMS service center that relayed this message
      * or null if there is none.
      */
+    @UnsupportedAppUsage
     public String getServiceCenterAddress() {
         return mScAddress;
     }
@@ -114,6 +127,7 @@ public abstract class SmsMessageBase {
      * Returns the originating address (sender) of this SMS message in String
      * form or null if unavailable
      */
+    @UnsupportedAppUsage
     public String getOriginatingAddress() {
         if (mOriginatingAddress == null) {
             return null;
@@ -127,6 +141,7 @@ public abstract class SmsMessageBase {
      * was from an email gateway. Returns null if originating address
      * unavailable.
      */
+    @UnsupportedAppUsage
     public String getDisplayOriginatingAddress() {
         if (mIsEmail) {
             return mEmailFrom;
@@ -139,6 +154,7 @@ public abstract class SmsMessageBase {
      * Returns the message body as a String, if it exists and is text based.
      * @return message body is there is one, otherwise null
      */
+    @UnsupportedAppUsage
     public String getMessageBody() {
         return mMessageBody;
     }
@@ -152,6 +168,7 @@ public abstract class SmsMessageBase {
      * Returns the message body, or email message body if this message was from
      * an email gateway. Returns null if message body unavailable.
      */
+    @UnsupportedAppUsage
     public String getDisplayMessageBody() {
         if (mIsEmail) {
             return mEmailBody;
@@ -164,6 +181,7 @@ public abstract class SmsMessageBase {
      * Unofficial convention of a subject line enclosed in parens empty string
      * if not present
      */
+    @UnsupportedAppUsage
     public String getPseudoSubject() {
         return mPseudoSubject == null ? "" : mPseudoSubject;
     }
@@ -171,6 +189,7 @@ public abstract class SmsMessageBase {
     /**
      * Returns the service centre timestamp in currentTimeMillis() format
      */
+    @UnsupportedAppUsage
     public long getTimestampMillis() {
         return mScTimeMillis;
     }
@@ -204,12 +223,14 @@ public abstract class SmsMessageBase {
     /**
      * Get protocol identifier.
      */
+    @UnsupportedAppUsage
     public abstract int getProtocolIdentifier();
 
     /**
      * See TS 23.040 9.2.3.9 returns true if this is a "replace short message"
      * SMS
      */
+    @UnsupportedAppUsage
     public abstract boolean isReplace();
 
     /**
@@ -242,6 +263,7 @@ public abstract class SmsMessageBase {
      * returns the user data section minus the user data header if one was
      * present.
      */
+    @UnsupportedAppUsage
     public byte[] getUserData() {
         return mUserData;
     }
@@ -251,6 +273,7 @@ public abstract class SmsMessageBase {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public SmsHeader getUserDataHeader() {
         return mUserDataHeader;
     }
@@ -279,17 +302,20 @@ public abstract class SmsMessageBase {
      *         See TS 23.040, 9.9.2.3.15 for a description of other possible
      *         values.
      */
+    @UnsupportedAppUsage
     public abstract int getStatus();
 
     /**
      * Return true iff the message is a SMS-STATUS-REPORT message.
      */
+    @UnsupportedAppUsage
     public abstract boolean isStatusReportMessage();
 
     /**
      * Returns true iff the <code>TP-Reply-Path</code> bit is set in
      * this message.
      */
+    @UnsupportedAppUsage
     public abstract boolean isReplyPathPresent();
 
     /**

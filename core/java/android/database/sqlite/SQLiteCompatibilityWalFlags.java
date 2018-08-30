@@ -16,6 +16,7 @@
 
 package android.database.sqlite;
 
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.provider.Settings;
@@ -33,6 +34,7 @@ import com.android.internal.annotations.VisibleForTesting;
  * for consistent behavior across all connections opened in the process.
  * @hide
  */
+@TestApi
 public class SQLiteCompatibilityWalFlags {
 
     private static final String TAG = "SQLiteCompatibilityWalFlags";
@@ -44,6 +46,9 @@ public class SQLiteCompatibilityWalFlags {
     private static volatile long sTruncateSize = -1;
     // This flag is used to avoid recursive initialization due to circular dependency on Settings
     private static volatile boolean sCallingGlobalSettings;
+
+    private SQLiteCompatibilityWalFlags() {
+    }
 
     /**
      * @hide
@@ -140,6 +145,7 @@ public class SQLiteCompatibilityWalFlags {
      * @hide
      */
     @VisibleForTesting
+    @TestApi
     public static void reset() {
         sInitialized = false;
         sFlagsSet = false;

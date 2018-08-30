@@ -29,6 +29,7 @@ import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keymaster.KeymasterDefs;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.ArraySet;
 
 import java.io.ByteArrayInputStream;
@@ -128,14 +129,14 @@ public abstract class AttestationUtils {
     @NonNull public static KeymasterArguments prepareAttestationArgumentsIfMisprovisioned(
             Context context, @NonNull int[] idTypes, @NonNull byte[] attestationChallenge) throws
             DeviceIdAttestationException {
-        if (!isPotentiallyMisprovisionedDevice(context)) {
-            return null;
-        }
         Resources resources = context.getResources();
         String misprovisionedBrand = resources.getString(
                 com.android.internal.R.string.config_misprovisionedBrandValue);
+        if (!TextUtils.isEmpty(misprovisionedBrand) && !isPotentiallyMisprovisionedDevice(context)){
+            return null;
+        }
         return prepareAttestationArguments(
-                    context, idTypes, attestationChallenge, misprovisionedBrand);
+                context, idTypes, attestationChallenge, misprovisionedBrand);
     }
 
     @NonNull private static boolean isPotentiallyMisprovisionedDevice(Context context) {

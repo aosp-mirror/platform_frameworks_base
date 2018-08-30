@@ -35,7 +35,6 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkUtils;
 import android.net.Uri;
-import android.net.dns.ResolvUtil;
 import android.os.Binder;
 import android.os.INetworkManagementService;
 import android.os.UserHandle;
@@ -172,15 +171,6 @@ public class DnsManager {
         }
 
         return new PrivateDnsConfig(useTls);
-    }
-
-    public static PrivateDnsConfig tryBlockingResolveOf(Network network, String name) {
-        try {
-            final InetAddress[] ips = ResolvUtil.blockingResolveAllLocally(network, name);
-            return new PrivateDnsConfig(name, ips);
-        } catch (UnknownHostException uhe) {
-            return new PrivateDnsConfig(name, null);
-        }
     }
 
     public static Uri[] getPrivateDnsSettingsUris() {

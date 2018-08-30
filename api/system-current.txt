@@ -213,9 +213,22 @@ package android {
     field public static final int userRestriction = 16844164; // 0x1010584
   }
 
+  public static final class R.bool {
+    field public static final int config_sendPackageName = 17891328; // 0x1110000
+  }
+
   public static final class R.raw {
     field public static final int loaderror = 17825792; // 0x1100000
     field public static final int nodomain = 17825793; // 0x1100001
+  }
+
+  public static final class R.string {
+    field public static final int config_feedback_intent_extra_key = 17039391; // 0x104001f
+    field public static final int config_feedback_intent_name_key = 17039392; // 0x1040020
+    field public static final int config_help_intent_extra_key = 17039389; // 0x104001d
+    field public static final int config_help_intent_name_key = 17039390; // 0x104001e
+    field public static final int config_help_package_name_key = 17039387; // 0x104001b
+    field public static final int config_help_package_name_value = 17039388; // 0x104001c
   }
 
   public static final class R.style {
@@ -4542,11 +4555,9 @@ package android.service.autofill {
   public abstract class AutofillFieldClassificationService extends android.app.Service {
     method public android.os.IBinder onBind(android.content.Intent);
     method public float[][] onGetScores(java.lang.String, android.os.Bundle, java.util.List<android.view.autofill.AutofillValue>, java.util.List<java.lang.String>);
-    field public static final java.lang.String RESOURCE_AVAILABLE_ALGORITHMS = "autofill_field_classification_available_algorithms";
-    field public static final java.lang.String RESOURCE_DEFAULT_ALGORITHM = "autofill_field_classification_default_algorithm";
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.autofill.AutofillFieldClassificationService";
-    field public static final deprecated java.lang.String SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS = "android.autofill.field_classification.available_algorithms";
-    field public static final deprecated java.lang.String SERVICE_META_DATA_KEY_DEFAULT_ALGORITHM = "android.autofill.field_classification.default_algorithm";
+    field public static final java.lang.String SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS = "android.autofill.field_classification.available_algorithms";
+    field public static final java.lang.String SERVICE_META_DATA_KEY_DEFAULT_ALGORITHM = "android.autofill.field_classification.default_algorithm";
   }
 
 }
@@ -5984,6 +5995,7 @@ package android.telephony.ims {
     field public static final int CODE_SIP_SERVICE_UNAVAILABLE = 352; // 0x160
     field public static final int CODE_SIP_TEMPRARILY_UNAVAILABLE = 336; // 0x150
     field public static final int CODE_SIP_TRANSACTION_DOES_NOT_EXIST = 343; // 0x157
+    field public static final int CODE_SIP_USER_MARKED_UNWANTED = 365; // 0x16d
     field public static final int CODE_SIP_USER_REJECTED = 361; // 0x169
     field public static final int CODE_SUPP_SVC_CANCELLED = 1202; // 0x4b2
     field public static final int CODE_SUPP_SVC_FAILED = 1201; // 0x4b1
