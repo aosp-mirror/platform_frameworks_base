@@ -184,6 +184,11 @@ public abstract class DhcpPacket {
     protected String mVendorInfo;
 
     /**
+     * Value of the vendor specific option used to indicate that the network is metered
+     */
+    public static final String VENDOR_INFO_ANDROID_METERED = "ANDROID_METERED";
+
+    /**
      * DHCP Optional Type: DHCP Requested IP Address
      */
     protected static final byte DHCP_REQUESTED_IP = 50;
@@ -677,6 +682,23 @@ public abstract class DhcpPacket {
         if (!TextUtils.isEmpty(hn)) addTlv(buf, DHCP_HOST_NAME, hn);
     }
 
+    protected void addCommonServerTlvs(ByteBuffer buf) {
+        addTlv(buf, DHCP_LEASE_TIME, mLeaseTime);
+        if (mLeaseTime != null && mLeaseTime != INFINITE_LEASE) {
+            // The client should renew at 1/2 the lease-expiry interval
+            addTlv(buf, DHCP_RENEWAL_TIME, (int) (Integer.toUnsignedLong(mLeaseTime) / 2));
+            // Default rebinding time is set as below by RFC2131
+            addTlv(buf, DHCP_REBINDING_TIME,
+                    (int) (Integer.toUnsignedLong(mLeaseTime) * 875L / 1000L));
+        }
+        addTlv(buf, DHCP_SUBNET_MASK, mSubnetMask);
+        addTlv(buf, DHCP_BROADCAST_ADDRESS, mBroadcastAddress);
+        addTlv(buf, DHCP_ROUTER, mGateways);
+        addTlv(buf, DHCP_DNS_SERVER, mDnsServers);
+        addTlv(buf, DHCP_DOMAIN_NAME, mDomainName);
+        addTlv(buf, DHCP_VENDOR_INFO, mVendorInfo);
+    }
+
     /**
      * Converts a MAC from an array of octets to an ASCII string.
      */
@@ -1085,7 +1107,7 @@ public abstract class DhcpPacket {
                 break;
             case DHCP_MESSAGE_TYPE_OFFER:
                 newPacket = new DhcpOfferPacket(
-                    transactionId, secs, broadcast, ipSrc, clientIp, yourIp, clientMac);
+                    transactionId, secs, broadcast, ipSrc, relayIp, clientIp, yourIp, clientMac);
                 break;
             case DHCP_MESSAGE_TYPE_REQUEST:
                 newPacket = new DhcpRequestPacket(
@@ -1098,11 +1120,11 @@ public abstract class DhcpPacket {
                 break;
             case DHCP_MESSAGE_TYPE_ACK:
                 newPacket = new DhcpAckPacket(
-                    transactionId, secs, broadcast, ipSrc, clientIp, yourIp, clientMac);
+                    transactionId, secs, broadcast, ipSrc, relayIp, clientIp, yourIp, clientMac);
                 break;
             case DHCP_MESSAGE_TYPE_NAK:
                 newPacket = new DhcpNakPacket(
-                        transactionId, secs, nextIp, relayIp, clientMac, broadcast);
+                        transactionId, secs, relayIp, clientMac, broadcast);
                 break;
             case DHCP_MESSAGE_TYPE_RELEASE:
                 if (serverIdentifier == null) {
@@ -1234,12 +1256,13 @@ public abstract class DhcpPacket {
      * parameters.
      */
     public static ByteBuffer buildOfferPacket(int encap, int transactionId,
-        boolean broadcast, Inet4Address serverIpAddr, Inet4Address clientIpAddr,
-        byte[] mac, Integer timeout, Inet4Address netMask, Inet4Address bcAddr,
-        List<Inet4Address> gateways, List<Inet4Address> dnsServers,
-        Inet4Address dhcpServerIdentifier, String domainName) {
+        boolean broadcast, Inet4Address serverIpAddr, Inet4Address relayIp,
+        Inet4Address yourIp, byte[] mac, Integer timeout, Inet4Address netMask,
+        Inet4Address bcAddr, List<Inet4Address> gateways, List<Inet4Address> dnsServers,
+        Inet4Address dhcpServerIdentifier, String domainName, boolean metered) {
         DhcpPacket pkt = new DhcpOfferPacket(
-            transactionId, (short) 0, broadcast, serverIpAddr, INADDR_ANY, clientIpAddr, mac);
+                transactionId, (short) 0, broadcast, serverIpAddr, relayIp,
+                INADDR_ANY /* clientIp */, yourIp, mac);
         pkt.mGateways = gateways;
         pkt.mDnsServers = dnsServers;
         pkt.mLeaseTime = timeout;
@@ -1247,6 +1270,9 @@ public abstract class DhcpPacket {
         pkt.mServerIdentifier = dhcpServerIdentifier;
         pkt.mSubnetMask = netMask;
         pkt.mBroadcastAddress = bcAddr;
+        if (metered) {
+            pkt.mVendorInfo = VENDOR_INFO_ANDROID_METERED;
+        }
         return pkt.buildPacket(encap, DHCP_CLIENT, DHCP_SERVER);
     }
 
@@ -1254,12 +1280,13 @@ public abstract class DhcpPacket {
      * Builds a DHCP-ACK packet from the required specified parameters.
      */
     public static ByteBuffer buildAckPacket(int encap, int transactionId,
-        boolean broadcast, Inet4Address serverIpAddr, Inet4Address clientIpAddr,
+        boolean broadcast, Inet4Address serverIpAddr, Inet4Address relayIp, Inet4Address yourIp,
         byte[] mac, Integer timeout, Inet4Address netMask, Inet4Address bcAddr,
         List<Inet4Address> gateways, List<Inet4Address> dnsServers,
-        Inet4Address dhcpServerIdentifier, String domainName) {
+        Inet4Address dhcpServerIdentifier, String domainName, boolean metered) {
         DhcpPacket pkt = new DhcpAckPacket(
-            transactionId, (short) 0, broadcast, serverIpAddr, INADDR_ANY, clientIpAddr, mac);
+                transactionId, (short) 0, broadcast, serverIpAddr, relayIp,
+                INADDR_ANY /* clientIp */, yourIp, mac);
         pkt.mGateways = gateways;
         pkt.mDnsServers = dnsServers;
         pkt.mLeaseTime = timeout;
@@ -1267,6 +1294,9 @@ public abstract class DhcpPacket {
         pkt.mSubnetMask = netMask;
         pkt.mServerIdentifier = dhcpServerIdentifier;
         pkt.mBroadcastAddress = bcAddr;
+        if (metered) {
+            pkt.mVendorInfo = VENDOR_INFO_ANDROID_METERED;
+        }
         return pkt.buildPacket(encap, DHCP_CLIENT, DHCP_SERVER);
     }
 
@@ -1274,10 +1304,11 @@ public abstract class DhcpPacket {
      * Builds a DHCP-NAK packet from the required specified parameters.
      */
     public static ByteBuffer buildNakPacket(int encap, int transactionId, Inet4Address serverIpAddr,
-            byte[] mac, boolean broadcast, String message) {
+            Inet4Address relayIp, byte[] mac, boolean broadcast, String message) {
         DhcpPacket pkt = new DhcpNakPacket(
-                transactionId, (short) 0, serverIpAddr, serverIpAddr, mac, broadcast);
+                transactionId, (short) 0, relayIp, mac, broadcast);
         pkt.mMessage = message;
+        pkt.mServerIdentifier = serverIpAddr;
         return pkt.buildPacket(encap, DHCP_CLIENT, DHCP_SERVER);
     }
 
