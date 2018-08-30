@@ -262,16 +262,10 @@ public class ScreenPinningRequest implements View.OnClickListener {
             }
 
             if (navigationBarView != null) {
-                int dualToneDarkTheme = Utils.getThemeAttr(getContext(), R.attr.darkIconTheme);
-                int dualToneLightTheme = Utils.getThemeAttr(getContext(), R.attr.lightIconTheme);
-                Context lightContext = new ContextThemeWrapper(getContext(), dualToneLightTheme);
-                Context darkContext = new ContextThemeWrapper(getContext(), dualToneDarkTheme);
                 ((ImageView) mLayout.findViewById(R.id.screen_pinning_back_icon))
-                        .setImageDrawable(navigationBarView.getBackDrawable(lightContext,
-                                darkContext));
+                        .setImageDrawable(navigationBarView.getBackDrawable());
                 ((ImageView) mLayout.findViewById(R.id.screen_pinning_home_icon))
-                        .setImageDrawable(navigationBarView.getHomeDrawable(lightContext,
-                                darkContext));
+                        .setImageDrawable(navigationBarView.getHomeDrawable());
             }
 
             ((TextView) mLayout.findViewById(R.id.screen_pinning_description))
