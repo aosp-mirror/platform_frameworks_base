@@ -17,6 +17,7 @@
 package android.os.health;
 
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.BatteryStats;
 import android.os.Process;
@@ -49,6 +50,7 @@ public class SystemHealthManager {
      * Construct a new SystemHealthManager object.
      * @hide
      */
+    @UnsupportedAppUsage
     public SystemHealthManager() {
         this(IBatteryStats.Stub.asInterface(ServiceManager.getService(BatteryStats.SERVICE_NAME)));
     }
@@ -63,6 +65,7 @@ public class SystemHealthManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static SystemHealthManager from(Context context) {
         return (SystemHealthManager)context.getSystemService(Context.SYSTEM_HEALTH_SERVICE);
     }

@@ -107,6 +107,7 @@ public class ColorMatrixColorFilter extends ColorFilter {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setColorMatrixArray(@Nullable float[] array) {
         // called '...Array' so that passing null isn't ambiguous
         discardNativeInstance();
