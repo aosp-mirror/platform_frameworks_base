@@ -31,6 +31,7 @@ import android.util.KeyValueListParser;
 import android.util.Slog;
 
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.os.CachedDeviceState;
 import com.android.internal.os.LooperStats;
 import com.android.internal.util.DumpUtils;
 
@@ -99,6 +100,7 @@ public class LooperStatsService extends Binder {
                 "thread_name",
                 "handler_class",
                 "message_name",
+                "is_interactive",
                 "message_count",
                 "recorded_message_count",
                 "total_latency_micros",
@@ -108,10 +110,11 @@ public class LooperStatsService extends Binder {
                 "exception_count"));
         pw.println(header);
         for (LooperStats.ExportedEntry entry : entries) {
-            pw.printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", entry.threadName, entry.handlerClassName,
-                    entry.messageName, entry.messageCount, entry.recordedMessageCount,
-                    entry.totalLatencyMicros, entry.maxLatencyMicros, entry.cpuUsageMicros,
-                    entry.maxCpuUsageMicros, entry.exceptionCount);
+            pw.printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", entry.threadName,
+                    entry.handlerClassName, entry.messageName, entry.isInteractive,
+                    entry.messageCount, entry.recordedMessageCount, entry.totalLatencyMicros,
+                    entry.maxLatencyMicros, entry.cpuUsageMicros, entry.maxCpuUsageMicros,
+                    entry.exceptionCount);
         }
     }
 
@@ -155,6 +158,7 @@ public class LooperStatsService extends Binder {
                 Uri settingsUri = Settings.Global.getUriFor(Settings.Global.LOOPER_STATS);
                 getContext().getContentResolver().registerContentObserver(
                         settingsUri, false, mSettingsObserver, UserHandle.USER_SYSTEM);
+                mStats.setDeviceState(getLocalService(CachedDeviceState.Readonly.class));
             }
         }
     }
