@@ -22,6 +22,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.RectEvaluator;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -108,6 +109,7 @@ public class ChangeBounds extends Transition {
                 }
             };
 
+    @UnsupportedAppUsage
     private static final Property<View, PointF> BOTTOM_RIGHT_ONLY_PROPERTY =
             new Property<View, PointF>(PointF.class, "bottomRight") {
                 @Override
@@ -142,6 +144,7 @@ public class ChangeBounds extends Transition {
                 }
             };
 
+    @UnsupportedAppUsage
     private static final Property<View, PointF> POSITION_PROPERTY =
             new Property<View, PointF>(PointF.class, "position") {
                 @Override
