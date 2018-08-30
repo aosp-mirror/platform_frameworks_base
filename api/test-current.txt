@@ -1598,7 +1598,6 @@ package android.widget {
   public final class Magnifier {
     method public android.graphics.Bitmap getContent();
     method public static android.graphics.PointF getMagnifierDefaultSize();
-    method public android.graphics.Rect getWindowPositionOnScreen();
     method public void setOnOperationCompleteCallback(android.widget.Magnifier.Callback);
   }
 
