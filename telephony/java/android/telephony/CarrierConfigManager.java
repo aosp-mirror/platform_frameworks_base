@@ -496,19 +496,19 @@ public class CarrierConfigManager {
             "carrier_wfc_supports_wifi_only_bool";
 
     /**
-     * Default mode for WFC over IMS on home network:
-     * <ul>
-     *   <li>0: Wi-Fi only
-     *   <li>1: prefer mobile network
-     *   <li>2: prefer Wi-Fi
-     * </ul>
+     * Default WFC_IMS_MODE for home network   0: WIFI_ONLY
+     *                                         1: CELLULAR_PREFERRED
+     *                                         2: WIFI_PREFERRED
+     * @hide
      */
     public static final String KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT =
             "carrier_default_wfc_ims_mode_int";
 
     /**
-     * Default mode for WFC over IMS on roaming network.
-     * See {@link KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT} for meaning of values.
+     * Default WFC_IMS_MODE for roaming
+     * See {@link KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT} for valid values.
+     *
+     * @hide
      */
     public static final String KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT =
             "carrier_default_wfc_ims_roaming_mode_int";
