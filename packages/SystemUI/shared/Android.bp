@@ -24,20 +24,3 @@ android_library {
     // no compatibility issues with launcher
     java_version: "1.7",
 }
-
-android_app {
-
-    name: "SysUISharedLib",
-    platform_apis: true,
-    srcs: [
-        "src/**/*.java",
-        "src/**/I*.aidl",
-    ],
-
-    static_libs: ["SystemUISharedLib"],
-
-    optimize: {
-        enabled: false,
-    },
-
-}
