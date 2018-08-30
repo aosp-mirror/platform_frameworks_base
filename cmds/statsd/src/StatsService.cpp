@@ -1009,7 +1009,7 @@ void StatsService::binderDied(const wp <IBinder>& who) {
     ALOGW("statscompanion service died");
     StatsdStats::getInstance().noteSystemServerRestart(getWallClockSec());
     if (mProcessor != nullptr) {
-        ALOGW("Reset statsd upon system server restars.");
+        ALOGW("Reset statsd upon system server restarts.");
         mProcessor->WriteDataToDisk(STATSCOMPANION_DIED);
         mProcessor->resetConfigs();
     }
