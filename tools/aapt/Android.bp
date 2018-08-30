@@ -99,6 +99,17 @@ cc_library_host_static {
 }
 
 // ==========================================================
+// Build the host executable: aapt
+// ==========================================================
+cc_binary_host {
+    name: "aapt",
+    defaults: ["aapt_defaults"],
+    srcs: ["Main.cpp"],
+    use_version_lib: true,
+    static_libs: ["libaapt"],
+}
+
+// ==========================================================
 // Build the host tests: libaapt_tests
 // ==========================================================
 cc_test_host {
