@@ -17060,8 +17060,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             activeInstr.mUiAutomationConnection = uiAutomationConnection;
             activeInstr.mResultClass = className;
 
-            boolean disableHiddenApiChecks =
-                    (flags & INSTRUMENTATION_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
+            boolean disableHiddenApiChecks = ai.usesNonSdkApi
+                    || (flags & INSTRUMENTATION_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
             if (disableHiddenApiChecks) {
                 enforceCallingPermission(android.Manifest.permission.DISABLE_HIDDEN_API_CHECKS,
                         "disable hidden API checks");

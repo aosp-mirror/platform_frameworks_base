@@ -1009,6 +1009,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public String appComponentFactory;
 
     /**
+     * Indicates whether this package requires access to non-SDK APIs. Only system apps
+     * and tests are allowed to use this property.
+     * @hide
+     */
+    public boolean usesNonSdkApi;
+
+    /**
      * The category of this app. Categories are used to cluster multiple apps
      * together into meaningful groups, such as when summarizing battery,
      * network, or disk usage. Apps should only define this value when they fit
@@ -1712,8 +1719,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     private boolean isAllowedToUseHiddenApis() {
-        return isSignedWithPlatformKey()
-            || (isPackageWhitelistedForHiddenApis() && (isSystemApp() || isUpdatedSystemApp()));
+        if (isSignedWithPlatformKey()) {
+            return true;
+        } else if (isSystemApp() || isUpdatedSystemApp()) {
+            return usesNonSdkApi || isPackageWhitelistedForHiddenApis();
+        } else {
+            return false;
+        }
     }
 
     /**
