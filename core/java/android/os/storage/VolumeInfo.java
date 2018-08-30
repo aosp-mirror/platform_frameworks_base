@@ -18,6 +18,7 @@ package android.os.storage;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -76,8 +77,10 @@ public class VolumeInfo implements Parcelable {
     /** Real volume representing internal emulated storage */
     public static final String ID_EMULATED_INTERNAL = "emulated";
 
+    @UnsupportedAppUsage
     public static final int TYPE_PUBLIC = IVold.VOLUME_TYPE_PUBLIC;
     public static final int TYPE_PRIVATE = IVold.VOLUME_TYPE_PRIVATE;
+    @UnsupportedAppUsage
     public static final int TYPE_EMULATED = IVold.VOLUME_TYPE_EMULATED;
     public static final int TYPE_ASEC = IVold.VOLUME_TYPE_ASEC;
     public static final int TYPE_OBB = IVold.VOLUME_TYPE_OBB;
@@ -148,16 +151,23 @@ public class VolumeInfo implements Parcelable {
 
     /** vold state */
     public final String id;
+    @UnsupportedAppUsage
     public final int type;
+    @UnsupportedAppUsage
     public final DiskInfo disk;
     public final String partGuid;
     public int mountFlags = 0;
     public int mountUserId = -1;
+    @UnsupportedAppUsage
     public int state = STATE_UNMOUNTED;
     public String fsType;
+    @UnsupportedAppUsage
     public String fsUuid;
+    @UnsupportedAppUsage
     public String fsLabel;
+    @UnsupportedAppUsage
     public String path;
+    @UnsupportedAppUsage
     public String internalPath;
 
     public VolumeInfo(String id, int type, DiskInfo disk, String partGuid) {
@@ -167,6 +177,7 @@ public class VolumeInfo implements Parcelable {
         this.partGuid = partGuid;
     }
 
+    @UnsupportedAppUsage
     public VolumeInfo(Parcel parcel) {
         id = parcel.readString();
         type = parcel.readInt();
@@ -186,6 +197,7 @@ public class VolumeInfo implements Parcelable {
         internalPath = parcel.readString();
     }
 
+    @UnsupportedAppUsage
     public static @NonNull String getEnvironmentForState(int state) {
         final String envState = sStateToEnvironment.get(state);
         if (envState != null) {
@@ -207,22 +219,27 @@ public class VolumeInfo implements Parcelable {
         return sDescriptionComparator;
     }
 
+    @UnsupportedAppUsage
     public @NonNull String getId() {
         return id;
     }
 
+    @UnsupportedAppUsage
     public @Nullable DiskInfo getDisk() {
         return disk;
     }
 
+    @UnsupportedAppUsage
     public @Nullable String getDiskId() {
         return (disk != null) ? disk.id : null;
     }
 
+    @UnsupportedAppUsage
     public int getType() {
         return type;
     }
 
+    @UnsupportedAppUsage
     public int getState() {
         return state;
     }
@@ -231,14 +248,17 @@ public class VolumeInfo implements Parcelable {
         return sStateToDescrip.get(state, 0);
     }
 
+    @UnsupportedAppUsage
     public @Nullable String getFsUuid() {
         return fsUuid;
     }
 
+    @UnsupportedAppUsage
     public int getMountUserId() {
         return mountUserId;
     }
 
+    @UnsupportedAppUsage
     public @Nullable String getDescription() {
         if (ID_PRIVATE_INTERNAL.equals(id) || ID_EMULATED_INTERNAL.equals(id)) {
             return Resources.getSystem().getString(com.android.internal.R.string.storage_internal);
@@ -249,22 +269,27 @@ public class VolumeInfo implements Parcelable {
         }
     }
 
+    @UnsupportedAppUsage
     public boolean isMountedReadable() {
         return state == STATE_MOUNTED || state == STATE_MOUNTED_READ_ONLY;
     }
 
+    @UnsupportedAppUsage
     public boolean isMountedWritable() {
         return state == STATE_MOUNTED;
     }
 
+    @UnsupportedAppUsage
     public boolean isPrimary() {
         return (mountFlags & MOUNT_FLAG_PRIMARY) != 0;
     }
 
+    @UnsupportedAppUsage
     public boolean isPrimaryPhysical() {
         return isPrimary() && (getType() == TYPE_PUBLIC);
     }
 
+    @UnsupportedAppUsage
     public boolean isVisible() {
         return (mountFlags & MOUNT_FLAG_VISIBLE) != 0;
     }
@@ -283,18 +308,22 @@ public class VolumeInfo implements Parcelable {
         return isVisibleForUser(userId);
     }
 
+    @UnsupportedAppUsage
     public boolean isVisibleForWrite(int userId) {
         return isVisibleForUser(userId);
     }
 
+    @UnsupportedAppUsage
     public File getPath() {
         return (path != null) ? new File(path) : null;
     }
 
+    @UnsupportedAppUsage
     public File getInternalPath() {
         return (internalPath != null) ? new File(internalPath) : null;
     }
 
+    @UnsupportedAppUsage
     public File getPathForUser(int userId) {
         if (path == null) {
             return null;
@@ -311,6 +340,7 @@ public class VolumeInfo implements Parcelable {
      * Path which is accessible to apps holding
      * {@link android.Manifest.permission#WRITE_MEDIA_STORAGE}.
      */
+    @UnsupportedAppUsage
     public File getInternalPathForUser(int userId) {
         if (path == null) {
             return null;
@@ -322,6 +352,7 @@ public class VolumeInfo implements Parcelable {
         }
     }
 
+    @UnsupportedAppUsage
     public StorageVolume buildStorageVolume(Context context, int userId, boolean reportUnmounted) {
         final StorageManager storage = context.getSystemService(StorageManager.class);
 
@@ -382,6 +413,7 @@ public class VolumeInfo implements Parcelable {
                 derivedFsUuid, envState);
     }
 
+    @UnsupportedAppUsage
     public static int buildStableMtpStorageId(String fsUuid) {
         if (TextUtils.isEmpty(fsUuid)) {
             return StorageVolume.STORAGE_ID_INVALID;
@@ -408,6 +440,7 @@ public class VolumeInfo implements Parcelable {
      * Build an intent to browse the contents of this volume. Only valid for
      * {@link #TYPE_EMULATED} or {@link #TYPE_PUBLIC}.
      */
+    @UnsupportedAppUsage
     public @Nullable Intent buildBrowseIntent() {
         return buildBrowseIntentForUser(UserHandle.myUserId());
     }
@@ -486,6 +519,7 @@ public class VolumeInfo implements Parcelable {
         return id.hashCode();
     }
 
+    @UnsupportedAppUsage
     public static final Creator<VolumeInfo> CREATOR = new Creator<VolumeInfo>() {
         @Override
         public VolumeInfo createFromParcel(Parcel in) {

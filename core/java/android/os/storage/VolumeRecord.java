@@ -16,6 +16,7 @@
 
 package android.os.storage;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DebugUtils;
@@ -52,6 +53,7 @@ public class VolumeRecord implements Parcelable {
         this.fsUuid = Preconditions.checkNotNull(fsUuid);
     }
 
+    @UnsupportedAppUsage
     public VolumeRecord(Parcel parcel) {
         type = parcel.readInt();
         fsUuid = parcel.readString();
@@ -127,6 +129,7 @@ public class VolumeRecord implements Parcelable {
         return fsUuid.hashCode();
     }
 
+    @UnsupportedAppUsage
     public static final Creator<VolumeRecord> CREATOR = new Creator<VolumeRecord>() {
         @Override
         public VolumeRecord createFromParcel(Parcel in) {

@@ -16,6 +16,8 @@
 
 package android.hardware.biometrics;
 
+import android.annotation.UnsupportedAppUsage;
+
 
 /**
  * Interface containing all of the biometric modality agnostic constants.
@@ -119,6 +121,7 @@ public interface BiometricConstants {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     int BIOMETRIC_ERROR_VENDOR_BASE = 1000;
 
     //
