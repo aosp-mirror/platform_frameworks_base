@@ -22,6 +22,7 @@ import com.android.internal.util.HexDump;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
+import android.annotation.UnsupportedAppUsage;
 import java.util.ArrayList;
 
 /**
@@ -72,14 +73,19 @@ public class SmsHeader {
     public static final int PORT_WAP_WSP  = 9200;
 
     public static class PortAddrs {
+        @UnsupportedAppUsage
         public int destPort;
+        @UnsupportedAppUsage
         public int origPort;
         public boolean areEightBits;
     }
 
     public static class ConcatRef {
+        @UnsupportedAppUsage
         public int refNumber;
+        @UnsupportedAppUsage
         public int seqNumber;
+        @UnsupportedAppUsage
         public int msgCount;
         public boolean isEightBits;
     }
@@ -98,17 +104,22 @@ public class SmsHeader {
         public byte[] data;
     }
 
+    @UnsupportedAppUsage
     public PortAddrs portAddrs;
+    @UnsupportedAppUsage
     public ConcatRef concatRef;
     public ArrayList<SpecialSmsMsg> specialSmsMsgList = new ArrayList<SpecialSmsMsg>();
     public ArrayList<MiscElt> miscEltList = new ArrayList<MiscElt>();
 
     /** 7 bit national language locking shift table, or 0 for GSM default 7 bit alphabet. */
+    @UnsupportedAppUsage
     public int languageTable;
 
     /** 7 bit national language single shift table, or 0 for GSM default 7 bit extension table. */
+    @UnsupportedAppUsage
     public int languageShiftTable;
 
+    @UnsupportedAppUsage
     public SmsHeader() {}
 
     /**
@@ -117,6 +128,7 @@ public class SmsHeader {
      * @param data is user data header bytes
      * @return SmsHeader object
      */
+    @UnsupportedAppUsage
     public static SmsHeader fromByteArray(byte[] data) {
         ByteArrayInputStream inStream = new ByteArrayInputStream(data);
         SmsHeader smsHeader = new SmsHeader();
@@ -198,6 +210,7 @@ public class SmsHeader {
      * (see TS 23.040 9.2.3.24)
      * @return Byte array representing the SmsHeader
      */
+    @UnsupportedAppUsage
     public static byte[] toByteArray(SmsHeader smsHeader) {
         if ((smsHeader.portAddrs == null) &&
             (smsHeader.concatRef == null) &&
