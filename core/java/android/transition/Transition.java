@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Path;
@@ -848,6 +849,7 @@ public abstract class Transition implements Cloneable {
         return false;
     }
 
+    @UnsupportedAppUsage
     private static ArrayMap<Animator, AnimationInfo> getRunningAnimators() {
         ArrayMap<Animator, AnimationInfo> runningAnimators = sRunningAnimators.get();
         if (runningAnimators == null) {
@@ -1915,6 +1917,7 @@ public abstract class Transition implements Cloneable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     protected void end() {
         --mNumInstances;
         if (mNumInstances == 0) {
@@ -1967,6 +1970,7 @@ public abstract class Transition implements Cloneable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     protected void cancel() {
         int numAnimators = mCurrentAnimators.size();
         for (int i = numAnimators - 1; i >= 0; i--) {
