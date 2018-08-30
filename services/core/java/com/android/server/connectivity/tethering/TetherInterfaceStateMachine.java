@@ -218,6 +218,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
                     .setDhcpLeaseTimeSecs(DHCP_LEASE_TIME_SECS)
                     .setDnsServers(addr)
                     .setServerAddr(new LinkAddress(addr, prefixLen))
+                    .setMetered(true)
                     .build();
             // TODO: also advertise link MTU
         } catch (DhcpServingParams.InvalidParameterException e) {

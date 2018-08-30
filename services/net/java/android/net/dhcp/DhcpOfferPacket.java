@@ -32,8 +32,8 @@ class DhcpOfferPacket extends DhcpPacket {
      * Generates a OFFER packet with the specified parameters.
      */
     DhcpOfferPacket(int transId, short secs, boolean broadcast, Inet4Address serverAddress,
-                    Inet4Address clientIp, Inet4Address yourIp, byte[] clientMac) {
-        super(transId, secs, clientIp, yourIp, INADDR_ANY, INADDR_ANY, clientMac, broadcast);
+            Inet4Address relayIp, Inet4Address clientIp, Inet4Address yourIp, byte[] clientMac) {
+        super(transId, secs, clientIp, yourIp, serverAddress, relayIp, clientMac, broadcast);
         mSrcIp = serverAddress;
     }
 
@@ -72,19 +72,8 @@ class DhcpOfferPacket extends DhcpPacket {
     void finishPacket(ByteBuffer buffer) {
         addTlv(buffer, DHCP_MESSAGE_TYPE, DHCP_MESSAGE_TYPE_OFFER);
         addTlv(buffer, DHCP_SERVER_IDENTIFIER, mServerIdentifier);
-        addTlv(buffer, DHCP_LEASE_TIME, mLeaseTime);
 
-        // the client should renew at 1/2 the lease-expiry interval
-        if (mLeaseTime != null) {
-            addTlv(buffer, DHCP_RENEWAL_TIME,
-                Integer.valueOf(mLeaseTime.intValue() / 2));
-        }
-
-        addTlv(buffer, DHCP_SUBNET_MASK, mSubnetMask);
-        addTlv(buffer, DHCP_ROUTER, mGateways);
-        addTlv(buffer, DHCP_DOMAIN_NAME, mDomainName);
-        addTlv(buffer, DHCP_BROADCAST_ADDRESS, mBroadcastAddress);
-        addTlv(buffer, DHCP_DNS_SERVER, mDnsServers);
+        addCommonServerTlvs(buffer);
         addTlvEnd(buffer);
     }
 }
