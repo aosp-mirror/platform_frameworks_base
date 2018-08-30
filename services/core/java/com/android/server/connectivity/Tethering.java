@@ -1126,7 +1126,9 @@ public class Tethering extends BaseNetworkObserver {
     }
 
     public String[] getTetheredDhcpRanges() {
-        return mConfig.dhcpRanges;
+        // TODO: this is only valid for the old DHCP server. Latest search suggests it is only used
+        // by WifiP2pServiceImpl to start dnsmasq: remove/deprecate after migrating callers.
+        return mConfig.legacyDhcpRanges;
     }
 
     public String[] getErroredIfaces() {
@@ -1297,13 +1299,17 @@ public class Tethering extends BaseNetworkObserver {
                 return false;
             }
             // TODO: Randomize DHCPv4 ranges, especially in hotspot mode.
+            // Legacy DHCP server is disabled if passed an empty ranges array
+            final String[] dhcpRanges = cfg.enableLegacyDhcpServer
+                    ? cfg.legacyDhcpRanges
+                    : new String[0];
             try {
                 // TODO: Find a more accurate method name (startDHCPv4()?).
-                mNMService.startTethering(cfg.dhcpRanges);
+                mNMService.startTethering(dhcpRanges);
             } catch (Exception e) {
                 try {
                     mNMService.stopTethering();
-                    mNMService.startTethering(cfg.dhcpRanges);
+                    mNMService.startTethering(dhcpRanges);
                 } catch (Exception ee) {
                     mLog.e(ee);
                     transitionTo(mStartTetheringErrorState);
@@ -1972,7 +1978,7 @@ public class Tethering extends BaseNetworkObserver {
         final TetherState tetherState = new TetherState(
                 new TetherInterfaceStateMachine(
                     iface, mLooper, interfaceType, mLog, mNMService, mStatsService,
-                    makeControlCallback(iface), mDeps));
+                    makeControlCallback(iface), mConfig.enableLegacyDhcpServer, mDeps));
         mTetherStates.put(iface, tetherState);
         tetherState.stateMachine.start();
     }

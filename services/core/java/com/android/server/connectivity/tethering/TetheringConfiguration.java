@@ -21,6 +21,8 @@ import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
+import static android.provider.Settings.Global.TETHER_ENABLE_LEGACY_DHCP_SERVER;
+
 import static com.android.internal.R.array.config_mobile_hotspot_provision_app;
 import static com.android.internal.R.array.config_tether_bluetooth_regexs;
 import static com.android.internal.R.array.config_tether_dhcp_range;
@@ -30,15 +32,16 @@ import static com.android.internal.R.array.config_tether_wifi_regexs;
 import static com.android.internal.R.bool.config_tether_upstream_automatic;
 import static com.android.internal.R.string.config_mobile_hotspot_provision_app_no_ui;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.util.SharedLog;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.R;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -68,12 +71,13 @@ public class TetheringConfiguration {
     public static final int DUN_REQUIRED = 1;
     public static final int DUN_UNSPECIFIED = 2;
 
+    // Default ranges used for the legacy DHCP server.
     // USB is  192.168.42.1 and 255.255.255.0
     // Wifi is 192.168.43.1 and 255.255.255.0
     // BT is limited to max default of 5 connections. 192.168.44.1 to 192.168.48.1
     // with 255.255.255.0
     // P2P is 192.168.49.1 and 255.255.255.0
-    private static final String[] DHCP_DEFAULT_RANGE = {
+    private static final String[] LEGACY_DHCP_DEFAULT_RANGE = {
         "192.168.42.2", "192.168.42.254", "192.168.43.2", "192.168.43.254",
         "192.168.44.2", "192.168.44.254", "192.168.45.2", "192.168.45.254",
         "192.168.46.2", "192.168.46.254", "192.168.47.2", "192.168.47.254",
@@ -89,8 +93,9 @@ public class TetheringConfiguration {
     public final boolean isDunRequired;
     public final boolean chooseUpstreamAutomatically;
     public final Collection<Integer> preferredUpstreamIfaceTypes;
-    public final String[] dhcpRanges;
+    public final String[] legacyDhcpRanges;
     public final String[] defaultIPv4DNS;
+    public final boolean enableLegacyDhcpServer;
 
     public final String[] provisioningApp;
     public final String provisioningAppNoUi;
@@ -112,8 +117,9 @@ public class TetheringConfiguration {
         preferredUpstreamIfaceTypes = getUpstreamIfaceTypes(ctx, dunCheck);
         isDunRequired = preferredUpstreamIfaceTypes.contains(TYPE_MOBILE_DUN);
 
-        dhcpRanges = getDhcpRanges(ctx);
+        legacyDhcpRanges = getLegacyDhcpRanges(ctx);
         defaultIPv4DNS = copy(DEFAULT_IPV4_DNS);
+        enableLegacyDhcpServer = getEnableLegacyDhcpServer(ctx);
 
         provisioningApp = getResourceStringArray(ctx, config_mobile_hotspot_provision_app);
         provisioningAppNoUi = getProvisioningAppNoUi(ctx);
@@ -150,7 +156,7 @@ public class TetheringConfiguration {
         dumpStringArray(pw, "preferredUpstreamIfaceTypes",
                 preferredUpstreamNames(preferredUpstreamIfaceTypes));
 
-        dumpStringArray(pw, "dhcpRanges", dhcpRanges);
+        dumpStringArray(pw, "legacyDhcpRanges", legacyDhcpRanges);
         dumpStringArray(pw, "defaultIPv4DNS", defaultIPv4DNS);
 
         dumpStringArray(pw, "provisioningApp", provisioningApp);
@@ -276,12 +282,12 @@ public class TetheringConfiguration {
         return false;
     }
 
-    private static String[] getDhcpRanges(Context ctx) {
+    private static String[] getLegacyDhcpRanges(Context ctx) {
         final String[] fromResource = getResourceStringArray(ctx, config_tether_dhcp_range);
         if ((fromResource.length > 0) && (fromResource.length % 2 == 0)) {
             return fromResource;
         }
-        return copy(DHCP_DEFAULT_RANGE);
+        return copy(LEGACY_DHCP_DEFAULT_RANGE);
     }
 
     private static String getProvisioningAppNoUi(Context ctx) {
@@ -307,6 +313,13 @@ public class TetheringConfiguration {
         } catch (Resources.NotFoundException e404) {
             return EMPTY_STRING_ARRAY;
         }
+    }
+
+    private static boolean getEnableLegacyDhcpServer(Context ctx) {
+        // TODO: make the default false (0) and update javadoc in Settings.java
+        final ContentResolver cr = ctx.getContentResolver();
+        final int intVal = Settings.Global.getInt(cr, TETHER_ENABLE_LEGACY_DHCP_SERVER, 1);
+        return intVal != 0;
     }
 
     private static String[] copy(String[] strarray) {
