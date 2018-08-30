@@ -114,14 +114,7 @@ Landroid/os/RegistrantList;->remove(Landroid/os/Handler;)V
 Landroid/os/RegistrantList;->removeCleared()V
 Landroid/os/RemoteException;->rethrowFromSystemServer()Ljava/lang/RuntimeException;
 Landroid/os/ServiceSpecificException;->errorCode:I
-Landroid/os/storage/DiskInfo;->getId()Ljava/lang/String;
 Landroid/os/storage/StorageEventListener;-><init>()V
-Landroid/os/storage/StorageManager;->findVolumeById(Ljava/lang/String;)Landroid/os/storage/VolumeInfo;
-Landroid/os/storage/StorageManager;->from(Landroid/content/Context;)Landroid/os/storage/StorageManager;
-Landroid/os/storage/StorageManager;->registerListener(Landroid/os/storage/StorageEventListener;)V
-Landroid/os/storage/StorageManager;->unregisterListener(Landroid/os/storage/StorageEventListener;)V
-Landroid/os/storage/StorageVolume;->getId()Ljava/lang/String;
-Landroid/os/storage/VolumeInfo;->getId()Ljava/lang/String;
 Landroid/os/SystemProperties;->reportSyspropChanged()V
 Landroid/os/SystemService;->start(Ljava/lang/String;)V
 Landroid/os/SystemService;->stop(Ljava/lang/String;)V

@@ -16,6 +16,7 @@
 
 package android.transition;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -35,7 +36,9 @@ public final class Scene {
     private int mLayoutId = -1;
     private ViewGroup mSceneRoot;
     private View mLayout; // alternative to layoutId
+    @UnsupportedAppUsage
     Runnable mEnterAction;
+    @UnsupportedAppUsage
     Runnable mExitAction;
 
     /**
@@ -195,6 +198,7 @@ public final class Scene {
      *
      * @param view The view on which the current scene is being set
      */
+    @UnsupportedAppUsage
     static void setCurrentScene(View view, Scene scene) {
         view.setTagInternal(com.android.internal.R.id.current_scene, scene);
     }
