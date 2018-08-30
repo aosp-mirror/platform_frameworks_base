@@ -47,7 +47,6 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SELinux;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
@@ -55,7 +54,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.biometrics.BiometricService;
@@ -154,7 +152,7 @@ public class FingerprintService extends BiometricService {
             final AuthenticationClientImpl client = new AuthenticationClientImpl(getContext(),
                     mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver),
                     mCurrentUserId, groupId, opId, restricted, opPackageName, null /* bundle */,
-                    null /* dialogReceiver */, mStatusBarService);
+                    null /* dialogReceiver */, mStatusBarService, mFingerprintManager);
 
             authenticateInternal(client, opId, opPackageName);
         }
@@ -170,7 +168,7 @@ public class FingerprintService extends BiometricService {
                     mDaemonWrapper, mHalDeviceId, token,
                     new BiometricPromptServiceListenerImpl(receiver),
                     mCurrentUserId, groupId, opId, restricted, opPackageName, bundle,
-                    dialogReceiver, mStatusBarService);
+                    dialogReceiver, mStatusBarService, mFingerprintManager);
             authenticateInternal(client, opId, opPackageName, callingUid, callingPid,
                     callingUserId);
         }
@@ -362,14 +360,10 @@ public class FingerprintService extends BiometricService {
      */
     private class BiometricPromptServiceListenerImpl implements ServiceListener {
 
-        // Use FingerprintManager to get strings, so BiometricPrompt interface is cleaner
-        private FingerprintManager mFingerprintManager;
         private IBiometricPromptServiceReceiver mBiometricPromptServiceReceiver;
 
         public BiometricPromptServiceListenerImpl(IBiometricPromptServiceReceiver receiver) {
             mBiometricPromptServiceReceiver = receiver;
-            mFingerprintManager = (FingerprintManager)
-                    getContext().getSystemService(Context.FINGERPRINT_SERVICE);
         }
 
         @Override
@@ -571,9 +565,10 @@ public class FingerprintService extends BiometricService {
     private IBiometricsFingerprint mDaemon;
 
     private long mHalDeviceId;
-    private IStatusBarService mStatusBarService;
     private IBinder mToken = new Binder(); // used for internal FingerprintService enumeration
     private ArrayList<UserFingerprint> mUnknownFingerprints = new ArrayList<>(); // hw fingerprints
+    // Use FingerprintManager to get strings, so BiometricPrompt interface is cleaner.
+    private FingerprintManager mFingerprintManager;
 
     /**
      * Receives callbacks from the HAL.
@@ -715,9 +710,6 @@ public class FingerprintService extends BiometricService {
 
     public FingerprintService(Context context) {
         super(context);
-        // TODO: can this be retrieved from AuthenticationClient, or BiometricService?
-        mStatusBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
 
     @Override
@@ -725,6 +717,8 @@ public class FingerprintService extends BiometricService {
         super.onStart();
         publishBinderService(Context.FINGERPRINT_SERVICE, new FingerprintServiceWrapper());
         SystemServerInitThreadPool.get().submit(this::getFingerprintDaemon, TAG + ".onStart");
+        mFingerprintManager = (FingerprintManager)
+                getContext().getSystemService(Context.FINGERPRINT_SERVICE);
     }
 
     @Override

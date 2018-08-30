@@ -552,6 +552,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     /**
      * @hide
      */
+    @Override
     public String getAcquiredString(int acquireInfo, int vendorCode) {
         switch (acquireInfo) {
             case FACE_ACQUIRED_GOOD:
@@ -588,6 +589,14 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         }
         Slog.w(TAG, "Invalid acquired message: " + acquireInfo + ", " + vendorCode);
         return null;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int getType() {
+        return TYPE_FACE;
     }
 
     /**
