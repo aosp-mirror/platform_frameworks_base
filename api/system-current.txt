@@ -217,6 +217,14 @@ package android {
     field public static final int config_sendPackageName = 17891328; // 0x1110000
   }
 
+  public static final class R.dimen {
+    field public static final int config_restricted_icon_size = 17104903; // 0x1050007
+  }
+
+  public static final class R.drawable {
+    field public static final int ic_info = 17301684; // 0x10800b4
+  }
+
   public static final class R.raw {
     field public static final int loaderror = 17825792; // 0x1100000
     field public static final int nodomain = 17825793; // 0x1100001

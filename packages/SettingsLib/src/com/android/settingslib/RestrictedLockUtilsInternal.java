@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -55,9 +56,15 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
      * @return drawables for displaying with settings that are locked by a device admin.
      */
     public static Drawable getRestrictedPadlock(Context context) {
-        Drawable restrictedPadlock = context.getDrawable(R.drawable.ic_info);
+        Drawable restrictedPadlock = context.getDrawable(android.R.drawable.ic_info);
         final int iconSize = context.getResources().getDimensionPixelSize(
-                R.dimen.restricted_icon_size);
+                android.R.dimen.config_restricted_icon_size);
+
+        TypedArray ta = context.obtainStyledAttributes(new int[]{android.R.attr.colorAccent});
+        int colorAccent = ta.getColor(0, 0);
+        ta.recycle();
+        restrictedPadlock.setTint(colorAccent);
+
         restrictedPadlock.setBounds(0, 0, iconSize, iconSize);
         return restrictedPadlock;
     }

@@ -965,11 +965,6 @@
     <!-- Summary for settings preference disabled by administrator [CHAR LIMIT=50] -->
     <string name="disabled_by_admin_summary_text">Controlled by admin</string>
 
-    <!-- Summary for switch preference to denote it is switched on [CHAR LIMIT=50] -->
-    <string name="enabled_by_admin">Enabled by admin</string>
-    <!-- Summary for switch preference to denote it is switched off [CHAR LIMIT=50] -->
-    <string name="disabled_by_admin">Disabled by admin</string>
-
     <!-- [CHAR LIMIT=25] Manage applications, text telling using an application is disabled. -->
     <string name="disabled">Disabled</string>
     <!-- Summary of app trusted to install apps [CHAR LIMIT=45] -->

@@ -3486,6 +3486,9 @@
     <!-- Name of the font family used for system surfaces where the font should use medium weight -->
     <string name="config_headlineFontFamilyMedium">@string/font_family_button_material</string>
 
+    <!-- Size of icon shown beside a preference locked by admin -->
+    <dimen name="config_restricted_icon_size">@dimen/restricted_icon_size_material</dimen>
+
     <string translatable="false" name="config_batterySaverDeviceSpecificConfig"></string>
 
     <!-- Package name that should be granted Notification Assistant access -->

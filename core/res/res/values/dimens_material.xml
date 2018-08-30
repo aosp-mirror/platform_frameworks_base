@@ -117,6 +117,9 @@
     <!-- Default rounded corner for controls -->
     <dimen name="control_corner_material">2dp</dimen>
 
+    <!-- Size of icon shown beside a preference locked by admin -->
+    <dimen name="restricted_icon_size_material">16dp</dimen>
+
     <dimen name="edit_text_inset_horizontal_material">4dp</dimen>
     <dimen name="edit_text_inset_top_material">10dp</dimen>
     <dimen name="edit_text_inset_bottom_material">7dp</dimen>

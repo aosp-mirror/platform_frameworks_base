@@ -36,7 +36,6 @@
     <dimen name="two_target_pref_medium_icon_size">32dp</dimen>
 
     <!-- Lock icon for preferences locked by admin -->
-    <dimen name="restricted_icon_size">16dp</dimen>
     <dimen name="restricted_icon_padding">4dp</dimen>
 
     <dimen name="wifi_preference_badge_padding">8dip</dimen>
