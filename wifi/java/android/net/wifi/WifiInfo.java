@@ -17,14 +17,14 @@
 package android.net.wifi;
 
 import android.annotation.UnsupportedAppUsage;
-import android.os.Parcelable;
-import android.os.Parcel;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkUtils;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
-import java.net.InetAddress;
 import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.EnumMap;
 import java.util.Locale;
@@ -540,9 +540,13 @@ public class WifiInfo implements Parcelable {
         dest.writeInt(mMeteredHint ? 1 : 0);
         dest.writeInt(mEphemeral ? 1 : 0);
         dest.writeInt(score);
+        dest.writeLong(txSuccess);
         dest.writeDouble(txSuccessRate);
+        dest.writeLong(txRetries);
         dest.writeDouble(txRetriesRate);
+        dest.writeLong(txBad);
         dest.writeDouble(txBadRate);
+        dest.writeLong(rxSuccess);
         dest.writeDouble(rxSuccessRate);
         mSupplicantState.writeToParcel(dest, flags);
     }
@@ -570,9 +574,13 @@ public class WifiInfo implements Parcelable {
                 info.mMeteredHint = in.readInt() != 0;
                 info.mEphemeral = in.readInt() != 0;
                 info.score = in.readInt();
+                info.txSuccess = in.readLong();
                 info.txSuccessRate = in.readDouble();
+                info.txRetries = in.readLong();
                 info.txRetriesRate = in.readDouble();
+                info.txBad = in.readLong();
                 info.txBadRate = in.readDouble();
+                info.rxSuccess = in.readLong();
                 info.rxSuccessRate = in.readDouble();
                 info.mSupplicantState = SupplicantState.CREATOR.createFromParcel(in);
                 return info;
