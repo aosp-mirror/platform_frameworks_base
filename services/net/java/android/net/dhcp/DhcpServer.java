@@ -367,7 +367,7 @@ public class DhcpServer {
         final int timeout = getLeaseTimeout(lease);
         final ByteBuffer ackPacket = DhcpPacket.buildAckPacket(ENCAP_BOOTP, request.mTransId,
                 broadcastFlag, mServingParams.getServerInet4Addr(), request.mRelayIp,
-                lease.getNetAddr(), request.mClientMac, timeout,
+                lease.getNetAddr(), request.mClientIp, request.mClientMac, timeout,
                 mServingParams.getPrefixMaskAsAddress(), mServingParams.getBroadcastAddress(),
                 new ArrayList<>(mServingParams.defaultRouters),
                 new ArrayList<>(mServingParams.dnsServers),
