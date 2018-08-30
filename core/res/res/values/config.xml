@@ -1282,6 +1282,10 @@
          that can be set by the user. -->
     <integer name="config_screenBrightnessDoze">1</integer>
 
+    <!-- Delay that allows some content to arrive at the display before switching
+         from DOZE to ON. -->
+    <integer name="config_wakeUpDelayDoze">0</integer>
+
     <!-- Whether or not to skip the initial brightness ramps when the display transitions to
          STATE_ON. Setting this to true will skip the brightness ramp to the last stored active
          brightness value and will repeat for the following ramp if autobrightness is enabled. -->
