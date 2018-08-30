@@ -18,6 +18,7 @@
 #include <GpuMemoryTracker.h>
 
 #include "AnimationContext.h"
+#include "Caches.h"
 #include "EglManager.h"
 #include "Frame.h"
 #include "LayerUpdateQueue.h"
@@ -494,6 +495,13 @@ void CanvasContext::draw() {
     }
 
     GpuMemoryTracker::onFrameCompleted();
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+    auto renderType = Properties::getRenderPipelineType();
+    if (RenderPipelineType::OpenGL == renderType) {
+        Caches& caches = Caches::getInstance();
+        caches.fontRenderer.getFontRenderer().historyTracker().frameCompleted();
+    }
+#endif
 }
 
 // Called by choreographer to do an RT-driven animation
