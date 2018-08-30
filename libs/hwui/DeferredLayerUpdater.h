@@ -17,19 +17,18 @@
 #pragma once
 
 #include <SkColorFilter.h>
-#include <SkImage.h>
 #include <SkMatrix.h>
 #include <cutils/compiler.h>
-#include <map>
+#include <gui/GLConsumer.h>
 #include <system/graphics.h>
 #include <utils/StrongPointer.h>
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#include "surfacetexture/SurfaceTexture.h"
 #include "Layer.h"
 #include "Rect.h"
+#include "renderthread/RenderThread.h"
 
 namespace android {
 namespace uirenderer {
@@ -42,7 +41,12 @@ class DeferredLayerUpdater : public VirtualLightRefBase {
 public:
     // Note that DeferredLayerUpdater assumes it is taking ownership of the layer
     // and will not call incrementRef on it as a result.
-    ANDROID_API explicit DeferredLayerUpdater(RenderState& renderState);
+    typedef std::function<Layer*(RenderState& renderState, uint32_t layerWidth,
+                                 uint32_t layerHeight, sk_sp<SkColorFilter> colorFilter, int alpha,
+                                 SkBlendMode mode, bool blend)>
+            CreateLayerFn;
+    ANDROID_API explicit DeferredLayerUpdater(RenderState& renderState, CreateLayerFn createLayerFn,
+                                              Layer::Api layerApi);
 
     ANDROID_API ~DeferredLayerUpdater();
 
@@ -66,13 +70,13 @@ public:
         return false;
     }
 
-    ANDROID_API void setSurfaceTexture(const sp<SurfaceTexture>& consumer) {
-        if (consumer.get() != mSurfaceTexture.get()) {
-            mSurfaceTexture = consumer;
+    ANDROID_API void setSurfaceTexture(const sp<GLConsumer>& texture) {
+        if (texture.get() != mSurfaceTexture.get()) {
+            mSurfaceTexture = texture;
 
-            GLenum target = consumer->getCurrentTextureTarget();
+            GLenum target = texture->getCurrentTextureTarget();
             LOG_ALWAYS_FATAL_IF(target != GL_TEXTURE_2D && target != GL_TEXTURE_EXTERNAL_OES,
-                                "set unsupported SurfaceTexture with target %x", target);
+                                "set unsupported GLConsumer with target %x", target);
         }
     }
 
@@ -93,10 +97,11 @@ public:
 
     void detachSurfaceTexture();
 
-    void updateLayer(bool forceFilter, const SkMatrix& textureTransform,
-            android_dataspace dataspace, const sk_sp<SkImage>& layerImage);
+    void updateLayer(bool forceFilter, const float* textureTransform, android_dataspace dataspace);
 
     void destroyLayer();
+
+    Layer::Api getBackingLayerApi() { return mLayerApi; }
 
 private:
     RenderState& mRenderState;
@@ -108,12 +113,17 @@ private:
     sk_sp<SkColorFilter> mColorFilter;
     int mAlpha = 255;
     SkBlendMode mMode = SkBlendMode::kSrcOver;
-    sp<SurfaceTexture> mSurfaceTexture;
+    sp<GLConsumer> mSurfaceTexture;
     SkMatrix* mTransform;
     bool mGLContextAttached;
     bool mUpdateTexImage;
 
     Layer* mLayer;
+    Layer::Api mLayerApi;
+    CreateLayerFn mCreateLayerFn;
+
+    void doUpdateTexImage();
+    void doUpdateVkTexImage();
 };
 
 } /* namespace uirenderer */

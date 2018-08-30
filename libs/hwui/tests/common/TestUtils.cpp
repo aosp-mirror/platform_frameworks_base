@@ -67,14 +67,16 @@ sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
         renderthread::RenderThread& renderThread, uint32_t width, uint32_t height,
         const SkMatrix& transform) {
     sp<DeferredLayerUpdater> layerUpdater = createTextureLayerUpdater(renderThread);
-    layerUpdater->backingLayer()->getTransform() = transform;
+    layerUpdater->backingLayer()->getTransform().load(transform);
     layerUpdater->setSize(width, height);
     layerUpdater->setTransform(&transform);
 
     // updateLayer so it's ready to draw
-    SkMatrix identity;
-    identity.setIdentity();
-    layerUpdater->updateLayer(true, identity, HAL_DATASPACE_UNKNOWN, nullptr);
+    layerUpdater->updateLayer(true, Matrix4::identity().data, HAL_DATASPACE_UNKNOWN);
+    if (layerUpdater->backingLayer()->getApi() == Layer::Api::OpenGL) {
+        static_cast<GlLayer*>(layerUpdater->backingLayer())
+                ->setRenderTarget(GL_TEXTURE_EXTERNAL_OES);
+    }
     return layerUpdater;
 }
 
@@ -115,6 +117,7 @@ void TestUtils::TestTask::run() {
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
         renderThread.vulkanManager().destroy();
     } else {
+        renderThread.renderState().flush(Caches::FlushMode::Full);
         renderThread.destroyGlContext();
     }
 }
