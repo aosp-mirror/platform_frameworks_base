@@ -16,6 +16,7 @@
 
 package com.android.server.connectivity.tethering;
 
+import static android.net.NetworkUtils.numericToInetAddress;
 import static android.net.util.NetworkConstants.asByte;
 import static android.net.util.NetworkConstants.FF;
 import static android.net.util.NetworkConstants.RFC7421_PREFIX_LENGTH;
@@ -27,8 +28,9 @@ import android.net.InterfaceConfiguration;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
-import android.net.NetworkUtils;
 import android.net.RouteInfo;
+import android.net.dhcp.DhcpServer;
+import android.net.dhcp.DhcpServingParams;
 import android.net.ip.InterfaceController;
 import android.net.ip.RouterAdvertisementDaemon;
 import android.net.ip.RouterAdvertisementDaemon.RaParams;
@@ -49,6 +51,7 @@ import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 
+import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -72,6 +75,13 @@ public class TetherInterfaceStateMachine extends StateMachine {
     private static final int USB_PREFIX_LENGTH = 24;
     private static final String WIFI_HOST_IFACE_ADDR = "192.168.43.1";
     private static final int WIFI_HOST_IFACE_PREFIX_LENGTH = 24;
+
+    // TODO: have PanService use some visible version of this constant
+    private static final String BLUETOOTH_IFACE_ADDR = "192.168.44.1";
+    private static final int BLUETOOTH_DHCP_PREFIX_LENGTH = 24;
+
+    // TODO: have this configurable
+    private static final int DHCP_LEASE_TIME_SECS = 3600;
 
     private final static String TAG = "TetherInterfaceSM";
     private final static boolean DBG = false;
@@ -119,6 +129,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
     private final String mIfaceName;
     private final int mInterfaceType;
     private final LinkProperties mLinkProperties;
+    private final boolean mUsingLegacyDhcp;
 
     private final TetheringDependencies mDeps;
 
@@ -134,12 +145,13 @@ public class TetherInterfaceStateMachine extends StateMachine {
     // Advertisements (otherwise, we do not add them to mLinkProperties at all).
     private LinkProperties mLastIPv6LinkProperties;
     private RouterAdvertisementDaemon mRaDaemon;
+    private DhcpServer mDhcpServer;
     private RaParams mLastRaParams;
 
     public TetherInterfaceStateMachine(
             String ifaceName, Looper looper, int interfaceType, SharedLog log,
             INetworkManagementService nMService, INetworkStatsService statsService,
-            IControlsTethering tetherController,
+            IControlsTethering tetherController, boolean usingLegacyDhcp,
             TetheringDependencies deps) {
         super(ifaceName, looper);
         mLog = log.forSubComponent(ifaceName);
@@ -151,6 +163,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
         mIfaceName = ifaceName;
         mInterfaceType = interfaceType;
         mLinkProperties = new LinkProperties();
+        mUsingLegacyDhcp = usingLegacyDhcp;
         mDeps = deps;
         resetLinkProperties();
         mLastError = ConnectivityManager.TETHER_ERROR_NO_ERROR;
@@ -188,6 +201,52 @@ public class TetherInterfaceStateMachine extends StateMachine {
 
     private boolean startIPv4() { return configureIPv4(true); }
 
+    private boolean startDhcp(Inet4Address addr, int prefixLen) {
+        if (mUsingLegacyDhcp) {
+            return true;
+        }
+
+        final InterfaceParams ifaceParams = mDeps.getInterfaceParams(mIfaceName);
+        if (ifaceParams == null) {
+            Log.e(TAG, "Failed to find interface params for DHCPv4");
+            return false;
+        }
+        final DhcpServingParams params;
+        try {
+            params = new DhcpServingParams.Builder()
+                    .setDefaultRouters(addr)
+                    .setDhcpLeaseTimeSecs(DHCP_LEASE_TIME_SECS)
+                    .setDnsServers(addr)
+                    .setServerAddr(new LinkAddress(addr, prefixLen))
+                    .build();
+            // TODO: also advertise link MTU
+        } catch (DhcpServingParams.InvalidParameterException e) {
+            Log.e(TAG, "Invalid DHCP parameters", e);
+            return false;
+        }
+
+        mDhcpServer = mDeps.makeDhcpServer(getHandler().getLooper(), ifaceParams, params,
+                mLog.forSubComponent("DHCP"));
+        mDhcpServer.start();
+        return true;
+    }
+
+    private void stopDhcp() {
+        if (mDhcpServer != null) {
+            mDhcpServer.stop();
+            mDhcpServer = null;
+        }
+    }
+
+    private boolean configureDhcp(boolean enable, Inet4Address addr, int prefixLen) {
+        if (enable) {
+            return startDhcp(addr, prefixLen);
+        } else {
+            stopDhcp();
+            return true;
+        }
+    }
+
     private void stopIPv4() {
         configureIPv4(false);
         // NOTE: All of configureIPv4() will be refactored out of existence
@@ -210,8 +269,9 @@ public class TetherInterfaceStateMachine extends StateMachine {
             ipAsString = getRandomWifiIPv4Address();
             prefixLen = WIFI_HOST_IFACE_PREFIX_LENGTH;
         } else {
-            // Nothing to do, BT does this elsewhere.
-            return true;
+            // BT configures the interface elsewhere: only start DHCP.
+            final Inet4Address srvAddr = (Inet4Address) numericToInetAddress(BLUETOOTH_IFACE_ADDR);
+            return configureDhcp(enabled, srvAddr, BLUETOOTH_DHCP_PREFIX_LENGTH);
         }
 
         final LinkAddress linkAddr;
@@ -222,7 +282,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
                 return false;
             }
 
-            InetAddress addr = NetworkUtils.numericToInetAddress(ipAsString);
+            InetAddress addr = numericToInetAddress(ipAsString);
             linkAddr = new LinkAddress(addr, prefixLen);
             ifcg.setLinkAddress(linkAddr);
             if (mInterfaceType == ConnectivityManager.TETHERING_WIFI) {
@@ -239,6 +299,10 @@ public class TetherInterfaceStateMachine extends StateMachine {
             }
             ifcg.clearFlag("running");
             mNMService.setInterfaceConfig(mIfaceName, ifcg);
+
+            if (!configureDhcp(enabled, (Inet4Address) addr, prefixLen)) {
+                return false;
+            }
         } catch (Exception e) {
             mLog.e("Error configuring interface " + e);
             return false;
@@ -258,7 +322,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
 
     private String getRandomWifiIPv4Address() {
         try {
-            byte[] bytes = NetworkUtils.numericToInetAddress(WIFI_HOST_IFACE_ADDR).getAddress();
+            byte[] bytes = numericToInetAddress(WIFI_HOST_IFACE_ADDR).getAddress();
             bytes[3] = getRandomSanitizedByte(DOUG_ADAMS, asByte(0), asByte(1), FF);
             return InetAddress.getByAddress(bytes).getHostAddress();
         } catch (Exception e) {

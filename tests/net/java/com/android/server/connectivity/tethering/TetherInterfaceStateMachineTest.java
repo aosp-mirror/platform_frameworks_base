@@ -16,6 +16,7 @@
 
 package com.android.server.connectivity.tethering;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -23,7 +24,9 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -40,9 +43,15 @@ import static com.android.server.connectivity.tethering.IControlsTethering.STATE
 
 import android.net.INetworkStatsService;
 import android.net.InterfaceConfiguration;
+import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.MacAddress;
 import android.net.RouteInfo;
+import android.net.dhcp.DhcpServer;
+import android.net.dhcp.DhcpServingParams;
+import android.net.ip.RouterAdvertisementDaemon;
+import android.net.util.InterfaceParams;
 import android.net.util.InterfaceSet;
 import android.net.util.SharedLog;
 import android.os.INetworkManagementService;
@@ -58,6 +67,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -68,13 +78,21 @@ public class TetherInterfaceStateMachineTest {
     private static final String IFACE_NAME = "testnet1";
     private static final String UPSTREAM_IFACE = "upstream0";
     private static final String UPSTREAM_IFACE2 = "upstream1";
+    private static final int DHCP_LEASE_TIME_SECS = 3600;
+
+    private static final InterfaceParams TEST_IFACE_PARAMS = new InterfaceParams(
+            IFACE_NAME, 42 /* index */, MacAddress.ALL_ZEROS_ADDRESS, 1500 /* defaultMtu */);
 
     @Mock private INetworkManagementService mNMService;
     @Mock private INetworkStatsService mStatsService;
     @Mock private IControlsTethering mTetherHelper;
     @Mock private InterfaceConfiguration mInterfaceConfiguration;
     @Mock private SharedLog mSharedLog;
+    @Mock private DhcpServer mDhcpServer;
+    @Mock private RouterAdvertisementDaemon mRaDaemon;
     @Mock private TetheringDependencies mTetheringDependencies;
+
+    @Captor private ArgumentCaptor<DhcpServingParams> mDhcpParamsCaptor;
 
     private final TestLooper mLooper = new TestLooper();
     private final ArgumentCaptor<LinkProperties> mLinkPropertiesCaptor =
@@ -82,19 +100,36 @@ public class TetherInterfaceStateMachineTest {
     private TetherInterfaceStateMachine mTestedSm;
 
     private void initStateMachine(int interfaceType) throws Exception {
+        initStateMachine(interfaceType, false /* usingLegacyDhcp */);
+    }
+
+    private void initStateMachine(int interfaceType, boolean usingLegacyDhcp) throws Exception {
         mTestedSm = new TetherInterfaceStateMachine(
                 IFACE_NAME, mLooper.getLooper(), interfaceType, mSharedLog,
-                mNMService, mStatsService, mTetherHelper, mTetheringDependencies);
+                mNMService, mStatsService, mTetherHelper, usingLegacyDhcp,
+                mTetheringDependencies);
         mTestedSm.start();
         // Starting the state machine always puts us in a consistent state and notifies
         // the rest of the world that we've changed from an unknown to available state.
         mLooper.dispatchAll();
         reset(mNMService, mStatsService, mTetherHelper);
         when(mNMService.getInterfaceConfig(IFACE_NAME)).thenReturn(mInterfaceConfiguration);
+        when(mTetheringDependencies.makeDhcpServer(
+                any(), any(), mDhcpParamsCaptor.capture(), any())).thenReturn(mDhcpServer);
+        when(mTetheringDependencies.getRouterAdvertisementDaemon(any())).thenReturn(mRaDaemon);
+        when(mTetheringDependencies.getInterfaceParams(IFACE_NAME)).thenReturn(TEST_IFACE_PARAMS);
+
+        when(mRaDaemon.start()).thenReturn(true);
     }
 
-    private void initTetheredStateMachine(int interfaceType, String upstreamIface) throws Exception {
-        initStateMachine(interfaceType);
+    private void initTetheredStateMachine(int interfaceType, String upstreamIface)
+            throws Exception {
+        initTetheredStateMachine(interfaceType, upstreamIface, false);
+    }
+
+    private void initTetheredStateMachine(int interfaceType, String upstreamIface,
+            boolean usingLegacyDhcp) throws Exception {
+        initStateMachine(interfaceType, usingLegacyDhcp);
         dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_REQUESTED, STATE_TETHERED);
         if (upstreamIface != null) {
             dispatchTetherConnectionChanged(upstreamIface);
@@ -112,7 +147,7 @@ public class TetherInterfaceStateMachineTest {
     public void startsOutAvailable() {
         mTestedSm = new TetherInterfaceStateMachine(IFACE_NAME, mLooper.getLooper(),
                 TETHERING_BLUETOOTH, mSharedLog, mNMService, mStatsService, mTetherHelper,
-                mTetheringDependencies);
+                false /* usingLegacyDhcp */, mTetheringDependencies);
         mTestedSm.start();
         mLooper.dispatchAll();
         verify(mTetherHelper).updateInterfaceState(
@@ -343,6 +378,45 @@ public class TetherInterfaceStateMachineTest {
             dispatchTetherConnectionChanged(UPSTREAM_IFACE);
             verifyNoMoreInteractions(mNMService, mStatsService, mTetherHelper);
         }
+    }
+
+    @Test
+    public void startsDhcpServer() throws Exception {
+        initTetheredStateMachine(TETHERING_WIFI, UPSTREAM_IFACE);
+        dispatchTetherConnectionChanged(UPSTREAM_IFACE);
+
+        assertDhcpStarted(new IpPrefix("192.168.43.0/24"));
+    }
+
+    @Test
+    public void startsDhcpServerOnBluetooth() throws Exception {
+        initTetheredStateMachine(TETHERING_BLUETOOTH, UPSTREAM_IFACE);
+        dispatchTetherConnectionChanged(UPSTREAM_IFACE);
+
+        assertDhcpStarted(new IpPrefix("192.168.44.0/24"));
+    }
+
+    @Test
+    public void doesNotStartDhcpServerIfDisabled() throws Exception {
+        initTetheredStateMachine(TETHERING_WIFI, UPSTREAM_IFACE, true /* usingLegacyDhcp */);
+        dispatchTetherConnectionChanged(UPSTREAM_IFACE);
+
+        verify(mTetheringDependencies, never()).makeDhcpServer(any(), any(), any(), any());
+    }
+
+    private void assertDhcpStarted(IpPrefix expectedPrefix) {
+        verify(mTetheringDependencies, times(1)).makeDhcpServer(
+                eq(mLooper.getLooper()), eq(TEST_IFACE_PARAMS), any(), eq(mSharedLog));
+        verify(mDhcpServer, times(1)).start();
+        final DhcpServingParams params = mDhcpParamsCaptor.getValue();
+        // Last address byte is random
+        assertTrue(expectedPrefix.contains(params.serverAddr.getAddress()));
+        assertEquals(expectedPrefix.getPrefixLength(), params.serverAddr.getPrefixLength());
+        assertEquals(1, params.defaultRouters.size());
+        assertEquals(params.serverAddr.getAddress(), params.defaultRouters.iterator().next());
+        assertEquals(1, params.dnsServers.size());
+        assertEquals(params.serverAddr.getAddress(), params.dnsServers.iterator().next());
+        assertEquals(DHCP_LEASE_TIME_SECS, params.dhcpLeaseTimeSecs);
     }
 
     /**
