@@ -43,6 +43,7 @@ import android.graphics.Region;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.test.filters.FlakyTest;
 import android.view.MagnificationSpec;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -66,6 +67,7 @@ import org.mockito.stubbing.Answer;
 import java.util.Locale;
 
 @RunWith(AndroidJUnit4.class)
+@FlakyTest
 public class MagnificationControllerTest {
     static final Rect INITIAL_MAGNIFICATION_BOUNDS = new Rect(0, 0, 100, 200);
     static final PointF INITIAL_MAGNIFICATION_BOUNDS_CENTER = new PointF(
