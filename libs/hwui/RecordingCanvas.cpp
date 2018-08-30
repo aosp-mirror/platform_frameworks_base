@@ -311,7 +311,7 @@ struct DrawImageRect final : Op {
     DrawImageRect(sk_sp<const SkImage>&& image, const SkRect* src, const SkRect& dst,
                   const SkPaint* paint, SkCanvas::SrcRectConstraint constraint)
             : image(std::move(image)), dst(dst), constraint(constraint) {
-        this->src = src ? *src : SkRect::MakeIWH(image->width(), image->height());
+        this->src = src ? *src : SkRect::MakeIWH(this->image->width(), this->image->height());
         if (paint) {
             this->paint = *paint;
         }
