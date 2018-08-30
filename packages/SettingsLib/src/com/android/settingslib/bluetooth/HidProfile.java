@@ -29,7 +29,7 @@ import com.android.settingslib.R;
 import java.util.List;
 
 /**
- * HidProfile handles Bluetooth HID profile.
+ * HidProfile handles Bluetooth HID Host role.
  */
 public class HidProfile implements LocalBluetoothProfile {
     private static final String TAG = "HidProfile";
@@ -117,11 +117,7 @@ public class HidProfile implements LocalBluetoothProfile {
         if (mService == null) {
             return BluetoothProfile.STATE_DISCONNECTED;
         }
-        List<BluetoothDevice> deviceList = mService.getConnectedDevices();
-
-        return !deviceList.isEmpty() && deviceList.get(0).equals(device)
-                ? mService.getConnectionState(device)
-                : BluetoothProfile.STATE_DISCONNECTED;
+        return mService.getConnectionState(device);
     }
 
     public boolean isPreferred(BluetoothDevice device) {
