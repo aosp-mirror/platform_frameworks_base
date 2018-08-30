@@ -20,6 +20,7 @@ import static android.net.NetworkUtils.inet4AddressToIntHTH;
 import static android.net.NetworkUtils.intToInet4AddressHTH;
 import static android.net.NetworkUtils.prefixLengthToV4NetmaskIntHTH;
 import static android.net.dhcp.DhcpLease.EXPIRATION_NEVER;
+import static android.net.dhcp.DhcpLease.inet4AddrToString;
 import static android.net.util.NetworkConstants.IPV4_ADDR_BITS;
 
 import static java.lang.Math.min;
@@ -252,7 +253,7 @@ class DhcpLeaseRepository {
         final DhcpLease lease =
                 checkClientAndMakeLease(clientId, hwAddr, leaseAddr, hostname, currentTime);
         mLog.logf("DHCPREQUEST assignedLease %s, reqAddr=%s, sidSet=%s: created/renewed lease %s",
-                assignedLease, reqAddr, sidSet, lease);
+                assignedLease, inet4AddrToString(reqAddr), sidSet, lease);
         return lease;
     }
 
@@ -304,7 +305,7 @@ class DhcpLeaseRepository {
             @NonNull Inet4Address addr) {
         final DhcpLease currentLease = mCommittedLeases.getOrDefault(addr, null);
         if (currentLease == null) {
-            mLog.w("Could not release unknown lease for " + addr);
+            mLog.w("Could not release unknown lease for " + inet4AddrToString(addr));
             return false;
         }
         if (currentLease.matchesClient(clientId, hwAddr)) {
@@ -319,12 +320,13 @@ class DhcpLeaseRepository {
 
     public void markLeaseDeclined(@NonNull Inet4Address addr) {
         if (mDeclinedAddrs.containsKey(addr) || !isValidAddress(addr)) {
-            mLog.logf("Not marking %s as declined: already declined or not assignable", addr);
+            mLog.logf("Not marking %s as declined: already declined or not assignable",
+                    inet4AddrToString(addr));
             return;
         }
         final long expTime = mClock.elapsedRealtime() + mLeaseTimeMs;
         mDeclinedAddrs.put(addr, expTime);
-        mLog.logf("Marked %s as declined expiring %d", addr, expTime);
+        mLog.logf("Marked %s as declined expiring %d", inet4AddrToString(addr), expTime);
         maybeUpdateEarliestExpiration(expTime);
     }
 
@@ -515,7 +517,8 @@ class DhcpLeaseRepository {
         while (it.hasNext()) {
             final Inet4Address addr = it.next();
             it.remove();
-            mLog.logf("Out of addresses in address pool: dropped declined addr %s", addr);
+            mLog.logf("Out of addresses in address pool: dropped declined addr %s",
+                    inet4AddrToString(addr));
             // isValidAddress() is always verified for entries in mDeclinedAddrs.
             // However declined addresses may have been requested (typically by the machine that was
             // already using the address) after being declined.
