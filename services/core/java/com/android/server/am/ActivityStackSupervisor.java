@@ -48,6 +48,7 @@ import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.TYPE_VIRTUAL;
+import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
@@ -81,13 +82,6 @@ import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
-import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
-import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
-import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
-import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
-import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
-import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
-import static com.android.server.am.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
 import static com.android.server.am.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
 import static com.android.server.am.ActivityStackSupervisorProto.DISPLAYS;
 import static com.android.server.am.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
@@ -95,7 +89,13 @@ import static com.android.server.am.ActivityStackSupervisorProto.IS_HOME_RECENTS
 import static com.android.server.am.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
 import static com.android.server.am.ActivityStackSupervisorProto.PENDING_ACTIVITIES;
 import static com.android.server.am.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
-import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
+import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
+import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
+import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
+import static com.android.server.am.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
 
 import static java.lang.Integer.MAX_VALUE;
 
@@ -109,8 +109,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerInternal;
-import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.server.wm.ActivityTaskManagerInternal.SleepToken;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
 import android.app.ProfilerInfo;
@@ -170,11 +168,13 @@ import android.view.Display;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
-import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.wm.ActivityTaskManagerInternal.SleepToken;
 import com.android.server.wm.ConfigurationContainer;
 import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.WindowManagerService;
@@ -1862,7 +1862,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         final ActivityDisplay activityDisplay = getActivityDisplayOrCreateLocked(launchDisplayId);
-        if (activityDisplay == null) {
+        if (activityDisplay == null || activityDisplay.isRemoved()) {
             Slog.w(TAG, "Launch on display check: display not found");
             return false;
         }
@@ -4359,10 +4359,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             activityDisplay.remove();
 
             releaseSleepTokens(activityDisplay);
-
-            mActivityDisplays.remove(displayId);
         }
     }
+
+    void releaseActivityDisplayLocked(int displayId) {
+        mActivityDisplays.remove(displayId);
+    }
+
 
     private void handleDisplayChanged(int displayId) {
         synchronized (mService.mGlobalLock) {
