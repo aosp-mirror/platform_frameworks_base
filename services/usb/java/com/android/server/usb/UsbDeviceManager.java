@@ -279,8 +279,8 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
         }
         mControlFds.put(UsbManager.FUNCTION_MTP, mtpFd);
         FileDescriptor ptpFd = nativeOpenControl(UsbManager.USB_FUNCTION_PTP);
-        if (mtpFd == null) {
-            Slog.e(TAG, "Failed to open control for mtp");
+        if (ptpFd == null) {
+            Slog.e(TAG, "Failed to open control for ptp");
         }
         mControlFds.put(UsbManager.FUNCTION_PTP, ptpFd);
 
