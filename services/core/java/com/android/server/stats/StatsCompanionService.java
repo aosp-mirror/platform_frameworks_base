@@ -19,7 +19,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.AlarmManager.OnAlarmListener;
-import android.app.PendingIntent;
 import android.app.ProcessMemoryState;
 import android.app.StatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
@@ -65,10 +64,10 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
 import com.android.internal.os.KernelCpuSpeedReader;
-import com.android.internal.os.KernelUidCpuTimeReader;
-import com.android.internal.os.KernelUidCpuClusterTimeReader;
 import com.android.internal.os.KernelUidCpuActiveTimeReader;
+import com.android.internal.os.KernelUidCpuClusterTimeReader;
 import com.android.internal.os.KernelUidCpuFreqTimeReader;
+import com.android.internal.os.KernelUidCpuTimeReader;
 import com.android.internal.os.KernelWakelockReader;
 import com.android.internal.os.KernelWakelockStats;
 import com.android.internal.os.PowerProfile;
@@ -79,7 +78,6 @@ import com.android.server.SystemService;
 
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -328,7 +326,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                             PackageManager pm = context.getPackageManager();
                             String app = intent.getData().getSchemeSpecificPart();
                             sStatsd.informOnePackageRemoved(app, uid);
-                            StatsLog.write(StatsLog.GENERIC_ATOM, uid, 1000);
                         }
                     } else {
                         PackageManager pm = context.getPackageManager();
@@ -337,7 +334,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         String app = intent.getData().getSchemeSpecificPart();
                         PackageInfo pi = pm.getPackageInfo(app, PackageManager.MATCH_ANY_USER);
                         sStatsd.informOnePackage(app, uid, pi.getLongVersionCode());
-                        StatsLog.write(StatsLog.GENERIC_ATOM, uid, 1001);
                     }
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to inform statsd of an app update", e);
