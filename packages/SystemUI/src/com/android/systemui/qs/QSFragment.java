@@ -101,12 +101,7 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
         if (savedInstanceState != null) {
             setExpanded(savedInstanceState.getBoolean(EXTRA_EXPANDED));
             setListening(savedInstanceState.getBoolean(EXTRA_LISTENING));
-            int[] loc = new int[2];
-            View edit = view.findViewById(android.R.id.edit);
-            edit.getLocationInWindow(loc);
-            int x = loc[0] + edit.getWidth() / 2;
-            int y = loc[1] + edit.getHeight() / 2;
-            mQSCustomizer.setEditLocation(x, y);
+            setEditLocation(view);
             mQSCustomizer.restoreInstanceState(savedInstanceState);
         }
         SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallbacks(this);
@@ -161,13 +156,22 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        setEditLocation(getView());
         if (newConfig.getLayoutDirection() != mLayoutDirection) {
             mLayoutDirection = newConfig.getLayoutDirection();
-
             if (mQSAnimator != null) {
                 mQSAnimator.onRtlChanged();
             }
         }
+    }
+
+    private void setEditLocation(View view) {
+        Log.w(TAG, "I'm changing the location of the button!!!");
+        View edit = view.findViewById(android.R.id.edit);
+        int[] loc = edit.getLocationOnScreen();
+        int x = loc[0] + edit.getWidth() / 2;
+        int y = loc[1] + edit.getHeight() / 2;
+        mQSCustomizer.setEditLocation(x, y);
     }
 
     @Override
