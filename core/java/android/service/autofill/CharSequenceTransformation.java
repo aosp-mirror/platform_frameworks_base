@@ -78,7 +78,7 @@ public final class CharSequenceTransformation extends InternalTransformation imp
             int childViewId) throws Exception {
         final StringBuilder converted = new StringBuilder();
         final int size = mFields.size();
-        if (sDebug) Log.d(TAG, size + " multiple fields on id " + childViewId);
+        if (sDebug) Log.d(TAG, size + " fields on id " + childViewId);
         for (Entry<AutofillId, Pair<Pattern, String>> entry : mFields.entrySet()) {
             final AutofillId id = entry.getKey();
             final Pair<Pattern, String> field = entry.getValue();

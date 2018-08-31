@@ -212,20 +212,20 @@ final class ViewState {
     public String toString() {
         final StringBuilder builder = new StringBuilder("ViewState: [id=").append(id);
         if (mDatasetId != null) {
-            builder.append("datasetId:" ).append(mDatasetId);
+            builder.append(", datasetId:" ).append(mDatasetId);
         }
         builder.append("state:" ).append(getStateAsString());
         if (mCurrentValue != null) {
-            builder.append("currentValue:" ).append(mCurrentValue);
+            builder.append(", currentValue:" ).append(mCurrentValue);
         }
         if (mAutofilledValue != null) {
-            builder.append("autofilledValue:" ).append(mAutofilledValue);
+            builder.append(", autofilledValue:" ).append(mAutofilledValue);
         }
         if (mSanitizedValue != null) {
-            builder.append("sanitizedValue:" ).append(mSanitizedValue);
+            builder.append(", sanitizedValue:" ).append(mSanitizedValue);
         }
         if (mVirtualBounds != null) {
-            builder.append("virtualBounds:" ).append(mVirtualBounds);
+            builder.append(", virtualBounds:" ).append(mVirtualBounds);
         }
         return builder.toString();
     }
