@@ -154,6 +154,8 @@ public final class BackgroundDexOptServiceIntegrationTests {
             stdout.append(new String(buf, 0, bytesRead));
         }
         fis.close();
+        Log.i(TAG, "stdout");
+        Log.i(TAG, stdout.toString());
         return stdout.toString();
     }
 
@@ -202,7 +204,10 @@ public final class BackgroundDexOptServiceIntegrationTests {
 
     // TODO(aeubanks): figure out how to get scheduled bg-dexopt to run
     private static void runBackgroundDexOpt() throws IOException {
-        runShellCommand("cmd package bg-dexopt-job " + PACKAGE_NAME);
+        String result = runShellCommand("cmd package bg-dexopt-job " + PACKAGE_NAME);
+        if (!result.trim().equals("Success")) {
+            throw new IllegalStateException("Expected command success, received >" + result + "<");
+        }
     }
 
     // Set the time ahead of the last use time of the test app in days.

@@ -9005,15 +9005,15 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
-     * Enforces that only the system UID or shell's UID can call a method exposed
-     * via Binder.
+     * Enforces that only the system UID or root's UID or shell's UID can call
+     * a method exposed via Binder.
      *
      * @param message used as message if SecurityException is thrown
      * @throws SecurityException if the caller is not system or shell
      */
-    private static void enforceSystemOrShell(String message) {
+    private static void enforceSystemOrRootOrShell(String message) {
         final int uid = Binder.getCallingUid();
-        if (uid != Process.SYSTEM_UID && uid != Process.SHELL_UID) {
+        if (uid != Process.SYSTEM_UID && uid != Process.ROOT_UID && uid != Process.SHELL_UID) {
             throw new SecurityException(message);
         }
     }
@@ -9512,7 +9512,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return false;
         }
-        enforceSystemOrShell("runBackgroundDexoptJob");
+        enforceSystemOrRootOrShell("runBackgroundDexoptJob");
         final long identity = Binder.clearCallingIdentity();
         try {
             return BackgroundDexOptService.runIdleOptimizationsNow(this, mContext, packageNames);
