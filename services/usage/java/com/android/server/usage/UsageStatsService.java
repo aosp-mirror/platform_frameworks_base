@@ -207,8 +207,8 @@ public class UsageStatsService extends SystemService implements
 
     @Override
     public void onBootPhase(int phase) {
+        mAppStandby.onBootPhase(phase);
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
-            mAppStandby.onBootPhase(phase);
             // initialize mDpmInternal
             getDpmInternal();
 
