@@ -52,4 +52,8 @@
 
     <!-- Whether to show a custom view for FOD -->
     <bool name="config_needCustomFODView">false</bool>
+
+    <!-- Whether to allow process with media UID to access CameraServiceProxy -->
+    <bool name="config_allowMediaUidForCameraServiceProxy">false</bool>
+
 </resources>
