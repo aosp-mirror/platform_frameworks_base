@@ -17,7 +17,6 @@
 package android.permissionpresenterservice;
 
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -78,10 +77,7 @@ public abstract class RuntimePermissionPresenterService extends Service {
      *
      * @param packageName The package for which to revoke
      * @param permissionName The permission to revoke
-     *
-     * @hide
      */
-    @UnsupportedAppUsage
     public abstract void onRevokeRuntimePermission(String packageName, String permissionName);
 
     @Override
