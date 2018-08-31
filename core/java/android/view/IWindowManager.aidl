@@ -73,7 +73,6 @@ interface IWindowManager
 
     IWindowSession openSession(in IWindowSessionCallback callback, in IInputMethodClient client,
             in IInputContext inputContext);
-    boolean inputMethodClientHasFocus(IInputMethodClient client);
 
     void getInitialDisplaySize(int displayId, out Point size);
     void getBaseDisplaySize(int displayId, out Point size);
