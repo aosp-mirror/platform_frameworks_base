@@ -1068,6 +1068,7 @@ public final class AudioFormat implements Parcelable {
         ENCODING_E_AC3_JOC,
         ENCODING_DTS,
         ENCODING_DTS_HD,
+        ENCODING_MP3,
         ENCODING_IEC61937,
         ENCODING_AAC_HE_V1,
         ENCODING_AAC_HE_V2,

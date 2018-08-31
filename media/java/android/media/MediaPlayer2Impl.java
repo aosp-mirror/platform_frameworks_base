@@ -3277,12 +3277,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }
 
         @Override
-        public void onStreamPresentationEnd(AudioTrack track) {
+        public void onPresentationEnded(AudioTrack track) {
             native_stream_event_onStreamPresentationEnd(mNativeCallbackPtr, mUserDataPtr);
         }
 
         @Override
-        public void onStreamDataRequest(AudioTrack track) {
+        public void onDataRequest(AudioTrack track, int size) {
             native_stream_event_onStreamDataRequest(
                     mJAudioTrackPtr, mNativeCallbackPtr, mUserDataPtr);
         }
