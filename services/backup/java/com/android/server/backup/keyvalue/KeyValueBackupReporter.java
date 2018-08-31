@@ -52,11 +52,9 @@ import java.util.List;
 //       verify calls to this object. Add these and more assertions to the test of this class.
 @VisibleForTesting
 public class KeyValueBackupReporter {
-    @VisibleForTesting
-    static final String TAG = "KeyValueBackupTask";
+    @VisibleForTesting static final String TAG = "KeyValueBackupTask";
     private static final boolean DEBUG = BackupManagerService.DEBUG;
-    @VisibleForTesting
-    static final boolean MORE_DEBUG = BackupManagerService.MORE_DEBUG || true;
+    @VisibleForTesting static final boolean MORE_DEBUG = BackupManagerService.MORE_DEBUG || true;
 
     static void onNewThread(String threadName) {
         if (DEBUG) {
@@ -130,12 +128,6 @@ public class KeyValueBackupReporter {
 
     void onExtractPmAgentDataError(Exception e) {
         Slog.e(TAG, "Error during PM metadata backup", e);
-    }
-
-    void onEmptyQueue() {
-        if (MORE_DEBUG) {
-            Slog.i(TAG, "Queue now empty");
-        }
     }
 
     void onStartPackageBackup(String packageName) {
@@ -361,6 +353,14 @@ public class KeyValueBackupReporter {
                         BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT,
                         BackupManagerMonitorUtils.putMonitoringExtra(
                                 null, BackupManagerMonitor.EXTRA_LOG_CANCEL_ALL, true));
+    }
+
+    void onAgentResultError(@Nullable PackageInfo packageInfo) {
+        String packageName = getPackageName(packageInfo);
+        BackupObserverUtils.sendBackupOnPackageResult(
+                mObserver, packageName, BackupManager.ERROR_AGENT_FAILURE);
+        EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, packageName, "result error");
+        Slog.w(TAG, "Agent " + packageName + " error in onBackup()");
     }
 
     private String getPackageName(@Nullable PackageInfo packageInfo) {

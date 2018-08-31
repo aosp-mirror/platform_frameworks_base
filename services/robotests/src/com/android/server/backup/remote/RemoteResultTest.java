@@ -35,28 +35,38 @@ import org.robolectric.annotation.Config;
 @Presubmit
 public class RemoteResultTest {
     @Test
-    public void testSucceeded_whenSuccessfulResult_returnsTrue() {
-        RemoteResult result = RemoteResult.successful(3);
+    public void testIsPresent_whenNonFailedResult_returnsTrue() {
+        RemoteResult result = RemoteResult.of(3);
 
-        boolean succeeded = result.succeeded();
+        boolean isPresent = result.isPresent();
 
-        assertThat(succeeded).isTrue();
+        assertThat(isPresent).isTrue();
     }
 
     @Test
-    public void testSucceeded_whenFailedResults_returnsFalse() {
-        boolean timeOutSucceeded = RemoteResult.FAILED_TIMED_OUT.succeeded();
-        boolean cancelledSucceeded = RemoteResult.FAILED_CANCELLED.succeeded();
-        boolean threadInterruptedSucceeded = RemoteResult.FAILED_THREAD_INTERRUPTED.succeeded();
+    public void testIsPresent_whenTimeOutResult_returnsFalse() {
+        boolean timeOutIsPresent = RemoteResult.FAILED_TIMED_OUT.isPresent();
 
-        assertThat(timeOutSucceeded).isFalse();
-        assertThat(cancelledSucceeded).isFalse();
-        assertThat(threadInterruptedSucceeded).isFalse();
+        assertThat(timeOutIsPresent).isFalse();
+    }
+
+    @Test
+    public void testIsPresent_whenCancelledResult_returnsFalse() {
+        boolean cancelledIsPresent = RemoteResult.FAILED_CANCELLED.isPresent();
+
+        assertThat(cancelledIsPresent).isFalse();
+    }
+
+    @Test
+    public void testIsPresent_whenThreadInterruptedResult_returnsFalse() {
+        boolean threadInterruptedIsPresent = RemoteResult.FAILED_THREAD_INTERRUPTED.isPresent();
+
+        assertThat(threadInterruptedIsPresent).isFalse();
     }
 
     @Test
     public void testGet_whenSuccessfulResult_returnsValue() {
-        RemoteResult result = RemoteResult.successful(7);
+        RemoteResult result = RemoteResult.of(7);
 
         long value = result.get();
 
@@ -72,7 +82,7 @@ public class RemoteResultTest {
 
     @Test
     public void testToString() {
-        assertThat(RemoteResult.successful(3).toString()).isEqualTo("RemoteResult{3}");
+        assertThat(RemoteResult.of(3).toString()).isEqualTo("RemoteResult{3}");
         assertThat(RemoteResult.FAILED_TIMED_OUT.toString())
                 .isEqualTo("RemoteResult{FAILED_TIMED_OUT}");
         assertThat(RemoteResult.FAILED_CANCELLED.toString())
@@ -83,14 +93,14 @@ public class RemoteResultTest {
 
     @Test
     public void testEquals() {
-        assertThat(RemoteResult.successful(3).equals(RemoteResult.successful(3))).isTrue();
-        assertThat(RemoteResult.successful(3).equals(RemoteResult.successful(7))).isFalse();
-        assertThat(RemoteResult.successful(-1).equals(RemoteResult.successful(1))).isFalse();
-        assertThat(RemoteResult.successful(Long.MAX_VALUE).equals(RemoteResult.successful(-1)))
+        assertThat(RemoteResult.of(3).equals(RemoteResult.of(3))).isTrue();
+        assertThat(RemoteResult.of(3).equals(RemoteResult.of(7))).isFalse();
+        assertThat(RemoteResult.of(-1).equals(RemoteResult.of(1))).isFalse();
+        assertThat(RemoteResult.of(Long.MAX_VALUE).equals(RemoteResult.of(-1)))
                 .isFalse();
-        assertThat(RemoteResult.successful(3).equals(RemoteResult.FAILED_TIMED_OUT)).isFalse();
-        assertThat(RemoteResult.successful(3).equals("3")).isFalse();
-        assertThat(RemoteResult.successful(3).equals(null)).isFalse();
+        assertThat(RemoteResult.of(3).equals(RemoteResult.FAILED_TIMED_OUT)).isFalse();
+        assertThat(RemoteResult.of(3).equals("3")).isFalse();
+        assertThat(RemoteResult.of(3).equals(null)).isFalse();
         assertThat(RemoteResult.FAILED_TIMED_OUT.equals(RemoteResult.FAILED_TIMED_OUT)).isTrue();
         assertThat(RemoteResult.FAILED_TIMED_OUT.equals(RemoteResult.FAILED_CANCELLED)).isFalse();
     }
@@ -98,9 +108,9 @@ public class RemoteResultTest {
     /** @see Object#hashCode() */
     @Test
     public void testHashCode() {
-        RemoteResult result3 = RemoteResult.successful(3);
+        RemoteResult result3 = RemoteResult.of(3);
         assertThat(result3.hashCode()).isEqualTo(result3.hashCode());
-        assertThat(result3.hashCode()).isEqualTo(RemoteResult.successful(3).hashCode());
+        assertThat(result3.hashCode()).isEqualTo(RemoteResult.of(3).hashCode());
         assertThat(RemoteResult.FAILED_TIMED_OUT.hashCode())
                 .isEqualTo(RemoteResult.FAILED_TIMED_OUT.hashCode());
         assertThat(RemoteResult.FAILED_CANCELLED.hashCode())

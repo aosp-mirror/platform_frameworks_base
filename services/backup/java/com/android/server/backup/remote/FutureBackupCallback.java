@@ -23,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * An implementation of {@link IBackupCallback} that completes the {@link CompletableFuture}
- * provided in the constructor with a successful {@link RemoteResult}.
+ * provided in the constructor with a present {@link RemoteResult}.
  */
 public class FutureBackupCallback extends IBackupCallback.Stub {
     private final CompletableFuture<RemoteResult> mFuture;
@@ -34,6 +34,6 @@ public class FutureBackupCallback extends IBackupCallback.Stub {
 
     @Override
     public void operationComplete(long result) throws RemoteException {
-        mFuture.complete(RemoteResult.successful(result));
+        mFuture.complete(RemoteResult.of(result));
     }
 }
