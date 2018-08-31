@@ -764,7 +764,7 @@ public class FaceService extends BiometricService {
             return 0;
         }
         try {
-            return daemon.preEnroll().value;
+            return daemon.generateChallenge().value;
         } catch (RemoteException e) {
             Slog.e(TAG, "startPreEnroll failed", e);
         }
@@ -778,7 +778,7 @@ public class FaceService extends BiometricService {
             return 0;
         }
         try {
-            return daemon.postEnroll();
+            return daemon.revokeChallenge();
         } catch (RemoteException e) {
             Slog.e(TAG, "startPostEnroll failed", e);
         }
