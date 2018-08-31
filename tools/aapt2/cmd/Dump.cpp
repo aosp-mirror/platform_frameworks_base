@@ -298,7 +298,7 @@ int DumpTableCommand::Action(const std::vector<std::string>& args) {
       return 1;
     }
 
-    if (loaded_apk->GetApkFormat()) {
+    if (loaded_apk->GetApkFormat() == ApkFormat::kProto) {
       printer.Println("Proto APK");
     } else {
       printer.Println("Binary APK");
@@ -356,7 +356,7 @@ int DumpXmlStringsCommand::Action(const std::vector<std::string>& args) {
   for (auto xml_file : files_) {
     android::ResXMLTree tree;
 
-    if (loaded_apk->GetApkFormat() == kProto) {
+    if (loaded_apk->GetApkFormat() == ApkFormat::kProto) {
       auto xml = loaded_apk->LoadXml(xml_file, diag_);
       if (!xml) {
         return 1;
@@ -375,7 +375,7 @@ int DumpXmlStringsCommand::Action(const std::vector<std::string>& args) {
       std::string data = buffer.to_string();
       tree.setTo(data.data(), data.size(), /** copyData */ true);
 
-    } else if (loaded_apk->GetApkFormat() == kBinary) {
+    } else if (loaded_apk->GetApkFormat() == ApkFormat::kBinary) {
       io::IFile* file = loaded_apk->GetFileCollection()->FindFile(xml_file);
       if (!file) {
         diag_->Error(DiagMessage(xml_file) << "file '" << xml_file << "' not found in APK");
