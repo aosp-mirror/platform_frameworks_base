@@ -8251,7 +8251,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mAutofillId == null) {
             // The autofill id needs to be unique, but its value doesn't matter,
             // so it's better to reuse the accessibility id to save space.
-            mAutofillId = new AutofillId(getAutofillViewId());
+            mAutofillId = new AutofillId(getAutofillManager(), getAutofillViewId());
         }
         return mAutofillId;
     }
@@ -8313,11 +8313,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Ignore reset because it was never explicitly set before.
             return;
         }
-        mAutofillId = id;
         if (id != null) {
+            // Must create a new id so the session id is preserved.
+            final int oldSessionId = mAutofillId.getSessionId();
             mAutofillViewId = id.getViewId();
+            mAutofillId = new AutofillId(mAutofillViewId);
+            mAutofillId.setSessionId(oldSessionId);
             mPrivateFlags3 |= PFLAG3_AUTOFILLID_EXPLICITLY_SET;
         } else {
+            mAutofillId = null;
             mAutofillViewId = NO_ID;
             mPrivateFlags3 &= ~PFLAG3_AUTOFILLID_EXPLICITLY_SET;
         }
@@ -8607,8 +8611,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             structure.setContextClickable(true);
         }
         if (forAutofill) {
-            structure.setAutofillId(new AutofillId(getAutofillId(),
-                    AccessibilityNodeInfo.getVirtualDescendantId(info.getSourceNodeId())));
+            final AutofillId autofillId = new AutofillId(getAutofillId(),
+                    AccessibilityNodeInfo.getVirtualDescendantId(info.getSourceNodeId()));
+            final AutofillManager afm = getAutofillManager();
+            autofillId.setSessionId(afm == null ? AutofillManager.NO_SESSION : afm.getSessionId());
+            structure.setAutofillId(autofillId);
         }
         CharSequence cname = info.getClassName();
         structure.setClassName(cname != null ? cname.toString() : null);

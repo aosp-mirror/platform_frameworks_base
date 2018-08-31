@@ -15,6 +15,10 @@
  */
 package android.view.autofill;
 
+import static android.view.autofill.Helper.sDebug;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -28,6 +32,7 @@ public final class AutofillId implements Parcelable {
     private final int mViewId;
     private final boolean mVirtual;
     private final int mVirtualId;
+    private int mSessionId = AutofillManager.NO_SESSION;
 
     /** @hide */
     @TestApi
@@ -38,18 +43,26 @@ public final class AutofillId implements Parcelable {
     }
 
     /** @hide */
+    // NOTE: caller must set sessionId
     @TestApi
-    public AutofillId(AutofillId parent, int virtualChildId) {
+    public AutofillId(@NonNull AutofillId parent, int virtualChildId) {
         mVirtual = true;
         mViewId = parent.mViewId;
         mVirtualId = virtualChildId;
     }
 
     /** @hide */
-    public AutofillId(int parentId, int virtualChildId) {
+    public AutofillId(int sessionId, int parentId, int virtualChildId) {
         mVirtual = true;
         mViewId = parentId;
         mVirtualId = virtualChildId;
+        mSessionId = sessionId;
+    }
+
+    /** @hide */
+    public AutofillId(@Nullable AutofillManager afm, int id) {
+        this(id);
+        mSessionId = afm == null ? AutofillManager.NO_SESSION : afm.getSessionId();
     }
 
     /** @hide */
@@ -67,6 +80,16 @@ public final class AutofillId implements Parcelable {
         return mVirtual;
     }
 
+    /** @hide */
+    public int getSessionId() {
+        return mSessionId;
+    }
+
+    /** @hide */
+    public void setSessionId(int sessionId) {
+        this.mSessionId = sessionId;
+    }
+
     /////////////////////////////////
     //  Object "contract" methods. //
     /////////////////////////////////
@@ -77,6 +100,7 @@ public final class AutofillId implements Parcelable {
         int result = 1;
         result = prime * result + mViewId;
         result = prime * result + mVirtualId;
+        result = prime * result + mSessionId;
         return result;
     }
 
@@ -88,6 +112,7 @@ public final class AutofillId implements Parcelable {
         final AutofillId other = (AutofillId) obj;
         if (mViewId != other.mViewId) return false;
         if (mVirtualId != other.mVirtualId) return false;
+        if (mSessionId != other.mSessionId) return false;
         return true;
     }
 
@@ -96,6 +121,9 @@ public final class AutofillId implements Parcelable {
         final StringBuilder builder = new StringBuilder().append(mViewId);
         if (mVirtual) {
             builder.append(':').append(mVirtualId);
+        }
+        if (mSessionId != AutofillManager.NO_SESSION && sDebug) {
+            builder.append('<').append(mSessionId).append('>');
         }
         return builder.toString();
     }
@@ -110,12 +138,14 @@ public final class AutofillId implements Parcelable {
         parcel.writeInt(mViewId);
         parcel.writeInt(mVirtual ? 1 : 0);
         parcel.writeInt(mVirtualId);
+        parcel.writeInt(mSessionId);
     }
 
     private AutofillId(Parcel parcel) {
         mViewId = parcel.readInt();
         mVirtual = parcel.readInt() == 1;
         mVirtualId = parcel.readInt();
+        mSessionId = parcel.readInt();
     }
 
     public static final Parcelable.Creator<AutofillId> CREATOR =
