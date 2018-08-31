@@ -20,7 +20,6 @@
 #include "Readback.h"
 #include "SkiaPipeline.h"
 #include "SkiaProfileRenderer.h"
-#include "VkLayer.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/Frame.h"
 
@@ -114,16 +113,10 @@ bool SkiaVulkanPipeline::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bi
     return false;
 }
 
-static Layer* createLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,
-                          sk_sp<SkColorFilter> colorFilter, int alpha, SkBlendMode mode,
-                          bool blend) {
-    return new VkLayer(renderState, layerWidth, layerHeight, colorFilter, alpha, mode, blend);
-}
-
 DeferredLayerUpdater* SkiaVulkanPipeline::createTextureLayer() {
     mVkManager.initialize();
 
-    return new DeferredLayerUpdater(mRenderThread.renderState(), createLayer, Layer::Api::Vulkan);
+    return new DeferredLayerUpdater(mRenderThread.renderState());
 }
 
 void SkiaVulkanPipeline::onStop() {}

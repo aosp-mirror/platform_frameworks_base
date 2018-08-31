@@ -22,8 +22,6 @@
 #include "SkColorFilter.h"
 #include "SkColorMatrixFilter.h"
 
-#include <Caches.h>
-
 namespace android {
 
 using namespace uirenderer;
