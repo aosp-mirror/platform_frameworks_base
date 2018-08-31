@@ -3528,6 +3528,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         boolean mHasLetterSpacing = false;
         float mLetterSpacing = 0;
         String mFontFeatureSettings = null;
+        String mFontVariationSettings = null;
 
         @Override
         public String toString() {
@@ -3555,6 +3556,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     + "    mHasLetterSpacing:" + mHasLetterSpacing + "\n"
                     + "    mLetterSpacing:" + mLetterSpacing + "\n"
                     + "    mFontFeatureSettings:" + mFontFeatureSettings + "\n"
+                    + "    mFontVariationSettings:" + mFontVariationSettings + "\n"
                     + "}";
         }
     }
@@ -3598,6 +3600,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 com.android.internal.R.styleable.TextAppearance_letterSpacing);
         sAppearanceValues.put(com.android.internal.R.styleable.TextView_fontFeatureSettings,
                 com.android.internal.R.styleable.TextAppearance_fontFeatureSettings);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_fontVariationSettings,
+                com.android.internal.R.styleable.TextAppearance_fontVariationSettings);
     }
 
     /**
@@ -3700,6 +3704,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 case com.android.internal.R.styleable.TextAppearance_fontFeatureSettings:
                     attributes.mFontFeatureSettings = appearance.getString(attr);
                     break;
+                case com.android.internal.R.styleable.TextAppearance_fontVariationSettings:
+                    attributes.mFontVariationSettings = appearance.getString(attr);
+                    break;
                 default:
             }
         }
@@ -3755,6 +3762,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (attributes.mFontFeatureSettings != null) {
             setFontFeatureSettings(attributes.mFontFeatureSettings);
+        }
+
+        if (attributes.mFontVariationSettings != null) {
+            setFontVariationSettings(attributes.mFontVariationSettings);
         }
     }
 
