@@ -2378,4 +2378,17 @@ public class LocationManager {
             throw new IllegalArgumentException("invalid geofence: " + fence);
         }
     }
+
+    /**
+     * @hide
+     */
+    @SystemApi
+    public String getNetworkProviderPackage() {
+        try {
+            return mService.getNetworkProviderPackage();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return null;
+        }
+    }
 }
