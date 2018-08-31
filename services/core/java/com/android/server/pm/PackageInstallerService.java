@@ -58,7 +58,6 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SELinux;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
@@ -646,8 +645,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         }
 
         try {
-            Os.mkdir(stageDir.getAbsolutePath(), 0755);
-            Os.chmod(stageDir.getAbsolutePath(), 0755);
+            Os.mkdir(stageDir.getAbsolutePath(), 0775);
+            Os.chmod(stageDir.getAbsolutePath(), 0775);
         } catch (ErrnoException e) {
             // This purposefully throws if directory already exists
             throw new IOException("Failed to prepare session dir: " + stageDir, e);
