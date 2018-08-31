@@ -269,6 +269,11 @@ public class DhcpServer {
         }
     }
 
+    private void logIgnoredPacketInvalidSubnet(DhcpLeaseRepository.InvalidSubnetException e) {
+        // Not an internal error: only logging exception message, not stacktrace
+        mLog.e("Ignored packet from invalid subnet: " + e.getMessage());
+    }
+
     private void processDiscover(@NonNull DhcpDiscoverPacket packet)
             throws MalformedPacketException {
         final DhcpLease lease;
@@ -279,8 +284,8 @@ public class DhcpServer {
         } catch (DhcpLeaseRepository.OutOfAddressesException e) {
             transmitNak(packet, "Out of addresses to offer");
             return;
-        } catch (DhcpLeaseRepository.InvalidAddressException e) {
-            transmitNak(packet, "Lease requested from an invalid subnet");
+        } catch (DhcpLeaseRepository.InvalidSubnetException e) {
+            logIgnoredPacketInvalidSubnet(e);
             return;
         }
 
@@ -294,16 +299,20 @@ public class DhcpServer {
         final MacAddress clientMac = getMacAddr(packet);
         try {
             lease = mLeaseRepo.requestLease(packet.getExplicitClientIdOrNull(), clientMac,
-                    packet.mClientIp, packet.mRequestedIp, sidSet, packet.mHostName);
+                    packet.mClientIp, packet.mRelayIp, packet.mRequestedIp, sidSet,
+                    packet.mHostName);
         } catch (DhcpLeaseRepository.InvalidAddressException e) {
             transmitNak(packet, "Invalid requested address");
+            return;
+        } catch (DhcpLeaseRepository.InvalidSubnetException e) {
+            logIgnoredPacketInvalidSubnet(e);
             return;
         }
 
         transmitAck(packet, lease, clientMac);
     }
 
-    private void processRelease(@Nullable DhcpReleasePacket packet)
+    private void processRelease(@NonNull DhcpReleasePacket packet)
             throws MalformedPacketException {
         final byte[] clientId = packet.getExplicitClientIdOrNull();
         final MacAddress macAddr = getMacAddr(packet);
@@ -464,7 +473,7 @@ public class DhcpServer {
         }
     }
 
-    private static boolean isEmpty(@NonNull Inet4Address address) {
+    private static boolean isEmpty(@Nullable Inet4Address address) {
         return address == null || Inet4Address.ANY.equals(address);
     }
 
