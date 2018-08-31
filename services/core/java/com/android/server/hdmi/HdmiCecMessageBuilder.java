@@ -365,6 +365,20 @@ public class HdmiCecMessageBuilder {
     }
 
     /**
+     * Build &lt;Routing Information&gt; command.
+     *
+     * <p>This is a broadcast message sent to all devices on the bus.
+     *
+     * @param src source address of command
+     * @param physicalAddress physical address of the new active routing path
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildRoutingInformation(int src, int physicalAddress) {
+        return buildCommand(src, Constants.ADDR_BROADCAST,
+            Constants.MESSAGE_ROUTING_INFORMATION, physicalAddressToParam(physicalAddress));
+    }
+
+    /**
      * Build &lt;Give Device Power Status&gt; command.
      *
      * @param src source address of command
