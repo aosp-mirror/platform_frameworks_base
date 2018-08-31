@@ -16,12 +16,12 @@
 
 package com.android.server.am;
 
-import com.android.internal.app.ProcessMap;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto;
-import com.android.internal.os.ProcessCpuTracker;
-import com.android.server.RescueParty;
-import com.android.server.Watchdog;
+import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityManagerService.MY_PID;
+import static com.android.server.am.ActivityManagerService.SYSTEM_DEBUGGABLE;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -45,10 +45,17 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Slog;
-import android.util.StatsLog;
 import android.util.SparseArray;
+import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+
+import com.android.internal.app.ProcessMap;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.os.ProcessCpuTracker;
+import com.android.server.RescueParty;
+import com.android.server.Watchdog;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -56,13 +63,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
-
-import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityManagerService.MY_PID;
-import static com.android.server.am.ActivityManagerService.SYSTEM_DEBUGGABLE;
 
 /**
  * Controls error conditions in applications.
@@ -1017,7 +1017,7 @@ class AppErrors {
         // For background ANRs, don't pass the ProcessCpuTracker to
         // avoid spending 1/2 second collecting stats to rank lastPids.
         File tracesFile = ActivityManagerService.dumpStackTraces(
-                true, firstPids,
+                firstPids,
                 (isSilentANR) ? null : processCpuTracker,
                 (isSilentANR) ? null : lastPids,
                 nativePids);
