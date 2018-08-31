@@ -11,6 +11,7 @@ package android.test.mock {
 
   public deprecated class MockPackageManager extends android.content.pm.PackageManager {
     method public void addOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
+    method public boolean arePermissionsIndividuallyControlled();
     method public java.util.List<android.content.IntentFilter> getAllIntentFilters(java.lang.String);
     method public java.lang.String getDefaultBrowserPackageNameAsUser(int);
     method public java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
