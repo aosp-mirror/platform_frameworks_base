@@ -37,7 +37,7 @@ import androidx.preference.Preference.OnPreferenceClickListener;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.R;
-import com.android.settingslib.RestrictedLockUtils;
+import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.RestrictedSwitchPreference;
 
 import java.text.Collator;
@@ -208,7 +208,7 @@ public class InputMethodPreference extends RestrictedSwitchPreference implements
             setEnabled(false);
         } else if (!mIsAllowedByOrganization) {
             EnforcedAdmin admin =
-                    RestrictedLockUtils.checkIfInputMethodDisallowed(getContext(),
+                    RestrictedLockUtilsInternal.checkIfInputMethodDisallowed(getContext(),
                             mImi.getPackageName(), UserHandle.myUserId());
             setDisabledByAdmin(admin);
         } else {

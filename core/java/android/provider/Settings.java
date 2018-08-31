@@ -1469,6 +1469,7 @@ public final class Settings {
      *
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS
             = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";

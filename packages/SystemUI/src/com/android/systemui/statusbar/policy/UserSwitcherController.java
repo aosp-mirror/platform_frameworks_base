@@ -18,12 +18,8 @@ package com.android.systemui.statusbar.policy;
 
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
-import android.R.attr;
 import android.app.ActivityManager;
 import android.app.Dialog;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -49,24 +45,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.UserIcons;
-import com.android.settingslib.RestrictedLockUtils;
+import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.Prefs;
 import com.android.systemui.Prefs.Key;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUISecondaryUserService;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.tiles.UserDetailView;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
-import com.android.systemui.util.NotificationChannels;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -690,9 +683,9 @@ public class UserSwitcherController {
     }
 
     private void checkIfAddUserDisallowedByAdminOnly(UserRecord record) {
-        EnforcedAdmin admin = RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
+        EnforcedAdmin admin = RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
                 UserManager.DISALLOW_ADD_USER, ActivityManager.getCurrentUser());
-        if (admin != null && !RestrictedLockUtils.hasBaseUserRestriction(mContext,
+        if (admin != null && !RestrictedLockUtilsInternal.hasBaseUserRestriction(mContext,
                 UserManager.DISALLOW_ADD_USER, ActivityManager.getCurrentUser())) {
             record.isDisabledByAdmin = true;
             record.enforcedAdmin = admin;

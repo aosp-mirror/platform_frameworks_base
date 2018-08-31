@@ -1205,7 +1205,7 @@ public class DevicePolicyManager {
      * @see #createAdminSupportIntent(String)
      * @hide
      */
-    @TestApi
+    @TestApi @SystemApi
     public static final String EXTRA_RESTRICTION = "android.app.extra.RESTRICTION";
 
     /**
@@ -5142,10 +5142,10 @@ public class DevicePolicyManager {
      * @return ID of the user who runs device owner, or {@link UserHandle#USER_NULL} if there's
      * no device owner.
      *
-     * <p>Requires the MANAGE_USERS permission.
-     *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @SystemApi
     public int getDeviceOwnerUserId() {
         if (mService != null) {
             try {
@@ -5565,12 +5565,13 @@ public class DevicePolicyManager {
      * @see #getProfileOwner()
      * @hide
      */
-    @UnsupportedAppUsage
-    public @Nullable ComponentName getProfileOwnerAsUser(final int userId)
-            throws IllegalArgumentException {
+    @RequiresPermission(value = android.Manifest.permission.INTERACT_ACROSS_USERS,
+            conditional = true)
+    @SystemApi
+    public @Nullable ComponentName getProfileOwnerAsUser(final int userId) {
         if (mService != null) {
             try {
-                return mService.getProfileOwner(userId);
+                return mService.getProfileOwnerAsUser(userId);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }

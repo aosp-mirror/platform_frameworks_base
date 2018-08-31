@@ -1,0 +1,12 @@
+android_library {
+    name: "SettingsLibRestrictedLockUtils",
+
+    srcs: ["src/**/*.java"],
+
+    libs: [
+        "androidx.annotation_annotation",
+    ],
+
+    sdk_version: "system_current",
+    min_sdk_version: "21",
+}

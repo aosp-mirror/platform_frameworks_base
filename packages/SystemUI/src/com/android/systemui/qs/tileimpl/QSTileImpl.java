@@ -40,6 +40,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.settingslib.RestrictedLockUtils;
+import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
@@ -360,9 +361,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     }
 
     protected void checkIfRestrictionEnforcedByAdminOnly(State state, String userRestriction) {
-        EnforcedAdmin admin = RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
+        EnforcedAdmin admin = RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
                 userRestriction, ActivityManager.getCurrentUser());
-        if (admin != null && !RestrictedLockUtils.hasBaseUserRestriction(mContext,
+        if (admin != null && !RestrictedLockUtilsInternal.hasBaseUserRestriction(mContext,
                 userRestriction, ActivityManager.getCurrentUser())) {
             state.disabledByPolicy = true;
             mEnforcedAdmin = admin;

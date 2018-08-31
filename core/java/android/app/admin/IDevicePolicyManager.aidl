@@ -145,6 +145,7 @@ interface IDevicePolicyManager {
     int getDeviceOwnerUserId();
 
     boolean setProfileOwner(in ComponentName who, String ownerName, int userHandle);
+    ComponentName getProfileOwnerAsUser(int userHandle);
     ComponentName getProfileOwner(int userHandle);
     String getProfileOwnerName(int userHandle);
     void setProfileEnabled(in ComponentName who);

@@ -2343,7 +2343,10 @@ public class UserManager {
      *
      * @hide
      */
-    public int[] getProfileIds(@UserIdInt int userId, boolean enabledOnly) {
+    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS}, conditional = true)
+    @SystemApi
+    public @NonNull int[] getProfileIds(@UserIdInt int userId, boolean enabledOnly) {
         try {
             return mService.getProfileIds(userId, enabledOnly);
         } catch (RemoteException re) {
