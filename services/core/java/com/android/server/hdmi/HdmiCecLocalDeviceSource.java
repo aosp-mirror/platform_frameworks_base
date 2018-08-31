@@ -32,6 +32,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
 
     private static final String TAG = "HdmiCecLocalDeviceSource";
 
+    // Indicate if current device is Active Source or not
     private boolean mIsActiveSource = false;
 
     protected HdmiCecLocalDeviceSource(HdmiControlService service, int deviceType) {
@@ -87,7 +88,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         if (!mActiveSource.equals(activeSource)) {
             setActiveSource(activeSource);
         }
-        setActiveSource(physicalAddress == mService.getPhysicalAddress());
+        setIsActiveSource(physicalAddress == mService.getPhysicalAddress());
         return true;
     }
 
@@ -103,7 +104,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    void setActiveSource(boolean on) {
+    void setIsActiveSource(boolean on) {
         assertRunOnServiceThread();
         mIsActiveSource = on;
     }

@@ -174,7 +174,7 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     }
 
     @ServiceThreadOnly
-    void setActiveSource(boolean on) {
+    void setIsActiveSource(boolean on) {
         assertRunOnServiceThread();
         mIsActiveSource = on;
         if (on) {
@@ -228,7 +228,7 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         // If the path is under the current device, should switch
         int port = getLocalPortFromPhysicalAddress(physicalAddress);
         if (port == 0) {
-            setActiveSource(true);
+            setIsActiveSource(true);
             maySendActiveSource(message.getSource());
             wakeUpIfActiveSource();
         } else if (port > 0) {
@@ -263,7 +263,7 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     }
 
     private void maySetActiveSource(int physicalAddress) {
-        setActiveSource(physicalAddress == mService.getPhysicalAddress());
+        setIsActiveSource(physicalAddress == mService.getPhysicalAddress());
     }
 
     private void wakeUpIfActiveSource() {
@@ -352,7 +352,7 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
             mService.sendCecCommand(HdmiCecMessageBuilder.buildInactiveSource(
                     mAddress, mService.getPhysicalAddress()));
         }
-        setActiveSource(false);
+        setIsActiveSource(false);
         checkIfPendingActionsCleared();
     }
 
