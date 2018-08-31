@@ -17,7 +17,7 @@
 package com.android.server.biometrics.fingerprint;
 
 import com.android.internal.logging.nano.MetricsProto;
-import com.android.server.biometrics.common.Metrics;
+import com.android.server.biometrics.Metrics;
 
 public class FingerprintMetrics implements Metrics {
 

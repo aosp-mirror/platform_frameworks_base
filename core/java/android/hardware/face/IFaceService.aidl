@@ -17,22 +17,34 @@ package android.hardware.face;
 
 import android.os.Bundle;
 import android.hardware.biometrics.IBiometricPromptReceiver;
+import android.hardware.biometrics.IBiometricPromptServiceReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.Face;
 
 /**
- * Communication channel from client to the face service.
+ * Communication channel from client to the face service. These methods are all require the
+ * MANAGE_BIOMETRIC signature permission.
  * @hide
  */
 interface IFaceService {
     // Authenticate the given sessionId with a face
     void authenticate(IBinder token, long sessionId,
-            IFaceServiceReceiver receiver, int flags, String opPackageName,
-            in Bundle bundle, IBiometricPromptReceiver dialogReceiver);
+            IFaceServiceReceiver receiver, int flags, String opPackageName);
+
+    // This method invokes the BiometricDialog. The arguments are almost the same as above,
+    // but should only be called from (BiometricPromptService).
+    void authenticateFromService(IBinder token, long sessionId, int userId,
+            IBiometricPromptServiceReceiver receiver, int flags, String opPackageName,
+            in Bundle bundle, IBiometricPromptReceiver dialogReceiver,
+            int callingUid, int callingPid, int callingUserId);
 
     // Cancel authentication for the given sessionId
     void cancelAuthentication(IBinder token, String opPackageName);
+
+    // Same as above, with extra arguments.
+    void cancelAuthenticationFromService(IBinder token, String opPackageName,
+            int callingUid, int callingPid, int callingUserId);
 
     // Start face enrollment
     void enroll(IBinder token, in byte [] cryptoToken, int userId, IFaceServiceReceiver receiver,

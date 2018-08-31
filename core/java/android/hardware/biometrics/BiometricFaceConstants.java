@@ -229,7 +229,8 @@ public interface BiometricFaceConstants {
      *
      * @hide
      */
-    public static final int FACE_ACQUIRED_VENDOR = 13;
+    public static final int FACE_ACQUIRED_VENDOR = 14;
+
     /**
      * @hide
      */

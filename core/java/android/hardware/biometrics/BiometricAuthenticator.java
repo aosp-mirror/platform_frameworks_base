@@ -161,12 +161,6 @@ public interface BiometricAuthenticator {
         public void onAuthenticationHelp(int helpCode, CharSequence helpString) {}
 
         /**
-         * Called when a biometric is recognized.
-         * @param result An object containing authentication-related data
-         */
-        public void onAuthenticationSucceeded(AuthenticationResult result) {}
-
-        /**
          * Called when a biometric is valid but not recognized.
          */
         public void onAuthenticationFailed() {}
@@ -177,6 +171,29 @@ public interface BiometricAuthenticator {
          */
         public void onAuthenticationAcquired(int acquireInfo) {}
     };
+
+    /**
+     * @return true if the biometric hardware is detected.
+     */
+    default boolean isHardwareDetected() {
+        throw new UnsupportedOperationException("Stub!");
+    }
+
+    /**
+     * @return true if the user has enrolled templates for this biometric.
+     */
+    default boolean hasEnrolledTemplates() {
+        throw new UnsupportedOperationException("Stub!");
+    }
+
+    /**
+     * @param error
+     * @param vendorCode
+     * @return the error string associated with this error
+     */
+    default String getErrorString(int error, int vendorCode) {
+        throw new UnsupportedOperationException("Stub!");
+    }
 
     /**
      * This call warms up the hardware and starts scanning for valid biometrics. It terminates
@@ -198,10 +215,12 @@ public interface BiometricAuthenticator {
      * @param executor An executor to handle callback events
      * @param callback An object to receive authentication events
      */
-    void authenticate(@NonNull CryptoObject crypto,
+    default void authenticate(@NonNull CryptoObject crypto,
             @NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull AuthenticationCallback callback);
+            @NonNull AuthenticationCallback callback) {
+        throw new UnsupportedOperationException("Stub!");
+    }
 
     /**
      * This call warms up the hardware and starts scanning for valid biometrics. It terminates
@@ -221,7 +240,9 @@ public interface BiometricAuthenticator {
      * @param executor An executor to handle callback events
      * @param callback An object to receive authentication events
      */
-    void authenticate(@NonNull CancellationSignal cancel,
+    default void authenticate(@NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull AuthenticationCallback callback);
+            @NonNull AuthenticationCallback callback) {
+        throw new UnsupportedOperationException("Stub!");
+    }
 }

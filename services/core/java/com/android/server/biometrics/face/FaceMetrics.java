@@ -17,7 +17,7 @@
 package com.android.server.biometrics.face;
 
 import com.android.internal.logging.nano.MetricsProto;
-import com.android.server.biometrics.common.Metrics;
+import com.android.server.biometrics.Metrics;
 
 public class FaceMetrics implements Metrics {
     @Override

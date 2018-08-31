@@ -175,5 +175,5 @@ public interface BiometricConstants {
     /**
      * @hide
      */
-    int BIOMETRICT_ACQUIRED_VENDOR_BASE = 1000;
+    int BIOMETRIC_ACQUIRED_VENDOR_BASE = 1000;
 }
