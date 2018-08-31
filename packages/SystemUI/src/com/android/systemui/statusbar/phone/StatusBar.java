@@ -4380,6 +4380,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             mEntryManager.updateNotifications();
             updateDozingState();
+            updateScrimController();
             updateReportRejectedTouchVisibility();
         }
         Trace.endSection();
@@ -4515,8 +4516,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (mDozingRequested) {
                 mDozingRequested = false;
                 DozeLog.traceDozing(mContext, mDozing);
-                mWakefulnessLifecycle.dispatchStartedWakingUp();
                 updateDozing();
+                mWakefulnessLifecycle.dispatchStartedWakingUp();
             }
         }
 
