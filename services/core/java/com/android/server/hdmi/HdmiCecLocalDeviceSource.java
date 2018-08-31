@@ -84,11 +84,10 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         int logicalAddress = message.getSource();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
         ActiveSource activeSource = ActiveSource.of(logicalAddress, physicalAddress);
-        if (physicalAddress != mService.getPhysicalAddress()
-                || !mActiveSource.equals(activeSource)) {
+        if (!mActiveSource.equals(activeSource)) {
             setActiveSource(activeSource);
-            setActiveSource(false);
         }
+        setActiveSource(physicalAddress == mService.getPhysicalAddress());
         return true;
     }
 
