@@ -579,7 +579,8 @@ public class FaceService extends BiometricService {
             for (int i = 0; i < cryptoToken.length; i++) {
                 token.add(cryptoToken[i]);
             }
-            return daemon.enroll(token, timeout);
+            // TODO: plumb requireAttention down from framework
+            return daemon.enroll(token, timeout, true /* requireAttention */);
         }
     };
 
