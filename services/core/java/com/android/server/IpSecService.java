@@ -27,7 +27,6 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.annotation.NonNull;
 import android.app.AppOpsManager;
 import android.content.Context;
-import android.net.ConnectivityManager;
 import android.net.IIpSecService;
 import android.net.INetd;
 import android.net.IpSecAlgorithm;
@@ -44,7 +43,6 @@ import android.net.NetworkUtils;
 import android.net.TrafficStats;
 import android.net.util.NetdService;
 import android.os.Binder;
-import android.os.DeadSystemException;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -89,9 +87,8 @@ public class IpSecService extends IIpSecService.Stub {
     private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final String NETD_SERVICE_NAME = "netd";
-    private static final int[] DIRECTIONS =
-            new int[] {IpSecManager.DIRECTION_OUT, IpSecManager.DIRECTION_IN};
-    private static final String[] WILDCARD_ADDRESSES = new String[]{"0.0.0.0", "::"};
+    private static final int[] ADDRESS_FAMILIES =
+            new int[] {OsConstants.AF_INET, OsConstants.AF_INET6};
 
     private static final int NETD_FETCH_TIMEOUT_MS = 5000; // ms
     private static final int MAX_PORT_BIND_ATTEMPTS = 10;
@@ -819,16 +816,22 @@ public class IpSecService extends IIpSecService.Stub {
             //       Teardown VTI
             //       Delete global policies
             try {
-                mSrvConfig.getNetdInstance().removeVirtualTunnelInterface(mInterfaceName);
+                final INetd netd = mSrvConfig.getNetdInstance();
+                netd.removeVirtualTunnelInterface(mInterfaceName);
 
-                for(String wildcardAddr : WILDCARD_ADDRESSES) {
-                    for (int direction : DIRECTIONS) {
-                        int mark = (direction == IpSecManager.DIRECTION_IN) ? mIkey : mOkey;
-                        mSrvConfig
-                                .getNetdInstance()
-                                .ipSecDeleteSecurityPolicy(
-                                        0, direction, wildcardAddr, wildcardAddr, mark, 0xffffffff);
-                    }
+                for (int selAddrFamily : ADDRESS_FAMILIES) {
+                    netd.ipSecDeleteSecurityPolicy(
+                            0,
+                            selAddrFamily,
+                            IpSecManager.DIRECTION_OUT,
+                            mOkey,
+                            0xffffffff);
+                    netd.ipSecDeleteSecurityPolicy(
+                            0,
+                            selAddrFamily,
+                            IpSecManager.DIRECTION_IN,
+                            mIkey,
+                            0xffffffff);
                 }
             } catch (ServiceSpecificException | RemoteException e) {
                 Log.e(
@@ -1276,25 +1279,29 @@ public class IpSecService extends IIpSecService.Stub {
             //       Create VTI
             //       Add inbound/outbound global policies
             //              (use reqid = 0)
-            mSrvConfig
-                    .getNetdInstance()
-                    .addVirtualTunnelInterface(intfName, localAddr, remoteAddr, ikey, okey);
+            final INetd netd = mSrvConfig.getNetdInstance();
+            netd.addVirtualTunnelInterface(intfName, localAddr, remoteAddr, ikey, okey);
 
-            for(String wildcardAddr : WILDCARD_ADDRESSES) {
-                for (int direction : DIRECTIONS) {
-                    int mark = (direction == IpSecManager.DIRECTION_OUT) ? okey : ikey;
-
-                    mSrvConfig
-                            .getNetdInstance()
-                            .ipSecAddSecurityPolicy(
-                                0, // Use 0 for reqId
-                                direction,
-                                wildcardAddr,
-                                wildcardAddr,
-                                0,
-                                mark,
-                                0xffffffff);
-                }
+            for (int selAddrFamily : ADDRESS_FAMILIES) {
+                // Always send down correct local/remote addresses for template.
+                netd.ipSecAddSecurityPolicy(
+                        0, // Use 0 for reqId
+                        selAddrFamily,
+                        IpSecManager.DIRECTION_OUT,
+                        localAddr,
+                        remoteAddr,
+                        0,
+                        okey,
+                        0xffffffff);
+                netd.ipSecAddSecurityPolicy(
+                        0, // Use 0 for reqId
+                        selAddrFamily,
+                        IpSecManager.DIRECTION_IN,
+                        remoteAddr,
+                        localAddr,
+                        0,
+                        ikey,
+                        0xffffffff);
             }
 
             userRecord.mTunnelInterfaceRecords.put(
@@ -1693,9 +1700,9 @@ public class IpSecService extends IIpSecService.Stub {
         SpiRecord spiRecord = userRecord.mSpiRecords.getResourceOrThrow(c.getSpiResourceId());
 
         int mark =
-                (direction == IpSecManager.DIRECTION_IN)
-                        ? tunnelInterfaceInfo.getIkey()
-                        : tunnelInterfaceInfo.getOkey();
+                (direction == IpSecManager.DIRECTION_OUT)
+                        ? tunnelInterfaceInfo.getOkey()
+                        : tunnelInterfaceInfo.getIkey();
 
         try {
             c.setMarkValue(mark);
@@ -1706,14 +1713,15 @@ public class IpSecService extends IIpSecService.Stub {
                 c.setNetwork(tunnelInterfaceInfo.getUnderlyingNetwork());
 
                 // If outbound, also add SPI to the policy.
-                for(String wildcardAddr : WILDCARD_ADDRESSES) {
+                for (int selAddrFamily : ADDRESS_FAMILIES) {
                     mSrvConfig
                             .getNetdInstance()
                             .ipSecUpdateSecurityPolicy(
                                     0, // Use 0 for reqId
+                                    selAddrFamily,
                                     direction,
-                                    wildcardAddr,
-                                    wildcardAddr,
+                                    tunnelInterfaceInfo.getLocalAddress(),
+                                    tunnelInterfaceInfo.getRemoteAddress(),
                                     transformInfo.getSpiRecord().getSpi(),
                                     mark,
                                     0xffffffff);
