@@ -1113,9 +1113,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             mWindowFrames.mFrame.bottom - mWindowFrames.mStableFrame.bottom, 0));
         }
 
-
         mWindowFrames.setDisplayCutout(
-                windowFrames.mDisplayCutout.calculateRelativeTo(windowFrames.mFrame));
+                windowFrames.mDisplayCutout.calculateRelativeTo(mWindowFrames.mFrame));
 
         // Offset the actual frame by the amount layout frame is off.
         mWindowFrames.mFrame.offset(-layoutXDiff, -layoutYDiff);
