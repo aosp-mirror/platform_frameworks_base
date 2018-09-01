@@ -414,7 +414,11 @@ public final class BroadcastQueue {
         if (state == BroadcastRecord.IDLE) {
             Slog.w(TAG, "finishReceiver [" + mQueueName + "] called but state is IDLE");
         }
-        r.duration[r.nextReceiver - 1] = finishTime - r.receiverTime;
+        // If we're abandoning this broadcast before any receivers were actually spun up,
+        // nextReceiver is zero; in which case time-to-process bookkeeping doesn't apply.
+        if (r.nextReceiver > 0) {
+            r.duration[r.nextReceiver - 1] = finishTime - r.receiverTime;
+        }
         r.receiver = null;
         r.intent.setComponent(null);
         if (r.curApp != null && r.curApp.curReceivers.contains(r)) {
