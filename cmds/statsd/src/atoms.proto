@@ -29,6 +29,7 @@ import "frameworks/base/core/proto/android/server/enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
+import "frameworks/base/proto/src/stats_enums.proto";
 
 /**
  * The master atom class. This message defines all of the available
@@ -1770,7 +1771,7 @@ message GenericAtom {
     optional int32 uid = 1 [(is_uid) = true];
 
     // An event_id indicates the type of event.
-    optional int32 event_id = 2;
+    optional android.os.statsd.EventType event_id = 2;
 }
 
 //////////////////////////////////////////////////////////////////////
