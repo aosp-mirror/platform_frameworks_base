@@ -353,9 +353,11 @@ public class ServiceState implements Parcelable {
         mIsDataRoamingFromRegistration = s.mIsDataRoamingFromRegistration;
         mIsUsingCarrierAggregation = s.mIsUsingCarrierAggregation;
         mChannelNumber = s.mChannelNumber;
-        mCellBandwidths = Arrays.copyOf(s.mCellBandwidths, s.mCellBandwidths.length);
+        mCellBandwidths = s.mCellBandwidths == null ? null :
+                Arrays.copyOf(s.mCellBandwidths, s.mCellBandwidths.length);
         mLteEarfcnRsrpBoost = s.mLteEarfcnRsrpBoost;
-        mNetworkRegistrationStates = new ArrayList<>(s.mNetworkRegistrationStates);
+        mNetworkRegistrationStates = s.mNetworkRegistrationStates == null ? null :
+                new ArrayList<>(s.mNetworkRegistrationStates);
     }
 
     /**
@@ -812,7 +814,9 @@ public class ServiceState implements Parcelable {
                 && mIsEmergencyOnly == s.mIsEmergencyOnly
                 && mIsDataRoamingFromRegistration == s.mIsDataRoamingFromRegistration
                 && mIsUsingCarrierAggregation == s.mIsUsingCarrierAggregation)
-                && mNetworkRegistrationStates.containsAll(s.mNetworkRegistrationStates);
+                && (mNetworkRegistrationStates == null ? s.mNetworkRegistrationStates == null :
+                        s.mNetworkRegistrationStates != null &&
+                        mNetworkRegistrationStates.containsAll(s.mNetworkRegistrationStates));
     }
 
     /**
