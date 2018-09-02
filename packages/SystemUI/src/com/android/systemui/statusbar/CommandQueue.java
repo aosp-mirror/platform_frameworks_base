@@ -160,7 +160,8 @@ public class CommandQueue extends IStatusBar.Stub {
 
         default void onRotationProposal(int rotation, boolean isValid) { }
 
-        default void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver) { }
+        default void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver,
+                int type) { }
         default void onBiometricAuthenticated() { }
         default void onBiometricHelp(String message) { }
         default void onBiometricError(String error) { }
@@ -513,11 +514,12 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     @Override
-    public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver) {
+    public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver, int type) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = bundle;
             args.arg2 = receiver;
+            args.argi1 = type;
             mHandler.obtainMessage(MSG_BIOMETRIC_SHOW, args)
                     .sendToTarget();
         }
@@ -756,11 +758,14 @@ public class CommandQueue extends IStatusBar.Stub {
                     mHandler.removeMessages(MSG_BIOMETRIC_ERROR);
                     mHandler.removeMessages(MSG_BIOMETRIC_HELP);
                     mHandler.removeMessages(MSG_BIOMETRIC_AUTHENTICATED);
+                    SomeArgs someArgs = (SomeArgs) msg.obj;
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).showBiometricDialog(
-                                (Bundle)((SomeArgs)msg.obj).arg1,
-                                (IBiometricPromptReceiver)((SomeArgs)msg.obj).arg2);
+                                (Bundle) someArgs.arg1,
+                                (IBiometricPromptReceiver) someArgs.arg2,
+                                someArgs.argi1);
                     }
+                    someArgs.recycle();
                     break;
                 case MSG_BIOMETRIC_AUTHENTICATED:
                     for (int i = 0; i < mCallbacks.size(); i++) {

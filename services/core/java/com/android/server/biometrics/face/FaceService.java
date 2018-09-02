@@ -42,7 +42,6 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SELinux;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
@@ -50,7 +49,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.biometrics.BiometricService;
@@ -133,7 +131,7 @@ public class FaceService extends BiometricService {
             final AuthenticationClientImpl client = new AuthenticationClientImpl(getContext(),
                     mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver),
                     mCurrentUserId, 0 /* groupId */, opId, restricted, opPackageName,
-                    null /* bundle */, null /* dialogReceiver */, mStatusBarService);
+                    null /* bundle */, null /* dialogReceiver */, mStatusBarService, mFaceManager);
 
             authenticateInternal(client, opId, opPackageName);
         }
@@ -149,7 +147,7 @@ public class FaceService extends BiometricService {
                     mDaemonWrapper, mHalDeviceId, token,
                     new BiometricPromptServiceListenerImpl(receiver),
                     mCurrentUserId, 0 /* groupId */, opId, restricted, opPackageName,
-                    bundle, dialogReceiver, mStatusBarService);
+                    bundle, dialogReceiver, mStatusBarService, mFaceManager);
             authenticateInternal(client, opId, opPackageName, callingUid, callingPid,
                     callingUserId);
         }
@@ -326,13 +324,10 @@ public class FaceService extends BiometricService {
      */
     private class BiometricPromptServiceListenerImpl implements ServiceListener {
 
-        // Use FaceManager to get strings, so BiometricPrompt interface is cleaner
-        private FaceManager mFaceManager;
         private IBiometricPromptServiceReceiver mBiometricPromptServiceReceiver;
 
         public BiometricPromptServiceListenerImpl(IBiometricPromptServiceReceiver receiver) {
             mBiometricPromptServiceReceiver = receiver;
-            mFaceManager = (FaceManager) getContext().getSystemService(Context.FACE_SERVICE);
         }
 
         @Override
@@ -451,9 +446,9 @@ public class FaceService extends BiometricService {
 
     @GuardedBy("this")
     private IBiometricsFace mDaemon;
-
     private long mHalDeviceId;
-    private IStatusBarService mStatusBarService;
+    // Use FaceManager to get strings, so BiometricPrompt interface is cleaner
+    private FaceManager mFaceManager;
 
     /**
      * Receives callbacks from the HAL.
@@ -586,15 +581,14 @@ public class FaceService extends BiometricService {
 
     public FaceService(Context context) {
         super(context);
-        // TODO: can this be retrieved from AuthenticationClient, or BiometricService?
-        mStatusBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
 
     @Override
     public void onStart() {
+        super.onStart();
         publishBinderService(Context.FACE_SERVICE, new FaceServiceWrapper());
         SystemServerInitThreadPool.get().submit(this::getFaceDaemon, TAG + ".onStart");
+        mFaceManager = (FaceManager) getContext().getSystemService(Context.FACE_SERVICE);
     }
 
     @Override

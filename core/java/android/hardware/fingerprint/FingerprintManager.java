@@ -979,6 +979,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     /**
      * @hide
      */
+    @Override
     public String getAcquiredString(int acquireInfo, int vendorCode) {
         switch (acquireInfo) {
             case FINGERPRINT_ACQUIRED_GOOD:
@@ -1008,6 +1009,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
         Slog.w(TAG, "Invalid acquired message: " + acquireInfo + ", " + vendorCode);
         return null;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int getType() {
+        return TYPE_FINGERPRINT;
     }
 
     private IFingerprintServiceReceiver mServiceReceiver = new IFingerprintServiceReceiver.Stub() {

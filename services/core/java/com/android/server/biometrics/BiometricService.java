@@ -47,6 +47,7 @@ import android.os.IHwBinder;
 import android.os.IRemoteCallback;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -96,6 +97,7 @@ public abstract class BiometricService extends SystemService implements IHwBinde
     private final LockoutReceiver mLockoutReceiver = new LockoutReceiver();
     private final ArrayList<LockoutResetMonitor> mLockoutMonitors = new ArrayList<>();
 
+    protected final IStatusBarService mStatusBarService;
     protected final Map<Integer, Long> mAuthenticatorIds =
             Collections.synchronizedMap(new HashMap<>());
     protected final ResetFailedAttemptsForUserRunnable mResetFailedAttemptsForCurrentUserRunnable =
@@ -221,10 +223,10 @@ public abstract class BiometricService extends SystemService implements IHwBinde
                 IBinder token, ServiceListener listener, int targetUserId, int groupId, long opId,
                 boolean restricted, String owner, Bundle bundle,
                 IBiometricPromptReceiver dialogReceiver,
-                IStatusBarService statusBarService) {
+                IStatusBarService statusBarService, BiometricAuthenticator authenticator) {
             super(context, getMetrics(), daemon, halDeviceId, token, listener,
                     targetUserId, groupId, opId, restricted, owner, bundle, dialogReceiver,
-                    statusBarService);
+                    statusBarService, authenticator);
         }
 
         @Override
@@ -524,6 +526,8 @@ public abstract class BiometricService extends SystemService implements IHwBinde
     public BiometricService(Context context) {
         super(context);
         mContext = context;
+        mStatusBarService = IStatusBarService.Stub.asInterface(
+                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mKeyguardPackage = ComponentName.unflattenFromString(context.getResources().getString(
                 com.android.internal.R.string.config_keyguardComponent)).getPackageName();
         mAppOps = context.getSystemService(AppOpsManager.class);
