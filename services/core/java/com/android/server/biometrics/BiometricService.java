@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
-package com.android.server.biometrics.common;
+package com.android.server.biometrics;
 
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
 
@@ -333,8 +333,8 @@ public abstract class BiometricService extends SystemService implements IHwBinde
      * Wraps the callback interface from Service -> Manager
      */
     protected interface ServiceListener {
-        void onEnrollResult(BiometricAuthenticator.Identifier identifier,
-                int remaining) throws RemoteException;
+        default void onEnrollResult(BiometricAuthenticator.Identifier identifier,
+                int remaining) throws RemoteException {};
 
         void onAcquired(long deviceId, int acquiredInfo, int vendorCode)
                 throws RemoteException;
@@ -349,11 +349,11 @@ public abstract class BiometricService extends SystemService implements IHwBinde
         void onError(long deviceId, int error, int vendorCode)
                 throws RemoteException;
 
-        void onRemoved(BiometricAuthenticator.Identifier identifier,
-                int remaining) throws RemoteException;
+        default void onRemoved(BiometricAuthenticator.Identifier identifier,
+                int remaining) throws RemoteException {};
 
-        void onEnumerated(BiometricAuthenticator.Identifier identifier,
-                int remaining) throws RemoteException;
+        default void onEnumerated(BiometricAuthenticator.Identifier identifier,
+                int remaining) throws RemoteException {};
     }
 
     /**
@@ -688,7 +688,11 @@ public abstract class BiometricService extends SystemService implements IHwBinde
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
         final int callingUserId = UserHandle.getCallingUserId();
+        authenticateInternal(client, opId, opPackageName, callingUid, callingPid, callingUserId);
+    }
 
+    protected void authenticateInternal(AuthenticationClientImpl client, long opId,
+            String opPackageName, int callingUid, int callingPid, int callingUserId) {
         if (!canUseBiometric(opPackageName, true /* foregroundOnly */, callingUid, callingPid,
                 callingUserId)) {
             if (DEBUG) Slog.v(getTag(), "authenticate(): reject " + opPackageName);
@@ -716,7 +720,11 @@ public abstract class BiometricService extends SystemService implements IHwBinde
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
         final int callingUserId = UserHandle.getCallingUserId();
+        cancelAuthenticationInternal(token, opPackageName, callingUid, callingPid, callingUserId);
+    }
 
+    protected void cancelAuthenticationInternal(final IBinder token, final String opPackageName,
+            int callingUid, int callingPid, int callingUserId) {
         if (!canUseBiometric(opPackageName, true /* foregroundOnly */, callingUid, callingPid,
                 callingUserId)) {
             if (DEBUG) Slog.v(getTag(), "cancelAuthentication(): reject " + opPackageName);

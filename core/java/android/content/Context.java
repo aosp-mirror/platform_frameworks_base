@@ -1701,7 +1701,7 @@ public abstract class Context {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
-    @UnsupportedAppUsage
+    @SystemApi
     public void startActivityAsUser(@RequiresPermission Intent intent, UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
@@ -3670,6 +3670,15 @@ public abstract class Context {
      * @see android.media.AudioManager
      */
     public static final String AUDIO_SERVICE = "audio";
+
+    /**
+     * Use with {@link #getSystemService(String)}
+     *
+     * @hide
+     * @see #getSystemService(String)
+     * @see com.android.server.biometrics.BiometricPromptService
+     */
+    public static final String BIOMETRIC_PROMPT_SERVICE = "biometric_prompt";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a

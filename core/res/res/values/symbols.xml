@@ -2392,6 +2392,9 @@
   <!-- From KeyguardServiceDelegate -->
   <java-symbol type="string" name="config_keyguardComponent" />
 
+  <!-- Biometric messages -->
+  <java-symbol type="string" name="biometric_error_hw_unavailable" />
+
   <!-- Fingerprint messages -->
   <java-symbol type="string" name="fingerprint_error_unable_to_process" />
   <java-symbol type="string" name="fingerprint_error_hw_not_available" />
@@ -2626,8 +2629,16 @@
   <java-symbol type="dimen" name="magnifier_width" />
   <java-symbol type="dimen" name="magnifier_height" />
   <java-symbol type="dimen" name="magnifier_elevation" />
-  <java-symbol type="dimen" name="magnifier_zoom_scale" />
-  <java-symbol type="dimen" name="magnifier_offset" />
+  <java-symbol type="dimen" name="magnifier_zoom" />
+  <java-symbol type="dimen" name="magnifier_vertical_offset" />
+  <java-symbol type="dimen" name="magnifier_horizontal_offset" />
+  <java-symbol type="attr" name="magnifierWidth" />
+  <java-symbol type="attr" name="magnifierHeight" />
+  <java-symbol type="attr" name="magnifierElevation" />
+  <java-symbol type="attr" name="magnifierZoom" />
+  <java-symbol type="attr" name="magnifierVerticalOffset" />
+  <java-symbol type="attr" name="magnifierHorizontalOffset" />
+  <java-symbol type="attr" name="magnifierStyle" />
 
   <java-symbol type="string" name="date_picker_prev_month_button" />
   <java-symbol type="string" name="date_picker_next_month_button" />
@@ -3452,4 +3463,5 @@
   <java-symbol type="string" name="config_misprovisionedBrandValue" />
 
   <java-symbol type="integer" name="db_wal_truncate_size" />
+  <java-symbol type="integer" name="config_wakeUpDelayDoze" />
 </resources>

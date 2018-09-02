@@ -44,6 +44,7 @@ import android.widget.ImageView;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.RestrictedLockUtils;
+import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.systemui.Dependency;
 
 import java.util.ArrayList;
@@ -399,7 +400,7 @@ public class BrightnessController implements ToggleSlider.Listener {
             @Override
             public void run() {
                 ((ToggleSliderView)mControl).setEnforcedAdmin(
-                        RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
+                        RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
                                 UserManager.DISALLOW_CONFIG_BRIGHTNESS,
                                 mUserTracker.getCurrentUserId()));
             }

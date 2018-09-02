@@ -108,6 +108,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
     private StatusBar mStatusBar;
     private final UnlockMethodCache mUnlockMethodCache;
     private final Context mContext;
+    private final int mWakeUpDelay;
     private int mPendingAuthenticatedUserId = -1;
     private BiometricSourceType mPendingAuthenticatedBioSourceType = null;
     private boolean mPendingShowBouncer;
@@ -131,6 +132,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         mScrimController = scrimController;
         mStatusBar = statusBar;
         mUnlockMethodCache = unlockMethodCache;
+        mWakeUpDelay = context.getResources().getInteger(
+                com.android.internal.R.integer.config_wakeUpDelayDoze);
     }
 
     public void setStatusBarKeyguardViewManager(
@@ -219,7 +222,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         // During wake and unlock, we need to draw black before waking up to avoid abrupt
         // brightness changes due to display state transitions.
         boolean alwaysOnEnabled = DozeParameters.getInstance(mContext).getAlwaysOn();
-        boolean delayWakeUp = mode == MODE_WAKE_AND_UNLOCK && alwaysOnEnabled;
+        boolean delayWakeUp = mode == MODE_WAKE_AND_UNLOCK && alwaysOnEnabled && mWakeUpDelay > 0;
         Runnable wakeUp = ()-> {
             if (!wasDeviceInteractive) {
                 if (DEBUG_BIO_WAKELOCK) {
@@ -271,7 +274,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
                 }
                 mStatusBarWindowController.setStatusBarFocusable(false);
                 if (delayWakeUp) {
-                    mHandler.postDelayed(wakeUp, 50);
+                    mHandler.postDelayed(wakeUp, mWakeUpDelay);
                 } else {
                     mKeyguardViewMediator.onWakeAndUnlocking();
                 }

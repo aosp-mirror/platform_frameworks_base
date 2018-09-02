@@ -21,6 +21,8 @@ import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
 import static android.net.ConnectivityManager.TYPE_WIFI;
+import static android.provider.Settings.Global.TETHER_ENABLE_LEGACY_DHCP_SERVER;
+
 import static com.android.server.connectivity.tethering.TetheringConfiguration.DUN_NOT_REQUIRED;
 import static com.android.server.connectivity.tethering.TetheringConfiguration.DUN_REQUIRED;
 import static com.android.server.connectivity.tethering.TetheringConfiguration.DUN_UNSPECIFIED;
@@ -29,15 +31,18 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import android.content.ContentResolver;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.net.util.SharedLog;
+import android.provider.Settings;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.telephony.TelephonyManager;
+import android.test.mock.MockContentResolver;
 
 import com.android.internal.util.test.BroadcastInterceptingContext;
+import com.android.internal.util.test.FakeSettingsProvider;
 
 import java.util.Iterator;
 
@@ -55,6 +60,7 @@ public class TetheringConfigurationTest {
     @Mock private Context mContext;
     @Mock private TelephonyManager mTelephonyManager;
     @Mock private Resources mResources;
+    private MockContentResolver mContentResolver;
     private Context mMockContext;
     private boolean mHasTelephonyManager;
 
@@ -73,6 +79,11 @@ public class TetheringConfigurationTest {
             }
             return super.getSystemService(name);
         }
+
+        @Override
+        public ContentResolver getContentResolver() {
+            return mContentResolver;
+        }
     }
 
     @Before
@@ -86,6 +97,10 @@ public class TetheringConfigurationTest {
                 .thenReturn(new String[]{ "test_wlan\\d" });
         when(mResources.getStringArray(com.android.internal.R.array.config_tether_bluetooth_regexs))
                 .thenReturn(new String[0]);
+        when(mResources.getIntArray(com.android.internal.R.array.config_tether_upstream_types))
+                .thenReturn(new int[0]);
+        mContentResolver = new MockContentResolver();
+        mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         mMockContext = new MockContext(mContext);
     }
 
@@ -193,5 +208,30 @@ public class TetheringConfigurationTest {
         assertTrue(upstreamIterator.hasNext());
         assertEquals(TYPE_MOBILE_HIPRI, upstreamIterator.next().intValue());
         assertFalse(upstreamIterator.hasNext());
+    }
+
+    @Test
+    public void testNewDhcpServerDisabled() {
+        Settings.Global.putInt(mContentResolver, TETHER_ENABLE_LEGACY_DHCP_SERVER, 1);
+
+        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
+        assertTrue(cfg.enableLegacyDhcpServer);
+    }
+
+    @Test
+    public void testNewDhcpServerEnabled() {
+        Settings.Global.putInt(mContentResolver, TETHER_ENABLE_LEGACY_DHCP_SERVER, 0);
+
+        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
+        assertFalse(cfg.enableLegacyDhcpServer);
+    }
+
+    @Test
+    public void testNewDhcpServerDefault() {
+        Settings.Global.putString(mContentResolver, TETHER_ENABLE_LEGACY_DHCP_SERVER, null);
+
+        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
+        // TODO: change to false when new server is promoted to default
+        assertTrue(cfg.enableLegacyDhcpServer);
     }
 }

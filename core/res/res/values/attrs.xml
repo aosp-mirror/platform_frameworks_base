@@ -759,6 +759,8 @@
         <attr name="contextPopupMenuStyle" format="reference" />
         <!-- Default StackView style. -->
         <attr name="stackViewStyle" format="reference" />
+        <!-- Magnifier style. -->
+        <attr name="magnifierStyle" format="reference" />
 
         <!-- Default style for the FragmentBreadCrumbs widget. This widget is deprecated
              starting in API level 21 ({@link android.os.Build.VERSION_CODES#.L}). -->
@@ -8921,4 +8923,13 @@
     </declare-styleable>
 
     <attr name="lockPatternStyle" format="reference" />
+
+    <declare-styleable name="Magnifier">
+        <attr name="magnifierWidth" format="dimension" />
+        <attr name="magnifierHeight" format="dimension" />
+        <attr name="magnifierZoom" format="float" />
+        <attr name="magnifierElevation" format="dimension" />
+        <attr name="magnifierVerticalOffset" format="dimension" />
+        <attr name="magnifierHorizontalOffset" format="dimension" />
+    </declare-styleable>
 </resources>

@@ -26,6 +26,7 @@ import android.content.pm.PackageInfo;
 import android.util.EventLog;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.DataChangedJournal;
@@ -49,10 +50,17 @@ import java.util.List;
  */
 // TODO: In KeyValueBackupTaskTest, remove direct assertions on logcat, observer or monitor and
 //       verify calls to this object. Add these and more assertions to the test of this class.
-class KeyValueBackupReporter {
-    private static final String TAG = "KeyValueBackupTask";
+@VisibleForTesting
+public class KeyValueBackupReporter {
+    @VisibleForTesting static final String TAG = "KeyValueBackupTask";
     private static final boolean DEBUG = BackupManagerService.DEBUG;
-    private static final boolean MORE_DEBUG = BackupManagerService.MORE_DEBUG || true;
+    @VisibleForTesting static final boolean MORE_DEBUG = BackupManagerService.MORE_DEBUG || true;
+
+    static void onNewThread(String threadName) {
+        if (DEBUG) {
+            Slog.d(TAG, "Spinning thread " + threadName);
+        }
+    }
 
     private final BackupManagerService mBackupManagerService;
     private final IBackupObserver mObserver;
@@ -61,7 +69,7 @@ class KeyValueBackupReporter {
     KeyValueBackupReporter(
             BackupManagerService backupManagerService,
             IBackupObserver observer,
-            IBackupManagerMonitor monitor) {
+            @Nullable IBackupManagerMonitor monitor) {
         mBackupManagerService = backupManagerService;
         mObserver = observer;
         mMonitor = monitor;
@@ -71,6 +79,10 @@ class KeyValueBackupReporter {
     @Nullable
     IBackupManagerMonitor getMonitor() {
         return mMonitor;
+    }
+
+    IBackupObserver getObserver() {
+        return mObserver;
     }
 
     void onSkipBackup() {
@@ -116,12 +128,6 @@ class KeyValueBackupReporter {
 
     void onExtractPmAgentDataError(Exception e) {
         Slog.e(TAG, "Error during PM metadata backup", e);
-    }
-
-    void onEmptyQueue() {
-        if (MORE_DEBUG) {
-            Slog.i(TAG, "Queue now empty");
-        }
     }
 
     void onStartPackageBackup(String packageName) {
@@ -237,10 +243,6 @@ class KeyValueBackupReporter {
         }
     }
 
-    void onTruncateDataError() {
-        Slog.w(TAG, "Unable to roll back");
-    }
-
     void onSendDataToTransport(String packageName) {
         if (MORE_DEBUG) {
             Slog.v(TAG, "Sending non-empty data to transport for " + packageName);
@@ -353,11 +355,19 @@ class KeyValueBackupReporter {
                                 null, BackupManagerMonitor.EXTRA_LOG_CANCEL_ALL, true));
     }
 
+    void onAgentResultError(@Nullable PackageInfo packageInfo) {
+        String packageName = getPackageName(packageInfo);
+        BackupObserverUtils.sendBackupOnPackageResult(
+                mObserver, packageName, BackupManager.ERROR_AGENT_FAILURE);
+        EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, packageName, "result error");
+        Slog.w(TAG, "Agent " + packageName + " error in onBackup()");
+    }
+
     private String getPackageName(@Nullable PackageInfo packageInfo) {
         return (packageInfo != null) ? packageInfo.packageName : "no_package_yet";
     }
 
-    void onRevertBackup() {
+    void onRevertTask() {
         if (MORE_DEBUG) {
             Slog.i(TAG, "Reverting backup queue, re-staging everything");
         }
@@ -391,6 +401,10 @@ class KeyValueBackupReporter {
         Slog.w(TAG, "Failed to query transport name for pending init: " + e);
     }
 
+    /**
+     * This is a bit different from {@link #onTaskFinished()}, it's only called if there is no
+     * full-backup requests associated with the key-value task.
+     */
     void onBackupFinished(int status) {
         BackupObserverUtils.sendBackupFinished(mObserver, status);
     }
@@ -399,7 +413,7 @@ class KeyValueBackupReporter {
         Slog.d(TAG, "Starting full backups for: " + pendingFullBackups);
     }
 
-    void onKeyValueBackupFinished() {
+    void onTaskFinished() {
         Slog.i(TAG, "K/V backup pass finished");
     }
 }

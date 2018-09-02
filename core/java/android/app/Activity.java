@@ -1349,7 +1349,12 @@ public class Activity extends ContextThemeWrapper
      * to give the activity a hint that its state is no longer saved -- it will generally
      * be called after {@link #onSaveInstanceState} and prior to the activity being
      * resumed/started again.
+     *
+     * @deprecated starting with {@link android.os.Build.VERSION_CODES#P} onSaveInstanceState is
+     * called after {@link #onStop}, so this hint isn't accurate anymore: you should consider your
+     * state not saved in between {@code onStart} and {@code onStop} callbacks inclusively.
      */
+    @Deprecated
     public void onStateNotSaved() {
     }
 
@@ -4744,7 +4749,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * @hide Implement to provide correct calling token.
      */
-    @UnsupportedAppUsage
+    @Override
     public void startActivityAsUser(Intent intent, UserHandle user) {
         startActivityAsUser(intent, null, user);
     }

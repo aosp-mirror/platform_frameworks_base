@@ -4570,17 +4570,18 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     /**
      * If a stack trace dump file is configured, dump process stack traces.
-     * @param clearTraces causes the dump file to be erased prior to the new
-     *    traces being written, if true; when false, the new traces will be
-     *    appended to any existing file content.
      * @param firstPids of dalvik VM processes to dump stack traces for first
      * @param lastPids of dalvik VM processes to dump stack traces for last
      * @param nativePids optional list of native pids to dump stack crawls
      */
-    public static File dumpStackTraces(boolean clearTraces, ArrayList<Integer> firstPids,
+    public static File dumpStackTraces(ArrayList<Integer> firstPids,
             ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
             ArrayList<Integer> nativePids) {
         ArrayList<Integer> extraPids = null;
+
+        if (DEBUG_ANR) {
+            Slog.d(TAG, "dumpStackTraces pids=" + lastPids + " nativepids=" + nativePids);
+        }
 
         // Measure CPU usage as soon as we're called in order to get a realistic sampling
         // of the top users at the time of the request.
@@ -17060,8 +17061,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             activeInstr.mUiAutomationConnection = uiAutomationConnection;
             activeInstr.mResultClass = className;
 
-            boolean disableHiddenApiChecks =
-                    (flags & INSTRUMENTATION_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
+            boolean disableHiddenApiChecks = ai.usesNonSdkApi
+                    || (flags & INSTRUMENTATION_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
             if (disableHiddenApiChecks) {
                 enforceCallingPermission(android.Manifest.permission.DISABLE_HIDDEN_API_CHECKS,
                         "disable hidden API checks");
@@ -21561,11 +21562,16 @@ public class ActivityManagerService extends IActivityManager.Stub
      * cause a watchdog kill.
      */
     void maybeTriggerWatchdog() {
-        if (SystemProperties.getInt("debug.trigger.watchdog", 0) == 1) {
-            Slog.w(TAG, "TRIGGERING WATCHDOG");
+        final String key = "debug.trigger.watchdog";
+        if (Watchdog.DEBUG && SystemProperties.getInt(key, 0) == 1) {
+            Slog.w(TAG, "!!! TRIGGERING WATCHDOG !!!");
+
+            // Clear the property; otherwise the system would hang again after a watchdog restart.
+            SystemProperties.set(key, "");
             synchronized (ActivityManagerService.this) {
                 try {
-                    Thread.sleep(600 * 1000);
+                    // Arbitrary long sleep for watchdog to catch.
+                    Thread.sleep(60 * 60 * 1000);
                 } catch (InterruptedException e) {
                 }
             }

@@ -19,6 +19,8 @@ package com.android.server.backup.testing;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
 
 public class Utils {
@@ -39,6 +41,10 @@ public class Utils {
 
     public static <T> Iterable<T> oneTimeIterable(Iterator<T> iterator) {
         return () -> iterator;
+    }
+
+    public static boolean isFileNonEmpty(Path path) throws IOException {
+        return Files.exists(path) && Files.size(path) > 0;
     }
 
     private Utils() {}

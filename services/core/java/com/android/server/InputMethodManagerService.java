@@ -115,7 +115,6 @@ import android.view.inputmethod.InputConnectionInspector;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.view.inputmethod.InputMethodManagerInternal;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 import android.widget.ArrayAdapter;
@@ -148,6 +147,7 @@ import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.IInputSessionCallback;
 import com.android.internal.view.InputBindResult;
 import com.android.internal.view.InputMethodClient;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -204,6 +204,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_START_INPUT = 2000;
     static final int MSG_START_VR_INPUT = 2010;
 
+    static final int MSG_ADD_CLIENT = 2980;
+    static final int MSG_REMOVE_CLIENT = 2990;
     static final int MSG_UNBIND_CLIENT = 3000;
     static final int MSG_BIND_CLIENT = 3010;
     static final int MSG_SET_ACTIVE = 3020;
@@ -1712,22 +1714,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @Override
-    public void addClient(IInputMethodClient client, IInputContext inputContext, int uid, int pid) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Only system process can call this method.");
-        }
+    void addClient(ClientState clientState) {
         synchronized (mMethodMap) {
-            mClients.put(client.asBinder(), new ClientState(client,
-                    inputContext, uid, pid));
+            mClients.put(clientState.client.asBinder(), clientState);
         }
     }
 
-    @Override
-    public void removeClient(IInputMethodClient client) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Only system process can call this method.");
-        }
+    void removeClient(IInputMethodClient client) {
         synchronized (mMethodMap) {
             ClientState cs = mClients.remove(client.asBinder());
             if (cs != null) {
@@ -2530,19 +2523,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             synchronized (mMethodMap) {
                 if (mCurClient == null || client == null
                         || mCurClient.client.asBinder() != client.asBinder()) {
-                    try {
-                        // We need to check if this is the current client with
-                        // focus in the window manager, to allow this call to
-                        // be made before input is started in it.
-                        if (!mIWindowManager.inputMethodClientHasFocus(client)) {
-                            Slog.w(TAG, "Ignoring showSoftInput of uid " + uid + ": " + client);
-                            return false;
-                        }
-                    } catch (RemoteException e) {
+                    // We need to check if this is the current client with
+                    // focus in the window manager, to allow this call to
+                    // be made before input is started in it.
+                    if (!mWindowManagerInternal.inputMethodClientHasFocus(client)) {
+                        Slog.w(TAG, "Ignoring showSoftInput of uid " + uid + ": " + client);
                         return false;
                     }
                 }
-
                 if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
                 return showCurrentInputLocked(flags, resultReceiver);
             }
@@ -2615,16 +2603,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             synchronized (mMethodMap) {
                 if (mCurClient == null || client == null
                         || mCurClient.client.asBinder() != client.asBinder()) {
-                    try {
-                        // We need to check if this is the current client with
-                        // focus in the window manager, to allow this call to
-                        // be made before input is started in it.
-                        if (!mIWindowManager.inputMethodClientHasFocus(client)) {
-                            if (DEBUG) Slog.w(TAG, "Ignoring hideSoftInput of uid "
-                                    + uid + ": " + client);
-                            return false;
+                    // We need to check if this is the current client with
+                    // focus in the window manager, to allow this call to
+                    // be made before input is started in it.
+                    if (!mWindowManagerInternal.inputMethodClientHasFocus(client)) {
+                        if (DEBUG) {
+                            Slog.w(TAG, "Ignoring hideSoftInput of uid " + uid + ": " + client);
                         }
-                    } catch (RemoteException e) {
                         return false;
                     }
                 }
@@ -2739,20 +2724,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             + client.asBinder());
                 }
 
-                try {
-                    if (!mIWindowManager.inputMethodClientHasFocus(cs.client)) {
-                        // Check with the window manager to make sure this client actually
-                        // has a window with focus.  If not, reject.  This is thread safe
-                        // because if the focus changes some time before or after, the
-                        // next client receiving focus that has any interest in input will
-                        // be calling through here after that change happens.
-                        if (DEBUG) {
-                            Slog.w(TAG, "Focus gain on non-focused client " + cs.client
-                                    + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
-                        }
-                        return InputBindResult.NOT_IME_TARGET_WINDOW;
+                if (!mWindowManagerInternal.inputMethodClientHasFocus(cs.client)) {
+                    // Check with the window manager to make sure this client actually
+                    // has a window with focus.  If not, reject.  This is thread safe
+                    // because if the focus changes some time before or after, the
+                    // next client receiving focus that has any interest in input will
+                    // be calling through here after that change happens.
+                    if (DEBUG) {
+                        Slog.w(TAG, "Focus gain on non-focused client " + cs.client
+                                + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
                     }
-                } catch (RemoteException e) {
+                    return InputBindResult.NOT_IME_TARGET_WINDOW;
                 }
 
                 if (!calledFromValidUser) {
@@ -3412,6 +3394,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 args.recycle();
                 return true;
             }
+
+            // ---------------------------------------------------------
+            case MSG_ADD_CLIENT:
+                addClient((ClientState) msg.obj);
+                return true;
+
+            case MSG_REMOVE_CLIENT:
+                removeClient((IInputMethodClient) msg.obj);
+                return true;
 
             // ---------------------------------------------------------
 
@@ -4404,12 +4395,24 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private static final class LocalServiceImpl implements InputMethodManagerInternal {
+    private static final class LocalServiceImpl extends InputMethodManagerInternal {
         @NonNull
         private final Handler mHandler;
 
         LocalServiceImpl(@NonNull final Handler handler) {
             mHandler = handler;
+        }
+
+        @Override
+        public void addClient(IInputMethodClient client, IInputContext inputContext, int uid,
+                int pid) {
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_ADD_CLIENT,
+                    new ClientState(client, inputContext, uid, pid)));
+        }
+
+        @Override
+        public void removeClient(IInputMethodClient client) {
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_REMOVE_CLIENT, client));
         }
 
         @Override

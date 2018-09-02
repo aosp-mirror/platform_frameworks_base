@@ -13,6 +13,7 @@ android_library {
 
     static_libs: [
         "SettingsLibHelpUtils",
+        "SettingsLibRestrictedLockUtils",
     ],
 
     // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES

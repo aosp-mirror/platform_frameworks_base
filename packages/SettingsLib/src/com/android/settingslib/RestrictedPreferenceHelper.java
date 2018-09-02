@@ -62,7 +62,7 @@ public class RestrictedPreferenceHelper {
             }
             mAttrUserRestriction = data == null ? null : data.toString();
             // If the system has set the user restriction, then we shouldn't add the padlock.
-            if (RestrictedLockUtils.hasBaseUserRestriction(mContext, mAttrUserRestriction,
+            if (RestrictedLockUtilsInternal.hasBaseUserRestriction(mContext, mAttrUserRestriction,
                     UserHandle.myUserId())) {
                 mAttrUserRestriction = null;
                 return;
@@ -133,7 +133,7 @@ public class RestrictedPreferenceHelper {
      * @param userId user to check the restriction for.
      */
     public void checkRestrictionAndSetDisabled(String userRestriction, int userId) {
-        EnforcedAdmin admin = RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
+        EnforcedAdmin admin = RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
                 userRestriction, userId);
         setDisabledByAdmin(admin);
     }

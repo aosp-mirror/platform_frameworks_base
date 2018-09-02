@@ -57,9 +57,10 @@ public class TetherUtil {
 
     public static boolean isTetherAvailable(Context context) {
         final ConnectivityManager cm = context.getSystemService(ConnectivityManager.class);
-        final boolean tetherConfigDisallowed = RestrictedLockUtils.checkIfRestrictionEnforced(
-                context, DISALLOW_CONFIG_TETHERING, UserHandle.myUserId()) != null;
-        final boolean hasBaseUserRestriction = RestrictedLockUtils.hasBaseUserRestriction(
+        final boolean tetherConfigDisallowed = RestrictedLockUtilsInternal
+                .checkIfRestrictionEnforced(context, DISALLOW_CONFIG_TETHERING,
+                        UserHandle.myUserId()) != null;
+        final boolean hasBaseUserRestriction = RestrictedLockUtilsInternal.hasBaseUserRestriction(
                 context, DISALLOW_CONFIG_TETHERING, UserHandle.myUserId());
         return (cm.isTetheringSupported() || tetherConfigDisallowed) && !hasBaseUserRestriction;
     }

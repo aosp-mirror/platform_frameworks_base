@@ -1190,7 +1190,10 @@ public final class Telephony {
              *
              * <p>Requires {@code android.Manifest.permission#CONTROL_INCALL_EXPERIENCE} to
              * send and receive.</p>
+             * @deprecated it is no longer supported, use {@link
+             * TelephonyManager#ACTION_SECRET_CODE} instead
              */
+            @Deprecated
             @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
             public static final String SECRET_CODE_ACTION =
                     "android.provider.Telephony.SECRET_CODE";

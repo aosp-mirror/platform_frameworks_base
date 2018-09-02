@@ -2281,6 +2281,14 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device has biometric hardware to perform iris authentication.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_IRIS = "android.hardware.iris";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports portrait orientation
      * screens.  For backwards compatibility, you can assume that if neither
      * this nor {@link #FEATURE_SCREEN_LANDSCAPE} is set then the device supports

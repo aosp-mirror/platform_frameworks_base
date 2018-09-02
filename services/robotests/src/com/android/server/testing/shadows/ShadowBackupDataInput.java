@@ -20,6 +20,7 @@ import android.app.backup.BackupDataInput;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.annotation.Resetter;
 
 import java.io.EOFException;
 import java.io.FileDescriptor;
@@ -33,6 +34,17 @@ import java.io.ObjectInputStream;
  */
 @Implements(BackupDataInput.class)
 public class ShadowBackupDataInput {
+    private static boolean sReadNextHeaderThrow = false;
+
+    public static void throwInNextHeaderRead() {
+        sReadNextHeaderThrow = true;
+    }
+
+    @Resetter
+    public static void reset() {
+        sReadNextHeaderThrow = false;
+    }
+
     private FileDescriptor mFileDescriptor;
     private ObjectInputStream mInput;
     private int mSize;
@@ -46,6 +58,10 @@ public class ShadowBackupDataInput {
 
     @Implementation
     public boolean readNextHeader() throws IOException {
+        if (sReadNextHeaderThrow) {
+            sReadNextHeaderThrow = false;
+            throw new IOException("Fake exception");
+        }
         mHeaderReady = false;
         try {
             ensureInput();

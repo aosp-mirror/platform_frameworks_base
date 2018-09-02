@@ -24,7 +24,7 @@ import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.biometrics.common.BiometricUserState;
+import com.android.server.biometrics.BiometricUserState;
 
 import libcore.io.IoUtils;
 

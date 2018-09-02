@@ -371,9 +371,11 @@ package android.app {
     method public final void attachBaseContext(android.content.Context);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public deprecated void onGetInstantAppIntentFilter(int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
-    method public void onGetInstantAppIntentFilter(android.content.Intent, int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public deprecated void onGetInstantAppIntentFilter(android.content.Intent, int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public void onGetInstantAppIntentFilter(android.content.Intent, int[], android.os.UserHandle, java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
     method public deprecated void onGetInstantAppResolveInfo(int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
-    method public void onGetInstantAppResolveInfo(android.content.Intent, int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public deprecated void onGetInstantAppResolveInfo(android.content.Intent, int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public void onGetInstantAppResolveInfo(android.content.Intent, int[], android.os.UserHandle, java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
   }
 
   public static final class InstantAppResolverService.InstantAppResolutionCallback {
@@ -513,9 +515,11 @@ package android.app.admin {
     method public android.content.ComponentName getDeviceOwnerComponentOnAnyUser();
     method public java.lang.String getDeviceOwnerNameOnAnyUser();
     method public java.lang.CharSequence getDeviceOwnerOrganizationName();
+    method public int getDeviceOwnerUserId();
     method public java.util.List<java.lang.String> getPermittedAccessibilityServices(int);
     method public java.util.List<java.lang.String> getPermittedInputMethodsForCurrentUser();
     method public android.content.ComponentName getProfileOwner() throws java.lang.IllegalArgumentException;
+    method public android.content.ComponentName getProfileOwnerAsUser(int);
     method public java.lang.String getProfileOwnerNameAsUser(int) throws java.lang.IllegalArgumentException;
     method public int getUserProvisioningState();
     method public boolean isDeviceManaged();
@@ -537,6 +541,7 @@ package android.app.admin {
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL";
     field public static final java.lang.String EXTRA_PROVISIONING_ORGANIZATION_NAME = "android.app.extra.PROVISIONING_ORGANIZATION_NAME";
     field public static final java.lang.String EXTRA_PROVISIONING_SUPPORT_URL = "android.app.extra.PROVISIONING_SUPPORT_URL";
+    field public static final java.lang.String EXTRA_RESTRICTION = "android.app.extra.RESTRICTION";
     field public static final int STATE_USER_PROFILE_COMPLETE = 4; // 0x4
     field public static final int STATE_USER_SETUP_COMPLETE = 2; // 0x2
     field public static final int STATE_USER_SETUP_FINALIZED = 3; // 0x3
@@ -931,6 +936,7 @@ package android.content {
     method public abstract void sendBroadcast(android.content.Intent, java.lang.String, android.os.Bundle);
     method public abstract void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String, android.os.Bundle);
     method public abstract void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.os.Bundle, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
+    method public void startActivityAsUser(android.content.Intent, android.os.UserHandle);
     field public static final java.lang.String BACKUP_SERVICE = "backup";
     field public static final java.lang.String CONTEXTHUB_SERVICE = "contexthub";
     field public static final java.lang.String EUICC_CARD_SERVICE = "euicc_card";
@@ -996,6 +1002,7 @@ package android.content {
     field public static final java.lang.String EXTRA_REMOTE_CALLBACK = "android.intent.extra.REMOTE_CALLBACK";
     field public static final java.lang.String EXTRA_RESULT_NEEDED = "android.intent.extra.RESULT_NEEDED";
     field public static final java.lang.String EXTRA_UNKNOWN_INSTANT_APP = "android.intent.extra.UNKNOWN_INSTANT_APP";
+    field public static final java.lang.String EXTRA_USER_ID = "android.intent.extra.USER_ID";
     field public static final java.lang.String EXTRA_VERIFICATION_BUNDLE = "android.intent.extra.VERIFICATION_BUNDLE";
   }
 
@@ -4093,10 +4100,12 @@ package android.os {
     method public boolean isSystem();
     method public static int myUserId();
     method public static android.os.UserHandle of(int);
+    field public static final int USER_NULL = -10000; // 0xffffd8f0
   }
 
   public class UserManager {
     method public void clearSeedAccountData();
+    method public int[] getProfileIds(int, boolean);
     method public java.lang.String getSeedAccountName();
     method public android.os.PersistableBundle getSeedAccountOptions();
     method public java.lang.String getSeedAccountType();
@@ -4370,6 +4379,7 @@ package android.provider {
 
   public final class Settings {
     field public static final java.lang.String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
+    field public static final java.lang.String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {

@@ -3514,16 +3514,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         private void addStackReferenceIfNeeded(TaskStack stack) {
             if (stack.isActivityTypeHome()) {
-                // TODO(b/111363427) Rollback to throws exceptions once we figure out how to
-                // properly deal with home type stack when external display removed
                 if (mHomeStack != null) {
-                    // throw new IllegalArgumentException("addStackReferenceIfNeeded: home stack="
-                    //        + mHomeStack + " already exist on display=" + this + " stack=" + stack);
-                    Slog.e(TAG, "addStackReferenceIfNeeded: home stack="
+                    throw new IllegalArgumentException("addStackReferenceIfNeeded: home stack="
                             + mHomeStack + " already exist on display=" + this + " stack=" + stack);
-                } else {
-                    mHomeStack = stack;
+
                 }
+                mHomeStack = stack;
             }
             final int windowingMode = stack.getWindowingMode();
             if (windowingMode == WINDOWING_MODE_PINNED) {

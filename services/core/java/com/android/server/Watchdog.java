@@ -61,7 +61,8 @@ import java.util.List;
 public class Watchdog extends Thread {
     static final String TAG = "Watchdog";
 
-    private static final boolean DEBUG = true; // STOPSHIP disable it (b/113252928)
+    /** Debug flag. */
+    public static final boolean DEBUG = true; // STOPSHIP disable it (b/113252928)
 
     // Set this to true to use debug default values.
     static final boolean DB = false;
@@ -141,7 +142,7 @@ public class Watchdog extends Thread {
             mCompleted = true;
         }
 
-        public void addMonitor(Monitor monitor) {
+        void addMonitorLocked(Monitor monitor) {
             mMonitors.add(monitor);
         }
 
@@ -168,7 +169,7 @@ public class Watchdog extends Thread {
             mHandler.postAtFrontOfQueue(this);
         }
 
-        public boolean isOverdueLocked() {
+        boolean isOverdueLocked() {
             return (!mCompleted) && (SystemClock.uptimeMillis() > mStartTime + mWaitMax);
         }
 
@@ -194,7 +195,7 @@ public class Watchdog extends Thread {
             return mName;
         }
 
-        public String describeBlockedStateLocked() {
+        String describeBlockedStateLocked() {
             if (mCurrentMonitor == null) {
                 return "Blocked in handler on " + mName + " (" + getThread().getName() + ")";
             } else {
@@ -324,7 +325,7 @@ public class Watchdog extends Thread {
             if (isAlive()) {
                 throw new RuntimeException("Monitors can't be added once the Watchdog is running");
             }
-            mMonitorChecker.addMonitor(monitor);
+            mMonitorChecker.addMonitorLocked(monitor);
         }
     }
 
@@ -484,7 +485,7 @@ public class Watchdog extends Thread {
                             // trace and wait another half.
                             ArrayList<Integer> pids = new ArrayList<Integer>();
                             pids.add(Process.myPid());
-                            ActivityManagerService.dumpStackTraces(true, pids, null, null,
+                            ActivityManagerService.dumpStackTraces(pids, null, null,
                                 getInterestingNativePids());
                             waitedHalf = true;
                         }
@@ -509,14 +510,13 @@ public class Watchdog extends Thread {
             ArrayList<Integer> pids = new ArrayList<>();
             pids.add(Process.myPid());
             if (mPhonePid > 0) pids.add(mPhonePid);
-            // Pass !waitedHalf so that just in case we somehow wind up here without having
-            // dumped the halfway stacks, we properly re-initialize the trace file.
+
             final File stack = ActivityManagerService.dumpStackTraces(
-                    !waitedHalf, pids, null, null, getInterestingNativePids());
+                    pids, null, null, getInterestingNativePids());
 
             // Give some extra time to make sure the stack traces get written.
             // The system's been hanging for a minute, another second or two won't hurt much.
-            SystemClock.sleep(2000);
+            SystemClock.sleep(5000);
 
             // Trigger the kernel to dump all blocked threads, and backtraces on all CPUs to the kernel log
             doSysRq('w');

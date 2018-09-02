@@ -50,11 +50,11 @@ import android.view.IDockedStackListener;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
-import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.server.LocalServices;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;

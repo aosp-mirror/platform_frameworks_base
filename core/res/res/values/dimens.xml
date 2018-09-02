@@ -564,8 +564,9 @@
     <dimen name="magnifier_width">100dp</dimen>
     <dimen name="magnifier_height">48dp</dimen>
     <dimen name="magnifier_elevation">4dp</dimen>
-    <dimen name="magnifier_offset">42dp</dimen>
-    <item type="dimen" format="float" name="magnifier_zoom_scale">1.25</item>
+    <dimen name="magnifier_vertical_offset">-42dp</dimen>
+    <dimen name="magnifier_horizontal_offset">0dp</dimen>
+    <item type="dimen" format="float" name="magnifier_zoom">1.25</item>
 
     <dimen name="chooser_grid_padding">0dp</dimen>
     <!-- Spacing around the background change frome service to non-service -->

@@ -520,19 +520,19 @@ public class CarrierConfigManager {
             "carrier_wfc_supports_wifi_only_bool";
 
     /**
-     * Default WFC_IMS_MODE for home network   0: WIFI_ONLY
-     *                                         1: CELLULAR_PREFERRED
-     *                                         2: WIFI_PREFERRED
-     * @hide
+     * Default mode for WFC over IMS on home network:
+     * <ul>
+     *   <li>0: Wi-Fi only
+     *   <li>1: prefer mobile network
+     *   <li>2: prefer Wi-Fi
+     * </ul>
      */
     public static final String KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT =
             "carrier_default_wfc_ims_mode_int";
 
     /**
-     * Default WFC_IMS_MODE for roaming
-     * See {@link KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT} for valid values.
-     *
-     * @hide
+     * Default mode for WFC over IMS on roaming network.
+     * See {@link #KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT} for meaning of values.
      */
     public static final String KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT =
             "carrier_default_wfc_ims_roaming_mode_int";
@@ -2056,6 +2056,13 @@ public class CarrierConfigManager {
      */
     public static final String KEY_CALL_REDIRECTION_SERVICE_COMPONENT_NAME_STRING =
             "call_redirection_service_component_name_string";
+    /**
+     * Support for the original string display of CDMA MO call.
+     * By default, it is disabled.
+     * @hide
+     */
+    public static final String KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL =
+            "config_show_orig_dial_string_for_cdma";
 
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
@@ -2390,6 +2397,7 @@ public class CarrierConfigManager {
                         -85  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "");
+        sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
     }
 
     /**

@@ -18,6 +18,7 @@ package android.os.storage;
 
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -77,11 +78,16 @@ import java.io.File;
 // user, but is now part of the public API.
 public final class StorageVolume implements Parcelable {
 
+    @UnsupportedAppUsage
     private final String mId;
+    @UnsupportedAppUsage
     private final File mPath;
     private final File mInternalPath;
+    @UnsupportedAppUsage
     private final String mDescription;
+    @UnsupportedAppUsage
     private final boolean mPrimary;
+    @UnsupportedAppUsage
     private final boolean mRemovable;
     private final boolean mEmulated;
     private final boolean mAllowMassStorage;
@@ -153,6 +159,7 @@ public final class StorageVolume implements Parcelable {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public String getId() {
         return mId;
     }
@@ -179,6 +186,7 @@ public final class StorageVolume implements Parcelable {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public File getPathFile() {
         return mPath;
     }
@@ -224,6 +232,7 @@ public final class StorageVolume implements Parcelable {
      * @return whether mass storage is allowed
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean allowMassStorage() {
         return mAllowMassStorage;
     }
@@ -234,11 +243,13 @@ public final class StorageVolume implements Parcelable {
      * @return maximum file size
      * @hide
      */
+    @UnsupportedAppUsage
     public long getMaxFileSize() {
         return mMaxFileSize;
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public UserHandle getOwner() {
         return mOwner;
     }
@@ -255,6 +266,7 @@ public final class StorageVolume implements Parcelable {
      * parse or UUID is unknown.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getFatVolumeId() {
         if (mFsUuid == null || mFsUuid.length() != 9) {
             return -1;
@@ -267,6 +279,7 @@ public final class StorageVolume implements Parcelable {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public String getUserLabel() {
         return mDescription;
     }

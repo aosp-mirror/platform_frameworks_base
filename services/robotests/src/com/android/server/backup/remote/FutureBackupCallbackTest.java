@@ -41,6 +41,6 @@ public class FutureBackupCallbackTest {
 
         callback.operationComplete(7);
 
-        assertThat(future.get()).isEqualTo(RemoteResult.successful(7));
+        assertThat(future.get()).isEqualTo(RemoteResult.of(7));
     }
 }

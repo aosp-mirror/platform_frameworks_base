@@ -151,6 +151,8 @@ java_library {
         ":libcamera_client_framework_aidl",
         "core/java/android/hardware/IConsumerIrService.aidl",
         "core/java/android/hardware/ISerialManager.aidl",
+        "core/java/android/hardware/biometrics/IBiometricPromptService.aidl",
+        "core/java/android/hardware/biometrics/IBiometricPromptServiceReceiver.aidl",
         "core/java/android/hardware/biometrics/IBiometricPromptReceiver.aidl",
         "core/java/android/hardware/biometrics/IBiometricServiceLockoutResetCallback.aidl",
         "core/java/android/hardware/display/IDisplayManager.aidl",
@@ -790,9 +792,10 @@ java_library_host {
     name: "platformprotos",
     srcs: [
         "cmds/am/proto/instrumentation_data.proto",
+        "cmds/statsd/src/**/*.proto",
         "core/proto/**/*.proto",
         "libs/incident/proto/**/*.proto",
-        "cmds/statsd/src/**/*.proto",
+        "proto/src/stats_enums.proto",
     ],
     proto: {
         include_dirs: ["external/protobuf/src"],
@@ -830,6 +833,7 @@ java_library {
     srcs: [
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
+        "proto/src/stats_enums.proto",
     ],
     // Protos have lots of MissingOverride and similar.
     errorprone: {
@@ -855,6 +859,7 @@ cc_library {
     srcs: [
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
+        "proto/src/stats_enums.proto",
     ],
 
     target: {
@@ -1568,4 +1573,11 @@ droiddoc {
             removed_api_file: "api/test-removed.txt",
         },
     },
+}
+
+filegroup {
+    name: "framework-annotation-nonnull-srcs",
+    srcs: [
+        "core/java/android/annotation/NonNull.java",
+    ],
 }

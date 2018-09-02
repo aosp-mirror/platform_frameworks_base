@@ -20,14 +20,20 @@ import static android.Manifest.permission.USE_BIOMETRIC;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.pm.PackageManager;
-import android.hardware.fingerprint.FingerprintManager;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.text.TextUtils;
+import android.util.Log;
+
+import com.android.internal.R;
 
 import java.security.Signature;
 import java.util.concurrent.Executor;
@@ -39,6 +45,8 @@ import javax.crypto.Mac;
  * A class that manages a system-provided biometric dialog.
  */
 public class BiometricPrompt implements BiometricAuthenticator, BiometricConstants {
+
+    private static final String TAG = "BiometricPrompt";
 
     /**
      * @hide
@@ -208,11 +216,23 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
     }
 
-    private PackageManager mPackageManager;
-    private FingerprintManager mFingerprintManager;
-    private Bundle mBundle;
-    private ButtonInfo mPositiveButtonInfo;
-    private ButtonInfo mNegativeButtonInfo;
+    private class OnAuthenticationCancelListener implements CancellationSignal.OnCancelListener {
+        @Override
+        public void onCancel() {
+            cancelAuthentication();
+        }
+    }
+
+    private final IBinder mToken = new Binder();
+    private final Context mContext;
+    private final IBiometricPromptService mService;
+    private final Bundle mBundle;
+    private final ButtonInfo mPositiveButtonInfo;
+    private final ButtonInfo mNegativeButtonInfo;
+
+    private CryptoObject mCryptoObject;
+    private Executor mExecutor;
+    private AuthenticationCallback mAuthenticationCallback;
 
     IBiometricPromptReceiver mDialogReceiver = new IBiometricPromptReceiver.Stub() {
         @Override
@@ -230,13 +250,48 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
     };
 
+    IBiometricPromptServiceReceiver mBiometricPromptServiceReceiver =
+            new IBiometricPromptServiceReceiver.Stub() {
+
+        @Override
+        public void onAuthenticationSucceeded(long deviceId) throws RemoteException {
+            mExecutor.execute(() -> {
+                final AuthenticationResult result = new AuthenticationResult(mCryptoObject);
+                mAuthenticationCallback.onAuthenticationSucceeded(result);
+            });
+        }
+
+        @Override
+        public void onAuthenticationFailed(long deviceId) throws RemoteException {
+            mExecutor.execute(() -> {
+                mAuthenticationCallback.onAuthenticationFailed();
+            });
+        }
+
+        @Override
+        public void onError(long deviceId, int error, String message)
+                throws RemoteException {
+            mExecutor.execute(() -> {
+                mAuthenticationCallback.onAuthenticationError(error, message);
+            });
+        }
+
+        @Override
+        public void onAcquired(long deviceId, int acquireInfo, String message) {
+            mExecutor.execute(() -> {
+                mAuthenticationCallback.onAuthenticationHelp(acquireInfo, message);
+            });
+        }
+    };
+
     private BiometricPrompt(Context context, Bundle bundle,
             ButtonInfo positiveButtonInfo, ButtonInfo negativeButtonInfo) {
+        mContext = context;
         mBundle = bundle;
         mPositiveButtonInfo = positiveButtonInfo;
         mNegativeButtonInfo = negativeButtonInfo;
-        mFingerprintManager = context.getSystemService(FingerprintManager.class);
-        mPackageManager = context.getPackageManager();
+        mService = IBiometricPromptService.Stub.asInterface(
+                ServiceManager.getService(Context.BIOMETRIC_PROMPT_SERVICE));
     }
 
     /**
@@ -290,13 +345,12 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         /**
          * Authentication result
          * @param crypto
-         * @param identifier
-         * @param userId
          * @hide
          */
-        public AuthenticationResult(CryptoObject crypto, Identifier identifier,
-                int userId) {
-            super(crypto, identifier, userId);
+        public AuthenticationResult(CryptoObject crypto) {
+            // For compatibility, this extends from common base class as FingerprintManager does.
+            // Identifier and userId is not used for BiometricPrompt.
+            super(crypto, null /* identifier */, 0 /* userId */);
         }
         /**
          * Obtain the crypto object associated with this transaction
@@ -353,53 +407,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          */
         @Override
         public void onAuthenticationAcquired(int acquireInfo) {}
-
-        /**
-         * @param result An object containing authentication-related data
-         * @hide
-         */
-        @Override
-        public void onAuthenticationSucceeded(BiometricAuthenticator.AuthenticationResult result) {
-            onAuthenticationSucceeded(new AuthenticationResult(
-                    (CryptoObject) result.getCryptoObject(),
-                    result.getId(),
-                    result.getUserId()));
-        }
-    }
-
-    /**
-     * @param crypto Object associated with the call
-     * @param cancel An object that can be used to cancel authentication
-     * @param executor An executor to handle callback events
-     * @param callback An object to receive authentication events
-     * @hide
-     */
-    @Override
-    public void authenticate(@NonNull android.hardware.biometrics.CryptoObject crypto,
-            @NonNull CancellationSignal cancel,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull BiometricAuthenticator.AuthenticationCallback callback) {
-        if (!(callback instanceof BiometricPrompt.AuthenticationCallback)) {
-            throw new IllegalArgumentException("Callback cannot be casted");
-        }
-        authenticate(crypto, cancel, executor, (AuthenticationCallback) callback);
-    }
-
-    /**
-     *
-     * @param cancel An object that can be used to cancel authentication
-     * @param executor An executor to handle callback events
-     * @param callback An object to receive authentication events
-     * @hide
-     */
-    @Override
-    public void authenticate(@NonNull CancellationSignal cancel,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull BiometricAuthenticator.AuthenticationCallback callback) {
-        if (!(callback instanceof BiometricPrompt.AuthenticationCallback)) {
-            throw new IllegalArgumentException("Callback cannot be casted");
-        }
-        authenticate(cancel, executor, (AuthenticationCallback) callback);
     }
 
     /**
@@ -430,11 +437,19 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             @NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AuthenticationCallback callback) {
-        if (handlePreAuthenticationErrors(callback, executor)) {
-            return;
+        if (crypto == null) {
+            throw new IllegalArgumentException("Must supply a crypto object");
         }
-        mFingerprintManager.authenticate(crypto, cancel, mBundle, executor, mDialogReceiver,
-                callback);
+        if (cancel == null) {
+            throw new IllegalArgumentException("Must supply a cancellation signal");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must supply an executor");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("Must supply a callback");
+        }
+        authenticateInternal(crypto, cancel, executor, callback);
     }
 
     /**
@@ -462,34 +477,53 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     public void authenticate(@NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AuthenticationCallback callback) {
-        if (handlePreAuthenticationErrors(callback, executor)) {
-            return;
+        if (cancel == null) {
+            throw new IllegalArgumentException("Must supply a cancellation signal");
         }
-        mFingerprintManager.authenticate(cancel, mBundle, executor, mDialogReceiver, callback);
+        if (executor == null) {
+            throw new IllegalArgumentException("Must supply an executor");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("Must supply a callback");
+        }
+        authenticateInternal(null /* crypto */, cancel, executor, callback);
     }
 
-    private boolean handlePreAuthenticationErrors(AuthenticationCallback callback,
-            Executor executor) {
-        if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
-            sendError(BiometricPrompt.BIOMETRIC_ERROR_HW_NOT_PRESENT, callback,
-                      executor);
-            return true;
-        } else if (!mFingerprintManager.isHardwareDetected()) {
-            sendError(BiometricPrompt.BIOMETRIC_ERROR_HW_UNAVAILABLE, callback,
-                      executor);
-            return true;
-        } else if (!mFingerprintManager.hasEnrolledFingerprints()) {
-            sendError(BiometricPrompt.BIOMETRIC_ERROR_NO_BIOMETRICS, callback,
-                      executor);
-            return true;
+    private void cancelAuthentication() {
+        if (mService != null) {
+            try {
+                mService.cancelAuthentication(mToken, mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Unable to cancel authentication", e);
+            }
         }
-        return false;
     }
 
-    private void sendError(int error, AuthenticationCallback callback, Executor executor) {
-        executor.execute(() -> {
-            callback.onAuthenticationError(error, mFingerprintManager.getErrorString(
-                    error, 0 /* vendorCode */));
-        });
+    private void authenticateInternal(@Nullable CryptoObject crypto,
+            @NonNull CancellationSignal cancel,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull AuthenticationCallback callback) {
+        try {
+            if (cancel.isCanceled()) {
+                Log.w(TAG, "Authentication already canceled");
+                return;
+            } else {
+                cancel.setOnCancelListener(new OnAuthenticationCancelListener());
+            }
+
+            mCryptoObject = crypto;
+            mExecutor = executor;
+            mAuthenticationCallback = callback;
+            final long sessionId = crypto != null ? crypto.getOpId() : 0;
+            mService.authenticate(mToken, sessionId, mContext.getUserId(),
+                    mBiometricPromptServiceReceiver, 0 /* flags */, mContext.getOpPackageName(),
+                    mBundle, mDialogReceiver);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Remote exception while authenticating", e);
+            mExecutor.execute(() -> {
+                callback.onAuthenticationError(BiometricPrompt.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                        mContext.getString(R.string.biometric_error_hw_unavailable));
+            });
+        }
     }
 }

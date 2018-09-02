@@ -16,6 +16,7 @@
 
 package android.hardware.biometrics;
 
+import android.annotation.UnsupportedAppUsage;
 import android.hardware.fingerprint.FingerprintManager;
 
 /**
@@ -120,6 +121,7 @@ public interface BiometricFingerprintConstants {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int FINGERPRINT_ERROR_VENDOR_BASE = 1000;
 
     //

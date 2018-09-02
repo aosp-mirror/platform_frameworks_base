@@ -29,6 +29,7 @@ import "frameworks/base/core/proto/android/server/enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
+import "frameworks/base/proto/src/stats_enums.proto";
 
 /**
  * The master atom class. This message defines all of the available
@@ -128,6 +129,7 @@ message Atom {
         LowMemReported low_mem_reported = 81;
         GenericAtom generic_atom = 82;
         KeyValuePairsAtom key_value_pairs_atom = 83;
+        VibratorStateChanged vibrator_state_changed = 84;
     }
 
     // Pulled events will start at field 10000.
@@ -1410,6 +1412,25 @@ message ANROccurred {
     optional ForegroundState foreground_state = 6;
 }
 
+/**
+ * Logs when the vibrator state changes.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/VibratorService.java
+ */
+message VibratorStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+
+    // Duration (in milliseconds) requested to keep the vibrator on.
+    // Only applicable for State == ON.
+    optional int64 duration_millis = 3;
+}
+
 /*
  * Allows other apps to push events into statsd.
  * Logged from:
@@ -1750,7 +1771,7 @@ message GenericAtom {
     optional int32 uid = 1 [(is_uid) = true];
 
     // An event_id indicates the type of event.
-    optional int32 event_id = 2;
+    optional android.os.statsd.EventType event_id = 2;
 }
 
 //////////////////////////////////////////////////////////////////////
