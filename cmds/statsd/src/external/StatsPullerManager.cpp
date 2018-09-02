@@ -163,10 +163,7 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
           new ResourceHealthManagerPuller(android::util::FULL_BATTERY_CAPACITY)}},
         // battery_voltage
         {android::util::BATTERY_VOLTAGE,
-         {{},
-          {},
-          1 * NS_PER_SEC,
-          new ResourceHealthManagerPuller(android::util::BATTERY_VOLTAGE)}},
+         {{}, {}, 1 * NS_PER_SEC, new ResourceHealthManagerPuller(android::util::BATTERY_VOLTAGE)}},
         // process_memory_state
         {android::util::PROCESS_MEMORY_STATE,
          {{4, 5, 6, 7, 8, 9},
@@ -204,17 +201,17 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
          {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::APP_SIZE)}},
         // Size of specific categories of files. Eg. Music.
         {android::util::CATEGORY_SIZE,
-         {{},
-          {},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::CATEGORY_SIZE)}},
+         {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::CATEGORY_SIZE)}},
         // Number of fingerprints registered to each user.
         {android::util::NUM_FINGERPRINTS,
          {{},
           {},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::NUM_FINGERPRINTS)}},
-        };
+        // ProcStats.
+        {android::util::PROC_STATS,
+         {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::PROC_STATS)}},
+};
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
 }
