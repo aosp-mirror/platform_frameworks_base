@@ -1302,6 +1302,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
         boolean result = mInterface.runBackgroundDexoptJob(packageNames.isEmpty() ? null :
                 packageNames);
+        getOutPrintWriter().println(result ? "Success" : "Failure");
         return result ? 0 : -1;
     }
 
