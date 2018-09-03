@@ -35,6 +35,8 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -76,6 +78,13 @@ public class ImageWallpaper extends WallpaperService {
         private final Runnable mUnloadWallpaperCallback = () -> {
             unloadWallpaper(false /* forgetSize */);
         };
+
+        // Surface is rejected if size below a threshold on some devices (ie. 8px on elfin)
+        // set min to 64 px (CTS covers this)
+        @VisibleForTesting
+        static final int MIN_BACKGROUND_WIDTH = 64;
+        @VisibleForTesting
+        static final int MIN_BACKGROUND_HEIGHT = 64;
 
         Bitmap mBackground;
         int mBackgroundWidth = -1, mBackgroundHeight = -1;
@@ -156,9 +165,9 @@ public class ImageWallpaper extends WallpaperService {
                 hasWallpaper = false;
             }
 
-            // Force the wallpaper to cover the screen in both dimensions
-            int surfaceWidth = Math.max(displayInfo.logicalWidth, mBackgroundWidth);
-            int surfaceHeight = Math.max(displayInfo.logicalHeight, mBackgroundHeight);
+            // Set surface size equal to bitmap size, prevent memory waste
+            int surfaceWidth = Math.max(MIN_BACKGROUND_WIDTH, mBackgroundWidth);
+            int surfaceHeight = Math.max(MIN_BACKGROUND_HEIGHT, mBackgroundHeight);
 
             // Used a fixed size surface, because we are special.  We can do
             // this because we know the current design of window animations doesn't
@@ -257,7 +266,8 @@ public class ImageWallpaper extends WallpaperService {
             drawFrame();
         }
 
-        private DisplayInfo getDefaultDisplayInfo() {
+        @VisibleForTesting
+        DisplayInfo getDefaultDisplayInfo() {
             mDefaultDisplay.getDisplayInfo(mTmpDisplayInfo);
             return mTmpDisplayInfo;
         }
@@ -420,7 +430,8 @@ public class ImageWallpaper extends WallpaperService {
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
 
-        private void updateBitmap(Bitmap bitmap) {
+        @VisibleForTesting
+        void updateBitmap(Bitmap bitmap) {
             mBackground = null;
             mBackgroundWidth = -1;
             mBackgroundHeight = -1;
