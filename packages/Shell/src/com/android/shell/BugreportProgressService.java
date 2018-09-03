@@ -16,6 +16,8 @@
 
 package com.android.shell;
 
+import static android.content.pm.PackageManager.FEATURE_LEANBACK;
+import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
 import static com.android.shell.BugreportPrefs.STATE_HIDE;
@@ -235,6 +237,7 @@ public class BugreportProgressService extends Service {
     private static final Bundle sNotificationBundle = new Bundle();
 
     private boolean mIsWatch;
+    private boolean mIsTv;
 
     private int mLastProgressPercent;
 
@@ -255,6 +258,9 @@ public class BugreportProgressService extends Service {
         final Configuration conf = mContext.getResources().getConfiguration();
         mIsWatch = (conf.uiMode & Configuration.UI_MODE_TYPE_MASK) ==
                 Configuration.UI_MODE_TYPE_WATCH;
+        PackageManager packageManager = getPackageManager();
+        mIsTv = packageManager.hasSystemFeature(FEATURE_LEANBACK)
+                || packageManager.hasSystemFeature(FEATURE_TELEVISION);
         NotificationManager nm = NotificationManager.from(mContext);
         nm.createNotificationChannel(
                 new NotificationChannel(NOTIFICATION_CHANNEL_ID,
@@ -500,8 +506,8 @@ public class BugreportProgressService extends Service {
                 .setProgress(info.max, info.progress, false)
                 .setOngoing(true);
 
-        // Wear bugreport doesn't need the bug info dialog, screenshot and cancel action.
-        if (!mIsWatch) {
+        // Wear and ATV bugreport doesn't need the bug info dialog, screenshot and cancel action.
+        if (!(mIsWatch || mIsTv)) {
             final Action cancelAction = new Action.Builder(null, mContext.getString(
                     com.android.internal.R.string.cancel), newCancelIntent(mContext, info)).build();
             final Intent infoIntent = new Intent(mContext, BugreportProgressService.class);
