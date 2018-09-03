@@ -216,8 +216,8 @@ public class DhcpServerTest {
     @Test
     public void testRequest_Selecting_Ack() throws Exception {
         when(mRepository.requestLease(isNull() /* clientId */, eq(TEST_CLIENT_MAC),
-                eq(INADDR_ANY) /* clientAddr */, eq(TEST_CLIENT_ADDR) /* reqAddr */,
-                eq(true) /* sidSet */, isNull() /* hostname */))
+                eq(INADDR_ANY) /* clientAddr */, eq(INADDR_ANY) /* relayAddr */,
+                eq(TEST_CLIENT_ADDR) /* reqAddr */, eq(true) /* sidSet */, isNull() /* hostname */))
                 .thenReturn(TEST_LEASE);
 
         final DhcpRequestPacket request = makeRequestSelectingPacket();
@@ -231,8 +231,8 @@ public class DhcpServerTest {
     @Test
     public void testRequest_Selecting_Nak() throws Exception {
         when(mRepository.requestLease(isNull(), eq(TEST_CLIENT_MAC),
-                eq(INADDR_ANY) /* clientAddr */, eq(TEST_CLIENT_ADDR) /* reqAddr */,
-                eq(true) /* sidSet */, isNull() /* hostname */))
+                eq(INADDR_ANY) /* clientAddr */, eq(INADDR_ANY) /* relayAddr */,
+                eq(TEST_CLIENT_ADDR) /* reqAddr */, eq(true) /* sidSet */, isNull() /* hostname */))
                 .thenThrow(new InvalidAddressException("Test error"));
 
         final DhcpRequestPacket request = makeRequestSelectingPacket();
@@ -248,7 +248,8 @@ public class DhcpServerTest {
         final DhcpRequestPacket request = makeRequestSelectingPacket();
         mServer.processPacket(request, 50000);
 
-        verify(mRepository, never()).requestLease(any(), any(), any(), any(), anyBoolean(), any());
+        verify(mRepository, never())
+                .requestLease(any(), any(), any(), any(), any(), anyBoolean(), any());
         verify(mDeps, never()).sendPacket(any(), any(), any());
     }
 
