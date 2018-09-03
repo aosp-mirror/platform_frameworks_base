@@ -36,7 +36,7 @@ import com.android.systemui.statusbar.CommandQueue;
  * FingerprintDialogView).
  */
 public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callbacks {
-    private static final String TAG = "FingerprintDialogImpl";
+    private static final String TAG = "BiometricDialogImpl";
     private static final boolean DEBUG = true;
 
     private static final int MSG_SHOW_DIALOG = 1;
@@ -120,8 +120,8 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     }
 
     @Override
-    public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver) {
-        if (DEBUG) Log.d(TAG, "showBiometricDialog");
+    public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver, int type) {
+        if (DEBUG) Log.d(TAG, "showBiometricDialog, type: " + type);
         // Remove these messages as they are part of the previous client
         mHandler.removeMessages(MSG_BIOMETRIC_ERROR);
         mHandler.removeMessages(MSG_BIOMETRIC_HELP);

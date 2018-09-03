@@ -21,7 +21,6 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricPromptReceiver;
-import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -45,17 +44,16 @@ public abstract class AuthenticationClient extends ClientMonitor {
     public static final int LOCKOUT_TIMED = 1;
     public static final int LOCKOUT_PERMANENT = 2;
 
+    private final BiometricAuthenticator mAuthenticator;
     // Callback mechanism received from the client
-    // (BiometricPrompt -> FingerprintManager -> FingerprintService -> AuthenticationClient)
+    // (BiometricPrompt -> BiometricPromptService -> <Biometric>Service -> AuthenticationClient)
     private IBiometricPromptReceiver mDialogReceiverFromClient;
     private Bundle mBundle;
     private IStatusBarService mStatusBarService;
     private boolean mInLockout;
-    // TODO: BiometricManager, after other biometric modalities are introduced.
-    private final FingerprintManager mFingerprintManager;
     protected boolean mDialogDismissed;
 
-    // Receives events from SystemUI and handles them before forwarding them to FingerprintDialog
+    // Receives events from SystemUI and handles them before forwarding them to BiometricDialog
     protected IBiometricPromptReceiver mDialogReceiver = new IBiometricPromptReceiver.Stub() {
         @Override // binder call
         public void onDialogDismissed(int reason) {
@@ -81,7 +79,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
     public abstract void onStart();
 
     /**
-     * This method is called when a fingerprint is authenticated or authentication is stopped
+     * This method is called when a biometric is authenticated or authentication is stopped
      * (cancelled by the user, or an error such as lockout has occurred).
      */
     public abstract void onStop();
@@ -90,15 +88,15 @@ public abstract class AuthenticationClient extends ClientMonitor {
             BiometricService.DaemonWrapper daemon, long halDeviceId, IBinder token,
             BiometricService.ServiceListener listener, int targetUserId, int groupId, long opId,
             boolean restricted, String owner, Bundle bundle,
-            IBiometricPromptReceiver dialogReceiver, IStatusBarService statusBarService) {
+            IBiometricPromptReceiver dialogReceiver, IStatusBarService statusBarService,
+            BiometricAuthenticator authenticator) {
         super(context, metrics, daemon, halDeviceId, token, listener, targetUserId, groupId,
                 restricted, owner);
         mOpId = opId;
         mBundle = bundle;
         mDialogReceiverFromClient = dialogReceiver;
         mStatusBarService = statusBarService;
-        mFingerprintManager = (FingerprintManager) getContext()
-                .getSystemService(Context.FINGERPRINT_SERVICE);
+        mAuthenticator = authenticator;
         mHandler = new Handler(Looper.getMainLooper());
     }
 
@@ -118,7 +116,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             try {
                 if (acquiredInfo != BiometricConstants.BIOMETRIC_ACQUIRED_GOOD) {
                     mStatusBarService.onBiometricHelp(
-                            mFingerprintManager.getAcquiredString(acquiredInfo, vendorCode));
+                            mAuthenticator.getAcquiredString(acquiredInfo, vendorCode));
                 }
                 return false; // acquisition continues
             } catch (RemoteException e) {
@@ -139,15 +137,15 @@ public abstract class AuthenticationClient extends ClientMonitor {
     public boolean onError(long deviceId, int error, int vendorCode) {
         if (mDialogDismissed) {
             // If user cancels authentication, the application has already received the
-            // FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED message from onDialogDismissed()
-            // and stopped the fingerprint hardware, so there is no need to send a
-            // FingerprintManager.FINGERPRINT_ERROR_CANCELED message.
+            // ERROR_USER_CANCELED message from onDialogDismissed()
+            // and stopped the biometric hardware, so there is no need to send a
+            // ERROR_CANCELED message.
             return true;
         }
         if (mBundle != null) {
             try {
                 mStatusBarService.onBiometricError(
-                        mFingerprintManager.getErrorString(error, vendorCode));
+                        mAuthenticator.getErrorString(error, vendorCode));
             } catch (RemoteException e) {
                 Slog.e(getLogTag(), "Remote exception when sending error", e);
             }
@@ -160,15 +158,14 @@ public abstract class AuthenticationClient extends ClientMonitor {
             boolean authenticated) {
         boolean result = false;
 
-        // If the fingerprint dialog is showing, notify authentication succeeded
-        // TODO: this goes to BiometricPrompt, split between biometric modalities
+        // If the biometric dialog is showing, notify authentication succeeded
         if (mBundle != null) {
             try {
                 if (authenticated) {
                     mStatusBarService.onBiometricAuthenticated();
                 } else {
                     mStatusBarService.onBiometricHelp(getContext().getResources().getString(
-                            com.android.internal.R.string.fingerprint_not_recognized));
+                            com.android.internal.R.string.biometric_not_recognized));
                 }
             } catch (RemoteException e) {
                 Slog.e(getLogTag(), "Failed to notify Authenticated:", e);
@@ -223,7 +220,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                     // Send the lockout message to the system dialog
                     if (mBundle != null) {
                         mStatusBarService.onBiometricError(
-                                mFingerprintManager.getErrorString(errorCode, 0 /* vendorCode */));
+                                mAuthenticator.getErrorString(errorCode, 0 /* vendorCode */));
                         mHandler.postDelayed(() -> {
                             try {
                                 listener.onError(getHalDeviceId(), errorCode, 0 /* vendorCode */);
@@ -243,7 +240,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             if (listener != null) {
                 vibrateSuccess();
             }
-            result |= true; // we have a valid fingerprint, done
+            result |= true; // we have a valid biometric, done
             resetFailedAttempts();
             onStop();
         }
@@ -270,9 +267,10 @@ public abstract class AuthenticationClient extends ClientMonitor {
             // If authenticating with system dialog, show the dialog
             if (mBundle != null) {
                 try {
-                    mStatusBarService.showBiometricDialog(mBundle, mDialogReceiver);
+                    mStatusBarService.showBiometricDialog(mBundle, mDialogReceiver,
+                            mAuthenticator.getType());
                 } catch (RemoteException e) {
-                    Slog.e(getLogTag(), "Unable to show fingerprint dialog", e);
+                    Slog.e(getLogTag(), "Unable to show biometric dialog", e);
                 }
             }
         } catch (RemoteException e) {
@@ -297,7 +295,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 Slog.w(getLogTag(), "stopAuthentication failed, result=" + result);
                 return result;
             }
-            if (DEBUG) Slog.w(getLogTag(), "client " + getOwnerString() + " is no longer authenticating");
+            if (DEBUG) Slog.w(getLogTag(), "client " + getOwnerString() +
+                    " is no longer authenticating");
         } catch (RemoteException e) {
             Slog.e(getLogTag(), "stopAuthentication failed", e);
             return ERROR_ESRCH;
@@ -310,7 +309,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 try {
                     mStatusBarService.hideBiometricDialog();
                 } catch (RemoteException e) {
-                    Slog.e(getLogTag(), "Unable to hide fingerprint dialog", e);
+                    Slog.e(getLogTag(), "Unable to hide biometric dialog", e);
                 }
             }
         }

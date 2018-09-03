@@ -1414,8 +1414,8 @@
     <string-array name="fingerprint_acquired_vendor">
     </string-array>
 
-    <!-- Message shown by the fingerprint dialog when fingerprint is not recognized -->
-    <string name="fingerprint_not_recognized">Not recognized</string>
+    <!-- Message shown by the biometric dialog when biometric is not recognized -->
+    <string name="biometric_not_recognized">Not recognized</string>
     <!-- Accessibility message announced when a fingerprint has been authenticated [CHAR LIMIT=NONE] -->
     <string name="fingerprint_authenticated">Fingerprint authenticated</string>
 
