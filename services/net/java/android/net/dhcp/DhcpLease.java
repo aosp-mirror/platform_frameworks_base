@@ -130,9 +130,14 @@ public class DhcpLease {
         return HexDump.toHexString(bytes);
     }
 
+    static String inet4AddrToString(@Nullable Inet4Address addr) {
+        return (addr == null) ? "null" : addr.getHostAddress();
+    }
+
     @Override
     public String toString() {
         return String.format("clientId: %s, hwAddr: %s, netAddr: %s, expTime: %d, hostname: %s",
-                clientIdToString(mClientId), mHwAddr.toString(), mNetAddr, mExpTime, mHostname);
+                clientIdToString(mClientId), mHwAddr.toString(), inet4AddrToString(mNetAddr),
+                mExpTime, mHostname);
     }
 }

@@ -162,6 +162,9 @@ public class TetheringConfiguration {
         dumpStringArray(pw, "provisioningApp", provisioningApp);
         pw.print("provisioningAppNoUi: ");
         pw.println(provisioningAppNoUi);
+
+        pw.print("enableLegacyDhcpServer: ");
+        pw.println(enableLegacyDhcpServer);
     }
 
     public String toString() {
@@ -176,6 +179,7 @@ public class TetheringConfiguration {
                 makeString(preferredUpstreamNames(preferredUpstreamIfaceTypes))));
         sj.add(String.format("provisioningApp:%s", makeString(provisioningApp)));
         sj.add(String.format("provisioningAppNoUi:%s", provisioningAppNoUi));
+        sj.add(String.format("enableLegacyDhcpServer:%s", enableLegacyDhcpServer));
         return String.format("TetheringConfiguration{%s}", sj.toString());
     }
 
