@@ -188,6 +188,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @UnsupportedAppUsage
     private final CameraMetadataNative mProperties;
     private List<CameraCharacteristics.Key<?>> mKeys;
+    private List<CameraCharacteristics.Key<?>> mKeysNeedingPermission;
     private List<CaptureRequest.Key<?>> mAvailableRequestKeys;
     private List<CaptureRequest.Key<?>> mAvailableSessionKeys;
     private List<CaptureRequest.Key<?>> mAvailablePhysicalRequestKeys;
@@ -268,8 +269,47 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
         }
 
         mKeys = Collections.unmodifiableList(
-                getKeys(getClass(), getKeyClass(), this, filterTags));
+                getKeys(getClass(), getKeyClass(), this, filterTags, true));
         return mKeys;
+    }
+
+    /**
+     * <p>Returns a subset of the list returned by {@link #getKeys} with all keys that
+     * require camera clients to obtain the {@link android.Manifest.permission#CAMERA} permission.
+     * </p>
+     *
+     * <p>If an application calls {@link CameraManager#getCameraCharacteristics} without holding the
+     * {@link android.Manifest.permission#CAMERA} permission,
+     * all keys in this list will not be available, and calling {@link #get} will
+     * return null for those keys. If the application obtains the
+     * {@link android.Manifest.permission#CAMERA} permission, then the
+     * CameraCharacteristics from a call to a subsequent
+     * {@link CameraManager#getCameraCharacteristics} will have the keys available.</p>
+     *
+     * <p>The list returned is not modifiable, so any attempts to modify it will throw
+     * a {@code UnsupportedOperationException}.</p>
+     *
+     * <p>Each key is only listed once in the list. The order of the keys is undefined.</p>
+     *
+     * @return List of camera characteristic keys that require the
+     *         {@link android.Manifest.permission#CAMERA} permission. The list can be null in case
+     *         there are no currently present keys that need additional permission.
+     */
+    public List<Key<?>> getKeysNeedingPermission() {
+        if (mKeysNeedingPermission == null) {
+            Object crKey = CameraCharacteristics.Key.class;
+            Class<CameraCharacteristics.Key<?>> crKeyTyped =
+                (Class<CameraCharacteristics.Key<?>>)crKey;
+
+            int[] filterTags = get(REQUEST_CHARACTERISTIC_KEYS_NEEDING_PERMISSION);
+            if (filterTags == null) {
+                return null;
+            }
+            mKeysNeedingPermission =
+                getAvailableKeyList(CameraCharacteristics.class, crKeyTyped, filterTags,
+                        /*includeSynthetic*/ false);
+        }
+        return mKeysNeedingPermission;
     }
 
     /**
@@ -328,7 +368,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
                 return null;
             }
             mAvailableSessionKeys =
-                    getAvailableKeyList(CaptureRequest.class, crKeyTyped, filterTags);
+                    getAvailableKeyList(CaptureRequest.class, crKeyTyped, filterTags,
+                            /*includeSynthetic*/ false);
         }
         return mAvailableSessionKeys;
     }
@@ -367,7 +408,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
                 return null;
             }
             mAvailablePhysicalRequestKeys =
-                    getAvailableKeyList(CaptureRequest.class, crKeyTyped, filterTags);
+                    getAvailableKeyList(CaptureRequest.class, crKeyTyped, filterTags,
+                            /*includeSynthetic*/ false);
         }
         return mAvailablePhysicalRequestKeys;
     }
@@ -399,7 +441,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
                         + "in the characteristics");
             }
             mAvailableRequestKeys =
-                    getAvailableKeyList(CaptureRequest.class, crKeyTyped, filterTags);
+                    getAvailableKeyList(CaptureRequest.class, crKeyTyped, filterTags,
+                            /*includeSynthetic*/ true);
         }
         return mAvailableRequestKeys;
     }
@@ -430,7 +473,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
                 throw new AssertionError("android.request.availableResultKeys must be non-null "
                         + "in the characteristics");
             }
-            mAvailableResultKeys = getAvailableKeyList(CaptureResult.class, crKeyTyped, filterTags);
+            mAvailableResultKeys = getAvailableKeyList(CaptureResult.class, crKeyTyped, filterTags,
+                    /*includeSynthetic*/ true);
         }
         return mAvailableResultKeys;
     }
@@ -445,13 +489,16 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @param metadataClass The subclass of CameraMetadata that you want to get the keys for.
      * @param keyClass The class of the metadata key, e.g. CaptureRequest.Key.class
+     * @param filterTags An array of tags to be used for filtering
+     * @param includeSynthetic Include public syntethic tag by default.
      *
      * @return List of keys supported by this CameraDevice for metadataClass.
      *
      * @throws IllegalArgumentException if metadataClass is not a subclass of CameraMetadata
      */
     private <TKey> List<TKey>
-    getAvailableKeyList(Class<?> metadataClass, Class<TKey> keyClass, int[] filterTags) {
+    getAvailableKeyList(Class<?> metadataClass, Class<TKey> keyClass, int[] filterTags,
+            boolean includeSynthetic) {
 
         if (metadataClass.equals(CameraMetadata.class)) {
             throw new AssertionError(
@@ -462,7 +509,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
         }
 
         List<TKey> staticKeyList = getKeys(
-                metadataClass, keyClass, /*instance*/null, filterTags);
+                metadataClass, keyClass, /*instance*/null, filterTags, includeSynthetic);
         return Collections.unmodifiableList(staticKeyList);
     }
 
@@ -1103,6 +1150,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION
@@ -1124,6 +1172,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION
@@ -1238,6 +1287,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p><b>Units</b>:
      * Quaternion coefficients</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      */
     @PublicKey
     public static final Key<float[]> LENS_POSE_ROTATION =
@@ -1273,6 +1323,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * with PRIMARY_CAMERA.</p>
      * <p><b>Units</b>: Meters</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#LENS_DISTORTION
      * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
@@ -1344,6 +1395,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}
      * coordinate system.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#LENS_DISTORTION
      * @see CameraCharacteristics#LENS_POSE_ROTATION
@@ -1387,6 +1439,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p><b>Units</b>:
      * Unitless coefficients.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
      * @deprecated
@@ -1411,6 +1464,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #LENS_POSE_REFERENCE_GYROSCOPE GYROSCOPE}</li>
      * </ul></p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#LENS_POSE_TRANSLATION
      * @see #LENS_POSE_REFERENCE_PRIMARY_CAMERA
@@ -1452,6 +1506,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p><b>Units</b>:
      * Unitless coefficients.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
      * @see CameraCharacteristics#LENS_RADIAL_DISTORTION
@@ -1878,6 +1933,21 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     public static final Key<int[]> REQUEST_AVAILABLE_PHYSICAL_CAMERA_REQUEST_KEYS =
             new Key<int[]>("android.request.availablePhysicalCameraRequestKeys", int[].class);
+
+    /**
+     * <p>A list of camera characteristics keys that are only available
+     * in case the camera client has camera permission.</p>
+     * <p>The entry contains a subset of
+     * {@link android.hardware.camera2.CameraCharacteristics#getKeys } that require camera clients
+     * to acquire the {@link android.Manifest.permission#CAMERA } permission before calling
+     * {@link android.hardware.camera2.CameraManager#getCameraCharacteristics }. If the
+     * permission is not held by the camera client, then the values of the repsective properties
+     * will not be present in {@link android.hardware.camera2.CameraCharacteristics }.</p>
+     * <p>This key is available on all devices.</p>
+     * @hide
+     */
+    public static final Key<int[]> REQUEST_CHARACTERISTIC_KEYS_NEEDING_PERMISSION =
+            new Key<int[]>("android.request.characteristicKeysNeedingPermission", int[].class);
 
     /**
      * <p>The list of image formats that are supported by this
@@ -2703,6 +2773,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #SENSOR_REFERENCE_ILLUMINANT1_ISO_STUDIO_TUNGSTEN ISO_STUDIO_TUNGSTEN}</li>
      * </ul></p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM1
      * @see CameraCharacteristics#SENSOR_COLOR_TRANSFORM1
@@ -2744,6 +2815,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1 android.sensor.referenceIlluminant1}</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM2
      * @see CameraCharacteristics#SENSOR_COLOR_TRANSFORM2
@@ -2766,6 +2838,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * space under the first reference illuminant
      * ({@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1 android.sensor.referenceIlluminant1}).</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
      */
@@ -2788,6 +2861,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>This matrix will only be present if the second reference
      * illuminant is present.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
      */
@@ -2811,6 +2885,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * match the standard white point for the first reference illuminant
      * (i.e. no chromatic adaptation will be applied by this transform).</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
      */
@@ -2836,6 +2911,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>This matrix will only be present if the second reference
      * illuminant is present.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
      */
@@ -2857,6 +2933,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * illuminant in the reference sensor colorspace is mapped to D50 in the
      * CIE XYZ colorspace.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
      */
@@ -2880,6 +2957,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>This matrix will only be present if the second reference
      * illuminant is present.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
      */
