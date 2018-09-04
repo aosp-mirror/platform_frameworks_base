@@ -75,18 +75,13 @@ PageTypeInfoParser::Parse(const int in, const int out) const
             } else return BAD_VALUE;
             // expect part 2 starts with "type"
             if (stripPrefix(&record[2], "type")) {
-                // expect the rest of part 2 has number of (pageBlockOrder + 2) parts
                 // An example looks like:
                 // header line:      type    0   1   2 3 4 5 6 7 8 9 10
                 // record line: Unmovable  426 279 226 1 1 1 0 0 2 2  0
-                // The pageBlockOrder = 10 and it's zero-indexed. so total parts
-                // are 10 + 1(zero-indexed) + 1(the type part) = 12.
                 record_t pageCounts = parseRecord(record[2]);
-                int pageCountsSize = pageBlockOrder + 2;
-                if ((int)pageCounts.size() != pageCountsSize) return BAD_VALUE;
 
                 proto.write(PageTypeInfoProto::MigrateType::TYPE, pageCounts[0]);
-                for (auto i=1; i<pageCountsSize; i++) {
+                for (size_t i=1; i<pageCounts.size(); i++) {
                     proto.write(PageTypeInfoProto::MigrateType::FREE_PAGES_COUNT, toInt(pageCounts[i]));
                 }
             } else return BAD_VALUE;
