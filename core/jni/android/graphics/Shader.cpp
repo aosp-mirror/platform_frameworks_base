@@ -6,6 +6,7 @@
 #include "SkBlendMode.h"
 #include "core_jni_helpers.h"
 
+#include <Caches.h>
 #include <jni.h>
 
 using namespace android::uirenderer;

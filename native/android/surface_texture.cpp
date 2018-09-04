@@ -21,16 +21,15 @@
 
 #include <utils/Log.h>
 
+#include <gui/GLConsumer.h>
 #include <gui/Surface.h>
 
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 
-#include "surfacetexture/SurfaceTexture.h"
-
 using namespace android;
 
 struct ASurfaceTexture {
-    sp<SurfaceTexture> consumer;
+    sp<GLConsumer> consumer;
     sp<IGraphicBufferProducer> producer;
 };
 

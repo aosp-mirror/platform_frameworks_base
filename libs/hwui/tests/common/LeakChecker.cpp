@@ -16,6 +16,7 @@
 
 #include "LeakChecker.h"
 
+#include "Caches.h"
 #include "TestUtils.h"
 
 #include <memunreachable/memunreachable.h>
@@ -70,6 +71,9 @@ void LeakChecker::checkForLeaks() {
     // thread-local caches so some leaks will not be properly tagged as leaks
     UnreachableMemoryInfo rtMemInfo;
     TestUtils::runOnRenderThread([&rtMemInfo](renderthread::RenderThread& thread) {
+        if (Caches::hasInstance()) {
+            Caches::getInstance().tasks.stop();
+        }
         // Check for leaks
         if (!GetUnreachableMemory(rtMemInfo)) {
             cerr << "Failed to get unreachable memory!" << endl;
