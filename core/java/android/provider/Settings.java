@@ -497,6 +497,16 @@ public final class Settings {
             "android.settings.BLUETOOTH_SETTINGS";
 
     /**
+     * Activity action: Show Settings app search UI when this action is available for device.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_APP_SEARCH_SETTINGS = "android.settings.APP_SEARCH_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of Assist Gesture.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
