@@ -3624,7 +3624,7 @@ Lcom/android/internal/telephony/SubscriptionController;->mDefaultPhoneId:I
 Lcom/android/internal/telephony/SubscriptionController;->mLock:Ljava/lang/Object;
 Lcom/android/internal/telephony/SubscriptionController;->notifySubscriptionInfoChanged()V
 Lcom/android/internal/telephony/SubscriptionController;->setDefaultDataSubId(I)V
-Lcom/android/internal/telephony/SubscriptionController;->setDefaultFallbackSubId(I)V
+Lcom/android/internal/telephony/SubscriptionController;->setDefaultFallbackSubId(II)V
 Lcom/android/internal/telephony/SubscriptionController;->setDefaultSmsSubId(I)V
 Lcom/android/internal/telephony/SubscriptionController;->setDefaultVoiceSubId(I)V
 Lcom/android/internal/telephony/SubscriptionController;->setPlmnSpn(IZLjava/lang/String;ZLjava/lang/String;)Z
