@@ -921,6 +921,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     @Override
+    DisplayWindowController getController() {
+        return (DisplayWindowController) super.getController();
+    }
+
+    @Override
     public Display getDisplay() {
         return mDisplay;
     }

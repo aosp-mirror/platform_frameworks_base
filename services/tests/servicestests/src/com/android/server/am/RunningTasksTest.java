@@ -68,9 +68,9 @@ public class RunningTasksTest extends ActivityTestsBase {
     public void testCollectTasksByLastActiveTime() throws Exception {
         // Create a number of stacks with tasks (of incrementing active time)
         final ActivityStackSupervisor supervisor = mService.mStackSupervisor;
-        final SparseArray<ActivityDisplay> displays = new SparseArray<>();
+        final ArrayList<ActivityDisplay> displays = new ArrayList<>();
         final ActivityDisplay display = new TestActivityDisplay(supervisor, DEFAULT_DISPLAY);
-        displays.put(DEFAULT_DISPLAY, display);
+        displays.add(display);
 
         final int numStacks = 2;
         for (int stackIndex = 0; stackIndex < numStacks; stackIndex++) {

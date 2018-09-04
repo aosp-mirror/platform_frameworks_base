@@ -5345,17 +5345,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mWindowPlacerLocked.performSurfacePlacement();
     }
 
-    /**
-     * Get an array with display ids ordered by focus priority - last items should be given
-     * focus first. Sparse array just maps position to displayId.
-     */
-    // TODO: Maintain display list in focus order in ActivityManager and remove this call.
-    public void getDisplaysInFocusOrder(SparseIntArray displaysInFocusOrder) {
-        synchronized(mWindowMap) {
-            mRoot.getDisplaysInFocusOrder(displaysInFocusOrder);
-        }
-    }
-
     @Override
     public void setOverscan(int displayId, int left, int top, int right, int bottom) {
         if (mContext.checkCallingOrSelfPermission(

@@ -35,7 +35,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
@@ -45,7 +44,6 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.DisplayWindowController;
 
 import org.junit.Rule;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 
 import android.app.IApplicationThread;
@@ -63,26 +61,22 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.testing.DexmakerShareClassLoaderRule;
-import android.util.SparseIntArray;
 
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.AttributeCache;
 import com.android.server.wm.AppWindowContainerController;
-import com.android.server.wm.DisplayWindowController;
 import com.android.server.wm.PinnedStackWindowController;
+import com.android.server.wm.RootWindowContainerController;
 import com.android.server.wm.StackWindowController;
 import com.android.server.wm.TaskWindowContainerController;
 import com.android.server.wm.WindowManagerService;
 import com.android.server.wm.WindowTestUtils;
-import com.android.server.uri.UriGrantsManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
 
 import java.util.List;
 
@@ -500,13 +494,14 @@ public class ActivityTestsBase {
                     (DisplayManager) mService.mContext.getSystemService(Context.DISPLAY_SERVICE);
             mWindowManager = prepareMockWindowManager();
             mKeyguardController = mock(KeyguardController.class);
+            setWindowContainerController(mock(RootWindowContainerController.class));
         }
 
         @Override
         public void initialize() {
             super.initialize();
             mDisplay = spy(new TestActivityDisplay(this, DEFAULT_DISPLAY));
-            attachDisplay(mDisplay);
+            addChild(mDisplay, ActivityDisplay.POSITION_TOP);
         }
 
         @Override
@@ -575,12 +570,6 @@ public class ActivityTestsBase {
             }
             return null;
         }).when(service).inSurfaceTransaction(any());
-
-        doAnswer((InvocationOnMock invocationOnMock) -> {
-            final SparseIntArray displayIds = invocationOnMock.<SparseIntArray>getArgument(0);
-            displayIds.put(0, 0);
-            return null;
-        }).when(service).getDisplaysInFocusOrder(any());
 
         return service;
     }
