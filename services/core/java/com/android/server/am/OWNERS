@@ -4,7 +4,6 @@ yamasani@google.com
 jsharkey@google.com
 hackbod@google.com
 omakoto@google.com
-fkupolov@google.com
 ctate@google.com
 huiyu@google.com
 mwachens@google.com
@@ -28,7 +27,4 @@ toddke@google.com
 michaelwr@google.com
 narayan@google.com
 
-per-file GlobalSettingsToPropertiesMapper.java=fkupolov@google.com
-per-file GlobalSettingsToPropertiesMapper.java=omakoto@google.com
-per-file GlobalSettingsToPropertiesMapper.java=svetoslavganov@google.com
-per-file GlobalSettingsToPropertiesMapper.java=yamasani@google.com
+per-file GlobalSettingsToPropertiesMapper.java = omakoto@google.com, svetoslavganov@google.com, yamasani@google.com
