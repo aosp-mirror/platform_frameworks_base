@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -63,6 +64,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     private static final int MENU_RESET = Menu.FIRST;
     private static final String EXTRA_QS_CUSTOMIZING = "qs_customizing";
+    private static final String TAG = "QSCustomizer";
 
     private final QSDetailClipper mClipper;
     private final LightBarController mLightBarController;
@@ -94,7 +96,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mToolbar.setNavigationOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                hide((int) v.getX() + v.getWidth() / 2, (int) v.getY() + v.getHeight() / 2);
+                hide();
             }
         });
         mToolbar.setOnMenuItemClickListener(this);
@@ -154,16 +156,20 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mQs = qs;
     }
 
+    /** Animate and show QSCustomizer panel.
+     * @param x,y Location on screen of {@code edit} button to determine center of animation.
+     */
     public void show(int x, int y) {
         if (!isShown) {
-            mX = x;
-            mY = y;
+            int containerLocation[] = findViewById(R.id.customize_container).getLocationOnScreen();
+            mX = x - containerLocation[0];
+            mY = y - containerLocation[1];
             MetricsLogger.visible(getContext(), MetricsProto.MetricsEvent.QS_EDIT);
             isShown = true;
             mOpening = true;
             setTileSpecs();
             setVisibility(View.VISIBLE);
-            mClipper.animateCircularClip(x, y, true, mExpandAnimationListener);
+            mClipper.animateCircularClip(mX, mY, true, mExpandAnimationListener);
             queryTiles();
             mNotifQsContainer.setCustomizerAnimating(true);
             mNotifQsContainer.setCustomizerShowing(true);
@@ -192,7 +198,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mTileQueryHelper.queryTiles(mHost);
     }
 
-    public void hide(int x, int y) {
+    public void hide() {
         if (isShown) {
             MetricsLogger.hidden(getContext(), MetricsProto.MetricsEvent.QS_EDIT);
             isShown = false;
@@ -278,16 +284,18 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             });
         }
     }
-
+    /** @param x,y Location on screen of animation center.
+     */
     public void setEditLocation(int x, int y) {
-        mX = x;
-        mY = y;
+        int containerLocation[] = findViewById(R.id.customize_container).getLocationOnScreen();
+        mX = x - containerLocation[0];
+        mY = y - containerLocation[1];
     }
 
     private final Callback mKeyguardCallback = () -> {
         if (!isAttachedToWindow()) return;
         if (Dependency.get(KeyguardMonitor.class).isShowing() && !mOpening) {
-            hide(0, 0);
+            hide();
         }
     };
 
