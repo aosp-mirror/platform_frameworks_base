@@ -46,6 +46,7 @@ import com.android.server.AppWidgetBackupBridge;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.BackupRestoreTask;
+import com.android.server.backup.remote.RemoteCall;
 import com.android.server.backup.utils.FullBackupUtils;
 
 import java.io.BufferedOutputStream;
@@ -270,10 +271,12 @@ public class FullBackupEngine {
         return result;
     }
 
-    public void sendQuotaExceeded(final long backupDataBytes, final long quotaBytes) {
+    public void sendQuotaExceeded(long backupDataBytes, long quotaBytes) {
         if (initializeAgent()) {
             try {
-                mAgent.doQuotaExceeded(backupDataBytes, quotaBytes);
+                RemoteCall.execute(
+                        callback -> mAgent.doQuotaExceeded(backupDataBytes, quotaBytes, callback),
+                        mAgentTimeoutParameters.getQuotaExceededTimeoutMillis());
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception while telling agent about quota exceeded");
             }

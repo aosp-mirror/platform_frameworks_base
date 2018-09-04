@@ -45,6 +45,7 @@ import android.util.Log;
 import android.util.MergedConfiguration;
 import android.view.Display;
 import android.view.DisplayCutout;
+import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IWindowSession;
 import android.view.InputChannel;
@@ -163,7 +164,8 @@ public abstract class WallpaperService extends Service {
         int mType;
         int mCurWidth;
         int mCurHeight;
-        int mWindowFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        int mWindowFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                         | WindowManager.LayoutParams.FLAG_SCALED;
         int mWindowPrivateFlags =
                 WindowManager.LayoutParams.PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS;
         int mCurWindowFlags = mWindowFlags;
@@ -763,9 +765,19 @@ public abstract class WallpaperService extends Service {
 
                     mLayout.x = 0;
                     mLayout.y = 0;
-                    mLayout.width = myWidth;
-                    mLayout.height = myHeight;
-                    
+
+                    if (!fixedSize) {
+                        mLayout.width = myWidth;
+                        mLayout.height = myHeight;
+                    } else {
+                        // Force the wallpaper to cover the screen in both dimensions
+                        // only internal implementations like ImageWallpaper
+                        DisplayInfo displayInfo = new DisplayInfo();
+                        mDisplay.getDisplayInfo(displayInfo);
+                        mLayout.width = Math.max(displayInfo.logicalWidth, myWidth);
+                        mLayout.height = Math.max(displayInfo.logicalHeight, myHeight);
+                    }
+
                     mLayout.format = mFormat;
                     
                     mCurWindowFlags = mWindowFlags;
@@ -773,7 +785,8 @@ public abstract class WallpaperService extends Service {
                             | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                             | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
                             | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                            | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+                            | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                            | WindowManager.LayoutParams.FLAG_SCALED;
                     mCurWindowPrivateFlags = mWindowPrivateFlags;
                     mLayout.privateFlags = mWindowPrivateFlags;
 
@@ -847,6 +860,9 @@ public abstract class WallpaperService extends Service {
                         mStableInsets.bottom += padding.bottom;
                         mDisplayCutout.set(mDisplayCutout.get().inset(-padding.left, -padding.top,
                                 -padding.right, -padding.bottom));
+                    } else {
+                        w = myWidth;
+                        h = myHeight;
                     }
 
                     if (mCurWidth != w) {

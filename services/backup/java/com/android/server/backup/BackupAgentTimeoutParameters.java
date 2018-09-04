@@ -57,6 +57,10 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
     public static final String SETTING_RESTORE_AGENT_FINISHED_TIMEOUT_MILLIS =
             "restore_agent_finished_timeout_millis";
 
+    @VisibleForTesting
+    public static final String SETTING_QUOTA_EXCEEDED_TIMEOUT_MILLIS =
+            "quota_exceeded_timeout_millis";
+
     // Default values
     @VisibleForTesting public static final long DEFAULT_KV_BACKUP_AGENT_TIMEOUT_MILLIS = 30 * 1000;
 
@@ -70,6 +74,9 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
 
     @VisibleForTesting
     public static final long DEFAULT_RESTORE_AGENT_FINISHED_TIMEOUT_MILLIS = 30 * 1000;
+
+    @VisibleForTesting
+    public static final long DEFAULT_QUOTA_EXCEEDED_TIMEOUT_MILLIS = 3 * 1000;
 
     @GuardedBy("mLock")
     private long mKvBackupAgentTimeoutMillis;
@@ -85,6 +92,9 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
 
     @GuardedBy("mLock")
     private long mRestoreAgentFinishedTimeoutMillis;
+
+    @GuardedBy("mLock")
+    private long mQuotaExceededTimeoutMillis;
 
     private final Object mLock = new Object();
 
@@ -118,6 +128,10 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
                     parser.getLong(
                             SETTING_RESTORE_AGENT_FINISHED_TIMEOUT_MILLIS,
                             DEFAULT_RESTORE_AGENT_FINISHED_TIMEOUT_MILLIS);
+            mQuotaExceededTimeoutMillis =
+                    parser.getLong(
+                            SETTING_QUOTA_EXCEEDED_TIMEOUT_MILLIS,
+                            DEFAULT_QUOTA_EXCEEDED_TIMEOUT_MILLIS);
         }
     }
 
@@ -168,6 +182,18 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
                                 + mRestoreAgentFinishedTimeoutMillis);
             }
             return mRestoreAgentFinishedTimeoutMillis;
+        }
+    }
+
+    public long getQuotaExceededTimeoutMillis() {
+        synchronized (mLock) {
+            if (BackupManagerService.DEBUG_SCHEDULING) {
+                Slog.v(
+                        TAG,
+                        "getQuotaExceededTimeoutMillis(): "
+                                + mQuotaExceededTimeoutMillis);
+            }
+            return mQuotaExceededTimeoutMillis;
         }
     }
 }

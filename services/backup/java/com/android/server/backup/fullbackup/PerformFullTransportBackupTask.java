@@ -51,6 +51,7 @@ import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.internal.Operation;
+import com.android.server.backup.remote.RemoteCall;
 import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.utils.AppBackupUtils;
@@ -739,7 +740,9 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                         Slog.d(TAG, "Package hit quota limit on preflight " +
                                 pkg.packageName + ": " + totalSize + " of " + mQuota);
                     }
-                    agent.doQuotaExceeded(totalSize, mQuota);
+                    RemoteCall.execute(
+                            callback -> agent.doQuotaExceeded(totalSize, mQuota, callback),
+                            mAgentTimeoutParameters.getQuotaExceededTimeoutMillis());
                 }
             } catch (Exception e) {
                 Slog.w(TAG, "Exception preflighting " + pkg.packageName + ": " + e.getMessage());

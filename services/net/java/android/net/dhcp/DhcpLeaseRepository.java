@@ -20,6 +20,7 @@ import static android.net.NetworkUtils.inet4AddressToIntHTH;
 import static android.net.NetworkUtils.intToInet4AddressHTH;
 import static android.net.NetworkUtils.prefixLengthToV4NetmaskIntHTH;
 import static android.net.dhcp.DhcpLease.EXPIRATION_NEVER;
+import static android.net.dhcp.DhcpLease.inet4AddrToString;
 import static android.net.util.NetworkConstants.IPV4_ADDR_BITS;
 
 import static java.lang.Math.min;
@@ -98,6 +99,12 @@ class DhcpLeaseRepository {
         }
     }
 
+    static class InvalidSubnetException extends DhcpLeaseException {
+        InvalidSubnetException(String message) {
+            super(message);
+        }
+    }
+
     /**
      * Leases by IP address
      */
@@ -152,25 +159,17 @@ class DhcpLeaseRepository {
      * @param reqAddr Requested address by the client (option 50), or {@link #INETADDR_UNSPEC}
      * @param hostname Client-provided hostname, or {@link DhcpLease#HOSTNAME_NONE}
      * @throws OutOfAddressesException The server does not have any available address
-     * @throws InvalidAddressException The lease was requested from an unsupported subnet
+     * @throws InvalidSubnetException The lease was requested from an unsupported subnet
      */
     @NonNull
     public DhcpLease getOffer(@Nullable byte[] clientId, @NonNull MacAddress hwAddr,
-            @NonNull Inet4Address relayAddr,
-            @Nullable Inet4Address reqAddr, @Nullable String hostname)
-            throws OutOfAddressesException, InvalidAddressException {
+            @NonNull Inet4Address relayAddr, @Nullable Inet4Address reqAddr,
+            @Nullable String hostname) throws OutOfAddressesException, InvalidSubnetException {
         final long currentTime = mClock.elapsedRealtime();
         final long expTime = currentTime + mLeaseTimeMs;
 
         removeExpiredLeases(currentTime);
-
-        // As per #4.3.1, addresses are assigned based on the relay address if present. This
-        // implementation only assigns addresses if the relayAddr is inside our configured subnet.
-        // This also applies when the client requested a specific address for consistency between
-        // requests, and with older behavior.
-        if (isIpAddrOutsidePrefix(mPrefix, relayAddr)) {
-            throw new InvalidAddressException("Lease requested by relay from outside of subnet");
-        }
+        checkValidRelayAddr(relayAddr);
 
         final DhcpLease currentLease = findByClient(clientId, hwAddr);
         final DhcpLease newLease;
@@ -188,7 +187,19 @@ class DhcpLeaseRepository {
         return newLease;
     }
 
-    private static boolean isIpAddrOutsidePrefix(IpPrefix prefix, Inet4Address addr) {
+    private void checkValidRelayAddr(@Nullable Inet4Address relayAddr)
+            throws InvalidSubnetException {
+        // As per #4.3.1, addresses are assigned based on the relay address if present. This
+        // implementation only assigns addresses if the relayAddr is inside our configured subnet.
+        // This also applies when the client requested a specific address for consistency between
+        // requests, and with older behavior.
+        if (isIpAddrOutsidePrefix(mPrefix, relayAddr)) {
+            throw new InvalidSubnetException("Lease requested by relay from outside of subnet");
+        }
+    }
+
+    private static boolean isIpAddrOutsidePrefix(@NonNull IpPrefix prefix,
+            @Nullable Inet4Address addr) {
         return addr != null && !addr.equals(Inet4Address.ANY) && !prefix.contains(addr);
     }
 
@@ -222,10 +233,12 @@ class DhcpLeaseRepository {
      */
     @NonNull
     public DhcpLease requestLease(@Nullable byte[] clientId, @NonNull MacAddress hwAddr,
-            @NonNull Inet4Address clientAddr, @Nullable Inet4Address reqAddr, boolean sidSet,
-            @Nullable String hostname) throws InvalidAddressException {
+            @NonNull Inet4Address clientAddr, @NonNull Inet4Address relayAddr,
+            @Nullable Inet4Address reqAddr, boolean sidSet, @Nullable String hostname)
+            throws InvalidAddressException, InvalidSubnetException {
         final long currentTime = mClock.elapsedRealtime();
         removeExpiredLeases(currentTime);
+        checkValidRelayAddr(relayAddr);
         final DhcpLease assignedLease = findByClient(clientId, hwAddr);
 
         final Inet4Address leaseAddr = reqAddr != null ? reqAddr : clientAddr;
@@ -252,7 +265,7 @@ class DhcpLeaseRepository {
         final DhcpLease lease =
                 checkClientAndMakeLease(clientId, hwAddr, leaseAddr, hostname, currentTime);
         mLog.logf("DHCPREQUEST assignedLease %s, reqAddr=%s, sidSet=%s: created/renewed lease %s",
-                assignedLease, reqAddr, sidSet, lease);
+                assignedLease, inet4AddrToString(reqAddr), sidSet, lease);
         return lease;
     }
 
@@ -304,7 +317,7 @@ class DhcpLeaseRepository {
             @NonNull Inet4Address addr) {
         final DhcpLease currentLease = mCommittedLeases.getOrDefault(addr, null);
         if (currentLease == null) {
-            mLog.w("Could not release unknown lease for " + addr);
+            mLog.w("Could not release unknown lease for " + inet4AddrToString(addr));
             return false;
         }
         if (currentLease.matchesClient(clientId, hwAddr)) {
@@ -319,12 +332,13 @@ class DhcpLeaseRepository {
 
     public void markLeaseDeclined(@NonNull Inet4Address addr) {
         if (mDeclinedAddrs.containsKey(addr) || !isValidAddress(addr)) {
-            mLog.logf("Not marking %s as declined: already declined or not assignable", addr);
+            mLog.logf("Not marking %s as declined: already declined or not assignable",
+                    inet4AddrToString(addr));
             return;
         }
         final long expTime = mClock.elapsedRealtime() + mLeaseTimeMs;
         mDeclinedAddrs.put(addr, expTime);
-        mLog.logf("Marked %s as declined expiring %d", addr, expTime);
+        mLog.logf("Marked %s as declined expiring %d", inet4AddrToString(addr), expTime);
         maybeUpdateEarliestExpiration(expTime);
     }
 
@@ -515,7 +529,8 @@ class DhcpLeaseRepository {
         while (it.hasNext()) {
             final Inet4Address addr = it.next();
             it.remove();
-            mLog.logf("Out of addresses in address pool: dropped declined addr %s", addr);
+            mLog.logf("Out of addresses in address pool: dropped declined addr %s",
+                    inet4AddrToString(addr));
             // isValidAddress() is always verified for entries in mDeclinedAddrs.
             // However declined addresses may have been requested (typically by the machine that was
             // already using the address) after being declined.
