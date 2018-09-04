@@ -1561,7 +1561,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 final String defaultImiId = mSettings.getSelectedInputMethod();
                 final boolean imeSelectedOnBoot = !TextUtils.isEmpty(defaultImiId);
                 buildInputMethodListLocked(!imeSelectedOnBoot /* resetDefaultEnabledIme */);
-                resetDefaultImeLocked(mContext);
                 updateFromSettingsLocked(true);
                 InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
                         mSettings.getEnabledInputMethodListLocked(), currentUserId,
