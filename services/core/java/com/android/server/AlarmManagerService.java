@@ -80,6 +80,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseLongArray;
+import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
@@ -3560,6 +3561,8 @@ class AlarmManagerService extends SystemService {
                         if (DEBUG_BATCH) {
                             Slog.v(TAG, "Time changed notification from kernel; rebatching");
                         }
+                        // StatsLog requires currentTimeMillis(), which == nowRTC to within usecs.
+                        StatsLog.write(StatsLog.WALL_CLOCK_TIME_SHIFTED, nowRTC);
                         removeImpl(mTimeTickSender);
                         removeImpl(mDateChangeSender);
                         rebatchAllAlarms();
