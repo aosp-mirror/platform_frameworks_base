@@ -596,9 +596,10 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                 mContext.getString(R.string.instant_apps));
         mCurrentNotifs.add(new Pair<>(pkg, userId));
         String message = mContext.getString(R.string.instant_apps_message);
-        PendingIntent appInfoAction = PendingIntent.getActivity(mContext, 0,
+        UserHandle user = UserHandle.of(userId);
+        PendingIntent appInfoAction = PendingIntent.getActivityAsUser(mContext, 0,
                 new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        .setData(Uri.fromParts("package", pkg, null)), 0);
+                        .setData(Uri.fromParts("package", pkg, null)), 0, null, user);
         Action action = new Notification.Action.Builder(null, mContext.getString(R.string.app_info),
                 appInfoAction).build();
 
@@ -611,8 +612,8 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                     .addFlags(Intent.FLAG_IGNORE_EPHEMERAL)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-            PendingIntent pendingIntent = PendingIntent.getActivity(mContext,
-                    0 /* requestCode */, browserIntent, 0 /* flags */);
+            PendingIntent pendingIntent = PendingIntent.getActivityAsUser(mContext,
+                    0 /* requestCode */, browserIntent, 0 /* flags */, null, user);
             ComponentName aiaComponent = null;
             try {
                 aiaComponent = AppGlobals.getPackageManager().getInstantAppInstallerComponent();
@@ -629,7 +630,8 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                     .putExtra(Intent.EXTRA_LONG_VERSION_CODE, appInfo.versionCode)
                     .putExtra(Intent.EXTRA_INSTANT_APP_FAILURE, pendingIntent);
 
-            PendingIntent webPendingIntent = PendingIntent.getActivity(mContext, 0, goToWebIntent, 0);
+            PendingIntent webPendingIntent = PendingIntent.getActivityAsUser(mContext, 0,
+                    goToWebIntent, 0, null, user);
             Action webAction = new Notification.Action.Builder(null, mContext.getString(R.string.go_to_web),
                     webPendingIntent).build();
             builder.addAction(webAction);
