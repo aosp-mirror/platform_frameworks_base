@@ -85,13 +85,6 @@ public class NotificationListenerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testPostNotificationRemovesKeyKeptForRemoteInput() {
-        mListener.onNotificationPosted(mSbn, mRanking);
-        TestableLooper.get(this).processAllMessages();
-        verify(mEntryManager).removeKeyKeptForRemoteInput(mSbn.getKey());
-    }
-
-    @Test
     public void testNotificationUpdateCallsUpdateNotification() {
         when(mNotificationData.get(mSbn.getKey())).thenReturn(new NotificationData.Entry(mSbn));
         mListener.onNotificationPosted(mSbn, mRanking);

@@ -258,18 +258,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         return mTrackingHeadsUp;
     }
 
-    /**
-     * React to the removal of the notification in the heads up.
-     *
-     * @return true if the notification was removed and false if it still needs to be kept around
-     * for a bit since it wasn't shown long enough
-     */
-    @Override
-    public boolean removeNotification(@NonNull String key, boolean releaseImmediately) {
-        return super.removeNotification(key, canRemoveImmediately(key)
-                || releaseImmediately);
-    }
-
     @Override
     public void snooze() {
         super.snooze();
@@ -405,7 +393,8 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         return (HeadsUpEntryPhone) getTopHeadsUpEntry();
     }
 
-    private boolean canRemoveImmediately(@NonNull String key) {
+    @Override
+    protected boolean canRemoveImmediately(@NonNull String key) {
         if (mSwipedOutKeys.contains(key)) {
             // We always instantly dismiss views being manually swiped out.
             mSwipedOutKeys.remove(key);
@@ -414,7 +403,8 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
         HeadsUpEntryPhone headsUpEntry = getHeadsUpEntryPhone(key);
         HeadsUpEntryPhone topEntry = getTopHeadsUpEntryPhone();
-        return headsUpEntry != topEntry || headsUpEntry.wasShownLongEnough();
+
+        return headsUpEntry == null || headsUpEntry != topEntry || super.canRemoveImmediately(key);
     }
 
     /**

@@ -800,7 +800,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 this,
                 mNotificationPanel,
                 notifListContainer);
-        mGutsManager.setUpWithPresenter(this, mEntryManager, notifListContainer, mCheckSaveListener,
+        mGutsManager.setUpWithPresenter(this, notifListContainer, mCheckSaveListener,
                 key -> {
                     try {
                         mBarService.onNotificationSettingsViewed(key);
@@ -1811,7 +1811,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mStatusBarWindowController.setHeadsUpShowing(false);
                         mHeadsUpManager.setHeadsUpGoingAway(false);
                     }
-                    mRemoteInputManager.removeRemoteInputEntriesKeptUntilCollapsed();
+                    mRemoteInputManager.onPanelCollapsed();
                 });
             }
         }
@@ -1828,7 +1828,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onHeadsUpStateChanged(Entry entry, boolean isHeadsUp) {
-        mEntryManager.onHeadsUpStateChanged(entry, isHeadsUp);
+        mEntryManager.updateNotificationRanking(null /* rankingMap */);
 
         if (isHeadsUp) {
             mDozeServiceHost.fireNotificationHeadsUp();
@@ -1858,7 +1858,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         if (!isExpanded) {
-            mRemoteInputManager.removeRemoteInputEntriesKeptUntilCollapsed();
+            mRemoteInputManager.onPanelCollapsed();
         }
     }
 
@@ -3751,7 +3751,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             clearNotificationEffects();
         }
         if (newState == StatusBarState.KEYGUARD) {
-            mRemoteInputManager.removeRemoteInputEntriesKeptUntilCollapsed();
+            mRemoteInputManager.onPanelCollapsed();
             maybeEscalateHeadsUp();
         }
     }
@@ -4862,7 +4862,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                     removeNotification(parentToCancelFinal);
                 }
                 if (shouldAutoCancel(sbn)
-                        || mEntryManager.isNotificationKeptForRemoteInput(notificationKey)) {
+                        || mRemoteInputManager.isNotificationKeptForRemoteInputHistory(
+                                notificationKey)) {
                     // Automatically remove all notifications that we may have kept around longer
                     removeNotification(sbn);
                 }

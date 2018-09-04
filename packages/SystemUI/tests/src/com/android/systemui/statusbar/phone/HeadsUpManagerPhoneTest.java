@@ -23,6 +23,7 @@ import android.testing.TestableLooper;
 
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
+import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 
 import org.junit.Before;
@@ -82,5 +83,27 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
         mHeadsUpManager.removeNotification(mEntry.key, false /* releaseImmediately */);
 
         assertFalse(mHeadsUpManager.contains(mEntry.key));
+    }
+
+    @Test
+    public void testShouldExtendLifetime_swipedOut() {
+        mHeadsUpManager.showNotification(mEntry);
+        mHeadsUpManager.addSwipedOutNotification(mEntry.key);
+
+        // Notification is swiped so its lifetime should not be extended even if it hasn't been
+        // shown long enough
+        assertFalse(mHeadsUpManager.shouldExtendLifetime(mEntry));
+    }
+
+    @Test
+    public void testShouldExtendLifetime_notTopEntry() {
+        NotificationData.Entry laterEntry = new NotificationData.Entry(createNewNotification(1));
+        laterEntry.row = mRow;
+        mHeadsUpManager.showNotification(mEntry);
+        mHeadsUpManager.showNotification(laterEntry);
+
+        // Notification is "behind" a higher priority notification so we have no reason to keep
+        // its lifetime extended
+        assertFalse(mHeadsUpManager.shouldExtendLifetime(mEntry));
     }
 }

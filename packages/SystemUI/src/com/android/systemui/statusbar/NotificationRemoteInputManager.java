@@ -17,8 +17,10 @@ package com.android.systemui.statusbar;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.content.Context;
@@ -29,6 +31,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserManager;
 import android.service.notification.StatusBarNotification;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -50,6 +53,7 @@ import com.android.systemui.statusbar.policy.RemoteInputView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Set;
 
 /**
@@ -61,10 +65,10 @@ import java.util.Set;
 public class NotificationRemoteInputManager implements Dumpable {
     public static final boolean ENABLE_REMOTE_INPUT =
             SystemProperties.getBoolean("debug.enable_remote_input", true);
-    public static final boolean FORCE_REMOTE_INPUT_HISTORY =
+    public static boolean FORCE_REMOTE_INPUT_HISTORY =
             SystemProperties.getBoolean("debug.force_remoteinput_history", true);
     private static final boolean DEBUG = false;
-    private static final String TAG = "NotificationRemoteInputManager";
+    private static final String TAG = "NotifRemoteInputManager";
 
     /**
      * How long to wait before auto-dismissing a notification that was kept for remote input, and
@@ -74,12 +78,25 @@ public class NotificationRemoteInputManager implements Dumpable {
      */
     private static final int REMOTE_INPUT_KEPT_ENTRY_AUTO_CANCEL_DELAY = 200;
 
-    protected final ArraySet<NotificationData.Entry> mRemoteInputEntriesToRemoveOnCollapse =
+    /**
+     * Notifications that are already removed but are kept around because we want to show the
+     * remote input history. See {@link RemoteInputHistoryExtender} and
+     * {@link SmartReplyHistoryExtender}.
+     */
+    protected final ArraySet<String> mKeysKeptForRemoteInputHistory = new ArraySet<>();
+
+    /**
+     * Notifications that are already removed but are kept around because the remote input is
+     * actively being used (i.e. user is typing in it).  See {@link RemoteInputActiveExtender}.
+     */
+    protected final ArraySet<NotificationData.Entry> mEntriesKeptForRemoteInputActive =
             new ArraySet<>();
 
     // Dependencies:
     protected final NotificationLockscreenUserManager mLockscreenUserManager =
             Dependency.get(NotificationLockscreenUserManager.class);
+    protected final SmartReplyController mSmartReplyController =
+            Dependency.get(SmartReplyController.class);
 
     protected final Context mContext;
     private final UserManager mUserManager;
@@ -87,8 +104,11 @@ public class NotificationRemoteInputManager implements Dumpable {
     protected RemoteInputController mRemoteInputController;
     protected NotificationPresenter mPresenter;
     protected NotificationEntryManager mEntryManager;
+    protected NotificationLifetimeExtender.NotificationSafeToRemoveCallback
+            mNotificationLifetimeFinishedCallback;
     protected IStatusBarService mBarService;
     protected Callback mCallback;
+    protected final ArrayList<NotificationLifetimeExtender> mLifetimeExtenders = new ArrayList<>();
 
     private final RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
 
@@ -276,6 +296,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        addLifetimeExtenders();
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -290,16 +311,16 @@ public class NotificationRemoteInputManager implements Dumpable {
             @Override
             public void onRemoteInputSent(NotificationData.Entry entry) {
                 if (FORCE_REMOTE_INPUT_HISTORY
-                        && mEntryManager.isNotificationKeptForRemoteInput(entry.key)) {
-                    mEntryManager.removeNotification(entry.key, null);
-                } else if (mRemoteInputEntriesToRemoveOnCollapse.contains(entry)) {
+                        && isNotificationKeptForRemoteInputHistory(entry.key)) {
+                    mNotificationLifetimeFinishedCallback.onSafeToRemove(entry.key);
+                } else if (mEntriesKeptForRemoteInputActive.contains(entry)) {
                     // We're currently holding onto this notification, but from the apps point of
                     // view it is already canceled, so we'll need to cancel it on the apps behalf
                     // after sending - unless the app posts an update in the mean time, so wait a
                     // bit.
                     mPresenter.getHandler().postDelayed(() -> {
-                        if (mRemoteInputEntriesToRemoveOnCollapse.remove(entry)) {
-                            mEntryManager.removeNotification(entry.key, null);
+                        if (mEntriesKeptForRemoteInputActive.remove(entry)) {
+                            mNotificationLifetimeFinishedCallback.onSafeToRemove(entry.key);
                         }
                     }, REMOTE_INPUT_KEPT_ENTRY_AUTO_CANCEL_DELAY);
                 }
@@ -310,45 +331,74 @@ public class NotificationRemoteInputManager implements Dumpable {
                 }
             }
         });
+        mSmartReplyController.setCallback((entry, reply) -> {
+            StatusBarNotification newSbn =
+                    rebuildNotificationWithRemoteInput(entry, reply, true /* showSpinner */);
+            mEntryManager.updateNotification(newSbn, null /* ranking */);
+        });
+    }
 
+    /**
+     * Adds all the notification lifetime extenders. Each extender represents a reason for the
+     * NotificationRemoteInputManager to keep a notification lifetime extended.
+     */
+    protected void addLifetimeExtenders() {
+        mLifetimeExtenders.add(new RemoteInputHistoryExtender());
+        mLifetimeExtenders.add(new SmartReplyHistoryExtender());
+        mLifetimeExtenders.add(new RemoteInputActiveExtender());
+    }
+
+    public ArrayList<NotificationLifetimeExtender> getLifetimeExtenders() {
+        return mLifetimeExtenders;
     }
 
     public RemoteInputController getController() {
         return mRemoteInputController;
     }
 
-    public void onUpdateNotification(NotificationData.Entry entry) {
-        mRemoteInputEntriesToRemoveOnCollapse.remove(entry);
-    }
-
-    /**
-     * Returns true if NotificationRemoteInputManager wants to keep this notification around.
-     *
-     * @param entry notification being removed
-     */
-    public boolean onRemoveNotification(NotificationData.Entry entry) {
-        if (entry != null && mRemoteInputController.isRemoteInputActive(entry)
-                && (entry.row != null && !entry.row.isDismissed())) {
-            mRemoteInputEntriesToRemoveOnCollapse.add(entry);
-            return true;
-        }
-        return false;
-    }
-
     public void onPerformRemoveNotification(StatusBarNotification n,
             NotificationData.Entry entry) {
+        if (mKeysKeptForRemoteInputHistory.contains(n.getKey())) {
+            mKeysKeptForRemoteInputHistory.remove(n.getKey());
+        }
         if (mRemoteInputController.isRemoteInputActive(entry)) {
             mRemoteInputController.removeRemoteInput(entry, null);
         }
     }
 
-    public void removeRemoteInputEntriesKeptUntilCollapsed() {
-        for (int i = 0; i < mRemoteInputEntriesToRemoveOnCollapse.size(); i++) {
-            NotificationData.Entry entry = mRemoteInputEntriesToRemoveOnCollapse.valueAt(i);
+    public void onPanelCollapsed() {
+        for (int i = 0; i < mEntriesKeptForRemoteInputActive.size(); i++) {
+            NotificationData.Entry entry = mEntriesKeptForRemoteInputActive.valueAt(i);
             mRemoteInputController.removeRemoteInput(entry, null);
-            mEntryManager.removeNotification(entry.key, mEntryManager.getLatestRankingMap());
+            if (mNotificationLifetimeFinishedCallback != null) {
+                mNotificationLifetimeFinishedCallback.onSafeToRemove(entry.key);
+            }
         }
-        mRemoteInputEntriesToRemoveOnCollapse.clear();
+        mEntriesKeptForRemoteInputActive.clear();
+    }
+
+    public boolean isNotificationKeptForRemoteInputHistory(String key) {
+        return mKeysKeptForRemoteInputHistory.contains(key);
+    }
+
+    public boolean shouldKeepForRemoteInputHistory(NotificationData.Entry entry) {
+        if (entry.row == null || entry.row.isDismissed()) {
+            return false;
+        }
+        if (!FORCE_REMOTE_INPUT_HISTORY) {
+            return false;
+        }
+        return (mRemoteInputController.isSpinning(entry.key) || entry.hasJustSentRemoteInput());
+    }
+
+    public boolean shouldKeepForSmartReplyHistory(NotificationData.Entry entry) {
+        if (entry.row == null || entry.row.isDismissed()) {
+            return false;
+        }
+        if (!FORCE_REMOTE_INPUT_HISTORY) {
+            return false;
+        }
+        return mSmartReplyController.isSendingSmartReply(entry.key);
     }
 
     public void checkRemoteInputOutside(MotionEvent event) {
@@ -359,11 +409,63 @@ public class NotificationRemoteInputManager implements Dumpable {
         }
     }
 
+    @VisibleForTesting
+    StatusBarNotification rebuildNotificationForCanceledSmartReplies(
+            NotificationData.Entry entry) {
+        return rebuildNotificationWithRemoteInput(entry, null /* remoteInputTest */,
+                false /* showSpinner */);
+    }
+
+    @VisibleForTesting
+    StatusBarNotification rebuildNotificationWithRemoteInput(NotificationData.Entry entry,
+            CharSequence remoteInputText, boolean showSpinner) {
+        StatusBarNotification sbn = entry.notification;
+
+        Notification.Builder b = Notification.Builder
+                .recoverBuilder(mContext, sbn.getNotification().clone());
+        if (remoteInputText != null) {
+            CharSequence[] oldHistory = sbn.getNotification().extras
+                    .getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY);
+            CharSequence[] newHistory;
+            if (oldHistory == null) {
+                newHistory = new CharSequence[1];
+            } else {
+                newHistory = new CharSequence[oldHistory.length + 1];
+                System.arraycopy(oldHistory, 0, newHistory, 1, oldHistory.length);
+            }
+            newHistory[0] = String.valueOf(remoteInputText);
+            b.setRemoteInputHistory(newHistory);
+        }
+        b.setShowRemoteInputSpinner(showSpinner);
+        b.setHideSmartReplies(true);
+
+        Notification newNotification = b.build();
+
+        // Undo any compatibility view inflation
+        newNotification.contentView = sbn.getNotification().contentView;
+        newNotification.bigContentView = sbn.getNotification().bigContentView;
+        newNotification.headsUpContentView = sbn.getNotification().headsUpContentView;
+
+        return new StatusBarNotification(
+                sbn.getPackageName(),
+                sbn.getOpPkg(),
+                sbn.getId(),
+                sbn.getTag(),
+                sbn.getUid(),
+                sbn.getInitialPid(),
+                newNotification,
+                sbn.getUser(),
+                sbn.getOverrideGroupKey(),
+                sbn.getPostTime());
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("NotificationRemoteInputManager state:");
-        pw.print("  mRemoteInputEntriesToRemoveOnCollapse: ");
-        pw.println(mRemoteInputEntriesToRemoveOnCollapse);
+        pw.print("  mKeysKeptForRemoteInputHistory: ");
+        pw.println(mKeysKeptForRemoteInputHistory);
+        pw.print("  mEntriesKeptForRemoteInputActive: ");
+        pw.println(mEntriesKeptForRemoteInputActive);
     }
 
     public void bindRow(ExpandableNotificationRow row) {
@@ -372,8 +474,133 @@ public class NotificationRemoteInputManager implements Dumpable {
     }
 
     @VisibleForTesting
-    public Set<NotificationData.Entry> getRemoteInputEntriesToRemoveOnCollapse() {
-        return mRemoteInputEntriesToRemoveOnCollapse;
+    public Set<NotificationData.Entry> getEntriesKeptForRemoteInputActive() {
+        return mEntriesKeptForRemoteInputActive;
+    }
+
+    /**
+     * NotificationRemoteInputManager has multiple reasons to keep notification lifetime extended
+     * so we implement multiple NotificationLifetimeExtenders
+     */
+    protected abstract class RemoteInputExtender implements NotificationLifetimeExtender {
+        @Override
+        public void setCallback(NotificationSafeToRemoveCallback callback) {
+            if (mNotificationLifetimeFinishedCallback == null) {
+                mNotificationLifetimeFinishedCallback = callback;
+            }
+        }
+    }
+
+    /**
+     * Notification is kept alive as it was cancelled in response to a remote input interaction.
+     * This allows us to show what you replied and allows you to continue typing into it.
+     */
+    protected class RemoteInputHistoryExtender extends RemoteInputExtender {
+        @Override
+        public boolean shouldExtendLifetime(@NonNull NotificationData.Entry entry) {
+            return shouldKeepForRemoteInputHistory(entry);
+        }
+
+        @Override
+        public void setShouldExtendLifetime(NotificationData.Entry entry,
+                boolean shouldExtend) {
+            if (shouldExtend) {
+                CharSequence remoteInputText = entry.remoteInputText;
+                if (TextUtils.isEmpty(remoteInputText)) {
+                    remoteInputText = entry.remoteInputTextWhenReset;
+                }
+                StatusBarNotification newSbn = rebuildNotificationWithRemoteInput(entry,
+                        remoteInputText, false /* showSpinner */);
+                entry.onRemoteInputInserted();
+
+                if (newSbn == null) {
+                    return;
+                }
+
+                mEntryManager.updateNotification(newSbn, null);
+
+                // Ensure the entry hasn't already been removed. This can happen if there is an
+                // inflation exception while updating the remote history
+                if (entry.row == null || entry.row.isRemoved()) {
+                    return;
+                }
+
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Keeping notification around after sending remote input "
+                            + entry.key);
+                }
+
+                mKeysKeptForRemoteInputHistory.add(entry.key);
+            } else {
+                mKeysKeptForRemoteInputHistory.remove(entry.key);
+            }
+        }
+    }
+
+    /**
+     * Notification is kept alive for smart reply history.  Similar to REMOTE_INPUT_HISTORY but with
+     * {@link SmartReplyController} specific logic
+     */
+    protected class SmartReplyHistoryExtender extends RemoteInputExtender {
+        @Override
+        public boolean shouldExtendLifetime(@NonNull NotificationData.Entry entry) {
+            return shouldKeepForSmartReplyHistory(entry);
+        }
+
+        @Override
+        public void setShouldExtendLifetime(NotificationData.Entry entry,
+                boolean shouldExtend) {
+            if (shouldExtend) {
+                StatusBarNotification newSbn = rebuildNotificationForCanceledSmartReplies(entry);
+
+                if (newSbn == null) {
+                    return;
+                }
+
+                mEntryManager.updateNotification(newSbn, null);
+
+                if (entry.row == null || entry.row.isRemoved()) {
+                    return;
+                }
+
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Keeping notification around after sending smart reply "
+                            + entry.key);
+                }
+
+                mKeysKeptForRemoteInputHistory.add(entry.key);
+            } else {
+                mKeysKeptForRemoteInputHistory.remove(entry.key);
+                mSmartReplyController.stopSending(entry);
+            }
+        }
+    }
+
+    /**
+     * Notification is kept alive because the user is still using the remote input
+     */
+    protected class RemoteInputActiveExtender extends RemoteInputExtender {
+        @Override
+        public boolean shouldExtendLifetime(@NonNull NotificationData.Entry entry) {
+            if (entry.row == null || entry.row.isDismissed()) {
+                return false;
+            }
+            return mRemoteInputController.isRemoteInputActive(entry);
+        }
+
+        @Override
+        public void setShouldExtendLifetime(NotificationData.Entry entry,
+                boolean shouldExtend) {
+            if (shouldExtend) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Keeping notification around while remote input active "
+                            + entry.key);
+                }
+                mEntriesKeptForRemoteInputActive.add(entry);
+            } else {
+                mEntriesKeptForRemoteInputActive.remove(entry);
+            }
+        }
     }
 
     /**
