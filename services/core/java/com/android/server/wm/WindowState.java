@@ -2396,11 +2396,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && (mViewVisibility == View.VISIBLE) && !mRemoveOnExit
                 && ((mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) == 0)
                 && (mAppToken == null || mAppToken.windowsAreFocusable())
-                && !canReceiveTouchInput();
+                && !cantReceiveTouchInput();
     }
 
-    /** @return true if this window desires touch events. */
-    boolean canReceiveTouchInput() {
+    /** @return false if this window desires touch events. */
+    boolean cantReceiveTouchInput() {
         return mAppToken != null && mAppToken.getTask() != null
                 && mAppToken.getTask().mStack.shouldIgnoreInput();
     }

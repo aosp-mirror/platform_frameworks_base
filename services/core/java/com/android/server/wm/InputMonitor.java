@@ -402,7 +402,7 @@ final class InputMonitor {
             final InputChannel inputChannel = w.mInputChannel;
             final InputWindowHandle inputWindowHandle = w.mInputWindowHandle;
             if (inputChannel == null || inputWindowHandle == null || w.mRemoved
-                    || w.canReceiveTouchInput()) {
+                    || w.cantReceiveTouchInput()) {
                 // Skip this window because it cannot possibly receive input.
                 return;
             }
