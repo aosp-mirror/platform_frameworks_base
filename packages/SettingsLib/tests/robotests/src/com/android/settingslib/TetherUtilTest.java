@@ -17,6 +17,7 @@
 package com.android.settingslib;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.when;
 
 import android.content.Context;

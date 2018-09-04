@@ -18,7 +18,6 @@ package com.android.settingslib.core.instrumentation;
 
 import android.content.Context;
 import android.metrics.LogMaker;
-import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.logging.MetricsLogger;

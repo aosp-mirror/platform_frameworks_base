@@ -26,7 +26,6 @@ import android.util.Log;
 
 import com.android.settingslib.R;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
