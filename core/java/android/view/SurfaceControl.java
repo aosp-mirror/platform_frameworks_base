@@ -36,6 +36,8 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.display.DisplayedContentSample;
+import android.hardware.display.DisplayedContentSamplingAttributes;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -129,6 +131,12 @@ public class SurfaceControl implements Parcelable {
             int width, int height);
     private static native SurfaceControl.PhysicalDisplayInfo[] nativeGetDisplayConfigs(
             IBinder displayToken);
+    private static native DisplayedContentSamplingAttributes
+            nativeGetDisplayedContentSamplingAttributes(IBinder displayToken);
+    private static native boolean nativeSetDisplayedContentSamplingEnabled(IBinder displayToken,
+            boolean enable, int componentMask, int maxFrames);
+    private static native DisplayedContentSample nativeGetDisplayedContentSample(
+            IBinder displayToken, long numFrames, long timestamp);
     private static native int nativeGetActiveConfig(IBinder displayToken);
     private static native boolean nativeSetActiveConfig(IBinder displayToken, int id);
     private static native int[] nativeGetDisplayColorModes(IBinder displayToken);
@@ -1163,6 +1171,45 @@ public class SurfaceControl implements Parcelable {
         }
         return nativeGetActiveConfig(displayToken);
     }
+
+    /**
+     * @hide
+     */
+    public static DisplayedContentSamplingAttributes getDisplayedContentSamplingAttributes(
+            IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        return nativeGetDisplayedContentSamplingAttributes(displayToken);
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean setDisplayedContentSamplingEnabled(
+            IBinder displayToken, boolean enable, int componentMask, int maxFrames) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        final int maxColorComponents = 4;
+        if ((componentMask >> maxColorComponents) != 0) {
+            throw new IllegalArgumentException("invalid componentMask when enabling sampling");
+        }
+        return nativeSetDisplayedContentSamplingEnabled(
+                displayToken, enable, componentMask, maxFrames);
+    }
+
+    /**
+     * @hide
+     */
+    public static DisplayedContentSample getDisplayedContentSample(
+            IBinder displayToken, long maxFrames, long timestamp) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        return nativeGetDisplayedContentSample(displayToken, maxFrames, timestamp);
+    }
+
 
     public static boolean setActiveConfig(IBinder displayToken, int id) {
         if (displayToken == null) {
