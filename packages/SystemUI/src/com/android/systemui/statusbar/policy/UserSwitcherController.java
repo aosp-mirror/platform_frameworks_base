@@ -51,6 +51,7 @@ import com.android.internal.util.UserIcons;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
+import com.android.systemui.Dumpable;
 import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.Prefs;
 import com.android.systemui.Prefs.Key;
@@ -70,7 +71,7 @@ import java.util.List;
 /**
  * Keeps a list of all users on the device for user switching.
  */
-public class UserSwitcherController {
+public class UserSwitcherController implements Dumpable {
 
     private static final String TAG = "UserSwitcherController";
     private static final boolean DEBUG = false;
@@ -549,6 +550,7 @@ public class UserSwitcherController {
         };
     };
 
+    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("UserSwitcherController state:");
         pw.println("  mLastNonGuestUser=" + mLastNonGuestUser);
