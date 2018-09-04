@@ -391,7 +391,8 @@ void VulkanManager::initialize() {
 
     GrContextOptions options;
     options.fDisableDistanceFieldPaths = true;
-    mRenderThread.cacheManager().configureContext(&options);
+    // TODO: get a string describing the SPIR-V compiler version and use it here
+    mRenderThread.cacheManager().configureContext(&options, nullptr, 0);
     sk_sp<GrContext> grContext(GrContext::MakeVulkan(backendContext, options));
     LOG_ALWAYS_FATAL_IF(!grContext.get());
     mRenderThread.setGrContext(grContext);

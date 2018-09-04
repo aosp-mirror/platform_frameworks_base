@@ -44,7 +44,7 @@ class CacheManager {
 public:
     enum class TrimMemoryMode { Complete, UiHidden };
 
-    void configureContext(GrContextOptions* context);
+    void configureContext(GrContextOptions* context, const void* identity, ssize_t size);
     void trimMemory(TrimMemoryMode mode);
     void trimStaleResources();
     void dumpMemoryUsage(String8& log, const RenderState* renderState = nullptr);
