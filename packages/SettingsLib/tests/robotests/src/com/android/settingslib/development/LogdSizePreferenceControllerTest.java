@@ -40,6 +40,7 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.os.SystemProperties;
+
 import androidx.preference.ListPreference;
 import androidx.preference.PreferenceScreen;
 

@@ -5,8 +5,9 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import androidx.annotation.DrawableRes;
 import android.util.Pair;
+
+import androidx.annotation.DrawableRes;
 
 import com.android.settingslib.R;
 import com.android.settingslib.graph.BluetoothDeviceLayerDrawable;

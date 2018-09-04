@@ -17,7 +17,6 @@
 package com.android.settingslib.drawer;
 
 import android.app.ActivityManager;
-
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.database.DataSetObserver;
@@ -32,10 +31,10 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
-import com.android.internal.util.UserIcons;
-import com.android.settingslib.drawable.UserIconDrawable;
 
+import com.android.internal.util.UserIcons;
 import com.android.settingslib.R;
+import com.android.settingslib.drawable.UserIconDrawable;
 
 import java.util.ArrayList;
 import java.util.List;

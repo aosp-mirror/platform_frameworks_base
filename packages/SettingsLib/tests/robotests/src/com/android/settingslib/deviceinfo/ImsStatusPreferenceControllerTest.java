@@ -17,16 +17,18 @@
 package com.android.settingslib.deviceinfo;
 
 import static com.google.common.truth.Truth.assertWithMessage;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.os.PersistableBundle;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceScreen;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
+
+import androidx.preference.Preference;
+import androidx.preference.PreferenceScreen;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.core.lifecycle.Lifecycle;

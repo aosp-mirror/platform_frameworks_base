@@ -20,6 +20,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.wifi.WifiManager;
+
 import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;

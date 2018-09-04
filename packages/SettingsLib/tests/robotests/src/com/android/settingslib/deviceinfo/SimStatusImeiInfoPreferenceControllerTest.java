@@ -17,6 +17,7 @@
 package com.android.settingslib.deviceinfo;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.robolectric.shadow.api.Shadow.extract;
 
 import android.net.ConnectivityManager;

@@ -21,6 +21,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.SystemClock;
+
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;

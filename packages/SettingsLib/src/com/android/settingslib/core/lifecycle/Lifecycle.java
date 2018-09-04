@@ -18,18 +18,19 @@ package com.android.settingslib.core.lifecycle;
 import static androidx.lifecycle.Lifecycle.Event.ON_ANY;
 
 import android.annotation.UiThread;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.LifecycleRegistry;
-import androidx.lifecycle.OnLifecycleEvent;
 import android.content.Context;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.preference.PreferenceScreen;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleRegistry;
+import androidx.lifecycle.OnLifecycleEvent;
+import androidx.preference.PreferenceScreen;
 
 import com.android.settingslib.core.lifecycle.events.OnAttach;
 import com.android.settingslib.core.lifecycle.events.OnCreate;
