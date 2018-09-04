@@ -15,6 +15,7 @@
  */
 
 #include "ResourceCache.h"
+#include "Caches.h"
 
 namespace android {
 
@@ -111,9 +112,13 @@ void ResourceCache::destructorLocked(Res_png_9patch* resource) {
     ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : nullptr;
     if (ref == nullptr) {
         // If we're not tracking this resource, just delete it
-        // A Res_png_9patch is actually an array of byte that's larger
-        // than sizeof(Res_png_9patch). It must be freed as an array.
-        delete[](int8_t*) resource;
+        if (Caches::hasInstance()) {
+            // DEAD CODE
+        } else {
+            // A Res_png_9patch is actually an array of byte that's larger
+            // than sizeof(Res_png_9patch). It must be freed as an array.
+            delete[](int8_t*) resource;
+        }
         return;
     }
     ref->destroyed = true;
@@ -130,10 +135,14 @@ void ResourceCache::deleteResourceReferenceLocked(const void* resource, Resource
     if (ref->destroyed) {
         switch (ref->resourceType) {
             case kNinePatch: {
-                // A Res_png_9patch is actually an array of byte that's larger
-                // than sizeof(Res_png_9patch). It must be freed as an array.
-                int8_t* patch = (int8_t*)resource;
-                delete[] patch;
+                if (Caches::hasInstance()) {
+                    // DEAD CODE
+                } else {
+                    // A Res_png_9patch is actually an array of byte that's larger
+                    // than sizeof(Res_png_9patch). It must be freed as an array.
+                    int8_t* patch = (int8_t*)resource;
+                    delete[] patch;
+                }
             } break;
         }
     }
