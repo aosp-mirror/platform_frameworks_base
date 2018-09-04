@@ -156,7 +156,7 @@ public:
      * Report a config has been removed.
      */
     void noteConfigRemoved(const ConfigKey& key);
-   /**
+    /**
      * Report a config has been reset when ttl expires.
      */
     void noteConfigReset(const ConfigKey& key);
@@ -201,7 +201,6 @@ public:
      * [size]: The output tuple size.
      */
     void noteMetricDimensionSize(const ConfigKey& key, const int64_t& id, int size);
-
 
     /**
      * Report the max size of output tuple of dimension in condition across dimensions in what.
@@ -272,8 +271,8 @@ public:
     void notePullFromCache(int pullAtomId);
 
     /*
-    * Records when system server restarts.
-    */
+     * Records when system server restarts.
+     */
     void noteSystemServerRestart(int32_t timeSec);
 
     /**
@@ -296,9 +295,9 @@ public:
     void dumpStats(std::vector<uint8_t>* buffer, bool reset);
 
     /**
-     * Output statsd stats in human readable format to [out] file.
+     * Output statsd stats in human readable format to [out] file descriptor.
      */
-    void dumpStats(FILE* out) const;
+    void dumpStats(int outFd) const;
 
     typedef struct {
         long totalPull;

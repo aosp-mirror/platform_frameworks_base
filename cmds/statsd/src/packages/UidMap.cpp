@@ -386,12 +386,12 @@ void UidMap::appendUidMap(const int64_t& timestamp, const ConfigKey& key,
     StatsdStats::getInstance().setUidMapChanges(mChanges.size());
 }
 
-void UidMap::printUidMap(FILE* out) const {
+void UidMap::printUidMap(int out) const {
     lock_guard<mutex> lock(mMutex);
 
     for (const auto& kv : mMap) {
         if (!kv.second.deleted) {
-            fprintf(out, "%s, v%" PRId64 " (%i)\n", kv.first.second.c_str(), kv.second.versionCode,
+            dprintf(out, "%s, v%" PRId64 " (%i)\n", kv.first.second.c_str(), kv.second.versionCode,
                     kv.first.first);
         }
     }
