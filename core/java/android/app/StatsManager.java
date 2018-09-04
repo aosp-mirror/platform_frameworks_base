@@ -119,6 +119,7 @@ public final class StatsManager {
     /**
      * @deprecated Use {@link #addConfig(long, byte[])}
      */
+    @Deprecated
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public boolean addConfiguration(long configKey, byte[] config) {
         try {
@@ -154,6 +155,7 @@ public final class StatsManager {
     /**
      * @deprecated Use {@link #removeConfig(long)}
      */
+    @Deprecated
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public boolean removeConfiguration(long configKey) {
         try {
@@ -222,6 +224,7 @@ public final class StatsManager {
     /**
      * @deprecated Use {@link #setBroadcastSubscriber(PendingIntent, long, long)}
      */
+    @Deprecated
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public boolean setBroadcastSubscriber(
             long configKey, long subscriberId, PendingIntent pendingIntent) {
@@ -275,6 +278,7 @@ public final class StatsManager {
     /**
      * @deprecated Use {@link #setFetchReportsOperation(PendingIntent, long)}
      */
+    @Deprecated
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public boolean setDataFetchOperation(long configKey, PendingIntent pendingIntent) {
         try {
@@ -312,6 +316,7 @@ public final class StatsManager {
     /**
      * @deprecated Use {@link #getReports(long)}
      */
+    @Deprecated
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public @Nullable byte[] getData(long configKey) {
         try {
@@ -348,6 +353,7 @@ public final class StatsManager {
     /**
      * @deprecated Use {@link #getStatsMetadata()}
      */
+    @Deprecated
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public @Nullable byte[] getMetadata() {
         try {
