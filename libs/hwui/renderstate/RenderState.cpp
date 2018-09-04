@@ -16,8 +16,6 @@
 #include "renderstate/RenderState.h"
 #include <GpuMemoryTracker.h>
 #include "DeferredLayerUpdater.h"
-#include "GlLayer.h"
-#include "VkLayer.h"
 #include "Snapshot.h"
 
 #include "renderthread/CanvasContext.h"
@@ -39,54 +37,17 @@ RenderState::RenderState(renderthread::RenderThread& thread)
 RenderState::~RenderState() {
 }
 
-void RenderState::onGLContextCreated() {
-    GpuMemoryTracker::onGpuContextCreated();
-
-    // This is delayed because the first access of Caches makes GL calls
-    if (!mCaches) {
-        mCaches = &Caches::createInstance(*this);
-    }
-    mCaches->init();
-}
-
-static void layerLostGlContext(Layer* layer) {
-    LOG_ALWAYS_FATAL_IF(layer->getApi() != Layer::Api::OpenGL,
-                        "layerLostGlContext on non GL layer");
-    static_cast<GlLayer*>(layer)->onGlContextLost();
-}
-
-void RenderState::onGLContextDestroyed() {
-    // TODO: reset all cached state in state objects
-    std::for_each(mActiveLayers.begin(), mActiveLayers.end(), layerLostGlContext);
-
-    mCaches->terminate();
-
-    destroyLayersInUpdater();
-    GpuMemoryTracker::onGpuContextDestroyed();
-}
-
-void RenderState::onVkContextCreated() {
+void RenderState::onContextCreated() {
     GpuMemoryTracker::onGpuContextCreated();
 }
 
-static void layerDestroyedVkContext(Layer* layer) {
-    LOG_ALWAYS_FATAL_IF(layer->getApi() != Layer::Api::Vulkan,
-                        "layerLostVkContext on non Vulkan layer");
-    static_cast<VkLayer*>(layer)->onVkContextDestroyed();
-}
-
-void RenderState::onVkContextDestroyed() {
-    std::for_each(mActiveLayers.begin(), mActiveLayers.end(), layerDestroyedVkContext);
+void RenderState::onContextDestroyed() {
     destroyLayersInUpdater();
     GpuMemoryTracker::onGpuContextDestroyed();
 }
 
 GrContext* RenderState::getGrContext() const {
     return mRenderThread.getGrContext();
-}
-
-void RenderState::flush(Caches::FlushMode mode) {
-    if (mCaches) mCaches->flush(mode);
 }
 
 void RenderState::onBitmapDestroyed(uint32_t pixelRefId) {
@@ -126,42 +87,6 @@ void RenderState::deleteFramebuffer(GLuint fbo) {
     glDeleteFramebuffers(1, &fbo);
 }
 
-void RenderState::invokeFunctor(Functor* functor, DrawGlInfo::Mode mode, DrawGlInfo* info) {
-    if (mode == DrawGlInfo::kModeProcessNoContext) {
-        // If there's no context we don't need to interrupt as there's
-        // no gl state to save/restore
-        (*functor)(mode, info);
-    } else {
-        interruptForFunctorInvoke();
-        (*functor)(mode, info);
-        resumeFromFunctorInvoke();
-    }
-}
-
-void RenderState::interruptForFunctorInvoke() {
-    mCaches->textureState().resetActiveTexture();
-    debugOverdraw(false, false);
-    // TODO: We need a way to know whether the functor is sRGB aware (b/32072673)
-    if (mCaches->extensions().hasLinearBlending() && mCaches->extensions().hasSRGBWriteControl()) {
-        glDisable(GL_FRAMEBUFFER_SRGB_EXT);
-    }
-}
-
-void RenderState::resumeFromFunctorInvoke() {
-    if (mCaches->extensions().hasLinearBlending() && mCaches->extensions().hasSRGBWriteControl()) {
-        glEnable(GL_FRAMEBUFFER_SRGB_EXT);
-    }
-
-    glViewport(0, 0, mViewportWidth, mViewportHeight);
-    glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
-    debugOverdraw(false, false);
-
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-    mCaches->textureState().activateTexture(0);
-    mCaches->textureState().resetBoundTextures();
-}
-
 void RenderState::debugOverdraw(bool enable, bool clear) {
     // DEAD CODE
 }
@@ -188,6 +113,10 @@ void RenderState::postDecStrong(VirtualLightRefBase* object) {
 
 void RenderState::dump() {
     // DEAD CODE
+}
+
+renderthread::RenderThread& RenderState::getRenderThread() {
+    return mRenderThread;
 }
 
 } /* namespace uirenderer */

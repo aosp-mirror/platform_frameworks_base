@@ -15,11 +15,11 @@
  */
 #include "Bitmap.h"
 
-#include "Caches.h"
 #include "HardwareBitmapUploader.h"
 #include "Properties.h"
 #include "renderthread/RenderProxy.h"
 #include "utils/Color.h"
+#include <utils/Trace.h>
 
 #include <sys/mman.h>
 

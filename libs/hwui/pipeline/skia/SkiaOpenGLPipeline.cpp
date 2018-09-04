@@ -17,7 +17,6 @@
 #include "SkiaOpenGLPipeline.h"
 
 #include "DeferredLayerUpdater.h"
-#include "GlLayer.h"
 #include "LayerDrawable.h"
 #include "SkiaPipeline.h"
 #include "SkiaProfileRenderer.h"
@@ -187,18 +186,9 @@ bool SkiaOpenGLPipeline::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBi
     return false;
 }
 
-static Layer* createLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,
-                          sk_sp<SkColorFilter> colorFilter, int alpha, SkBlendMode mode,
-                          bool blend) {
-    GlLayer* layer =
-            new GlLayer(renderState, layerWidth, layerHeight, colorFilter, alpha, mode, blend);
-    layer->generateTexture();
-    return layer;
-}
-
 DeferredLayerUpdater* SkiaOpenGLPipeline::createTextureLayer() {
     mRenderThread.requireGlContext();
-    return new DeferredLayerUpdater(mRenderThread.renderState(), createLayer, Layer::Api::OpenGL);
+    return new DeferredLayerUpdater(mRenderThread.renderState());
 }
 
 void SkiaOpenGLPipeline::onStop() {

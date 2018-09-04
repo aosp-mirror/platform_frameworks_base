@@ -16,8 +16,6 @@
 #ifndef RENDERSTATE_H
 #define RENDERSTATE_H
 
-#include "Caches.h"
-#include "renderstate/PixelBufferState.h"
 #include "utils/Macros.h"
 
 #include <GLES2/gl2.h>
@@ -34,7 +32,6 @@ class GrContext;
 namespace android {
 namespace uirenderer {
 
-class Caches;
 class Layer;
 class DeferredLayerUpdater;
 
@@ -44,22 +41,16 @@ class CanvasContext;
 class RenderThread;
 }
 
-// TODO: Replace Cache's GL state tracking with this. For now it's more a thin
 // wrapper of Caches for users to migrate to.
 class RenderState {
     PREVENT_COPY_AND_ASSIGN(RenderState);
     friend class renderthread::RenderThread;
-    friend class Caches;
     friend class renderthread::CacheManager;
 
 public:
-    void onGLContextCreated();
-    void onGLContextDestroyed();
+    void onContextCreated();
+    void onContextDestroyed();
 
-    void onVkContextCreated();
-    void onVkContextDestroyed();
-
-    void flush(Caches::FlushMode flushMode);
     void onBitmapDestroyed(uint32_t pixelRefId);
 
     void setViewport(GLsizei width, GLsizei height);
@@ -69,8 +60,6 @@ public:
     GLuint getFramebuffer() { return mFramebuffer; }
     GLuint createFramebuffer();
     void deleteFramebuffer(GLuint fbo);
-
-    void invokeFunctor(Functor* functor, DrawGlInfo::Mode mode, DrawGlInfo* info);
 
     void debugOverdraw(bool enable, bool clear);
 
@@ -101,16 +90,15 @@ public:
 
     void dump();
 
+    renderthread::RenderThread& getRenderThread();
+
 private:
-    void interruptForFunctorInvoke();
-    void resumeFromFunctorInvoke();
     void destroyLayersInUpdater();
 
     explicit RenderState(renderthread::RenderThread& thread);
     ~RenderState();
 
     renderthread::RenderThread& mRenderThread;
-    Caches* mCaches = nullptr;
 
     std::set<Layer*> mActiveLayers;
     std::set<DeferredLayerUpdater*> mActiveLayerUpdaters;
