@@ -19,11 +19,14 @@ package android.net.wifi.p2p;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.support.test.filters.SmallTest;
+
 import org.junit.Test;
 
 /**
  * Unit test harness for {@link android.net.wifi.p2p.WifiP2pDevice}
  */
+@SmallTest
 public class WifiP2pDeviceTest {
 
     /**
