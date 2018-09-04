@@ -23,8 +23,9 @@
 #include <SkColorFilter.h>
 #include <SkColorSpace.h>
 #include <SkPaint.h>
-
-#include "Matrix.h"
+#include <SkImage.h>
+#include <SkMatrix.h>
+#include <system/graphics.h>
 
 namespace android {
 namespace uirenderer {
@@ -40,24 +41,19 @@ class RenderState;
  */
 class Layer : public VirtualLightRefBase, GpuMemoryTracker {
 public:
-    enum class Api {
-        OpenGL = 0,
-        Vulkan = 1,
-    };
-
-    Api getApi() const { return mApi; }
+    Layer(RenderState& renderState, sk_sp<SkColorFilter>, int alpha, SkBlendMode mode);
 
     ~Layer();
 
-    virtual uint32_t getWidth() const = 0;
+    virtual uint32_t getWidth() const { return mWidth; }
 
-    virtual uint32_t getHeight() const = 0;
+    virtual uint32_t getHeight() const { return mHeight; }
 
-    virtual void setSize(uint32_t width, uint32_t height) = 0;
+    virtual void setSize(uint32_t width, uint32_t height) { mWidth = width; mHeight = height; }
 
-    virtual void setBlend(bool blend) = 0;
+    virtual void setBlend(bool blend) { mBlend = blend; }
 
-    virtual bool isBlend() const = 0;
+    virtual bool isBlend() const { return mBlend; }
 
     inline void setForceFilter(bool forceFilter) { this->forceFilter = forceFilter; }
 
@@ -84,9 +80,9 @@ public:
 
     inline sk_sp<SkColorFilter> getColorSpaceWithFilter() const { return mColorSpaceWithFilter; }
 
-    inline mat4& getTexTransform() { return texTransform; }
+    inline SkMatrix& getTexTransform() { return texTransform; }
 
-    inline mat4& getTransform() { return transform; }
+    inline SkMatrix& getTransform() { return transform; }
 
     /**
      * Posts a decStrong call to the appropriate thread.
@@ -94,15 +90,16 @@ public:
      */
     void postDecStrong();
 
+    inline void setImage(const sk_sp<SkImage>& image) { this->layerImage = image; }
+
+    inline sk_sp<SkImage> getImage() const { return this->layerImage; }
+
 protected:
-    Layer(RenderState& renderState, Api api, sk_sp<SkColorFilter>, int alpha, SkBlendMode mode);
 
     RenderState& mRenderState;
 
 private:
     void buildColorSpaceWithFilter();
-
-    Api mApi;
 
     /**
      * Color filter used to draw this layer. Optional.
@@ -137,12 +134,32 @@ private:
     /**
      * Optional texture coordinates transform.
      */
-    mat4 texTransform;
+    SkMatrix texTransform;
 
     /**
      * Optional transform.
      */
-    mat4 transform;
+    SkMatrix transform;
+
+    /**
+     * An image backing the layer.
+     */
+    sk_sp<SkImage> layerImage;
+
+    /**
+     * layer width.
+     */
+    uint32_t mWidth = 0;
+
+    /**
+     * layer height.
+     */
+    uint32_t mHeight = 0;
+
+    /**
+     * enable blending
+     */
+    bool mBlend = false;
 
 };  // struct Layer
 

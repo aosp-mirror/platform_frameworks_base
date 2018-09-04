@@ -15,27 +15,20 @@
  */
 #include "DeferredLayerUpdater.h"
 
-#include "GlLayer.h"
-#include "VkLayer.h"
 #include "renderstate/RenderState.h"
-#include "renderthread/EglManager.h"
-#include "renderthread/RenderTask.h"
 #include "utils/PaintUtils.h"
 
 namespace android {
 namespace uirenderer {
 
-DeferredLayerUpdater::DeferredLayerUpdater(RenderState& renderState, CreateLayerFn createLayerFn,
-                                           Layer::Api layerApi)
+DeferredLayerUpdater::DeferredLayerUpdater(RenderState& renderState)
         : mRenderState(renderState)
         , mBlend(false)
         , mSurfaceTexture(nullptr)
         , mTransform(nullptr)
         , mGLContextAttached(false)
         , mUpdateTexImage(false)
-        , mLayer(nullptr)
-        , mLayerApi(layerApi)
-        , mCreateLayerFn(createLayerFn) {
+        , mLayer(nullptr) {
     renderState.registerDeferredLayerUpdater(this);
 }
 
@@ -50,13 +43,9 @@ void DeferredLayerUpdater::destroyLayer() {
         return;
     }
 
-    if (mSurfaceTexture.get() && mLayerApi == Layer::Api::OpenGL && mGLContextAttached) {
-        status_t err = mSurfaceTexture->detachFromContext();
+    if (mSurfaceTexture.get() && mGLContextAttached) {
+        mSurfaceTexture->detachFromView();
         mGLContextAttached = false;
-        if (err != 0) {
-            // TODO: Elevate to fatal exception
-            ALOGE("Failed to detach SurfaceTexture from context %d", err);
-        }
     }
 
     mLayer->postDecStrong();
@@ -75,99 +64,53 @@ void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
 
 void DeferredLayerUpdater::apply() {
     if (!mLayer) {
-        mLayer = mCreateLayerFn(mRenderState, mWidth, mHeight, mColorFilter, mAlpha, mMode, mBlend);
+        mLayer = new Layer(mRenderState, mColorFilter, mAlpha, mMode);
     }
 
     mLayer->setColorFilter(mColorFilter);
     mLayer->setAlpha(mAlpha, mMode);
 
     if (mSurfaceTexture.get()) {
-        if (mLayer->getApi() == Layer::Api::Vulkan) {
-            if (mUpdateTexImage) {
-                mUpdateTexImage = false;
-                doUpdateVkTexImage();
-            }
-        } else {
-            LOG_ALWAYS_FATAL_IF(mLayer->getApi() != Layer::Api::OpenGL,
-                                "apply surfaceTexture with non GL backend %x, GL %x, VK %x",
-                                mLayer->getApi(), Layer::Api::OpenGL, Layer::Api::Vulkan);
-            if (!mGLContextAttached) {
-                mGLContextAttached = true;
-                mUpdateTexImage = true;
-                mSurfaceTexture->attachToContext(static_cast<GlLayer*>(mLayer)->getTextureId());
-            }
-            if (mUpdateTexImage) {
-                mUpdateTexImage = false;
-                doUpdateTexImage();
-            }
-            GLenum renderTarget = mSurfaceTexture->getCurrentTextureTarget();
-            static_cast<GlLayer*>(mLayer)->setRenderTarget(renderTarget);
+        if (!mGLContextAttached) {
+            mGLContextAttached = true;
+            mUpdateTexImage = true;
+            mSurfaceTexture->attachToView();
         }
+        if (mUpdateTexImage) {
+            mUpdateTexImage = false;
+            sk_sp<SkImage> layerImage;
+            SkMatrix textureTransform;
+            android_dataspace dataSpace;
+            bool queueEmpty = true;
+            // If the SurfaceTexture queue is in synchronous mode, need to discard all
+            // but latest frame. Since we can't tell which mode it is in,
+            // do this unconditionally.
+            do {
+                layerImage = mSurfaceTexture->dequeueImage(textureTransform, dataSpace, &queueEmpty,
+                        mRenderState);
+            } while (layerImage.get() && (!queueEmpty));
+            if (layerImage.get()) {
+                // force filtration if buffer size != layer size
+                bool forceFilter = mWidth != layerImage->width() || mHeight != layerImage->height();
+                updateLayer(forceFilter, textureTransform, dataSpace, layerImage);
+            }
+        }
+
         if (mTransform) {
-            mLayer->getTransform().load(*mTransform);
+            mLayer->getTransform() = *mTransform;
             setTransform(nullptr);
         }
     }
 }
 
-void DeferredLayerUpdater::doUpdateTexImage() {
-    LOG_ALWAYS_FATAL_IF(mLayer->getApi() != Layer::Api::OpenGL,
-                        "doUpdateTexImage non GL backend %x, GL %x, VK %x", mLayer->getApi(),
-                        Layer::Api::OpenGL, Layer::Api::Vulkan);
-    if (mSurfaceTexture->updateTexImage() == NO_ERROR) {
-        float transform[16];
-
-        int64_t frameNumber = mSurfaceTexture->getFrameNumber();
-        // If the GLConsumer queue is in synchronous mode, need to discard all
-        // but latest frame, using the frame number to tell when we no longer
-        // have newer frames to target. Since we can't tell which mode it is in,
-        // do this unconditionally.
-        int dropCounter = 0;
-        while (mSurfaceTexture->updateTexImage() == NO_ERROR) {
-            int64_t newFrameNumber = mSurfaceTexture->getFrameNumber();
-            if (newFrameNumber == frameNumber) break;
-            frameNumber = newFrameNumber;
-            dropCounter++;
-        }
-
-        bool forceFilter = false;
-        sp<GraphicBuffer> buffer = mSurfaceTexture->getCurrentBuffer();
-        if (buffer != nullptr) {
-            // force filtration if buffer size != layer size
-            forceFilter = mWidth != static_cast<int>(buffer->getWidth()) ||
-                          mHeight != static_cast<int>(buffer->getHeight());
-        }
-
-#if DEBUG_RENDERER
-        if (dropCounter > 0) {
-            RENDERER_LOGD("Dropped %d frames on texture layer update", dropCounter);
-        }
-#endif
-        mSurfaceTexture->getTransformMatrix(transform);
-
-        updateLayer(forceFilter, transform, mSurfaceTexture->getCurrentDataSpace());
-    }
-}
-
-void DeferredLayerUpdater::doUpdateVkTexImage() {
-    LOG_ALWAYS_FATAL_IF(mLayer->getApi() != Layer::Api::Vulkan,
-                        "updateLayer non Vulkan backend %x, GL %x, VK %x", mLayer->getApi(),
-                        Layer::Api::OpenGL, Layer::Api::Vulkan);
-
-    static const mat4 identityMatrix;
-    updateLayer(false, identityMatrix.data, HAL_DATASPACE_UNKNOWN);
-
-    VkLayer* vkLayer = static_cast<VkLayer*>(mLayer);
-    vkLayer->updateTexture();
-}
-
-void DeferredLayerUpdater::updateLayer(bool forceFilter, const float* textureTransform,
-                                       android_dataspace dataspace) {
+void DeferredLayerUpdater::updateLayer(bool forceFilter, const SkMatrix& textureTransform,
+        android_dataspace dataspace, const sk_sp<SkImage>& layerImage) {
     mLayer->setBlend(mBlend);
     mLayer->setForceFilter(forceFilter);
     mLayer->setSize(mWidth, mHeight);
-    mLayer->getTexTransform().load(textureTransform);
+    mLayer->getTexTransform() = textureTransform;
     mLayer->setDataSpace(dataspace);
+    mLayer->setImage(layerImage);
 }
 
 void DeferredLayerUpdater::detachSurfaceTexture() {

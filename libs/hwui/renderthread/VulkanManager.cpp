@@ -40,7 +40,7 @@ namespace renderthread {
 VulkanManager::VulkanManager(RenderThread& thread) : mRenderThread(thread) {}
 
 void VulkanManager::destroy() {
-    mRenderThread.renderState().onVkContextDestroyed();
+    mRenderThread.renderState().onContextDestroyed();
     mRenderThread.setGrContext(nullptr);
 
     if (VK_NULL_HANDLE != mCommandPool) {
@@ -405,7 +405,7 @@ void VulkanManager::initialize() {
         mSwapBehavior = SwapBehavior::BufferAge;
     }
 
-    mRenderThread.renderState().onVkContextCreated();
+    mRenderThread.renderState().onContextCreated();
 }
 
 // Returns the next BackbufferInfo to use for the next draw. The function will make sure all
@@ -980,6 +980,22 @@ int VulkanManager::getAge(VulkanSurface* surface) {
     }
     uint16_t lastUsed = surface->mImageInfos[backbuffer->mImageIndex].mLastUsed;
     return surface->mCurrentTime - lastUsed;
+}
+
+status_t VulkanManager::fenceWait(sp<Fence>& fence) {
+    //TODO: Insert a wait on fence command into the Vulkan command buffer.
+    // Block CPU on the fence.
+    status_t err = fence->waitForever("VulkanManager::fenceWait");
+    if (err != NO_ERROR) {
+        ALOGE("VulkanManager::fenceWait: error waiting for fence: %d", err);
+        return err;
+    }
+    return OK;
+}
+
+status_t VulkanManager::createReleaseFence(sp<Fence>& nativeFence) {
+    //TODO: Create a fence that is signaled, when all the pending Vulkan commands are flushed.
+    return OK;
 }
 
 } /* namespace renderthread */
