@@ -106,6 +106,14 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".PackageInstalledReceiver"
+                android:exported="true">
+            <intent-filter android:priority="1">
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
         <activity android:name=".UninstallUninstalling"
             android:excludeFromRecents="true"
             android:exported="false" />
