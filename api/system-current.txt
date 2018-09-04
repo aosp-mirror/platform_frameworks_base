@@ -474,9 +474,6 @@ package android.app {
     method public android.app.Vr2dDisplayProperties.Builder setEnabled(boolean);
   }
 
-  public static abstract class Vr2dDisplayProperties.Vr2dDisplayFlag implements java.lang.annotation.Annotation {
-  }
-
   public class VrManager {
     method public int getVr2dDisplayId();
     method public boolean isPersistentVrModeEnabled();
