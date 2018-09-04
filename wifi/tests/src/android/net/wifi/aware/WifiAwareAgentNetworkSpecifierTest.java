@@ -18,6 +18,7 @@ package android.net.wifi.aware;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
 import android.support.test.filters.SmallTest;
@@ -60,6 +61,13 @@ public class WifiAwareAgentNetworkSpecifierTest {
                 WifiAwareAgentNetworkSpecifier.CREATOR.createFromParcel(parcelR);
 
         assertEquals(dut, rereadDut);
+
+        // Ensure that individual network specifiers are satisfied by both the original & marshaled
+        // |WifiAwareNetworkAgentSpecifier instances.
+        for (WifiAwareNetworkSpecifier ns : nsSet) {
+            assertTrue(dut.satisfiesAwareNetworkSpecifier(ns));
+            assertTrue(rereadDut.satisfiesAwareNetworkSpecifier(ns));
+        }
     }
 
     /**
