@@ -215,11 +215,11 @@ public final class Magnifier {
             final Point windowCoords = getCurrentClampedWindowCoordinates();
             final InternalPopupWindow currentWindowInstance = mWindow;
             sPixelCopyHandlerThread.getThreadHandler().post(() -> {
-                if (mWindow != currentWindowInstance) {
-                    // The magnifier was dismissed (and maybe shown again) in the meantime.
-                    return;
-                }
                 synchronized (mLock) {
+                    if (mWindow != currentWindowInstance) {
+                        // The magnifier was dismissed (and maybe shown again) in the meantime.
+                        return;
+                    }
                     mWindow.setContentPositionForNextDraw(windowCoords.x, windowCoords.y);
                 }
             });
