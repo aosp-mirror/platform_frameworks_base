@@ -547,38 +547,23 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     /**
      * Fades in the updated status text. Note that if there's already a status showing, this will
-     * immediately hide it and fade in the updated status.
+     * immediately fade it out and fade in the updated status.
      */
     private void showStatus() {
         mStatusContainer.setAlpha(0f);
-        mStatusContainer.setVisibility(View.VISIBLE);
 
-        // Animate the alarm back in. Make sure to clear the animator listener for the animation!
         mStatusContainer.animate()
                 .alpha(1f)
                 .setDuration(FADE_ANIMATION_DURATION_MS)
-                .setListener(null)
                 .start();
     }
 
-    /** Fades out and hides the status text. */
+    /** Fades out the status text. */
     private void hideStatusText() {
-        if (mStatusContainer.getVisibility() == View.VISIBLE) {
-            mStatusContainer.animate()
-                    .alpha(0f)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            if (DEBUG) Log.d(TAG, "hideAlarmText: Hid alarm text");
-
-                            // Reset the alpha regardless of how the animation ends for the next
-                            // time we show this view/want to animate it.
-                            mStatusContainer.setVisibility(View.INVISIBLE);
-                            mStatusContainer.setAlpha(1f);
-                        }
-                    })
-                    .start();
-        }
+        mStatusContainer.animate()
+                .alpha(0f)
+                .setDuration(FADE_ANIMATION_DURATION_MS)
+                .start();
     }
 
     public void updateEverything() {
