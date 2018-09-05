@@ -2668,32 +2668,6 @@ public class NotificationPanelView extends PanelView implements
         setLaunchingAffordance(false);
     }
 
-    @Override
-    public void setAlpha(float alpha) {
-        super.setAlpha(alpha);
-        updateFullyVisibleState(false /* forceNotFullyVisible */);
-    }
-
-    /**
-     * Must be called before starting a ViewPropertyAnimator alpha animation because those
-     * do NOT call setAlpha and therefore don't properly update the fullyVisibleState.
-     */
-    public void notifyStartFading() {
-        updateFullyVisibleState(true /* forceNotFullyVisible */);
-    }
-
-    @Override
-    public void setVisibility(int visibility) {
-        super.setVisibility(visibility);
-        updateFullyVisibleState(false /* forceNotFullyVisible */);
-    }
-
-    private void updateFullyVisibleState(boolean forceNotFullyVisible) {
-        mNotificationStackScroller.setParentNotFullyVisible(forceNotFullyVisible
-                || getAlpha() != 1.0f
-                || getVisibility() != VISIBLE);
-    }
-
     /**
      * Set whether we are currently launching an affordance. This is currently only set when
      * launched via a camera gesture.
@@ -2992,10 +2966,6 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setActivatedChild(o);
     }
 
-    public void setParentNotFullyVisible(boolean parent) {
-        mNotificationStackScroller.setParentNotFullyVisible(parent);
-    }
-
     public void runAfterAnimationFinished(Runnable r) {
         mNotificationStackScroller.runAfterAnimationFinished(r);
     }
@@ -3019,9 +2989,5 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setShelf(notificationShelf);
         mNotificationStackScroller.setScrimController(scrimController);
         updateShowEmptyShadeView();
-    }
-
-    public void setDrawBackgroundAsSrc(boolean asSrc) {
-        mNotificationStackScroller.setDrawBackgroundAsSrc(asSrc);
     }
 }
