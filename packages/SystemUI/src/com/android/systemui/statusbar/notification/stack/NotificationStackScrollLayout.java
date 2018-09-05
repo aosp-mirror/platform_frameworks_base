@@ -394,9 +394,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     };
     private PorterDuffXfermode mSrcMode = new PorterDuffXfermode(PorterDuff.Mode.SRC);
     private boolean mPulsing;
-    private boolean mDrawBackgroundAsSrc;
-    private boolean mFadingOut;
-    private boolean mParentNotFullyVisible;
     private boolean mGroupExpandedForMeasure;
     private boolean mScrollable;
     private View mForcedScroll;
@@ -789,21 +786,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                 R.dimen.heads_up_status_bar_padding);
     }
 
-    public void setDrawBackgroundAsSrc(boolean asSrc) {
-        mDrawBackgroundAsSrc = asSrc;
-        updateSrcDrawing();
-    }
-
-    private void updateSrcDrawing() {
-        if (!mShouldDrawNotificationBackground) {
-            return;
-        }
-
-        mBackgroundPaint.setXfermode(mDrawBackgroundAsSrc && !mFadingOut && !mParentNotFullyVisible
-                ? mSrcMode : null);
-        invalidate();
-    }
-
     private void notifyHeightChangeListener(ExpandableView view) {
         notifyHeightChangeListener(view, false /* needsAnimation */);
     }
@@ -1128,7 +1110,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                 && !mHeadsUpAnimatingAway;
         if (mIsClipped != clipped) {
             mIsClipped = clipped;
-            updateFadingState();
         }
 
         if (animatingClipping) {
@@ -2447,7 +2428,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 startBackgroundAnimation();
             } else {
                 mCurrentBounds.set(mBackgroundBounds);
-                applyCurrentBackgroundBounds();
+                invalidate();
             }
         } else {
             abortBackgroundAnimators();
@@ -2575,25 +2556,11 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void setBackgroundTop(int top) {
         mCurrentBounds.top = top;
-        applyCurrentBackgroundBounds();
+        invalidate();
     }
 
     public void setBackgroundBottom(int bottom) {
         mCurrentBounds.bottom = bottom;
-        applyCurrentBackgroundBounds();
-    }
-
-    private void applyCurrentBackgroundBounds() {
-        // If the background of the notification is not being drawn, then there is no need to
-        // exclude an area in the scrim. Rather, the scrim's color should serve as the background.
-        if (!mShouldDrawNotificationBackground) {
-            return;
-        }
-
-        final boolean awake = mInterpolatedDarkAmount != 0 || mAmbientState.isDark();
-        mScrimController.setExcludedBackgroundArea(
-                mFadingOut || mParentNotFullyVisible || awake || mIsClipped ? null
-                        : mCurrentBounds);
         invalidate();
     }
 
@@ -4176,7 +4143,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             updateBackground();
         }
         requestChildrenUpdate();
-        applyCurrentBackgroundBounds();
         updateWillNotDraw();
         notifyHeightChangeListener(mShelf);
     }
@@ -4648,35 +4614,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             mAnimationEvents.add(new AnimationEvent(mNeedingPulseAnimation, type));
             mNeedingPulseAnimation = null;
         }
-    }
-
-    public void setFadingOut(boolean fadingOut) {
-        if (fadingOut != mFadingOut) {
-            mFadingOut = fadingOut;
-            updateFadingState();
-        }
-    }
-
-    public void setParentNotFullyVisible(boolean parentNotFullyVisible) {
-        if (mScrimController == null) {
-            // we're not set up yet.
-            return;
-        }
-        if (parentNotFullyVisible != mParentNotFullyVisible) {
-            mParentNotFullyVisible = parentNotFullyVisible;
-            updateFadingState();
-        }
-    }
-
-    private void updateFadingState() {
-        applyCurrentBackgroundBounds();
-        updateSrcDrawing();
-    }
-
-    @Override
-    public void setAlpha(@FloatRange(from = 0.0, to = 1.0) float alpha) {
-        super.setAlpha(alpha);
-        setFadingOut(alpha != 1.0f);
     }
 
     public void setQsExpanded(boolean qsExpanded) {

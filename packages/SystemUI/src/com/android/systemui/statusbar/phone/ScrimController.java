@@ -685,10 +685,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         return scrim.getTag(TAG_KEY_ANIM) != null;
     }
 
-    public void setDrawBehindAsSrc(boolean asSrc) {
-        mScrimBehind.setDrawAsSrc(asSrc);
-    }
-
     @VisibleForTesting
     void setOnAnimationFinished(Runnable onAnimationFinished) {
         mOnAnimationFinished = onAnimationFinished;
@@ -798,10 +794,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     @VisibleForTesting
     protected Handler getHandler() {
         return Handler.getMain();
-    }
-
-    public void setExcludedBackgroundArea(Rect area) {
-        mScrimBehind.setExcludedArea(area);
     }
 
     public int getBackgroundColor() {
