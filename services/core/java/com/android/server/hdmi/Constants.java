@@ -279,9 +279,8 @@ final class Constants {
      * <p>True means enabling muting logic.
      * <p>False means never mute device.
      */
-    // TODO(OEM): Change property to ro and set to true to disable muting.
     static final String PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE =
-            "persist.sys.hdmi.property_system_audio_mode_muting_enable";
+            "ro.hdmi.property_system_audio_mode_muting_enable";
 
     /**
      * When set to true the HdmiControlService will never request a Logical Address for the
