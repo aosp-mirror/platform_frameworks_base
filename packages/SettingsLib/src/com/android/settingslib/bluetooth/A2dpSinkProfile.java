@@ -33,7 +33,6 @@ import java.util.List;
 
 final class A2dpSinkProfile implements LocalBluetoothProfile {
     private static final String TAG = "A2dpSinkProfile";
-    private static boolean V = true;
 
     private BluetoothA2dpSink mService;
     private boolean mIsProfileReady;
@@ -56,7 +55,7 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
             implements BluetoothProfile.ServiceListener {
 
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            if (V) Log.d(TAG,"Bluetooth service connected");
+            Log.d(TAG, "Bluetooth service connected");
             mService = (BluetoothA2dpSink) proxy;
             // We just bound to the service, so refresh the UI for any connected A2DP devices.
             List<BluetoothDevice> deviceList = mService.getConnectedDevices();
@@ -75,7 +74,7 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
         }
 
         public void onServiceDisconnected(int profile) {
-            if (V) Log.d(TAG,"Bluetooth service disconnected");
+            Log.d(TAG, "Bluetooth service disconnected");
             mIsProfileReady=false;
         }
     }
@@ -106,7 +105,9 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
     }
 
     public List<BluetoothDevice> getConnectedDevices() {
-        if (mService == null) return new ArrayList<BluetoothDevice>(0);
+        if (mService == null) {
+            return new ArrayList<BluetoothDevice>(0);
+        }
         return mService.getDevicesMatchingConnectionStates(
               new int[] {BluetoothProfile.STATE_CONNECTED,
                          BluetoothProfile.STATE_CONNECTING,
@@ -114,24 +115,18 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
     }
 
     public boolean connect(BluetoothDevice device) {
-        if (mService == null) return false;
-        List<BluetoothDevice> srcs = getConnectedDevices();
-        if (srcs != null) {
-            for (BluetoothDevice src : srcs) {
-                if (src.equals(device)) {
-                    // Connect to same device, Ignore it
-                    Log.d(TAG,"Ignoring Connect");
-                    return true;
-                }
-            }
+        if (mService == null) {
+            return false;
         }
         return mService.connect(device);
     }
 
     public boolean disconnect(BluetoothDevice device) {
-        if (mService == null) return false;
+        if (mService == null) {
+            return false;
+        }
         // Downgrade priority as user is disconnecting the headset.
-        if (mService.getPriority(device) > BluetoothProfile.PRIORITY_ON){
+        if (mService.getPriority(device) > BluetoothProfile.PRIORITY_ON) {
             mService.setPriority(device, BluetoothProfile.PRIORITY_ON);
         }
         return mService.disconnect(device);
@@ -145,17 +140,23 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
     }
 
     public boolean isPreferred(BluetoothDevice device) {
-        if (mService == null) return false;
+        if (mService == null) {
+            return false;
+        }
         return mService.getPriority(device) > BluetoothProfile.PRIORITY_OFF;
     }
 
     public int getPreferred(BluetoothDevice device) {
-        if (mService == null) return BluetoothProfile.PRIORITY_OFF;
+        if (mService == null) {
+            return BluetoothProfile.PRIORITY_OFF;
+        }
         return mService.getPriority(device);
     }
 
     public void setPreferred(BluetoothDevice device, boolean preferred) {
-        if (mService == null) return;
+        if (mService == null) {
+            return;
+        }
         if (preferred) {
             if (mService.getPriority(device) < BluetoothProfile.PRIORITY_ON) {
                 mService.setPriority(device, BluetoothProfile.PRIORITY_ON);
@@ -166,7 +167,9 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
     }
 
     boolean isA2dpPlaying() {
-        if (mService == null) return false;
+        if (mService == null) {
+            return false;
+        }
         List<BluetoothDevice> srcs = mService.getConnectedDevices();
         if (!srcs.isEmpty()) {
             if (mService.isA2dpPlaying(srcs.get(0))) {
@@ -208,7 +211,7 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
     }
 
     protected void finalize() {
-        if (V) Log.d(TAG, "finalize()");
+        Log.d(TAG, "finalize()");
         if (mService != null) {
             try {
                 BluetoothAdapter.getDefaultAdapter().closeProfileProxy(BluetoothProfile.A2DP_SINK,
