@@ -18,6 +18,7 @@ package android.graphics;
 
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
+import android.annotation.Px;
 import android.annotation.Size;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.fonts.FontVariationAxis;
@@ -805,25 +806,39 @@ public class Paint {
      * Helper for getFlags(), returning true if UNDERLINE_TEXT_FLAG bit is set
      *
      * @return true if the underlineText bit is set in the paint's flags.
+     * @see #getUnderlinePosition()
+     * @see #getUnderlineThickness()
+     * @see #setUnderlineText(boolean)
      */
     public final boolean isUnderlineText() {
         return (getFlags() & UNDERLINE_TEXT_FLAG) != 0;
     }
 
     /**
-     * Distance from top of the underline to the baseline. Positive values mean below the baseline.
-     * This method returns where the underline should be drawn independent of if the underlineText
-     * bit is set at the moment.
-     * @hide
+     * Returns the distance from top of the underline to the baseline in pixels.
+     *
+     * The result is positive for positions that are below the baseline.
+     * This method returns where the underline should be drawn independent of if the {@link
+     * #UNDERLINE_TEXT_FLAG} bit is set.
+     *
+     * @return the position of the underline in pixels
+     * @see #isUnderlineText()
+     * @see #getUnderlineThickness()
+     * @see #setUnderlineText(boolean)
      */
-    public float getUnderlinePosition() {
+    public @Px float getUnderlinePosition() {
         return nGetUnderlinePosition(mNativePaint);
     }
 
     /**
-     * @hide
+     * Returns the thickness of the underline in pixels.
+     *
+     * @return the thickness of the underline in pixels
+     * @see #isUnderlineText()
+     * @see #getUnderlinePosition()
+     * @see #setUnderlineText(boolean)
      */
-    public float getUnderlineThickness() {
+    public @Px float getUnderlineThickness() {
         return nGetUnderlineThickness(mNativePaint);
     }
 
@@ -832,6 +847,9 @@ public class Paint {
      *
      * @param underlineText true to set the underlineText bit in the paint's
      *                      flags, false to clear it.
+     * @see #isUnderlineText()
+     * @see #getUnderlinePosition()
+     * @see #getUnderlineThickness()
      */
     public void setUnderlineText(boolean underlineText) {
         nSetUnderlineText(mNativePaint, underlineText);
@@ -840,26 +858,40 @@ public class Paint {
     /**
      * Helper for getFlags(), returning true if STRIKE_THRU_TEXT_FLAG bit is set
      *
-     * @return true if the strikeThruText bit is set in the paint's flags.
+     * @return true if the {@link #STRIKE_THRU_TEXT_FLAG} bit is set in the paint's flags.
+     * @see #getStrikeThruPosition()
+     * @see #getStrikeThruThickness()
+     * @see #setStrikeThruText(boolean)
      */
     public final boolean isStrikeThruText() {
         return (getFlags() & STRIKE_THRU_TEXT_FLAG) != 0;
     }
 
     /**
-     * Distance from top of the strike-through line to the baseline. Negative values mean above the
-     * baseline. This method returns where the strike-through line should be drawn independent of if
-     * the strikeThruText bit is set at the moment.
-     * @hide
+     * Distance from top of the strike-through line to the baseline in pixels.
+     *
+     * The result is negative for positions that are above the baseline.
+     * This method returns where the strike-through line should be drawn independent of if the
+     * {@link #STRIKE_THRU_TEXT_FLAG} bit is set.
+     *
+     * @return the position of the strike-through line in pixels
+     * @see #getStrikeThruThickness()
+     * @see #setStrikeThruText(boolean)
+     * @see #isStrikeThruText()
      */
-    public float getStrikeThruPosition() {
+    public @Px float getStrikeThruPosition() {
         return nGetStrikeThruPosition(mNativePaint);
     }
 
     /**
-     * @hide
+     * Returns the thickness of the strike-through line in pixels.
+     *
+     * @return the position of the strike-through line in pixels
+     * @see #getStrikeThruPosition()
+     * @see #setStrikeThruText(boolean)
+     * @see #isStrikeThruText()
      */
-    public float getStrikeThruThickness() {
+    public @Px float getStrikeThruThickness() {
         return nGetStrikeThruThickness(mNativePaint);
     }
 
@@ -868,6 +900,9 @@ public class Paint {
      *
      * @param strikeThruText true to set the strikeThruText bit in the paint's
      *                       flags, false to clear it.
+     * @see #getStrikeThruPosition()
+     * @see #getStrikeThruThickness()
+     * @see #isStrikeThruText()
      */
     public void setStrikeThruText(boolean strikeThruText) {
         nSetStrikeThruText(mNativePaint, strikeThruText);
@@ -1560,22 +1595,25 @@ public class Paint {
     }
 
     /**
-     * Return the paint's word-spacing for text. The default value is 0.
+     * Return the paint's extra word-spacing for text.
      *
-     * @return the paint's word-spacing for drawing text.
-     * @hide
+     * The default value is 0.
+     *
+     * @return the paint's extra word-spacing for drawing text in pixels.
+     * @see #setWordSpacing(float)
      */
     public float getWordSpacing() {
         return nGetWordSpacing(mNativePaint);
     }
 
     /**
-     * Set the paint's word-spacing for text. The default value is 0.
-     * The value is in pixels (note the units are not the same as for
-     * letter-spacing).
+     * Set the paint's extra word-spacing for text.
      *
-     * @param wordSpacing set the paint's word-spacing for drawing text.
-     * @hide
+     * Increases the white space width between words with the given amount of pixels.
+     * The default value is 0.
+     *
+     * @param wordSpacing set the paint's extra word-spacing for drawing text in pixels.
+     * @see #getWordSpacing()
      */
     public void setWordSpacing(float wordSpacing) {
         nSetWordSpacing(mNativePaint, wordSpacing);
