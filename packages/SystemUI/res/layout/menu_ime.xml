@@ -19,7 +19,6 @@
     android:id="@+id/menu_container"
     android:layout_width="@dimen/navigation_key_width"
     android:layout_height="match_parent"
-    android:focusable="false"
     android:importantForAccessibility="no"
     >
     <!-- Use nav button width & height=match_parent for parent FrameLayout and buttons because they
