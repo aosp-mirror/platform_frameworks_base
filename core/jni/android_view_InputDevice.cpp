@@ -37,13 +37,13 @@ static struct {
 } gInputDeviceClassInfo;
 
 jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& deviceInfo) {
-    ScopedLocalRef<jstring> nameObj(env, env->NewStringUTF(deviceInfo.getDisplayName().string()));
+    ScopedLocalRef<jstring> nameObj(env, env->NewStringUTF(deviceInfo.getDisplayName().c_str()));
     if (!nameObj.get()) {
         return NULL;
     }
 
     ScopedLocalRef<jstring> descriptorObj(env,
-            env->NewStringUTF(deviceInfo.getIdentifier().descriptor.string()));
+            env->NewStringUTF(deviceInfo.getIdentifier().descriptor.c_str()));
     if (!descriptorObj.get()) {
         return NULL;
     }
