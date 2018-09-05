@@ -13308,6 +13308,23 @@ public final class Settings {
          * @hide
          */
         public static final String BINDER_CALLS_STATS = "binder_calls_stats";
+
+        /**
+         * Default user id to boot into. They map to user ids, for example, 10, 11, 12.
+         *
+         * @hide
+         */
+        public static final String DEFAULT_USER_ID_TO_BOOT_INTO = "default_boot_into_user_id";
+
+        /**
+         * Persistent user id that is last logged in to.
+         *
+         * They map to user ids, for example, 10, 11, 12.
+         *
+         * @hide
+         */
+        public static final String LAST_ACTIVE_USER_ID = "last_active_persistent_user_id";
+
     }
 
     /**
