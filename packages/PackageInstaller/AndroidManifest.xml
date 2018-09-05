@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.UPDATE_APP_OPS_STATS" />
     <uses-permission android:name="android.permission.MANAGE_APP_OPS_MODES" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+    <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
 
     <uses-permission android:name="com.google.android.permission.INSTALL_WEARABLE_PACKAGES" />
 
