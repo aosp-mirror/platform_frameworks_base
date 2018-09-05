@@ -183,6 +183,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -202,6 +203,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final String DIAG_ARG = "--diag";
     public static final String SHORT_ARG = "--short";
     private static final String TETHERING_ARG = "tethering";
+    private static final String NETWORK_ARG = "networks";
+    private static final String REQUEST_ARG = "requests";
 
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
@@ -1978,7 +1981,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void dumpNetworkDiagnostics(IndentingPrintWriter pw) {
         final List<NetworkDiagnostics> netDiags = new ArrayList<NetworkDiagnostics>();
         final long DIAG_TIME_MS = 5000;
-        for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+        for (NetworkAgentInfo nai : networksSortedById()) {
             // Start gathering diagnostic information.
             netDiags.add(new NetworkDiagnostics(
                     nai.network,
@@ -2009,6 +2012,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         } else if (ArrayUtils.contains(args, TETHERING_ARG)) {
             mTethering.dump(fd, pw, args);
             return;
+        } else if (ArrayUtils.contains(args, NETWORK_ARG)) {
+            dumpNetworks(pw);
+            return;
+        } else if (ArrayUtils.contains(args, REQUEST_ARG)) {
+            dumpNetworkRequests(pw);
+            return;
         }
 
         pw.print("NetworkFactories for:");
@@ -2029,36 +2038,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         pw.println("Current Networks:");
         pw.increaseIndent();
-        for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
-            pw.println(nai.toString());
-            pw.increaseIndent();
-            pw.println(String.format(
-                    "Requests: REQUEST:%d LISTEN:%d BACKGROUND_REQUEST:%d total:%d",
-                    nai.numForegroundNetworkRequests(),
-                    nai.numNetworkRequests() - nai.numRequestNetworkRequests(),
-                    nai.numBackgroundNetworkRequests(),
-                    nai.numNetworkRequests()));
-            pw.increaseIndent();
-            for (int i = 0; i < nai.numNetworkRequests(); i++) {
-                pw.println(nai.requestAt(i).toString());
-            }
-            pw.decreaseIndent();
-            pw.println("Lingered:");
-            pw.increaseIndent();
-            nai.dumpLingerTimers(pw);
-            pw.decreaseIndent();
-            pw.decreaseIndent();
-        }
+        dumpNetworks(pw);
         pw.decreaseIndent();
         pw.println();
 
         pw.println("Network Requests:");
         pw.increaseIndent();
-        for (NetworkRequestInfo nri : mNetworkRequests.values()) {
-            pw.println(nri.toString());
-        }
-        pw.println();
+        dumpNetworkRequests(pw);
         pw.decreaseIndent();
+        pw.println();
 
         mLegacyTypeTracker.dump(pw);
 
@@ -2124,6 +2112,55 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             pw.decreaseIndent();
         }
+    }
+
+    private void dumpNetworks(IndentingPrintWriter pw) {
+        for (NetworkAgentInfo nai : networksSortedById()) {
+            pw.println(nai.toString());
+            pw.increaseIndent();
+            pw.println(String.format(
+                    "Requests: REQUEST:%d LISTEN:%d BACKGROUND_REQUEST:%d total:%d",
+                    nai.numForegroundNetworkRequests(),
+                    nai.numNetworkRequests() - nai.numRequestNetworkRequests(),
+                    nai.numBackgroundNetworkRequests(),
+                    nai.numNetworkRequests()));
+            pw.increaseIndent();
+            for (int i = 0; i < nai.numNetworkRequests(); i++) {
+                pw.println(nai.requestAt(i).toString());
+            }
+            pw.decreaseIndent();
+            pw.println("Lingered:");
+            pw.increaseIndent();
+            nai.dumpLingerTimers(pw);
+            pw.decreaseIndent();
+            pw.decreaseIndent();
+        }
+    }
+
+    private void dumpNetworkRequests(IndentingPrintWriter pw) {
+        for (NetworkRequestInfo nri : requestsSortedById()) {
+            pw.println(nri.toString());
+        }
+    }
+
+    /**
+     * Return an array of all current NetworkAgentInfos sorted by network id.
+     */
+    private NetworkAgentInfo[] networksSortedById() {
+        NetworkAgentInfo[] networks = new NetworkAgentInfo[0];
+        networks = mNetworkAgentInfos.values().toArray(networks);
+        Arrays.sort(networks, Comparator.comparingInt(nai -> nai.network.netId));
+        return networks;
+    }
+
+    /**
+     * Return an array of all current NetworkRequest sorted by request id.
+     */
+    private NetworkRequestInfo[] requestsSortedById() {
+        NetworkRequestInfo[] requests = new NetworkRequestInfo[0];
+        requests = mNetworkRequests.values().toArray(requests);
+        Arrays.sort(requests, Comparator.comparingInt(nri -> nri.request.requestId));
+        return requests;
     }
 
     private boolean isLiveNetworkAgent(NetworkAgentInfo nai, int what) {
@@ -2916,7 +2953,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         pw.println("User setting:      " + description);
         pw.println("Network overrides:");
         pw.increaseIndent();
-        for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+        for (NetworkAgentInfo nai : networksSortedById()) {
             if (nai.avoidUnvalidated) {
                 pw.println(nai.name());
             }
