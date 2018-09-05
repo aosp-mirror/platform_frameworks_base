@@ -51,6 +51,7 @@ import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.ColorDisplayController;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.RingBuffer;
@@ -72,7 +73,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Deque;
 import java.util.HashMap;
@@ -363,12 +363,9 @@ public class BrightnessTracker {
             return;
         }
 
-        builder.setNightMode(mInjector.getSecureIntForUser(mContentResolver,
-                Settings.Secure.NIGHT_DISPLAY_ACTIVATED, 0, UserHandle.USER_CURRENT)
-                == 1);
-        builder.setColorTemperature(mInjector.getSecureIntForUser(mContentResolver,
-                Settings.Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE,
-                0, UserHandle.USER_CURRENT));
+        builder.setNightMode(mInjector.isNightModeActive(mContext, UserHandle.USER_CURRENT));
+        builder.setColorTemperature(mInjector.getColorTemperature(mContext,
+                UserHandle.USER_CURRENT));
 
         BrightnessChangeEvent event = builder.build();
         if (DEBUG) {
@@ -951,6 +948,14 @@ public class BrightnessTracker {
 
         public boolean isInteractive(Context context) {
             return context.getSystemService(PowerManager.class).isInteractive();
+        }
+
+        public int getColorTemperature(Context context, int userId) {
+            return new ColorDisplayController(context, userId).getColorTemperature();
+        }
+
+        public boolean isNightModeActive(Context context, int userId) {
+            return new ColorDisplayController(context, userId).isActivated();
         }
     }
 }
