@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.util.Log;
@@ -212,23 +214,24 @@ public class ZygoteProcess {
      * @param instructionSet null-ok the instruction set to use.
      * @param appDataDir null-ok the data directory of the app.
      * @param invokeWith null-ok the command to invoke with.
+     * @param packageName null-ok the name of the package this process belongs to.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
      *
      * @return An object that describes the result of the attempt to start the process.
      * @throws RuntimeException on fatal start failure
      */
-    public final Process.ProcessStartResult start(final String processClass,
+    public final Process.ProcessStartResult start(@NonNull final String processClass,
                                                   final String niceName,
-                                                  int uid, int gid, int[] gids,
+                                                  int uid, int gid, @Nullable int[] gids,
                                                   int runtimeFlags, int mountExternal,
                                                   int targetSdkVersion,
-                                                  String seInfo,
-                                                  String abi,
-                                                  String instructionSet,
-                                                  String appDataDir,
-                                                  String invokeWith,
-                                                  String packageName,
-                                                  String[] zygoteArgs) {
+                                                  @Nullable String seInfo,
+                                                  @NonNull String abi,
+                                                  @Nullable String instructionSet,
+                                                  @Nullable String appDataDir,
+                                                  @Nullable String invokeWith,
+                                                  @Nullable String packageName,
+                                                  @Nullable String[] zygoteArgs) {
         try {
             return startViaZygote(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
@@ -351,24 +354,25 @@ public class ZygoteProcess {
      * @param appDataDir null-ok the data directory of the app.
      * @param startChildZygote Start a sub-zygote. This creates a new zygote process
      * that has its state cloned from this zygote process.
+     * @param packageName null-ok the name of the package this process belongs to.
      * @param extraArgs Additional arguments to supply to the zygote process.
      * @return An object that describes the result of the attempt to start the process.
      * @throws ZygoteStartFailedEx if process start failed for any reason
      */
-    private Process.ProcessStartResult startViaZygote(final String processClass,
-                                                      final String niceName,
+    private Process.ProcessStartResult startViaZygote(@NonNull final String processClass,
+                                                      @Nullable final String niceName,
                                                       final int uid, final int gid,
-                                                      final int[] gids,
+                                                      @Nullable final int[] gids,
                                                       int runtimeFlags, int mountExternal,
                                                       int targetSdkVersion,
-                                                      String seInfo,
-                                                      String abi,
-                                                      String instructionSet,
-                                                      String appDataDir,
-                                                      String invokeWith,
+                                                      @Nullable String seInfo,
+                                                      @NonNull String abi,
+                                                      @Nullable String instructionSet,
+                                                      @Nullable String appDataDir,
+                                                      @Nullable String invokeWith,
                                                       boolean startChildZygote,
-                                                      String packageName,
-                                                      String[] extraArgs)
+                                                      @Nullable String packageName,
+                                                      @Nullable String[] extraArgs)
                                                       throws ZygoteStartFailedEx {
         ArrayList<String> argsForZygote = new ArrayList<String>();
 
