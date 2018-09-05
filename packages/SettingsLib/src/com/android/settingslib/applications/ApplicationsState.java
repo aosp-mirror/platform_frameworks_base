@@ -675,6 +675,7 @@ public class ApplicationsState {
                 if (!mResumed) {
                     mResumed = true;
                     mSessionsChanged = true;
+                    doPauseLocked();
                     doResumeIfNeededLocked();
                 }
             }
