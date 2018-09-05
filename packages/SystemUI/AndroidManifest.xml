@@ -165,6 +165,9 @@
     <!-- shortcut manager -->
     <uses-permission android:name="android.permission.RESET_SHORTCUT_MANAGER_THROTTLING" />
 
+    <!-- permission necessary to hide non-system overlay windows from covering up the SystemUI -->
+    <uses-permission android:name="android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
