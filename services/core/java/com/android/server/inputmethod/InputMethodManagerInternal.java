@@ -28,6 +28,10 @@ public abstract class InputMethodManagerInternal {
     /**
      * Called by the window manager service when a client process is being attached to the window
      * manager service.
+     *
+     * <p>The caller must not have WindowManagerService lock.  This method internally acquires
+     * InputMethodManagerService lock.</p>
+     *
      * @param client {@link android.os.Binder} proxy that is associated with the singleton instance
      *               of {@link android.view.inputmethod.InputMethodManager} that runs on the client
      *               process
@@ -42,6 +46,10 @@ public abstract class InputMethodManagerInternal {
     /**
      * Called by the window manager service when a client process is being attached to the window
      * manager service.
+     *
+     * <p>The caller must not have WindowManagerService lock.  This method internally acquires
+     * InputMethodManagerService lock.</p>
+     *
      * @param client {@link android.os.Binder} proxy that is associated with the singleton instance
      *               of {@link android.view.inputmethod.InputMethodManager} that runs on the client
      *               process
