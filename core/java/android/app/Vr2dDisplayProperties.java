@@ -35,6 +35,7 @@ public final class Vr2dDisplayProperties implements Parcelable {
 
     public static final int FLAG_VIRTUAL_DISPLAY_ENABLED = 1;
 
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
         FLAG_VIRTUAL_DISPLAY_ENABLED
