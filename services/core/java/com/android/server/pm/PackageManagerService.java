@@ -8579,7 +8579,7 @@ public class PackageManagerService extends IPackageManager.Stub
      *  Traces a package scan.
      *  @see #scanPackageLI(File, int, int, long, UserHandle)
      */
-    @GuardedBy("mInstallLock")
+    @GuardedBy({"mInstallLock", "mPackages"})
     private PackageParser.Package scanPackageTracedLI(File scanFile, final int parseFlags,
             int scanFlags, long currentTime, UserHandle user) throws PackageManagerException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage [" + scanFile.toString() + "]");
