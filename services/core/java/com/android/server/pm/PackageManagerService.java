@@ -1988,6 +1988,14 @@ public class PackageManagerService extends IPackageManager.Stub
                             mRequiredVerifierPackage, null /*finishedReceiver*/,
                             updateUserIds, instantUserIds);
                 }
+                // If package installer is defined, notify package installer about new
+                // app installed
+                if (mRequiredInstallerPackage != null) {
+                    sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
+                            extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND /*flags*/,
+                            mRequiredInstallerPackage, null /*finishedReceiver*/,
+                            firstUserIds, instantUserIds);
+                }
 
                 // Send replaced for users that don't see the package for the first time
                 if (update) {

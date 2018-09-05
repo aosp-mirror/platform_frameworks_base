@@ -57,6 +57,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -84,7 +85,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -142,6 +142,10 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         public CountDownLatch getCountDownLatch() {
             return mCountDownLatch;
+        }
+
+        public ArrayList<NotificationLifetimeExtender> getLifetimeExtenders() {
+            return mNotificationLifetimeExtenders;
         }
     }
 
@@ -279,7 +283,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(mBarService, never()).onNotificationError(any(), any(), anyInt(), anyInt(), anyInt(),
                 any(), anyInt());
 
-        verify(mRemoteInputManager).onUpdateNotification(mEntry);
         verify(mPresenter).updateNotificationViews();
         verify(mForegroundServiceController).updateNotification(eq(mSbn), anyInt());
         verify(mCallback).onNotificationUpdated(mSbn);
@@ -301,8 +304,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 any(), anyInt());
 
         verify(mMediaManager).onNotificationRemoved(mSbn.getKey());
-        verify(mRemoteInputManager).onRemoveNotification(mEntry);
-        verify(mSmartReplyController).stopSending(mEntry);
         verify(mForegroundServiceController).removeNotification(mSbn);
         verify(mListContainer).cleanUpViewState(mRow);
         verify(mPresenter).updateNotificationViews();
@@ -313,17 +314,23 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testRemoveNotification_blockedBySendingSmartReply() throws Exception {
+    public void testRemoveNotification_blockedByLifetimeExtender() {
         com.android.systemui.util.Assert.isNotMainThread();
+
+        NotificationLifetimeExtender extender = mock(NotificationLifetimeExtender.class);
+        when(extender.shouldExtendLifetime(mEntry)).thenReturn(true);
+
+        ArrayList<NotificationLifetimeExtender> extenders = mEntryManager.getLifetimeExtenders();
+        extenders.clear();
+        extenders.add(extender);
 
         mEntry.row = mRow;
         mEntryManager.getNotificationData().add(mEntry);
-        when(mSmartReplyController.isSendingSmartReply(mEntry.key)).thenReturn(true);
 
         mEntryManager.removeNotification(mSbn.getKey(), mRankingMap);
 
         assertNotNull(mEntryManager.getNotificationData().get(mSbn.getKey()));
-        assertTrue(mEntryManager.isNotificationKeptForRemoteInput(mEntry.key));
+        verify(extender).setShouldExtendLifetime(mEntry, true);
     }
 
     @Test
@@ -408,61 +415,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         mEntryManager.tagForeground(mEntry.notification);
         Assert.assertEquals(0, mEntry.mActiveAppOps.size());
-    }
-
-    @Test
-    public void testRebuildWithRemoteInput_noExistingInputNoSpinner() {
-        StatusBarNotification newSbn =
-                mEntryManager.rebuildNotificationWithRemoteInput(mEntry, "A Reply", false);
-        CharSequence[] messages = newSbn.getNotification().extras
-                .getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY);
-        Assert.assertEquals(1, messages.length);
-        Assert.assertEquals("A Reply", messages[0]);
-        Assert.assertFalse(newSbn.getNotification().extras
-                .getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false));
-        Assert.assertTrue(newSbn.getNotification().extras
-                .getBoolean(Notification.EXTRA_HIDE_SMART_REPLIES, false));
-    }
-
-    @Test
-    public void testRebuildWithRemoteInput_noExistingInputWithSpinner() {
-        StatusBarNotification newSbn =
-                mEntryManager.rebuildNotificationWithRemoteInput(mEntry, "A Reply", true);
-        CharSequence[] messages = newSbn.getNotification().extras
-                .getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY);
-        Assert.assertEquals(1, messages.length);
-        Assert.assertEquals("A Reply", messages[0]);
-        Assert.assertTrue(newSbn.getNotification().extras
-                .getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false));
-        Assert.assertTrue(newSbn.getNotification().extras
-                .getBoolean(Notification.EXTRA_HIDE_SMART_REPLIES, false));
-    }
-
-    @Test
-    public void testRebuildWithRemoteInput_withExistingInput() {
-        // Setup a notification entry with 1 remote input.
-        StatusBarNotification newSbn =
-                mEntryManager.rebuildNotificationWithRemoteInput(mEntry, "A Reply", false);
-        NotificationData.Entry entry = new NotificationData.Entry(newSbn);
-
-        // Try rebuilding to add another reply.
-        newSbn = mEntryManager.rebuildNotificationWithRemoteInput(entry, "Reply 2", true);
-        CharSequence[] messages = newSbn.getNotification().extras
-                .getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY);
-        Assert.assertEquals(2, messages.length);
-        Assert.assertEquals("Reply 2", messages[0]);
-        Assert.assertEquals("A Reply", messages[1]);
-    }
-
-    @Test
-    public void testRebuildNotificationForCanceledSmartReplies() {
-        // Try rebuilding to remove spinner and hide buttons.
-        StatusBarNotification newSbn =
-                mEntryManager.rebuildNotificationForCanceledSmartReplies(mEntry);
-        Assert.assertFalse(newSbn.getNotification().extras
-                .getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false));
-        Assert.assertTrue(newSbn.getNotification().extras
-                .getBoolean(Notification.EXTRA_HIDE_SMART_REPLIES, false));
     }
 
     @Test

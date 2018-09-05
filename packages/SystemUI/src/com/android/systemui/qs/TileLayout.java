@@ -56,6 +56,10 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     public void addTile(TileRecord tile) {
         mRecords.add(tile);
         tile.tile.setListening(this, mListening);
+        addTileView(tile);
+    }
+
+    protected void addTileView(TileRecord tile) {
         addView(tile.tileView);
     }
 
@@ -120,19 +124,18 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         return false;
     }
 
-    private static int exactly(int size) {
+    protected static int exactly(int size) {
         return MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);
     }
 
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        final int w = getWidth();
+
+    protected void layoutTileRecords(int numRecords) {
         final boolean isRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
         int row = 0;
         int column = 0;
 
         // Layout each QS tile.
-        for (int i = 0; i < mRecords.size(); i++, column++) {
+        for (int i = 0; i < numRecords; i++, column++) {
             // If we reached the last column available to layout a tile, wrap back to the next row.
             if (column == mColumns) {
                 column = 0;
@@ -147,12 +150,22 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         }
     }
 
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        layoutTileRecords(mRecords.size());
+    }
+
     private int getRowTop(int row) {
         return row * (mCellHeight + mCellMarginVertical) + mCellMarginTop;
     }
 
-    private int getColumnStart(int column) {
+    protected int getColumnStart(int column) {
         return getPaddingStart() + mSidePadding + mCellMarginHorizontal / 2 +
                 column *  (mCellWidth + mCellMarginHorizontal);
+    }
+
+    @Override
+    public int getNumVisibleTiles() {
+        return mRecords.size();
     }
 }

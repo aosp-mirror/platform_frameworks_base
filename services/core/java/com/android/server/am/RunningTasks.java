@@ -16,13 +16,9 @@
 
 package com.android.server.am;
 
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration.ActivityType;
 import android.app.WindowConfiguration.WindowingMode;
-import android.util.SparseArray;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -45,7 +41,7 @@ class RunningTasks {
     private final ArrayList<TaskRecord> mTmpStackTasks = new ArrayList<>();
 
     void getTasks(int maxNum, List<RunningTaskInfo> list, @ActivityType int ignoreActivityType,
-            @WindowingMode int ignoreWindowingMode, SparseArray<ActivityDisplay> activityDisplays,
+            @WindowingMode int ignoreWindowingMode, ArrayList<ActivityDisplay> activityDisplays,
             int callingUid, boolean allowed) {
         // Return early if there are no tasks to fetch
         if (maxNum <= 0) {
@@ -56,7 +52,7 @@ class RunningTasks {
         mTmpSortedSet.clear();
         final int numDisplays = activityDisplays.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final ActivityDisplay display = activityDisplays.valueAt(displayNdx);
+            final ActivityDisplay display = activityDisplays.get(displayNdx);
             for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getChildAt(stackNdx);
                 mTmpStackTasks.clear();

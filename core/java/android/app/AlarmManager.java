@@ -1151,7 +1151,9 @@ public class AlarmManager {
         public void writeToProto(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
             proto.write(AlarmClockInfoProto.TRIGGER_TIME_MS, mTriggerTime);
-            mShowIntent.writeToProto(proto, AlarmClockInfoProto.SHOW_INTENT);
+            if (mShowIntent != null) {
+                mShowIntent.writeToProto(proto, AlarmClockInfoProto.SHOW_INTENT);
+            }
             proto.end(token);
         }
     }

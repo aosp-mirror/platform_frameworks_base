@@ -36,10 +36,20 @@ import java.util.stream.Stream;
  * remove notifications that appear on screen for a period of time and dismiss themselves at the
  * appropriate time.  These include heads up notifications and ambient pulses.
  */
-public abstract class AlertingNotificationManager {
+public abstract class AlertingNotificationManager implements NotificationLifetimeExtender {
     private static final String TAG = "AlertNotifManager";
     protected final Clock mClock = new Clock();
     protected final ArrayMap<String, AlertEntry> mAlertEntries = new ArrayMap<>();
+
+    /**
+     * This is the list of entries that have already been removed from the
+     * NotificationManagerService side, but we keep it to prevent the UI from looking weird and
+     * will remove when possible. See {@link NotificationLifetimeExtender}
+     */
+    protected final ArraySet<NotificationData.Entry> mExtendedLifetimeAlertEntries =
+            new ArraySet<>();
+
+    protected NotificationSafeToRemoveCallback mNotificationLifetimeFinishedCallback;
     protected int mMinimumDisplayTime;
     protected int mAutoDismissNotificationDecay;
     @VisibleForTesting
@@ -74,7 +84,7 @@ public abstract class AlertingNotificationManager {
         if (alertEntry == null) {
             return true;
         }
-        if (releaseImmediately || alertEntry.wasShownLongEnough()) {
+        if (releaseImmediately || canRemoveImmediately(key)) {
             removeAlertEntry(key);
         } else {
             alertEntry.removeAsSoonAsPossible();
@@ -191,6 +201,12 @@ public abstract class AlertingNotificationManager {
         onAlertEntryRemoved(alertEntry);
         entry.row.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         alertEntry.reset();
+        if (mExtendedLifetimeAlertEntries.contains(entry)) {
+            if (mNotificationLifetimeFinishedCallback != null) {
+                mNotificationLifetimeFinishedCallback.onSafeToRemove(key);
+            }
+            mExtendedLifetimeAlertEntries.remove(entry);
+        }
     }
 
     /**
@@ -207,6 +223,40 @@ public abstract class AlertingNotificationManager {
         return new AlertEntry();
     }
 
+    /**
+     * Whether or not the alert can be removed currently.  If it hasn't been on screen long enough
+     * it should not be removed unless forced
+     * @param key the key to check if removable
+     * @return true if the alert entry can be removed
+     */
+    protected boolean canRemoveImmediately(String key) {
+        AlertEntry alertEntry = mAlertEntries.get(key);
+        return alertEntry == null || alertEntry.wasShownLongEnough();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // NotificationLifetimeExtender Methods
+
+    @Override
+    public void setCallback(NotificationSafeToRemoveCallback callback) {
+        mNotificationLifetimeFinishedCallback = callback;
+    }
+
+    @Override
+    public boolean shouldExtendLifetime(NotificationData.Entry entry) {
+        return !canRemoveImmediately(entry.key);
+    }
+
+    @Override
+    public void setShouldExtendLifetime(NotificationData.Entry entry, boolean shouldExtend) {
+        if (shouldExtend) {
+            mExtendedLifetimeAlertEntries.add(entry);
+        } else {
+            mExtendedLifetimeAlertEntries.remove(entry);
+        }
+    }
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     protected class AlertEntry implements Comparable<AlertEntry> {
         @Nullable public NotificationData.Entry mEntry;
         public long mPostTime;
@@ -214,11 +264,11 @@ public abstract class AlertingNotificationManager {
 
         @Nullable protected Runnable mRemoveAlertRunnable;
 
-        public void setEntry(@Nullable final NotificationData.Entry entry) {
+        public void setEntry(@NonNull final NotificationData.Entry entry) {
             setEntry(entry, () -> removeAlertEntry(entry.key));
         }
 
-        public void setEntry(@Nullable final NotificationData.Entry entry,
+        public void setEntry(@NonNull final NotificationData.Entry entry,
                 @Nullable Runnable removeAlertRunnable) {
             mEntry = entry;
             mRemoveAlertRunnable = removeAlertRunnable;

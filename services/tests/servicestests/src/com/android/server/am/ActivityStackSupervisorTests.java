@@ -33,9 +33,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -46,7 +44,6 @@ import android.app.ActivityOptions;
 import android.app.WaitResult;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.util.SparseIntArray;
 
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -54,7 +51,6 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
 
 import java.util.ArrayList;
 
@@ -246,22 +242,6 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
                 null /* target */, null /* targetOptions */);
     }
 
-    @Test
-    public void testTopRunningActivityLockedWithNonExistentDisplay() throws Exception {
-        // Create display that ActivityManagerService does not know about
-        final int unknownDisplayId = 100;
-
-        doAnswer((InvocationOnMock invocationOnMock) -> {
-            final SparseIntArray displayIds = invocationOnMock.<SparseIntArray>getArgument(0);
-            displayIds.put(0, 0);
-            displayIds.put(1, unknownDisplayId);
-            return null;
-        }).when(mSupervisor.mWindowManager).getDisplaysInFocusOrder(any());
-
-        // Supervisor should skip over the non-existent display.
-        assertEquals(null, mSupervisor.topRunningActivityLocked());
-    }
-
     /**
      * Verifies that removal of activity with task and stack is done correctly.
      */
@@ -338,12 +318,6 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final ActivityRecord activity = new ActivityBuilder(mService).setCreateTask(true)
                 .setStack(stack).build();
-
-        doAnswer((InvocationOnMock invocationOnMock) -> {
-            final SparseIntArray displayIds = invocationOnMock.<SparseIntArray>getArgument(0);
-            displayIds.put(0, display.mDisplayId);
-            return null;
-        }).when(mSupervisor.mWindowManager).getDisplaysInFocusOrder(any());
 
         // Make sure the top running activity is not affected when keyguard is not locked
         assertEquals(activity, mService.mStackSupervisor.topRunningActivityLocked());

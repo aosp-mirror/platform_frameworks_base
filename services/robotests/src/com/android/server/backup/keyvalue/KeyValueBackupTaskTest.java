@@ -63,6 +63,7 @@ import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 import static org.robolectric.shadow.api.Shadow.extract;
 import static org.testng.Assert.fail;
+import static org.testng.Assert.expectThrows;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Collections.emptyList;
@@ -1939,6 +1940,29 @@ public class KeyValueBackupTaskTest {
         runTask(task);
 
         task.markCancel();
+    }
+
+    @Test
+    public void testHandleCancel_callsMarkCancelAndWaitCancel() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgentWithData(PACKAGE_1);
+        KeyValueBackupTask task = spy(createKeyValueBackupTask(transportMock, PACKAGE_1));
+        doNothing().when(task).waitCancel();
+
+        task.handleCancel(true);
+
+        InOrder inOrder = inOrder(task);
+        inOrder.verify(task).markCancel();
+        inOrder.verify(task).waitCancel();
+    }
+
+    @Test
+    public void testHandleCancel_whenCancelAllFalse_throws() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgentWithData(PACKAGE_1);
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+
+        expectThrows(IllegalArgumentException.class, () -> task.handleCancel(false));
     }
 
     private void runTask(KeyValueBackupTask task) {

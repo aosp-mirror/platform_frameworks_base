@@ -191,7 +191,9 @@ void RenderThread::requireGlContext() {
     GrContextOptions options;
     options.fPreferExternalImagesOverES3 = true;
     options.fDisableDistanceFieldPaths = true;
-    cacheManager().configureContext(&options);
+    auto glesVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+    auto size = glesVersion ? strlen(glesVersion) : -1;
+    cacheManager().configureContext(&options, glesVersion, size);
     sk_sp<GrContext> grContext(GrContext::MakeGL(std::move(glInterface), options));
     LOG_ALWAYS_FATAL_IF(!grContext.get());
     setGrContext(grContext);

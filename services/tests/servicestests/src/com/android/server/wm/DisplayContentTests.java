@@ -446,24 +446,6 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(anotherAlwaysOnTopStack, mDisplayContent.getStacks().get(topPosition - 1));
     }
 
-    /**
-     * Test that WM does not report displays to AM that are pending to be removed.
-     */
-    @Test
-    public void testDontReportDeferredRemoval() {
-        // Create a display and add an animating window to it.
-        final DisplayContent dc = createNewDisplay();
-        final WindowState window = createWindow(null /* parent */, TYPE_BASE_APPLICATION, dc, "w");
-        window.mAnimatingExit = true;
-        // Request display removal, it should be deferred.
-        dc.removeIfPossible();
-        // Request ordered display ids from WM.
-        final SparseIntArray orderedDisplayIds = new SparseIntArray();
-        sWm.getDisplaysInFocusOrder(orderedDisplayIds);
-        // Make sure that display that is marked for removal is not reported.
-        assertEquals(-1, orderedDisplayIds.indexOfValue(dc.getDisplayId()));
-    }
-
     @Test
     public void testDisplayCutout_rot0() throws Exception {
         synchronized (sWm.getWindowManagerLock()) {

@@ -22,6 +22,8 @@ import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -30,6 +32,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.spy;
@@ -54,6 +57,7 @@ import android.view.View;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationTestHelper;
@@ -99,7 +103,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         mHelper = new NotificationTestHelper(mContext);
 
         mGutsManager = new NotificationGutsManager(mContext);
-        mGutsManager.setUpWithPresenter(mPresenter, mEntryManager, mStackScroller,
+        mGutsManager.setUpWithPresenter(mPresenter, mStackScroller,
                 mCheckSaveListener, mOnSettingsClickListener);
     }
 
@@ -344,6 +348,35 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(false) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */);
+    }
+
+    @Test
+    public void testShouldExtendLifetime() {
+        NotificationGuts guts = new NotificationGuts(mContext);
+        ExpandableNotificationRow row = spy(createTestNotificationRow());
+        doReturn(guts).when(row).getGuts();
+        NotificationData.Entry entry = row.getEntry();
+        entry.row = row;
+        mGutsManager.setExposedGuts(guts);
+
+        assertTrue(mGutsManager.shouldExtendLifetime(entry));
+    }
+
+    @Test
+    public void testSetShouldExtendLifetime_setShouldExtend() {
+        NotificationData.Entry entry = createTestNotificationRow().getEntry();
+        mGutsManager.setShouldExtendLifetime(entry, true /* shouldExtend */);
+
+        assertTrue(entry.key.equals(mGutsManager.mKeyToRemoveOnGutsClosed));
+    }
+
+    @Test
+    public void testSetShouldExtendLifetime_setShouldNotExtend() {
+        NotificationData.Entry entry = createTestNotificationRow().getEntry();
+        mGutsManager.mKeyToRemoveOnGutsClosed = entry.key;
+        mGutsManager.setShouldExtendLifetime(entry, false /* shouldExtend */);
+
+        assertNull(mGutsManager.mKeyToRemoveOnGutsClosed);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
