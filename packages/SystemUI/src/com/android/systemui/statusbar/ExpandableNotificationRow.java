@@ -2747,16 +2747,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             case AccessibilityNodeInfo.ACTION_LONG_CLICK:
                 doLongClickCallback();
                 return true;
-            case R.id.action_snooze:
-                NotificationMenuRowPlugin provider = getProvider();
-                if (provider == null) {
-                    provider = createMenu();
+            default:
+                if (action == R.id.action_snooze) {
+                    NotificationMenuRowPlugin provider = getProvider();
+                    if (provider == null) {
+                        provider = createMenu();
+                    }
+                    MenuItem snoozeMenu = provider.getSnoozeMenuItem(getContext());
+                    if (snoozeMenu != null) {
+                        doLongClickCallback(getWidth() / 2, getHeight() / 2, snoozeMenu);
+                    }
+                    return true;
                 }
-                MenuItem snoozeMenu = provider.getSnoozeMenuItem(getContext());
-                if (snoozeMenu != null) {
-                    doLongClickCallback(getWidth() / 2, getHeight() / 2, snoozeMenu);
-                }
-                return true;
         }
         return false;
     }
