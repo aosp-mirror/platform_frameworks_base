@@ -38,7 +38,6 @@ public:
               FrameInfoVisualizer* profiler) override;
     bool swapBuffers(const renderthread::Frame& frame, bool drew, const SkRect& screenDirty,
                      FrameInfo* currentFrameInfo, bool* requireSwap) override;
-    bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) override;
     DeferredLayerUpdater* createTextureLayer() override;
     bool setSurface(Surface* window, renderthread::SwapBehavior swapBehavior,
                     renderthread::ColorMode colorMode) override;

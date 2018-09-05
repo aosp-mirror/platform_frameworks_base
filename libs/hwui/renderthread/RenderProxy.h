@@ -125,7 +125,7 @@ public:
                                            int bottom, SkBitmap* bitmap);
     ANDROID_API static void prepareToDraw(Bitmap& bitmap);
 
-    static int copyGraphicBufferInto(GraphicBuffer* buffer, SkBitmap* bitmap);
+    static int copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap);
 
     static void onBitmapDestroyed(uint32_t pixelRefId);
 

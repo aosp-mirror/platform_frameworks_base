@@ -108,11 +108,6 @@ bool SkiaVulkanPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect
     return *requireSwap;
 }
 
-bool SkiaVulkanPipeline::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
-    // TODO: implement copyLayerInto for vulkan.
-    return false;
-}
-
 DeferredLayerUpdater* SkiaVulkanPipeline::createTextureLayer() {
     mVkManager.initialize();
 

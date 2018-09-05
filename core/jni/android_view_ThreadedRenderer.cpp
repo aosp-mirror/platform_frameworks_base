@@ -1024,6 +1024,9 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
         // Continue I guess?
     }
     sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer);
+    // Bitmap::createFrom currently can only attach to a GraphicBuffer with PIXEL_FORMAT_RGBA_8888
+    // format and SRGB color space.
+    // To support any color space, we could extract it from BufferItem and pass it to Bitmap.
     return bitmap::createBitmap(env, bitmap.release(),
             android::bitmap::kBitmapCreateFlag_Premultiplied);
 }

@@ -60,7 +60,6 @@ public:
                       FrameInfoVisualizer* profiler) = 0;
     virtual bool swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
                              FrameInfo* currentFrameInfo, bool* requireSwap) = 0;
-    virtual bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) = 0;
     virtual DeferredLayerUpdater* createTextureLayer() = 0;
     virtual bool setSurface(Surface* window, SwapBehavior swapBehavior, ColorMode colorMode) = 0;
     virtual void onStop() = 0;
