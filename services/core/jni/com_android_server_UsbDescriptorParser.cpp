@@ -25,6 +25,7 @@
 #include <usbhost/usbhost.h>
 
 #define MAX_DESCRIPTORS_LENGTH 4096
+static const int USB_CONTROL_TRANSFER_TIMEOUT_MS = 200;
 
 // com.android.server.usb.descriptors
 extern "C" {
@@ -85,8 +86,9 @@ jstring JNICALL Java_com_android_server_usb_descriptors_UsbDescriptorParser_getD
     jbyte* byteBuffer = NULL;
     size_t numUSC2Bytes = 0;
     int retVal =
-            usb_device_get_string_ucs2(device, stringId, 0 /*timeout*/,
-                                     (void**)&byteBuffer, &numUSC2Bytes);
+            usb_device_get_string_ucs2(device, stringId,
+                                       USB_CONTROL_TRANSFER_TIMEOUT_MS,
+                                       (void**)&byteBuffer, &numUSC2Bytes);
 
     jstring j_str = NULL;
 
