@@ -77,15 +77,14 @@ public class QuickStepController implements GestureHelper {
     /** Experiment to swipe home button left to execute a back key press */
     private static final String PULL_HOME_GO_BACK_PROP = "persist.quickstepcontroller.homegoesback";
     private static final String HIDE_BACK_BUTTON_PROP = "persist.quickstepcontroller.hideback";
+    private static final String BACK_AFTER_END_PROP
+            = "persist.quickstepcontroller.homegoesbackwhenend";
     private static final long BACK_BUTTON_FADE_OUT_ALPHA = 60;
     private static final long BACK_BUTTON_FADE_IN_ALPHA = 150;
     private static final long BACK_GESTURE_POLL_TIMEOUT = 1000;
 
     /** When the home-swipe-back gesture is disallowed, make it harder to pull */
     private static final float DISALLOW_GESTURE_DAMPING_FACTOR = 0.16f;
-
-    /** When dragging the home button too far during back gesture, make it harder to pull */
-    private static final float EXCEED_DRAG_HOME_DAMPING_FACTOR = 0.33f;
 
     private NavigationBarView mNavigationBarView;
 
@@ -361,7 +360,7 @@ public class QuickStepController implements GestureHelper {
                         // Once the user drags the home button past a certain limit, the distance
                         // will lessen as the home button dampens showing that it was pulled too far
                         float distanceAfterDragLimit = (Math.abs(diff) - mHomeBackGestureDragLimit)
-                                * EXCEED_DRAG_HOME_DAMPING_FACTOR;
+                                * DISALLOW_GESTURE_DAMPING_FACTOR;
                         diff = (int)(distanceAfterDragLimit + mHomeBackGestureDragLimit);
                         if (mDragPositive) {
                             diff *= -1;
@@ -580,15 +579,21 @@ public class QuickStepController implements GestureHelper {
         if (!mBackGestureActive) {
             mBackGestureActive = true;
             mNavigationBarView.getHomeButton().abortCurrentGesture();
+            final boolean runBackMidGesture
+                    = !SystemProperties.getBoolean(BACK_AFTER_END_PROP, false);
             if (mCanPerformBack) {
                 if (!shouldhideBackButton()) {
                     mNavigationBarView.getBackButton().setAlpha(0 /* alpha */, true /* animate */,
                             BACK_BUTTON_FADE_OUT_ALPHA);
                 }
-                performBack();
+                if (runBackMidGesture) {
+                    performBack();
+                }
             }
             mHandler.removeCallbacks(mExecuteBackRunnable);
-            mHandler.postDelayed(mExecuteBackRunnable, BACK_GESTURE_POLL_TIMEOUT);
+            if (runBackMidGesture) {
+                mHandler.postDelayed(mExecuteBackRunnable, BACK_GESTURE_POLL_TIMEOUT);
+            }
         }
     }
 
@@ -608,6 +613,9 @@ public class QuickStepController implements GestureHelper {
             if (!shouldhideBackButton()) {
                 mNavigationBarView.getBackButton().setAlpha(
                         mOverviewEventSender.getBackButtonAlpha(), true /* animate */);
+            }
+            if (SystemProperties.getBoolean(BACK_AFTER_END_PROP, false)) {
+                performBack();
             }
         }
     }
