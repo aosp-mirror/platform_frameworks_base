@@ -408,11 +408,15 @@ public class UsbHostManager {
     /* Called from JNI in monitorUsbHostBus to report USB device removal */
     @SuppressWarnings("unused")
     private void usbDeviceRemoved(String deviceAddress) {
+        if (DEBUG) {
+            Slog.d(TAG, "usbDeviceRemoved(" + deviceAddress + ") end");
+        }
+
         synchronized (mLock) {
             UsbDevice device = mDevices.remove(deviceAddress);
             if (device != null) {
                 Slog.d(TAG, "Removed device at " + deviceAddress + ": " + device.getProductName());
-                mUsbAlsaManager.usbDeviceRemoved(deviceAddress/*device*/);
+                mUsbAlsaManager.usbDeviceRemoved(deviceAddress);
                 mSettingsManager.usbDeviceRemoved(device);
                 getCurrentUserSettings().usbDeviceRemoved(device);
 

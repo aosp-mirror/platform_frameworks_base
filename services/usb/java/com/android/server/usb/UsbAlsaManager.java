@@ -44,6 +44,10 @@ public final class UsbAlsaManager {
     private static final String TAG = UsbAlsaManager.class.getSimpleName();
     private static final boolean DEBUG = false;
 
+    // Flag to turn on/off multi-peripheral select mode
+    // Set to true to have single-device-only mode
+    private static final boolean mIsSingleMode = true;
+
     private static final String ALSA_DIRECTORY = "/dev/snd/";
 
     private final Context mContext;
@@ -84,10 +88,11 @@ public final class UsbAlsaManager {
      */
     private synchronized void selectAlsaDevice(UsbAlsaDevice alsaDevice) {
         if (DEBUG) {
-            Slog.d(TAG, "selectAlsaDevice " + alsaDevice);
+            Slog.d(TAG, "selectAlsaDevice() " + alsaDevice);
         }
 
-        if (mSelectedDevice != null) {
+        // This must be where an existing USB audio device is deselected.... (I think)
+        if (mIsSingleMode && mSelectedDevice != null) {
             deselectAlsaDevice();
         }
 
@@ -104,9 +109,15 @@ public final class UsbAlsaManager {
 
         mSelectedDevice = alsaDevice;
         alsaDevice.start();
+        if (DEBUG) {
+            Slog.d(TAG, "selectAlsaDevice() - done.");
+        }
     }
 
     private synchronized void deselectAlsaDevice() {
+        if (DEBUG) {
+            Slog.d(TAG, "deselectAlsaDevice() mSelectedDevice " + mSelectedDevice);
+        }
         if (mSelectedDevice != null) {
             mSelectedDevice.stop();
             mSelectedDevice = null;
@@ -133,7 +144,7 @@ public final class UsbAlsaManager {
 
     /* package */ UsbAlsaDevice selectDefaultDevice() {
         if (DEBUG) {
-            Slog.d(TAG, "UsbAudioManager.selectDefaultDevice()");
+            Slog.d(TAG, "selectDefaultDevice()");
         }
 
         if (mAlsaDevices.size() > 0) {
@@ -230,6 +241,8 @@ public final class UsbAlsaManager {
             }
         }
 
+        logDevices("deviceAdded()");
+
         if (DEBUG) {
             Slog.d(TAG, "deviceAdded() - done");
         }
@@ -254,6 +267,9 @@ public final class UsbAlsaManager {
             Slog.i(TAG, "USB MIDI Device Removed: " + usbMidiDevice);
             IoUtils.closeQuietly(usbMidiDevice);
         }
+
+        logDevices("usbDeviceRemoved()");
+
     }
 
    /* package */ void setPeripheralMidiState(boolean enabled, int card, int device) {
@@ -296,6 +312,7 @@ public final class UsbAlsaManager {
     /**
      * Dump the USB alsa state.
      */
+    // invoked with "adb shell dumpsys usb"
     public void dump(DualDumpOutputStream dump, String idName, long id) {
         long token = dump.start(idName, id);
 
@@ -314,29 +331,26 @@ public final class UsbAlsaManager {
         dump.end(token);
     }
 
-/*
     public void logDevicesList(String title) {
-      if (DEBUG) {
-          for (HashMap.Entry<UsbDevice,UsbAlsaDevice> entry : mAudioDevices.entrySet()) {
-              Slog.i(TAG, "UsbDevice-------------------");
-              Slog.i(TAG, "" + (entry != null ? entry.getKey() : "[none]"));
-              Slog.i(TAG, "UsbAlsaDevice--------------");
-              Slog.i(TAG, "" + entry.getValue());
-          }
-      }
+        if (DEBUG) {
+            Slog.i(TAG, title + "----------------");
+            for (UsbAlsaDevice alsaDevice : mAlsaDevices) {
+                Slog.i(TAG, "  -->");
+                Slog.i(TAG, "" + alsaDevice);
+                Slog.i(TAG, "  <--");
+            }
+            Slog.i(TAG, "----------------");
+        }
     }
-*/
 
     // This logs a more terse (and more readable) version of the devices list
-/*
     public void logDevices(String title) {
-      if (DEBUG) {
-          Slog.i(TAG, title);
-          for (HashMap.Entry<UsbDevice,UsbAlsaDevice> entry : mAudioDevices.entrySet()) {
-              Slog.i(TAG, entry.getValue().toShortString());
-          }
-      }
+        if (DEBUG) {
+            Slog.i(TAG, title + "----------------");
+            for (UsbAlsaDevice alsaDevice : mAlsaDevices) {
+                Slog.i(TAG, alsaDevice.toShortString());
+            }
+            Slog.i(TAG, "----------------");
+        }
     }
-*/
-
 }
