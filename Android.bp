@@ -25,8 +25,8 @@
 //
 // READ ME: ########################################################
 
-java_library {
-    name: "framework",
+java_defaults {
+    name: "framework-defaults",
     installable: true,
 
     srcs: [
@@ -703,11 +703,37 @@ java_library {
         "libmedia2_jni",
     ],
 
-    javac_shard_size: 150,
-
     dxflags: [
         "--core-library",
         "--multi-dex",
+    ],
+
+}
+
+java_library {
+    name: "framework",
+    defaults: ["framework-defaults"],
+    javac_shard_size: 150,
+}
+
+java_library {
+    name: "framework-annotation-proc",
+    defaults: ["framework-defaults"],
+    // Use UsedByApps annotation processor
+    annotation_processors: ["unsupportedappusage-annotation-processor"],
+    // b/25860419: annotation processors must be explicitly specified for grok
+    annotation_processor_classes: [
+        "android.processor.unsupportedappusage.UsedByAppsProcessor",
+    ],
+}
+
+// A host library including just UnsupportedAppUsage.java so that the annotation
+// processor can also use this annotation.
+java_library_host {
+    name: "unsupportedappusage-annotation",
+    srcs: [
+        "core/java/android/annotation/IntDef.java",
+        "core/java/android/annotation/UnsupportedAppUsage.java",
     ],
 }
 
