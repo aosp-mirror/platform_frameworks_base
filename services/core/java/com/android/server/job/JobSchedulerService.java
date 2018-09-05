@@ -2413,6 +2413,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 BatteryStatsInternal mBatteryStatsInternal = LocalServices.getService
                         (BatteryStatsInternal.class);
                 mBatteryStatsInternal.noteJobsDeferred(uid, counter.numDeferred(), sinceLast);
+                StatsLog.write_non_chained(StatsLog.DEFERRED_JOB_STATS_REPORTED, uid, null,
+                        counter.numDeferred(), sinceLast);
             }
         }
     }
