@@ -70,6 +70,7 @@ import com.android.internal.os.KernelUidCpuFreqTimeReader;
 import com.android.internal.os.KernelUidCpuTimeReader;
 import com.android.internal.os.KernelWakelockReader;
 import com.android.internal.os.KernelWakelockStats;
+import com.android.internal.os.LooperStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.util.DumpUtils;
 import com.android.server.BinderCallsStatsService;
@@ -938,6 +939,29 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    private void pullLooperStats(int tagId, List<StatsLogEventWrapper> pulledData) {
+        LooperStats looperStats = LocalServices.getService(LooperStats.class);
+        if (looperStats == null) {
+            return;
+        }
+
+        List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+        for (LooperStats.ExportedEntry entry : entries) {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 9 /* fields */);
+            e.writeLong(0); // uid collection not implemented yet
+            e.writeString(entry.handlerClassName);
+            e.writeString(entry.threadName);
+            e.writeString(entry.messageName);
+            e.writeLong(entry.messageCount);
+            e.writeLong(entry.exceptionCount);
+            e.writeLong(entry.recordedMessageCount);
+            e.writeLong(entry.totalLatencyMicros);
+            e.writeLong(entry.cpuUsageMicros);
+            pulledData.add(e);
+        }
+    }
+
     /**
      * Pulls various data.
      */
@@ -1026,6 +1050,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.BINDER_CALLS_EXCEPTIONS: {
                 pullBinderCallsStatsExceptions(tagId, ret);
+                break;
+            }
+            case StatsLog.LOOPER_STATS: {
+                pullLooperStats(tagId, ret);
                 break;
             }
             default:
