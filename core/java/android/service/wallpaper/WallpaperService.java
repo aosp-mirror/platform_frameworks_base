@@ -164,8 +164,7 @@ public abstract class WallpaperService extends Service {
         int mType;
         int mCurWidth;
         int mCurHeight;
-        int mWindowFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                         | WindowManager.LayoutParams.FLAG_SCALED;
+        int mWindowFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
         int mWindowPrivateFlags =
                 WindowManager.LayoutParams.PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS;
         int mCurWindowFlags = mWindowFlags;
@@ -776,6 +775,7 @@ public abstract class WallpaperService extends Service {
                         mDisplay.getDisplayInfo(displayInfo);
                         mLayout.width = Math.max(displayInfo.logicalWidth, myWidth);
                         mLayout.height = Math.max(displayInfo.logicalHeight, myHeight);
+                        mWindowFlags |= WindowManager.LayoutParams.FLAG_SCALED;
                     }
 
                     mLayout.format = mFormat;
@@ -785,8 +785,7 @@ public abstract class WallpaperService extends Service {
                             | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                             | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
                             | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                            | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                            | WindowManager.LayoutParams.FLAG_SCALED;
+                            | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
                     mCurWindowPrivateFlags = mWindowPrivateFlags;
                     mLayout.privateFlags = mWindowPrivateFlags;
 
