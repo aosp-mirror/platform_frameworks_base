@@ -734,8 +734,9 @@ public class WindowManagerService extends IWindowManager.Stub
     final DisplayManagerInternal mDisplayManagerInternal;
     final DisplayManager mDisplayManager;
 
-    // Indicates whether this device supports wide color gamut rendering
+    // Indicates whether this device supports wide color gamut / HDR rendering
     private boolean mHasWideColorGamutSupport;
+    private boolean mHasHdrSupport;
 
     // Who is holding the screen on.
     private Session mHoldingScreenOn;
@@ -4504,6 +4505,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.systemReady();
         mTaskSnapshotController.systemReady();
         mHasWideColorGamutSupport = queryWideColorGamutSupport();
+        mHasHdrSupport = queryHdrSupport();
     }
 
     private static boolean queryWideColorGamutSupport() {
@@ -4512,6 +4514,19 @@ public class WindowManagerService extends IWindowManager.Stub
             OptionalBool hasWideColor = surfaceFlinger.hasWideColorDisplay();
             if (hasWideColor != null) {
                 return hasWideColor.value;
+            }
+        } catch (RemoteException e) {
+            // Ignore, we're in big trouble if we can't talk to SurfaceFlinger's config store
+        }
+        return false;
+    }
+
+    private static boolean queryHdrSupport() {
+        try {
+            ISurfaceFlingerConfigs surfaceFlinger = ISurfaceFlingerConfigs.getService();
+            OptionalBool hasHdr = surfaceFlinger.hasHDRDisplay();
+            if (hasHdr != null) {
+                return hasHdr.value;
             }
         } catch (RemoteException e) {
             // Ignore, we're in big trouble if we can't talk to SurfaceFlinger's config store
@@ -7497,6 +7512,10 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean hasWideColorGamutSupport() {
         return mHasWideColorGamutSupport &&
                 SystemProperties.getInt("persist.sys.sf.native_mode", 0) != 1;
+    }
+
+    boolean hasHdrSupport() {
+        return mHasHdrSupport && hasWideColorGamutSupport();
     }
 
     void updateNonSystemOverlayWindowsVisibilityIfNeeded(WindowState win, boolean surfaceShown) {
