@@ -3205,20 +3205,6 @@ String8 ResTable_config::toString() const {
                 break;
         }
     }
-    if ((colorMode&MASK_HDR) != 0) {
-        if (res.size() > 0) res.append("-");
-        switch (colorMode&MASK_HDR) {
-            case ResTable_config::HDR_NO:
-                res.append("lowdr");
-                break;
-            case ResTable_config::HDR_YES:
-                res.append("highdr");
-                break;
-            default:
-                res.appendFormat("hdr=%d", dtohs(colorMode&MASK_HDR));
-                break;
-        }
-    }
     if ((colorMode&MASK_WIDE_COLOR_GAMUT) != 0) {
         if (res.size() > 0) res.append("-");
         switch (colorMode&MASK_WIDE_COLOR_GAMUT) {
@@ -3230,6 +3216,20 @@ String8 ResTable_config::toString() const {
                 break;
             default:
                 res.appendFormat("wideColorGamut=%d", dtohs(colorMode&MASK_WIDE_COLOR_GAMUT));
+                break;
+        }
+    }
+    if ((colorMode&MASK_HDR) != 0) {
+        if (res.size() > 0) res.append("-");
+        switch (colorMode&MASK_HDR) {
+            case ResTable_config::HDR_NO:
+                res.append("lowdr");
+                break;
+            case ResTable_config::HDR_YES:
+                res.append("highdr");
+                break;
+            default:
+                res.appendFormat("hdr=%d", dtohs(colorMode&MASK_HDR));
                 break;
         }
     }
