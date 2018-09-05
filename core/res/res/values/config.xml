@@ -913,7 +913,7 @@
     <!--  Control whether to lock day/night mode change from normal application. When it is
           true, day / night mode change is only allowed to apps with MODIFY_DAY_NIGHT_MODE
           permission. -->
-    <bool name="config_lockDayNightMode">false</bool>
+    <bool name="config_lockDayNightMode">true</bool>
 
     <!-- Control the default night mode to use when there is no other mode override set.
          One of the following values (see UiModeManager.java):
