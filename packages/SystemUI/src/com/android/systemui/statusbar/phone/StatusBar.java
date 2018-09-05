@@ -328,14 +328,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     /** If true, the lockscreen will show a distinct wallpaper */
     private static final boolean ENABLE_LOCKSCREEN_WALLPAPER = true;
 
-    /**
-     * Never let the alpha become zero for surfaces that draw with SRC - otherwise the RenderNode
-     * won't draw anything and uninitialized memory will show through
-     * if mScrimSrcModeEnabled. Note that 0.001 is rounded down to 0 in
-     * libhwui.
-     */
-    private static final float SRC_MIN_ALPHA = 0.002f;
-
     static {
         boolean onlyCoreApps;
         try {
@@ -485,7 +477,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected boolean mDozing;
     private boolean mDozingRequested;
-    protected boolean mScrimSrcModeEnabled;
 
     protected BackDropView mBackdrop;
     protected ImageView mBackdropFront, mBackdropBack;
@@ -652,7 +643,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mVibrateOnOpening = mContext.getResources().getBoolean(
                 R.bool.config_vibrateOnIconAnimation);
         mVibratorHelper = Dependency.get(VibratorHelper.class);
-        mScrimSrcModeEnabled = res.getBoolean(R.bool.config_status_bar_scrim_behind_use_src);
 
         DateTimeView.setReceiverHandler(Dependency.get(Dependency.TIME_TICK_HANDLER));
         putComponent(StatusBar.class, this);
@@ -948,15 +938,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                     }
                 }, DozeParameters.getInstance(mContext),
                 mContext.getSystemService(AlarmManager.class));
-        if (mScrimSrcModeEnabled) {
-            Runnable runnable = () -> {
-                boolean asSrc = mBackdrop.getVisibility() != View.VISIBLE;
-                mScrimController.setDrawBehindAsSrc(asSrc);
-                mNotificationPanel.setDrawBackgroundAsSrc(asSrc);
-            };
-            mBackdrop.setOnVisibilityChangedRunnable(runnable);
-            runnable.run();
-        }
         mNotificationPanel.initDependencies(this, mGroupManager, mNotificationShelf,
                 mHeadsUpManager, mNotificationIconAreaController, mScrimController);
         mDozeScrimController = new DozeScrimController(mScrimController, context,
@@ -1483,7 +1464,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (mBackdrop.getVisibility() != View.VISIBLE) {
                 mBackdrop.setVisibility(View.VISIBLE);
                 if (allowEnterAnimation) {
-                    mBackdrop.setAlpha(SRC_MIN_ALPHA);
+                    mBackdrop.setAlpha(0);
                     mBackdrop.animate().alpha(1f);
                 } else {
                     mBackdrop.animate().cancel();
@@ -1501,9 +1482,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                             mBackdropBack.getDrawable().getConstantState()
                                     .newDrawable(mBackdropFront.getResources()).mutate();
                     mBackdropFront.setImageDrawable(drawable);
-                    if (mScrimSrcModeEnabled) {
-                        mBackdropFront.getDrawable().mutate().setXfermode(mSrcOverXferMode);
-                    }
                     mBackdropFront.setAlpha(1f);
                     mBackdropFront.setVisibility(View.VISIBLE);
                 } else {
@@ -1517,9 +1495,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mBackdropBack.setImageDrawable(new ColorDrawable(c));
                 } else {
                     mBackdropBack.setImageDrawable(artworkDrawable);
-                }
-                if (mScrimSrcModeEnabled) {
-                    mBackdropBack.getDrawable().mutate().setXfermode(mSrcXferMode);
                 }
 
                 if (mBackdropFront.getVisibility() == View.VISIBLE) {
@@ -1553,7 +1528,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 } else {
                     mStatusBarWindowController.setBackdropShowing(false);
                     mBackdrop.animate()
-                            .alpha(SRC_MIN_ALPHA)
+                            .alpha(0)
                             .setInterpolator(Interpolators.ACCELERATE_DECELERATE)
                             .setDuration(300)
                             .setStartDelay(0)
@@ -1763,10 +1738,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override  // NotificationData.Environment
     public String getCurrentMediaNotificationKey() {
         return mMediaManager.getMediaNotificationKey();
-    }
-
-    public boolean isScrimSrcModeEnabled() {
-        return mScrimSrcModeEnabled;
     }
 
     /**
@@ -3410,7 +3381,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             updateScrimController();
             updateMediaMetaData(false, true);
             mNotificationPanel.setAlpha(1);
-            mNotificationPanel.setParentNotFullyVisible(true);
             mNotificationPanel.animate()
                     .alpha(0)
                     .setStartDelay(FADE_KEYGUARD_START_DELAY)
@@ -3432,7 +3402,6 @@ public class StatusBar extends SystemUI implements DemoMode,
      * fading.
      */
     public void fadeKeyguardWhilePulsing() {
-        mNotificationPanel.notifyStartFading();
         mNotificationPanel.animate()
                 .alpha(0f)
                 .setStartDelay(0)

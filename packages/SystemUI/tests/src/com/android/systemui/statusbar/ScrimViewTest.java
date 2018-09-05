@@ -92,15 +92,6 @@ public class ScrimViewTest extends LeakCheckedTest {
     }
 
     @Test
-    public void testOnDraw_ExcludeRectDrawable() {
-        mView.setExcludedArea(new Rect(10, 10, 20, 20));
-        Canvas canvas = mock(Canvas.class);
-        mView.onDraw(canvas);
-        // One time for each rect side
-        verify(canvas, times(8)).clipRect(anyInt(), anyInt(), anyInt(), anyInt());
-    }
-
-    @Test
     public void setTint_set() {
         int tint = Color.BLUE;
         mView.setTint(tint);
