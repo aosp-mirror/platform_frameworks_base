@@ -870,7 +870,11 @@ public class SettingsProvider extends ContentProvider {
                 }
             }
             if (newRestrictions.getBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES)
-                    != prevRestrictions.getBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES)) {
+                    != prevRestrictions.getBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES) ||
+                    newRestrictions.getBoolean(
+                            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY)
+                    != prevRestrictions.getBoolean(
+                            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     synchronized (mLock) {

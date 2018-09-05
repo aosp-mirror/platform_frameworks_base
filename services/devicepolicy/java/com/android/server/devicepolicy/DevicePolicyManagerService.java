@@ -10072,13 +10072,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (setting.equals(Settings.Secure.INSTALL_NON_MARKET_APPS)) {
                 if (getTargetSdk(who.getPackageName(), callingUserId) >= Build.VERSION_CODES.O) {
                     throw new UnsupportedOperationException(Settings.Secure.INSTALL_NON_MARKET_APPS
-                            + " is deprecated. Please use the user restriction "
-                            + UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES + " instead.");
+                            + " is deprecated. Please use one of the user restrictions "
+                            + UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES + " or "
+                            + UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY + " instead.");
                 }
                 if (!mUserManager.isManagedProfile(callingUserId)) {
                     Slog.e(LOG_TAG, "Ignoring setSecureSetting request for "
                             + setting + ". User restriction "
-                            + UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES
+                            + UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES + " or "
+                            + UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY
                             + " should be used instead.");
                 } else {
                     try {

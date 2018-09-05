@@ -256,6 +256,7 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from enabling the
      * "Unknown Sources" setting, that allows installation of apps from unknown sources.
+     * Unknown sources exclude adb and special apps such as trusted app stores.
      * The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
@@ -265,6 +266,22 @@ public class UserManager {
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_INSTALL_UNKNOWN_SOURCES = "no_install_unknown_sources";
+
+    /**
+     * This restriction is a device-wide version of {@link DISALLOW_INSTALL_UNKNOWN_SOURCES}.
+     *
+     * Specifies if all users on the device are disallowed from enabling the
+     * "Unknown Sources" setting, that allows installation of apps from unknown sources.
+     * The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY =
+            "no_install_unknown_sources_globally";
 
     /**
      * Specifies if a user is disallowed from configuring bluetooth.
@@ -1669,8 +1686,9 @@ public class UserManager {
      /**
      * @hide
      * Returns whether the given user has been disallowed from performing certain actions
-     * or setting certain settings through UserManager. This method disregards restrictions
-     * set by device policy.
+     * or setting certain settings through UserManager (e.g. this type of restriction would prevent
+     * the guest user from doing certain things, such as making calls). This method disregards
+     * restrictions set by device policy.
      * @param restrictionKey the string key representing the restriction
      * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
      */

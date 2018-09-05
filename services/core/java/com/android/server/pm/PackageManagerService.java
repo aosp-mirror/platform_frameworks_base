@@ -207,7 +207,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Environment;
-import android.os.Environment.UserEnvironment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
@@ -23116,7 +23115,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 return false;
             }
         }
-        if (sUserManager.hasUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, userId)) {
+        if (sUserManager.hasUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, userId)
+                  || sUserManager.hasUserRestriction(
+                        UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY, userId)) {
             return false;
         }
         if (mExternalSourcesPolicy != null) {

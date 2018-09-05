@@ -7414,6 +7414,10 @@ public class DevicePolicyManager {
      * If any app targeting {@link android.os.Build.VERSION_CODES#O} or higher calls this method
      * with {@link android.provider.Settings.Secure#INSTALL_NON_MARKET_APPS},
      * an {@link UnsupportedOperationException} is thrown.
+     *
+     * Starting from Android Q, the device and profile owner can also call
+     * {@link UserManager#DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY} to restrict unknown sources for
+     * all users.
      * </strong>
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
