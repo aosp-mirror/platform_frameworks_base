@@ -19,6 +19,7 @@ package android.telephony;
 import static android.net.NetworkPolicyManager.OVERRIDE_CONGESTED;
 import static android.net.NetworkPolicyManager.OVERRIDE_UNMETERED;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -47,6 +48,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.euicc.EuiccManager;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.ISub;
@@ -57,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -666,7 +669,7 @@ public class SubscriptionManager {
                 tr.addOnSubscriptionsChangedListener(pkgName, listener.callback);
             }
         } catch (RemoteException ex) {
-            // Should not happen
+            Log.e(LOG_TAG, "Remote exception ITelephonyRegistry " + ex);
         }
     }
 
@@ -684,7 +687,7 @@ public class SubscriptionManager {
                     + " listener=" + listener);
         }
         try {
-            // We use the TelephonyRegistry as its runs in the system and thus is always
+            // We use the TelephonyRegistry as it runs in the system and thus is always
             // available where as SubscriptionController could crash and not be available
             ITelephonyRegistry tr = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
                     "telephony.registry"));
@@ -692,7 +695,116 @@ public class SubscriptionManager {
                 tr.removeOnSubscriptionsChangedListener(pkgForDebug, listener.callback);
             }
         } catch (RemoteException ex) {
-            // Should not happen
+            Log.e(LOG_TAG, "Remote exception ITelephonyRegistry " + ex);
+        }
+    }
+
+    /**
+     * A listener class for monitoring changes to {@link SubscriptionInfo} records of opportunistic
+     * subscriptions.
+     * <p>
+     * Override the onOpportunisticSubscriptionsChanged method in the object that extends this
+     * or {@link #addOnOpportunisticSubscriptionsChangedListener(
+     * Executor, OnOpportunisticSubscriptionsChangedListener)}
+     * to register your listener and to unregister invoke
+     * {@link #removeOnOpportunisticSubscriptionsChangedListener(
+     * OnOpportunisticSubscriptionsChangedListener)}
+     * <p>
+     * Permissions android.Manifest.permission.READ_PHONE_STATE is required
+     * for #onOpportunisticSubscriptionsChanged to be invoked.
+     */
+    public static class OnOpportunisticSubscriptionsChangedListener {
+        private Executor mExecutor;
+        /**
+         * Callback invoked when there is any change to any SubscriptionInfo. Typically
+         * this method would invoke {@link #getActiveSubscriptionInfoList}
+         */
+        public void onOpportunisticSubscriptionsChanged() {
+            if (DBG) log("onOpportunisticSubscriptionsChanged: NOT OVERRIDDEN");
+        }
+
+        private void setExecutor(Executor executor) {
+            mExecutor = executor;
+        }
+
+        /**
+         * The callback methods need to be called on the handler thread where
+         * this object was created.  If the binder did that for us it'd be nice.
+         */
+        IOnSubscriptionsChangedListener callback = new IOnSubscriptionsChangedListener.Stub() {
+            @Override
+            public void onSubscriptionsChanged() {
+                if (DBG) log("onOpportunisticSubscriptionsChanged callback received.");
+                mExecutor.execute(() -> onOpportunisticSubscriptionsChanged());
+            }
+        };
+
+        private void log(String s) {
+            Rlog.d(LOG_TAG, s);
+        }
+    }
+
+    /**
+     * Register for changes to the list of opportunistic subscription records or to the
+     * individual records themselves. When a change occurs the onOpportunisticSubscriptionsChanged
+     * method of the listener will be invoked immediately if there has been a notification.
+     *
+     * @param listener an instance of {@link OnOpportunisticSubscriptionsChangedListener} with
+     *                 onOpportunisticSubscriptionsChanged overridden.
+     */
+    public void addOnOpportunisticSubscriptionsChangedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnOpportunisticSubscriptionsChangedListener listener) {
+        if (executor == null || listener == null) {
+            return;
+        }
+
+        String pkgName = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        if (DBG) {
+            logd("register addOnOpportunisticSubscriptionsChangedListener pkgName=" + pkgName
+                    + " listener=" + listener);
+        }
+
+        listener.setExecutor(executor);
+
+        try {
+            // We use the TelephonyRegistry as it runs in the system and thus is always
+            // available. Where as SubscriptionController could crash and not be available
+            ITelephonyRegistry tr = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
+                    "telephony.registry"));
+            if (tr != null) {
+                tr.addOnOpportunisticSubscriptionsChangedListener(pkgName, listener.callback);
+            }
+        } catch (RemoteException ex) {
+            Log.e(LOG_TAG, "Remote exception ITelephonyRegistry " + ex);
+        }
+    }
+
+    /**
+     * Unregister the {@link OnOpportunisticSubscriptionsChangedListener} that is currently
+     * listening opportunistic subscriptions change. This is not strictly necessary
+     * as the listener will automatically be unregistered if an attempt to invoke the listener
+     * fails.
+     *
+     * @param listener that is to be unregistered.
+     */
+    public void removeOnOpportunisticSubscriptionsChangedListener(
+            OnOpportunisticSubscriptionsChangedListener listener) {
+        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        if (DBG) {
+            logd("unregister OnOpportunisticSubscriptionsChangedListener pkgForDebug="
+                    + pkgForDebug + " listener=" + listener);
+        }
+        try {
+            // We use the TelephonyRegistry as it runs in the system and thus is always
+            // available where as SubscriptionController could crash and not be available
+            ITelephonyRegistry tr = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
+                    "telephony.registry"));
+            if (tr != null) {
+                tr.removeOnSubscriptionsChangedListener(pkgForDebug, listener.callback);
+            }
+        } catch (RemoteException ex) {
+            Log.e(LOG_TAG, "Remote exception ITelephonyRegistry " + ex);
         }
     }
 
