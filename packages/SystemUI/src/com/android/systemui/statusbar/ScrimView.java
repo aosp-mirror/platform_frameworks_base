@@ -53,11 +53,8 @@ public class ScrimView extends View implements ConfigurationController.Configura
     private static final String TAG = "ScrimView";
     private final ColorExtractor.GradientColors mColors;
     private int mDensity;
-    private boolean mDrawAsSrc;
     private float mViewAlpha = 1.0f;
     private ValueAnimator mAlphaAnimator;
-    private Rect mExcludedRect = new Rect();
-    private boolean mHasExcludedArea;
     private Drawable mDrawable;
     private PorterDuffColorFilter mColorFilter;
     private int mTintColor;
@@ -137,59 +134,8 @@ public class ScrimView extends View implements ConfigurationController.Configura
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mDrawAsSrc || mDrawable.getAlpha() > 0) {
-            if (!mHasExcludedArea) {
-                mDrawable.draw(canvas);
-            } else {
-                if (mExcludedRect.top > 0) {
-                    canvas.save();
-                    canvas.clipRect(0, 0, getWidth(), mExcludedRect.top);
-                    mDrawable.draw(canvas);
-                    canvas.restore();
-                }
-                if (mExcludedRect.left > 0) {
-                    canvas.save();
-                    canvas.clipRect(0, mExcludedRect.top, mExcludedRect.left,
-                            mExcludedRect.bottom);
-                    mDrawable.draw(canvas);
-                    canvas.restore();
-                }
-                if (mExcludedRect.right < getWidth()) {
-                    canvas.save();
-                    canvas.clipRect(mExcludedRect.right, mExcludedRect.top, getWidth(),
-                            mExcludedRect.bottom);
-                    mDrawable.draw(canvas);
-                    canvas.restore();
-                }
-                if (mExcludedRect.bottom < getHeight()) {
-                    canvas.save();
-                    canvas.clipRect(0, mExcludedRect.bottom, getWidth(), getHeight());
-                    mDrawable.draw(canvas);
-                    canvas.restore();
-                }
-                // We also need to draw the rounded corners of the background
-                canvas.save();
-                canvas.clipRect(mExcludedRect.left, mExcludedRect.top,
-                        mExcludedRect.left + mCornerRadius, mExcludedRect.top + mCornerRadius);
-                mDrawable.draw(canvas);
-                canvas.restore();
-                canvas.save();
-                canvas.clipRect(mExcludedRect.right - mCornerRadius, mExcludedRect.top,
-                        mExcludedRect.right, mExcludedRect.top + mCornerRadius);
-                mDrawable.draw(canvas);
-                canvas.restore();
-                canvas.save();
-                canvas.clipRect(mExcludedRect.left, mExcludedRect.bottom - mCornerRadius,
-                        mExcludedRect.left + mCornerRadius, mExcludedRect.bottom);
-                mDrawable.draw(canvas);
-                canvas.restore();
-                canvas.save();
-                canvas.clipRect(mExcludedRect.right - mCornerRadius,
-                        mExcludedRect.bottom - mCornerRadius,
-                        mExcludedRect.right, mExcludedRect.bottom);
-                mDrawable.draw(canvas);
-                canvas.restore();
-            }
+        if (mDrawable.getAlpha() > 0) {
+            mDrawable.draw(canvas);
         }
     }
 
@@ -198,7 +144,6 @@ public class ScrimView extends View implements ConfigurationController.Configura
         mDrawable.setCallback(this);
         mDrawable.setBounds(getLeft(), getTop(), getRight(), getBottom());
         mDrawable.setAlpha((int) (255 * mViewAlpha));
-        setDrawAsSrc(mDrawAsSrc);
         updateScreenSize();
         invalidate();
     }
@@ -209,12 +154,6 @@ public class ScrimView extends View implements ConfigurationController.Configura
         if (drawable == mDrawable) {
             invalidate();
         }
-    }
-
-    public void setDrawAsSrc(boolean asSrc) {
-        mDrawAsSrc = asSrc;
-        PorterDuff.Mode mode = asSrc ? PorterDuff.Mode.SRC : PorterDuff.Mode.SRC_OVER;
-        mDrawable.setXfermode(new PorterDuffXfermode(mode));
     }
 
     @Override
@@ -326,22 +265,6 @@ public class ScrimView extends View implements ConfigurationController.Configura
 
     public float getViewAlpha() {
         return mViewAlpha;
-    }
-
-    public void setExcludedArea(Rect area) {
-        if (area == null) {
-            mHasExcludedArea = false;
-            invalidate();
-            return;
-        }
-
-        int left = Math.max(area.left, 0);
-        int top = Math.max(area.top, 0);
-        int right = Math.min(area.right, getWidth());
-        int bottom = Math.min(area.bottom, getHeight());
-        mExcludedRect.set(left, top, right, bottom);
-        mHasExcludedArea = left < right && top < bottom;
-        invalidate();
     }
 
     public void setChangeRunnable(Runnable changeRunnable) {
