@@ -145,6 +145,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
         }
     }
 
+    @GuardedBy("mRootsLock")
     private void updateVolumesLocked() {
         mRoots.clear();
 

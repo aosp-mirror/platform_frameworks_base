@@ -274,6 +274,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public int getVersionLocked() {
         return mVersion;
     }
@@ -283,6 +284,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public void setVersionLocked(int version) {
         if (version == mVersion) {
             return;
@@ -293,6 +295,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public void removeSettingsForPackageLocked(String packageName) {
         boolean removedSomething = false;
 
@@ -317,6 +320,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public List<String> getSettingNamesLocked() {
         ArrayList<String> names = new ArrayList<>();
         final int settingsCount = mSettings.size();
@@ -328,6 +332,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public Setting getSettingLocked(String name) {
         if (TextUtils.isEmpty(name)) {
             return mNullSetting;
@@ -350,6 +355,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public void resetSettingDefaultValueLocked(String name) {
         Setting oldSetting = getSettingLocked(name);
         if (oldSetting != null && !oldSetting.isNull() && oldSetting.getDefaultValue() != null) {
@@ -366,6 +372,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public boolean insertSettingLocked(String name, String value, String tag,
             boolean makeDefault, String packageName) {
         if (TextUtils.isEmpty(name)) {
@@ -407,6 +414,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public boolean deleteSettingLocked(String name) {
         if (TextUtils.isEmpty(name) || !hasSettingLocked(name)) {
             return false;
@@ -429,6 +437,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public boolean resetSettingLocked(String name) {
         if (TextUtils.isEmpty(name) || !hasSettingLocked(name)) {
             return false;
@@ -458,6 +467,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    @GuardedBy("mLock")
     public void destroyLocked(Runnable callback) {
         mHandler.removeMessages(MyHandler.MSG_PERSIST_SETTINGS);
         if (callback != null) {
@@ -471,6 +481,7 @@ final class SettingsState {
         }
     }
 
+    @GuardedBy("mLock")
     private void addHistoricalOperationLocked(String type, Setting setting) {
         if (mHistoricalOperations == null) {
             return;
@@ -553,6 +564,7 @@ final class SettingsState {
         }
     }
 
+    @GuardedBy("mLock")
     private void updateMemoryUsagePerPackageLocked(String packageName, String oldValue,
             String newValue, String oldDefaultValue, String newDefaultValue) {
         if (mMaxBytesPerAppPackage == MAX_BYTES_PER_APP_PACKAGE_UNLIMITED) {
@@ -588,10 +600,12 @@ final class SettingsState {
         mPackageToMemoryUsage.put(packageName, newSize);
     }
 
+    @GuardedBy("mLock")
     private boolean hasSettingLocked(String name) {
         return mSettings.indexOfKey(name) >= 0;
     }
 
+    @GuardedBy("mLock")
     private void scheduleWriteIfNeededLocked() {
         // If dirty then we have a write already scheduled.
         if (!mDirty) {
@@ -600,6 +614,7 @@ final class SettingsState {
         }
     }
 
+    @GuardedBy("mLock")
     private void writeStateAsyncLocked() {
         final long currentTimeMillis = SystemClock.uptimeMillis();
 
@@ -771,6 +786,7 @@ final class SettingsState {
         }
     }
 
+    @GuardedBy("mLock")
     private void readStateSyncLocked() {
         FileInputStream in;
         try {
@@ -820,6 +836,7 @@ final class SettingsState {
         }
     }
 
+    @GuardedBy("mLock")
     private void parseSettingsLocked(XmlPullParser parser)
             throws IOException, XmlPullParserException {
 
