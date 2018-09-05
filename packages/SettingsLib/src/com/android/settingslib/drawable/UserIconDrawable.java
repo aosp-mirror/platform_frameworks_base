@@ -172,11 +172,13 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
 
     public UserIconDrawable setBadgeIfManagedUser(Context context, int userId) {
         Drawable badge = null;
-        boolean isManaged = context.getSystemService(DevicePolicyManager.class)
-                .getProfileOwnerAsUser(userId) != null;
-        if (isManaged) {
-            badge = getDrawableForDisplayDensity(
-                    context, com.android.internal.R.drawable.ic_corp_badge_case);
+        if (userId != UserHandle.USER_NULL) {
+            boolean isManaged = context.getSystemService(DevicePolicyManager.class)
+                    .getProfileOwnerAsUser(userId) != null;
+            if (isManaged) {
+                badge = getDrawableForDisplayDensity(
+                        context, com.android.internal.R.drawable.ic_corp_badge_case);
+            }
         }
         return setBadge(badge);
     }
