@@ -4386,12 +4386,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final class LocalServiceImpl extends InputMethodManagerInternal {
         @NonNull
         private final InputMethodManagerService mService;
-        @NonNull
-        private final Handler mHandler;
 
         LocalServiceImpl(@NonNull InputMethodManagerService service) {
             mService = service;
-            mHandler = service.mHandler;
         }
 
         @Override
@@ -4411,19 +4408,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void setInteractive(boolean interactive) {
             // Do everything in handler so as not to block the caller.
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_SET_INTERACTIVE,
-                    interactive ? 1 : 0, 0));
+            mService.mHandler.obtainMessage(MSG_SET_INTERACTIVE, interactive ? 1 : 0, 0)
+                    .sendToTarget();
         }
 
         @Override
         public void hideCurrentInputMethod() {
-            mHandler.removeMessages(MSG_HIDE_CURRENT_INPUT_METHOD);
-            mHandler.sendEmptyMessage(MSG_HIDE_CURRENT_INPUT_METHOD);
+            mService.mHandler.removeMessages(MSG_HIDE_CURRENT_INPUT_METHOD);
+            mService.mHandler.sendEmptyMessage(MSG_HIDE_CURRENT_INPUT_METHOD);
         }
 
         @Override
         public void startVrInputMethodNoCheck(@Nullable ComponentName componentName) {
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_START_VR_INPUT, componentName));
+            mService.mHandler.obtainMessage(MSG_START_VR_INPUT, componentName).sendToTarget();
         }
     }
 
