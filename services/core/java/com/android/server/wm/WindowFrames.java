@@ -30,11 +30,11 @@ import static com.android.server.wm.WindowFramesProto.VISIBLE_FRAME;
 import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
-
-import java.io.PrintWriter;
 import android.view.DisplayCutout;
 
 import com.android.server.wm.utils.WmDisplayCutout;
+
+import java.io.PrintWriter;
 
 /**
  * Container class for all the window frames that affect how windows are laid out.
@@ -42,6 +42,7 @@ import com.android.server.wm.utils.WmDisplayCutout;
  * TODO(b/111611553): Investigate which frames are still needed and which are duplicates
  */
 public class WindowFrames {
+    private static final StringBuilder sTmpSB = new StringBuilder();
 
     /**
      * In most cases, this is the area of the entire screen.
@@ -197,29 +198,18 @@ public class WindowFrames {
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.print("Frames: containing=");
-                mContainingFrame.printShortString(pw);
-                pw.print(" parent="); mParentFrame.printShortString(pw);
-                pw.println();
-        pw.print(prefix); pw.print("    display=");
-                mDisplayFrame.printShortString(pw);
-                pw.print(" overscan="); mOverscanFrame.printShortString(pw);
-                pw.println();
-        pw.print(prefix); pw.print("    content=");
-                mContentFrame.printShortString(pw);
-                pw.print(" visible="); mVisibleFrame.printShortString(pw);
-                pw.println();
-        pw.print(prefix); pw.print("    decor=");
-                mDecorFrame.printShortString(pw);
-                pw.println();
-        pw.print(prefix); pw.print("    outset=");
-                mOutsetFrame.printShortString(pw);
-                pw.println();
-        pw.print(prefix); pw.print("mFrame="); mFrame.printShortString(pw);
-                pw.print(" last="); mLastFrame.printShortString(pw);
-                pw.println();
-        pw.print(prefix); pw.print(" cutout=" + mDisplayCutout.getDisplayCutout());
-                pw.print(" last=" + mLastDisplayCutout.getDisplayCutout());
-                pw.println();
+        pw.println(prefix + "Frames: containing="
+                + mContainingFrame.toShortString(sTmpSB)
+                + " parent=" + mParentFrame.toShortString(sTmpSB));
+        pw.println(prefix + "    display=" + mDisplayFrame.toShortString(sTmpSB)
+                + " overscan=" + mOverscanFrame.toShortString(sTmpSB));
+        pw.println(prefix + "    content=" + mContentFrame.toShortString(sTmpSB)
+                + " visible=" + mVisibleFrame.toShortString(sTmpSB));
+        pw.println(prefix + "    decor=" + mDecorFrame.toShortString(sTmpSB));
+        pw.println(prefix + "    outset=" + mOutsetFrame.toShortString(sTmpSB));
+        pw.println(prefix + "mFrame=" + mFrame.toShortString(sTmpSB)
+                + " last=" + mLastFrame.toShortString(sTmpSB));
+        pw.println(prefix + " cutout=" + mDisplayCutout.getDisplayCutout()
+                + " last=" + mLastDisplayCutout.getDisplayCutout());
     }
 }
