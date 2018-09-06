@@ -1385,6 +1385,20 @@ public class IpClient extends StateMachine {
 
     private boolean startIpReachabilityMonitor() {
         try {
+            // TODO: Fetch these parameters from settings, and install a
+            // settings observer to watch for update and re-program these
+            // parameters (Q: is this level of dynamic updatability really
+            // necessary or does reading from settings at startup suffice?).
+            final int NUM_SOLICITS = 5;
+            final int INTER_SOLICIT_INTERVAL_MS = 750;
+            setNeighborParameters(mDependencies.getNetd(), mInterfaceName,
+                    NUM_SOLICITS, INTER_SOLICIT_INTERVAL_MS);
+        } catch (Exception e) {
+            mLog.e("Failed to adjust neighbor parameters", e);
+            // Carry on using the system defaults (currently: 3, 1000);
+        }
+
+        try {
             mIpReachabilityMonitor = new IpReachabilityMonitor(
                     mContext,
                     mInterfaceParams,
@@ -1860,6 +1874,20 @@ public class IpClient extends StateMachine {
         public String toString() {
             return String.format("rcvd_in=%s, proc_in=%s",
                                  receivedInState, processedInState);
+        }
+    }
+
+    private static void setNeighborParameters(
+            INetd netd, String ifName, int num_solicits, int inter_solicit_interval_ms)
+            throws RemoteException, IllegalArgumentException {
+        Preconditions.checkNotNull(netd);
+        Preconditions.checkArgument(!TextUtils.isEmpty(ifName));
+        Preconditions.checkArgument(num_solicits > 0);
+        Preconditions.checkArgument(inter_solicit_interval_ms > 0);
+
+        for (int family : new Integer[]{INetd.IPV4, INetd.IPV6}) {
+            netd.setProcSysNet(family, INetd.NEIGH, ifName, "retrans_time_ms", Integer.toString(inter_solicit_interval_ms));
+            netd.setProcSysNet(family, INetd.NEIGH, ifName, "ucast_solicit", Integer.toString(num_solicits));
         }
     }
 
