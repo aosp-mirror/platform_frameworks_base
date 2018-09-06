@@ -1177,6 +1177,15 @@ public class SubscriptionManager {
 
     }
 
+    /**
+     * Get an array of Subscription Ids for specified slot Index.
+     * @param slotIndex the slot Index.
+     * @return subscription Ids or null if the given slot Index is not valid.
+     */
+    public static int[] getSubscriptionIds(int slotIndex) {
+        return getSubId(slotIndex);
+    }
+
     /** @hide */
     @UnsupportedAppUsage
     public static int[] getSubId(int slotIndex) {
