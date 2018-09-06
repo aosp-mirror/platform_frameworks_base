@@ -16,6 +16,9 @@
 
 package android.util.apk;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -26,8 +29,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 /**
- * ApkVerityBuilder builds the APK verity tree and the verity header, which will be used by the
- * kernel to verity the APK content on access.
+ * ApkVerityBuilder builds the APK verity tree and the verity header.  The generated tree format can
+ * be stored on disk for apk-verity setup and used by kernel.  Note that since the current
+ * implementation is different from the upstream, we call this implementation apk-verity instead of
+ * fs-verity.
  *
  * <p>Unlike a regular Merkle tree, APK verity tree does not cover the content fully. Due to
  * the existing APK format, it has to skip APK Signing Block and also has some special treatment for
@@ -47,26 +52,28 @@ abstract class ApkVerityBuilder {
     private static final byte[] DEFAULT_SALT = new byte[8];
 
     static class ApkVerityResult {
-        public final ByteBuffer fsverityData;
+        public final ByteBuffer verityData;
+        public final int merkleTreeSize;
         public final byte[] rootHash;
 
-        ApkVerityResult(ByteBuffer fsverityData, byte[] rootHash) {
-            this.fsverityData = fsverityData;
+        ApkVerityResult(ByteBuffer verityData, int merkleTreeSize, byte[] rootHash) {
+            this.verityData = verityData;
+            this.merkleTreeSize = merkleTreeSize;
             this.rootHash = rootHash;
         }
     }
 
     /**
-     * Generates fsverity metadata and the Merkle tree into the {@link ByteBuffer} created by the
-     * {@link ByteBufferFactory}. The bytes layout in the buffer will be used by the kernel and is
-     * ready to be appended to the target file to set up fsverity. For fsverity to work, this data
-     * must be placed at the next page boundary, and the caller must add additional padding in that
-     * case.
+     * Generates the 4k, SHA-256 based Merkle tree for the given APK and stores in the {@link
+     * ByteBuffer} created by the {@link ByteBufferFactory}.  The Merkle tree is suitable to be used
+     * as the on-disk format for apk-verity.
      *
-     * @return ApkVerityResult containing the fsverity data and the root hash of the Merkle tree.
+     * @return ApkVerityResult containing a buffer with the generated Merkle tree stored at the
+     *         front, the tree size, and the calculated root hash.
      */
-    static ApkVerityResult generateApkVerity(RandomAccessFile apk,
-            SignatureInfo signatureInfo, ByteBufferFactory bufferFactory)
+    @NonNull
+    static ApkVerityResult generateApkVerityTree(@NonNull RandomAccessFile apk,
+            @Nullable SignatureInfo signatureInfo, @NonNull ByteBufferFactory bufferFactory)
             throws IOException, SecurityException, NoSuchAlgorithmException, DigestException {
         long signingBlockSize =
                 signatureInfo.centralDirOffset - signatureInfo.apkSigningBlockOffset;
@@ -76,86 +83,69 @@ abstract class ApkVerityBuilder {
 
         ByteBuffer output = bufferFactory.create(
                 merkleTreeSize
-                + CHUNK_SIZE_BYTES);  // maximum size of fsverity metadata
+                + CHUNK_SIZE_BYTES);  // maximum size of apk-verity metadata
         output.order(ByteOrder.LITTLE_ENDIAN);
 
         ByteBuffer tree = slice(output, 0, merkleTreeSize);
-        ByteBuffer header = slice(output, merkleTreeSize,
-                merkleTreeSize + FSVERITY_HEADER_SIZE_BYTES);
-        ByteBuffer extensions = slice(output, merkleTreeSize + FSVERITY_HEADER_SIZE_BYTES,
-                merkleTreeSize + CHUNK_SIZE_BYTES);
-        byte[] apkDigestBytes = new byte[DIGEST_SIZE_BYTES];
-        ByteBuffer apkDigest = ByteBuffer.wrap(apkDigestBytes);
-        apkDigest.order(ByteOrder.LITTLE_ENDIAN);
+        byte[] apkRootHash = generateApkVerityTreeInternal(apk, signatureInfo, DEFAULT_SALT,
+                levelOffset, tree);
+        return new ApkVerityResult(output, merkleTreeSize, apkRootHash);
+    }
 
-        // NB: Buffer limit is set inside once finished.
-        calculateFsveritySignatureInternal(apk, signatureInfo, tree, apkDigest, header, extensions);
-
-        // Put the reverse offset to fs-verity header at the end.
-        output.position(merkleTreeSize + FSVERITY_HEADER_SIZE_BYTES + extensions.limit());
-        output.putInt(FSVERITY_HEADER_SIZE_BYTES + extensions.limit()
-                + 4);  // size of this integer right before EOF
-        output.flip();
-
-        return new ApkVerityResult(output, apkDigestBytes);
+    static void generateApkVerityFooter(@NonNull RandomAccessFile apk,
+            @NonNull SignatureInfo signatureInfo, @NonNull ByteBuffer footerOutput)
+            throws IOException {
+        footerOutput.order(ByteOrder.LITTLE_ENDIAN);
+        generateApkVerityHeader(footerOutput, apk.length(), DEFAULT_SALT);
+        long signingBlockSize =
+                signatureInfo.centralDirOffset - signatureInfo.apkSigningBlockOffset;
+        generateApkVerityExtensions(footerOutput, signatureInfo.apkSigningBlockOffset,
+                signingBlockSize, signatureInfo.eocdOffset);
     }
 
     /**
-     * Calculates the fsverity root hash for integrity measurement.  This needs to be consistent to
-     * what kernel returns.
+     * Calculates the apk-verity root hash for integrity measurement.  This needs to be consistent
+     * to what kernel returns.
      */
-    static byte[] generateFsverityRootHash(RandomAccessFile apk, ByteBuffer apkDigest,
-            SignatureInfo signatureInfo)
+    @NonNull
+    static byte[] generateApkVerityRootHash(@NonNull RandomAccessFile apk,
+            @NonNull ByteBuffer apkDigest, @NonNull SignatureInfo signatureInfo)
             throws NoSuchAlgorithmException, DigestException, IOException {
-        ByteBuffer verityBlock = ByteBuffer.allocate(CHUNK_SIZE_BYTES)
-                .order(ByteOrder.LITTLE_ENDIAN);
-        ByteBuffer header = slice(verityBlock, 0, FSVERITY_HEADER_SIZE_BYTES);
-        ByteBuffer extensions = slice(verityBlock, FSVERITY_HEADER_SIZE_BYTES,
-                CHUNK_SIZE_BYTES - FSVERITY_HEADER_SIZE_BYTES);
+        assertSigningBlockAlignedAndHasFullPages(signatureInfo);
 
-        calculateFsveritySignatureInternal(apk, signatureInfo, null, null, header, extensions);
+        ByteBuffer footer = ByteBuffer.allocate(CHUNK_SIZE_BYTES).order(ByteOrder.LITTLE_ENDIAN);
+        generateApkVerityFooter(apk, signatureInfo, footer);
+        footer.flip();
 
         MessageDigest md = MessageDigest.getInstance(JCA_DIGEST_ALGORITHM);
-        md.update(header);
-        md.update(extensions);
+        md.update(footer);
         md.update(apkDigest);
         return md.digest();
     }
 
     /**
-     * Internal method to generate various parts of FSVerity constructs, including the header,
-     * extensions, Merkle tree, and the tree's root hash.  The output buffer is flipped to the
-     * generated data size and is readey for consuming.
+     * Generates the apk-verity header and hash tree to be used by kernel for the given apk. This
+     * method does not check whether the root hash exists in the Signing Block or not.
+     *
+     * <p>The output is stored in the {@link ByteBuffer} created by the given {@link
+     * ByteBufferFactory}.
+     *
+     * @return the root hash of the generated hash tree.
      */
-    private static void calculateFsveritySignatureInternal(
-            RandomAccessFile apk, SignatureInfo signatureInfo, ByteBuffer treeOutput,
-            ByteBuffer rootHashOutput, ByteBuffer headerOutput, ByteBuffer extensionsOutput)
-            throws IOException, NoSuchAlgorithmException, DigestException {
-        assertSigningBlockAlignedAndHasFullPages(signatureInfo);
-        long signingBlockSize =
-                signatureInfo.centralDirOffset - signatureInfo.apkSigningBlockOffset;
-        long dataSize = apk.length() - signingBlockSize;
-        int[] levelOffset = calculateVerityLevelOffset(dataSize);
-
-        if (treeOutput != null) {
-            byte[] apkRootHash = generateApkVerityTree(apk, signatureInfo, DEFAULT_SALT,
-                    levelOffset, treeOutput);
-            if (rootHashOutput != null) {
-                rootHashOutput.put(apkRootHash);
-                rootHashOutput.flip();
-            }
-        }
-
-        if (headerOutput != null) {
-            headerOutput.order(ByteOrder.LITTLE_ENDIAN);
-            generateFsverityHeader(headerOutput, apk.length(), levelOffset.length - 1,
-                    DEFAULT_SALT);
-        }
-
-        if (extensionsOutput != null) {
-            extensionsOutput.order(ByteOrder.LITTLE_ENDIAN);
-            generateFsverityExtensions(extensionsOutput, signatureInfo.apkSigningBlockOffset,
-                    signingBlockSize, signatureInfo.eocdOffset);
+    @NonNull
+    static byte[] generateApkVerity(@NonNull String apkPath,
+            @NonNull ByteBufferFactory bufferFactory, @NonNull SignatureInfo signatureInfo)
+            throws IOException, SignatureNotFoundException, SecurityException, DigestException,
+                   NoSuchAlgorithmException {
+        try (RandomAccessFile apk = new RandomAccessFile(apkPath, "r")) {
+            ApkVerityResult result = generateApkVerityTree(apk, signatureInfo, bufferFactory);
+            ByteBuffer footer = slice(result.verityData, result.merkleTreeSize,
+                    result.verityData.limit());
+            generateApkVerityFooter(apk, signatureInfo, footer);
+            // Put the reverse offset to apk-verity header at the end.
+            footer.putInt(footer.position() + 4);
+            result.verityData.limit(result.merkleTreeSize + footer.position());
+            return result.rootHash;
         }
     }
 
@@ -297,9 +287,13 @@ abstract class ApkVerityBuilder {
         digester.fillUpLastOutputChunk();
     }
 
-    private static byte[] generateApkVerityTree(RandomAccessFile apk, SignatureInfo signatureInfo,
-            byte[] salt, int[] levelOffset, ByteBuffer output)
+    @NonNull
+    private static byte[] generateApkVerityTreeInternal(@NonNull RandomAccessFile apk,
+            @Nullable SignatureInfo signatureInfo, @NonNull byte[] salt,
+            @NonNull int[] levelOffset, @NonNull ByteBuffer output)
             throws IOException, NoSuchAlgorithmException, DigestException {
+        assertSigningBlockAlignedAndHasFullPages(signatureInfo);
+
         // 1. Digest the apk to generate the leaf level hashes.
         generateApkVerityDigestAtLeafLevel(apk, signatureInfo, salt, slice(output,
                     levelOffset[levelOffset.length - 2], levelOffset[levelOffset.length - 1]));
@@ -324,7 +318,7 @@ abstract class ApkVerityBuilder {
         return rootHash;
     }
 
-    private static ByteBuffer generateFsverityHeader(ByteBuffer buffer, long fileSize, int depth,
+    private static ByteBuffer generateApkVerityHeader(ByteBuffer buffer, long fileSize,
             byte[] salt) {
         if (salt.length != 8) {
             throw new IllegalArgumentException("salt is not 8 bytes long");
@@ -351,13 +345,12 @@ abstract class ApkVerityBuilder {
         buffer.put(salt);                   // salt (8 bytes)
         skip(buffer, 22);                   // reserved
 
-        buffer.flip();
         return buffer;
     }
 
-    private static ByteBuffer generateFsverityExtensions(ByteBuffer buffer, long signingBlockOffset,
-            long signingBlockSize, long eocdOffset) {
-        // Snapshot of the FSVerity structs (subject to change once upstreamed).
+    private static ByteBuffer generateApkVerityExtensions(ByteBuffer buffer,
+            long signingBlockOffset, long signingBlockSize, long eocdOffset) {
+        // Snapshot of the experimental fs-verity structs (different from upstream).
         //
         // struct fsverity_extension_elide {
         //   __le64 offset;
@@ -409,7 +402,6 @@ abstract class ApkVerityBuilder {
             skip(buffer, kPadding);      // padding
         }
 
-        buffer.flip();
         return buffer;
     }
 

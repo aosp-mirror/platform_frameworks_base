@@ -432,16 +432,16 @@ public class ApkSignatureVerifier {
      *
      * @return FSverity root hash
      */
-    public static byte[] generateFsverityRootHash(String apkPath)
+    public static byte[] generateApkVerityRootHash(String apkPath)
             throws NoSuchAlgorithmException, DigestException, IOException {
         // first try v3
         try {
-            return ApkSignatureSchemeV3Verifier.generateFsverityRootHash(apkPath);
+            return ApkSignatureSchemeV3Verifier.generateApkVerityRootHash(apkPath);
         } catch (SignatureNotFoundException e) {
             // try older version
         }
         try {
-            return ApkSignatureSchemeV2Verifier.generateFsverityRootHash(apkPath);
+            return ApkSignatureSchemeV2Verifier.generateApkVerityRootHash(apkPath);
         } catch (SignatureNotFoundException e) {
             return null;
         }
