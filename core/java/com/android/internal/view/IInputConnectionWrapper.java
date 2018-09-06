@@ -16,9 +16,6 @@
 
 package com.android.internal.view;
 
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.os.SomeArgs;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
@@ -36,6 +33,9 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionInspector;
 import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputContentInfo;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.SomeArgs;
 
 public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     private static final String TAG = "IInputConnectionWrapper";
