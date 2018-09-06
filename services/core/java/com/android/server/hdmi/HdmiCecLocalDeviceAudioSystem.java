@@ -20,10 +20,12 @@ import static com.android.server.hdmi.Constants.PROPERTY_SYSTEM_AUDIO_CONTROL_ON
 import static com.android.server.hdmi.Constants.USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
 
 import android.annotation.Nullable;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.AudioSystem;
+import android.media.tv.TvContract;
 import android.os.SystemProperties;
 import android.provider.Settings.Global;
 
@@ -60,16 +62,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     // AVR as audio receiver.
     @ServiceThreadOnly private boolean mArcEstablished = false;
 
-    /**
-     * Return value of {@link #getLocalPortFromPhysicalAddress(int)}
-     */
-    private static final int TARGET_NOT_UNDER_LOCAL_DEVICE = -1;
-    private static final int TARGET_SAME_PHYSICAL_ADDRESS = 0;
-
-    // Local active port number used for Routing Control.
-    // Default 0 means HOME is the current active path. Temp solution only.
-    // TODO(amyjojo): adding system constants for Atom inputs port and TIF mapping.
-    private int mLocalActivePath = 0;
+    private boolean mArcIntentUsed = SystemProperties
+            .get(Constants.PROPERTY_SYSTEM_AUDIO_DEVICE_ARC_PORT, "0").contains("tvinput");
 
     protected HdmiCecLocalDeviceAudioSystem(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
@@ -594,5 +588,68 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     void setAutoDeviceOff(boolean autoDeviceOff) {
         assertRunOnServiceThread();
         mAutoDeviceOff = autoDeviceOff;
+    }
+
+    @Override
+    protected void switchInputOnReceivingNewActivePath(int physicalAddress) {
+        int port = getLocalPortFromPhysicalAddress(physicalAddress);
+        // Wake up if the new Active Source is the current device or under it
+        // or if Arc is enabled.
+        if ((isArcEnabled() || port >= 0) && mService.isPowerStandbyOrTransient()) {
+            mService.wakeUp();
+        }
+
+        if (isArcEnabled() && port < 0) {
+            // New active source will trigger arc input switching.
+            routeToInputFromPortId(Constants.CEC_SWITCH_ARC);
+        } else if (port >= 0) {
+            // TODO(amyjojo): Routing Control input swithcing.
+        }
+    }
+
+    @Override
+    protected void routeToInputFromPortId(int portId) {
+        if (mArcIntentUsed) {
+            routeToTvInputFromPortId(portId);
+        } else {
+            // TODO(): implement input switching for devices not using TvInput.
+        }
+    }
+
+    protected void routeToTvInputFromPortId(int portId) {
+        if (portId < 0 || portId >= Constants.CEC_SWITCH_PORT_MAX) {
+            HdmiLogger.debug("Invalid port number for Tv Input switching.");
+            return;
+        }
+        // TODO(amyjojo): handle if switching to the current input
+        if (portId == Constants.CEC_SWITCH_HOME) {
+            switchToHomeTvInput();
+        } else if (portId == Constants.CEC_SWITCH_ARC) {
+            switchToTvInput(SystemProperties.get(Constants.PROPERTY_SYSTEM_AUDIO_DEVICE_ARC_PORT));
+            // TODO(amyjojo): check if setParameters is still needed.
+            return;
+        } else {
+            // TODO(amyjojo): map port number parsed from physical address to LocalActivePort id
+        }
+
+        setLocalActivePort(portId);
+    }
+
+    // For device to switch to specific TvInput with corresponding URI.
+    private void switchToTvInput(String uri) {
+        mService.getContext().startActivity(new Intent(Intent.ACTION_VIEW,
+                TvContract.buildChannelUriForPassthroughInput(uri))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    }
+
+    // For device using TvInput to switch to Home.
+    private void switchToHomeTvInput() {
+        Intent activityIntent = new Intent(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_HOME)
+                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        | Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        mService.getContext().startActivity(activityIntent);
     }
 }

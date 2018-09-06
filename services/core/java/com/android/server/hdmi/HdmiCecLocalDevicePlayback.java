@@ -277,7 +277,8 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         }
     }
 
-    private void maySendActiveSource(int dest) {
+    @Override
+    protected void maySendActiveSource(int dest) {
         if (mIsActiveSource) {
             mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(
                     mAddress, mService.getPhysicalAddress()));

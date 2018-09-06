@@ -557,4 +557,18 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
+
+    @Test
+    public void handleActiveSource_activeSourceFromTV_swithToArc() {
+        mHdmiCecLocalDeviceAudioSystem.setArcStatus(true);
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+
+        ActiveSource expectedActiveSource = ActiveSource.of(ADDR_TV, 0x0000);
+
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleActiveSource(message)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getActiveSource())
+            .isEqualTo(expectedActiveSource);
+    }
 }
