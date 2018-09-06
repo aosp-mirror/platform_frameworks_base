@@ -86,10 +86,10 @@ public interface InputMethod {
      * needed to identify itself with the service to validate its operations.
      * This token <strong>must not</strong> be passed to applications, since
      * it grants special priviledges that should not be given to applications.
-     * 
-     * <p>Note: to protect yourself from malicious clients, you should only
-     * accept the first token given to you.  Any after that may come from the
-     * client.
+     *
+     * <p>The system guarantees that this method is called back between
+     * {@link InputMethodService#onCreate()} and {@link InputMethodService#onDestroy()}
+     * at most once.
      */
     @MainThread
     public void attachToken(IBinder token);

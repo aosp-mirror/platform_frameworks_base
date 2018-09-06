@@ -450,10 +450,12 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public void attachToken(IBinder token) {
-            if (mToken == null) {
-                mToken = token;
-                mWindow.setToken(token);
+            if (mToken != null) {
+                throw new IllegalStateException(
+                        "attachToken() must be called at most once. token=" + token);
             }
+            mToken = token;
+            mWindow.setToken(token);
         }
 
         /**
