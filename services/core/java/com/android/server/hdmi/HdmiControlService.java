@@ -2114,11 +2114,15 @@ public class HdmiControlService extends SystemService {
         return mLocalDevices.contains(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
     }
 
+    boolean isPlaybackDevice() {
+        return mLocalDevices.contains(HdmiDeviceInfo.DEVICE_PLAYBACK);
+    }
+
     boolean isTvDeviceEnabled() {
         return isTvDevice() && tv() != null;
     }
 
-    private HdmiCecLocalDevicePlayback playback() {
+    protected HdmiCecLocalDevicePlayback playback() {
         return (HdmiCecLocalDevicePlayback)
                 mCecController.getLocalDevice(HdmiDeviceInfo.DEVICE_PLAYBACK);
     }

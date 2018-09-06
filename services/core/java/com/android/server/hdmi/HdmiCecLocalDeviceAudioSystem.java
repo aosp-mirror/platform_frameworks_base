@@ -34,6 +34,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.Constants.AudioCodec;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
+import java.util.HashMap;
+
 /**
  * Represent a logical device of type {@link HdmiDeviceInfo#DEVICE_AUDIO_SYSTEM} residing in Android
  * system.
@@ -62,8 +64,16 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     // AVR as audio receiver.
     @ServiceThreadOnly private boolean mArcEstablished = false;
 
+    // If the current device uses TvInput for ARC. We assume all other inputs also use TvInput
+    // when ARC is using TvInput.
     private boolean mArcIntentUsed = SystemProperties
             .get(Constants.PROPERTY_SYSTEM_AUDIO_DEVICE_ARC_PORT, "0").contains("tvinput");
+
+    // Keeps the mapping (HDMI port ID to TV input URI) to keep track of the TV inputs ready to
+    // accept input switching request from HDMI devices. Requests for which the corresponding
+    // input ID is not yet registered by TV input framework need to be buffered for delayed
+    // processing.
+    private final HashMap<Integer, String> mTvInputs = new HashMap<>();
 
     protected HdmiCecLocalDeviceAudioSystem(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
@@ -75,6 +85,13 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
                 Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED, true);
         mAutoTvOff = mService.readBooleanSetting(
                 Global.HDMI_CONTROL_AUTO_TV_OFF_ENABLED, true);
+        // TODO(amyjojo): make the map ro property.
+        mTvInputs.put(Constants.CEC_SWITCH_HDMI1,
+                "com.droidlogic.tvinput/.services.Hdmi1InputService/HW5");
+        mTvInputs.put(Constants.CEC_SWITCH_HDMI2,
+                "com.droidlogic.tvinput/.services.Hdmi2InputService/HW6");
+        mTvInputs.put(Constants.CEC_SWITCH_HDMI3,
+                "com.droidlogic.tvinput/.services.Hdmi3InputService/HW7");
     }
 
     @Override
@@ -594,20 +611,23 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     protected void switchInputOnReceivingNewActivePath(int physicalAddress) {
         int port = getLocalPortFromPhysicalAddress(physicalAddress);
         // Wake up if the new Active Source is the current device or under it
-        // or if Arc is enabled.
-        if ((isArcEnabled() || port >= 0) && mService.isPowerStandbyOrTransient()) {
+        // or if System Audio Control is enabled.
+        if ((isSystemAudioActivated() || port >= 0) && mService.isPowerStandbyOrTransient()) {
             mService.wakeUp();
         }
 
-        if (isArcEnabled() && port < 0) {
-            // New active source will trigger arc input switching.
+        if (isSystemAudioActivated() && port < 0) {
+            // If system audio mode is on and the new active source is not under the current device,
+            // Will switch to ARC input.
+            // TODO(b/115637145): handle system aduio without ARC
             routeToInputFromPortId(Constants.CEC_SWITCH_ARC);
-        } else if (port >= 0) {
-            // TODO(amyjojo): Routing Control input swithcing.
+        } else if (mIsSwitchDevice && port >= 0) {
+            // If current device is a switch and the new active source is under it,
+            // will switch to the corresponding active path.
+            routeToInputFromPortId(port);
         }
     }
 
-    @Override
     protected void routeToInputFromPortId(int portId) {
         if (mArcIntentUsed) {
             routeToTvInputFromPortId(portId);
@@ -622,14 +642,19 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             return;
         }
         // TODO(amyjojo): handle if switching to the current input
-        if (portId == Constants.CEC_SWITCH_HOME) {
+        if (portId == Constants.CEC_SWITCH_HOME && mService.isPlaybackDevice()) {
             switchToHomeTvInput();
         } else if (portId == Constants.CEC_SWITCH_ARC) {
             switchToTvInput(SystemProperties.get(Constants.PROPERTY_SYSTEM_AUDIO_DEVICE_ARC_PORT));
-            // TODO(amyjojo): check if setParameters is still needed.
             return;
         } else {
-            // TODO(amyjojo): map port number parsed from physical address to LocalActivePort id
+            String uri = mTvInputs.get(portId);
+            if (uri != null) {
+                switchToTvInput(mTvInputs.get(portId));
+            } else {
+                HdmiLogger.debug("Port number does not match any Tv Input.");
+                return;
+            }
         }
 
         setLocalActivePort(portId);
