@@ -168,12 +168,12 @@ public class CellularTile extends QSTileImpl<SignalState> {
         }
 
         final Resources r = mContext.getResources();
-        state.activityIn = cb.enabled && cb.activityIn;
-        state.activityOut = cb.enabled && cb.activityOut;
         state.label = r.getString(R.string.mobile_data);
         boolean mobileDataEnabled = mDataController.isMobileDataSupported()
                 && mDataController.isMobileDataEnabled();
         state.value = mobileDataEnabled;
+        state.activityIn = mobileDataEnabled && cb.activityIn;
+        state.activityOut = mobileDataEnabled && cb.activityOut;
         state.expandedAccessibilityClassName = Switch.class.getName();
         if (cb.noSim) {
             state.icon = ResourceIcon.get(R.drawable.ic_qs_no_sim);
@@ -231,7 +231,6 @@ public class CellularTile extends QSTileImpl<SignalState> {
     }
 
     private static final class CallbackInfo {
-        boolean enabled;
         boolean airplaneModeEnabled;
         String dataContentDescription;
         boolean activityIn;
@@ -251,7 +250,6 @@ public class CellularTile extends QSTileImpl<SignalState> {
                 // Not data sim, don't display.
                 return;
             }
-            mInfo.enabled = qsIcon.visible;
             mInfo.dataContentDescription = typeContentDescription;
             mInfo.activityIn = activityIn;
             mInfo.activityOut = activityOut;
