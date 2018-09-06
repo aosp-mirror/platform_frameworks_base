@@ -284,6 +284,7 @@ import com.android.server.Watchdog;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PermissionsState.PermissionState;
+import com.android.server.pm.PackageSetting;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.pm.Settings.VersionInfo;
 import com.android.server.pm.dex.DexManager;
@@ -5643,8 +5644,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private static void enforceDeclaredAsUsedAndRuntimeOrDevelopmentPermission(
             PackageParser.Package pkg, BasePermission bp) {
+        final PackageSetting pkgSetting = (PackageSetting) pkg.mExtras;
+        final PermissionsState permsState = pkgSetting.getPermissionsState();
         int index = pkg.requestedPermissions.indexOf(bp.name);
-        if (index == -1) {
+        if (!permsState.hasRequestedPermission(bp.name) && index == -1) {
             throw new SecurityException("Package " + pkg.packageName
                     + " has not requested permission " + bp.name);
         }
