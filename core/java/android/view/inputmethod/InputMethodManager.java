@@ -2333,7 +2333,13 @@ public final class InputMethodManager {
     }
 
     /**
-     * @return The current height of the input method window.
+     * This is kept due to {@link android.annotation.UnsupportedAppUsage}.
+     *
+     * <p>TODO(Bug 113914148): Check if we can remove this.  We have accidentally exposed
+     * WindowManagerInternal#getInputMethodWindowVisibleHeight to app developers and some of them
+     * started relying on it.</p>
+     *
+     * @return Something that is not well-defined.
      * @hide
      */
     @UnsupportedAppUsage

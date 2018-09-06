@@ -3145,6 +3145,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return;
     }
 
+    /**
+     * This is kept due to {@link android.annotation.UnsupportedAppUsage} in
+     * {@link InputMethodManager#getInputMethodWindowVisibleHeight()} and a dependency in
+     * {@link InputMethodService#onCreate()}.
+     *
+     * <p>TODO(Bug 113914148): Check if we can remove this.</p>
+     * @return {@link WindowManagerInternal#getInputMethodWindowVisibleHeight()}
+     */
     @Override
     public int getInputMethodWindowVisibleHeight() {
         return mWindowManagerInternal.getInputMethodWindowVisibleHeight();
