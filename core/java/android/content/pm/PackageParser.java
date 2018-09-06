@@ -3580,8 +3580,10 @@ public class PackageParser {
             ai.appComponentFactory = buildClassName(ai.packageName, factory, outError);
         }
 
-        ai.usesNonSdkApi = sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestApplication_usesNonSdkApi, false);
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_usesNonSdkApi, false)) {
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_USES_NON_SDK_API;
+        }
 
         if (outError[0] == null) {
             CharSequence pname;
