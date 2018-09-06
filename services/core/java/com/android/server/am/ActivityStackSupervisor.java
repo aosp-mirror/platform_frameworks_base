@@ -2817,8 +2817,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     if (!otherStack.inSplitScreenSecondaryWindowingMode()) {
                         continue;
                     }
-                    resizeStackLocked(otherStack, null, null, null, PRESERVE_WINDOWS,
-                            true /* allowResizeInDockedMode */, DEFER_RESUME);
+                    otherStack.setWindowingMode(WINDOWING_MODE_UNDEFINED);
                 }
 
                 // Also disable docked stack resizing since we have manually adjusted the

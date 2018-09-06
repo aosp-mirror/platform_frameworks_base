@@ -291,7 +291,13 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     <T extends ActivityStack> T getOrCreateStack(@Nullable ActivityRecord r,
             @Nullable ActivityOptions options, @Nullable TaskRecord candidateTask, int activityType,
             boolean onTop) {
-        final int windowingMode = resolveWindowingMode(r, options, candidateTask, activityType);
+        // First preference is the windowing mode in the activity options if set.
+        int windowingMode = (options != null)
+                ? options.getLaunchWindowingMode() : WINDOWING_MODE_UNDEFINED;
+        // Validate that our desired windowingMode will work under the current conditions.
+        // UNDEFINED windowing mode is a valid result and means that the new stack will inherit
+        // it's display's windowing mode.
+        windowingMode = validateWindowingMode(windowingMode, r, candidateTask, activityType);
         return getOrCreateStack(windowingMode, activityType, onTop);
     }
 
@@ -303,7 +309,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
      * Creates a stack matching the input windowing mode and activity type on this display.
      * @param windowingMode The windowing mode the stack should be created in. If
      *                      {@link WindowConfiguration#WINDOWING_MODE_UNDEFINED} then the stack will
-     *                      be created in {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN}.
+     *                      inherit it's parent's windowing mode.
      * @param activityType The activityType the stack should be created in. If
      *                     {@link WindowConfiguration#ACTIVITY_TYPE_UNDEFINED} then the stack will
      *                     be created in {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD}.
@@ -549,7 +555,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 if (!otherStack.inSplitScreenSecondaryWindowingMode()) {
                     continue;
                 }
-                otherStack.setWindowingMode(WINDOWING_MODE_FULLSCREEN, false /* animate */,
+                otherStack.setWindowingMode(WINDOWING_MODE_UNDEFINED, false /* animate */,
                         false /* showRecents */, false /* enteringSplitScreenMode */,
                         true /* deferEnsuringVisibility */);
             }
@@ -610,10 +616,14 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             return false;
         }
 
+        final int displayWindowingMode = getWindowingMode();
         if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                 || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
             return supportsSplitScreen
-                    && WindowConfiguration.supportSplitScreenWindowingMode(activityType);
+                    && WindowConfiguration.supportSplitScreenWindowingMode(activityType)
+                    // Freeform windows and split-screen windows don't mix well, so prevent
+                    // split windowing modes on freeform displays.
+                    && displayWindowingMode != WINDOWING_MODE_FREEFORM;
         }
 
         if (!supportsFreeform && windowingMode == WINDOWING_MODE_FREEFORM) {
@@ -626,6 +636,16 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         return true;
     }
 
+    /**
+     * Resolves the windowing mode that an {@link ActivityRecord} would be in if started on this
+     * display with the provided parameters.
+     *
+     * @param r The ActivityRecord in question.
+     * @param options Options to start with.
+     * @param task The task within-which the activity would start.
+     * @param activityType The type of activity to start.
+     * @return The resolved (not UNDEFINED) windowing-mode that the activity would be in.
+     */
     int resolveWindowingMode(@Nullable ActivityRecord r, @Nullable ActivityOptions options,
             @Nullable TaskRecord task, int activityType) {
 
@@ -647,7 +667,9 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 windowingMode = getWindowingMode();
             }
         }
-        return validateWindowingMode(windowingMode, r, task, activityType);
+        windowingMode = validateWindowingMode(windowingMode, r, task, activityType);
+        return windowingMode != WINDOWING_MODE_UNDEFINED
+                ? windowingMode : WINDOWING_MODE_FULLSCREEN;
     }
 
     /**
@@ -684,23 +706,21 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         final boolean inSplitScreenMode = hasSplitScreenPrimaryStack();
         if (!inSplitScreenMode
                 && windowingMode == WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY) {
-            // Switch to fullscreen windowing mode if we are not in split-screen mode and we are
+            // Switch to the display's windowing mode if we are not in split-screen mode and we are
             // trying to launch in split-screen secondary.
-            windowingMode = WINDOWING_MODE_FULLSCREEN;
-        } else if (inSplitScreenMode && windowingMode == WINDOWING_MODE_FULLSCREEN
+            windowingMode = WINDOWING_MODE_UNDEFINED;
+        } else if (inSplitScreenMode && (windowingMode == WINDOWING_MODE_FULLSCREEN
+                        || windowingMode == WINDOWING_MODE_UNDEFINED)
                 && supportsSplitScreen) {
             windowingMode = WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
         }
 
         if (windowingMode != WINDOWING_MODE_UNDEFINED
                 && isWindowingModeSupported(windowingMode, supportsMultiWindow, supportsSplitScreen,
-                supportsFreeform, supportsPip, activityType)) {
+                        supportsFreeform, supportsPip, activityType)) {
             return windowingMode;
         }
-        // Try to use the display's windowing mode otherwise fallback to fullscreen.
-        windowingMode = getWindowingMode();
-        return windowingMode != WINDOWING_MODE_UNDEFINED
-                ? windowingMode : WINDOWING_MODE_FULLSCREEN;
+        return WINDOWING_MODE_UNDEFINED;
     }
 
     /**
