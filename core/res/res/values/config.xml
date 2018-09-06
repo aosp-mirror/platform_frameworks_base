@@ -2116,6 +2116,9 @@
     <!-- Type of the reach sensor. Empty if reach is not supported. -->
     <string name="config_dozeReachSensorType" translatable="false"></string>
 
+    <!-- Type of the wake up sensor. Empty if not supported. -->
+    <string name="config_dozeWakeScreenSensorType" translatable="false"></string>
+
     <!-- Control whether the always on display mode is available. This should only be enabled on
          devices where the display has been tuned to be power efficient in DOZE and/or DOZE_SUSPEND
          states. -->

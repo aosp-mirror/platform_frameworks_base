@@ -63,6 +63,7 @@ public class DozeSensors {
     private final AmbientDisplayConfiguration mConfig;
     private final WakeLock mWakeLock;
     private final Consumer<Boolean> mProxCallback;
+    private final Consumer<Boolean> mWakeScreenCallback;
     private final Callback mCallback;
 
     private final Handler mHandler = new Handler();
@@ -70,9 +71,9 @@ public class DozeSensors {
 
 
     public DozeSensors(Context context, AlarmManager alarmManager, SensorManager sensorManager,
-            DozeParameters dozeParameters,
-            AmbientDisplayConfiguration config, WakeLock wakeLock, Callback callback,
-            Consumer<Boolean> proxCallback, AlwaysOnDisplayPolicy policy) {
+            DozeParameters dozeParameters, AmbientDisplayConfiguration config, WakeLock wakeLock,
+            Callback callback, Consumer<Boolean> proxCallback,
+            Consumer<Boolean> wakeScreenCallback, AlwaysOnDisplayPolicy policy) {
         mContext = context;
         mAlarmManager = alarmManager;
         mSensorManager = sensorManager;
@@ -80,6 +81,7 @@ public class DozeSensors {
         mConfig = config;
         mWakeLock = wakeLock;
         mProxCallback = proxCallback;
+        mWakeScreenCallback = wakeScreenCallback;
         mResolver = mContext.getContentResolver();
 
         mSensors = new TriggerSensor[] {
@@ -117,6 +119,7 @@ public class DozeSensors {
                         DozeLog.PULSE_REASON_SENSOR_REACH,
                         false /* reports touch coordinates */,
                         false /* touchscreen */),
+                new WakeScreenSensor(),
         };
 
         mProxSensor = new ProxSensor(policy);
@@ -302,9 +305,9 @@ public class DozeSensors {
         final boolean mSettingDefault;
         final boolean mRequiresTouchscreen;
 
-        private boolean mRequested;
-        private boolean mRegistered;
-        private boolean mDisabled;
+        protected boolean mRequested;
+        protected boolean mRegistered;
+        protected boolean mDisabled;
 
         public TriggerSensor(Sensor sensor, String setting, boolean configured, int pulseReason,
                 boolean reportsTouchCoordinates, boolean requiresTouchscreen) {
@@ -348,7 +351,7 @@ public class DozeSensors {
             }
         }
 
-        private boolean enabledBySetting() {
+        protected boolean enabledBySetting() {
             if (TextUtils.isEmpty(mSetting)) {
                 return true;
             }
@@ -401,7 +404,7 @@ public class DozeSensors {
             }
         }
 
-        private String triggerEventToString(TriggerEvent event) {
+        protected String triggerEventToString(TriggerEvent event) {
             if (event == null) return null;
             final StringBuilder sb = new StringBuilder("TriggerEvent[")
                     .append(event.timestamp).append(',')
@@ -412,6 +415,28 @@ public class DozeSensors {
                 }
             }
             return sb.append(']').toString();
+        }
+    }
+
+    private class WakeScreenSensor extends TriggerSensor {
+
+        WakeScreenSensor() {
+            super(findSensorWithType(mConfig.wakeScreenSensorType()),
+                    Settings.Secure.DOZE_WAKE_SCREEN_GESTURE, true /* configured */,
+                    DozeLog.REASON_SENSOR_WAKE_UP, false /* reportsTouchCoordinates */,
+                    false /* requiresTouchscreen */);
+        }
+
+        @Override
+        @AnyThread
+        public void onTrigger(TriggerEvent event) {
+            DozeLog.traceSensor(mContext, mPulseReason);
+            mHandler.post(mWakeLock.wrap(() -> {
+                if (DEBUG) Log.d(TAG, "onTrigger: " + triggerEventToString(event));
+                mRegistered = false;
+                mWakeScreenCallback.accept(event.values[0] > 0);
+                updateListener();  // reregister, this sensor only fires once
+            }));
         }
     }
 
