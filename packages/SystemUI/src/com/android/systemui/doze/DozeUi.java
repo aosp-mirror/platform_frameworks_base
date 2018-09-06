@@ -158,8 +158,12 @@ public class DozeUi implements DozeMachine.Part {
             return;
         }
 
-        long delta = roundToNextMinute(System.currentTimeMillis()) - System.currentTimeMillis();
-        mTimeTicker.schedule(delta, AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
+        long time = System.currentTimeMillis();
+        long delta = roundToNextMinute(time) - System.currentTimeMillis();
+        boolean scheduled = mTimeTicker.schedule(delta, AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
+        if (scheduled) {
+            DozeLog.traceTimeTickScheduled(time, time + delta);
+        }
         mLastTimeTickElapsed = SystemClock.elapsedRealtime();
     }
 
