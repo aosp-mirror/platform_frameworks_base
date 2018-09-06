@@ -29,7 +29,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -56,7 +55,6 @@ import android.view.ViewRootImpl;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillManager;
 
-import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputConnectionWrapper;
 import com.android.internal.view.IInputContext;
@@ -810,24 +808,6 @@ public final class InputMethodManager {
     }
 
     /** @hide */
-    public void setImeWindowStatus(IBinder imeToken, int vis, int backDisposition) {
-        try {
-            mService.setImeWindowStatus(imeToken, vis, backDisposition);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** @hide */
-    public void reportStartInput(IBinder imeToken, IBinder startInputToken) {
-        try {
-            mService.reportStartInput(imeToken, startInputToken);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** @hide */
     @UnsupportedAppUsage
     public void registerSuggestionSpansForNotification(SuggestionSpan[] spans) {
         try {
@@ -855,17 +835,6 @@ public final class InputMethodManager {
     public boolean isFullscreenMode() {
         synchronized (mH) {
             return mFullscreenMode;
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void reportFullscreenMode(IBinder token, boolean fullscreen) {
-        try {
-            mService.reportFullscreenMode(token, fullscreen);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2354,28 +2323,6 @@ public final class InputMethodManager {
     }
 
     /**
-     * Tells the system that the IME decided to not show a window and the system no longer needs to
-     * use the previous IME's inset.
-     *
-     * <p>Caveat: {@link android.inputmethodservice.InputMethodService#clearInsetOfPreviousIme()}
-     * is the only expected caller of this method.  Do not depend on this anywhere else.</p>
-     *
-     * <p>TODO: We probably need to reconsider how IME should be handled.</p>
-     * @hide
-     * @param token Supplies the identifying token given to an input method when it was started,
-     * which allows it to perform this operation on itself.
-     */
-    public void clearLastInputMethodWindowForTransition(final IBinder token) {
-        synchronized (mH) {
-            try {
-                mService.clearLastInputMethodWindowForTransition(token);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
      * Force switch to the last used input method and subtype. If the last input method didn't have
      * any subtypes, the framework will simply switch to the last input method with no subtype
      * specified.
@@ -2511,40 +2458,6 @@ public final class InputMethodManager {
                 throw e.rethrowFromSystemServer();
             }
         }
-    }
-
-    /**
-     * Allow the receiver of {@link InputContentInfo} to obtain a temporary read-only access
-     * permission to the content.
-     *
-     * <p>See {@link android.inputmethodservice.InputMethodService#exposeContent(InputContentInfo,
-     * InputConnection)} for details.</p>
-     *
-     * @param token Supplies the identifying token given to an input method when it was started,
-     * which allows it to perform this operation on itself.
-     * @param inputContentInfo Content to be temporarily exposed from the input method to the
-     * application.
-     * This cannot be {@code null}.
-     * @param editorInfo The editor that receives {@link InputContentInfo}.
-     * @hide
-     */
-    public void exposeContent(@NonNull IBinder token, @NonNull InputContentInfo inputContentInfo,
-            @NonNull EditorInfo editorInfo) {
-        final IInputContentUriToken uriToken;
-        final Uri contentUri = inputContentInfo.getContentUri();
-        try {
-            uriToken = mService.createInputContentUriToken(token, contentUri,
-                    editorInfo.packageName);
-            if (uriToken == null) {
-                return;
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "createInputContentAccessToken failed. contentUri=" + contentUri.toString()
-                    + " packageName=" + editorInfo.packageName, e);
-            return;
-        }
-        inputContentInfo.setUriToken(uriToken);
-        return;
     }
 
     void doDump(FileDescriptor fd, PrintWriter fout, String[] args) {

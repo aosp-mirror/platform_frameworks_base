@@ -25,6 +25,8 @@ import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 
+import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+
 /**
  * The InputMethod interface represents an input method which can generate key
  * events and text, such as digital, email addresses, CJK characters, other
@@ -79,7 +81,25 @@ public interface InputMethod {
     public interface SessionCallback {
         public void sessionCreated(InputMethodSession session);
     }
-    
+
+    /**
+     * Called first thing after an input method is created, this supplies a
+     * unique token for the session it has with the system service as well as
+     * IPC endpoint to do some other privileged operations.
+     *
+     * @param token special token for the system to identify
+     *              {@link InputMethodService}
+     * @param privilegedOperations IPC endpoint to do some privileged
+     *                             operations that are allowed only to the
+     *                             current IME.
+     * @hide
+     */
+    @MainThread
+    default void initializeInternal(IBinder token,
+            IInputMethodPrivilegedOperations privilegedOperations) {
+        attachToken(token);
+    }
+
     /**
      * Called first thing after an input method is created, this supplies a
      * unique token for the session it has with the system service.  It is
