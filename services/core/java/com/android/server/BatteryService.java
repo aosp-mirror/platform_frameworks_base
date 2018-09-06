@@ -399,6 +399,12 @@ public final class BatteryService extends SystemService {
 
     private void update(android.hardware.health.V2_0.HealthInfo info) {
         traceBegin("HealthInfoUpdate");
+
+        Trace.traceCounter(Trace.TRACE_TAG_POWER, "BatteryChargeCounter",
+                info.legacy.batteryChargeCounter);
+        Trace.traceCounter(Trace.TRACE_TAG_POWER, "BatteryCurrent",
+                info.legacy.batteryCurrent);
+
         synchronized (mLock) {
             if (!mUpdatesStopped) {
                 mHealthInfo = info.legacy;
