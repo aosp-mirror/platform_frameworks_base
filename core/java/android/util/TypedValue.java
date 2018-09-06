@@ -232,7 +232,9 @@ public class TypedValue {
     };
 
     /**
-     * Determine if a value is a color by comparing {@link type} to {@link #TYPE_FIRST_COLOR_INT}
+     * Determine if a value is a color.
+     *
+     * This works by comparing {@link #type} to {@link #TYPE_FIRST_COLOR_INT}
      * and {@link #TYPE_LAST_COLOR_INT}.
      *
      * @return true if this value is a color
