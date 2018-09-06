@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"
         android:gravity="center_vertical"
-        android:visibility="invisible">
+        android:alpha="0">
 
         <ImageView
             android:id="@+id/next_alarm_icon"
