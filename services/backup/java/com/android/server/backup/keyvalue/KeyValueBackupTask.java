@@ -249,10 +249,10 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     private final List<String> mPendingFullBackups;
     private final Object mQueueLock;
     @Nullable private final DataChangedJournal mJournal;
-    @Nullable private PerformFullTransportBackupTask mFullBackupTask;
 
     private int mStatus;
-    @Nullable private IBackupAgent mAgentBinder;
+    @Nullable private PerformFullTransportBackupTask mFullBackupTask;
+    @Nullable private IBackupAgent mAgent;
     @Nullable private PackageInfo mCurrentPackage;
     @Nullable private File mSavedStateFile;
     @Nullable private File mBackupDataFile;
@@ -349,24 +349,24 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             // Not an explicit cancel, we need to flag it.
             mCancelled = true;
             mReporter.onAgentCancelled(packageInfo);
-            errorCleanup();
+            cleanUpAgentForAgentError();
             return false;
         }
         if (result == RemoteResult.FAILED_CANCELLED) {
             mReporter.onAgentCancelled(packageInfo);
-            errorCleanup();
+            cleanUpAgentForAgentError();
             return false;
         }
         if (result == RemoteResult.FAILED_TIMED_OUT) {
             mReporter.onAgentTimedOut(packageInfo);
-            errorCleanup();
+            cleanUpAgentForAgentError();
             return true;
         }
         Preconditions.checkState(result.isPresent());
         long agentResult = result.get();
         if (agentResult == BackupAgent.RESULT_ERROR) {
             mReporter.onAgentResultError(packageInfo);
-            errorCleanup();
+            cleanUpAgentForAgentError();
             return true;
         }
         return sendDataToTransport();
@@ -380,37 +380,22 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
 
     /** Returns whether to consume next queue package. */
     private boolean startTask() {
-        synchronized (mBackupManagerService.getCurrentOpLock()) {
-            if (mBackupManagerService.isBackupOperationInProgress()) {
-                mReporter.onSkipBackup();
-                return false;
-            }
+        if (mBackupManagerService.isBackupOperationInProgress()) {
+            mReporter.onSkipBackup();
+            return false;
         }
 
-        String[] fullBackups = mPendingFullBackups.toArray(new String[mPendingFullBackups.size()]);
-        mFullBackupTask =
-                new PerformFullTransportBackupTask(
-                        mBackupManagerService,
-                        mTransportClient,
-                        /* fullBackupRestoreObserver */ null,
-                        fullBackups,
-                        /* updateSchedule */ false,
-                        /* runningJob */ null,
-                        new CountDownLatch(1),
-                        mReporter.getObserver(),
-                        mReporter.getMonitor(),
-                        mTaskFinishedListener,
-                        mUserInitiated);
+        // Unfortunately full backup task constructor registers the task with BMS, so we have to
+        // create it here instead of in our constructor.
+        mFullBackupTask = createFullBackupTask(mPendingFullBackups);
         registerTask();
 
-        mAgentBinder = null;
         mStatus = BackupTransport.TRANSPORT_OK;
 
         if (mQueue.isEmpty() && mPendingFullBackups.isEmpty()) {
             mReporter.onEmptyQueueAtStart();
             return false;
         }
-
         // We only backup PM if it was explicitly in the queue or if it's incremental.
         boolean backupPm = mQueue.remove(PM_PACKAGE) || !mNonIncremental;
         if (backupPm) {
@@ -446,6 +431,21 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         return true;
     }
 
+    private PerformFullTransportBackupTask createFullBackupTask(List<String> packages) {
+        return new PerformFullTransportBackupTask(
+                mBackupManagerService,
+                mTransportClient,
+                /* fullBackupRestoreObserver */ null,
+                packages.toArray(new String[packages.size()]),
+                /* updateSchedule */ false,
+                /* runningJob */ null,
+                new CountDownLatch(1),
+                mReporter.getObserver(),
+                mReporter.getMonitor(),
+                mTaskFinishedListener,
+                mUserInitiated);
+    }
+
     /** Returns whether to consume next queue package. */
     private boolean backupPm() {
         RemoteResult agentResult = null;
@@ -455,10 +455,9 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
 
             // Since PM is running in the system process we can set up its agent directly.
             BackupAgent pmAgent = mBackupManagerService.makeMetadataAgent();
-            Pair<Integer, RemoteResult> statusAndResult =
-                    extractAgentData(
-                            PM_PACKAGE,
-                            IBackupAgent.Stub.asInterface(pmAgent.onBind()));
+            mAgent = IBackupAgent.Stub.asInterface(pmAgent.onBind());
+
+            Pair<Integer, RemoteResult> statusAndResult = extractAgentData(PM_PACKAGE, mAgent);
             mStatus = statusAndResult.first;
             agentResult = statusAndResult.second;
         } catch (Exception e) {
@@ -467,6 +466,8 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         }
 
         if (mStatus != BackupTransport.TRANSPORT_OK) {
+            // In this case either extractAgentData() already made the agent clean-up or we haven't
+            // prepared the state for calling the agent, in either case we don't need to clean-up.
             mBackupManagerService.resetBackupState(mStateDirectory);
             return false;
         }
@@ -512,7 +513,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
                                 applicationInfo,
                                 ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL);
                 if (agent != null) {
-                    mAgentBinder = agent;
+                    mAgent = agent;
                     Pair<Integer, RemoteResult> statusAndResult =
                             extractAgentData(packageName, agent);
                     mStatus = statusAndResult.first;
@@ -532,7 +533,9 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         }
 
         if (mStatus != BackupTransport.TRANSPORT_OK) {
-            mAgentBinder = null;
+            // In this case either extractAgentData() already made the agent clean-up or we haven't
+            // prepared the state for calling the agent, in either case we don't need to clean-up.
+            Preconditions.checkState(mAgent == null);
 
             if (mStatus == BackupTransport.AGENT_ERROR) {
                 mReporter.onAgentError(packageName);
@@ -710,7 +713,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
                             "doBackup()");
         } catch (Exception e) {
             mReporter.onCallAgentDoBackupError(packageName, callingAgent, e);
-            errorCleanup();
+            cleanUpAgentForAgentError();
             // TODO: Remove the check on callingAgent when RemoteCall supports local agent calls.
             int status =
                     callingAgent ? BackupTransport.AGENT_ERROR : BackupTransport.TRANSPORT_ERROR;
@@ -808,7 +811,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         boolean writingWidgetData = false;
         try {
             if (!validateBackupData(applicationInfo, mBackupDataFile)) {
-                errorCleanup();
+                cleanUpAgentForAgentError();
                 return true;
             }
             writingWidgetData = true;
@@ -819,11 +822,11 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             } else {
                 mReporter.onReadAgentDataError(packageName, e);
             }
+            cleanUpAgentForAgentError();
             revertTask();
             return false;
         }
 
-        clearAgentState();
         boolean nonIncremental = mSavedStateFile.length() == 0;
         long size = mBackupDataFile.length();
         if (size > 0) {
@@ -853,31 +856,12 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             mStatus = BackupTransport.TRANSPORT_ERROR;
         }
 
-        updateFiles(mStatus);
-        return handleTransportStatus(mStatus, packageName, size);
-    }
 
-    private void updateFiles(int status) {
-        switch (status) {
-            case BackupTransport.TRANSPORT_OK:
-                mBackupDataFile.delete();
-                mNewStateFile.renameTo(mSavedStateFile);
-                break;
-            case BackupTransport.TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED:
-                mSavedStateFile.delete();
-                mBackupDataFile.delete();
-                mNewStateFile.delete();
-                break;
-            default:
-                // Includes:
-                // * BackupTransport.TRANSPORT_PACKAGE_REJECTED
-                // * BackupTransport.TRANSPORT_QUOTA_EXCEEDED
-                // * BackupTransport.TRANSPORT_ERROR
-                mBackupDataFile.delete();
-                mNewStateFile.delete();
-                break;
-
-        }
+        boolean processQueue = handleTransportStatus(mStatus, packageName, size);
+        // We might report quota exceeded to the agent in handleTransportStatus() above, so we
+        // only clean-up after it.
+        cleanUpAgentForTransportStatus(mStatus);
+        return processQueue;
     }
 
     /** Returns whether to consume next queue package. */
@@ -898,7 +882,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         }
         if (status == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
             mReporter.onPackageBackupQuotaExceeded(packageName);
-            agentDoQuotaExceeded(mAgentBinder, packageName, size);
+            agentDoQuotaExceeded(mAgent, packageName, size);
             return true;
         }
         // Any other error here indicates a transport-level failure.
@@ -943,7 +927,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
                 if (key != null && key.charAt(0) >= 0xff00) {
                     mReporter.onAgentIllegalKey(mCurrentPackage, key);
                     // Crash them if they wrote any protected keys.
-                    agentFail(mAgentBinder, "Illegal backup key: " + key);
+                    agentFail(mAgent, "Illegal backup key: " + key);
                     return false;
                 }
                 backupDataInput.skipEntityData();
@@ -1025,21 +1009,50 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         }
     }
 
-    private void errorCleanup() {
-        mBackupDataFile.delete();
-        mNewStateFile.delete();
-        clearAgentState();
+    /** Cleans-up after having called the agent. */
+    private void cleanUpAgentForTransportStatus(int status) {
+        updateFiles(status);
+        cleanUpAgent();
     }
 
-    private void clearAgentState() {
-        // Cleanup common to both success and failure cases.
+    /** Cleans-up if we failed to call the agent. */
+    private void cleanUpAgentForAgentError() {
+        mBackupDataFile.delete();
+        mNewStateFile.delete();
+        cleanUpAgent();
+    }
+
+    private void updateFiles(int status) {
+        switch (status) {
+            case BackupTransport.TRANSPORT_OK:
+                mBackupDataFile.delete();
+                mNewStateFile.renameTo(mSavedStateFile);
+                break;
+            case BackupTransport.TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED:
+                mSavedStateFile.delete();
+                mBackupDataFile.delete();
+                mNewStateFile.delete();
+                break;
+            default:
+                // Includes:
+                // * BackupTransport.TRANSPORT_PACKAGE_REJECTED
+                // * BackupTransport.TRANSPORT_QUOTA_EXCEEDED
+                // * BackupTransport.TRANSPORT_ERROR
+                mBackupDataFile.delete();
+                mNewStateFile.delete();
+                break;
+        }
+    }
+
+    /** Cleans-up file-descriptors and unbinds agent. */
+    private void cleanUpAgent() {
+        mAgent = null;
         tryCloseFileDescriptor(mSavedState, "old state");
         tryCloseFileDescriptor(mBackupData, "backup data");
         tryCloseFileDescriptor(mNewState, "new state");
-        synchronized (mBackupManagerService.getCurrentOpLock()) {
-            // TODO: Do we still need this?
-            mSavedState = mBackupData = mNewState = null;
-        }
+        mSavedState = null;
+        mBackupData = null;
+        mNewState = null;
 
         // For PM metadata (for which applicationInfo is null) there is no agent-bound state.
         if (mCurrentPackage.applicationInfo != null) {
