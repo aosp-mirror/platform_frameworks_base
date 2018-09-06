@@ -79,6 +79,8 @@ interface IInputMethodManager {
     boolean switchToNextInputMethod(in IBinder token, boolean onlyCurrentIme);
     boolean shouldOfferSwitchingToNextInputMethod(in IBinder token);
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
+    // This is kept due to @UnsupportedAppUsage.
+    // TODO(Bug 113914148): Consider removing this.
     int getInputMethodWindowVisibleHeight();
     void clearLastInputMethodWindowForTransition(in IBinder token);
 
