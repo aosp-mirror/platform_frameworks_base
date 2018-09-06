@@ -157,6 +157,12 @@ public class DozeLog {
         log("missedTick by=" + delay);
     }
 
+    public static void traceTimeTickScheduled(long when, long triggerAt) {
+        if (!ENABLED) return;
+        log("timeTickScheduled at=" + FORMAT.format(new Date(when)) + " triggerAt="
+                + FORMAT.format(new Date(triggerAt)));
+    }
+
     public static void traceKeyguard(boolean showing) {
         if (!ENABLED) return;
         log("keyguard " + showing);
