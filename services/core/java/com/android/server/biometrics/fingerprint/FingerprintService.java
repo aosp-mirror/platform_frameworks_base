@@ -50,12 +50,14 @@ import android.os.SELinux;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
+import android.util.StatsLog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemServerInitThreadPool;
+import com.android.server.biometrics.AuthenticationClient;
 import com.android.server.biometrics.BiometricService;
 import com.android.server.biometrics.BiometricUtils;
 import com.android.server.biometrics.ClientMonitor;
@@ -590,6 +592,11 @@ public class FingerprintService extends BiometricService {
         public void onAcquired(final long deviceId, final int acquiredInfo, final int vendorCode) {
             mHandler.post(() -> {
                 FingerprintService.super.handleAcquired(deviceId, acquiredInfo, vendorCode);
+                if (getLockoutMode() == AuthenticationClient.LOCKOUT_NONE
+                        && getCurrentClient() instanceof AuthenticationClient) {
+                    // Ignore enrollment acquisitions or acquisitions when we are locked out.
+                    StatsLog.write(StatsLog.FINGERPRINT_ACQUIRED, mCurrentUserId, mIsCrypto);
+                }
             });
         }
 
@@ -599,6 +606,22 @@ public class FingerprintService extends BiometricService {
             mHandler.post(() -> {
                 Fingerprint fp = new Fingerprint("", groupId, fingerId, deviceId);
                 FingerprintService.super.handleAuthenticated(fp, token);
+                // Send authentication to statsd.
+                final boolean authenticated = fingerId != 0;
+                StatsLog.write(StatsLog.FINGERPRINT_AUTHENTICATED, mCurrentUserId, mIsCrypto,
+                        authenticated);
+                if (!authenticated) {
+                    // If we failed to authenticate because of a lockout, inform statsd.
+                    final int lockoutMode = getLockoutMode();
+                    if (lockoutMode == AuthenticationClient.LOCKOUT_TIMED) {
+                        StatsLog.write(StatsLog.FINGERPRINT_ERROR_OCCURRED, mCurrentUserId,
+                                mIsCrypto, StatsLog.FINGERPRINT_ERROR_OCCURRED__ERROR__LOCKOUT);
+                    } else if (lockoutMode == AuthenticationClient.LOCKOUT_PERMANENT) {
+                        StatsLog.write(StatsLog.FINGERPRINT_ERROR_OCCURRED, mCurrentUserId,
+                                mIsCrypto,
+                                StatsLog.FINGERPRINT_ERROR_OCCURRED__ERROR__PERMANENT_LOCKOUT);
+                    }
+                }
             });
         }
 

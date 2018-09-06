@@ -108,6 +108,8 @@ public abstract class BiometricService extends SystemService implements IHwBinde
     private ClientMonitor mPendingClient;
     private PerformanceStats mPerformanceStats;
     protected int mCurrentUserId = UserHandle.USER_NULL;
+    // Tracks if the current authentication makes use of CryptoObjects.
+    protected boolean mIsCrypto;
     // Normal authentications are tracked by mPerformanceMap.
     protected HashMap<Integer, PerformanceStats> mPerformanceMap = new HashMap<>();
     // Transactions that make use of CryptoObjects are tracked by mCryptoPerformaceMap.
@@ -715,6 +717,7 @@ public abstract class BiometricService extends SystemService implements IHwBinde
                 pmap.put(mCurrentUserId, stats);
             }
             mPerformanceStats = stats;
+            mIsCrypto = (opId != 0);
 
             startAuthentication(client, opPackageName);
         });
@@ -847,7 +850,7 @@ public abstract class BiometricService extends SystemService implements IHwBinde
         return mKeyguardPackage.equals(clientPackage);
     }
 
-    private int getLockoutMode() {
+    protected int getLockoutMode() {
         final int currentUser = ActivityManager.getCurrentUser();
         final int failedAttempts = mFailedAttempts.get(currentUser, 0);
         if (failedAttempts >= getFailedAttemptsLockoutPermanent()) {

@@ -32,6 +32,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.hardware.fingerprint.FingerprintManager;
 import android.net.NetworkStats;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiActivityEnergyInfo;
@@ -1171,6 +1172,28 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    private void pullNumFingerprints(int tagId, List<StatsLogEventWrapper> pulledData) {
+        FingerprintManager fingerprintManager = mContext.getSystemService(FingerprintManager.class);
+        if (fingerprintManager == null) {
+            return;
+        }
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        if (userManager == null) {
+            return;
+        }
+        final long token = Binder.clearCallingIdentity();
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+        for (UserInfo user : userManager.getUsers()) {
+            final int userId = user.getUserHandle().getIdentifier();
+            final int numFingerprints = fingerprintManager.getEnrolledFingerprints(userId).size();
+            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 2 /* fields */);
+            e.writeInt(userId);
+            e.writeInt(numFingerprints);
+            pulledData.add(e);
+        }
+        Binder.restoreCallingIdentity(token);
+    }
+
     /**
      * Pulls various data.
      */
@@ -1275,6 +1298,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.CATEGORY_SIZE: {
                 pullCategorySize(tagId, ret);
+                break;
+            }
+            case StatsLog.NUM_FINGERPRINTS: {
+                pullNumFingerprints(tagId, ret);
                 break;
             }
             default:

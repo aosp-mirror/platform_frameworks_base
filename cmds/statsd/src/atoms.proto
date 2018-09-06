@@ -133,6 +133,9 @@ message Atom {
         VibratorStateChanged vibrator_state_changed = 84;
         DeferredJobStatsReported deferred_job_stats_reported = 85;
         ThermalThrottlingStateChanged thermal_throttling = 86;
+        FingerprintAcquired fingerprint_acquired = 87;
+        FingerprintAuthenticated fingerprint_authenticated = 88;
+        FingerprintErrorOccurred fingerprint_error_occurred = 89;
     }
 
     // Pulled events will start at field 10000.
@@ -169,6 +172,7 @@ message Atom {
         CategorySize category_size = 10028;
         android.service.procstats.ProcessStatsSectionProto proc_stats = 10029;
         BatteryVoltage battery_voltage = 10030;
+        NumFingerprints num_fingerprints = 10031;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP. Field numbers above
@@ -1832,6 +1836,60 @@ message GenericAtom {
     optional android.os.statsd.EventType event_id = 2;
 }
 
+/**
+ * Logs when a fingerprint acquire event occurs.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/biometrics/fingerprint/FingerprintService.java
+ */
+message FingerprintAcquired {
+    // The associated user. Eg: 0 for owners, 10+ for others.
+    // Defined in android/os/UserHandle.java
+    optional int32 user = 1;
+    // If this acquire is for a crypto fingerprint.
+    // e.g. Secure purchases, unlock password storage.
+    optional bool is_crypto = 2;
+}
+
+/**
+ * Logs when a fingerprint authentication event occurs.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/biometrics/fingerprint/FingerprintService.java
+ */
+message FingerprintAuthenticated {
+    // The associated user. Eg: 0 for owners, 10+ for others.
+    // Defined in android/os/UserHandle.java
+    optional int32 user = 1;
+    // If this authentication is for a crypto fingerprint.
+    // e.g. Secure purchases, unlock password storage.
+    optional bool is_crypto = 2;
+    // Whether or not this authentication was successful.
+    optional bool is_authenticated = 3;
+}
+
+/**
+ * Logs when a fingerprint error occurs.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/biometrics/fingerprint/FingerprintService.java
+ */
+message FingerprintErrorOccurred {
+    // The associated user. Eg: 0 for owners, 10+ for others.
+    // Defined in android/os/UserHandle.java
+    optional int32 user = 1;
+    // If this error is for a crypto fingerprint.
+    // e.g. Secure purchases, unlock password storage.
+    optional bool is_crypto = 2;
+
+    enum Error {
+        UNKNOWN = 0;
+        LOCKOUT = 1;
+        PERMANENT_LOCKOUT = 2;
+    }
+    // The type of error.
+    optional Error error = 3;
+}
 //////////////////////////////////////////////////////////////////////
 // Pulled atoms below this line //
 //////////////////////////////////////////////////////////////////////
@@ -2407,4 +2465,17 @@ message CategorySize {
     // Time that the cache file was produced.
     // Uses System.currentTimeMillis(), which is wall clock time.
     optional int64 cache_time_millis = 3;
+}
+
+/**
+ * Pulls the number of fingerprints for each user.
+ *
+ * Pulled from StatsCompanionService, which queries FingerprintManager.
+ */
+message NumFingerprints {
+    // The associated user. Eg: 0 for owners, 10+ for others.
+    // Defined in android/os/UserHandle.java
+    optional int32 user = 1;
+    // Number of fingerprints registered to that user.
+    optional int32 num_fingerprints = 2;
 }
