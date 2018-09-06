@@ -93,7 +93,9 @@ public class Nat464Xlat extends BaseNetworkObserver {
         // We only run clat on networks that don't have a native IPv4 address.
         final boolean hasIPv4Address =
                 (nai.linkProperties != null) && nai.linkProperties.hasIPv4Address();
-        return supported && connected && !hasIPv4Address;
+        final boolean skip464xlat =
+                (nai.networkMisc != null) && nai.networkMisc.skip464xlat;
+        return supported && connected && !hasIPv4Address && !skip464xlat;
     }
 
     /**
