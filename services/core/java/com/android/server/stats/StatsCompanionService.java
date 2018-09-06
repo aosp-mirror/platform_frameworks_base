@@ -43,6 +43,7 @@ import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.IStatsCompanionService;
 import android.os.IStatsManager;
+import android.os.IStoraged;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
@@ -54,6 +55,7 @@ import android.os.SynchronousResultReceiver;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.telephony.ModemActivityInfo;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
@@ -76,9 +78,19 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.storage.DiskStatsFileLogger;
+import com.android.server.storage.DiskStatsLoggingService;
+
+import libcore.io.IoUtils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -861,14 +873,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private void pullDiskSpace(int tagId, List<StatsLogEventWrapper> pulledData) {
-        StatsLogEventWrapper e = new StatsLogEventWrapper(SystemClock.elapsedRealtimeNanos(), tagId, 3);
-        e.writeLong(mStatFsData.getAvailableBytes());
-        e.writeLong(mStatFsSystem.getAvailableBytes());
-        e.writeLong(mStatFsTemp.getAvailableBytes());
-        pulledData.add(e);
-    }
-
     private void pullSystemUpTime(int tagId, List<StatsLogEventWrapper> pulledData) {
         StatsLogEventWrapper e = new StatsLogEventWrapper(SystemClock.elapsedRealtimeNanos(), tagId, 1);
         e.writeLong(SystemClock.uptimeMillis());
@@ -962,6 +966,183 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    private void pullDiskStats(int tagId, List<StatsLogEventWrapper> pulledData) {
+        // Run a quick-and-dirty performance test: write 512 bytes
+        byte[] junk = new byte[512];
+        for (int i = 0; i < junk.length; i++) junk[i] = (byte) i;  // Write nonzero bytes
+
+        File tmp = new File(Environment.getDataDirectory(), "system/statsdperftest.tmp");
+        FileOutputStream fos = null;
+        IOException error = null;
+
+        long before = SystemClock.elapsedRealtime();
+        try {
+            fos = new FileOutputStream(tmp);
+            fos.write(junk);
+        } catch (IOException e) {
+            error = e;
+        } finally {
+            try {
+                if (fos != null) fos.close();
+            } catch (IOException e) {
+                // Do nothing.
+            }
+        }
+
+        long latency = SystemClock.elapsedRealtime() - before;
+        if (tmp.exists()) tmp.delete();
+
+        if (error != null) {
+            Slog.e(TAG, "Error performing diskstats latency test");
+            latency = -1;
+        }
+        // File based encryption.
+        boolean fileBased = StorageManager.isFileEncryptedNativeOnly();
+
+        //Recent disk write speed. Binder call to storaged.
+        int writeSpeed = -1;
+        try {
+            IBinder binder = ServiceManager.getService("storaged");
+            if (binder == null) {
+                Slog.e(TAG, "storaged not found");
+            }
+            IStoraged storaged = IStoraged.Stub.asInterface(binder);
+            writeSpeed = storaged.getRecentPerf();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "storaged not found");
+        }
+
+        // Add info pulledData.
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+        StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3 /* fields */);
+        e.writeLong(latency);
+        e.writeBoolean(fileBased);
+        e.writeInt(writeSpeed);
+        pulledData.add(e);
+    }
+
+    private void pullDirectoryUsage(int tagId, List<StatsLogEventWrapper> pulledData) {
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+        StatFs statFsData = new StatFs(Environment.getDataDirectory().getAbsolutePath());
+        StatFs statFsSystem = new StatFs(Environment.getRootDirectory().getAbsolutePath());
+        StatFs statFsCache = new StatFs(Environment.getDownloadCacheDirectory().getAbsolutePath());
+
+        StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3 /* fields */);
+        e.writeInt(StatsLog.DIRECTORY_USAGE__DIRECTORY__DATA);
+        e.writeLong(statFsData.getAvailableBytes());
+        e.writeLong(statFsData.getTotalBytes());
+        pulledData.add(e);
+
+        e = new StatsLogEventWrapper(elapsedNanos, tagId, 3 /* fields */);
+        e.writeInt(StatsLog.DIRECTORY_USAGE__DIRECTORY__CACHE);
+        e.writeLong(statFsCache.getAvailableBytes());
+        e.writeLong(statFsCache.getTotalBytes());
+        pulledData.add(e);
+
+        e = new StatsLogEventWrapper(elapsedNanos, tagId, 3 /* fields */);
+        e.writeInt(StatsLog.DIRECTORY_USAGE__DIRECTORY__SYSTEM);
+        e.writeLong(statFsSystem.getAvailableBytes());
+        e.writeLong(statFsSystem.getTotalBytes());
+        pulledData.add(e);
+    }
+
+    private void pullAppSize(int tagId, List<StatsLogEventWrapper> pulledData) {
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+        try {
+            String jsonStr = IoUtils.readFileAsString(DiskStatsLoggingService.DUMPSYS_CACHE_PATH);
+            JSONObject json = new JSONObject(jsonStr);
+            long cache_time = json.optLong(DiskStatsFileLogger.LAST_QUERY_TIMESTAMP_KEY, -1L);
+            JSONArray pkg_names = json.getJSONArray(DiskStatsFileLogger.PACKAGE_NAMES_KEY);
+            JSONArray app_sizes = json.getJSONArray(DiskStatsFileLogger.APP_SIZES_KEY);
+            JSONArray app_data_sizes = json.getJSONArray(DiskStatsFileLogger.APP_DATA_KEY);
+            JSONArray app_cache_sizes = json.getJSONArray(DiskStatsFileLogger.APP_CACHES_KEY);
+            // Sanity check: Ensure all 4 lists have the same length.
+            int length = pkg_names.length();
+            if (app_sizes.length() != length || app_data_sizes.length() != length
+                    || app_cache_sizes.length() != length) {
+                Slog.e(TAG, "formatting error in diskstats cache file!");
+                return;
+            }
+            for (int i = 0; i < length; i++) {
+                StatsLogEventWrapper e =
+                        new StatsLogEventWrapper(elapsedNanos, tagId, 5 /* fields */);
+                e.writeString(pkg_names.getString(i));
+                e.writeLong(app_sizes.optLong(i, -1L));
+                e.writeLong(app_data_sizes.optLong(i, -1L));
+                e.writeLong(app_cache_sizes.optLong(i, -1L));
+                e.writeLong(cache_time);
+                pulledData.add(e);
+            }
+        } catch (IOException | JSONException e) {
+            Slog.e(TAG, "exception reading diskstats cache file", e);
+        }
+    }
+
+    private void pullCategorySize(int tagId, List<StatsLogEventWrapper> pulledData) {
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+        try {
+            String jsonStr = IoUtils.readFileAsString(DiskStatsLoggingService.DUMPSYS_CACHE_PATH);
+            JSONObject json = new JSONObject(jsonStr);
+            long cacheTime = json.optLong(DiskStatsFileLogger.LAST_QUERY_TIMESTAMP_KEY, -1L);
+
+            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3 /* fields */);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__APP_SIZE);
+            e.writeLong(json.optLong(DiskStatsFileLogger.APP_SIZE_AGG_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+
+            e = new StatsLogEventWrapper(elapsedNanos, tagId, 3 /* fields */);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__APP_DATA_SIZE);
+            e.writeLong(json.optLong(DiskStatsFileLogger.APP_DATA_SIZE_AGG_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+
+            e = new StatsLogEventWrapper(elapsedNanos, tagId, 3 /* fields */);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__APP_CACHE_SIZE);
+            e.writeLong(json.optLong(DiskStatsFileLogger.APP_CACHE_AGG_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+
+            e = new StatsLogEventWrapper(elapsedNanos, tagId, 3 /* fields */);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__PHOTOS);
+            e.writeLong(json.optLong(DiskStatsFileLogger.PHOTOS_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+
+            e = new StatsLogEventWrapper(elapsedNanos, tagId, 3 /* fields */);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__VIDEOS);
+            e.writeLong(json.optLong(DiskStatsFileLogger.VIDEOS_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+
+            e = new StatsLogEventWrapper(elapsedNanos, tagId, 3 /* fields */);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__AUDIO);
+            e.writeLong(json.optLong(DiskStatsFileLogger.AUDIO_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+
+            e = new StatsLogEventWrapper(elapsedNanos, tagId, 3 /* fields */);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__DOWNLOADS);
+            e.writeLong(json.optLong(DiskStatsFileLogger.DOWNLOADS_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+
+            e = new StatsLogEventWrapper(elapsedNanos, tagId, 3 /* fields */);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__SYSTEM);
+            e.writeLong(json.optLong(DiskStatsFileLogger.SYSTEM_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+
+            e = new StatsLogEventWrapper(elapsedNanos, tagId, 3 /* fields */);
+            e.writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__OTHER);
+            e.writeLong(json.optLong(DiskStatsFileLogger.MISC_KEY, -1L));
+            e.writeLong(cacheTime);
+            pulledData.add(e);
+        } catch (IOException | JSONException e) {
+            Slog.e(TAG, "exception reading diskstats cache file", e);
+        }
+    }
+
     /**
      * Pulls various data.
      */
@@ -1036,10 +1217,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 pullSystemElapsedRealtime(tagId, ret);
                 break;
             }
-            case StatsLog.DISK_SPACE: {
-                pullDiskSpace(tagId, ret);
-                break;
-            }
             case StatsLog.PROCESS_MEMORY_STATE: {
                 pullProcessMemoryState(tagId, ret);
                 break;
@@ -1054,6 +1231,22 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.LOOPER_STATS: {
                 pullLooperStats(tagId, ret);
+                break;
+            }
+            case StatsLog.DISK_STATS: {
+                pullDiskStats(tagId, ret);
+                break;
+            }
+            case StatsLog.DIRECTORY_USAGE: {
+                pullDirectoryUsage(tagId, ret);
+                break;
+            }
+            case StatsLog.APP_SIZE: {
+                pullAppSize(tagId, ret);
+                break;
+            }
+            case StatsLog.CATEGORY_SIZE: {
+                pullCategorySize(tagId, ret);
                 break;
             }
             default:
