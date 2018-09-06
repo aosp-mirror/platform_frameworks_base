@@ -152,8 +152,8 @@ Landroid/view/IRemoteAnimationFinishedCallback;->onAnimationFinished()V
 Landroid/view/IRemoteAnimationRunner$Stub;-><init>()V
 Landroid/view/IRemoteAnimationRunner;->onAnimationCancelled()V
 Landroid/view/IRemoteAnimationRunner;->onAnimationStart([Landroid/view/RemoteAnimationTarget;Landroid/view/IRemoteAnimationFinishedCallback;)V
-Landroid/view/IWindowManager;->createInputConsumer(Landroid/os/IBinder;Ljava/lang/String;Landroid/view/InputChannel;)V
-Landroid/view/IWindowManager;->destroyInputConsumer(Ljava/lang/String;)Z
+Landroid/view/IWindowManager;->createInputConsumer(Landroid/os/IBinder;Ljava/lang/String;ILandroid/view/InputChannel;)V
+Landroid/view/IWindowManager;->destroyInputConsumer(Ljava/lang/String;I)Z
 Landroid/view/IWindowManager;->endProlongedAnimations()V
 Landroid/view/IWindowManager;->getStableInsets(ILandroid/graphics/Rect;)V
 Landroid/view/IWindowManager;->overridePendingAppTransitionMultiThumbFuture(Landroid/view/IAppTransitionAnimationSpecsFuture;Landroid/os/IRemoteCallback;Z)V
