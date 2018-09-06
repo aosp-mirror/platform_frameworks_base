@@ -806,11 +806,19 @@ public final class Parcel {
             return;
         }
         Set<Map.Entry<String,Object>> entries = val.entrySet();
-        writeInt(entries.size());
+        int size = entries.size();
+        writeInt(size);
+
         for (Map.Entry<String,Object> e : entries) {
             writeValue(e.getKey());
             writeValue(e.getValue());
+            size--;
         }
+
+        if (size != 0) {
+            throw new BadParcelableException("Map size does not match number of entries!");
+        }
+
     }
 
     /**
