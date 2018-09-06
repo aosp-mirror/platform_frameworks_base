@@ -330,7 +330,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntryManager.removeNotification(mSbn.getKey(), mRankingMap);
 
         assertNotNull(mEntryManager.getNotificationData().get(mSbn.getKey()));
-        verify(extender).setShouldExtendLifetime(mEntry, true);
+        verify(extender).setShouldManageLifetime(mEntry, true /* shouldManage */);
     }
 
     @Test

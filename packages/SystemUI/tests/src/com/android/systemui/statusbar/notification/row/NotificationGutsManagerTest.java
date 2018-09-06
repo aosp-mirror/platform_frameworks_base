@@ -363,18 +363,18 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSetShouldExtendLifetime_setShouldExtend() {
+    public void testSetShouldManageLifetime_setShouldManage() {
         NotificationData.Entry entry = createTestNotificationRow().getEntry();
-        mGutsManager.setShouldExtendLifetime(entry, true /* shouldExtend */);
+        mGutsManager.setShouldManageLifetime(entry, true /* shouldManage */);
 
         assertTrue(entry.key.equals(mGutsManager.mKeyToRemoveOnGutsClosed));
     }
 
     @Test
-    public void testSetShouldExtendLifetime_setShouldNotExtend() {
+    public void testSetShouldManageLifetime_setShouldNotManage() {
         NotificationData.Entry entry = createTestNotificationRow().getEntry();
         mGutsManager.mKeyToRemoveOnGutsClosed = entry.key;
-        mGutsManager.setShouldExtendLifetime(entry, false /* shouldExtend */);
+        mGutsManager.setShouldManageLifetime(entry, false /* shouldManage */);
 
         assertNull(mGutsManager.mKeyToRemoveOnGutsClosed);
     }

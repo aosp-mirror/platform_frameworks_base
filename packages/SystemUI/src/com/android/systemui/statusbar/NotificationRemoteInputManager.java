@@ -502,7 +502,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         }
 
         @Override
-        public void setShouldExtendLifetime(NotificationData.Entry entry,
+        public void setShouldManageLifetime(NotificationData.Entry entry,
                 boolean shouldExtend) {
             if (shouldExtend) {
                 CharSequence remoteInputText = entry.remoteInputText;
@@ -548,7 +548,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         }
 
         @Override
-        public void setShouldExtendLifetime(NotificationData.Entry entry,
+        public void setShouldManageLifetime(NotificationData.Entry entry,
                 boolean shouldExtend) {
             if (shouldExtend) {
                 StatusBarNotification newSbn = rebuildNotificationForCanceledSmartReplies(entry);
@@ -589,7 +589,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         }
 
         @Override
-        public void setShouldExtendLifetime(NotificationData.Entry entry,
+        public void setShouldManageLifetime(NotificationData.Entry entry,
                 boolean shouldExtend) {
             if (shouldExtend) {
                 if (Log.isLoggable(TAG, Log.DEBUG)) {

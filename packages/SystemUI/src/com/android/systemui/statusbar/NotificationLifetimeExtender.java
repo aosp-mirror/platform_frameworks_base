@@ -27,17 +27,17 @@ public interface NotificationLifetimeExtender {
     boolean shouldExtendLifetime(@NonNull NotificationData.Entry entry);
 
     /**
-     * Sets whether or not the lifetime should be extended.  In practice, if shouldExtend is
-     * true, this is where the extender starts managing the entry internally and is now
-     * responsible for calling {@link NotificationSafeToRemoveCallback#onSafeToRemove(String)} when
-     * the entry is safe to remove.  If shouldExtend is false, the extender no longer needs to
+     * Sets whether or not the lifetime should be managed by the extender.  In practice, if
+     * shouldManage is true, this is where the extender starts managing the entry internally and is
+     * now responsible for calling {@link NotificationSafeToRemoveCallback#onSafeToRemove(String)}
+     * when the entry is safe to remove.  If shouldManage is false, the extender no longer needs to
      * worry about it (either because we will be removing it anyway or the entry is no longer
      * removed due to an update).
      *
-     * @param entry the entry to mark as having an extended lifetime
-     * @param shouldExtend true if the extender should manage the entry now, false otherwise
+     * @param entry the entry that needs an extended lifetime
+     * @param shouldManage true if the extender should manage the entry now, false otherwise
      */
-    void setShouldExtendLifetime(@NonNull NotificationData.Entry entry, boolean shouldExtend);
+    void setShouldManageLifetime(@NonNull NotificationData.Entry entry, boolean shouldManage);
 
     /**
      * The callback for when the notification is now safe to remove (i.e. its lifetime has ended).
