@@ -20,6 +20,8 @@ import android.accessibilityservice.FingerprintGestureController;
 import android.accessibilityservice.FingerprintGestureController.FingerprintGestureCallback;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.os.Looper;
+import android.support.test.filters.FlakyTest;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -95,6 +97,7 @@ public class FingerprintGestureControllerTest {
     }
 
     @Test
+    @FlakyTest
     public void testDetectionActiveCallback_withHandler_shouldPostRunnableToHandler() {
         MessageCapturingHandler messageCapturingHandler = new MessageCapturingHandler((message) -> {
             message.getCallback().run();
@@ -142,6 +145,7 @@ public class FingerprintGestureControllerTest {
     }
 
     @Test
+    @FlakyTest
     public void testGestureCallback_withHandler_shouldPostRunnableToHandler() {
         MessageCapturingHandler messageCapturingHandler = new MessageCapturingHandler((message) -> {
             message.getCallback().run();
