@@ -66,6 +66,18 @@ class Metrics {
     }
 
     /**
+     * Writes the given <code>text</code> to a log with the given label.
+     */
+    private void logText(String label, String text) throws IOException {
+      File file = File.createTempFile(label, "txt");
+      PrintStream ps = new PrintStream(file);
+      ps.print(text);
+      try (FileInputStreamSource dataStream = new FileInputStreamSource(file)) {
+        logs.addTestLog(label, LogDataType.TEXT, dataStream);
+      }
+    }
+
+    /**
      * Returns the pid for the process with the given name.
      */
     private int getPidForProcess(String name)
@@ -111,13 +123,7 @@ class Metrics {
 
         // Read showmap for system server and add it as a test log
         String showmap = device.executeShellCommand("showmap " + pid);
-        String showmapLabel = label + ".system_server.showmap";
-        File file = File.createTempFile(showmapLabel, "txt");
-        PrintStream ps = new PrintStream(file);
-        ps.print(showmap);
-        try (FileInputStreamSource dataStream = new FileInputStreamSource(file)) {
-            logs.addTestLog(showmapLabel, LogDataType.TEXT, dataStream);
-        }
+        logText(label + ".system_server.showmap", showmap);
 
         // Extract VSS, PSS and RSS from the showmap and output them as metrics.
         // The last lines of the showmap output looks something like:
@@ -139,6 +145,11 @@ class Metrics {
         } catch (InputMismatchException e) {
             throw new MetricsException("unexpected showmap format", e);
         }
+
+        // Run debuggerd -j to get GC stats for system server and add it as a
+        // test log
+        String debuggerd = device.executeShellCommand("debuggerd -j " + pid);
+        logText(label + ".system_server.debuggerd", debuggerd);
 
         // TODO: Experiment with other additional metrics.
 
