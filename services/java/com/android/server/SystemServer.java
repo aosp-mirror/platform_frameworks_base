@@ -747,6 +747,11 @@ public final class SystemServer {
         traceBeginAndSlog("StartBinderCallsStatsService");
         mSystemServiceManager.startService(BinderCallsStatsService.LifeCycle.class);
         traceEnd();
+
+        // Tracks time spent in handling messages in handlers.
+        traceBeginAndSlog("StartLooperStatsService");
+        mSystemServiceManager.startService(LooperStatsService.Lifecycle.class);
+        traceEnd();
     }
 
     /**

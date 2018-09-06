@@ -1426,7 +1426,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         config.densityDpi = displayInfo.logicalDensityDpi;
 
         config.colorMode =
-                (displayInfo.isHdr()
+                ((displayInfo.isHdr() && mService.hasHdrSupport())
                         ? Configuration.COLOR_MODE_HDR_YES
                         : Configuration.COLOR_MODE_HDR_NO)
                         | (displayInfo.isWideColorGamut() && mService.hasWideColorGamutSupport()

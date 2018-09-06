@@ -300,6 +300,23 @@ public class UsbManager {
     public static final String EXTRA_PERMISSION_GRANTED = "permission";
 
     /**
+     * Name of extra added to start systemui.usb.UsbPermissionActivity
+     * containing package name of the app which requests USB permission.
+     *
+     * @hide
+     */
+    public static final String EXTRA_PACKAGE = "android.hardware.usb.extra.PACKAGE";
+
+    /**
+     * Name of extra added to start systemui.usb.UsbPermissionActivity
+     * containing the whether the app which requests USB permission can be set as default handler
+     * for USB device attach event or USB accessory attach event or not.
+     *
+     * @hide
+     */
+    public static final String EXTRA_CAN_BE_DEFAULT = "android.hardware.usb.extra.CAN_BE_DEFAULT";
+
+    /**
      * Code for the charging usb function. Passed into {@link #setCurrentFunctions(long)}
      * {@hide}
      */

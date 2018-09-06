@@ -27,7 +27,6 @@ import android.icu.util.ULocale;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.TtsSpan;
-import android.util.Log;
 
 import com.android.settingslib.R;
 
@@ -36,8 +35,6 @@ import java.util.Locale;
 
 /** Utility class for generally useful string methods **/
 public class StringUtil {
-
-    private static final String TAG = "StringUtil";
 
     public static final int SECONDS_PER_MINUTE = 60;
     public static final int SECONDS_PER_HOUR = 60 * 60;
@@ -97,7 +94,6 @@ public class StringUtil {
         final Locale locale = context.getResources().getConfiguration().locale;
         final MeasureFormat measureFormat = MeasureFormat.getInstance(
                 locale, FormatWidth.SHORT);
-        Log.i(TAG, "Locale is: " + locale);
         sb.append(measureFormat.formatMeasures(measureArray));
 
         if (measureArray.length == 1 && MeasureUnit.MINUTE.equals(measureArray[0].getUnit())) {
@@ -150,7 +146,6 @@ public class StringUtil {
                 null /* default NumberFormat */,
                 RelativeDateTimeFormatter.Style.LONG,
                 android.icu.text.DisplayContext.CAPITALIZATION_FOR_MIDDLE_OF_SENTENCE);
-        Log.i(TAG, "Locale is: " + locale);
 
         return formatter.format(value, RelativeDateTimeFormatter.Direction.LAST, unit);
     }

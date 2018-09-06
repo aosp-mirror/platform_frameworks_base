@@ -48,7 +48,7 @@ public class WifiAwareAgentNetworkSpecifier extends NetworkSpecifier implements 
     private MessageDigest mDigester;
 
     public WifiAwareAgentNetworkSpecifier() {
-        // do nothing, already initialized to empty
+        initialize();
     }
 
     public WifiAwareAgentNetworkSpecifier(WifiAwareNetworkSpecifier ns) {

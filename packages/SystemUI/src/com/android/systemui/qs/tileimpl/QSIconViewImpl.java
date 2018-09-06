@@ -84,16 +84,15 @@ public class QSIconViewImpl extends QSIconView {
         layout(mIcon, iconLeft, top);
     }
 
-    public void setIcon(QSTile.State state) {
-        setIcon((ImageView) mIcon, state);
+    public void setIcon(State state, boolean allowAnimations) {
+        setIcon((ImageView) mIcon, state, allowAnimations);
     }
 
-    protected void updateIcon(ImageView iv, State state) {
+    protected void updateIcon(ImageView iv, State state, boolean allowAnimations) {
         final QSTile.Icon icon = state.iconSupplier != null ? state.iconSupplier.get() : state.icon;
         if (!Objects.equals(icon, iv.getTag(R.id.qs_icon_tag))
                 || !Objects.equals(state.slash, iv.getTag(R.id.qs_slash_tag))) {
-            boolean shouldAnimate = iv.isShown() && mAnimationEnabled
-                    && iv.getDrawable() != null;
+            boolean shouldAnimate = allowAnimations && shouldAnimate(iv);
             Drawable d = icon != null
                     ? shouldAnimate ? icon.getDrawable(mContext)
                     : icon.getInvisibleDrawable(mContext) : null;
@@ -128,7 +127,11 @@ public class QSIconViewImpl extends QSIconView {
         }
     }
 
-    protected void setIcon(ImageView iv, QSTile.State state) {
+    private boolean shouldAnimate(ImageView iv) {
+        return mAnimationEnabled && iv.isShown() && iv.getDrawable() != null;
+    }
+
+    protected void setIcon(ImageView iv, QSTile.State state, boolean allowAnimations) {
         if (state.disabledByPolicy) {
             iv.setColorFilter(getContext().getColor(R.color.qs_tile_disabled_color));
         } else {
@@ -137,8 +140,8 @@ public class QSIconViewImpl extends QSIconView {
         if (state.state != mState) {
             int color = getColor(state.state);
             mState = state.state;
-            if (iv.isShown() && mTint != 0) {
-                animateGrayScale(mTint, color, iv, () -> updateIcon(iv, state));
+            if (mTint != 0 && allowAnimations && shouldAnimate(iv)) {
+                animateGrayScale(mTint, color, iv, () -> updateIcon(iv, state, allowAnimations));
                 mTint = color;
             } else {
                 if (iv instanceof AlphaControlledSlashImageView) {
@@ -148,10 +151,10 @@ public class QSIconViewImpl extends QSIconView {
                     setTint(iv, color);
                 }
                 mTint = color;
-                updateIcon(iv, state);
+                updateIcon(iv, state, allowAnimations);
             }
         } else {
-            updateIcon(iv, state);
+            updateIcon(iv, state, allowAnimations);
         }
     }
 

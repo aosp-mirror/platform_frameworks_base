@@ -193,6 +193,8 @@ class UsbProfileGroupSettingsManager {
 
     MyPackageMonitor mPackageMonitor = new MyPackageMonitor();
 
+    private final UsbHandlerManager mUsbHandlerManager;
+
     private final MtpNotificationManager mMtpNotificationManager;
 
     /**
@@ -201,9 +203,11 @@ class UsbProfileGroupSettingsManager {
      * @param context The context of the service
      * @param user The parent profile
      * @param settingsManager The settings manager of the service
+     * @param usbResolveActivityManager The resovle activity manager of the service
      */
     UsbProfileGroupSettingsManager(@NonNull Context context, @NonNull UserHandle user,
-            @NonNull UsbSettingsManager settingsManager) {
+            @NonNull UsbSettingsManager settingsManager,
+            @NonNull UsbHandlerManager usbResolveActivityManager) {
         if (DEBUG) Slog.v(TAG, "Creating settings for " + user);
 
         Context parentUserContext;
@@ -238,6 +242,8 @@ class UsbProfileGroupSettingsManager {
                 parentUserContext,
                 device -> resolveActivity(createDeviceAttachedIntent(device),
                         device, false /* showMtpNotification */));
+
+        mUsbHandlerManager = usbResolveActivityManager;
     }
 
     /**
@@ -830,23 +836,8 @@ class UsbProfileGroupSettingsManager {
         // don't show the resolver activity if there are no choices available
         if (matches.size() == 0) {
             if (accessory != null) {
-                String uri = accessory.getUri();
-                if (uri != null && uri.length() > 0) {
-                    // display URI to user
-                    Intent dialogIntent = new Intent();
-                    dialogIntent.setClassName("com.android.systemui",
-                            "com.android.systemui.usb.UsbAccessoryUriActivity");
-                    dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    dialogIntent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
-                    dialogIntent.putExtra("uri", uri);
-                    try {
-                        mContext.startActivityAsUser(dialogIntent, mParentUser);
-                    } catch (ActivityNotFoundException e) {
-                        Slog.e(TAG, "unable to start UsbAccessoryUriActivity");
-                    }
-                }
+                mUsbHandlerManager.showUsbAccessoryUriActivity(accessory, mParentUser);
             }
-
             // do nothing
             return;
         }
@@ -875,37 +866,10 @@ class UsbProfileGroupSettingsManager {
                 Slog.e(TAG, "startActivity failed", e);
             }
         } else {
-            Intent resolverIntent = new Intent();
-            resolverIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            UserHandle user;
-
             if (matches.size() == 1) {
-                ResolveInfo rInfo = matches.get(0);
-
-                // start UsbConfirmActivity if there is only one choice
-                resolverIntent.setClassName("com.android.systemui",
-                        "com.android.systemui.usb.UsbConfirmActivity");
-                resolverIntent.putExtra("rinfo", rInfo);
-                user = UserHandle.getUserHandleForUid(rInfo.activityInfo.applicationInfo.uid);
-
-                if (device != null) {
-                    resolverIntent.putExtra(UsbManager.EXTRA_DEVICE, device);
-                } else {
-                    resolverIntent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
-                }
+                mUsbHandlerManager.confirmUsbHandler(matches.get(0), device, accessory);
             } else {
-                user = mParentUser;
-
-                // start UsbResolverActivity so user can choose an activity
-                resolverIntent.setClassName("com.android.systemui",
-                        "com.android.systemui.usb.UsbResolverActivity");
-                resolverIntent.putParcelableArrayListExtra("rlist", matches);
-                resolverIntent.putExtra(Intent.EXTRA_INTENT, intent);
-            }
-            try {
-                mContext.startActivityAsUser(resolverIntent, user);
-            } catch (ActivityNotFoundException e) {
-                Slog.e(TAG, "unable to start activity " + resolverIntent, e);
+                mUsbHandlerManager.selectUsbHandler(matches, mParentUser, intent);
             }
         }
     }

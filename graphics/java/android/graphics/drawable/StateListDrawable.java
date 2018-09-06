@@ -280,7 +280,7 @@ public class StateListDrawable extends DrawableContainer {
      * @see #getStateDrawable(int)
      * @see #getStateSet(int)
      */
-    public int getStateDrawableIndex(int[] stateSet) {
+    public int findStateDrawableIndex(int[] stateSet) {
         return mStateListState.indexOfStateSet(stateSet);
     }
 

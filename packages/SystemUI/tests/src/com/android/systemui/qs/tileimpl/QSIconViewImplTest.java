@@ -59,14 +59,14 @@ public class QSIconViewImplTest extends SysuiTestCase {
         // No current icon, only the static drawable should be used.
         s.icon = mock(Icon.class);
         when(iv.getDrawable()).thenReturn(null);
-        mIconView.updateIcon(iv, s);
+        mIconView.updateIcon(iv, s, true);
         verify(s.icon, never()).getDrawable(any());
         verify(s.icon).getInvisibleDrawable(any());
 
         // Has icon, should use the standard (animated) form.
         s.icon = mock(Icon.class);
         when(iv.getDrawable()).thenReturn(mock(Drawable.class));
-        mIconView.updateIcon(iv, s);
+        mIconView.updateIcon(iv, s, true);
         verify(s.icon).getDrawable(any());
         verify(s.icon, never()).getInvisibleDrawable(any());
     }
@@ -79,7 +79,7 @@ public class QSIconViewImplTest extends SysuiTestCase {
         int desiredColor = mIconView.getColor(s.state);
         when(iv.isShown()).thenReturn(true);
 
-        mIconView.setIcon(iv, s);
+        mIconView.setIcon(iv, s, true);
         verify(iv).setImageTintList(argThat(stateList -> stateList.getColors()[0] == desiredColor));
     }
 }

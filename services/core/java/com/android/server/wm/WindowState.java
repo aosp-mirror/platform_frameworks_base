@@ -602,6 +602,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private long mFrameNumber = -1;
 
+    private static final StringBuilder sTmpSB = new StringBuilder();
+
     /**
      * Compares two window sub-layers and returns -1 if the first is lesser than the second in terms
      * of z-order and 1 otherwise.
@@ -1113,9 +1115,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             mWindowFrames.mFrame.bottom - mWindowFrames.mStableFrame.bottom, 0));
         }
 
-
         mWindowFrames.setDisplayCutout(
-                windowFrames.mDisplayCutout.calculateRelativeTo(windowFrames.mFrame));
+                windowFrames.mDisplayCutout.calculateRelativeTo(mWindowFrames.mFrame));
 
         // Offset the actual frame by the amount layout frame is off.
         mWindowFrames.mFrame.offset(-layoutXDiff, -layoutYDiff);
@@ -3336,183 +3337,160 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         final TaskStack stack = getStack();
-        pw.print(prefix); pw.print("mDisplayId="); pw.print(getDisplayId());
-                if (stack != null) {
-                    pw.print(" stackId="); pw.print(stack.mStackId);
-                }
-                pw.print(" mSession="); pw.print(mSession);
-                pw.print(" mClient="); pw.println(mClient.asBinder());
-        pw.print(prefix); pw.print("mOwnerUid="); pw.print(mOwnerUid);
-                pw.print(" mShowToOwnerOnly="); pw.print(mShowToOwnerOnly);
-                pw.print(" package="); pw.print(mAttrs.packageName);
-                pw.print(" appop="); pw.println(AppOpsManager.opToName(mAppOp));
-        pw.print(prefix); pw.print("mAttrs="); pw.println(mAttrs.toString(prefix));
-        pw.print(prefix); pw.print("Requested w="); pw.print(mRequestedWidth);
-                pw.print(" h="); pw.print(mRequestedHeight);
-                pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
+        pw.print(prefix + "mDisplayId=" + getDisplayId());
+        if (stack != null) {
+            pw.print(" stackId=" + stack.mStackId);
+        }
+        pw.println(" mSession=" + mSession
+                + " mClient=" + mClient.asBinder());
+        pw.println(prefix + "mOwnerUid=" + mOwnerUid
+                + " mShowToOwnerOnly=" + mShowToOwnerOnly
+                + " package=" + mAttrs.packageName
+                + " appop=" + AppOpsManager.opToName(mAppOp));
+        pw.println(prefix + "mAttrs=" + mAttrs.toString(prefix));
+        pw.println(prefix + "Requested w=" + mRequestedWidth
+                + " h=" + mRequestedHeight
+                + " mLayoutSeq=" + mLayoutSeq);
         if (mRequestedWidth != mLastRequestedWidth || mRequestedHeight != mLastRequestedHeight) {
-            pw.print(prefix); pw.print("LastRequested w="); pw.print(mLastRequestedWidth);
-                    pw.print(" h="); pw.println(mLastRequestedHeight);
+            pw.println(prefix + "LastRequested w=" + mLastRequestedWidth
+                    + " h=" + mLastRequestedHeight);
         }
         if (mIsChildWindow || mLayoutAttached) {
-            pw.print(prefix); pw.print("mParentWindow="); pw.print(getParentWindow());
-                    pw.print(" mLayoutAttached="); pw.println(mLayoutAttached);
+            pw.println(prefix + "mParentWindow=" + getParentWindow()
+                    + " mLayoutAttached=" + mLayoutAttached);
         }
         if (mIsImWindow || mIsWallpaper || mIsFloatingLayer) {
-            pw.print(prefix); pw.print("mIsImWindow="); pw.print(mIsImWindow);
-                    pw.print(" mIsWallpaper="); pw.print(mIsWallpaper);
-                    pw.print(" mIsFloatingLayer="); pw.print(mIsFloatingLayer);
-                    pw.print(" mWallpaperVisible="); pw.println(mWallpaperVisible);
+            pw.println(prefix + "mIsImWindow=" + mIsImWindow
+                    + " mIsWallpaper=" + mIsWallpaper
+                    + " mIsFloatingLayer=" + mIsFloatingLayer
+                    + " mWallpaperVisible=" + mWallpaperVisible);
         }
         if (dumpAll) {
-            pw.print(prefix); pw.print("mBaseLayer="); pw.print(mBaseLayer);
-                    pw.print(" mSubLayer="); pw.print(mSubLayer);
-                    pw.print(" mAnimLayer="); pw.print(mLayer); pw.print("+");
-                    pw.print("="); pw.print(mWinAnimator.mAnimLayer);
-                    pw.print(" mLastLayer="); pw.println(mWinAnimator.mLastLayer);
+            pw.println(prefix + "mBaseLayer=" + mBaseLayer
+                    + " mSubLayer=" + mSubLayer
+                    + " mAnimLayer=" + mLayer + "=" + mWinAnimator.mAnimLayer
+                    + " mLastLayer=" + mWinAnimator.mLastLayer);
         }
         if (dumpAll) {
-            pw.print(prefix); pw.print("mToken="); pw.println(mToken);
+            pw.println(prefix + "mToken=" + mToken);
             if (mAppToken != null) {
-                pw.print(prefix); pw.print("mAppToken="); pw.println(mAppToken);
-                pw.print(prefix); pw.print(" isAnimatingWithSavedSurface()=");
-                pw.print(" mAppDied=");pw.print(mAppDied);
-                pw.print(prefix); pw.print("drawnStateEvaluated=");
-                        pw.print(getDrawnStateEvaluated());
-                pw.print(prefix); pw.print("mightAffectAllDrawn=");
-                        pw.println(mightAffectAllDrawn());
+                pw.println(prefix + "mAppToken=" + mAppToken);
+                pw.print(prefix + "mAppDied=" + mAppDied);
+                pw.print(prefix + "drawnStateEvaluated=" + getDrawnStateEvaluated());
+                pw.println(prefix + "mightAffectAllDrawn=" + mightAffectAllDrawn());
             }
-            pw.print(prefix); pw.print("mViewVisibility=0x");
-            pw.print(Integer.toHexString(mViewVisibility));
-            pw.print(" mHaveFrame="); pw.print(mHaveFrame);
-            pw.print(" mObscured="); pw.println(mObscured);
-            pw.print(prefix); pw.print("mSeq="); pw.print(mSeq);
-            pw.print(" mSystemUiVisibility=0x");
-            pw.println(Integer.toHexString(mSystemUiVisibility));
+            pw.println(prefix + "mViewVisibility=0x" + Integer.toHexString(mViewVisibility)
+                    + " mHaveFrame=" + mHaveFrame
+                    + " mObscured=" + mObscured);
+            pw.println(prefix + "mSeq=" + mSeq
+                    + " mSystemUiVisibility=0x" + Integer.toHexString(mSystemUiVisibility));
         }
         if (!mPolicyVisibility || !mPolicyVisibilityAfterAnim || !mAppOpVisibility
-                || isParentWindowHidden()|| mPermanentlyHidden || mForceHideNonSystemOverlayWindow
+                || isParentWindowHidden() || mPermanentlyHidden || mForceHideNonSystemOverlayWindow
                 || mHiddenWhileSuspended) {
-            pw.print(prefix); pw.print("mPolicyVisibility=");
-                    pw.print(mPolicyVisibility);
-                    pw.print(" mPolicyVisibilityAfterAnim=");
-                    pw.print(mPolicyVisibilityAfterAnim);
-                    pw.print(" mAppOpVisibility=");
-                    pw.print(mAppOpVisibility);
-                    pw.print(" parentHidden="); pw.print(isParentWindowHidden());
-                    pw.print(" mPermanentlyHidden="); pw.print(mPermanentlyHidden);
-                    pw.print(" mHiddenWhileSuspended="); pw.print(mHiddenWhileSuspended);
-                    pw.print(" mForceHideNonSystemOverlayWindow="); pw.println(
-                    mForceHideNonSystemOverlayWindow);
+            pw.println(prefix + "mPolicyVisibility=" + mPolicyVisibility
+                    + " mPolicyVisibilityAfterAnim=" + mPolicyVisibilityAfterAnim
+                    + " mAppOpVisibility=" + mAppOpVisibility
+                    + " parentHidden=" + isParentWindowHidden()
+                    + " mPermanentlyHidden=" + mPermanentlyHidden
+                    + " mHiddenWhileSuspended=" + mHiddenWhileSuspended
+                    + " mForceHideNonSystemOverlayWindow=" + mForceHideNonSystemOverlayWindow);
         }
         if (!mRelayoutCalled || mLayoutNeeded) {
-            pw.print(prefix); pw.print("mRelayoutCalled="); pw.print(mRelayoutCalled);
-                    pw.print(" mLayoutNeeded="); pw.println(mLayoutNeeded);
+            pw.println(prefix + "mRelayoutCalled=" + mRelayoutCalled
+                    + " mLayoutNeeded=" + mLayoutNeeded);
         }
         if (dumpAll) {
-            pw.print(prefix); pw.print("mGivenContentInsets=");
-                    mGivenContentInsets.printShortString(pw);
-                    pw.print(" mGivenVisibleInsets=");
-                    mGivenVisibleInsets.printShortString(pw);
-                    pw.println();
+            pw.println(prefix + "mGivenContentInsets=" + mGivenContentInsets.toShortString(sTmpSB)
+                    + " mGivenVisibleInsets=" + mGivenVisibleInsets.toShortString(sTmpSB));
             if (mTouchableInsets != 0 || mGivenInsetsPending) {
-                pw.print(prefix); pw.print("mTouchableInsets="); pw.print(mTouchableInsets);
-                        pw.print(" mGivenInsetsPending="); pw.println(mGivenInsetsPending);
+                pw.println(prefix + "mTouchableInsets=" + mTouchableInsets
+                        + " mGivenInsetsPending=" + mGivenInsetsPending);
                 Region region = new Region();
                 getTouchableRegion(region);
-                pw.print(prefix); pw.print("touchable region="); pw.println(region);
+                pw.println(prefix + "touchable region=" + region);
             }
-            pw.print(prefix); pw.print("mFullConfiguration="); pw.println(getConfiguration());
-            pw.print(prefix); pw.print("mLastReportedConfiguration=");
-                    pw.println(getLastReportedConfiguration());
+            pw.println(prefix + "mFullConfiguration=" + getConfiguration());
+            pw.println(prefix + "mLastReportedConfiguration=" + getLastReportedConfiguration());
         }
-        pw.print(prefix); pw.print("mHasSurface="); pw.print(mHasSurface);
-                pw.print(" isReadyForDisplay()="); pw.print(isReadyForDisplay());
-                pw.print(" mWindowRemovalAllowed="); pw.println(mWindowRemovalAllowed);
+        pw.println(prefix + "mHasSurface=" + mHasSurface
+                + " isReadyForDisplay()=" + isReadyForDisplay()
+                + " mWindowRemovalAllowed=" + mWindowRemovalAllowed);
         if (mEnforceSizeCompat) {
-            pw.print(prefix); pw.print("mCompatFrame="); mCompatFrame.printShortString(pw);
-                    pw.println();
+            pw.println(prefix + "mCompatFrame=" + mCompatFrame.toShortString(sTmpSB));
         }
         if (dumpAll) {
             mWindowFrames.dump(pw, prefix);
-            pw.print(prefix); pw.print("Cur insets: overscan=");
-                    mOverscanInsets.printShortString(pw);
-                    pw.print(" content="); mContentInsets.printShortString(pw);
-                    pw.print(" visible="); mVisibleInsets.printShortString(pw);
-                    pw.print(" stable="); mStableInsets.printShortString(pw);
-                    pw.print(" surface="); mAttrs.surfaceInsets.printShortString(pw);
-                    pw.print(" outsets="); mOutsets.printShortString(pw);
-            pw.print(prefix); pw.print("Lst insets: overscan=");
-                    mLastOverscanInsets.printShortString(pw);
-                    pw.print(" content="); mLastContentInsets.printShortString(pw);
-                    pw.print(" visible="); mLastVisibleInsets.printShortString(pw);
-                    pw.print(" stable="); mLastStableInsets.printShortString(pw);
-                    pw.print(" physical="); mLastOutsets.printShortString(pw);
-                    pw.print(" outset="); mLastOutsets.printShortString(pw);
-                    pw.println();
+            pw.print(prefix + "Cur insets: overscan=" + mOverscanInsets.toShortString(sTmpSB)
+                    + " content=" + mContentInsets.toShortString(sTmpSB)
+                    + " visible=" + mVisibleInsets.toShortString(sTmpSB)
+                    + " stable=" + mStableInsets.toShortString(sTmpSB)
+                    + " surface=" + mAttrs.surfaceInsets.toShortString(sTmpSB)
+                    + " outsets=" + mOutsets.toShortString(sTmpSB));
+            pw.println(prefix + "Lst insets: overscan=" + mLastOverscanInsets.toShortString(sTmpSB)
+                    + " content=" + mLastContentInsets.toShortString(sTmpSB)
+                    + " visible=" + mLastVisibleInsets.toShortString(sTmpSB)
+                    + " stable=" + mLastStableInsets.toShortString(sTmpSB)
+                    + " outset=" + mLastOutsets.toShortString(sTmpSB));
         }
         super.dump(pw, prefix, dumpAll);
-        pw.print(prefix); pw.print(mWinAnimator); pw.println(":");
+        pw.println(prefix + mWinAnimator + ":");
         mWinAnimator.dump(pw, prefix + "  ", dumpAll);
         if (mAnimatingExit || mRemoveOnExit || mDestroying || mRemoved) {
-            pw.print(prefix); pw.print("mAnimatingExit="); pw.print(mAnimatingExit);
-                    pw.print(" mRemoveOnExit="); pw.print(mRemoveOnExit);
-                    pw.print(" mDestroying="); pw.print(mDestroying);
-                    pw.print(" mRemoved="); pw.println(mRemoved);
+            pw.println(prefix + "mAnimatingExit=" + mAnimatingExit
+                    + " mRemoveOnExit=" + mRemoveOnExit
+                    + " mDestroying=" + mDestroying
+                    + " mRemoved=" + mRemoved);
         }
         if (getOrientationChanging() || mAppFreezing || mReportOrientationChanged) {
-            pw.print(prefix); pw.print("mOrientationChanging=");
-                    pw.print(mOrientationChanging);
-                    pw.print(" configOrientationChanging=");
-                    pw.print(getLastReportedConfiguration().orientation
-                            != getConfiguration().orientation);
-                    pw.print(" mAppFreezing="); pw.print(mAppFreezing);
-                    pw.print(" mReportOrientationChanged="); pw.println(mReportOrientationChanged);
+            pw.println(prefix + "mOrientationChanging=" + mOrientationChanging
+                    + " configOrientationChanging="
+                    + (getLastReportedConfiguration().orientation != getConfiguration().orientation)
+                    + " mAppFreezing=" + mAppFreezing
+                    + " mReportOrientationChanged=" + mReportOrientationChanged);
         }
         if (mLastFreezeDuration != 0) {
-            pw.print(prefix); pw.print("mLastFreezeDuration=");
-                    TimeUtils.formatDuration(mLastFreezeDuration, pw); pw.println();
+            pw.print(prefix + "mLastFreezeDuration=");
+            TimeUtils.formatDuration(mLastFreezeDuration, pw);
+            pw.println();
         }
-        pw.print(prefix); pw.print("mForceSeamlesslyRotate="); pw.print(mForceSeamlesslyRotate);
-        pw.print(" seamlesslyRotate: pending=");
+        pw.print(prefix + "mForceSeamlesslyRotate=" + mForceSeamlesslyRotate
+                + " seamlesslyRotate: pending=");
         if (mPendingSeamlessRotate != null) {
             mPendingSeamlessRotate.dump(pw);
         } else {
             pw.print("null");
         }
-        pw.print(" finishedFrameNumber="); pw.print(mFinishSeamlessRotateFrameNumber);
-        pw.println();
+        pw.println(" finishedFrameNumber=" + mFinishSeamlessRotateFrameNumber);
 
         if (mHScale != 1 || mVScale != 1) {
-            pw.print(prefix); pw.print("mHScale="); pw.print(mHScale);
-                    pw.print(" mVScale="); pw.println(mVScale);
+            pw.println(prefix + "mHScale=" + mHScale
+                    + " mVScale=" + mVScale);
         }
         if (mWallpaperX != -1 || mWallpaperY != -1) {
-            pw.print(prefix); pw.print("mWallpaperX="); pw.print(mWallpaperX);
-                    pw.print(" mWallpaperY="); pw.println(mWallpaperY);
+            pw.println(prefix + "mWallpaperX=" + mWallpaperX
+                    + " mWallpaperY=" + mWallpaperY);
         }
         if (mWallpaperXStep != -1 || mWallpaperYStep != -1) {
-            pw.print(prefix); pw.print("mWallpaperXStep="); pw.print(mWallpaperXStep);
-                    pw.print(" mWallpaperYStep="); pw.println(mWallpaperYStep);
+            pw.println(prefix + "mWallpaperXStep=" + mWallpaperXStep
+                    + " mWallpaperYStep=" + mWallpaperYStep);
         }
         if (mWallpaperDisplayOffsetX != Integer.MIN_VALUE
                 || mWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
-            pw.print(prefix); pw.print("mWallpaperDisplayOffsetX=");
-                    pw.print(mWallpaperDisplayOffsetX);
-                    pw.print(" mWallpaperDisplayOffsetY=");
-                    pw.println(mWallpaperDisplayOffsetY);
+            pw.println(prefix + "mWallpaperDisplayOffsetX=" + mWallpaperDisplayOffsetX
+                    + " mWallpaperDisplayOffsetY=" + mWallpaperDisplayOffsetY);
         }
         if (mDrawLock != null) {
-            pw.print(prefix); pw.println("mDrawLock=" + mDrawLock);
+            pw.println(prefix + "mDrawLock=" + mDrawLock);
         }
         if (isDragResizing()) {
-            pw.print(prefix); pw.println("isDragResizing=" + isDragResizing());
+            pw.println(prefix + "isDragResizing=" + isDragResizing());
         }
         if (computeDragResizing()) {
-            pw.print(prefix); pw.println("computeDragResizing=" + computeDragResizing());
+            pw.println(prefix + "computeDragResizing=" + computeDragResizing());
         }
-        pw.print(prefix); pw.println("isOnScreen=" + isOnScreen());
-        pw.print(prefix); pw.println("isVisible=" + isVisible());
+        pw.println(prefix + "isOnScreen=" + isOnScreen());
+        pw.println(prefix + "isVisible=" + isVisible());
     }
 
     @Override
@@ -4934,9 +4912,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         @Override
         public void dump(PrintWriter pw, String prefix) {
-            pw.print(prefix); pw.print("from="); pw.print(mFrom);
-            pw.print(" to="); pw.print(mTo);
-            pw.print(" duration="); pw.println(mDuration);
+            pw.println(prefix + "from=" + mFrom
+                    + " to=" + mTo
+                    + " duration=" + mDuration);
         }
 
         @Override

@@ -178,7 +178,7 @@ void RenderThread::requireGlContext() {
         return;
     }
     mEglManager->initialize();
-    renderState().onGLContextCreated();
+    renderState().onContextCreated();
 
 #ifdef HWUI_GLES_WRAP_ENABLED
     debug::GlesDriver* driver = debug::GlesDriver::get();
@@ -202,7 +202,7 @@ void RenderThread::requireGlContext() {
 void RenderThread::destroyGlContext() {
     if (mEglManager->hasEglContext()) {
         setGrContext(nullptr);
-        renderState().onGLContextDestroyed();
+        renderState().onContextDestroyed();
         mEglManager->destroy();
     }
 }

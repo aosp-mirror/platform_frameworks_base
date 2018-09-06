@@ -1,0 +1,15 @@
+
+java_library_host {
+    name: "unsupportedappusage-annotation-processor",
+    java_resources: [
+        "META-INF/**/*",
+    ],
+    srcs: [
+        "src/**/*.java",
+    ],
+    static_libs: [
+        "guava",
+        "unsupportedappusage-annotation"
+    ],
+    use_tools_jar: true,
+}

@@ -1,0 +1,331 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.internal.os;
+
+import static com.google.common.truth.Truth.assertThat;
+
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.util.Comparator;
+import java.util.List;
+
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+@Presubmit
+public final class LooperStatsTest {
+    private HandlerThread mThreadFirst;
+    private HandlerThread mThreadSecond;
+    private Handler mHandlerFirst;
+    private Handler mHandlerSecond;
+    private Handler mHandlerAnonymous;
+
+    @Before
+    public void setUp() {
+        // The tests are all single-threaded. HandlerThreads are created to allow creating Handlers
+        // and to test Thread name collection.
+        mThreadFirst = new HandlerThread("TestThread1");
+        mThreadSecond = new HandlerThread("TestThread2");
+        mThreadFirst.start();
+        mThreadSecond.start();
+
+        mHandlerFirst = new TestHandlerFirst(mThreadFirst.getLooper());
+        mHandlerSecond = new TestHandlerSecond(mThreadSecond.getLooper());
+        mHandlerAnonymous = new Handler(mThreadFirst.getLooper()) {
+            /* To create an anonymous subclass. */
+        };
+    }
+
+    @After
+    public void tearDown() {
+        mThreadFirst.quit();
+        mThreadSecond.quit();
+    }
+
+    @Test
+    public void testSingleMessageDispatched() {
+        TestableLooperStats looperStats = new TestableLooperStats(1, 100);
+
+        Object token = looperStats.messageDispatchStarting();
+        looperStats.tickRealtime(100);
+        looperStats.tickThreadTime(10);
+        looperStats.messageDispatched(token, mHandlerFirst.obtainMessage(1000));
+
+        List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
+        assertThat(entries).hasSize(1);
+        LooperStats.ExportedEntry entry = entries.get(0);
+        assertThat(entry.threadName).isEqualTo("TestThread1");
+        assertThat(entry.handlerClassName).isEqualTo(
+                "com.android.internal.os.LooperStatsTest$TestHandlerFirst");
+        assertThat(entry.messageName).isEqualTo("0x3e8" /* 1000 in hex */);
+        assertThat(entry.messageCount).isEqualTo(1);
+        assertThat(entry.recordedMessageCount).isEqualTo(1);
+        assertThat(entry.exceptionCount).isEqualTo(0);
+        assertThat(entry.totalLatencyMicros).isEqualTo(100);
+        assertThat(entry.maxLatencyMicros).isEqualTo(100);
+        assertThat(entry.cpuUsageMicros).isEqualTo(10);
+        assertThat(entry.maxCpuUsageMicros).isEqualTo(10);
+    }
+
+    @Test
+    public void testThrewException() {
+        TestableLooperStats looperStats = new TestableLooperStats(1, 100);
+
+        Object token = looperStats.messageDispatchStarting();
+        looperStats.tickRealtime(100);
+        looperStats.tickThreadTime(10);
+        looperStats.dispatchingThrewException(token, mHandlerFirst.obtainMessage(7),
+                new ArithmeticException());
+
+        List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
+        assertThat(entries).hasSize(1);
+        LooperStats.ExportedEntry entry = entries.get(0);
+        assertThat(entry.threadName).isEqualTo("TestThread1");
+        assertThat(entry.handlerClassName).isEqualTo(
+                "com.android.internal.os.LooperStatsTest$TestHandlerFirst");
+        assertThat(entry.messageName).isEqualTo("0x7"  /* 7 in hex */);
+        assertThat(entry.messageCount).isEqualTo(0);
+        assertThat(entry.recordedMessageCount).isEqualTo(0);
+        assertThat(entry.exceptionCount).isEqualTo(1);
+        assertThat(entry.totalLatencyMicros).isEqualTo(0);
+        assertThat(entry.maxLatencyMicros).isEqualTo(0);
+        assertThat(entry.cpuUsageMicros).isEqualTo(0);
+        assertThat(entry.maxCpuUsageMicros).isEqualTo(0);
+    }
+
+    @Test
+    public void testMultipleMessagesDispatched() {
+        TestableLooperStats looperStats = new TestableLooperStats(2, 100);
+
+        // Contributes to entry2.
+        Object token1 = looperStats.messageDispatchStarting();
+        looperStats.tickRealtime(100);
+        looperStats.tickThreadTime(10);
+        looperStats.messageDispatched(token1, mHandlerFirst.obtainMessage(1000));
+
+        // Contributes to entry2.
+        Object token2 = looperStats.messageDispatchStarting();
+        looperStats.tickRealtime(50);
+        looperStats.tickThreadTime(20);
+        looperStats.messageDispatched(token2, mHandlerFirst.obtainMessage(1000));
+
+        // Contributes to entry3.
+        Object token3 = looperStats.messageDispatchStarting();
+        looperStats.tickRealtime(10);
+        looperStats.tickThreadTime(10);
+        looperStats.messageDispatched(token3, mHandlerSecond.obtainMessage().setCallback(() -> {
+        }));
+
+        // Contributes to entry1.
+        Object token4 = looperStats.messageDispatchStarting();
+        looperStats.tickRealtime(100);
+        looperStats.tickThreadTime(100);
+        looperStats.messageDispatched(token4, mHandlerAnonymous.obtainMessage(1));
+
+        List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
+        assertThat(entries).hasSize(3);
+        entries.sort(Comparator.comparing(e -> e.handlerClassName));
+
+        // Captures data for token4 call.
+        LooperStats.ExportedEntry entry1 = entries.get(0);
+        assertThat(entry1.threadName).isEqualTo("TestThread1");
+        assertThat(entry1.handlerClassName).isEqualTo("com.android.internal.os.LooperStatsTest$1");
+        assertThat(entry1.messageName).isEqualTo("0x1" /* 1 in hex */);
+        assertThat(entry1.messageCount).isEqualTo(1);
+        assertThat(entry1.recordedMessageCount).isEqualTo(0);
+        assertThat(entry1.exceptionCount).isEqualTo(0);
+        assertThat(entry1.totalLatencyMicros).isEqualTo(0);
+        assertThat(entry1.maxLatencyMicros).isEqualTo(0);
+        assertThat(entry1.cpuUsageMicros).isEqualTo(0);
+        assertThat(entry1.maxCpuUsageMicros).isEqualTo(0);
+
+        // Captures data for token1 and token2 calls.
+        LooperStats.ExportedEntry entry2 = entries.get(1);
+        assertThat(entry2.threadName).isEqualTo("TestThread1");
+        assertThat(entry2.handlerClassName).isEqualTo(
+                "com.android.internal.os.LooperStatsTest$TestHandlerFirst");
+        assertThat(entry2.messageName).isEqualTo("0x3e8" /* 1000 in hex */);
+        assertThat(entry2.messageCount).isEqualTo(2);
+        assertThat(entry2.recordedMessageCount).isEqualTo(1);
+        assertThat(entry2.exceptionCount).isEqualTo(0);
+        assertThat(entry2.totalLatencyMicros).isEqualTo(100);
+        assertThat(entry2.maxLatencyMicros).isEqualTo(100);
+        assertThat(entry2.cpuUsageMicros).isEqualTo(10);
+        assertThat(entry2.maxCpuUsageMicros).isEqualTo(10);
+
+        // Captures data for token3 call.
+        LooperStats.ExportedEntry entry3 = entries.get(2);
+        assertThat(entry3.threadName).isEqualTo("TestThread2");
+        assertThat(entry3.handlerClassName).isEqualTo(
+                "com.android.internal.os.LooperStatsTest$TestHandlerSecond");
+        assertThat(entry3.messageName).startsWith(
+                "com.android.internal.os.-$$Lambda$LooperStatsTest$");
+        assertThat(entry3.messageCount).isEqualTo(1);
+        assertThat(entry3.recordedMessageCount).isEqualTo(1);
+        assertThat(entry3.exceptionCount).isEqualTo(0);
+        assertThat(entry3.totalLatencyMicros).isEqualTo(10);
+        assertThat(entry3.maxLatencyMicros).isEqualTo(10);
+        assertThat(entry3.cpuUsageMicros).isEqualTo(10);
+        assertThat(entry3.maxCpuUsageMicros).isEqualTo(10);
+    }
+
+    @Test
+    public void testMessagesOverSizeCap() {
+        TestableLooperStats looperStats = new TestableLooperStats(2, 1 /* sizeCap */);
+
+        Object token1 = looperStats.messageDispatchStarting();
+        looperStats.tickRealtime(100);
+        looperStats.tickThreadTime(10);
+        looperStats.messageDispatched(token1, mHandlerFirst.obtainMessage(1000));
+
+        Object token2 = looperStats.messageDispatchStarting();
+        looperStats.tickRealtime(50);
+        looperStats.tickThreadTime(20);
+        looperStats.messageDispatched(token2, mHandlerFirst.obtainMessage(1001));
+
+        Object token3 = looperStats.messageDispatchStarting();
+        looperStats.tickRealtime(10);
+        looperStats.tickThreadTime(10);
+        looperStats.messageDispatched(token3, mHandlerFirst.obtainMessage(1002));
+
+        Object token4 = looperStats.messageDispatchStarting();
+        looperStats.tickRealtime(10);
+        looperStats.tickThreadTime(10);
+        looperStats.messageDispatched(token4, mHandlerSecond.obtainMessage(1003));
+
+        List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
+        assertThat(entries).hasSize(2);
+        entries.sort(Comparator.comparing(e -> e.handlerClassName));
+
+        LooperStats.ExportedEntry entry1 = entries.get(0);
+        assertThat(entry1.threadName).isEqualTo("");
+        assertThat(entry1.handlerClassName).isEqualTo("");
+        assertThat(entry1.messageName).isEqualTo("OVERFLOW");
+        assertThat(entry1.messageCount).isEqualTo(3);
+        assertThat(entry1.recordedMessageCount).isEqualTo(1);
+        assertThat(entry1.exceptionCount).isEqualTo(0);
+        assertThat(entry1.totalLatencyMicros).isEqualTo(10);
+        assertThat(entry1.maxLatencyMicros).isEqualTo(10);
+        assertThat(entry1.cpuUsageMicros).isEqualTo(10);
+        assertThat(entry1.maxCpuUsageMicros).isEqualTo(10);
+
+        LooperStats.ExportedEntry entry2 = entries.get(1);
+        assertThat(entry2.threadName).isEqualTo("TestThread1");
+        assertThat(entry2.handlerClassName).isEqualTo(
+                "com.android.internal.os.LooperStatsTest$TestHandlerFirst");
+    }
+
+    @Test
+    public void testInvalidTokensCauseException() {
+        TestableLooperStats looperStats = new TestableLooperStats(1, 100);
+        assertThrows(ClassCastException.class,
+                () -> looperStats.dispatchingThrewException(new Object(),
+                        mHandlerFirst.obtainMessage(),
+                        new ArithmeticException()));
+        assertThrows(ClassCastException.class,
+                () -> looperStats.messageDispatched(new Object(), mHandlerFirst.obtainMessage()));
+        assertThrows(ClassCastException.class,
+                () -> looperStats.messageDispatched(123, mHandlerFirst.obtainMessage()));
+        assertThrows(ClassCastException.class,
+                () -> looperStats.messageDispatched(mHandlerFirst.obtainMessage(),
+                        mHandlerFirst.obtainMessage()));
+
+        assertThat(looperStats.getEntries()).hasSize(0);
+    }
+
+    @Test
+    public void testTracksMultipleHandlerInstancesIfSameClass() {
+        TestableLooperStats looperStats = new TestableLooperStats(1, 100);
+        Handler handlerFirstAnother = new TestHandlerFirst(mHandlerFirst.getLooper());
+
+        Object token1 = looperStats.messageDispatchStarting();
+        looperStats.messageDispatched(token1, mHandlerFirst.obtainMessage(1000));
+
+        Object token2 = looperStats.messageDispatchStarting();
+        looperStats.messageDispatched(token2, handlerFirstAnother.obtainMessage(1000));
+
+        assertThat(looperStats.getEntries()).hasSize(1);
+        assertThat(looperStats.getEntries().get(0).messageCount).isEqualTo(2);
+    }
+
+    private static void assertThrows(Class<? extends Exception> exceptionClass, Runnable r) {
+        try {
+            r.run();
+            Assert.fail("Expected " + exceptionClass + " to be thrown.");
+        } catch (Exception exception) {
+            assertThat(exception).isInstanceOf(exceptionClass);
+        }
+    }
+
+    private static final class TestableLooperStats extends LooperStats {
+        private static final long INITIAL_MICROS = 10001000123L;
+        private int mCount;
+        private long mRealtimeMicros;
+        private long mThreadTimeMicros;
+        private int mSamplingInterval;
+
+        TestableLooperStats(int samplingInterval, int sizeCap) {
+            super(samplingInterval, sizeCap);
+            this.mSamplingInterval = samplingInterval;
+        }
+
+        void tickRealtime(long micros) {
+            mRealtimeMicros += micros;
+        }
+
+        void tickThreadTime(long micros) {
+            mThreadTimeMicros += micros;
+        }
+
+        @Override
+        protected long getElapsedRealtimeMicro() {
+            return INITIAL_MICROS + mRealtimeMicros;
+        }
+
+        @Override
+        protected long getThreadTimeMicro() {
+            return INITIAL_MICROS + mThreadTimeMicros;
+        }
+
+        @Override
+        protected boolean shouldCollectDetailedData() {
+            return mCount++ % mSamplingInterval == 0;
+        }
+    }
+
+    private static final class TestHandlerFirst extends Handler {
+        TestHandlerFirst(Looper looper) {
+            super(looper);
+        }
+    }
+
+    private static final class TestHandlerSecond extends Handler {
+        TestHandlerSecond(Looper looper) {
+            super(looper);
+        }
+    }
+}

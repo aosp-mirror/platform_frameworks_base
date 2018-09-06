@@ -545,7 +545,7 @@ public class PopupWindow {
             StateListDrawable stateList = (StateListDrawable) mBackground;
 
             // Find the above-anchor view - this one's easy, it should be labeled as such.
-            int aboveAnchorStateIndex = stateList.getStateDrawableIndex(ABOVE_ANCHOR_STATE_SET);
+            int aboveAnchorStateIndex = stateList.findStateDrawableIndex(ABOVE_ANCHOR_STATE_SET);
 
             // Now, for the below-anchor view, look for any other drawable specified in the
             // StateListDrawable which is not for the above-anchor state and use that.

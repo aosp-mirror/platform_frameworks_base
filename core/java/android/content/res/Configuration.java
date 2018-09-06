@@ -2076,23 +2076,23 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 break;
         }
 
-        switch (config.colorMode & Configuration.COLOR_MODE_HDR_MASK) {
-            case Configuration.COLOR_MODE_HDR_YES:
-                parts.add("highdr");
-                break;
-            case Configuration.COLOR_MODE_HDR_NO:
-                parts.add("lowdr");
-                break;
-            default:
-                break;
-        }
-
         switch (config.colorMode & Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_MASK) {
             case Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_YES:
                 parts.add("widecg");
                 break;
             case Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_NO:
                 parts.add("nowidecg");
+                break;
+            default:
+                break;
+        }
+
+        switch (config.colorMode & Configuration.COLOR_MODE_HDR_MASK) {
+            case Configuration.COLOR_MODE_HDR_YES:
+                parts.add("highdr");
+                break;
+            case Configuration.COLOR_MODE_HDR_NO:
+                parts.add("lowdr");
                 break;
             default:
                 break;

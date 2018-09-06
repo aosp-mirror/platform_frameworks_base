@@ -23,14 +23,10 @@
 #include <utils/String8.h>
 #include <gui/Surface.h>
 
-// ToDo: Fix code to be warning free
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkColor.h>
 #include <SkPaint.h>
-#pragma GCC diagnostic pop
 
 #include <android/native_window.h>
 

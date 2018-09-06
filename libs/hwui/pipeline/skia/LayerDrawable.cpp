@@ -15,8 +15,6 @@
  */
 
 #include "LayerDrawable.h"
-#include "GlLayer.h"
-#include "VkLayer.h"
 
 #include "GrBackendSurface.h"
 #include "SkColorFilter.h"
@@ -41,42 +39,21 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         return false;
     }
     // transform the matrix based on the layer
-    SkMatrix layerTransform;
-    layer->getTransform().copyTo(layerTransform);
-    sk_sp<SkImage> layerImage;
+    SkMatrix layerTransform = layer->getTransform();
+    sk_sp<SkImage> layerImage = layer->getImage();
     const int layerWidth = layer->getWidth();
     const int layerHeight = layer->getHeight();
-    if (layer->getApi() == Layer::Api::OpenGL) {
-        GlLayer* glLayer = static_cast<GlLayer*>(layer);
-        GrGLTextureInfo externalTexture;
-        externalTexture.fTarget = glLayer->getRenderTarget();
-        externalTexture.fID = glLayer->getTextureId();
-        // The format may not be GL_RGBA8, but given the DeferredLayerUpdater and GLConsumer don't
-        // expose that info we use it as our default.  Further, given that we only use this texture
-        // as a source this will not impact how Skia uses the texture.  The only potential affect
-        // this is anticipated to have is that for some format types if we are not bound as an OES
-        // texture we may get invalid results for SKP capture if we read back the texture.
-        externalTexture.fFormat = GL_RGBA8;
-        GrBackendTexture backendTexture(layerWidth, layerHeight, GrMipMapped::kNo, externalTexture);
-        layerImage = SkImage::MakeFromTexture(context, backendTexture, kTopLeft_GrSurfaceOrigin,
-                                              kRGBA_8888_SkColorType, kPremul_SkAlphaType, nullptr);
-    } else {
-        SkASSERT(layer->getApi() == Layer::Api::Vulkan);
-        VkLayer* vkLayer = static_cast<VkLayer*>(layer);
-        canvas->clear(SK_ColorGREEN);
-        layerImage = vkLayer->getImage();
-    }
 
     if (layerImage) {
         SkMatrix textureMatrixInv;
-        layer->getTexTransform().copyTo(textureMatrixInv);
+        textureMatrixInv = layer->getTexTransform();
         // TODO: after skia bug https://bugs.chromium.org/p/skia/issues/detail?id=7075 is fixed
         // use bottom left origin and remove flipV and invert transformations.
         SkMatrix flipV;
         flipV.setAll(1, 0, 0, 0, -1, 1, 0, 0, 1);
         textureMatrixInv.preConcat(flipV);
         textureMatrixInv.preScale(1.0f / layerWidth, 1.0f / layerHeight);
-        textureMatrixInv.postScale(layerWidth, layerHeight);
+        textureMatrixInv.postScale(layerImage->width(), layerImage->height());
         SkMatrix textureMatrix;
         if (!textureMatrixInv.invert(&textureMatrix)) {
             textureMatrix = textureMatrixInv;
@@ -95,6 +72,9 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         paint.setAlpha(layer->getAlpha());
         paint.setBlendMode(layer->getMode());
         paint.setColorFilter(layer->getColorSpaceWithFilter());
+        if (layer->getForceFilter()) {
+            paint.setFilterQuality(kLow_SkFilterQuality);
+        }
 
         const bool nonIdentityMatrix = !matrix.isIdentity();
         if (nonIdentityMatrix) {

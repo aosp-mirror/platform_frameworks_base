@@ -16,6 +16,9 @@
 
 package android.graphics;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 /**
  * An Insets instance holds four integer offsets which describe changes to the four
  * edges of a Rectangle. By convention, positive values move edges towards the
@@ -24,7 +27,7 @@ package android.graphics;
  * Insets are immutable so may be treated as values.
  *
  */
-public class Insets {
+public final class Insets {
     public static final Insets NONE = new Insets(0, 0, 0, 0);
 
     public final int left;
@@ -51,7 +54,7 @@ public class Insets {
      *
      * @return Insets instance with the appropriate values
      */
-    public static Insets of(int left, int top, int right, int bottom) {
+    public static @NonNull Insets of(int left, int top, int right, int bottom) {
         if (left == 0 && top == 0 && right == 0 && bottom == 0) {
             return NONE;
         }
@@ -65,7 +68,7 @@ public class Insets {
      *
      * @return an Insets instance with the appropriate values
      */
-    public static Insets of(Rect r) {
+    public static @NonNull Insets of(@Nullable Rect r) {
         return (r == null) ? NONE : of(r.left, r.top, r.right, r.bottom);
     }
 

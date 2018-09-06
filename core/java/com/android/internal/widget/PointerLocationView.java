@@ -19,8 +19,8 @@ package com.android.internal.widget;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.graphics.Paint.FontMetricsInt;
+import android.graphics.RectF;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManager.InputDeviceListener;
 import android.os.SystemProperties;
@@ -29,12 +29,12 @@ import android.util.Slog;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.MotionEvent.PointerCoords;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowInsets;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
-import android.view.MotionEvent.PointerCoords;
 
 import java.util.ArrayList;
 
@@ -104,10 +104,6 @@ public class PointerLocationView extends View implements InputDeviceListener,
             mTraceCount += 1;
         }
     }
-
-    private final int ESTIMATE_PAST_POINTS = 4;
-    private final int ESTIMATE_FUTURE_POINTS = 2;
-    private final float ESTIMATE_INTERVAL = 0.02f;
 
     private final InputManager mIm;
 
@@ -336,37 +332,14 @@ public class PointerLocationView extends View implements InputDeviceListener,
             }
 
             if (drawn) {
-                // Draw movement estimate curve.
-                mPaint.setARGB(128, 128, 0, 128);
-                float lx = ps.mEstimator.estimateX(-ESTIMATE_PAST_POINTS * ESTIMATE_INTERVAL);
-                float ly = ps.mEstimator.estimateY(-ESTIMATE_PAST_POINTS * ESTIMATE_INTERVAL);
-                for (int i = -ESTIMATE_PAST_POINTS + 1; i <= ESTIMATE_FUTURE_POINTS; i++) {
-                    float x = ps.mEstimator.estimateX(i * ESTIMATE_INTERVAL);
-                    float y = ps.mEstimator.estimateY(i * ESTIMATE_INTERVAL);
-                    canvas.drawLine(lx, ly, x, y, mPaint);
-                    lx = x;
-                    ly = y;
-                }
-
                 // Draw velocity vector.
                 mPaint.setARGB(255, 255, 64, 128);
                 float xVel = ps.mXVelocity * (1000 / 60);
                 float yVel = ps.mYVelocity * (1000 / 60);
                 canvas.drawLine(lastX, lastY, lastX + xVel, lastY + yVel, mPaint);
 
-                // Draw alternate estimate.
+                // Draw velocity vector using an alternate VelocityTracker strategy.
                 if (mAltVelocity != null) {
-                    mPaint.setARGB(128, 0, 128, 128);
-                    lx = ps.mAltEstimator.estimateX(-ESTIMATE_PAST_POINTS * ESTIMATE_INTERVAL);
-                    ly = ps.mAltEstimator.estimateY(-ESTIMATE_PAST_POINTS * ESTIMATE_INTERVAL);
-                    for (int i = -ESTIMATE_PAST_POINTS + 1; i <= ESTIMATE_FUTURE_POINTS; i++) {
-                        float x = ps.mAltEstimator.estimateX(i * ESTIMATE_INTERVAL);
-                        float y = ps.mAltEstimator.estimateY(i * ESTIMATE_INTERVAL);
-                        canvas.drawLine(lx, ly, x, y, mPaint);
-                        lx = x;
-                        ly = y;
-                    }
-
                     mPaint.setARGB(255, 64, 255, 128);
                     xVel = ps.mAltXVelocity * (1000 / 60);
                     yVel = ps.mAltYVelocity * (1000 / 60);

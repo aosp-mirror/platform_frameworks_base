@@ -133,7 +133,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10024
+    // Next: 10025
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -159,6 +159,7 @@ message Atom {
         Temperature temperature = 10021;
         BinderCalls binder_calls = 10022;
         BinderCallsExceptions binder_calls_exceptions = 10023;
+        LooperStats looper_stats = 10024;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP. Field numbers above
@@ -2202,4 +2203,51 @@ message BinderCallsExceptions {
     optional string exception_class_name = 1;
     // Total number of exceptions.
     optional int64 exception_count = 2;
+}
+
+message LooperStats {
+    // Currently not collected and always set to 0.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Fully qualified class name of the handler target class.
+    //
+    // This field does not contain PII. This is a system server class name.
+    optional string handler_class_name = 2;
+
+    // The name of the thread that runs the Looper.
+    //
+    // This field does not contain PII. This is a system server thread name.
+    optional string looper_thread_name = 3;
+
+    // The name of the dispatched message.
+    //
+    // This field does not contain PII. This is a system server constant or class
+    // name.
+    optional string message_name = 4;
+
+    // Total number of successfully dispatched messages.
+    optional int64 message_count = 5;
+
+    // Total number of messages that failed dispatching.
+    optional int64 exception_count = 6;
+
+    // Total number of processed messages we have data recorded for. If we
+    // collected data for all the messages, message_count will be equal to
+    // recorded_message_count.
+    //
+    // If recorded_message_count is different than message_count, it means data
+    // collection has been sampled. All the fields below will be sampled in this
+    // case.
+    optional int64 recorded_message_count = 7;
+
+    // Total latency of all processed messages.
+    // Average can be computed using recorded_total_latency_micros /
+    // recorded_message_count.
+    optional int64 recorded_total_latency_micros = 8;
+
+    // Total CPU usage of all processed message.
+    // Average can be computed using recorded_total_cpu_micros /
+    // recorded_message_count. Total can be computed using
+    // recorded_total_cpu_micros / recorded_message_count * call_count.
+    optional int64 recorded_total_cpu_micros = 9;
 }

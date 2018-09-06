@@ -178,8 +178,8 @@ void Typeface::setRobotoTypefaceForTest() {
     struct stat st = {};
     LOG_ALWAYS_FATAL_IF(fstat(fd, &st) == -1, "Failed to stat file %s", kRobotoFont);
     void* data = mmap(nullptr, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
-    std::unique_ptr<SkMemoryStream> fontData(new SkMemoryStream(data, st.st_size));
-    sk_sp<SkTypeface> typeface = SkTypeface::MakeFromStream(fontData.release());
+    std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(data, st.st_size));
+    sk_sp<SkTypeface> typeface = SkTypeface::MakeFromStream(std::move(fontData));
     LOG_ALWAYS_FATAL_IF(typeface == nullptr, "Failed to make typeface from %s", kRobotoFont);
 
     std::shared_ptr<minikin::MinikinFont> font = std::make_shared<MinikinFontSkia>(

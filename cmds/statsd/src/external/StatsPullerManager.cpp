@@ -183,7 +183,13 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
          {{},
           {},
           1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::BINDER_CALLS_EXCEPTIONS)}}
+          new StatsCompanionServicePuller(android::util::BINDER_CALLS_EXCEPTIONS)}},
+        // looper_stats
+        {android::util::LOOPER_STATS,
+         {{5, 6, 7, 8, 9},
+          {2, 3, 4},
+          1 * NS_PER_SEC,
+          new StatsCompanionServicePuller(android::util::LOOPER_STATS)}}
         };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {

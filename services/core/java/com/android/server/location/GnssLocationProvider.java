@@ -69,7 +69,6 @@ import android.os.WorkSource.WorkChain;
 import android.provider.Settings;
 import android.provider.Telephony.Carriers;
 import android.telephony.CarrierConfigManager;
-import android.telephony.ServiceState;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
@@ -1577,6 +1576,8 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
             mSingleShot = false;
             native_stop();
             mLastFixTime = 0;
+            // native_stop() may reset the position mode in hardware.
+            mLastPositionMode = null;
 
             // reset SV count to zero
             updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE);

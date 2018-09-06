@@ -3352,9 +3352,6 @@
          to occur. The expand button will have increased touch boundaries to accomodate this. -->
     <bool name="config_notificationHeaderClickableForExpand">false</bool>
 
-    <!-- Configuration for automotive -->
-    <bool name="enable_pbap_pce_profile">false</bool>
-
     <!-- Default data warning level in mb -->
     <integer name="default_data_warning_level_mb">2048</integer>
 

@@ -57,10 +57,12 @@ class UsbSettingsManager {
     private final SparseArray<UsbProfileGroupSettingsManager> mSettingsByProfileGroup
             = new SparseArray<>();
     private UserManager mUserManager;
+    private UsbHandlerManager mUsbHandlerManager;
 
     public UsbSettingsManager(@NonNull Context context) {
         mContext = context;
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        mUsbHandlerManager = new UsbHandlerManager(context);
     }
 
     /**
@@ -74,7 +76,8 @@ class UsbSettingsManager {
         synchronized (mSettingsByUser) {
             UsbUserSettingsManager settings = mSettingsByUser.get(userId);
             if (settings == null) {
-                settings = new UsbUserSettingsManager(mContext, new UserHandle(userId));
+                settings = new UsbUserSettingsManager(mContext, UserHandle.of(userId),
+                        new UsbPermissionManager(mContext, UserHandle.of(userId)));
                 mSettingsByUser.put(userId, settings);
             }
             return settings;
@@ -102,7 +105,8 @@ class UsbSettingsManager {
             UsbProfileGroupSettingsManager settings = mSettingsByProfileGroup.get(
                     parentUser.getIdentifier());
             if (settings == null) {
-                settings = new UsbProfileGroupSettingsManager(mContext, parentUser, this);
+                settings = new UsbProfileGroupSettingsManager(mContext, parentUser, this,
+                      mUsbHandlerManager);
                 mSettingsByProfileGroup.put(parentUser.getIdentifier(), settings);
             }
             return settings;
