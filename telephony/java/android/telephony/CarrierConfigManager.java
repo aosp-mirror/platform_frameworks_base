@@ -152,9 +152,17 @@ public class CarrierConfigManager {
      * Flag indicating whether radio is to be restarted on error PDP_FAIL_REGULAR_DEACTIVATION
      * This is false by default.
      */
-    public static final String
-            KEY_RESTART_RADIO_ON_PDP_FAIL_REGULAR_DEACTIVATION_BOOL =
-                    "restart_radio_on_pdp_fail_regular_deactivation_bool";
+    public static final String KEY_RESTART_RADIO_ON_PDP_FAIL_REGULAR_DEACTIVATION_BOOL =
+            "restart_radio_on_pdp_fail_regular_deactivation_bool";
+
+    /**
+     * A list of failure cause codes that will trigger a modem restart when telephony receiving
+     * one of those during data setup. The cause codes are defined in 3GPP TS 24.008 Annex I and
+     * TS 24.301 Annex B.
+     * @hide
+     */
+    public static final String KEY_RADIO_RESTART_FAILURE_CAUSES_INT_ARRAY =
+            "radio_restart_failure_causes_int_array";
 
     /**
      * If true, enable vibration (haptic feedback) for key presses in the EmergencyDialer activity.
@@ -2100,6 +2108,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_WORLD_PHONE_BOOL, false);
         sDefaults.putBoolean(KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL, true);
         sDefaults.putBoolean(KEY_RESTART_RADIO_ON_PDP_FAIL_REGULAR_DEACTIVATION_BOOL, false);
+        sDefaults.putIntArray(KEY_RADIO_RESTART_FAILURE_CAUSES_INT_ARRAY, new int[]{});
         sDefaults.putInt(KEY_VOLTE_REPLACEMENT_RAT_INT, 0);
         sDefaults.putString(KEY_DEFAULT_SIM_CALL_MANAGER_STRING, "");
         sDefaults.putString(KEY_VVM_DESTINATION_NUMBER_STRING, "");
