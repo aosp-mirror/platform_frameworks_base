@@ -24,7 +24,9 @@ import android.app.usage.UsageStats;
 import android.content.res.Configuration;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.proto.ProtoInputStream;
 
+import java.io.IOException;
 import java.util.List;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -127,6 +129,76 @@ public class IntervalStats {
             event.mClass = getCachedStringRef(className);
         }
         return event;
+    }
+
+    /**
+     * Builds a UsageEvents.Event from a proto, but does not add it internally.
+     * Built here to take advantage of the cached String Refs
+     */
+    UsageEvents.Event buildEvent(ProtoInputStream parser) throws IOException {
+        final UsageEvents.Event event = new UsageEvents.Event();
+        while (true) {
+            switch (parser.nextField()) {
+                case (int) IntervalStatsProto.Event.PACKAGE:
+                    event.mPackage = getCachedStringRef(
+                            parser.readString(IntervalStatsProto.Event.PACKAGE));
+                    break;
+                case (int) IntervalStatsProto.Event.CLASS:
+                    event.mClass = getCachedStringRef(
+                            parser.readString(IntervalStatsProto.Event.CLASS));
+                    break;
+                case (int) IntervalStatsProto.Event.TIME_MS:
+                    event.mTimeStamp = beginTime + parser.readLong(
+                            IntervalStatsProto.Event.TIME_MS);
+                    break;
+                case (int) IntervalStatsProto.Event.FLAGS:
+                    event.mFlags = parser.readInt(IntervalStatsProto.Event.FLAGS);
+                    break;
+                case (int) IntervalStatsProto.Event.TYPE:
+                    event.mEventType = parser.readInt(IntervalStatsProto.Event.TYPE);
+                    break;
+                case (int) IntervalStatsProto.Event.CONFIG:
+                    event.mConfiguration = new Configuration();
+                    event.mConfiguration.readFromProto(parser, IntervalStatsProto.Event.CONFIG);
+                    break;
+                case (int) IntervalStatsProto.Event.SHORTCUT_ID:
+                    event.mShortcutId = parser.readString(
+                            IntervalStatsProto.Event.SHORTCUT_ID).intern();
+                    break;
+                case (int) IntervalStatsProto.Event.STANDBY_BUCKET:
+                    event.mBucketAndReason = parser.readInt(
+                            IntervalStatsProto.Event.STANDBY_BUCKET);
+                    break;
+                case (int) IntervalStatsProto.Event.NOTIFICATION_CHANNEL:
+                    event.mNotificationChannelId = parser.readString(
+                            IntervalStatsProto.Event.NOTIFICATION_CHANNEL);
+                    break;
+                case ProtoInputStream.NO_MORE_FIELDS:
+                    // Handle default values for certain events types
+                    switch (event.mEventType) {
+                        case UsageEvents.Event.CONFIGURATION_CHANGE:
+                            if (event.mConfiguration == null) {
+                                event.mConfiguration = new Configuration();
+                            }
+                            break;
+                        case UsageEvents.Event.SHORTCUT_INVOCATION:
+                            if (event.mShortcutId == null) {
+                                event.mShortcutId = "";
+                            }
+                            break;
+                        case UsageEvents.Event.NOTIFICATION_INTERRUPTION:
+                            if (event.mNotificationChannelId == null) {
+                                event.mNotificationChannelId = "";
+                            }
+                            break;
+                    }
+                    if (event.mTimeStamp == 0) {
+                        //mTimestamp not set, assume default value 0 plus beginTime
+                        event.mTimeStamp = beginTime;
+                    }
+                    return event;
+            }
+        }
     }
 
     private boolean isStatefulEvent(int eventType) {
