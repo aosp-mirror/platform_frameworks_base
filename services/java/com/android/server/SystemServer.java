@@ -883,7 +883,8 @@ public final class SystemServer {
             }
 
             traceBeginAndSlog("StartAlarmManagerService");
-            mSystemServiceManager.startService(AlarmManagerService.class);
+            mSystemServiceManager.startService(new AlarmManagerService(context));
+
             traceEnd();
 
             traceBeginAndSlog("InitWatchdog");

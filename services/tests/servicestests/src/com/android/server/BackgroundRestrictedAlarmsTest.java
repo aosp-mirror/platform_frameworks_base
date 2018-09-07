@@ -35,14 +35,13 @@ import java.util.ArrayList;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class AlarmManagerServiceTest {
+public class BackgroundRestrictedAlarmsTest {
     private SparseArray<ArrayList<Alarm>> addPendingAlarm(
             SparseArray<ArrayList<Alarm>> all, int uid, String name, boolean removeIt) {
         ArrayList<Alarm> uidAlarms = all.get(uid);
         if (uidAlarms == null) {
             all.put(uid, uidAlarms = new ArrayList<>());
         }
-        // Details don't matter.
         uidAlarms.add(new Alarm(
                 removeIt ? RTC : RTC_WAKEUP,
                 0, 0, 0, 0, 0, null, null, null, null, 0, null, uid, name));
