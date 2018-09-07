@@ -45,8 +45,11 @@ def get_args():
         '--input-whitelists', nargs='*',
         help='Lists of members to force on whitelist')
     parser.add_argument(
-        '--input-greylists', nargs='*',
+        '--input-light-greylists', nargs='*',
         help='Lists of members to force on light greylist')
+    parser.add_argument(
+        '--input-dark-greylists', nargs='*',
+        help='Lists of members to force on dark greylist')
     parser.add_argument(
         '--input-blacklists', nargs='*',
         help='Lists of members to force on blacklist')
@@ -78,60 +81,30 @@ def write_lines(filename, lines):
     with open(filename, 'w') as f:
         f.writelines(lines)
 
-def move_between_sets(subset, src, dst, source = "<unknown>"):
+def move_between_sets(subset, src, dst, source = "<unknown>", ignoreMissing = False):
     """Removes a subset of elements from one set and add it to another.
 
     Args:
         subset (set): The subset of `src` to be moved from `src` to `dst`.
         src (set): Source set. Must be a superset of `subset`.
         dst (set): Destination set. Must be disjoint with `subset`.
+        source (string): Name of the data source.
+        ignoreMissing (bool): If true, do not check whether `src` is a superset of `subset`.
     """
-    assert src.issuperset(subset), (
-        "Error processing: {}\n"
-        "The following entries were not found:\n"
-        "{}"
-        "Please visit go/hiddenapi for more information.").format(
-            source, "".join(map(lambda x: "  " + str(x), subset.difference(src))))
-    assert dst.isdisjoint(subset)
+    if ignoreMissing:
+        # Some entries in `subset` may not be in `src`. Remove such entries first.
+        subset.intersection_update(src)
+    else:
+        assert src.issuperset(subset), (
+            "Error processing: {}\n"
+            "The following entries were not found:\n"
+            "{}"
+            "Please visit go/hiddenapi for more information.").format(
+                source, "".join(map(lambda x: "  " + str(x), subset.difference(src))))
+        assert dst.isdisjoint(subset)
     # Order matters if `src` and `subset` are the same object.
     dst.update(subset)
     src.difference_update(subset)
-
-def get_package_name(signature):
-    """Returns the package name prefix of a class member signature.
-
-    Example: "Ljava/lang/String;->hashCode()J" --> "Ljava/lang/"
-
-    Args:
-        signature (string): Member signature
-
-    Returns
-        string: Package name of the given member
-    """
-    class_name_end = signature.find("->")
-    assert class_name_end != -1, "Invalid signature: {}".format(signature)
-    package_name_end = signature.rfind("/", 0, class_name_end)
-    assert package_name_end != -1, "Invalid signature: {}".format(signature)
-    return signature[:package_name_end + 1]
-
-def all_package_names(*args):
-    """Returns a set of packages names in given lists of member signatures.
-
-    Example: args = [ set([ "Lpkg1/ClassA;->foo()V", "Lpkg2/ClassB;->bar()J" ]),
-                      set([ "Lpkg1/ClassC;->baz()Z" ]) ]
-             return value = set([ "Lpkg1/", "Lpkg2" ])
-
-    Args:
-        *args (list): List of sets to iterate over and extract the package names
-                      of its elements (member signatures)
-
-    Returns:
-        set: All package names extracted from the given lists of signatures.
-    """
-    packages = set()
-    for arg in args:
-        packages = packages.union(map(get_package_name, arg))
-    return packages
 
 def move_all(src, dst):
     """Moves all elements of one set to another.
@@ -142,7 +115,7 @@ def move_all(src, dst):
     """
     move_between_sets(src, src, dst)
 
-def move_from_files(filenames, src, dst):
+def move_from_files(filenames, src, dst, ignoreMissing = False):
     """Loads member signatures from a list of files and moves them to a given set.
 
     Opens files in `filenames`, reads all their lines and moves those from `src`
@@ -155,7 +128,7 @@ def move_from_files(filenames, src, dst):
     """
     if filenames:
         for filename in filenames:
-            move_between_sets(set(read_lines(filename)), src, dst, filename)
+            move_between_sets(set(read_lines(filename)), src, dst, filename, ignoreMissing)
 
 def move_serialization(src, dst):
     """Moves all members matching serialization API signatures between given sets.
@@ -177,17 +150,6 @@ def move_serialization(src, dst):
     regex = re.compile(r'.*->(' + '|'.join(serialization_patterns) + r')$')
     move_between_sets(filter(lambda api: regex.match(api), src), src, dst)
 
-def move_from_packages(packages, src, dst):
-    """Moves all members of given package names from one set to another.
-
-    Args:
-        packages (list): List of string package names.
-        src (set): Set that will be searched for API matching one of the given
-                   package names. Surch API will be removed from the set.
-        dst (set): Set that matching API will be moved to.
-    """
-    move_between_sets(filter(lambda api: get_package_name(api) in packages, src), src, dst)
-
 def main(argv):
     args = get_args()
 
@@ -207,17 +169,15 @@ def main(argv):
 
     # Read all files which manually assign members to specific lists.
     move_from_files(args.input_whitelists, uncategorized, whitelist)
-    move_from_files(args.input_greylists, uncategorized, light_greylist)
+    move_from_files(args.input_light_greylists, uncategorized, light_greylist)
     move_from_files(args.input_blacklists, uncategorized, blacklist)
 
     # Iterate over all uncategorized members and move serialization API to light greylist.
     move_serialization(uncategorized, light_greylist)
 
-    # Extract package names of members from whitelist and light greylist, which
-    # are assumed to have been finalized at this point. Assign all uncategorized
-    # members from the same packages to the dark greylist.
-    dark_greylist_packages = all_package_names(whitelist, light_greylist)
-    move_from_packages(dark_greylist_packages, uncategorized, dark_greylist)
+    # Read dark greylist inputs and move all entries to dark greylist.
+    # Note that the input is the list from P, so we will ignore missing entries.
+    move_from_files(args.input_dark_greylists, uncategorized, dark_greylist, ignoreMissing=True)
 
     # Assign all uncategorized members to the blacklist.
     move_all(uncategorized, blacklist)
