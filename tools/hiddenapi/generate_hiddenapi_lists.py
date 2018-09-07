@@ -62,6 +62,8 @@ def get_args():
 def read_lines(filename):
     """Reads entire file and return it as a list of lines.
 
+    Lines which begin with a hash are ignored.
+
     Args:
         filename (string): Path to the file to read from.
 
@@ -69,7 +71,7 @@ def read_lines(filename):
         list: Lines of the loaded file as a list of strings.
     """
     with open(filename, 'r') as f:
-        return f.readlines()
+        return filter(lambda line: not line.startswith('#'), f.readlines())
 
 def write_lines(filename, lines):
     """Writes list of lines into a file, overwriting the file it it exists.
