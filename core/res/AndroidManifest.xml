@@ -608,6 +608,9 @@
 
     <protected-broadcast android:name="android.provider.action.DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL" />
 
+    <!-- For tether entitlement recheck-->
+    <protected-broadcast
+        android:name="com.android.server.connectivity.tethering.PROVISIONING_RECHECK_ALARM" />
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
