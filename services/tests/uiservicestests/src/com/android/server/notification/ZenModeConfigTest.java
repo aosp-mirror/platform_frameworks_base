@@ -19,7 +19,9 @@ package com.android.server.notification;
 import static junit.framework.Assert.assertEquals;
 
 import android.app.NotificationManager.Policy;
+import android.net.Uri;
 import android.service.notification.ZenModeConfig;
+import android.service.notification.ZenModeConfig.EventInfo;
 import android.service.notification.ZenPolicy;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -110,6 +112,30 @@ public class ZenModeConfigTest extends UiServiceTestCase {
 
         assertEquals(true, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
         assertEquals(true, ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
+    }
+
+    @Test
+    public void testParseOldEvent() {
+        EventInfo oldEvent = new EventInfo();
+        oldEvent.userId = 1;
+        oldEvent.calName = "calName";
+        oldEvent.calendarId = null; // old events will have null ids
+
+        Uri conditionId = ZenModeConfig.toEventConditionId(oldEvent);
+        EventInfo eventParsed = ZenModeConfig.tryParseEventConditionId(conditionId);
+        assertEquals(oldEvent, eventParsed);
+    }
+
+    @Test
+    public void testParseNewEvent() {
+        EventInfo event = new EventInfo();
+        event.userId = 1;
+        event.calName = "calName";
+        event.calendarId = 12345L;
+
+        Uri conditionId = ZenModeConfig.toEventConditionId(event);
+        EventInfo eventParsed = ZenModeConfig.tryParseEventConditionId(conditionId);
+        assertEquals(event, eventParsed);
     }
 
     private ZenModeConfig getMutedNotificationsConfig() {
