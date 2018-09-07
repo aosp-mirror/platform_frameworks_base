@@ -189,7 +189,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         assertEquals(task.getTopActivity(false /* includeOverlays */), r);
         assertEquals(task.getTopActivity(true /* includeOverlays */), taskOverlay);
-        assertNotNull(result.r);
+        assertNotNull(result.mRecord);
     }
 
     @Test
