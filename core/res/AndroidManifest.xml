@@ -628,6 +628,9 @@
 
     <protected-broadcast android:name="android.intent.action.DEVICE_CUSTOMIZATION_READY" />
 
+    <!-- For tether entitlement recheck-->
+    <protected-broadcast
+        android:name="com.android.server.connectivity.tethering.PROVISIONING_RECHECK_ALARM" />
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->

@@ -16,6 +16,7 @@
 
 package com.android.server.connectivity.tethering;
 
+import static android.net.ConnectivityManager.TETHERING_BLUETOOTH;
 import static android.net.ConnectivityManager.TETHERING_USB;
 import static android.net.ConnectivityManager.TETHERING_WIFI;
 import static android.net.ConnectivityManager.TETHER_ERROR_ENTITLEMENT_UNKONWN;
@@ -72,6 +73,7 @@ public final class EntitlementManagerTest {
 
     private static final int EVENT_EM_UPDATE = 1;
     private static final String[] PROVISIONING_APP_NAME = {"some", "app"};
+    private static final String PROVISIONING_NO_UI_APP_NAME = "no_ui_app";
 
     @Mock private CarrierConfigManager mCarrierConfigManager;
     @Mock private Context mContext;
@@ -108,16 +110,28 @@ public final class EntitlementManagerTest {
     public class WrappedEntitlementManager extends EntitlementManager {
         public int fakeEntitlementResult = TETHER_ERROR_ENTITLEMENT_UNKONWN;
         public boolean everRunUiEntitlement = false;
+        public int uiProvisionCount = 0;
+        public int silentProvisionCount = 0;
 
         public WrappedEntitlementManager(Context ctx, StateMachine target,
-                SharedLog log, MockableSystemProperties systemProperties) {
-            super(ctx, target, log, systemProperties);
+                SharedLog log, int what, MockableSystemProperties systemProperties) {
+            super(ctx, target, log, what, systemProperties);
         }
 
         @Override
         protected void runUiTetherProvisioning(int type, ResultReceiver receiver) {
             everRunUiEntitlement = true;
             receiver.send(fakeEntitlementResult, null);
+        }
+
+        @Override
+        protected void runUiTetherProvisioning(int type) {
+            uiProvisionCount++;
+        }
+
+        @Override
+        protected void runSilentTetherProvisioning(int type) {
+            silentProvisionCount++;
         }
     }
 
@@ -141,7 +155,8 @@ public final class EntitlementManagerTest {
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         mMockContext = new MockContext(mContext);
         mSM = new TestStateMachine();
-        mEnMgr = new WrappedEntitlementManager(mMockContext, mSM, mLog, mSystemProperties);
+        mEnMgr = new WrappedEntitlementManager(mMockContext, mSM, mLog, EVENT_EM_UPDATE,
+                mSystemProperties);
         mEnMgr.updateConfiguration(
                 new TetheringConfiguration(mMockContext, mLog, INVALID_SUBSCRIPTION_ID));
     }
@@ -158,7 +173,9 @@ public final class EntitlementManagerTest {
         // Produce some acceptable looking provision app setting if requested.
         when(mResources.getStringArray(R.array.config_mobile_hotspot_provision_app))
                 .thenReturn(PROVISIONING_APP_NAME);
-        // Don't disable tethering provisioning unless requested.
+        when(mResources.getString(R.string.config_mobile_hotspot_provision_app_no_ui))
+                .thenReturn(PROVISIONING_NO_UI_APP_NAME);
+       // Don't disable tethering provisioning unless requested.
         when(mSystemProperties.getBoolean(eq(EntitlementManager.DISABLE_PROVISIONING_SYSPROP_KEY),
                 anyBoolean())).thenReturn(false);
         // Act like the CarrierConfigManager is present and ready unless told otherwise.
@@ -238,6 +255,7 @@ public final class EntitlementManagerTest {
             }
         };
         mEnMgr.getLatestTetheringEntitlementResult(TETHERING_WIFI, receiver, true);
+        mLooper.dispatchAll();
         callbackTimeoutHelper(mCallbacklatch);
         assertFalse(mEnMgr.everRunUiEntitlement);
 
@@ -254,6 +272,7 @@ public final class EntitlementManagerTest {
             }
         };
         mEnMgr.getLatestTetheringEntitlementResult(TETHERING_WIFI, receiver, false);
+        mLooper.dispatchAll();
         callbackTimeoutHelper(mCallbacklatch);
         assertFalse(mEnMgr.everRunUiEntitlement);
         // 3. No cache value and ui entitlement check is needed.
@@ -281,6 +300,7 @@ public final class EntitlementManagerTest {
             }
         };
         mEnMgr.getLatestTetheringEntitlementResult(TETHERING_WIFI, receiver, false);
+        mLooper.dispatchAll();
         callbackTimeoutHelper(mCallbacklatch);
         assertFalse(mEnMgr.everRunUiEntitlement);
         // 5. Cache value is TETHER_ERROR_PROVISION_FAILED and ui entitlement check is needed.
@@ -308,6 +328,7 @@ public final class EntitlementManagerTest {
             }
         };
         mEnMgr.getLatestTetheringEntitlementResult(TETHERING_WIFI, receiver, true);
+        mLooper.dispatchAll();
         callbackTimeoutHelper(mCallbacklatch);
         assertFalse(mEnMgr.everRunUiEntitlement);
         // 7. Test get value for other downstream type.
@@ -320,19 +341,128 @@ public final class EntitlementManagerTest {
             }
         };
         mEnMgr.getLatestTetheringEntitlementResult(TETHERING_USB, receiver, false);
+        mLooper.dispatchAll();
         callbackTimeoutHelper(mCallbacklatch);
         assertFalse(mEnMgr.everRunUiEntitlement);
     }
 
     void callbackTimeoutHelper(final CountDownLatch latch) throws Exception {
         if (!latch.await(1, TimeUnit.SECONDS)) {
-            fail("Timout, fail to recieve callback");
+            fail("Timout, fail to receive callback");
         }
     }
+
+    @Test
+    public void verifyPermissionResult() {
+        setupForRequiredProvisioning();
+        mEnMgr.notifyUpstream(true);
+        mEnMgr.updateConfiguration(new TetheringConfiguration(mMockContext, mLog,
+                  INVALID_SUBSCRIPTION_ID));
+        mEnMgr.startProvisioningIfNeeded(TETHERING_WIFI, true);
+        mLooper.dispatchAll();
+        mEnMgr.addDownstreamMapping(TETHERING_WIFI, TETHER_ERROR_PROVISION_FAILED);
+        assertFalse(mEnMgr.isCellularUpstreamPermitted());
+        mEnMgr.stopProvisioningIfNeeded(TETHERING_WIFI);
+        mLooper.dispatchAll();
+        mEnMgr.startProvisioningIfNeeded(TETHERING_WIFI, true);
+        mLooper.dispatchAll();
+        mEnMgr.addDownstreamMapping(TETHERING_WIFI, TETHER_ERROR_NO_ERROR);
+        assertTrue(mEnMgr.isCellularUpstreamPermitted());
+    }
+
+    @Test
+    public void verifyPermissionIfAllNotApproved() {
+        setupForRequiredProvisioning();
+        mEnMgr.notifyUpstream(true);
+        mEnMgr.updateConfiguration(new TetheringConfiguration(mMockContext, mLog,
+                  INVALID_SUBSCRIPTION_ID));
+        mEnMgr.startProvisioningIfNeeded(TETHERING_WIFI, true);
+        mLooper.dispatchAll();
+        mEnMgr.addDownstreamMapping(TETHERING_WIFI, TETHER_ERROR_PROVISION_FAILED);
+        assertFalse(mEnMgr.isCellularUpstreamPermitted());
+        mEnMgr.startProvisioningIfNeeded(TETHERING_USB, true);
+        mLooper.dispatchAll();
+        mEnMgr.addDownstreamMapping(TETHERING_USB, TETHER_ERROR_PROVISION_FAILED);
+        assertFalse(mEnMgr.isCellularUpstreamPermitted());
+        mEnMgr.startProvisioningIfNeeded(TETHERING_BLUETOOTH, true);
+        mLooper.dispatchAll();
+        mEnMgr.addDownstreamMapping(TETHERING_BLUETOOTH, TETHER_ERROR_PROVISION_FAILED);
+        assertFalse(mEnMgr.isCellularUpstreamPermitted());
+    }
+
+    @Test
+    public void verifyPermissionIfAnyApproved() {
+        setupForRequiredProvisioning();
+        mEnMgr.notifyUpstream(true);
+        mEnMgr.updateConfiguration(new TetheringConfiguration(mMockContext, mLog,
+                  INVALID_SUBSCRIPTION_ID));
+        mEnMgr.startProvisioningIfNeeded(TETHERING_WIFI, true);
+        mLooper.dispatchAll();
+        mEnMgr.addDownstreamMapping(TETHERING_WIFI, TETHER_ERROR_NO_ERROR);
+        assertTrue(mEnMgr.isCellularUpstreamPermitted());
+        mLooper.dispatchAll();
+        mEnMgr.startProvisioningIfNeeded(TETHERING_USB, true);
+        mLooper.dispatchAll();
+        mEnMgr.addDownstreamMapping(TETHERING_USB, TETHER_ERROR_PROVISION_FAILED);
+        assertTrue(mEnMgr.isCellularUpstreamPermitted());
+        mEnMgr.stopProvisioningIfNeeded(TETHERING_WIFI);
+        mLooper.dispatchAll();
+        assertFalse(mEnMgr.isCellularUpstreamPermitted());
+
+    }
+
+    @Test
+    public void testRunTetherProvisioning() {
+        setupForRequiredProvisioning();
+        mEnMgr.updateConfiguration(new TetheringConfiguration(mMockContext, mLog,
+                INVALID_SUBSCRIPTION_ID));
+        // 1. start ui provisioning, upstream is mobile
+        mEnMgr.notifyUpstream(true);
+        mLooper.dispatchAll();
+        mEnMgr.startProvisioningIfNeeded(TETHERING_USB, true);
+        mLooper.dispatchAll();
+        assertTrue(mEnMgr.uiProvisionCount == 1);
+        assertTrue(mEnMgr.silentProvisionCount == 0);
+        mEnMgr.addDownstreamMapping(TETHERING_USB, TETHER_ERROR_PROVISION_FAILED);
+        // 2. start no-ui provisioning
+        mEnMgr.startProvisioningIfNeeded(TETHERING_WIFI, false);
+        mLooper.dispatchAll();
+        assertTrue(mEnMgr.silentProvisionCount == 1);
+        assertTrue(mEnMgr.uiProvisionCount == 1);
+        mEnMgr.addDownstreamMapping(TETHERING_WIFI, TETHER_ERROR_PROVISION_FAILED);
+        // 3. tear down mobile, then start ui provisioning
+        mEnMgr.notifyUpstream(false);
+        mLooper.dispatchAll();
+        mEnMgr.startProvisioningIfNeeded(TETHERING_BLUETOOTH, true);
+        mLooper.dispatchAll();
+        assertTrue(mEnMgr.uiProvisionCount == 1);
+        assertTrue(mEnMgr.silentProvisionCount == 1);
+        // 4. switch upstream back to mobile
+        mEnMgr.notifyUpstream(true);
+        mLooper.dispatchAll();
+        assertTrue(mEnMgr.uiProvisionCount == 2);
+        assertTrue(mEnMgr.silentProvisionCount == 1);
+        mEnMgr.addDownstreamMapping(TETHERING_BLUETOOTH, TETHER_ERROR_PROVISION_FAILED);
+        // 5. tear down mobile, then switch SIM
+        mEnMgr.notifyUpstream(false);
+        mLooper.dispatchAll();
+        mEnMgr.reevaluateSimCardProvisioning();
+        assertTrue(mEnMgr.uiProvisionCount == 2);
+        assertTrue(mEnMgr.silentProvisionCount == 1);
+        // 6. switch upstream back to mobile again
+        mEnMgr.notifyUpstream(true);
+        mLooper.dispatchAll();
+        assertTrue(mEnMgr.uiProvisionCount == 2);
+        assertTrue(mEnMgr.silentProvisionCount == 4);
+        mEnMgr.addDownstreamMapping(TETHERING_USB, TETHER_ERROR_PROVISION_FAILED);
+        mEnMgr.addDownstreamMapping(TETHERING_WIFI, TETHER_ERROR_PROVISION_FAILED);
+        mEnMgr.addDownstreamMapping(TETHERING_BLUETOOTH, TETHER_ERROR_PROVISION_FAILED);
+    }
+
     public class TestStateMachine extends StateMachine {
         public final ArrayList<Message> messages = new ArrayList<>();
-        private final State mLoggingState =
-                new EntitlementManagerTest.TestStateMachine.LoggingState();
+        private final State
+                mLoggingState = new EntitlementManagerTest.TestStateMachine.LoggingState();
 
         class LoggingState extends State {
             @Override public void enter() {
