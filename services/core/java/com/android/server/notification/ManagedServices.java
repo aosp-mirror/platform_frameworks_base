@@ -694,7 +694,8 @@ abstract public class ManagedServices {
 
             for (int userId : userIds) {
                 if (enabled) {
-                    if (isPackageOrComponentAllowed(component.toString(), userId)) {
+                    if (isPackageOrComponentAllowed(component.toString(), userId)
+                            || isPackageOrComponentAllowed(component.getPackageName(), userId)) {
                         registerServiceLocked(component, userId);
                     } else {
                         Slog.d(TAG, component + " no longer has permission to be bound");
