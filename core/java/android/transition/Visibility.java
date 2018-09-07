@@ -52,9 +52,11 @@ public abstract class Visibility extends Transition {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "MODE_" }, value = {
+    @IntDef(flag = true, value = {
             MODE_IN,
-            MODE_OUT
+            MODE_OUT,
+            Fade.IN,
+            Fade.OUT
     })
     @interface VisibilityMode {}
 
