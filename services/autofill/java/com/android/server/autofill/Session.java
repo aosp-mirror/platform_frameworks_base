@@ -395,16 +395,42 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * or {@code null} when not found on either of them.
      */
     @GuardedBy("mLock")
-    private AutofillValue findValueLocked(@NonNull AutofillId id) {
-        final ViewState state = mViewStates.get(id);
+    @Nullable
+    private AutofillValue findValueLocked(@NonNull AutofillId autofillId) {
+        final AutofillValue value = findValueFromThisSessionOnlyLocked(autofillId);
+        if (value != null) return value;
+
+        // TODO(b/113281366): rather than explicitly look for previous session, it might be better
+        // to merge the sessions when created (see note on mergePreviousSessionLocked())
+        final ArrayList<Session> previousSessions = mService.getPreviousSessionsLocked(this);
+        if (previousSessions != null) {
+            if (sDebug) {
+                Slog.d(TAG, "findValueLocked(): looking on " + previousSessions.size()
+                        + " previous sessions for autofillId " + autofillId);
+            }
+            for (int i = 0; i < previousSessions.size(); i++) {
+                final Session previousSession = previousSessions.get(i);
+                final AutofillValue previousValue = previousSession
+                        .findValueFromThisSessionOnlyLocked(autofillId);
+                if (previousValue != null) {
+                    return previousValue;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    private AutofillValue findValueFromThisSessionOnlyLocked(@NonNull AutofillId autofillId) {
+        final ViewState state = mViewStates.get(autofillId);
         if (state == null) {
-            if (sDebug) Slog.d(TAG, "findValueLocked(): no view state for " + id);
+            if (sDebug) Slog.d(TAG, "findValueLocked(): no view state for " + autofillId);
             return null;
         }
         AutofillValue value = state.getCurrentValue();
         if (value == null) {
-            if (sDebug) Slog.d(TAG, "findValueLocked(): no current value for " + id);
-            value = getValueFromContextsLocked(id);
+            if (sDebug) Slog.d(TAG, "findValueLocked(): no current value for " + autofillId);
+            value = getValueFromContextsLocked(autofillId);
         }
         return value;
     }
@@ -1769,15 +1795,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     @Nullable
-    private AutofillValue getValueFromContextsLocked(AutofillId id) {
+    private AutofillValue getValueFromContextsLocked(@NonNull AutofillId autofillId) {
         final int numContexts = mContexts.size();
         for (int i = numContexts - 1; i >= 0; i--) {
             final FillContext context = mContexts.get(i);
-            final ViewNode node = Helper.findViewNodeByAutofillId(context.getStructure(), id);
+            final ViewNode node = Helper.findViewNodeByAutofillId(context.getStructure(),
+                    autofillId);
             if (node != null) {
                 final AutofillValue value = node.getAutofillValue();
                 if (sDebug) {
-                    Slog.d(TAG, "getValueFromContexts(" + id + ") at " + i + ": " + value);
+                    Slog.d(TAG, "getValueFromContexts(" + autofillId + ") at " + i + ": " + value);
                 }
                 if (value != null && !value.isEmpty()) {
                     return value;
