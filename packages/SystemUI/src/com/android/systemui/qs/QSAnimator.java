@@ -155,7 +155,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         TouchAnimator.Builder translationYBuilder = new Builder();
 
         if (mQsPanel.getHost() == null) return;
-        if (mQuickQsPanel.getTileLayout().getNumVisibleTiles() < 1) return;
         Collection<QSTile> tiles = mQsPanel.getHost().getTiles();
         int count = 0;
         int[] loc1 = new int[2];
@@ -170,7 +169,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         QSTileLayout tileLayout = mQsPanel.getTileLayout();
         mAllViews.add((View) tileLayout);
         int height = mQs.getView() != null ? mQs.getView().getMeasuredHeight() : 0;
-        int width = mQs.getView() != null ? mQs.getView().getMeasuredWidth() : 0;
         int heightDiff = height - mQs.getHeader().getBottom()
                 + mQs.getHeader().getPaddingBottom();
         firstPageBuilder.addFloat(tileLayout, "translationY", heightDiff, 0);
@@ -183,9 +181,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             }
             final View tileIcon = tileView.getIcon().getIconView();
             View view = mQs.getView();
-
-            // This case: less tiles to animate in small displays.
-            if (count < mQuickQsPanel.getTileLayout().getNumVisibleTiles() && mAllowFancy) {
+            if (count < mNumQuickTiles && mAllowFancy) {
                 // Quick tiles.
                 QSTileView quickTileView = mQuickQsPanel.getTileView(tile);
                 if (quickTileView == null) continue;
@@ -196,26 +192,18 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 final int xDiff = loc2[0] - loc1[0];
                 final int yDiff = loc2[1] - loc1[1];
                 lastXDiff = loc1[0] - lastX;
+                // Move the quick tile right from its location to the new one.
+                translationXBuilder.addFloat(quickTileView, "translationX", 0, xDiff);
+                translationYBuilder.addFloat(quickTileView, "translationY", 0, yDiff);
 
-                if (count < tileLayout.getNumVisibleTiles()) {
-                    // Move the quick tile right from its location to the new one.
-                    translationXBuilder.addFloat(quickTileView, "translationX", 0, xDiff);
-                    translationYBuilder.addFloat(quickTileView, "translationY", 0, yDiff);
+                // Counteract the parent translation on the tile. So we have a static base to
+                // animate the label position off from.
+                //firstPageBuilder.addFloat(tileView, "translationY", mQsPanel.getHeight(), 0);
 
-                    // Counteract the parent translation on the tile. So we have a static base to
-                    // animate the label position off from.
-                    //firstPageBuilder.addFloat(tileView, "translationY", mQsPanel.getHeight(), 0);
-
-                    // Move the real tile from the quick tile position to its final
-                    // location.
-                    translationXBuilder.addFloat(tileView, "translationX", -xDiff, 0);
-                    translationYBuilder.addFloat(tileView, "translationY", -yDiff, 0);
-
-                } else { // These tiles disappear when expanding
-                    firstPageBuilder.addFloat(quickTileView, "alpha", 1, 0);
-                    translationYBuilder.addFloat(quickTileView, "translationY", 0, yDiff);
-                    translationXBuilder.addFloat(quickTileView, "translationX", 0, xDiff + width);
-                }
+                // Move the real tile from the quick tile position to its final
+                // location.
+                translationXBuilder.addFloat(tileView, "translationX", -xDiff, 0);
+                translationYBuilder.addFloat(tileView, "translationY", -yDiff, 0);
 
                 mQuickQsViews.add(tileView.getIconWithBackground());
                 mAllViews.add(tileView.getIcon());
@@ -230,9 +218,10 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 final int xDiff = loc2[0] - loc1[0];
                 final int yDiff = loc2[1] - loc1[1];
 
-                firstPageBuilder.addFloat(tileView, "translationY", -heightDiff, 0);
-                translationYBuilder.addFloat(tileView, "translationY", -yDiff, 0);
+                firstPageBuilder.addFloat(tileView, "translationY", heightDiff, 0);
                 translationXBuilder.addFloat(tileView, "translationX", -xDiff, 0);
+                translationYBuilder.addFloat(tileView, "translationY", -yDiff, 0);
+                translationYBuilder.addFloat(tileIcon, "translationY", -yDiff, 0);
 
                 mAllViews.add(tileIcon);
             } else {
