@@ -11,8 +11,14 @@ fi
 readarray A < "$source_list"
 # Sort
 IFS=$'\n'
+# Stash away comments
+C=( $(grep -E '^#' <<< "${A[*]}") )
+A=( $(grep -v -E '^#' <<< "${A[*]}") )
+# Sort entries
 A=( $(LC_COLLATE=C sort -f <<< "${A[*]}") )
 A=( $(uniq <<< "${A[*]}") )
+# Concatenate comments and entries
+A=( ${C[*]} ${A[*]} )
 unset IFS
 # Dump array back into the file
 printf '%s\n' "${A[@]}" > "$dest_list"

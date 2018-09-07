@@ -322,6 +322,11 @@ $(OUT_DOCS)/offline-sdk-timestamp: $(OUT_DOCS)/offline-sdk-docs-docs.zip
 	( unzip -qo $< -d $(OUT_DOCS)/offline-sdk && touch -f $@ ) || exit 1
 
 # ==== hiddenapi lists =======================================
+.KATI_RESTAT: \
+	$(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST) \
+	$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST) \
+	$(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST) \
+	$(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST)
 $(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST): \
     .KATI_IMPLICIT_OUTPUTS := \
         $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST) \
@@ -331,6 +336,7 @@ $(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST): \
     frameworks/base/tools/hiddenapi/generate_hiddenapi_lists.py \
     frameworks/base/config/hiddenapi-light-greylist.txt \
     frameworks/base/config/hiddenapi-vendor-list.txt \
+    frameworks/base/config/hiddenapi-dark-greylist.txt \
     frameworks/base/config/hiddenapi-force-blacklist.txt \
     $(INTERNAL_PLATFORM_HIDDENAPI_PUBLIC_LIST) \
     $(INTERNAL_PLATFORM_HIDDENAPI_PRIVATE_LIST) \
@@ -339,17 +345,22 @@ $(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST): \
 	    --input-public $(INTERNAL_PLATFORM_HIDDENAPI_PUBLIC_LIST) \
 	    --input-private $(INTERNAL_PLATFORM_HIDDENAPI_PRIVATE_LIST) \
 	    --input-whitelists $(PRIVATE_WHITELIST_INPUTS) \
-	    --input-greylists \
+	    --input-light-greylists \
 	        frameworks/base/config/hiddenapi-light-greylist.txt \
 	        frameworks/base/config/hiddenapi-vendor-list.txt \
 	        <(comm -12 <(sort $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE)) \
 	                   $(INTERNAL_PLATFORM_HIDDENAPI_PRIVATE_LIST)) \
 	        $(PRIVATE_GREYLIST_INPUTS) \
+	    --input-dark-greylists frameworks/base/config/hiddenapi-dark-greylist.txt \
 	    --input-blacklists frameworks/base/config/hiddenapi-force-blacklist.txt \
-	    --output-whitelist $(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST) \
-	    --output-light-greylist $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST) \
-	    --output-dark-greylist $(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST) \
-	    --output-blacklist $(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST)
+	    --output-whitelist $(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST).tmp \
+	    --output-light-greylist $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST).tmp \
+	    --output-dark-greylist $(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST).tmp \
+	    --output-blacklist $(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST).tmp
+	$(call commit-change-for-toc,$(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST))
+	$(call commit-change-for-toc,$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST))
+	$(call commit-change-for-toc,$(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST))
+	$(call commit-change-for-toc,$(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST))
 
 # Include subdirectory makefiles
 # ============================================================
