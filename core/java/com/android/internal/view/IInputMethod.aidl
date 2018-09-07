@@ -22,6 +22,7 @@ import android.view.InputChannel;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethodSubtype;
+import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.IInputSessionCallback;
@@ -32,7 +33,7 @@ import com.android.internal.view.IInputSessionCallback;
  * {@hide}
  */
 oneway interface IInputMethod {
-    void attachToken(IBinder token);
+    void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps);
 
     void bindInput(in InputBinding binding);
 

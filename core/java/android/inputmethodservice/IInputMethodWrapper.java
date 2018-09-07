@@ -35,6 +35,7 @@ import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodSession;
 import android.view.inputmethod.InputMethodSubtype;
 
+import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputContext;
@@ -60,7 +61,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final String TAG = "InputMethodWrapper";
 
     private static final int DO_DUMP = 1;
-    private static final int DO_ATTACH_TOKEN = 10;
+    private static final int DO_INITIALIZE_INTERNAL = 10;
     private static final int DO_SET_INPUT_CONTEXT = 20;
     private static final int DO_UNSET_INPUT_CONTEXT = 30;
     private static final int DO_START_INPUT = 32;
@@ -159,9 +160,15 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 args.recycle();
                 return;
             }
-            
-            case DO_ATTACH_TOKEN: {
-                inputMethod.attachToken((IBinder)msg.obj);
+
+            case DO_INITIALIZE_INTERNAL: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                try {
+                    inputMethod.initializeInternal((IBinder) args.arg1,
+                            (IInputMethodPrivilegedOperations) args.arg2);
+                } finally {
+                    args.recycle();
+                }
                 return;
             }
             case DO_SET_INPUT_CONTEXT: {
@@ -246,8 +253,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @BinderThread
     @Override
-    public void attachToken(IBinder token) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_ATTACH_TOKEN, token));
+    public void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageOO(DO_INITIALIZE_INTERNAL, token, privOps));
     }
 
     @BinderThread

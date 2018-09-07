@@ -127,6 +127,7 @@ import android.widget.TextView;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.IInputContentUriToken;
+import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
 import com.android.internal.inputmethod.InputMethodUtils;
@@ -198,7 +199,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_SHOW_SOFT_INPUT = 1020;
     static final int MSG_HIDE_SOFT_INPUT = 1030;
     static final int MSG_HIDE_CURRENT_INPUT_METHOD = 1035;
-    static final int MSG_ATTACH_TOKEN = 1040;
+    static final int MSG_INITIALIZE_IME = 1040;
     static final int MSG_CREATE_SESSION = 1050;
 
     static final int MSG_START_INPUT = 2000;
@@ -1968,7 +1969,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
                 executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
-                        MSG_ATTACH_TOKEN, mCurMethod, mCurToken));
+                        MSG_INITIALIZE_IME, mCurMethod, mCurToken));
                 if (mCurClient != null) {
                     clearClientSessionLocked(mCurClient);
                     requestClientSessionLocked(mCurClient);
@@ -2217,8 +2218,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @BinderThread
     @SuppressWarnings("deprecation")
-    @Override
-    public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
+    private void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
         if (!calledWithValidToken(token)) {
             return;
         }
@@ -2253,8 +2253,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    @Override
-    public void reportStartInput(IBinder token, IBinder startInputToken) {
+    private void reportStartInput(IBinder token, IBinder startInputToken) {
         if (!calledWithValidToken(token)) {
             return;
         }
@@ -3158,8 +3157,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return mWindowManagerInternal.getInputMethodWindowVisibleHeight();
     }
 
-    @Override
-    public void clearLastInputMethodWindowForTransition(IBinder token) {
+    @BinderThread
+    private void clearLastInputMethodWindowForTransition(IBinder token) {
         if (!calledFromValidUser()) {
             return;
         }
@@ -3354,11 +3353,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     hideCurrentInputLocked(0, null);
                 }
                 return true;
-            case MSG_ATTACH_TOKEN:
+            case MSG_INITIALIZE_IME:
                 args = (SomeArgs)msg.obj;
                 try {
                     if (DEBUG) Slog.v(TAG, "Sending attach of token: " + args.arg2);
-                    ((IInputMethod)args.arg1).attachToken((IBinder)args.arg2);
+                    final IBinder token = (IBinder) args.arg2;
+                    ((IInputMethod) args.arg1).initializeInternal(token,
+                            new InputMethodPrivilegedOperationsImpl(this, token));
                 } catch (RemoteException e) {
                 }
                 args.recycle();
@@ -4432,8 +4433,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @Override
-    public IInputContentUriToken createInputContentUriToken(@Nullable IBinder token,
+    @BinderThread
+    private IInputContentUriToken createInputContentUriToken(@Nullable IBinder token,
             @Nullable Uri contentUri, @Nullable String packageName) {
         if (!calledFromValidUser()) {
             return null;
@@ -4490,8 +4491,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @Override
-    public void reportFullscreenMode(IBinder token, boolean fullscreen) {
+    @BinderThread
+    private void reportFullscreenMode(IBinder token, boolean fullscreen) {
         if (!calledFromValidUser()) {
             return;
         }
@@ -4964,6 +4965,47 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
             return ShellCommandResult.SUCCESS;
+        }
+    }
+
+    private static final class InputMethodPrivilegedOperationsImpl
+            extends IInputMethodPrivilegedOperations.Stub {
+        private final InputMethodManagerService mImms;
+        private final IBinder mToken;
+        InputMethodPrivilegedOperationsImpl(InputMethodManagerService imms, IBinder token) {
+            mImms = imms;
+            mToken = token;
+        }
+
+        @BinderThread
+        @Override
+        public void setImeWindowStatus(int vis, int backDisposition) {
+            mImms.setImeWindowStatus(mToken, vis, backDisposition);
+        }
+
+        @BinderThread
+        @Override
+        public void reportStartInput(IBinder startInputToken) {
+            mImms.reportStartInput(mToken, startInputToken);
+        }
+
+        @BinderThread
+        @Override
+        public void clearLastInputMethodWindowForTransition() {
+            mImms.clearLastInputMethodWindowForTransition(mToken);
+        }
+
+        @BinderThread
+        @Override
+        public IInputContentUriToken createInputContentUriToken(Uri contentUri,
+                String packageName) {
+            return mImms.createInputContentUriToken(mToken, contentUri, packageName);
+        }
+
+        @BinderThread
+        @Override
+        public void reportFullscreenMode(boolean fullscreen) {
+            mImms.reportFullscreenMode(mToken, fullscreen);
         }
     }
 }

@@ -183,7 +183,15 @@ public final class InputContentInfo implements Parcelable {
     @Nullable
     public Uri getLinkUri() { return mLinkUri; }
 
-    void setUriToken(IInputContentUriToken token) {
+    /**
+     * Update the internal state of this object to be associated with the given token.
+     *
+     * <p>TODO(yukawa): Come up with an idea to make {@link InputContentInfo} immutable.</p>
+     *
+     * @param token special URI token obtained from the system.
+     * @hide
+     */
+    public void setUriToken(IInputContentUriToken token) {
         if (mUriToken != null) {
             throw new IllegalStateException("URI token is already set");
         }
