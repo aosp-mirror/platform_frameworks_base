@@ -1,20 +1,6 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.policy."
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "android.support.test.filters.FlakyTest"
-        }
-      ]
-    },
-    {
       "name": "WmTests",
       "options": [
         {
@@ -30,14 +16,6 @@
     }
   ],
   "postsubmit": [
-    {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.policy."
-        }
-      ]
-    },
     {
       "name": "WmTests",
       "options": [
