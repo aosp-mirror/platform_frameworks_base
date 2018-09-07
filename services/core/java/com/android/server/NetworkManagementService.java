@@ -621,22 +621,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         mBandwidthControlEnabled = false;
 
-        // only enable bandwidth control when support exists
-        final boolean hasKernelSupport = new File("/proc/net/xt_qtaguid/ctrl").exists();
-
         // push any existing quota or UID rules
         synchronized (mQuotaLock) {
 
-            if (hasKernelSupport) {
-                Slog.d(TAG, "enabling bandwidth control");
-                try {
-                    mConnector.execute("bandwidth", "enable");
-                    mBandwidthControlEnabled = true;
-                } catch (NativeDaemonConnectorException e) {
-                    Log.wtf(TAG, "problem enabling bandwidth controls", e);
-                }
-            } else {
-                Slog.i(TAG, "not enabling bandwidth control");
+            // TODO: Delete this code and have netd unconditionally enable bandwidth control at
+            // startup time
+            Slog.d(TAG, "enabling bandwidth control");
+            try {
+                mConnector.execute("bandwidth", "enable");
+                mBandwidthControlEnabled = true;
+            } catch (NativeDaemonConnectorException e) {
+                Log.wtf(TAG, "problem enabling bandwidth controls", e);
             }
 
             SystemProperties.set(PROP_QTAGUID_ENABLED, mBandwidthControlEnabled ? "1" : "0");
