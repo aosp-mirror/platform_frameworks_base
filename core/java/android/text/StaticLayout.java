@@ -1216,11 +1216,19 @@ public class StaticLayout extends Layout {
     }
 
     /**
+     * Returns the packed hyphen edit value for this line.
+     *
+     * You can extract start hyphen edit and end hyphen edit by using
+     * {@link Hyphenator#unpackStartHyphenEdit(int)} and
+     * {@link Hyphenator#unpackEndHyphenEdit(int)}.
+     *
+     * @param lineNumber a line number
+     * @return A packed hyphen edit value.
      * @hide
      */
     @Override
-    public int getHyphen(int line) {
-        return mLines[mColumns * line + HYPHEN] & HYPHEN_MASK;
+    public int getHyphen(int lineNumber) {
+        return mLines[mColumns * lineNumber + HYPHEN] & HYPHEN_MASK;
     }
 
     /**
