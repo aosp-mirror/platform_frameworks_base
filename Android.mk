@@ -322,6 +322,11 @@ $(OUT_DOCS)/offline-sdk-timestamp: $(OUT_DOCS)/offline-sdk-docs-docs.zip
 	( unzip -qo $< -d $(OUT_DOCS)/offline-sdk && touch -f $@ ) || exit 1
 
 # ==== hiddenapi lists =======================================
+.KATI_RESTAT: \
+	$(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST) \
+	$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST) \
+	$(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST) \
+	$(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST)
 $(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST): \
     .KATI_IMPLICIT_OUTPUTS := \
         $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST) \
@@ -348,10 +353,14 @@ $(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST): \
 	        $(PRIVATE_GREYLIST_INPUTS) \
 	    --input-dark-greylists frameworks/base/config/hiddenapi-dark-greylist.txt \
 	    --input-blacklists frameworks/base/config/hiddenapi-force-blacklist.txt \
-	    --output-whitelist $(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST) \
-	    --output-light-greylist $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST) \
-	    --output-dark-greylist $(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST) \
-	    --output-blacklist $(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST)
+	    --output-whitelist $(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST).tmp \
+	    --output-light-greylist $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST).tmp \
+	    --output-dark-greylist $(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST).tmp \
+	    --output-blacklist $(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST).tmp
+	$(call commit-change-for-toc,$(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST))
+	$(call commit-change-for-toc,$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST))
+	$(call commit-change-for-toc,$(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST))
+	$(call commit-change-for-toc,$(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST))
 
 # Include subdirectory makefiles
 # ============================================================
