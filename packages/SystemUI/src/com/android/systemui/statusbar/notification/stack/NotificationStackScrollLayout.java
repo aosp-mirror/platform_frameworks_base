@@ -26,7 +26,6 @@ import android.animation.PropertyValuesHolder;
 import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.annotation.FloatRange;
 import android.annotation.Nullable;
 import android.app.WallpaperManager;
 import android.content.Context;
@@ -5316,12 +5315,14 @@ public class NotificationStackScrollLayout extends ViewGroup
         void flingTopOverscroll(float velocity, boolean open);
     }
 
-  @ShadeViewRefactor(RefactorComponent.INPUT)
-  private class NotificationSwipeHelper extends SwipeHelper
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    private class NotificationSwipeHelper extends SwipeHelper
             implements NotificationSwipeActionHelper {
         private static final long COVER_MENU_DELAY = 4000;
         private Runnable mFalsingCheck;
         private Handler mHandler;
+
+        private static final long SWIPE_MENU_TIMING = 200;
 
         public NotificationSwipeHelper(int swipeDirection, Callback callback, Context context) {
             super(swipeDirection, callback, context);
@@ -5338,7 +5339,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         public void onDownUpdate(View currView, MotionEvent ev) {
             mTranslatingParentView = currView;
             if (mCurrMenuRow != null) {
-                mCurrMenuRow.onTouchEvent(currView, ev, 0 /* velocity */);
+                mCurrMenuRow.onTouchStart();
             }
             mCurrMenuRow = null;
             mHandler.removeCallbacks(mFalsingCheck);
@@ -5351,18 +5352,21 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 if (row.getEntry().hasFinishedInitialization()) {
                     mCurrMenuRow = row.createMenu();
-                    mCurrMenuRow.setSwipeActionHelper(NotificationSwipeHelper.this);
                     mCurrMenuRow.setMenuClickListener(NotificationStackScrollLayout.this);
-                    mCurrMenuRow.onTouchEvent(currView, ev, 0 /* velocity */);
+                    mCurrMenuRow.onTouchStart();
                 }
             }
+        }
+
+        private boolean swipedEnoughToShowMenu(NotificationMenuRowPlugin menuRow) {
+            return !swipedFarEnough() && menuRow.isSwipedEnoughToShowMenu();
         }
 
         @Override
         public void onMoveUpdate(View view, MotionEvent ev, float translation, float delta) {
             mHandler.removeCallbacks(mFalsingCheck);
             if (mCurrMenuRow != null) {
-                mCurrMenuRow.onTouchEvent(view, ev, 0 /* velocity */);
+                mCurrMenuRow.onTouchMove(delta);
             }
         }
 
@@ -5370,9 +5374,89 @@ public class NotificationStackScrollLayout extends ViewGroup
         public boolean handleUpEvent(MotionEvent ev, View animView, float velocity,
                 float translation) {
             if (mCurrMenuRow != null) {
-                return mCurrMenuRow.onTouchEvent(animView, ev, velocity);
+                mCurrMenuRow.onTouchEnd();
+                handleMenuRowSwipe(ev, animView, velocity, mCurrMenuRow);
+                return true;
             }
             return false;
+        }
+
+        @Override
+        public boolean swipedFarEnough(float translation, float viewSize) {
+            return swipedFarEnough();
+        }
+
+        private void handleMenuRowSwipe(MotionEvent ev, View animView, float velocity,
+                NotificationMenuRowPlugin menuRow) {
+            if (!menuRow.shouldShowMenu()) {
+                // If the menu should not be shown, then there is no need to check if the a swipe
+                // should result in a snapping to the menu. As a result, just check if the swipe
+                // was enough to dismiss the notification.
+                if (isDismissGesture(ev)) {
+                    dismiss(animView, velocity);
+                } else {
+                    snapBack(animView, velocity);
+                    menuRow.onSnapClosed();
+                }
+                return;
+            }
+
+            if (menuRow.isSnappedAndOnSameSide()) {
+                // Menu was snapped to previously and we're on the same side
+                handleSwipeFromSnap(ev, animView, velocity, menuRow);
+            } else {
+                // Menu has not been snapped, or was snapped previously but is now on
+                // the opposite side.
+                handleSwipeFromNonSnap(ev, animView, velocity, menuRow);
+            }
+        }
+
+        private void handleSwipeFromNonSnap(MotionEvent ev, View animView, float velocity,
+                NotificationMenuRowPlugin menuRow) {
+            boolean isDismissGesture = isDismissGesture(ev);
+            final boolean gestureTowardsMenu = menuRow.isTowardsMenu(velocity);
+            final boolean gestureFastEnough =
+                    mSwipeHelper.getMinDismissVelocity() <= Math.abs(velocity);
+
+            final double timeForGesture = ev.getEventTime() - ev.getDownTime();
+            final boolean showMenuForSlowOnGoing = !menuRow.canBeDismissed()
+                    && timeForGesture >= SWIPE_MENU_TIMING;
+
+            if (!isFalseGesture(ev)
+                    && (swipedEnoughToShowMenu(menuRow)
+                    && (!gestureFastEnough || showMenuForSlowOnGoing))
+                    || (gestureTowardsMenu && !isDismissGesture)) {
+                // Menu has not been snapped to previously and this is menu revealing gesture
+                snapOpen(animView, menuRow.getMenuSnapTarget(), velocity);
+                menuRow.onSnapOpen();
+            } else if (isDismissGesture(ev) && !gestureTowardsMenu) {
+                dismiss(animView, velocity);
+                menuRow.onDismiss();
+            } else {
+                snapBack(animView, velocity);
+                menuRow.onSnapClosed();
+            }
+        }
+
+        private void handleSwipeFromSnap(MotionEvent ev, View animView, float velocity,
+                NotificationMenuRowPlugin menuRow) {
+            boolean isDismissGesture = isDismissGesture(ev);
+
+            final boolean withinSnapMenuThreshold =
+                    menuRow.isWithinSnapMenuThreshold();
+
+            if (withinSnapMenuThreshold && !isDismissGesture) {
+                // Haven't moved enough to unsnap from the menu
+                menuRow.onSnapOpen();
+                snapOpen(animView, menuRow.getMenuSnapTarget(), velocity);
+            } else if (isDismissGesture && !menuRow.shouldSnapBack()) {
+                // Only dismiss if we're not moving towards the menu
+                dismiss(animView, velocity);
+                menuRow.onDismiss();
+            } else {
+                snapBack(animView, velocity);
+                menuRow.onSnapClosed();
+            }
         }
 
         @Override
@@ -5402,10 +5486,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         @Override
         public void snooze(StatusBarNotification sbn, SnoozeOption snoozeOption) {
             mStatusBar.setNotificationSnoozed(sbn, snoozeOption);
-        }
-
-        public boolean isFalseGesture(MotionEvent ev) {
-            return super.isFalseGesture(ev);
         }
 
         private void handleMenuCoveredOrDismissed() {
@@ -5441,13 +5521,12 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         @Override
-        public void snap(View animView, float targetLeft, float velocity) {
+        public void snapOpen(View animView, int targetLeft, float velocity) {
             snapChild(animView, targetLeft, velocity);
         }
 
-        @Override
-        public boolean swipedFarEnough(float translation, float viewSize) {
-            return swipedFarEnough();
+        private void snapBack(View animView, float velocity) {
+            snapChild(animView, 0, velocity);
         }
 
         @Override
