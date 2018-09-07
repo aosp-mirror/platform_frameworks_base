@@ -51,6 +51,11 @@ public final class Font {
     private static final int STYLE_NORMAL = 0;
 
     /**
+     * A minimum weight value for the font
+     */
+    public static final int FONT_WEIGHT_MIN = 1;
+
+    /**
      * A font weight value for the thin weight
      */
     public static final int FONT_WEIGHT_THIN = 100;
@@ -94,6 +99,11 @@ public final class Font {
      * A font weight value for the black weight
      */
     public static final int FONT_WEIGHT_BLACK = 900;
+
+    /**
+     * A maximum weight value for the font
+     */
+    public static final int FONT_WEIGHT_MAX = 1000;
 
     /**
      * A builder class for creating new Font.
@@ -322,8 +332,9 @@ public final class Font {
          * @param weight a weight value
          * @return this builder
          */
-        public @NonNull Builder setWeight(@IntRange(from = 1, to = 1000) int weight) {
-            Preconditions.checkArgument(1 <= weight && weight <= 1000);
+        public @NonNull Builder setWeight(
+                @IntRange(from = FONT_WEIGHT_MIN, to = FONT_WEIGHT_MAX) int weight) {
+            Preconditions.checkArgument(FONT_WEIGHT_MIN <= weight && weight <= FONT_WEIGHT_MAX);
             mWeight = weight;
             return this;
         }
@@ -403,6 +414,7 @@ public final class Font {
                     mItalic = STYLE_NORMAL;
                 }
             }
+            mWeight = Math.max(FONT_WEIGHT_MIN, Math.min(FONT_WEIGHT_MAX, mWeight));
             final boolean italic = (mItalic == STYLE_ITALIC);
             final long builderPtr = nInitBuilder();
             if (mAxes != null) {

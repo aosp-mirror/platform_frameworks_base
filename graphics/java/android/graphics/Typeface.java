@@ -148,13 +148,7 @@ public class Typeface {
     @UnsupportedAppUsage
     private @Style int mStyle = 0;
 
-    /**
-     * A maximum value for the weight value.
-     * @hide
-     */
-    public static final int MAX_WEIGHT = 1000;
-
-    private @IntRange(from = 0, to = MAX_WEIGHT) int mWeight = 0;
+    private @IntRange(from = 0, to = android.graphics.fonts.Font.FONT_WEIGHT_MAX) int mWeight = 0;
 
     // Value for weight and italic. Indicates the value is resolved by font metadata.
     // Must be the same as the C++ constant in core/jni/android/graphics/FontFamily.cpp
