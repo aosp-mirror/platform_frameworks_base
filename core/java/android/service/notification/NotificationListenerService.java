@@ -91,6 +91,10 @@ import java.util.List;
  * notification listeners running in a work profile. A
  * {@link android.app.admin.DevicePolicyManager} might block notifications originating from a work
  * profile.</p>
+ * <p>
+ *     From {@link Build.VERSION_CODES#N} onward all callbacks are called on the main thread. Prior
+ *     to N, there is no guarantee on what thread the callback will happen.
+ * </p>
  */
 public abstract class NotificationListenerService extends Service {
 
