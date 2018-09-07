@@ -90,7 +90,7 @@ public final class CharSequenceTransformation extends InternalTransformation imp
             try {
                 final Matcher matcher = field.first.matcher(value);
                 if (!matcher.find()) {
-                    if (sDebug) Log.d(TAG, "match for " + field.first + " failed on id " + id);
+                    if (sDebug) Log.d(TAG, "Match for " + field.first + " failed on id " + id);
                     return;
                 }
                 // replaceAll throws an exception if the subst is invalid
@@ -103,6 +103,9 @@ public final class CharSequenceTransformation extends InternalTransformation imp
                 throw e;
             }
         }
+        // Cannot log converted, it might have PII
+        Log.d(TAG, "Converting text on child " + childViewId + " to " + converted.length()
+                + "_chars");
         parentTemplate.setCharSequence(childViewId, "setText", converted);
     }
 
