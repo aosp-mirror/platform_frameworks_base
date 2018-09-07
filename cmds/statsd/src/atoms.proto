@@ -734,7 +734,7 @@ message WifiRadioPowerStateChanged {
  * Logs kernel wakeup reasons and aborts.
  *
  * Logged from:
- *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message KernelWakeupReported {
     // Name of the kernel wakeup reason (or abort).
