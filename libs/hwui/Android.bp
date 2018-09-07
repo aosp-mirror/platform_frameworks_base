@@ -196,7 +196,6 @@ cc_defaults {
         "utils/GLUtils.cpp",
         "utils/LinearAllocator.cpp",
         "utils/StringUtils.cpp",
-        "utils/TestWindowContext.cpp",
         "utils/VectorDrawableUtils.cpp",
         "AnimationContext.cpp",
         "Animator.cpp",
