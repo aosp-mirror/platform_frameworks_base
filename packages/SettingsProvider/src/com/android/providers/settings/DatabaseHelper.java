@@ -2628,6 +2628,9 @@ class DatabaseHelper extends SQLiteOpenHelper {
             loadIntegerSetting(stmt, Settings.Global.OTA_DISABLE_AUTOMATIC_UPDATE,
                     R.integer.def_ota_disable_automatic_update);
 
+            loadIntegerSetting(stmt, Global.DEVELOPMENT_SETTINGS_ENABLED,
+                    R.integer.def_development_settings);
+
             /*
              * IMPORTANT: Do not add any more upgrade steps here as the global,
              * secure, and system settings are no longer stored in a database
