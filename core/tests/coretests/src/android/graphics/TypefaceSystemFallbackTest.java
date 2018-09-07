@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.graphics.fonts.Font;
 import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.SystemFonts;
 import android.support.test.InstrumentationRegistry;
@@ -43,6 +44,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.HashSet;
 import java.util.Locale;
 
 @SmallTest
@@ -110,13 +112,14 @@ public class TypefaceSystemFallbackTest {
 
     private static void buildSystemFallback(String xml,
             ArrayMap<String, Typeface> fontMap, ArrayMap<String, FontFamily[]> fallbackMap) {
+        final HashSet<Font> availableFonts = new HashSet<>();
         try (FileOutputStream fos = new FileOutputStream(TEST_FONTS_XML)) {
             fos.write(xml.getBytes(Charset.forName("UTF-8")));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         final FontConfig.Alias[] aliases = SystemFonts.buildSystemFallback(TEST_FONTS_XML,
-                TEST_FONT_DIR, fallbackMap);
+                TEST_FONT_DIR, fallbackMap, availableFonts);
         Typeface.initSystemDefaultTypefaces(fontMap, fallbackMap, aliases);
     }
 
@@ -124,9 +127,10 @@ public class TypefaceSystemFallbackTest {
     public void testBuildSystemFallback() {
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
+        final HashSet<Font> availableFonts = new HashSet<>();
 
         final FontConfig.Alias[] aliases = SystemFonts.buildSystemFallback(SYSTEM_FONTS_XML,
-                SYSTEM_FONT_DIR, fallbackMap);
+                SYSTEM_FONT_DIR, fallbackMap, availableFonts);
 
         assertNotNull(aliases);
         assertFalse(fallbackMap.isEmpty());
@@ -487,7 +491,7 @@ public class TypefaceSystemFallbackTest {
                 + "  <family lang='de'>"
                 + "    <font weight='400' style='normal'>a3em.ttf</font>"
                 + "  </family>"
-                + "  <family lang='it fr'>"
+                + "  <family lang='it,fr'>"
                 + "    <font weight='400' style='normal'>b3em.ttf</font>"
                 + "  </family>"
                 + "</familyset>";
