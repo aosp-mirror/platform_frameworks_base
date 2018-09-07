@@ -154,6 +154,7 @@
                 style="@style/TextAppearance.NotificationInfo.Button" />
             <TextView
                 android:id="@+id/keep"
+                android:minWidth="48dp"
                 android:text="@string/inline_keep_button"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
