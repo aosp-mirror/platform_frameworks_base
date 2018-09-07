@@ -459,6 +459,13 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
                 mService.announceSystemAudioModeChange(newSystemAudioMode);
             }
         }
+        // Init arc whenever System Audio Mode is on
+        // Since some TV like LG don't request ARC on with System Audio Mode on request
+        if (newSystemAudioMode
+                && SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)
+                && !isArcEnabled() && isDirectConnectToTv()) {
+            addAndStartAction(new ArcInitiationActionFromAvr(this));
+        }
     }
 
     protected void switchToAudioInput() {
