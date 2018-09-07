@@ -36,6 +36,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -292,6 +294,12 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
             sharingIntent.setType("image/png");
             sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
+            // Include URI in ClipData also, so that grantPermission picks it up.
+            // We don't use setData here because some apps interpret this as "to:".
+            ClipData clipdata = new ClipData(new ClipDescription("content",
+                    new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}),
+                    new ClipData.Item(uri));
+            sharingIntent.setClipData(clipdata);
             sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
             sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
@@ -300,7 +308,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
             Intent sharingChooserIntent = Intent.createChooser(sharingIntent, null,
                     chooserAction.getIntentSender())
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
             // Create a share action for the notification
             PendingIntent shareAction = PendingIntent.getBroadcastAsUser(context, 0,
