@@ -143,7 +143,8 @@
         <activity android:name="com.android.server.pm.BaseShortcutManagerTest$ShortcutActivity2" />
         <activity android:name="com.android.server.pm.BaseShortcutManagerTest$ShortcutActivity3" />
 
-        <activity android:name="com.android.server.wm.ScreenDecorWindowTests$TestActivity" />
+        <activity android:name="com.android.server.wm.ScreenDecorWindowTests$TestActivity"
+                  android:showWhenLocked="true"/>
 
         <activity android:name="com.android.server.pm.ShortcutTestActivity"
                  android:enabled="true" android:exported="true" />
