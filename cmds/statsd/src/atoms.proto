@@ -130,6 +130,7 @@ message Atom {
         GenericAtom generic_atom = 82;
         KeyValuePairsAtom key_value_pairs_atom = 83;
         VibratorStateChanged vibrator_state_changed = 84;
+        DeferredJobStatsReported deferred_job_stats_reported = 85;
     }
 
     // Pulled events will start at field 10000.
@@ -467,6 +468,22 @@ message SyncStateChanged {
         ON = 1;
     }
     optional State state = 3;
+}
+
+/*
+ * Deferred job stats.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/job/JobSchedulerService.java
+*/
+message DeferredJobStatsReported {
+    repeated AttributionNode attribution_node = 1;
+
+    // Number of jobs deferred.
+    optional int32 num_jobs_deferred = 2;
+
+    // Time since the last job runs.
+    optional int64 time_since_last_job_millis = 3;
 }
 
 /**
