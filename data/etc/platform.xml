@@ -182,11 +182,11 @@
          code to link against. -->
 
     <library name="android.test.base"
-            file="/system/framework/android.test.base.jar" />
+            file="/system/framework/android.test.base.impl.jar" />
     <library name="android.test.mock"
-            file="/system/framework/android.test.mock.jar" />
+            file="/system/framework/android.test.mock.impl.jar" />
     <library name="android.test.runner"
-            file="/system/framework/android.test.runner.jar" />
+            file="/system/framework/android.test.runner.impl.jar" />
 
     <!-- These are the standard packages that are white-listed to always have internet
          access while in power save mode, even if they aren't in the foreground. -->
