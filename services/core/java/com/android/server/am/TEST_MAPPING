@@ -49,6 +49,20 @@
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
+    },
+    {
+      "name": "WmTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.am."
+        },
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
     }
   ],
   "postsubmit": [
@@ -60,6 +74,14 @@
     },
     {
       "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.am."
+        }
+      ]
+    },
+    {
+      "name": "WmTests",
       "options": [
         {
           "include-filter": "com.android.server.am."
