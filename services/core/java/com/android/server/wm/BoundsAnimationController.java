@@ -26,9 +26,9 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Debug;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.Choreographer;
@@ -36,8 +36,8 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
-
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -178,7 +178,7 @@ public class BoundsAnimationController {
         BoundsAnimator(BoundsAnimationTarget target, Rect from, Rect to,
                 @SchedulePipModeChangedState int schedulePipModeChangedState,
                 @SchedulePipModeChangedState int prevShedulePipModeChangedState,
-                boolean moveFromFullscreen, boolean moveToFullscreen) {
+                boolean moveFromFullscreen, boolean moveToFullscreen, Rect frozenTask) {
             super();
             mTarget = target;
             mFrom.set(from);
@@ -198,8 +198,8 @@ public class BoundsAnimationController {
                 mFrozenTaskWidth = mTo.width();
                 mFrozenTaskHeight = mTo.height();
             } else {
-                mFrozenTaskWidth = mFrom.width();
-                mFrozenTaskHeight = mFrom.height();
+                mFrozenTaskWidth = frozenTask.isEmpty() ? mFrom.width() : frozenTask.width();
+                mFrozenTaskHeight = frozenTask.isEmpty() ? mFrom.height() : frozenTask.height();
             }
         }
 
@@ -425,6 +425,7 @@ public class BoundsAnimationController {
                 + " schedulePipModeChangedState=" + schedulePipModeChangedState
                 + " replacing=" + replacing);
 
+        Rect frozenTask = new Rect();
         if (replacing) {
             if (existing.isAnimatingTo(to) && (!moveToFullscreen || existing.mMoveToFullscreen)
                     && (!moveFromFullscreen || existing.mMoveFromFullscreen)) {
@@ -467,12 +468,17 @@ public class BoundsAnimationController {
                 moveFromFullscreen = existing.mMoveFromFullscreen;
             }
 
+            // We are in the middle of an existing animation, so that this new animation may
+            // start from an interpolated bounds. We should keep using the existing frozen task
+            // width/height for consistent configurations.
+            frozenTask.set(0, 0, existing.mFrozenTaskWidth, existing.mFrozenTaskHeight);
+
             // Since we are replacing, we skip both animation start and end callbacks
             existing.cancel();
         }
         final BoundsAnimator animator = new BoundsAnimator(target, from, to,
                 schedulePipModeChangedState, prevSchedulePipModeChangedState,
-                moveFromFullscreen, moveToFullscreen);
+                moveFromFullscreen, moveToFullscreen, frozenTask);
         mRunningAnimations.put(target, animator);
         animator.setFloatValues(0f, 1f);
         animator.setDuration((animationDuration != -1 ? animationDuration
