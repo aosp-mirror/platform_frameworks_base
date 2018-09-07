@@ -1062,7 +1062,8 @@ class WindowStateAnimator {
         // comes in at the new size (normally position and crop are unfrozen).
         // setGeometryAppliesWithResizeInTransaction accomplishes this for us.
         if (wasForceScaled && !mForceScaleUntilResize) {
-            mSurfaceController.setGeometryAppliesWithResizeInTransaction(true);
+            mSurfaceController.deferTransactionUntil(mSurfaceController.getHandle(),
+                    mWin.getFrameNumber());
             mSurfaceController.forceScaleableInTransaction(false);
         }
 
