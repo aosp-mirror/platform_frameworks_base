@@ -4574,6 +4574,8 @@
         <attr name="letterSpacing" format="float" />
         <!-- Font feature settings. -->
         <attr name="fontFeatureSettings" format="string" />
+        <!-- Font variation settings. -->
+        <attr name="fontVariationSettings" format="string"/>
     </declare-styleable>
     <declare-styleable name="TextClock">
         <!-- Specifies the formatting pattern used to show the time and/or date
@@ -4922,6 +4924,8 @@
         <attr name="letterSpacing" />
         <!-- Font feature settings. -->
         <attr name="fontFeatureSettings" />
+        <!-- Font variation settings. -->
+        <attr name="fontVariationSettings" />
         <!-- Break strategy (control over paragraph layout). -->
         <attr name="breakStrategy">
             <!-- Line breaking uses simple strategy. -->
