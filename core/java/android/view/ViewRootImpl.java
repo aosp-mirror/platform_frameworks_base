@@ -81,6 +81,7 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.view.Surface.OutOfResourcesException;
+import android.view.SurfaceControl.Transaction;
 import android.view.ThreadedRenderer.FrameDrawingCallback;
 import android.view.View.AttachInfo;
 import android.view.View.FocusDirection;
@@ -342,6 +343,7 @@ public final class ViewRootImpl implements ViewParent,
 
     final Rect mTempRect; // used in the transaction to not thrash the heap.
     final Rect mVisRect; // used to retrieve visible rect of focused view.
+    private final Rect mTempBoundsRect = new Rect(); // used to set the size of the bounds surface.
 
     // This is used to reduce the race between window focus changes being dispatched from
     // the window manager and input events coming through the input system.
@@ -403,6 +405,18 @@ public final class ViewRootImpl implements ViewParent,
     // Surface can never be reassigned or cleared (use Surface.clear()).
     @UnsupportedAppUsage
     public final Surface mSurface = new Surface();
+
+    /**
+     * Child surface of {@code mSurface} with the same bounds as its parent, and crop bounds
+     * are set to the parent's bounds adjusted for surface insets. This surface is created when
+     * {@link ViewRootImpl#createBoundsSurface(int)} is called.
+     * By parenting to this bounds surface, child surfaces can ensure they do not draw into the
+     * surface inset regions set by the parent window.
+     */
+    public final Surface mBoundsSurface = new Surface();
+    private SurfaceSession mSurfaceSession;
+    private SurfaceControl mBoundsSurfaceControl;
+    private final Transaction mTransaction = new Transaction();
 
     @UnsupportedAppUsage
     boolean mAdded;
@@ -1390,8 +1404,75 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             if (mStopped) {
-                mSurface.release();
+                destroySurface();
             }
+        }
+    }
+
+    /**
+     * Creates a surface as a child of {@code mSurface} with the same bounds as its parent and
+     * crop bounds set to the parent's bounds adjusted for surface insets.
+     *
+     * @param zOrderLayer Z order relative to the parent surface.
+     */
+    public void createBoundsSurface(int zOrderLayer) {
+        if (mSurfaceSession == null) {
+            mSurfaceSession = new SurfaceSession(mSurface);
+        }
+        if (mBoundsSurfaceControl != null && mBoundsSurface.isValid()) {
+            return; // surface control for bounds surface already exists.
+        }
+
+        mBoundsSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
+                .setName("Bounds for - " + getTitle().toString())
+                .setSize(mWidth, mHeight)
+                .build();
+
+        setBoundsSurfaceSizeAndCrop();
+        mTransaction.setLayer(mBoundsSurfaceControl, zOrderLayer)
+                    .show(mBoundsSurfaceControl)
+                    .apply();
+        mBoundsSurface.copyFrom(mBoundsSurfaceControl);
+    }
+
+    private void setBoundsSurfaceSizeAndCrop() {
+        // mWinFrame is already adjusted for surface insets. So offset it and use it as
+        // the cropping bounds.
+        mTempBoundsRect.set(mWinFrame);
+        mTempBoundsRect.offsetTo(mWindowAttributes.surfaceInsets.left,
+                mWindowAttributes.surfaceInsets.top);
+        mTransaction.setWindowCrop(mBoundsSurfaceControl, mTempBoundsRect);
+
+        // Expand the bounds by the surface insets to get the size of surface.
+        mTempBoundsRect.inset(-mWindowAttributes.surfaceInsets.left,
+                -mWindowAttributes.surfaceInsets.top,
+                -mWindowAttributes.surfaceInsets.right,
+                -mWindowAttributes.surfaceInsets.bottom);
+        mTransaction.setSize(mBoundsSurfaceControl, mTempBoundsRect.width(),
+                mTempBoundsRect.height());
+    }
+
+    /**
+     * Called after window layout to update the bounds surface. If the surface insets have
+     * changed or the surface has resized, update the bounds surface.
+     */
+    private void updateBoundsSurface() {
+        if (mBoundsSurfaceControl != null && mSurface.isValid()) {
+            setBoundsSurfaceSizeAndCrop();
+            mTransaction.deferTransactionUntilSurface(mBoundsSurfaceControl,
+                    mSurface, mSurface.getNextFrameNumber())
+                    .apply();
+        }
+    }
+
+    private void destroySurface() {
+        mSurface.release();
+        mSurfaceSession = null;
+
+        if (mBoundsSurfaceControl != null) {
+            mBoundsSurfaceControl.destroy();
+            mBoundsSurface.release();
+            mBoundsSurfaceControl = null;
         }
     }
 
@@ -2348,6 +2429,10 @@ public final class ViewRootImpl implements ViewParent,
             // the window manager tells us only for the new frame but the insets are the
             // same and we do not want to translate them more than once.
             maybeHandleWindowMove(frame);
+        }
+
+        if (surfaceChanged) {
+            updateBoundsSurface();
         }
 
         final boolean didLayout = layoutRequested && (!mStopped || mReportNextDraw);
@@ -3860,7 +3945,7 @@ public final class ViewRootImpl implements ViewParent,
         mView = null;
         mAttachInfo.mRootView = null;
 
-        mSurface.release();
+        destroySurface();
 
         if (mInputQueueCallback != null && mInputQueue != null) {
             mInputQueueCallback.onInputQueueDestroyed(mInputQueue);
@@ -6809,7 +6894,7 @@ public final class ViewRootImpl implements ViewParent,
                         }
                     }
 
-                    mSurface.release();
+                    destroySurface();
                 }
             }
 
