@@ -415,7 +415,6 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"ବୃହତ୍ତମ"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"ବୃହତ୍ତମ"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"କଷ୍ଟମ୍‌ (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
-    <string name="help_feedback_label" msgid="6815040660801785649">"ସହାୟତା ଓ ମତାମତ"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"ମେନୁ"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"ଡେମୋ ମୋଡ୍‌ରେ ଫ୍ୟାକ୍ଟୋରୀ ରିସେଟ୍‌ କରିବାକୁ ପାସ୍‌ୱାର୍ଡ ଲେଖନ୍ତୁ"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"ପରବର୍ତ୍ତୀ"</string>
