@@ -31,8 +31,6 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager.SmartReplyH
 
 import com.google.android.collect.Sets;
 
-import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -130,7 +128,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
 
     @Test
     public void testNotificationWithRemoteInputActiveIsRemovedOnCollapse() {
-        mRemoteInputActiveExtender.setShouldExtendLifetime(mEntry, true);
+        mRemoteInputActiveExtender.setShouldManageLifetime(mEntry, true /* shouldManage */);
 
         assertEquals(mRemoteInputManager.getEntriesKeptForRemoteInputActive(),
                 Sets.newArraySet(mEntry));

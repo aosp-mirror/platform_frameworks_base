@@ -248,7 +248,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
     }
 
     @Override
-    public void setShouldExtendLifetime(NotificationData.Entry entry, boolean shouldExtend) {
+    public void setShouldManageLifetime(NotificationData.Entry entry, boolean shouldExtend) {
         if (shouldExtend) {
             mExtendedLifetimeAlertEntries.add(entry);
         } else {

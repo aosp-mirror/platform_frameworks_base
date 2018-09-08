@@ -418,7 +418,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     }
 
     @Override
-    public void setShouldExtendLifetime(NotificationData.Entry entry, boolean shouldExtend) {
+    public void setShouldManageLifetime(NotificationData.Entry entry, boolean shouldExtend) {
         if (shouldExtend) {
             mKeyToRemoveOnGutsClosed = entry.key;
             if (Log.isLoggable(TAG, Log.DEBUG)) {
