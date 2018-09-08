@@ -514,6 +514,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"यसले अनुप्रयोगलाई तपाईंको तस्बिरको सङ्ग्रह परिमार्जन गर्न दिन्छ।"</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"आफ्नो मिडियाको सङ्ग्रहका स्थानहरू पढ्नुहोस्‌"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"यसले अनुप्रयोगलाई तपाईंको मिडिया सङ्ग्रहका स्थानहरू पढ्न दिन्छ।"</string>
+    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"बायोमेट्रिक हार्डवेयर उपलब्ध छैन"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"आंशिक औठाछाप पत्ता लाग्यो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"औठाछाप प्रशोधन गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"औँठाछाप सेन्सर फोहोर छ। कृपया सफा गरेर फेरि प्रयास गर्नुहोस्।"</string>
@@ -521,7 +522,7 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"औंला निकै सुस्त सारियो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"चिनिएको छैन"</string>
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"पहिचान भएन"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"फिंगरप्रिन्ट प्रमाणीकरण गरियो"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"औँठाछाप हार्डवेयर उपलब्ध छैन।"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"औँठाछाप भण्डारण गर्न सकिँदैन। कृपया अवस्थित औठाछाप हटाउनुहोस्।"</string>

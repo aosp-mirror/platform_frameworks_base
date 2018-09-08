@@ -253,7 +253,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Alertes réseau"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Réseau accessible"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"État du RPV"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administration d\'appareils"</string>
+    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Gestion de l\'appareil"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertes"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Démo en magasin"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Connexion USB"</string>
@@ -514,6 +514,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Autorise l\'application à modifier votre collection de photos."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"lire les positions issues de votre collection multimédia"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Autorise l\'application à lire les positions indiquées dans votre collection multimédia."</string>
+    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Matériel biométrique indisponible"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Empreinte digitale partielle détectée. Veuillez essayer de nouveau."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossible de traiter les empreintes digitales. Veuillez essayer de nouveau."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Le capteur d\'empreintes digitales est sale. Veuillez le nettoyer et essayer de nouveau."</string>
@@ -521,7 +522,7 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Vous avez déplacé votre doigt trop lentement. Veuillez réessayer."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Doigt non reconnu"</string>
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"Données biométriques non reconnues"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Empreinte digitale authentifiée"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Matériel d\'empreinte numérique indisponible."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"L\'empreinte digitale ne peut pas être enregistrée. Veuillez supprimer une empreinte existante."</string>

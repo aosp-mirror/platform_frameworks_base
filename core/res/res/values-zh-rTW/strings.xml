@@ -514,6 +514,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"允許應用程式修改你的相片收藏。"</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"讀取你的媒體收藏的位置資訊"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"允許應用程式讀取你的媒體收藏的位置資訊。"</string>
+    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"找不到生物特徵辨識硬體"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"僅偵測到部分指紋，請再試一次。"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"無法處理指紋，請再試一次。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"指紋感應器有髒汙。請清潔感應器，然後再試一次。"</string>
@@ -521,7 +522,7 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"手指移動速度過慢，請再試一次。"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"無法識別"</string>
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"無法辨識"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"指紋驗證成功"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"指紋硬體無法使用。"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"無法儲存指紋，請先移除現有指紋。"</string>

@@ -514,6 +514,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Permite que a aplicación modifique a túa colección de fotos."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"ler localizacións da túa colección multimedia"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Permite que a aplicación lea as localizacións da túa colección multimedia."</string>
+    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"O hardware biométrico non está dispoñible"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Detectouse unha impresión dixital parcial. Téntao de novo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Non se puido procesar a impresión dixital. Téntao de novo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"O sensor de impresión dixital está sucio. Límpao e téntao de novo."</string>
@@ -521,7 +522,7 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"O dedo moveuse demasiado lento. Téntao de novo."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Non se recoñece"</string>
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"Non se recoñeceu"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Autenticouse a impresión dixital"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardware de impresión dixital non dispoñible."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Non se pode almacenar a impresión dixital. Elimina unha impresión dixital existente."</string>
@@ -1891,8 +1892,8 @@
     </plurals>
     <string name="autofill_save_title" msgid="3345527308992082601">"Queres gardar o contido en: &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Queres gardar <xliff:g id="TYPE">%1$s</xliff:g> en: &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Queres gardar <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> en: &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Queres gardar <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g> en: &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Queres gardar estes datos (<xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g>) en &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Queres gardar estes datos (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g>) en &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_update_title" msgid="4879673117448810818">"Queres actualizar &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; con estes datos?"</string>
     <string name="autofill_update_title_with_type" msgid="339733442087186755">"Queres actualizar &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; con estes datos (<xliff:g id="TYPE">%1$s</xliff:g>)?"</string>
     <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Queres actualizar &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; con estes datos (<xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g>)?"</string>

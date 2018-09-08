@@ -300,18 +300,12 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"शरीर संवेदक"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"अपने महत्वपूर्ण संकेतों के बारे में सेंसर डेटा को ऐक्सेस करें"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपने स्वास्थ्य से जुड़ी ज़रूरी जानकारी इस्तेमाल करने की अनुमति देना चाहते हैं?"</string>
-    <!-- no translation found for permgrouplab_aural (965607064083134896) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_aural (4870189506255958055) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_aural (6787926123071735620) -->
-    <skip />
-    <!-- no translation found for permgrouplab_visual (8030190588123857921) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_visual (3415827902566663546) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_visual (6907523945030290376) -->
-    <skip />
+    <string name="permgrouplab_aural" msgid="965607064083134896">"संगीत"</string>
+    <string name="permgroupdesc_aural" msgid="4870189506255958055">"अपना संगीत संग्रह एक्सेस करने दें"</string>
+    <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपना संगीत एक्सेस करने दें?"</string>
+    <string name="permgrouplab_visual" msgid="8030190588123857921">"फ़ोटो और वीडियो"</string>
+    <string name="permgroupdesc_visual" msgid="3415827902566663546">"अपने फ़ोटो और वीडियो एक्सेस करने दें"</string>
+    <string name="permgrouprequest_visual" msgid="6907523945030290376">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपने फ़ोटो और वीडियो एक्सेस करने दें?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विंडो की सामग्री वापस पाएं"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"उस विंडो की सामग्री की जाँच करें, जिसका आप इस्तेमाल कर रहे हैं."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"छूकर, किसी चीज़ से जुड़ी जानकारी सुनने की सुविधा चालू करें"</string>
@@ -506,33 +500,21 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"उंगली की छाप वाले टेम्पलेट का उपयोग करने के लिए जोड़ने और हटाने हेतु ऐप को विधियां प्रारंभ करने देती है."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"उंगली की छाप के लिए हार्डवेयर का उपयोग करें"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ऐप के प्रमाणीकरण के लिए उंगली की छाप हार्डवेयर का उपयोग करने देती है"</string>
-    <!-- no translation found for permlab_audioRead (6617225220728465565) -->
-    <skip />
-    <!-- no translation found for permdesc_audioRead (5034032570243484805) -->
-    <skip />
-    <!-- no translation found for permlab_audioWrite (2661772059799779292) -->
-    <skip />
-    <!-- no translation found for permdesc_audioWrite (8888544708166230494) -->
-    <skip />
-    <!-- no translation found for permlab_videoRead (9182618678674737229) -->
-    <skip />
-    <!-- no translation found for permdesc_videoRead (7045676429859396194) -->
-    <skip />
-    <!-- no translation found for permlab_videoWrite (128769316366746446) -->
-    <skip />
-    <!-- no translation found for permdesc_videoWrite (5448565757490640841) -->
-    <skip />
-    <!-- no translation found for permlab_imagesRead (3015078545742665304) -->
-    <skip />
-    <!-- no translation found for permdesc_imagesRead (3144263806038695580) -->
-    <skip />
-    <!-- no translation found for permlab_imagesWrite (3391306186247235510) -->
-    <skip />
-    <!-- no translation found for permdesc_imagesWrite (7073662756617474375) -->
-    <skip />
-    <!-- no translation found for permlab_mediaLocation (8675148183726247864) -->
-    <skip />
-    <!-- no translation found for permdesc_mediaLocation (2237023389178865130) -->
+    <string name="permlab_audioRead" msgid="6617225220728465565">"अपना संगीत संग्रह एक्सेस करने की अनुमति दें"</string>
+    <string name="permdesc_audioRead" msgid="5034032570243484805">"इससे ऐप्लिकेशन को आपके संगीत संग्रह को एक्सेस करने की मंज़ूरी दी जाती है."</string>
+    <string name="permlab_audioWrite" msgid="2661772059799779292">"अपने संगीत संग्रह में बदलाव करने की अनुमति दें"</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"इससे ऐप्लिकेशन को आपके संगीत संग्रह में बदलाव करने की मंज़ूरी दी जाती है"</string>
+    <string name="permlab_videoRead" msgid="9182618678674737229">"अपना वीडियो संग्रह एक्सेस करने की अनुमति दें"</string>
+    <string name="permdesc_videoRead" msgid="7045676429859396194">"इससे ऐप्लिकेशन को आपके वीडियो संग्रह को एक्सेस करने की मंज़ूरी दी जाती है."</string>
+    <string name="permlab_videoWrite" msgid="128769316366746446">"अपने वीडियो संग्रह में बदलाव करने की अनुमति दें"</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"इससे ऐप्लिकेशन को आपके वीडियो संग्रह में बदलाव करने की मंज़ूरी दी जाती है."</string>
+    <string name="permlab_imagesRead" msgid="3015078545742665304">"अपना फ़ोटो संग्रह एक्सेस करने की अनुमति दें"</string>
+    <string name="permdesc_imagesRead" msgid="3144263806038695580">"इससे ऐप्लिकेशन को आपके फ़ोटो संग्रह को एक्सेस करने की मंज़ूरी दी जाती है."</string>
+    <string name="permlab_imagesWrite" msgid="3391306186247235510">"अपने फ़ोटो संग्रह में बदलाव करने की अनुमति दें"</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"इससे ऐप्लिकेशन को आपके फ़ोटो संग्रह में बदलाव करने की मंज़ूरी दी जाती है."</string>
+    <string name="permlab_mediaLocation" msgid="8675148183726247864">"अपने मीडिया संग्रह से जगह की जानकारी एक्सेस करने की अनुमति दें"</string>
+    <string name="permdesc_mediaLocation" msgid="2237023389178865130">"इससे ऐप्लिकेशन को आपके मीडिया संग्रह से जगह की जानकारी एक्सेस करने की अनुमति दी जाती है."</string>
+    <!-- no translation found for biometric_error_hw_unavailable (645781226537551036) -->
     <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"आंशिक फ़िंगरप्रिंट की पहचान की गई. कृपया पुनः प्रयास करें."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"फ़िंगरप्रिंट संसाधित नहीं हो सका. कृपया पुन: प्रयास करें."</string>
@@ -541,7 +523,8 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"उंगली बहुत धीरे चलाई गई. कृपया फिर से कोशिश करें."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"पहचाना नहीं गया"</string>
+    <!-- no translation found for biometric_not_recognized (5770511773560736082) -->
+    <skip />
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"फ़िंगरप्रिंट की पुष्टि हो गई"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"फ़िंगरप्रिंट हार्डवेयर उपलब्ध नहीं है."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"फ़िंगरप्रिंट को संग्रहित नहीं किया जा सका. कृपया कोई मौजूदा फ़िंगरप्रिंट निकालें."</string>
@@ -1912,18 +1895,13 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> को &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; में सेव करें?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> और <xliff:g id="TYPE_1">%2$s</xliff:g> को &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; में सेव करें?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> और <xliff:g id="TYPE_2">%3$s</xliff:g> को &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; में सेव करें?"</string>
-    <!-- no translation found for autofill_update_title (4879673117448810818) -->
-    <skip />
-    <!-- no translation found for autofill_update_title_with_type (339733442087186755) -->
-    <skip />
-    <!-- no translation found for autofill_update_title_with_2types (6321714204167424745) -->
-    <skip />
-    <!-- no translation found for autofill_update_title_with_3types (5866735124066629287) -->
-    <skip />
+    <string name="autofill_update_title" msgid="4879673117448810818">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;? में अपडेट करें?"</string>
+    <string name="autofill_update_title_with_type" msgid="339733442087186755">"<xliff:g id="TYPE">%1$s</xliff:g> को to &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; में अपडेट करें?"</string>
+    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"<xliff:g id="TYPE_0">%1$s</xliff:g> और <xliff:g id="TYPE_1">%2$s</xliff:g> को &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; में अपडेट करें?"</string>
+    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> और <xliff:g id="TYPE_2">%3$s</xliff:g> को &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; में अपडेट करें."</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"सेव करें"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"नहीं, धन्यवाद"</string>
-    <!-- no translation found for autofill_update_yes (310358413273276958) -->
-    <skip />
+    <string name="autofill_update_yes" msgid="310358413273276958">"अपडेट करें"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"पासवर्ड"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"पता"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"क्रेडिट कार्ड"</string>

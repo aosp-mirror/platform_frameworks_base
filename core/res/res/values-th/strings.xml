@@ -514,6 +514,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"อนุญาตให้แอปแก้ไขคอลเล็กชันรูปภาพของคุณ"</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"อ่านตำแหน่งจากคอลเล็กชันสื่อของคุณ"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"อนุญาตให้แอปอ่านตำแหน่งจากคอลเล็กชันสื่อของคุณ"</string>
+    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"ฮาร์ดแวร์ไบโอเมตริกไม่พร้อมใช้งาน"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ตรวจพบลายนิ้วมือเพียงบางส่วน โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ไม่สามารถประมวลผลลายนิ้วมือได้ โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"เซ็นเซอร์ลายนิ้วมือไม่สะอาด โปรดทำความสะอาดและลองอีกครั้ง"</string>
@@ -521,7 +522,7 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"นิ้วเคลื่อนที่ช้าเกินไป โปรดลองอีกครั้ง"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"ไม่รู้จัก"</string>
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"ไม่รู้จัก"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"ตรวจสอบสิทธิ์ลายนิ้วมือแล้ว"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ฮาร์ดแวร์ลายนิ้วมือไม่พร้อมใช้งาน"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ไม่สามารถเก็บลายนิ้วมือได้ โปรดนำลายนิ้วมือที่มีอยู่ออก"</string>
@@ -1509,7 +1510,7 @@
     <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"เกินปริมาณเน็ตมือถือที่กำหนดไว้"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"เกินขีดจำกัดของข้อมูล Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"คุณใช้อินเทอร์เน็ตเกินไป <xliff:g id="SIZE">%s</xliff:g> จากปริมาณที่กำหนดไว้"</string>
-    <string name="data_usage_restricted_title" msgid="5965157361036321914">"จำกัดข้อมูลแบ็กกราวด์"</string>
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"จำกัดอินเทอร์เน็ตที่ใช้งานอยู่เบื้องหลัง"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"แตะเพื่อนำข้อจำกัดออก"</string>
     <string name="data_usage_rapid_title" msgid="1809795402975261331">"ปริมาณการใช้เน็ตมือถือสูง"</string>
     <string name="data_usage_rapid_body" msgid="6897825788682442715">"แอปของคุณใช้อินเทอร์เน็ตมากกว่าปกติ"</string>
