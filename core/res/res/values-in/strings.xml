@@ -514,6 +514,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Mengizinkan aplikasi untuk memodifikasi koleksi foto Anda."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"membaca lokasi dari koleksi media Anda"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Mengizinkan aplikasi untuk membaca lokasi dari koleksi media Anda."</string>
+    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Hardware biometrik tidak tersedia"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Sebagian sidik jari terdeteksi. Coba lagi."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Tidak dapat memproses sidik jari. Coba lagi."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Sensor sidik jari kotor. Bersihkan dan coba lagi."</string>
@@ -521,7 +522,7 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Jari digerakkan terlalu lambat. Coba lagi."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Tidak dikenali"</string>
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"Tidak dikenali"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Sidik jari diautentikasi"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardware sidik jari tidak tersedia."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Sidik jari tidak dapat disimpan. Hapus sidik jari yang ada."</string>

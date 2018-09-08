@@ -514,6 +514,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Pinapayagan ang app na baguhin ang iyong koleksyon ng larawan."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"basahin ang mga lokasyon mula sa iyong koleksyon ng media"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Pinapayagan ang app na basahin ang mga lokasyon mula sa iyong koleksyon ng media."</string>
+    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Walang biometric hardware"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Hindi buo ang natukoy na fingerprint. Pakisubukang muli."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Hindi maproseso ang fingerprint. Pakisubukang muli."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Marumi ang sensor ng fingerprint. Pakilinis at subukang muli."</string>
@@ -521,7 +522,7 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Masyadong mabagal ang paggalaw ng daliri. Pakisubukang muli."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Hindi nakilala"</string>
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"Hindi nakilala"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Na-authenticate ang fingerprint"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hindi available ang hardware na ginagamitan ng fingerprint."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Hindi maiimbak ang fingerprint. Mangyaring mag-alis ng umiiral nang fingerprint."</string>

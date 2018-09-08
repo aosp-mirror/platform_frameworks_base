@@ -520,6 +520,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Приложение сможет вносить изменения в вашу фотоколлекцию."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"доступ к геоданным в медиаколлекции"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Приложение получит доступ к геоданным в вашей медиаколлекции."</string>
+    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Биометрическое оборудование недоступно"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Отсканирована только часть пальца. Повторите попытку."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Не удалось распознать отпечаток. Повторите попытку."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Очистите сканер и повторите попытку."</string>
@@ -527,7 +528,7 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Вы перемещали палец слишком медленно. Повторите попытку."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Не распознано"</string>
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"Не распознано"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Отпечаток пальца проверен"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Сканер недоступен"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Чтобы сохранить новый отпечаток, удалите существующий."</string>
