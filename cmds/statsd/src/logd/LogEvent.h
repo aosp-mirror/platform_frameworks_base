@@ -119,6 +119,9 @@ public:
     bool write(float value);
     bool write(const std::vector<AttributionNodeInternal>& nodes);
     bool write(const AttributionNodeInternal& node);
+    bool writeKeyValuePairs(const std::map<int32_t, int64_t>& int_map,
+                            const std::map<int32_t, std::string>& string_map,
+                            const std::map<int32_t, float>& float_map);
 
     /**
      * Return a string representation of this event.
