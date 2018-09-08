@@ -399,7 +399,7 @@ public abstract class AccessibilityService extends Service {
     @IntDef(prefix = { "SHOW_MODE_" }, value = {
             SHOW_MODE_AUTO,
             SHOW_MODE_HIDDEN,
-            SHOW_MODE_WITH_HARD_KEYBOARD
+            SHOW_MODE_IGNORE_HARD_KEYBOARD
     })
     public @interface SoftKeyboardShowMode {}
 
@@ -419,7 +419,7 @@ public abstract class AccessibilityService extends Service {
      * Allow the soft keyboard to be shown, even if a hard keyboard is connected
      * @see SoftKeyboardController
      */
-    public static final int SHOW_MODE_WITH_HARD_KEYBOARD = 2;
+    public static final int SHOW_MODE_IGNORE_HARD_KEYBOARD = 2;
 
     /**
      * Mask used to cover the show modes supported in public API
@@ -1205,7 +1205,7 @@ public abstract class AccessibilityService extends Service {
      *
      * @see AccessibilityService#SHOW_MODE_AUTO
      * @see AccessibilityService#SHOW_MODE_HIDDEN
-     * @see AccessibilityService#SHOW_MODE_WITH_HARD_KEYBOARD
+     * @see AccessibilityService#SHOW_MODE_IGNORE_HARD_KEYBOARD
      */
     public static final class SoftKeyboardController {
         private final AccessibilityService mService;
@@ -1354,7 +1354,7 @@ public abstract class AccessibilityService extends Service {
          *
          * @see AccessibilityService#SHOW_MODE_AUTO
          * @see AccessibilityService#SHOW_MODE_HIDDEN
-         * @see AccessibilityService#SHOW_MODE_WITH_HARD_KEYBOARD
+         * @see AccessibilityService#SHOW_MODE_IGNORE_HARD_KEYBOARD
          */
         @SoftKeyboardShowMode
         public int getShowMode() {
@@ -1384,7 +1384,7 @@ public abstract class AccessibilityService extends Service {
          *
          * @see AccessibilityService#SHOW_MODE_AUTO
          * @see AccessibilityService#SHOW_MODE_HIDDEN
-         * @see AccessibilityService#SHOW_MODE_WITH_HARD_KEYBOARD
+         * @see AccessibilityService#SHOW_MODE_IGNORE_HARD_KEYBOARD
          */
         public boolean setShowMode(@SoftKeyboardShowMode int showMode) {
            final IAccessibilityServiceConnection connection =
