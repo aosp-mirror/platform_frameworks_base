@@ -428,9 +428,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"LOGI KASUTAJA VÄLJA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Kas lisada uus kasutaja?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Kui lisate uue kasutaja, siis peab ta seadistama oma ruumi.\n\nIga kasutaja saab värskendada rakendusi kõigi kasutajate jaoks."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Kasutajate limiit on täis"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">Võite lisada kuni <xliff:g id="COUNT">%d</xliff:g> kasutajat.</item>
+      <item quantity="one">Luua saab ainult ühe kasutaja.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Kas eemaldada kasutaja?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Kasutaja kõik rakendused ja andmed kustutatakse."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Eemalda"</string>
@@ -734,8 +736,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Vasak ikoon"</string>
     <string name="right_icon" msgid="3952104823293824311">"Parem ikoon"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Paanide lisamiseks hoidke all ja lohistage"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Paanide ümberpaigutamiseks hoidke neid all ja lohistage"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Lohistage eemaldamiseks siia"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Teil on vaja vähemalt kuut paani"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Muutmine"</string>

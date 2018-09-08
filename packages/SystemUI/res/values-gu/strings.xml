@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"વપરાશકર્તાને લૉગઆઉટ કરો"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"નવા વપરાશકર્તાને ઉમેરીએ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"જ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમનું સ્થાન સેટ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા બધા અન્ય વપરાશકર્તાઓ માટે એપ્લિકેશન્સને અપડેટ કરી શકે છે."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"વપરાશકર્તા સંખ્યાની મર્યાદા"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="one">તમે <xliff:g id="COUNT">%d</xliff:g> વપરાશકર્તા સુધી ઉમેરી શકો છો.</item>
+      <item quantity="other">તમે <xliff:g id="COUNT">%d</xliff:g> વપરાશકર્તાઓ સુધી ઉમેરી શકો છો.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"વપરાશકર્તાને દૂર કરીએ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"આ વપરાશકર્તાની તમામ ઍપ્લિકેશનો અને ડેટા કાઢી નાખવામાં આવશે."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"દૂર કરો"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"ડાબું આઇકન"</string>
     <string name="right_icon" msgid="3952104823293824311">"જમણું આઇકન"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"ટાઇલ ઉમેરવા માટે તેના પર આંગળી દબાવીને ખેંચો"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"ટાઇલને ફરીથી ગોઠવવા માટે આંગળી દબાવીને ખેંચો"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"દૂર કરવા માટે અહીં ખેંચો"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"તમને ઓછામાં ઓછી 6 ટાઇલની જરૂર છે"</string>
     <string name="qs_edit" msgid="2232596095725105230">"સંપાદિત કરો"</string>

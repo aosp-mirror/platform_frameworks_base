@@ -428,9 +428,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"사용자 로그아웃"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"새 사용자를 추가할까요?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"추가된 새로운 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자는 다른 사용자들을 위하여 앱을 업데이트할 수 있습니다."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"사용자 제한 도달"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">사용자를 <xliff:g id="COUNT">%d</xliff:g>명까지 추가할 수 있습니다.</item>
+      <item quantity="one">사용자를 한 명만 만들 수 있습니다.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"사용자를 삭제할까요?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"이 사용자의 모든 앱과 데이터가 삭제됩니다."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"삭제"</string>
@@ -734,8 +736,7 @@
     <string name="left_icon" msgid="3096287125959387541">"왼쪽 아이콘"</string>
     <string name="right_icon" msgid="3952104823293824311">"오른쪽 아이콘"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"길게 터치하고 드래그하여 타일 추가"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"길게 터치하고 드래그하여 타일을 다시 정렬"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"여기로 드래그하여 삭제"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"6개 이상의 타일이 필요합니다."</string>
     <string name="qs_edit" msgid="2232596095725105230">"수정"</string>

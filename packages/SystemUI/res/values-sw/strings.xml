@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ONDOA MTUMIAJI"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Ungependa kuongeza mtumiaji?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Mtumiaji mpya utakayemwongeza atahitaji kuongeza akaunti yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa niaba ya wengine wote."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Umefikia kima cha juu cha watumiaji"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">Unaruhusiwa kuongeza hadi watumiaji <xliff:g id="COUNT">%d</xliff:g>.</item>
+      <item quantity="one">Unaruhusiwa kuongeza mtumiaji mmoja pekee.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Je, ungependa kuondoa mtumiaji?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Programu na data yote ya mtumiaji huyu itafutwa."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Ondoa"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Aikoni ya kushoto"</string>
     <string name="right_icon" msgid="3952104823293824311">"Aikoni ya kulia"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Shikilia na uburute ili uongeze vigae"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Shikilia na uburute ili upange vigae upya"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Buruta hapa ili uondoe"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Unahitaji angalau vigae 6"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Badilisha"</string>

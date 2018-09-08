@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ഉപയോക്താവിനെ ലോഗൗട്ട് ചെയ്യുക"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"പുതിയ ഉപയോക്താവിനെ ചേർക്കണോ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"നിങ്ങൾ ഒരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തിക്ക് അവരുടെ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\nമറ്റ് എല്ലാ ഉപയോക്താക്കൾക്കുമായി ഏതൊരു ഉപയോക്താവിനും അപ്ലിക്കേഷനുകൾ അപ്‌ഡേറ്റ് ചെയ്യാനാവും."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"ഉപയോക്തൃ പരിധി എത്തി"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">നിങ്ങൾക്ക് <xliff:g id="COUNT">%d</xliff:g> ഉപയോക്താക്കളെ വരെ ചേർക്കാനാവും.</item>
+      <item quantity="one">ഒരു ഉപയോക്താവിന് മാത്രമേ സൃഷ്‌ടിക്കാനാവൂ.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"ഉപയോക്താവിനെ ഇല്ലാതാക്കണോ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ഈ ഉപയോക്താവിന്റെ എല്ലാ ആപ്സും ഡാറ്റയും ഇല്ലാതാക്കും."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"നീക്കംചെയ്യുക"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"ഇടതുവശത്തെ ചിഹ്നം"</string>
     <string name="right_icon" msgid="3952104823293824311">"വലതുവശത്തെ ചിഹ്നം"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"ടൈലുകൾ ചേർക്കാൻ ക്ലിക്ക് ചെയ്ത് ഇഴയ്‌ക്കുക"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"ടൈലുകൾ പുനഃക്രമീകരിക്കാൻ അമർത്തിപ്പിടിച്ച് വലിച്ചിടുക"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"നീക്കംചെയ്യുന്നതിന് ഇവിടെ വലിച്ചിടുക"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"നിങ്ങൾക്ക് ചുരുങ്ങിയത് 6 ടൈലുകൾ വേണം"</string>
     <string name="qs_edit" msgid="2232596095725105230">"എഡിറ്റുചെയ്യുക"</string>

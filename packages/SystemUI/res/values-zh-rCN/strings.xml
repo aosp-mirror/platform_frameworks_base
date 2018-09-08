@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"退出当前用户"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"要添加新用户吗？"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"当您添加新用户时，该用户必须设置自己的空间。\n\n任何用户均可为其他所有用户更新应用。"</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"已达到用户数上限"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">您最多可以添加 <xliff:g id="COUNT">%d</xliff:g> 位用户。</item>
+      <item quantity="one">您只能创建一位用户。</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"是否移除用户？"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"此用户的所有应用和数据均将被删除。"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"移除"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"向左图标"</string>
     <string name="right_icon" msgid="3952104823293824311">"向右图标"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"按住并拖动即可添加图块"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"按住并拖动即可重新排列图块"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"拖动到此处即可移除"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"您至少需要 6 个图块"</string>
     <string name="qs_edit" msgid="2232596095725105230">"编辑"</string>

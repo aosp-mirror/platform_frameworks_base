@@ -209,7 +209,7 @@
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Təyyarə rejimi deaktiv edildi."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Təyyarə rejimi aktiv edildi."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"tam sakitlik"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"yalnız siqnallar"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"yalnız alarmlar"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Narahat etməyin."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Narahat etməyin\" qeyri-aktivdir."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Narahat etməyin\" aktivdir."</string>
@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"İSTİFADƏÇİ ÇIXIŞI"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Yeni istifadəçi əlavə edilsin?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Yeni istifadəçi əlavə etdiyiniz zaman həmin şəxs öz yerini quraşdırmalıdır. \n\n İstənilən istifadəçi bütün digər istifadəçilərdən olan tətbiqləri güncəlləşdirə bilər."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"İstifadəçi limitinə çatmısınız"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">Maksimum <xliff:g id="COUNT">%d</xliff:g> istifadəçi əlavə edə bilərsiniz.</item>
+      <item quantity="one">Yalnız bir istifadəçi yaradıla bilər.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"İstifadəçi silinsin?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Bu istifadəçinin bütün tətbiqləri və datası silinəcək."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Silin"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Sol ikona"</string>
     <string name="right_icon" msgid="3952104823293824311">"Sağ ikona"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Mozaika əlavə etmək üçün basıb saxlayaraq çəkin"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Mozaikaları yenidən təşkil etmək üçün basıb saxlayın və çəkin"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Silmək üçün bura sürüşdürün"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Minimum 6 mozaikaya ehtiyacınız var"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Redaktə edin"</string>

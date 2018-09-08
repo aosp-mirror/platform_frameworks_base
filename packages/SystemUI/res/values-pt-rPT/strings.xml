@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"TERMINAR SESSÃO DO UTILIZADOR"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Adicionar um novo utilizador?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Limite de utilizadores alcançado"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">Pode adicionar até <xliff:g id="COUNT">%d</xliff:g> utilizadores.</item>
+      <item quantity="one">Apenas é possível criar um utilizador.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Pretende remover o utilizador?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Serão eliminados todos os dados e todas as aplicações deste utilizador."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Remover"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Ícone esquerdo"</string>
     <string name="right_icon" msgid="3952104823293824311">"Ícone direito"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Toque sem soltar e arraste para adicionar mosaicos."</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Tocar sem soltar e arrastar para reorganizar os mosaicos"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrastar para aqui para remover"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Necessita de, pelo menos, 6 mosaicos."</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editar"</string>

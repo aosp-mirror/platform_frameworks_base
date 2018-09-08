@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ተጠቃሚን አስወጣ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"አዲስ ተጠቃሚ ይታከል?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"እርስዎ አንድ አዲስ ተጠቃሚ ሲያክሉ ያ ሰው የራሱ ቦታ ማዘጋጀት አለበት።\n\nማንኛውም ተጠቃሚ መተግበሪያዎችን ለሌሎች ተጠቃሚዎች ሁሉ ሊያዘምን ይችላል።"</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"የተጠቃሚ ገደብ ላይ ተደርሷል"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ተጠቃሚዎች ብቻ ናቸው ሊፈጠሩ የሚችሉት።</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ተጠቃሚዎች ብቻ ናቸው ሊፈጠሩ የሚችሉት።</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"ተጠቃሚ ይወገድ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ሁሉም የዚህ ተጠቃሚ መተግበሪያዎች እና ውሂብ ይሰረዛሉ።"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"አስወግድ"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"የግራ አዶ"</string>
     <string name="right_icon" msgid="3952104823293824311">"የቀኝ አዶ"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"ፋይሎችን ለማከል ይዘት ይጎትቱ"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"ሰድሮችን ዳግም ለማስተካከል ይያዙ እና ይጎትቱ።"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ለማስወገድ ወደዚህ ይጎትቱ"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"ቢያንስ 6 ሰቆች ያስፈልገዎታል"</string>
     <string name="qs_edit" msgid="2232596095725105230">"አርትዕ"</string>

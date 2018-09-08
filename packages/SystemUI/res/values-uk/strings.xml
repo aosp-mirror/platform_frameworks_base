@@ -434,9 +434,13 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ВИЙТИ З ОБЛІКОВОГО ЗАПИСУ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Додати нового користувача?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Користувач має налаштувати свій профіль після створення.\n\nБудь-який користувач пристрою може оновлювати додатки для решти користувачів."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Ви досягли ліміту користувачів"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="one">Можна додати до <xliff:g id="COUNT">%d</xliff:g> користувача.</item>
+      <item quantity="few">Можна додати до <xliff:g id="COUNT">%d</xliff:g> користувачів.</item>
+      <item quantity="many">Можна додати до <xliff:g id="COUNT">%d</xliff:g> користувачів.</item>
+      <item quantity="other">Можна додати до <xliff:g id="COUNT">%d</xliff:g> користувача.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Видалити користувача?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Усі додатки й дані цього користувача буде видалено."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Видалити"</string>
@@ -744,8 +748,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Значок ліворуч"</string>
     <string name="right_icon" msgid="3952104823293824311">"Значок праворуч"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Натисніть і перетягніть, щоб додати фрагменти"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Щоб упорядковувати компоненти, перетягуйте їх"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Перетягніть сюди, щоб видалити"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Потрібно принаймні 6 фрагментів"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Редагувати"</string>

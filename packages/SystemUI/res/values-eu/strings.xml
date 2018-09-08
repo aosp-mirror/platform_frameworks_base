@@ -428,9 +428,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"AMAITU ERABILTZAILEAREN SAIOA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Beste erabiltzaile bat gehitu?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Erabiltzaile bat gehitzen duzunean, horrek bere eremua konfiguratu beharko du.\n\nEdozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Erabiltzaile-mugara iritsi zara"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">Gehienez, <xliff:g id="COUNT">%d</xliff:g> erabiltzaile gehi ditzakezu.</item>
+      <item quantity="one">Erabiltzaile bakarra sor daiteke.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Erabiltzailea kendu nahi duzu?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Erabiltzailearen aplikazio eta datu guztiak ezabatuko dira."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Kendu"</string>
@@ -734,8 +736,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Ezkerreko ikonoa"</string>
     <string name="right_icon" msgid="3952104823293824311">"Eskuineko ikonoa"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Eduki sakatuta eta arrastatu lauzak gehitzeko"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Eduki sakatuta eta arrastatu, lauzak berrantolatzeko"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Kentzeko, arrastatu hona"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Gutxienez sei lauza behar dituzu"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editatu"</string>

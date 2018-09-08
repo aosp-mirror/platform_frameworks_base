@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"KELUARKAN PENGGUNA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Tambahkan pengguna baru?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Saat Anda menambahkan pengguna baru, orang tersebut perlu menyiapkan ruangnya sendiri.\n\nPengguna mana pun dapat mengupdate aplikasi untuk semua pengguna lain."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Batas pengguna tercapai"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">Anda dapat menambahkan hingga <xliff:g id="COUNT">%d</xliff:g> pengguna.</item>
+      <item quantity="one">Hanya dapat membuat satu pengguna.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Hapus pengguna?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Semua aplikasi dan data pengguna ini akan dihapus."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Hapus"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Ikon kiri"</string>
     <string name="right_icon" msgid="3952104823293824311">"Ikon kanan"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Tahan dan tarik untuk menambahkan tile"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Tahan dan tarik untuk mengatur ulang tile"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Tarik ke sini untuk menghapus"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Anda membutuhkan setidaknya 6 tile"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Edit"</string>

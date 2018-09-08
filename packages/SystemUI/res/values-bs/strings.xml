@@ -429,9 +429,12 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ODJAVI KORISNIKA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Želite dodati novog korisnika?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Kada dodate novog korisnika, ta osoba treba uspostaviti svoj prostor.\n\nSvaki korisnik može ažurirati aplikacije za sve ostale korisnike."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Dostignut limit za broj korisnika"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="one">Možete dodati najviše <xliff:g id="COUNT">%d</xliff:g> korisnika.</item>
+      <item quantity="few">Možete dodati najviše <xliff:g id="COUNT">%d</xliff:g> korisnika.</item>
+      <item quantity="other">Možete dodati najviše <xliff:g id="COUNT">%d</xliff:g> korisnika.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Zaista želite ukloniti korisnika?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Sve aplikacije i podaci ovog korisnika bit će izbrisani."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Ukloni"</string>
@@ -739,8 +742,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Ikona lijevo"</string>
     <string name="right_icon" msgid="3952104823293824311">"Ikona desno"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Držite i prevucite da dodate polja"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Držite i prevucite da preuredite polja"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Prevucite ovdje za uklanjanje"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Trebate najmanje šest polja"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Uredi"</string>
@@ -851,7 +853,7 @@
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Postavke ne mogu potvrditi vaš odgovor jer aplikacija zaklanja zahtjev za odobrenje."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"Dozvoliti aplikaciji <xliff:g id="APP_0">%1$s</xliff:g> prikazivanje isječaka aplikacije <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- Može čitati informacije iz aplikacije <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <string name="slice_permission_text_2" msgid="3146758297471143723">"- Može poduzeti radnje unutar aplikacije <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="slice_permission_text_2" msgid="3146758297471143723">"- Može poduzeti radnje u aplikaciji <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"Dozvoli aplikaciji <xliff:g id="APP">%1$s</xliff:g> prikazivanje isječaka iz svake aplikacije"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"Dozvoli"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Odbij"</string>

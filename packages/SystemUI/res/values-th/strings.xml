@@ -426,14 +426,16 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ออกจากระบบผู้ใช้"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"ต้องการเพิ่มผู้ใช้ใหม่ใช่ไหม"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"เมื่อคุณเพิ่มผู้ใช้ใหม่ ผู้ใช้ดังกล่าวจะต้องตั้งค่าพื้นที่ของตนเอง\n\nผู้ใช้ทุกคนสามารถอัปเดตแอปสำหรับผู้ใช้รายอื่นทุกคนได้"</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"ถึงขีดจำกัดผู้ใช้แล้ว"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">คุณเพิ่มผู้ใช้ได้สูงสุด <xliff:g id="COUNT">%d</xliff:g> คน</item>
+      <item quantity="one">สร้างผู้ใช้ได้เพียง 1 คนเท่านั้น</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"นำผู้ใช้ออกใช่ไหม"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"แอปและข้อมูลทั้งหมดของผู้ใช้นี้จะถูกลบ"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"นำออก"</string>
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"เปิดโหมดประหยัดแบตเตอรี่อยู่"</string>
-    <string name="battery_saver_notification_text" msgid="820318788126672692">"ลดการใช้แบตเตอรี่และข้อมูลแบ็กกราวด์"</string>
+    <string name="battery_saver_notification_text" msgid="820318788126672692">"ลดการใช้แบตเตอรี่และอินเทอร์เน็ตที่ใช้งานอยู่เบื้องหลัง"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ปิดโหมดประหยัดแบตเตอรี่"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> จะเริ่มจับภาพทุกอย่างที่แสดงบนหน้าจอ"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ไม่ต้องแสดงข้อความนี้อีก"</string>
@@ -646,7 +648,7 @@
     <string name="battery_panel_title" msgid="7944156115535366613">"การใช้งานแบตเตอรี่"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ไม่สามารถใช้โหมดประหยัดแบตเตอรี่ระหว่างการชาร์จ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"โหมดประหยัดแบตเตอรี่"</string>
-    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"ลดประสิทธิภาพการทำงานและข้อมูลแบ็กกราวด์"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"ลดประสิทธิภาพการทำงานและอินเทอร์เน็ตที่ใช้งานอยู่เบื้องหลัง"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"ปุ่ม <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
     <string name="keyboard_key_back" msgid="2337450286042721351">"กลับ"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"ไอคอนทางซ้าย"</string>
     <string name="right_icon" msgid="3952104823293824311">"ไอคอนทางขวา"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"กดชิ้นส่วนค้างไว้แล้วลากไปเพื่อเพิ่ม"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"กดชิ้นส่วนค้างไว้แล้วลากไปเพื่อจัดลำดับใหม่"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ลากมาที่นี่เพื่อนำออก"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"คุณต้องมีชิ้นส่วนอย่างน้อย 6 ชิ้น"</string>
     <string name="qs_edit" msgid="2232596095725105230">"แก้ไข"</string>

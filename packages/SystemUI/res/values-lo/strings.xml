@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ເອົາຜູ້ໃຊ້ອອກຈາກລະບົບ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"ເພີ່ມຜູ້ໃຊ້ໃໝ່ບໍ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ເມື່ອ​ທ່ານ​ເພີ່ມ​ຜູ້ໃຊ້​ໃໝ່, ຜູ້ໃຊ້​ນັ້ນ​ຈະ​ຕ້ອງ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ຂອງ​ລາວ.\n\nຜູ້ໃຊ້​ທຸກ​ຄົນ​ສາ​ມາດ​ອັບ​ເດດ​ແອັບຯຂອງ​ຜູ້​ໃຊ້​ຄົນ​ອື່ນ​ທັງ​ໝົດ​ໄດ້."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"ຮອດຂີດຈຳກັດຜູ້ໃຊ້ແລ້ວ"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">ທ່ານສາມາດເພີ່ມໄດ້ສູງສຸດ <xliff:g id="COUNT">%d</xliff:g> ຄົນ.</item>
+      <item quantity="one">ສາມາດສ້າງໄດ້ໜຶ່ງຜູ້ໃຊ້ເທົ່ານັ້ນ.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"ລຶບຜູ້ໃຊ້ອອກບໍ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ທຸກ​ແອັບ ແລະ ຂໍ້​ມູນ​ຂອງ​ຜູ້​ໃຊ້​ນີ້​ຈະ​ຖືກ​ລຶບ."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"ເອົາ​ອອກ"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"ໄອຄອນຊ້າຍ"</string>
     <string name="right_icon" msgid="3952104823293824311">"ໄອຄອນຂວາ"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"ກົດຄ້າງໄວ້ແລ້ວລາກເພື່ອເພີ່ມຊ່ອງ"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"ກົດຄ້າງໄວ້ແລ້ວລາກເພື່ອຈັດຮຽງໃໝ່"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ລາກມາບ່ອນນີ້ເພື່ອລຶບອອກ"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"ທ່ານຍຕ້ອງໃຊ້ຢ່າງໜ້ອຍ 6 ຊ່ອງ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ແກ້ໄຂ"</string>

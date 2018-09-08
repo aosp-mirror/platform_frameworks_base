@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"प्रयोगकर्ता लगआउट गर्नुहोस्"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"नयाँ प्रयोगकर्ता थप्ने हो?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"जब तपाईँले नयाँ प्रयोगकर्ता थप्नुहुन्छ, त्यस प्रयोगकर्ताले आफ्नो स्थान स्थापना गर्न पर्ने छ।\n\nकुनै पनि प्रयोगकर्ताले सबै अन्य प्रयोगकर्ताहरूका लागि अनुप्रयोगहरू अद्यावधिक गर्न सक्छन्।"</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"प्रयोगकर्ताको सीमा पुग्यो"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">तपाईं अधिकतम <xliff:g id="COUNT">%d</xliff:g> प्रयोगहरू मात्र थप्न सक्नुहुन्छ।</item>
+      <item quantity="one">एउटा प्रयोगकर्ता मात्र सिर्जना गर्न सकिन्छ।</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"प्रयोगकर्ता हटाउन चाहनुहुन्छ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"यस प्रयोगकर्ताको सबै अनुप्रयोगहरू तथा डेटा हटाइनेछ।"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"हटाउनुहोस्"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"बायाँतिर देखाउने आइकन"</string>
     <string name="right_icon" msgid="3952104823293824311">"दायाँतिरको आइकन"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"टाइलहरू थप्न होल्ड गरी ड्र्याग गर्नुहोस्"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"टाइलहरू पुनः क्रमबद्ध गर्न होल्ड गरी ड्र्याग गर्नुहोस्"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"हटाउनका लागि यहाँ तान्नुहोस्"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"तपाईंलाई कम्तीमा ६ वटा टाइलहरू चाहिन्छ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"सम्पादन गर्नुहोस्"</string>
