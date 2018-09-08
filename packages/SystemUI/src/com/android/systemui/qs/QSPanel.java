@@ -665,5 +665,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         void setListening(boolean listening);
 
         default void setExpansion(float expansion) {}
+
+        int getNumVisibleTiles();
     }
 }
