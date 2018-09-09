@@ -79,6 +79,14 @@ public final class SubtitleData
         }
     }
 
+    /** @hide */
+    public SubtitleData(int trackIndex, long startTimeUs, long durationUs, byte[] data) {
+        mTrackIndex = trackIndex;
+        mStartTimeUs = startTimeUs;
+        mDurationUs = durationUs;
+        mData = data;
+    }
+
     /**
      * Returns the index of the MediaPlayer track which contains this subtitle data.
      * @return an index in the array returned by {@link MediaPlayer#getTrackInfo()}.
