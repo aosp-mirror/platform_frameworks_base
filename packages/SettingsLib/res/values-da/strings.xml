@@ -196,7 +196,7 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Vis en knap til oprettelse af fejlrapporter i menu for slukknap"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Lås ikke"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Skærmen går ikke i dvale under opladning"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Aktivér Bluetooth HCI snoop log"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Aktivér Bluetooth HCI spionlog"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Gem alle Bluetooth HCI-pakker i en fil (slå Bluetooth fra og til igen, når du har ændret denne indstilling)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM-oplåsning"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Tillad, at startindlæseren låses op"</string>
@@ -415,7 +415,6 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Større"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Størst"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Tilpasset (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
-    <string name="help_feedback_label" msgid="6815040660801785649">"Hjælp og feedback"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menu"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Angiv adgangskode for at gendanne fabriksdata i demotilstand"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Næste"</string>

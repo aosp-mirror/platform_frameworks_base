@@ -415,7 +415,6 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Plus grande"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"La plus grande"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Personnalisée (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
-    <string name="help_feedback_label" msgid="6815040660801785649">"Aide et commentaires"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menu"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Entrez m. passe pour réinit. en mode démo"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Suivant"</string>
