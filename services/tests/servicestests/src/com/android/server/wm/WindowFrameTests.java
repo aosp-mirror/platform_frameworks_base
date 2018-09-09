@@ -133,15 +133,15 @@ public class WindowFrameTests extends WindowTestsBase {
     }
 
     private void assertContentInset(WindowState w, int left, int top, int right, int bottom) {
-        assertRect(w.mContentInsets, left, top, right, bottom);
+        assertRect(w.getContentInsets(), left, top, right, bottom);
     }
 
     private void assertVisibleInset(WindowState w, int left, int top, int right, int bottom) {
-        assertRect(w.mVisibleInsets, left, top, right, bottom);
+        assertRect(w.getVisibleInsets(), left, top, right, bottom);
     }
 
     private void assertStableInset(WindowState w, int left, int top, int right, int bottom) {
-        assertRect(w.mStableInsets, left, top, right, bottom);
+        assertRect(w.getStableInsets(), left, top, right, bottom);
     }
 
     private void assertFrame(WindowState w, int left, int top, int right, int bottom) {

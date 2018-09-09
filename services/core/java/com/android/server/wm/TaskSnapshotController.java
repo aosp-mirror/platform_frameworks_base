@@ -303,7 +303,7 @@ class TaskSnapshotController {
     private Rect getInsets(WindowState state) {
         // XXX(b/72757033): These are insets relative to the window frame, but we're really
         // interested in the insets relative to the task bounds.
-        final Rect insets = minRect(state.mContentInsets, state.mStableInsets);
+        final Rect insets = minRect(state.getContentInsets(), state.getStableInsets());
         InsetUtils.addInsets(insets, state.mAppToken.getLetterboxInsets());
         return insets;
     }
@@ -373,7 +373,7 @@ class TaskSnapshotController {
         node.setClipToBounds(false);
         final DisplayListCanvas c = node.start(width, height);
         c.drawColor(color);
-        decorPainter.setInsets(mainWindow.mContentInsets, mainWindow.mStableInsets);
+        decorPainter.setInsets(mainWindow.getContentInsets(), mainWindow.getStableInsets());
         decorPainter.drawDecors(c, null /* statusBarExcludeFrame */);
         node.end(c);
         final Bitmap hwBitmap = ThreadedRenderer.createHardwareBitmap(node, width, height);
@@ -383,7 +383,7 @@ class TaskSnapshotController {
         // Note, the app theme snapshot is never translucent because we enforce a non-translucent
         // color above
         return new TaskSnapshot(hwBitmap.createGraphicBufferHandle(),
-                topChild.getConfiguration().orientation, mainWindow.mStableInsets,
+                topChild.getConfiguration().orientation, mainWindow.getStableInsets(),
                 ActivityManager.isLowRamDeviceStatic() /* reduced */, 1.0f /* scale */,
                 false /* isRealSnapshot */, task.getWindowingMode(), getSystemUiVisibility(task),
                 false);

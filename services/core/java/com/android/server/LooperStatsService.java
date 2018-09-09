@@ -17,12 +17,21 @@
 package com.android.server;
 
 import android.content.Context;
+import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Looper;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
+import android.os.SystemProperties;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.util.KeyValueListParser;
+import android.util.Slog;
 
+import com.android.internal.os.BackgroundThread;
+import com.android.internal.os.CachedDeviceState;
 import com.android.internal.os.LooperStats;
 import com.android.internal.util.DumpUtils;
 
@@ -38,6 +47,13 @@ import java.util.List;
 public class LooperStatsService extends Binder {
     private static final String TAG = "LooperStatsService";
     private static final String LOOPER_STATS_SERVICE_NAME = "looper_stats";
+    private static final String SETTINGS_ENABLED_KEY = "enabled";
+    private static final String SETTINGS_SAMPLING_INTERVAL_KEY = "sampling_interval";
+    private static final String DEBUG_SYS_LOOPER_STATS_ENABLED =
+            "debug.sys.looper_stats_enabled";
+    private static final int DEFAULT_SAMPLING_INTERVAL = 100;
+    private static final int DEFAULT_ENTRIES_SIZE_CAP = 2000;
+    private static final boolean DEFAULT_ENABLED = false;
 
     private final Context mContext;
     private final LooperStats mStats;
@@ -46,6 +62,24 @@ public class LooperStatsService extends Binder {
     private LooperStatsService(Context context, LooperStats stats) {
         this.mContext = context;
         this.mStats = stats;
+    }
+
+    private void initFromSettings() {
+        final KeyValueListParser parser = new KeyValueListParser(',');
+
+        try {
+            parser.setString(Settings.Global.getString(mContext.getContentResolver(),
+                    Settings.Global.LOOPER_STATS));
+        } catch (IllegalArgumentException e) {
+            Slog.e(TAG, "Bad looper_stats settings", e);
+        }
+
+        setSamplingInterval(
+                parser.getInt(SETTINGS_SAMPLING_INTERVAL_KEY, DEFAULT_SAMPLING_INTERVAL));
+        // Manually specified value takes precedence over Settings.
+        setEnabled(SystemProperties.getBoolean(
+                DEBUG_SYS_LOOPER_STATS_ENABLED,
+                parser.getBoolean(SETTINGS_ENABLED_KEY, DEFAULT_ENABLED)));
     }
 
     @Override
@@ -66,6 +100,7 @@ public class LooperStatsService extends Binder {
                 "thread_name",
                 "handler_class",
                 "message_name",
+                "is_interactive",
                 "message_count",
                 "recorded_message_count",
                 "total_latency_micros",
@@ -75,10 +110,11 @@ public class LooperStatsService extends Binder {
                 "exception_count"));
         pw.println(header);
         for (LooperStats.ExportedEntry entry : entries) {
-            pw.printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", entry.threadName, entry.handlerClassName,
-                    entry.messageName, entry.messageCount, entry.recordedMessageCount,
-                    entry.totalLatencyMicros, entry.maxLatencyMicros, entry.cpuUsageMicros,
-                    entry.maxCpuUsageMicros, entry.exceptionCount);
+            pw.printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", entry.threadName,
+                    entry.handlerClassName, entry.messageName, entry.isInteractive,
+                    entry.messageCount, entry.recordedMessageCount, entry.totalLatencyMicros,
+                    entry.maxLatencyMicros, entry.cpuUsageMicros, entry.maxCpuUsageMicros,
+                    entry.exceptionCount);
         }
     }
 
@@ -90,19 +126,54 @@ public class LooperStatsService extends Binder {
         }
     }
 
+    private void setSamplingInterval(int samplingInterval) {
+        mStats.setSamplingInterval(samplingInterval);
+    }
+
     /**
      * Manages the lifecycle of LooperStatsService within System Server.
      */
     public static class Lifecycle extends SystemService {
+        private final SettingsObserver mSettingsObserver;
+        private final LooperStatsService mService;
+        private final LooperStats mStats;
+
         public Lifecycle(Context context) {
             super(context);
+            mStats = new LooperStats(DEFAULT_SAMPLING_INTERVAL, DEFAULT_ENTRIES_SIZE_CAP);
+            mService = new LooperStatsService(getContext(), mStats);
+            mSettingsObserver = new SettingsObserver(mService);
         }
 
         @Override
         public void onStart() {
-            LooperStats stats = new LooperStats();
-            publishLocalService(LooperStats.class, stats);
+            publishLocalService(LooperStats.class, mStats);
             // TODO: publish LooperStatsService as a binder service when the SE Policy is changed.
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (SystemService.PHASE_SYSTEM_SERVICES_READY == phase) {
+                mService.initFromSettings();
+                Uri settingsUri = Settings.Global.getUriFor(Settings.Global.LOOPER_STATS);
+                getContext().getContentResolver().registerContentObserver(
+                        settingsUri, false, mSettingsObserver, UserHandle.USER_SYSTEM);
+                mStats.setDeviceState(getLocalService(CachedDeviceState.Readonly.class));
+            }
+        }
+    }
+
+    private static class SettingsObserver extends ContentObserver {
+        private final LooperStatsService mService;
+
+        SettingsObserver(LooperStatsService service) {
+            super(BackgroundThread.getHandler());
+            mService = service;
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri, int userId) {
+            mService.initFromSettings();
         }
     }
 

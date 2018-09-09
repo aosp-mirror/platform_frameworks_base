@@ -74,8 +74,7 @@ public class FontListParser {
     private static FontConfig.Family readFamily(XmlPullParser parser)
             throws XmlPullParserException, IOException {
         final String name = parser.getAttributeValue(null, "name");
-        final String lang = parser.getAttributeValue(null, "lang");
-        final String[] langs = lang == null ? null : lang.split("\\s+");
+        final String lang = parser.getAttributeValue("", "lang");
         final String variant = parser.getAttributeValue(null, "variant");
         final List<FontConfig.Font> fonts = new ArrayList<FontConfig.Font>();
         while (parser.next() != XmlPullParser.END_TAG) {
@@ -95,7 +94,7 @@ public class FontListParser {
                 intVariant = FontConfig.Family.VARIANT_ELEGANT;
             }
         }
-        return new FontConfig.Family(name, fonts.toArray(new FontConfig.Font[fonts.size()]), langs,
+        return new FontConfig.Family(name, fonts.toArray(new FontConfig.Font[fonts.size()]), lang,
                 intVariant);
     }
 
@@ -126,8 +125,8 @@ public class FontListParser {
             }
         }
         String sanitizedName = FILENAME_WHITESPACE_PATTERN.matcher(filename).replaceAll("");
-        return new FontConfig.Font(sanitizedName, index,
-                axes.toArray(new FontVariationAxis[axes.size()]), weight, isItalic, fallbackFor);
+        return new FontConfig.Font(sanitizedName, index, axes.toArray(
+                new FontVariationAxis[axes.size()]), weight, isItalic, fallbackFor);
     }
 
     private static FontVariationAxis readAxis(XmlPullParser parser)

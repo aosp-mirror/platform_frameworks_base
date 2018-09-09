@@ -16,16 +16,9 @@
 
 package com.android.internal.os;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.BatteryManager;
-import android.os.BatteryManagerInternal;
 import android.os.Binder;
-import android.os.OsProtoEnums;
-import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.DateFormat;
@@ -37,7 +30,6 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BinderInternal.CallSession;
-import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -63,7 +55,6 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
     private static final String TAG = "BinderCallsStats";
     private static final int CALL_SESSIONS_POOL_SIZE = 100;
-    private static final int PERIODIC_SAMPLING_INTERVAL = 10;
     private static final int MAX_EXCEPTION_COUNT_SIZE = 50;
     private static final String EXCEPTION_COUNT_OVERFLOW_NAME = "overflow";
 
@@ -81,25 +72,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     private final Random mRandom;
     private long mStartTime = System.currentTimeMillis();
 
-    // State updated by the broadcast receiver below.
-    private boolean mScreenInteractive;
-    private boolean mCharging;
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case Intent.ACTION_BATTERY_CHANGED:
-                    mCharging = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
-                    break;
-                case Intent.ACTION_SCREEN_ON:
-                    mScreenInteractive = true;
-                    break;
-                case Intent.ACTION_SCREEN_OFF:
-                    mScreenInteractive = false;
-                    break;
-            }
-        }
-    };
+    private CachedDeviceState.Readonly mDeviceState;
 
     /** Injector for {@link BinderCallsStats}. */
     public static class Injector {
@@ -112,65 +85,14 @@ public class BinderCallsStats implements BinderInternal.Observer {
         this.mRandom = injector.getRandomGenerator();
     }
 
-    public void systemReady(Context context) {
-        registerBroadcastReceiver(context);
-        setInitialState(queryScreenInteractive(context), queryIsCharging());
-    }
-
-    /**
-     * Listens for screen/battery state changes.
-     */
-    @VisibleForTesting
-    public void registerBroadcastReceiver(Context context) {
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-        filter.addAction(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-        context.registerReceiver(mBroadcastReceiver, filter);
-    }
-
-    /**
-     * Sets the battery/screen initial state.
-     *
-     * This has to be updated *after* the broadcast receiver is installed.
-     */
-    @VisibleForTesting
-    public void setInitialState(boolean isScreenInteractive, boolean isCharging) {
-        this.mScreenInteractive = isScreenInteractive;
-        this.mCharging = isCharging;
-        // Data collected previously was not accurate since the battery/screen state was not set.
-        reset();
-    }
-
-    private boolean queryIsCharging() {
-        final BatteryManagerInternal batteryManager =
-                LocalServices.getService(BatteryManagerInternal.class);
-        if (batteryManager == null) {
-            Slog.wtf(TAG, "BatteryManager null while starting BinderCallsStatsService");
-            // Default to true to not collect any data.
-            return true;
-        } else {
-            return batteryManager.getPlugType() != OsProtoEnums.BATTERY_PLUGGED_NONE;
-        }
-    }
-
-    private boolean queryScreenInteractive(Context context) {
-        final PowerManager powerManager = context.getSystemService(PowerManager.class);
-        final boolean screenInteractive;
-        if (powerManager == null) {
-            Slog.wtf(TAG, "PowerManager null while starting BinderCallsStatsService",
-                    new Throwable());
-            return true;
-        } else {
-            return powerManager.isInteractive();
-        }
+    public void setDeviceState(@NonNull CachedDeviceState.Readonly deviceState) {
+        mDeviceState = deviceState;
     }
 
     @Override
     @Nullable
     public CallSession callStarted(Binder binder, int code) {
-        if (mCharging) {
+        if (mDeviceState == null || mDeviceState.isCharging()) {
             return null;
         }
 
@@ -221,7 +143,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
         synchronized (mLock) {
             // This was already checked in #callStart but check again while synchronized.
-            if (mCharging) {
+            if (mDeviceState == null || mDeviceState.isCharging()) {
                 return;
             }
 
@@ -233,7 +155,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 uidEntry.recordedCallCount++;
 
                 final CallStat callStat = uidEntry.getOrCreate(
-                        s.binderClass, s.transactionCode, mScreenInteractive);
+                        s.binderClass, s.transactionCode, mDeviceState.isScreenInteractive());
                 callStat.callCount++;
                 callStat.recordedCallCount++;
                 callStat.cpuTimeMicros += duration;
@@ -252,7 +174,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 // Only record the total call count if we already track data for this key.
                 // It helps to keep the memory usage down when sampling is enabled.
                 final CallStat callStat = uidEntry.get(
-                        s.binderClass, s.transactionCode, mScreenInteractive);
+                        s.binderClass, s.transactionCode, mDeviceState.isScreenInteractive());
                 if (callStat != null) {
                     callStat.callCount++;
                 }
@@ -319,13 +241,13 @@ public class BinderCallsStats implements BinderInternal.Observer {
     public ArrayList<ExportedCallStat> getExportedCallStats() {
         // We do not collect all the data if detailed tracking is off.
         if (!mDetailedTracking) {
-            return new ArrayList<ExportedCallStat>();
+            return new ArrayList<>();
         }
 
         ArrayList<ExportedCallStat> resultCallStats = new ArrayList<>();
         synchronized (mLock) {
             final int uidEntriesSize = mUidEntries.size();
-            for (int entryIdx = 0; entryIdx < uidEntriesSize; entryIdx++){
+            for (int entryIdx = 0; entryIdx < uidEntriesSize; entryIdx++) {
                 final UidEntry entry = mUidEntries.valueAt(entryIdx);
                 for (CallStat stat : entry.getCallStatsList()) {
                     ExportedCallStat exported = new ExportedCallStat();
@@ -387,13 +309,15 @@ public class BinderCallsStats implements BinderInternal.Observer {
         }
     }
 
-    public void dump(PrintWriter pw, Map<Integer,String> appIdToPkgNameMap, boolean verbose) {
+    /** Writes the collected statistics to the supplied {@link PrintWriter}.*/
+    public void dump(PrintWriter pw, Map<Integer, String> appIdToPkgNameMap, boolean verbose) {
         synchronized (mLock) {
             dumpLocked(pw, appIdToPkgNameMap, verbose);
         }
     }
 
-    private void dumpLocked(PrintWriter pw, Map<Integer,String> appIdToPkgNameMap, boolean verbose) {
+    private void dumpLocked(PrintWriter pw, Map<Integer, String> appIdToPkgNameMap,
+            boolean verbose) {
         long totalCallsCount = 0;
         long totalRecordedCallsCount = 0;
         long totalCpuTime = 0;
@@ -450,13 +374,13 @@ public class BinderCallsStats implements BinderInternal.Observer {
         for (UidEntry entry : summaryEntries) {
             String uidStr = uidToString(entry.uid, appIdToPkgNameMap);
             pw.println(String.format("  %10d %3.0f%% %8d %8d %s",
-                        entry.cpuTimeMicros, 100d * entry.cpuTimeMicros / totalCpuTime,
-                        entry.recordedCallCount, entry.callCount, uidStr));
+                    entry.cpuTimeMicros, 100d * entry.cpuTimeMicros / totalCpuTime,
+                    entry.recordedCallCount, entry.callCount, uidStr));
         }
         pw.println();
         pw.println(String.format("  Summary: total_cpu_time=%d, "
-                    + "calls_count=%d, avg_call_cpu_time=%.0f",
-                    totalCpuTime, totalCallsCount, (double)totalCpuTime / totalRecordedCallsCount));
+                        + "calls_count=%d, avg_call_cpu_time=%.0f",
+                totalCpuTime, totalCallsCount, (double) totalCpuTime / totalRecordedCallsCount));
         pw.println();
 
         pw.println("Exceptions thrown (exception_count, class_name):");
@@ -721,11 +645,6 @@ public class BinderCallsStats implements BinderInternal.Observer {
             runningSum += toDouble.applyAsDouble(item);
         }
         return result;
-    }
-
-    @VisibleForTesting
-    public BroadcastReceiver getBroadcastReceiver() {
-        return mBroadcastReceiver;
     }
 
     private static int compareByCpuDesc(

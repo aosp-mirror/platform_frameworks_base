@@ -615,6 +615,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_PRODUCT = 1 << 19;
 
     /**
+     * Value for {@link #privateFlags}: whether this app is signed with the
+     * platform key.
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY = 1 << 20;
+
+    /**
      * Value for {@link #privateFlags}: whether this app is pre-installed on the
      * google partition of the system image.
      * @hide
@@ -622,11 +629,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_PRODUCT_SERVICES = 1 << 21;
 
     /**
-     * Value for {@link #privateFlags}: whether this app is signed with the
-     * platform key.
+     * Indicates whether this package requires access to non-SDK APIs.
+     * Only system apps and tests are allowed to use this property.
      * @hide
      */
-    public static final int PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY = 1 << 20;
+    public static final int PRIVATE_FLAG_USES_NON_SDK_API = 1 << 22;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_" }, value = {
@@ -1009,13 +1016,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public String appComponentFactory;
 
     /**
-     * Indicates whether this package requires access to non-SDK APIs. Only system apps
-     * and tests are allowed to use this property.
-     * @hide
-     */
-    public boolean usesNonSdkApi;
-
-    /**
      * The category of this app. Categories are used to cluster multiple apps
      * together into meaningful groups, such as when summarizing battery,
      * network, or disk usage. Apps should only define this value when they fit
@@ -1294,6 +1294,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 pw.println(prefix + "category=" + category);
             }
             pw.println(prefix + "HiddenApiEnforcementPolicy=" + getHiddenApiEnforcementPolicy());
+            pw.println(prefix + "usesNonSdkApi=" + usesNonSdkApi());
         }
         super.dumpBack(pw, prefix);
     }
@@ -1718,11 +1719,18 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         return SystemConfig.getInstance().getHiddenApiWhitelistedApps().contains(packageName);
     }
 
+    /**
+     * @hide
+     */
+    public boolean usesNonSdkApi() {
+        return (privateFlags & PRIVATE_FLAG_USES_NON_SDK_API) != 0;
+    }
+
     private boolean isAllowedToUseHiddenApis() {
         if (isSignedWithPlatformKey()) {
             return true;
         } else if (isSystemApp() || isUpdatedSystemApp()) {
-            return usesNonSdkApi || isPackageWhitelistedForHiddenApis();
+            return usesNonSdkApi() || isPackageWhitelistedForHiddenApis();
         } else {
             return false;
         }

@@ -491,7 +491,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             for (NotificationLifetimeExtender extender : mNotificationLifetimeExtenders) {
                 if (extender.shouldExtendLifetime(entry)) {
                     mLatestRankingMap = ranking;
-                    extender.setShouldExtendLifetime(entry, true /* shouldExtend */);
+                    extender.setShouldManageLifetime(entry, true /* shouldManage */);
                     return;
                 }
             }
@@ -501,7 +501,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
         // Ensure any managers keeping the lifetime extended stop managing the entry
         for (NotificationLifetimeExtender extender: mNotificationLifetimeExtenders) {
-            extender.setShouldExtendLifetime(entry, false /* shouldExtend */);
+            extender.setShouldManageLifetime(entry, false /* shouldManage */);
         }
 
         mMediaManager.onNotificationRemoved(key);
@@ -745,9 +745,9 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         }
 
         // Notification is updated so it is essentially re-added and thus alive again.  Don't need
-        // to keep it's lifetime extended.
+        // to keep its lifetime extended.
         for (NotificationLifetimeExtender extender : mNotificationLifetimeExtenders) {
-            extender.setShouldExtendLifetime(entry, false /* shouldExtend */);
+            extender.setShouldManageLifetime(entry, false /* shouldManage */);
         }
 
         Notification n = notification.getNotification();

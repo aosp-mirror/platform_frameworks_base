@@ -155,7 +155,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         TouchAnimator.Builder translationYBuilder = new Builder();
 
         if (mQsPanel.getHost() == null) return;
-        if (mQuickQsPanel.getTileLayout().getNumVisibleTiles() < 1) return;
         Collection<QSTile> tiles = mQsPanel.getHost().getTiles();
         int count = 0;
         int[] loc1 = new int[2];
@@ -230,9 +229,10 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 final int xDiff = loc2[0] - loc1[0];
                 final int yDiff = loc2[1] - loc1[1];
 
-                firstPageBuilder.addFloat(tileView, "translationY", -heightDiff, 0);
-                translationYBuilder.addFloat(tileView, "translationY", -yDiff, 0);
+                firstPageBuilder.addFloat(tileView, "translationY", heightDiff, 0);
                 translationXBuilder.addFloat(tileView, "translationX", -xDiff, 0);
+                translationYBuilder.addFloat(tileView, "translationY", -yDiff, 0);
+                translationYBuilder.addFloat(tileIcon, "translationY", -yDiff, 0);
 
                 mAllViews.add(tileIcon);
             } else {

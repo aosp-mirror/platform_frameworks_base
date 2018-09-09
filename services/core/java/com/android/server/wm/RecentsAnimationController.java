@@ -373,7 +373,7 @@ public class RecentsAnimationController implements DeathRecipient {
                             : null;
             final Rect contentInsets;
             if (mTargetAppToken != null && mTargetAppToken.findMainWindow() != null) {
-                contentInsets = mTargetAppToken.findMainWindow().mContentInsets;
+                contentInsets = mTargetAppToken.findMainWindow().getContentInsets();
             } else {
                 // If the window for the activity had not yet been created, use the display insets.
                 mService.getStableInsets(mDisplayId, mTmpRect);
@@ -583,7 +583,8 @@ public class RecentsAnimationController implements DeathRecipient {
             if (mainWindow == null) {
                 return null;
             }
-            final Rect insets = new Rect(mainWindow.mContentInsets);
+            final Rect insets = new Rect();
+            mainWindow.getContentInsets(insets);
             InsetUtils.addInsets(insets, mainWindow.mAppToken.getLetterboxInsets());
             mTarget = new RemoteAnimationTarget(mTask.mTaskId, MODE_CLOSING, mCapturedLeash,
                     !topApp.fillsParent(), mainWindow.mWinAnimator.mLastClipRect,

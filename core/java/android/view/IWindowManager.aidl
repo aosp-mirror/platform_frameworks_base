@@ -391,15 +391,16 @@ interface IWindowManager
     void registerShortcutKey(in long shortcutCode, IShortcutService keySubscriber);
 
     /**
-     * Create an input consumer by name.
+     * Create an input consumer by name and display id.
      */
-    void createInputConsumer(IBinder token, String name, out InputChannel inputChannel);
+    void createInputConsumer(IBinder token, String name, int displayId,
+        out InputChannel inputChannel);
 
     /**
-     * Destroy an input consumer by name.  This method will also dispose the input channels
-     * associated with that InputConsumer.
+     * Destroy an input consumer by name and display id.
+     * This method will also dispose the input channels associated with that InputConsumer.
      */
-    boolean destroyInputConsumer(String name);
+    boolean destroyInputConsumer(String name, int displayId);
 
     /**
      * Return the touch region for the current IME window, or an empty region if there is none.

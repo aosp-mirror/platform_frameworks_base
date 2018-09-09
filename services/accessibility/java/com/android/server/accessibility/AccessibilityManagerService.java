@@ -25,7 +25,7 @@ import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_AUTO;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HIDDEN;
-import static android.accessibilityservice.AccessibilityService.SHOW_MODE_WITH_HARD_KEYBOARD;
+import static android.accessibilityservice.AccessibilityService.SHOW_MODE_IGNORE_HARD_KEYBOARD;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HARD_KEYBOARD_ORIGINAL_VALUE;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HARD_KEYBOARD_OVERRIDDEN;
 
@@ -3796,14 +3796,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
          */
         public boolean setSoftKeyboardModeLocked(int newMode, @Nullable ComponentName requester) {
             if ((newMode != SHOW_MODE_AUTO) && (newMode != SHOW_MODE_HIDDEN)
-                    && (newMode != SHOW_MODE_WITH_HARD_KEYBOARD))
+                    && (newMode != SHOW_MODE_IGNORE_HARD_KEYBOARD))
             {
                 Slog.w(LOG_TAG, "Invalid soft keyboard mode");
                 return false;
             }
             if (mSoftKeyboardShowMode == newMode) return true;
 
-            if (newMode == SHOW_MODE_WITH_HARD_KEYBOARD) {
+            if (newMode == SHOW_MODE_IGNORE_HARD_KEYBOARD) {
                 if (hasUserOverriddenHardKeyboardSettingLocked()) {
                     // The user has specified a default for this setting
                     return false;
@@ -3811,13 +3811,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 // Save the original value. But don't do this if the value in settings is already
                 // the new mode. That happens when we start up after a reboot, and we don't want
                 // to overwrite the value we had from when we first started controlling the setting.
-                if (getSoftKeyboardValueFromSettings() != SHOW_MODE_WITH_HARD_KEYBOARD) {
+                if (getSoftKeyboardValueFromSettings() != SHOW_MODE_IGNORE_HARD_KEYBOARD) {
                     setOriginalHardKeyboardValue(
                             Settings.Secure.getInt(mContext.getContentResolver(),
                                     Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, 0) != 0);
                 }
                 putSecureIntForUser(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, 1, mUserId);
-            } else if (mSoftKeyboardShowMode == SHOW_MODE_WITH_HARD_KEYBOARD) {
+            } else if (mSoftKeyboardShowMode == SHOW_MODE_IGNORE_HARD_KEYBOARD) {
                 putSecureIntForUser(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
                         getOriginalHardKeyboardValue() ? 1 : 0, mUserId);
             }
@@ -3837,7 +3837,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final ContentResolver cr = mContext.getContentResolver();
             final boolean showWithHardKeyboardSettings =
                     Settings.Secure.getInt(cr, Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, 0) != 0;
-            if (mSoftKeyboardShowMode == SHOW_MODE_WITH_HARD_KEYBOARD) {
+            if (mSoftKeyboardShowMode == SHOW_MODE_IGNORE_HARD_KEYBOARD) {
                 if (!showWithHardKeyboardSettings) {
                     // The user has overridden the setting. Respect that and prevent further changes
                     // to this behavior.

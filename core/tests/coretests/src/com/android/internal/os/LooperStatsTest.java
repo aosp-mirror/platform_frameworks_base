@@ -43,6 +43,7 @@ public final class LooperStatsTest {
     private Handler mHandlerFirst;
     private Handler mHandlerSecond;
     private Handler mHandlerAnonymous;
+    private CachedDeviceState mDeviceState;
 
     @Before
     public void setUp() {
@@ -58,6 +59,9 @@ public final class LooperStatsTest {
         mHandlerAnonymous = new Handler(mThreadFirst.getLooper()) {
             /* To create an anonymous subclass. */
         };
+        mDeviceState = new CachedDeviceState();
+        mDeviceState.setCharging(false);
+        mDeviceState.setScreenInteractive(true);
     }
 
     @After
@@ -82,6 +86,7 @@ public final class LooperStatsTest {
         assertThat(entry.handlerClassName).isEqualTo(
                 "com.android.internal.os.LooperStatsTest$TestHandlerFirst");
         assertThat(entry.messageName).isEqualTo("0x3e8" /* 1000 in hex */);
+        assertThat(entry.isInteractive).isEqualTo(true);
         assertThat(entry.messageCount).isEqualTo(1);
         assertThat(entry.recordedMessageCount).isEqualTo(1);
         assertThat(entry.exceptionCount).isEqualTo(0);
@@ -108,6 +113,7 @@ public final class LooperStatsTest {
         assertThat(entry.handlerClassName).isEqualTo(
                 "com.android.internal.os.LooperStatsTest$TestHandlerFirst");
         assertThat(entry.messageName).isEqualTo("0x7"  /* 7 in hex */);
+        assertThat(entry.isInteractive).isEqualTo(true);
         assertThat(entry.messageCount).isEqualTo(0);
         assertThat(entry.recordedMessageCount).isEqualTo(0);
         assertThat(entry.exceptionCount).isEqualTo(1);
@@ -191,6 +197,70 @@ public final class LooperStatsTest {
         assertThat(entry3.maxLatencyMicros).isEqualTo(10);
         assertThat(entry3.cpuUsageMicros).isEqualTo(10);
         assertThat(entry3.maxCpuUsageMicros).isEqualTo(10);
+    }
+
+    @Test
+    public void testDataNotCollectedBeforeDeviceStateSet() {
+        TestableLooperStats looperStats = new TestableLooperStats(1, 100);
+        looperStats.setDeviceState(null);
+
+        Object token1 = looperStats.messageDispatchStarting();
+        looperStats.messageDispatched(token1, mHandlerFirst.obtainMessage(1000));
+        Object token2 = looperStats.messageDispatchStarting();
+        looperStats.dispatchingThrewException(token2, mHandlerFirst.obtainMessage(1000),
+                new IllegalArgumentException());
+
+        List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
+        assertThat(entries).hasSize(0);
+    }
+
+    @Test
+    public void testDataNotCollectedOnCharger() {
+        TestableLooperStats looperStats = new TestableLooperStats(1, 100);
+        mDeviceState.setCharging(true);
+
+        Object token1 = looperStats.messageDispatchStarting();
+        looperStats.messageDispatched(token1, mHandlerFirst.obtainMessage(1000));
+        Object token2 = looperStats.messageDispatchStarting();
+        looperStats.dispatchingThrewException(token2, mHandlerFirst.obtainMessage(1000),
+                new IllegalArgumentException());
+
+        List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
+        assertThat(entries).hasSize(0);
+    }
+
+    @Test
+    public void testScreenStateCollected() {
+        TestableLooperStats looperStats = new TestableLooperStats(1, 100);
+
+        mDeviceState.setScreenInteractive(true);
+        Object token1 = looperStats.messageDispatchStarting();
+        looperStats.messageDispatched(token1, mHandlerFirst.obtainMessage(1000));
+        Object token2 = looperStats.messageDispatchStarting();
+        looperStats.dispatchingThrewException(token2, mHandlerFirst.obtainMessage(1000),
+                new IllegalArgumentException());
+
+        Object token3 = looperStats.messageDispatchStarting();
+        // If screen state changed during the call, we take the final state into account.
+        mDeviceState.setScreenInteractive(false);
+        looperStats.messageDispatched(token3, mHandlerFirst.obtainMessage(1000));
+        Object token4 = looperStats.messageDispatchStarting();
+        looperStats.dispatchingThrewException(token4, mHandlerFirst.obtainMessage(1000),
+                new IllegalArgumentException());
+
+        List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
+        assertThat(entries).hasSize(2);
+        entries.sort(Comparator.comparing(e -> e.isInteractive));
+
+        LooperStats.ExportedEntry entry1 = entries.get(0);
+        assertThat(entry1.isInteractive).isEqualTo(false);
+        assertThat(entry1.messageCount).isEqualTo(1);
+        assertThat(entry1.exceptionCount).isEqualTo(1);
+
+        LooperStats.ExportedEntry entry2 = entries.get(1);
+        assertThat(entry2.isInteractive).isEqualTo(true);
+        assertThat(entry2.messageCount).isEqualTo(1);
+        assertThat(entry2.exceptionCount).isEqualTo(1);
     }
 
     @Test
@@ -281,7 +351,7 @@ public final class LooperStatsTest {
         }
     }
 
-    private static final class TestableLooperStats extends LooperStats {
+    private final class TestableLooperStats extends LooperStats {
         private static final long INITIAL_MICROS = 10001000123L;
         private int mCount;
         private long mRealtimeMicros;
@@ -291,6 +361,7 @@ public final class LooperStatsTest {
         TestableLooperStats(int samplingInterval, int sizeCap) {
             super(samplingInterval, sizeCap);
             this.mSamplingInterval = samplingInterval;
+            this.setDeviceState(mDeviceState.getReadonlyClient());
         }
 
         void tickRealtime(long micros) {

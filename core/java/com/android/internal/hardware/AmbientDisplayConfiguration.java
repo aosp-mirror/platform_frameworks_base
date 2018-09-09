@@ -75,6 +75,15 @@ public class AmbientDisplayConfiguration {
         return !TextUtils.isEmpty(reachSensorType());
     }
 
+    public boolean wakeScreenGestureEnabled(int user) {
+        return boolSettingDefaultOn(Settings.Secure.DOZE_WAKE_SCREEN_GESTURE, user)
+                && wakeScreenGestureAvailable();
+    }
+
+    public boolean wakeScreenGestureAvailable() {
+        return !TextUtils.isEmpty(wakeScreenSensorType());
+    }
+
     public String doubleTapSensorType() {
         return mContext.getResources().getString(R.string.config_dozeDoubleTapSensorType);
     }
@@ -85,6 +94,10 @@ public class AmbientDisplayConfiguration {
 
     public String reachSensorType() {
         return mContext.getResources().getString(R.string.config_dozeReachSensorType);
+    }
+
+    public String wakeScreenSensorType() {
+        return mContext.getResources().getString(R.string.config_dozeWakeScreenSensorType);
     }
 
     public boolean pulseOnLongPressEnabled(int user) {

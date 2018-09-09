@@ -2168,14 +2168,10 @@ public class WindowManagerService extends IWindowManager.Stub
             // The last inset values represent the last client state.
             win.updateLastInsetValues();
 
-            outFrame.set(win.mCompatFrame);
-            outOverscanInsets.set(win.mOverscanInsets);
-            outContentInsets.set(win.mContentInsets);
-            win.mLastRelayoutContentInsets.set(win.mContentInsets);
-            outVisibleInsets.set(win.mVisibleInsets);
-            outStableInsets.set(win.mStableInsets);
+            win.getCompatFrame(outFrame);
+            win.getInsetsForRelayout(outOverscanInsets, outContentInsets, outVisibleInsets,
+                    outStableInsets, outOutsets);
             outCutout.set(win.getWmDisplayCutout().getDisplayCutout());
-            outOutsets.set(win.mOutsets);
             outBackdropFrame.set(win.getBackdropFrame(win.getFrameLw()));
             if (localLOGV) Slog.v(
                 TAG_WM, "Relayout given client " + client.asBinder()
@@ -6008,11 +6004,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void createInputConsumer(IBinder token, String name, InputChannel inputChannel) {
+    public void createInputConsumer(IBinder token, String name, int displayId,
+            InputChannel inputChannel) {
         synchronized (mWindowMap) {
-            // TODO(b/112049699): Fix this for multiple displays. There is only one inputChannel
-            // here to accept the return value.
-            DisplayContent display = mRoot.getDisplayContent(Display.DEFAULT_DISPLAY);
+            DisplayContent display = mRoot.getDisplayContent(displayId);
             if (display != null) {
                 display.getInputMonitor().createInputConsumer(token, name, inputChannel,
                         Binder.getCallingPid(), Binder.getCallingUserHandle());
@@ -6021,11 +6016,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public boolean destroyInputConsumer(String name) {
+    public boolean destroyInputConsumer(String name, int displayId) {
         synchronized (mWindowMap) {
-            // TODO(b/112049699): Fix this for multiple displays. For consistency with
-            // createInputConsumer above.
-            DisplayContent display = mRoot.getDisplayContent(Display.DEFAULT_DISPLAY);
+            DisplayContent display = mRoot.getDisplayContent(displayId);
             if (display != null) {
                 return display.getInputMonitor().destroyInputConsumer(name);
             }

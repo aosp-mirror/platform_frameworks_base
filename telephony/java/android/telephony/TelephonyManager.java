@@ -64,6 +64,7 @@ import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telecom.ITelecomService;
 import com.android.internal.telephony.CellNetworkScanResult;
+import com.android.internal.telephony.IAnas;
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.ITelephonyRegistry;
@@ -133,6 +134,22 @@ public class TelephonyManager {
         /** Never use Wi-Fi calling */
         static final int NEVER_USE = 2;
     }
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"NETWORK_SELECTION_MODE_"},
+            value = {
+                    NETWORK_SELECTION_MODE_UNKNOWN,
+                    NETWORK_SELECTION_MODE_AUTO,
+                    NETWORK_SELECTION_MODE_MANUAL})
+    public @interface NetworkSelectionMode {}
+
+    /** @hide */
+    public static final int NETWORK_SELECTION_MODE_UNKNOWN = 0;
+    /** @hide */
+    public static final int NETWORK_SELECTION_MODE_AUTO = 1;
+    /** @hide */
+    public static final int NETWORK_SELECTION_MODE_MANUAL = 2;
 
     /** The otaspMode passed to PhoneStateListener#onOtaspChanged */
     /** @hide */
@@ -4327,6 +4344,10 @@ public class TelephonyManager {
         return ITelephonyRegistry.Stub.asInterface(ServiceManager.getService("telephony.registry"));
     }
 
+    private IAnas getIAnas() {
+        return IAnas.Stub.asInterface(ServiceManager.getService("ianas"));
+    }
+
     //
     //
     // PhoneStateListener
@@ -5785,6 +5806,31 @@ public class TelephonyManager {
         return false;
     }
 
+   /**
+     * Get the network selection mode.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+
+     * @return the network selection mode.
+     *
+     * @hide
+     */
+    @NetworkSelectionMode
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    public int getNetworkSelectionMode() {
+        int mode = NETWORK_SELECTION_MODE_UNKNOWN;
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                mode = telephony.getNetworkSelectionMode(getSubId());
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getNetworkSelectionMode RemoteException", ex);
+        }
+        return mode;
+    }
+
     /**
      * Set the preferred network type.
      * Used for device configuration by some CDMA operators.
@@ -6696,6 +6742,84 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#isDataRoamingEnabled", e);
         }
         return isDataRoamingEnabled;
+    }
+
+    /**
+     * Gets the roaming mode for CDMA phone.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * @return one of {@link #CDMA_ROAMING_MODE_RADIO_DEFAULT}, {@link #CDMA_ROAMING_MODE_HOME},
+     * {@link #CDMA_ROAMING_MODE_AFFILIATED}, {@link #CDMA_ROAMING_MODE_ANY}.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    public int getCdmaRoamingMode() {
+        int mode = CDMA_ROAMING_MODE_RADIO_DEFAULT;
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                mode = telephony.getCdmaRoamingMode(getSubId());
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Error calling ITelephony#getCdmaRoamingMode", ex);
+        }
+        return mode;
+    }
+
+    /**
+     * Sets the roaming mode for CDMA phone to the given mode {@code mode}.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * @param mode should be one of {@link #CDMA_ROAMING_MODE_RADIO_DEFAULT},
+     * {@link #CDMA_ROAMING_MODE_HOME}, {@link #CDMA_ROAMING_MODE_AFFILIATED},
+     * {@link #CDMA_ROAMING_MODE_ANY}.
+     *
+     * @return {@code true} if successed.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean setCdmaRoamingMode(int mode) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.setCdmaRoamingMode(getSubId(), mode);
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Error calling ITelephony#setCdmaRoamingMode", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Sets the subscription mode for CDMA phone to the given mode {@code mode}.
+     *
+     * @param mode CDMA subscription mode
+     *
+     * @return {@code true} if successed.
+     *
+     * @see Phone#CDMA_SUBSCRIPTION_UNKNOWN
+     * @see Phone#CDMA_SUBSCRIPTION_RUIM_SIM
+     * @see Phone#CDMA_SUBSCRIPTION_NV
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean setCdmaSubscriptionMode(int mode) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.setCdmaSubscriptionMode(getSubId(), mode);
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Error calling ITelephony#setCdmaSubscriptionMode", ex);
+        }
+        return false;
     }
 
     /**
@@ -8193,7 +8317,6 @@ public class TelephonyManager {
         return UNKNOWN_CARRIER_ID_LIST_VERSION;
     }
 
-
     /**
      * How many modems can have simultaneous data connections.
      * @hide
@@ -8210,5 +8333,63 @@ public class TelephonyManager {
             // This could happen if binder process crashes.
         }
         return 0;
+    }
+
+    /**
+     * Enable or disable AlternativeNetworkAccessService.
+     *
+     * This method should be called to enable or disable
+     * AlternativeNetworkAccess service on the device.
+     *
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @param enable enable(True) or disable(False)
+     * @return returns true if successfully set.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean setAlternativeNetworkAccessState(boolean enable) {
+        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        boolean ret = false;
+        try {
+            IAnas iAlternativeAccessService = getIAnas();
+            if (iAlternativeAccessService != null) {
+                ret = iAlternativeAccessService.setEnable(enable, pkgForDebug);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "enableAlternativeNetworkAccess RemoteException", ex);
+        }
+
+        return ret;
+    }
+
+    /**
+     * is AlternativeNetworkAccessService enabled
+     *
+     * This method should be called to determine if the AlternativeNetworkAccessService is
+     * enabled
+     *
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    public boolean isAlternativeNetworkAccessEnabled() {
+        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        boolean isEnabled = false;
+
+        try {
+            IAnas iAlternativeAccessService = getIAnas();
+            if (iAlternativeAccessService != null) {
+                isEnabled = iAlternativeAccessService.isEnabled(pkgForDebug);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "enableAlternativeNetworkAccess RemoteException", ex);
+        }
+
+        return isEnabled;
     }
 }

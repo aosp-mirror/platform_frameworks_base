@@ -34,7 +34,6 @@ import android.testing.TestableLooper;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
@@ -183,19 +182,19 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSetShouldExtendLifetime_setShouldExtend() {
+    public void testSetShouldManageLifetime_setShouldManage() {
         mAlertingNotificationManager.showNotification(mEntry);
 
-        mAlertingNotificationManager.setShouldExtendLifetime(mEntry, true /* shouldExtend */);
+        mAlertingNotificationManager.setShouldManageLifetime(mEntry, true /* shouldManage */);
 
         assertTrue(mAlertingNotificationManager.mExtendedLifetimeAlertEntries.contains(mEntry));
     }
 
     @Test
-    public void testSetShouldExtendLifetime_setShouldNotExtend() {
+    public void testSetShouldManageLifetime_setShouldNotManage() {
         mAlertingNotificationManager.mExtendedLifetimeAlertEntries.add(mEntry);
 
-        mAlertingNotificationManager.setShouldExtendLifetime(mEntry, false /* shouldExtend */);
+        mAlertingNotificationManager.setShouldManageLifetime(mEntry, false /* shouldManage */);
 
         assertFalse(mAlertingNotificationManager.mExtendedLifetimeAlertEntries.contains(mEntry));
     }

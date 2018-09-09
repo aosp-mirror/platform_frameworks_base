@@ -545,7 +545,8 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                 mScreenRect.offset(surfaceInsets.left, surfaceInsets.top);
 
                 if (creating) {
-                    mSurfaceSession = new SurfaceSession(viewRoot.mSurface);
+                    viewRoot.createBoundsSurface(mSubLayer);
+                    mSurfaceSession = new SurfaceSession(viewRoot.mBoundsSurface);
                     mDeferredDestroySurfaceControl = mSurfaceControl;
 
                     updateOpaqueFlag();

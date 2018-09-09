@@ -232,6 +232,18 @@ public class TypedValue {
     };
 
     /**
+     * Determine if a value is a color.
+     *
+     * This works by comparing {@link #type} to {@link #TYPE_FIRST_COLOR_INT}
+     * and {@link #TYPE_LAST_COLOR_INT}.
+     *
+     * @return true if this value is a color
+     */
+    public boolean isColorType() {
+        return (type >= TYPE_FIRST_COLOR_INT && type <= TYPE_LAST_COLOR_INT);
+    }
+
+    /**
      * Retrieve the base value from a complex data integer.  This uses the 
      * {@link #COMPLEX_MANTISSA_MASK} and {@link #COMPLEX_RADIX_MASK} fields of 
      * the data to compute a floating point representation of the number they 

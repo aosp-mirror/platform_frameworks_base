@@ -21,6 +21,7 @@ option java_multiple_files = true;
 option java_outer_classname = "ProcessStatsServiceProto";
 
 import "frameworks/base/core/proto/android/util/common.proto";
+import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 /**
@@ -86,55 +87,12 @@ message ProcessStatsSectionProto {
 message ProcessStatsStateProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    enum ScreenState {
-        SCREEN_UNKNOWN = 0;
-        OFF = 1;
-        ON = 2;
-    }
     optional ScreenState screen_state = 1;
 
-    enum MemoryState {
-        MEMORY_UNKNOWN = 0;
-        NORMAL = 1;     // normal.
-        MODERATE = 2;   // moderate memory pressure.
-        LOW = 3;        // low memory.
-        CRITICAL = 4;   // critical memory.
-    }
     optional MemoryState memory_state = 2;
 
     // this enum list is from frameworks/base/core/java/com/android/internal/app/procstats/ProcessStats.java
     // and not frameworks/base/core/java/android/app/ActivityManager.java
-    enum ProcessState {
-        PROCESS_UNKNOWN = 0;
-        // Persistent system process.
-        PERSISTENT = 1;
-        // Top activity; actually any visible activity.
-        TOP = 2;
-        // Important foreground process (ime, wallpaper, etc).
-        IMPORTANT_FOREGROUND = 3;
-        // Important background process.
-        IMPORTANT_BACKGROUND = 4;
-        // Performing backup operation.
-        BACKUP = 5;
-        // Background process running a service.
-        SERVICE = 6;
-        // Process not running, but would be if there was enough RAM.
-        SERVICE_RESTARTING = 7;
-        // Process running a receiver.
-        RECEIVER = 8;
-        // Heavy-weight process (currently not used).
-        HEAVY_WEIGHT = 9;
-        // Process hosting home/launcher app when not on top.
-        HOME = 10;
-        // Process hosting the last app the user was in.
-        LAST_ACTIVITY = 11;
-        // Cached process hosting a previous activity.
-        CACHED_ACTIVITY = 12;
-        // Cached process hosting a client activity.
-        CACHED_ACTIVITY_CLIENT = 13;
-        // Cached process that is empty.
-        CACHED_EMPTY = 14;
-    }
     optional ProcessState process_state = 3;
 
     // Millisecond uptime duration spent in this state
@@ -189,74 +147,85 @@ message ProcessStatsProto {
     optional ProcessStatsStateProto total_running_state = 6;
 }
 
-// Next Tag: 7
-message ProcessStatsServiceStateProto {
+// Next Tag: 4
+message PackageServiceOperationStatsProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Operate enum: Started, Foreground, Bound, Executing
+    optional ServiceOperationState operation = 1;
+
+    // Number of times the service was in this operation.
+    optional int32 count = 2;
+
+    // Information about a state the service can be in.
+    message StateStats {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // Screen state enum.
+        optional android.service.procstats.ScreenState screen_state = 1;
+        // Memory state enum.
+        optional android.service.procstats.MemoryState memory_state = 2;
+
+        // duration in milliseconds.
+        optional int64 duration_ms = 3;
+        // Millisecond elapsed realtime duration spent in this state
+        optional int64 realtime_duration_ms = 4;
+    }
+    repeated StateStats state_stats = 3;
+}
+
+// Next Tag: 3
+message PackageServiceStatsProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // Name of service component.
     optional string service_name = 1;
 
-    // Information about a state the service can be in.
-    message OperationInfo {
-        option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-        // Number of times the service was in this operation.
-        optional int32 count = 1;
-
-        // Time this operation was active in various states.  process_state will not be set;
-        // includes only uptime, not memory info.
-        repeated ProcessStatsStateProto states = 2;
-    }
-
-    // Information about when the service was operating as running (that is how long it was
-    // running for any reason, such as the finer-grained started, bound, and executing times
-    // also reported in this proto).
-    optional OperationInfo running_op = 2;
-
-    // Information about when the service was operating as started.
-    optional OperationInfo started_op = 3;
-
-    // Information about when the service was operating as foreground.
-    optional OperationInfo foreground_op = 4;
-
-    // Information about when the service was operating as bound.
-    optional OperationInfo bound_op = 5;
-
-    // Information about when the service was operating as executing.
-    optional OperationInfo executing_op = 6;
+    // The operation stats.
+    // The package_name, package_uid, package_version, service_name will not be set to save space.
+    repeated PackageServiceOperationStatsProto operation_stats = 2;
 }
 
 // Next Tag: 7
-message ProcessStatsAssociationStateProto {
+message PackageAssociationSourceProcessStatsProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Uid of the process.
+    optional int32 process_uid = 1;
+    // Process name.
+    optional string process_name = 2;
+
+    // Total count of the times this association appeared.
+    optional int32 total_count = 3;
+
+    // Millisecond uptime total duration this association was around.
+    optional int64 total_duration_ms = 4;
+
+    // Total count of the times this association became actively impacting its target process.
+    optional int32 active_count = 5;
+
+    // Information on one source in this association.
+    message StateStats {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // Process state enum.
+        optional android.service.procstats.ProcessState process_state = 1;
+        // Millisecond uptime duration spent in this state
+        optional int64 duration_ms = 2;
+        // Millisecond elapsed realtime duration spent in this state
+        optional int64 realtime_duration_ms = 3;
+    }
+    repeated StateStats active_state_stats = 6;
+}
+
+// Next Tag: 3
+message PackageAssociationProcessStatsProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // Name of the target component.
     optional string component_name = 1;
-
     // Information on one source in this association.
-    message Source {
-        option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-        // Name of source process.
-        optional string process = 1;
-
-        // Uid of the source process.
-        optional int32 uid = 2;
-
-        // Total count of the times this association appeared.
-        optional int32 total_count = 3;
-
-        // Millisecond uptime total duration this association was around.
-        optional int64 total_duration_ms = 4;
-
-        // Total count of the times this association became actively impacting its target process.
-        optional int32 active_count = 5;
-
-        // Time association was active in various states.  screen_state and memory_state will not
-        // be set; includes only uptime, not memory info.
-        repeated ProcessStatsStateProto active_states = 6;
-    }
-    repeated Source sources = 3;
+    repeated PackageAssociationSourceProcessStatsProto sources = 2;
 }
 
 // Next Tag: 7
@@ -276,8 +245,8 @@ message ProcessStatsPackageProto {
     repeated ProcessStatsProto process_stats = 4;
 
     // Stats for each of the package's services.
-    repeated ProcessStatsServiceStateProto service_stats = 5;
+    repeated PackageServiceStatsProto service_stats = 5;
 
     // Stats for each association with the package.
-    repeated ProcessStatsAssociationStateProto association_stats = 6;
+    repeated PackageAssociationProcessStatsProto association_stats = 6;
 }

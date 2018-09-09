@@ -18,10 +18,7 @@ package com.android.internal.os;
 
 import static org.junit.Assert.assertEquals;
 
-import android.content.Intent;
-import android.os.BatteryManager;
 import android.os.Binder;
-import android.os.OsProtoEnums;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -33,7 +30,6 @@ import com.android.internal.os.BinderInternal.CallSession;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -50,6 +46,7 @@ public class BinderCallsStatsTest {
     private static final int TEST_UID = 1;
     private static final int REQUEST_SIZE = 2;
     private static final int REPLY_SIZE = 3;
+    private final CachedDeviceState mDeviceState = new CachedDeviceState(false, true);
 
     @Test
     public void testDetailedOff() {
@@ -388,43 +385,27 @@ public class BinderCallsStatsTest {
     }
 
     @Test
-    public void testDataResetWhenInitialStateSet() {
+    public void testNoDataCollectedBeforeInitialDeviceStateSet() {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setDeviceState(null);
         bcs.setDetailedTracking(true);
         Binder binder = new Binder();
         CallSession callSession = bcs.callStarted(binder, 1);
         bcs.time += 10;
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
 
-        bcs.setInitialState(true, true);
+        bcs.setDeviceState(mDeviceState.getReadonlyClient());
 
         SparseArray<BinderCallsStats.UidEntry> uidEntries = bcs.getUidEntries();
         assertEquals(0, uidEntries.size());
     }
 
     @Test
-    public void testScreenAndChargerInitialStates() {
-        TestBinderCallsStats bcs = new TestBinderCallsStats();
-        bcs.setDetailedTracking(true);
-        Binder binder = new Binder();
-        bcs.setInitialState(true /** screen iteractive */, false);
-
-        CallSession callSession = bcs.callStarted(binder, 1);
-        bcs.time += 10;
-        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
-
-        List<BinderCallsStats.CallStat> callStatsList =
-                new ArrayList(bcs.getUidEntries().get(TEST_UID).getCallStatsList());
-        assertEquals(true, callStatsList.get(0).screenInteractive);
-    }
-
-    @Test
     public void testNoDataCollectedOnCharger() {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         bcs.setDetailedTracking(true);
-        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED)
-                .putExtra(BatteryManager.EXTRA_PLUGGED, OsProtoEnums.BATTERY_PLUGGED_AC);
-        bcs.getBroadcastReceiver().onReceive(null, intent);
+        mDeviceState.setCharging(true);
+
         Binder binder = new Binder();
         CallSession callSession = bcs.callStarted(binder, 1);
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
@@ -436,7 +417,7 @@ public class BinderCallsStatsTest {
     public void testScreenOff() {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         bcs.setDetailedTracking(true);
-        bcs.getBroadcastReceiver().onReceive(null, new Intent(Intent.ACTION_SCREEN_OFF));
+        mDeviceState.setScreenInteractive(false);
         Binder binder = new Binder();
         CallSession callSession = bcs.callStarted(binder, 1);
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
@@ -453,7 +434,7 @@ public class BinderCallsStatsTest {
     public void testScreenOn() {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         bcs.setDetailedTracking(true);
-        bcs.getBroadcastReceiver().onReceive(null, new Intent(Intent.ACTION_SCREEN_ON));
+        mDeviceState.setScreenInteractive(true);
         Binder binder = new Binder();
         CallSession callSession = bcs.callStarted(binder, 1);
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
@@ -470,9 +451,8 @@ public class BinderCallsStatsTest {
     public void testOnCharger() {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         bcs.setDetailedTracking(true);
-        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED)
-                .putExtra(BatteryManager.EXTRA_PLUGGED, OsProtoEnums.BATTERY_PLUGGED_AC);
-        bcs.getBroadcastReceiver().onReceive(null, intent);
+        mDeviceState.setCharging(true);
+
         Binder binder = new Binder();
         CallSession callSession = bcs.callStarted(binder, 1);
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
@@ -484,9 +464,8 @@ public class BinderCallsStatsTest {
     public void testOnBattery() {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         bcs.setDetailedTracking(true);
-        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED)
-                .putExtra(BatteryManager.EXTRA_PLUGGED, OsProtoEnums.BATTERY_PLUGGED_NONE);
-        bcs.getBroadcastReceiver().onReceive(null, intent);
+        mDeviceState.setCharging(false);
+
         Binder binder = new Binder();
         CallSession callSession = bcs.callStarted(binder, 1);
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
@@ -522,7 +501,6 @@ public class BinderCallsStatsTest {
     public void testGetExportedStatsWhenDetailedTrackingEnabled() {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         bcs.setDetailedTracking(true);
-        bcs.getBroadcastReceiver().onReceive(null, new Intent(Intent.ACTION_SCREEN_ON));
 
         Binder binder = new Binder();
         CallSession callSession = bcs.callStarted(binder, 1);
@@ -561,7 +539,7 @@ public class BinderCallsStatsTest {
         assertEquals(0, bcs.getExceptionCounts().size());
     }
 
-    static class TestBinderCallsStats extends BinderCallsStats {
+    class TestBinderCallsStats extends BinderCallsStats {
         int callingUid = TEST_UID;
         long time = 1234;
         long elapsedTime = 0;
@@ -580,6 +558,7 @@ public class BinderCallsStatsTest {
                 }
             });
             setSamplingInterval(1);
+            setDeviceState(mDeviceState.getReadonlyClient());
         }
 
         @Override

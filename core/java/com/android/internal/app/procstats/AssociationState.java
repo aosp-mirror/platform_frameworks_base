@@ -20,8 +20,8 @@ package com.android.internal.app.procstats;
 import android.os.Parcel;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.service.procstats.ProcessStatsAssociationStateProto;
-import android.service.procstats.ProcessStatsStateProto;
+import android.service.procstats.PackageAssociationProcessStatsProto;
+import android.service.procstats.PackageAssociationSourceProcessStatsProto;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -662,22 +662,23 @@ public final class AssociationState {
     public void writeToProto(ProtoOutputStream proto, long fieldId, long now) {
         final long token = proto.start(fieldId);
 
-        proto.write(ProcessStatsAssociationStateProto.COMPONENT_NAME, mName);
+        proto.write(PackageAssociationProcessStatsProto.COMPONENT_NAME, mName);
+
         final int NSRC = mSources.size();
         for (int isrc = 0; isrc < NSRC; isrc++) {
             final SourceKey key = mSources.keyAt(isrc);
             final SourceState src = mSources.valueAt(isrc);
-            final long sourceToken = proto.start(ProcessStatsAssociationStateProto.SOURCES);
-            proto.write(ProcessStatsAssociationStateProto.Source.PROCESS, key.mProcess);
-            proto.write(ProcessStatsAssociationStateProto.Source.UID, key.mUid);
-            proto.write(ProcessStatsAssociationStateProto.Source.TOTAL_COUNT, src.mCount);
+            final long sourceToken = proto.start(PackageAssociationProcessStatsProto.SOURCES);
+            proto.write(PackageAssociationSourceProcessStatsProto.PROCESS_NAME, key.mProcess);
+            proto.write(PackageAssociationSourceProcessStatsProto.PROCESS_UID, key.mUid);
+            proto.write(PackageAssociationSourceProcessStatsProto.TOTAL_COUNT, src.mCount);
             long duration = src.mDuration;
             if (src.mNesting > 0) {
                 duration += now - src.mStartUptime;
             }
-            proto.write(ProcessStatsAssociationStateProto.Source.TOTAL_DURATION_MS, duration);
+            proto.write(PackageAssociationSourceProcessStatsProto.TOTAL_DURATION_MS, duration);
             if (src.mActiveCount != 0) {
-                proto.write(ProcessStatsAssociationStateProto.Source.ACTIVE_COUNT,
+                proto.write(PackageAssociationSourceProcessStatsProto.ACTIVE_COUNT,
                         src.mActiveCount);
             }
             final long timeNow = src.mActiveStartUptime != 0 ? (now-src.mActiveStartUptime) : 0;
@@ -690,16 +691,26 @@ public final class AssociationState {
                         duration += timeNow;
                     }
                     final int procState = SparseMappingTable.getIdFromKey(dkey);
-                    DumpUtils.printProcStateDurationProto(proto,
-                            ProcessStatsAssociationStateProto.Source.ACTIVE_STATES,
-                            procState, duration);
+                    final long stateToken = proto.start(
+                            PackageAssociationSourceProcessStatsProto.ACTIVE_STATE_STATS);
+                    DumpUtils.printProto(proto,
+                            PackageAssociationSourceProcessStatsProto.StateStats.PROCESS_STATE,
+                            DumpUtils.STATE_PROTO_ENUMS, procState, 1);
+                    proto.write(PackageAssociationSourceProcessStatsProto.StateStats.DURATION_MS,
+                            duration);
+                    proto.end(stateToken);
                 }
             } else {
                 duration = src.mActiveDuration + timeNow;
                 if (duration != 0) {
-                    DumpUtils.printProcStateDurationProto(proto,
-                            ProcessStatsAssociationStateProto.Source.ACTIVE_STATES,
-                            src.mActiveProcState, duration);
+                    final long stateToken = proto.start(
+                            PackageAssociationSourceProcessStatsProto.ACTIVE_STATE_STATS);
+                    DumpUtils.printProto(proto,
+                            PackageAssociationSourceProcessStatsProto.StateStats.PROCESS_STATE,
+                            DumpUtils.STATE_PROTO_ENUMS, src.mActiveProcState, 1);
+                    proto.write(PackageAssociationSourceProcessStatsProto.StateStats.DURATION_MS,
+                            duration);
+                    proto.end(stateToken);
                 }
             }
             proto.end(sourceToken);

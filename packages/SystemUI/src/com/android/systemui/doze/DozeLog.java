@@ -35,7 +35,7 @@ public class DozeLog {
     private static final int SIZE = Build.IS_DEBUGGABLE ? 400 : 50;
     static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
-    private static final int PULSE_REASONS = 7;
+    private static final int REASONS = 8;
 
     public static final int PULSE_REASON_NONE = -1;
     public static final int PULSE_REASON_INTENT = 0;
@@ -45,6 +45,7 @@ public class DozeLog {
     public static final int PULSE_REASON_SENSOR_DOUBLE_TAP = 4;
     public static final int PULSE_REASON_SENSOR_LONG_PRESS = 5;
     public static final int PULSE_REASON_SENSOR_REACH = 6;
+    public static final int REASON_SENSOR_WAKE_UP = 7;
 
     private static boolean sRegisterKeyguardCallback = true;
 
@@ -74,7 +75,7 @@ public class DozeLog {
     public static void tracePulseStart(int reason) {
         if (!ENABLED) return;
         sPulsing = true;
-        log("pulseStart reason=" + pulseReasonToString(reason));
+        log("pulseStart reason=" + reasonToString(reason));
     }
 
     public static void tracePulseFinish() {
@@ -102,8 +103,8 @@ public class DozeLog {
                 sScreenOnPulsingStats = new SummaryStats();
                 sScreenOnNotPulsingStats = new SummaryStats();
                 sEmergencyCallStats = new SummaryStats();
-                sProxStats = new SummaryStats[PULSE_REASONS][2];
-                for (int i = 0; i < PULSE_REASONS; i++) {
+                sProxStats = new SummaryStats[REASONS][2];
+                for (int i = 0; i < REASONS; i++) {
                     sProxStats[i][0] = new SummaryStats();
                     sProxStats[i][1] = new SummaryStats();
                 }
@@ -157,6 +158,12 @@ public class DozeLog {
         log("missedTick by=" + delay);
     }
 
+    public static void traceTimeTickScheduled(long when, long triggerAt) {
+        if (!ENABLED) return;
+        log("timeTickScheduled at=" + FORMAT.format(new Date(when)) + " triggerAt="
+                + FORMAT.format(new Date(triggerAt)));
+    }
+
     public static void traceKeyguard(boolean showing) {
         if (!ENABLED) return;
         log("keyguard " + showing);
@@ -176,15 +183,15 @@ public class DozeLog {
     }
 
     public static void traceProximityResult(Context context, boolean near, long millis,
-            int pulseReason) {
+            int reason) {
         if (!ENABLED) return;
         init(context);
-        log("proximityResult reason=" + pulseReasonToString(pulseReason) + " near=" + near
+        log("proximityResult reason=" + reasonToString(reason) + " near=" + near
                 + " millis=" + millis);
-        sProxStats[pulseReason][near ? 0 : 1].append();
+        sProxStats[reason][near ? 0 : 1].append();
     }
 
-    public static String pulseReasonToString(int pulseReason) {
+    public static String reasonToString(int pulseReason) {
         switch (pulseReason) {
             case PULSE_REASON_INTENT: return "intent";
             case PULSE_REASON_NOTIFICATION: return "notification";
@@ -193,6 +200,7 @@ public class DozeLog {
             case PULSE_REASON_SENSOR_DOUBLE_TAP: return "doubletap";
             case PULSE_REASON_SENSOR_LONG_PRESS: return "longpress";
             case PULSE_REASON_SENSOR_REACH: return "reach";
+            case REASON_SENSOR_WAKE_UP: return "wakeup";
             default: throw new IllegalArgumentException("bad reason: " + pulseReason);
         }
     }
@@ -218,8 +226,8 @@ public class DozeLog {
             sScreenOnPulsingStats.dump(pw, "Screen on (pulsing)");
             sScreenOnNotPulsingStats.dump(pw, "Screen on (not pulsing)");
             sEmergencyCallStats.dump(pw, "Emergency call");
-            for (int i = 0; i < PULSE_REASONS; i++) {
-                final String reason = pulseReasonToString(i);
+            for (int i = 0; i < REASONS; i++) {
+                final String reason = reasonToString(i);
                 sProxStats[i][0].dump(pw, "Proximity near (" + reason + ")");
                 sProxStats[i][1].dump(pw, "Proximity far (" + reason + ")");
             }
@@ -262,10 +270,10 @@ public class DozeLog {
         }
     }
 
-    public static void traceSensor(Context context, int pulseReason) {
+    public static void traceSensor(Context context, int reason) {
         if (!ENABLED) return;
         init(context);
-        log("sensor type=" + pulseReasonToString(pulseReason));
+        log("sensor type=" + reasonToString(reason));
     }
 
     private static class SummaryStats {

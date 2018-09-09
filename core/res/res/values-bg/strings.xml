@@ -514,6 +514,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Разрешава на приложението да променя колекцията ви от снимки."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"да чете местоположенията от мултимедийната ви колекция"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Разрешава на приложението да чете местоположенията от мултимедийната ви колекция."</string>
+    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Биометричният хардуер не е налице"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Открит е частичен отпечатък. Моля, опитайте отново."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Отпечатъкът не можа да се обработи. Моля, опитайте отново."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Сензорът за отпечатъци е мръсен. Моля, почистете го и опитайте отново."</string>
@@ -521,7 +522,7 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Преместихте пръста си твърде бавно. Моля, опитайте отново."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Не е разпознато"</string>
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"Не е разпознато"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Отпечатъкът е удостоверен"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Хардуерът за отпечатъци не е налице."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Отпечатъкът не може да бъде съхранен. Моля, премахнете съществуващ."</string>

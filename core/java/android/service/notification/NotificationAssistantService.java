@@ -52,6 +52,9 @@ import java.util.List;
  * {@link #onNotificationEnqueued(StatusBarNotification)} will only be called for notifications
  * sent to the current user, and {@link Adjustment adjuments} will only be accepted for the
  * current user.
+ * <p>
+ *     All callbacks are called on the main thread.
+ * </p>
  *
  * @hide
  */

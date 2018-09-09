@@ -743,6 +743,11 @@ public final class SystemServer {
             traceEnd();
         }
 
+        // Tracks and caches the device state.
+        traceBeginAndSlog("StartCachedDeviceStateService");
+        mSystemServiceManager.startService(CachedDeviceStateService.class);
+        traceEnd();
+
         // Tracks cpu time spent in binder calls
         traceBeginAndSlog("StartBinderCallsStatsService");
         mSystemServiceManager.startService(BinderCallsStatsService.LifeCycle.class);
@@ -878,7 +883,8 @@ public final class SystemServer {
             }
 
             traceBeginAndSlog("StartAlarmManagerService");
-            mSystemServiceManager.startService(AlarmManagerService.class);
+            mSystemServiceManager.startService(new AlarmManagerService(context));
+
             traceEnd();
 
             traceBeginAndSlog("InitWatchdog");

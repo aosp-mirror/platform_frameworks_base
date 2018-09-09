@@ -130,6 +130,7 @@ message Atom {
         GenericAtom generic_atom = 82;
         KeyValuePairsAtom key_value_pairs_atom = 83;
         VibratorStateChanged vibrator_state_changed = 84;
+        DeferredJobStatsReported deferred_job_stats_reported = 85;
     }
 
     // Pulled events will start at field 10000.
@@ -153,13 +154,17 @@ message Atom {
         SystemUptime system_uptime = 10015;
         CpuActiveTime cpu_active_time = 10016;
         CpuClusterTime cpu_cluster_time = 10017;
-        DiskSpace disk_space = 10018;
+        DiskSpace disk_space = 10018 [deprecated=true];
         RemainingBatteryCapacity remaining_battery_capacity = 10019;
         FullBatteryCapacity full_battery_capacity = 10020;
         Temperature temperature = 10021;
         BinderCalls binder_calls = 10022;
         BinderCallsExceptions binder_calls_exceptions = 10023;
         LooperStats looper_stats = 10024;
+        DiskStats disk_stats = 10025;
+        DirectoryUsage directory_usage = 10026;
+        AppSize app_size = 10027;
+        CategorySize category_size = 10028;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP. Field numbers above
@@ -467,6 +472,22 @@ message SyncStateChanged {
         ON = 1;
     }
     optional State state = 3;
+}
+
+/*
+ * Deferred job stats.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/job/JobSchedulerService.java
+*/
+message DeferredJobStatsReported {
+    repeated AttributionNode attribution_node = 1;
+
+    // Number of jobs deferred.
+    optional int32 num_jobs_deferred = 2;
+
+    // Time since the last job runs.
+    optional int64 time_since_last_job_millis = 3;
 }
 
 /**
@@ -2250,4 +2271,83 @@ message LooperStats {
     // recorded_message_count. Total can be computed using
     // recorded_total_cpu_micros / recorded_message_count * call_count.
     optional int64 recorded_total_cpu_micros = 9;
+}
+
+/**
+ * Pulls disk information, such as write speed and latency.
+ */
+message DiskStats {
+    // Time taken to open, write 512B to, and close a file.
+    // -1 if error performing the check.
+    optional int64 data_write_latency_millis = 1;
+
+    optional bool file_based_encryption = 2;
+
+    // Recent disk write speed in kB/s.
+    // -1 if error querying storageed.
+    // 0 if data is unavailable.
+    optional int32 recent_disk_write_speed = 3;
+}
+
+
+/**
+ * Free and total bytes of the Data, Cache, and System partition.
+ */
+message DirectoryUsage {
+    enum Directory {
+        UNKNOWN = 0;
+        DATA = 1;
+        CACHE = 2;
+        SYSTEM = 3;
+    }
+    optional Directory directory = 1;
+    optional int64 free_bytes = 2;
+    optional int64 total_bytes = 3;
+}
+
+
+/**
+ * Size of an application: apk size, data size, and cache size.
+ * Reads from a cached file produced daily by DiskStatsLoggingService.java.
+ * Information is only reported for apps with the primary user (user 0).
+ * Sizes are aggregated by package name.
+ */
+message AppSize {
+    // Including uids will involve modifying diskstats logic.
+    optional string package_name = 1;
+    // App size in bytes. -1 if unavailable.
+    optional int64 app_size_bytes = 2;
+    // App data size in bytes. -1 if unavailable.
+    optional int64 app_data_size_bytes = 3;
+    // App cache size in bytes. -1 if unavailable.
+    optional int64 app_cache_size_bytes = 4;
+    // Time that the cache file was produced.
+    // Uses System.currentTimeMillis(), which is wall clock time.
+    optional int64 cache_time_millis = 5;
+}
+
+
+/**
+ * Size of a particular category. Eg: photos, videos.
+ * Reads from a cached file produced daily by DiskStatsLoggingService.java.
+ */
+message CategorySize {
+    enum Category {
+        UNKNOWN = 0;
+        APP_SIZE = 1;
+        APP_DATA_SIZE = 2;
+        APP_CACHE_SIZE = 3;
+        PHOTOS = 4;
+        VIDEOS = 5;
+        AUDIO = 6;
+        DOWNLOADS = 7;
+        SYSTEM = 8;
+        OTHER = 9;
+    }
+    optional Category category = 1;
+    // Category size in bytes.
+    optional int64 size_bytes = 2;
+    // Time that the cache file was produced.
+    // Uses System.currentTimeMillis(), which is wall clock time.
+    optional int64 cache_time_millis = 3;
 }

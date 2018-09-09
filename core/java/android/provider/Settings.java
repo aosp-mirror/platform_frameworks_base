@@ -7256,6 +7256,14 @@ public final class Settings {
         private static final Validator DOZE_REACH_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * Gesture that wakes up the display, showing the ambient version of the status bar.
+         * @hide
+         */
+        public static final String DOZE_WAKE_SCREEN_GESTURE = "doze_wake_screen_gesture";
+
+        private static final Validator DOZE_WAKE_SCREEN_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
          * The current night mode that has been selected by the user.  Owned
          * and controlled by UiModeManagerService.  Constants are as per
          * UiModeManager.
@@ -8158,6 +8166,7 @@ public final class Settings {
             DOZE_PICK_UP_GESTURE,
             DOZE_DOUBLE_TAP_GESTURE,
             DOZE_REACH_GESTURE,
+            DOZE_WAKE_SCREEN_GESTURE,
             NFC_PAYMENT_DEFAULT_COMPONENT,
             AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
             FACE_UNLOCK_KEYGUARD_ENABLED,
@@ -8302,6 +8311,7 @@ public final class Settings {
             VALIDATORS.put(DOZE_PICK_UP_GESTURE, DOZE_PICK_UP_GESTURE_VALIDATOR);
             VALIDATORS.put(DOZE_DOUBLE_TAP_GESTURE, DOZE_DOUBLE_TAP_GESTURE_VALIDATOR);
             VALIDATORS.put(DOZE_REACH_GESTURE, DOZE_REACH_GESTURE_VALIDATOR);
+            VALIDATORS.put(DOZE_WAKE_SCREEN_GESTURE, DOZE_WAKE_SCREEN_GESTURE_VALIDATOR);
             VALIDATORS.put(NFC_PAYMENT_DEFAULT_COMPONENT, NFC_PAYMENT_DEFAULT_COMPONENT_VALIDATOR);
             VALIDATORS.put(AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
                     AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN_VALIDATOR);
@@ -13308,6 +13318,19 @@ public final class Settings {
          * @hide
          */
         public static final String BINDER_CALLS_STATS = "binder_calls_stats";
+
+        /**
+         * Looper stats settings.
+         *
+         * The following strings are supported as keys:
+         * <pre>
+         *     enabled              (boolean)
+         *     sampling_interval    (int)
+         * </pre>
+         *
+         * @hide
+         */
+        public static final String LOOPER_STATS = "looper_stats";
 
         /**
          * Default user id to boot into. They map to user ids, for example, 10, 11, 12.

@@ -17,8 +17,8 @@
 package com.android.server.input;
 
 import android.graphics.Region;
-import android.view.InputChannel;
 import android.view.IWindow;
+import android.view.InputChannel;
 
 /**
  * Functions as a handle for a window that can receive input.
@@ -106,7 +106,7 @@ public final class InputWindowHandle {
 
     @Override
     public String toString() {
-        return new StringBuilder(name)
+        return new StringBuilder(name != null ? name : "")
                 .append(", layer=").append(layer)
                 .append(", frame=[").append(frameLeft).append(",").append(frameTop).append(",")
                         .append(frameRight).append(",").append(frameBottom).append("]")

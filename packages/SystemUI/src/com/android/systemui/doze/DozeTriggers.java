@@ -84,7 +84,7 @@ public class DozeTriggers implements DozeMachine.Part {
         mWakeLock = wakeLock;
         mAllowPulseTriggers = allowPulseTriggers;
         mDozeSensors = new DozeSensors(context, alarmManager, mSensorManager, dozeParameters,
-                config, wakeLock, this::onSensor, this::onProximityFar,
+                config, wakeLock, this::onSensor, this::onProximityFar, this::onWakeScreen,
                 dozeParameters.getPolicy());
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
     }
@@ -103,7 +103,7 @@ public class DozeTriggers implements DozeMachine.Part {
 
     private void proximityCheckThenCall(IntConsumer callback,
             boolean alreadyPerformedProxCheck,
-            int pulseReason) {
+            int reason) {
         Boolean cachedProxFar = mDozeSensors.isProximityCurrentlyFar();
         if (alreadyPerformedProxCheck) {
             callback.accept(ProximityCheck.RESULT_NOT_CHECKED);
@@ -116,7 +116,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 public void onProximityResult(int result) {
                     final long end = SystemClock.uptimeMillis();
                     DozeLog.traceProximityResult(mContext, result == RESULT_NEAR,
-                            end - start, pulseReason);
+                            end - start, reason);
                     callback.accept(result);
                 }
             }.check();
@@ -179,6 +179,28 @@ public class DozeTriggers implements DozeMachine.Part {
         } else if (near && aod) {
             if (DEBUG) Log.i(TAG, "Prox NEAR, pausing AOD");
             mMachine.requestState(DozeMachine.State.DOZE_AOD_PAUSING);
+        }
+    }
+
+    private void onWakeScreen(boolean wake) {
+        DozeMachine.State state = mMachine.getState();
+        boolean paused = (state == DozeMachine.State.DOZE_AOD_PAUSED);
+        boolean pausing = (state == DozeMachine.State.DOZE_AOD_PAUSING);
+
+        if (wake) {
+            proximityCheckThenCall((result) -> {
+                if (result == ProximityCheck.RESULT_NEAR) {
+                    // In pocket, drop event.
+                    return;
+                }
+                if (pausing || paused) {
+                    mMachine.requestState(DozeMachine.State.DOZE_AOD);
+                }
+            }, false /* alreadyPerformedProxCheck */, DozeLog.REASON_SENSOR_WAKE_UP);
+        } else {
+            if (!pausing && !paused) {
+                mMachine.requestState(DozeMachine.State.DOZE_AOD_PAUSING);
+            }
         }
     }
 

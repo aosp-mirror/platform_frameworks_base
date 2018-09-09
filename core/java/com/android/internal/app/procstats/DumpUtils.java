@@ -17,6 +17,7 @@
 package com.android.internal.app.procstats;
 
 import android.os.UserHandle;
+import android.service.procstats.ProcessStatsEnums;
 import android.service.procstats.ProcessStatsStateProto;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -107,20 +108,24 @@ public final class DumpUtils {
         STATE_TAGS[STATE_CACHED_EMPTY]              = "e";
 
         STATE_PROTO_ENUMS = new int[STATE_COUNT];
-        STATE_PROTO_ENUMS[STATE_PERSISTENT] = ProcessStatsStateProto.PERSISTENT;
-        STATE_PROTO_ENUMS[STATE_TOP] = ProcessStatsStateProto.TOP;
-        STATE_PROTO_ENUMS[STATE_IMPORTANT_FOREGROUND] = ProcessStatsStateProto.IMPORTANT_FOREGROUND;
-        STATE_PROTO_ENUMS[STATE_IMPORTANT_BACKGROUND] = ProcessStatsStateProto.IMPORTANT_BACKGROUND;
-        STATE_PROTO_ENUMS[STATE_BACKUP] = ProcessStatsStateProto.BACKUP;
-        STATE_PROTO_ENUMS[STATE_SERVICE] = ProcessStatsStateProto.SERVICE;
-        STATE_PROTO_ENUMS[STATE_SERVICE_RESTARTING] = ProcessStatsStateProto.SERVICE_RESTARTING;
-        STATE_PROTO_ENUMS[STATE_RECEIVER] = ProcessStatsStateProto.RECEIVER;
-        STATE_PROTO_ENUMS[STATE_HEAVY_WEIGHT] = ProcessStatsStateProto.HEAVY_WEIGHT;
-        STATE_PROTO_ENUMS[STATE_HOME] = ProcessStatsStateProto.HOME;
-        STATE_PROTO_ENUMS[STATE_LAST_ACTIVITY] = ProcessStatsStateProto.LAST_ACTIVITY;
-        STATE_PROTO_ENUMS[STATE_CACHED_ACTIVITY] = ProcessStatsStateProto.CACHED_ACTIVITY;
-        STATE_PROTO_ENUMS[STATE_CACHED_ACTIVITY_CLIENT] = ProcessStatsStateProto.CACHED_ACTIVITY_CLIENT;
-        STATE_PROTO_ENUMS[STATE_CACHED_EMPTY] = ProcessStatsStateProto.CACHED_EMPTY;
+        STATE_PROTO_ENUMS[STATE_PERSISTENT] = ProcessStatsEnums.PROCESS_STATE_PERSISTENT;
+        STATE_PROTO_ENUMS[STATE_TOP] = ProcessStatsEnums.PROCESS_STATE_TOP;
+        STATE_PROTO_ENUMS[STATE_IMPORTANT_FOREGROUND] =
+                ProcessStatsEnums.PROCESS_STATE_IMPORTANT_FOREGROUND;
+        STATE_PROTO_ENUMS[STATE_IMPORTANT_BACKGROUND] =
+                ProcessStatsEnums.PROCESS_STATE_IMPORTANT_BACKGROUND;
+        STATE_PROTO_ENUMS[STATE_BACKUP] = ProcessStatsEnums.PROCESS_STATE_BACKUP;
+        STATE_PROTO_ENUMS[STATE_SERVICE] = ProcessStatsEnums.PROCESS_STATE_SERVICE;
+        STATE_PROTO_ENUMS[STATE_SERVICE_RESTARTING] =
+                ProcessStatsEnums.PROCESS_STATE_SERVICE_RESTARTING;
+        STATE_PROTO_ENUMS[STATE_RECEIVER] = ProcessStatsEnums.PROCESS_STATE_RECEIVER;
+        STATE_PROTO_ENUMS[STATE_HEAVY_WEIGHT] = ProcessStatsEnums.PROCESS_STATE_HEAVY_WEIGHT;
+        STATE_PROTO_ENUMS[STATE_HOME] = ProcessStatsEnums.PROCESS_STATE_HOME;
+        STATE_PROTO_ENUMS[STATE_LAST_ACTIVITY] = ProcessStatsEnums.PROCESS_STATE_LAST_ACTIVITY;
+        STATE_PROTO_ENUMS[STATE_CACHED_ACTIVITY] = ProcessStatsEnums.PROCESS_STATE_CACHED_ACTIVITY;
+        STATE_PROTO_ENUMS[STATE_CACHED_ACTIVITY_CLIENT] =
+                ProcessStatsEnums.PROCESS_STATE_CACHED_ACTIVITY_CLIENT;
+        STATE_PROTO_ENUMS[STATE_CACHED_EMPTY] = ProcessStatsEnums.PROCESS_STATE_CACHED_EMPTY;
     }
 
     public static final String[] ADJ_SCREEN_NAMES_CSV = new String[] {
@@ -138,8 +143,8 @@ public final class DumpUtils {
     };
 
     static final int[] ADJ_SCREEN_PROTO_ENUMS = new int[] {
-            ProcessStatsStateProto.OFF,
-            ProcessStatsStateProto.ON
+            ProcessStatsEnums.SCREEN_STATE_OFF,
+            ProcessStatsEnums.SCREEN_STATE_ON
     };
 
     static final String[] ADJ_MEM_TAGS = new String[] {
@@ -147,10 +152,10 @@ public final class DumpUtils {
     };
 
     static final int[] ADJ_MEM_PROTO_ENUMS = new int[] {
-            ProcessStatsStateProto.NORMAL,
-            ProcessStatsStateProto.MODERATE,
-            ProcessStatsStateProto.LOW,
-            ProcessStatsStateProto.CRITICAL
+            ProcessStatsEnums.MEMORY_STATE_NORMAL,
+            ProcessStatsEnums.MEMORY_STATE_MODERATE,
+            ProcessStatsEnums.MEMORY_STATE_LOW,
+            ProcessStatsEnums.MEMORY_STATE_CRITICAL
     };
 
     static final String CSV_SEP = "\t";
@@ -278,7 +283,6 @@ public final class DumpUtils {
                 DumpUtils.STATE_PROTO_ENUMS, procState, 1);
         proto.write(ProcessStatsStateProto.DURATION_MS, duration);
         proto.end(stateToken);
-
     }
 
     public static void printProcStateTagAndValue(PrintWriter pw, int state, long value) {

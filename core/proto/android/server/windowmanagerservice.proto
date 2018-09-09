@@ -271,7 +271,7 @@ message WindowStateProto {
     optional .android.graphics.RectProto containing_frame = 8 [deprecated=true];
     optional .android.graphics.RectProto parent_frame = 9 [deprecated=true];
     optional .android.graphics.RectProto content_frame = 10 [deprecated=true];
-    optional .android.graphics.RectProto content_insets = 11;
+    optional .android.graphics.RectProto content_insets = 11 [deprecated=true];
     optional .android.graphics.RectProto surface_insets = 12;
     optional WindowStateAnimatorProto animator = 13;
     optional bool animating_exit = 14;
@@ -288,10 +288,10 @@ message WindowStateProto {
     optional .android.graphics.RectProto visible_frame = 26 [deprecated=true];
     optional .android.graphics.RectProto decor_frame = 27 [deprecated=true];
     optional .android.graphics.RectProto outset_frame = 28 [deprecated=true];
-    optional .android.graphics.RectProto overscan_insets = 29;
-    optional .android.graphics.RectProto visible_insets = 30;
-    optional .android.graphics.RectProto stable_insets = 31;
-    optional .android.graphics.RectProto outsets = 32;
+    optional .android.graphics.RectProto overscan_insets = 29 [deprecated=true];
+    optional .android.graphics.RectProto visible_insets = 30 [deprecated=true];
+    optional .android.graphics.RectProto stable_insets = 31 [deprecated=true];
+    optional .android.graphics.RectProto outsets = 32 [deprecated=true];
     optional .android.view.DisplayCutoutProto cutout = 33 [deprecated=true];
     optional bool remove_on_exit = 34;
     optional bool destroying = 35;
@@ -380,4 +380,9 @@ message WindowFramesProto {
     optional .android.graphics.RectProto parent_frame = 8;
     optional .android.graphics.RectProto visible_frame = 9;
     optional .android.view.DisplayCutoutProto cutout = 10;
+    optional .android.graphics.RectProto content_insets = 11;
+    optional .android.graphics.RectProto overscan_insets = 12;
+    optional .android.graphics.RectProto visible_insets = 13;
+    optional .android.graphics.RectProto stable_insets = 14;
+    optional .android.graphics.RectProto outsets = 15;
 }

@@ -23,16 +23,13 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal.CallSession;
-
-import java.util.Random;
+import com.android.internal.os.CachedDeviceState;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertNull;
 
 
 /**
@@ -49,6 +46,8 @@ public class BinderCallsStatsPerfTest {
     @Before
     public void setUp() {
         mBinderCallsStats = new BinderCallsStats(new BinderCallsStats.Injector());
+        CachedDeviceState deviceState = new CachedDeviceState(false, false);
+        mBinderCallsStats.setDeviceState(deviceState.getReadonlyClient());
     }
 
     @After

@@ -1176,8 +1176,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 //dump();
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS,
                         "For Intent " + intent + " bringing to top: " + r.intent);
-                result.r = r;
-                result.matchedByRootAffinity = false;
+                result.mRecord = r;
+                result.mIdealMatch = true;
                 break;
             } else if (affinityIntent != null && affinityIntent.getComponent() != null &&
                     affinityIntent.getComponent().compareTo(cls) == 0 &&
@@ -1186,18 +1186,18 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 //dump();
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS,
                         "For Intent " + intent + " bringing to top: " + r.intent);
-                result.r = r;
-                result.matchedByRootAffinity = false;
+                result.mRecord = r;
+                result.mIdealMatch = true;
                 break;
             } else if (!isDocument && !taskIsDocument
-                    && result.r == null && task.rootAffinity != null) {
+                    && result.mRecord == null && task.rootAffinity != null) {
                 if (task.rootAffinity.equals(target.taskAffinity)) {
                     if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Found matching affinity candidate!");
                     // It is possible for multiple tasks to have the same root affinity especially
                     // if they are in separate stacks. We save off this candidate, but keep looking
                     // to see if there is a better candidate.
-                    result.r = r;
-                    result.matchedByRootAffinity = true;
+                    result.mRecord = r;
+                    result.mIdealMatch = false;
                 }
             } else if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Not a match: " + task);
         }

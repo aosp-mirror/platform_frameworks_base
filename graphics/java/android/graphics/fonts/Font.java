@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.os.LocaleList;
 import android.util.TypedValue;
 
 import com.android.internal.util.Preconditions;
@@ -107,6 +108,8 @@ public final class Font {
                     nGetReleaseNativeFont(), 64);
 
         private @Nullable ByteBuffer mBuffer;
+        private @Nullable File mFile;
+        private @NonNull LocaleList mLocaleList = LocaleList.getEmptyLocaleList();
         private @IntRange(from = -1, to = 1000) int mWeight = NOT_SPECIFIED;
         private @IntRange(from = -1, to = 1) int mItalic = NOT_SPECIFIED;
         private @IntRange(from = 0) int mTtcIndex = 0;
@@ -131,6 +134,19 @@ public final class Font {
         }
 
         /**
+         * Construct a builder with a byte buffer and file path.
+         *
+         * This method is intended to be called only from SystemFonts.
+         * @hide
+         */
+        public Builder(@NonNull ByteBuffer buffer, @NonNull File path,
+                @NonNull LocaleList localeList) {
+            this(buffer);
+            mFile = path;
+            mLocaleList = localeList;
+        }
+
+        /**
          * Constructs a builder with a file path.
          *
          * @param path a file path to the font file
@@ -143,6 +159,7 @@ public final class Font {
             } catch (IOException e) {
                 mException = e;
             }
+            mFile = path;
         }
 
         /**
@@ -394,7 +411,8 @@ public final class Font {
                 }
             }
             final long ptr = nBuild(builderPtr, mBuffer, mWeight, italic, mTtcIndex);
-            final Font font = new Font(ptr, mBuffer, mWeight, italic, mTtcIndex, mAxes);
+            final Font font = new Font(ptr, mBuffer, mFile, mWeight, italic, mTtcIndex, mAxes,
+                    mLocaleList);
             sFontRegistory.registerNativeAllocation(font, ptr);
             return font;
         }
@@ -422,23 +440,48 @@ public final class Font {
 
     private final long mNativePtr;  // address of the shared ptr of minikin::Font
     private final @NonNull ByteBuffer mBuffer;
+    private final @Nullable File mFile;
     private final @IntRange(from = 0, to = 1000) int mWeight;
     private final boolean mItalic;
     private final @IntRange(from = 0) int mTtcIndex;
     private final @Nullable FontVariationAxis[] mAxes;
+    private final @NonNull LocaleList mLocaleList;
 
     /**
      * Use Builder instead
      */
-    private Font(long nativePtr, @NonNull ByteBuffer buffer,
+    private Font(long nativePtr, @NonNull ByteBuffer buffer, @Nullable File file,
             @IntRange(from = 0, to = 1000) int weight, boolean italic,
-            @IntRange(from = 0) int ttcIndex, @Nullable FontVariationAxis[] axes) {
+            @IntRange(from = 0) int ttcIndex, @Nullable FontVariationAxis[] axes,
+            @NonNull LocaleList localeList) {
         mBuffer = buffer;
+        mFile = file;
         mWeight = weight;
         mItalic = italic;
         mNativePtr = nativePtr;
         mTtcIndex = ttcIndex;
         mAxes = axes;
+        mLocaleList = localeList;
+    }
+
+    /**
+     * Retuns a font file buffer.
+     *
+     * @return a font buffer
+     */
+    public @NonNull ByteBuffer getBuffer() {
+        return mBuffer;
+    }
+
+    /**
+     * Returns a file path of this font.
+     *
+     * This returns null if this font is not created from regular file.
+     *
+     * @return a file path of the font
+     */
+    public @Nullable File getFile() {
+        return mFile;
     }
 
     /**
@@ -484,6 +527,16 @@ public final class Font {
         return mAxes == null ? null : mAxes.clone();
     }
 
+    /**
+     * Get a locale list of this font.
+     *
+     * This is always empty if this font is not a system font.
+     * @return a locale list
+     */
+    public @NonNull LocaleList getLocaleList() {
+        return mLocaleList;
+    }
+
     /** @hide */
     public long getNativePtr() {
         return mNativePtr;
@@ -504,11 +557,19 @@ public final class Font {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mWeight, mItalic, mTtcIndex, mAxes, mBuffer);
+        return Objects.hash(mWeight, mItalic, mTtcIndex, Arrays.hashCode(mAxes), mBuffer);
     }
 
     @Override
     public String toString() {
-        return "Font {weight=" + mWeight + ", italic=" + mItalic + "}";
+        return "Font {"
+            + "path=" + mFile
+            + ", weight=" + mWeight
+            + ", italic=" + mItalic
+            + ", ttcIndex=" + mTtcIndex
+            + ", axes=" + FontVariationAxis.toFontVariationSettings(mAxes)
+            + ", localeList=" + mLocaleList.toLanguageTags()
+            + ", buffer=" + mBuffer
+            + "}";
     }
 }

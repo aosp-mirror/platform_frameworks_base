@@ -16,13 +16,12 @@
 
 package com.android.internal.view;
 
-import android.net.Uri;
 import android.os.ResultReceiver;
 import android.text.style.SuggestionSpan;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.EditorInfo;
-import com.android.internal.inputmethod.IInputContentUriToken;
+
 import com.android.internal.view.InputBindResult;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
@@ -69,8 +68,6 @@ interface IInputMethodManager {
     void hideMySoftInput(in IBinder token, int flags);
     void showMySoftInput(in IBinder token, int flags);
     void updateStatusIcon(in IBinder token, String packageName, int iconId);
-    void setImeWindowStatus(in IBinder token, int vis, int backDisposition);
-    void reportStartInput(in IBinder token, in IBinder startInputToken);
     void registerSuggestionSpansForNotification(in SuggestionSpan[] spans);
     boolean notifySuggestionPicked(in SuggestionSpan span, String originalString, int index);
     InputMethodSubtype getCurrentInputMethodSubtype();
@@ -79,13 +76,9 @@ interface IInputMethodManager {
     boolean switchToNextInputMethod(in IBinder token, boolean onlyCurrentIme);
     boolean shouldOfferSwitchingToNextInputMethod(in IBinder token);
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
+    // This is kept due to @UnsupportedAppUsage.
+    // TODO(Bug 113914148): Consider removing this.
     int getInputMethodWindowVisibleHeight();
-    void clearLastInputMethodWindowForTransition(in IBinder token);
-
-    IInputContentUriToken createInputContentUriToken(in IBinder token, in Uri contentUri,
-            in String packageName);
-
-    void reportFullscreenMode(in IBinder token, boolean fullscreen);
 
     oneway void notifyUserAction(int sequenceNumber);
 }

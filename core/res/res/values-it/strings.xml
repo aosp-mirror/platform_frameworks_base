@@ -514,6 +514,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Consente all\'app di modificare la tua raccolta di foto."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"Lettura delle posizioni dalla tua raccolta multimediale"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Consente all\'app di leggere le posizioni dalla tua raccolta multimediale."</string>
+    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Hardware biometrico non disponibile"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Rilevata impronta digitale parziale. Riprova."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossibile elaborare l\'impronta digitale. Riprova."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Il sensore di impronte digitali è sporco. Puliscilo e riprova."</string>
@@ -521,7 +522,7 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Movimento del dito troppo lento. Riprova."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Non riconosciuto"</string>
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"Non riconosciuto"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Impronta digitale autenticata"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardware per l\'impronta digitale non disponibile."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Impossibile memorizzare l\'impronta digitale. Rimuovi un\'impronta esistente."</string>
@@ -832,7 +833,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Hai dimenticato la sequenza?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Sblocco account"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Troppi tentativi di inserimento della sequenza"</string>
-    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Per sbloccare, accedi tramite il tuo account Google."</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Per sbloccare, accedi tramite il tuo Account Google."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Nome utente (email)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Password"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Accedi"</string>
@@ -1585,7 +1586,7 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Inserisci di nuovo il codice PUK corretto. Ripetuti tentativi comportano la disattivazione definitiva della scheda SIM."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"I codici PIN non corrispondono"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Troppi tentativi di inserimento della sequenza"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"Per sbloccare, accedi con il tuo account Google."</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Per sbloccare, accedi con il tuo Account Google."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Nome utente (email)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Password"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Accedi"</string>

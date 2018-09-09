@@ -3462,4 +3462,5 @@
 
   <java-symbol type="integer" name="db_wal_truncate_size" />
   <java-symbol type="integer" name="config_wakeUpDelayDoze" />
+  <java-symbol type="string" name="config_dozeWakeScreenSensorType" />
 </resources>

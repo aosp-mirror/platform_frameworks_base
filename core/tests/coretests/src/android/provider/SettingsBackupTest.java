@@ -282,6 +282,7 @@ public class SettingsBackupTest {
                     Settings.Global.LOCATION_GLOBAL_KILL_SWITCH,
                     Settings.Global.LOCATION_SETTINGS_LINK_TO_PERMISSIONS_ENABLED,
                     Settings.Global.LOCK_SOUND,
+                    Settings.Global.LOOPER_STATS,
                     Settings.Global.LOW_BATTERY_SOUND,
                     Settings.Global.LOW_BATTERY_SOUND_TIMEOUT,
                     Settings.Global.LOW_POWER_MODE,

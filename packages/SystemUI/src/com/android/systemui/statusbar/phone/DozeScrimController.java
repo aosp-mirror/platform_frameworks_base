@@ -45,7 +45,7 @@ public class DozeScrimController {
         public void onDisplayBlanked() {
             if (DEBUG) {
                 Log.d(TAG, "Pulse in, mDozing=" + mDozing + " mPulseReason="
-                        + DozeLog.pulseReasonToString(mPulseReason));
+                        + DozeLog.reasonToString(mPulseReason));
             }
             if (!mDozing) {
                 return;
