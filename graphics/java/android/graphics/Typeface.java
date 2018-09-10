@@ -673,6 +673,128 @@ public class Typeface {
     }
 
     /**
+     * A builder class for creating new Typeface instance.
+     *
+     * <p>
+     * Examples,
+     * 1) Create Typeface from single ttf file.
+     * <pre>
+     * <code>
+     * Font font = new Font.Builder("your_font_file.ttf").build();
+     * FontFamily family = new FontFamily.Builder(font).build();
+     * Typeface typeface = new Typeface.CustomFallbackBuilder(family).build();
+     * </code>
+     * </pre>
+     *
+     * 2) Create Typeface from multiple font files and select bold style by default.
+     * <pre>
+     * <code>
+     * Font regularFont = new Font.Builder("regular.ttf").build();
+     * Font boldFont = new Font.Builder("bold.ttf").build();
+     * FontFamily family = new FontFamily.Builder(regularFont)
+     *     .addFont(boldFont).build();
+     * Typeface typeface = new Typeface.CustomFallbackBuilder(family)
+     *     .setWeight(Font.FONT_WEIGHT_BOLD)  // Set bold style as the default style.
+     *                                        // If the font family doesn't have bold style font,
+     *                                        // system will select the closest font.
+     *     .build();
+     * </code>
+     * </pre>
+     *
+     * 3) Create Typeface from single ttf file and if that font does not have glyph for the
+     * characters, use "serif" font family instead.
+     * <pre>
+     * <code>
+     * Font font = new Font.Builder("your_font_file.ttf").build();
+     * FontFamily family = new FontFamily.Builder(font).build();
+     * Typeface typeface = new Typeface.CustomFallbackBuilder(family)
+     *     .setFallback("serif")  // Set serif font family as the fallback.
+     *     .build();
+     * </code>
+     * </pre>
+     * </p>
+     */
+    public static class CustomFallbackBuilder {
+        // TODO: Remove package modifier once android.graphics.FontFamily is deprecated.
+        private final android.graphics.fonts.FontFamily mFamily;
+        private String mFallbackName = null;
+        private @IntRange(from = 0, to = 1000) int mWeight = 400;
+        private boolean mItalic = false;
+
+        /**
+         * Constructs a builder with a font family.
+         *
+         * @param family a family object
+         */
+        // TODO: Remove package modifier once android.graphics.FontFamily is deprecated.
+        public CustomFallbackBuilder(@NonNull android.graphics.fonts.FontFamily family) {
+            Preconditions.checkNotNull(family);
+            mFamily = family;
+        }
+
+        /**
+         * Sets a system fallback by name.
+         *
+         * @param familyName a family name to be used for fallback if the provided fonts can not be
+         *                   used
+         */
+        public CustomFallbackBuilder setFallback(@NonNull String familyName) {
+            Preconditions.checkNotNull(familyName);
+            mFallbackName = familyName;
+            return this;
+        }
+
+        /**
+         * Sets a weight of the Typeface.
+         *
+         * If the font family doesn't have a font of given weight, system will select the closest
+         * font from font family. For example, if a font family has fonts of 300 weight and 700
+         * weight then setWeight(400) is called, system will select the font of 300 weight.
+         *
+         * @see Font#FONT_WEIGHT_THIN
+         * @see Font#FONT_WEIGHT_EXTRA_LIGHT
+         * @see Font#FONT_WEIGHT_LIGHT
+         * @see Font#FONT_WEIGHT_NORMAL
+         * @see Font#FONT_WEIGHT_MEDIUM
+         * @see Font#FONT_WEIGHT_SEMI_BOLD
+         * @see Font#FONT_WEIGHT_BOLD
+         * @see Font#FONT_WEIGHT_EXTRA_BOLD
+         * @see Font#FONT_WEIGHT_BLACK
+         * @param weight a weight value
+         */
+        public CustomFallbackBuilder setWeight(@IntRange(from = 0, to = 1000) int weight) {
+            mWeight = weight;
+            return this;
+        }
+
+        /**
+         * Sets a italic style of the Typeface.
+         *
+         * @param italic true if italic, otherwise false
+         */
+        public CustomFallbackBuilder setItalic(boolean italic) {
+            mItalic = italic;
+            return this;
+        }
+
+        /**
+         * Create the Typeface based on the configured values.
+         *
+         * @return the Typeface object
+         */
+        public Typeface build() {
+            final android.graphics.fonts.FontFamily[] fallback =
+                    SystemFonts.getSystemFallback(mFallbackName);
+            final long[] ptrArray = new long[fallback.length + 1];
+            ptrArray[0] = mFamily.getNativePtr();
+            for (int i = 0; i < fallback.length; ++i) {
+                ptrArray[i + 1] = fallback[i].getNativePtr();
+            }
+            return new Typeface(nativeCreateFromArray(ptrArray, mWeight, mItalic ? 1 : 0));
+        }
+    }
+
+    /**
      * Create a typeface object given a family name, and option style information.
      * If null is passed for the name, then the "default" font will be chosen.
      * The resulting typeface object can be queried (getStyle()) to discover what
