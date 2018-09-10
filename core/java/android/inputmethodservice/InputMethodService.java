@@ -1170,7 +1170,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * used input method and subtype.
      */
     public final boolean switchToPreviousInputMethod() {
-        return mImm.switchToPreviousInputMethodInternal(mToken);
+        return mPrivOps.switchToPreviousInputMethod();
     }
 
     /**
@@ -1182,7 +1182,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * input method and subtype.
      */
     public final boolean switchToNextInputMethod(boolean onlyCurrentIme) {
-        return mImm.switchToNextInputMethodInternal(mToken, onlyCurrentIme);
+        return mPrivOps.switchToNextInputMethod(onlyCurrentIme);
     }
 
     /**
@@ -1195,7 +1195,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * between IMEs and subtypes.
      */
     public final boolean shouldOfferSwitchingToNextInputMethod() {
-        return mImm.shouldOfferSwitchingToNextInputMethodInternal(mToken);
+        return mPrivOps.shouldOfferSwitchingToNextInputMethod();
     }
 
     public boolean getCurrentInputStarted() {
@@ -1513,12 +1513,12 @@ public class InputMethodService extends AbstractInputMethodService {
 
     public void showStatusIcon(@DrawableRes int iconResId) {
         mStatusIcon = iconResId;
-        mImm.showStatusIconInternal(mToken, getPackageName(), iconResId);
+        mPrivOps.updateStatusIcon(getPackageName(), iconResId);
     }
 
     public void hideStatusIcon() {
         mStatusIcon = 0;
-        mImm.hideStatusIconInternal(mToken);
+        mPrivOps.updateStatusIcon(null, 0);
     }
 
     /**
@@ -1529,7 +1529,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param id Unique identifier of the new input method to start.
      */
     public void switchInputMethod(String id) {
-        mImm.setInputMethodInternal(mToken, id);
+        mPrivOps.setInputMethod(id);
     }
 
     /**
@@ -1541,7 +1541,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param subtype The new subtype of the new input method to be switched to.
      */
     public final void switchInputMethod(String id, InputMethodSubtype subtype) {
-        mImm.setInputMethodAndSubtypeInternal(mToken, id, subtype);
+        mPrivOps.setInputMethodAndSubtype(id, subtype);
     }
 
     public void setExtractView(View view) {
@@ -2132,7 +2132,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param flags Provides additional operating flags.
      */
     public void requestHideSelf(int flags) {
-        mImm.hideSoftInputFromInputMethodInternal(mToken, flags);
+        mPrivOps.hideMySoftInput(flags);
     }
 
     /**
@@ -2144,7 +2144,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param flags Provides additional operating flags.
      */
     public final void requestShowSelf(int flags) {
-        mImm.showSoftInputFromInputMethodInternal(mToken, flags);
+        mPrivOps.showMySoftInput(flags);
     }
 
     private boolean handleBack(boolean doIt) {

@@ -5007,5 +5007,53 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         public void reportFullscreenMode(boolean fullscreen) {
             mImms.reportFullscreenMode(mToken, fullscreen);
         }
+
+        @BinderThread
+        @Override
+        public void setInputMethod(String id) {
+            mImms.setInputMethod(mToken, id);
+        }
+
+        @BinderThread
+        @Override
+        public void setInputMethodAndSubtype(String id, InputMethodSubtype subtype) {
+            mImms.setInputMethodAndSubtype(mToken, id, subtype);
+        }
+
+        @BinderThread
+        @Override
+        public void hideMySoftInput(int flags) {
+            mImms.hideMySoftInput(mToken, flags);
+        }
+
+        @BinderThread
+        @Override
+        public void showMySoftInput(int flags) {
+            mImms.showMySoftInput(mToken, flags);
+        }
+
+        @BinderThread
+        @Override
+        public void updateStatusIcon(String packageName, int iconId) {
+            mImms.updateStatusIcon(mToken, packageName, iconId);
+        }
+
+        @BinderThread
+        @Override
+        public boolean switchToPreviousInputMethod() {
+            return mImms.switchToPreviousInputMethod(mToken);
+        }
+
+        @BinderThread
+        @Override
+        public boolean switchToNextInputMethod(boolean onlyCurrentIme) {
+            return mImms.switchToNextInputMethod(mToken, onlyCurrentIme);
+        }
+
+        @BinderThread
+        @Override
+        public boolean shouldOfferSwitchingToNextInputMethod() {
+            return mImms.shouldOfferSwitchingToNextInputMethod(mToken);
+        }
     }
 }

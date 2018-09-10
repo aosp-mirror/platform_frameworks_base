@@ -17,6 +17,7 @@
 package com.android.internal.inputmethod;
 
 import android.net.Uri;
+import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.inputmethod.IInputContentUriToken;
 
@@ -30,4 +31,12 @@ interface IInputMethodPrivilegedOperations {
     void clearLastInputMethodWindowForTransition();
     IInputContentUriToken createInputContentUriToken(in Uri contentUri, in String packageName);
     void reportFullscreenMode(boolean fullscreen);
+    void setInputMethod(String id);
+    void setInputMethodAndSubtype(String id, in InputMethodSubtype subtype);
+    void hideMySoftInput(int flags);
+    void showMySoftInput(int flags);
+    void updateStatusIcon(String packageName, int iconId);
+    boolean switchToPreviousInputMethod();
+    boolean switchToNextInputMethod(boolean onlyCurrentIme);
+    boolean shouldOfferSwitchingToNextInputMethod();
 }

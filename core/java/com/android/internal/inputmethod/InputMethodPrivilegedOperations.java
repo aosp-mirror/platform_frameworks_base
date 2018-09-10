@@ -17,11 +17,13 @@
 package com.android.internal.inputmethod;
 
 import android.annotation.AnyThread;
+import android.annotation.IdRes;
 import android.annotation.Nullable;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -185,6 +187,161 @@ public final class InputMethodPrivilegedOperations {
         }
         try {
             ops.reportFullscreenMode(fullscreen);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Calls {@link IInputMethodPrivilegedOperations#updateStatusIcon(String, int)}.
+     *
+     * @param packageName package name from which the status icon should be loaded
+     * @param iconResId resource ID of the icon to be loaded
+     */
+    @AnyThread
+    public void updateStatusIcon(String packageName, @IdRes int iconResId) {
+        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
+        if (ops == null) {
+            return;
+        }
+        try {
+            ops.updateStatusIcon(packageName, iconResId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Calls {@link IInputMethodPrivilegedOperations#setInputMethod(String)}.
+     *
+     * @param id IME ID of the IME to switch to
+     * @see android.view.inputmethod.InputMethodInfo#getId()
+     */
+    @AnyThread
+    public void setInputMethod(String id) {
+        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
+        if (ops == null) {
+            return;
+        }
+        try {
+            ops.setInputMethod(id);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Calls {@link IInputMethodPrivilegedOperations#setInputMethodAndSubtype(String,
+     * InputMethodSubtype)}
+     *
+     * @param id IME ID of the IME to switch to
+     * @param subtype {@link InputMethodSubtype} to switch to
+     * @see android.view.inputmethod.InputMethodInfo#getId()
+     */
+    @AnyThread
+    public void setInputMethodAndSubtype(String id, InputMethodSubtype subtype) {
+        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
+        if (ops == null) {
+            return;
+        }
+        try {
+            ops.setInputMethodAndSubtype(id, subtype);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Calls {@link IInputMethodPrivilegedOperations#hideMySoftInput(int)}
+     *
+     * @param flags additional operating flags
+     * @see android.view.inputmethod.InputMethodManager#HIDE_IMPLICIT_ONLY
+     * @see android.view.inputmethod.InputMethodManager#HIDE_NOT_ALWAYS
+     */
+    @AnyThread
+    public void hideMySoftInput(int flags) {
+        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
+        if (ops == null) {
+            return;
+        }
+        try {
+            ops.hideMySoftInput(flags);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Calls {@link IInputMethodPrivilegedOperations#showMySoftInput(int)}
+     *
+     * @param flags additional operating flags
+     * @see android.view.inputmethod.InputMethodManager#SHOW_IMPLICIT
+     * @see android.view.inputmethod.InputMethodManager#SHOW_FORCED
+     */
+    @AnyThread
+    public void showMySoftInput(int flags) {
+        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
+        if (ops == null) {
+            return;
+        }
+        try {
+            ops.showMySoftInput(flags);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Calls {@link IInputMethodPrivilegedOperations#switchToPreviousInputMethod()}
+     *
+     * @return {@code true} if handled
+     */
+    @AnyThread
+    public boolean switchToPreviousInputMethod() {
+        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
+        if (ops == null) {
+            return false;
+        }
+        try {
+            return ops.switchToPreviousInputMethod();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Calls {@link IInputMethodPrivilegedOperations#switchToNextInputMethod(boolean)}
+     *
+     * @param onlyCurrentIme {@code true} to switch to a {@link InputMethodSubtype} within the same
+     *                       IME
+     * @return {@code true} if handled
+     */
+    @AnyThread
+    public boolean switchToNextInputMethod(boolean onlyCurrentIme) {
+        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
+        if (ops == null) {
+            return false;
+        }
+        try {
+            return ops.switchToNextInputMethod(onlyCurrentIme);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Calls {@link IInputMethodPrivilegedOperations#shouldOfferSwitchingToNextInputMethod()}
+     *
+     * @return {@code true} if the IEM should offer a way to globally switch IME
+     */
+    @AnyThread
+    public boolean shouldOfferSwitchingToNextInputMethod() {
+        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
+        if (ops == null) {
+            return false;
+        }
+        try {
+            return ops.shouldOfferSwitchingToNextInputMethod();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
