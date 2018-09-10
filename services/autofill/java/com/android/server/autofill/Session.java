@@ -2981,11 +2981,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mMetricsLogger.write(newLogMaker(category));
     }
 
+    @GuardedBy("mLock")
     private void logAuthenticationStatusLocked(int requestId, int status) {
         addTaggedDataToRequestLogLocked(requestId,
                 MetricsEvent.FIELD_AUTOFILL_AUTHENTICATION_STATUS, status);
     }
 
+    @GuardedBy("mLock")
     private void addTaggedDataToRequestLogLocked(int requestId, int tag, @Nullable Object value) {
         final LogMaker requestLog = mRequestLogs.get(requestId);
         if (requestLog == null) {
