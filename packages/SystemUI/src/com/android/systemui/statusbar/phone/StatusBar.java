@@ -732,12 +732,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         IVrManager vrManager = IVrManager.Stub.asInterface(ServiceManager.getService(
                 Context.VR_SERVICE));
-        if (vrManager != null) {
-            try {
-                vrManager.registerListener(mVrStateCallbacks);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to register VR mode state listener: " + e);
-            }
+        try {
+            vrManager.registerListener(mVrStateCallbacks);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to register VR mode state listener: " + e);
         }
 
         IWallpaperManager wallpaperManager = IWallpaperManager.Stub.asInterface(
