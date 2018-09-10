@@ -458,6 +458,7 @@ public class InputMethodService extends AbstractInputMethodService {
         public final void initializeInternal(IBinder token,
                 IInputMethodPrivilegedOperations privilegedOperations) {
             mPrivOps.set(privilegedOperations);
+            mImm.registerInputMethodPrivOps(token, mPrivOps);
             attachToken(token);
         }
 
@@ -999,6 +1000,11 @@ public class InputMethodService extends AbstractInputMethodService {
         if (mSettingsObserver != null) {
             mSettingsObserver.unregister();
             mSettingsObserver = null;
+        }
+        if (mToken != null) {
+            // This is completely optional, but allows us to show more explicit error messages
+            // when IME developers are doing something unsupported.
+            mImm.unregisterInputMethodPrivOps(mToken);
         }
     }
 

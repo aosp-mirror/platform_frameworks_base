@@ -63,18 +63,18 @@ interface IInputMethodManager {
             int auxiliarySubtypeMode);
     void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
     boolean isInputMethodPickerShownForTest();
+    // TODO(Bug 114488811): this can be removed once we deprecate special null token rule.
     void setInputMethod(in IBinder token, String id);
+    // TODO(Bug 114488811): this can be removed once we deprecate special null token rule.
     void setInputMethodAndSubtype(in IBinder token, String id, in InputMethodSubtype subtype);
-    void hideMySoftInput(in IBinder token, int flags);
-    void showMySoftInput(in IBinder token, int flags);
-    void updateStatusIcon(in IBinder token, String packageName, int iconId);
     void registerSuggestionSpansForNotification(in SuggestionSpan[] spans);
     boolean notifySuggestionPicked(in SuggestionSpan span, String originalString, int index);
     InputMethodSubtype getCurrentInputMethodSubtype();
     boolean setCurrentInputMethodSubtype(in InputMethodSubtype subtype);
+    // TODO(Bug 114488811): this can be removed once we deprecate special null token rule.
     boolean switchToPreviousInputMethod(in IBinder token);
+    // TODO(Bug 114488811): this can be removed once we deprecate special null token rule.
     boolean switchToNextInputMethod(in IBinder token, boolean onlyCurrentIme);
-    boolean shouldOfferSwitchingToNextInputMethod(in IBinder token);
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
     // This is kept due to @UnsupportedAppUsage.
     // TODO(Bug 113914148): Consider removing this.
