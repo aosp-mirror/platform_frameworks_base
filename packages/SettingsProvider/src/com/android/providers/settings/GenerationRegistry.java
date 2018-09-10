@@ -111,6 +111,7 @@ final class GenerationRegistry {
         }
     }
 
+    @GuardedBy("mLock")
     private MemoryIntArray getBackingStoreLocked() {
         if (mBackingStore == null) {
             // One for the global table, two for system and secure tables for a

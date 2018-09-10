@@ -722,6 +722,7 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
+    @GuardedBy("mLock")
     private void dumpForUserLocked(int userId, PrintWriter pw) {
         if (userId == UserHandle.USER_SYSTEM) {
             pw.println("GLOBAL SETTINGS (user " + userId + ")");
@@ -1179,6 +1180,7 @@ public class SettingsProvider extends ContentProvider {
                 && UserHandle.getAppId(Binder.getCallingUid()) >= Process.FIRST_APPLICATION_UID;
     }
 
+    @GuardedBy("mLock")
     private Setting getSsaidSettingLocked(PackageInfo callingPkg, int owningUserId) {
         // Get uid of caller (key) used to store ssaid value
         String name = Integer.toString(
@@ -1709,6 +1711,7 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
+    @GuardedBy("mLock")
     private List<String> getSettingsNamesLocked(int settingsType, int userId) {
         // Don't enforce the instant app whitelist for now -- its too prone to unintended breakage
         // in the current form.
@@ -1801,6 +1804,7 @@ public class SettingsProvider extends ContentProvider {
      *
      * @returns whether the enabled location providers changed.
      */
+    @GuardedBy("mLock")
     private boolean updateLocationProvidersAllowedLocked(String value, String tag,
             int owningUserId, boolean makeDefault, boolean forceNotify) {
         if (TextUtils.isEmpty(value)) {
@@ -2718,6 +2722,7 @@ public class SettingsProvider extends ContentProvider {
             }
         }
 
+        @GuardedBy("secureSettings.mLock")
         private void ensureSecureSettingAndroidIdSetLocked(SettingsState secureSettings) {
             Setting value = secureSettings.getSettingLocked(Settings.Secure.ANDROID_ID);
 
