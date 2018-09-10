@@ -135,7 +135,6 @@ public:
     void prepareAndDraw(RenderNode* node);
 
     void buildLayer(RenderNode* node);
-    bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
     void markLayerInUse(RenderNode* node);
 
     void destroyHardwareResources();

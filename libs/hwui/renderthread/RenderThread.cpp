@@ -19,13 +19,12 @@
 #include "CanvasContext.h"
 #include "DeviceInfo.h"
 #include "EglManager.h"
+#include "Readback.h"
 #include "RenderProxy.h"
 #include "VulkanManager.h"
 #include "hwui/Bitmap.h"
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
-#include "pipeline/skia/SkiaOpenGLReadback.h"
 #include "pipeline/skia/SkiaVulkanPipeline.h"
-#include "pipeline/skia/SkiaVulkanReadback.h"
 #include "renderstate/RenderState.h"
 #include "utils/FatVector.h"
 #include "utils/TimeUtils.h"
@@ -235,18 +234,7 @@ void RenderThread::dumpGraphicsMemory(int fd) {
 
 Readback& RenderThread::readback() {
     if (!mReadback) {
-        auto renderType = Properties::getRenderPipelineType();
-        switch (renderType) {
-            case RenderPipelineType::SkiaGL:
-                mReadback = new skiapipeline::SkiaOpenGLReadback(*this);
-                break;
-            case RenderPipelineType::SkiaVulkan:
-                mReadback = new skiapipeline::SkiaVulkanReadback(*this);
-                break;
-            default:
-                LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
-                break;
-        }
+        mReadback = new Readback(*this);
     }
 
     return *mReadback;

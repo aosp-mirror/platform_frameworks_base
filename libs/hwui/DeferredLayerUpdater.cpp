@@ -49,6 +49,7 @@ void DeferredLayerUpdater::destroyLayer() {
     }
 
     mLayer->postDecStrong();
+
     mLayer = nullptr;
 }
 

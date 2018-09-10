@@ -562,10 +562,6 @@ void CanvasContext::buildLayer(RenderNode* node) {
     mPrefetchedLayers.insert(node);
 }
 
-bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
-    return mRenderPipeline->copyLayerInto(layer, bitmap);
-}
-
 void CanvasContext::destroyHardwareResources() {
     stopDrawing();
     if (mRenderPipeline->isContextReady()) {
