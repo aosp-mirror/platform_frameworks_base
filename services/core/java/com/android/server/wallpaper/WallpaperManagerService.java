@@ -55,7 +55,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
@@ -99,7 +98,6 @@ import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
 
-import java.lang.reflect.InvocationTargetException;
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -120,7 +118,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import com.android.internal.R;
 
 public class WallpaperManagerService extends IWallpaperManager.Stub
         implements IWallpaperManagerService {
@@ -1544,14 +1541,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         return false;
     }
 
-    private Point getDefaultDisplaySize() {
-        Point p = new Point();
-        WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
-        Display d = wm.getDefaultDisplay();
-        d.getRealSize(p);
-        return p;
-    }
-
     public void setDimensionHints(int width, int height, String callingPackage)
             throws RemoteException {
         checkPermission(android.Manifest.permission.SET_WALLPAPER_HINTS);
@@ -1564,10 +1553,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             if (width <= 0 || height <= 0) {
                 throw new IllegalArgumentException("width and height must be > 0");
             }
-            // Make sure it is at least as large as the display.
-            Point displaySize = getDefaultDisplaySize();
-            width = Math.max(width, displaySize.x);
-            height = Math.max(height, displaySize.y);
 
             if (width != wallpaper.width || height != wallpaper.height) {
                 wallpaper.width = width;
