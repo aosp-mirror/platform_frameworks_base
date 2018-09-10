@@ -315,7 +315,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
     private HashMap<String, IdleTimerParams> mActiveIdleTimers = Maps.newHashMap();
 
-    private volatile boolean mBandwidthControlEnabled;
     private volatile boolean mFirewallEnabled;
     private volatile boolean mStrictEnabled;
 
@@ -619,22 +618,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      */
     private void prepareNativeDaemon() {
 
-        mBandwidthControlEnabled = false;
-
         // push any existing quota or UID rules
         synchronized (mQuotaLock) {
 
-            // TODO: Delete this code and have netd unconditionally enable bandwidth control at
-            // startup time
-            Slog.d(TAG, "enabling bandwidth control");
-            try {
-                mConnector.execute("bandwidth", "enable");
-                mBandwidthControlEnabled = true;
-            } catch (NativeDaemonConnectorException e) {
-                Log.wtf(TAG, "problem enabling bandwidth controls", e);
-            }
-
-            SystemProperties.set(PROP_QTAGUID_ENABLED, mBandwidthControlEnabled ? "1" : "0");
+            // Netd unconditionally enable bandwidth control
+            SystemProperties.set(PROP_QTAGUID_ENABLED, "1");
 
             mStrictEnabled = true;
 
@@ -716,11 +704,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             }
         }
 
-        if (mBandwidthControlEnabled) {
-            try {
-                getBatteryStats().noteNetworkStatsEnabled();
-            } catch (RemoteException e) {
-            }
+
+        try {
+            getBatteryStats().noteNetworkStatsEnabled();
+        } catch (RemoteException e) {
         }
 
     }
@@ -1566,10 +1553,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setInterfaceQuota(String iface, long quotaBytes) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        // silently discard when control disabled
-        // TODO: eventually migrate to be always enabled
-        if (!mBandwidthControlEnabled) return;
-
         synchronized (mQuotaLock) {
             if (mActiveQuotas.containsKey(iface)) {
                 throw new IllegalStateException("iface " + iface + " already has quota");
@@ -1599,10 +1582,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     @Override
     public void removeInterfaceQuota(String iface) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-
-        // silently discard when control disabled
-        // TODO: eventually migrate to be always enabled
-        if (!mBandwidthControlEnabled) return;
 
         synchronized (mQuotaLock) {
             if (!mActiveQuotas.containsKey(iface)) {
@@ -1637,10 +1616,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setInterfaceAlert(String iface, long alertBytes) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        // silently discard when control disabled
-        // TODO: eventually migrate to be always enabled
-        if (!mBandwidthControlEnabled) return;
-
         // quick sanity check
         if (!mActiveQuotas.containsKey(iface)) {
             throw new IllegalStateException("setting alert requires existing quota on iface");
@@ -1665,10 +1640,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void removeInterfaceAlert(String iface) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        // silently discard when control disabled
-        // TODO: eventually migrate to be always enabled
-        if (!mBandwidthControlEnabled) return;
-
         synchronized (mQuotaLock) {
             if (!mActiveAlerts.containsKey(iface)) {
                 // TODO: eventually consider throwing
@@ -1689,10 +1660,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setGlobalAlert(long alertBytes) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        // silently discard when control disabled
-        // TODO: eventually migrate to be always enabled
-        if (!mBandwidthControlEnabled) return;
-
         try {
             mConnector.execute("bandwidth", "setglobalalert", alertBytes);
         } catch (NativeDaemonConnectorException e) {
@@ -1702,10 +1669,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private void setUidOnMeteredNetworkList(int uid, boolean blacklist, boolean enable) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-
-        // silently discard when control disabled
-        // TODO: eventually migrate to be always enabled
-        if (!mBandwidthControlEnabled) return;
 
         final String chain = blacklist ? "naughtyapps" : "niceapps";
         final String suffix = enable ? "add" : "remove";
@@ -1858,7 +1821,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     @Override
     public boolean isBandwidthControlEnabled() {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        return mBandwidthControlEnabled;
+        return true;
     }
 
     @Override
@@ -2365,7 +2328,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mConnector.dump(fd, pw, args);
         pw.println();
 
-        pw.print("Bandwidth control enabled: "); pw.println(mBandwidthControlEnabled);
         pw.print("mMobileActivityFromRadio="); pw.print(mMobileActivityFromRadio);
                 pw.print(" mLastPowerStateFromRadio="); pw.println(mLastPowerStateFromRadio);
         pw.print("mNetworkActive="); pw.println(mNetworkActive);
