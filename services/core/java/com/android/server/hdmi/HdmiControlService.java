@@ -1663,6 +1663,9 @@ public class HdmiControlService extends SystemService {
                     }
                     HdmiCecLocalDevice device = mCecController.getLocalDevice(deviceType);
                     if (device == null) {
+                        device = audioSystem();
+                    }
+                    if (device == null) {
                         Slog.w(TAG, "Local device not available");
                         return;
                     }

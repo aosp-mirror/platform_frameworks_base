@@ -50,6 +50,16 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         }
     }
 
+    @Override
+    @ServiceThreadOnly
+    protected void sendStandby(int deviceId) {
+        assertRunOnServiceThread();
+
+        // Send standby to TV only for now
+        int targetAddress = Constants.ADDR_TV;
+        mService.sendCecCommand(HdmiCecMessageBuilder.buildStandby(mAddress, targetAddress));
+    }
+
     @ServiceThreadOnly
     void oneTouchPlay(IHdmiControlCallback callback) {
         assertRunOnServiceThread();
