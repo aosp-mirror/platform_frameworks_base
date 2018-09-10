@@ -976,10 +976,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
 
         List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
+        looperStats.reset();
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         for (LooperStats.ExportedEntry entry : entries) {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 9 /* fields */);
-            e.writeLong(0); // uid collection not implemented yet
+            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 10 /* fields */);
+            e.writeInt(1000); // uid collection not implemented yet
             e.writeString(entry.handlerClassName);
             e.writeString(entry.threadName);
             e.writeString(entry.messageName);
@@ -988,6 +989,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(entry.recordedMessageCount);
             e.writeLong(entry.totalLatencyMicros);
             e.writeLong(entry.cpuUsageMicros);
+            e.writeBoolean(entry.isInteractive);
             pulledData.add(e);
         }
     }

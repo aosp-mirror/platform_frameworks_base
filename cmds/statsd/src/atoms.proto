@@ -2261,6 +2261,14 @@ message BinderCallsExceptions {
     optional int64 exception_count = 2;
 }
 
+/**
+ * Pulls the statistics of message dispatching on HandlerThreads.
+ *
+ * Looper stats will be reset every time the data is pulled. It means it can only be pulled by one
+ * config on the device.
+ *
+ * Next tag: 11
+ */
 message LooperStats {
     // Currently not collected and always set to 0.
     optional int32 uid = 1 [(is_uid) = true];
@@ -2304,8 +2312,11 @@ message LooperStats {
     // Total CPU usage of all processed message.
     // Average can be computed using recorded_total_cpu_micros /
     // recorded_message_count. Total can be computed using
-    // recorded_total_cpu_micros / recorded_message_count * call_count.
+    // recorded_total_cpu_micros / recorded_message_count * message_count.
     optional int64 recorded_total_cpu_micros = 9;
+
+    // True if the screen was interactive PowerManager#isInteractive at the end of the call.
+    optional bool screen_interactive = 10;
 }
 
 /**
