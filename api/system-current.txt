@@ -1266,6 +1266,14 @@ package android.content.pm.permission {
 
 }
 
+package android.graphics.drawable {
+
+  public final class Icon implements android.os.Parcelable {
+    method public static android.graphics.drawable.Icon createWithResource(android.content.res.Resources, int);
+  }
+
+}
+
 package android.hardware {
 
   public final class Sensor {
