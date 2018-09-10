@@ -415,7 +415,6 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"বৃহত্তৰ"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"সকলোতকৈ ডাঙৰ"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"নিজৰ উপযোগিতা অনুযায়ী (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
-    <string name="help_feedback_label" msgid="6815040660801785649">"সহায় আৰু ফীডবেক"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"মেনু"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"ডেম’ ম\'ডত ফেক্টৰী ৰিছেট কৰিবলৈ পাছৱৰ্ড দিয়ক"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"পৰৱৰ্তী"</string>

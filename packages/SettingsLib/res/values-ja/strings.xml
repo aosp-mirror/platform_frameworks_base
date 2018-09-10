@@ -415,7 +415,6 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"特大"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"最大"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"カスタム（<xliff:g id="DENSITYDPI">%d</xliff:g>）"</string>
-    <string name="help_feedback_label" msgid="6815040660801785649">"ヘルプとフィードバック"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"メニュー"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"デモモードで初期状態にリセットするには、パスワードを入力してください"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"次へ"</string>

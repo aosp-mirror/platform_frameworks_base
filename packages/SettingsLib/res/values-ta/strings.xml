@@ -415,7 +415,6 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"கொஞ்சம் பெரியது"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"மிகப் பெரியது"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"தனிப்பயன் (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
-    <string name="help_feedback_label" msgid="6815040660801785649">"உதவி &amp; கருத்து"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"மெனு"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"டெமோ பயன்முறையில் ஆரம்பநிலை மீட்டமைவைச் செயல்படுத்த, கடவுச்சொல்லை உள்ளிடவும்"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"அடுத்து"</string>
