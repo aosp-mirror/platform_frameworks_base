@@ -76,6 +76,8 @@ message IntervalStatsProto {
     optional string shortcut_id = 9;
     optional int32 standby_bucket = 11;
     optional string notification_channel = 12;
+    // notification_channel_index contains the index + 1 of the channel name in the string pool
+    optional int32 notification_channel_index = 13;
   }
 
   // The following fields contain supplemental data used to build IntervalStats, such as a string

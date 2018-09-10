@@ -48,7 +48,7 @@ public class IntervalStats {
     // keep hundreds of strings that have the same contents. We will read the string
     // and only keep it if it's not in the cache. The GC will take care of the
     // strings that had identical copies in the cache.
-    private final ArraySet<String> mStringCache = new ArraySet<>();
+    public final ArraySet<String> mStringCache = new ArraySet<>();
 
     public static final class EventTracker {
         public long curStartTime;
@@ -135,7 +135,8 @@ public class IntervalStats {
      * Builds a UsageEvents.Event from a proto, but does not add it internally.
      * Built here to take advantage of the cached String Refs
      */
-    UsageEvents.Event buildEvent(ProtoInputStream parser) throws IOException {
+    UsageEvents.Event buildEvent(ProtoInputStream parser, List<String> stringPool)
+            throws IOException {
         final UsageEvents.Event event = new UsageEvents.Event();
         while (true) {
             switch (parser.nextField()) {
@@ -143,9 +144,17 @@ public class IntervalStats {
                     event.mPackage = getCachedStringRef(
                             parser.readString(IntervalStatsProto.Event.PACKAGE));
                     break;
+                case (int) IntervalStatsProto.Event.PACKAGE_INDEX:
+                    event.mPackage = getCachedStringRef(stringPool.get(
+                            parser.readInt(IntervalStatsProto.Event.PACKAGE_INDEX) - 1));
+                    break;
                 case (int) IntervalStatsProto.Event.CLASS:
                     event.mClass = getCachedStringRef(
                             parser.readString(IntervalStatsProto.Event.CLASS));
+                    break;
+                case (int) IntervalStatsProto.Event.CLASS_INDEX:
+                    event.mClass = getCachedStringRef(stringPool.get(
+                            parser.readInt(IntervalStatsProto.Event.CLASS_INDEX) - 1));
                     break;
                 case (int) IntervalStatsProto.Event.TIME_MS:
                     event.mTimeStamp = beginTime + parser.readLong(
@@ -172,6 +181,11 @@ public class IntervalStats {
                 case (int) IntervalStatsProto.Event.NOTIFICATION_CHANNEL:
                     event.mNotificationChannelId = parser.readString(
                             IntervalStatsProto.Event.NOTIFICATION_CHANNEL);
+                    break;
+                case (int) IntervalStatsProto.Event.NOTIFICATION_CHANNEL_INDEX:
+                    event.mNotificationChannelId = getCachedStringRef(stringPool.get(
+                            parser.readInt(IntervalStatsProto.Event.NOTIFICATION_CHANNEL_INDEX)
+                                    - 1));
                     break;
                 case ProtoInputStream.NO_MORE_FIELDS:
                     // Handle default values for certain events types
@@ -215,8 +229,6 @@ public class IntervalStats {
     /**
      * Returns whether the event type is one caused by user visible
      * interaction. Excludes those that are internally generated.
-     * @param eventType
-     * @return
      */
     private boolean isUserVisibleEvent(int eventType) {
         return eventType != UsageEvents.Event.SYSTEM_INTERACTION
@@ -254,6 +266,25 @@ public class IntervalStats {
         }
 
         endTime = timeStamp;
+    }
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public void addEvent(UsageEvents.Event event) {
+        if (events == null) {
+            events = new EventList();
+        }
+        // Cache common use strings
+        event.mPackage = getCachedStringRef(event.mPackage);
+        if (event.mClass != null) {
+            event.mClass = getCachedStringRef(event.mClass);
+        }
+        if (event.mEventType == UsageEvents.Event.NOTIFICATION_INTERRUPTION) {
+            event.mNotificationChannelId = getCachedStringRef(event.mNotificationChannelId);
+        }
+        events.insert(event);
     }
 
     void updateChooserCounts(String packageName, String category, String action) {

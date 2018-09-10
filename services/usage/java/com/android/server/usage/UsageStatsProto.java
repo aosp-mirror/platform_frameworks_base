@@ -22,6 +22,7 @@ import android.app.usage.UsageStats;
 import android.content.res.Configuration;
 import android.util.ArrayMap;
 
+import android.util.Slog;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 
@@ -29,23 +30,51 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.ProtocolException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * UsageStats reader/writer for Protocol Buffer format
  */
 final class UsageStatsProto {
+    private static String TAG = "UsageStatsProto";
+
     // Static-only utility class.
     private UsageStatsProto() {}
 
+    private static List<String> readStringPool(ProtoInputStream proto) throws IOException {
+
+        final long token = proto.start(IntervalStatsProto.STRINGPOOL);
+        List<String> stringPool;
+        if (proto.isNextField(IntervalStatsProto.StringPool.SIZE)) {
+            stringPool = new ArrayList(proto.readInt(IntervalStatsProto.StringPool.SIZE));
+        } else {
+            stringPool = new ArrayList();
+        }
+        while (proto.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (proto.getFieldNumber()) {
+                case (int) IntervalStatsProto.StringPool.STRINGS:
+                    stringPool.add(proto.readString(IntervalStatsProto.StringPool.STRINGS));
+                    break;
+            }
+        }
+        proto.end(token);
+        return stringPool;
+    }
+
     private static void loadUsageStats(ProtoInputStream proto, long fieldId,
-            IntervalStats statsOut)
+            IntervalStats statsOut, List<String> stringPool)
             throws IOException {
 
         final long token = proto.start(fieldId);
         UsageStats stats;
-        if (proto.isNextField(IntervalStatsProto.UsageStats.PACKAGE)) {
-            // Fast path reading the package name. Most cases this should work since it is
+        if (proto.isNextField(IntervalStatsProto.UsageStats.PACKAGE_INDEX)) {
+            // Fast path reading the package name index. Most cases this should work since it is
             // written first
+            stats = statsOut.getOrCreateUsageStats(
+                    stringPool.get(proto.readInt(IntervalStatsProto.UsageStats.PACKAGE_INDEX) - 1));
+        } else if (proto.isNextField(IntervalStatsProto.UsageStats.PACKAGE)) {
+            // No package index, try package name instead
             stats = statsOut.getOrCreateUsageStats(
                     proto.readString(IntervalStatsProto.UsageStats.PACKAGE));
         } else {
@@ -57,13 +86,23 @@ final class UsageStatsProto {
             switch (proto.getFieldNumber()) {
                 case (int) IntervalStatsProto.UsageStats.PACKAGE:
                     // Fast track failed from some reason, add UsageStats object to statsOut now
-                    UsageStats temp = statsOut.getOrCreateUsageStats(
+                    UsageStats tempPackage = statsOut.getOrCreateUsageStats(
                             proto.readString(IntervalStatsProto.UsageStats.PACKAGE));
-                    temp.mLastTimeUsed = stats.mLastTimeUsed;
-                    temp.mTotalTimeInForeground = stats.mTotalTimeInForeground;
-                    temp.mLastEvent = stats.mLastEvent;
-                    temp.mAppLaunchCount = stats.mAppLaunchCount;
-                    stats = temp;
+                    tempPackage.mLastTimeUsed = stats.mLastTimeUsed;
+                    tempPackage.mTotalTimeInForeground = stats.mTotalTimeInForeground;
+                    tempPackage.mLastEvent = stats.mLastEvent;
+                    tempPackage.mAppLaunchCount = stats.mAppLaunchCount;
+                    stats = tempPackage;
+                    break;
+                case (int) IntervalStatsProto.UsageStats.PACKAGE_INDEX:
+                    // Fast track failed from some reason, add UsageStats object to statsOut now
+                    UsageStats tempPackageIndex = statsOut.getOrCreateUsageStats(stringPool.get(
+                            proto.readInt(IntervalStatsProto.UsageStats.PACKAGE_INDEX) - 1));
+                    tempPackageIndex.mLastTimeUsed = stats.mLastTimeUsed;
+                    tempPackageIndex.mTotalTimeInForeground = stats.mTotalTimeInForeground;
+                    tempPackageIndex.mLastEvent = stats.mLastEvent;
+                    tempPackageIndex.mAppLaunchCount = stats.mAppLaunchCount;
+                    stats = tempPackageIndex;
                     break;
                 case (int) IntervalStatsProto.UsageStats.LAST_TIME_ACTIVE_MS:
                     stats.mLastTimeUsed = statsOut.beginTime + proto.readLong(
@@ -237,10 +276,10 @@ final class UsageStatsProto {
         }
     }
 
-    private static void loadEvent(ProtoInputStream proto, long fieldId, IntervalStats statsOut)
-            throws IOException {
+    private static void loadEvent(ProtoInputStream proto, long fieldId, IntervalStats statsOut,
+            List<String> stringPool) throws IOException {
         final long token = proto.start(fieldId);
-        UsageEvents.Event event = statsOut.buildEvent(proto);
+        UsageEvents.Event event = statsOut.buildEvent(proto, stringPool);
         proto.end(token);
         if (event.mPackage == null) {
             throw new ProtocolException("no package field present");
@@ -252,11 +291,30 @@ final class UsageStatsProto {
         statsOut.events.insert(event);
     }
 
+    private static void writeStringPool(ProtoOutputStream proto, final IntervalStats stats)
+            throws IOException {
+        final long token = proto.start(IntervalStatsProto.STRINGPOOL);
+        final int size = stats.mStringCache.size();
+        proto.write(IntervalStatsProto.StringPool.SIZE, size);
+        for (int i = 0; i < size; i++) {
+            proto.write(IntervalStatsProto.StringPool.STRINGS, stats.mStringCache.valueAt(i));
+        }
+        proto.end(token);
+    }
+
     private static void writeUsageStats(ProtoOutputStream proto, long fieldId,
             final IntervalStats stats, final UsageStats usageStats) throws IOException {
         final long token = proto.start(fieldId);
         // Write the package name first, so loadUsageStats can avoid creating an extra object
-        proto.write(IntervalStatsProto.UsageStats.PACKAGE, usageStats.mPackageName);
+        final int packageIndex = stats.mStringCache.indexOf(usageStats.mPackageName);
+        if (packageIndex >= 0) {
+            proto.write(IntervalStatsProto.UsageStats.PACKAGE_INDEX, packageIndex + 1);
+        } else {
+            // Package not in Stringpool for some reason, write full string instead
+            Slog.w(TAG, "UsageStats package name (" + usageStats.mPackageName
+                    + ") not found in IntervalStats string cache");
+            proto.write(IntervalStatsProto.UsageStats.PACKAGE, usageStats.mPackageName);
+        }
         proto.write(IntervalStatsProto.UsageStats.LAST_TIME_ACTIVE_MS,
                 usageStats.mLastTimeUsed - stats.beginTime);
         proto.write(IntervalStatsProto.UsageStats.TOTAL_TIME_ACTIVE_MS,
@@ -329,8 +387,26 @@ final class UsageStatsProto {
     private static void writeEvent(ProtoOutputStream proto, long fieldId, final IntervalStats stats,
             final UsageEvents.Event event) throws IOException {
         final long token = proto.start(fieldId);
-        proto.write(IntervalStatsProto.Event.PACKAGE, event.mPackage);
-        proto.write(IntervalStatsProto.Event.CLASS, event.mClass);
+        final int packageIndex = stats.mStringCache.indexOf(event.mPackage);
+        if (packageIndex >= 0) {
+            proto.write(IntervalStatsProto.Event.PACKAGE_INDEX, packageIndex + 1);
+        } else {
+            // Package not in Stringpool for some reason, write full string instead
+            Slog.w(TAG, "Usage event package name (" + event.mPackage
+                    + ") not found in IntervalStats string cache");
+            proto.write(IntervalStatsProto.Event.PACKAGE, event.mPackage);
+        }
+        if (event.mClass != null) {
+            final int classIndex = stats.mStringCache.indexOf(event.mClass);
+            if (classIndex >= 0) {
+                proto.write(IntervalStatsProto.Event.CLASS_INDEX, classIndex + 1);
+            } else {
+                // Class not in Stringpool for some reason, write full string instead
+                Slog.w(TAG, "Usage event class name (" + event.mClass
+                        + ") not found in IntervalStats string cache");
+                proto.write(IntervalStatsProto.Event.CLASS, event.mClass);
+            }
+        }
         proto.write(IntervalStatsProto.Event.TIME_MS, event.mTimeStamp - stats.beginTime);
         proto.write(IntervalStatsProto.Event.FLAGS, event.mFlags);
         proto.write(IntervalStatsProto.Event.TYPE, event.mEventType);
@@ -352,8 +428,19 @@ final class UsageStatsProto {
                 break;
             case UsageEvents.Event.NOTIFICATION_INTERRUPTION:
                 if (event.mNotificationChannelId != null) {
-                    proto.write(IntervalStatsProto.Event.NOTIFICATION_CHANNEL,
+                    final int channelIndex = stats.mStringCache.indexOf(
                             event.mNotificationChannelId);
+                    if (channelIndex >= 0) {
+                        proto.write(IntervalStatsProto.Event.NOTIFICATION_CHANNEL_INDEX,
+                                channelIndex + 1);
+                    } else {
+                        // Channel not in Stringpool for some reason, write full string instead
+                        Slog.w(TAG, "Usage event notification channel name ("
+                                + event.mNotificationChannelId
+                                + ") not found in IntervalStats string cache");
+                        proto.write(IntervalStatsProto.Event.NOTIFICATION_CHANNEL,
+                                event.mNotificationChannelId);
+                    }
                 }
                 break;
         }
@@ -368,6 +455,7 @@ final class UsageStatsProto {
      */
     public static void read(InputStream in, IntervalStats statsOut) throws IOException {
         final ProtoInputStream proto = new ProtoInputStream(in);
+        List<String> stringPool = null;
 
         statsOut.packageStats.clear();
         statsOut.configurations.clear();
@@ -399,14 +487,18 @@ final class UsageStatsProto {
                     loadCountAndTime(proto, IntervalStatsProto.KEYGUARD_HIDDEN,
                             statsOut.keyguardHiddenTracker);
                     break;
+                case (int) IntervalStatsProto.STRINGPOOL:
+                    stringPool = readStringPool(proto);
+                    statsOut.mStringCache.addAll(stringPool);
+                    break;
                 case (int) IntervalStatsProto.PACKAGES:
-                    loadUsageStats(proto, IntervalStatsProto.PACKAGES, statsOut);
+                    loadUsageStats(proto, IntervalStatsProto.PACKAGES, statsOut, stringPool);
                     break;
                 case (int) IntervalStatsProto.CONFIGURATIONS:
                     loadConfigStats(proto, IntervalStatsProto.CONFIGURATIONS, statsOut);
                     break;
                 case (int) IntervalStatsProto.EVENT_LOG:
-                    loadEvent(proto, IntervalStatsProto.EVENT_LOG, statsOut);
+                    loadEvent(proto, IntervalStatsProto.EVENT_LOG, statsOut, stringPool);
                     break;
                 case ProtoInputStream.NO_MORE_FIELDS:
                     if (statsOut.endTime == 0) {
@@ -426,8 +518,10 @@ final class UsageStatsProto {
      */
     public static void write(OutputStream out, IntervalStats stats) throws IOException {
         final ProtoOutputStream proto = new ProtoOutputStream(out);
-
         proto.write(IntervalStatsProto.END_TIME_MS, stats.endTime - stats.beginTime);
+        // String pool should be written before the rest of the usage stats
+        writeStringPool(proto, stats);
+
         writeCountAndTime(proto, IntervalStatsProto.INTERACTIVE, stats.interactiveTracker.count,
                 stats.interactiveTracker.duration);
         writeCountAndTime(proto, IntervalStatsProto.NON_INTERACTIVE,

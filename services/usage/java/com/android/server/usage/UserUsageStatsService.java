@@ -176,12 +176,8 @@ class UserUsageStatsService {
                     currentDailyStats.activeConfiguration, newFullConfig);
         }
 
-        // Add the event to the daily list.
-        if (currentDailyStats.events == null) {
-            currentDailyStats.events = new EventList();
-        }
         if (event.mEventType != UsageEvents.Event.SYSTEM_INTERACTION) {
-            currentDailyStats.events.insert(event);
+            currentDailyStats.addEvent(event);
         }
 
         boolean incrementAppLaunch = false;
