@@ -27,6 +27,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.annotation.AnyThread;
 import android.annotation.BinderThread;
 import android.annotation.ColorInt;
+import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -2114,7 +2115,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private void updateStatusIcon(@NonNull IBinder token, String packageName, int iconId) {
+    private void updateStatusIcon(@NonNull IBinder token, String packageName,
+            @DrawableRes int iconId) {
         synchronized (mMethodMap) {
             if (!calledWithValidToken(token)) {
                 return;
@@ -5034,7 +5036,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void updateStatusIcon(String packageName, int iconId) {
+        public void updateStatusIcon(String packageName, @DrawableRes int iconId) {
             mImms.updateStatusIcon(mToken, packageName, iconId);
         }
 

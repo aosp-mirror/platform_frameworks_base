@@ -17,7 +17,7 @@
 package com.android.internal.inputmethod;
 
 import android.annotation.AnyThread;
-import android.annotation.IdRes;
+import android.annotation.DrawableRes;
 import android.annotation.Nullable;
 import android.net.Uri;
 import android.os.IBinder;
@@ -199,7 +199,7 @@ public final class InputMethodPrivilegedOperations {
      * @param iconResId resource ID of the icon to be loaded
      */
     @AnyThread
-    public void updateStatusIcon(String packageName, @IdRes int iconResId) {
+    public void updateStatusIcon(String packageName, @DrawableRes int iconResId) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;

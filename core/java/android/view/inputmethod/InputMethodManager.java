@@ -18,6 +18,7 @@ package android.view.inputmethod;
 
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
+import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
@@ -776,7 +777,7 @@ public final class InputMethodManager {
      * class are intended for app developers interacting with the IME.
      */
     @Deprecated
-    public void showStatusIcon(IBinder imeToken, String packageName, int iconId) {
+    public void showStatusIcon(IBinder imeToken, String packageName, @DrawableRes int iconId) {
         mPrivOpsRegistry.get(imeToken).updateStatusIcon(packageName, iconId);
     }
 
