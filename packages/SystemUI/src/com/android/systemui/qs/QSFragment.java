@@ -288,6 +288,7 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
         mHeader.setListening(listening);
         mFooter.setListening(listening);
         mQSPanel.setListening(mListening && mQsExpanded);
+        mQSPanel.getFooter().setListening(listening);
     }
 
     @Override
