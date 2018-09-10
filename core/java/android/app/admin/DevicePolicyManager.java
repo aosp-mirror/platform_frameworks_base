@@ -3450,15 +3450,14 @@ public class DevicePolicyManager {
      * @param flags Bit mask of additional options: currently supported flags are
      *            {@link #WIPE_EXTERNAL_STORAGE} and {@link #WIPE_RESET_PROTECTION_DATA}.
      * @param reason a string that contains the reason for wiping data, which can be
-     *                          presented to the user.
+     *            presented to the user. If the string is null or empty, user won't be notified.
      * @throws SecurityException if the calling application does not own an active administrator
      *             that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}
      * @throws IllegalArgumentException if the input reason string is null or empty.
      */
-    public void wipeData(int flags, @NonNull CharSequence reason) {
+    public void wipeData(int flags, CharSequence reason) {
         throwIfParentInstance("wipeData");
-        Preconditions.checkNotNull(reason, "CharSequence is null");
-        wipeDataInternal(flags, reason.toString());
+        wipeDataInternal(flags, reason != null ? reason.toString() : null);
     }
 
     /**
@@ -3469,7 +3468,7 @@ public class DevicePolicyManager {
      * @see #wipeData(int, CharSequence)
      * @hide
      */
-    private void wipeDataInternal(int flags, @NonNull String wipeReasonForUser) {
+    private void wipeDataInternal(int flags, String wipeReasonForUser) {
         if (mService != null) {
             try {
                 mService.wipeDataWithReason(flags, wipeReasonForUser);

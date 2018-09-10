@@ -5969,7 +5969,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             success = mUserManagerInternal.removeUserEvenWhenDisallowed(userId);
             if (!success) {
                 Slog.w(LOG_TAG, "Couldn't remove user " + userId);
-            } else if (isManagedProfile(userId)) {
+            } else if (isManagedProfile(userId) && !TextUtils.isEmpty(wipeReasonForUser)) {
                 sendWipeProfileNotification(wipeReasonForUser);
             }
         } catch (RemoteException re) {
@@ -5984,7 +5984,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return;
         }
-        Preconditions.checkStringNotEmpty(wipeReasonForUser, "wipeReasonForUser is null or empty");
         enforceFullCrossUsersPermission(mInjector.userHandleGetCallingUserId());
 
         final ActiveAdmin admin;
