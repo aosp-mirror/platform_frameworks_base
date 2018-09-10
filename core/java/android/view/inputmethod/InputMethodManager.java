@@ -55,6 +55,8 @@ import android.view.ViewRootImpl;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillManager;
 
+import com.android.internal.inputmethod.InputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputConnectionWrapper;
 import com.android.internal.view.IInputContext;
@@ -404,6 +406,9 @@ public final class InputMethodManager {
 
     final Pool<PendingEvent> mPendingEventPool = new SimplePool<>(20);
     final SparseArray<PendingEvent> mPendingEvents = new SparseArray<>(20);
+
+    private final InputMethodPrivilegedOperationsRegistry mPrivOpsRegistry =
+            new InputMethodPrivilegedOperationsRegistry();
 
     // -----------------------------------------------------------
 
@@ -772,11 +777,7 @@ public final class InputMethodManager {
      */
     @Deprecated
     public void showStatusIcon(IBinder imeToken, String packageName, int iconId) {
-        try {
-            mService.updateStatusIcon(imeToken, packageName, iconId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mPrivOpsRegistry.get(imeToken).updateStatusIcon(packageName, iconId);
     }
 
     /**
@@ -786,11 +787,7 @@ public final class InputMethodManager {
      */
     @Deprecated
     public void hideStatusIcon(IBinder imeToken) {
-        try {
-            mService.updateStatusIcon(imeToken, null, 0);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mPrivOpsRegistry.get(imeToken).updateStatusIcon(null, 0);
     }
 
     /** @hide */
@@ -1831,11 +1828,18 @@ public final class InputMethodManager {
      */
     @Deprecated
     public void setInputMethod(IBinder token, String id) {
-        try {
-            mService.setInputMethod(token, id);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (token == null) {
+            // Note: null token is allowed for callers that have WRITE_SECURE_SETTINGS permission.
+            // Thus we cannot always rely on mPrivOpsRegistry unfortunately.
+            // TODO(Bug 114488811): Consider deprecating null token rule.
+            try {
+                mService.setInputMethod(token, id);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            return;
         }
+        mPrivOpsRegistry.get(token).setInputMethod(id);
     }
 
     /**
@@ -1853,11 +1857,18 @@ public final class InputMethodManager {
      */
     @Deprecated
     public void setInputMethodAndSubtype(IBinder token, String id, InputMethodSubtype subtype) {
-        try {
-            mService.setInputMethodAndSubtype(token, id, subtype);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (token == null) {
+            // Note: null token is allowed for callers that have WRITE_SECURE_SETTINGS permission.
+            // Thus we cannot always rely on mPrivOpsRegistry unfortunately.
+            // TODO(Bug 114488811): Consider deprecating null token rule.
+            try {
+                mService.setInputMethodAndSubtype(token, id, subtype);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            return;
         }
+        mPrivOpsRegistry.get(token).setInputMethodAndSubtype(id, subtype);
     }
 
     /**
@@ -1877,11 +1888,7 @@ public final class InputMethodManager {
      */
     @Deprecated
     public void hideSoftInputFromInputMethod(IBinder token, int flags) {
-        try {
-            mService.hideMySoftInput(token, flags);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mPrivOpsRegistry.get(token).hideMySoftInput(flags);
     }
 
     /**
@@ -1902,11 +1909,7 @@ public final class InputMethodManager {
      */
     @Deprecated
     public void showSoftInputFromInputMethod(IBinder token, int flags) {
-        try {
-            mService.showMySoftInput(token, flags);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mPrivOpsRegistry.get(token).showMySoftInput(flags);
     }
 
     /**
@@ -2285,11 +2288,17 @@ public final class InputMethodManager {
      */
     @Deprecated
     public boolean switchToLastInputMethod(IBinder imeToken) {
-        try {
-            return mService.switchToPreviousInputMethod(imeToken);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (imeToken == null) {
+            // Note: null token is allowed for callers that have WRITE_SECURE_SETTINGS permission.
+            // Thus we cannot always rely on mPrivOpsRegistry unfortunately.
+            // TODO(Bug 114488811): Consider deprecating null token rule.
+            try {
+                return mService.switchToPreviousInputMethod(imeToken);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
+        return mPrivOpsRegistry.get(imeToken).switchToPreviousInputMethod();
     }
 
     /**
@@ -2307,11 +2316,17 @@ public final class InputMethodManager {
      */
     @Deprecated
     public boolean switchToNextInputMethod(IBinder imeToken, boolean onlyCurrentIme) {
-        try {
-            return mService.switchToNextInputMethod(imeToken, onlyCurrentIme);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (imeToken == null) {
+            // Note: null token is allowed for callers that have WRITE_SECURE_SETTINGS permission.
+            // Thus we cannot always rely on mPrivOpsRegistry unfortunately.
+            // TODO(Bug 114488811): Consider deprecating null token rule.
+            try {
+                return mService.switchToNextInputMethod(imeToken, onlyCurrentIme);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
+        return mPrivOpsRegistry.get(imeToken).switchToNextInputMethod(onlyCurrentIme);
     }
 
     /**
@@ -2330,11 +2345,7 @@ public final class InputMethodManager {
      */
     @Deprecated
     public boolean shouldOfferSwitchingToNextInputMethod(IBinder imeToken) {
-        try {
-            return mService.shouldOfferSwitchingToNextInputMethod(imeToken);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return mPrivOpsRegistry.get(imeToken).shouldOfferSwitchingToNextInputMethod();
     }
 
     /**
@@ -2473,5 +2484,35 @@ public final class InputMethodManager {
         sb.append(",window=" + view.getWindowToken());
         sb.append(",temporaryDetach=" + view.isTemporarilyDetached());
         return sb.toString();
+    }
+
+    /**
+     * Called by {@link InputMethodService} so that API calls to deprecated ones defined in this
+     * class can be forwarded to {@link InputMethodPrivilegedOperations}.
+     *
+     * <p>Note: this method does not hold strong references to {@code token} and {@code ops}. The
+     * registry entry will be automatically cleared after {@code token} is garbage collected.</p>
+     *
+     * @param token IME token that is associated with {@code ops}
+     * @param ops {@link InputMethodPrivilegedOperations} that is associated with {@code token}
+     * @hide
+     */
+    public void registerInputMethodPrivOps(IBinder token, InputMethodPrivilegedOperations ops) {
+        mPrivOpsRegistry.put(token, ops);
+    }
+
+    /**
+     * Called from {@link InputMethodService#onDestroy()} to make sure that deprecated IME APIs
+     * defined in this class can no longer access to {@link InputMethodPrivilegedOperations}.
+     *
+     * <p>Note: Calling this method is optional, but at least gives more explict error message in
+     * logcat when IME developers are doing something unsupported (e.g. trying to call IME APIs
+     * after {@link InputMethodService#onDestroy()}).</p>
+     *
+     * @param token IME token to be removed.
+     * @hide
+     */
+    public void unregisterInputMethodPrivOps(IBinder token) {
+        mPrivOpsRegistry.remove(token);
     }
 }

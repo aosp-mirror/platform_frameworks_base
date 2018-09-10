@@ -2113,8 +2113,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @Override
-    public void updateStatusIcon(IBinder token, String packageName, int iconId) {
+    @BinderThread
+    private void updateStatusIcon(@NonNull IBinder token, String packageName, int iconId) {
         synchronized (mMethodMap) {
             if (!calledWithValidToken(token)) {
                 return;
@@ -3060,8 +3060,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @Override
-    public boolean shouldOfferSwitchingToNextInputMethod(IBinder token) {
+    @BinderThread
+    private boolean shouldOfferSwitchingToNextInputMethod(@NonNull IBinder token) {
         if (!calledFromValidUser()) {
             return false;
         }
@@ -3220,8 +3220,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @Override
-    public void hideMySoftInput(IBinder token, int flags) {
+    @BinderThread
+    private void hideMySoftInput(@NonNull IBinder token, int flags) {
         if (!calledFromValidUser()) {
             return;
         }
@@ -3238,8 +3238,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @Override
-    public void showMySoftInput(IBinder token, int flags) {
+    @BinderThread
+    private void showMySoftInput(@NonNull IBinder token, int flags) {
         if (!calledFromValidUser()) {
             return;
         }
