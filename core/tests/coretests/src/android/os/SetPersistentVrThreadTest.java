@@ -24,7 +24,6 @@ import android.os.Process;
 import android.provider.Settings;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
 
 /**
  * Tests ActivityManager#setPersistentVrThread and ActivityManager#setVrThread's
@@ -76,9 +75,11 @@ public class SetPersistentVrThreadTest extends ActivityInstrumentationTestCase2<
     }
 
     private void setPersistentVrModeEnabled(boolean enable) throws Throwable {
-        mVrManager.setPersistentVrModeEnabled(enable);
-        // Allow the system time to send out callbacks for persistent VR mode.
-        Thread.sleep(200);
+        if (mVrManager != null) {
+            mVrManager.setPersistentVrModeEnabled(enable);
+            // Allow the system time to send out callbacks for persistent VR mode.
+            Thread.sleep(200);
+        }
     }
 
     @SmallTest
