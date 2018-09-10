@@ -96,6 +96,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     public void setListening(boolean listening) {
         if (listening) {
             mSecurityController.addCallback(mCallback);
+            refreshState();
         } else {
             mSecurityController.removeCallback(mCallback);
         }
