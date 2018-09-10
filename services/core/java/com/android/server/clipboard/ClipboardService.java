@@ -26,6 +26,7 @@ import android.app.KeyguardManager;
 import android.app.UriGrantsManager;
 import android.content.ClipData;
 import android.content.ClipDescription;
+import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -48,6 +49,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -630,8 +632,11 @@ public class ClipboardService extends SystemService {
         // The default IME is always allowed to access the clipboard.
         String defaultIme = Settings.Secure.getStringForUser(getContext().getContentResolver(),
                 Settings.Secure.DEFAULT_INPUT_METHOD, UserHandle.getUserId(callingUid));
-        if (defaultIme != null && defaultIme.equals(callingPackage)) {
-            return true;
+        if (!TextUtils.isEmpty(defaultIme)) {
+            final String imePkg = ComponentName.unflattenFromString(defaultIme).getPackageName();
+            if (imePkg.equals(callingPackage)) {
+                return true;
+            }
         }
 
         // Otherwise only focused applications can access the clipboard.
