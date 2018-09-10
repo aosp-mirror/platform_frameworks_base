@@ -6512,6 +6512,11 @@ message MetricsEvent {
     // OS: Q
     SETTINGS_GESTURE_WAKE_SCREEN = 1570;
 
+    // OPEN: Settings > Network & internet > Mobile network
+    // CATEGORY: SETTINGS
+    // OS: Q
+    MOBILE_NETWORK = 1571;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.
