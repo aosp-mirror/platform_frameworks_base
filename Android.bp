@@ -683,6 +683,7 @@ java_defaults {
 
     static_libs: [
         "framework-protos",
+        "mediaplayer2-protos",
         "android.hidl.base-V1.0-java",
         "android.hardware.cas-V1.0-java",
         "android.hardware.contexthub-V1.0-java",

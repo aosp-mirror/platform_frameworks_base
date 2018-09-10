@@ -773,22 +773,6 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
     }
 
     /**
-     * Invoke a generic method on the native player using opaque
-     * parcels for the request and reply. Both payloads' format is a
-     * convention between the java caller and the native player.
-     * Must be called after setDataSource to make sure a native player
-     * exists. On failure, a RuntimeException is thrown.
-     *
-     * @param request Parcel with the data for the extension. The
-     * caller must use {@link #newRequest()} to get one.
-     *
-     * @param reply Output parcel with the data returned by the
-     * native player.
-     * {@hide}
-     */
-    public void invoke(Parcel request, Parcel reply) { }
-
-    /**
      * Insert a task in the command queue to help the client to identify whether a batch
      * of commands has been finished. When this command is processed, a notification
      * {@code EventCallback.onCommandLabelReached} will be fired with the

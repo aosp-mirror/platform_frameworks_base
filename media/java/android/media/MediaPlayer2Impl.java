@@ -25,6 +25,9 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.SurfaceTexture;
+import android.media.MediaPlayer2Proto;
+import android.media.MediaPlayer2Proto.PlayerMessage;
+import android.media.MediaPlayer2Proto.Value;
 import android.media.SubtitleController.Anchor;
 import android.media.SubtitleTrack.RenderingWidget;
 import android.net.Uri;
@@ -49,6 +52,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.widget.VideoView;
 
+import com.android.framework.protobuf.InvalidProtocolBufferException;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
@@ -72,6 +76,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -555,27 +560,29 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     }
 
     /**
-     * Invoke a generic method on the native player using opaque
-     * parcels for the request and reply. Both payloads' format is a
+     * Invoke a generic method on the native player using opaque protocol
+     * buffer message for the request and reply. Both payloads' format is a
      * convention between the java caller and the native player.
-     * Must be called after setDataSource or setPlaylist to make sure a native player
-     * exists. On failure, a RuntimeException is thrown.
      *
-     * @param request Parcel with the data for the extension. The
+     * @param request PlayerMessage for the extension. The
      * caller must use {@link #newRequest()} to get one.
      *
-     * @param reply Output parcel with the data returned by the
+     * @return PlayerMessage with the data returned by the
      * native player.
-     * {@hide}
      */
-    @Override
-    public void invoke(Parcel request, Parcel reply) {
-        int retcode = native_invoke(request, reply);
-        reply.setDataPosition(0);
-        if (retcode != 0) {
-            throw new RuntimeException("failure code: " + retcode);
+    private PlayerMessage invoke(PlayerMessage msg) {
+        byte[] ret = _invoke(msg.toByteArray());
+        if (ret == null) {
+            return null;
+        }
+        try {
+            return PlayerMessage.parseFrom(ret);
+        } catch (InvalidProtocolBufferException e) {
+            return null;
         }
     }
+
+    private native byte[] _invoke(byte[] request);
 
     @Override
     public void notifyWhenCommandLabelReached(Object label) {
@@ -683,16 +690,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     final String msg = "Scaling mode " + mode + " is not supported";
                     throw new IllegalArgumentException(msg);
                 }
-                Parcel request = Parcel.obtain();
-                Parcel reply = Parcel.obtain();
-                try {
-                    request.writeInt(INVOKE_ID_SET_VIDEO_SCALE_MODE);
-                    request.writeInt(mode);
-                    invoke(request, reply);
-                } finally {
-                    request.recycle();
-                    reply.recycle();
-                }
+                PlayerMessage request = PlayerMessage.newBuilder()
+                        .addValues(Value.newBuilder()
+                                .setInt32Value(INVOKE_ID_SET_VIDEO_SCALE_MODE))
+                        .addValues(Value.newBuilder().setInt32Value(mode))
+                        .build();
+                invoke(request);
             }
         });
     }
@@ -1799,14 +1802,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private native void _setAuxEffectSendLevel(float level);
 
     /*
-     * @param request Parcel destinated to the media player.
-     * @param reply[out] Parcel that will contain the reply.
-     * @return The status code.
-     */
-    private native final int native_invoke(Parcel request, Parcel reply);
-
-
-    /*
      * @param update_only If true fetch only the set of metadata that have
      *                    changed since the last invocation of getMetadata.
      *                    The set is built using the unfiltered
@@ -1886,18 +1881,18 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         final int mTrackType;
         final MediaFormat mFormat;
 
-        TrackInfoImpl(Parcel in) {
-            mTrackType = in.readInt();
-            // TODO: parcel in the full MediaFormat; currently we are using createSubtitleFormat
+        TrackInfoImpl(Iterator<Value> in) {
+            mTrackType = in.next().getInt32Value();
+            // TODO: build the full MediaFormat; currently we are using createSubtitleFormat
             // even for audio/video tracks, meaning we only set the mime and language.
-            String mime = in.readString();
-            String language = in.readString();
+            String mime = in.next().getStringValue();
+            String language = in.next().getStringValue();
             mFormat = MediaFormat.createSubtitleFormat(mime, language);
 
             if (mTrackType == MEDIA_TRACK_TYPE_SUBTITLE) {
-                mFormat.setInteger(MediaFormat.KEY_IS_AUTOSELECT, in.readInt());
-                mFormat.setInteger(MediaFormat.KEY_IS_DEFAULT, in.readInt());
-                mFormat.setInteger(MediaFormat.KEY_IS_FORCED_SUBTITLE, in.readInt());
+                mFormat.setInteger(MediaFormat.KEY_IS_AUTOSELECT, in.next().getInt32Value());
+                mFormat.setInteger(MediaFormat.KEY_IS_DEFAULT, in.next().getInt32Value());
+                mFormat.setInteger(MediaFormat.KEY_IS_FORCED_SUBTITLE, in.next().getInt32Value());
             }
         }
 
@@ -1952,23 +1947,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             out.append("}");
             return out.toString();
         }
-
-        /**
-         * Used to read a TrackInfoImpl from a Parcel.
-         */
-        /* package private */ static final Parcelable.Creator<TrackInfoImpl> CREATOR
-                = new Parcelable.Creator<TrackInfoImpl>() {
-                    @Override
-                    public TrackInfoImpl createFromParcel(Parcel in) {
-                        return new TrackInfoImpl(in);
-                    }
-
-                    @Override
-                    public TrackInfoImpl[] newArray(int size) {
-                        return new TrackInfoImpl[size];
-                    }
-                };
-
     };
 
     // We would like domain specific classes with more informative names than the `first` and `second`
@@ -2010,17 +1988,23 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     }
 
     private TrackInfoImpl[] getInbandTrackInfoImpl() throws IllegalStateException {
-        Parcel request = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        try {
-            request.writeInt(INVOKE_ID_GET_TRACK_INFO);
-            invoke(request, reply);
-            TrackInfoImpl trackInfo[] = reply.createTypedArray(TrackInfoImpl.CREATOR);
-            return trackInfo;
-        } finally {
-            request.recycle();
-            reply.recycle();
+        PlayerMessage request = PlayerMessage.newBuilder()
+                .addValues(Value.newBuilder().setInt32Value(INVOKE_ID_GET_TRACK_INFO))
+                .build();
+        PlayerMessage response = invoke(request);
+        if (response == null) {
+            return null;
         }
+        Iterator<Value> in = response.getValuesList().iterator();
+        int size = in.next().getInt32Value();
+        if (size == 0) {
+            return null;
+        }
+        TrackInfoImpl trackInfo[] = new TrackInfoImpl[size];
+        for (int i = 0; i < size; ++i) {
+            trackInfo[i] = new TrackInfoImpl(in);
+        }
+        return trackInfo;
     }
 
     /*
@@ -2481,26 +2465,24 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             }
         }
 
-        Parcel request = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        try {
-            request.writeInt(INVOKE_ID_GET_SELECTED_TRACK);
-            request.writeInt(trackType);
-            invoke(request, reply);
-            int inbandTrackIndex = reply.readInt();
-            synchronized (mIndexTrackPairs) {
-                for (int i = 0; i < mIndexTrackPairs.size(); i++) {
-                    Pair<Integer, SubtitleTrack> p = mIndexTrackPairs.get(i);
-                    if (p.first != null && p.first == inbandTrackIndex) {
-                        return i;
-                    }
+        PlayerMessage request = PlayerMessage.newBuilder()
+                .addValues(Value.newBuilder().setInt32Value(INVOKE_ID_GET_SELECTED_TRACK))
+                .addValues(Value.newBuilder().setInt32Value(trackType))
+                .build();
+        PlayerMessage response = invoke(request);
+        if (response == null) {
+            return -1;
+        }
+        int inbandTrackIndex = response.getValues(0).getInt32Value();
+        synchronized (mIndexTrackPairs) {
+            for (int i = 0; i < mIndexTrackPairs.size(); i++) {
+                Pair<Integer, SubtitleTrack> p = mIndexTrackPairs.get(i);
+                if (p.first != null && p.first == inbandTrackIndex) {
+                    return i;
                 }
             }
-            return -1;
-        } finally {
-            request.recycle();
-            reply.recycle();
         }
+        return -1;
     }
 
     /**
@@ -2617,16 +2599,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private void selectOrDeselectInbandTrack(int index, boolean select)
             throws IllegalStateException {
-        Parcel request = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        try {
-            request.writeInt(select? INVOKE_ID_SELECT_TRACK: INVOKE_ID_DESELECT_TRACK);
-            request.writeInt(index);
-            invoke(request, reply);
-        } finally {
-            request.recycle();
-            reply.recycle();
-        }
+        PlayerMessage request = PlayerMessage.newBuilder()
+                .addValues(Value.newBuilder().setInt32Value(
+                            select? INVOKE_ID_SELECT_TRACK: INVOKE_ID_DESELECT_TRACK))
+                .addValues(Value.newBuilder().setInt32Value(index))
+                .build();
+        invoke(request);
     }
 
     // Have to declare protected for finalize() since it is protected
@@ -2935,20 +2913,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
             case MEDIA_INFO:
             {
-                synchronized (mEventCbLock) {
-                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                        cb.first.execute(() -> cb.second.onInfo(
-                                mMediaPlayer, dsd, what, extra));
-                    }
-                }
-
                 switch (msg.arg1) {
-                    case MEDIA_INFO_DATA_SOURCE_START:
-                        if (isCurrentSrcId) {
-                            prepareNextDataSource();
-                        }
-                        break;
-
                     case MEDIA_INFO_VIDEO_TRACK_LAGGING:
                         Log.i(TAG, "Info (" + msg.arg1 + "," + msg.arg2 + ")");
                         break;
@@ -2980,6 +2945,20 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                         }
                         break;
                 }
+
+                synchronized (mEventCbLock) {
+                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
+                        cb.first.execute(() -> cb.second.onInfo(
+                                mMediaPlayer, dsd, what, extra));
+                    }
+                }
+
+                if (msg.arg1 == MEDIA_INFO_DATA_SOURCE_START) {
+                    if (isCurrentSrcId) {
+                        prepareNextDataSource();
+                    }
+                }
+
                 // No real default action so far.
                 return;
             }
