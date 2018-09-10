@@ -33,7 +33,7 @@ import java.lang.reflect.Modifier;
  * them as they come out of the message queue.
  * 
  * <p>There are two main uses for a Handler: (1) to schedule messages and
- * runnables to be executed as some point in the future; and (2) to enqueue
+ * runnables to be executed at some point in the future; and (2) to enqueue
  * an action to be performed on a different thread than your own.
  * 
  * <p>Scheduling messages is accomplished with the
