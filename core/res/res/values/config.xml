@@ -3510,6 +3510,9 @@
         <item>"wifi"</item>
     </string-array>
 
+    <!-- Default hyphenation frequency setting (0=NONE, 1=NORMAL, 2=FULL). -->
+    <item name="config_preferredHyphenationFrequency" format="integer" type="dimen">0</item>
+
     <!-- Package name for ManagedProvisioning which is responsible for provisioning work profiles. -->
     <string name="config_managed_provisioning_package" translatable="false">com.android.managedprovisioning</string>
 

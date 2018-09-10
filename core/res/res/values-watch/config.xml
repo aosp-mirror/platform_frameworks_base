@@ -70,4 +70,7 @@
 
      <!-- Default Gravity setting for the system Toast view. Equivalent to: Gravity.CENTER -->
      <integer name="config_toastDefaultGravity">0x00000011</integer>
+
+    <!-- Default hyphenation frequency setting (0=NONE, 1=NORMAL, 2=FULL). -->
+    <item name="config_preferredHyphenationFrequency" format="integer" type="dimen">1</item>
 </resources>
