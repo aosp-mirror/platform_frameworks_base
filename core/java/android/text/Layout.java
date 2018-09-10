@@ -619,7 +619,7 @@ public abstract class Layout {
                     previousLineBottom = lbottom;
                     int lbaseline = lbottom - getLineDescent(i);
 
-                    if (start >= spanEnd) {
+                    if (end >= spanEnd) {
                         // These should be infrequent, so we'll use this so that
                         // we don't have to check as often.
                         spanEnd = mLineBackgroundSpans.getNextTransition(start, textLength);
