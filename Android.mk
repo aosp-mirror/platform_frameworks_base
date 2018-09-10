@@ -351,7 +351,9 @@ $(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST): \
 	        <(comm -12 <(sort $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE)) \
 	                   $(INTERNAL_PLATFORM_HIDDENAPI_PRIVATE_LIST)) \
 	        $(PRIVATE_GREYLIST_INPUTS) \
-	    --input-dark-greylists frameworks/base/config/hiddenapi-dark-greylist.txt \
+	    --input-dark-greylists \
+	        frameworks/base/config/hiddenapi-dark-greylist.txt \
+	        $(PRIVATE_DARKGREYLIST_INPUTS) \
 	    --input-blacklists frameworks/base/config/hiddenapi-force-blacklist.txt \
 	    --output-whitelist $(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST).tmp \
 	    --output-light-greylist $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST).tmp \
