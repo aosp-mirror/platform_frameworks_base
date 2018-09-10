@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"صارف لاگ آؤٹ کریں"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"نیا صارف شامل کریں؟"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"جب آپ ایک نیا صارف شامل کرتے ہیں تو اس شخص کو اپنی جگہ کو ترتیب دینے کی ضرورت ہوتی ہے۔\n\nکوئی بھی صارف دیگر سبھی صارفین کیلئے ایپس کو اپ ڈیٹ کر سکتا ہے۔"</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"صارف کی حد مکمل ہو گئی"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">صرف <xliff:g id="COUNT">%d</xliff:g> صارفین بنائے جا سکتے ہیں۔</item>
+      <item quantity="one">صرف ایک صارف بنایا جا سکتا ہے۔</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"صارف کو ہٹائیں؟"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"اس صارف کی سبھی ایپس اور ڈیٹا حذف کر دیا جائے گا۔"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"ہٹائیں"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"بائیں جانب کا آئیکن"</string>
     <string name="right_icon" msgid="3952104823293824311">"دائيں جانب کا آئيکن"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"ٹائلز شامل کرنے کے لئے پکڑ کر گھسیٹیں"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"ٹائلز کو دوبارہ ترتیب دینے کیلئے پکڑ کر گھسیٹیں"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ہٹانے کیلئے یہاں گھسیٹیں؟"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"آپ کو کم از کم 6 ٹائلز کی ضرورت ہے"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ترمیم کریں"</string>

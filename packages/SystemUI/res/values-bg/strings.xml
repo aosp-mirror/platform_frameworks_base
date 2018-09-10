@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ИЗЛИЗАНЕ НА ПОТРЕБИТЕЛЯ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Да се добави ли нов потреб.?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Когато добавите нов потребител, той трябва да настрои работното си пространство.\n\nВсеки потребител може да актуализира приложенията за всички останали потребители."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Достигнахте огранич. за потребители"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">Можете да добавите до <xliff:g id="COUNT">%d</xliff:g> потребители.</item>
+      <item quantity="one">Може да бъде създаден само един потребител.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Да се премахне ли потребителят?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Всички приложения и данни на този потребител ще бъдат изтрити."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Премахване"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Лява икона"</string>
     <string name="right_icon" msgid="3952104823293824311">"Дясна икона"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Задръжте и плъзнете, за да добавите плочки"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Задръжте и плъзнете, за да пренаредите плочките"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Преместете тук с плъзгане за премахване"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Трябва да останат поне 6 плочки"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Редактиране"</string>

@@ -432,9 +432,13 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ATJUNGTI NAUDOTOJĄ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Pridėti naują naudotoją?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Kai pridedate naują naudotoją, šis asmuo turi nustatyti savo erdvę.\n\nBet kuris naudotojas gali atnaujinti visų kitų naudotojų programas."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Pasiekta naudotojų riba"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="one">Galite pridėti iki <xliff:g id="COUNT">%d</xliff:g> naudotojo.</item>
+      <item quantity="few">Galite pridėti iki <xliff:g id="COUNT">%d</xliff:g> naudotojų.</item>
+      <item quantity="many">Galite pridėti iki <xliff:g id="COUNT">%d</xliff:g> naudotojo.</item>
+      <item quantity="other">Galite pridėti iki <xliff:g id="COUNT">%d</xliff:g> naudotojų.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Pašalinti naudotoją?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Bus ištrinti visi šio naudotojo duomenys ir programos."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Pašalinti"</string>
@@ -742,8 +746,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Piktograma kairėje"</string>
     <string name="right_icon" msgid="3952104823293824311">"Piktograma dešinėje"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Jei norite pridėti išklotinių, laikykite nuspaudę ir vilkite"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Norėdami pertvarkyti išklot., laikykite nuspaudę ir vilkite"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Vilkite čia, jei norite pašalinti"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Turi būti bent 6 išklotinės"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Redaguoti"</string>

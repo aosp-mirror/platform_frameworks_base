@@ -204,8 +204,8 @@
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Đã bật Wifi."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Di động <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Pin <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Chế độ trên máy bay tắt."</string>
-    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Chế độ trên máy bay bật."</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Chế độ trên máy bay đang tắt."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Chế độ trên máy bay đang bật."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Đã tắt chế độ trên máy bay."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Đã bật chế độ trên máy bay."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"hoàn toàn tắt tiếng"</string>
@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ĐĂNG XUẤT NGƯỜI DÙNG"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Thêm người dùng mới?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Khi bạn thêm người dùng mới, người dùng đó cần thiết lập dung lượng lưu trữ của mình.\n\nMọi người dùng đều có thể cập nhật ứng dụng cho tất cả người dùng khác."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Đã đạt đến giới hạn người dùng"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">Bạn có thể thêm tối đa <xliff:g id="COUNT">%d</xliff:g> người dùng.</item>
+      <item quantity="one">Chỉ có thể tạo một người dùng.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Xóa người dùng?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Tất cả các ứng dụng và dữ liệu của người dùng này sẽ bị xóa."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Xóa"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Biểu tượng bên trái"</string>
     <string name="right_icon" msgid="3952104823293824311">"Biểu tượng bên phải"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Giữ và kéo để thêm ô"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Giữ và kéo để sắp xếp lại các ô"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Kéo vào đây để xóa"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Bạn cần ít nhất 6 ô"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Chỉnh sửa"</string>

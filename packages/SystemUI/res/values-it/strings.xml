@@ -428,9 +428,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"DISCONNETTI UTENTE"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Aggiungere un nuovo utente?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Il nuovo utente, una volta aggiunto, deve impostare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Limite di utenti raggiunto"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">Puoi aggiungere fino a <xliff:g id="COUNT">%d</xliff:g> utenti.</item>
+      <item quantity="one">È possibile creare un solo utente.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Rimuovere l\'utente?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Tutte le app e i dati di questo utente verranno eliminati."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Rimuovi"</string>
@@ -734,8 +736,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Icona sinistra"</string>
     <string name="right_icon" msgid="3952104823293824311">"Icona destra"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Tieni premuto e trascina per aggiungere riquadri"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Tieni premuto e trascina per riordinare i riquadri"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Trascina qui per rimuovere"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Occorrono almeno sei riquadri"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Modifica"</string>

@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"LOG BRUGEREN UD"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Vil du tilføje den nye bruger?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Når du tilføjer en ny bruger, skal personen konfigurere sit område.\n\nEnhver bruger kan opdatere apps for alle andre brugere."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Grænsen for antal brugere er nået"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="one">Du kan tilføje op til <xliff:g id="COUNT">%d</xliff:g> bruger.</item>
+      <item quantity="other">Du kan tilføje op til <xliff:g id="COUNT">%d</xliff:g> brugere.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Vil du fjerne brugeren?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Alle apps og data for denne bruger slettes."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Fjern"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Venstre ikon"</string>
     <string name="right_icon" msgid="3952104823293824311">"Højre ikon"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Tilføj felter ved at holde dem nede og trække"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Omorganiser felter ved at holde dem nede og trække"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Træk herhen for at fjerne"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Du skal bruge mindst seks felter"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Rediger"</string>

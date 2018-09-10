@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"පරිශීලකයා වරන්න"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"අලුත් පරිශීලකයෙක් එක් කරන්නද?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ඔබ අලුත් පරිශීලකයෙක් එකතු කරන විට, එම පුද්ගලයා ඔහුගේ වැඩ කරන ඉඩ සකසා ගත යුතුය.\n\nසියළුම අනෙක් පරිශීලකයින් සඳහා ඕනෑම පරිශීලකයෙකුට යාවත්කාලීන කළ හැක."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"පරිශීලක සීමාවට ළඟා විය"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="one">ඔබට පරිශීලකයින් <xliff:g id="COUNT">%d</xliff:g>ක් දක්වා එක් කළ හැකිය.</item>
+      <item quantity="other">ඔබට පරිශීලකයින් <xliff:g id="COUNT">%d</xliff:g>ක් දක්වා එක් කළ හැකිය.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"පරිශීලකයා ඉවත් කරන්නද?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"මෙම පරිශීලකයාගේ සියලු යෙදුම් සහ දත්ත මකනු ඇත."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"ඉවත් කරන්න"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"වම් නිරූපකය"</string>
     <string name="right_icon" msgid="3952104823293824311">"දකුණු නිරූපකය"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"ටයිල් එක් කිරීමට අල්ලාගෙන සිට අදින්න"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"ටයිල් නැවත සකස් කිරීමට අල්ලාගෙන සිට අදින්න"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ඉවත් කිරීමට මෙතැනට අදින්න"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"ඔබ අවම වශයෙන් ටයිල් 6ක් අවශ්‍ය වේ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"සංස්කරණය"</string>

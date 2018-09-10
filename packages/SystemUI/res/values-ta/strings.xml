@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"பயனரை வெளியேற்று"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"புதியவரைச் சேர்க்கவா?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"புதிய பயனரைச் சேர்க்கும்போது, அவர் தனக்கான இடத்தை அமைக்க வேண்டும்.\n\nஎந்தவொரு பயனரும், மற்ற எல்லா பயனர்களுக்காகவும் பயன்பாடுகளைப் புதுப்பிக்கலாம்."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"பயனர் வரம்பை அடைந்துவிட்டீர்கள்"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> பயனர்கள் வரை சேர்க்க முடியும்.</item>
+      <item quantity="one">ஒரு பயனரை மட்டுமே சேர்க்க முடியும்.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"பயனரை அகற்றவா?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"இந்தப் பயனரின் எல்லா பயன்பாடுகளும் தரவும் நீக்கப்படும்."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"அகற்று"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"இடப்புற ஐகான்"</string>
     <string name="right_icon" msgid="3952104823293824311">"வலப்புற ஐகான்"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"கட்டங்களைச் சேர்க்க, அவற்றைப் பிடித்து இழுக்கவும்"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"கட்டங்களை மறுவரிசைப்படுத்த அவற்றைப் பிடித்து இழுக்கவும்"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"அகற்ற, இங்கே இழுக்கவும்"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"குறைந்தது 6 கட்டங்கள் தேவை"</string>
     <string name="qs_edit" msgid="2232596095725105230">"மாற்று"</string>

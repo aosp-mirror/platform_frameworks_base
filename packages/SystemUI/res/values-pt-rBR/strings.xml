@@ -160,7 +160,7 @@
     <string name="data_connection_roaming" msgid="6037232010953697354">"Roaming"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"Sem SIM."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"Sem chip."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Dados móveis"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Dados móveis ativados"</string>
     <string name="cell_data_off_content_description" msgid="4356113230238585072">"Dados móveis desativados"</string>
@@ -168,7 +168,7 @@
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Tethering Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo avião."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN ativada."</string>
-    <string name="accessibility_no_sims" msgid="3957997018324995781">"Sem cartão SIM."</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"Sem chip."</string>
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Alteração de rede da operadora"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Abrir detalhes da bateria"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Bateria em <xliff:g id="NUMBER">%d</xliff:g> por cento."</string>
@@ -428,9 +428,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"DESCONECTAR USUÁRIO"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Adicionar novo usuário?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Quando você adiciona um novo usuário, essa pessoa precisa configurar o próprio espaço.\n\nQualquer usuário pode atualizar apps para os demais usuários."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Limite de usuários atingido"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="one">É possível adicionar até <xliff:g id="COUNT">%d</xliff:g> usuário.</item>
+      <item quantity="other">É possível adicionar até <xliff:g id="COUNT">%d</xliff:g> usuários.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Remover usuário?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Todos os apps e dados deste usuário serão excluídos."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Remover"</string>
@@ -734,8 +736,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Ícone à esquerda"</string>
     <string name="right_icon" msgid="3952104823293824311">"Ícone à direita"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Mantenha pressionado e arraste para adicionar blocos"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Mantenha pressionado e arraste para reorganizar os blocos"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arraste aqui para remover"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"É preciso haver pelo menos seis blocos"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editar"</string>

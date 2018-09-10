@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"వినియోగదారుని లాగ్ అవుట్ చేయి"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"కొత్త వినియోగదారుని జోడించాలా?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"మీరు కొత్త వినియోగదారుని జోడించినప్పుడు, ఆ వ్యక్తి తన స్థలాన్ని సెటప్ చేసుకోవాలి.\n\nఏ వినియోగదారు అయినా మిగతా అందరు వినియోగదారుల కోసం అనువర్తనాలను నవీకరించగలరు."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"వినియోగదారు పరిమితిని చేరుకున్నారు"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">మీరు <xliff:g id="COUNT">%d</xliff:g> వినియోగదారుల వరకు జోడించవచ్చు.</item>
+      <item quantity="one">ఒక్క వినియోగదారుని మాత్రమే సృష్టించవచ్చు.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"వినియోగదారుని తీసివేయాలా?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ఈ వినియోగదారుకు సంబంధించిన అన్ని అనువర్తనాలు మరియు డేటా తొలగించబడతాయి."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"తీసివేయి"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"ఎడమ వైపు చిహ్నం"</string>
     <string name="right_icon" msgid="3952104823293824311">"కుడివైపు ఉన్న చిహ్నం"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"టైల్‌లను జోడించడం కోసం పట్టుకుని, లాగండి"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"టైల్‌ల క్రమం మార్చడానికి వాటిని పట్టుకుని, లాగండి"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"తీసివేయడానికి ఇక్కడికి లాగండి"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"మీ వద్ద కనీసం 6 టైల్‌లు ఉండాలి"</string>
     <string name="qs_edit" msgid="2232596095725105230">"సవరించు"</string>
