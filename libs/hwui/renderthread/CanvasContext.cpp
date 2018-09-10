@@ -151,7 +151,8 @@ void CanvasContext::setSurface(sp<Surface>&& surface) {
 
     mNativeSurface = std::move(surface);
 
-    ColorMode colorMode = mWideColorGamut ? ColorMode::WideColorGamut : ColorMode::Srgb;
+    // TODO(b/111436479) Introduce a way for app to specify DisplayColorGamut mode.
+    ColorMode colorMode = mWideColorGamut ? ColorMode::WideColorGamut : ColorMode::Legacy;
     bool hasSurface = mRenderPipeline->setSurface(mNativeSurface.get(), mSwapBehavior, colorMode);
 
     mFrameNumber = -1;
@@ -416,7 +417,7 @@ void CanvasContext::draw() {
     SkRect windowDirty = computeDirtyRect(frame, &dirty);
 
     bool drew = mRenderPipeline->draw(frame, windowDirty, dirty, mLightGeometry, &mLayerUpdateQueue,
-                                      mContentDrawBounds, mOpaque, mWideColorGamut, mLightInfo,
+                                      mContentDrawBounds, mOpaque, mLightInfo,
                                       mRenderNodes, &(profiler()));
 
     int64_t frameCompleteNr = mFrameCompleteCallbacks.size() ? getFrameNumber() : -1;
@@ -555,8 +556,7 @@ void CanvasContext::buildLayer(RenderNode* node) {
     // purposes when the frame is actually drawn
     node->setPropertyFieldsDirty(RenderNode::GENERIC);
 
-    mRenderPipeline->renderLayers(mLightGeometry, &mLayerUpdateQueue, mOpaque, mWideColorGamut,
-                                  mLightInfo);
+    mRenderPipeline->renderLayers(mLightGeometry, &mLayerUpdateQueue, mOpaque, mLightInfo);
 
     node->incStrong(nullptr);
     mPrefetchedLayers.insert(node);

@@ -16,11 +16,12 @@
 
 #pragma once
 
+#include "DamageAccumulator.h"
 #include "FrameInfoVisualizer.h"
 #include "LayerUpdateQueue.h"
+#include "Lighting.h"
 #include "SwapBehavior.h"
 #include "hwui/Bitmap.h"
-#include "thread/TaskManager.h"
 
 #include <SkRect.h>
 #include <utils/RefBase.h>
@@ -35,13 +36,25 @@ namespace uirenderer {
 
 class DeferredLayerUpdater;
 class ErrorHandler;
+class TaskManager;
 
 namespace renderthread {
 
 enum class MakeCurrentResult { AlreadyCurrent, Failed, Succeeded };
 
 enum class ColorMode {
-    Srgb,
+    // Legacy means HWUI will produce buffer with whatever platform prefers
+    // HWUI to produce, however, HWUI doesn't accurately convert color from
+    // source color space to destination color space, instead HWUI will take
+    // the pixel value directly and interpret it destination color space.
+    Legacy,
+    // DisplayColorGamut means HWUI will produce buffer with whatever platform
+    // prefers HWUI to produce and accurately convert color from source color
+    // space to destination color space.
+    DisplayColorGamut,
+    // WideColorGamut means HWUI would support rendering scRGB non-linear into
+    // a signed buffer with enough range to support the wide color gamut of the
+    // display.
     WideColorGamut,
     // Hdr
 };
@@ -55,7 +68,7 @@ public:
     virtual bool draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
                       const LightGeometry& lightGeometry,
                       LayerUpdateQueue* layerUpdateQueue, const Rect& contentDrawBounds,
-                      bool opaque, bool wideColorGamut, const LightInfo& lightInfo,
+                      bool opaque, const LightInfo& lightInfo,
                       const std::vector<sp<RenderNode>>& renderNodes,
                       FrameInfoVisualizer* profiler) = 0;
     virtual bool swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
@@ -67,15 +80,17 @@ public:
     virtual bool isContextReady() = 0;
     virtual void onDestroyHardwareResources() = 0;
     virtual void renderLayers(const LightGeometry& lightGeometry,
-                              LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
+                              LayerUpdateQueue* layerUpdateQueue, bool opaque,
                               const LightInfo& lightInfo) = 0;
     virtual TaskManager* getTaskManager() = 0;
     virtual bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
-                                     bool wideColorGamut, ErrorHandler* errorHandler) = 0;
+                                     ErrorHandler* errorHandler) = 0;
     virtual bool pinImages(std::vector<SkImage*>& mutableImages) = 0;
     virtual bool pinImages(LsaVector<sk_sp<Bitmap>>& images) = 0;
     virtual void unpinImages() = 0;
     virtual void onPrepareTree() = 0;
+    virtual SkColorType getSurfaceColorType() const = 0;
+    virtual sk_sp<SkColorSpace> getSurfaceColorSpace() = 0;
 
     virtual ~IRenderPipeline() {}
 };

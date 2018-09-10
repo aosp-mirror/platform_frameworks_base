@@ -50,7 +50,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrame) {
     auto surface = SkSurface::MakeRasterN32Premul(1, 1);
     surface->getCanvas()->drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, false, contentDrawBounds,
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
                           surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorRED);
 }
@@ -83,7 +83,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, testOnPrepareTree) {
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
 
     // drawFrame will crash if "SkiaPipeline::onPrepareTree" did not clean invalid VD pointer
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, false, contentDrawBounds,
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
                           surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorRED);
 }
@@ -105,11 +105,11 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckOpaque) {
     auto surface = SkSurface::MakeRasterN32Premul(2, 2);
     surface->getCanvas()->drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, true, false, contentDrawBounds,
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, true, contentDrawBounds,
                           surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 1), SK_ColorGREEN);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, false, false, contentDrawBounds,
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, false, contentDrawBounds,
                           surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned int)SK_ColorTRANSPARENT);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 1), SK_ColorGREEN);
@@ -129,7 +129,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckDirtyRect) {
     auto surface = SkSurface::MakeRasterN32Premul(2, 2);
     surface->getCanvas()->drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, true, false, contentDrawBounds,
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, true, contentDrawBounds,
                           surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
     ASSERT_EQ(TestUtils::getColor(surface, 1, 0), SK_ColorBLUE);
@@ -171,7 +171,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderLayer) {
     lightGeometry.center = {0.0f, 0.0f, 0.0f};
     LightInfo lightInfo;
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
-    pipeline->renderLayers(lightGeometry, &layerUpdateQueue, opaque, false, lightInfo);
+    pipeline->renderLayers(lightGeometry, &layerUpdateQueue, opaque, lightInfo);
     ASSERT_EQ(TestUtils::getColor(surfaceLayer1, 0, 0), SK_ColorRED);
     ASSERT_EQ(TestUtils::getColor(surfaceLayer2, 0, 0), SK_ColorBLUE);
     ASSERT_EQ(TestUtils::getColor(surfaceLayer2, 0, 1), SK_ColorWHITE);
@@ -202,37 +202,37 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderOverdraw) {
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
 
     // Single draw, should be white.
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, false, contentDrawBounds,
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
                           surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorWHITE);
 
     // 1 Overdraw, should be blue blended onto white.
     renderNodes.push_back(whiteNode);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, false, contentDrawBounds,
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
                           surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned)0xffd0d0ff);
 
     // 2 Overdraw, should be green blended onto white
     renderNodes.push_back(whiteNode);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, false, contentDrawBounds,
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
                           surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned)0xffd0ffd0);
 
     // 3 Overdraw, should be pink blended onto white.
     renderNodes.push_back(whiteNode);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, false, contentDrawBounds,
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
                           surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned)0xffffc0c0);
 
     // 4 Overdraw, should be red blended onto white.
     renderNodes.push_back(whiteNode);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, false, contentDrawBounds,
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
                           surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned)0xffff8080);
 
     // 5 Overdraw, should be red blended onto white.
     renderNodes.push_back(whiteNode);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, false, contentDrawBounds,
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
                           surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned)0xffff8080);
 }
@@ -318,7 +318,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, deferRenderNodeScene) {
     SkRect dirty = SkRect::MakeWH(800, 600);
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
     sk_sp<DeferLayer<DeferTestCanvas>> surface(new DeferLayer<DeferTestCanvas>());
-    pipeline->renderFrame(layerUpdateQueue, dirty, nodes, true, false, contentDrawBounds, surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, nodes, true, contentDrawBounds, surface);
     EXPECT_EQ(4, surface->canvas()->mDrawCounter);
 }
 
@@ -348,7 +348,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clipped) {
     SkRect dirty = SkRect::MakeLTRB(10, 20, 30, 40);
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
     sk_sp<DeferLayer<ClippedTestCanvas>> surface(new DeferLayer<ClippedTestCanvas>());
-    pipeline->renderFrame(layerUpdateQueue, dirty, nodes, true, false,
+    pipeline->renderFrame(layerUpdateQueue, dirty, nodes, true,
                           SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT), surface);
     EXPECT_EQ(1, surface->canvas()->mDrawCounter);
 }
@@ -378,7 +378,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clip_replace) {
     SkRect dirty = SkRect::MakeLTRB(10, 10, 40, 40);
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
     sk_sp<DeferLayer<ClipReplaceTestCanvas>> surface(new DeferLayer<ClipReplaceTestCanvas>());
-    pipeline->renderFrame(layerUpdateQueue, dirty, nodes, true, false,
+    pipeline->renderFrame(layerUpdateQueue, dirty, nodes, true,
                           SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT), surface);
     EXPECT_EQ(1, surface->canvas()->mDrawCounter);
 }
