@@ -175,6 +175,7 @@ private:
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsAnomalyDetection);
     FRIEND_TEST(GaugeMetricProducerTest, TestFirstBucket);
     FRIEND_TEST(GaugeMetricProducerTest, TestPullOnTrigger);
+    FRIEND_TEST(GaugeMetricProducerTest, TestRemoveDimensionInOutput);
 };
 
 }  // namespace statsd
