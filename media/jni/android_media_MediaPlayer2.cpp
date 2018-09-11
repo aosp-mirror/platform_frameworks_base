@@ -909,7 +909,7 @@ android_media_MediaPlayer2_getAudioStreamType(JNIEnv *env, jobject thiz)
 }
 
 static jboolean
-android_media_MediaPlayer2_setParameter(JNIEnv *env, jobject thiz, jint key, jobject java_request)
+android_media_MediaPlayer2_setParameter(JNIEnv *env, jobject thiz, jint key, jobject)
 {
     ALOGV("setParameter: key %d", key);
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
@@ -918,9 +918,11 @@ android_media_MediaPlayer2_setParameter(JNIEnv *env, jobject thiz, jint key, job
         return false;
     }
 
-    // TODO: parcelForJavaObject() shouldn't be used since it's dependent on
-    //       framework's Parcel implementation. This setParameter() is used
-    //       only with AudioAttribute. Can this be used as jobject with JAudioTrack?
+    return false;
+    // TODO: set/getParameter is temporarily disabled to remove android_runtime.so dependency.
+    //       Once JAudioTrack migration is done, the AudioAttribute jobject
+    //       should be directly passed to AudioTrack without native parcel conversion.
+    /*
     Parcel *request = parcelForJavaObject(env, java_request);
     status_t err = mp->setParameter(key, *request);
     if (err == OK) {
@@ -928,6 +930,7 @@ android_media_MediaPlayer2_setParameter(JNIEnv *env, jobject thiz, jint key, job
     } else {
         return false;
     }
+    */
 }
 
 static jobject
@@ -940,6 +943,11 @@ android_media_MediaPlayer2_getParameter(JNIEnv *env, jobject thiz, jint key)
         return NULL;
     }
 
+    return NULL;
+    // TODO: set/getParameter is temporarily disabled to remove android_runtime.so dependency.
+    //       Once JAudioTrack migration is done, the AudioAttribute jobject
+    //       should be directly passed to AudioTrack without native parcel conversion.
+    /*
     jobject jParcel = createJavaParcelObject(env);
     if (jParcel != NULL) {
         Parcel* nativeParcel = parcelForJavaObject(env, jParcel);
@@ -950,6 +958,7 @@ android_media_MediaPlayer2_getParameter(JNIEnv *env, jobject thiz, jint key)
         }
     }
     return jParcel;
+    */
 }
 
 static void
