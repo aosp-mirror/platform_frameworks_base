@@ -38,7 +38,8 @@ LOCAL_JAVA_LIBRARIES := \
     android.test.runner \
     telephony-common \
     android.test.base \
-    android.car
+    android.car \
+    android.car.user
 
 LOCAL_AAPT_FLAGS := --extra-packages com.android.systemui:com.android.keyguard
 
