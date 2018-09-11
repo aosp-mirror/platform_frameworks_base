@@ -165,7 +165,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
      * Whether or not the given notification is alerting and managed by this manager.
      * @return true if the notification is alerting
      */
-    public boolean contains(@NonNull String key) {
+    public boolean isAlerting(@NonNull String key) {
         return mAlertEntries.containsKey(key);
     }
 
@@ -294,7 +294,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
             removeAutoRemovalCallbacks();
 
             if (!isSticky()) {
-                long finishTime = mPostTime + mAutoDismissNotificationDecay;
+                long finishTime = calculateFinishTime();
                 long removeDelay = Math.max(finishTime - currentTime, mMinimumDisplayTime);
                 mHandler.postDelayed(mRemoveAlertRunnable, removeDelay);
             }
@@ -356,6 +356,14 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
          */
         protected long calculatePostTime() {
             return mClock.currentTimeMillis();
+        }
+
+        /**
+         * Calculate when the notification should auto-dismiss itself.
+         * @return the finish time
+         */
+        protected long calculateFinishTime() {
+            return mPostTime + mAutoDismissNotificationDecay;
         }
     }
 

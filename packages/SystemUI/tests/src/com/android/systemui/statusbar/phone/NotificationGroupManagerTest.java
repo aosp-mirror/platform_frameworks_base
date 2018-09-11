@@ -36,6 +36,7 @@ import android.testing.TestableLooper;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.NotificationGroupManager.OnGroupChangeListener;
@@ -60,15 +61,23 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
     private static final String TEST_CHANNEL_ID = "test_channel";
     private static final String TEST_GROUP_ID = "test_group";
     private static final String TEST_PACKAGE_NAME = "test_pkg";
-    private NotificationGroupManager mGroupManager = new NotificationGroupManager();
+    private NotificationGroupManager mGroupManager;
     private int mId = 0;
 
     @Mock HeadsUpManager mHeadsUpManager;
+    @Mock AmbientPulseManager mAmbientPulseManager;
 
     @Before
     public void setup() {
-         mGroupManager.setHeadsUpManager(mHeadsUpManager);
-         mGroupManager.setOnGroupChangeListener(mock(OnGroupChangeListener.class));
+        mDependency.injectTestDependency(AmbientPulseManager.class, mAmbientPulseManager);
+
+        initializeGroupManager();
+    }
+
+    private void initializeGroupManager() {
+        mGroupManager = new NotificationGroupManager();
+        mGroupManager.setHeadsUpManager(mHeadsUpManager);
+        mGroupManager.setOnGroupChangeListener(mock(OnGroupChangeListener.class));
     }
 
     @Test
@@ -141,8 +150,7 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
         mGroupManager.onEntryAdded(createChildNotification());
-        when(childEntry.row.isHeadsUp()).thenReturn(true);
-        when(mHeadsUpManager.contains(childEntry.key)).thenReturn(true);
+        when(mHeadsUpManager.isAlerting(childEntry.key)).thenReturn(true);
 
         mGroupManager.onHeadsUpStateChanged(childEntry, true);
 
@@ -154,17 +162,35 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testAmbientPulseEntryIsIsolated() {
+        mGroupManager.setDozing(true);
+        NotificationData.Entry childEntry = createChildNotification();
+        NotificationData.Entry summaryEntry = createSummaryNotification();
+        mGroupManager.onEntryAdded(summaryEntry);
+        mGroupManager.onEntryAdded(childEntry);
+        mGroupManager.onEntryAdded(createChildNotification());
+        when(mAmbientPulseManager.isAlerting(childEntry.key)).thenReturn(true);
+
+        mGroupManager.onAmbientStateChanged(childEntry, true);
+
+        // Child entries that are heads upped should be considered separate groups visually even if
+        // they are the same group logically
+        assertEquals(childEntry.row, mGroupManager.getGroupSummary(childEntry.notification));
+        assertEquals(summaryEntry.row,
+                mGroupManager.getLogicalGroupSummary(childEntry.notification));
+    }
+
+    @Test
     public void testSuppressedSummaryHeadsUpTransfersToChild() {
         NotificationData.Entry summaryEntry = createSummaryNotification();
-        when(summaryEntry.row.isHeadsUp()).thenReturn(true);
-        when(mHeadsUpManager.contains(summaryEntry.key)).thenReturn(true);
+        when(mHeadsUpManager.isAlerting(summaryEntry.key)).thenReturn(true);
         NotificationData.Entry childEntry = createChildNotification();
 
-        // Summary will be suppressed because there is only one child
+        // Summary will be suppressed because there is only one child.
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
 
-        // A suppressed summary should transfer its heads up state to the child
+        // A suppressed summary should transfer its heads up state to the child.
         verify(mHeadsUpManager, never()).showNotification(summaryEntry);
         verify(mHeadsUpManager).showNotification(childEntry);
     }
@@ -175,24 +201,64 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
         NotificationData.Entry summaryEntry =
                 createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
-        when(summaryEntry.row.isHeadsUp()).thenReturn(true);
         NotificationData.Entry childEntry =
                 createChildNotification(Notification.GROUP_ALERT_SUMMARY);
         NotificationData.Entry childEntry2 =
                 createChildNotification(Notification.GROUP_ALERT_SUMMARY);
+        mHeadsUpManager.showNotification(summaryEntry);
         // Trigger a transfer of heads up state from summary to child.
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
-        when(summaryEntry.row.isHeadsUp()).thenReturn(false);
-        when(childEntry.row.isHeadsUp()).thenReturn(true);
 
         // Add second child notification so that summary is no longer suppressed.
         mGroupManager.onEntryAdded(childEntry2);
 
         // The heads up state should transfer back to the summary as there is now more than one
         // child and the summary should no longer be suppressed.
-        assertTrue(mHeadsUpManager.contains(summaryEntry.key));
-        assertFalse(mHeadsUpManager.contains(childEntry.key));
+        assertTrue(mHeadsUpManager.isAlerting(summaryEntry.key));
+        assertFalse(mHeadsUpManager.isAlerting(childEntry.key));
+    }
+
+    @Test
+    public void testSuppressedSummaryAmbientPulseTransfersToChild() {
+        mGroupManager.setDozing(true);
+        NotificationData.Entry summaryEntry = createSummaryNotification();
+        when(mAmbientPulseManager.isAlerting(summaryEntry.key)).thenReturn(true);
+        NotificationData.Entry childEntry = createChildNotification();
+
+        // Summary will be suppressed because there is only one child.
+        mGroupManager.onEntryAdded(summaryEntry);
+        mGroupManager.onEntryAdded(childEntry);
+
+        // A suppressed summary should transfer its ambient state to the child.
+        verify(mAmbientPulseManager, never()).showNotification(summaryEntry);
+        verify(mAmbientPulseManager).showNotification(childEntry);
+    }
+
+    @Test
+    public void testSuppressedSummaryAmbientPulseTransfersToChildButBackAgain() {
+        mGroupManager.setDozing(true);
+        mAmbientPulseManager = new AmbientPulseManager(mContext);
+        mDependency.injectTestDependency(AmbientPulseManager.class, mAmbientPulseManager);
+        initializeGroupManager();
+        NotificationData.Entry summaryEntry =
+                createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
+        NotificationData.Entry childEntry =
+                createChildNotification(Notification.GROUP_ALERT_SUMMARY);
+        NotificationData.Entry childEntry2 =
+                createChildNotification(Notification.GROUP_ALERT_SUMMARY);
+        mAmbientPulseManager.showNotification(summaryEntry);
+        // Trigger a transfer of ambient state from summary to child.
+        mGroupManager.onEntryAdded(summaryEntry);
+        mGroupManager.onEntryAdded(childEntry);
+
+        // Add second child notification so that summary is no longer suppressed.
+        mGroupManager.onEntryAdded(childEntry2);
+
+        // The ambient state should transfer back to the summary as there is now more than one
+        // child and the summary should no longer be suppressed.
+        assertTrue(mAmbientPulseManager.isAlerting(summaryEntry.key));
+        assertFalse(mAmbientPulseManager.isAlerting(childEntry.key));
     }
 
     private NotificationData.Entry createSummaryNotification() {

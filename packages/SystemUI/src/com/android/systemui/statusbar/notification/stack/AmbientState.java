@@ -20,14 +20,15 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.view.View;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
 
@@ -44,7 +45,7 @@ public class AmbientState {
     private int mSpeedBumpIndex = -1;
     private boolean mDark;
     private boolean mHideSensitive;
-    private HeadsUpManager mHeadsUpManager;
+    private AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
     private float mStackTranslation;
     private int mLayoutHeight;
     private int mTopPadding;
@@ -207,10 +208,6 @@ public class AmbientState {
         mSpeedBumpIndex = shelfIndex;
     }
 
-    public void setHeadsUpManager(HeadsUpManager headsUpManager) {
-        mHeadsUpManager = headsUpManager;
-    }
-
     public float getStackTranslation() {
         return mStackTranslation;
     }
@@ -334,10 +331,10 @@ public class AmbientState {
     }
 
     public boolean isPulsing(NotificationData.Entry entry) {
-        if (!mPulsing || mHeadsUpManager == null) {
+        if (!mPulsing || mAmbientPulseManager == null) {
             return false;
         }
-        return mHeadsUpManager.getAllEntries().anyMatch(e -> (e == entry));
+        return mAmbientPulseManager.isAlerting(entry.key);
     }
 
     public boolean isPanelTracking() {

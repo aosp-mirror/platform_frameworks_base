@@ -358,7 +358,7 @@ public class StatusBarTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldPeek_nonSuppressedGroupSummary() {
+    public void testShouldHeadsUp_nonSuppressedGroupSummary() {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
         when(mNotificationData.shouldSuppressStatusBar(any())).thenReturn(false);
@@ -375,11 +375,11 @@ public class StatusBarTest extends SysuiTestCase {
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
 
-        assertTrue(mEntryManager.shouldPeek(entry, sbn));
+        assertTrue(mEntryManager.shouldHeadsUp(entry));
     }
 
     @Test
-    public void testShouldPeek_suppressedGroupSummary() {
+    public void testShouldHeadsUp_suppressedGroupSummary() {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
         when(mNotificationData.shouldSuppressStatusBar(any())).thenReturn(false);
@@ -396,11 +396,11 @@ public class StatusBarTest extends SysuiTestCase {
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
 
-        assertFalse(mEntryManager.shouldPeek(entry, sbn));
+        assertFalse(mEntryManager.shouldHeadsUp(entry));
     }
 
     @Test
-    public void testShouldPeek_suppressedPeek() {
+    public void testShouldHeadsUp_suppressedHeadsUp() {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
         when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
@@ -414,11 +414,11 @@ public class StatusBarTest extends SysuiTestCase {
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
 
-        assertFalse(mEntryManager.shouldPeek(entry, sbn));
+        assertFalse(mEntryManager.shouldHeadsUp(entry));
     }
 
     @Test
-    public void testShouldPeek_noSuppressedPeek() {
+    public void testShouldHeadsUp_noSuppressedHeadsUp() {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
         when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
@@ -432,31 +432,31 @@ public class StatusBarTest extends SysuiTestCase {
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
 
-        assertTrue(mEntryManager.shouldPeek(entry, sbn));
+        assertTrue(mEntryManager.shouldHeadsUp(entry));
     }
 
     @Test
-    public void testPeek_disabledStatusBar() {
+    public void testHeadsUp_disabledStatusBar() {
         Notification n = new Notification.Builder(getContext(), "a").build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
         mStatusBar.disable(StatusBarManager.DISABLE_EXPAND, 0, false /* animate */);
 
-        assertFalse("The panel shouldn't allow peek while disabled",
-                mStatusBar.shouldPeek(entry, sbn));
+        assertFalse("The panel shouldn't allow heads up while disabled",
+                mStatusBar.canHeadsUp(entry, sbn));
     }
 
     @Test
-    public void testPeek_disabledNotificationShade() {
+    public void testHeadsUp_disabledNotificationShade() {
         Notification n = new Notification.Builder(getContext(), "a").build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
         mStatusBar.disable(0, StatusBarManager.DISABLE2_NOTIFICATION_SHADE, false /* animate */);
 
-        assertFalse("The panel shouldn't allow peek while notitifcation shade disabled",
-                mStatusBar.shouldPeek(entry, sbn));
+        assertFalse("The panel shouldn't allow heads up while notification shade disabled",
+                mStatusBar.canHeadsUp(entry, sbn));
     }
 
     @Test
@@ -472,7 +472,7 @@ public class StatusBarTest extends SysuiTestCase {
     }
 
     @Test
-    public void testPanelOpenForPeek() {
+    public void testPanelOpenForHeadsUp() {
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
         when(mNotificationData.getActiveNotifications()).thenReturn(mNotificationList);
         when(mNotificationList.size()).thenReturn(5);

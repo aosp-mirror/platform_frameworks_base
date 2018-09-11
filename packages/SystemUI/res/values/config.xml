@@ -146,18 +146,28 @@
     <!-- Should "LTE"/"4G" be shown instead of "LTE+"/"4G+" when on NETWORK_TYPE_LTE_CA? -->
     <bool name="config_hideLtePlus">false</bool>
 
-    <!-- milliseconds before the heads up notification auto-dismisses. -->
+    <!-- The number of milliseconds before the heads up notification auto-dismisses. -->
     <integer name="heads_up_notification_decay">5000</integer>
 
-    <!-- milliseconds after a heads up notification is pushed back
+    <!-- The number of milliseconds after a heads up notification is pushed back
      before the app can interrupt again. -->
     <integer name="heads_up_default_snooze_length_ms">60000</integer>
 
     <!-- Minimum display time for a heads up notification, in milliseconds. -->
     <integer name="heads_up_notification_minimum_time">2000</integer>
 
-    <!-- milliseconds before the heads up notification accepts touches. -->
+    <!-- The number of milliseconds before the heads up notification accepts touches. -->
     <integer name="touch_acceptance_delay">700</integer>
+
+    <!-- The number of milliseconds before the ambient notification auto-dismisses. This will
+         override the default pulse length. -->
+    <integer name="ambient_notification_decay">6000</integer>
+
+    <!-- Minimum display time for a heads up notification, in milliseconds. -->
+    <integer name="ambient_notification_minimum_time">2000</integer>
+
+    <!-- The number of milliseconds to extend ambient pulse by when prompted (e.g. on touch) -->
+    <integer name="ambient_notification_extension_time">6000</integer>
 
     <!-- The duration in seconds to wait before the dismiss buttons are shown. -->
     <integer name="recents_task_bar_dismiss_delay_seconds">1000</integer>
