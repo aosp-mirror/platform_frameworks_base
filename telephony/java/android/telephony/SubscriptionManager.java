@@ -1826,6 +1826,19 @@ public class SubscriptionManager {
     }
 
     /**
+     * Checks if the supplied subscription ID corresponds to an active subscription.
+     *
+     * @param subscriptionId the subscription ID.
+     * @return {@code true} if the supplied subscription ID corresponds to an active subscription;
+     * {@code false} if it does not correspond to an active subscription; or throw a
+     * SecurityException if the caller hasn't got the right permission.
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    public boolean isActiveSubscriptionId(int subscriptionId) {
+        return isActiveSubId(subscriptionId);
+    }
+
+    /**
      * @return true if the sub ID is active. i.e. The sub ID corresponds to a known subscription
      * and the SIM providing the subscription is present in a slot and in "LOADED" state.
      * @hide
@@ -1835,7 +1848,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                return iSub.isActiveSubId(subId);
+                return iSub.isActiveSubId(subId, mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
         }
