@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.system.Os;
 import android.system.OsConstants;
@@ -475,6 +477,7 @@ public class Process {
      * @param instructionSet null-ok the instruction set to use.
      * @param appDataDir null-ok the data directory of the app.
      * @param invokeWith null-ok the command to invoke with.
+     * @param packageName null-ok the name of the package this process belongs to.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
      * 
      * @return An object that describes the result of the attempt to start the process.
@@ -482,36 +485,36 @@ public class Process {
      * 
      * {@hide}
      */
-    public static final ProcessStartResult start(final String processClass,
-                                  final String niceName,
-                                  int uid, int gid, int[] gids,
+    public static final ProcessStartResult start(@NonNull final String processClass,
+                                  @Nullable final String niceName,
+                                  int uid, int gid, @Nullable int[] gids,
                                   int runtimeFlags, int mountExternal,
                                   int targetSdkVersion,
-                                  String seInfo,
-                                  String abi,
-                                  String instructionSet,
-                                  String appDataDir,
-                                  String invokeWith,
-                                  String packageName,
-                                  String[] zygoteArgs) {
+                                  @Nullable String seInfo,
+                                  @NonNull String abi,
+                                  @Nullable String instructionSet,
+                                  @Nullable String appDataDir,
+                                  @Nullable String invokeWith,
+                                  @Nullable String packageName,
+                                  @Nullable String[] zygoteArgs) {
         return zygoteProcess.start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName, zygoteArgs);
     }
 
     /** @hide */
-    public static final ProcessStartResult startWebView(final String processClass,
-                                  final String niceName,
-                                  int uid, int gid, int[] gids,
+    public static final ProcessStartResult startWebView(@NonNull final String processClass,
+                                  @Nullable final String niceName,
+                                  int uid, int gid, @Nullable int[] gids,
                                   int runtimeFlags, int mountExternal,
                                   int targetSdkVersion,
-                                  String seInfo,
-                                  String abi,
-                                  String instructionSet,
-                                  String appDataDir,
-                                  String invokeWith,
-                                  String packageName,
-                                  String[] zygoteArgs) {
+                                  @Nullable String seInfo,
+                                  @NonNull String abi,
+                                  @Nullable String instructionSet,
+                                  @Nullable String appDataDir,
+                                  @Nullable String invokeWith,
+                                  @Nullable String packageName,
+                                  @Nullable String[] zygoteArgs) {
         return WebViewZygote.getProcess().start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName, zygoteArgs);
