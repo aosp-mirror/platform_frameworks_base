@@ -29,7 +29,6 @@ import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.os.WorkSource;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -1150,7 +1149,9 @@ public class AlarmManager {
         public void writeToProto(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
             proto.write(AlarmClockInfoProto.TRIGGER_TIME_MS, mTriggerTime);
-            mShowIntent.writeToProto(proto, AlarmClockInfoProto.SHOW_INTENT);
+            if (mShowIntent != null) {
+                mShowIntent.writeToProto(proto, AlarmClockInfoProto.SHOW_INTENT);
+            }
             proto.end(token);
         }
     }
