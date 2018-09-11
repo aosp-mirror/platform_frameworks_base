@@ -105,8 +105,6 @@ public class MobileSignalController extends SignalController<
     // 4G instead of LTE
     private boolean mShow4GUserConfig;
     private ImsManager mImsManager;
-    private boolean mImsResitered;
-    private final boolean mShowVolteIcon;
     private int mCallState = TelephonyManager.CALL_STATE_IDLE;
 
     // TODO: Reduce number of vars passed in, if we have the NetworkController, probably don't
@@ -128,8 +126,6 @@ public class MobileSignalController extends SignalController<
                 .toString();
         mNetworkNameDefault = getStringIfExists(
                 com.android.internal.R.string.lockscreen_carrier_default).toString();
-
-        mShowVolteIcon = context.getResources().getBoolean(R.bool.config_display_volte);
 
         mapIconSets();
 
@@ -388,15 +384,15 @@ public class MobileSignalController extends SignalController<
     private int getVolteResId() {
         int resId = 0;
 
-        if ( mImsResitered ) {
+        if ( mCurrentState.imsResitered ) {
             resId = R.drawable.ic_volte;
         }
         return resId;
     }
 
     private void updateImsRegistrationState() {
-        mImsResitered = mPhone.isImsRegistered(mSubscriptionInfo.getSubscriptionId());
-        Log.d(mTag, "updateImsRegistrationState mImsResitered=" + mImsResitered);
+        mCurrentState.imsResitered = mPhone.isImsRegistered(mSubscriptionInfo.getSubscriptionId());
+        notifyListenersIfNecessary();
     }
 
     @Override
@@ -441,7 +437,8 @@ public class MobileSignalController extends SignalController<
                 && mCurrentState.activityOut;
         showDataIcon &= mCurrentState.isDefault || dataDisabled;
         int typeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.mDataType : 0;
-        int volteIcon = mShowVolteIcon && isEnhanced4gLteModeSettingEnabled() ? getVolteResId() : 0;
+        int volteIcon = mConfig.showVolteIcon && isEnhanced4gLteModeSettingEnabled()
+                ? getVolteResId() : 0;
         callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
                 activityIn, activityOut, volteIcon, dataContentDescription, dataContentDescriptionHtml,
                 description, icons.mIsWide, mSubscriptionInfo.getSubscriptionId(),
@@ -852,7 +849,6 @@ public class MobileSignalController extends SignalController<
                         @ImsRegistrationImplBase.ImsRegistrationTech int imsRadioTech) {
                     Log.d(mTag, "onRegistered imsRadioTech=" + imsRadioTech);
                     updateImsRegistrationState();
-                    notifyListeners();
                 }
 
                 @Override
@@ -860,21 +856,21 @@ public class MobileSignalController extends SignalController<
                         @ImsRegistrationImplBase.ImsRegistrationTech int imsRadioTech) {
                     Log.d(mTag, "onRegistering imsRadioTech=" + imsRadioTech);
                     updateImsRegistrationState();
-                    notifyListeners();
                 }
 
                 @Override
                 public void onDeregistered(ImsReasonInfo imsReasonInfo) {
                     Log.d(mTag, "onDeregistered imsReasonInfo=" + imsReasonInfo);
                     updateImsRegistrationState();
-                    notifyListeners();
                 }
             };
 
     private final BroadcastReceiver mVolteSwitchObserver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             Log.d(mTag, "action=" + intent.getAction());
-            notifyListeners();
+            if ( mConfig.showVolteIcon ) {
+                notifyListeners();
+            }
         }
     };
 
@@ -908,6 +904,7 @@ public class MobileSignalController extends SignalController<
         boolean userSetup;
         boolean roaming;
         boolean defaultDataOff;  // Tracks the on/off state of the defaultDataSubscription
+        boolean imsResitered;
 
         @Override
         public void copyFrom(State s) {
@@ -924,6 +921,7 @@ public class MobileSignalController extends SignalController<
             userSetup = state.userSetup;
             roaming = state.roaming;
             defaultDataOff = state.defaultDataOff;
+            imsResitered = state.imsResitered;
         }
 
         @Override
@@ -941,7 +939,8 @@ public class MobileSignalController extends SignalController<
             builder.append("carrierNetworkChangeMode=").append(carrierNetworkChangeMode)
                     .append(',');
             builder.append("userSetup=").append(userSetup).append(',');
-            builder.append("defaultDataOff=").append(defaultDataOff);
+            builder.append("defaultDataOff=").append(defaultDataOff).append(',');
+            builder.append("imsResitered=").append(imsResitered);
         }
 
         @Override
@@ -957,7 +956,8 @@ public class MobileSignalController extends SignalController<
                     && ((MobileState) o).userSetup == userSetup
                     && ((MobileState) o).isDefault == isDefault
                     && ((MobileState) o).roaming == roaming
-                    && ((MobileState) o).defaultDataOff == defaultDataOff;
+                    && ((MobileState) o).defaultDataOff == defaultDataOff
+                    && ((MobileState) o).imsResitered == imsResitered;
         }
     }
 }
