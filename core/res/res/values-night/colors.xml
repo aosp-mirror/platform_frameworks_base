@@ -27,5 +27,5 @@
     <color name="notification_default_color_dark">#ddffffff</color>
 
     <!-- The background color of a notification card. -->
-    <color name="notification_material_background_color">@*android:color/material_grey_900</color>
+    <color name="notification_material_background_color">@color/black</color>
 </resources>
