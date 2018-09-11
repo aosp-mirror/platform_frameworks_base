@@ -12057,7 +12057,7 @@ public class BatteryStatsImpl extends BatteryStats {
             // level to a now very high level).
             boolean reset = false;
             if (!mNoAutoReset && (oldStatus == BatteryManager.BATTERY_STATUS_FULL
-                    || level >= 90
+                    || level >= 99
                     || (mDischargeCurrentLevel < 20 && level >= 80))) {
                 Slog.i(TAG, "Resetting battery stats: level=" + level + " status=" + oldStatus
                         + " dischargeLevel=" + mDischargeCurrentLevel
