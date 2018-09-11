@@ -25,6 +25,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.SurfaceTexture;
+import android.graphics.Rect;
 import android.media.MediaPlayer2Proto;
 import android.media.MediaPlayer2Proto.PlayerMessage;
 import android.media.MediaPlayer2Proto.Value;
@@ -2769,8 +2770,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             {
                 if (msg.obj == null) {
                     Log.w(TAG, "MEDIA_DRM_INFO msg.obj=NULL");
-                } else if (msg.obj instanceof Parcel) {
-                    // The parcel was parsed already in postEventFromNative
+                } else if (msg.obj instanceof byte[]) {
+                    // The PlayerMessage was parsed already in postEventFromNative
                     final DrmInfoImpl drmInfo;
 
                     synchronized (mDrmLock) {
@@ -2975,10 +2976,15 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             case MEDIA_TIMED_TEXT:
             {
                 final TimedText text;
-                if (msg.obj instanceof Parcel) {
-                    Parcel parcel = (Parcel)msg.obj;
-                    text = new TimedText(parcel);
-                    parcel.recycle();
+                if (msg.obj instanceof byte[]) {
+                    PlayerMessage playerMsg;
+                    try {
+                        playerMsg = PlayerMessage.parseFrom((byte[]) msg.obj);
+                    } catch (InvalidProtocolBufferException e) {
+                        Log.w(TAG, "Failed to parse timed text.", e);
+                        return;
+                    }
+                    text = TimedTextUtil.parsePlayerMessage(playerMsg);
                 } else {
                     text = null;
                 }
@@ -2994,10 +3000,20 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
             case MEDIA_SUBTITLE_DATA:
             {
-                if (msg.obj instanceof Parcel) {
-                    Parcel parcel = (Parcel) msg.obj;
-                    SubtitleData data = new SubtitleData(parcel);
-                    parcel.recycle();
+                if (msg.obj instanceof byte[]) {
+                    PlayerMessage playerMsg;
+                    try {
+                        playerMsg = PlayerMessage.parseFrom((byte[]) msg.obj);
+                    } catch (InvalidProtocolBufferException e) {
+                        Log.w(TAG, "Failed to parse subtitle data.", e);
+                        return;
+                    }
+                    Iterator<Value> in = playerMsg.getValuesList().iterator();
+                    SubtitleData data = new SubtitleData(
+                            in.next().getInt32Value(),  // trackIndex
+                            in.next().getInt64Value(),  // startTimeUs
+                            in.next().getInt64Value(),  // durationUs
+                            in.next().getBytesValue().toByteArray());  // data
                     synchronized (mEventCbLock) {
                         for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                             cb.first.execute(() -> cb.second.onSubtitleData(
@@ -3011,10 +3027,18 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             case MEDIA_META_DATA:
             {
                 final TimedMetaData data;
-                if (msg.obj instanceof Parcel) {
-                    Parcel parcel = (Parcel) msg.obj;
-                    data = TimedMetaData.createTimedMetaDataFromParcel(parcel);
-                    parcel.recycle();
+                if (msg.obj instanceof byte[]) {
+                    PlayerMessage playerMsg;
+                    try {
+                        playerMsg = PlayerMessage.parseFrom((byte[]) msg.obj);
+                    } catch (InvalidProtocolBufferException e) {
+                        Log.w(TAG, "Failed to parse timed meta data.", e);
+                        return;
+                    }
+                    Iterator<Value> in = playerMsg.getValuesList().iterator();
+                    data = new TimedMetaData(
+                            in.next().getInt64Value(),  // timestampUs
+                            in.next().getBytesValue().toByteArray());  // metaData
                 } else {
                     data = null;
                 }
@@ -3062,7 +3086,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * the cookie passed to native_setup().)
      */
     private static void postEventFromNative(Object mediaplayer2_ref, long srcId,
-                                            int what, int arg1, int arg2, Object obj)
+                                            int what, int arg1, int arg2, byte[] obj)
     {
         final MediaPlayer2Impl mp = (MediaPlayer2Impl)((WeakReference)mediaplayer2_ref).get();
         if (mp == null) {
@@ -3076,9 +3100,15 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             // notification looper so its handleMessage might process the event after prepare()
             // has returned.
             Log.v(TAG, "postEventFromNative MEDIA_DRM_INFO");
-            if (obj instanceof Parcel) {
-                Parcel parcel = (Parcel)obj;
-                DrmInfoImpl drmInfo = new DrmInfoImpl(parcel);
+            if (obj != null) {
+                PlayerMessage playerMsg;
+                try {
+                    playerMsg = PlayerMessage.parseFrom(obj);
+                } catch (InvalidProtocolBufferException e) {
+                    Log.w(TAG, "MEDIA_DRM_INFO failed to parse msg.obj " + obj);
+                    break;
+                }
+                DrmInfoImpl drmInfo = new DrmInfoImpl(playerMsg);
                 synchronized (mp.mDrmLock) {
                     mp.mDrmInfoImpl = drmInfo;
                 }
@@ -3745,22 +3775,21 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             supportedSchemes = SupportedSchemes;
         }
 
-        private DrmInfoImpl(Parcel parcel) {
-            Log.v(TAG, "DrmInfoImpl(" + parcel + ") size " + parcel.dataSize());
+        private DrmInfoImpl(PlayerMessage msg) {
+            Log.v(TAG, "DrmInfoImpl(" + msg + ")");
 
-            int psshsize = parcel.readInt();
-            byte[] pssh = new byte[psshsize];
-            parcel.readByteArray(pssh);
+            Iterator<Value> in = msg.getValuesList().iterator();
+            byte[] pssh = in.next().getBytesValue().toByteArray();
 
             Log.v(TAG, "DrmInfoImpl() PSSH: " + arrToHex(pssh));
-            mapPssh = parsePSSH(pssh, psshsize);
+            mapPssh = parsePSSH(pssh, pssh.length);
             Log.v(TAG, "DrmInfoImpl() PSSH: " + mapPssh);
 
-            int supportedDRMsCount = parcel.readInt();
+            int supportedDRMsCount = in.next().getInt32Value();
             supportedSchemes = new UUID[supportedDRMsCount];
             for (int i = 0; i < supportedDRMsCount; i++) {
                 byte[] uuid = new byte[16];
-                parcel.readByteArray(uuid);
+                in.next().getBytesValue().copyTo(uuid, uuid.length);
 
                 supportedSchemes[i] = bytesToUUID(uuid);
 
@@ -3768,7 +3797,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                       supportedSchemes[i]);
             }
 
-            Log.v(TAG, "DrmInfoImpl() Parcel psshsize: " + psshsize +
+            Log.v(TAG, "DrmInfoImpl() Parcel psshsize: " + pssh.length +
                   " supportedDRMsCount: " + supportedDRMsCount);
         }
 
@@ -4246,6 +4275,60 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private boolean isVideoScalingModeSupported(int mode) {
         return (mode == VIDEO_SCALING_MODE_SCALE_TO_FIT ||
                 mode == VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+    }
+
+    private static class TimedTextUtil {
+        // These keys must be in sync with the keys in TextDescription2.h
+        private static final int KEY_START_TIME                     = 7; // int
+        private static final int KEY_STRUCT_TEXT_POS               = 14; // TextPos
+        private static final int KEY_STRUCT_TEXT                   = 16; // Text
+        private static final int KEY_GLOBAL_SETTING               = 101;
+        private static final int KEY_LOCAL_SETTING                = 102;
+
+        private static TimedText parsePlayerMessage(PlayerMessage playerMsg) {
+            if (playerMsg.getValuesCount() == 0) {
+                return null;
+            }
+
+            String textChars = null;
+            Rect textBounds = null;
+            Iterator<Value> in = playerMsg.getValuesList().iterator();
+            int type = in.next().getInt32Value();
+            if (type == KEY_LOCAL_SETTING) {
+                type = in.next().getInt32Value();
+                if (type != KEY_START_TIME) {
+                    return null;
+                }
+                int startTimeMs = in.next().getInt32Value();
+
+                type = in.next().getInt32Value();
+                if (type != KEY_STRUCT_TEXT) {
+                    return null;
+                }
+
+                byte[] text = in.next().getBytesValue().toByteArray();
+                if (text == null || text.length == 0) {
+                    textChars = null;
+                } else {
+                    textChars = new String(text);
+                }
+
+            } else if (type != KEY_GLOBAL_SETTING) {
+                Log.w(TAG, "Invalid timed text key found: " + type);
+                return null;
+            }
+            if (in.hasNext()) {
+                type = in.next().getInt32Value();
+                if (type == KEY_STRUCT_TEXT_POS) {
+                    int top = in.next().getInt32Value();
+                    int left = in.next().getInt32Value();
+                    int bottom = in.next().getInt32Value();
+                    int right = in.next().getInt32Value();
+                    textBounds = new Rect(left, top, right, bottom);
+                }
+            }
+            return new TimedText(textChars, textBounds);
+        }
     }
 
     /** @hide */

@@ -48,6 +48,14 @@ public final class TimedMetaData {
     }
 
     /**
+     * @hide
+     */
+    public TimedMetaData(long timestampUs, byte[] metaData) {
+        mTimestampUs = timestampUs;
+        mMetaData = metaData;
+    }
+
+    /**
      * @return the timestamp associated with this metadata access unit in microseconds;
      * 0 denotes playback start.
      */
