@@ -46,9 +46,9 @@ public class NetworkPolicyLogger {
     static final boolean LOGV = Log.isLoggable(TAG, Log.VERBOSE);
 
     private static final int MAX_LOG_SIZE =
-            ActivityManager.isLowRamDeviceStatic() ? 20 : 50;
+            ActivityManager.isLowRamDeviceStatic() ? 100 : 400;
     private static final int MAX_NETWORK_BLOCKED_LOG_SIZE =
-            ActivityManager.isLowRamDeviceStatic() ? 50 : 100;
+            ActivityManager.isLowRamDeviceStatic() ? 100 : 400;
 
     private static final int EVENT_TYPE_GENERIC = 0;
     private static final int EVENT_NETWORK_BLOCKED = 1;
