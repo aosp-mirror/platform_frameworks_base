@@ -3352,7 +3352,7 @@
           @hide
           @removed -->
     <permission android:name="android.permission.CAPTURE_SECURE_VIDEO_OUTPUT"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows an application to know what content is playing and control its playback.
          <p>Not for use by third-party applications due to privacy of media consumption</p>  -->
