@@ -199,11 +199,6 @@ void JNIMediaPlayer2Listener::notify(int64_t srcId, int msg, int ext1, int ext2,
 {
     JNIEnv *env = JavaVMHelper::getJNIEnv();
     if (obj != NULL) {
-        // TODO: replace the following Parcel usages with proto.
-        // 1. MEDIA_DRM_INFO : DrmInfo
-        // 2. MEDIA_TIMED_TEXT : TimedText
-        // 2. MEDIA_SUBTITLE_DATA : SubtitleData
-        // 4. MEDIA_META_DATA : TimedMetaData
         int size = obj->ByteSize();
         jbyte* temp = new jbyte[size];
         obj->SerializeToArray(temp, size);

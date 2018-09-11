@@ -25,6 +25,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.SurfaceTexture;
+import android.graphics.Rect;
 import android.media.MediaPlayer2Proto;
 import android.media.MediaPlayer2Proto.PlayerMessage;
 import android.media.MediaPlayer2Proto.Value;
@@ -2983,7 +2984,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                         Log.w(TAG, "Failed to parse timed text.", e);
                         return;
                     }
-                    text = null; // TODO: convert PlayerMessage to new TimedText(playerMsg);
+                    text = TimedTextUtil.parsePlayerMessage(playerMsg);
                 } else {
                     text = null;
                 }
@@ -4274,6 +4275,60 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private boolean isVideoScalingModeSupported(int mode) {
         return (mode == VIDEO_SCALING_MODE_SCALE_TO_FIT ||
                 mode == VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+    }
+
+    private static class TimedTextUtil {
+        // These keys must be in sync with the keys in TextDescription2.h
+        private static final int KEY_START_TIME                     = 7; // int
+        private static final int KEY_STRUCT_TEXT_POS               = 14; // TextPos
+        private static final int KEY_STRUCT_TEXT                   = 16; // Text
+        private static final int KEY_GLOBAL_SETTING               = 101;
+        private static final int KEY_LOCAL_SETTING                = 102;
+
+        private static TimedText parsePlayerMessage(PlayerMessage playerMsg) {
+            if (playerMsg.getValuesCount() == 0) {
+                return null;
+            }
+
+            String textChars = null;
+            Rect textBounds = null;
+            Iterator<Value> in = playerMsg.getValuesList().iterator();
+            int type = in.next().getInt32Value();
+            if (type == KEY_LOCAL_SETTING) {
+                type = in.next().getInt32Value();
+                if (type != KEY_START_TIME) {
+                    return null;
+                }
+                int startTimeMs = in.next().getInt32Value();
+
+                type = in.next().getInt32Value();
+                if (type != KEY_STRUCT_TEXT) {
+                    return null;
+                }
+
+                byte[] text = in.next().getBytesValue().toByteArray();
+                if (text == null || text.length == 0) {
+                    textChars = null;
+                } else {
+                    textChars = new String(text);
+                }
+
+            } else if (type != KEY_GLOBAL_SETTING) {
+                Log.w(TAG, "Invalid timed text key found: " + type);
+                return null;
+            }
+            if (in.hasNext()) {
+                type = in.next().getInt32Value();
+                if (type == KEY_STRUCT_TEXT_POS) {
+                    int top = in.next().getInt32Value();
+                    int left = in.next().getInt32Value();
+                    int bottom = in.next().getInt32Value();
+                    int right = in.next().getInt32Value();
+                    textBounds = new Rect(left, top, right, bottom);
+                }
+            }
+            return new TimedText(textChars, textBounds);
+        }
     }
 
     /** @hide */
