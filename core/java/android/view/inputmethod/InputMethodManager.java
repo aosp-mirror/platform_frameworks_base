@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -2249,7 +2250,7 @@ public final class InputMethodManager {
      * Notify that a user took some action with this input method.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 114740982, maxTargetSdk = Build.VERSION_CODES.P)
     public void notifyUserAction() {
         synchronized (mH) {
             if (mLastSentUserActionNotificationSequenceNumber ==
