@@ -63,6 +63,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.graphics.fonts.Font;
 import android.graphics.fonts.FontVariationAxis;
 import android.icu.text.DecimalFormatSymbols;
 import android.os.AsyncTask;
@@ -2068,7 +2069,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     private void setTypefaceFromAttrs(@Nullable Typeface typeface, @Nullable String familyName,
             @XMLTypefaceAttr int typefaceIndex, @Typeface.Style int style,
-            @IntRange(from = -1, to = Typeface.MAX_WEIGHT) int weight) {
+            @IntRange(from = -1, to = Font.FONT_WEIGHT_MAX) int weight) {
         if (typeface == null && familyName != null) {
             // Lookup normal Typeface from system font map.
             final Typeface normalTypeface = Typeface.create(familyName, Typeface.NORMAL);
@@ -2095,9 +2096,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void resolveStyleAndSetTypeface(@NonNull Typeface typeface, @Typeface.Style int style,
-            @IntRange(from = -1, to = Typeface.MAX_WEIGHT) int weight) {
+            @IntRange(from = -1, to = Font.FONT_WEIGHT_MAX) int weight) {
         if (weight >= 0) {
-            weight = Math.min(Typeface.MAX_WEIGHT, weight);
+            weight = Math.min(Font.FONT_WEIGHT_MAX, weight);
             final boolean italic = (style & Typeface.ITALIC) != 0;
             setTypeface(Typeface.create(typeface, weight, italic));
         } else {
