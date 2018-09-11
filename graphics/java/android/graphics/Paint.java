@@ -1742,26 +1742,52 @@ public class Paint {
     }
 
     /**
-     * Get the current value of hyphen edit.
+     * Get the current value of packed hyphen edit.
+     *
+     * You can extract start hyphen edit and end hyphen edit by using
+     * {@link android.text.Hyphenator#unpackStartHyphenEdit(int)} and
+     * {@link android.text.Hyphenator#unpackEndHyphenEdit(int)}.
+     *
+     * The default value is 0 which is equivalent to packed value of
+     * {@link android.text.Hyphenator#START_HYPHEN_EDIT_NO_EDIT} and
+     * {@link android.text.Hyphenator#END_HYPHEN_EDIT_NO_EDIT}.
      *
      * @return the current hyphen edit value
-     *
-     * @hide
+     * @see #setHyphenEdit(int)
      */
     public int getHyphenEdit() {
         return nGetHyphenEdit(mNativePaint);
     }
 
     /**
-     * Set a hyphen edit on the paint (causes a hyphen to be added to text when
-     * measured or drawn).
+     * Set a packed hyphen edit on the paint.
      *
-     * @param hyphen 0 for no edit, 1 for adding a hyphen at the end, etc.
-     *        Definition of various values are in the HyphenEdit class in Minikin's Hyphenator.h.
+     * By setting hyphen edit, the measurement and drawing is performed with modifying hyphenation
+     * at the start of line and end of line. For example, by passing
+     * {@link android.text.Hyphenator#END_HYPHEN_EDIT_INSERT_HYPHEN} like as follows, HYPHEN(U+2010)
+     * character is appended at the end of line.
      *
-     * @hide
+     * <pre>
+     * <code>
+     *   Paint paint = new Paint();
+     *   paint.setHyphenEdit(Hyphenator.packHyphenEdit(
+     *       Hyphenator.START_HYPHEN_EDIT_NO_EDIT,
+     *       Hyphenator.END_HYPHEN_EDIT_INSERT_HYPHEN));
+     *   paint.measureText("abc", 0, 3);  // Returns the width of "abc‐"
+     *   Canvas.drawText("abc", 0, 3, 0f, 0f, paint);  // Draws "abc‐"
+     * </code>
+     * </pre>
+     *
+     * You can pack start hyphen edit and end hyphen edit by
+     * {@link android.text.Hyphenator#packHyphenEdit(int,int)}
+     *
+     * The default value is 0 which is equivalent to packed value of
+     * {@link android.text.Hyphenator#START_HYPHEN_EDIT_NO_EDIT} and
+     * {@link android.text.Hyphenator#END_HYPHEN_EDIT_NO_EDIT}.
+     *
+     * @param hyphen a packed hyphen edit value.
+     * @see #getHyphenEdit()
      */
-    @UnsupportedAppUsage
     public void setHyphenEdit(int hyphen) {
         nSetHyphenEdit(mNativePaint, hyphen);
     }
