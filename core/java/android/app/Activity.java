@@ -1461,7 +1461,7 @@ public class Activity extends ContextThemeWrapper
      */
     @Override
     public AutofillId autofillClientGetNextAutofillId() {
-        return new AutofillId(getNextAutofillId());
+        return new AutofillId(getAutofillManager(), getNextAutofillId());
     }
 
     /**

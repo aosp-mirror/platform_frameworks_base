@@ -916,7 +916,7 @@ public final class AutofillManager {
             boolean isVisible, boolean virtual) {
         synchronized (mLock) {
             if (mEnabled && isActiveLocked()) {
-                final AutofillId id = virtual ? getAutofillId(view, virtualId)
+                final AutofillId id = virtual ? getAutofillIdLocked(view, virtualId)
                         : view.getAutofillId();
                 if (sVerbose) Log.v(TAG, "visibility changed for " + id + ": " + isVisible);
                 if (!isVisible && mFillableIds != null) {
@@ -976,7 +976,7 @@ public final class AutofillManager {
     @GuardedBy("mLock")
     private AutofillCallback notifyViewEnteredLocked(View view, int virtualId, Rect bounds,
                                                      int flags) {
-        final AutofillId id = getAutofillId(view, virtualId);
+        final AutofillId id = getAutofillIdLocked(view, virtualId);
         AutofillCallback callback = null;
         if (shouldIgnoreViewEnteredLocked(id, flags)) return callback;
 
@@ -1033,7 +1033,7 @@ public final class AutofillManager {
         if (mEnabled && isActiveLocked()) {
             // don't notify exited when Activity is already in background
             if (!isClientDisablingEnterExitEvent()) {
-                final AutofillId id = getAutofillId(view, virtualId);
+                final AutofillId id = getAutofillIdLocked(view, virtualId);
 
                 // Update focus on existing session.
                 updateSessionLocked(id, null, null, ACTION_VIEW_EXITED, 0);
@@ -1116,7 +1116,7 @@ public final class AutofillManager {
                 return;
             }
 
-            final AutofillId id = getAutofillId(view, virtualId);
+            final AutofillId id = getAutofillIdLocked(view, virtualId);
             updateSessionLocked(id, null, value, ACTION_VALUE_CHANGED, 0);
         }
     }
@@ -1137,7 +1137,11 @@ public final class AutofillManager {
      * @param virtualId id identifying the virtual child inside the parent view.
      */
     public void notifyViewClicked(@NonNull View view, int virtualId) {
-        notifyViewClicked(getAutofillId(view, virtualId));
+        final AutofillId id;
+        synchronized (mLock) {
+            id = getAutofillIdLocked(view, virtualId);
+        }
+        notifyViewClicked(id);
     }
 
     private void notifyViewClicked(AutofillId id) {
@@ -1534,8 +1538,9 @@ public final class AutofillManager {
         return id;
     }
 
-    private static AutofillId getAutofillId(View parent, int virtualId) {
-        return new AutofillId(parent.getAutofillViewId(), virtualId);
+    @GuardedBy("mLock")
+    private AutofillId getAutofillIdLocked(View parent, int virtualId) {
+        return new AutofillId(mSessionId, parent.getAutofillViewId(), virtualId);
     }
 
     @GuardedBy("mLock")
@@ -1566,6 +1571,8 @@ public final class AutofillManager {
             mSessionId = receiver.getIntResult();
             if (mSessionId != NO_SESSION) {
                 mState = STATE_ACTIVE;
+                // Need to update the view's autofill id with the session
+                id.setSessionId(mSessionId);
             }
             client.autofillClientResetableStateAvailable();
         } catch (RemoteException e) {
@@ -2208,6 +2215,13 @@ public final class AutofillManager {
     @GuardedBy("mLock")
     private String getStateAsStringLocked() {
         return getStateAsString(mState);
+    }
+
+    /** @hide */
+    public int getSessionId() {
+        synchronized (mLock) {
+            return mSessionId;
+        }
     }
 
     @NonNull
