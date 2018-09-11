@@ -69,7 +69,6 @@ import org.mockito.invocation.InvocationOnMock;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ActivityRecordTests extends ActivityTestsBase {
-    private ActivityTaskManagerService mService;
     private TestActivityStack mStack;
     private TaskRecord mTask;
     private ActivityRecord mActivity;
@@ -79,10 +78,10 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void setUp() throws Exception {
         super.setUp();
 
-        mService = createActivityTaskManagerService();
-        mStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
+        setupActivityTaskManagerService();
+        mStack = mSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        mTask = new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build();
+        mTask = new TaskBuilder(mSupervisor).setStack(mStack).build();
         mActivity = new ActivityBuilder(mService).setTask(mTask).build();
     }
 

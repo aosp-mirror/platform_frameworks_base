@@ -64,8 +64,6 @@ import java.util.ArrayList;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ActivityStackSupervisorTests extends ActivityTestsBase {
-    private ActivityTaskManagerService mService;
-    private ActivityStackSupervisor mSupervisor;
     private ActivityStack mFullscreenStack;
 
     @Before
@@ -73,8 +71,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
     public void setUp() throws Exception {
         super.setUp();
 
-        mService = createActivityTaskManagerService();
-        mSupervisor = mService.mStackSupervisor;
+        setupActivityTaskManagerService();
         mFullscreenStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
     }

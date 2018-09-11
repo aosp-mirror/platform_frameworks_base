@@ -870,8 +870,8 @@ public class RecentTasksTest extends ActivityTestsBase {
         @Override
         public void initialize() {
             super.initialize();
-            mDisplay = new TestActivityDisplay(this, DEFAULT_DISPLAY);
-            mOtherDisplay = new TestActivityDisplay(this, DEFAULT_DISPLAY);
+            mDisplay = TestActivityDisplay.create(this, DEFAULT_DISPLAY);
+            mOtherDisplay = TestActivityDisplay.create(this, DEFAULT_DISPLAY + 1);
             addChild(mOtherDisplay, ActivityDisplay.POSITION_TOP);
             addChild(mDisplay, ActivityDisplay.POSITION_TOP);
         }

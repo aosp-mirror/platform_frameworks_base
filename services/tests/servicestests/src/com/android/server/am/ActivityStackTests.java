@@ -60,8 +60,6 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ActivityStackTests extends ActivityTestsBase {
-    private ActivityTaskManagerService mService;
-    private ActivityStackSupervisor mSupervisor;
     private ActivityDisplay mDefaultDisplay;
     private ActivityStack mStack;
     private TaskRecord mTask;
@@ -71,9 +69,8 @@ public class ActivityStackTests extends ActivityTestsBase {
     public void setUp() throws Exception {
         super.setUp();
 
-        mService = createActivityTaskManagerService();
-        mSupervisor = mService.mStackSupervisor;
-        mDefaultDisplay = mService.mStackSupervisor.getDefaultDisplay();
+        setupActivityTaskManagerService();
+        mDefaultDisplay = mSupervisor.getDefaultDisplay();
         mStack = mDefaultDisplay.createStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
         mTask = new TaskBuilder(mSupervisor).setStack(mStack).build();

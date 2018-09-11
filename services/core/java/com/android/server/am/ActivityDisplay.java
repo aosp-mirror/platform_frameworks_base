@@ -126,11 +126,6 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
 
     private final FindTaskResult mTmpFindTaskResult = new FindTaskResult();
 
-    @VisibleForTesting
-    ActivityDisplay(ActivityStackSupervisor supervisor, int displayId) {
-        this(supervisor, supervisor.mDisplayManager.getDisplay(displayId));
-    }
-
     ActivityDisplay(ActivityStackSupervisor supervisor, Display display) {
         mSupervisor = supervisor;
         mDisplayId = display.getDisplayId();

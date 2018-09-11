@@ -51,7 +51,6 @@ import java.util.ArrayList;
 public class RunningTasksTest extends ActivityTestsBase {
 
     private Context mContext = InstrumentationRegistry.getContext();
-    private ActivityTaskManagerService mService;
 
     private RunningTasks mRunningTasks;
 
@@ -60,21 +59,20 @@ public class RunningTasksTest extends ActivityTestsBase {
     public void setUp() throws Exception {
         super.setUp();
 
-        mService = createActivityTaskManagerService();
+        setupActivityTaskManagerService();
         mRunningTasks = new RunningTasks();
     }
 
     @Test
     public void testCollectTasksByLastActiveTime() throws Exception {
         // Create a number of stacks with tasks (of incrementing active time)
-        final ActivityStackSupervisor supervisor = mService.mStackSupervisor;
         final ArrayList<ActivityDisplay> displays = new ArrayList<>();
-        final ActivityDisplay display = new TestActivityDisplay(supervisor, DEFAULT_DISPLAY);
+        final ActivityDisplay display = TestActivityDisplay.create(mSupervisor, DEFAULT_DISPLAY);
         displays.add(display);
 
         final int numStacks = 2;
         for (int stackIndex = 0; stackIndex < numStacks; stackIndex++) {
-            final ActivityStack stack = new TestActivityStack(display, stackIndex, supervisor,
+            final ActivityStack stack = new TestActivityStack(display, stackIndex, mSupervisor,
                     WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true);
             display.addChild(stack, POSITION_BOTTOM);
         }

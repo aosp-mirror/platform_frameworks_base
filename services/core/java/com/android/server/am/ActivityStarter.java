@@ -52,6 +52,7 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
@@ -1901,14 +1902,20 @@ class ActivityStarter {
         // except...  well, with SINGLE_TASK_LAUNCH it's not entirely clear. We'd like to have
         // the same behavior as if a new instance was being started, which means not bringing it
         // to the front if the caller is not itself in the front.
-        final ActivityStack focusStack = mSupervisor.getTopDisplayFocusedStack();
-        ActivityRecord curTop = (focusStack == null)
-                ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);
+        final boolean differentTopTask;
+        if (mPreferredDisplayId == mTargetStack.mDisplayId) {
+            final ActivityStack focusStack = mTargetStack.getDisplay().getFocusedStack();
+            final ActivityRecord curTop = (focusStack == null)
+                    ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);
+            final TaskRecord topTask = curTop != null ? curTop.getTask() : null;
+            differentTopTask = topTask != null
+                    && (topTask != intentActivity.getTask() || topTask != focusStack.topTask());
+        } else {
+            // The existing task should always be different from those in other displays.
+            differentTopTask = true;
+        }
 
-        final TaskRecord topTask = curTop != null ? curTop.getTask() : null;
-        if (topTask != null
-                && (topTask != intentActivity.getTask() || topTask != focusStack.topTask())
-                && !mAvoidMoveToFront) {
+        if (differentTopTask && !mAvoidMoveToFront) {
             mStartActivity.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
             if (mSourceRecord == null || (mSourceStack.getTopActivity() != null &&
                     mSourceStack.getTopActivity().getTask() == mSourceRecord.getTask())) {
