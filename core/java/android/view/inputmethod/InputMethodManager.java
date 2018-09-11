@@ -354,28 +354,6 @@ public final class InputMethodManager {
     int mCursorCandEnd;
 
     /**
-     * Represents an invalid action notification sequence number.
-     * {@link com.android.server.InputMethodManagerService} always issues a positive integer for
-     * action notification sequence numbers. Thus {@code -1} is guaranteed to be different from any
-     * valid sequence number.
-     */
-    private static final int NOT_AN_ACTION_NOTIFICATION_SEQUENCE_NUMBER = -1;
-    /**
-     * The next sequence number that is to be sent to
-     * {@link com.android.server.InputMethodManagerService} via
-     * {@link IInputMethodManager#notifyUserAction(int)} at once when a user action is observed.
-     */
-    private int mNextUserActionNotificationSequenceNumber =
-            NOT_AN_ACTION_NOTIFICATION_SEQUENCE_NUMBER;
-
-    /**
-     * The last sequence number that is already sent to
-     * {@link com.android.server.InputMethodManagerService}.
-     */
-    private int mLastSentUserActionNotificationSequenceNumber =
-            NOT_AN_ACTION_NOTIFICATION_SEQUENCE_NUMBER;
-
-    /**
      * The instance that has previously been sent to the input method.
      */
     private CursorAnchorInfo mCursorAnchorInfo = null;
@@ -421,7 +399,6 @@ public final class InputMethodManager {
     static final int MSG_SEND_INPUT_EVENT = 5;
     static final int MSG_TIMEOUT_INPUT_EVENT = 6;
     static final int MSG_FLUSH_INPUT_EVENT = 7;
-    static final int MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER = 9;
     static final int MSG_REPORT_FULLSCREEN_MODE = 10;
 
     private static boolean isAutofillUIShowing(View servedView) {
@@ -558,12 +535,6 @@ public final class InputMethodManager {
                     finishedInputEvent(msg.arg1, false, false);
                     return;
                 }
-                case MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER: {
-                    synchronized (mH) {
-                        mNextUserActionNotificationSequenceNumber = msg.arg1;
-                    }
-                    return;
-                }
                 case MSG_REPORT_FULLSCREEN_MODE: {
                     final boolean fullscreen = msg.arg1 != 0;
                     InputConnection ic = null;
@@ -603,11 +574,6 @@ public final class InputMethodManager {
                 return;
             }
             closeConnection();
-        }
-
-        @Override
-        protected void onUserAction() {
-            mParentInputMethodManager.notifyUserAction();
         }
 
         @Override
@@ -654,12 +620,6 @@ public final class InputMethodManager {
         @Override
         public void setActive(boolean active, boolean fullscreen) {
             mH.obtainMessage(MSG_SET_ACTIVE, active ? 1 : 0, fullscreen ? 1 : 0).sendToTarget();
-        }
-
-        @Override
-        public void setUserActionNotificationSequenceNumber(int sequenceNumber) {
-            mH.obtainMessage(MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER, sequenceNumber, 0)
-                    .sendToTarget();
         }
 
         @Override
@@ -1355,8 +1315,6 @@ public final class InputMethodManager {
                     mBindSequence = res.sequence;
                     mCurMethod = res.method;
                     mCurId = res.id;
-                    mNextUserActionNotificationSequenceNumber =
-                            res.userActionNotificationSequenceNumber;
                 } else if (res.channel != null && res.channel != mCurChannel) {
                     res.channel.dispose();
                 }
@@ -2190,37 +2148,16 @@ public final class InputMethodManager {
 
     /**
      * Notify that a user took some action with this input method.
+     *
+     * @deprecated Just kept to avoid possible app compat issue.
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage(trackingBug = 114740982, maxTargetSdk = Build.VERSION_CODES.P)
     public void notifyUserAction() {
-        synchronized (mH) {
-            if (mLastSentUserActionNotificationSequenceNumber ==
-                    mNextUserActionNotificationSequenceNumber) {
-                if (DEBUG) {
-                    Log.w(TAG, "Ignoring notifyUserAction as it has already been sent."
-                            + " mLastSentUserActionNotificationSequenceNumber: "
-                            + mLastSentUserActionNotificationSequenceNumber
-                            + " mNextUserActionNotificationSequenceNumber: "
-                            + mNextUserActionNotificationSequenceNumber);
-                }
-                return;
-            }
-            try {
-                if (DEBUG) {
-                    Log.w(TAG, "notifyUserAction: "
-                            + " mLastSentUserActionNotificationSequenceNumber: "
-                            + mLastSentUserActionNotificationSequenceNumber
-                            + " mNextUserActionNotificationSequenceNumber: "
-                            + mNextUserActionNotificationSequenceNumber);
-                }
-                mService.notifyUserAction(mNextUserActionNotificationSequenceNumber);
-                mLastSentUserActionNotificationSequenceNumber =
-                        mNextUserActionNotificationSequenceNumber;
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
+        Log.w(TAG, "notifyUserAction() is a hidden method, which is now just a stub method"
+                + " that does nothing.  Leave comments in b.android.com/114740982 if your "
+                + " application still depends on the previous behavior of this method.");
     }
 
     /**
@@ -2421,10 +2358,6 @@ public final class InputMethodManager {
                 + " mCursorSelEnd=" + mCursorSelEnd
                 + " mCursorCandStart=" + mCursorCandStart
                 + " mCursorCandEnd=" + mCursorCandEnd);
-        p.println("  mNextUserActionNotificationSequenceNumber="
-                + mNextUserActionNotificationSequenceNumber
-                + " mLastSentUserActionNotificationSequenceNumber="
-                + mLastSentUserActionNotificationSequenceNumber);
     }
 
     /**
