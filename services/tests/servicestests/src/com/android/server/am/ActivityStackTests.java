@@ -24,6 +24,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
@@ -73,7 +74,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         mService = createActivityTaskManagerService();
         mSupervisor = mService.mStackSupervisor;
         mDefaultDisplay = mService.mStackSupervisor.getDefaultDisplay();
-        mStack = mDefaultDisplay.createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
+        mStack = mDefaultDisplay.createStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
         mTask = new TaskBuilder(mSupervisor).setStack(mStack).build();
     }
@@ -140,7 +141,7 @@ public class ActivityStackTests extends ActivityTestsBase {
     }
 
     @Test
-    public void testPrimarySplitScreenToFullscreenWhenMovedToBack() throws Exception {
+    public void testPrimarySplitScreenRestoresWhenMovedToBack() throws Exception {
         // Create primary splitscreen stack. This will create secondary stacks and places the
         // existing fullscreen stack on the bottom.
         final ActivityStack primarySplitScreen = mDefaultDisplay.createStack(
@@ -158,6 +159,60 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         // Ensure no longer in splitscreen.
         assertEquals(primarySplitScreen.getWindowingMode(), WINDOWING_MODE_FULLSCREEN);
+
+        // Ensure that the override mode is restored to undefined
+        assertEquals(primarySplitScreen.getOverrideWindowingMode(), WINDOWING_MODE_UNDEFINED);
+    }
+
+    @Test
+    public void testPrimarySplitScreenRestoresPreviousWhenMovedToBack() throws Exception {
+        // This time, start with a fullscreen activitystack
+        final ActivityStack primarySplitScreen = mDefaultDisplay.createStack(
+            WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+
+        primarySplitScreen.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+
+        // Assert windowing mode.
+        assertEquals(primarySplitScreen.getWindowingMode(), WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+
+        // Move primary to back.
+        primarySplitScreen.moveToBack("testPrimarySplitScreenToFullscreenWhenMovedToBack",
+            null /* task */);
+
+        // Assert that stack is at the bottom.
+        assertEquals(mDefaultDisplay.getIndexOf(primarySplitScreen), 0);
+
+        // Ensure that the override mode is restored to what it was (fullscreen)
+        assertEquals(primarySplitScreen.getOverrideWindowingMode(), WINDOWING_MODE_FULLSCREEN);
+    }
+
+    @Test
+    public void testStackInheritsDisplayWindowingMode() throws Exception {
+        final ActivityStack primarySplitScreen = mDefaultDisplay.createStack(
+            WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+
+        assertEquals(WINDOWING_MODE_FULLSCREEN, primarySplitScreen.getWindowingMode());
+        assertEquals(WINDOWING_MODE_UNDEFINED, primarySplitScreen.getOverrideWindowingMode());
+
+        mDefaultDisplay.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertEquals(WINDOWING_MODE_FREEFORM, primarySplitScreen.getWindowingMode());
+        assertEquals(WINDOWING_MODE_UNDEFINED, primarySplitScreen.getOverrideWindowingMode());
+    }
+
+    @Test
+    public void testStackOverridesDisplayWindowingMode() throws Exception {
+        final ActivityStack primarySplitScreen = mDefaultDisplay.createStack(
+            WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+
+        assertEquals(WINDOWING_MODE_FULLSCREEN, primarySplitScreen.getWindowingMode());
+        assertEquals(WINDOWING_MODE_UNDEFINED, primarySplitScreen.getOverrideWindowingMode());
+
+        primarySplitScreen.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        // setting windowing mode should still work even though resolved mode is already fullscreen
+        assertEquals(WINDOWING_MODE_FULLSCREEN, primarySplitScreen.getOverrideWindowingMode());
+
+        mDefaultDisplay.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertEquals(WINDOWING_MODE_FULLSCREEN, primarySplitScreen.getWindowingMode());
     }
 
     @Test

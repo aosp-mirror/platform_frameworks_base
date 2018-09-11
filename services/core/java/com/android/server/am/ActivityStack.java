@@ -347,6 +347,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     /** The attached Display's unique identifier, or -1 if detached */
     int mDisplayId;
 
+    /** Stores the override windowing-mode from before a transient mode change (eg. split) */
+    private int mRestoreOverrideWindowingMode = WINDOWING_MODE_UNDEFINED;
+
     private final SparseArray<Rect> mTmpBounds = new SparseArray<>();
     private final SparseArray<Rect> mTmpInsetBounds = new SparseArray<>();
     private final Rect mTmpRect2 = new Rect();
@@ -531,16 +534,48 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */);
     }
 
+    /**
+     * A transient windowing mode is one which activities enter into temporarily. Examples of this
+     * are Split window modes and pip. Non-transient modes are modes that displays can adopt.
+     *
+     * @param windowingMode the windowingMode to test for transient-ness.
+     * @return {@code true} if the windowing mode is transient, {@code false} otherwise.
+     */
+    private static boolean isTransientWindowingMode(int windowingMode) {
+        // TODO(b/114842032): add PIP if/when it uses mode transitions instead of task reparenting
+        return windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+    }
+
+    /**
+     * Specialization of {@link #setWindowingMode(int)} for this subclass.
+     *
+     * @param preferredWindowingMode the preferred windowing mode. This may not be honored depending
+     *         on the state of things. For example, WINDOWING_MODE_UNDEFINED will resolve to the
+     *         previous non-transient mode if this stack is currently in a transient mode.
+     * @param animate Can be used to prevent animation.
+     * @param showRecents Controls whether recents is shown on the other side of a split while
+     *         entering split mode.
+     * @param enteringSplitScreenMode {@code true} if entering split mode.
+     * @param deferEnsuringVisibility Whether visibility updates are deferred. This is set when
+     *         many operations (which can effect visibility) are being performed in bulk.
+     */
     void setWindowingMode(int preferredWindowingMode, boolean animate, boolean showRecents,
             boolean enteringSplitScreenMode, boolean deferEnsuringVisibility) {
         final boolean creating = mWindowContainerController == null;
         final int currentMode = getWindowingMode();
+        final int currentOverrideMode = getOverrideWindowingMode();
         final ActivityDisplay display = getDisplay();
         final TaskRecord topTask = topTask();
         final ActivityStack splitScreenStack = display.getSplitScreenPrimaryStack();
-        mTmpOptions.setLaunchWindowingMode(preferredWindowingMode);
-
         int windowingMode = preferredWindowingMode;
+        if (preferredWindowingMode == WINDOWING_MODE_UNDEFINED
+                && isTransientWindowingMode(currentMode)) {
+            // Leaving a transient mode. Interpret UNDEFINED as "restore"
+            windowingMode = mRestoreOverrideWindowingMode;
+        }
+        mTmpOptions.setLaunchWindowingMode(windowingMode);
+
         // Need to make sure windowing mode is supported. If we in the process of creating the stack
         // no need to resolve the windowing mode again as it is already resolved to the right mode.
         if (!creating) {
@@ -550,8 +585,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (splitScreenStack == this
                 && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
             // Resolution to split-screen secondary for the primary split-screen stack means
-            // we want to go fullscreen.
-            windowingMode = WINDOWING_MODE_FULLSCREEN;
+            // we want to leave split-screen mode.
+            windowingMode = mRestoreOverrideWindowingMode;
         }
 
         final boolean alreadyInSplitScreenMode = display.hasSplitScreenPrimaryStack();
@@ -570,21 +605,33 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 // doesn't support split-screen mode, go ahead an dismiss split-screen and display a
                 // warning toast about it.
                 mService.getTaskChangeNotificationController().notifyActivityDismissingDockedStack();
-                display.getSplitScreenPrimaryStack().setWindowingMode(WINDOWING_MODE_FULLSCREEN,
+                display.getSplitScreenPrimaryStack().setWindowingMode(WINDOWING_MODE_UNDEFINED,
                         false /* animate */, false /* showRecents */,
                         false /* enteringSplitScreenMode */, true /* deferEnsuringVisibility */);
             }
         }
 
         if (currentMode == windowingMode) {
-            // You are already in the window mode silly...
+            // You are already in the window mode, so we can skip most of the work below. However,
+            // it's possible that we have inherited the current windowing mode from a parent. So,
+            // fulfill this method's contract by setting the override mode directly.
+            getOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
             return;
         }
 
         final WindowManagerService wm = mService.mWindowManager;
         final ActivityRecord topActivity = getTopActivity();
 
-        if (sendNonResizeableNotification && windowingMode != WINDOWING_MODE_FULLSCREEN
+        // For now, assume that the Stack's windowing mode is what will actually be used
+        // by it's activities. In the future, there may be situations where this doesn't
+        // happen; so at that point, this message will need to handle that.
+        int likelyResolvedMode = windowingMode;
+        if (windowingMode == WINDOWING_MODE_UNDEFINED) {
+            final ConfigurationContainer parent = getParent();
+            likelyResolvedMode = parent != null ? parent.getWindowingMode()
+                    : WINDOWING_MODE_FULLSCREEN;
+        }
+        if (sendNonResizeableNotification && likelyResolvedMode != WINDOWING_MODE_FULLSCREEN
                 && topActivity != null && topActivity.isNonResizableOrForcedResizable()
                 && !topActivity.noDisplay) {
             // Inform the user that they are starting an app that may not work correctly in
@@ -624,6 +671,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 throw new IllegalArgumentException("Setting primary split-screen windowing mode"
                         + " while there is already one isn't currently supported");
                 //return;
+            }
+            if (isTransientWindowingMode(windowingMode) && !isTransientWindowingMode(currentMode)) {
+                mRestoreOverrideWindowingMode = currentOverrideMode;
             }
 
             mTmpRect2.setEmpty();
@@ -673,13 +723,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // Undefined activity types end up in a standard stack once the stack is created on a
             // display, so they should be considered compatible.
             activityType = ACTIVITY_TYPE_STANDARD;
-        }
-        final ActivityDisplay display = getDisplay();
-        if (display != null && activityType == ACTIVITY_TYPE_STANDARD
-                    && windowingMode == WINDOWING_MODE_UNDEFINED) {
-            // Standard activity types will mostly take on the windowing mode of the display if one
-            // isn't specified, so look-up a compatible stack based on the display's windowing mode.
-            windowingMode = display.getWindowingMode();
         }
         return super.isCompatible(windowingMode, activityType);
     }
@@ -1085,7 +1128,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
          * behind the home stack. Exit split screen in this case.
          */
         if (getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-            setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+            setWindowingMode(WINDOWING_MODE_UNDEFINED);
         }
 
         getDisplay().positionChildAtBottom(this);
