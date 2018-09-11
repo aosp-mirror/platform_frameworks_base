@@ -1115,6 +1115,7 @@ package android.content.pm {
 
   public abstract class PackageManager {
     method public abstract void addOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
+    method public abstract boolean arePermissionsIndividuallyControlled();
     method public abstract java.util.List<android.content.IntentFilter> getAllIntentFilters(java.lang.String);
     method public android.content.pm.dex.ArtManager getArtManager();
     method public abstract java.lang.String getDefaultBrowserPackageNameAsUser(int);

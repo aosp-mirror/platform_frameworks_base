@@ -3276,11 +3276,14 @@ public abstract class PackageManager {
             @PermissionInfoFlags int flags) throws NameNotFoundException;
 
     /**
-     * Returns true if some permissions are individually controlled
+     * Returns true if some permissions are individually controlled.
+     *
+     * <p>The user usually grants and revokes permission-groups. If this option is set some
+     * dangerous system permissions can be revoked/granted by the user separately from their group.
      *
      * @hide
      */
-    @TestApi
+    @TestApi @SystemApi
     public abstract boolean arePermissionsIndividuallyControlled();
 
     /**
