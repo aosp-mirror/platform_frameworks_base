@@ -18,7 +18,7 @@ package android.service.notification;
 
 import android.annotation.UnsupportedAppUsage;
 import android.app.Notification;
-import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -261,7 +261,7 @@ public class StatusBarNotification implements Parcelable {
         return this.user.getIdentifier();
     }
 
-    /** The package of the app that posted the notification. */
+    /** The package that the notification belongs to. */
     public String getPackageName() {
         return pkg;
     }
@@ -277,14 +277,18 @@ public class StatusBarNotification implements Parcelable {
         return tag;
     }
 
-    /** The notifying app's calling uid. @hide */
-    @UnsupportedAppUsage
+    /**
+     * The notifying app's ({@link #getPackageName()}'s) uid.
+     */
     public int getUid() {
         return uid;
     }
 
-    /** The package used for AppOps tracking. @hide */
-    @UnsupportedAppUsage
+    /** The package that posted the notification.
+     *<p>
+     * Might be different from {@link #getPackageName()} if the app owning the notification has
+     * a {@link NotificationManager#setNotificationDelegate(String) notification delegate}.
+     */
     public String getOpPkg() {
         return opPkg;
     }

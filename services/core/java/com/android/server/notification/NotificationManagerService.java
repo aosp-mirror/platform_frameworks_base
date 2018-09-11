@@ -35,6 +35,8 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
@@ -203,6 +205,7 @@ import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 import com.android.server.notification.ManagedServices.ManagedServiceInfo;
 import com.android.server.notification.ManagedServices.UserProfiles;
+import com.android.server.pm.PackageManagerService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -470,8 +473,8 @@ public class NotificationManagerService extends SystemService {
                 // Gather all notification listener components for candidate pkgs.
                 Set<ComponentName> approvedListeners =
                         mListeners.queryPackageForServices(whitelisted,
-                                PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
+                                MATCH_DIRECT_BOOT_AWARE
+                                        | MATCH_DIRECT_BOOT_UNAWARE, userId);
                 for (ComponentName cn : approvedListeners) {
                     try {
                         getBinderService().setNotificationListenerAccessGrantedForUser(cn,
@@ -507,8 +510,8 @@ public class NotificationManagerService extends SystemService {
             // only be one
             Set<ComponentName> approvedAssistants =
                     mAssistants.queryPackageForServices(defaultAssistantAccess,
-                            PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
+                            MATCH_DIRECT_BOOT_AWARE
+                                    | MATCH_DIRECT_BOOT_UNAWARE, userId);
             for (ComponentName cn : approvedAssistants) {
                 try {
                     getBinderService().setNotificationAssistantAccessGrantedForUser(
@@ -1377,7 +1380,7 @@ public class NotificationManagerService extends SystemService {
             NotificationUsageStats usageStats, AtomicFile policyFile,
             ActivityManager activityManager, GroupHelper groupHelper, IActivityManager am,
             UsageStatsManagerInternal appUsageStats, DevicePolicyManagerInternal dpm,
-            IUriGrantsManager ugm, UriGrantsManagerInternal ugmInternal) {
+            IUriGrantsManager ugm, UriGrantsManagerInternal ugmInternal, AppOpsManager appOps) {
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
                 Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
@@ -1390,7 +1393,7 @@ public class NotificationManagerService extends SystemService {
         mUgmInternal = ugmInternal;
         mPackageManager = packageManager;
         mPackageManagerClient = packageManagerClient;
-        mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
+        mAppOps = appOps;
         mVibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
         mAppUsageStats = appUsageStats;
         mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
@@ -1544,7 +1547,8 @@ public class NotificationManagerService extends SystemService {
                 LocalServices.getService(UsageStatsManagerInternal.class),
                 LocalServices.getService(DevicePolicyManagerInternal.class),
                 UriGrantsManager.getService(),
-                LocalServices.getService(UriGrantsManagerInternal.class));
+                LocalServices.getService(UriGrantsManagerInternal.class),
+                (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE));
 
         // register for various Intents
         IntentFilter filter = new IntentFilter();
@@ -2231,6 +2235,60 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystem();
             mPreferencesHelper.setShowBadge(pkg, uid, showBadge);
             savePolicyFile();
+        }
+
+        @Override
+        public void setNotificationDelegate(String callingPkg, String delegate) {
+            checkCallerIsSameApp(callingPkg);
+            final int callingUid = Binder.getCallingUid();
+            UserHandle user = UserHandle.getUserHandleForUid(callingUid);
+            try {
+                ApplicationInfo info =
+                        mPackageManager.getApplicationInfo(delegate,
+                                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                                user.getIdentifier());
+                if (info != null) {
+                    mPreferencesHelper.setNotificationDelegate(
+                            callingPkg, callingUid, delegate, info.uid);
+                    savePolicyFile();
+                }
+            } catch (RemoteException e) {
+                // :(
+            }
+        }
+
+        @Override
+        public void revokeNotificationDelegate(String callingPkg) {
+            checkCallerIsSameApp(callingPkg);
+            mPreferencesHelper.revokeNotificationDelegate(callingPkg, Binder.getCallingUid());
+            savePolicyFile();
+        }
+
+        @Override
+        public String getNotificationDelegate(String callingPkg) {
+            // callable by Settings also
+            checkCallerIsSystemOrSameApp(callingPkg);
+            return mPreferencesHelper.getNotificationDelegate(callingPkg, Binder.getCallingUid());
+        }
+
+        @Override
+        public boolean canNotifyAsPackage(String callingPkg, String targetPkg) {
+            checkCallerIsSameApp(callingPkg);
+            final int callingUid = Binder.getCallingUid();
+            UserHandle user = UserHandle.getUserHandleForUid(callingUid);
+            try {
+                ApplicationInfo info =
+                        mPackageManager.getApplicationInfo(targetPkg,
+                                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                                user.getIdentifier());
+                if (info != null) {
+                    return mPreferencesHelper.isDelegateAllowed(
+                            targetPkg, info.uid, callingPkg, callingUid);
+                }
+            } catch (RemoteException e) {
+                // :(
+            }
+            return false;
         }
 
         @Override
@@ -4053,20 +4111,21 @@ public class NotificationManagerService extends SystemService {
             Slog.v(TAG, "enqueueNotificationInternal: pkg=" + pkg + " id=" + id
                     + " notification=" + notification);
         }
-        checkCallerIsSystemOrSameApp(pkg);
-        checkRestrictedCategories(notification);
-
-        final int userId = ActivityManager.handleIncomingUser(callingPid,
-                callingUid, incomingUserId, true, false, "enqueueNotification", pkg);
-        final UserHandle user = new UserHandle(userId);
 
         if (pkg == null || notification == null) {
             throw new IllegalArgumentException("null not allowed: pkg=" + pkg
                     + " id=" + id + " notification=" + notification);
         }
 
-        // The system can post notifications for any package, let us resolve that.
-        final int notificationUid = resolveNotificationUid(opPkg, callingUid, userId);
+        final int userId = ActivityManager.handleIncomingUser(callingPid,
+                callingUid, incomingUserId, true, false, "enqueueNotification", pkg);
+        final UserHandle user = UserHandle.of(userId);
+
+        // Can throw a SecurityException if the calling uid doesn't have permission to post
+        // as "pkg"
+        final int notificationUid = resolveNotificationUid(opPkg, pkg, callingUid, userId);
+
+        checkRestrictedCategories(notification);
 
         // Fix the notification as best we can.
         try {
@@ -4193,17 +4252,28 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private int resolveNotificationUid(String opPackageName, int callingUid, int userId) {
-        // The system can post notifications on behalf of any package it wants
-        if (isCallerSystemOrPhone() && opPackageName != null && !"android".equals(opPackageName)) {
-            try {
-                return getContext().getPackageManager()
-                        .getPackageUidAsUser(opPackageName, userId);
-            } catch (NameNotFoundException e) {
-                /* ignore */
-            }
+    @VisibleForTesting
+    int resolveNotificationUid(String callingPkg, String targetPkg,
+            int callingUid, int userId) {
+        // posted from app A on behalf of app A
+        if (isCallerSameApp(targetPkg, callingUid) && TextUtils.equals(callingPkg, targetPkg)) {
+            return callingUid;
         }
-        return callingUid;
+
+        int targetUid = -1;
+        try {
+            targetUid = mPackageManagerClient.getPackageUidAsUser(targetPkg, userId);
+        } catch (NameNotFoundException e) {
+            /* ignore */
+        }
+        // posted from app A on behalf of app B
+        if (targetUid != -1 && (isCallerAndroid(callingPkg, callingUid)
+                || mPreferencesHelper.isDelegateAllowed(
+                        targetPkg, targetUid, callingPkg, callingUid))) {
+            return targetUid;
+        }
+
+        throw new SecurityException("Caller " + callingUid + " cannot post for pkg " + targetPkg);
     }
 
     /**
@@ -4222,7 +4292,8 @@ public class NotificationManagerService extends SystemService {
         // package or a registered listener can enqueue.  Prevents DOS attacks and deals with leaks.
         if (!isSystemNotification && !isNotificationFromListener) {
             synchronized (mNotificationLock) {
-                if (mNotificationsByKey.get(r.sbn.getKey()) == null && isCallerInstantApp(pkg)) {
+                if (mNotificationsByKey.get(r.sbn.getKey()) == null
+                        && isCallerInstantApp(pkg, callingUid)) {
                     // Ephemeral apps have some special constraints for notifications.
                     // They are not allowed to create new notifications however they are allowed to
                     // update notifications created by the system (e.g. a foreground service
@@ -5149,11 +5220,11 @@ public class NotificationManagerService extends SystemService {
                     try {
                         Thread.sleep(waitMs);
                     } catch (InterruptedException e) { }
-                    mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
+                    mVibrator.vibrate(record.sbn.getUid(), record.sbn.getPackageName(),
                             effect, "Notification (delayed)", record.getAudioAttributes());
                 }).start();
             } else {
-                mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
+                mVibrator.vibrate(record.sbn.getUid(), record.sbn.getPackageName(),
                         effect, "Notification", record.getAudioAttributes());
             }
             return true;
@@ -6282,6 +6353,11 @@ public class NotificationManagerService extends SystemService {
         checkCallerIsSameApp(pkg);
     }
 
+    private boolean isCallerAndroid(String callingPkg, int uid) {
+        return isUidSystemOrPhone(uid) && callingPkg != null
+                && PackageManagerService.PLATFORM_PACKAGE_NAME.equals(callingPkg);
+    }
+
     /**
      * Check if the notification is of a category type that is restricted to system use only,
      * if so throw SecurityException
@@ -6302,13 +6378,13 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private boolean isCallerInstantApp(String pkg) {
+    private boolean isCallerInstantApp(String pkg, int callingUid) {
         // System is always allowed to act for ephemeral apps.
-        if (isCallerSystemOrPhone()) {
+        if (isUidSystemOrPhone(callingUid)) {
             return false;
         }
 
-        mAppOps.checkPackage(Binder.getCallingUid(), pkg);
+        mAppOps.checkPackage(callingUid, pkg);
 
         try {
             ApplicationInfo ai = mPackageManager.getApplicationInfo(pkg, 0,
@@ -6324,7 +6400,10 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void checkCallerIsSameApp(String pkg) {
-        final int uid = Binder.getCallingUid();
+        checkCallerIsSameApp(pkg, Binder.getCallingUid());
+    }
+
+    private void checkCallerIsSameApp(String pkg, int uid) {
         try {
             ApplicationInfo ai = mPackageManager.getApplicationInfo(
                     pkg, 0, UserHandle.getCallingUserId());
@@ -6337,6 +6416,24 @@ public class NotificationManagerService extends SystemService {
             }
         } catch (RemoteException re) {
             throw new SecurityException("Unknown package " + pkg + "\n" + re);
+        }
+    }
+
+    private boolean isCallerSameApp(String pkg) {
+        try {
+            checkCallerIsSameApp(pkg);
+            return true;
+        } catch (SecurityException e) {
+            return false;
+        }
+    }
+
+    private boolean isCallerSameApp(String pkg, int uid) {
+        try {
+            checkCallerIsSameApp(pkg, uid);
+            return true;
+        } catch (SecurityException e) {
+            return false;
         }
     }
 
