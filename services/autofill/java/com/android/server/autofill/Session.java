@@ -23,7 +23,6 @@ import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.ACTION_VALUE_CHANGED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_ENTERED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_EXITED;
-import static android.view.autofill.AutofillManager.NO_SESSION;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.autofill.Helper.getNumericValue;
@@ -76,6 +75,7 @@ import android.service.autofill.ValueFinder;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LocalLog;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -128,7 +128,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
-    private static AtomicInteger sIdCounter = new AtomicInteger(1);
+    private static AtomicInteger sIdCounter = new AtomicInteger();
 
     /** ID of the session */
     public final int id;
@@ -385,7 +385,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     @Override
     public AutofillValue findRawValueByAutofillId(AutofillId id) {
-        if (id == null) return null;
         synchronized (mLock) {
             return findValueLocked(id);
         }
@@ -398,50 +397,39 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     @Nullable
     private AutofillValue findValueLocked(@NonNull AutofillId autofillId) {
-        // TODO(b/113281366): rather than explicitly look for previous session, it might be
-        // better to merge the sessions when created (see note on mergePreviousSessionLocked())
-        final int requiredId = autofillId.getSessionId();
-        Session rightSession = null;
-        if (requiredId == NO_SESSION || requiredId == id) {
-            rightSession = this;
-        } else {
-            final ArrayList<Session> previousSessions = mService.getPreviousSessionsLocked(this);
-            if (previousSessions == null) {
-                if (sVerbose) Slog.v(TAG, "findValue(): no previous sessions");
-                return null;
-            }
+        final AutofillValue value = findValueFromThisSessionOnlyLocked(autofillId);
+        if (value != null) return value;
+
+        // TODO(b/113281366): rather than explicitly look for previous session, it might be better
+        // to merge the sessions when created (see note on mergePreviousSessionLocked())
+        final ArrayList<Session> previousSessions = mService.getPreviousSessionsLocked(this);
+        if (previousSessions != null) {
             if (sDebug) {
-                Slog.d(TAG, "findValue(): looking on " + previousSessions.size()
+                Slog.d(TAG, "findValueLocked(): looking on " + previousSessions.size()
                         + " previous sessions for autofillId " + autofillId);
             }
             for (int i = 0; i < previousSessions.size(); i++) {
                 final Session previousSession = previousSessions.get(i);
-                if (previousSession.id == requiredId) {
-                    rightSession = previousSession;
-                    break;
+                final AutofillValue previousValue = previousSession
+                        .findValueFromThisSessionOnlyLocked(autofillId);
+                if (previousValue != null) {
+                    return previousValue;
                 }
             }
         }
-        if (rightSession == null) {
-            Slog.w(TAG, "findValue(): no session with id" + requiredId);
-            return null;
-        }
-        return rightSession.findValueFromThisSessionOnlyLocked(autofillId);
+        return null;
     }
 
-    @GuardedBy("mLock")
     @Nullable
     private AutofillValue findValueFromThisSessionOnlyLocked(@NonNull AutofillId autofillId) {
         final ViewState state = mViewStates.get(autofillId);
         if (state == null) {
-            if (sDebug) {
-                Slog.d(TAG, "findValueLocked(): no view state for " + autofillId + " on " + id);
-            }
+            if (sDebug) Slog.d(TAG, "findValueLocked(): no view state for " + autofillId);
             return null;
         }
         AutofillValue value = state.getCurrentValue();
         if (value == null) {
-            Slog.d(TAG, "findValueLocked(): no current value for " + autofillId + " on " + id);
+            if (sDebug) Slog.d(TAG, "findValueLocked(): no current value for " + autofillId);
             value = getValueFromContextsLocked(autofillId);
         }
         return value;

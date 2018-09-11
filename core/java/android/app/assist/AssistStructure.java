@@ -32,7 +32,6 @@ import android.view.ViewStructure.HtmlInfo.Builder;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.autofill.AutofillId;
-import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 
 import com.android.internal.util.Preconditions;
@@ -73,8 +72,6 @@ public class AssistStructure implements Parcelable {
     boolean mHaveData;
 
     ComponentName mActivityComponent;
-    // Not written to parcel, only used to set session id on virtual node children
-    private final int mAutofillSessionId;
     private boolean mIsHomeActivity;
     private int mFlags;
 
@@ -1849,13 +1846,11 @@ public class AssistStructure implements Parcelable {
         @Override
         public void setAutofillId(@NonNull AutofillId id) {
             mNode.mAutofillId = id;
-            mNode.mAutofillId.setSessionId(mAssist.mAutofillSessionId);
         }
 
         @Override
         public void setAutofillId(@NonNull AutofillId parentId, int virtualId) {
             mNode.mAutofillId = new AutofillId(parentId, virtualId);
-            mNode.mAutofillId.setSessionId(mAssist.mAutofillSessionId);
         }
 
         @Override
@@ -2045,8 +2040,6 @@ public class AssistStructure implements Parcelable {
     public AssistStructure(Activity activity, boolean forAutoFill, int flags) {
         mHaveData = true;
         mActivityComponent = activity.getComponentName();
-        final AutofillManager afm = activity.getSystemService(AutofillManager.class);
-        mAutofillSessionId = afm == null ? AutofillManager.NO_SESSION : afm.getSessionId();
         mFlags = flags;
         ArrayList<ViewRootImpl> views = WindowManagerGlobal.getInstance().getRootViews(
                 activity.getActivityToken());
@@ -2063,7 +2056,6 @@ public class AssistStructure implements Parcelable {
     public AssistStructure() {
         mHaveData = true;
         mActivityComponent = null;
-        mAutofillSessionId = AutofillManager.NO_SESSION;
         mFlags = 0;
     }
 
@@ -2071,7 +2063,6 @@ public class AssistStructure implements Parcelable {
     public AssistStructure(Parcel in) {
         mIsHomeActivity = in.readInt() == 1;
         mReceiveChannel = in.readStrongBinder();
-        mAutofillSessionId = AutofillManager.NO_SESSION;
     }
 
     /**
@@ -2091,10 +2082,6 @@ public class AssistStructure implements Parcelable {
             ensureData();
         }
         Log.i(TAG, "Activity: " + mActivityComponent.flattenToShortString());
-        if (mAutofillSessionId != AutofillManager.NO_SESSION) {
-            Log.i(TAG, "Autofill Session ID: " + mAutofillSessionId);
-        }
-
         Log.i(TAG, "Sanitize on write: " + mSanitizeOnWrite);
         Log.i(TAG, "Flags: " + mFlags);
         final int N = getWindowNodeCount();
