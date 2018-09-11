@@ -38,12 +38,52 @@ class TestHiddenapiListGeneration(unittest.TestCase):
         with self.assertRaises(AssertionError) as ar:
             move_between_sets(set([1, 4]), A, B)
 
+    def test_get_package_name(self):
+        self.assertEqual(get_package_name("Ljava/lang/String;->clone()V"), "Ljava/lang/")
+
+    def test_get_package_name_fail_no_arrow(self):
+        with self.assertRaises(AssertionError) as ar:
+            get_package_name("Ljava/lang/String;-clone()V")
+        with self.assertRaises(AssertionError) as ar:
+            get_package_name("Ljava/lang/String;>clone()V")
+        with self.assertRaises(AssertionError) as ar:
+            get_package_name("Ljava/lang/String;__clone()V")
+
+    def test_get_package_name_fail_no_package(self):
+        with self.assertRaises(AssertionError) as ar:
+            get_package_name("LString;->clone()V")
+
+    def test_all_package_names(self):
+        self.assertEqual(all_package_names(), set())
+        self.assertEqual(all_package_names(set(["Lfoo/Bar;->baz()V"])), set(["Lfoo/"]))
+        self.assertEqual(
+            all_package_names(set(["Lfoo/Bar;->baz()V", "Lfoo/BarX;->bazx()I"])),
+            set(["Lfoo/"]))
+        self.assertEqual(
+            all_package_names(
+                set(["Lfoo/Bar;->baz()V"]),
+                set(["Lfoo/BarX;->bazx()I", "Labc/xyz/Mno;->ijk()J"])),
+            set(["Lfoo/", "Labc/xyz/"]))
+
     def test_move_all(self):
         src = set([ "abc", "xyz" ])
         dst = set([ "def" ])
         move_all(src, dst)
         self.assertEqual(src, set())
         self.assertEqual(dst, set([ "abc", "def", "xyz" ]))
+
+    def test_move_from_packages(self):
+        src = set([ "Lfoo/bar/ClassA;->abc()J",        # will be moved
+                    "Lfoo/bar/ClassA;->def()J",        # will be moved
+                    "Lcom/pkg/example/ClassD;->ijk:J", # not moved: different package
+                    "Lfoo/bar/xyz/ClassC;->xyz()Z" ])  # not moved: subpackage
+        dst = set()
+        packages = set([ "Lfoo/bar/" ])
+        move_from_packages(packages, src, dst)
+        self.assertEqual(
+            src, set([ "Lfoo/bar/xyz/ClassC;->xyz()Z", "Lcom/pkg/example/ClassD;->ijk:J" ]))
+        self.assertEqual(
+            dst, set([ "Lfoo/bar/ClassA;->abc()J", "Lfoo/bar/ClassA;->def()J" ]))
 
 if __name__ == '__main__':
     unittest.main()

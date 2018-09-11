@@ -336,7 +336,6 @@ $(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST): \
     frameworks/base/tools/hiddenapi/generate_hiddenapi_lists.py \
     frameworks/base/config/hiddenapi-light-greylist.txt \
     frameworks/base/config/hiddenapi-vendor-list.txt \
-    frameworks/base/config/hiddenapi-dark-greylist.txt \
     frameworks/base/config/hiddenapi-force-blacklist.txt \
     $(INTERNAL_PLATFORM_HIDDENAPI_PUBLIC_LIST) \
     $(INTERNAL_PLATFORM_HIDDENAPI_PRIVATE_LIST) \
@@ -345,15 +344,12 @@ $(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST): \
 	    --input-public $(INTERNAL_PLATFORM_HIDDENAPI_PUBLIC_LIST) \
 	    --input-private $(INTERNAL_PLATFORM_HIDDENAPI_PRIVATE_LIST) \
 	    --input-whitelists $(PRIVATE_WHITELIST_INPUTS) \
-	    --input-light-greylists \
+	    --input-greylists \
 	        frameworks/base/config/hiddenapi-light-greylist.txt \
 	        frameworks/base/config/hiddenapi-vendor-list.txt \
 	        <(comm -12 <(sort $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE)) \
 	                   $(INTERNAL_PLATFORM_HIDDENAPI_PRIVATE_LIST)) \
 	        $(PRIVATE_GREYLIST_INPUTS) \
-	    --input-dark-greylists \
-	        frameworks/base/config/hiddenapi-dark-greylist.txt \
-	        $(PRIVATE_DARKGREYLIST_INPUTS) \
 	    --input-blacklists frameworks/base/config/hiddenapi-force-blacklist.txt \
 	    --output-whitelist $(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST).tmp \
 	    --output-light-greylist $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST).tmp \
