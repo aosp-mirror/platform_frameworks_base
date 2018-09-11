@@ -796,7 +796,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             try {
                 mActivityManager.registerUidObserver(mUidObserver,
                         ActivityManager.UID_OBSERVER_PROCSTATE|ActivityManager.UID_OBSERVER_GONE,
-                        ActivityManager.PROCESS_STATE_UNKNOWN, null);
+                        NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE, "android");
                 mNetworkManager.registerObserver(mAlertObserver);
             } catch (RemoteException e) {
                 // ignored; both services live in system_server
