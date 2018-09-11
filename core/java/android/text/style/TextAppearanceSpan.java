@@ -16,11 +16,13 @@
 
 package android.text.style;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.LeakyTypefaceStorage;
 import android.graphics.Typeface;
+import android.graphics.fonts.Font;
 import android.os.Parcel;
 import android.text.ParcelableSpan;
 import android.text.TextPaint;
@@ -37,6 +39,21 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
     private final ColorStateList mTextColor;
     private final ColorStateList mTextColorLink;
     private final Typeface mTypeface;
+
+    private final int mTextFontWeight;
+
+    private final float mShadowRadius;
+    private final float mShadowDx;
+    private final float mShadowDy;
+    private final int mShadowColor;
+
+    private final boolean mHasElegantTextHeight;
+    private final boolean mElegantTextHeight;
+    private final boolean mHasLetterSpacing;
+    private final float mLetterSpacing;
+
+    private final String mFontFeatureSettings;
+    private final String mFontVariationSettings;
 
     /**
      * Uses the specified TextAppearance resource to determine the
@@ -104,6 +121,34 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
             }
         }
 
+        mTextFontWeight = a.getInt(com.android.internal.R.styleable
+                .TextAppearance_textFontWeight, -1);
+
+        mShadowRadius = a.getFloat(com.android.internal.R.styleable
+                .TextAppearance_shadowRadius, 0.0f);
+        mShadowDx = a.getFloat(com.android.internal.R.styleable
+                .TextAppearance_shadowDx, 0.0f);
+        mShadowDy = a.getFloat(com.android.internal.R.styleable
+                .TextAppearance_shadowDy, 0.0f);
+        mShadowColor = a.getInt(com.android.internal.R.styleable
+                .TextAppearance_shadowColor, 0);
+
+        mHasElegantTextHeight = a.hasValue(com.android.internal.R.styleable
+                .TextAppearance_elegantTextHeight);
+        mElegantTextHeight = a.getBoolean(com.android.internal.R.styleable
+                .TextAppearance_elegantTextHeight, false);
+
+        mHasLetterSpacing = a.hasValue(com.android.internal.R.styleable
+                .TextAppearance_letterSpacing);
+        mLetterSpacing = a.getFloat(com.android.internal.R.styleable
+                .TextAppearance_letterSpacing, 0.0f);
+
+        mFontFeatureSettings = a.getString(com.android.internal.R.styleable
+                .TextAppearance_fontFeatureSettings);
+
+        mFontVariationSettings = a.getString(com.android.internal.R.styleable
+                .TextAppearance_fontVariationSettings);
+
         a.recycle();
 
         if (colorList >= 0) {
@@ -129,6 +174,21 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
         mTextColor = color;
         mTextColorLink = linkColor;
         mTypeface = null;
+
+        mTextFontWeight = -1;
+
+        mShadowRadius = 0.0f;
+        mShadowDx = 0.0f;
+        mShadowDy = 0.0f;
+        mShadowColor = 0;
+
+        mHasElegantTextHeight = false;
+        mElegantTextHeight = false;
+        mHasLetterSpacing = false;
+        mLetterSpacing = 0.0f;
+
+        mFontFeatureSettings = null;
+        mFontVariationSettings = null;
     }
 
     public TextAppearanceSpan(Parcel src) {
@@ -146,6 +206,21 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
             mTextColorLink = null;
         }
         mTypeface = LeakyTypefaceStorage.readTypefaceFromParcel(src);
+
+        mTextFontWeight = src.readInt();
+
+        mShadowRadius = src.readFloat();
+        mShadowDx = src.readFloat();
+        mShadowDy = src.readFloat();
+        mShadowColor = src.readInt();
+
+        mHasElegantTextHeight = src.readBoolean();
+        mElegantTextHeight = src.readBoolean();
+        mHasLetterSpacing = src.readBoolean();
+        mLetterSpacing = src.readFloat();
+
+        mFontFeatureSettings = src.readString();
+        mFontVariationSettings = src.readString();
     }
 
     public int getSpanTypeId() {
@@ -183,6 +258,21 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
             dest.writeInt(0);
         }
         LeakyTypefaceStorage.writeTypefaceToParcel(mTypeface, dest);
+
+        dest.writeInt(mTextFontWeight);
+
+        dest.writeFloat(mShadowRadius);
+        dest.writeFloat(mShadowDx);
+        dest.writeFloat(mShadowDy);
+        dest.writeInt(mShadowColor);
+
+        dest.writeBoolean(mHasElegantTextHeight);
+        dest.writeBoolean(mElegantTextHeight);
+        dest.writeBoolean(mHasLetterSpacing);
+        dest.writeFloat(mLetterSpacing);
+
+        dest.writeString(mFontFeatureSettings);
+        dest.writeString(mFontVariationSettings);
     }
 
     /**
@@ -225,6 +315,81 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
         return mStyle;
     }
 
+    /**
+     * Returns the text font weight specified by this span, or <code>-1</code>
+     * if it does not specify one.
+     */
+    public int getTextFontWeight() {
+        return mTextFontWeight;
+    }
+
+    /**
+     * Returns the typeface specified by this span, or <code>null</code>
+     * if it does not specify one.
+     */
+    @Nullable
+    public Typeface getTypeface() {
+        return mTypeface;
+    }
+
+    /**
+     * Returns the color of the text shadow specified by this span, or <code>0</code>
+     * if it does not specify one.
+     */
+    public int getShadowColor() {
+        return mShadowColor;
+    }
+
+    /**
+     * Returns the horizontal offset of the text shadow specified by this span, or <code>0.0f</code>
+     * if it does not specify one.
+     */
+    public float getShadowDx() {
+        return mShadowDx;
+    }
+
+    /**
+     * Returns the vertical offset of the text shadow specified by this span, or <code>0.0f</code>
+     * if it does not specify one.
+     */
+    public float getShadowDy() {
+        return mShadowDy;
+    }
+
+    /**
+     * Returns the blur radius of the text shadow specified by this span, or <code>0.0f</code>
+     * if it does not specify one.
+     */
+    public float getShadowRadius() {
+        return mShadowRadius;
+    }
+
+    /**
+     * Returns the font feature settings specified by this span, or <code>null</code>
+     * if it does not specify one.
+     */
+    @Nullable
+    public String getFontFeatureSettings() {
+        return mFontFeatureSettings;
+    }
+
+    /**
+     * Returns the font variation settings specified by this span, or <code>null</code>
+     * if it does not specify one.
+     */
+    @Nullable
+    public String getFontVariationSettings() {
+        return mFontVariationSettings;
+    }
+
+    /**
+     * Returns the value of elegant height metrics flag specified by this span,
+     * or <code>false</code> if it does not specify one.
+     */
+    public boolean isElegantTextHeight() {
+        return mElegantTextHeight;
+    }
+
     @Override
     public void updateDrawState(TextPaint ds) {
         updateMeasureState(ds);
@@ -235,6 +400,10 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
 
         if (mTextColorLink != null) {
             ds.linkColor = mTextColorLink.getColorForState(ds.drawableState, 0);
+        }
+
+        if (mShadowColor != 0) {
+            ds.setShadowLayer(mShadowRadius, mShadowDx, mShadowDy, mShadowColor);
         }
     }
 
@@ -267,7 +436,16 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
         }
 
         if (styledTypeface != null) {
-            int fake = style & ~styledTypeface.getStyle();
+            final Typeface readyTypeface;
+            if (mTextFontWeight >= 0) {
+                final int weight = Math.min(Font.FONT_WEIGHT_MAX, mTextFontWeight);
+                final boolean italic = (style & Typeface.ITALIC) != 0;
+                readyTypeface = ds.setTypeface(Typeface.create(styledTypeface, weight, italic));
+            } else {
+                readyTypeface = styledTypeface;
+            }
+
+            int fake = style & ~readyTypeface.getStyle();
 
             if ((fake & Typeface.BOLD) != 0) {
                 ds.setFakeBoldText(true);
@@ -277,11 +455,27 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
                 ds.setTextSkewX(-0.25f);
             }
 
-            ds.setTypeface(styledTypeface);
+            ds.setTypeface(readyTypeface);
         }
 
         if (mTextSize > 0) {
             ds.setTextSize(mTextSize);
+        }
+
+        if (mHasElegantTextHeight) {
+            ds.setElegantTextHeight(mElegantTextHeight);
+        }
+
+        if (mHasLetterSpacing) {
+            ds.setLetterSpacing(mLetterSpacing);
+        }
+
+        if (mFontFeatureSettings != null) {
+            ds.setFontFeatureSettings(mFontFeatureSettings);
+        }
+
+        if (mFontVariationSettings != null) {
+            ds.setFontVariationSettings(mFontVariationSettings);
         }
     }
 }
