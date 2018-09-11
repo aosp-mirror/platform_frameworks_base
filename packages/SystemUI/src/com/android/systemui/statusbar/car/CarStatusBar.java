@@ -495,30 +495,35 @@ public class CarStatusBar extends StatusBar implements
     }
 
     @Override
-    public void onUserSwitched(int newUserId) {
-        super.onUserSwitched(newUserId);
-        if (mFullscreenUserSwitcher != null) {
-            mFullscreenUserSwitcher.onUserSwitched(newUserId);
-        }
-    }
-
-    @Override
     public void onStateChanged(int newState) {
         super.onStateChanged(newState);
-        CarUserManagerHelper helper = new CarUserManagerHelper(mContext);
-        if (!helper.isHeadlessSystemUser()) {
-            showUserSwitcher();
+        if (newState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
+            if (!mFullscreenUserSwitcher.isVisible()) {
+                // Current execution path continues to set state after this, thus we deffer the
+                // dismissal to the next execution cycle.
+                postDismissKeyguard(); // Dismiss the keyguard if switcher is not visible.
+            }
+        } else {
+            mFullscreenUserSwitcher.hide();
         }
     }
 
     public void showUserSwitcher() {
-        if (mFullscreenUserSwitcher != null) {
-            if (mState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
-                mFullscreenUserSwitcher.show();
-            } else {
-                mFullscreenUserSwitcher.hide();
-            }
+        if (mFullscreenUserSwitcher != null && mState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
+            mFullscreenUserSwitcher.show(); // Makes the switcher visible.
         }
+    }
+
+    public void postDismissKeyguard() {
+        mHandler.post(this::dismissKeyguard);
+    }
+
+    /**
+     * Dismisses the keyguard and shows bouncer if authentication is necessary.
+     */
+    public void dismissKeyguard() {
+        executeRunnableDismissingKeyguard(null/* runnable */, null /* cancelAction */,
+            true /* dismissShade */, true /* afterKeyguardGone */, true /* deferred */);
     }
 
     @Override
