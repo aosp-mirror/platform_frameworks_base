@@ -99,6 +99,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         IPhoneStateListener callback;
         IOnSubscriptionsChangedListener onSubscriptionsChangedListenerCallback;
+        IOnSubscriptionsChangedListener onOpportunisticSubscriptionsChangedListenerCallback;
 
         int callerUid;
         int callerPid;
@@ -117,6 +118,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return (onSubscriptionsChangedListenerCallback != null);
         }
 
+        boolean matchOnOpportunisticSubscriptionsChangedListener() {
+            return (onOpportunisticSubscriptionsChangedListenerCallback != null);
+        }
+
         boolean canReadCallLog() {
             try {
                 return TelephonyPermissions.checkReadCallLog(
@@ -131,7 +136,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return "{callingPackage=" + callingPackage + " binder=" + binder
                     + " callback=" + callback
                     + " onSubscriptionsChangedListenererCallback="
-                                            + onSubscriptionsChangedListenerCallback
+                    + onSubscriptionsChangedListenerCallback
+                    + " onOpportunisticSubscriptionsChangedListenererCallback="
+                    + onOpportunisticSubscriptionsChangedListenerCallback
                     + " callerUid=" + callerUid + " subId=" + subId + " phoneId=" + phoneId
                     + " events=" + Integer.toHexString(events) + "}";
         }
@@ -147,7 +154,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private final AppOpsManager mAppOps;
 
-    private boolean hasNotifySubscriptionInfoChangedOccurred = false;
+    private boolean mHasNotifySubscriptionInfoChangedOccurred = false;
+
+    private boolean mHasNotifyOpportunisticSubscriptionInfoChangedOccurred = false;
 
     private int mNumPhones;
 
@@ -407,7 +416,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 log("listen oscl:  Register r=" + r);
             }
             // Always notify when registration occurs if there has been a notification.
-            if (hasNotifySubscriptionInfoChangedOccurred) {
+            if (mHasNotifySubscriptionInfoChangedOccurred) {
                 try {
                     if (VDBG) log("listen oscl: send to r=" + r);
                     r.onSubscriptionsChangedListenerCallback.onSubscriptionsChanged();
@@ -417,7 +426,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     remove(r.binder);
                 }
             } else {
-                log("listen oscl: hasNotifySubscriptionInfoChangedOccurred==false no callback");
+                log("listen oscl: mHasNotifySubscriptionInfoChangedOccurred==false no callback");
             }
         }
     }
@@ -429,15 +438,61 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         remove(callback.asBinder());
     }
 
+
+    @Override
+    public void addOnOpportunisticSubscriptionsChangedListener(String callingPackage,
+            IOnSubscriptionsChangedListener callback) {
+        int callerUserId = UserHandle.getCallingUserId();
+        mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
+        if (VDBG) {
+            log("listen ooscl: E pkg=" + callingPackage + " myUserId=" + UserHandle.myUserId()
+                    + " callerUserId="  + callerUserId + " callback=" + callback
+                    + " callback.asBinder=" + callback.asBinder());
+        }
+
+        synchronized (mRecords) {
+            // register
+            IBinder b = callback.asBinder();
+            Record r = add(b);
+
+            if (r == null) {
+                return;
+            }
+
+            r.context = mContext;
+            r.onOpportunisticSubscriptionsChangedListenerCallback = callback;
+            r.callingPackage = callingPackage;
+            r.callerUid = Binder.getCallingUid();
+            r.callerPid = Binder.getCallingPid();
+            r.events = 0;
+            if (DBG) {
+                log("listen ooscl:  Register r=" + r);
+            }
+            // Always notify when registration occurs if there has been a notification.
+            if (mHasNotifyOpportunisticSubscriptionInfoChangedOccurred) {
+                try {
+                    if (VDBG) log("listen ooscl: send to r=" + r);
+                    r.onOpportunisticSubscriptionsChangedListenerCallback.onSubscriptionsChanged();
+                    if (VDBG) log("listen ooscl: sent to r=" + r);
+                } catch (RemoteException e) {
+                    if (VDBG) log("listen ooscl: remote exception sending to r=" + r + " e=" + e);
+                    remove(r.binder);
+                }
+            } else {
+                log("listen ooscl: hasNotifyOpptSubInfoChangedOccurred==false no callback");
+            }
+        }
+    }
+
     @Override
     public void notifySubscriptionInfoChanged() {
         if (VDBG) log("notifySubscriptionInfoChanged:");
         synchronized (mRecords) {
-            if (!hasNotifySubscriptionInfoChangedOccurred) {
+            if (!mHasNotifySubscriptionInfoChangedOccurred) {
                 log("notifySubscriptionInfoChanged: first invocation mRecords.size="
                         + mRecords.size());
             }
-            hasNotifySubscriptionInfoChangedOccurred = true;
+            mHasNotifySubscriptionInfoChangedOccurred = true;
             mRemoveList.clear();
             for (Record r : mRecords) {
                 if (r.matchOnSubscriptionsChangedListener()) {
@@ -447,6 +502,33 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         if (VDBG) log("notifySubscriptionInfoChanged: done osc to r=" + r);
                     } catch (RemoteException ex) {
                         if (VDBG) log("notifySubscriptionInfoChanged: RemoteException r=" + r);
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+    @Override
+    public void notifyOpportunisticSubscriptionInfoChanged() {
+        if (VDBG) log("notifyOpptSubscriptionInfoChanged:");
+        synchronized (mRecords) {
+            if (!mHasNotifyOpportunisticSubscriptionInfoChangedOccurred) {
+                log("notifyOpptSubscriptionInfoChanged: first invocation mRecords.size="
+                        + mRecords.size());
+            }
+            mHasNotifyOpportunisticSubscriptionInfoChangedOccurred = true;
+            mRemoveList.clear();
+            for (Record r : mRecords) {
+                if (r.matchOnOpportunisticSubscriptionsChangedListener()) {
+                    try {
+                        if (VDBG) log("notifyOpptSubChanged: call oosc to r=" + r);
+                        r.onOpportunisticSubscriptionsChangedListenerCallback
+                                .onSubscriptionsChanged();
+                        if (VDBG) log("notifyOpptSubChanged: done oosc to r=" + r);
+                    } catch (RemoteException ex) {
+                        if (VDBG) log("notifyOpptSubChanged: RemoteException r=" + r);
                         mRemoveList.add(r.binder);
                     }
                 }
