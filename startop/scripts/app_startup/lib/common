@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [[ -z $ANDROID_BUILD_TOP ]]; then
+  echo "Please run source build/envsetup.sh first" >&2
+  exit 1
+fi
+
+source $ANDROID_BUILD_TOP/build/envsetup.sh
+
+verbose_print() {
+  if [[ "$verbose" == "y" ]]; then
+    echo "$@" >&2
+  fi
+}
