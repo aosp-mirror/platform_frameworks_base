@@ -133,11 +133,19 @@ class SourcePathDiagnostics : public IDiagnostics {
   void Log(Level level, DiagMessageActual& actual_msg) override {
     actual_msg.source.path = source_.path;
     diag_->Log(level, actual_msg);
+    if (level == Level::Error) {
+      error = true;
+    }
+  }
+
+  bool HadError() {
+    return error;
   }
 
  private:
   Source source_;
   IDiagnostics* diag_;
+  bool error = false;
 
   DISALLOW_COPY_AND_ASSIGN(SourcePathDiagnostics);
 };
