@@ -15,7 +15,7 @@
 -->
 <resources>
     <!-- Theme for the dialog shown when an app crashes or ANRs. Override to make it dark. -->
-    <style name="Theme.Dialog.AppError" parent="Theme.DeviceDefault.Dialog.Alert">
+    <style name="Theme.DeviceDefault.Dialog.AppError" parent="Theme.DeviceDefault.Dialog.Alert">
         <item name="windowContentTransitions">false</item>
         <item name="windowActivityTransitions">false</item>
         <item name="windowCloseOnTouchOutside">false</item>
