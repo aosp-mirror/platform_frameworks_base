@@ -18,8 +18,6 @@ using namespace std;
 namespace android {
 namespace stats_log_api_gen {
 
-const int PULL_ATOM_START_ID = 1000;
-
 int maxPushedAtomId = 2;
 
 using android::os::statsd::Atom;

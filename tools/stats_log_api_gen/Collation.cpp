@@ -195,9 +195,11 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
       print_error(field, "Unkown type for field: %s\n", field->name().c_str());
       errorCount++;
       continue;
-    } else if (javaType == JAVA_TYPE_OBJECT) {
+    } else if (javaType == JAVA_TYPE_OBJECT &&
+               atomDecl->code < PULL_ATOM_START_ID) {
       // Allow attribution chain, but only at position 1.
-      print_error(field, "Message type not allowed for field: %s\n",
+      print_error(field,
+                  "Message type not allowed for field in pushed atoms: %s\n",
                   field->name().c_str());
       errorCount++;
       continue;
@@ -233,12 +235,19 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
     java_type_t javaType = java_type(field);
 
     AtomField atField(field->name(), javaType);
+    // Generate signature for pushed atoms
+    if (atomDecl->code < PULL_ATOM_START_ID) {
+      if (javaType == JAVA_TYPE_ENUM) {
+        // All enums are treated as ints when it comes to function signatures.
+        signature->push_back(JAVA_TYPE_INT);
+        collate_enums(*field->enum_type(), &atField);
+      } else {
+        signature->push_back(javaType);
+      }
+    }
     if (javaType == JAVA_TYPE_ENUM) {
       // All enums are treated as ints when it comes to function signatures.
-      signature->push_back(JAVA_TYPE_INT);
       collate_enums(*field->enum_type(), &atField);
-    } else {
-      signature->push_back(javaType);
     }
     atomDecl->fields.push_back(atField);
 

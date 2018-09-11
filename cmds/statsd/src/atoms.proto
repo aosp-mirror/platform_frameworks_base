@@ -30,6 +30,7 @@ import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
 import "frameworks/base/proto/src/stats_enums.proto";
+import "frameworks/base/core/proto/android/service/procstats.proto";
 
 /**
  * The master atom class. This message defines all of the available
@@ -165,6 +166,7 @@ message Atom {
         DirectoryUsage directory_usage = 10026;
         AppSize app_size = 10027;
         CategorySize category_size = 10028;
+        android.service.procstats.ProcessStatsSectionProto proc_stats = 10029;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP. Field numbers above

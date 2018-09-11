@@ -34,6 +34,8 @@ using std::vector;
 using google::protobuf::Descriptor;
 using google::protobuf::FieldDescriptor;
 
+const int PULL_ATOM_START_ID = 10000;
+
 /**
  * The types for atom parameters.
  */
