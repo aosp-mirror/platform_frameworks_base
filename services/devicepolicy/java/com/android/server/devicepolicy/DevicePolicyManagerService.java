@@ -2210,6 +2210,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * @return the user password metrics, or {@code null} if none have been associated with
      * the user yet (for example, if the device has booted but not been unlocked).
      */
+    @GuardedBy("getLockObject()")
     PasswordMetrics getUserPasswordMetricsLocked(int userHandle) {
         return mUserPasswordMetrics.get(userHandle);
     }
@@ -3990,6 +3991,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * be the correct one upon boot.
      * This should be called whenever the password or the admin policies have changed.
      */
+    @GuardedBy("getLockObject()")
     private void updatePasswordValidityCheckpointLocked(int userHandle, boolean parent) {
         final int credentialOwner = getCredentialOwner(userHandle, parent);
         DevicePolicyData policy = getUserData(credentialOwner);
@@ -12331,6 +12333,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /** Pauses security and network logging if there are unaffiliated users on the device */
+    @GuardedBy("getLockObject()")
     private void maybePauseDeviceWideLoggingLocked() {
         if (!areAllUsersAffiliatedWithDeviceLocked()) {
             Slog.i(LOG_TAG, "There are unaffiliated users, security and network logging will be "
@@ -12343,6 +12346,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /** Resumes security and network logging (if they are enabled) if all users are affiliated */
+    @GuardedBy("getLockObject()")
     private void maybeResumeDeviceWideLoggingLocked() {
         if (areAllUsersAffiliatedWithDeviceLocked()) {
             final long ident = mInjector.binderClearCallingIdentity();
@@ -12358,6 +12362,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /** Deletes any security and network logs that might have been collected so far */
+    @GuardedBy("getLockObject()")
     private void discardDeviceWideLogsLocked() {
         mSecurityLogMonitor.discardLogs();
         if (mNetworkLogger != null) {

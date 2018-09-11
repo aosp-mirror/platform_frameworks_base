@@ -431,9 +431,12 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"DECONECTAȚI UTILIZATORUL"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Adăugați un utilizator nou?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Când adăugați un utilizator nou, acesta trebuie să-și configureze spațiul.\n\nOrice utilizator poate actualiza aplicațiile pentru toți ceilalți utilizatori."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Ați atins limita de utilizatori"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="few">Puteți adăuga maximum <xliff:g id="COUNT">%d</xliff:g> utilizatori.</item>
+      <item quantity="other">Puteți adăuga maximum <xliff:g id="COUNT">%d</xliff:g> de utilizatori.</item>
+      <item quantity="one">Poate fi creat doar un utilizator.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Eliminați utilizatorul?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Toate aplicațiile și datele acestui utilizator vor fi șterse."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Eliminați"</string>
@@ -739,8 +742,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Pictograma din stânga"</string>
     <string name="right_icon" msgid="3952104823293824311">"Pictograma din dreapta"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Țineți apăsat și trageți pentru a adăuga piese"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Țineți apăsat și trageți pentru a rearanja piesele"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Trageți aici pentru a elimina"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Aveți nevoie de cel puțin 6 piese"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editați"</string>

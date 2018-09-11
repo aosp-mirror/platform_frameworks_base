@@ -428,9 +428,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ユーザーをログアウト"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"新しいユーザーを追加しますか？"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"新しいユーザーを追加したら、そのユーザーは自分のスペースをセットアップする必要があります。\n\nすべてのユーザーは他のユーザーに代わってアプリを更新できます。"</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"ユーザー数が上限に達しました"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">最大 <xliff:g id="COUNT">%d</xliff:g> 人のユーザーを追加できます。</item>
+      <item quantity="one">作成できるユーザーは 1 人のみです。</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"ユーザーを削除しますか？"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"このユーザーのアプリとデータがすべて削除されます。"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"削除"</string>
@@ -734,8 +736,7 @@
     <string name="left_icon" msgid="3096287125959387541">"左アイコン"</string>
     <string name="right_icon" msgid="3952104823293824311">"右アイコン"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"タイルを追加するには押し続けながらドラッグ"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"タイルを並べ替えるには押し続けながらドラッグ"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"削除するにはここにドラッグ"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"タイルは 6 個以上必要"</string>
     <string name="qs_edit" msgid="2232596095725105230">"編集"</string>

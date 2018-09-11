@@ -148,7 +148,7 @@ public class LooperStatsService extends Binder {
         @Override
         public void onStart() {
             publishLocalService(LooperStats.class, mStats);
-            // TODO: publish LooperStatsService as a binder service when the SE Policy is changed.
+            publishBinderService(LOOPER_STATS_SERVICE_NAME, mService);
         }
 
         @Override

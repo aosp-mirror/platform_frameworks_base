@@ -432,9 +432,13 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"WYLOGUJ UŻYTKOWNIKA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Dodać nowego użytkownika?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Gdy dodasz nowego użytkownika, musi on skonfigurować swój profil.\n\nKażdy użytkownik może aktualizować aplikacje wszystkich innych użytkowników."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Osiągnięto limit użytkowników"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="few">Możesz dodać maksymalnie <xliff:g id="COUNT">%d</xliff:g> użytkowników.</item>
+      <item quantity="many">Możesz dodać maksymalnie <xliff:g id="COUNT">%d</xliff:g> użytkowników.</item>
+      <item quantity="other">Możesz dodać maksymalnie <xliff:g id="COUNT">%d</xliff:g> użytkownika.</item>
+      <item quantity="one">Można utworzyć tylko jednego użytkownika.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Usunąć użytkownika?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Wszystkie aplikacje i dane tego użytkownika zostaną usunięte."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Usuń"</string>
@@ -742,8 +746,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Lewa ikona"</string>
     <string name="right_icon" msgid="3952104823293824311">"Prawa ikona"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Przytrzymaj i przeciągnij, by dodać kafelki"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Przytrzymaj i przeciągnij, by przestawić kafelki"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Przeciągnij tutaj, by usunąć"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Potrzebnych jest co najmniej sześć kafelków"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Edytuj"</string>

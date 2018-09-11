@@ -913,7 +913,7 @@
     <!--  Control whether to lock day/night mode change from normal application. When it is
           true, day / night mode change is only allowed to apps with MODIFY_DAY_NIGHT_MODE
           permission. -->
-    <bool name="config_lockDayNightMode">false</bool>
+    <bool name="config_lockDayNightMode">true</bool>
 
     <!-- Control the default night mode to use when there is no other mode override set.
          One of the following values (see UiModeManager.java):
@@ -3509,6 +3509,9 @@
     <string-array name="config_wearActivityModeRadios">
         <item>"wifi"</item>
     </string-array>
+
+    <!-- Default hyphenation frequency setting (0=NONE, 1=NORMAL, 2=FULL). -->
+    <item name="config_preferredHyphenationFrequency" format="integer" type="dimen">0</item>
 
     <!-- Package name for ManagedProvisioning which is responsible for provisioning work profiles. -->
     <string name="config_managed_provisioning_package" translatable="false">com.android.managedprovisioning</string>

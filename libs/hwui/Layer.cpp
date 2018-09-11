@@ -26,8 +26,7 @@ namespace uirenderer {
 
 Layer::Layer(RenderState& renderState, sk_sp<SkColorFilter> colorFilter, int alpha,
         SkBlendMode mode)
-        : GpuMemoryTracker(GpuObjectType::Layer)
-        , mRenderState(renderState)
+        : mRenderState(renderState)
         , mColorFilter(colorFilter)
         , alpha(alpha)
         , mode(mode) {

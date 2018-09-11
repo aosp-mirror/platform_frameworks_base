@@ -70,6 +70,9 @@ static struct {
     jfieldID    mRole;
     jfieldID    mGains;
     jfieldID    mActiveConfig;
+    // Valid only if an AudioDevicePort
+    jfieldID    mType;
+    jfieldID    mAddress;
     // other fields unused by JNI
 } gAudioPortFields;
 
@@ -153,6 +156,9 @@ static jclass gAudioAttributesClass;
 static struct {
     jfieldID    mUsage;
     jfieldID    mSource;
+    jfieldID    mContentType;
+    jfieldID    mFlags;
+    jfieldID    mFormattedTags;
 } gAudioAttributesFields;
 
 static const char* const kEventHandlerClassPathName =
@@ -669,6 +675,26 @@ static void convertAudioGainConfigToNative(JNIEnv *env,
     env->DeleteLocalRef(jValues);
 }
 
+static jint convertAudioAttributesToNative(JNIEnv *env,
+                                           audio_attributes_t *nAudioAttributes,
+                                           const jobject jAudioAttributes)
+{
+    nAudioAttributes->usage = (audio_usage_t)env->GetIntField(jAudioAttributes,
+            gAudioAttributesFields.mUsage);
+    nAudioAttributes->source = (audio_source_t)env->GetIntField(jAudioAttributes,
+            gAudioAttributesFields.mSource);
+    nAudioAttributes->content_type = (audio_content_type_t)env->GetIntField(jAudioAttributes,
+            gAudioAttributesFields.mContentType);
+    nAudioAttributes->flags = env->GetIntField(jAudioAttributes,
+            gAudioAttributesFields.mFlags);
+    const jstring jtags = (jstring)env->GetObjectField(jAudioAttributes,
+            gAudioAttributesFields.mFormattedTags);
+    const char *tags = env->GetStringUTFChars(jtags, NULL);
+    strncpy(nAudioAttributes->tags, tags, AUDIO_ATTRIBUTES_TAGS_MAX_SIZE - 1);
+    env->ReleaseStringUTFChars(jtags, tags);
+    return (jint)AUDIO_JAVA_SUCCESS;
+}
+
 
 static jint convertAudioPortConfigToNative(JNIEnv *env,
                                                struct audio_port_config *nAudioPortConfig,
@@ -743,6 +769,42 @@ static jint convertAudioPortConfigToNative(JNIEnv *env,
     env->DeleteLocalRef(jAudioPort);
     env->DeleteLocalRef(jHandle);
     return (jint)AUDIO_JAVA_SUCCESS;
+}
+
+/**
+ * Extends convertAudioPortConfigToNative with extra device port info.
+ * Mix / Session specific info is not fulfilled.
+ */
+static jint convertAudioPortConfigToNativeWithDevicePort(JNIEnv *env,
+                                                         struct audio_port_config *nAudioPortConfig,
+                                                         const jobject jAudioPortConfig,
+                                                         bool useConfigMask)
+{
+    jint jStatus = convertAudioPortConfigToNative(env,
+            nAudioPortConfig,
+            jAudioPortConfig,
+            useConfigMask);
+    if (jStatus != AUDIO_JAVA_SUCCESS) {
+        return jStatus;
+    }
+    // Supports AUDIO_PORT_TYPE_DEVICE only
+    if (nAudioPortConfig->type != AUDIO_PORT_TYPE_DEVICE) {
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+
+    jobject jAudioDevicePort = env->GetObjectField(jAudioPortConfig,
+            gAudioPortConfigFields.mPort);
+    nAudioPortConfig->ext.device.type = env->GetIntField(jAudioDevicePort,
+            gAudioPortFields.mType);
+    jstring jDeviceAddress = (jstring)env->GetObjectField(jAudioDevicePort,
+            gAudioPortFields.mAddress);
+    const char *nDeviceAddress = env->GetStringUTFChars(jDeviceAddress, NULL);
+    strncpy(nAudioPortConfig->ext.device.address,
+            nDeviceAddress, AUDIO_DEVICE_MAX_ADDRESS_LEN - 1);
+    env->ReleaseStringUTFChars(jDeviceAddress, nDeviceAddress);
+    env->DeleteLocalRef(jDeviceAddress);
+    env->DeleteLocalRef(jAudioDevicePort);
+    return jStatus;
 }
 
 static jint convertAudioPortConfigFromNative(JNIEnv *env,
@@ -1592,6 +1654,51 @@ android_media_AudioSystem_setAudioPortConfig(JNIEnv *env, jobject clazz,
     return jStatus;
 }
 
+/**
+ * Returns handle if the audio source is successfully started.
+ */
+static jint
+android_media_AudioSystem_startAudioSource(JNIEnv *env, jobject clazz,
+                                           jobject jAudioPortConfig,
+                                           jobject jAudioAttributes)
+{
+    ALOGV("startAudioSource");
+    if (jAudioPortConfig == NULL || jAudioAttributes == NULL) {
+        return AUDIO_JAVA_BAD_VALUE;
+    }
+    if (!env->IsInstanceOf(jAudioPortConfig, gAudioPortConfigClass)) {
+        return AUDIO_JAVA_BAD_VALUE;
+    }
+    if (!env->IsInstanceOf(jAudioAttributes, gAudioAttributesClass)) {
+        return AUDIO_JAVA_BAD_VALUE;
+    }
+    struct audio_port_config nAudioPortConfig = {};
+    jint jStatus = convertAudioPortConfigToNativeWithDevicePort(env,
+            &nAudioPortConfig, jAudioPortConfig, false);
+    if (jStatus != AUDIO_JAVA_SUCCESS) {
+        return jStatus;
+    }
+    audio_attributes_t nAudioAttributes = {};
+    jStatus = convertAudioAttributesToNative(env, &nAudioAttributes, jAudioAttributes);
+    if (jStatus != AUDIO_JAVA_SUCCESS) {
+        return jStatus;
+    }
+    audio_port_handle_t handle;
+    status_t status = AudioSystem::startAudioSource(&nAudioPortConfig, &nAudioAttributes, &handle);
+    ALOGV("AudioSystem::startAudioSource() returned %d handle %d", status, handle);
+    return handle > 0 ? handle : nativeToJavaStatus(status);
+}
+
+static jint
+android_media_AudioSystem_stopAudioSource(JNIEnv *env, jobject clazz, jint handle)
+{
+    ALOGV("stopAudioSource");
+    status_t status = AudioSystem::stopAudioSource(
+            static_cast <audio_port_handle_t>(handle));
+    ALOGV("AudioSystem::stopAudioSource() returned %d", status);
+    return nativeToJavaStatus(status);
+}
+
 static void
 android_media_AudioSystem_eventHandlerSetup(JNIEnv *env, jobject thiz, jobject weak_this)
 {
@@ -1947,6 +2054,9 @@ static const JNINativeMethod gMethods[] = {
                                                 (void *)android_media_AudioSystem_listAudioPatches},
     {"setAudioPortConfig",   "(Landroid/media/AudioPortConfig;)I",
                                             (void *)android_media_AudioSystem_setAudioPortConfig},
+    {"startAudioSource",    "(Landroid/media/AudioPortConfig;Landroid/media/AudioAttributes;)I",
+                                            (void *)android_media_AudioSystem_startAudioSource},
+    {"stopAudioSource",     "(I)I", (void *)android_media_AudioSystem_stopAudioSource},
     {"getAudioHwSyncForSession", "(I)I",
                                     (void *)android_media_AudioSystem_getAudioHwSyncForSession},
     {"registerPolicyMixes",    "(Ljava/util/ArrayList;Z)I",
@@ -2040,6 +2150,11 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gAudioDevicePortCstor = GetMethodIDOrDie(env, audioDevicePortClass, "<init>",
             "(Landroid/media/AudioHandle;Ljava/lang/String;[I[I[I[I[Landroid/media/AudioGain;ILjava/lang/String;)V");
 
+    // When access AudioPort as AudioDevicePort
+    gAudioPortFields.mType = GetFieldIDOrDie(env, audioDevicePortClass, "mType", "I");
+    gAudioPortFields.mAddress = GetFieldIDOrDie(env, audioDevicePortClass, "mAddress",
+            "Ljava/lang/String;");
+
     jclass audioMixPortClass = FindClassOrDie(env, "android/media/AudioMixPort");
     gAudioMixPortClass = MakeGlobalRefOrDie(env, audioMixPortClass);
     gAudioMixPortCstor = GetMethodIDOrDie(env, audioMixPortClass, "<init>",
@@ -2120,6 +2235,11 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gAudioAttributesClass = MakeGlobalRefOrDie(env, audioAttributesClass);
     gAudioAttributesFields.mUsage = GetFieldIDOrDie(env, audioAttributesClass, "mUsage", "I");
     gAudioAttributesFields.mSource = GetFieldIDOrDie(env, audioAttributesClass, "mSource", "I");
+    gAudioAttributesFields.mContentType = GetFieldIDOrDie(env,
+            audioAttributesClass, "mContentType", "I");
+    gAudioAttributesFields.mFlags = GetFieldIDOrDie(env, audioAttributesClass, "mFlags", "I");
+    gAudioAttributesFields.mFormattedTags = GetFieldIDOrDie(env,
+            audioAttributesClass, "mFormattedTags", "Ljava/lang/String;");
 
     AudioSystem::setErrorCallback(android_media_AudioSystem_error_callback);
 

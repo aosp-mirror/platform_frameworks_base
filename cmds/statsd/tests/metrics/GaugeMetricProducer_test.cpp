@@ -95,6 +95,8 @@ TEST(GaugeMetricProducerTest, TestPulledEventsNoCondition) {
                 data->clear();
                 shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
                 event->write(3);
+                event->write("some value");
+                event->write(11);
                 event->init();
                 data->push_back(event);
                 return true;
@@ -600,9 +602,109 @@ TEST(GaugeMetricProducerTest, TestPullOnTrigger) {
     EXPECT_EQ(10, it->mValue.int_value);
     EXPECT_EQ(1UL, gaugeProducer.mPastBuckets.size());
     EXPECT_EQ(3UL, gaugeProducer.mPastBuckets.begin()->second.back().mGaugeAtoms.size());
-    EXPECT_EQ(3, gaugeProducer.mPastBuckets.begin()->second.back().mGaugeAtoms[0].mFields->begin()->mValue.int_value);
-    EXPECT_EQ(4, gaugeProducer.mPastBuckets.begin()->second.back().mGaugeAtoms[1].mFields->begin()->mValue.int_value);
-    EXPECT_EQ(5, gaugeProducer.mPastBuckets.begin()->second.back().mGaugeAtoms[2].mFields->begin()->mValue.int_value);
+    EXPECT_EQ(3, gaugeProducer.mPastBuckets.begin()
+                         ->second.back()
+                         .mGaugeAtoms[0]
+                         .mFields->begin()
+                         ->mValue.int_value);
+    EXPECT_EQ(4, gaugeProducer.mPastBuckets.begin()
+                         ->second.back()
+                         .mGaugeAtoms[1]
+                         .mFields->begin()
+                         ->mValue.int_value);
+    EXPECT_EQ(5, gaugeProducer.mPastBuckets.begin()
+                         ->second.back()
+                         .mGaugeAtoms[2]
+                         .mFields->begin()
+                         ->mValue.int_value);
+}
+
+TEST(GaugeMetricProducerTest, TestRemoveDimensionInOutput) {
+    GaugeMetric metric;
+    metric.set_id(metricId);
+    metric.set_bucket(ONE_MINUTE);
+    metric.set_sampling_type(GaugeMetric::ALL_CONDITION_CHANGES);
+    metric.mutable_gauge_fields_filter()->set_include_all(true);
+    auto dimensionMatcher = metric.mutable_dimensions_in_what();
+    // use field 1 as dimension.
+    dimensionMatcher->set_field(tagId);
+    dimensionMatcher->add_child()->set_field(1);
+
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
+            .WillOnce(Invoke([](int tagId, int64_t timeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 3);
+                event->write(3);
+                event->write(4);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            .WillOnce(Invoke([](int tagId, int64_t timeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
+                event->write(4);
+                event->write(5);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            .WillOnce(Invoke([](int tagId, int64_t timeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 20);
+                event->write(4);
+                event->write(6);
+                event->init();
+                data->push_back(event);
+                return true;
+            }));
+
+    int triggerId = 5;
+    GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
+                                      tagId, triggerId, tagId, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
+
+    vector<shared_ptr<LogEvent>> allData;
+    allData.clear();
+
+    EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
+    LogEvent trigger(triggerId, bucketStartTimeNs + 10);
+    trigger.init();
+    gaugeProducer.onMatchedLogEvent(1 /*log matcher index*/, trigger);
+    EXPECT_EQ(2UL, gaugeProducer.mCurrentSlicedBucket->size());
+    EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->begin()->second.size());
+    trigger.setElapsedTimestampNs(bucketStartTimeNs + 20);
+    gaugeProducer.onMatchedLogEvent(1 /*log matcher index*/, trigger);
+    EXPECT_EQ(2UL, gaugeProducer.mCurrentSlicedBucket->begin()->second.size());
+
+    allData.clear();
+    shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 1);
+    event->write(4);
+    event->write(11);
+    event->init();
+    allData.push_back(event);
+
+    gaugeProducer.onDataPulled(allData);
+    EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
+    auto it = gaugeProducer.mCurrentSlicedBucket->begin()->second.front().mFields->begin();
+    EXPECT_EQ(INT, it->mValue.getType());
+    EXPECT_EQ(11, it->mValue.int_value);
+    EXPECT_EQ(2UL, gaugeProducer.mPastBuckets.size());
+    auto bucketIt = gaugeProducer.mPastBuckets.begin();
+    EXPECT_EQ(1UL, bucketIt->second.back().mGaugeAtoms.size());
+    EXPECT_EQ(3, bucketIt->first.getDimensionKeyInWhat().getValues().begin()->mValue.int_value);
+    EXPECT_EQ(4, bucketIt->second.back().mGaugeAtoms[0].mFields->begin()->mValue.int_value);
+    bucketIt++;
+    EXPECT_EQ(2UL, bucketIt->second.back().mGaugeAtoms.size());
+    EXPECT_EQ(4, bucketIt->first.getDimensionKeyInWhat().getValues().begin()->mValue.int_value);
+    EXPECT_EQ(5, bucketIt->second.back().mGaugeAtoms[0].mFields->begin()->mValue.int_value);
+    EXPECT_EQ(6, bucketIt->second.back().mGaugeAtoms[1].mFields->begin()->mValue.int_value);
 }
 
 }  // namespace statsd

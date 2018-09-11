@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <GpuMemoryTracker.h>
 #include <utils/RefBase.h>
 
 #include <SkBlendMode.h>
@@ -39,21 +38,21 @@ class RenderState;
 /**
  * A layer has dimensions and is backed by a backend specific texture or framebuffer.
  */
-class Layer : public VirtualLightRefBase, GpuMemoryTracker {
+class Layer : public VirtualLightRefBase {
 public:
     Layer(RenderState& renderState, sk_sp<SkColorFilter>, int alpha, SkBlendMode mode);
 
     ~Layer();
 
-    virtual uint32_t getWidth() const { return mWidth; }
+    uint32_t getWidth() const { return mWidth; }
 
-    virtual uint32_t getHeight() const { return mHeight; }
+    uint32_t getHeight() const { return mHeight; }
 
-    virtual void setSize(uint32_t width, uint32_t height) { mWidth = width; mHeight = height; }
+    void setSize(uint32_t width, uint32_t height) { mWidth = width; mHeight = height; }
 
-    virtual void setBlend(bool blend) { mBlend = blend; }
+    void setBlend(bool blend) { mBlend = blend; }
 
-    virtual bool isBlend() const { return mBlend; }
+    bool isBlend() const { return mBlend; }
 
     inline void setForceFilter(bool forceFilter) { this->forceFilter = forceFilter; }
 

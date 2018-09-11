@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ব্যবহারকারীকে লগ-আউট করুন"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"নতুন ব্যবহারকারীকে যোগ করবেন?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"আপনি একজন নতুন ব্যবহারকারী যোগ করলে তাকে তার জায়গা সেট আপ করে নিতে হবে৷\n\nযেকোনো ব্যবহারকারী অন্য সব ব্যবহারকারীর জন্য অ্যাপ্লিকেশান আপডেট করতে পারবেন৷"</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"আর কোনও প্রোফাইল যোগ করা যাবে না"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="one">আপনি <xliff:g id="COUNT">%d</xliff:g> জন পর্যন্ত ব্যবহারকারীর প্রোফাইল যোগ করতে পারেন।</item>
+      <item quantity="other">আপনি <xliff:g id="COUNT">%d</xliff:g> জন পর্যন্ত ব্যবহারকারীর প্রোফাইল যোগ করতে পারেন।</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"ব্যবহারকারী সরাবেন?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"এই ব্যবহারকারীর সমস্ত অ্যাপ্লিকেশান ও ডেটা মুছে ফেলা হবে।"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"সরান"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"বাঁ দিকের আইকন"</string>
     <string name="right_icon" msgid="3952104823293824311">"ডানদিকের আইকন"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"টাইল যোগ করতে ট্যাপ করে টেনে আনুন"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"টাইলগুলি আবার সাজানোর জন্য ধরে থেকে টেনে আনুন"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"সরানোর জন্য এখানে টেনে আনুন"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"অন্তত ৬টি টাইল রাখতে হবে"</string>
     <string name="qs_edit" msgid="2232596095725105230">"সম্পাদনা করুন"</string>

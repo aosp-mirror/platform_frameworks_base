@@ -28,12 +28,13 @@ namespace skiapipeline {
 void LayerDrawable::onDraw(SkCanvas* canvas) {
     Layer* layer = mLayerUpdater->backingLayer();
     if (layer) {
-        DrawLayer(canvas->getGrContext(), canvas, layer);
+        DrawLayer(canvas->getGrContext(), canvas, layer, nullptr, nullptr, true);
     }
 }
 
 bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer,
-                              const SkRect* dstRect) {
+                              const SkRect* srcRect, const SkRect* dstRect,
+                              bool useLayerTransform) {
     if (context == nullptr) {
         SkDEBUGF(("Attempting to draw LayerDrawable into an unsupported surface"));
         return false;
@@ -60,12 +61,10 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         }
 
         SkMatrix matrix;
-        if (dstRect) {
-            // Destination rectangle is set only when we are trying to read back the content
-            // of the layer. In this case we don't want to apply layer transform.
-            matrix = textureMatrix;
-        } else {
+        if (useLayerTransform) {
             matrix = SkMatrix::Concat(layerTransform, textureMatrix);
+        } else {
+            matrix = textureMatrix;
         }
 
         SkPaint paint;
@@ -81,16 +80,26 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
             canvas->save();
             canvas->concat(matrix);
         }
-        if (dstRect) {
+        if (dstRect || srcRect) {
             SkMatrix matrixInv;
             if (!matrix.invert(&matrixInv)) {
                 matrixInv = matrix;
             }
-            SkRect srcRect = SkRect::MakeIWH(layerWidth, layerHeight);
-            matrixInv.mapRect(&srcRect);
-            SkRect skiaDestRect = *dstRect;
+            SkRect skiaSrcRect;
+            if (srcRect) {
+                skiaSrcRect = *srcRect;
+            } else {
+                skiaSrcRect = SkRect::MakeIWH(layerWidth, layerHeight);
+            }
+            matrixInv.mapRect(&skiaSrcRect);
+            SkRect skiaDestRect;
+            if (dstRect) {
+                skiaDestRect = *dstRect;
+            } else {
+                skiaDestRect = SkRect::MakeIWH(layerWidth, layerHeight);
+            }
             matrixInv.mapRect(&skiaDestRect);
-            canvas->drawImageRect(layerImage.get(), srcRect, skiaDestRect, &paint,
+            canvas->drawImageRect(layerImage.get(), skiaSrcRect, skiaDestRect, &paint,
                                   SkCanvas::kFast_SrcRectConstraint);
         } else {
             canvas->drawImage(layerImage.get(), 0, 0, &paint);

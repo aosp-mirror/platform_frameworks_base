@@ -160,8 +160,10 @@ void RenderProxy::buildLayer(RenderNode* node) {
 }
 
 bool RenderProxy::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap& bitmap) {
-    return mRenderThread.queue().runSync(
-            [&]() -> bool { return mContext->copyLayerInto(layer, &bitmap); });
+    auto& thread = RenderThread::getInstance();
+    return thread.queue().runSync(
+            [&]() -> bool { return thread.readback().copyLayerInto(layer, &bitmap)
+                                   == CopyResult::Success; });
 }
 
 void RenderProxy::pushLayerUpdate(DeferredLayerUpdater* layer) {
@@ -331,14 +333,14 @@ void RenderProxy::prepareToDraw(Bitmap& bitmap) {
     }
 }
 
-int RenderProxy::copyGraphicBufferInto(GraphicBuffer* buffer, SkBitmap* bitmap) {
+int RenderProxy::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
     RenderThread& thread = RenderThread::getInstance();
     if (gettid() == thread.getTid()) {
         // TODO: fix everything that hits this. We should never be triggering a readback ourselves.
-        return (int)thread.readback().copyGraphicBufferInto(buffer, bitmap);
+        return (int)thread.readback().copyHWBitmapInto(hwBitmap, bitmap);
     } else {
         return thread.queue().runSync([&]() -> int {
-            return (int)thread.readback().copyGraphicBufferInto(buffer, bitmap);
+            return (int)thread.readback().copyHWBitmapInto(hwBitmap, bitmap);
         });
     }
 }

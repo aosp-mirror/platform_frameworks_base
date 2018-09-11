@@ -432,9 +432,13 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"נתק משתמש"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"האם להוסיף משתמש חדש?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"בעת הוספת משתמש חדש, על משתמש זה להגדיר את השטח שלו.\n\nכל משתמש יכול לעדכן אפליקציות עבור כל המשתמשים האחרים."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"הגעת למגבלת המשתמשים שניתן להוסיף"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="two">ניתן להוסיף עד <xliff:g id="COUNT">%d</xliff:g> משתמשים.</item>
+      <item quantity="many">ניתן להוסיף עד <xliff:g id="COUNT">%d</xliff:g> משתמשים.</item>
+      <item quantity="other">ניתן להוסיף עד <xliff:g id="COUNT">%d</xliff:g> משתמשים.</item>
+      <item quantity="one">ניתן ליצור רק משתמש אחד.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"האם להסיר את המשתמש?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"כל האפליקציות והנתונים של המשתמש הזה יימחקו."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"הסר"</string>
@@ -742,8 +746,7 @@
     <string name="left_icon" msgid="3096287125959387541">"סמל שמאלי"</string>
     <string name="right_icon" msgid="3952104823293824311">"סמל ימני"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"יש ללחוץ ולגרור כדי להוסיף אריחים"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"יש ללחוץ ולגרור כדי לסדר מחדש את האריחים"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"גרור לכאן כדי להסיר"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"יש צורך בשישה אריחים לכל הפחות"</string>
     <string name="qs_edit" msgid="2232596095725105230">"עריכה"</string>

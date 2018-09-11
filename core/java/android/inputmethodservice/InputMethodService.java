@@ -42,7 +42,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -82,6 +81,7 @@ import android.widget.TextView;
 
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.InputMethodPrivilegedOperations;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -346,7 +346,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private static final int BACK_DISPOSITION_MAX = BACK_DISPOSITION_ADJUST_NOTHING;
 
     InputMethodManager mImm;
-    private IInputMethodPrivilegedOperations mPrivOps;
+    private InputMethodPrivilegedOperations mPrivOps = new InputMethodPrivilegedOperations();
 
     @UnsupportedAppUsage
     int mTheme = 0;
@@ -457,11 +457,8 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public final void initializeInternal(IBinder token,
                 IInputMethodPrivilegedOperations privilegedOperations) {
-            if (mToken != null) {
-                throw new IllegalStateException("initializeInternal() must be called at most once."
-                        + " privOps=" + privilegedOperations);
-            }
-            mPrivOps = privilegedOperations;
+            mPrivOps.set(privilegedOperations);
+            mImm.registerInputMethodPrivOps(token, mPrivOps);
             attachToken(token);
         }
 
@@ -540,12 +537,7 @@ public class InputMethodService extends AbstractInputMethodService {
         public void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
                 @NonNull EditorInfo editorInfo, boolean restarting,
                 @NonNull IBinder startInputToken) {
-            try {
-                mPrivOps.reportStartInput(startInputToken);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-
+            mPrivOps.reportStartInput(startInputToken);
             // This needs to be dispatched to interface methods rather than doStartInput().
             // Otherwise IME developers who have overridden those interface methods will lose
             // notifications.
@@ -607,14 +599,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     private void setImeWindowStatus(int visibilityFlags, int backDisposition) {
-        if (mPrivOps == null) {
-            return;
-        }
-        try {
-            mPrivOps.setImeWindowStatus(visibilityFlags, backDisposition);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mPrivOps.setImeWindowStatus(visibilityFlags, backDisposition);
     }
 
     /**
@@ -1016,6 +1001,11 @@ public class InputMethodService extends AbstractInputMethodService {
             mSettingsObserver.unregister();
             mSettingsObserver = null;
         }
+        if (mToken != null) {
+            // This is completely optional, but allows us to show more explicit error messages
+            // when IME developers are doing something unsupported.
+            mImm.unregisterInputMethodPrivOps(mToken);
+        }
     }
 
     /**
@@ -1186,7 +1176,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * used input method and subtype.
      */
     public final boolean switchToPreviousInputMethod() {
-        return mImm.switchToPreviousInputMethodInternal(mToken);
+        return mPrivOps.switchToPreviousInputMethod();
     }
 
     /**
@@ -1198,7 +1188,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * input method and subtype.
      */
     public final boolean switchToNextInputMethod(boolean onlyCurrentIme) {
-        return mImm.switchToNextInputMethodInternal(mToken, onlyCurrentIme);
+        return mPrivOps.switchToNextInputMethod(onlyCurrentIme);
     }
 
     /**
@@ -1211,7 +1201,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * between IMEs and subtypes.
      */
     public final boolean shouldOfferSwitchingToNextInputMethod() {
-        return mImm.shouldOfferSwitchingToNextInputMethodInternal(mToken);
+        return mPrivOps.shouldOfferSwitchingToNextInputMethod();
     }
 
     public boolean getCurrentInputStarted() {
@@ -1223,14 +1213,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     private void reportFullscreenMode() {
-        if (mPrivOps == null) {
-            return;
-        }
-        try {
-            mPrivOps.reportFullscreenMode(mIsFullscreen);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mPrivOps.reportFullscreenMode(mIsFullscreen);
     }
 
     /**
@@ -1536,12 +1519,12 @@ public class InputMethodService extends AbstractInputMethodService {
 
     public void showStatusIcon(@DrawableRes int iconResId) {
         mStatusIcon = iconResId;
-        mImm.showStatusIconInternal(mToken, getPackageName(), iconResId);
+        mPrivOps.updateStatusIcon(getPackageName(), iconResId);
     }
 
     public void hideStatusIcon() {
         mStatusIcon = 0;
-        mImm.hideStatusIconInternal(mToken);
+        mPrivOps.updateStatusIcon(null, 0);
     }
 
     /**
@@ -1552,7 +1535,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param id Unique identifier of the new input method to start.
      */
     public void switchInputMethod(String id) {
-        mImm.setInputMethodInternal(mToken, id);
+        mPrivOps.setInputMethod(id);
     }
 
     /**
@@ -1564,7 +1547,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param subtype The new subtype of the new input method to be switched to.
      */
     public final void switchInputMethod(String id, InputMethodSubtype subtype) {
-        mImm.setInputMethodAndSubtypeInternal(mToken, id, subtype);
+        mPrivOps.setInputMethodAndSubtype(id, subtype);
     }
 
     public void setExtractView(View view) {
@@ -1945,14 +1928,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * <p>TODO: We probably need to reconsider how IME should be handled.</p>
      */
     private void clearLastInputMethodWindowForTransition() {
-        if (mPrivOps == null) {
-            return;
-        }
-        try {
-            mPrivOps.clearLastInputMethodWindowForTransition();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mPrivOps.clearLastInputMethodWindowForTransition();
     }
 
     /**
@@ -2162,7 +2138,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param flags Provides additional operating flags.
      */
     public void requestHideSelf(int flags) {
-        mImm.hideSoftInputFromInputMethodInternal(mToken, flags);
+        mPrivOps.hideMySoftInput(flags);
     }
 
     /**
@@ -2174,7 +2150,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param flags Provides additional operating flags.
      */
     public final void requestShowSelf(int flags) {
-        mImm.showSoftInputFromInputMethodInternal(mToken, flags);
+        mPrivOps.showMySoftInput(flags);
     }
 
     private boolean handleBack(boolean doIt) {
@@ -2885,23 +2861,15 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     private void exposeContentInternal(@NonNull InputContentInfo inputContentInfo,
             @NonNull EditorInfo editorInfo) {
-        if (mPrivOps == null) {
-            return;
-        }
-        final IInputContentUriToken uriToken;
         final Uri contentUri = inputContentInfo.getContentUri();
-        try {
-            uriToken = mPrivOps.createInputContentUriToken(contentUri, editorInfo.packageName);
-            if (uriToken == null) {
-                return;
-            }
-        } catch (RemoteException e) {
+        final IInputContentUriToken uriToken =
+                mPrivOps.createInputContentUriToken(contentUri, editorInfo.packageName);
+        if (uriToken == null) {
             Log.e(TAG, "createInputContentAccessToken failed. contentUri=" + contentUri.toString()
-                    + " packageName=" + editorInfo.packageName, e);
+                    + " packageName=" + editorInfo.packageName);
             return;
         }
         inputContentInfo.setUriToken(uriToken);
-        return;
     }
 
     private static int mapToImeWindowStatus(boolean isInputViewShown) {

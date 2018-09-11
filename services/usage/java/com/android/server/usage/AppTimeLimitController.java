@@ -168,6 +168,7 @@ public class AppTimeLimitController {
     }
 
     /** Returns an existing UserData object for the given userId, or creates one */
+    @GuardedBy("mLock")
     private UserData getOrCreateUserDataLocked(int userId) {
         UserData userData = mUsers.get(userId);
         if (userData == null) {

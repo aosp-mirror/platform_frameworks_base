@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -124,7 +125,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         synchronized (mPackageManagerService.mPackages) {
             // Important: the packages we need to run with ab-ota compiler-reason.
             important = PackageManagerServiceUtils.getPackagesForDexopt(
-                    mPackageManagerService.mPackages.values(), mPackageManagerService);
+                    mPackageManagerService.mPackages.values(), mPackageManagerService,
+                    DEBUG_DEXOPT);
             // Others: we should optimize this with the (first-)boot compiler-reason.
             others = new ArrayList<>(mPackageManagerService.mPackages.values());
             others.removeAll(important);
@@ -157,6 +159,24 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         long spaceAvailableNow = getAvailableSpace();
 
         prepareMetricsLogging(important.size(), others.size(), spaceAvailable, spaceAvailableNow);
+
+        if (DEBUG_DEXOPT) {
+            try {
+                // Output some data about the packages.
+                PackageParser.Package lastUsed = Collections.max(important,
+                        (pkg1, pkg2) -> Long.compare(
+                                pkg1.getLatestForegroundPackageUseTimeInMills(),
+                                pkg2.getLatestForegroundPackageUseTimeInMills()));
+                Log.d(TAG, "A/B OTA: lastUsed time = "
+                        + lastUsed.getLatestForegroundPackageUseTimeInMills());
+                Log.d(TAG, "A/B OTA: deprioritized packages:");
+                for (PackageParser.Package pkg : others) {
+                    Log.d(TAG, "  " + pkg.packageName + " - "
+                            + pkg.getLatestForegroundPackageUseTimeInMills());
+                }
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     @Override

@@ -426,9 +426,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ចុះឈ្មោះអ្នកប្រើចេញ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"បន្ថែម​អ្នកប្រើ​ថ្មី?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ពេល​អ្នក​បន្ថែម​អ្នកប្រើ​ថ្មី អ្នកប្រើ​នោះ​ត្រូវ​កំណត់​ទំហំ​ផ្ទាល់​របស់​គេ។\n\nអ្នក​ប្រើ​ណាមួយ​ក៏​អាច​ធ្វើ​បច្ចុប្បន្នភាព​កម្មវិធី​សម្រាប់​អ្នកប្រើ​ផ្សេង​បាន​ដែរ។"</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"​បាន​ឈាន​ដល់ចំនួន​កំណត់អ្នកប្រើប្រាស់"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">អ្នកអាចបញ្ចូល​អ្នក​ប្រើប្រាស់បាន​រហូតដល់ <xliff:g id="COUNT">%d</xliff:g> នាក់។</item>
+      <item quantity="one">អាច​បង្កើត​អ្នក​ប្រើប្រាស់​បាន​​តែម្នាក់ប៉ុណ្ណោះ។</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"យកអ្នកប្រើចេញ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"កម្មវិធី និងទិន្នន័យទាំងអស់របស់អ្នកប្រើនេះនឹងត្រូវបានលុប។"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"យកចេញ"</string>
@@ -732,8 +734,7 @@
     <string name="left_icon" msgid="3096287125959387541">"រូបតំណាង​ខាង​ឆ្វេង"</string>
     <string name="right_icon" msgid="3952104823293824311">"រូបតំណាង​ខាង​ស្ដាំ"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"ចុច​ឱ្យ​ជាប់ រួចអូសដើម្បី​បញ្ចូល​ប្រអប់"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"ចុច​ឱ្យ​ជាប់ រួចអូស​ដើម្បី​រៀបចំ​ប្រអប់​ឡើងវិញ"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"អូសទីនេះដើម្បីយកចេញ"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"អ្នកត្រូវការប្រអប់​យ៉ាងតិច 6"</string>
     <string name="qs_edit" msgid="2232596095725105230">"កែសម្រួល"</string>

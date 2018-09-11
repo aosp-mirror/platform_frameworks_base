@@ -5296,7 +5296,9 @@ public class AccountManagerService
         try {
             INotificationManager notificationManager = mInjector.getNotificationManager();
             try {
-                notificationManager.enqueueNotificationWithTag(packageName, packageName,
+                // The calling uid must match either the package or op package, so use an op
+                // package that matches the cleared calling identity.
+                notificationManager.enqueueNotificationWithTag(packageName, "android",
                         id.mTag, id.mId, notification, userId);
             } catch (RemoteException e) {
                 /* ignore - local call */

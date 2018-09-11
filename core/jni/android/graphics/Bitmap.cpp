@@ -1198,6 +1198,10 @@ static jobject Bitmap_copyPreserveInternalConfig(JNIEnv* env, jobject, jlong bit
 
 static jobject Bitmap_createHardwareBitmap(JNIEnv* env, jobject, jobject graphicBuffer) {
     sp<GraphicBuffer> buffer(graphicBufferForJavaObject(env, graphicBuffer));
+    // Bitmap::createFrom currently can only attach to a GraphicBuffer with PIXEL_FORMAT_RGBA_8888
+    // format and SRGB color space.
+    // To support any color space, we need to pass an additional ColorSpace argument to
+    // java Bitmap.createHardwareBitmap.
     sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer);
     if (!bitmap.get()) {
         ALOGW("failed to create hardware bitmap from graphic buffer");

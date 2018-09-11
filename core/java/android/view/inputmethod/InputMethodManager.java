@@ -18,6 +18,7 @@ package android.view.inputmethod;
 
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
+import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
@@ -55,6 +56,8 @@ import android.view.ViewRootImpl;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillManager;
 
+import com.android.internal.inputmethod.InputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputConnectionWrapper;
 import com.android.internal.view.IInputContext;
@@ -404,6 +407,9 @@ public final class InputMethodManager {
 
     final Pool<PendingEvent> mPendingEventPool = new SimplePool<>(20);
     final SparseArray<PendingEvent> mPendingEvents = new SparseArray<>(20);
+
+    private final InputMethodPrivilegedOperationsRegistry mPrivOpsRegistry =
+            new InputMethodPrivilegedOperationsRegistry();
 
     // -----------------------------------------------------------
 
@@ -771,19 +777,8 @@ public final class InputMethodManager {
      * class are intended for app developers interacting with the IME.
      */
     @Deprecated
-    public void showStatusIcon(IBinder imeToken, String packageName, int iconId) {
-        showStatusIconInternal(imeToken, packageName, iconId);
-    }
-
-    /**
-     * @hide
-     */
-    public void showStatusIconInternal(IBinder imeToken, String packageName, int iconId) {
-        try {
-            mService.updateStatusIcon(imeToken, packageName, iconId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+    public void showStatusIcon(IBinder imeToken, String packageName, @DrawableRes int iconId) {
+        mPrivOpsRegistry.get(imeToken).updateStatusIcon(packageName, iconId);
     }
 
     /**
@@ -793,18 +788,7 @@ public final class InputMethodManager {
      */
     @Deprecated
     public void hideStatusIcon(IBinder imeToken) {
-        hideStatusIconInternal(imeToken);
-    }
-
-    /**
-     * @hide
-     */
-    public void hideStatusIconInternal(IBinder imeToken) {
-        try {
-            mService.updateStatusIcon(imeToken, null, 0);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mPrivOpsRegistry.get(imeToken).updateStatusIcon(null, 0);
     }
 
     /** @hide */
@@ -1845,18 +1829,18 @@ public final class InputMethodManager {
      */
     @Deprecated
     public void setInputMethod(IBinder token, String id) {
-        setInputMethodInternal(token, id);
-    }
-
-    /**
-     * @hide
-     */
-    public void setInputMethodInternal(IBinder token, String id) {
-        try {
-            mService.setInputMethod(token, id);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (token == null) {
+            // Note: null token is allowed for callers that have WRITE_SECURE_SETTINGS permission.
+            // Thus we cannot always rely on mPrivOpsRegistry unfortunately.
+            // TODO(Bug 114488811): Consider deprecating null token rule.
+            try {
+                mService.setInputMethod(token, id);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            return;
         }
+        mPrivOpsRegistry.get(token).setInputMethod(id);
     }
 
     /**
@@ -1874,19 +1858,18 @@ public final class InputMethodManager {
      */
     @Deprecated
     public void setInputMethodAndSubtype(IBinder token, String id, InputMethodSubtype subtype) {
-        setInputMethodAndSubtypeInternal(token, id, subtype);
-    }
-
-    /**
-     * @hide
-     */
-    public void setInputMethodAndSubtypeInternal(
-            IBinder token, String id, InputMethodSubtype subtype) {
-        try {
-            mService.setInputMethodAndSubtype(token, id, subtype);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (token == null) {
+            // Note: null token is allowed for callers that have WRITE_SECURE_SETTINGS permission.
+            // Thus we cannot always rely on mPrivOpsRegistry unfortunately.
+            // TODO(Bug 114488811): Consider deprecating null token rule.
+            try {
+                mService.setInputMethodAndSubtype(token, id, subtype);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            return;
         }
+        mPrivOpsRegistry.get(token).setInputMethodAndSubtype(id, subtype);
     }
 
     /**
@@ -1906,18 +1889,7 @@ public final class InputMethodManager {
      */
     @Deprecated
     public void hideSoftInputFromInputMethod(IBinder token, int flags) {
-        hideSoftInputFromInputMethodInternal(token, flags);
-    }
-
-    /**
-     * @hide
-     */
-    public void hideSoftInputFromInputMethodInternal(IBinder token, int flags) {
-        try {
-            mService.hideMySoftInput(token, flags);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mPrivOpsRegistry.get(token).hideMySoftInput(flags);
     }
 
     /**
@@ -1938,18 +1910,7 @@ public final class InputMethodManager {
      */
     @Deprecated
     public void showSoftInputFromInputMethod(IBinder token, int flags) {
-        showSoftInputFromInputMethodInternal(token, flags);
-    }
-
-    /**
-     * @hide
-     */
-    public void showSoftInputFromInputMethodInternal(IBinder token, int flags) {
-        try {
-            mService.showMySoftInput(token, flags);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mPrivOpsRegistry.get(token).showMySoftInput(flags);
     }
 
     /**
@@ -2147,15 +2108,13 @@ public final class InputMethodManager {
      * @hide
      */
     public void showInputMethodPicker(boolean showAuxiliarySubtypes) {
-        synchronized (mH) {
-            try {
-                final int mode = showAuxiliarySubtypes ?
-                        SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES:
-                        SHOW_IM_PICKER_MODE_EXCLUDE_AUXILIARY_SUBTYPES;
-                mService.showInputMethodPickerFromClient(mClient, mode);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        final int mode = showAuxiliarySubtypes
+                ? SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES
+                : SHOW_IM_PICKER_MODE_EXCLUDE_AUXILIARY_SUBTYPES;
+        try {
+            mService.showInputMethodPickerFromClient(mClient, mode);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2193,12 +2152,10 @@ public final class InputMethodManager {
      * subtypes of all input methods will be shown.
      */
     public void showInputMethodAndSubtypeEnabler(String imiId) {
-        synchronized (mH) {
-            try {
-                mService.showInputMethodAndSubtypeEnablerFromClient(mClient, imiId);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        try {
+            mService.showInputMethodAndSubtypeEnablerFromClient(mClient, imiId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2223,12 +2180,10 @@ public final class InputMethodManager {
      */
     @RequiresPermission(WRITE_SECURE_SETTINGS)
     public boolean setCurrentInputMethodSubtype(InputMethodSubtype subtype) {
-        synchronized (mH) {
-            try {
-                return mService.setCurrentInputMethodSubtype(subtype);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        try {
+            return mService.setCurrentInputMethodSubtype(subtype);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2313,12 +2268,10 @@ public final class InputMethodManager {
      */
     @UnsupportedAppUsage
     public int getInputMethodWindowVisibleHeight() {
-        synchronized (mH) {
-            try {
-                return mService.getInputMethodWindowVisibleHeight();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        try {
+            return mService.getInputMethodWindowVisibleHeight();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2336,20 +2289,17 @@ public final class InputMethodManager {
      */
     @Deprecated
     public boolean switchToLastInputMethod(IBinder imeToken) {
-        return switchToPreviousInputMethodInternal(imeToken);
-    }
-
-    /**
-     * @hide
-     */
-    public boolean switchToPreviousInputMethodInternal(IBinder imeToken) {
-        synchronized (mH) {
+        if (imeToken == null) {
+            // Note: null token is allowed for callers that have WRITE_SECURE_SETTINGS permission.
+            // Thus we cannot always rely on mPrivOpsRegistry unfortunately.
+            // TODO(Bug 114488811): Consider deprecating null token rule.
             try {
                 return mService.switchToPreviousInputMethod(imeToken);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
+        return mPrivOpsRegistry.get(imeToken).switchToPreviousInputMethod();
     }
 
     /**
@@ -2367,20 +2317,17 @@ public final class InputMethodManager {
      */
     @Deprecated
     public boolean switchToNextInputMethod(IBinder imeToken, boolean onlyCurrentIme) {
-        return switchToNextInputMethodInternal(imeToken, onlyCurrentIme);
-    }
-
-    /**
-     * @hide
-     */
-    public boolean switchToNextInputMethodInternal(IBinder imeToken, boolean onlyCurrentIme) {
-        synchronized (mH) {
+        if (imeToken == null) {
+            // Note: null token is allowed for callers that have WRITE_SECURE_SETTINGS permission.
+            // Thus we cannot always rely on mPrivOpsRegistry unfortunately.
+            // TODO(Bug 114488811): Consider deprecating null token rule.
             try {
                 return mService.switchToNextInputMethod(imeToken, onlyCurrentIme);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
+        return mPrivOpsRegistry.get(imeToken).switchToNextInputMethod(onlyCurrentIme);
     }
 
     /**
@@ -2399,20 +2346,7 @@ public final class InputMethodManager {
      */
     @Deprecated
     public boolean shouldOfferSwitchingToNextInputMethod(IBinder imeToken) {
-        return shouldOfferSwitchingToNextInputMethodInternal(imeToken);
-    }
-
-    /**
-     * @hide
-     */
-    public boolean shouldOfferSwitchingToNextInputMethodInternal(IBinder imeToken) {
-        synchronized (mH) {
-            try {
-                return mService.shouldOfferSwitchingToNextInputMethod(imeToken);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
+        return mPrivOpsRegistry.get(imeToken).shouldOfferSwitchingToNextInputMethod();
     }
 
     /**
@@ -2441,22 +2375,18 @@ public final class InputMethodManager {
      * @param subtypes subtypes will be added as additional subtypes of the current input method.
      */
     public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
-        synchronized (mH) {
-            try {
-                mService.setAdditionalInputMethodSubtypes(imiId, subtypes);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        try {
+            mService.setAdditionalInputMethodSubtypes(imiId, subtypes);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
     public InputMethodSubtype getLastInputMethodSubtype() {
-        synchronized (mH) {
-            try {
-                return mService.getLastInputMethodSubtype();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        try {
+            return mService.getLastInputMethodSubtype();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2555,5 +2485,35 @@ public final class InputMethodManager {
         sb.append(",window=" + view.getWindowToken());
         sb.append(",temporaryDetach=" + view.isTemporarilyDetached());
         return sb.toString();
+    }
+
+    /**
+     * Called by {@link InputMethodService} so that API calls to deprecated ones defined in this
+     * class can be forwarded to {@link InputMethodPrivilegedOperations}.
+     *
+     * <p>Note: this method does not hold strong references to {@code token} and {@code ops}. The
+     * registry entry will be automatically cleared after {@code token} is garbage collected.</p>
+     *
+     * @param token IME token that is associated with {@code ops}
+     * @param ops {@link InputMethodPrivilegedOperations} that is associated with {@code token}
+     * @hide
+     */
+    public void registerInputMethodPrivOps(IBinder token, InputMethodPrivilegedOperations ops) {
+        mPrivOpsRegistry.put(token, ops);
+    }
+
+    /**
+     * Called from {@link InputMethodService#onDestroy()} to make sure that deprecated IME APIs
+     * defined in this class can no longer access to {@link InputMethodPrivilegedOperations}.
+     *
+     * <p>Note: Calling this method is optional, but at least gives more explict error message in
+     * logcat when IME developers are doing something unsupported (e.g. trying to call IME APIs
+     * after {@link InputMethodService#onDestroy()}).</p>
+     *
+     * @param token IME token to be removed.
+     * @hide
+     */
+    public void unregisterInputMethodPrivOps(IBinder token) {
+        mPrivOpsRegistry.remove(token);
     }
 }

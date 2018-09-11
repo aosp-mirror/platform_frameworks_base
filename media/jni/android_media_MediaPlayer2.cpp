@@ -56,6 +56,10 @@
 #include "android_util_Binder.h"
 #include <binder/Parcel.h>
 
+#include "mediaplayer2.pb.h"
+
+using android::media::MediaPlayer2Proto::PlayerMessage;
+
 // Modular DRM begin
 #define FIND_CLASS(var, className) \
 var = env->FindClass(className); \
@@ -196,6 +200,11 @@ void JNIMediaPlayer2Listener::notify(int64_t srcId, int msg, int ext1, int ext2,
     if (obj && obj->dataSize() > 0) {
         jobject jParcel = createJavaParcelObject(env);
         if (jParcel != NULL) {
+            // TODO: replace the following Parcel usages with proto.
+            // 1. MEDIA_DRM_INFO : DrmInfo
+            // 2. MEDIA_TIMED_TEXT : TimedText
+            // 2. MEDIA_SUBTITLE_DATA : SubtitleData
+            // 4. MEDIA_META_DATA : TimedMetaData
             Parcel* nativeParcel = parcelForJavaObject(env, jParcel);
             nativeParcel->setData(obj->data(), obj->dataSize());
             env->CallStaticVoidMethod(mClass, fields.post_event, mObject,
@@ -911,6 +920,9 @@ android_media_MediaPlayer2_setParameter(JNIEnv *env, jobject thiz, jint key, job
         return false;
     }
 
+    // TODO: parcelForJavaObject() shouldn't be used since it's dependent on
+    //       framework's Parcel implementation. This setParameter() is used
+    //       only with AudioAttribute. Can this be used as jobject with JAudioTrack?
     Parcel *request = parcelForJavaObject(env, java_request);
     status_t err = mp->setParameter(key, *request);
     if (err == OK) {
@@ -978,26 +990,35 @@ android_media_MediaPlayer2_setVolume(JNIEnv *env, jobject thiz, jfloat leftVolum
     process_media_player_call( env, thiz, mp->setVolume((float) leftVolume, (float) rightVolume), NULL, NULL );
 }
 
-// Sends the request and reply parcels to the media player via the
-// binder interface.
-static jint
-android_media_MediaPlayer2_invoke(JNIEnv *env, jobject thiz,
-                                 jobject java_request, jobject java_reply)
-{
+static jbyteArray
+android_media_MediaPlayer2_invoke(JNIEnv *env, jobject thiz, jbyteArray requestData) {
     sp<MediaPlayer2> media_player = getMediaPlayer(env, thiz);
-    if (media_player == NULL ) {
+    if (media_player == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return UNKNOWN_ERROR;
+        return NULL;
     }
 
-    Parcel *request = parcelForJavaObject(env, java_request);
-    Parcel *reply = parcelForJavaObject(env, java_reply);
+    // Get the byte[] pointer and data length.
+    jbyte* pData = env->GetByteArrayElements(requestData, NULL);
+    jsize pDataLen = env->GetArrayLength(requestData);
 
-    request->setDataPosition(0);
+    // Deserialize from the byte stream.
+    PlayerMessage request;
+    PlayerMessage response;
+    request.ParseFromArray(pData, pDataLen);
 
-    // Don't use process_media_player_call which use the async loop to
-    // report errors, instead returns the status.
-    return (jint) media_player->invoke(*request, reply);
+    media_player->invoke(request, &response);
+
+    int size = response.ByteSize();
+    jbyte* temp = new jbyte[size];
+    response.SerializeToArray(temp, size);
+
+    // return the response as a byte array.
+    jbyteArray out = env->NewByteArray(size);
+    env->SetByteArrayRegion(out, 0, size, temp);
+    delete[] temp;
+
+    return out;
 }
 
 // Sends the new filter to the client.
@@ -1512,7 +1533,7 @@ static const JNINativeMethod gMethods[] = {
     {"setLooping",          "(Z)V",                             (void *)android_media_MediaPlayer2_setLooping},
     {"isLooping",           "()Z",                              (void *)android_media_MediaPlayer2_isLooping},
     {"_setVolume",          "(FF)V",                            (void *)android_media_MediaPlayer2_setVolume},
-    {"native_invoke",       "(Landroid/os/Parcel;Landroid/os/Parcel;)I",(void *)android_media_MediaPlayer2_invoke},
+    {"_invoke",             "([B)[B",                           (void *)android_media_MediaPlayer2_invoke},
     {"native_setMetadataFilter", "(Landroid/os/Parcel;)I",      (void *)android_media_MediaPlayer2_setMetadataFilter},
     {"native_getMetadata", "(ZZLandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer2_getMetadata},
     {"native_init",         "()V",                              (void *)android_media_MediaPlayer2_native_init},

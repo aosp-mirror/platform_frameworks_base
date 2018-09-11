@@ -429,9 +429,12 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ATTEIKT LIETOTĀJU"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Vai pievienot jaunu lietotāju?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Kad pievienosiet jaunu lietotāju, viņam būs jāizveido savs profils.\n\nIkviens lietotājs var atjaunināt lietotnes citu lietotāju vietā."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Sasniegts lietotāju ierobežojums"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="zero">Varat pievienot ne vairāk kā <xliff:g id="COUNT">%d</xliff:g> lietotājus.</item>
+      <item quantity="one">Varat pievienot ne vairāk kā <xliff:g id="COUNT">%d</xliff:g> lietotāju.</item>
+      <item quantity="other">Varat pievienot ne vairāk kā <xliff:g id="COUNT">%d</xliff:g> lietotājus.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Vai noņemt lietotāju?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Tiks dzēstas visas šī lietotāja lietotnes un dati."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Noņemt"</string>
@@ -737,8 +740,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Ikona kreisajā pusē"</string>
     <string name="right_icon" msgid="3952104823293824311">"Ikona labajā pusē"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Lai pievienotu elementus, pieturiet tos un velciet"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Lai pārkārtotu elementus, turiet un velciet tos"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Lai noņemtu vienumus, velciet tos šeit."</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Nepieciešami vismaz 6 elementi"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Rediģēt"</string>

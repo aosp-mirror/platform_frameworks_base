@@ -367,13 +367,26 @@ void GaugeMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition
 }
 
 std::shared_ptr<vector<FieldValue>> GaugeMetricProducer::getGaugeFields(const LogEvent& event) {
+    std::shared_ptr<vector<FieldValue>> gaugeFields;
     if (mFieldMatchers.size() > 0) {
-        std::shared_ptr<vector<FieldValue>> gaugeFields = std::make_shared<vector<FieldValue>>();
+        gaugeFields = std::make_shared<vector<FieldValue>>();
         filterGaugeValues(mFieldMatchers, event.getValues(), gaugeFields.get());
-        return gaugeFields;
     } else {
-        return std::make_shared<vector<FieldValue>>(event.getValues());
+        gaugeFields = std::make_shared<vector<FieldValue>>(event.getValues());
     }
+    // Trim all dimension fields from output. Dimensions will appear in output report and will
+    // benefit from dictionary encoding. For large pulled atoms, this can give the benefit of
+    // optional repeated field.
+    for (const auto& field : mDimensionsInWhat) {
+        for (auto it = gaugeFields->begin(); it != gaugeFields->end();) {
+            if (it->mField.matches(field)) {
+                it = gaugeFields->erase(it);
+            } else {
+                it++;
+            }
+        }
+    }
+    return gaugeFields;
 }
 
 void GaugeMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData) {

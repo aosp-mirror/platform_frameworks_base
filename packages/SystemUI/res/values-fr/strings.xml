@@ -361,7 +361,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"rechercher"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Impossible de lancer <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"L\'application <xliff:g id="APP">%s</xliff:g> est désactivée en mode sécurisé."</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Tout effacer"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Tout fermer"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Faire glisser ici pour utiliser l\'écran partagé"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Balayer l\'écran vers le haut pour changer d\'application"</string>
     <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Déplacer vers la droite pour changer rapidement d\'application"</string>
@@ -428,9 +428,11 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"DÉCONNECTER L\'UTILISATEUR"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Ajouter un utilisateur ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Lorsque vous ajoutez un utilisateur, celui-ci doit configurer son espace.\n\nN\'importe quel utilisateur peut mettre à jour les applications pour tous les autres utilisateurs."</string>
-    <!-- no translation found for user_limit_reached_title (7374910700117359177) -->
-    <skip />
-    <!-- no translation found for user_limit_reached_message (1855040563671964242) -->
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"Limite nombre utilisateurs atteinte"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="one">Vous pouvez ajouter <xliff:g id="COUNT">%d</xliff:g> profil utilisateur.</item>
+      <item quantity="other">Vous pouvez ajouter jusqu\'à <xliff:g id="COUNT">%d</xliff:g> profils utilisateur.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Supprimer l\'utilisateur ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Toutes les applications et les données de cet utilisateur seront supprimées."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Supprimer"</string>
@@ -734,8 +736,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Icône gauche"</string>
     <string name="right_icon" msgid="3952104823293824311">"Icône droite"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Sélectionnez et faites glisser les tuiles pour les ajouter"</string>
-    <!-- no translation found for drag_to_rearrange_tiles (4566074720193667473) -->
-    <skip />
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Sélectionnez et faites glisser les tuiles pour réorganiser"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Faites glisser les tuiles ici pour les supprimer."</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Au minimum six tuiles sont nécessaires"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Modifier"</string>

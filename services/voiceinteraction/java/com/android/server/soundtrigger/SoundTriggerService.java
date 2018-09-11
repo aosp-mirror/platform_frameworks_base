@@ -670,6 +670,7 @@ public class SoundTriggerService extends SystemService {
         /**
          * Disconnect from the service, but allow to re-connect when new operations are triggered.
          */
+        @GuardedBy("mRemoteServiceLock")
         private void disconnectLocked() {
             if (mService != null) {
                 try {

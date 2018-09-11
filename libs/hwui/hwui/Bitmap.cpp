@@ -290,7 +290,7 @@ void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
     if (isHardware()) {
         outBitmap->allocPixels(SkImageInfo::Make(info().width(), info().height(),
                                                  info().colorType(), info().alphaType(), nullptr));
-        uirenderer::renderthread::RenderProxy::copyGraphicBufferInto(graphicBuffer(), outBitmap);
+        uirenderer::renderthread::RenderProxy::copyHWBitmapInto(this, outBitmap);
         if (mInfo.colorSpace()) {
             sk_sp<SkPixelRef> pixelRef = sk_ref_sp(outBitmap->pixelRef());
             outBitmap->setInfo(mInfo);

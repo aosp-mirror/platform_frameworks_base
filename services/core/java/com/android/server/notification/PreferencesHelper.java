@@ -20,6 +20,7 @@ import static android.app.NotificationManager.IMPORTANCE_NONE;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
@@ -66,12 +67,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PreferencesHelper implements RankingConfig {
     private static final String TAG = "NotificationPrefHelper";
     private static final int XML_VERSION = 1;
+    private static final int UNKNOWN_UID = UserHandle.USER_NULL;
 
     @VisibleForTesting
     static final String TAG_RANKING = "ranking";
     private static final String TAG_PACKAGE = "package";
     private static final String TAG_CHANNEL = "channel";
     private static final String TAG_GROUP = "channelGroup";
+    private static final String TAG_DELEGATE = "delegate";
 
     private static final String ATT_VERSION = "version";
     private static final String ATT_NAME = "name";
@@ -82,6 +85,8 @@ public class PreferencesHelper implements RankingConfig {
     private static final String ATT_IMPORTANCE = "importance";
     private static final String ATT_SHOW_BADGE = "show_badge";
     private static final String ATT_APP_USER_LOCKED_FIELDS = "app_user_locked_fields";
+    private static final String ATT_ENABLED = "enabled";
+    private static final String ATT_USER_ALLOWED = "allowed";
 
     private static final int DEFAULT_PRIORITY = Notification.PRIORITY_DEFAULT;
     private static final int DEFAULT_VISIBILITY = NotificationManager.VISIBILITY_NO_OVERRIDE;
@@ -147,8 +152,7 @@ public class PreferencesHelper implements RankingConfig {
             }
             if (type == XmlPullParser.START_TAG) {
                 if (TAG_PACKAGE.equals(tag)) {
-                    int uid = XmlUtils.readIntAttribute(parser, ATT_UID,
-                            PackagePreferences.UNKNOWN_UID);
+                    int uid = XmlUtils.readIntAttribute(parser, ATT_UID, UNKNOWN_UID);
                     String name = parser.getAttributeValue(null, ATT_NAME);
                     if (!TextUtils.isEmpty(name)) {
                         if (forRestore) {
@@ -217,6 +221,24 @@ public class PreferencesHelper implements RankingConfig {
                                     r.channels.put(id, channel);
                                 }
                             }
+                            // Delegate
+                            if (TAG_DELEGATE.equals(tagName)) {
+                                int delegateId =
+                                        XmlUtils.readIntAttribute(parser, ATT_UID, UNKNOWN_UID);
+                                String delegateName =
+                                        XmlUtils.readStringAttribute(parser, ATT_NAME);
+                                boolean delegateEnabled = XmlUtils.readBooleanAttribute(
+                                        parser, ATT_ENABLED, Delegate.DEFAULT_ENABLED);
+                                boolean userAllowed = XmlUtils.readBooleanAttribute(
+                                        parser, ATT_USER_ALLOWED, Delegate.DEFAULT_USER_ALLOWED);
+                                Delegate d = null;
+                                if (delegateId != UNKNOWN_UID && !TextUtils.isEmpty(delegateName)) {
+                                    d = new Delegate(
+                                            delegateName, delegateId, delegateEnabled, userAllowed);
+                                }
+                                r.delegate = d;
+                            }
+
                         }
 
                         try {
@@ -248,7 +270,7 @@ public class PreferencesHelper implements RankingConfig {
         final String key = packagePreferencesKey(pkg, uid);
         synchronized (mPackagePreferencess) {
             PackagePreferences
-                    r = (uid == PackagePreferences.UNKNOWN_UID) ? mRestoredWithoutUids.get(pkg)
+                    r = (uid == UNKNOWN_UID) ? mRestoredWithoutUids.get(pkg)
                     : mPackagePreferencess.get(key);
             if (r == null) {
                 r = new PackagePreferences();
@@ -265,7 +287,7 @@ public class PreferencesHelper implements RankingConfig {
                     Slog.e(TAG, "createDefaultChannelIfNeeded - Exception: " + e);
                 }
 
-                if (r.uid == PackagePreferences.UNKNOWN_UID) {
+                if (r.uid == UNKNOWN_UID) {
                     mRestoredWithoutUids.put(pkg, r);
                 } else {
                     mPackagePreferencess.put(key, r);
@@ -357,7 +379,8 @@ public class PreferencesHelper implements RankingConfig {
                                 || r.showBadge != DEFAULT_SHOW_BADGE
                                 || r.lockedAppFields != DEFAULT_LOCKED_APP_FIELDS
                                 || r.channels.size() > 0
-                                || r.groups.size() > 0;
+                                || r.groups.size() > 0
+                                || r.delegate != null;
                 if (hasNonDefaultSettings) {
                     out.startTag(null, TAG_PACKAGE);
                     out.attribute(null, ATT_NAME, r.pkg);
@@ -376,6 +399,21 @@ public class PreferencesHelper implements RankingConfig {
 
                     if (!forBackup) {
                         out.attribute(null, ATT_UID, Integer.toString(r.uid));
+                    }
+
+                    if (r.delegate != null) {
+                        out.startTag(null, TAG_DELEGATE);
+
+                        out.attribute(null, ATT_NAME, r.delegate.mPkg);
+                        out.attribute(null, ATT_UID, Integer.toString(r.delegate.mUid));
+                        if (r.delegate.mEnabled != Delegate.DEFAULT_ENABLED) {
+                            out.attribute(null, ATT_ENABLED, Boolean.toString(r.delegate.mEnabled));
+                        }
+                        if (r.delegate.mUserAllowed != Delegate.DEFAULT_USER_ALLOWED) {
+                            out.attribute(null, ATT_USER_ALLOWED,
+                                    Boolean.toString(r.delegate.mUserAllowed));
+                        }
+                        out.endTag(null, TAG_DELEGATE);
                     }
 
                     for (NotificationChannelGroup group : r.groups.values()) {
@@ -923,14 +961,74 @@ public class PreferencesHelper implements RankingConfig {
      * considered for sentiment adjustments (and thus never show a blocking helper).
      */
     public void setAppImportanceLocked(String packageName, int uid) {
-        PackagePreferences PackagePreferences = getOrCreatePackagePreferences(packageName, uid);
-        if ((PackagePreferences.lockedAppFields & LockableAppFields.USER_LOCKED_IMPORTANCE) != 0) {
+        PackagePreferences prefs = getOrCreatePackagePreferences(packageName, uid);
+        if ((prefs.lockedAppFields & LockableAppFields.USER_LOCKED_IMPORTANCE) != 0) {
             return;
         }
 
-        PackagePreferences.lockedAppFields =
-                PackagePreferences.lockedAppFields | LockableAppFields.USER_LOCKED_IMPORTANCE;
+        prefs.lockedAppFields = prefs.lockedAppFields | LockableAppFields.USER_LOCKED_IMPORTANCE;
         updateConfig();
+    }
+
+    /**
+     * Returns the delegate for a given package, if it's allowed by the package and the user.
+     */
+    public @Nullable String getNotificationDelegate(String sourcePkg, int sourceUid) {
+        PackagePreferences prefs = getPackagePreferences(sourcePkg, sourceUid);
+
+        if (prefs == null || prefs.delegate == null) {
+            return null;
+        }
+        if (!prefs.delegate.mUserAllowed || !prefs.delegate.mEnabled) {
+            return null;
+        }
+        return prefs.delegate.mPkg;
+    }
+
+    /**
+     * Used by an app to delegate notification posting privileges to another apps.
+     */
+    public void setNotificationDelegate(String sourcePkg, int sourceUid,
+            String delegatePkg, int delegateUid) {
+        PackagePreferences prefs = getOrCreatePackagePreferences(sourcePkg, sourceUid);
+
+        boolean userAllowed = prefs.delegate == null || prefs.delegate.mUserAllowed;
+        Delegate delegate = new Delegate(delegatePkg, delegateUid, true, userAllowed);
+        prefs.delegate = delegate;
+        updateConfig();
+    }
+
+    /**
+     * Used by an app to turn off its notification delegate.
+     */
+    public void revokeNotificationDelegate(String sourcePkg, int sourceUid) {
+        PackagePreferences prefs = getPackagePreferences(sourcePkg, sourceUid);
+        if (prefs != null && prefs.delegate != null) {
+            prefs.delegate.mEnabled = false;
+            updateConfig();
+        }
+    }
+
+    /**
+     * Toggles whether an app can have a notification delegate on behalf of a user.
+     */
+    public void toggleNotificationDelegate(String sourcePkg, int sourceUid, boolean userAllowed) {
+        PackagePreferences prefs = getPackagePreferences(sourcePkg, sourceUid);
+        if (prefs != null && prefs.delegate != null) {
+            prefs.delegate.mUserAllowed = userAllowed;
+            updateConfig();
+        }
+    }
+
+    /**
+     * Returns whether the given app is allowed on post notifications on behalf of the other given
+     * app.
+     */
+    public boolean isDelegateAllowed(String sourcePkg, int sourceUid,
+            String potentialDelegatePkg, int potentialDelegateUid) {
+        PackagePreferences prefs = getPackagePreferences(sourcePkg, sourceUid);
+
+        return prefs != null && prefs.isValidDelegate(potentialDelegatePkg, potentialDelegateUid);
     }
 
     @VisibleForTesting
@@ -994,8 +1092,7 @@ public class PreferencesHelper implements RankingConfig {
                 pw.print("  AppSettings: ");
                 pw.print(r.pkg);
                 pw.print(" (");
-                pw.print(r.uid == PackagePreferences.UNKNOWN_UID ? "UNKNOWN_UID"
-                        : Integer.toString(r.uid));
+                pw.print(r.uid == UNKNOWN_UID ? "UNKNOWN_UID" : Integer.toString(r.uid));
                 pw.print(')');
                 if (r.importance != DEFAULT_IMPORTANCE) {
                     pw.print(" importance=");
@@ -1356,8 +1453,6 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     private static class PackagePreferences {
-        static int UNKNOWN_UID = UserHandle.USER_NULL;
-
         String pkg;
         int uid = UNKNOWN_UID;
         int importance = DEFAULT_IMPORTANCE;
@@ -1366,7 +1461,37 @@ public class PreferencesHelper implements RankingConfig {
         boolean showBadge = DEFAULT_SHOW_BADGE;
         int lockedAppFields = DEFAULT_LOCKED_APP_FIELDS;
 
+        Delegate delegate = null;
         ArrayMap<String, NotificationChannel> channels = new ArrayMap<>();
         Map<String, NotificationChannelGroup> groups = new ConcurrentHashMap<>();
+
+        public boolean isValidDelegate(String pkg, int uid) {
+            return delegate != null && delegate.isAllowed(pkg, uid);
+        }
+    }
+
+    private static class Delegate {
+        static final boolean DEFAULT_ENABLED = true;
+        static final boolean DEFAULT_USER_ALLOWED = true;
+        String mPkg;
+        int mUid = UNKNOWN_UID;
+        boolean mEnabled = DEFAULT_ENABLED;
+        boolean mUserAllowed = DEFAULT_USER_ALLOWED;
+
+        Delegate(String pkg, int uid, boolean enabled, boolean userAllowed) {
+            mPkg = pkg;
+            mUid = uid;
+            mEnabled = enabled;
+            mUserAllowed = userAllowed;
+        }
+
+        public boolean isAllowed(String pkg, int uid) {
+            if (pkg == null || uid == UNKNOWN_UID) {
+                return false;
+            }
+            return pkg.equals(mPkg)
+                    && uid == mUid
+                    && (mUserAllowed && mEnabled);
+        }
     }
 }
