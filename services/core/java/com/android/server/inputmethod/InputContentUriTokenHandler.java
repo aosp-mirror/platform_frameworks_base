@@ -14,11 +14,10 @@
 ** limitations under the License.
 */
 
-package com.android.server;
+package com.android.server.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
 import android.app.UriGrantsManager;
 import android.content.Intent;
 import android.net.Uri;
@@ -28,6 +27,7 @@ import android.os.RemoteException;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IInputContentUriToken;
+import com.android.server.LocalServices;
 import com.android.server.uri.UriGrantsManagerInternal;
 
 final class InputContentUriTokenHandler extends IInputContentUriToken.Stub {
