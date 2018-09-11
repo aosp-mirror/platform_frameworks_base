@@ -715,6 +715,7 @@ public final class AudioAttributes implements Parcelable {
                     break;
                 case AudioSystem.STREAM_TTS:
                     mContentType = CONTENT_TYPE_SONIFICATION;
+                    mFlags |= FLAG_BEACON;
                     break;
                 case AudioSystem.STREAM_ACCESSIBILITY:
                     mContentType = CONTENT_TYPE_SPEECH;
@@ -1038,6 +1039,10 @@ public final class AudioAttributes implements Parcelable {
         if ((aa.getFlags() & FLAG_SCO) == FLAG_SCO) {
             return fromGetVolumeControlStream ?
                     AudioSystem.STREAM_VOICE_CALL : AudioSystem.STREAM_BLUETOOTH_SCO;
+        }
+        if ((aa.getAllFlags() & FLAG_BEACON) == FLAG_BEACON) {
+            return fromGetVolumeControlStream ?
+                    AudioSystem.STREAM_MUSIC : AudioSystem.STREAM_TTS;
         }
 
         // usage to stream type mapping
