@@ -210,7 +210,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_BIND_CLIENT = 3010;
     static final int MSG_SET_ACTIVE = 3020;
     static final int MSG_SET_INTERACTIVE = 3030;
-    static final int MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER = 3040;
     static final int MSG_REPORT_FULLSCREEN_MODE = 3045;
 
     static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
@@ -597,8 +596,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * True if the device is currently interactive with user.  The value is true initially.
      */
     boolean mIsInteractive = true;
-
-    int mCurUserActionNotificationSequenceNumber = 0;
 
     int mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
 
@@ -1822,7 +1819,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         return new InputBindResult(InputBindResult.ResultCode.SUCCESS_WITH_IME_SESSION,
                 session.session, (session.channel != null ? session.channel.dup() : null),
-                mCurId, mCurSeq, mCurUserActionNotificationSequenceNumber);
+                mCurId, mCurSeq);
     }
 
     @GuardedBy("mMethodMap")
@@ -1881,8 +1878,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     requestClientSessionLocked(cs);
                     return new InputBindResult(
                             InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION,
-                            null, null, mCurId, mCurSeq,
-                            mCurUserActionNotificationSequenceNumber);
+                            null, null, mCurId, mCurSeq);
                 } else if (SystemClock.uptimeMillis()
                         < (mLastBindTime+TIME_TO_RECONNECT)) {
                     // In this case we have connected to the service, but
@@ -1894,8 +1890,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // to see if we can get back in touch with the service.
                     return new InputBindResult(
                             InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
-                            null, null, mCurId, mCurSeq,
-                            mCurUserActionNotificationSequenceNumber);
+                            null, null, mCurId, mCurSeq);
                 } else {
                     EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME,
                             mCurMethodId, SystemClock.uptimeMillis()-mLastBindTime, 0);
@@ -1917,8 +1912,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // party code.
             return new InputBindResult(
                     InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
-                    null, null, mCurMethodId, mCurSeq,
-                    mCurUserActionNotificationSequenceNumber);
+                    null, null, mCurMethodId, mCurSeq);
         }
 
         InputMethodInfo info = mMethodMap.get(mCurMethodId);
@@ -1946,8 +1940,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
-                    null, null, mCurId, mCurSeq,
-                    mCurUserActionNotificationSequenceNumber);
+                    null, null, mCurId, mCurSeq);
         }
         mCurIntent = null;
         Slog.w(TAG, "Failure connecting to input method service: " + mCurIntent);
@@ -2754,7 +2747,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                     return new InputBindResult(
                             InputBindResult.ResultCode.SUCCESS_REPORT_WINDOW_FOCUS_ONLY,
-                            null, null, null, -1, -1);
+                            null, null, null, -1);
                 }
                 mCurFocusedWindow = windowToken;
                 mCurFocusedWindowSoftInputMode = softInputMode;
@@ -3172,17 +3165,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mWindowManagerInternal.clearLastInputMethodWindowForTransition();
     }
 
-    @Override
-    public void notifyUserAction(int sequenceNumber) {
+    @BinderThread
+    private void notifyUserAction(@NonNull IBinder token) {
         if (DEBUG) {
-            Slog.d(TAG, "Got the notification of a user action. sequenceNumber:" + sequenceNumber);
+            Slog.d(TAG, "Got the notification of a user action.");
         }
         synchronized (mMethodMap) {
-            if (mCurUserActionNotificationSequenceNumber != sequenceNumber) {
+            if (mCurToken != token) {
                 if (DEBUG) {
-                    Slog.d(TAG, "Ignoring the user action notification due to the sequence number "
-                            + "mismatch. expected:" + mCurUserActionNotificationSequenceNumber
-                            + " actual: " + sequenceNumber);
+                    Slog.d(TAG, "Ignoring the user action notification from IMEs that are no longer"
+                            + " active.");
                 }
                 return;
             }
@@ -3445,20 +3437,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_START_VR_INPUT:
                 startVrInputMethodNoCheck((ComponentName) msg.obj);
                 return true;
-            case MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER: {
-                final int sequenceNumber = msg.arg1;
-                final ClientState clientState = (ClientState)msg.obj;
-                try {
-                    clientState.client.setUserActionNotificationSequenceNumber(sequenceNumber);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Got RemoteException sending "
-                            + "setUserActionNotificationSequenceNumber("
-                            + sequenceNumber + ") notification to pid "
-                            + clientState.pid + " uid "
-                            + clientState.uid);
-                }
-                return true;
-            }
             case MSG_REPORT_FULLSCREEN_MODE: {
                 final boolean fullscreen = msg.arg1 != 0;
                 final ClientState clientState = (ClientState)msg.obj;
@@ -3942,19 +3920,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (!isVrInput) {
             // Update the history of InputMethod and Subtype
             mSettings.saveCurrentInputMethodAndSubtypeToHistory(mCurMethodId, mCurrentSubtype);
-        }
-
-        mCurUserActionNotificationSequenceNumber =
-                Math.max(mCurUserActionNotificationSequenceNumber + 1, 1);
-        if (DEBUG) {
-            Slog.d(TAG, "Bump mCurUserActionNotificationSequenceNumber:"
-                    + mCurUserActionNotificationSequenceNumber);
-        }
-
-        if (mCurClient != null && mCurClient.client != null) {
-            executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
-                    MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER,
-                    mCurUserActionNotificationSequenceNumber, mCurClient));
         }
 
         if (isVrInput) {
@@ -4558,8 +4523,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + " mShowForced=" + mShowForced
                     + " mInputShown=" + mInputShown);
             p.println("  mInFullscreenMode=" + mInFullscreenMode);
-            p.println("  mCurUserActionNotificationSequenceNumber="
-                    + mCurUserActionNotificationSequenceNumber);
             p.println("  mSystemReady=" + mSystemReady + " mInteractive=" + mIsInteractive);
             p.println("  mSettingsObserver=" + mSettingsObserver);
             p.println("  mSwitchingController:");
@@ -5056,6 +5019,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public boolean shouldOfferSwitchingToNextInputMethod() {
             return mImms.shouldOfferSwitchingToNextInputMethod(mToken);
+        }
+
+        @BinderThread
+        @Override
+        public void notifyUserActionAsync() {
+            mImms.notifyUserAction(mToken);
         }
     }
 }

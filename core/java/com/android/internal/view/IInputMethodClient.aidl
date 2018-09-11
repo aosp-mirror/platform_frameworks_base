@@ -27,6 +27,5 @@ oneway interface IInputMethodClient {
     // unbindReason corresponds to InputMethodClient.UnbindReason.
     void onUnbindMethod(int sequence, int unbindReason);
     void setActive(boolean active, boolean fullscreen);
-    void setUserActionNotificationSequenceNumber(int sequenceNumber);
     void reportFullscreenMode(boolean fullscreen);
 }

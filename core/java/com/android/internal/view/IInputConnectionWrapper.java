@@ -110,12 +110,6 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
 
     abstract protected boolean isActive();
 
-    /**
-     * Called when the user took some actions that should be taken into consideration to update the
-     * LRU list for input method rotation.
-     */
-    abstract protected void onUserAction();
-
     public void getTextAfterCursor(int length, int flags, int seq, IInputContextCallback callback) {
         dispatchMessage(obtainMessageIISC(DO_GET_TEXT_AFTER_CURSOR, length, flags, seq, callback));
     }
@@ -342,7 +336,6 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                     return;
                 }
                 ic.commitText((CharSequence)msg.obj, msg.arg1);
-                onUserAction();
                 return;
             }
             case DO_SET_SELECTION: {
@@ -397,7 +390,6 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                     return;
                 }
                 ic.setComposingText((CharSequence)msg.obj, msg.arg1);
-                onUserAction();
                 return;
             }
             case DO_SET_COMPOSING_REGION: {
@@ -437,7 +429,6 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                     return;
                 }
                 ic.sendKeyEvent((KeyEvent)msg.obj);
-                onUserAction();
                 return;
             }
             case DO_CLEAR_META_KEY_STATES: {

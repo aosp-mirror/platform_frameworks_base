@@ -171,20 +171,13 @@ public final class InputBindResult implements Parcelable {
      */
     public final int sequence;
 
-    /**
-     * Sequence number of user action notification.
-     */
-    public final int userActionNotificationSequenceNumber;
-
     public InputBindResult(@ResultCode int _result,
-            IInputMethodSession _method, InputChannel _channel,
-            String _id, int _sequence, int _userActionNotificationSequenceNumber) {
+            IInputMethodSession _method, InputChannel _channel, String _id, int _sequence) {
         result = _result;
         method = _method;
         channel = _channel;
         id = _id;
         sequence = _sequence;
-        userActionNotificationSequenceNumber = _userActionNotificationSequenceNumber;
     }
 
     InputBindResult(Parcel source) {
@@ -197,14 +190,12 @@ public final class InputBindResult implements Parcelable {
         }
         id = source.readString();
         sequence = source.readInt();
-        userActionNotificationSequenceNumber = source.readInt();
     }
 
     @Override
     public String toString() {
         return "InputBindResult{result=" + getResultString() + " method="+ method + " id=" + id
                 + " sequence=" + sequence
-                + " userActionNotificationSequenceNumber=" + userActionNotificationSequenceNumber
                 + "}";
     }
 
@@ -226,7 +217,6 @@ public final class InputBindResult implements Parcelable {
         }
         dest.writeString(id);
         dest.writeInt(sequence);
-        dest.writeInt(userActionNotificationSequenceNumber);
     }
 
     /**
@@ -285,7 +275,7 @@ public final class InputBindResult implements Parcelable {
     }
 
     private static InputBindResult error(@ResultCode int result) {
-        return new InputBindResult(result, null, null, null, -1, -1);
+        return new InputBindResult(result, null, null, null, -1);
     }
 
     /**

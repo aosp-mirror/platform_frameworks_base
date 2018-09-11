@@ -346,4 +346,20 @@ public final class InputMethodPrivilegedOperations {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Calls {@link IInputMethodPrivilegedOperations#notifyUserActionAsync()}
+     */
+    @AnyThread
+    public void notifyUserActionAsync() {
+        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
+        if (ops == null) {
+            return;
+        }
+        try {
+            ops.notifyUserActionAsync();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
