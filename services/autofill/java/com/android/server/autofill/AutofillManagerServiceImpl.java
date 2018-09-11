@@ -378,7 +378,6 @@ final class AutofillManagerServiceImpl {
         if (newSession == null) {
             return NO_SESSION;
         }
-        autofillId.setSessionId(newSession.id);
 
         final String historyItem =
                 "id=" + newSession.id + " uid=" + uid + " a=" + shortComponentName
