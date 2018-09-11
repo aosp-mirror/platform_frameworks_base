@@ -134,7 +134,7 @@ public class DataUsageController {
             final NetworkStatsHistory history = session.getHistoryForNetwork(template, FIELDS);
             final long now = System.currentTimeMillis();
             final long start, end;
-            if (policy != null) {
+            if (policy != null && policy.hasCycle()) {
                 final Pair<ZonedDateTime, ZonedDateTime> cycle = NetworkPolicyManager
                         .cycleIterator(policy).next();
                 start = cycle.first.toInstant().toEpochMilli();
