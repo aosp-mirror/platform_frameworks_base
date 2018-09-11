@@ -164,6 +164,13 @@ public class PackageManagerServiceUtils {
     public static List<PackageParser.Package> getPackagesForDexopt(
             Collection<PackageParser.Package> packages,
             PackageManagerService packageManagerService) {
+        return getPackagesForDexopt(packages, packageManagerService, DEBUG_DEXOPT);
+    }
+
+    public static List<PackageParser.Package> getPackagesForDexopt(
+            Collection<PackageParser.Package> packages,
+            PackageManagerService packageManagerService,
+            boolean debug) {
         ArrayList<PackageParser.Package> remainingPkgs = new ArrayList<>(packages);
         LinkedList<PackageParser.Package> result = new LinkedList<>();
         ArrayList<PackageParser.Package> sortTemp = new ArrayList<>(remainingPkgs.size());
@@ -189,14 +196,14 @@ public class PackageManagerServiceUtils {
         // TODO: add a property to control this?
         Predicate<PackageParser.Package> remainingPredicate;
         if (!remainingPkgs.isEmpty() && packageManagerService.isHistoricalPackageUsageAvailable()) {
-            if (DEBUG_DEXOPT) {
+            if (debug) {
                 Log.i(TAG, "Looking at historical package use");
             }
             // Get the package that was used last.
             PackageParser.Package lastUsed = Collections.max(remainingPkgs, (pkg1, pkg2) ->
                     Long.compare(pkg1.getLatestForegroundPackageUseTimeInMills(),
                             pkg2.getLatestForegroundPackageUseTimeInMills()));
-            if (DEBUG_DEXOPT) {
+            if (debug) {
                 Log.i(TAG, "Taking package " + lastUsed.packageName + " as reference in time use");
             }
             long estimatedPreviousSystemUseTime =
@@ -218,7 +225,7 @@ public class PackageManagerServiceUtils {
         applyPackageFilter(remainingPredicate, result, remainingPkgs, sortTemp,
                 packageManagerService);
 
-        if (DEBUG_DEXOPT) {
+        if (debug) {
             Log.i(TAG, "Packages to be dexopted: " + packagesToString(result));
             Log.i(TAG, "Packages skipped from dexopt: " + packagesToString(remainingPkgs));
         }
