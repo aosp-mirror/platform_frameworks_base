@@ -1028,55 +1028,6 @@ android_media_MediaPlayer2_invoke(JNIEnv *env, jobject thiz, jbyteArray requestD
     return out;
 }
 
-// Sends the new filter to the client.
-static jint
-android_media_MediaPlayer2_setMetadataFilter(JNIEnv *env, jobject thiz, jobject request)
-{
-    sp<MediaPlayer2> media_player = getMediaPlayer(env, thiz);
-    if (media_player == NULL ) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return UNKNOWN_ERROR;
-    }
-
-    Parcel *filter = parcelForJavaObject(env, request);
-
-    if (filter == NULL ) {
-        jniThrowException(env, "java/lang/RuntimeException", "Filter is null");
-        return UNKNOWN_ERROR;
-    }
-
-    return (jint) media_player->setMetadataFilter(*filter);
-}
-
-static jboolean
-android_media_MediaPlayer2_getMetadata(JNIEnv *env, jobject thiz, jboolean update_only,
-                                      jboolean apply_filter, jobject reply)
-{
-    sp<MediaPlayer2> media_player = getMediaPlayer(env, thiz);
-    if (media_player == NULL ) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return JNI_FALSE;
-    }
-
-    Parcel *metadata = parcelForJavaObject(env, reply);
-
-    if (metadata == NULL ) {
-        jniThrowException(env, "java/lang/RuntimeException", "Reply parcel is null");
-        return JNI_FALSE;
-    }
-
-    metadata->freeData();
-    // On return metadata is positioned at the beginning of the
-    // metadata. Note however that the parcel actually starts with the
-    // return code so you should not rewind the parcel using
-    // setDataPosition(0).
-    if (media_player->getMetadata(update_only, apply_filter, metadata) == OK) {
-        return JNI_TRUE;
-    } else {
-        return JNI_FALSE;
-    }
-}
-
 // This function gets some field IDs, which in turn causes class initialization.
 // It is called from a static block in MediaPlayer2, which won't run until the
 // first time an instance of this class is used.
@@ -1541,8 +1492,6 @@ static const JNINativeMethod gMethods[] = {
     {"isLooping",           "()Z",                              (void *)android_media_MediaPlayer2_isLooping},
     {"_setVolume",          "(FF)V",                            (void *)android_media_MediaPlayer2_setVolume},
     {"_invoke",             "([B)[B",                           (void *)android_media_MediaPlayer2_invoke},
-    {"native_setMetadataFilter", "(Landroid/os/Parcel;)I",      (void *)android_media_MediaPlayer2_setMetadataFilter},
-    {"native_getMetadata", "(ZZLandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer2_getMetadata},
     {"native_init",         "()V",                              (void *)android_media_MediaPlayer2_native_init},
     {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_media_MediaPlayer2_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer2_native_finalize},
