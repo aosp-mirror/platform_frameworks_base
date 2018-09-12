@@ -463,7 +463,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                 style = rotationCCW ? R.style.RotateButtonCCWStart0 :
                         R.style.RotateButtonCWStart0;
             }
-            mNavigationBarView.updateRotateSuggestionButtonStyle(style, true);
+            mNavigationBarView.updateRotateSuggestionButtonStyle(style);
         }
 
         if (mNavigationBarWindowState != WINDOW_STATE_SHOWING) {
