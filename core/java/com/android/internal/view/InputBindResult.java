@@ -139,7 +139,8 @@ public final class InputBindResult implements Parcelable {
          * The client should try to restart input when its {@link android.view.Window} is focused
          * again.</p>
          *
-         * @see com.android.server.wm.WindowManagerService#inputMethodClientHasFocus(IInputMethodClient)
+         * @see com.android.server.wm.WindowManagerInternal#inputMethodClientHasFocus(
+         * IInputMethodClient)
          */
         int ERROR_NOT_IME_TARGET_WINDOW = 11;
         /**
