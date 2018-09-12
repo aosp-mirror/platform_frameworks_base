@@ -124,6 +124,7 @@ class PackageManagerShellCommand extends ShellCommand {
     int mTargetUser;
     boolean mBrief;
     boolean mComponents;
+    int mQueryFlags;
 
     PackageManagerShellCommand(PackageManagerService service) {
         mInterface = service;
@@ -739,6 +740,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 } else if ("--components".equals(opt)) {
                     mComponents = true;
                     return true;
+                } else if ("--query-flags".equals(opt)) {
+                    mQueryFlags = Integer.decode(cmd.getNextArgRequired());
+                    return true;
                 }
                 return false;
             }
@@ -784,7 +788,8 @@ class PackageManagerShellCommand extends ShellCommand {
             throw new RuntimeException(e.getMessage(), e);
         }
         try {
-            ResolveInfo ri = mInterface.resolveIntent(intent, intent.getType(), 0, mTargetUser);
+            ResolveInfo ri = mInterface.resolveIntent(intent, intent.getType(), mQueryFlags,
+                    mTargetUser);
             PrintWriter pw = getOutPrintWriter();
             if (ri == null) {
                 pw.println("No activity found");
@@ -806,8 +811,8 @@ class PackageManagerShellCommand extends ShellCommand {
             throw new RuntimeException(e.getMessage(), e);
         }
         try {
-            List<ResolveInfo> result = mInterface.queryIntentActivities(intent, intent.getType(), 0,
-                    mTargetUser).getList();
+            List<ResolveInfo> result = mInterface.queryIntentActivities(intent, intent.getType(),
+                    mQueryFlags, mTargetUser).getList();
             PrintWriter pw = getOutPrintWriter();
             if (result == null || result.size() <= 0) {
                 pw.println("No activities found");
@@ -840,8 +845,8 @@ class PackageManagerShellCommand extends ShellCommand {
             throw new RuntimeException(e.getMessage(), e);
         }
         try {
-            List<ResolveInfo> result = mInterface.queryIntentServices(intent, intent.getType(), 0,
-                    mTargetUser).getList();
+            List<ResolveInfo> result = mInterface.queryIntentServices(intent, intent.getType(),
+                    mQueryFlags, mTargetUser).getList();
             PrintWriter pw = getOutPrintWriter();
             if (result == null || result.size() <= 0) {
                 pw.println("No services found");
@@ -874,8 +879,8 @@ class PackageManagerShellCommand extends ShellCommand {
             throw new RuntimeException(e.getMessage(), e);
         }
         try {
-            List<ResolveInfo> result = mInterface.queryIntentReceivers(intent, intent.getType(), 0,
-                    mTargetUser).getList();
+            List<ResolveInfo> result = mInterface.queryIntentReceivers(intent, intent.getType(),
+                    mQueryFlags, mTargetUser).getList();
             PrintWriter pw = getOutPrintWriter();
             if (result == null || result.size() <= 0) {
                 pw.println("No receivers found");
@@ -2731,16 +2736,20 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -d: only list dangerous permissions");
         pw.println("      -u: list only the permissions users will see");
         pw.println("");
-        pw.println("  resolve-activity [--brief] [--components] [--user USER_ID] INTENT");
+        pw.println("  resolve-activity [--brief] [--components] [--query-flags FLAGS]");
+        pw.println("       [--user USER_ID] INTENT");
         pw.println("    Prints the activity that resolves to the given INTENT.");
         pw.println("");
-        pw.println("  query-activities [--brief] [--components] [--user USER_ID] INTENT");
+        pw.println("  query-activities [--brief] [--components] [--query-flags FLAGS]");
+        pw.println("       [--user USER_ID] INTENT");
         pw.println("    Prints all activities that can handle the given INTENT.");
         pw.println("");
-        pw.println("  query-services [--brief] [--components] [--user USER_ID] INTENT");
+        pw.println("  query-services [--brief] [--components] [--query-flags FLAGS]");
+        pw.println("       [--user USER_ID] INTENT");
         pw.println("    Prints all services that can handle the given INTENT.");
         pw.println("");
-        pw.println("  query-receivers [--brief] [--components] [--user USER_ID] INTENT");
+        pw.println("  query-receivers [--brief] [--components] [--query-flags FLAGS]");
+        pw.println("       [--user USER_ID] INTENT");
         pw.println("    Prints all broadcast receivers that can handle the given INTENT.");
         pw.println("");
         pw.println("  install [-lrtsfdg] [-i PACKAGE] [--user USER_ID|all|current]");
