@@ -51,9 +51,6 @@ public final class WebViewFactory {
 
     private static final String CHROMIUM_WEBVIEW_FACTORY_METHOD = "create";
 
-    public static final String CHROMIUM_WEBVIEW_VMSIZE_SIZE_PROPERTY =
-            "persist.sys.webview.vmsize";
-
     private static final String LOGTAG = "WebViewFactory";
 
     private static final boolean DEBUG = false;
