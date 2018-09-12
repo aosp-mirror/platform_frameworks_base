@@ -313,6 +313,7 @@ import java.util.function.Supplier;
  * @attr ref android.R.styleable#TextView_fallbackLineSpacing
  * @attr ref android.R.styleable#TextView_letterSpacing
  * @attr ref android.R.styleable#TextView_fontFeatureSettings
+ * @attr ref android.R.styleable#TextView_fontVariationSettings
  * @attr ref android.R.styleable#TextView_breakStrategy
  * @attr ref android.R.styleable#TextView_hyphenationFrequency
  * @attr ref android.R.styleable#TextView_autoSizeTextType
@@ -4382,6 +4383,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @see #getFontVariationSettings()
      * @see FontVariationAxis
+     *
+     * @attr ref android.R.styleable#TextView_fontVariationSettings
      */
     public boolean setFontVariationSettings(@Nullable String fontVariationSettings) {
         final String existingSettings = mTextPaint.getFontVariationSettings();
