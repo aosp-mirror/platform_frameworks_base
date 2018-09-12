@@ -28,7 +28,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Slog;
 
-import com.android.internal.inputmethod.LocaleUtils;
+import com.android.internal.inputmethod.InputMethodUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -384,7 +384,7 @@ public final class InputMethodSubtype implements Parcelable {
             if (!TextUtils.isEmpty(mSubtypeLanguageTag)) {
                 mCachedLocaleObj = Locale.forLanguageTag(mSubtypeLanguageTag);
             } else {
-                mCachedLocaleObj = LocaleUtils.constructLocaleFromString(mSubtypeLocale);
+                mCachedLocaleObj = InputMethodUtils.constructLocaleFromString(mSubtypeLocale);
             }
             return mCachedLocaleObj;
         }
