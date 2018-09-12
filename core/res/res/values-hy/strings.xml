@@ -514,7 +514,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Թույլ է տալիս հավելվածին փոփոխել ձեր լուսանկարների հավաքածուն:"</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"ճանաչել տեղադրության մասին տվյալները մեդիա բովանդակության հավաքածուից"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Թույլ է տալիս հավելվածին ճանաչել տեղադրության մասին տվյալները ձեր մեդիա բովանդակության հավաքածուից:"</string>
-    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Կենսաչափական սարք չի գտնվել"</string>
+    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Կենսաչափական սարքը հասանելի չէ"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Մատնահետքը հայտնաբերվել է մասամբ: Փորձեք նորից:"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Չհաջողվեց մշակել մատնահետքը: Նորից փորձեք:"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Մատնահետքերի սենսորն աղտոտված է: Մաքրեք այն և փորձեք նորից:"</string>
