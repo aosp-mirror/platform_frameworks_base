@@ -228,6 +228,9 @@ public class IpClient extends StateMachine {
     //       Encourages logging of any available arguments, and all call sites
     //       are necessarily logged identically.
     //
+    // NOTE: Log first because passed objects may or may not be thread-safe and
+    // once passed on to the callback they may be modified by another thread.
+    //
     // TODO: Find an lighter weight approach.
     private class LoggingCallbackWrapper extends Callback {
         private static final String PREFIX = "INVOKE ";
@@ -243,63 +246,63 @@ public class IpClient extends StateMachine {
 
         @Override
         public void onPreDhcpAction() {
-            mCallback.onPreDhcpAction();
             log("onPreDhcpAction()");
+            mCallback.onPreDhcpAction();
         }
         @Override
         public void onPostDhcpAction() {
-            mCallback.onPostDhcpAction();
             log("onPostDhcpAction()");
+            mCallback.onPostDhcpAction();
         }
         @Override
         public void onNewDhcpResults(DhcpResults dhcpResults) {
-            mCallback.onNewDhcpResults(dhcpResults);
             log("onNewDhcpResults({" + dhcpResults + "})");
+            mCallback.onNewDhcpResults(dhcpResults);
         }
         @Override
         public void onProvisioningSuccess(LinkProperties newLp) {
-            mCallback.onProvisioningSuccess(newLp);
             log("onProvisioningSuccess({" + newLp + "})");
+            mCallback.onProvisioningSuccess(newLp);
         }
         @Override
         public void onProvisioningFailure(LinkProperties newLp) {
-            mCallback.onProvisioningFailure(newLp);
             log("onProvisioningFailure({" + newLp + "})");
+            mCallback.onProvisioningFailure(newLp);
         }
         @Override
         public void onLinkPropertiesChange(LinkProperties newLp) {
-            mCallback.onLinkPropertiesChange(newLp);
             log("onLinkPropertiesChange({" + newLp + "})");
+            mCallback.onLinkPropertiesChange(newLp);
         }
         @Override
         public void onReachabilityLost(String logMsg) {
-            mCallback.onReachabilityLost(logMsg);
             log("onReachabilityLost(" + logMsg + ")");
+            mCallback.onReachabilityLost(logMsg);
         }
         @Override
         public void onQuit() {
-            mCallback.onQuit();
             log("onQuit()");
+            mCallback.onQuit();
         }
         @Override
         public void installPacketFilter(byte[] filter) {
-            mCallback.installPacketFilter(filter);
             log("installPacketFilter(byte[" + filter.length + "])");
+            mCallback.installPacketFilter(filter);
         }
         @Override
         public void startReadPacketFilter() {
-            mCallback.startReadPacketFilter();
             log("startReadPacketFilter()");
+            mCallback.startReadPacketFilter();
         }
         @Override
         public void setFallbackMulticastFilter(boolean enabled) {
-            mCallback.setFallbackMulticastFilter(enabled);
             log("setFallbackMulticastFilter(" + enabled + ")");
+            mCallback.setFallbackMulticastFilter(enabled);
         }
         @Override
         public void setNeighborDiscoveryOffload(boolean enable) {
-            mCallback.setNeighborDiscoveryOffload(enable);
             log("setNeighborDiscoveryOffload(" + enable + ")");
+            mCallback.setNeighborDiscoveryOffload(enable);
         }
     }
 
