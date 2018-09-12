@@ -2382,7 +2382,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             int logSampleRate = Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.HIDDEN_API_ACCESS_LOG_SAMPLING_RATE, -1);
+                    Settings.Global.HIDDEN_API_ACCESS_LOG_SAMPLING_RATE, 0x200);
             if (logSampleRate < 0 || logSampleRate > 0x10000) {
                 logSampleRate = -1;
             }
