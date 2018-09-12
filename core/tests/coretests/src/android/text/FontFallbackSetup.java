@@ -33,7 +33,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.HashSet;
+import java.util.ArrayList;
 
 public class FontFallbackSetup implements AutoCloseable {
     private final String[] mTestFontFiles;
@@ -76,7 +76,7 @@ public class FontFallbackSetup implements AutoCloseable {
         }
 
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final HashSet<Font> availableFonts = new HashSet<>();
+        final ArrayList<Font> availableFonts = new ArrayList<>();
         final FontConfig.Alias[] aliases = SystemFonts.buildSystemFallback(testFontsXml,
                 mTestFontsDir, fallbackMap, availableFonts);
         Typeface.initSystemDefaultTypefaces(mFontMap, fallbackMap, aliases);
