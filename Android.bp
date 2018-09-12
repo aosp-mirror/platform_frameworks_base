@@ -1207,7 +1207,7 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
     "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
     "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo"
 
-doc_defaults {
+stubs_defaults {
     name: "metalava-api-stubs-default",
     srcs: [
         ":opt-telephony-srcs",
@@ -1232,10 +1232,9 @@ doc_defaults {
     ],
     local_sourcepaths: frameworks_base_subdirs,
     installable: false,
-    metalava_enabled: true,
-    metalava_annotations_enabled: true,
-    metalava_previous_api: ":last-released-public-api",
-    metalava_merge_annotations_dirs: [
+    annotations_enabled: true,
+    previous_api: ":last-released-public-api",
+    merge_annotations_dirs: [
         "metalava-manual",
         "ojluni-annotated-stubs",
     ],
@@ -1467,7 +1466,7 @@ java_library_static {
     ],
 }
 
-droiddoc {
+droidstubs {
     name: "hiddenapi-lists-docs",
     defaults: ["metalava-api-stubs-default"],
     arg_files: [
@@ -1526,7 +1525,7 @@ filegroup {
     ],
 }
 
-droiddoc {
+droidstubs {
     name: "api-stubs-docs",
     defaults: ["metalava-api-stubs-default"],
     api_filename: "public_api.txt",
@@ -1548,7 +1547,7 @@ droiddoc {
     },
 }
 
-droiddoc {
+droidstubs {
     name: "system-api-stubs-docs",
     defaults: ["metalava-api-stubs-default"],
     api_tag_name: "SYSTEM",
@@ -1572,7 +1571,7 @@ droiddoc {
     },
 }
 
-droiddoc {
+droidstubs {
     name: "test-api-stubs-docs",
     defaults: ["metalava-api-stubs-default"],
     api_tag_name: "TEST",
