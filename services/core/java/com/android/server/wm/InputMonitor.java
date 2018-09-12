@@ -268,11 +268,11 @@ final class InputMonitor {
             }
             final InputWindowHandle dragWindowHandle =
                     mService.mDragDropController.getInputWindowHandleLocked();
-            if (dragWindowHandle != null) {
-                addInputWindowHandle(dragWindowHandle);
-            } else {
+            if (dragWindowHandle == null) {
                 Slog.w(TAG_WM, "Drag is in progress but there is no "
                         + "drag window handle.");
+            } else if (dragWindowHandle.displayId == mDisplayId) {
+                addInputWindowHandle(dragWindowHandle);
             }
         }
 
@@ -283,11 +283,11 @@ final class InputMonitor {
             }
             final InputWindowHandle dragWindowHandle =
                     mService.mTaskPositioningController.getDragWindowHandleLocked();
-            if (dragWindowHandle != null) {
-                addInputWindowHandle(dragWindowHandle);
-            } else {
+            if (dragWindowHandle == null) {
                 Slog.e(TAG_WM,
                         "Repositioning is in progress but there is no drag window handle.");
+            } else if (dragWindowHandle.displayId == mDisplayId) {
+                addInputWindowHandle(dragWindowHandle);
             }
         }
 
