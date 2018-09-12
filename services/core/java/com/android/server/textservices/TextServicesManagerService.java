@@ -461,7 +461,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         // is pre-installed or not.
         final Locale systemLocal = mContext.getResources().getConfiguration().locale;
         final ArrayList<Locale> suitableLocales =
-                InputMethodUtils.getSuitableLocalesForSpellChecker(systemLocal);
+                LocaleUtils.getSuitableLocalesForSpellChecker(systemLocal);
         if (DBG) {
             Slog.w(TAG, "findAvailSystemSpellCheckerLocked suitableLocales="
                     + Arrays.toString(suitableLocales.toArray(new Locale[suitableLocales.size()])));
