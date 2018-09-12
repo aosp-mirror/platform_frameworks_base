@@ -118,10 +118,22 @@ public class BinderCallsStatsService extends Binder {
             this.mBinderCallsStats = binderCallsStats;
         }
 
+        /** @see BinderCallsStats#reset */
+        public void reset() {
+            mBinderCallsStats.reset();
+        }
+
+        /**
+         * @see BinderCallsStats#getExportedCallStats.
+         *
+         * Note that binder calls stats will be reset by statsd every time
+         * the data is exported.
+         */
         public ArrayList<BinderCallsStats.ExportedCallStat> getExportedCallStats() {
             return mBinderCallsStats.getExportedCallStats();
         }
 
+        /** @see BinderCallsStats#getExportedExceptionStats */
         public ArrayMap<String, Integer> getExportedExceptionStats() {
             return mBinderCallsStats.getExportedExceptionStats();
         }

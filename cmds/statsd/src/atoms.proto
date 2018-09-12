@@ -2163,8 +2163,8 @@ message Temperature {
 /**
  * Pulls the statistics of calls to Binder.
  *
- * Binder stats are cumulative from boot unless somebody reset the data using
- * > adb shell dumpsys binder_calls_stats --reset
+ * Binder stats will be reset every time the data is pulled. It means it can only be pulled by one
+ * config on the device.
  *
  * Next tag: 14
  */
