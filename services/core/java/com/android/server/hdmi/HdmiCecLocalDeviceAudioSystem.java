@@ -677,4 +677,59 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
                         | Intent.FLAG_ACTIVITY_NO_ANIMATION);
         mService.getContext().startActivity(activityIntent);
     }
+
+    @Override
+    protected void handleRoutingChangeAndInformation(int physicalAddress, HdmiCecMessage message) {
+        int port = getLocalPortFromPhysicalAddress(physicalAddress);
+        // Routing change or information sent from switches under the current device can be ignored.
+        if (port > 0) {
+            return;
+        }
+        // When other switches route to some other devices not under the current device,
+        // check system audio mode status and do ARC switch if needed.
+        if (port < 0 && isSystemAudioActivated()) {
+            handleRoutingChangeAndInformationForSystemAudio();
+            return;
+        }
+        // When other switches route to the current device
+        // and the current device is also a switch.
+        if (port == 0) {
+            handleRoutingChangeAndInformationForSwitch(message);
+        }
+    }
+
+    // Handle the system audio(ARC) part of the logic on receiving routing change or information.
+    private void handleRoutingChangeAndInformationForSystemAudio() {
+        if (mService.isPowerStandbyOrTransient()) {
+            mService.wakeUp();
+        }
+        // TODO(b/115637145): handle system aduio without ARC
+        routeToInputFromPortId(Constants.CEC_SWITCH_ARC);
+    }
+
+    // Handle the routing control part of the logic on receiving routing change or information.
+    private void handleRoutingChangeAndInformationForSwitch(HdmiCecMessage message) {
+        if (mService.isPowerStandbyOrTransient()) {
+            mService.wakeUp();
+        }
+        if (getLocalActivePort() == Constants.CEC_SWITCH_HOME && mService.isPlaybackDevice()) {
+            routeToInputFromPortId(Constants.CEC_SWITCH_HOME);
+            setAndBroadcastActiveSource(message, mService.getPhysicalAddress());
+            return;
+        }
+
+        int routingInformationPath =
+                getActivePathOnSwitchFromActivePortId(mService.getPhysicalAddress());
+        // If current device is already the leaf of the whole HDMI system, will do nothing.
+        if (routingInformationPath == mService.getPhysicalAddress()) {
+            HdmiLogger.debug("Current device can't assign valid physical address"
+                    + "to devices under it any more. "
+                    + "It's physical address is " + routingInformationPath);
+            return;
+        }
+        // Otherwise will switch to the current active port and broadcast routing information.
+        mService.sendCecCommand(HdmiCecMessageBuilder.buildRoutingInformation(
+                mAddress, routingInformationPath));
+        routeToInputFromPortId(getActivePortId());
+    }
 }

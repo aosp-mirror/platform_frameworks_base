@@ -143,9 +143,45 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         return true;
     }
 
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleRoutingChange(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int newPath = HdmiUtils.twoBytesToInt(message.getParams(), 2);
+        // if the current device is a pure playback device
+        if (!mIsSwitchDevice
+                && newPath == mService.getPhysicalAddress()
+                && mService.isPlaybackDevice()) {
+            setAndBroadcastActiveSource(message, newPath);
+        }
+        handleRoutingChangeAndInformation(newPath, message);
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleRoutingInformation(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+        // if the current device is a pure playback device
+        if (!mIsSwitchDevice
+                && physicalAddress == mService.getPhysicalAddress()
+                && mService.isPlaybackDevice()) {
+            setAndBroadcastActiveSource(message, physicalAddress);
+        }
+        handleRoutingChangeAndInformation(physicalAddress, message);
+        return true;
+    }
+
     // Method to switch Input with the new Active Path.
     // All the devices with Switch functionality should implement this.
     protected void switchInputOnReceivingNewActivePath(int physicalAddress) {
+        // do nothing
+    }
+
+    // Source device with Switch functionality should implement this method.
+    // TODO(): decide which type will handle the routing when multi device type is supported
+    protected void handleRoutingChangeAndInformation(int physicalAddress, HdmiCecMessage message) {
         // do nothing
     }
 

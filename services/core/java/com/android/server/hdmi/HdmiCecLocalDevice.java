@@ -30,6 +30,7 @@ import android.view.KeyEvent;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.hdmi.Constants.LocalActivePort;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
@@ -1051,7 +1052,7 @@ abstract class HdmiCecLocalDevice {
      * <p>This check assumes target address is valid.
      * @param targetPhysicalAddress is the physical address of the target device
      * @return
-     * <p>If the target device is under the current device, return the port number of current device
+     * If the target device is under the current device, return the port number of current device
      * that the target device is connected to.
      *
      * <p>If the target device has the same physical address as the current device, return
@@ -1084,5 +1085,28 @@ abstract class HdmiCecLocalDevice {
             return port;
         }
         return TARGET_NOT_UNDER_LOCAL_DEVICE;
+    }
+
+    /** Calculates the physical address for {@code activePortId}.
+     *
+     * <p>This method assumes current device physical address is valid.
+     * <p>If the current device is already the leaf of the whole CEC system
+     * and can't have devices under it, will return its own physical address.
+     *
+     * @param activePortId is the local active port Id
+     * @return the calculated physical address of the port
+     */
+    protected int getActivePathOnSwitchFromActivePortId(@LocalActivePort int activePortId) {
+        int myPhysicalAddress = mService.getPhysicalAddress();
+        int finalMask = activePortId << 8;
+        int mask;
+        for (mask = 0x0F00; mask > 0x000F;  mask >>= 4) {
+            if ((myPhysicalAddress & mask) == 0)  {
+                break;
+            } else {
+                finalMask >>= 4;
+            }
+        }
+        return finalMask | myPhysicalAddress;
     }
 }
