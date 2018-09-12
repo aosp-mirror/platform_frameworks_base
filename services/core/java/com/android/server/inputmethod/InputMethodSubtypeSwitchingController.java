@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.inputmethod;
+package com.android.server.inputmethod;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -27,7 +27,7 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.inputmethod.InputMethodUtils.InputMethodSettings;
+import com.android.server.inputmethod.InputMethodUtils.InputMethodSettings;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,13 +41,11 @@ import java.util.TreeMap;
 
 /**
  * InputMethodSubtypeSwitchingController controls the switching behavior of the subtypes.
- * <p>
- * This class is designed to be used from and only from
- * {@link com.android.server.InputMethodManagerService} by using
- * {@link com.android.server.InputMethodManagerService#mMethodMap} as a global lock.
- * </p>
+ *
+ * <p>This class is designed to be used from and only from {@link InputMethodManagerService} by
+ * using {@link InputMethodManagerService#mMethodMap} as a global lock.</p>
  */
-public class InputMethodSubtypeSwitchingController {
+final class InputMethodSubtypeSwitchingController {
     private static final String TAG = InputMethodSubtypeSwitchingController.class.getSimpleName();
     private static final boolean DEBUG = false;
     private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;

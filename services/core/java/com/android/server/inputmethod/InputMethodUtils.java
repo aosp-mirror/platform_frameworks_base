@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.inputmethod;
+package com.android.server.inputmethod;
 
 import static android.view.inputmethod.InputMethodManager.CONTROL_WINDOW_IS_TEXT_EDITOR;
 import static android.view.inputmethod.InputMethodManager.CONTROL_WINDOW_VIEW_HAS_FOCUS;
@@ -53,10 +53,14 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * InputMethodManagerUtils contains some static methods that provides IME informations.
- * This methods are supposed to be used in both the framework and the Settings application.
+ * This class provides random static utility methods for {@link InputMethodManagerService} and its
+ * utility classes.
+ *
+ * <p>This class is intentionally package-private.  Utility methods here are tightly coupled with
+ * implementation details in {@link InputMethodManagerService}.  Hence this class is not suitable
+ * for other components to directly use.</p>
  */
-public class InputMethodUtils {
+final class InputMethodUtils {
     public static final boolean DEBUG = false;
     public static final int NOT_A_SUBTYPE_ID = -1;
     public static final String SUBTYPE_MODE_ANY = null;

@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.inputmethod;
-
-import com.android.internal.annotations.VisibleForTesting;
+package com.android.server.inputmethod;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -31,9 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-public final class LocaleUtils {
-
-    @VisibleForTesting
+final class LocaleUtils {
     public interface LocaleExtractor<T> {
         @Nullable
         Locale get(@Nullable T source);
@@ -149,7 +145,6 @@ public final class LocaleUtils {
      * @param dest Destination into which the filtered items will be added.
      * @param <T> Type of the data items.
      */
-    @VisibleForTesting
     public static <T> void filterByLanguage(
             @NonNull List<T> sources,
             @NonNull LocaleExtractor<T> extractor,
