@@ -41,7 +41,6 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.R;
-import com.android.internal.os.SomeArgs;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
@@ -133,6 +132,12 @@ public class BiometricPromptService extends SystemService {
             // AppOps and foreground check.
             checkPermission();
 
+            if (token == null || receiver == null || opPackageName == null || bundle == null
+                    || dialogReceiver == null) {
+                Slog.e(TAG, "Unable to authenticate, one or more null arguments");
+                return;
+            }
+
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int callingUserId = UserHandle.getCallingUserId();
@@ -165,6 +170,11 @@ public class BiometricPromptService extends SystemService {
         public void cancelAuthentication(IBinder token, String opPackageName)
                 throws RemoteException {
             checkPermission();
+
+            if (token == null || opPackageName == null) {
+                Slog.e(TAG, "Unable to cancel, one or more null arguments");
+                return;
+            }
 
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
