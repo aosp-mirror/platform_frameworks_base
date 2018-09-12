@@ -46,6 +46,11 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
     sk_sp<SkImage> layerImage;
     const int layerWidth = layer->getWidth();
     const int layerHeight = layer->getHeight();
+    const int bufferWidth = layer->getBufferWidth();
+    const int bufferHeight = layer->getBufferHeight();
+    if (bufferWidth <= 0 || bufferHeight <=0) {
+        return false;
+    }
     if (layer->getApi() == Layer::Api::OpenGL) {
         GlLayer* glLayer = static_cast<GlLayer*>(layer);
         GrGLTextureInfo externalTexture;
@@ -57,7 +62,7 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         // this is anticipated to have is that for some format types if we are not bound as an OES
         // texture we may get invalid results for SKP capture if we read back the texture.
         externalTexture.fFormat = GL_RGBA8;
-        GrBackendTexture backendTexture(layerWidth, layerHeight, GrMipMapped::kNo, externalTexture);
+        GrBackendTexture backendTexture(bufferWidth, bufferHeight, GrMipMapped::kNo, externalTexture);
         layerImage = SkImage::MakeFromTexture(context, backendTexture, kTopLeft_GrSurfaceOrigin,
                                               kPremul_SkAlphaType, nullptr);
     } else {
@@ -76,7 +81,7 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         flipV.setAll(1, 0, 0, 0, -1, 1, 0, 0, 1);
         textureMatrixInv.preConcat(flipV);
         textureMatrixInv.preScale(1.0f / layerWidth, 1.0f / layerHeight);
-        textureMatrixInv.postScale(layerWidth, layerHeight);
+        textureMatrixInv.postScale(bufferWidth, bufferHeight);
         SkMatrix textureMatrix;
         if (!textureMatrixInv.invert(&textureMatrix)) {
             textureMatrix = textureMatrixInv;
@@ -95,6 +100,9 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         paint.setAlpha(layer->getAlpha());
         paint.setBlendMode(layer->getMode());
         paint.setColorFilter(layer->getColorSpaceWithFilter());
+        if (layer->getForceFilter()) {
+            paint.setFilterQuality(kLow_SkFilterQuality);
+        }
 
         const bool nonIdentityMatrix = !matrix.isIdentity();
         if (nonIdentityMatrix) {
