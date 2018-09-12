@@ -1005,7 +1005,11 @@ android_media_MediaPlayer2_invoke(JNIEnv *env, jobject thiz, jbyteArray requestD
     PlayerMessage response;
     request.ParseFromArray(pData, pDataLen);
 
-    media_player->invoke(request, &response);
+    process_media_player_call( env, thiz, media_player->invoke(request, &response),
+            "java.lang.RuntimeException", NULL );
+    if (env->ExceptionCheck()) {
+        return NULL;
+    }
 
     int size = response.ByteSize();
     jbyte* temp = new jbyte[size];
