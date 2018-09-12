@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.textservices;
 
 import static android.view.textservice.TextServicesManager.DISABLE_PER_PROFILE_SPELL_CHECKER;
 
@@ -29,6 +29,7 @@ import com.android.internal.textservice.ITextServicesManager;
 import com.android.internal.textservice.ITextServicesSessionListener;
 import com.android.internal.textservice.LazyIntToIntMap;
 import com.android.internal.util.DumpUtils;
+import com.android.server.SystemService;
 
 import org.xmlpull.v1.XmlPullParserException;
 
