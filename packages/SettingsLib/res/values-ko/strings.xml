@@ -135,7 +135,7 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"테더링"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"테더링 및 휴대용 핫스팟"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"모든 직장 앱"</string>
-    <string name="user_guest" msgid="8475274842845401871">"손님"</string>
+    <string name="user_guest" msgid="8475274842845401871">"게스트"</string>
     <string name="unknown" msgid="1592123443519355854">"알 수 없음"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"사용자: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"일부 기본값이 설정됨"</string>
