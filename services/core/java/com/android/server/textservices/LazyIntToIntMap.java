@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.internal.textservice;
+package com.android.server.textservices;
 
 import android.annotation.NonNull;
 import android.util.SparseIntArray;
-
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.function.IntUnaryOperator;
 
@@ -27,8 +25,7 @@ import java.util.function.IntUnaryOperator;
  * Simple int-to-int key-value-store that is to be lazily initialized with the given
  * {@link IntUnaryOperator}.
  */
-@VisibleForTesting
-public final class LazyIntToIntMap {
+final class LazyIntToIntMap {
 
     private final SparseIntArray mMap = new SparseIntArray();
 

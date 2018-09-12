@@ -27,7 +27,6 @@ import com.android.internal.textservice.ISpellCheckerSession;
 import com.android.internal.textservice.ISpellCheckerSessionListener;
 import com.android.internal.textservice.ITextServicesManager;
 import com.android.internal.textservice.ITextServicesSessionListener;
-import com.android.internal.textservice.LazyIntToIntMap;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
 
