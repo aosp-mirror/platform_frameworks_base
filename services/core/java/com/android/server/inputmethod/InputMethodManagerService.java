@@ -15,6 +15,7 @@
 
 package com.android.server.inputmethod;
 
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -65,6 +66,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
+import android.hardware.display.DisplayManagerInternal;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Binder;
@@ -102,6 +104,8 @@ import android.util.Printer;
 import android.util.Slog;
 import android.util.Xml;
 import android.view.ContextThemeWrapper;
+import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.LayoutInflater;
@@ -392,6 +396,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     };
 
     private void restoreNonVrImeFromSettingsNoCheck() {
+        mIsVrImeStarted = false;
         // switch back to non-VR InputMethod from settings.
         synchronized (mMethodMap) {
             final String lastInputId = mSettings.getSelectedInputMethod();
@@ -593,6 +598,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * The displayId of current active input method.
      */
     int mCurTokenDisplayId = INVALID_DISPLAY;
+
+    final ImeDisplayValidator mImeDisplayValidator;
+
+    /** True if VR IME started by {@link #startVrInputMethodNoCheck}. */
+    boolean mIsVrImeStarted;
 
     /**
      * If non-null, this is the input method service we are currently connected
@@ -992,6 +1002,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // set this is as current inputMethod without updating settings.
                     setInputMethodEnabledLocked(info.getId(), true);
                     setInputMethodLocked(info.getId(), NOT_A_SUBTYPE_ID);
+                    mIsVrImeStarted = true;
                     break;
                 }
             }
@@ -1388,6 +1399,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
+        final DisplayManagerInternal displayManagerInternal = LocalServices.getService(
+                DisplayManagerInternal.class);
+        mImeDisplayValidator = (displayId) -> {
+            final DisplayInfo displayInfo = displayManagerInternal.getDisplayInfo(displayId);
+            return displayInfo != null
+                    && (displayInfo.flags & Display.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0;
+        };
         mCaller = new HandlerCaller(context, null, new HandlerCaller.Callback() {
             @Override
             public void executeMessage(Message msg) {
@@ -1913,8 +1931,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // Wait, the client no longer has access to the display.
             return InputBindResult.INVALID_DISPLAY_ID;
         }
-        // Now that the display ID is validated, we trust cs.selfReportedDisplayId for this session.
-        final int displayIdToShowIme = cs.selfReportedDisplayId;
+        // Compute the final shown display ID with validated cs.selfReportedDisplayId for this
+        // session & other conditions.
+        final int displayIdToShowIme = computeImeDisplayIdForTarget(
+                cs.selfReportedDisplayId, mIsVrImeStarted, mImeDisplayValidator);
 
         if (mCurClient != cs) {
             // Was the keyguard locked when switching over to the new client?
@@ -2012,6 +2032,35 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mCurIntent = null;
         Slog.w(TAG, "Failure connecting to input method service: " + mCurIntent);
         return InputBindResult.IME_NOT_CONNECTED;
+    }
+
+    @FunctionalInterface
+    interface ImeDisplayValidator {
+        boolean displayCanShowIme(int displayId);
+    }
+
+    /**
+     * Find the display where the IME should be shown.
+     *
+     * @param displayId the ID of the display where the IME client target is.
+     * @param isVrImeStarted {@code true} if VR IME started, {@code false} otherwise.
+     * @param checker instance of {@link ImeDisplayValidator} which is used for
+     *                checking display config to adjust the final target display.
+     * @return The ID of the display where the IME should be shown.
+     */
+    static int computeImeDisplayIdForTarget(int displayId, boolean isVrImeStarted,
+            @NonNull ImeDisplayValidator checker) {
+        // For VR IME, we always show in default display.
+        if (isVrImeStarted) {
+            return DEFAULT_DISPLAY;
+        }
+        if (displayId == DEFAULT_DISPLAY || displayId == INVALID_DISPLAY) {
+            // We always assume that the default display id suitable to show the IME window.
+            return DEFAULT_DISPLAY;
+        }
+        // Show IME in default display when the display with IME target doesn't support system
+        // decorations.
+        return checker.displayCanShowIme(displayId) ? displayId : DEFAULT_DISPLAY;
     }
 
     @Override
