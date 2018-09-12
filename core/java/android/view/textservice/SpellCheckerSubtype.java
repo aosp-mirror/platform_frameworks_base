@@ -25,7 +25,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Slog;
 
-import com.android.internal.inputmethod.LocaleUtils;
+import com.android.internal.inputmethod.InputMethodUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -228,7 +228,7 @@ public final class SpellCheckerSubtype implements Parcelable {
         if (!TextUtils.isEmpty(mSubtypeLanguageTag)) {
             return Locale.forLanguageTag(mSubtypeLanguageTag);
         }
-        return LocaleUtils.constructLocaleFromString(mSubtypeLocale);
+        return InputMethodUtils.constructLocaleFromString(mSubtypeLocale);
     }
 
     /**
