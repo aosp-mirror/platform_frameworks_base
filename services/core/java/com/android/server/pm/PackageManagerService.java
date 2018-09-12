@@ -545,6 +545,12 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final long DEFAULT_VERIFICATION_TIMEOUT = 10 * 1000;
 
     /**
+     * The default duration to wait for rollback to be enabled in
+     * milliseconds.
+     */
+    private static final long DEFAULT_ENABLE_ROLLBACK_TIMEOUT = 10 * 1000;
+
+    /**
      * The default response for package verification timeout.
      *
      * This can be either PackageManager.VERIFICATION_ALLOW or
@@ -864,6 +870,9 @@ public class PackageManagerService extends IPackageManager.Stub
     /** List of packages waiting for verification. */
     final SparseArray<PackageVerificationState> mPendingVerification = new SparseArray<>();
 
+    /** List of packages waiting for rollback to be enabled. */
+    final SparseArray<InstallParams> mPendingEnableRollback = new SparseArray<>();
+
     final PackageInstallerService mInstallerService;
 
     final ArtManagerService mArtManagerService;
@@ -883,6 +892,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     /** Token for keys in mPendingVerification. */
     private int mPendingVerificationToken = 0;
+
+    /** Token for keys in mPendingEnableRollback. */
+    private int mPendingEnableRollbackToken = 0;
 
     volatile boolean mSystemReady;
     volatile boolean mSafeMode;
@@ -1255,6 +1267,8 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int INTENT_FILTER_VERIFIED = 18;
     static final int WRITE_PACKAGE_LIST = 19;
     static final int INSTANT_APP_RESOLUTION_PHASE_TWO = 20;
+    static final int ENABLE_ROLLBACK_STATUS = 21;
+    static final int ENABLE_ROLLBACK_TIMEOUT = 22;
 
     static final int WRITE_SETTINGS_DELAY = 10*1000;  // 10 seconds
 
@@ -1478,13 +1492,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     final PackageVerificationState state = mPendingVerification.get(verificationId);
 
                     if ((state != null) && !state.timeoutExtended()) {
-                        final InstallArgs args = state.getInstallArgs();
+                        final InstallParams params = state.getInstallParams();
+                        final InstallArgs args = params.mArgs;
                         final Uri originUri = Uri.fromFile(args.origin.resolvedFile);
 
                         Slog.i(TAG, "Verification timed out for " + originUri);
                         mPendingVerification.remove(verificationId);
-
-                        int ret = PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
 
                         final UserHandle user = args.getUser();
                         if (getDefaultVerificationResponse(user)
@@ -1494,16 +1507,16 @@ public class PackageManagerService extends IPackageManager.Stub
                                     PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT);
                             broadcastPackageVerified(verificationId, originUri,
                                     PackageManager.VERIFICATION_ALLOW, user);
-                            ret = args.copyApk();
                         } else {
                             broadcastPackageVerified(verificationId, originUri,
                                     PackageManager.VERIFICATION_REJECT, user);
+                            params.setReturnCode(
+                                    PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE);
                         }
 
                         Trace.asyncTraceEnd(
                                 TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
-
-                        processPendingInstall(args, ret);
+                        params.handleVerificationFinished();
                     }
                     break;
                 }
@@ -1523,22 +1536,22 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (state.isVerificationComplete()) {
                         mPendingVerification.remove(verificationId);
 
-                        final InstallArgs args = state.getInstallArgs();
+                        final InstallParams params = state.getInstallParams();
+                        final InstallArgs args = params.mArgs;
                         final Uri originUri = Uri.fromFile(args.origin.resolvedFile);
 
-                        int ret;
                         if (state.isInstallAllowed()) {
                             broadcastPackageVerified(verificationId, originUri,
-                                    response.code, state.getInstallArgs().getUser());
-                            ret = args.copyApk();
+                                    response.code, args.getUser());
                         } else {
-                            ret = PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
+                            params.setReturnCode(
+                                    PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE);
                         }
 
                         Trace.asyncTraceEnd(
                                 TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
 
-                        processPendingInstall(args, ret);
+                        params.handleVerificationFinished();
                     }
 
                     break;
@@ -1598,6 +1611,49 @@ public class PackageManagerService extends IPackageManager.Stub
                             (InstantAppRequest) msg.obj,
                             mInstantAppInstallerActivity,
                             mHandler);
+                    break;
+                }
+                case ENABLE_ROLLBACK_STATUS: {
+                    final int enableRollbackToken = msg.arg1;
+                    final int enableRollbackCode = msg.arg2;
+                    InstallParams params = mPendingEnableRollback.get(enableRollbackToken);
+                    if (params == null) {
+                        Slog.w(TAG, "Invalid rollback enabled token "
+                                + enableRollbackToken + " received");
+                        break;
+                    }
+
+                    mPendingEnableRollback.remove(enableRollbackToken);
+
+                    if (enableRollbackCode != PackageManagerInternal.ENABLE_ROLLBACK_SUCCEEDED) {
+                        final InstallArgs args = params.mArgs;
+                        final Uri originUri = Uri.fromFile(args.origin.resolvedFile);
+                        Slog.w(TAG, "Failed to enable rollback for " + originUri);
+                        Slog.w(TAG, "Continuing with installation of " + originUri);
+                    }
+
+                    Trace.asyncTraceEnd(
+                            TRACE_TAG_PACKAGE_MANAGER, "enable_rollback", enableRollbackToken);
+
+                    params.handleRollbackEnabled();
+                    break;
+                }
+                case ENABLE_ROLLBACK_TIMEOUT: {
+                    final int enableRollbackToken = msg.arg1;
+                    final InstallParams params = mPendingEnableRollback.get(enableRollbackToken);
+                    if (params != null) {
+                        final InstallArgs args = params.mArgs;
+                        final Uri originUri = Uri.fromFile(args.origin.resolvedFile);
+
+                        Slog.w(TAG, "Enable rollback timed out for " + originUri);
+                        mPendingEnableRollback.remove(enableRollbackToken);
+
+                        Slog.w(TAG, "Continuing with installation of " + originUri);
+                        Trace.asyncTraceEnd(
+                                TRACE_TAG_PACKAGE_MANAGER, "enable_rollback", enableRollbackToken);
+                        params.handleRollbackEnabled();
+                    }
+                    break;
                 }
             }
         }
@@ -13220,6 +13276,13 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    private void setEnableRollbackCode(int token, int enableRollbackCode) {
+        final Message msg = mHandler.obtainMessage(ENABLE_ROLLBACK_STATUS);
+        msg.arg1 = token;
+        msg.arg2 = enableRollbackCode;
+        mHandler.sendMessage(msg);
+    }
+
     @Override
     public void finishPackageInstall(int token, boolean didLaunch) {
         enforceSystemOrRoot("Only the system is allowed to finish installs");
@@ -13871,7 +13934,7 @@ public class PackageManagerService extends IPackageManager.Stub
         @NonNull
         private final ArrayList<InstallParams> mChildParams;
         @NonNull
-        private final Map<InstallArgs, Integer> mVerifiedState;
+        private final Map<InstallArgs, Integer> mCurrentState;
 
         MultiPackageInstallParams(
                 @NonNull UserHandle user,
@@ -13887,7 +13950,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 childParams.mParentInstallParams = this;
                 this.mChildParams.add(childParams);
             }
-            this.mVerifiedState = new ArrayMap<>(mChildParams.size());
+            this.mCurrentState = new ArrayMap<>(mChildParams.size());
         }
 
         @Override
@@ -13913,12 +13976,12 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         void tryProcessInstallRequest(InstallArgs args, int currentStatus) {
-            mVerifiedState.put(args, currentStatus);
+            mCurrentState.put(args, currentStatus);
             boolean success = true;
-            if (mVerifiedState.size() != mChildParams.size()) {
+            if (mCurrentState.size() != mChildParams.size()) {
                 return;
             }
-            for (Integer status : mVerifiedState.values()) {
+            for (Integer status : mCurrentState.values()) {
                 if (status == PackageManager.INSTALL_UNKNOWN) {
                     return;
                 } else if (status != PackageManager.INSTALL_SUCCEEDED) {
@@ -13926,8 +13989,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     break;
                 }
             }
-            final List<InstallRequest> installRequests = new ArrayList<>(mVerifiedState.size());
-            for (Map.Entry<InstallArgs, Integer> entry : mVerifiedState.entrySet()) {
+            final List<InstallRequest> installRequests = new ArrayList<>(mCurrentState.size());
+            for (Map.Entry<InstallArgs, Integer> entry : mCurrentState.entrySet()) {
                 installRequests.add(new InstallRequest(entry.getKey(),
                         createPackageInstalledInfo(entry.getValue())));
             }
@@ -13944,6 +14007,8 @@ public class PackageManagerService extends IPackageManager.Stub
         int installFlags;
         final String installerPackageName;
         final String volumeUuid;
+        private boolean mVerificationCompleted;
+        private boolean mEnableRollbackCompleted;
         private InstallArgs mArgs;
         int mRet;
         final String packageAbiOverride;
@@ -14193,6 +14258,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             final InstallArgs args = createInstallArgs(this);
+            mVerificationCompleted = true;
+            mEnableRollbackCompleted = true;
             mArgs = args;
 
             if (ret == PackageManager.INSTALL_SUCCEEDED) {
@@ -14272,7 +14339,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
 
                     final PackageVerificationState verificationState = new PackageVerificationState(
-                            requiredUid, args);
+                            requiredUid, this);
 
                     mPendingVerification.append(verificationId, verificationState);
 
@@ -14334,25 +14401,80 @@ public class PackageManagerService extends IPackageManager.Stub
 
                         /*
                          * We don't want the copy to proceed until verification
-                         * succeeds, so null out this field.
+                         * succeeds.
                          */
-                        mArgs = null;
+                        mVerificationCompleted = false;
                     }
-                } else {
-                    /*
-                     * No package verification is enabled, so immediately start
-                     * the remote call to initiate copy using temporary file.
-                     */
-                    ret = args.copyApk();
+                }
+
+                if ((installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
+                    // TODO(ruhler) b/112431924: Don't do this in case of 'move'?
+                    final int enableRollbackToken = mPendingEnableRollbackToken++;
+                    Trace.asyncTraceBegin(
+                            TRACE_TAG_PACKAGE_MANAGER, "enable_rollback", enableRollbackToken);
+                    mPendingEnableRollback.append(enableRollbackToken, this);
+
+                    // TODO(ruhler) b/112431924: What user? Test for multi-user.
+                    Intent enableRollbackIntent = new Intent(Intent.ACTION_PACKAGE_ENABLE_ROLLBACK);
+                    enableRollbackIntent.putExtra(
+                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN,
+                            enableRollbackToken);
+                    enableRollbackIntent.putExtra(
+                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALL_FLAGS,
+                            installFlags);
+                    enableRollbackIntent.setDataAndType(Uri.fromFile(new File(origin.resolvedPath)),
+                            PACKAGE_MIME_TYPE);
+                    enableRollbackIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                    mContext.sendOrderedBroadcastAsUser(enableRollbackIntent, getUser(),
+                            android.Manifest.permission.PACKAGE_ROLLBACK_AGENT,
+                            new BroadcastReceiver() {
+                                @Override
+                                public void onReceive(Context context, Intent intent) {
+                                    // TODO(ruhler) b/112431924 Have a configurable setting to
+                                    // allow changing the timeout and fall back to the default
+                                    // if no such specified.
+                                    final Message msg = mHandler.obtainMessage(
+                                            ENABLE_ROLLBACK_TIMEOUT);
+                                    msg.arg1 = enableRollbackToken;
+                                    mHandler.sendMessageDelayed(msg,
+                                            DEFAULT_ENABLE_ROLLBACK_TIMEOUT);
+                                }
+                            }, null, 0, null, null);
+
+                    mEnableRollbackCompleted = false;
                 }
             }
 
             mRet = ret;
         }
 
+        void setReturnCode(int ret) {
+            if (mRet == PackageManager.INSTALL_SUCCEEDED) {
+                // Only update mRet if it was previously INSTALL_SUCCEEDED to
+                // ensure we do not overwrite any previous failure results.
+                mRet = ret;
+            }
+        }
+
+        void handleVerificationFinished() {
+            mVerificationCompleted = true;
+            handleReturnCode();
+        }
+
+        void handleRollbackEnabled() {
+            // TODO(ruhler) b/112431924: Consider halting the install if we
+            // couldn't enable rollback.
+            mEnableRollbackCompleted = true;
+            handleReturnCode();
+        }
+
         @Override
         void handleReturnCode() {
-            if (mArgs != null) {
+            if (mVerificationCompleted && mEnableRollbackCompleted) {
+                if (mRet == PackageManager.INSTALL_SUCCEEDED) {
+                    mRet = mArgs.copyApk();
+                }
                 processPendingInstall(mArgs, mRet);
             }
         }
@@ -23449,6 +23571,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 return setting.getEnabled(userId);
             }
+        }
+
+        @Override
+        public void setEnableRollbackCode(int token, int enableRollbackCode) {
+            PackageManagerService.this.setEnableRollbackCode(token, enableRollbackCode);
         }
     }
 

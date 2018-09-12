@@ -3122,6 +3122,7 @@ public abstract class Context {
             APPWIDGET_SERVICE,
             //@hide: VOICE_INTERACTION_MANAGER_SERVICE,
             //@hide: BACKUP_SERVICE,
+            ROLLBACK_SERVICE,
             DROPBOX_SERVICE,
             //@hide: DEVICE_IDLE_CONTROLLER,
             DEVICE_POLICY_SERVICE,
@@ -3991,6 +3992,17 @@ public abstract class Context {
      */
     @SystemApi
     public static final String BACKUP_SERVICE = "backup";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.content.rollback.RollbackManager} for communicating
+     * with the rollback manager
+     *
+     * @see #getSystemService(String)
+     * @hide TODO(ruhler): hidden, @TestApi until we decide on public vs. @SystemApi.
+     */
+    @TestApi
+    public static final String ROLLBACK_SERVICE = "rollback";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
