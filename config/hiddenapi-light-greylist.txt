@@ -2209,7 +2209,6 @@ Lcom/android/internal/textservice/ITextServicesManager$Stub$Proxy;-><init>(Landr
 Lcom/android/internal/util/HexDump;->toHexString([BZ)Ljava/lang/String;
 Lcom/android/internal/view/BaseIWindow;-><init>()V
 Lcom/android/internal/view/IInputMethodManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
-Lcom/android/internal/view/IInputMethodManager$Stub$Proxy;->getEnabledInputMethodList()Ljava/util/List;
 Lcom/android/internal/view/IInputMethodManager$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/view/IInputMethodManager;
 Lcom/android/internal/view/IInputMethodSession$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/view/IInputMethodSession;
 Lcom/android/internal/widget/ILockSettings$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/widget/ILockSettings;
