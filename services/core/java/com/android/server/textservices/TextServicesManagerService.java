@@ -20,7 +20,7 @@ import static android.view.textservice.TextServicesManager.DISABLE_PER_PROFILE_S
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.inputmethod.InputMethodUtils;
+import com.android.internal.inputmethod.SubtypeLocaleUtils;
 import com.android.internal.textservice.ISpellCheckerService;
 import com.android.internal.textservice.ISpellCheckerServiceCallback;
 import com.android.internal.textservice.ISpellCheckerSession;
@@ -475,7 +475,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 final int subtypeCount = info.getSubtypeCount();
                 for (int subtypeIndex = 0; subtypeIndex < subtypeCount; ++subtypeIndex) {
                     final SpellCheckerSubtype subtype = info.getSubtypeAt(subtypeIndex);
-                    final Locale subtypeLocale = InputMethodUtils.constructLocaleFromString(
+                    final Locale subtypeLocale = SubtypeLocaleUtils.constructLocaleFromString(
                             subtype.getLocale());
                     if (locale.equals(subtypeLocale)) {
                         // TODO: We may have more spell checkers that fall into this category.
