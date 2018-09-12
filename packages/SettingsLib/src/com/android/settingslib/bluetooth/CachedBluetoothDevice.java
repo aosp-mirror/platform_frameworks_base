@@ -78,12 +78,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     private final static String MESSAGE_REJECTION_COUNT_PREFS_NAME = "bluetooth_message_reject";
 
-    /**
-     * When we connect to multiple profiles, we only want to display a single
-     * error even if they all fail. This tracks that state.
-     */
-    private boolean mIsConnectingErrorPossible;
-
     public long getHiSyncId() {
         return mHiSyncId;
     }
@@ -230,9 +224,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             return;
         }
 
-        // Reset the only-show-one-error-dialog tracking variable
-        mIsConnectingErrorPossible = true;
-
         int preferredProfiles = 0;
         for (LocalBluetoothProfile profile : mProfiles) {
             if (connectAllProfiles ? profile.isConnectable() : profile.isAutoConnectable()) {
@@ -253,8 +244,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         if (!ensurePaired()) {
             return;
         }
-        // Reset the only-show-one-error-dialog tracking variable
-        mIsConnectingErrorPossible = true;
 
         for (LocalBluetoothProfile profile : mProfiles) {
             if (profile.isAutoConnectable()) {
@@ -271,8 +260,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      */
     public void connectProfile(LocalBluetoothProfile profile) {
         mConnectAttempted = SystemClock.elapsedRealtime();
-        // Reset the only-show-one-error-dialog tracking variable
-        mIsConnectingErrorPossible = true;
         connectInt(profile);
         // Refresh the UI based on profile.connect() call
         refresh();
