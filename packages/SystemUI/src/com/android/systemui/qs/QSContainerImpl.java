@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -91,15 +92,24 @@ public class QSContainerImpl extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        // Since we control our own bottom, be whatever size we want.
-        // Otherwise the QSPanel ends up with 0 height when the window is only the
-        // size of the status bar.
-        mQSPanel.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(
-                MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.UNSPECIFIED));
+        // QSPanel will show as many rows as it can (up to TileLayout.MAX_ROWS) such that the
+        // bottom and footer are inside the screen.
+        Configuration config = getResources().getConfiguration();
+        boolean navBelow = config.smallestScreenWidthDp >= 600
+                || config.orientation != Configuration.ORIENTATION_LANDSCAPE;
+        MarginLayoutParams layoutParams = (MarginLayoutParams) mQSPanel.getLayoutParams();
+
+        // The footer is pinned to the bottom of QSPanel (same bottoms), therefore we don't need to
+        // subtract its height. We do not care if the collapsed notifications fit in the screen.
+        int maxQs = getDisplayHeight() - layoutParams.topMargin - layoutParams.bottomMargin
+                - getPaddingBottom();
+        if (navBelow) {
+            maxQs -= getResources().getDimensionPixelSize(R.dimen.navigation_bar_height);
+        }
+        mQSPanel.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(maxQs, MeasureSpec.AT_MOST));
         int width = mQSPanel.getMeasuredWidth();
-        LayoutParams layoutParams = (LayoutParams) mQSPanel.getLayoutParams();
         int height = layoutParams.topMargin + layoutParams.bottomMargin
-                + mQSPanel.getMeasuredHeight();
+                + mQSPanel.getMeasuredHeight() + getPaddingBottom();
         super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
 
