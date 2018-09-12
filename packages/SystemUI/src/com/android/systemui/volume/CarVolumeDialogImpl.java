@@ -356,10 +356,11 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     if (supplementalIconId != 0) {
       Drawable supplementalIcon = mContext.getResources().getDrawable(supplementalIconId);
       supplementalIcon.mutate().setTint(color);
-      listItem.setSupplementalIcon(supplementalIcon, true,
-          supplementalIconOnClickListener);
+      listItem.setSupplementalIcon(supplementalIcon, true);
+      listItem.setSupplementalIconListener(supplementalIconOnClickListener);
     } else {
       listItem.setSupplementalEmptyIcon(true);
+      listItem.setSupplementalIconListener(null);
     }
 
     mVolumeLineItems.add(listItem);
