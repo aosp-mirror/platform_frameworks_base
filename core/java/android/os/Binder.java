@@ -773,6 +773,7 @@ public class Binder implements IBinder {
             if (tracingEnabled) {
                 Trace.traceBegin(Trace.TRACE_TAG_ALWAYS, getClass().getName() + ":" + code);
             }
+            ThreadLocalWorkSourceUid.set(Binder.getCallingUid());
             res = onTransact(code, data, reply, flags);
         } catch (RemoteException|RuntimeException e) {
             if (observer != null) {
@@ -793,6 +794,7 @@ public class Binder implements IBinder {
             }
             res = true;
         } finally {
+            ThreadLocalWorkSourceUid.clear();
             if (tracingEnabled) {
                 Trace.traceEnd(Trace.TRACE_TAG_ALWAYS);
             }

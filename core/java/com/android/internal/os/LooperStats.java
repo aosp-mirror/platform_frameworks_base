@@ -176,7 +176,8 @@ public class LooperStats implements Looper.Observer {
             }
         }
 
-        if (entry.handler.getClass() != msg.getTarget().getClass()
+        if (entry.workSourceUid != msg.workSourceUid
+                || entry.handler.getClass() != msg.getTarget().getClass()
                 || entry.handler.getLooper().getThread() != msg.getTarget().getLooper().getThread()
                 || entry.isInteractive != isInteractive) {
             // If a hash collision happened, track totals under a single entry.
@@ -210,6 +211,7 @@ public class LooperStats implements Looper.Observer {
     }
 
     private static class Entry {
+        public final int workSourceUid;
         public final Handler handler;
         public final String messageName;
         public final boolean isInteractive;
@@ -222,12 +224,14 @@ public class LooperStats implements Looper.Observer {
         public long maxCpuUsageMicro;
 
         Entry(Message msg, boolean isInteractive) {
+            this.workSourceUid = msg.workSourceUid;
             this.handler = msg.getTarget();
             this.messageName = handler.getMessageName(msg);
             this.isInteractive = isInteractive;
         }
 
         Entry(String specialEntryName) {
+            this.workSourceUid = Message.UID_NONE;
             this.messageName = specialEntryName;
             this.handler = null;
             this.isInteractive = false;
@@ -245,6 +249,7 @@ public class LooperStats implements Looper.Observer {
 
         static int idFor(Message msg, boolean isInteractive) {
             int result = 7;
+            result = 31 * result + msg.workSourceUid;
             result = 31 * result + msg.getTarget().getLooper().getThread().hashCode();
             result = 31 * result + msg.getTarget().getClass().hashCode();
             result = 31 * result + (isInteractive ? 1231 : 1237);
@@ -258,6 +263,7 @@ public class LooperStats implements Looper.Observer {
 
     /** Aggregated data of Looper message dispatching in the in the current process. */
     public static class ExportedEntry {
+        public final int workSourceUid;
         public final String handlerClassName;
         public final String threadName;
         public final String messageName;
@@ -271,6 +277,7 @@ public class LooperStats implements Looper.Observer {
         public final long maxCpuUsageMicros;
 
         ExportedEntry(Entry entry) {
+            this.workSourceUid = entry.workSourceUid;
             if (entry.handler != null) {
                 this.handlerClassName = entry.handler.getClass().getName();
                 this.threadName = entry.handler.getLooper().getThread().getName();

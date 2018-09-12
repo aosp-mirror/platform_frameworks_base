@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.Message;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -74,14 +75,17 @@ public final class LooperStatsTest {
     public void testSingleMessageDispatched() {
         TestableLooperStats looperStats = new TestableLooperStats(1, 100);
 
+        Message message = mHandlerFirst.obtainMessage(1000);
+        message.workSourceUid = 1000;
         Object token = looperStats.messageDispatchStarting();
         looperStats.tickRealtime(100);
         looperStats.tickThreadTime(10);
-        looperStats.messageDispatched(token, mHandlerFirst.obtainMessage(1000));
+        looperStats.messageDispatched(token, message);
 
         List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
         assertThat(entries).hasSize(1);
         LooperStats.ExportedEntry entry = entries.get(0);
+        assertThat(entry.workSourceUid).isEqualTo(1000);
         assertThat(entry.threadName).isEqualTo("TestThread1");
         assertThat(entry.handlerClassName).isEqualTo(
                 "com.android.internal.os.LooperStatsTest$TestHandlerFirst");
@@ -100,15 +104,17 @@ public final class LooperStatsTest {
     public void testThrewException() {
         TestableLooperStats looperStats = new TestableLooperStats(1, 100);
 
+        Message message = mHandlerFirst.obtainMessage(7);
+        message.workSourceUid = 123;
         Object token = looperStats.messageDispatchStarting();
         looperStats.tickRealtime(100);
         looperStats.tickThreadTime(10);
-        looperStats.dispatchingThrewException(token, mHandlerFirst.obtainMessage(7),
-                new ArithmeticException());
+        looperStats.dispatchingThrewException(token, message, new ArithmeticException());
 
         List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
         assertThat(entries).hasSize(1);
         LooperStats.ExportedEntry entry = entries.get(0);
+        assertThat(entry.workSourceUid).isEqualTo(123);
         assertThat(entry.threadName).isEqualTo("TestThread1");
         assertThat(entry.handlerClassName).isEqualTo(
                 "com.android.internal.os.LooperStatsTest$TestHandlerFirst");
@@ -158,6 +164,7 @@ public final class LooperStatsTest {
 
         // Captures data for token4 call.
         LooperStats.ExportedEntry entry1 = entries.get(0);
+        assertThat(entry1.workSourceUid).isEqualTo(-1);
         assertThat(entry1.threadName).isEqualTo("TestThread1");
         assertThat(entry1.handlerClassName).isEqualTo("com.android.internal.os.LooperStatsTest$1");
         assertThat(entry1.messageName).isEqualTo("0x1" /* 1 in hex */);
@@ -171,6 +178,7 @@ public final class LooperStatsTest {
 
         // Captures data for token1 and token2 calls.
         LooperStats.ExportedEntry entry2 = entries.get(1);
+        assertThat(entry2.workSourceUid).isEqualTo(-1);
         assertThat(entry2.threadName).isEqualTo("TestThread1");
         assertThat(entry2.handlerClassName).isEqualTo(
                 "com.android.internal.os.LooperStatsTest$TestHandlerFirst");
@@ -185,6 +193,7 @@ public final class LooperStatsTest {
 
         // Captures data for token3 call.
         LooperStats.ExportedEntry entry3 = entries.get(2);
+        assertThat(entry3.workSourceUid).isEqualTo(-1);
         assertThat(entry3.threadName).isEqualTo("TestThread2");
         assertThat(entry3.handlerClassName).isEqualTo(
                 "com.android.internal.os.LooperStatsTest$TestHandlerSecond");

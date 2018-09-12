@@ -93,10 +93,12 @@ public class LooperStatsService extends Binder {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
         List<LooperStats.ExportedEntry> entries = mStats.getEntries();
         entries.sort(Comparator
-                .comparing((LooperStats.ExportedEntry entry) -> entry.threadName)
+                .comparing((LooperStats.ExportedEntry entry) -> entry.workSourceUid)
+                .thenComparing(entry -> entry.threadName)
                 .thenComparing(entry -> entry.handlerClassName)
                 .thenComparing(entry -> entry.messageName));
         String header = String.join(",", Arrays.asList(
+                "work_source_uid",
                 "thread_name",
                 "handler_class",
                 "message_name",
@@ -110,11 +112,11 @@ public class LooperStatsService extends Binder {
                 "exception_count"));
         pw.println(header);
         for (LooperStats.ExportedEntry entry : entries) {
-            pw.printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", entry.threadName,
-                    entry.handlerClassName, entry.messageName, entry.isInteractive,
-                    entry.messageCount, entry.recordedMessageCount, entry.totalLatencyMicros,
-                    entry.maxLatencyMicros, entry.cpuUsageMicros, entry.maxCpuUsageMicros,
-                    entry.exceptionCount);
+            pw.printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", entry.workSourceUid,
+                    entry.threadName, entry.handlerClassName, entry.messageName,
+                    entry.isInteractive, entry.messageCount, entry.recordedMessageCount,
+                    entry.totalLatencyMicros, entry.maxLatencyMicros, entry.cpuUsageMicros,
+                    entry.maxCpuUsageMicros, entry.exceptionCount);
         }
     }
 
