@@ -141,13 +141,6 @@ public final class BrightnessConfiguration implements Parcelable {
         private String mDescription;
 
         /**
-         * STOPSHIP remove when app has stopped using this.
-         * @hide
-         */
-        public Builder() {
-        }
-
-        /**
          * Constructs the builder with the control points for the brightness curve.
          *
          * Brightness curves must have strictly increasing ambient brightness values in lux and
@@ -159,24 +152,6 @@ public final class BrightnessConfiguration implements Parcelable {
          * @throws IllegalArgumentException if the nit levels are not monotonically increasing.
          */
         public Builder(float[] lux, float[] nits) {
-            setCurve(lux, nits);
-        }
-
-        /**
-         * Sets the control points for the brightness curve.
-         *
-         * Brightness curves must have strictly increasing ambient brightness values in lux and
-         * monotonically increasing display brightness values in nits. In addition, the initial
-         * control point must be 0 lux.
-         *
-         * @throws IllegalArgumentException if the initial control point is not at 0 lux.
-         * @throws IllegalArgumentException if the lux levels are not strictly increasing.
-         * @throws IllegalArgumentException if the nit levels are not monotonically increasing.
-         *
-         * STOPSHIP remove when app has stopped using this.
-         * @hide
-         */
-        public Builder setCurve(float[] lux, float[] nits) {
             Preconditions.checkNotNull(lux);
             Preconditions.checkNotNull(nits);
             if (lux.length == 0 || nits.length == 0) {
@@ -190,11 +165,10 @@ public final class BrightnessConfiguration implements Parcelable {
             }
             Preconditions.checkArrayElementsInRange(lux, 0, Float.MAX_VALUE, "lux");
             Preconditions.checkArrayElementsInRange(nits, 0, Float.MAX_VALUE, "nits");
-            checkMonotonic(lux, true/*strictly increasing*/, "lux");
+            checkMonotonic(lux, true /*strictly increasing*/, "lux");
             checkMonotonic(nits, false /*strictly increasing*/, "nits");
             mCurveLux = lux;
             mCurveNits = nits;
-            return this;
         }
 
         /**
