@@ -33,7 +33,7 @@ class BaseErrorDialog extends AlertDialog {
     private boolean mConsuming = true;
 
     public BaseErrorDialog(Context context) {
-        super(context, com.android.internal.R.style.Theme_Dialog_AppError);
+        super(context, com.android.internal.R.style.Theme_DeviceDefault_Dialog_AppError);
         context.assertRuntimeOverlayThemable();
 
         getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
