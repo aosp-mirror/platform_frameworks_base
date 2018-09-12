@@ -112,6 +112,7 @@ interface INotificationManager
 
     ParceledListSlice getActiveNotificationsFromListener(in INotificationListener token, in String[] keys, int trim);
     ParceledListSlice getSnoozedNotificationsFromListener(in INotificationListener token, int trim);
+    void clearRequestedListenerHints(in INotificationListener token);
     void requestHintsFromListener(in INotificationListener token, int hints);
     int getHintsFromListener(in INotificationListener token);
     void requestInterruptionFilterFromListener(in INotificationListener token, int interruptionFilter);

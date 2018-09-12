@@ -345,7 +345,7 @@ public class NotificationManagerService extends SystemService {
     private String mSoundNotificationKey;
     private String mVibrateNotificationKey;
 
-    private final SparseArray<ArraySet<ManagedServiceInfo>> mListenersDisablingEffects =
+    private final SparseArray<ArraySet<ComponentName>> mListenersDisablingEffects =
             new SparseArray<>();
     private List<ComponentName> mEffectsSuppressors = new ArrayList<>();
     private int mListenerHints;  // right now, all hints are global
@@ -1784,10 +1784,10 @@ public class NotificationManagerService extends SystemService {
     private ArrayList<ComponentName> getSuppressors() {
         ArrayList<ComponentName> names = new ArrayList<ComponentName>();
         for (int i = mListenersDisablingEffects.size() - 1; i >= 0; --i) {
-            ArraySet<ManagedServiceInfo> serviceInfoList = mListenersDisablingEffects.valueAt(i);
+            ArraySet<ComponentName> serviceInfoList = mListenersDisablingEffects.valueAt(i);
 
-            for (ManagedServiceInfo info : serviceInfoList) {
-                names.add(info.component);
+            for (ComponentName info : serviceInfoList) {
+                names.add(info);
             }
         }
 
@@ -1803,11 +1803,10 @@ public class NotificationManagerService extends SystemService {
 
         for (int i = mListenersDisablingEffects.size() - 1; i >= 0; --i) {
             final int hint = mListenersDisablingEffects.keyAt(i);
-            final ArraySet<ManagedServiceInfo> listeners =
-                    mListenersDisablingEffects.valueAt(i);
+            final ArraySet<ComponentName> listeners = mListenersDisablingEffects.valueAt(i);
 
             if (hints == 0 || (hint & hints) == hint) {
-                removed = removed || listeners.remove(info);
+                removed |= listeners.remove(info.component);
             }
         }
 
@@ -1830,18 +1829,18 @@ public class NotificationManagerService extends SystemService {
 
     private void addDisabledHint(ManagedServiceInfo info, int hint) {
         if (mListenersDisablingEffects.indexOfKey(hint) < 0) {
-            mListenersDisablingEffects.put(hint, new ArraySet<ManagedServiceInfo>());
+            mListenersDisablingEffects.put(hint, new ArraySet<>());
         }
 
-        ArraySet<ManagedServiceInfo> hintListeners = mListenersDisablingEffects.get(hint);
-        hintListeners.add(info);
+        ArraySet<ComponentName> hintListeners = mListenersDisablingEffects.get(hint);
+        hintListeners.add(info.component);
     }
 
     private int calculateHints() {
         int hints = 0;
         for (int i = mListenersDisablingEffects.size() - 1; i >= 0; --i) {
             int hint = mListenersDisablingEffects.keyAt(i);
-            ArraySet<ManagedServiceInfo> serviceInfoList = mListenersDisablingEffects.valueAt(i);
+            ArraySet<ComponentName> serviceInfoList = mListenersDisablingEffects.valueAt(i);
 
             if (!serviceInfoList.isEmpty()) {
                 hints |= hint;
@@ -2955,6 +2954,21 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public void clearRequestedListenerHints(INotificationListener token) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mNotificationLock) {
+                    final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                    removeDisabledHints(info);
+                    updateListenerHintsLocked();
+                    updateEffectsSuppressorLocked();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void requestHintsFromListener(INotificationListener token, int hints) {
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -3860,11 +3874,12 @@ public class NotificationManagerService extends SystemService {
 
                 proto.write(
                     ListenersDisablingEffectsProto.HINT, mListenersDisablingEffects.keyAt(i));
-                final ArraySet<ManagedServiceInfo> listeners =
+                final ArraySet<ComponentName> listeners =
                     mListenersDisablingEffects.valueAt(i);
                 for (int j = 0; j < listeners.size(); j++) {
-                    final ManagedServiceInfo listener = listeners.valueAt(i);
-                    listener.writeToProto(proto, ListenersDisablingEffectsProto.LISTENERS, null);
+                    final ComponentName componentName = listeners.valueAt(i);
+                    componentName.writeToProto(proto,
+                            ListenersDisablingEffectsProto.LISTENER_COMPONENTS);
                 }
 
                 proto.end(effectsToken);
@@ -4003,15 +4018,14 @@ public class NotificationManagerService extends SystemService {
                     if (i > 0) pw.print(';');
                     pw.print("hint[" + hint + "]:");
 
-                    final ArraySet<ManagedServiceInfo> listeners =
-                            mListenersDisablingEffects.valueAt(i);
+                    final ArraySet<ComponentName> listeners = mListenersDisablingEffects.valueAt(i);
                     final int listenerSize = listeners.size();
 
                     for (int j = 0; j < listenerSize; j++) {
                         if (i > 0) pw.print(',');
-                        final ManagedServiceInfo listener = listeners.valueAt(i);
+                        final ComponentName listener = listeners.valueAt(i);
                         if (listener != null) {
-                            pw.print(listener.component);
+                            pw.print(listener);
                         }
                     }
                 }

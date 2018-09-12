@@ -989,6 +989,21 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /**
+     * Clears listener hints set via {@link #getCurrentListenerHints()}.
+     *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing this operation.
+     */
+    public final void clearRequestedListenerHints() {
+        if (!isBound()) return;
+        try {
+            getNotificationInterface().clearRequestedListenerHints(mWrapper);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+    }
+
+    /**
      * Sets the desired {@link #getCurrentListenerHints() listener hints}.
      *
      * <p>
