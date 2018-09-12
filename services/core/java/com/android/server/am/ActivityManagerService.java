@@ -20892,7 +20892,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     memoryStat.pgmajfault,
                                     memoryStat.rssInBytes,
                                     memoryStat.cacheInBytes,
-                                    memoryStat.swapInBytes);
+                                    memoryStat.swapInBytes,
+                                    memoryStat.rssHighWatermarkInBytes);
                     processMemoryStates.add(processMemoryState);
                 }
             }

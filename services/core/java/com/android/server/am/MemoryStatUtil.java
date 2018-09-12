@@ -37,24 +37,34 @@ import java.util.regex.Pattern;
  * Static utility methods related to {@link MemoryStat}.
  */
 final class MemoryStatUtil {
+    static final int BYTES_IN_KILOBYTE = 1024;
+
     private static final String TAG = TAG_WITH_CLASS_NAME ? "MemoryStatUtil" : TAG_AM;
 
     /** True if device has per-app memcg */
-    private static final Boolean DEVICE_HAS_PER_APP_MEMCG =
+    private static final boolean DEVICE_HAS_PER_APP_MEMCG =
             SystemProperties.getBoolean("ro.config.per_app_memcg", false);
 
     /** Path to check if device has memcg */
     private static final String MEMCG_TEST_PATH = "/dev/memcg/apps/memory.stat";
     /** Path to memory stat file for logging app start memory state */
     private static final String MEMORY_STAT_FILE_FMT = "/dev/memcg/apps/uid_%d/pid_%d/memory.stat";
+    /** Path to memory max usage file for logging app memory state */
+    private static final String MEMORY_MAX_USAGE_FILE_FMT =
+            "/dev/memcg/apps/uid_%d/pid_%d/memory.max_usage_in_bytes";
     /** Path to procfs stat file for logging app start memory state */
     private static final String PROC_STAT_FILE_FMT = "/proc/%d/stat";
+    /** Path to procfs status file for logging app memory state */
+    private static final String PROC_STATUS_FILE_FMT = "/proc/%d/status";
 
     private static final Pattern PGFAULT = Pattern.compile("total_pgfault (\\d+)");
     private static final Pattern PGMAJFAULT = Pattern.compile("total_pgmajfault (\\d+)");
     private static final Pattern RSS_IN_BYTES = Pattern.compile("total_rss (\\d+)");
     private static final Pattern CACHE_IN_BYTES = Pattern.compile("total_cache (\\d+)");
     private static final Pattern SWAP_IN_BYTES = Pattern.compile("total_swap (\\d+)");
+
+    private static final Pattern RSS_HIGH_WATERMARK_IN_BYTES =
+            Pattern.compile("VmHWM:\\s*(\\d+)\\s*kB");
 
     private static final int PGFAULT_INDEX = 9;
     private static final int PGMAJFAULT_INDEX = 11;
@@ -80,8 +90,15 @@ final class MemoryStatUtil {
      */
     @Nullable
     static MemoryStat readMemoryStatFromMemcg(int uid, int pid) {
-        final String path = String.format(Locale.US, MEMORY_STAT_FILE_FMT, uid, pid);
-        return parseMemoryStatFromMemcg(readFileContents(path));
+        final String statPath = String.format(Locale.US, MEMORY_STAT_FILE_FMT, uid, pid);
+        MemoryStat stat = parseMemoryStatFromMemcg(readFileContents(statPath));
+        if (stat == null) {
+            return null;
+        }
+        String maxUsagePath = String.format(Locale.US, MEMORY_MAX_USAGE_FILE_FMT, uid, pid);
+        stat.rssHighWatermarkInBytes = parseMemoryMaxUsageFromMemCg(
+                readFileContents(maxUsagePath));
+        return stat;
     }
 
     /**
@@ -91,8 +108,14 @@ final class MemoryStatUtil {
      */
     @Nullable
     static MemoryStat readMemoryStatFromProcfs(int pid) {
-        final String path = String.format(Locale.US, PROC_STAT_FILE_FMT, pid);
-        return parseMemoryStatFromProcfs(readFileContents(path));
+        final String statPath = String.format(Locale.US, PROC_STAT_FILE_FMT, pid);
+        MemoryStat stat = parseMemoryStatFromProcfs(readFileContents(statPath));
+        if (stat == null) {
+            return null;
+        }
+        final String statusPath = String.format(Locale.US, PROC_STATUS_FILE_FMT, pid);
+        stat.rssHighWatermarkInBytes = parseVmHWMFromProcfs(readFileContents(statusPath));
+        return stat;
     }
 
     private static String readFileContents(String path) {
@@ -113,7 +136,7 @@ final class MemoryStatUtil {
     /**
      * Parses relevant statistics out from the contents of a memory.stat file in memcg.
      */
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    @VisibleForTesting
     @Nullable
     static MemoryStat parseMemoryStatFromMemcg(String memoryStatContents) {
         if (memoryStatContents == null || memoryStatContents.isEmpty()) {
@@ -135,10 +158,18 @@ final class MemoryStatUtil {
         return memoryStat;
     }
 
+    @VisibleForTesting
+    static long parseMemoryMaxUsageFromMemCg(String memoryMaxUsageContents) {
+        if (memoryMaxUsageContents == null || memoryMaxUsageContents.isEmpty()) {
+            return 0;
+        }
+        return Long.valueOf(memoryMaxUsageContents);
+    }
+
     /**
-     * Parses relevant statistics out from the contents of a /proc/pid/stat file in procfs.
+     * Parses relevant statistics out from the contents of the /proc/pid/stat file in procfs.
      */
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    @VisibleForTesting
     @Nullable
     static MemoryStat parseMemoryStatFromProcfs(String procStatContents) {
         if (procStatContents == null || procStatContents.isEmpty()) {
@@ -155,6 +186,20 @@ final class MemoryStatUtil {
         memoryStat.pgmajfault = Long.valueOf(splits[PGMAJFAULT_INDEX]);
         memoryStat.rssInBytes = Long.valueOf(splits[RSS_IN_BYTES_INDEX]);
         return memoryStat;
+    }
+
+    /**
+     * Parses RSS high watermark out from the contents of the /proc/pid/status file in procfs. The
+     * returned value is in bytes.
+     */
+    @VisibleForTesting
+    static long parseVmHWMFromProcfs(String procStatusContents) {
+        if (procStatusContents == null || procStatusContents.isEmpty()) {
+            return 0;
+        }
+        Matcher m = RSS_HIGH_WATERMARK_IN_BYTES.matcher(procStatusContents);
+        // Convert value read from /proc/pid/status from kilobytes to bytes.
+        return m.find() ? Long.valueOf(m.group(1)) * BYTES_IN_KILOBYTE : 0;
     }
 
     /**
@@ -175,5 +220,7 @@ final class MemoryStatUtil {
         long cacheInBytes;
         /** Number of bytes of swap usage */
         long swapInBytes;
+        /** Number of bytes of peak anonymous and swap cache memory */
+        long rssHighWatermarkInBytes;
     }
 }

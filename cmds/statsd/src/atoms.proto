@@ -2220,6 +2220,11 @@ message ProcessMemoryState {
 
     // SWAP
     optional int64 swap_in_bytes = 8;
+
+    // RSS high watermark.
+    // Peak RSS usage of the process. Value is read from the VmHWM field in /proc/PID/status or
+    // from memory.max_usage_in_bytes under /dev/memcg if the device uses per-app memory cgroups.
+    optional int64 rss_high_watermark_in_bytes = 9;
 }
 
 /*

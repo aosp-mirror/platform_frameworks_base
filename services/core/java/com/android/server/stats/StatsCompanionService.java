@@ -966,6 +966,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(processMemoryState.rssInBytes);
             e.writeLong(processMemoryState.cacheInBytes);
             e.writeLong(processMemoryState.swapInBytes);
+            e.writeLong(processMemoryState.rssHighWatermarkInBytes);
             pulledData.add(e);
         }
     }
