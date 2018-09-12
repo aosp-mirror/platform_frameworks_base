@@ -87,8 +87,8 @@ class IInputMethodWrapper extends IInputMethod.Stub
      * guarantees that {@link #bindInput(InputBinding)},
      * {@link #startInput(IBinder, IInputContext, int, EditorInfo, boolean)}, and
      * {@link #unbindInput()} are called with the same order as the original calls
-     * in {@link com.android.server.InputMethodManagerService}.  See {@link IBinder#FLAG_ONEWAY}
-     * for detailed semantics.</p>
+     * in {@link com.android.server.inputmethod.InputMethodManagerService}.
+     * See {@link IBinder#FLAG_ONEWAY} for detailed semantics.</p>
      */
     AtomicBoolean mIsUnbindIssued = null;
 

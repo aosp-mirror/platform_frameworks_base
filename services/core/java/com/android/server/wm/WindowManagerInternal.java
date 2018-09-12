@@ -356,8 +356,8 @@ public abstract class WindowManagerInternal {
     /**
      * Notifies WindowManagerService that the current IME window status is being changed.
      *
-     * <p>Only {@link com.android.server.InputMethodManagerService} is the expected and tested
-     * caller of this method.</p>
+     * <p>Only {@link com.android.server.inputmethod.InputMethodManagerService} is the expected and
+     * tested caller of this method.</p>
      *
      * @param imeToken token to track the active input method. Corresponding IME windows can be
      *                 identified by checking {@link android.view.WindowManager.LayoutParams#token}.
@@ -376,8 +376,8 @@ public abstract class WindowManagerInternal {
     /**
      * Notifies WindowManagerService that the current IME window status is being changed.
      *
-     * <p>Only {@link com.android.server.InputMethodManagerService} is the expected and tested
-     * caller of this method.</p>
+     * <p>Only {@link com.android.server.inputmethod.InputMethodManagerService} is the expected and
+     * tested caller of this method.</p>
      *
      * @param imeToken token to track the active input method. Corresponding IME windows can be
      *                 identified by checking {@link android.view.WindowManager.LayoutParams#token}.

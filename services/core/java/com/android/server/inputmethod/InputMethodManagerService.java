@@ -13,7 +13,7 @@
  * the License.
  */
 
-package com.android.server;
+package com.android.server.inputmethod;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
@@ -149,7 +149,9 @@ import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.IInputSessionCallback;
 import com.android.internal.view.InputBindResult;
 import com.android.internal.view.InputMethodClient;
-import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.EventLogTags;
+import com.android.server.LocalServices;
+import com.android.server.SystemService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -253,7 +255,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * the notification.
      */
     private static final String ACTION_SHOW_INPUT_METHOD_PICKER =
-            "com.android.server.InputMethodManagerService.SHOW_INPUT_METHOD_PICKER";
+            "com.android.server.inputmethod.InputMethodManagerService.SHOW_INPUT_METHOD_PICKER";
 
     /**
      * Debug flag for overriding runtime {@link SystemProperties}.
