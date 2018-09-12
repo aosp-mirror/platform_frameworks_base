@@ -100,6 +100,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkPolicy;
+import android.net.NetworkPolicyManager;
 import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
@@ -365,7 +366,7 @@ public class NetworkPolicyManagerServiceTest {
                 return null;
             }
         }).when(mActivityManager).registerUidObserver(any(), anyInt(),
-                eq(ActivityManager.PROCESS_STATE_UNKNOWN), isNull(String.class));
+                eq(NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE), isNull(String.class));
 
         mFutureIntent = newRestrictBackgroundChangedFuture();
         mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager,

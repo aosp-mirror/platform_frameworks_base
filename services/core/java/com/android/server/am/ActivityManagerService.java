@@ -11941,7 +11941,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         printed = true;
                     }
                     pw.print("    "); UserHandle.formatUid(pw, reg.uid);
-                    pw.print(" "); pw.print(reg.pkg); pw.print(":");
+                    pw.print(" "); pw.print(reg.pkg);
+                    final IUidObserver observer = mUidObservers.getRegisteredCallbackItem(i);
+                    pw.print(" "); pw.print(observer.getClass().getTypeName()); pw.print(":");
                     if ((reg.which&ActivityManager.UID_OBSERVER_IDLE) != 0) {
                         pw.print(" IDLE");
                     }
