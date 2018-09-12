@@ -41,9 +41,9 @@ import android.net.Network;
 import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
-import android.test.mock.MockContext;
 import android.support.test.filters.SmallTest;
 import android.system.Os;
+import android.test.mock.MockContext;
 
 import java.net.Socket;
 import java.util.Arrays;
@@ -121,6 +121,7 @@ public class IpSecServiceParameterizedTest {
     IpSecService.IpSecServiceConfiguration mMockIpSecSrvConfig;
     IpSecService mIpSecService;
     Network fakeNetwork = new Network(0xAB);
+    int mUid = Os.getuid();
 
     private static final IpSecAlgorithm AUTH_ALGO =
             new IpSecAlgorithm(IpSecAlgorithm.AUTH_HMAC_SHA256, AUTH_KEY, AUTH_KEY.length * 4);
@@ -181,7 +182,7 @@ public class IpSecServiceParameterizedTest {
 
         verify(mMockNetd)
                 .ipSecDeleteSecurityAssociation(
-                        eq(spiResp.resourceId),
+                        eq(mUid),
                         anyString(),
                         anyString(),
                         eq(TEST_SPI),
@@ -189,8 +190,7 @@ public class IpSecServiceParameterizedTest {
                         anyInt());
 
         // Verify quota and RefcountedResource objects cleaned up
-        IpSecService.UserRecord userRecord =
-                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+        IpSecService.UserRecord userRecord = mIpSecService.mUserResourceTracker.getUserRecord(mUid);
         assertEquals(0, userRecord.mSpiQuotaTracker.mCurrent);
         try {
             userRecord.mSpiRecords.getRefcountedResourceOrThrow(spiResp.resourceId);
@@ -209,8 +209,7 @@ public class IpSecServiceParameterizedTest {
                 mIpSecService.allocateSecurityParameterIndex(
                         mDestinationAddr, TEST_SPI, new Binder());
 
-        IpSecService.UserRecord userRecord =
-                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+        IpSecService.UserRecord userRecord = mIpSecService.mUserResourceTracker.getUserRecord(mUid);
         IpSecService.RefcountedResource refcountedRecord =
                 userRecord.mSpiRecords.getRefcountedResourceOrThrow(spiResp.resourceId);
 
@@ -218,7 +217,7 @@ public class IpSecServiceParameterizedTest {
 
         verify(mMockNetd)
                 .ipSecDeleteSecurityAssociation(
-                        eq(spiResp.resourceId),
+                        eq(mUid),
                         anyString(),
                         anyString(),
                         eq(TEST_SPI),
@@ -270,7 +269,7 @@ public class IpSecServiceParameterizedTest {
 
         verify(mMockNetd)
                 .ipSecAddSecurityAssociation(
-                        eq(createTransformResp.resourceId),
+                        eq(mUid),
                         anyInt(),
                         anyString(),
                         anyString(),
@@ -305,7 +304,7 @@ public class IpSecServiceParameterizedTest {
 
         verify(mMockNetd)
                 .ipSecAddSecurityAssociation(
-                        eq(createTransformResp.resourceId),
+                        eq(mUid),
                         anyInt(),
                         anyString(),
                         anyString(),
@@ -361,13 +360,12 @@ public class IpSecServiceParameterizedTest {
 
         IpSecTransformResponse createTransformResp =
                 mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
-        IpSecService.UserRecord userRecord =
-                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+        IpSecService.UserRecord userRecord = mIpSecService.mUserResourceTracker.getUserRecord(mUid);
         assertEquals(1, userRecord.mSpiQuotaTracker.mCurrent);
         mIpSecService.releaseSecurityParameterIndex(ipSecConfig.getSpiResourceId());
         verify(mMockNetd, times(0))
                 .ipSecDeleteSecurityAssociation(
-                        eq(createTransformResp.resourceId),
+                        eq(mUid),
                         anyString(),
                         anyString(),
                         eq(TEST_SPI),
@@ -389,7 +387,7 @@ public class IpSecServiceParameterizedTest {
 
         verify(mMockNetd, times(1))
                 .ipSecDeleteSecurityAssociation(
-                        eq(createTransformResp.resourceId),
+                        eq(mUid),
                         anyString(),
                         anyString(),
                         eq(TEST_SPI),
@@ -397,8 +395,7 @@ public class IpSecServiceParameterizedTest {
                         anyInt());
 
         // Verify quota and RefcountedResource objects cleaned up
-        IpSecService.UserRecord userRecord =
-                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+        IpSecService.UserRecord userRecord = mIpSecService.mUserResourceTracker.getUserRecord(mUid);
         assertEquals(0, userRecord.mTransformQuotaTracker.mCurrent);
         assertEquals(1, userRecord.mSpiQuotaTracker.mCurrent);
 
@@ -433,8 +430,7 @@ public class IpSecServiceParameterizedTest {
         IpSecTransformResponse createTransformResp =
                 mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
 
-        IpSecService.UserRecord userRecord =
-                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+        IpSecService.UserRecord userRecord = mIpSecService.mUserResourceTracker.getUserRecord(mUid);
         IpSecService.RefcountedResource refcountedRecord =
                 userRecord.mTransformRecords.getRefcountedResourceOrThrow(
                         createTransformResp.resourceId);
@@ -443,7 +439,7 @@ public class IpSecServiceParameterizedTest {
 
         verify(mMockNetd)
                 .ipSecDeleteSecurityAssociation(
-                        eq(createTransformResp.resourceId),
+                        eq(mUid),
                         anyString(),
                         anyString(),
                         eq(TEST_SPI),
@@ -477,7 +473,7 @@ public class IpSecServiceParameterizedTest {
         verify(mMockNetd)
                 .ipSecApplyTransportModeTransform(
                         eq(pfd.getFileDescriptor()),
-                        eq(resourceId),
+                        eq(mUid),
                         eq(IpSecManager.DIRECTION_OUT),
                         anyString(),
                         anyString(),
@@ -509,8 +505,7 @@ public class IpSecServiceParameterizedTest {
                 createAndValidateTunnel(mSourceAddr, mDestinationAddr, "blessedPackage");
 
         // Check that we have stored the tracking object, and retrieve it
-        IpSecService.UserRecord userRecord =
-                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+        IpSecService.UserRecord userRecord = mIpSecService.mUserResourceTracker.getUserRecord(mUid);
         IpSecService.RefcountedResource refcountedRecord =
                 userRecord.mTunnelInterfaceRecords.getRefcountedResourceOrThrow(
                         createTunnelResp.resourceId);
@@ -530,8 +525,7 @@ public class IpSecServiceParameterizedTest {
         IpSecTunnelInterfaceResponse createTunnelResp =
                 createAndValidateTunnel(mSourceAddr, mDestinationAddr, "blessedPackage");
 
-        IpSecService.UserRecord userRecord =
-                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+        IpSecService.UserRecord userRecord = mIpSecService.mUserResourceTracker.getUserRecord(mUid);
 
         mIpSecService.deleteTunnelInterface(createTunnelResp.resourceId, "blessedPackage");
 
@@ -551,8 +545,7 @@ public class IpSecServiceParameterizedTest {
         IpSecTunnelInterfaceResponse createTunnelResp =
                 createAndValidateTunnel(mSourceAddr, mDestinationAddr, "blessedPackage");
 
-        IpSecService.UserRecord userRecord =
-                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+        IpSecService.UserRecord userRecord = mIpSecService.mUserResourceTracker.getUserRecord(mUid);
         IpSecService.RefcountedResource refcountedRecord =
                 userRecord.mTunnelInterfaceRecords.getRefcountedResourceOrThrow(
                         createTunnelResp.resourceId);
