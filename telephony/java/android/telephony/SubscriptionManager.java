@@ -88,9 +88,7 @@ public class SubscriptionManager {
     /** @hide */
     public static final int INVALID_SIM_SLOT_INDEX = -1;
 
-    /** Indicates the caller wants the default sub id. */
-    /** @hide */
-    @UnsupportedAppUsage
+    /** Indicates the default subscription ID in Telephony. */
     public static final int DEFAULT_SUBSCRIPTION_ID = Integer.MAX_VALUE;
 
     /**
@@ -1597,6 +1595,19 @@ public class SubscriptionManager {
      */
     public static boolean isValidSubscriptionId(int subscriptionId) {
         return subscriptionId > INVALID_SUBSCRIPTION_ID;
+    }
+
+    /**
+     * Check if the subscription ID is usable.
+     *
+     * A usable subscription ID has a valid value except some special values such as
+     * {@link DEFAULT_SUBSCRIPTION_ID}. It can be used for subscription functions.
+     *
+     * @param subscriptionId the subscription ID
+     * @return {@code true} if the subscription ID is usable; {@code false} otherwise.
+     */
+    public static boolean isUsableSubscriptionId(int subscriptionId) {
+        return isUsableSubIdValue(subscriptionId);
     }
 
     /**
