@@ -22,6 +22,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACK
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.annotation.AnyThread;
 import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
@@ -79,6 +80,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperations;
@@ -402,6 +404,10 @@ public class InputMethodService extends AbstractInputMethodService {
     @BackDispositionMode
     int mBackDisposition;
 
+    private Object mLock = new Object();
+    @GuardedBy("mLock")
+    private boolean mNotifyUserActionSent;
+
     /**
      * {@code true} when the previous IME had non-empty inset at the bottom of the screen and we
      * have not shown our own window yet.  In this situation, the previous inset continues to be
@@ -594,7 +600,7 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public void changeInputMethodSubtype(InputMethodSubtype subtype) {
-            onCurrentInputMethodSubtypeChanged(subtype);
+            dispatchOnCurrentInputMethodSubtypeChanged(subtype);
         }
     }
 
@@ -2792,6 +2798,13 @@ public class InputMethodService extends AbstractInputMethodService {
         }
     }
 
+    private void dispatchOnCurrentInputMethodSubtypeChanged(InputMethodSubtype newSubtype) {
+        synchronized (mLock) {
+            mNotifyUserActionSent = false;
+        }
+        onCurrentInputMethodSubtypeChanged(newSubtype);
+    }
+
     // TODO: Handle the subtype change event
     /**
      * Called when the subtype was changed.
@@ -2845,6 +2858,22 @@ public class InputMethodService extends AbstractInputMethodService {
             return;
         }
         exposeContentInternal(inputContentInfo, getCurrentInputEditorInfo());
+    }
+
+    /**
+     * {@inheritDoc}
+     * @hide
+     */
+    @AnyThread
+    @Override
+    public final void notifyUserActionIfNecessary() {
+        synchronized (mLock) {
+            if (mNotifyUserActionSent) {
+                return;
+            }
+            mPrivOps.notifyUserActionAsync();
+            mNotifyUserActionSent = true;
+        }
     }
 
     /**

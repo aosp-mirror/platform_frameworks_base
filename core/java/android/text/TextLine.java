@@ -1053,13 +1053,16 @@ public class TextLine {
         return runIsRtl ? -ret : ret;
     }
 
-    private int adjustHyphenEdit(int start, int limit, int hyphenEdit) {
-        int result = hyphenEdit;
+    private int adjustHyphenEdit(int start, int limit, int packedHyphenEdit) {
+        int result = packedHyphenEdit;
         // Only draw hyphens on first or last run in line. Disable them otherwise.
         if (start > 0) { // not the first run
-            result &= ~Paint.HYPHENEDIT_MASK_START_OF_LINE;
+            result = Hyphenator.packHyphenEdit(Hyphenator.START_HYPHEN_EDIT_NO_EDIT,
+                    Hyphenator.unpackEndHyphenEdit(packedHyphenEdit));
         }
         if (limit < mLen) { // not the last run
+            result = Hyphenator.packHyphenEdit(Hyphenator.unpackStartHyphenEdit(packedHyphenEdit),
+                    Hyphenator.END_HYPHEN_EDIT_NO_EDIT);
             result &= ~Paint.HYPHENEDIT_MASK_END_OF_LINE;
         }
         return result;

@@ -161,7 +161,7 @@ public:
     JNIMediaPlayer2Listener(JNIEnv* env, jobject thiz, jobject weak_thiz);
     ~JNIMediaPlayer2Listener();
     virtual void notify(int64_t srcId, int msg, int ext1, int ext2,
-                        const Parcel *obj = NULL) override;
+                        const PlayerMessage *obj = NULL) override;
 private:
     JNIMediaPlayer2Listener();
     jclass      mClass;     // Reference to MediaPlayer2 class
@@ -194,23 +194,21 @@ JNIMediaPlayer2Listener::~JNIMediaPlayer2Listener()
     env->DeleteGlobalRef(mClass);
 }
 
-void JNIMediaPlayer2Listener::notify(int64_t srcId, int msg, int ext1, int ext2, const Parcel *obj)
+void JNIMediaPlayer2Listener::notify(int64_t srcId, int msg, int ext1, int ext2,
+        const PlayerMessage* obj)
 {
     JNIEnv *env = JavaVMHelper::getJNIEnv();
-    if (obj && obj->dataSize() > 0) {
-        jobject jParcel = createJavaParcelObject(env);
-        if (jParcel != NULL) {
-            // TODO: replace the following Parcel usages with proto.
-            // 1. MEDIA_DRM_INFO : DrmInfo
-            // 2. MEDIA_TIMED_TEXT : TimedText
-            // 2. MEDIA_SUBTITLE_DATA : SubtitleData
-            // 4. MEDIA_META_DATA : TimedMetaData
-            Parcel* nativeParcel = parcelForJavaObject(env, jParcel);
-            nativeParcel->setData(obj->data(), obj->dataSize());
-            env->CallStaticVoidMethod(mClass, fields.post_event, mObject,
-                    srcId, msg, ext1, ext2, jParcel);
-            env->DeleteLocalRef(jParcel);
-        }
+    if (obj != NULL) {
+        int size = obj->ByteSize();
+        jbyte* temp = new jbyte[size];
+        obj->SerializeToArray(temp, size);
+
+        // return the response as a byte array.
+        jbyteArray out = env->NewByteArray(size);
+        env->SetByteArrayRegion(out, 0, size, temp);
+        env->CallStaticVoidMethod(mClass, fields.post_event, mObject,
+                srcId, msg, ext1, ext2, out);
+        delete[] temp;
     } else {
         env->CallStaticVoidMethod(mClass, fields.post_event, mObject,
                 srcId, msg, ext1, ext2, NULL);
@@ -1089,7 +1087,7 @@ android_media_MediaPlayer2_native_init(JNIEnv *env)
     }
 
     fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
-                                               "(Ljava/lang/Object;JIIILjava/lang/Object;)V");
+                                               "(Ljava/lang/Object;JIII[B)V");
     if (fields.post_event == NULL) {
         return;
     }

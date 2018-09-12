@@ -46,6 +46,7 @@ cc_library_host_shared {
 // ====  java proto device library (for test only)  ==============================
 java_library {
     name: "statsdprotolite",
+    no_framework_libs: true,
     proto: {
         type: "lite",
         include_dirs: ["external/protobuf/src"],

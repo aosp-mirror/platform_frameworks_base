@@ -400,7 +400,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         that.initialLayout = this.initialLayout;
         that.initialKeyguardLayout = this.initialKeyguardLayout;
         that.configure = this.configure == null ? null : this.configure.clone();
-        that.label = this.label == null ? null : this.label.substring(0);
+        that.label = this.label;
         that.icon = this.icon;
         that.previewImage = this.previewImage;
         that.autoAdvanceViewId = this.autoAdvanceViewId;

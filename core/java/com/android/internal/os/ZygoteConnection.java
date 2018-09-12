@@ -22,6 +22,7 @@ import static android.system.OsConstants.POLLIN;
 import static android.system.OsConstants.STDERR_FILENO;
 import static android.system.OsConstants.STDIN_FILENO;
 import static android.system.OsConstants.STDOUT_FILENO;
+
 import static com.android.internal.os.ZygoteConnectionConstants.CONNECTION_TIMEOUT_MILLIS;
 import static com.android.internal.os.ZygoteConnectionConstants.MAX_ZYGOTE_ARGC;
 import static com.android.internal.os.ZygoteConnectionConstants.WRAPPED_PID_TIMEOUT_MILLIS;
@@ -36,20 +37,21 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructPollfd;
 import android.util.Log;
+
 import dalvik.system.VMRuntime;
+
+import libcore.io.IoUtils;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import libcore.io.IoUtils;
 
 /**
  * A connection that can make spawn requests.
@@ -377,6 +379,7 @@ class ZygoteConnection {
      *    are the settings for current and max value.</i>
      *   <li> --instruction-set=<i>instruction-set-string</i> which instruction set to use/emulate.
      *   <li> --nice-name=<i>nice name to appear in ps</i>
+     *   <li> --package-name=<i>package name this process belongs to</i>
      *   <li> --runtime-args indicates that the remaining arg list should
      * be handed off to com.android.internal.os.RuntimeInit, rather than
      * processed directly.
@@ -680,6 +683,9 @@ class ZygoteConnection {
                     }
                     expectRuntimeArgs = false;
                 } else if (arg.startsWith("--package-name=")) {
+                    if (packageName != null) {
+                        throw new IllegalArgumentException("Duplicate arg specified");
+                    }
                     packageName = arg.substring(arg.indexOf('=') + 1);
                 } else {
                     break;

@@ -3338,7 +3338,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     }
                 }
 
-                stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+                stack.setWindowingMode(WINDOWING_MODE_UNDEFINED);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

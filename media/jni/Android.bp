@@ -145,7 +145,7 @@ cc_library_shared {
         "libstagefright_nuplayer2",
         "libstagefright_player2",
         "libstagefright_rtsp",
-        "libstagefright_timedtext",
+        "libstagefright_timedtext2",
         "libunwindstack",
         "libutilscallstack",
         "libziparchive",

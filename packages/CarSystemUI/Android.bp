@@ -51,6 +51,7 @@ android_app {
     libs: [
         "telephony-common",
         "android.car",
+        "android.car.user",
     ],
 
     manifest: "AndroidManifest.xml",

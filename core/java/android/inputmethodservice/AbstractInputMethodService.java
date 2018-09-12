@@ -252,4 +252,12 @@ public abstract class AbstractInputMethodService extends Service
         return;
     }
 
+    /**
+     * Called when the user took some actions that should be taken into consideration to update the
+     * MRU list for input method rotation.
+     *
+     * @hide
+     */
+    public void notifyUserActionIfNecessary() {
+    }
 }

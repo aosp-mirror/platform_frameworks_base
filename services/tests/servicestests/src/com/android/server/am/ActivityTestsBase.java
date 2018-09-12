@@ -520,6 +520,9 @@ public class ActivityTestsBase {
         private final ActivityStackSupervisor mSupervisor;
         TestActivityDisplay(ActivityStackSupervisor supervisor, int displayId) {
             super(supervisor, displayId);
+            // Normally this comes from display-properties as exposed by WM. Without that, just
+            // hard-code to FULLSCREEN for tests.
+            setWindowingMode(WINDOWING_MODE_FULLSCREEN);
             mSupervisor = supervisor;
         }
 

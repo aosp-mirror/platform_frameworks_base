@@ -29,6 +29,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
+
 import static com.android.server.wm.ConfigurationContainerProto.FULL_CONFIGURATION;
 import static com.android.server.wm.ConfigurationContainerProto.MERGED_OVERRIDE_CONFIGURATION;
 import static com.android.server.wm.ConfigurationContainerProto.OVERRIDE_CONFIGURATION;
@@ -295,6 +296,10 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         return mFullConfiguration.windowConfiguration.getWindowingMode();
     }
 
+    public int getOverrideWindowingMode() {
+        return mOverrideConfiguration.windowConfiguration.getWindowingMode();
+    }
+
     /** Sets the windowing mode for the configuration container. */
     public void setWindowingMode(/*@WindowConfiguration.WindowingMode*/ int windowingMode) {
         mTmpConfig.setTo(getOverrideConfiguration());
@@ -513,7 +518,8 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         final String childPrefix = prefix + " ";
         pw.println(getName()
                 + " type=" + activityTypeToString(getActivityType())
-                + " mode=" + windowingModeToString(getWindowingMode()));
+                + " mode=" + windowingModeToString(getWindowingMode())
+                + " override-mode=" + windowingModeToString(getOverrideWindowingMode()));
         for (int i = getChildCount() - 1; i >= 0; --i) {
             final E cc = getChildAt(i);
             pw.print(childPrefix + "#" + i + " ");

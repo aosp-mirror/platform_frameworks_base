@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.car;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.car.user.CarUserManagerHelper;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewStub;
@@ -26,115 +25,87 @@ import android.view.ViewStub;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.StatusBar;
 
 /**
  * Manages the fullscreen user switcher.
  */
 public class FullscreenUserSwitcher {
-    private final View mContainer;
-    private final View mParent;
     private final UserGridRecyclerView mUserGridView;
+    private final View mParent;
     private final int mShortAnimDuration;
-    private final StatusBar mStatusBar;
-    private final CarUserManagerHelper mCarUserManagerHelper;
-    private boolean mShowing;
+    private final CarStatusBar mStatusBar;
 
-    public FullscreenUserSwitcher(StatusBar statusBar, ViewStub containerStub, Context context) {
+    public FullscreenUserSwitcher(CarStatusBar statusBar, ViewStub containerStub, Context context) {
         mStatusBar = statusBar;
         mParent = containerStub.inflate();
-        mContainer = mParent.findViewById(R.id.container);
-        mUserGridView = mContainer.findViewById(R.id.user_grid);
+        mParent.setVisibility(View.VISIBLE);
+        View container = mParent.findViewById(R.id.container);
+
+        // Initialize user grid.
+        mUserGridView = container.findViewById(R.id.user_grid);
         GridLayoutManager layoutManager = new GridLayoutManager(context,
-                context.getResources().getInteger(R.integer.user_fullscreen_switcher_num_col));
+            context.getResources().getInteger(R.integer.user_fullscreen_switcher_num_col));
         mUserGridView.getRecyclerView().setLayoutManager(layoutManager);
         mUserGridView.buildAdapter();
         mUserGridView.setUserSelectionListener(this::onUserSelected);
 
-        mCarUserManagerHelper = new CarUserManagerHelper(context);
+        // Hide the user grid by default. It will only be made visible by clicking on a cancel
+        // button in a bouncer.
+        hide();
 
-        mShortAnimDuration = mContainer.getResources()
+        mShortAnimDuration = container.getResources()
             .getInteger(android.R.integer.config_shortAnimTime);
     }
 
+    /**
+     * Makes user grid visible.
+     */
     public void show() {
-        if (mCarUserManagerHelper.isHeadlessSystemUser()) {
-            showUserGrid();
-        }
-        if (mShowing) {
-            return;
-        }
-        mShowing = true;
-        mParent.setVisibility(View.VISIBLE);
-    }
-
-    public void hide() {
-        mShowing = false;
-        mParent.setVisibility(View.GONE);
-    }
-
-    public void onUserSwitched(int newUserId) {
-        toggleSwitchInProgress(false);
-        mParent.post(this::dismissKeyguard);
-    }
-
-    private void onUserSelected(UserGridRecyclerView.UserRecord record) {
-        if (mCarUserManagerHelper.isHeadlessSystemUser()) {
-            hideUserGrid();
-        }
-
-        if (record.mIsForeground || (record.mIsStartGuestSession
-                && mCarUserManagerHelper.isForegroundUserGuest())) {
-            dismissKeyguard();
-            return;
-        }
-        toggleSwitchInProgress(true);
-    }
-
-    private void showUserGrid() {
         mUserGridView.setVisibility(View.VISIBLE);
     }
 
-    private void hideUserGrid() {
+    /**
+     * Hides the user grid.
+     */
+    public void hide() {
         mUserGridView.setVisibility(View.INVISIBLE);
     }
 
-    // Dismisses the keyguard and shows bouncer if authentication is necessary.
-    private void dismissKeyguard() {
-        mStatusBar.executeRunnableDismissingKeyguard(null/* runnable */, null /* cancelAction */,
-                true /* dismissShade */, true /* afterKeyguardGone */, true /* deferred */);
+    /**
+     * @return {@code true} if user grid is visible, {@code false} otherwise.
+     */
+    public boolean isVisible() {
+        return mUserGridView.getVisibility() == View.VISIBLE;
     }
 
-    private void toggleSwitchInProgress(boolean inProgress) {
-        if (inProgress) {
-            fadeOut(mContainer);
-        } else {
-            fadeIn(mContainer);
+    /**
+     * Every time user clicks on an item in the switcher, we hide the switcher, either
+     * gradually or immediately.
+     *
+     * We dismiss the entire keyguard if user clicked on the foreground user (user we're already
+     * logged in as).
+     */
+    private void onUserSelected(UserGridRecyclerView.UserRecord record) {
+        if (record.mIsForeground) {
+            hide();
+            mStatusBar.dismissKeyguard();
+            return;
         }
+        // Switching is about to happen, since it takes time, fade out the switcher gradually.
+        fadeOut();
     }
 
-    private void fadeOut(View view) {
-        view.animate()
+    private void fadeOut() {
+        mUserGridView.animate()
                 .alpha(0.0f)
                 .setDuration(mShortAnimDuration)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        view.setVisibility(View.GONE);
+                        hide();
+                        mUserGridView.setAlpha(1.0f);
                     }
                 });
-    }
 
-    private void fadeIn(View view) {
-        view.animate()
-                .alpha(1.0f)
-                .setDuration(mShortAnimDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animator) {
-                        view.setAlpha(0.0f);
-                        view.setVisibility(View.VISIBLE);
-                    }
-                });
     }
 }
