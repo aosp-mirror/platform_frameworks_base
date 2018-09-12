@@ -46,7 +46,7 @@ message EventMetricData {
 
   optional Atom atom = 2;
 
-  optional int64 wall_clock_timestamp_nanos = 3;
+  optional int64 wall_clock_timestamp_nanos = 3 [deprecated = true];
 }
 
 message CountBucketInfo {
@@ -142,7 +142,7 @@ message GaugeBucketInfo {
 
   repeated int64 elapsed_timestamp_nanos = 4;
 
-  repeated int64 wall_clock_timestamp_nanos = 5;
+  repeated int64 wall_clock_timestamp_nanos = 5 [deprecated = true];
 
   optional int64 bucket_num = 6;
 

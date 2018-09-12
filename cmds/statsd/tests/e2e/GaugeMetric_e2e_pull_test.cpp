@@ -148,7 +148,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
     EXPECT_EQ(1, data.bucket_info(0).atom_size());
     EXPECT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
     EXPECT_EQ(configAddedTimeNs + 55, data.bucket_info(0).elapsed_timestamp_nanos(0));
-    EXPECT_EQ(1, data.bucket_info(0).wall_clock_timestamp_nanos_size());
+    EXPECT_EQ(0, data.bucket_info(0).wall_clock_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 2 * bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(0).atom(0).temperature().sensor_name().empty());
@@ -271,7 +271,7 @@ TEST(GaugeMetricE2eTest, TestAllConditionChangesSamplePulledEvents) {
     EXPECT_EQ(1, data.bucket_info(0).atom_size());
     EXPECT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
     EXPECT_EQ(configAddedTimeNs + 55, data.bucket_info(0).elapsed_timestamp_nanos(0));
-    EXPECT_EQ(1, data.bucket_info(0).wall_clock_timestamp_nanos_size());
+    EXPECT_EQ(0, data.bucket_info(0).wall_clock_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 2 * bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(0).atom(0).temperature().sensor_name().empty());
@@ -375,7 +375,6 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm) {
     EXPECT_EQ(1, data.bucket_info(0).atom_size());
     EXPECT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
     EXPECT_EQ(configAddedTimeNs + 55, data.bucket_info(0).elapsed_timestamp_nanos(0));
-    EXPECT_EQ(1, data.bucket_info(0).wall_clock_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 2 * bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(0).atom(0).temperature().sensor_name().empty());

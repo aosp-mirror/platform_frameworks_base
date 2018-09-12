@@ -173,7 +173,7 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
         if (sampling_type == GaugeMetric::ALL_CONDITION_CHANGES) {
             EXPECT_EQ(2, data.bucket_info(0).atom_size());
             EXPECT_EQ(2, data.bucket_info(0).elapsed_timestamp_nanos_size());
-            EXPECT_EQ(2, data.bucket_info(0).wall_clock_timestamp_nanos_size());
+            EXPECT_EQ(0, data.bucket_info(0).wall_clock_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
             EXPECT_EQ(bucketStartTimeNs + bucketSizeNs,
                       data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -192,7 +192,6 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
 
             EXPECT_EQ(1, data.bucket_info(1).atom_size());
             EXPECT_EQ(1, data.bucket_info(1).elapsed_timestamp_nanos_size());
-            EXPECT_EQ(1, data.bucket_info(1).wall_clock_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs + bucketSizeNs,
                       data.bucket_info(1).start_bucket_elapsed_nanos());
             EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
@@ -206,7 +205,6 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
 
             EXPECT_EQ(2, data.bucket_info(2).atom_size());
             EXPECT_EQ(2, data.bucket_info(2).elapsed_timestamp_nanos_size());
-            EXPECT_EQ(2, data.bucket_info(2).wall_clock_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
                       data.bucket_info(2).start_bucket_elapsed_nanos());
             EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs,
@@ -226,7 +224,6 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
         } else {
             EXPECT_EQ(1, data.bucket_info(0).atom_size());
             EXPECT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
-            EXPECT_EQ(1, data.bucket_info(0).wall_clock_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
             EXPECT_EQ(bucketStartTimeNs + bucketSizeNs,
                       data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -239,7 +236,6 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
 
             EXPECT_EQ(1, data.bucket_info(1).atom_size());
             EXPECT_EQ(1, data.bucket_info(1).elapsed_timestamp_nanos_size());
-            EXPECT_EQ(1, data.bucket_info(1).wall_clock_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs + bucketSizeNs,
                       data.bucket_info(1).start_bucket_elapsed_nanos());
             EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
@@ -253,7 +249,6 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
 
             EXPECT_EQ(1, data.bucket_info(2).atom_size());
             EXPECT_EQ(1, data.bucket_info(2).elapsed_timestamp_nanos_size());
-            EXPECT_EQ(1, data.bucket_info(2).wall_clock_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
                       data.bucket_info(2).start_bucket_elapsed_nanos());
             EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs,
@@ -276,7 +271,6 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
         EXPECT_EQ(1, data.bucket_info_size());
         EXPECT_EQ(1, data.bucket_info(0).atom_size());
         EXPECT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
-        EXPECT_EQ(1, data.bucket_info(0).wall_clock_timestamp_nanos_size());
         EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
                   data.bucket_info(0).start_bucket_elapsed_nanos());
         EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs,
