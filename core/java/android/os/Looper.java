@@ -386,7 +386,9 @@ public final class Looper {
         final long looperToken = proto.start(fieldId);
         proto.write(LooperProto.THREAD_NAME, mThread.getName());
         proto.write(LooperProto.THREAD_ID, mThread.getId());
-        mQueue.writeToProto(proto, LooperProto.QUEUE);
+        if (mQueue != null) {
+            mQueue.writeToProto(proto, LooperProto.QUEUE);
+        }
         proto.end(looperToken);
     }
 
