@@ -284,7 +284,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"SMS メッセージの送信と表示を &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ストレージ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"端末内の写真、メディア、ファイルへのアクセス"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"端末内の写真、メディア、ファイルへのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"端末内の写真、メディア、ファイルへのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"マイク"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"音声の録音"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"音声の録音を &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
