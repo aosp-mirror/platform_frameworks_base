@@ -1141,9 +1141,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private void updateNotificationColor() {
+        Configuration currentConfig = getResources().getConfiguration();
+        boolean nightMode = (currentConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                == Configuration.UI_MODE_NIGHT_YES;
+
         mNotificationColor = ContrastColorUtil.resolveContrastColor(mContext,
                 getStatusBarNotification().getNotification().color,
-                getBackgroundColorWithoutTint());
+                getBackgroundColorWithoutTint(), nightMode);
         mNotificationColorAmbient = ContrastColorUtil.resolveAmbientColor(mContext,
                 getStatusBarNotification().getNotification().color);
     }

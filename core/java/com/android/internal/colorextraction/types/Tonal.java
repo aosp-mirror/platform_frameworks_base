@@ -51,10 +51,8 @@ public class Tonal implements ExtractionType {
 
     private static final boolean DEBUG = true;
 
-    public static final int THRESHOLD_COLOR_LIGHT = 0xffe0e0e0;
     public static final int MAIN_COLOR_LIGHT = 0xffe0e0e0;
-    public static final int THRESHOLD_COLOR_DARK = 0xff212121;
-    public static final int MAIN_COLOR_DARK = 0xff000000;
+    public static final int MAIN_COLOR_DARK = 0xff212121;
 
     private final TonalPalette mGreyPalette;
     private final ArrayList<TonalPalette> mTonalPalettes;
@@ -197,12 +195,12 @@ public class Tonal implements ExtractionType {
         // light fallback or darker than our dark fallback.
         ColorUtils.colorToHSL(mainColor, mTmpHSL);
         final float mainLuminosity = mTmpHSL[2];
-        ColorUtils.colorToHSL(THRESHOLD_COLOR_LIGHT, mTmpHSL);
+        ColorUtils.colorToHSL(MAIN_COLOR_LIGHT, mTmpHSL);
         final float lightLuminosity = mTmpHSL[2];
         if (mainLuminosity > lightLuminosity) {
             return false;
         }
-        ColorUtils.colorToHSL(THRESHOLD_COLOR_DARK, mTmpHSL);
+        ColorUtils.colorToHSL(MAIN_COLOR_DARK, mTmpHSL);
         final float darkLuminosity = mTmpHSL[2];
         if (mainLuminosity < darkLuminosity) {
             return false;
