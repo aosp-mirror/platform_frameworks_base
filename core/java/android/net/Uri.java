@@ -197,7 +197,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      *
      * <p>Example: "//www.google.com/search?q=android"
      *
-     * @return the decoded scheme-specific-part
+     * @return the encoded scheme-specific-part
      */
     public abstract String getEncodedSchemeSpecificPart();
 
