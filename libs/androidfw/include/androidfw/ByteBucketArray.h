@@ -60,7 +60,7 @@ class ByteBucketArray {
   }
 
   T& editItemAt(size_t index) {
-    CHECK(index < size()) << "ByteBucketArray.getOrCreate(index=" << index
+    CHECK(index < size()) << "ByteBucketArray.editItemAt(index=" << index
                           << ") with size=" << size();
 
     uint8_t bucket_index = static_cast<uint8_t>(index) >> 4;
