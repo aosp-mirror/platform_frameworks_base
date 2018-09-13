@@ -18,8 +18,11 @@ package android.media;
 
 import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
+
+import dalvik.system.VMRuntime;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +45,10 @@ import java.util.Hashtable;
  *
  * @hide This file is shared between MediaStore and MediaProvider and should remained internal use
  *       only.
+ * @deprecated thumbnails are now maintained in separate files, and this file
+ *             format is no longer used.
  */
+@Deprecated
 public class MiniThumbFile {
     private static final String TAG = "MiniThumbFile";
     private static final int MINI_THUMB_DATA_FILE_VERSION = 4;
@@ -69,6 +75,9 @@ public class MiniThumbFile {
     }
 
     public static synchronized MiniThumbFile instance(Uri uri) {
+        if (VMRuntime.getRuntime().getTargetSdkVersion() >= Build.VERSION_CODES.Q) {
+            throw new UnsupportedOperationException();
+        }
         String type = uri.getPathSegments().get(1);
         MiniThumbFile file = sThumbFiles.get(type);
         // Log.v(TAG, "get minithumbfile for type: "+type);
