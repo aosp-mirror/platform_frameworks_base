@@ -3367,7 +3367,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.app.NotificationManager} for controlling keyguard.
+     * {@link android.app.KeyguardManager} for controlling keyguard.
      *
      * @see #getSystemService(String)
      * @see android.app.KeyguardManager
