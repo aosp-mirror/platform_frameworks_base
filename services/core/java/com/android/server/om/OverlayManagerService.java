@@ -558,8 +558,8 @@ public final class OverlayManagerService extends SystemService {
         @Override
         public boolean setEnabledExclusive(@Nullable final String packageName, final boolean enable,
                 int userId) throws RemoteException {
-            enforceChangeOverlayPackagesPermission("setEnabled");
-            userId = handleIncomingUser(userId, "setEnabled");
+            enforceChangeOverlayPackagesPermission("setEnabledExclusive");
+            userId = handleIncomingUser(userId, "setEnabledExclusive");
             if (packageName == null || !enable) {
                 return false;
             }
@@ -578,8 +578,8 @@ public final class OverlayManagerService extends SystemService {
         @Override
         public boolean setEnabledExclusiveInCategory(@Nullable String packageName, int userId)
                 throws RemoteException {
-            enforceChangeOverlayPackagesPermission("setEnabled");
-            userId = handleIncomingUser(userId, "setEnabled");
+            enforceChangeOverlayPackagesPermission("setEnabledExclusiveInCategory");
+            userId = handleIncomingUser(userId, "setEnabledExclusiveInCategory");
             if (packageName == null) {
                 return false;
             }
