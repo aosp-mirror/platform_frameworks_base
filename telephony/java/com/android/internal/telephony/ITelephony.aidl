@@ -1536,6 +1536,34 @@ interface ITelephony {
     void setDataRoamingEnabled(int subId, boolean isEnabled);
 
     /**
+     * Gets the roaming mode for the CDMA phone with the subscription id {@code subId}.
+     *
+     * @param the subscription id.
+     * @return the roaming mode for CDMA phone.
+     */
+    int getCdmaRoamingMode(int subId);
+
+    /**
+     * Sets the roaming mode on the CDMA phone with the subscription {@code subId} to the given
+     * roaming mode {@code mode}.
+     *
+     * @param subId the subscription id.
+     * @param mode the roaming mode should be set.
+     * @return {@code true} if successed.
+     */
+    boolean setCdmaRoamingMode(int subId, int mode);
+
+    /**
+     * Sets the subscription mode for CDMA phone with the subscription {@code subId} to the given
+     * subscription mode {@code mode}.
+     *
+     * @param subId the subscription id.
+     * @param mode the subscription mode should be set.
+     * @return {@code true} if successed.
+     */
+    boolean setCdmaSubscriptionMode(int subId, int mode);
+
+    /**
      * A test API to override carrier information including mccmnc, imsi, iccid, gid1, gid2,
      * plmn and spn. This would be handy for, eg, forcing a particular carrier id, carrier's config
      * (also any country or carrier overlays) to be loaded when using a test SIM with a call box.
@@ -1559,4 +1587,9 @@ interface ITelephony {
      * @hide
      */
     int getNumberOfModemsWithSimultaneousDataConnections(int subId, String callingPackage);
+
+    /**
+     * Return the network selection mode on the subscription with id {@code subId}.
+     */
+     int getNetworkSelectionMode(int subId);
 }
