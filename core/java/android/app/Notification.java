@@ -3499,7 +3499,7 @@ public class Notification implements Parcelable
 
         /**
          * Set the small icon, which will be used to represent the notification in the
-         * status bar and content view (unless overriden there by a
+         * status bar and content view (unless overridden there by a
          * {@link #setLargeIcon(Bitmap) large icon}).
          *
          * @param icon An Icon object to use.
