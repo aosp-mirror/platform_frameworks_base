@@ -15,8 +15,8 @@
   limitations under the License.
   -->
 
-<!-- styles for the permission grant dialog. -->
 <resources>
+    <!-- styles for the permission grant dialog. -->
     <style name="PermissionGrantDialog">
         <item name="background">?attr/windowBackground</item>
         <item name="elevation">?attr/windowElevation</item>
@@ -91,6 +91,39 @@
     </style>
 
     <style name="PermissionGrantButtonBar">
+        <item name="layout_marginStart">24dp</item>
+        <item name="layout_marginEnd">16dp</item>
+        <item name="layout_marginBottom">4dp</item>
+    </style>
+
+    <!-- styles for the permission review screen. -->
+    <style name="PermissionReviewDescription">
+        <item name="layout_marginTop">20dp</item>
+        <item name="layout_marginStart">24dp</item>
+        <item name="layout_marginBottom">16dp</item>
+        <item name="layout_marginEnd">24dp</item>
+    </style>
+
+    <style name="PermissionReviewTitleIcon">
+        <item name="layout_marginTop">4dp</item>
+        <item name="layout_width">36dp</item>
+        <item name="layout_height">36dp</item>
+        <item name="scaleType">fitCenter</item>
+    </style>
+
+    <style name="PermissionReviewTitleMessage"
+           parent="@style/TextAppearance.DeviceDefault">
+        <item name="paddingStart">22dp</item>
+        <item name="textSize">20sp</item>
+        <item name="textColor">?attr/textColorPrimary</item>
+    </style>
+
+    <style name="PermissionReviewSettings">
+        <item name="layout_marginStart">8dp</item>
+        <item name="layout_marginEnd">8dp</item>
+    </style>
+
+    <style name="PermissionReviewButtonBar">
         <item name="layout_marginStart">24dp</item>
         <item name="layout_marginEnd">16dp</item>
         <item name="layout_marginBottom">4dp</item>
