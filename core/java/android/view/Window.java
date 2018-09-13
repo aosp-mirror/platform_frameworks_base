@@ -422,7 +422,7 @@ public abstract class Window {
          * @return boolean You must return true for the panel to be displayed;
          *         if you return false it will not be shown.
          */
-        public boolean onCreatePanelMenu(int featureId, Menu menu);
+        boolean onCreatePanelMenu(int featureId, @NonNull Menu menu);
 
         /**
          * Prepare a panel to be displayed.  This is called right before the
@@ -438,7 +438,7 @@ public abstract class Window {
          *
          * @see #onCreatePanelView
          */
-        public boolean onPreparePanel(int featureId, View view, Menu menu);
+        boolean onPreparePanel(int featureId, @Nullable View view, @NonNull Menu menu);
 
         /**
          * Called when a panel's menu is opened by the user. This may also be
@@ -450,7 +450,7 @@ public abstract class Window {
          * @return Return true to allow the menu to open, or false to prevent
          *         the menu from opening.
          */
-        public boolean onMenuOpened(int featureId, Menu menu);
+        boolean onMenuOpened(int featureId, @NonNull Menu menu);
 
         /**
          * Called when a panel's menu item has been selected by the user.
@@ -462,7 +462,7 @@ public abstract class Window {
          *         false to perform the normal menu handling (calling its
          *         Runnable or sending a Message to its target Handler).
          */
-        public boolean onMenuItemSelected(int featureId, MenuItem item);
+        boolean onMenuItemSelected(int featureId, @NonNull MenuItem item);
 
         /**
          * This is called whenever the current window attributes change.
@@ -512,7 +512,7 @@ public abstract class Window {
          * @param menu If onCreatePanelView() returned null, this is the Menu
          *            being displayed in the panel.
          */
-        public void onPanelClosed(int featureId, Menu menu);
+        void onPanelClosed(int featureId, @NonNull Menu menu);
 
         /**
          * Called when the user signals the desire to start a search.
