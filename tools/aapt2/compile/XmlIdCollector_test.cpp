@@ -64,4 +64,14 @@ TEST(XmlIdCollectorTest, DontCollectNonIds) {
   EXPECT_TRUE(doc->file.exported_symbols.empty());
 }
 
+TEST(XmlIdCollectorTest, ErrorOnInvalidIds) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+
+  std::unique_ptr<xml::XmlResource> doc =
+      test::BuildXmlDom("<View foo=\"@+id/foo$bar\"/>");
+
+  XmlIdCollector collector;
+  ASSERT_FALSE(collector.Consume(context.get(), doc.get()));
+}
+
 }  // namespace aapt
