@@ -8075,7 +8075,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         /**
          * Sets the margins, in pixels. A call to {@link android.view.View#requestLayout()} needs
          * to be done so that the new margins are taken into account. Left and right margins may be
-         * overriden by {@link android.view.View#requestLayout()} depending on layout direction.
+         * overridden by {@link android.view.View#requestLayout()} depending on layout direction.
          * Margin values should be positive.
          *
          * @param left the left margin size
@@ -8105,8 +8105,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         /**
          * Sets the relative margins, in pixels. A call to {@link android.view.View#requestLayout()}
          * needs to be done so that the new relative margins are taken into account. Left and right
-         * margins may be overriden by {@link android.view.View#requestLayout()} depending on layout
-         * direction. Margin values should be positive.
+         * margins may be overridden by {@link android.view.View#requestLayout()} depending on
+         * layout direction. Margin values should be positive.
          *
          * @param start the start margin size
          * @param top the top margin size
