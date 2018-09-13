@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
@@ -165,6 +166,7 @@ public class Environment {
      *
      * @hide
      */
+    @SystemApi
     public static File getOemDirectory() {
         return DIR_OEM_ROOT;
     }
@@ -175,6 +177,7 @@ public class Environment {
      *
      * @hide
      */
+    @SystemApi
     public static File getOdmDirectory() {
         return DIR_ODM_ROOT;
     }
@@ -184,6 +187,7 @@ public class Environment {
      * software that should persist across simple reflashing of the "system" partition.
      * @hide
      */
+    @SystemApi
     public static File getVendorDirectory() {
         return DIR_VENDOR_ROOT;
     }
@@ -194,6 +198,7 @@ public class Environment {
      *
      * @hide
      */
+    @SystemApi
     public static File getProductDirectory() {
         return DIR_PRODUCT_ROOT;
     }
@@ -204,6 +209,7 @@ public class Environment {
      *
      * @hide
      */
+    @SystemApi
     public static File getProductServicesDirectory() {
         return DIR_PRODUCT_SERVICES_ROOT;
     }
@@ -1063,7 +1069,6 @@ public class Environment {
         return cur;
     }
 
-
     /**
      * If the given path exists on emulated external storage, return the
      * translated backing path hosted on internal storage. This bypasses any
@@ -1074,8 +1079,10 @@ public class Environment {
      * must hold {@link android.Manifest.permission#WRITE_MEDIA_STORAGE}
      * permission.
      *
+     * @deprecated disabled now that FUSE has been replaced by sdcardfs
      * @hide
      */
+    @Deprecated
     public static File maybeTranslateEmulatedPathToInternal(File path) {
         return StorageManager.maybeTranslateEmulatedPathToInternal(path);
     }

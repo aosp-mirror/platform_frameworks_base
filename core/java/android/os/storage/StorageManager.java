@@ -1521,7 +1521,11 @@ public class StorageManager {
         return SystemProperties.getBoolean(PROP_HAS_ADOPTABLE, false);
     }
 
-    /** {@hide} */
+    /**
+     * @deprecated disabled now that FUSE has been replaced by sdcardfs
+     * @hide
+     */
+    @Deprecated
     public static File maybeTranslateEmulatedPathToInternal(File path) {
         // Disabled now that FUSE has been replaced by sdcardfs
         return path;

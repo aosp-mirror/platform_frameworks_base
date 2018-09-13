@@ -3807,6 +3807,14 @@ package android.os {
     field public static final java.lang.String ACTION_UPDATE_SMS_SHORT_CODES = "android.intent.action.UPDATE_SMS_SHORT_CODES";
   }
 
+  public class Environment {
+    method public static java.io.File getOdmDirectory();
+    method public static java.io.File getOemDirectory();
+    method public static java.io.File getProductDirectory();
+    method public static java.io.File getProductServicesDirectory();
+    method public static java.io.File getVendorDirectory();
+  }
+
   public class HidlSupport {
     method public static boolean deepEquals(java.lang.Object, java.lang.Object);
     method public static int deepHashCode(java.lang.Object);
