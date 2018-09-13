@@ -4112,6 +4112,9 @@ package android.os {
     method public boolean isSystem();
     method public static int myUserId();
     method public static android.os.UserHandle of(int);
+    field public static final android.os.UserHandle ALL;
+    field public static final android.os.UserHandle CURRENT;
+    field public static final android.os.UserHandle SYSTEM;
     field public static final int USER_NULL = -10000; // 0xffffd8f0
   }
 

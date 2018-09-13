@@ -4792,6 +4792,7 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
+    @TestApi
     public Context createPackageContextAsUser(
             String packageName, @CreatePackageOptions int flags, UserHandle user)
             throws PackageManager.NameNotFoundException {

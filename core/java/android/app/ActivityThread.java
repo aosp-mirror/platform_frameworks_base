@@ -2131,7 +2131,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             ai = getPackageManager().getApplicationInfo(packageName,
                     PackageManager.GET_SHARED_LIBRARY_FILES
                             | PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                    userId);
+                    (userId < 0) ? UserHandle.myUserId() : userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
