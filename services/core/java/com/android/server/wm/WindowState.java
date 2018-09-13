@@ -3734,6 +3734,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         windowInfo.focused = isFocused();
         Task task = getTask();
         windowInfo.inPictureInPicture = (task != null) && task.inPinnedWindowingMode();
+        windowInfo.hasFlagWatchOutsideTouch =
+                (mAttrs.flags & WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH) != 0;
 
         if (mIsChildWindow) {
             windowInfo.parentToken = getParentWindow().mClient.asBinder();
