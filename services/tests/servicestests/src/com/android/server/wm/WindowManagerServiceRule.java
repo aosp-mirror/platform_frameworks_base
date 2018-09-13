@@ -108,7 +108,7 @@ public class WindowManagerServiceRule implements TestRule {
                 // InputChannel is final and can't be mocked.
                 InputChannel[] input = InputChannel.openInputChannelPair(TAG_WM);
                 if (input != null && input.length > 1) {
-                    doReturn(input[1]).when(ims).monitorInput(anyString());
+                    doReturn(input[1]).when(ims).monitorInput(anyString(), anyInt());
                 }
 
                 mService = WindowManagerService.main(context, ims, false,
