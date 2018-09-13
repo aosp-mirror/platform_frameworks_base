@@ -697,8 +697,8 @@ def verify_layering(clazz):
         "android.provider",
         ["android.content","android.graphics.drawable"],
         "android.database",
-        "android.graphics",
         "android.text",
+        "android.graphics",
         "android.os",
         "android.util"
     ]
