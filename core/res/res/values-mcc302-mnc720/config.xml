@@ -61,7 +61,7 @@
         <item>ERR_ESTIMATE=0</item>
         <item>INTERMEDIATE_POS=0</item>
         <item>GPS_LOCK=0</item>
-        <item>SUPL_ES=0</item>
+        <item>SUPL_ES=1</item>
     </string-array>
 
 </resources>
