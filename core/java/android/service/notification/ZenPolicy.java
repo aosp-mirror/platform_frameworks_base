@@ -21,6 +21,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.proto.ProtoOutputStream;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -849,6 +850,34 @@ public final class ZenPolicy implements Parcelable {
                 mVisualEffects.set(visualEffect, policyToApply.mVisualEffects.get(visualEffect));
             }
         }
+    }
+
+    /**
+     * @hide
+     */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+
+        proto.write(ZenPolicyProto.REMINDERS, getPriorityCategoryReminders());
+        proto.write(ZenPolicyProto.EVENTS, getPriorityCategoryEvents());
+        proto.write(ZenPolicyProto.MESSAGES, getPriorityCategoryMessages());
+        proto.write(ZenPolicyProto.CALLS, getPriorityCategoryCalls());
+        proto.write(ZenPolicyProto.REPEAT_CALLERS, getPriorityCategoryRepeatCallers());
+        proto.write(ZenPolicyProto.ALARMS, getPriorityCategoryAlarms());
+        proto.write(ZenPolicyProto.MEDIA, getPriorityCategoryMedia());
+        proto.write(ZenPolicyProto.SYSTEM, getPriorityCategorySystem());
+
+        proto.write(ZenPolicyProto.FULL_SCREEN_INTENT, getVisualEffectFullScreenIntent());
+        proto.write(ZenPolicyProto.LIGHTS, getVisualEffectLights());
+        proto.write(ZenPolicyProto.PEEK, getVisualEffectPeek());
+        proto.write(ZenPolicyProto.STATUS_BAR, getVisualEffectStatusBar());
+        proto.write(ZenPolicyProto.BADGE, getVisualEffectBadge());
+        proto.write(ZenPolicyProto.AMBIENT, getVisualEffectAmbient());
+        proto.write(ZenPolicyProto.NOTIFICATION_LIST, getVisualEffectNotificationList());
+
+        proto.write(ZenPolicyProto.PRIORITY_MESSAGES, getPriorityMessageSenders());
+        proto.write(ZenPolicyProto.PRIORITY_CALLS, getPriorityCallSenders());
+        proto.end(token);
     }
 
     /**
