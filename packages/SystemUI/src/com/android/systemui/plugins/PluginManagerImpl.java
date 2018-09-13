@@ -37,13 +37,12 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.Log.TerribleFailure;
-import android.util.Log.TerribleFailureHandler;
 import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.plugins.PluginInstanceManager.PluginContextWrapper;
 import com.android.systemui.plugins.PluginInstanceManager.PluginInfo;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
@@ -53,13 +52,14 @@ import dalvik.system.PathClassLoader;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.Arrays;
 import java.util.Map;
-
 /**
  * @see Plugin
  */
 public class PluginManagerImpl extends BroadcastReceiver implements PluginManager {
 
+    private static final String TAG = PluginManagerImpl.class.getSimpleName();
     static final String DISABLE_PLUGIN = "com.android.systemui.action.DISABLE_PLUGIN";
 
     private static PluginManager sInstance;
@@ -68,6 +68,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             = new ArrayMap<>();
     private final Map<String, ClassLoader> mClassLoaders = new ArrayMap<>();
     private final ArraySet<String> mOneShotPackages = new ArraySet<>();
+    private final ArraySet<String> mWhitelistedPlugins = new ArraySet<>();
     private final Context mContext;
     private final PluginInstanceManagerFactory mFactory;
     private final boolean isDebuggable;
@@ -79,30 +80,30 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     private boolean mWtfsSet;
 
     public PluginManagerImpl(Context context) {
-        this(context, new PluginInstanceManagerFactory(),
-                Build.IS_DEBUGGABLE, Thread.getUncaughtExceptionPreHandler());
+        this(context, new PluginInstanceManagerFactory(), Build.IS_DEBUGGABLE,
+                context.getResources().getStringArray(R.array.config_pluginWhitelist),
+                Thread.getUncaughtExceptionPreHandler());
     }
 
     @VisibleForTesting
     PluginManagerImpl(Context context, PluginInstanceManagerFactory factory, boolean debuggable,
-            UncaughtExceptionHandler defaultHandler) {
+            String[] whitelistedPlugins, UncaughtExceptionHandler defaultHandler) {
         mContext = context;
         mFactory = factory;
         mLooper = Dependency.get(Dependency.BG_LOOPER);
         isDebuggable = debuggable;
+        mWhitelistedPlugins.addAll(Arrays.asList(whitelistedPlugins));
         mPluginPrefs = new PluginPrefs(mContext);
 
         PluginExceptionHandler uncaughtExceptionHandler = new PluginExceptionHandler(
                 defaultHandler);
         Thread.setUncaughtExceptionPreHandler(uncaughtExceptionHandler);
-        if (isDebuggable) {
-            new Handler(mLooper).post(() -> {
-                // Plugin dependencies that don't have another good home can go here, but
-                // dependencies that have better places to init can happen elsewhere.
-                Dependency.get(PluginDependencyProvider.class)
-                        .allowPluginDependency(ActivityStarter.class);
-            });
-        }
+        new Handler(mLooper).post(() -> {
+            // Plugin dependencies that don't have another good home can go here, but
+            // dependencies that have better places to init can happen elsewhere.
+            Dependency.get(PluginDependencyProvider.class)
+                    .allowPluginDependency(ActivityStarter.class);
+        });
     }
 
     public <T extends Plugin> T getOneShotPlugin(Class<T> cls) {
@@ -117,10 +118,6 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     }
 
     public <T extends Plugin> T getOneShotPlugin(String action, Class<?> cls) {
-        if (!isDebuggable) {
-            // Never ever ever allow these on production builds, they are only for prototyping.
-            return null;
-        }
         if (Looper.myLooper() != Looper.getMainLooper()) {
             throw new RuntimeException("Must be called from UI thread");
         }
@@ -153,10 +150,6 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
 
     public <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
             Class cls, boolean allowMultiple) {
-        if (!isDebuggable) {
-            // Never ever ever allow these on production builds, they are only for prototyping.
-            return;
-        }
         mPluginPrefs.addAction(action);
         PluginInstanceManager p = mFactory.createPluginInstanceManager(mContext, action, listener,
                 allowMultiple, mLooper, cls, this);
@@ -166,10 +159,6 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     }
 
     public void removePluginListener(PluginListener<?> listener) {
-        if (!isDebuggable) {
-            // Never ever ever allow these on production builds, they are only for prototyping.
-            return;
-        }
         if (!mPluginMap.containsKey(listener)) return;
         mPluginMap.remove(listener).destroy();
         if (mPluginMap.size() == 0) {
@@ -261,6 +250,11 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     }
 
     public ClassLoader getClassLoader(String sourceDir, String pkg) {
+        if (!isDebuggable && !mWhitelistedPlugins.contains(pkg)) {
+            Log.w(TAG, "Cannot get class loader for non-whitelisted plugin. Src:" + sourceDir +
+                    ", pkg: " + pkg);
+            return null;
+        }
         if (mClassLoaders.containsKey(pkg)) {
             return mClassLoaders.get(pkg);
         }
