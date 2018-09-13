@@ -62,21 +62,23 @@ Frame SkiaOpenGLPipeline::getFrame() {
 bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
                               const LightGeometry& lightGeometry,
                               LayerUpdateQueue* layerUpdateQueue, const Rect& contentDrawBounds,
-                              bool opaque, bool wideColorGamut, const LightInfo& lightInfo,
+                              bool opaque, const LightInfo& lightInfo,
                               const std::vector<sp<RenderNode>>& renderNodes,
                               FrameInfoVisualizer* profiler) {
     mEglManager.damageFrame(frame, dirty);
 
-    SkColorType colorType;
+    SkColorType colorType = getSurfaceColorType();
     // setup surface for fbo0
     GrGLFramebufferInfo fboInfo;
     fboInfo.fFBOID = 0;
-    if (wideColorGamut) {
+    if (colorType == kRGBA_F16_SkColorType) {
         fboInfo.fFormat = GL_RGBA16F;
-        colorType = kRGBA_F16_SkColorType;
-    } else {
+    } else if (colorType == kN32_SkColorType) {
+        // Note: The default preference of pixel format is RGBA_8888, when other
+        // pixel format is available, we should branch out and do more check.
         fboInfo.fFormat = GL_RGBA8;
-        colorType = kN32_SkColorType;
+    } else {
+        LOG_ALWAYS_FATAL("Unsupported color type.");
     }
 
     GrBackendRenderTarget backendRT(frame.width(), frame.height(), 0, STENCIL_BUFFER_SIZE, fboInfo);
@@ -89,8 +91,7 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
             nullptr, &props));
 
     SkiaPipeline::updateLighting(lightGeometry, lightInfo);
-    renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, wideColorGamut, contentDrawBounds,
-                surface);
+    renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
     layerUpdateQueue->clear();
 
     // Draw visual debugging features
@@ -147,8 +148,7 @@ bool SkiaOpenGLPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior,
 
     if (surface) {
         mRenderThread.requireGlContext();
-        const bool wideColorGamut = colorMode == ColorMode::WideColorGamut;
-        mEglSurface = mEglManager.createSurface(surface, wideColorGamut);
+        mEglSurface = mEglManager.createSurface(surface, colorMode);
     }
 
     if (mEglSurface != EGL_NO_SURFACE) {
@@ -166,6 +166,14 @@ bool SkiaOpenGLPipeline::isSurfaceReady() {
 
 bool SkiaOpenGLPipeline::isContextReady() {
     return CC_LIKELY(mEglManager.hasEglContext());
+}
+
+SkColorType SkiaOpenGLPipeline::getSurfaceColorType() const {
+    return mEglManager.getSurfaceColorType();
+}
+
+sk_sp<SkColorSpace> SkiaOpenGLPipeline::getSurfaceColorSpace() {
+    return mEglManager.getSurfaceColorSpace();
 }
 
 void SkiaOpenGLPipeline::invokeFunctor(const RenderThread& thread, Functor* functor) {
