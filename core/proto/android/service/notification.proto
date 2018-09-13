@@ -72,7 +72,8 @@ message ListenersDisablingEffectsProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional int32 hint = 1;
-    repeated ManagedServiceInfoProto listeners = 2;
+    reserved 2; // ManagedServiceInfoProto listeners
+    repeated android.content.ComponentNameProto listener_components = 3;
 }
 
 message ManagedServiceInfoProto {
