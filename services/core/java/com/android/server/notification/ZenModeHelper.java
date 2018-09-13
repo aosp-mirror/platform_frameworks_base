@@ -501,9 +501,14 @@ public class ZenModeHelper {
     }
 
     protected AutomaticZenRule createAutomaticZenRule(ZenRule rule) {
-        return new AutomaticZenRule(rule.name, rule.component, rule.conditionId,
-                NotificationManager.zenModeToInterruptionFilter(rule.zenMode), rule.enabled,
-                rule.creationTime);
+        if (rule.zenPolicy != null) {
+            return new AutomaticZenRule(rule.name, rule.component, rule.conditionId, rule.zenPolicy,
+                    rule.enabled, rule.creationTime);
+        } else {
+            return new AutomaticZenRule(rule.name, rule.component, rule.conditionId,
+                    NotificationManager.zenModeToInterruptionFilter(rule.zenMode), rule.enabled,
+                    rule.creationTime);
+        }
     }
 
     public void setManualZenMode(int zenMode, Uri conditionId, String caller, String reason) {
@@ -667,6 +672,9 @@ public class ZenModeHelper {
         }
     }
 
+    /**
+     * @return user-specified default notification policy for priority only do not disturb
+     */
     public Policy getNotificationPolicy() {
         return getNotificationPolicy(mConfig);
     }
@@ -675,6 +683,9 @@ public class ZenModeHelper {
         return config == null ? null : config.toNotificationPolicy();
     }
 
+    /**
+     * Sets the global notification policy used for priority only do not disturb
+     */
     public void setNotificationPolicy(Policy policy) {
         if (policy == null || mConfig == null) return;
         synchronized (mConfig) {
@@ -770,9 +781,7 @@ public class ZenModeHelper {
             ComponentName triggeringComponent, boolean setRingerMode) {
         final String val = Integer.toString(config.hashCode());
         Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_CONFIG_ETAG, val);
-        if (!evaluateZenMode(reason, setRingerMode)) {
-            applyRestrictions();  // evaluateZenMode will also apply restrictions if changed
-        }
+        evaluateZenMode(reason, setRingerMode);
         mConditions.evaluateConfig(config, triggeringComponent, true /*processSubscriptions*/);
     }
 
@@ -798,7 +807,7 @@ public class ZenModeHelper {
     }
 
     @VisibleForTesting
-    protected boolean evaluateZenMode(String reason, boolean setRingerMode) {
+    protected void evaluateZenMode(String reason, boolean setRingerMode) {
         if (DEBUG) Log.d(TAG, "evaluateZenMode");
         final int zenBefore = mZenMode;
         final int zen = computeZenMode();
@@ -813,7 +822,6 @@ public class ZenModeHelper {
         if (zen != zenBefore) {
             mHandler.postDispatchOnZenModeChanged();
         }
-        return true;
     }
 
     private void updateRingerModeAffectedStreams() {
@@ -822,7 +830,9 @@ public class ZenModeHelper {
         }
     }
 
+
     private int computeZenMode() {
+        // TODO: use mConfig.zenPolicy
         if (mConfig == null) return Global.ZEN_MODE_OFF;
         synchronized (mConfig) {
             if (mConfig.manualRule != null) return mConfig.manualRule.zenMode;
