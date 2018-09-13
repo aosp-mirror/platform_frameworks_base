@@ -869,13 +869,6 @@ please see themes_device_defaults.xml.
     <!-- System themes -->
     <eat-comment />
 
-    <!-- Theme for the dialog shown when an app crashes or ANRs. -->
-    <style name="Theme.Dialog.AppError" parent="Theme.DeviceDefault.Light.Dialog.Alert">
-        <item name="windowContentTransitions">false</item>
-        <item name="windowActivityTransitions">false</item>
-        <item name="windowCloseOnTouchOutside">false</item>
-    </style>
-
     <!-- Special theme for the recent apps dialog, to allow customization
          with overlays. -->
     <style name="Theme.Dialog.RecentApplications" parent="Theme.DeviceDefault.Light.Dialog">

@@ -63,7 +63,6 @@ import android.util.Xml;
 
 import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
-import com.android.server.pm.PackageManagerService;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -453,13 +452,6 @@ public final class DefaultPermissionGrantPolicy {
                 "com.android.externalstorage.documents", userId);
         if (storagePackage != null) {
             grantRuntimePermissions(storagePackage, STORAGE_PERMISSIONS, true, userId);
-        }
-
-        // Container service
-        PackageParser.Package containerPackage = getSystemPackage(
-                PackageManagerService.DEFAULT_CONTAINER_PACKAGE);
-        if (containerPackage != null) {
-            grantRuntimePermissions(containerPackage, STORAGE_PERMISSIONS, true, userId);
         }
 
         // CertInstaller

@@ -91,7 +91,7 @@ message Atom {
         ActivityForegroundStateChanged activity_foreground_state_changed = 42;
         IsolatedUidChanged isolated_uid_changed = 43;
         PacketWakeupOccurred packet_wakeup_occurred = 44;
-        // 45 is available
+        WallClockTimeShifted wall_clock_time_shifted = 45;
         AnomalyDetected anomaly_detected = 46;
         AppBreadcrumbReported app_breadcrumb_reported = 47;
         AppStartOccurred app_start_occurred = 48;
@@ -1476,6 +1476,18 @@ message AppBreadcrumbReported {
         START = 3;
     }
     optional State state = 3;
+}
+
+/**
+ * Logs the wall-clock time when a significant wall-clock time shift occurs.
+ * For example, this could be due to the user manually changing the time.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/AlarmManagerService.java
+ */
+message WallClockTimeShifted {
+    // New wall-clock time in milliseconds, according to System.currentTimeMillis().
+    optional int64 wall_clock_timestamp_millis = 1;
 }
 
 /**

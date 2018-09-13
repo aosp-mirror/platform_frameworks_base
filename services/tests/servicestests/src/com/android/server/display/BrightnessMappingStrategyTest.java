@@ -152,8 +152,7 @@ public class BrightnessMappingStrategyTest {
         final float[] lux = { 0f, 1f };
         final float[] nits = { 0, PowerManager.BRIGHTNESS_ON };
 
-        BrightnessConfiguration config = new BrightnessConfiguration.Builder()
-                .setCurve(lux, nits)
+        BrightnessConfiguration config = new BrightnessConfiguration.Builder(lux, nits)
                 .build();
         strategy.setBrightnessConfiguration(config);
         assertNotEquals(1.0f, strategy.getBrightness(1f), 0.01 /*tolerance*/);
@@ -214,8 +213,7 @@ public class BrightnessMappingStrategyTest {
                 DISPLAY_RANGE_NITS[DISPLAY_RANGE_NITS.length - 1]
         };
 
-        BrightnessConfiguration config = new BrightnessConfiguration.Builder()
-                .setCurve(lux, nits)
+        BrightnessConfiguration config = new BrightnessConfiguration.Builder(lux, nits)
                 .build();
         strategy.setBrightnessConfiguration(config);
         assertEquals(1.0f, strategy.getBrightness(1f), 0.01 /*tolerance*/);

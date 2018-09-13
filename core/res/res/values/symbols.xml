@@ -2099,7 +2099,7 @@
   <java-symbol type="string" name="vpn_lockdown_error" />
   <java-symbol type="string" name="vpn_lockdown_config" />
   <java-symbol type="string" name="wallpaper_binding_label" />
-  <java-symbol type="style" name="Theme.Dialog.AppError" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Dialog.AppError" />
   <java-symbol type="style" name="Theme.Leanback.Dialog.Alert" />
   <java-symbol type="style" name="Theme.Toast" />
   <java-symbol type="xml" name="storage_list" />

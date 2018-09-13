@@ -60,7 +60,7 @@ public final class InputBindResult implements Parcelable {
         /**
          * Indicates that this is a temporary binding until the
          * {@link android.inputmethodservice.InputMethodService} (IMS) establishes a valid session
-         * to {@link com.android.server.InputMethodManagerService} (IMMS).
+         * to {@link com.android.server.inputmethod.InputMethodManagerService} (IMMS).
          *
          * <p>Note that in this state the IMS is already bound to IMMS but the logical session
          * is not yet established on top of the IPC channel.</p>
@@ -73,7 +73,7 @@ public final class InputBindResult implements Parcelable {
         /**
          * Indicates that this is a temporary binding until the
          * {@link android.inputmethodservice.InputMethodService} (IMS) establishes a valid session
-         * to {@link com.android.server.InputMethodManagerService} (IMMS).
+         * to {@link com.android.server.inputmethod.InputMethodManagerService} (IMMS).
          *
          * <p>Note that in this state the IMMS has already initiated a connection to the IMS but
          * the binding process is not completed yet.</p>
@@ -91,12 +91,14 @@ public final class InputBindResult implements Parcelable {
         int SUCCESS_REPORT_WINDOW_FOCUS_ONLY = 3;
         /**
          * Indicates somehow
-         * {@link com.android.server.InputMethodManagerService#startInputOrWindowGainedFocus} is
-         * trying to return null {@link InputBindResult}, which must never happen.
+         * {@link
+         * com.android.server.inputmethod.InputMethodManagerService#startInputOrWindowGainedFocus}
+         * is trying to return null {@link InputBindResult}, which must never happen.
          */
         int ERROR_NULL = 4;
         /**
-         * Indicates that {@link com.android.server.InputMethodManagerService} recognizes no IME.
+         * Indicates that {@link com.android.server.inputmethod.InputMethodManagerService}
+         * recognizes no IME.
          */
         int ERROR_NO_IME = 5;
         /**
@@ -114,8 +116,8 @@ public final class InputBindResult implements Parcelable {
          */
         int ERROR_SYSTEM_NOT_READY = 7;
         /**
-         * Indicates that {@link com.android.server.InputMethodManagerService} tried to connect to
-         * an {@link android.inputmethodservice.InputMethodService} but failed.
+         * Indicates that {@link com.android.server.inputmethod.InputMethodManagerService} tried to
+         * connect to an {@link android.inputmethodservice.InputMethodService} but failed.
          *
          * @see android.content.Context#bindServiceAsUser(Intent, ServiceConnection, int, UserHandle)
          */
@@ -137,7 +139,8 @@ public final class InputBindResult implements Parcelable {
          * The client should try to restart input when its {@link android.view.Window} is focused
          * again.</p>
          *
-         * @see com.android.server.wm.WindowManagerService#inputMethodClientHasFocus(IInputMethodClient)
+         * @see com.android.server.wm.WindowManagerInternal#inputMethodClientHasFocus(
+         * IInputMethodClient)
          */
         int ERROR_NOT_IME_TARGET_WINDOW = 11;
         /**

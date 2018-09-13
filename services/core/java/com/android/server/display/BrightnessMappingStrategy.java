@@ -26,8 +26,8 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.Spline;
 
-import com.android.internal.util.Preconditions;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 import com.android.server.display.utils.Plog;
 
 import java.io.PrintWriter;
@@ -77,8 +77,8 @@ public abstract class BrightnessMappingStrategy {
                 Slog.w(TAG, "Screen brightness mapping does not cover whole range of available " +
                         "backlight values, autobrightness functionality may be impaired.");
             }
-            BrightnessConfiguration.Builder builder = new BrightnessConfiguration.Builder();
-            builder.setCurve(luxLevels, brightnessLevelsNits);
+            BrightnessConfiguration.Builder builder = new BrightnessConfiguration.Builder(
+                    luxLevels, brightnessLevelsNits);
             return new PhysicalMappingStrategy(builder.build(), nitsRange, backlightRange,
                     autoBrightnessAdjustmentMaxGamma);
         } else if (isValidMapping(luxLevels, brightnessLevelsBacklight)) {

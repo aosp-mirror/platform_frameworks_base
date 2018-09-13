@@ -25,10 +25,10 @@
     <color name="notification_legacy_background_color">@*android:color/notification_material_background_color</color>
 
     <!-- The color of the material notification background when dimmed -->
-    <color name="notification_material_background_dimmed_color">#aa212121</color>
+    <color name="notification_material_background_dimmed_color">#aa000000</color>
 
     <!-- The color of the dividing line between grouped notifications while . -->
-    <color name="notification_divider_color">#000</color>
+    <color name="notification_divider_color">#212121</color>
 
     <!-- The background color of the notification shade -->
     <color name="notification_shade_background_color">#181818</color>

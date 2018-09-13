@@ -107,7 +107,7 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     // pkg|uid => PackagePreferences
-    private final ArrayMap<String, PackagePreferences> mPackagePreferencess = new ArrayMap<>();
+    private final ArrayMap<String, PackagePreferences> mPackagePreferences = new ArrayMap<>();
     // pkg => PackagePreferences
     private final ArrayMap<String, PackagePreferences> mRestoredWithoutUids = new ArrayMap<>();
 
@@ -142,109 +142,117 @@ public class PreferencesHelper implements RankingConfig {
         if (type != XmlPullParser.START_TAG) return;
         String tag = parser.getName();
         if (!TAG_RANKING.equals(tag)) return;
-        // Clobber groups and channels with the xml, but don't delete other data that wasn't present
-        // at the time of serialization.
-        mRestoredWithoutUids.clear();
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
-            tag = parser.getName();
-            if (type == XmlPullParser.END_TAG && TAG_RANKING.equals(tag)) {
-                return;
-            }
-            if (type == XmlPullParser.START_TAG) {
-                if (TAG_PACKAGE.equals(tag)) {
-                    int uid = XmlUtils.readIntAttribute(parser, ATT_UID, UNKNOWN_UID);
-                    String name = parser.getAttributeValue(null, ATT_NAME);
-                    if (!TextUtils.isEmpty(name)) {
-                        if (forRestore) {
-                            try {
-                                //TODO: http://b/22388012
-                                uid = mPm.getPackageUidAsUser(name,
-                                        UserHandle.USER_SYSTEM);
-                            } catch (PackageManager.NameNotFoundException e) {
-                                // noop
-                            }
-                        }
+        synchronized (mPackagePreferences) {
+            // Clobber groups and channels with the xml, but don't delete other data that wasn't present
 
-                        PackagePreferences r = getOrCreatePackagePreferences(name, uid,
-                                XmlUtils.readIntAttribute(
-                                        parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE),
-                                XmlUtils.readIntAttribute(parser, ATT_PRIORITY, DEFAULT_PRIORITY),
-                                XmlUtils.readIntAttribute(
-                                        parser, ATT_VISIBILITY, DEFAULT_VISIBILITY),
-                                XmlUtils.readBooleanAttribute(
-                                        parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE));
-                        r.importance = XmlUtils.readIntAttribute(
-                                parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
-                        r.priority = XmlUtils.readIntAttribute(
-                                parser, ATT_PRIORITY, DEFAULT_PRIORITY);
-                        r.visibility = XmlUtils.readIntAttribute(
-                                parser, ATT_VISIBILITY, DEFAULT_VISIBILITY);
-                        r.showBadge = XmlUtils.readBooleanAttribute(
-                                parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE);
-                        r.lockedAppFields = XmlUtils.readIntAttribute(parser,
-                                ATT_APP_USER_LOCKED_FIELDS, DEFAULT_LOCKED_APP_FIELDS);
-
-                        final int innerDepth = parser.getDepth();
-                        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                                && (type != XmlPullParser.END_TAG
-                                || parser.getDepth() > innerDepth)) {
-                            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                                continue;
-                            }
-
-                            String tagName = parser.getName();
-                            // Channel groups
-                            if (TAG_GROUP.equals(tagName)) {
-                                String id = parser.getAttributeValue(null, ATT_ID);
-                                CharSequence groupName = parser.getAttributeValue(null, ATT_NAME);
-                                if (!TextUtils.isEmpty(id)) {
-                                    NotificationChannelGroup group
-                                            = new NotificationChannelGroup(id, groupName);
-                                    group.populateFromXml(parser);
-                                    r.groups.put(id, group);
+            // at the time of serialization.
+            mRestoredWithoutUids.clear();
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                tag = parser.getName();
+                if (type == XmlPullParser.END_TAG && TAG_RANKING.equals(tag)) {
+                    return;
+                }
+                if (type == XmlPullParser.START_TAG) {
+                    if (TAG_PACKAGE.equals(tag)) {
+                        int uid = XmlUtils.readIntAttribute(parser, ATT_UID, UNKNOWN_UID);
+                        String name = parser.getAttributeValue(null, ATT_NAME);
+                        if (!TextUtils.isEmpty(name)) {
+                            if (forRestore) {
+                                try {
+                                    //TODO: http://b/22388012
+                                    uid = mPm.getPackageUidAsUser(name,
+                                            UserHandle.USER_SYSTEM);
+                                } catch (PackageManager.NameNotFoundException e) {
+                                    // noop
                                 }
                             }
-                            // Channels
-                            if (TAG_CHANNEL.equals(tagName)) {
-                                String id = parser.getAttributeValue(null, ATT_ID);
-                                String channelName = parser.getAttributeValue(null, ATT_NAME);
-                                int channelImportance = XmlUtils.readIntAttribute(
-                                        parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
-                                if (!TextUtils.isEmpty(id) && !TextUtils.isEmpty(channelName)) {
-                                    NotificationChannel channel = new NotificationChannel(id,
-                                            channelName, channelImportance);
-                                    if (forRestore) {
-                                        channel.populateFromXmlForRestore(parser, mContext);
-                                    } else {
-                                        channel.populateFromXml(parser);
+
+                            PackagePreferences r = getOrCreatePackagePreferences(name, uid,
+                                    XmlUtils.readIntAttribute(
+                                            parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE),
+                                    XmlUtils.readIntAttribute(parser, ATT_PRIORITY,
+                                            DEFAULT_PRIORITY),
+                                    XmlUtils.readIntAttribute(
+                                            parser, ATT_VISIBILITY, DEFAULT_VISIBILITY),
+                                    XmlUtils.readBooleanAttribute(
+                                            parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE));
+                            r.importance = XmlUtils.readIntAttribute(
+                                    parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
+                            r.priority = XmlUtils.readIntAttribute(
+                                    parser, ATT_PRIORITY, DEFAULT_PRIORITY);
+                            r.visibility = XmlUtils.readIntAttribute(
+                                    parser, ATT_VISIBILITY, DEFAULT_VISIBILITY);
+                            r.showBadge = XmlUtils.readBooleanAttribute(
+                                    parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE);
+                            r.lockedAppFields = XmlUtils.readIntAttribute(parser,
+                                    ATT_APP_USER_LOCKED_FIELDS, DEFAULT_LOCKED_APP_FIELDS);
+
+                            final int innerDepth = parser.getDepth();
+                            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                                    && (type != XmlPullParser.END_TAG
+                                    || parser.getDepth() > innerDepth)) {
+                                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                                    continue;
+                                }
+
+                                String tagName = parser.getName();
+                                // Channel groups
+                                if (TAG_GROUP.equals(tagName)) {
+                                    String id = parser.getAttributeValue(null, ATT_ID);
+                                    CharSequence groupName = parser.getAttributeValue(null,
+                                            ATT_NAME);
+                                    if (!TextUtils.isEmpty(id)) {
+                                        NotificationChannelGroup group
+                                                = new NotificationChannelGroup(id, groupName);
+                                        group.populateFromXml(parser);
+                                        r.groups.put(id, group);
                                     }
-                                    r.channels.put(id, channel);
                                 }
-                            }
-                            // Delegate
-                            if (TAG_DELEGATE.equals(tagName)) {
-                                int delegateId =
-                                        XmlUtils.readIntAttribute(parser, ATT_UID, UNKNOWN_UID);
-                                String delegateName =
-                                        XmlUtils.readStringAttribute(parser, ATT_NAME);
-                                boolean delegateEnabled = XmlUtils.readBooleanAttribute(
-                                        parser, ATT_ENABLED, Delegate.DEFAULT_ENABLED);
-                                boolean userAllowed = XmlUtils.readBooleanAttribute(
-                                        parser, ATT_USER_ALLOWED, Delegate.DEFAULT_USER_ALLOWED);
-                                Delegate d = null;
-                                if (delegateId != UNKNOWN_UID && !TextUtils.isEmpty(delegateName)) {
-                                    d = new Delegate(
-                                            delegateName, delegateId, delegateEnabled, userAllowed);
+                                // Channels
+                                if (TAG_CHANNEL.equals(tagName)) {
+                                    String id = parser.getAttributeValue(null, ATT_ID);
+                                    String channelName = parser.getAttributeValue(null, ATT_NAME);
+                                    int channelImportance = XmlUtils.readIntAttribute(
+                                            parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
+                                    if (!TextUtils.isEmpty(id) && !TextUtils.isEmpty(channelName)) {
+                                        NotificationChannel channel = new NotificationChannel(id,
+                                                channelName, channelImportance);
+                                        if (forRestore) {
+                                            channel.populateFromXmlForRestore(parser, mContext);
+                                        } else {
+                                            channel.populateFromXml(parser);
+                                        }
+                                        r.channels.put(id, channel);
+                                    }
                                 }
-                                r.delegate = d;
+                                // Delegate
+                                if (TAG_DELEGATE.equals(tagName)) {
+                                    int delegateId =
+                                            XmlUtils.readIntAttribute(parser, ATT_UID, UNKNOWN_UID);
+                                    String delegateName =
+                                            XmlUtils.readStringAttribute(parser, ATT_NAME);
+                                    boolean delegateEnabled = XmlUtils.readBooleanAttribute(
+                                            parser, ATT_ENABLED, Delegate.DEFAULT_ENABLED);
+                                    boolean userAllowed = XmlUtils.readBooleanAttribute(
+                                            parser, ATT_USER_ALLOWED,
+                                            Delegate.DEFAULT_USER_ALLOWED);
+                                    Delegate d = null;
+                                    if (delegateId != UNKNOWN_UID && !TextUtils.isEmpty(
+                                            delegateName)) {
+                                        d = new Delegate(
+                                                delegateName, delegateId, delegateEnabled,
+                                                userAllowed);
+                                    }
+                                    r.delegate = d;
+                                }
+
                             }
 
-                        }
-
-                        try {
-                            deleteDefaultChannelIfNeeded(r);
-                        } catch (PackageManager.NameNotFoundException e) {
-                            Slog.e(TAG, "deleteDefaultChannelIfNeeded - Exception: " + e);
+                            try {
+                                deleteDefaultChannelIfNeeded(r);
+                            } catch (PackageManager.NameNotFoundException e) {
+                                Slog.e(TAG, "deleteDefaultChannelIfNeeded - Exception: " + e);
+                            }
                         }
                     }
                 }
@@ -255,8 +263,8 @@ public class PreferencesHelper implements RankingConfig {
 
     private PackagePreferences getPackagePreferences(String pkg, int uid) {
         final String key = packagePreferencesKey(pkg, uid);
-        synchronized (mPackagePreferencess) {
-            return mPackagePreferencess.get(key);
+        synchronized (mPackagePreferences) {
+            return mPackagePreferences.get(key);
         }
     }
 
@@ -268,10 +276,10 @@ public class PreferencesHelper implements RankingConfig {
     private PackagePreferences getOrCreatePackagePreferences(String pkg, int uid, int importance,
             int priority, int visibility, boolean showBadge) {
         final String key = packagePreferencesKey(pkg, uid);
-        synchronized (mPackagePreferencess) {
+        synchronized (mPackagePreferences) {
             PackagePreferences
                     r = (uid == UNKNOWN_UID) ? mRestoredWithoutUids.get(pkg)
-                    : mPackagePreferencess.get(key);
+                    : mPackagePreferences.get(key);
             if (r == null) {
                 r = new PackagePreferences();
                 r.pkg = pkg;
@@ -290,7 +298,7 @@ public class PreferencesHelper implements RankingConfig {
                 if (r.uid == UNKNOWN_UID) {
                     mRestoredWithoutUids.put(pkg, r);
                 } else {
-                    mPackagePreferencess.put(key, r);
+                    mPackagePreferences.put(key, r);
                 }
             }
             return r;
@@ -364,10 +372,10 @@ public class PreferencesHelper implements RankingConfig {
         out.startTag(null, TAG_RANKING);
         out.attribute(null, ATT_VERSION, Integer.toString(XML_VERSION));
 
-        synchronized (mPackagePreferencess) {
-            final int N = mPackagePreferencess.size();
+        synchronized (mPackagePreferences) {
+            final int N = mPackagePreferences.size();
             for (int i = 0; i < N; i++) {
-                final PackagePreferences r = mPackagePreferencess.valueAt(i);
+                final PackagePreferences r = mPackagePreferences.valueAt(i);
                 //TODO: http://b/22388012
                 if (forBackup && UserHandle.getUserId(r.uid) != UserHandle.USER_SYSTEM) {
                     continue;
@@ -882,10 +890,10 @@ public class PreferencesHelper implements RankingConfig {
 
     public int getBlockedAppCount(int userId) {
         int count = 0;
-        synchronized (mPackagePreferencess) {
-            final int N = mPackagePreferencess.size();
+        synchronized (mPackagePreferences) {
+            final int N = mPackagePreferences.size();
             for (int i = 0; i < N; i++) {
-                final PackagePreferences r = mPackagePreferencess.valueAt(i);
+                final PackagePreferences r = mPackagePreferences.valueAt(i);
                 if (userId == UserHandle.getUserId(r.uid)
                         && r.importance == IMPORTANCE_NONE) {
                     count++;
@@ -896,11 +904,11 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public void updateChannelsBypassingDnd() {
-        synchronized (mPackagePreferencess) {
-            final int numPackagePreferencess = mPackagePreferencess.size();
+        synchronized (mPackagePreferences) {
+            final int numPackagePreferencess = mPackagePreferences.size();
             for (int PackagePreferencesIndex = 0; PackagePreferencesIndex < numPackagePreferencess;
                     PackagePreferencesIndex++) {
-                final PackagePreferences r = mPackagePreferencess.valueAt(PackagePreferencesIndex);
+                final PackagePreferences r = mPackagePreferences.valueAt(PackagePreferencesIndex);
                 final int numChannels = r.channels.size();
 
                 for (int channelIndex = 0; channelIndex < numChannels; channelIndex++) {
@@ -1064,8 +1072,8 @@ public class PreferencesHelper implements RankingConfig {
         pw.println("per-package config:");
 
         pw.println("PackagePreferencess:");
-        synchronized (mPackagePreferencess) {
-            dumpPackagePreferencess(pw, prefix, filter, mPackagePreferencess);
+        synchronized (mPackagePreferences) {
+            dumpPackagePreferencess(pw, prefix, filter, mPackagePreferences);
         }
         pw.println("Restored without uid:");
         dumpPackagePreferencess(pw, prefix, filter, mRestoredWithoutUids);
@@ -1073,9 +1081,9 @@ public class PreferencesHelper implements RankingConfig {
 
     public void dump(ProtoOutputStream proto,
             @NonNull NotificationManagerService.DumpFilter filter) {
-        synchronized (mPackagePreferencess) {
+        synchronized (mPackagePreferences) {
             dumpPackagePreferencess(proto, RankingHelperProto.RECORDS, filter,
-                    mPackagePreferencess);
+                    mPackagePreferences);
         }
         dumpPackagePreferencess(proto, RankingHelperProto.RECORDS_RESTORED_WITHOUT_UID, filter,
                 mRestoredWithoutUids);
@@ -1160,10 +1168,10 @@ public class PreferencesHelper implements RankingConfig {
         } catch (JSONException e) {
             // pass
         }
-        synchronized (mPackagePreferencess) {
-            final int N = mPackagePreferencess.size();
+        synchronized (mPackagePreferences) {
+            final int N = mPackagePreferences.size();
             for (int i = 0; i < N; i++) {
-                final PackagePreferences r = mPackagePreferencess.valueAt(i);
+                final PackagePreferences r = mPackagePreferences.valueAt(i);
                 if (filter == null || filter.matches(r.pkg)) {
                     JSONObject PackagePreferences = new JSONObject();
                     try {
@@ -1240,11 +1248,11 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public Map<Integer, String> getPackageBans() {
-        synchronized (mPackagePreferencess) {
-            final int N = mPackagePreferencess.size();
+        synchronized (mPackagePreferences) {
+            final int N = mPackagePreferences.size();
             ArrayMap<Integer, String> packageBans = new ArrayMap<>(N);
             for (int i = 0; i < N; i++) {
-                final PackagePreferences r = mPackagePreferencess.valueAt(i);
+                final PackagePreferences r = mPackagePreferences.valueAt(i);
                 if (r.importance == IMPORTANCE_NONE) {
                     packageBans.put(r.uid, r.pkg);
                 }
@@ -1284,9 +1292,9 @@ public class PreferencesHelper implements RankingConfig {
 
     private Map<String, Integer> getPackageChannels() {
         ArrayMap<String, Integer> packageChannels = new ArrayMap<>();
-        synchronized (mPackagePreferencess) {
-            for (int i = 0; i < mPackagePreferencess.size(); i++) {
-                final PackagePreferences r = mPackagePreferencess.valueAt(i);
+        synchronized (mPackagePreferences) {
+            for (int i = 0; i < mPackagePreferences.size(); i++) {
+                final PackagePreferences r = mPackagePreferences.valueAt(i);
                 int channelCount = 0;
                 for (int j = 0; j < r.channels.size(); j++) {
                     if (!r.channels.valueAt(j).isDeleted()) {
@@ -1300,22 +1308,22 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public void onUserRemoved(int userId) {
-        synchronized (mPackagePreferencess) {
-            int N = mPackagePreferencess.size();
+        synchronized (mPackagePreferences) {
+            int N = mPackagePreferences.size();
             for (int i = N - 1; i >= 0; i--) {
-                PackagePreferences PackagePreferences = mPackagePreferencess.valueAt(i);
+                PackagePreferences PackagePreferences = mPackagePreferences.valueAt(i);
                 if (UserHandle.getUserId(PackagePreferences.uid) == userId) {
-                    mPackagePreferencess.removeAt(i);
+                    mPackagePreferences.removeAt(i);
                 }
             }
         }
     }
 
     protected void onLocaleChanged(Context context, int userId) {
-        synchronized (mPackagePreferencess) {
-            int N = mPackagePreferencess.size();
+        synchronized (mPackagePreferences) {
+            int N = mPackagePreferences.size();
             for (int i = 0; i < N; i++) {
-                PackagePreferences PackagePreferences = mPackagePreferencess.valueAt(i);
+                PackagePreferences PackagePreferences = mPackagePreferences.valueAt(i);
                 if (UserHandle.getUserId(PackagePreferences.uid) == userId) {
                     if (PackagePreferences.channels.containsKey(
                             NotificationChannel.DEFAULT_CHANNEL_ID)) {
@@ -1341,8 +1349,8 @@ public class PreferencesHelper implements RankingConfig {
             for (int i = 0; i < size; i++) {
                 final String pkg = pkgList[i];
                 final int uid = uidList[i];
-                synchronized (mPackagePreferencess) {
-                    mPackagePreferencess.remove(packagePreferencesKey(pkg, uid));
+                synchronized (mPackagePreferences) {
+                    mPackagePreferences.remove(packagePreferencesKey(pkg, uid));
                 }
                 mRestoredWithoutUids.remove(pkg);
                 updated = true;
@@ -1355,8 +1363,8 @@ public class PreferencesHelper implements RankingConfig {
                     try {
                         r.uid = mPm.getPackageUidAsUser(r.pkg, changeUserId);
                         mRestoredWithoutUids.remove(pkg);
-                        synchronized (mPackagePreferencess) {
-                            mPackagePreferencess.put(packagePreferencesKey(r.pkg, r.uid), r);
+                        synchronized (mPackagePreferences) {
+                            mPackagePreferences.put(packagePreferencesKey(r.pkg, r.uid), r);
                         }
                         updated = true;
                     } catch (PackageManager.NameNotFoundException e) {
@@ -1365,11 +1373,13 @@ public class PreferencesHelper implements RankingConfig {
                 }
                 // Package upgrade
                 try {
-                    PackagePreferences fullPackagePreferences = getPackagePreferences(pkg,
-                            mPm.getPackageUidAsUser(pkg, changeUserId));
-                    if (fullPackagePreferences != null) {
-                        createDefaultChannelIfNeeded(fullPackagePreferences);
-                        deleteDefaultChannelIfNeeded(fullPackagePreferences);
+                    synchronized (mPackagePreferences) {
+                        PackagePreferences fullPackagePreferences = getPackagePreferences(pkg,
+                                mPm.getPackageUidAsUser(pkg, changeUserId));
+                        if (fullPackagePreferences != null) {
+                            createDefaultChannelIfNeeded(fullPackagePreferences);
+                            deleteDefaultChannelIfNeeded(fullPackagePreferences);
+                        }
                     }
                 } catch (PackageManager.NameNotFoundException e) {
                 }

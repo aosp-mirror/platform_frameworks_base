@@ -58,7 +58,7 @@ import java.util.List;
  * execute in parallel with any {@link Surface} initialization, such as waiting for a
  * {@link android.view.SurfaceView} to be ready as part of the UI initialization.</li>
  *
- * <li>The third and most complex usage pattern inlvolves surface sharing. Once instantiated an
+ * <li>The third and most complex usage pattern involves surface sharing. Once instantiated an
  * OutputConfiguration can be enabled for surface sharing via {@link #enableSurfaceSharing}. This
  * must be done before creating a new capture session and enables calls to
  * {@link CameraCaptureSession#updateOutputConfiguration}. An OutputConfiguration with enabled

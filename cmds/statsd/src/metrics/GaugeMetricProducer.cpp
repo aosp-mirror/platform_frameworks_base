@@ -63,7 +63,6 @@ const int FIELD_ID_DIMENSION_LEAF_IN_CONDITION = 5;
 // for GaugeBucketInfo
 const int FIELD_ID_ATOM = 3;
 const int FIELD_ID_ELAPSED_ATOM_TIMESTAMP = 4;
-const int FIELD_ID_WALL_CLOCK_ATOM_TIMESTAMP = 5;
 const int FIELD_ID_BUCKET_NUM = 6;
 const int FIELD_ID_START_BUCKET_ELAPSED_MILLIS = 7;
 const int FIELD_ID_END_BUCKET_ELAPSED_MILLIS = 8;
@@ -286,16 +285,9 @@ void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                     const int64_t elapsedTimestampNs =  truncateTimestamp ?
                         truncateTimestampNsToFiveMinutes(atom.mElapsedTimestamps) :
                             atom.mElapsedTimestamps;
-                    const int64_t wallClockNs = truncateTimestamp ?
-                        truncateTimestampNsToFiveMinutes(atom.mWallClockTimestampNs) :
-                            atom.mWallClockTimestampNs;
                     protoOutput->write(
                         FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED | FIELD_ID_ELAPSED_ATOM_TIMESTAMP,
                         (long long)elapsedTimestampNs);
-                    protoOutput->write(
-                        FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED |
-                            FIELD_ID_WALL_CLOCK_ATOM_TIMESTAMP,
-                        (long long)wallClockNs);
                 }
             }
             protoOutput->end(bucketInfoToken);
@@ -450,7 +442,7 @@ void GaugeMetricProducer::onMatchedLogEventInternalLocked(
     if ((*mCurrentSlicedBucket)[eventKey].size() >= mGaugeAtomsPerDimensionLimit) {
         return;
     }
-    GaugeAtom gaugeAtom(getGaugeFields(event), eventTimeNs, getWallClockNs());
+    GaugeAtom gaugeAtom(getGaugeFields(event), eventTimeNs);
     (*mCurrentSlicedBucket)[eventKey].push_back(gaugeAtom);
     // Anomaly detection on gauge metric only works when there is one numeric
     // field specified.

@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright 2017, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
-#include <jni.h>
+#ifndef _ANDROID_MEDIA_MEDIAMETRICSJNI_H_
+#define _ANDROID_MEDIA_MEDIAMETRICSJNI_H_
 
-jint JNI_OnLoad(JavaVM * /*vm*/, void * /*reserved*/) {
-    return JNI_VERSION_1_4;
-}
+#include <jni.h>
+#include <nativehelper/JNIHelp.h>
+#include <media/MediaAnalyticsItem.h>
+
+// Copeid from core/jni/ (libandroid_runtime.so)
+namespace android {
+
+class MediaMetricsJNI {
+public:
+    static jobject writeMetricsToBundle(JNIEnv* env, MediaAnalyticsItem *item, jobject mybundle);
+};
+
+};  // namespace android
+
+#endif //  _ANDROID_MEDIA_MEDIAMETRICSJNI_H_
