@@ -76,6 +76,7 @@ import java.util.List;
  * @attr ref android.R.styleable#AccessibilityService_notificationTimeout
  * @attr ref android.R.styleable#AccessibilityService_packageNames
  * @attr ref android.R.styleable#AccessibilityService_settingsActivity
+ * @attr ref android.R.styleable#AccessibilityService_minimumUiTimeout
  * @see AccessibilityService
  * @see android.view.accessibility.AccessibilityEvent
  * @see android.view.accessibility.AccessibilityManager
@@ -426,6 +427,13 @@ public class AccessibilityServiceInfo implements Parcelable {
     public boolean crashed;
 
     /**
+     * The minimum timeout in milliseconds that UI controls need to remain on the screen.
+     *
+     * @see #setMinimumUiTimeoutMillis
+     */
+    private int mMinimumUiTimeout;
+
+    /**
      * The component name the accessibility service.
      */
     private ComponentName mComponentName;
@@ -529,6 +537,9 @@ public class AccessibilityServiceInfo implements Parcelable {
             notificationTimeout = asAttributes.getInt(
                     com.android.internal.R.styleable.AccessibilityService_notificationTimeout,
                     0);
+            mMinimumUiTimeout = asAttributes.getInt(
+                    com.android.internal.R.styleable.AccessibilityService_minimumUiTimeout,
+                    0);
             flags = asAttributes.getInt(
                     com.android.internal.R.styleable.AccessibilityService_accessibilityFlags, 0);
             mSettingsActivityName = asAttributes.getString(
@@ -598,6 +609,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         packageNames = other.packageNames;
         feedbackType = other.feedbackType;
         notificationTimeout = other.notificationTimeout;
+        mMinimumUiTimeout = other.mMinimumUiTimeout;
         flags = other.flags;
     }
 
@@ -755,6 +767,29 @@ public class AccessibilityServiceInfo implements Parcelable {
         return null;
     }
 
+    /**
+     * Set the minimum time that controls need to remain on the screen to support the user.
+     * <p>
+     *    <strong>This value can be dynamically set at runtime by
+     *    {@link AccessibilityService#setServiceInfo(AccessibilityServiceInfo)}.</strong>
+     * </p>
+     *
+     * @param timeout The timeout in milliseconds.
+     */
+    public void setMinimumUiTimeoutMillis(int timeout) {
+        mMinimumUiTimeout = timeout;
+    }
+
+    /**
+     * Get the minimum ui timeout.
+     *
+     * @see #setMinimumUiTimeoutMillis
+     * @return The timeout in milliseconds.
+     */
+    public int getMinimumUiTimeoutMillis() {
+        return mMinimumUiTimeout;
+    }
+
     /** {@hide} */
     public boolean isDirectBootAware() {
         return ((flags & FLAG_FORCE_DIRECT_BOOT_AWARE) != 0)
@@ -773,6 +808,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeStringArray(packageNames);
         parcel.writeInt(feedbackType);
         parcel.writeLong(notificationTimeout);
+        parcel.writeInt(mMinimumUiTimeout);
         parcel.writeInt(flags);
         parcel.writeInt(crashed ? 1 : 0);
         parcel.writeParcelable(mComponentName, flagz);
@@ -790,6 +826,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         packageNames = parcel.readStringArray();
         feedbackType = parcel.readInt();
         notificationTimeout = parcel.readLong();
+        mMinimumUiTimeout = parcel.readInt();
         flags = parcel.readInt();
         crashed = parcel.readInt() != 0;
         mComponentName = parcel.readParcelable(this.getClass().getClassLoader());
@@ -839,6 +876,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         appendFeedbackTypes(stringBuilder, feedbackType);
         stringBuilder.append(", ");
         stringBuilder.append("notificationTimeout: ").append(notificationTimeout);
+        stringBuilder.append(", ");
+        stringBuilder.append("minimumUiTimeout: ").append(mMinimumUiTimeout);
         stringBuilder.append(", ");
         appendFlags(stringBuilder, flags);
         stringBuilder.append(", ");

@@ -2914,6 +2914,7 @@
     <public-group type="attr" first-id="0x0101058d">
         <!-- @hide For use by platform and tools only. Developers should not specify this value. -->
         <public name="usesNonSdkApi" />
+        <public name="minimumUiTimeout" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e2">

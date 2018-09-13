@@ -3573,6 +3573,11 @@
              {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)
              android.accessibilityservice.AccessibilityService.setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
         <attr name="notificationTimeout" format="integer" />
+        <!-- The minimum timeout in milliseconds that UI controls need to remain on the screen.
+             This setting can be changed at runtime by calling
+             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)
+             android.accessibilityservice.AccessibilityService.setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
+        <attr name="minimumUiTimeout" format="integer" />
         <!-- Additional flags as specified in
              {@link android.accessibilityservice.AccessibilityServiceInfo}.
              This setting can be changed at runtime by calling
