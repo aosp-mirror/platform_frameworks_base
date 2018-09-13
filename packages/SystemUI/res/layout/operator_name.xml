@@ -27,5 +27,6 @@
         android:maxLength="20"
         android:gravity="center_vertical|start"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:singleLine="true" />
+        android:singleLine="true"
+        android:paddingEnd="5dp" />
 </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
