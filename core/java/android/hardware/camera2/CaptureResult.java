@@ -2841,6 +2841,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p><b>Units</b>:
      * Quaternion coefficients</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      */
     @PublicKey
     public static final Key<float[]> LENS_POSE_ROTATION =
@@ -2876,6 +2877,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * with PRIMARY_CAMERA.</p>
      * <p><b>Units</b>: Meters</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#LENS_DISTORTION
      * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
@@ -2947,6 +2949,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}
      * coordinate system.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#LENS_DISTORTION
      * @see CameraCharacteristics#LENS_POSE_ROTATION
@@ -2990,6 +2993,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p><b>Units</b>:
      * Unitless coefficients.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
      * @deprecated
@@ -3036,6 +3040,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p><b>Units</b>:
      * Unitless coefficients.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
      * @see CameraCharacteristics#LENS_RADIAL_DISTORTION
