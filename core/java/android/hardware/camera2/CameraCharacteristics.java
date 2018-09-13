@@ -335,10 +335,10 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>Returns a subset of {@link #getAvailableCaptureRequestKeys} keys that can
-     * be overriden for physical devices backing a logical multi-camera.</p>
+     * be overridden for physical devices backing a logical multi-camera.</p>
      *
      * <p>This is a subset of android.request.availableRequestKeys which contains a list
-     * of keys that can be overriden using {@link CaptureRequest.Builder#setPhysicalCameraKey }.
+     * of keys that can be overridden using {@link CaptureRequest.Builder#setPhysicalCameraKey }.
      * The respective value of such request key can be obtained by calling
      * {@link CaptureRequest.Builder#getPhysicalCameraKey }. Capture requests that contain
      * individual physical device requests must be built via
@@ -353,7 +353,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * <p>Each key is only listed once in the list. The order of the keys is undefined.</p>
      *
-     * @return List of keys that can be overriden in individual physical device requests.
+     * @return List of keys that can be overridden in individual physical device requests.
      * In case the camera device doesn't support such keys the list can be null.
      */
     @SuppressWarnings({"unchecked"})
@@ -1860,10 +1860,10 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<int[]>("android.request.availableSessionKeys", int[].class);
 
     /**
-     * <p>A subset of the available request keys that can be overriden for
+     * <p>A subset of the available request keys that can be overridden for
      * physical devices backing a logical multi-camera.</p>
      * <p>This is a subset of android.request.availableRequestKeys which contains a list
-     * of keys that can be overriden using {@link CaptureRequest.Builder#setPhysicalCameraKey }.
+     * of keys that can be overridden using {@link CaptureRequest.Builder#setPhysicalCameraKey }.
      * The respective value of such request key can be obtained by calling
      * {@link CaptureRequest.Builder#getPhysicalCameraKey }. Capture requests that contain
      * individual physical device requests must be built via
