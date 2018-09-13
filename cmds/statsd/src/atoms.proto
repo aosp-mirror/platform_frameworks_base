@@ -167,6 +167,7 @@ message Atom {
         AppSize app_size = 10027;
         CategorySize category_size = 10028;
         android.service.procstats.ProcessStatsSectionProto proc_stats = 10029;
+        BatteryVoltage battery_voltage = 10030;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP. Field numbers above
@@ -2152,6 +2153,16 @@ message RemainingBatteryCapacity {
  */
 message FullBatteryCapacity {
     optional int32 capacity_uAh = 1;
+}
+
+/**
+ * Pulls battery voltage.
+ * Pulled from:
+ *   frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
+ */
+message BatteryVoltage {
+    // The voltage of the battery, in millivolts.
+    optional int32 voltage_mV = 1;
 }
 
 /**
