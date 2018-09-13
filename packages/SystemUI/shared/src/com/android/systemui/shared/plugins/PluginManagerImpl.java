@@ -12,7 +12,7 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.plugins;
+package com.android.systemui.shared.plugins;
 
 import android.app.Notification;
 import android.app.Notification.Action;
@@ -41,10 +41,11 @@ import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.systemui.Dependency;
-import com.android.systemui.R;
-import com.android.systemui.plugins.PluginInstanceManager.PluginContextWrapper;
-import com.android.systemui.plugins.PluginInstanceManager.PluginInfo;
+
+import com.android.systemui.plugins.Plugin;
+import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.shared.plugins.PluginInstanceManager.PluginContextWrapper;
+import com.android.systemui.shared.plugins.PluginInstanceManager.PluginInfo;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
 import dalvik.system.PathClassLoader;
@@ -79,31 +80,33 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     private Looper mLooper;
     private boolean mWtfsSet;
 
-    public PluginManagerImpl(Context context) {
+    public PluginManagerImpl(Context context, PluginInitializer initializer) {
         this(context, new PluginInstanceManagerFactory(), Build.IS_DEBUGGABLE,
-                context.getResources().getStringArray(R.array.config_pluginWhitelist),
-                Thread.getUncaughtExceptionPreHandler());
+                Thread.getUncaughtExceptionPreHandler(), initializer);
     }
 
     @VisibleForTesting
     PluginManagerImpl(Context context, PluginInstanceManagerFactory factory, boolean debuggable,
-            String[] whitelistedPlugins, UncaughtExceptionHandler defaultHandler) {
+            UncaughtExceptionHandler defaultHandler, PluginInitializer initializer) {
         mContext = context;
         mFactory = factory;
-        mLooper = Dependency.get(Dependency.BG_LOOPER);
+        mLooper = initializer.getBgLooper();
         isDebuggable = debuggable;
-        mWhitelistedPlugins.addAll(Arrays.asList(whitelistedPlugins));
+        mWhitelistedPlugins.addAll(Arrays.asList(initializer.getWhitelistedPlugins(mContext)));
         mPluginPrefs = new PluginPrefs(mContext);
 
         PluginExceptionHandler uncaughtExceptionHandler = new PluginExceptionHandler(
                 defaultHandler);
         Thread.setUncaughtExceptionPreHandler(uncaughtExceptionHandler);
-        new Handler(mLooper).post(() -> {
-            // Plugin dependencies that don't have another good home can go here, but
-            // dependencies that have better places to init can happen elsewhere.
-            Dependency.get(PluginDependencyProvider.class)
-                    .allowPluginDependency(ActivityStarter.class);
-        });
+
+        Runnable bgRunnable = initializer.getBgInitCallback();
+        if (bgRunnable != null) {
+            new Handler(mLooper).post(bgRunnable);
+        }
+    }
+
+    public String[] getWhitelistedPlugins() {
+        return mWhitelistedPlugins.toArray(new String[0]);
     }
 
     public <T extends Plugin> T getOneShotPlugin(Class<T> cls) {
@@ -121,7 +124,9 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         if (Looper.myLooper() != Looper.getMainLooper()) {
             throw new RuntimeException("Must be called from UI thread");
         }
-        PluginInstanceManager<T> p = mFactory.createPluginInstanceManager(mContext, action, null,
+        // Passing null causes compiler to complain about incompatible (generic) types.
+        PluginListener<Plugin> dummy = null;
+        PluginInstanceManager<T> p = mFactory.createPluginInstanceManager(mContext, action, dummy,
                 false, mLooper, cls, this);
         mPluginPrefs.addAction(action);
         PluginInfo<T> info = p.getPlugin();
@@ -140,7 +145,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
 
     public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<?> cls,
             boolean allowMultiple) {
-        addPluginListener(PluginManager.getAction(cls), listener, cls, allowMultiple);
+        addPluginListener(PluginManager.Helper.getAction(cls), listener, cls, allowMultiple);
     }
 
     public <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
@@ -293,8 +298,12 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     public void handleWtfs() {
         if (!mWtfsSet) {
             mWtfsSet = true;
-            Log.setWtfHandler((tag, what, system) -> {
-                throw new CrashWhilePluginActiveException(what);
+            Log.setWtfHandler(new Log.TerribleFailureHandler() {
+                @Override
+                public void onTerribleFailure(String tag, Log.TerribleFailure what,
+                        boolean system) {
+                    throw new CrashWhilePluginActiveException(what);
+                }
             });
         }
     }

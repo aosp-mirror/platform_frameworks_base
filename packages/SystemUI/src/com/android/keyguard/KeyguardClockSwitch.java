@@ -14,7 +14,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.shared.plugins.PluginManager;
 
 /**
  * Switch to show plugin clock when plugin is connected, otherwise it will show default clock.

@@ -12,7 +12,7 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.plugins;
+package com.android.systemui.shared.plugins;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -20,7 +20,8 @@ import static org.junit.Assert.assertTrue;
 import android.support.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.VersionInfo.InvalidVersionException;
+import com.android.systemui.plugins.OverlayPlugin;
+import com.android.systemui.shared.plugins.VersionInfo.InvalidVersionException;
 import com.android.systemui.plugins.annotations.Requires;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.DetailAdapter;

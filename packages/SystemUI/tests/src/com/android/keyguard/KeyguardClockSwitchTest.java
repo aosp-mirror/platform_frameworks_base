@@ -40,7 +40,7 @@ import android.widget.TextClock;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.shared.plugins.PluginManager;
 
 import org.junit.Before;
 import org.junit.Test;

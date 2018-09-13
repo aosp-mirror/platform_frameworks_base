@@ -28,8 +28,8 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import com.android.internal.os.BinderInternal;
-import com.android.systemui.plugins.PluginManager;
-import com.android.systemui.plugins.PluginManagerImpl;
+import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.shared.plugins.PluginManagerImpl;
 
 public class SystemUIService extends Service {
 

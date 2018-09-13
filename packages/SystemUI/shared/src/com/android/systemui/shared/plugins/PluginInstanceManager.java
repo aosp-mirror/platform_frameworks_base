@@ -12,7 +12,7 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.plugins;
+package com.android.systemui.shared.plugins;
 
 import android.app.Notification;
 import android.app.Notification.Action;
@@ -39,12 +39,14 @@ import android.view.LayoutInflater;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.systemui.plugins.VersionInfo.InvalidVersionException;
+import com.android.systemui.plugins.Plugin;
+import com.android.systemui.plugins.PluginFragment;
+import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.shared.plugins.VersionInfo.InvalidVersionException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import com.android.systemui.R;
 
 public class PluginInstanceManager<T extends Plugin> {
 
@@ -71,8 +73,7 @@ public class PluginInstanceManager<T extends Plugin> {
     PluginInstanceManager(Context context, String action, PluginListener<T> listener,
             boolean allowMultiple, Looper looper, VersionInfo version, PluginManagerImpl manager) {
         this(context, context.getPackageManager(), action, listener, allowMultiple, looper, version,
-                manager, Build.IS_DEBUGGABLE,
-                context.getResources().getStringArray(R.array.config_pluginWhitelist));
+                manager, Build.IS_DEBUGGABLE, manager.getWhitelistedPlugins());
     }
 
     @VisibleForTesting
@@ -114,7 +115,7 @@ public class PluginInstanceManager<T extends Plugin> {
 
     public void destroy() {
         if (DEBUG) Log.d(TAG, "stopListening");
-        ArrayList<PluginInfo> plugins = new ArrayList<>(mPluginHandler.mPlugins);
+        ArrayList<PluginInfo> plugins = new ArrayList<PluginInfo>(mPluginHandler.mPlugins);
         for (PluginInfo plugin : plugins) {
             mMainHandler.obtainMessage(MainHandler.PLUGIN_DISCONNECTED,
                     plugin.mPlugin).sendToTarget();
@@ -132,7 +133,7 @@ public class PluginInstanceManager<T extends Plugin> {
 
     public boolean checkAndDisable(String className) {
         boolean disableAny = false;
-        ArrayList<PluginInfo> plugins = new ArrayList<>(mPluginHandler.mPlugins);
+        ArrayList<PluginInfo> plugins = new ArrayList<PluginInfo>(mPluginHandler.mPlugins);
         for (PluginInfo info : plugins) {
             if (className.startsWith(info.mPackage)) {
                 disable(info);
@@ -143,7 +144,7 @@ public class PluginInstanceManager<T extends Plugin> {
     }
 
     public boolean disableAll() {
-        ArrayList<PluginInfo> plugins = new ArrayList<>(mPluginHandler.mPlugins);
+        ArrayList<PluginInfo> plugins = new ArrayList<PluginInfo>(mPluginHandler.mPlugins);
         for (int i = 0; i < plugins.size(); i++) {
             disable(plugins.get(i));
         }
@@ -165,7 +166,7 @@ public class PluginInstanceManager<T extends Plugin> {
     }
 
     public <T> boolean dependsOn(Plugin p, Class<T> cls) {
-        ArrayList<PluginInfo> plugins = new ArrayList<>(mPluginHandler.mPlugins);
+        ArrayList<PluginInfo> plugins = new ArrayList<PluginInfo>(mPluginHandler.mPlugins);
         for (PluginInfo info : plugins) {
             if (info.mPlugin.getClass().getName().equals(p.getClass().getName())) {
                 return info.mVersion != null && info.mVersion.hasClass(cls);
