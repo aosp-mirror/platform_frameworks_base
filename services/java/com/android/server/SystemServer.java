@@ -785,6 +785,8 @@ public final class SystemServer {
 
         boolean disableSystemTextClassifier = SystemProperties.getBoolean(
                 "config.disable_systemtextclassifier", false);
+        boolean disableNetworkTime = SystemProperties.getBoolean("config.disable_networktime",
+                false);
         boolean disableCameraService = SystemProperties.getBoolean("config.disable_cameraservice",
                 false);
         boolean disableSlices = SystemProperties.getBoolean("config.disable_slices", false);
@@ -1459,7 +1461,7 @@ public final class SystemServer {
                 traceEnd();
             }
 
-            if (!isWatch) {
+            if (!isWatch && !disableNetworkTime) {
                 traceBeginAndSlog("StartNetworkTimeUpdateService");
                 try {
                     if (useNewTimeServices) {
