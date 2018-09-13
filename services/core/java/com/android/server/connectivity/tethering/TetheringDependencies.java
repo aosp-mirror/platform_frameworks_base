@@ -21,6 +21,7 @@ import android.net.INetd;
 import android.net.NetworkRequest;
 import android.net.dhcp.DhcpServer;
 import android.net.dhcp.DhcpServingParams;
+import android.net.ip.IpServer;
 import android.net.ip.RouterAdvertisementDaemon;
 import android.net.util.InterfaceParams;
 import android.net.util.NetdService;
@@ -49,20 +50,12 @@ public class TetheringDependencies {
     }
 
     public IPv6TetheringCoordinator getIPv6TetheringCoordinator(
-            ArrayList<TetherInterfaceStateMachine> notifyList, SharedLog log) {
+            ArrayList<IpServer> notifyList, SharedLog log) {
         return new IPv6TetheringCoordinator(notifyList, log);
     }
 
-    public RouterAdvertisementDaemon getRouterAdvertisementDaemon(InterfaceParams ifParams) {
-        return new RouterAdvertisementDaemon(ifParams);
-    }
-
-    public InterfaceParams getInterfaceParams(String ifName) {
-        return InterfaceParams.getByName(ifName);
-    }
-
-    public INetd getNetdService() {
-        return NetdService.getInstance();
+    public IpServer.Dependencies getIpServerDependencies() {
+        return new IpServer.Dependencies();
     }
 
     public boolean isTetheringSupported() {
@@ -71,10 +64,5 @@ public class TetheringDependencies {
 
     public NetworkRequest getDefaultNetworkRequest() {
         return null;
-    }
-
-    public DhcpServer makeDhcpServer(Looper looper, InterfaceParams iface, DhcpServingParams params,
-            SharedLog log) {
-        return new DhcpServer(looper, iface, params, log);
     }
 }
