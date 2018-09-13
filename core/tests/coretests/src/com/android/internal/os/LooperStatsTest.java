@@ -152,29 +152,35 @@ public final class LooperStatsTest {
         looperStats.messageDispatched(token3, mHandlerSecond.obtainMessage().setCallback(() -> {
         }));
 
-        // Contributes to entry1.
+        // Will not be sampled so does not contribute to any entries.
         Object token4 = looperStats.messageDispatchStarting();
+        looperStats.tickRealtime(10);
+        looperStats.tickThreadTime(10);
+        looperStats.messageDispatched(token4, mHandlerSecond.obtainMessage(0));
+
+        // Contributes to entry1.
+        Object token5 = looperStats.messageDispatchStarting();
         looperStats.tickRealtime(100);
         looperStats.tickThreadTime(100);
-        looperStats.messageDispatched(token4, mHandlerAnonymous.obtainMessage(1));
+        looperStats.messageDispatched(token5, mHandlerAnonymous.obtainMessage(1));
 
         List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
         assertThat(entries).hasSize(3);
         entries.sort(Comparator.comparing(e -> e.handlerClassName));
 
-        // Captures data for token4 call.
+        // Captures data for token5 call.
         LooperStats.ExportedEntry entry1 = entries.get(0);
         assertThat(entry1.workSourceUid).isEqualTo(-1);
         assertThat(entry1.threadName).isEqualTo("TestThread1");
         assertThat(entry1.handlerClassName).isEqualTo("com.android.internal.os.LooperStatsTest$1");
         assertThat(entry1.messageName).isEqualTo("0x1" /* 1 in hex */);
         assertThat(entry1.messageCount).isEqualTo(1);
-        assertThat(entry1.recordedMessageCount).isEqualTo(0);
+        assertThat(entry1.recordedMessageCount).isEqualTo(1);
         assertThat(entry1.exceptionCount).isEqualTo(0);
-        assertThat(entry1.totalLatencyMicros).isEqualTo(0);
-        assertThat(entry1.maxLatencyMicros).isEqualTo(0);
-        assertThat(entry1.cpuUsageMicros).isEqualTo(0);
-        assertThat(entry1.maxCpuUsageMicros).isEqualTo(0);
+        assertThat(entry1.totalLatencyMicros).isEqualTo(100);
+        assertThat(entry1.maxLatencyMicros).isEqualTo(100);
+        assertThat(entry1.cpuUsageMicros).isEqualTo(100);
+        assertThat(entry1.maxCpuUsageMicros).isEqualTo(100);
 
         // Captures data for token1 and token2 calls.
         LooperStats.ExportedEntry entry2 = entries.get(1);
@@ -274,7 +280,7 @@ public final class LooperStatsTest {
 
     @Test
     public void testMessagesOverSizeCap() {
-        TestableLooperStats looperStats = new TestableLooperStats(2, 1 /* sizeCap */);
+        TestableLooperStats looperStats = new TestableLooperStats(1, 1 /* sizeCap */);
 
         Object token1 = looperStats.messageDispatchStarting();
         looperStats.tickRealtime(100);
@@ -305,12 +311,12 @@ public final class LooperStatsTest {
         assertThat(entry1.handlerClassName).isEqualTo("");
         assertThat(entry1.messageName).isEqualTo("OVERFLOW");
         assertThat(entry1.messageCount).isEqualTo(3);
-        assertThat(entry1.recordedMessageCount).isEqualTo(1);
+        assertThat(entry1.recordedMessageCount).isEqualTo(3);
         assertThat(entry1.exceptionCount).isEqualTo(0);
-        assertThat(entry1.totalLatencyMicros).isEqualTo(10);
-        assertThat(entry1.maxLatencyMicros).isEqualTo(10);
-        assertThat(entry1.cpuUsageMicros).isEqualTo(10);
-        assertThat(entry1.maxCpuUsageMicros).isEqualTo(10);
+        assertThat(entry1.totalLatencyMicros).isEqualTo(70);
+        assertThat(entry1.maxLatencyMicros).isEqualTo(50);
+        assertThat(entry1.cpuUsageMicros).isEqualTo(40);
+        assertThat(entry1.maxCpuUsageMicros).isEqualTo(20);
 
         LooperStats.ExportedEntry entry2 = entries.get(1);
         assertThat(entry2.threadName).isEqualTo("TestThread1");

@@ -17,6 +17,7 @@
 package com.android.internal.os;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -36,7 +37,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @hide Only for use within the system server.
  */
 public class LooperStats implements Looper.Observer {
-    private static final int TOKEN_POOL_SIZE = 50;
+    private static final int SESSION_POOL_SIZE = 50;
 
     @GuardedBy("mLock")
     private final SparseArray<Entry> mEntries = new SparseArray<>(512);
@@ -78,17 +79,19 @@ public class LooperStats implements Looper.Observer {
         }
 
         DispatchSession session = (DispatchSession) token;
-        Entry entry = getOrCreateEntry(msg);
-        synchronized (entry) {
-            entry.messageCount++;
-            if (session != DispatchSession.NOT_SAMPLED) {
-                entry.recordedMessageCount++;
-                long latency = getElapsedRealtimeMicro() - session.startTimeMicro;
-                long cpuUsage = getThreadTimeMicro() - session.cpuStartMicro;
-                entry.totalLatencyMicro += latency;
-                entry.maxLatencyMicro = Math.max(entry.maxLatencyMicro, latency);
-                entry.cpuUsageMicro += cpuUsage;
-                entry.maxCpuUsageMicro = Math.max(entry.maxCpuUsageMicro, cpuUsage);
+        Entry entry = findEntry(msg, /* allowCreateNew= */session != DispatchSession.NOT_SAMPLED);
+        if (entry != null) {
+            synchronized (entry) {
+                entry.messageCount++;
+                if (session != DispatchSession.NOT_SAMPLED) {
+                    entry.recordedMessageCount++;
+                    long latency = getElapsedRealtimeMicro() - session.startTimeMicro;
+                    long cpuUsage = getThreadTimeMicro() - session.cpuStartMicro;
+                    entry.totalLatencyMicro += latency;
+                    entry.maxLatencyMicro = Math.max(entry.maxLatencyMicro, latency);
+                    entry.cpuUsageMicro += cpuUsage;
+                    entry.maxCpuUsageMicro = Math.max(entry.maxCpuUsageMicro, cpuUsage);
+                }
             }
         }
 
@@ -102,7 +105,7 @@ public class LooperStats implements Looper.Observer {
         }
 
         DispatchSession session = (DispatchSession) token;
-        Entry entry = getOrCreateEntry(msg);
+        Entry entry = findEntry(msg, /* allowCreateNew= */true);
         synchronized (entry) {
             entry.exceptionCount++;
         }
@@ -159,20 +162,23 @@ public class LooperStats implements Looper.Observer {
         mSamplingInterval = samplingInterval;
     }
 
-    @NonNull
-    private Entry getOrCreateEntry(Message msg) {
+    @Nullable
+    private Entry findEntry(Message msg, boolean allowCreateNew) {
         final boolean isInteractive = mDeviceState.isScreenInteractive();
         final int id = Entry.idFor(msg, isInteractive);
         Entry entry;
         synchronized (mLock) {
             entry = mEntries.get(id);
             if (entry == null) {
-                if (mEntries.size() >= mEntriesSizeCap) {
-                    // If over the size cap, track totals under a single entry.
+                if (!allowCreateNew) {
+                    return null;
+                } else if (mEntries.size() >= mEntriesSizeCap) {
+                    // If over the size cap track totals under OVERFLOW entry.
                     return mOverflowEntry;
+                } else {
+                    entry = new Entry(msg, isInteractive);
+                    mEntries.put(id, entry);
                 }
-                entry = new Entry(msg, isInteractive);
-                mEntries.put(id, entry);
             }
         }
 
@@ -187,7 +193,7 @@ public class LooperStats implements Looper.Observer {
     }
 
     private void recycleSession(DispatchSession session) {
-        if (session != DispatchSession.NOT_SAMPLED && mSessionPool.size() < TOKEN_POOL_SIZE) {
+        if (session != DispatchSession.NOT_SAMPLED && mSessionPool.size() < SESSION_POOL_SIZE) {
             mSessionPool.add(session);
         }
     }
