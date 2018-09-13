@@ -4732,8 +4732,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         final WindowManager.LayoutParams attrs = win.getAttrs();
         final boolean isDefaultDisplay = win.isDefaultDisplay();
-        final boolean needsToOffsetInputMethodTarget = isDefaultDisplay &&
-                (win == mLastInputMethodTargetWindow && mLastInputMethodWindow != null);
+        final boolean needsToOffsetInputMethodTarget =
+                (win == mLastInputMethodTargetWindow) && (mLastInputMethodWindow != null);
         if (needsToOffsetInputMethodTarget) {
             if (DEBUG_LAYOUT) Slog.i(TAG, "Offset ime target window by the last ime window state");
             offsetInputMethodWindowLw(mLastInputMethodWindow, displayFrames);

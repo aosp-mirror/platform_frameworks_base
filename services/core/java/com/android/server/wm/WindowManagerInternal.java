@@ -335,9 +335,9 @@ public abstract class WindowManagerInternal {
     public abstract void registerAppTransitionListener(AppTransitionListener listener);
 
     /**
-     * Retrieves a height of input method window.
+     * Retrieves a height of input method window for given display.
      */
-    public abstract int getInputMethodWindowVisibleHeight();
+    public abstract int getInputMethodWindowVisibleHeight(int displayId);
 
     /**
       * Saves last input method window for transition.
@@ -447,4 +447,9 @@ public abstract class WindowManagerInternal {
      * Returns {@code true} if a process that is identified by {@code client} has IME focus.
      */
     public abstract boolean inputMethodClientHasFocus(IInputMethodClient client);
+
+    /**
+     * Return the display Id for given window.
+     */
+    public abstract int getDisplayIdForWindow(IBinder windowToken);
 }

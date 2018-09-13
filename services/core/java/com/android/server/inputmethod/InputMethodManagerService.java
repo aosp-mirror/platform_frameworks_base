@@ -16,6 +16,7 @@
 package com.android.server.inputmethod;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
@@ -570,6 +571,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * identify it in the future.
      */
     IBinder mCurToken;
+
+    /**
+     * The displayId of current active input method.
+     */
+    int mCurTokenDisplayId = INVALID_DISPLAY;
 
     /**
      * If non-null, this is the input method service we are currently connected
@@ -1866,7 +1872,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mCurAttribute = attribute;
 
         // Check if the input method is changing.
-        if (mCurId != null && mCurId.equals(mCurMethodId)) {
+        final int displayId = mWindowManagerInternal.getDisplayIdForWindow(
+                mCurFocusedWindow);
+        if (mCurId != null && mCurId.equals(mCurMethodId) && displayId == mCurTokenDisplayId) {
             if (cs.curSession != null) {
                 // Fast case: if we are already connected to the input method,
                 // then just return it.
@@ -1930,14 +1938,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 com.android.internal.R.string.input_method_binding_label);
         mCurIntent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
                 mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS), 0));
+        final int displayId = mWindowManagerInternal.getDisplayIdForWindow(mCurFocusedWindow);
+        mCurTokenDisplayId = (displayId != INVALID_DISPLAY) ? displayId : DEFAULT_DISPLAY;
+
         if (bindCurrentInputMethodServiceLocked(mCurIntent, this, IME_CONNECTION_BIND_FLAGS)) {
             mLastBindTime = SystemClock.uptimeMillis();
             mHaveConnection = true;
             mCurId = info.getId();
             mCurToken = new Binder();
             try {
-                if (DEBUG) Slog.v(TAG, "Adding window token: " + mCurToken);
-                mIWindowManager.addWindowToken(mCurToken, TYPE_INPUT_METHOD, DEFAULT_DISPLAY);
+                if (DEBUG) {
+                    Slog.v(TAG, "Adding window token: " + mCurToken + " for display: "
+                            + mCurTokenDisplayId);
+                }
+                mIWindowManager.addWindowToken(mCurToken, TYPE_INPUT_METHOD, mCurTokenDisplayId);
             } catch (RemoteException e) {
             }
             return new InputBindResult(
@@ -1964,8 +1978,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     return;
                 }
                 if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
-                executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
-                        MSG_INITIALIZE_IME, mCurMethod, mCurToken));
+                // Dispatch display id for InputMethodService to update context display.
+                executeOrSendMessage(mCurMethod, mCaller.obtainMessageIOO(
+                        MSG_INITIALIZE_IME, mCurTokenDisplayId, mCurMethod, mCurToken));
                 if (mCurClient != null) {
                     clearClientSessionLocked(mCurClient);
                     requestClientSessionLocked(mCurClient);
@@ -2011,15 +2026,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         if (mCurToken != null) {
             try {
-                if (DEBUG) Slog.v(TAG, "Removing window token: " + mCurToken);
+                if (DEBUG) {
+                    Slog.v(TAG, "Removing window token: " + mCurToken + " for display: "
+                            + mCurTokenDisplayId);
+                }
                 if ((mImeWindowVis & InputMethodService.IME_ACTIVE) != 0 && savePosition) {
                     // The current IME is shown. Hence an IME switch (transition) is happening.
                     mWindowManagerInternal.saveLastInputMethodWindowForTransition();
                 }
-                mIWindowManager.removeWindowToken(mCurToken, DEFAULT_DISPLAY);
+                mIWindowManager.removeWindowToken(mCurToken, mCurTokenDisplayId);
             } catch (RemoteException e) {
             }
             mCurToken = null;
+            mCurTokenDisplayId = INVALID_DISPLAY;
         }
 
         mCurId = null;
@@ -2785,6 +2804,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 // soft input window if it is shown.
                                 if (DEBUG) Slog.v(TAG, "Unspecified window will hide input");
                                 hideCurrentInputLocked(InputMethodManager.HIDE_NOT_ALWAYS, null);
+
+                                // If focused display changed, we should unbind current method
+                                // to make app window in previous display relayout after Ime
+                                // window token removed.
+                                final int newFocusDisplayId =
+                                        mWindowManagerInternal.getDisplayIdForWindow(windowToken);
+                                if (newFocusDisplayId != mCurTokenDisplayId) {
+                                    unbindCurrentMethodLocked(false);
+                                }
                             }
                         } else if (isTextEditor && doAutoShow && (softInputMode &
                                 WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
@@ -3151,7 +3179,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @Override
     public int getInputMethodWindowVisibleHeight() {
-        return mWindowManagerInternal.getInputMethodWindowVisibleHeight();
+        return mWindowManagerInternal.getInputMethodWindowVisibleHeight(mCurTokenDisplayId);
     }
 
     @BinderThread
@@ -3352,9 +3380,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_INITIALIZE_IME:
                 args = (SomeArgs)msg.obj;
                 try {
-                    if (DEBUG) Slog.v(TAG, "Sending attach of token: " + args.arg2);
+                    if (DEBUG) {
+                        Slog.v(TAG, "Sending attach of token: " + args.arg2 + " for display: "
+                                + msg.arg1);
+                    }
                     final IBinder token = (IBinder) args.arg2;
-                    ((IInputMethod) args.arg1).initializeInternal(token,
+                    ((IInputMethod) args.arg1).initializeInternal(token, msg.arg1,
                             new InputMethodPrivilegedOperationsImpl(this, token));
                 } catch (RemoteException e) {
                 }
@@ -4516,6 +4547,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             p.println("  mCurId=" + mCurId + " mHaveConnection=" + mHaveConnection
                     + " mBoundToMethod=" + mBoundToMethod + " mVisibleBound=" + mVisibleBound);
             p.println("  mCurToken=" + mCurToken);
+            p.println("  mCurTokenDisplayId=" + mCurTokenDisplayId);
             p.println("  mCurIntent=" + mCurIntent);
             method = mCurMethod;
             p.println("  mCurMethod=" + mCurMethod);
