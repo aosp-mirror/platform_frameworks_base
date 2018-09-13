@@ -108,8 +108,9 @@ static struct {
 } gCodecInfo;
 
 struct fields_t {
-    jfieldID context;
     jmethodID postEventFromNativeID;
+    jmethodID lockAndGetContextID;
+    jmethodID setAndUnlockContextID;
     jfieldID cryptoInfoNumSubSamplesID;
     jfieldID cryptoInfoNumBytesOfClearDataID;
     jfieldID cryptoInfoNumBytesOfEncryptedDataID;
@@ -931,7 +932,7 @@ using namespace android;
 
 static sp<JMediaCodec> setMediaCodec(
         JNIEnv *env, jobject thiz, const sp<JMediaCodec> &codec) {
-    sp<JMediaCodec> old = (JMediaCodec *)env->GetLongField(thiz, gFields.context);
+    sp<JMediaCodec> old = (JMediaCodec *)env->CallLongMethod(thiz, gFields.lockAndGetContextID);
     if (codec != NULL) {
         codec->incStrong(thiz);
     }
@@ -944,13 +945,15 @@ static sp<JMediaCodec> setMediaCodec(
         old->release();
         old->decStrong(thiz);
     }
-    env->SetLongField(thiz, gFields.context, (jlong)codec.get());
+    env->CallVoidMethod(thiz, gFields.setAndUnlockContextID, (jlong)codec.get());
 
     return old;
 }
 
 static sp<JMediaCodec> getMediaCodec(JNIEnv *env, jobject thiz) {
-    return (JMediaCodec *)env->GetLongField(thiz, gFields.context);
+    sp<JMediaCodec> codec = (JMediaCodec *)env->CallLongMethod(thiz, gFields.lockAndGetContextID);
+    env->CallVoidMethod(thiz, gFields.setAndUnlockContextID, (jlong)codec.get());
+    return codec;
 }
 
 static void android_media_MediaCodec_release(JNIEnv *env, jobject thiz) {
@@ -1876,14 +1879,20 @@ static void android_media_MediaCodec_native_init(JNIEnv *env) {
             env, env->FindClass("android/media/MediaCodec"));
     CHECK(clazz.get() != NULL);
 
-    gFields.context = env->GetFieldID(clazz.get(), "mNativeContext", "J");
-    CHECK(gFields.context != NULL);
-
     gFields.postEventFromNativeID =
         env->GetMethodID(
                 clazz.get(), "postEventFromNative", "(IIILjava/lang/Object;)V");
-
     CHECK(gFields.postEventFromNativeID != NULL);
+
+    gFields.lockAndGetContextID =
+        env->GetMethodID(
+                clazz.get(), "lockAndGetContext", "()J");
+    CHECK(gFields.lockAndGetContextID != NULL);
+
+    gFields.setAndUnlockContextID =
+        env->GetMethodID(
+                clazz.get(), "setAndUnlockContext", "(J)V");
+    CHECK(gFields.setAndUnlockContextID != NULL);
 
     jfieldID field;
     field = env->GetStaticFieldID(clazz.get(), "CRYPTO_MODE_UNENCRYPTED", "I");
