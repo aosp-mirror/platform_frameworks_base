@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.LayoutRes;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
@@ -154,7 +155,9 @@ public abstract class LayoutInflater {
          * @return View Newly created view. Return null for the default
          *         behavior.
          */
-        public View onCreateView(String name, Context context, AttributeSet attrs);
+        @Nullable
+        View onCreateView(@NonNull String name, @NonNull Context context,
+                @NonNull AttributeSet attrs);
     }
 
     public interface Factory2 extends Factory {
@@ -172,7 +175,9 @@ public abstract class LayoutInflater {
          * @return View Newly created view. Return null for the default
          *         behavior.
          */
-        public View onCreateView(View parent, String name, Context context, AttributeSet attrs);
+        @Nullable
+        View onCreateView(@Nullable View parent, @NonNull String name,
+                @NonNull Context context, @NonNull AttributeSet attrs);
     }
 
     private static class FactoryMerger implements Factory2 {
@@ -186,13 +191,17 @@ public abstract class LayoutInflater {
             mF22 = f22;
         }
 
-        public View onCreateView(String name, Context context, AttributeSet attrs) {
+        @Nullable
+        public View onCreateView(@NonNull String name, @NonNull Context context,
+                @NonNull AttributeSet attrs) {
             View v = mF1.onCreateView(name, context, attrs);
             if (v != null) return v;
             return mF2.onCreateView(name, context, attrs);
         }
 
-        public View onCreateView(View parent, String name, Context context, AttributeSet attrs) {
+        @Nullable
+        public View onCreateView(@Nullable View parent, @NonNull String name,
+                @NonNull Context context, @NonNull AttributeSet attrs) {
             View v = mF12 != null ? mF12.onCreateView(parent, name, context, attrs)
                     : mF1.onCreateView(name, context, attrs);
             if (v != null) return v;

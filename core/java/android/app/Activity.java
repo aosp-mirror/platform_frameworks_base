@@ -6350,7 +6350,8 @@ public class Activity extends ContextThemeWrapper
      * @see android.view.Window#getLayoutInflater
      */
     @Nullable
-    public View onCreateView(String name, Context context, AttributeSet attrs) {
+    public View onCreateView(@NonNull String name, @NonNull Context context,
+            @NonNull AttributeSet attrs) {
         return null;
     }
 
@@ -6364,7 +6365,9 @@ public class Activity extends ContextThemeWrapper
      * @see android.view.LayoutInflater#createView
      * @see android.view.Window#getLayoutInflater
      */
-    public View onCreateView(View parent, String name, Context context, AttributeSet attrs) {
+    @Nullable
+    public View onCreateView(@Nullable View parent, @NonNull String name,
+            @NonNull Context context, @NonNull AttributeSet attrs) {
         if (!"fragment".equals(name)) {
             return onCreateView(name, context, attrs);
         }
