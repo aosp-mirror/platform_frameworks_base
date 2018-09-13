@@ -88,8 +88,6 @@ import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
-import static android.system.OsConstants.O_CREAT;
-import static android.system.OsConstants.O_RDWR;
 
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
@@ -137,7 +135,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
-import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.AppsQueryHelper;
@@ -207,14 +204,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Environment;
-import android.os.Environment.UserEnvironment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
-import android.os.ParcelFileDescriptor;
 import android.os.PatternMatcher;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -273,12 +268,10 @@ import android.view.Display;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.os.IParcelFileDescriptorFactory;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
 import com.android.internal.telephony.CarrierAppUtils;
@@ -550,12 +543,6 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final int DEFAULT_VERIFICATION_RESPONSE = PackageManager.VERIFICATION_ALLOW;
 
     public static final String PLATFORM_PACKAGE_NAME = "android";
-
-    public static final String DEFAULT_CONTAINER_PACKAGE = "com.android.defcontainer";
-
-    public static final ComponentName DEFAULT_CONTAINER_COMPONENT = new ComponentName(
-            DEFAULT_CONTAINER_PACKAGE,
-            "com.android.defcontainer.DefaultContainerService");
 
     private static final String KILL_APP_REASON_GIDS_CHANGED =
             "permission grant or revoke changed gids";
@@ -1238,18 +1225,9 @@ public class PackageManagerService extends IPackageManager.Stub
     }
     final PendingPackageBroadcasts mPendingBroadcasts = new PendingPackageBroadcasts();
 
-    // Service Connection to remote media container service to copy
-    // package uri's from external media onto secure containers
-    // or internal storage.
-    private IMediaContainerService mContainerService = null;
-
     static final int SEND_PENDING_BROADCAST = 1;
-    static final int MCS_BOUND = 3;
     static final int INIT_COPY = 5;
-    static final int MCS_UNBIND = 6;
     static final int POST_INSTALL = 9;
-    static final int MCS_RECONNECT = 10;
-    static final int MCS_GIVE_UP = 11;
     static final int WRITE_SETTINGS = 13;
     static final int WRITE_PACKAGE_RESTRICTIONS = 14;
     static final int PACKAGE_VERIFIED = 15;
@@ -1258,7 +1236,6 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int INTENT_FILTER_VERIFIED = 18;
     static final int WRITE_PACKAGE_LIST = 19;
     static final int INSTANT_APP_RESOLUTION_PHASE_TWO = 20;
-    static final int DEF_CONTAINER_BIND = 21;
 
     static final int WRITE_SETTINGS_DELAY = 10*1000;  // 10 seconds
 
@@ -1272,21 +1249,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     // Stores a list of users whose package restrictions file needs to be updated
     private ArraySet<Integer> mDirtyUsers = new ArraySet<>();
-
-    final private DefaultContainerConnection mDefContainerConn =
-            new DefaultContainerConnection();
-    class DefaultContainerConnection implements ServiceConnection {
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            if (DEBUG_SD_INSTALL) Log.i(TAG, "onServiceConnected");
-            final IMediaContainerService imcs = IMediaContainerService.Stub
-                    .asInterface(Binder.allowBlocking(service));
-            mHandler.sendMessage(mHandler.obtainMessage(MCS_BOUND, imcs));
-        }
-
-        public void onServiceDisconnected(ComponentName name) {
-            if (DEBUG_SD_INSTALL) Log.i(TAG, "onServiceDisconnected");
-        }
-    }
 
     // Recordkeeping of restore-after-install operations that are currently in flight
     // between the Package Manager and the Backup Manager
@@ -1346,31 +1308,6 @@ public class PackageManagerService extends IPackageManager.Stub
     private final CompilerStats mCompilerStats = new CompilerStats();
 
     class PackageHandler extends Handler {
-        private boolean mBound = false;
-        final ArrayList<HandlerParams> mPendingInstalls =
-                new ArrayList<>();
-
-        private boolean connectToService() {
-            if (DEBUG_INSTALL) Log.i(TAG, "Trying to bind to DefaultContainerService");
-            Intent service = new Intent().setComponent(DEFAULT_CONTAINER_COMPONENT);
-            Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
-            if (mContext.bindServiceAsUser(service, mDefContainerConn,
-                    Context.BIND_AUTO_CREATE, UserHandle.SYSTEM)) {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                mBound = true;
-                return true;
-            }
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            return false;
-        }
-
-        private void disconnectService() {
-            mContainerService = null;
-            mBound = false;
-            Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
-            mContext.unbindService(mDefContainerConn);
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        }
 
         PackageHandler(Looper looper) {
             super(looper);
@@ -1386,165 +1323,16 @@ public class PackageManagerService extends IPackageManager.Stub
 
         void doHandleMessage(Message msg) {
             switch (msg.what) {
-                case DEF_CONTAINER_BIND:
-                    if (!mBound) {
-                        Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "earlyBindingMCS",
-                                System.identityHashCode(mHandler));
-                        if (!connectToService()) {
-                            Slog.e(TAG, "Failed to bind to media container service");
-                        }
-                        Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "earlyBindingMCS",
-                                System.identityHashCode(mHandler));
-                    }
-                    break;
                 case INIT_COPY: {
                     HandlerParams params = (HandlerParams) msg.obj;
-                    int idx = mPendingInstalls.size();
-                    if (DEBUG_INSTALL) Slog.i(TAG, "init_copy idx=" + idx + ": " + params);
-                    // If a bind was already initiated we dont really
-                    // need to do anything. The pending install
-                    // will be processed later on.
-                    if (!mBound) {
-                        Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "bindingMCS",
-                                System.identityHashCode(mHandler));
-                        // If this is the only one pending we might
-                        // have to bind to the service again.
-                        if (!connectToService()) {
-                            Slog.e(TAG, "Failed to bind to media container service");
-                            params.serviceError();
-                            Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "bindingMCS",
-                                    System.identityHashCode(mHandler));
-                            if (params.traceMethod != null) {
-                                Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, params.traceMethod,
-                                        params.traceCookie);
-                            }
-                            return;
-                        } else {
-                            // Once we bind to the service, the first
-                            // pending request will be processed.
-                            mPendingInstalls.add(idx, params);
-                        }
-                    } else {
-                        mPendingInstalls.add(idx, params);
-                        // Already bound to the service. Just make
-                        // sure we trigger off processing the first request.
-                        if (idx == 0) {
-                            mHandler.sendEmptyMessage(MCS_BOUND);
-                        }
+                    if (params != null) {
+                        if (DEBUG_INSTALL) Slog.i(TAG, "init_copy: " + params);
+                        Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
+                                System.identityHashCode(params));
+                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "startCopy");
+                        params.startCopy();
+                        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                     }
-                    break;
-                }
-                case MCS_BOUND: {
-                    if (DEBUG_INSTALL) Slog.i(TAG, "mcs_bound");
-                    if (msg.obj != null) {
-                        mContainerService = (IMediaContainerService) msg.obj;
-                        Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "bindingMCS",
-                                System.identityHashCode(mHandler));
-                    }
-                    if (mContainerService == null) {
-                        if (!mBound) {
-                            // Something seriously wrong since we are not bound and we are not
-                            // waiting for connection. Bail out.
-                            Slog.e(TAG, "Cannot bind to media container service");
-                            for (HandlerParams params : mPendingInstalls) {
-                                // Indicate service bind error
-                                params.serviceError();
-                                Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
-                                        System.identityHashCode(params));
-                                if (params.traceMethod != null) {
-                                    Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER,
-                                            params.traceMethod, params.traceCookie);
-                                }
-                            }
-                            mPendingInstalls.clear();
-                        } else {
-                            Slog.w(TAG, "Waiting to connect to media container service");
-                        }
-                    } else if (mPendingInstalls.size() > 0) {
-                        HandlerParams params = mPendingInstalls.get(0);
-                        if (params != null) {
-                            Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
-                                    System.identityHashCode(params));
-                            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "startCopy");
-                            if (params.startCopy()) {
-                                // We are done...  look for more work or to
-                                // go idle.
-                                if (DEBUG_SD_INSTALL) Log.i(TAG,
-                                        "Checking for more work or unbind...");
-                                // Delete pending install
-                                if (mPendingInstalls.size() > 0) {
-                                    mPendingInstalls.remove(0);
-                                }
-                                if (mPendingInstalls.size() == 0) {
-                                    if (mBound) {
-                                        if (DEBUG_SD_INSTALL) Log.i(TAG,
-                                                "Posting delayed MCS_UNBIND");
-                                        removeMessages(MCS_UNBIND);
-                                        Message ubmsg = obtainMessage(MCS_UNBIND);
-                                        // Unbind after a little delay, to avoid
-                                        // continual thrashing.
-                                        sendMessageDelayed(ubmsg, 10000);
-                                    }
-                                } else {
-                                    // There are more pending requests in queue.
-                                    // Just post MCS_BOUND message to trigger processing
-                                    // of next pending install.
-                                    if (DEBUG_SD_INSTALL) Log.i(TAG,
-                                            "Posting MCS_BOUND for next work");
-                                    mHandler.sendEmptyMessage(MCS_BOUND);
-                                }
-                            }
-                            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-                        }
-                    } else {
-                        // Should never happen ideally.
-                        Slog.w(TAG, "Empty queue");
-                    }
-                    break;
-                }
-                case MCS_RECONNECT: {
-                    if (DEBUG_INSTALL) Slog.i(TAG, "mcs_reconnect");
-                    if (mPendingInstalls.size() > 0) {
-                        if (mBound) {
-                            disconnectService();
-                        }
-                        if (!connectToService()) {
-                            Slog.e(TAG, "Failed to bind to media container service");
-                            for (HandlerParams params : mPendingInstalls) {
-                                // Indicate service bind error
-                                params.serviceError();
-                                Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
-                                        System.identityHashCode(params));
-                            }
-                            mPendingInstalls.clear();
-                        }
-                    }
-                    break;
-                }
-                case MCS_UNBIND: {
-                    // If there is no actual work left, then time to unbind.
-                    if (DEBUG_INSTALL) Slog.i(TAG, "mcs_unbind");
-
-                    if (mPendingInstalls.size() == 0 && mPendingVerification.size() == 0) {
-                        if (mBound) {
-                            if (DEBUG_INSTALL) Slog.i(TAG, "calling disconnectService()");
-
-                            disconnectService();
-                        }
-                    } else if (mPendingInstalls.size() > 0) {
-                        // There are more pending requests in queue.
-                        // Just post MCS_BOUND message to trigger processing
-                        // of next pending install.
-                        mHandler.sendEmptyMessage(MCS_BOUND);
-                    }
-
-                    break;
-                }
-                case MCS_GIVE_UP: {
-                    if (DEBUG_INSTALL) Slog.i(TAG, "mcs_giveup too many retries");
-                    HandlerParams params = mPendingInstalls.remove(0);
-                    Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
-                            System.identityHashCode(params));
                     break;
                 }
                 case SEND_PENDING_BROADCAST: {
@@ -1685,11 +1473,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                     PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT);
                             broadcastPackageVerified(verificationId, originUri,
                                     PackageManager.VERIFICATION_ALLOW, user);
-                            try {
-                                ret = args.copyApk(mContainerService, true);
-                            } catch (RemoteException e) {
-                                Slog.e(TAG, "Could not contact the ContainerService");
-                            }
+                            ret = args.copyApk();
                         } else {
                             broadcastPackageVerified(verificationId, originUri,
                                     PackageManager.VERIFICATION_REJECT, user);
@@ -1699,7 +1483,6 @@ public class PackageManagerService extends IPackageManager.Stub
                                 TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
 
                         processPendingInstall(args, ret);
-                        mHandler.sendEmptyMessage(MCS_UNBIND);
                     }
                     break;
                 }
@@ -1724,14 +1507,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
                         int ret;
                         if (state.isInstallAllowed()) {
-                            ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
                             broadcastPackageVerified(verificationId, originUri,
                                     response.code, state.getInstallArgs().getUser());
-                            try {
-                                ret = args.copyApk(mContainerService, true);
-                            } catch (RemoteException e) {
-                                Slog.e(TAG, "Could not contact the ContainerService");
-                            }
+                            ret = args.copyApk();
                         } else {
                             ret = PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
                         }
@@ -1740,7 +1518,6 @@ public class PackageManagerService extends IPackageManager.Stub
                                 TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
 
                         processPendingInstall(args, ret);
-                        mHandler.sendEmptyMessage(MCS_UNBIND);
                     }
 
                     break;
@@ -12430,14 +12207,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return installReason;
     }
 
-    /**
-     * Attempts to bind to the default container service explicitly instead of doing so lazily on
-     * install commit.
-     */
-    void earlyBindToDefContainer() {
-        mHandler.sendMessage(mHandler.obtainMessage(DEF_CONTAINER_BIND));
-    }
-
     void installStage(String packageName, File stagedDir,
             IPackageInstallObserver2 observer, PackageInstaller.SessionParams sessionParams,
             String installerPackageName, int installerUid, UserHandle user,
@@ -13784,14 +13553,6 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private abstract class HandlerParams {
-        private static final int MAX_RETRIES = 4;
-
-        /**
-         * Number of times startCopy() has been attempted and had a non-fatal
-         * error.
-         */
-        private int mRetries = 0;
-
         /** User handle for the user requesting the information or installation. */
         private final UserHandle mUser;
         String traceMethod;
@@ -13815,37 +13576,13 @@ public class PackageManagerService extends IPackageManager.Stub
             return this;
         }
 
-        final boolean startCopy() {
-            boolean res;
-            try {
-                if (DEBUG_INSTALL) Slog.i(TAG, "startCopy " + mUser + ": " + this);
-
-                if (++mRetries > MAX_RETRIES) {
-                    Slog.w(TAG, "Failed to invoke remote methods on default container service. Giving up");
-                    mHandler.sendEmptyMessage(MCS_GIVE_UP);
-                    handleServiceError();
-                    return false;
-                } else {
-                    handleStartCopy();
-                    res = true;
-                }
-            } catch (RemoteException e) {
-                if (DEBUG_INSTALL) Slog.i(TAG, "Posting install MCS_RECONNECT");
-                mHandler.sendEmptyMessage(MCS_RECONNECT);
-                res = false;
-            }
-            handleReturnCode();
-            return res;
-        }
-
-        final void serviceError() {
-            if (DEBUG_INSTALL) Slog.i(TAG, "serviceError");
-            handleServiceError();
+        final void startCopy() {
+            if (DEBUG_INSTALL) Slog.i(TAG, "startCopy " + mUser + ": " + this);
+            handleStartCopy();
             handleReturnCode();
         }
 
-        abstract void handleStartCopy() throws RemoteException;
-        abstract void handleServiceError();
+        abstract void handleStartCopy();
         abstract void handleReturnCode();
     }
 
@@ -14088,7 +13825,7 @@ public class PackageManagerService extends IPackageManager.Stub
          * policy if needed and then create install arguments based
          * on the install location.
          */
-        public void handleStartCopy() throws RemoteException {
+        public void handleStartCopy() {
             int ret = PackageManager.INSTALL_SUCCEEDED;
 
             // If we're already staged, we've firmly committed to an install location
@@ -14114,8 +13851,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 Slog.w(TAG,  "Conflicting flags specified for installing ephemeral on external");
                 ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
             } else {
-                pkgLite = mContainerService.getMinimalPackageInfo(origin.resolvedPath, installFlags,
-                        packageAbiOverride);
+                pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
+                        origin.resolvedPath, installFlags, packageAbiOverride);
 
                 if (DEBUG_INSTANT && ephemeral) {
                     Slog.v(TAG, "pkgLite for install: " + pkgLite);
@@ -14132,15 +13869,16 @@ public class PackageManagerService extends IPackageManager.Stub
                     final long lowThreshold = storage.getStorageLowBytes(
                             Environment.getDataDirectory());
 
-                    final long sizeBytes = mContainerService.calculateInstalledSize(
+                    final long sizeBytes = PackageManagerServiceUtils.calculateInstalledSize(
                             origin.resolvedPath, packageAbiOverride);
-
-                    try {
-                        mInstaller.freeCache(null, sizeBytes + lowThreshold, 0, 0);
-                        pkgLite = mContainerService.getMinimalPackageInfo(origin.resolvedPath,
-                                installFlags, packageAbiOverride);
-                    } catch (InstallerException e) {
-                        Slog.w(TAG, "Failed to free cache", e);
+                    if (sizeBytes >= 0) {
+                        try {
+                            mInstaller.freeCache(null, sizeBytes + lowThreshold, 0, 0);
+                            pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
+                                    origin.resolvedPath, installFlags, packageAbiOverride);
+                        } catch (InstallerException e) {
+                            Slog.w(TAG, "Failed to free cache", e);
+                        }
                     }
 
                     /*
@@ -14351,7 +14089,7 @@ public class PackageManagerService extends IPackageManager.Stub
                      * No package verification is enabled, so immediately start
                      * the remote call to initiate copy using temporary file.
                      */
-                    ret = args.copyApk(mContainerService, true);
+                    ret = args.copyApk();
                 }
             }
 
@@ -14360,18 +14098,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         void handleReturnCode() {
-            // If mArgs is null, then MCS couldn't be reached. When it
-            // reconnects, it will try again to install. At that point, this
-            // will succeed.
             if (mArgs != null) {
                 processPendingInstall(mArgs, mRet);
             }
-        }
-
-        @Override
-        void handleServiceError() {
-            mArgs = createInstallArgs(this);
-            mRet = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
         }
     }
 
@@ -14439,7 +14168,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.installReason = installReason;
         }
 
-        abstract int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException;
+        abstract int copyApk();
         abstract int doPreInstall(int status);
 
         /**
@@ -14547,16 +14276,16 @@ public class PackageManagerService extends IPackageManager.Stub
             this.resourceFile = (resourcePath != null) ? new File(resourcePath) : null;
         }
 
-        int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
+        int copyApk() {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyApk");
             try {
-                return doCopyApk(imcs, temp);
+                return doCopyApk();
             } finally {
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
         }
 
-        private int doCopyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
+        private int doCopyApk() {
             if (origin.staged) {
                 if (DEBUG_INSTALL) Slog.d(TAG, origin.file + " already staged; skipping copy");
                 codeFile = origin.file;
@@ -14575,25 +14304,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
             }
 
-            final IParcelFileDescriptorFactory target = new IParcelFileDescriptorFactory.Stub() {
-                @Override
-                public ParcelFileDescriptor open(String name, int mode) throws RemoteException {
-                    if (!FileUtils.isValidExtFilename(name)) {
-                        throw new IllegalArgumentException("Invalid filename: " + name);
-                    }
-                    try {
-                        final File file = new File(codeFile, name);
-                        final FileDescriptor fd = Os.open(file.getAbsolutePath(),
-                                O_RDWR | O_CREAT, 0644);
-                        Os.chmod(file.getAbsolutePath(), 0644);
-                        return new ParcelFileDescriptor(fd);
-                    } catch (ErrnoException e) {
-                        throw new RemoteException("Failed to open: " + e.getMessage());
-                    }
-                }
-            };
-
-            int ret = imcs.copyPackage(origin.file.getAbsolutePath(), target);
+            int ret = PackageManagerServiceUtils.copyPackage(
+                    origin.file.getAbsolutePath(), codeFile);
             if (ret != PackageManager.INSTALL_SUCCEEDED) {
                 Slog.e(TAG, "Failed to copy package");
                 return ret;
@@ -14754,7 +14466,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     params.installReason);
         }
 
-        int copyApk(IMediaContainerService imcs, boolean temp) {
+        int copyApk() {
             if (DEBUG_INSTALL) Slog.d(TAG, "Moving " + move.packageName + " from "
                     + move.fromUuid + " to " + move.toUuid);
             synchronized (mInstaller) {
