@@ -60,6 +60,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_TEST_ONLY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
 import static android.content.pm.PackageManager.INSTALL_INTERNAL;
+import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
@@ -12358,28 +12359,15 @@ public class PackageManagerService extends IPackageManager.Stub
         return installReason;
     }
 
-    void installStage(String packageName, File stagedDir,
-            IPackageInstallObserver2 observer, PackageInstaller.SessionParams sessionParams,
-            String installerPackageName, int installerUid, UserHandle user,
-            PackageParser.SigningDetails signingDetails) {
+    void installStage(ActiveInstallSession activeInstallSession) {
         if (DEBUG_INSTANT) {
-            if ((sessionParams.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
-                Slog.d(TAG, "Ephemeral install of " + packageName);
+            if ((activeInstallSession.getSessionParams().installFlags
+                    & PackageManager.INSTALL_INSTANT_APP) != 0) {
+                Slog.d(TAG, "Ephemeral install of " + activeInstallSession.getPackageName());
             }
         }
-        final VerificationInfo verificationInfo = new VerificationInfo(
-                sessionParams.originatingUri, sessionParams.referrerUri,
-                sessionParams.originatingUid, installerUid);
-
-        final OriginInfo origin = OriginInfo.fromStagedFile(stagedDir);
-
         final Message msg = mHandler.obtainMessage(INIT_COPY);
-        final int installReason = fixUpInstallReason(installerPackageName, installerUid,
-                sessionParams.installReason);
-        final InstallParams params = new InstallParams(origin, null, observer,
-                sessionParams.installFlags, installerPackageName, sessionParams.volumeUuid,
-                verificationInfo, user, sessionParams.abiOverride,
-                sessionParams.grantedRuntimePermissions, signingDetails, installReason);
+        final InstallParams params = new InstallParams(activeInstallSession);
         params.setTraceMethod("installStage").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 
@@ -12388,6 +12376,22 @@ public class PackageManagerService extends IPackageManager.Stub
         Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
                 System.identityHashCode(msg.obj));
 
+        mHandler.sendMessage(msg);
+    }
+
+    void installStage(List<ActiveInstallSession> children)
+            throws PackageManagerException {
+        final Message msg = mHandler.obtainMessage(INIT_COPY);
+        final MultiPackageInstallParams params =
+                new MultiPackageInstallParams(UserHandle.ALL, children);
+        params.setTraceMethod("installStageMultiPackage")
+                .setTraceCookie(System.identityHashCode(params));
+        msg.obj = params;
+
+        Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "installStageMultiPackage",
+                System.identityHashCode(msg.obj));
+        Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
+                System.identityHashCode(msg.obj));
         mHandler.sendMessage(msg);
     }
 
@@ -13568,86 +13572,111 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private void processPendingInstall(final InstallArgs args, final int currentStatus) {
-        // Queue up an async operation since the package installation may take a little while.
-        mHandler.post(new Runnable() {
-            public void run() {
-                mHandler.removeCallbacks(this);
-                 // Result object to be returned
-                PackageInstalledInfo res = new PackageInstalledInfo();
-                res.setReturnCode(currentStatus);
-                res.uid = -1;
-                res.pkg = null;
-                res.removedInfo = null;
-                if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
-                    args.doPreInstall(res.returnCode);
-                    synchronized (mInstallLock) {
-                        installPackageTracedLI(args, res);
-                    }
-                    args.doPostInstall(res.returnCode, res.uid);
+        if (args.mMultiPackageInstallParams != null) {
+            args.mMultiPackageInstallParams.tryProcessInstallRequest(args, currentStatus);
+        } else {
+            PackageInstalledInfo res = createPackageInstalledInfo(currentStatus);
+            processInstallRequestsAsync(
+                    res.returnCode == PackageManager.INSTALL_SUCCEEDED,
+                    Collections.singletonList(new InstallRequest(args, res)));
+        }
+    }
+
+    // Queue up an async operation since the package installation may take a little while.
+    private void processInstallRequestsAsync(boolean success,
+            List<InstallRequest> installRequests) {
+        mHandler.post(() -> {
+            if (success) {
+                for (InstallRequest request : installRequests) {
+                    request.args.doPreInstall(request.installResult.returnCode);
                 }
-
-                // A restore should be performed at this point if (a) the install
-                // succeeded, (b) the operation is not an update, and (c) the new
-                // package has not opted out of backup participation.
-                final boolean update = res.removedInfo != null
-                        && res.removedInfo.removedPackage != null;
-                final int flags = (res.pkg == null) ? 0 : res.pkg.applicationInfo.flags;
-                boolean doRestore = !update
-                        && ((flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0);
-
-                // Set up the post-install work request bookkeeping.  This will be used
-                // and cleaned up by the post-install event handling regardless of whether
-                // there's a restore pass performed.  Token values are >= 1.
-                int token;
-                if (mNextInstallToken < 0) mNextInstallToken = 1;
-                token = mNextInstallToken++;
-
-                PostInstallData data = new PostInstallData(args, res);
-                mRunningInstalls.put(token, data);
-                if (DEBUG_INSTALL) Log.v(TAG, "+ starting restore round-trip " + token);
-
-                if (res.returnCode == PackageManager.INSTALL_SUCCEEDED && doRestore) {
-                    // Pass responsibility to the Backup Manager.  It will perform a
-                    // restore if appropriate, then pass responsibility back to the
-                    // Package Manager to run the post-install observer callbacks
-                    // and broadcasts.
-                    IBackupManager bm = IBackupManager.Stub.asInterface(
-                            ServiceManager.getService(Context.BACKUP_SERVICE));
-                    if (bm != null) {
-                        if (DEBUG_INSTALL) Log.v(TAG, "token " + token
-                                + " to BM for possible restore");
-                        Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "restore", token);
-                        try {
-                            // TODO: http://b/22388012
-                            if (bm.isBackupServiceActive(UserHandle.USER_SYSTEM)) {
-                                bm.restoreAtInstall(res.pkg.applicationInfo.packageName, token);
-                            } else {
-                                doRestore = false;
-                            }
-                        } catch (RemoteException e) {
-                            // can't happen; the backup manager is local
-                        } catch (Exception e) {
-                            Slog.e(TAG, "Exception trying to enqueue restore", e);
-                            doRestore = false;
-                        }
-                    } else {
-                        Slog.e(TAG, "Backup Manager not found!");
-                        doRestore = false;
-                    }
+                synchronized (mInstallLock) {
+                    installPackagesTracedLI(installRequests);
                 }
-
-                if (!doRestore) {
-                    // No restore possible, or the Backup Manager was mysteriously not
-                    // available -- just fire the post-install work request directly.
-                    if (DEBUG_INSTALL) Log.v(TAG, "No restore - queue post-install for " + token);
-
-                    Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "postInstall", token);
-
-                    Message msg = mHandler.obtainMessage(POST_INSTALL, token, 0);
-                    mHandler.sendMessage(msg);
+                for (InstallRequest request : installRequests) {
+                    request.args.doPostInstall(
+                            request.installResult.returnCode, request.installResult.uid);
                 }
             }
+            for (InstallRequest request : installRequests) {
+                resolvePackageInstalledInfo(request.args,
+                        request.installResult);
+            }
         });
+    }
+
+    private PackageInstalledInfo createPackageInstalledInfo(
+            int currentStatus) {
+        PackageInstalledInfo res = new PackageInstalledInfo();
+        res.setReturnCode(currentStatus);
+        res.uid = -1;
+        res.pkg = null;
+        res.removedInfo = null;
+        return res;
+    }
+
+    private void resolvePackageInstalledInfo(InstallArgs args, PackageInstalledInfo res) {
+        // A restore should be performed at this point if (a) the install
+        // succeeded, (b) the operation is not an update, and (c) the new
+        // package has not opted out of backup participation.
+        final boolean update = res.removedInfo != null
+                && res.removedInfo.removedPackage != null;
+        final int flags = (res.pkg == null) ? 0 : res.pkg.applicationInfo.flags;
+        boolean doRestore = !update
+                && ((flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0);
+
+        // Set up the post-install work request bookkeeping.  This will be used
+        // and cleaned up by the post-install event handling regardless of whether
+        // there's a restore pass performed.  Token values are >= 1.
+        int token;
+        if (mNextInstallToken < 0) mNextInstallToken = 1;
+        token = mNextInstallToken++;
+
+        PostInstallData data = new PostInstallData(args, res);
+        mRunningInstalls.put(token, data);
+        if (DEBUG_INSTALL) Log.v(TAG, "+ starting restore round-trip " + token);
+
+        if (res.returnCode == PackageManager.INSTALL_SUCCEEDED && doRestore) {
+            // Pass responsibility to the Backup Manager.  It will perform a
+            // restore if appropriate, then pass responsibility back to the
+            // Package Manager to run the post-install observer callbacks
+            // and broadcasts.
+            IBackupManager bm = IBackupManager.Stub.asInterface(
+                    ServiceManager.getService(Context.BACKUP_SERVICE));
+            if (bm != null) {
+                if (DEBUG_INSTALL) {
+                    Log.v(TAG, "token " + token + " to BM for possible restore");
+                }
+                Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "restore", token);
+                try {
+                    // TODO: http://b/22388012
+                    if (bm.isBackupServiceActive(UserHandle.USER_SYSTEM)) {
+                        bm.restoreAtInstall(res.pkg.applicationInfo.packageName, token);
+                    } else {
+                        doRestore = false;
+                    }
+                } catch (RemoteException e) {
+                    // can't happen; the backup manager is local
+                } catch (Exception e) {
+                    Slog.e(TAG, "Exception trying to enqueue restore", e);
+                    doRestore = false;
+                }
+            } else {
+                Slog.e(TAG, "Backup Manager not found!");
+                doRestore = false;
+            }
+        }
+
+        if (!doRestore) {
+            // No restore possible, or the Backup Manager was mysteriously not
+            // available -- just fire the post-install work request directly.
+            if (DEBUG_INSTALL) Log.v(TAG, "No restore - queue post-install for " + token);
+
+            Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "postInstall", token);
+
+            Message msg = mHandler.obtainMessage(POST_INSTALL, token, 0);
+            mHandler.sendMessage(msg);
+        }
     }
 
     /**
@@ -13837,7 +13866,83 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    /**
+     * Container for a multi-package install which refers to all install sessions and args being
+     * committed together.
+     */
+    class MultiPackageInstallParams extends HandlerParams {
+
+        private int mRet = INSTALL_SUCCEEDED;
+        @NonNull
+        private final ArrayList<InstallParams> mChildParams;
+        @NonNull
+        private final Map<InstallArgs, Integer> mVerifiedState;
+
+        MultiPackageInstallParams(
+                @NonNull UserHandle user,
+                @NonNull List<ActiveInstallSession> activeInstallSessions)
+                throws PackageManagerException {
+            super(user);
+            if (activeInstallSessions.size() == 0) {
+                throw new PackageManagerException("No child sessions found!");
+            }
+            mChildParams = new ArrayList<>(activeInstallSessions.size());
+            for (int i = 0; i < activeInstallSessions.size(); i++) {
+                final InstallParams childParams = new InstallParams(activeInstallSessions.get(i));
+                childParams.mParentInstallParams = this;
+                this.mChildParams.add(childParams);
+            }
+            this.mVerifiedState = new ArrayMap<>(mChildParams.size());
+        }
+
+        @Override
+        void handleStartCopy() {
+            for (InstallParams params : mChildParams) {
+                params.handleStartCopy();
+                if (params.mRet != INSTALL_SUCCEEDED) {
+                    mRet = params.mRet;
+                    break;
+                }
+            }
+        }
+
+        @Override
+        void handleReturnCode() {
+            for (InstallParams params : mChildParams) {
+                params.handleReturnCode();
+                if (params.mRet != INSTALL_SUCCEEDED) {
+                    mRet = params.mRet;
+                    break;
+                }
+            }
+        }
+
+        void tryProcessInstallRequest(InstallArgs args, int currentStatus) {
+            mVerifiedState.put(args, currentStatus);
+            boolean success = true;
+            if (mVerifiedState.size() != mChildParams.size()) {
+                return;
+            }
+            for (Integer status : mVerifiedState.values()) {
+                if (status == PackageManager.INSTALL_UNKNOWN) {
+                    return;
+                } else if (status != PackageManager.INSTALL_SUCCEEDED) {
+                    success = false;
+                    break;
+                }
+            }
+            final List<InstallRequest> installRequests = new ArrayList<>(mVerifiedState.size());
+            for (Map.Entry<InstallArgs, Integer> entry : mVerifiedState.entrySet()) {
+                installRequests.add(new InstallRequest(entry.getKey(),
+                        createPackageInstalledInfo(entry.getValue())));
+            }
+            processInstallRequestsAsync(success, installRequests);
+        }
+    }
+
     class InstallParams extends HandlerParams {
+        // TODO: see if we can collapse this into ActiveInstallSession
+
         final OriginInfo origin;
         final MoveInfo move;
         final IPackageInstallObserver2 observer;
@@ -13845,17 +13950,20 @@ public class PackageManagerService extends IPackageManager.Stub
         final String installerPackageName;
         final String volumeUuid;
         private InstallArgs mArgs;
-        private int mRet;
+        int mRet;
         final String packageAbiOverride;
         final String[] grantedRuntimePermissions;
         final VerificationInfo verificationInfo;
         final PackageParser.SigningDetails signingDetails;
         final int installReason;
+        @Nullable
+        MultiPackageInstallParams mParentInstallParams;
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, String installerPackageName, String volumeUuid,
                 VerificationInfo verificationInfo, UserHandle user, String packageAbiOverride,
-                String[] grantedPermissions, PackageParser.SigningDetails signingDetails, int installReason) {
+                String[] grantedPermissions, PackageParser.SigningDetails signingDetails,
+                int installReason) {
             super(user);
             this.origin = origin;
             this.move = move;
@@ -13868,6 +13976,34 @@ public class PackageManagerService extends IPackageManager.Stub
             this.grantedRuntimePermissions = grantedPermissions;
             this.signingDetails = signingDetails;
             this.installReason = installReason;
+        }
+
+        InstallParams(ActiveInstallSession activeInstallSession) {
+            super(activeInstallSession.getUser());
+            if (DEBUG_INSTANT) {
+                if ((activeInstallSession.getSessionParams().installFlags
+                        & PackageManager.INSTALL_INSTANT_APP) != 0) {
+                    Slog.d(TAG, "Ephemeral install of " + activeInstallSession.getPackageName());
+                }
+            }
+            verificationInfo = new VerificationInfo(
+                    activeInstallSession.getSessionParams().originatingUri,
+                    activeInstallSession.getSessionParams().referrerUri,
+                    activeInstallSession.getSessionParams().originatingUid,
+                    activeInstallSession.getInstallerUid());
+            origin = OriginInfo.fromStagedFile(activeInstallSession.getStagedDir());
+            move = null;
+            installReason = fixUpInstallReason(activeInstallSession.getInstallerPackageName(),
+                    activeInstallSession.getInstallerUid(),
+                    activeInstallSession.getSessionParams().installReason);
+            observer = activeInstallSession.getObserver();
+            installFlags = activeInstallSession.getSessionParams().installFlags;
+            installerPackageName = activeInstallSession.getInstallerPackageName();
+            volumeUuid = activeInstallSession.getSessionParams().volumeUuid;
+            packageAbiOverride = activeInstallSession.getSessionParams().abiOverride;
+            grantedRuntimePermissions =
+                    activeInstallSession.getSessionParams().grantedRuntimePermissions;
+            signingDetails = activeInstallSession.getSigningDetails();
         }
 
         @Override
@@ -14291,6 +14427,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int traceCookie;
         final PackageParser.SigningDetails signingDetails;
         final int installReason;
+        @Nullable final MultiPackageInstallParams mMultiPackageInstallParams;
 
         // The list of instruction sets supported by this app. This is currently
         // only used during the rmdex() phase to clean up resources. We can get rid of this
@@ -14301,8 +14438,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 int installFlags, String installerPackageName, String volumeUuid,
                 UserHandle user, String[] instructionSets,
                 String abiOverride, String[] installGrantPermissions,
-                String traceMethod, int traceCookie, PackageParser.SigningDetails signingDetails,
-                int installReason) {
+                String traceMethod, int traceCookie, SigningDetails signingDetails,
+                int installReason,
+                MultiPackageInstallParams multiPackageInstallParams) {
             this.origin = origin;
             this.move = move;
             this.installFlags = installFlags;
@@ -14317,6 +14455,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.traceCookie = traceCookie;
             this.signingDetails = signingDetails;
             this.installReason = installReason;
+            this.mMultiPackageInstallParams = multiPackageInstallParams;
         }
 
         abstract int copyApk();
@@ -14412,7 +14551,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     params.getUser(), null /*instructionSets*/, params.packageAbiOverride,
                     params.grantedRuntimePermissions,
                     params.traceMethod, params.traceCookie, params.signingDetails,
-                    params.installReason);
+                    params.installReason, params.mParentInstallParams);
             if (isFwdLocked()) {
                 throw new IllegalArgumentException("Forward locking only supported in ASEC");
             }
@@ -14422,7 +14561,7 @@ public class PackageManagerService extends IPackageManager.Stub
         FileInstallArgs(String codePath, String resourcePath, String[] instructionSets) {
             super(OriginInfo.fromNothing(), null, null, 0, null, null, null, instructionSets,
                     null, null, null, 0, PackageParser.SigningDetails.UNKNOWN,
-                    PackageManager.INSTALL_REASON_UNKNOWN);
+                    PackageManager.INSTALL_REASON_UNKNOWN, null /* parent */);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
             this.resourceFile = (resourcePath != null) ? new File(resourcePath) : null;
         }
@@ -14614,7 +14753,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     params.getUser(), null /* instruction sets */, params.packageAbiOverride,
                     params.grantedRuntimePermissions,
                     params.traceMethod, params.traceCookie, params.signingDetails,
-                    params.installReason);
+                    params.installReason, params.mParentInstallParams);
         }
 
         int copyApk() {
@@ -15019,10 +15158,10 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @GuardedBy({"mInstallLock", "mPackages"})
-    private void installPackageTracedLI(InstallArgs args, PackageInstalledInfo installResult) {
+    private void installPackagesTracedLI(List<InstallRequest> requests) {
         try {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackage");
-            installPackagesLI(Collections.singletonList(new InstallRequest(args, installResult)));
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackages");
+            installPackagesLI(requests);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -15362,7 +15501,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             request.installResult.setError(
                                     PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE,
                                     "Duplicate package " + result.pkgSetting.pkg.packageName
-                                            + " in atomic install request.");
+                                            + " in multi-package install request.");
                             return;
                         }
                     }
@@ -23433,6 +23572,62 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         return mProtectedPackages.isPackageStateProtected(userId, packageName);
+    }
+
+    static class ActiveInstallSession {
+        private final String mPackageName;
+        private final File mStagedDir;
+        private final IPackageInstallObserver2 mObserver;
+        private final PackageInstaller.SessionParams mSessionParams;
+        private final String mInstallerPackageName;
+        private final int mInstallerUid;
+        private final UserHandle mUser;
+        private final SigningDetails mSigningDetails;
+
+        ActiveInstallSession(String packageName, File stagedDir, IPackageInstallObserver2 observer,
+                PackageInstaller.SessionParams sessionParams, String installerPackageName,
+                int installerUid, UserHandle user, SigningDetails signingDetails) {
+            mPackageName = packageName;
+            mStagedDir = stagedDir;
+            mObserver = observer;
+            mSessionParams = sessionParams;
+            mInstallerPackageName = installerPackageName;
+            mInstallerUid = installerUid;
+            mUser = user;
+            mSigningDetails = signingDetails;
+        }
+
+        public String getPackageName() {
+            return mPackageName;
+        }
+
+        public File getStagedDir() {
+            return mStagedDir;
+        }
+
+        public IPackageInstallObserver2 getObserver() {
+            return mObserver;
+        }
+
+        public PackageInstaller.SessionParams getSessionParams() {
+            return mSessionParams;
+        }
+
+        public String getInstallerPackageName() {
+            return mInstallerPackageName;
+        }
+
+        public int getInstallerUid() {
+            return mInstallerUid;
+        }
+
+        public UserHandle getUser() {
+            return mUser;
+        }
+
+        public SigningDetails getSigningDetails() {
+            return mSigningDetails;
+        }
     }
 }
 

@@ -173,6 +173,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runSetInstallLocation();
                 case "get-install-location":
                     return runGetInstallLocation();
+                case "install-add-session":
+                    return runInstallAddSession();
                 case "move-package":
                     return runMovePackage();
                 case "move-primary-storage":
@@ -981,6 +983,23 @@ class PackageManagerShellCommand extends ShellCommand {
         final String splitName = getNextArg();
         final String path = getNextArg();
         return doWriteSplit(sessionId, path, sizeBytes, splitName, true /*logSuccess*/);
+    }
+
+    private int runInstallAddSession() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        final int parentSessionId = Integer.parseInt(getNextArg());
+
+        List<Integer> otherSessionIds = new ArrayList<>();
+        String opt;
+        while ((opt = getNextArg()) != null) {
+            otherSessionIds.add(Integer.parseInt(opt));
+        }
+        if (otherSessionIds.size() == 0) {
+            pw.println("Error: At least two sessions are required.");
+            return 1;
+        }
+        return doInstallAddSession(parentSessionId, ArrayUtils.convertToIntArray(otherSessionIds),
+                true /*logSuccess*/);
     }
 
     private int runInstallRemove() throws RemoteException {
@@ -2268,6 +2287,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "--apex":
                     sessionParams.installFlags |= PackageManager.INSTALL_APEX;
                     break;
+                case "--multi-package":
+                    sessionParams.setMultiPackage();
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
             }
@@ -2500,6 +2522,30 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
+    private int doInstallAddSession(int parentId, int[] sessionIds, boolean logSuccess)
+            throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        PackageInstaller.Session session = null;
+        try {
+            session = new PackageInstaller.Session(
+                    mInterface.getPackageInstaller().openSession(parentId));
+            if (!session.isMultiPackage()) {
+                getErrPrintWriter().println(
+                        "Error: parent session ID is not a multi-package session");
+                return 1;
+            }
+            for (int i = 0; i < sessionIds.length; i++) {
+                session.addChildSessionId(sessionIds[i]);
+            }
+            if (logSuccess) {
+                pw.println("Success");
+            }
+            return 0;
+        } finally {
+            IoUtils.closeQuietly(session);
+        }
+    }
+
     private int doRemoveSplit(int sessionId, String splitName, boolean logSuccess)
             throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
@@ -2521,24 +2567,26 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
-    private int doCommitSession(int sessionId, boolean logSuccess) throws RemoteException {
+    private int doCommitSession(int sessionId, boolean logSuccess)
+            throws RemoteException {
+
         final PrintWriter pw = getOutPrintWriter();
         PackageInstaller.Session session = null;
         try {
             session = new PackageInstaller.Session(
                     mInterface.getPackageInstaller().openSession(sessionId));
-
-            // Sanity check that all .dm files match an apk.
-            // (The installer does not support standalone .dm files and will not process them.)
-            try {
-                DexMetadataHelper.validateDexPaths(session.getNames());
-            } catch (IllegalStateException | IOException e) {
-                pw.println("Warning [Could not validate the dex paths: " + e.getMessage() + "]");
+            if (!session.isMultiPackage()) {
+                // Sanity check that all .dm files match an apk.
+                // (The installer does not support standalone .dm files and will not process them.)
+                try {
+                    DexMetadataHelper.validateDexPaths(session.getNames());
+                } catch (IllegalStateException | IOException e) {
+                    pw.println(
+                            "Warning [Could not validate the dex paths: " + e.getMessage() + "]");
+                }
             }
-
             final LocalIntentReceiver receiver = new LocalIntentReceiver();
             session.commit(receiver.getIntentSender());
-
             final Intent result = receiver.getResult();
             final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
                     PackageInstaller.STATUS_FAILURE);
@@ -2809,6 +2857,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--referrer URI] [--abi ABI_NAME] [--force-sdk]");
         pw.println("       [--preload] [--instantapp] [--full] [--dont-kill]");
         pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [-S BYTES]");
+        pw.println("       [--multi-package]");
         pw.println("    Like \"install\", but starts an install session.  Use \"install-write\"");
         pw.println("    to push data into the session, and \"install-commit\" to finish.");
         pw.println("");
@@ -2816,6 +2865,9 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    Write an apk into the given install session.  If the path is '-', data");
         pw.println("    will be read from stdin.  Options are:");
         pw.println("      -S: size in bytes of package, required for stdin");
+        pw.println("");
+        pw.println("  install-add-session MULTI_PACKAGE_SESSION_ID CHILD_SESSION_IDs");
+        pw.println("    Add one or more session IDs to a multi-package session.");
         pw.println("");
         pw.println("  install-commit SESSION_ID");
         pw.println("    Commit the given active install session, installing the app.");
