@@ -314,7 +314,8 @@ public final class CustomDescription implements Parcelable {
          * is called multiple times passing the same {@code id}, only the last call will be used.
          *
          * @param id resource id of the child view.
-         * @param action action to be performed.
+         * @param action action to be performed. Must be an an implementation provided by the
+         * Android System.
          *
          * @return this builder
          *
