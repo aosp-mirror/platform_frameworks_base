@@ -50,8 +50,7 @@ final class SystemAudioAutoInitiationAction extends HdmiCecFeatureAction {
             @Override
             public void onSendCompleted(int error) {
                 if (error != SendMessageResult.SUCCESS) {
-                    tv().setSystemAudioMode(false);
-                    finish();
+                    handleSystemAudioModeStatusTimeout();
                 }
             }
         });
