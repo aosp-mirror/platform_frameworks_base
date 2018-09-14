@@ -322,11 +322,11 @@ std::string Utf8ToModifiedUtf8(const std::string& utf8) {
   output.reserve(modified_size);
   for (size_t i = 0; i < size; i++) {
     if (((uint8_t) utf8[i] >> 4) == 0xF) {
-      auto codepoint = (char32_t) utf32_from_utf8_at(utf8.data(), size, i, nullptr);
+      int32_t codepoint = utf32_from_utf8_at(utf8.data(), size, i, nullptr);
 
       // Calculate the high and low surrogates as UTF-16 would
-      char32_t high = ((codepoint - 0x10000) / 0x400) + 0xD800;
-      char32_t low = ((codepoint - 0x10000) % 0x400) + 0xDC00;
+      int32_t high = ((codepoint - 0x10000) / 0x400) + 0xD800;
+      int32_t low = ((codepoint - 0x10000) % 0x400) + 0xDC00;
 
       // Encode each surrogate in UTF-8
       output.push_back((char) (0xE4 | ((high >> 12) & 0xF)));
@@ -341,6 +341,60 @@ std::string Utf8ToModifiedUtf8(const std::string& utf8) {
     }
   }
 
+  return output;
+}
+
+std::string ModifiedUtf8ToUtf8(const std::string& modified_utf8) {
+  // The UTF-8 representation will have a byte length less than or equal to the Modified UTF-8
+  // representation.
+  std::string output;
+  output.reserve(modified_utf8.size());
+
+  size_t index = 0;
+  const size_t modified_size = modified_utf8.size();
+  while (index < modified_size) {
+    size_t next_index;
+    int32_t high_surrogate = utf32_from_utf8_at(modified_utf8.data(), modified_size, index,
+                                                &next_index);
+    if (high_surrogate < 0) {
+      return {};
+    }
+
+    // Check that the first codepoint is within the high surrogate range
+    if (high_surrogate >= 0xD800 && high_surrogate <= 0xDB7F) {
+      int32_t low_surrogate = utf32_from_utf8_at(modified_utf8.data(), modified_size, next_index,
+                                                 &next_index);
+      if (low_surrogate < 0) {
+        return {};
+      }
+
+      // Check that the second codepoint is within the low surrogate range
+      if (low_surrogate >= 0xDC00 && low_surrogate <= 0xDFFF) {
+        const char32_t codepoint = (char32_t) (((high_surrogate - 0xD800) * 0x400)
+            + (low_surrogate - 0xDC00) + 0x10000);
+
+        // The decoded codepoint should represent a 4 byte, UTF-8 character
+        const size_t utf8_length = (size_t) utf32_to_utf8_length(&codepoint, 1);
+        if (utf8_length != 4) {
+          return {};
+        }
+
+        // Encode the UTF-8 representation of the codepoint into the string
+        char* start = &output[output.size()];
+        output.resize(output.size() + utf8_length);
+        utf32_to_utf8((char32_t*) &codepoint, 1, start, utf8_length + 1);
+
+        index = next_index;
+        continue;
+      }
+    }
+
+    // Append non-surrogate pairs to the output string
+    for (size_t i = index; i < next_index; i++) {
+      output.push_back(modified_utf8[i]);
+    }
+    index = next_index;
+  }
   return output;
 }
 
@@ -469,7 +523,7 @@ std::string GetString(const android::ResStringPool& pool, size_t idx) {
   size_t len;
   const char* str = pool.string8At(idx, &len);
   if (str != nullptr) {
-    return std::string(str, len);
+    return ModifiedUtf8ToUtf8(std::string(str, len));
   }
   return Utf16ToUtf8(GetString16(pool, idx));
 }
