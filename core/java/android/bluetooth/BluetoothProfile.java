@@ -21,6 +21,7 @@ import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 import java.util.List;
 
@@ -86,7 +87,7 @@ public interface BluetoothProfile {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     int PAN = 5;
 
     /**
