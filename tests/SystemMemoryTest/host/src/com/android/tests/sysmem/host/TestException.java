@@ -17,24 +17,19 @@
 package com.android.tests.sysmem.host;
 
 /**
- * Critical user journeys with which to exercise the system, driven from the
- * host.
+ * Exception thrown in case of unexpected error encountered when executing the
+ * test.
  */
-public class Cujs {
-    private Device mDevice;
-
-    public Cujs(Device device) {
-        this.mDevice = device;
+class TestException extends Exception {
+    TestException(Exception cause) {
+        super(cause);
     }
 
-    /**
-     * Runs the critical user journeys.
-     */
-    public void run() throws TestException {
-        // Invoke the Device Cujs instrumentation to run the cujs.
-        // TODO: Consider exercising the system in other interesting ways as
-        // well.
-        String command = "am instrument -w com.android.tests.sysmem.device/.Cujs";
-        mDevice.executeShellCommand(command);
+    TestException(String msg) {
+        super(msg);
+    }
+
+    TestException(String msg, Exception cause) {
+        super(msg, cause);
     }
 }

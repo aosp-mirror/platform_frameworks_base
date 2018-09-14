@@ -16,7 +16,6 @@
 
 package com.android.tests.sysmem.host;
 
-import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner.TestLogData;
@@ -26,8 +25,6 @@ import com.android.tradefed.testtype.IDeviceTest;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.io.IOException;
 
 /**
  * Runs a system memory test.
@@ -44,8 +41,9 @@ public class MemoryTest implements IDeviceTest {
     private Cujs mCujs;
 
     @Override
-    public void setDevice(ITestDevice device) {
-        mTestDevice = device;
+    public void setDevice(ITestDevice testDevice) {
+        mTestDevice = testDevice;
+        Device device = new Device(testDevice);
         mMetrics = new Metrics(device, testMetrics, testLogs);
         mCujs = new Cujs(device);
     }
@@ -56,14 +54,13 @@ public class MemoryTest implements IDeviceTest {
     }
 
     // Invoke a single iteration of running the cujs.
-    private void runCujs() throws DeviceNotAvailableException {
+    private void runCujs() throws TestException {
         mCujs.run();
         mIterations++;
     }
 
     // Sample desired memory.
-    private void sample()
-            throws DeviceNotAvailableException, IOException, Metrics.MetricsException {
+    private void sample() throws TestException {
         mMetrics.sample(String.format("%03d", mIterations));
     }
 
@@ -71,7 +68,7 @@ public class MemoryTest implements IDeviceTest {
      * Runs the memory tests.
      */
     @Test
-    public void run() throws Exception {
+    public void run() throws TestException {
         sample();   // Sample before running cujs
         runCujs();
         sample();   // Sample after first iteration of cujs
