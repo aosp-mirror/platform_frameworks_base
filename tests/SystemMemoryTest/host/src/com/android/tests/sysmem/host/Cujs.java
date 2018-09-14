@@ -31,6 +31,12 @@ public class Cujs {
      * Runs the critical user journeys.
      */
     public void run() throws TestException {
+        // Do an explicit GC in the system server process as part of the test
+        // case to reduce GC-related sources of noise.
+        // SIGUSR1 = 10 is the magic signal to trigger the GC.
+        int pid = mDevice.getPidForProcess("system_server");
+        mDevice.executeShellCommand("kill -10 " + pid);
+
         // Invoke the Device Cujs instrumentation to run the cujs.
         // TODO: Consider exercising the system in other interesting ways as
         // well.
