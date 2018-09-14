@@ -1610,13 +1610,14 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     public boolean equals(Object o) {
         if (o instanceof Spanned &&
                 toString().equals(o.toString())) {
-            Spanned other = (Spanned) o;
+            final Spanned other = (Spanned) o;
             // Check span data
-            Object[] otherSpans = other.getSpans(0, other.length(), Object.class);
+            final Object[] otherSpans = other.getSpans(0, other.length(), Object.class);
+            final Object[] thisSpans = getSpans(0, length(), Object.class);
             if (mSpanCount == otherSpans.length) {
                 for (int i = 0; i < mSpanCount; ++i) {
-                    Object thisSpan = mSpans[i];
-                    Object otherSpan = otherSpans[i];
+                    final Object thisSpan = thisSpans[i];
+                    final Object otherSpan = otherSpans[i];
                     if (thisSpan == this) {
                         if (other != otherSpan ||
                                 getSpanStart(thisSpan) != other.getSpanStart(otherSpan) ||
