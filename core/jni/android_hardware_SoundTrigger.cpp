@@ -788,63 +788,6 @@ android_hardware_SoundTrigger_stopRecognition(JNIEnv *env, jobject thiz,
     return status;
 }
 
-static jobject
-android_hardware_SoundTrigger_getModelState(JNIEnv *env, jobject thiz,
-                                            jint jHandle)
-{
-    ALOGV("getModelState");
-    sp<SoundTrigger> module = getSoundTrigger(env, thiz);
-    if (module == NULL) {
-        return NULL;
-    }
-    sp<IMemory> memory;
-    jint status = module->getModelState(jHandle, memory);
-    if (status != 0 || memory == NULL) {
-      ALOGW("getModelState, failed to get model state, status: %d", status);
-      return NULL;
-    }
-    struct sound_trigger_recognition_event* event =
-        (struct sound_trigger_recognition_event *)memory->pointer();
-    if (event == NULL) {
-      return NULL;
-    }
-    if (event->type != SOUND_MODEL_TYPE_GENERIC) {
-      ALOGW("getModelState, unsupported model type: %d", event->type);
-      return NULL;
-    }
-
-    jbyteArray jData = NULL;
-    if (event->data_size) {
-        jData = env->NewByteArray(event->data_size);
-        jbyte *nData = env->GetByteArrayElements(jData, NULL);
-        memcpy(nData, (char *)event + event->data_offset, event->data_size);
-        env->ReleaseByteArrayElements(jData, nData, 0);
-    }
-
-    jobject jAudioFormat = NULL;
-    if (event->trigger_in_data || event->capture_available) {
-        jAudioFormat = env->NewObject(gAudioFormatClass,
-                                      gAudioFormatCstor,
-                                      audioFormatFromNative(event->audio_config.format),
-                                      event->audio_config.sample_rate,
-                                      inChannelMaskFromNative(event->audio_config.channel_mask));
-
-    }
-    jobject jEvent = NULL;
-    jEvent = env->NewObject(gGenericRecognitionEventClass, gGenericRecognitionEventCstor,
-                            event->status, event->model, event->capture_available,
-                            event->capture_session, event->capture_delay_ms,
-                            event->capture_preamble_ms, event->trigger_in_data,
-                            jAudioFormat, jData);
-    if (jAudioFormat != NULL) {
-        env->DeleteLocalRef(jAudioFormat);
-    }
-    if (jData != NULL) {
-        env->DeleteLocalRef(jData);
-    }
-    return jEvent;
-}
-
 static const JNINativeMethod gMethods[] = {
     {"listModules",
         "(Ljava/util/ArrayList;)I",
@@ -874,9 +817,6 @@ static const JNINativeMethod gModuleMethods[] = {
     {"stopRecognition",
         "(I)I",
         (void *)android_hardware_SoundTrigger_stopRecognition},
-    {"getModelState",
-        "(I)Landroid/hardware/soundtrigger/SoundTrigger$RecognitionEvent;",
-        (void *)android_hardware_SoundTrigger_getModelState},
 };
 
 int register_android_hardware_SoundTrigger(JNIEnv *env)
