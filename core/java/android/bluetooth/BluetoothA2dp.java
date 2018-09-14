@@ -434,7 +434,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * {@inheritDoc}
      */
     @Override
-    public int getConnectionState(BluetoothDevice device) {
+    public @BtProfileState int getConnectionState(BluetoothDevice device) {
         if (VDBG) log("getState(" + device + ")");
         try {
             mServiceLock.readLock().lock();
@@ -689,7 +689,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @hide
      */
     @UnsupportedAppUsage
-    public BluetoothCodecStatus getCodecStatus(BluetoothDevice device) {
+    public @Nullable BluetoothCodecStatus getCodecStatus(BluetoothDevice device) {
         if (DBG) Log.d(TAG, "getCodecStatus(" + device + ")");
         try {
             mServiceLock.readLock().lock();

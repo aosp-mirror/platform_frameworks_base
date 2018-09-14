@@ -39,6 +39,8 @@ import java.util.Map;
  */
 public class AudioSystem
 {
+    private static final boolean DEBUG_VOLUME = true;
+
     private static final String TAG = "AudioSystem";
     /* These values must be kept in sync with system/audio.h */
     /*
@@ -879,6 +881,15 @@ public class AudioSystem
         }
     }
 
+    /** Wrapper for native methods called from AudioService */
+    public static int setStreamVolumeIndexAS(int stream, int index, int device) {
+        if (DEBUG_VOLUME) {
+            Log.i(TAG, "setStreamVolumeIndex: " + STREAM_NAMES[stream]
+                    + " dev=" + Integer.toHexString(device) + " idx=" + index);
+        }
+        return setStreamVolumeIndex(stream, index, device);
+    }
+
     // usage for AudioRecord.startRecordingSync(), must match AudioSystem::sync_event_t
     public static final int SYNC_EVENT_NONE = 0;
     public static final int SYNC_EVENT_PRESENTATION_COMPLETE = 1;
@@ -906,7 +917,7 @@ public class AudioSystem
     @UnsupportedAppUsage
     public static native int initStreamVolume(int stream, int indexMin, int indexMax);
     @UnsupportedAppUsage
-    public static native int setStreamVolumeIndex(int stream, int index, int device);
+    private static native int setStreamVolumeIndex(int stream, int index, int device);
     public static native int getStreamVolumeIndex(int stream, int device);
     public static native int setMasterVolume(float value);
     public static native float getMasterVolume();
