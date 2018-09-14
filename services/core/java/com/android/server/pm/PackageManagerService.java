@@ -166,6 +166,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -510,6 +511,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     /** Special library name that skips shared libraries check during compilation. */
     private static final String SKIP_SHARED_LIBRARY_CHECK = "&";
+
+    private static final int PROTECTION_MASK_BASE = 0xf;
 
     final ServiceThread mHandlerThread;
 
@@ -4213,6 +4216,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public void revokeRuntimePermission(String packageName, String name, int userId) {
+        revokeRuntimePermission(packageName, name, userId, mSettings.getPermission(name));
+    }
+
+    private void revokeRuntimePermission(String packageName, String name, int userId,
+            BasePermission bp) {
         if (!sUserManager.exists(userId)) {
             Log.e(TAG, "No such user:" + userId);
             return;
@@ -4233,8 +4241,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (pkg == null) {
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
-
-            final BasePermission bp = mSettings.mPermissions.get(name);
             if (bp == null) {
                 throw new IllegalArgumentException("Unknown permission: " + name);
             }
@@ -4289,6 +4295,82 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED);
     }
+
+    /**
+     * We might auto-grant permissions if any permission of the group is already granted. Hence if
+     * the group of a granted permission changes we need to revoke it to avoid having permissions of
+     * the new group auto-granted.
+     *
+     * @param newPackage The new package that was installed
+     * @param oldPackage The old package that was updated
+     * @param allPackageNames All package names
+     */
+    private void revokeRuntimePermissionsIfGroupChanged(
+            PackageParser.Package newPackage,
+            PackageParser.Package oldPackage,
+            ArrayList<String> allPackageNames) {
+        final int numOldPackagePermissions = oldPackage.permissions.size();
+        final ArrayMap<String, String> oldPermissionNameToGroupName
+                = new ArrayMap<>(numOldPackagePermissions);
+
+        for (int i = 0; i < numOldPackagePermissions; i++) {
+            final PackageParser.Permission permission = oldPackage.permissions.get(i);
+
+            if (permission.group != null) {
+                oldPermissionNameToGroupName.put(permission.info.name,
+                        permission.group.info.name);
+            }
+        }
+
+        final int numNewPackagePermissions = newPackage.permissions.size();
+        for (int newPermissionNum = 0; newPermissionNum < numNewPackagePermissions;
+                newPermissionNum++) {
+            final PackageParser.Permission newPermission =
+                    newPackage.permissions.get(newPermissionNum);
+            final int newProtection = newPermission.info.protectionLevel;
+
+            if ((newProtection & PermissionInfo.PROTECTION_DANGEROUS) != 0) {
+                final String permissionName = newPermission.info.name;
+                final String newPermissionGroupName =
+                        newPermission.group == null ? null : newPermission.group.info.name;
+                final String oldPermissionGroupName = oldPermissionNameToGroupName.get(
+                        permissionName);
+
+                if (newPermissionGroupName != null
+                        && !newPermissionGroupName.equals(oldPermissionGroupName)) {
+                    final List<UserInfo> users = mContext.getSystemService(UserManager.class)
+                            .getUsers();
+
+                    final int numUsers = users.size();
+                    for (int userNum = 0; userNum < numUsers; userNum++) {
+                        final int userId = users.get(userNum).id;
+                        final int numPackages = allPackageNames.size();
+                        for (int packageNum = 0; packageNum < numPackages; packageNum++) {
+                            final String packageName = allPackageNames.get(packageNum);
+
+                            if (checkPermission(permissionName, packageName, userId)
+                                    == PackageManager.PERMISSION_GRANTED) {
+                                EventLog.writeEvent(0x534e4554, "72710897",
+                                        newPackage.applicationInfo.uid,
+                                        "Revoking permission", permissionName, "from package",
+                                        packageName, "as the group changed from",
+                                        oldPermissionGroupName, "to", newPermissionGroupName);
+
+                                try {
+                                    revokeRuntimePermission(packageName, permissionName, userId,
+                                           mSettings.getPermission(permissionName));
+                                } catch (IllegalArgumentException e) {
+                                    Slog.e(TAG, "Could not revoke " + permissionName + " from "
+                                            + packageName, e);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     @Override
     public void resetRuntimePermissions() {
@@ -8099,12 +8181,21 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Log.d(TAG, "Scanning package " + pkg.packageName);
         }
 
+        final PackageParser.Package oldPkg;
+
         synchronized (mPackages) {
             if (mPackages.containsKey(pkg.packageName)
                     || mSharedLibraries.containsKey(pkg.packageName)) {
                 throw new PackageManagerException(INSTALL_FAILED_DUPLICATE_PACKAGE,
                         "Application package " + pkg.packageName
                                 + " already installed.  Skipping duplicate.");
+            }
+
+            final PackageSetting oldPkgSetting = mSettings.peekPackageLPr(pkg.packageName);
+            if (oldPkgSetting == null) {
+               oldPkg = null;
+            } else {
+               oldPkg = oldPkgSetting.pkg;
             }
 
             // If we're only installing presumed-existing packages, require that the
@@ -8970,6 +9061,24 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // This is a regular package, with one or more known overlay packages.
                 createIdmapsForPackageLI(pkg);
             }
+
+            if (oldPkg != null) {
+                // We need to call revokeRuntimePermissionsIfGroupChanged async as permission
+                // revokation from this method might need to kill apps which need the
+                // mPackages lock on a different thread. This would dead lock.
+                //
+                // Hence create a copy of all package names and pass it into
+                // revokeRuntimePermissionsIfGroupChanged. Only for those permissions might get
+                // revoked. If a new package is added before the async code runs the permission
+                // won't be granted yet, hence new packages are no problem.
+                final ArrayList<String> allPackageNames = new ArrayList<>(mPackages.keySet());
+
+                AsyncTask.execute(new Runnable() {
+                    public void run() {
+                        revokeRuntimePermissionsIfGroupChanged(pkg, oldPkg, allPackageNames);
+                    }
+                });
+            }
         }
 
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -9704,7 +9813,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (DEBUG_REMOVE) Log.d(TAG, "  Activities: " + r);
         }
 
+        final ArrayList<String> allPackageNames = new ArrayList<>(mPackages.keySet());
+
         N = pkg.permissions.size();
+        List<BasePermission> bps = new ArrayList<BasePermission>(N);
         r = null;
         for (i=0; i<N; i++) {
             PackageParser.Permission p = pkg.permissions.get(i);
@@ -9713,6 +9825,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 bp = mSettings.mPermissionTrees.get(p.info.name);
             }
             if (bp != null && bp.perm == p) {
+                if (((p.info.protectionLevel & PROTECTION_MASK_BASE) &
+                        PermissionInfo.PROTECTION_DANGEROUS) != 0) {
+                    bps.add(bp);
+                }
                 bp.perm = null;
                 if (DEBUG_REMOVE && chatty) {
                     if (r == null) {
@@ -9730,6 +9846,44 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
         }
+
+        AsyncTask.execute(() -> {
+            final int numRemovedPermissions = bps.size();
+            for (int permissionNum = 0; permissionNum < numRemovedPermissions; permissionNum++) {
+                final int[] userIds = sUserManager.getUserIds();
+                final int numUserIds = userIds.length;
+
+                final int numPackages = allPackageNames.size();
+                for (int packageNum = 0; packageNum < numPackages; packageNum++) {
+                    final String packageName = allPackageNames.get(packageNum);
+                    final PackageManagerInternal packageManagerInt =
+                            LocalServices.getService(PackageManagerInternal.class);
+                    final ApplicationInfo applicationInfo = packageManagerInt.getApplicationInfo(
+                            packageName, UserHandle.USER_SYSTEM);
+                    if (applicationInfo != null
+                            && applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
+                        continue;
+                    }
+                    for (int userIdNum = 0; userIdNum < numUserIds; userIdNum++) {
+                        final int userId = userIds[userIdNum];
+                        final String permissionName = bps.get(permissionNum).name;
+                        if (checkPermission(permissionName, packageName,
+                                userId) == PackageManager.PERMISSION_GRANTED) {
+                            try {
+                                revokeRuntimePermission(packageName,
+                                        permissionName,
+                                        userId,
+                                        bps.get(permissionNum));
+                            } catch (IllegalArgumentException e) {
+                                Slog.e(TAG, "Could not revoke " + permissionName + " from "
+                                        + packageName, e);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
         if (r != null) {
             if (DEBUG_REMOVE) Log.d(TAG, "  Permissions: " + r);
         }
