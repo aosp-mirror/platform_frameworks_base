@@ -92,8 +92,7 @@ parse_arguments() {
         shift
         ;;
       --compiler-filter)
-        # ignore any '--compiler-filter xyz' settings.
-        # FIXME: app_startup_runner.py should not be passing this flag.
+        compiler_filter="$2"
         shift
         ;;
       *)
@@ -194,9 +193,6 @@ if [[ $? -ne 0 ]]; then
 fi
 verbose_print "Package was in path '$package_path'"
 
-
-
-
 keep_application_trace_file=n
 application_trace_file_path="$package_path/TraceFile.pb"
 trace_file_directory="$package_path"
@@ -285,6 +281,47 @@ perform_aot_cleanup() {
     wait $hint_sender_pid
   fi
 }
+
+configure_compiler_filter() {
+  local the_compiler_filter="$1"
+  local the_package="$2"
+  local the_activity="$3"
+
+  if [[ -z $the_compiler_filter ]]; then
+    verbose_print "No --compiler-filter specified, don't need to force it."
+    return 0
+  fi
+
+  local current_compiler_filter_info="$("$DIR"/query_compiler_filter.py --package "$the_package")"
+  local res=$?
+  if [[ $res -ne 0 ]]; then
+    return $res
+  fi
+
+  local current_compiler_filter
+  local current_reason
+  local current_isa
+  read current_compiler_filter current_reason current_isa <<< "$current_compiler_filter_info"
+
+  verbose_print "Compiler Filter="$current_compiler_filter "Reason="$current_reason "Isa="$current_isa
+
+  # Don't trust reasons that aren't 'unknown' because that means we didn't manually force the compilation filter.
+  # (e.g. if any automatic system-triggered compilations are not unknown).
+  if [[ $current_reason != "unknown" ]] || [[ $current_compiler_filter != $the_compiler_filter ]]; then
+    verbose_print "$DIR"/force_compiler_filter --compiler-filter "$the_compiler_filter" --package "$the_package" --activity "$the_activity"
+    "$DIR"/force_compiler_filter --compiler-filter "$the_compiler_filter" --package "$the_package" --activity "$the_activity"
+    res=$?
+  else
+    verbose_print "Queried compiler-filter matched requested compiler-filter, skip forcing."
+    res=0
+  fi
+
+  return $res
+}
+
+# Ensure the APK is currently compiled with whatever we passed in via --compiler-filter.
+# No-op if this option was not passed in.
+configure_compiler_filter "$compiler_filter" "$package" "$activity" || exit 1
 
 # TODO: This loop logic could probably be moved into app_startup_runner.py
 for ((i=0;i<count;++i)) do
