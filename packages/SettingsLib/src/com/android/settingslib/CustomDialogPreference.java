@@ -26,6 +26,12 @@ import android.view.View;
 import androidx.preference.DialogPreference;
 import androidx.preference.PreferenceDialogFragment;
 
+/**
+ * Framework version is deprecated, use the compat version instead.
+ *
+ * @deprecated
+ */
+@Deprecated
 public class CustomDialogPreference extends DialogPreference {
 
     private CustomPreferenceDialogFragment mFragment;
