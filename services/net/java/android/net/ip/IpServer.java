@@ -430,6 +430,8 @@ public class IpServer extends StateMachine {
             params.mtu = v6only.getMtu();
             params.hasDefaultRoute = v6only.hasIPv6DefaultRoute();
 
+            if (params.hasDefaultRoute) params.hopLimit = getHopLimit(v6only.getInterfaceName());
+
             for (LinkAddress linkAddr : v6only.getLinkAddresses()) {
                 if (linkAddr.getPrefixLength() != RFC7421_PREFIX_LENGTH) continue;
 
@@ -547,6 +549,20 @@ public class IpServer extends StateMachine {
             mLog.e("Failed to update local DNS caching server");
             if (newDnses != null) newDnses.clear();
         }
+    }
+
+    private byte getHopLimit(String upstreamIface) {
+        try {
+            int upstreamHopLimit = Integer.parseUnsignedInt(
+                    mNetd.getProcSysNet(INetd.IPV6, INetd.CONF, upstreamIface, "hop_limit"));
+            // Add one hop to account for this forwarding device
+            upstreamHopLimit++;
+            // Cap the hop limit to 255.
+            return (byte) Integer.min(upstreamHopLimit, 255);
+        } catch (Exception e) {
+            mLog.e("Failed to find upstream interface hop limit", e);
+        }
+        return RaParams.DEFAULT_HOPLIMIT;
     }
 
     private void setRaParams(RaParams newParams) {
