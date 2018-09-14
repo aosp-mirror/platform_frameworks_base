@@ -286,8 +286,9 @@ public class WindowFrames {
         boolean overrideBottomInset = !windowsAreFloating && !inFullscreenContainer
                 && mFrame.bottom > windowBounds.bottom;
 
-        mTmpRect.set(mFrame.left, mFrame.top, overrideRightInset ? mTmpRect.right : mFrame.right,
-                overrideBottomInset ? mTmpRect.bottom : mFrame.bottom);
+        mTmpRect.set(mFrame.left, mFrame.top,
+                overrideRightInset ? windowBounds.right : mFrame.right,
+                overrideBottomInset ? windowBounds.bottom : mFrame.bottom);
 
         InsetUtils.insetsBetweenFrames(mTmpRect, mContentFrame, mContentInsets);
         InsetUtils.insetsBetweenFrames(mTmpRect, mVisibleFrame, mVisibleInsets);
