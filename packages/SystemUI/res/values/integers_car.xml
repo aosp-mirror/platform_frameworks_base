@@ -19,4 +19,9 @@
     <integer name="car_user_switcher_anim_cascade_delay_ms">27</integer>
     <!-- Full screen user switcher column number TODO: move to support library-->
     <integer name="user_fullscreen_switcher_num_col">3</integer>
+
+    <!-- Number of milliseconds user can spend driving with the keyguard up. After that, we switch to Guest. -->
+    <!-- If the number is negative, the feature is disabled.
+         If it's zero, we switch to guest immediately as we start driving. -->
+    <integer name="driving_on_keyguard_timeout_ms">30000</integer>
 </resources>
