@@ -34,6 +34,7 @@ import android.content.res.Configuration;
 import android.content.res.ResourceId;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -133,7 +134,7 @@ public class Dialog implements DialogInterface, Window.Callback,
     private final Handler mHandler = new Handler();
 
     private static final int DISMISS = 0x43;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static final int CANCEL = 0x44;
     private static final int SHOW = 0x45;
 

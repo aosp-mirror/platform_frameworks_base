@@ -27,6 +27,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
@@ -626,7 +627,7 @@ public class DreamService extends Service implements Window.Callback {
      * @see #startDozing
      * @hide For use by system UI components only.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public boolean canDoze() {
         return mCanDoze;
     }
@@ -694,7 +695,7 @@ public class DreamService extends Service implements Window.Callback {
      * @see #startDozing
      * @hide For use by system UI components only.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void stopDozing() {
         if (mDozing) {
             mDozing = false;
@@ -716,7 +717,7 @@ public class DreamService extends Service implements Window.Callback {
      * @see #setDozing(boolean)
      * @hide For use by system UI components only.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public boolean isDozing() {
         return mDozing;
     }

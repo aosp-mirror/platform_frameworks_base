@@ -19,6 +19,7 @@ package android.graphics.fonts;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ import java.util.regex.Pattern;
  * Class that holds information about single font variation axis.
  */
 public final class FontVariationAxis {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int mTag;
     private final String mTagString;
     @UnsupportedAppUsage

@@ -1417,7 +1417,7 @@ public class Notification implements Parcelable
         public static final int SEMANTIC_ACTION_CALL = 10;
 
         private final Bundle mExtras;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         private Icon mIcon;
         private final RemoteInput[] mRemoteInputs;
         private boolean mAllowGeneratedReplies = true;
