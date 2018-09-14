@@ -189,6 +189,10 @@ public class LooperStatsService extends Binder {
             } else if ("reset".equals(cmd)) {
                 mStats.reset();
                 return 0;
+            } else if ("sampling_interval".equals(cmd)) {
+                int sampling = Integer.parseUnsignedInt(getNextArgRequired());
+                setSamplingInterval(sampling);
+                return 0;
             } else {
                 return handleDefaultCommands(cmd);
             }
@@ -198,9 +202,10 @@ public class LooperStatsService extends Binder {
         public void onHelp() {
             final PrintWriter pw = getOutPrintWriter();
             pw.println(LOOPER_STATS_SERVICE_NAME + " commands:");
-            pw.println("  enable: Enable collecting stats");
-            pw.println("  disable: Disable collecting stats");
-            pw.println("  reset: Reset stats");
+            pw.println("  enable: Enable collecting stats.");
+            pw.println("  disable: Disable collecting stats.");
+            pw.println("  sampling_interval: Change the sampling interval.");
+            pw.println("  reset: Reset stats.");
         }
     }
 }
