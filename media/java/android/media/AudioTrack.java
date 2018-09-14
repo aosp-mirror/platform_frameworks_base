@@ -1656,7 +1656,7 @@ public class AudioTrack extends PlayerBase
     * @param timestamp a reference to a non-null AudioTimestamp instance allocated
     *        and owned by caller.
     * @return true if a timestamp is available, or false if no timestamp is available.
-    *         If a timestamp if available,
+    *         If a timestamp is available,
     *         the AudioTimestamp instance is filled in with a position in frame units, together
     *         with the estimated time when that frame was presented or is committed to
     *         be presented.
