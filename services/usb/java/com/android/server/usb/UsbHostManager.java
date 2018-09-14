@@ -40,6 +40,7 @@ import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.usb.descriptors.UsbDescriptor;
 import com.android.server.usb.descriptors.UsbDescriptorParser;
 import com.android.server.usb.descriptors.UsbDeviceDescriptor;
+import com.android.server.usb.descriptors.UsbInterfaceDescriptor;
 import com.android.server.usb.descriptors.report.TextReportCanvas;
 import com.android.server.usb.descriptors.tree.UsbDescriptorsTree;
 
@@ -352,8 +353,6 @@ public class UsbHostManager {
             }
             return false;
         }
-        UsbDescriptorParser parser = new UsbDescriptorParser(deviceAddress, descriptors);
-        logUsbDevice(parser);
 
         if (isBlackListed(deviceClass, deviceSubclass)) {
             if (DEBUG) {
@@ -361,6 +360,15 @@ public class UsbHostManager {
             }
             return false;
         }
+
+        UsbDescriptorParser parser = new UsbDescriptorParser(deviceAddress, descriptors);
+        if (deviceClass == UsbConstants.USB_CLASS_PER_INTERFACE
+                && !checkUsbInterfacesBlackListed(parser)) {
+            return false;
+        }
+
+        // Potentially can block as it may read data from the USB device.
+        logUsbDevice(parser);
 
         synchronized (mLock) {
             if (mDevices.get(deviceAddress) != null) {
@@ -511,6 +519,29 @@ public class UsbHostManager {
         } else {
             pw.println("No USB Devices have been connected.");
         }
+    }
+
+    private boolean checkUsbInterfacesBlackListed(UsbDescriptorParser parser) {
+        // Device class needs to be obtained through the device interface.  Ignore device only
+        // if ALL interfaces are black-listed.
+        boolean shouldIgnoreDevice = false;
+        for (UsbDescriptor descriptor: parser.getDescriptors()) {
+            if (!(descriptor instanceof UsbInterfaceDescriptor)) {
+                continue;
+            }
+            UsbInterfaceDescriptor iface = (UsbInterfaceDescriptor) descriptor;
+            shouldIgnoreDevice = isBlackListed(iface.getUsbClass(), iface.getUsbSubclass());
+            if (!shouldIgnoreDevice) {
+                break;
+            }
+        }
+        if (shouldIgnoreDevice) {
+            if (DEBUG) {
+                Slog.d(TAG, "usb interface class is black listed");
+            }
+            return false;
+        }
+        return true;
     }
 
     private native void monitorUsbHostBus();
