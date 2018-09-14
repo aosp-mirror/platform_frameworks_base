@@ -32,8 +32,11 @@ import com.android.settingslib.core.lifecycle.Lifecycle;
 import java.util.List;
 
 /**
- * Manages IPC communication to SettingsIntelligence for suggestion related services.
+ * Framework mixin is deprecated, use the compat version instead.
+ *
+ * @deprecated
  */
+@Deprecated
 public class SuggestionControllerMixin implements SuggestionController.ServiceConnectionListener,
         androidx.lifecycle.LifecycleObserver, LoaderManager.LoaderCallbacks<List<Suggestion>> {
 
@@ -65,7 +68,7 @@ public class SuggestionControllerMixin implements SuggestionController.ServiceCo
         mContext = context.getApplicationContext();
         mHost = host;
         mSuggestionController = new SuggestionController(mContext, componentName,
-                    this /* serviceConnectionListener */);
+                this /* serviceConnectionListener */);
         if (lifecycle != null) {
             lifecycle.addObserver(this);
         }
