@@ -1551,7 +1551,9 @@ public class ZenModeConfig implements Parcelable {
             if (component != null) {
                 component.writeToProto(proto, ZenRuleProto.COMPONENT);
             }
-            // TODO:  write zenPolicy to proto (b/115370281)
+            if (zenPolicy != null) {
+                zenPolicy.writeToProto(proto, ZenRuleProto.ZEN_POLICY);
+            }
             proto.end(token);
         }
 
