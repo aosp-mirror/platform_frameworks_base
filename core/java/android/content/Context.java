@@ -3431,7 +3431,7 @@ public abstract class Context {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final String COUNTRY_DETECTOR = "country_detector";
 
     /**

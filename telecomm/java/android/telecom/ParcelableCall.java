@@ -18,6 +18,7 @@ package android.telecom;
 
 import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -118,7 +119,7 @@ public final class ParcelableCall implements Parcelable {
     }
 
     /** The unique ID of the call. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public String getId() {
         return mId;
     }

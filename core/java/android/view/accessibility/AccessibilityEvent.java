@@ -18,6 +18,7 @@ package android.view.accessibility;
 
 import android.annotation.IntDef;
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -761,7 +762,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     private CharSequence mPackageName;
     private long mEventTime;
     int mMovementGranularity;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     int mAction;
     int mContentChangeTypes;
     int mWindowChangeTypes;

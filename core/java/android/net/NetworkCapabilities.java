@@ -21,6 +21,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.ConnectivityManager.NetworkCallback;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
@@ -904,7 +905,7 @@ public final class NetworkCapabilities implements Parcelable {
      *         specifier. See {@link #setNetworkSpecifier}.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public NetworkSpecifier getNetworkSpecifier() {
         return mNetworkSpecifier;
     }

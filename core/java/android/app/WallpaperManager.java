@@ -1288,7 +1288,7 @@ public class WallpaperManager {
      * requires permission {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public int setBitmap(Bitmap fullImage, Rect visibleCropHint,
             boolean allowBackup, @SetWallpaperFlags int which, int userId)
             throws IOException {

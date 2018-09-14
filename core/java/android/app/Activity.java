@@ -847,7 +847,7 @@ public class Activity extends ContextThemeWrapper
     /*package*/ ActionBar mActionBar = null;
     private boolean mEnableDefaultActionBarUp;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private VoiceInteractor mVoiceInteractor;
 
     @UnsupportedAppUsage
@@ -7097,7 +7097,7 @@ public class Activity extends ContextThemeWrapper
 
     // ------------------ Internal API ------------------
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     final void setParent(Activity parent) {
         mParent = parent;
     }

@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
@@ -655,7 +656,7 @@ public class IntentFilter implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final boolean isVerified() {
         if ((mVerifyState & STATE_NEED_VERIFY_CHECKED) == STATE_NEED_VERIFY_CHECKED) {
             return ((mVerifyState & STATE_NEED_VERIFY) == STATE_NEED_VERIFY);

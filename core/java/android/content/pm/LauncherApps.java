@@ -42,6 +42,7 @@ import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -136,7 +137,7 @@ public class LauncherApps {
             "android.content.pm.extra.PIN_ITEM_REQUEST";
 
     private final Context mContext;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final ILauncherApps mService;
     @UnsupportedAppUsage
     private final PackageManager mPm;

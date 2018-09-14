@@ -21,6 +21,7 @@ import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.IActivityManager;
 import android.app.QueuedWork;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -71,22 +72,22 @@ public abstract class BroadcastReceiver {
         /** @hide */
         public static final int TYPE_UNREGISTERED = 2;
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         final int mType;
         @UnsupportedAppUsage
         final boolean mOrderedHint;
         @UnsupportedAppUsage
         final boolean mInitialStickyHint;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         final IBinder mToken;
         @UnsupportedAppUsage
         final int mSendingUser;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         final int mFlags;
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         int mResultCode;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         String mResultData;
         @UnsupportedAppUsage
         Bundle mResultExtras;
@@ -96,7 +97,7 @@ public abstract class BroadcastReceiver {
         boolean mFinished;
 
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public PendingResult(int resultCode, String resultData, Bundle resultExtras, int type,
                 boolean ordered, boolean sticky, IBinder token, int userId, int flags) {
             mResultCode = resultCode;

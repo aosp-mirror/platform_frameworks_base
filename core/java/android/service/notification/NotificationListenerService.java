@@ -280,7 +280,7 @@ public abstract class NotificationListenerService extends Service {
 
     private final Object mLock = new Object();
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private Handler mHandler;
 
     /** @hide */

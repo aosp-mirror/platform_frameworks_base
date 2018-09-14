@@ -25,6 +25,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StrictMode;
@@ -198,7 +199,7 @@ public class ClipData implements Parcelable {
         final CharSequence mText;
         final String mHtmlText;
         final Intent mIntent;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         Uri mUri;
 
         /** @hide */

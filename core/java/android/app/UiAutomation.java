@@ -29,6 +29,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerGlobal;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -193,7 +194,7 @@ public final class UiAutomation {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public UiAutomation(Looper looper, IUiAutomationConnection connection) {
         if (looper == null) {
             throw new IllegalArgumentException("Looper cannot be null!");
@@ -210,7 +211,7 @@ public final class UiAutomation {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void connect() {
         connect(0);
     }
@@ -282,7 +283,7 @@ public final class UiAutomation {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void disconnect() {
         synchronized (mLock) {
             if (mIsConnecting) {

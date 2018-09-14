@@ -20,6 +20,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.ContentProviderNative;
 import android.content.IContentProvider;
 import android.content.pm.ProviderInfo;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -35,7 +36,7 @@ public class ContentProviderHolder implements Parcelable {
     @UnsupportedAppUsage
     public IContentProvider provider;
     public IBinder connection;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public boolean noReleaseNeeded;
 
     @UnsupportedAppUsage

@@ -22,6 +22,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -249,7 +250,7 @@ public final class StorageVolume implements Parcelable {
     }
 
     /** {@hide} */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public UserHandle getOwner() {
         return mOwner;
     }

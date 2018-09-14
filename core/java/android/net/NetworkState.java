@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Slog;
@@ -34,7 +35,7 @@ public class NetworkState implements Parcelable {
     public final NetworkInfo networkInfo;
     public final LinkProperties linkProperties;
     public final NetworkCapabilities networkCapabilities;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final Network network;
     public final String subscriberId;
     public final String networkId;

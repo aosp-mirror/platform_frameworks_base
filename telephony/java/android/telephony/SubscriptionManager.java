@@ -41,6 +41,7 @@ import android.content.res.Resources;
 import android.net.INetworkPolicyManager;
 import android.net.NetworkCapabilities;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -191,7 +192,7 @@ public class SubscriptionManager {
      * The name_source is from the user
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final int NAME_SOURCE_USER_INPUT = 2;
 
     /**
@@ -1610,7 +1611,7 @@ public class SubscriptionManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static boolean isValidSlotIndex(int slotIndex) {
         return slotIndex >= 0 && slotIndex < TelephonyManager.getDefault().getSimCount();
     }

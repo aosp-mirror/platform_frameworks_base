@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.drawable.AdaptiveIconDrawable;
+import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -55,7 +56,7 @@ public class ShortcutManager {
     private static final String TAG = "ShortcutManager";
 
     private final Context mContext;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final IShortcutService mService;
 
     /**

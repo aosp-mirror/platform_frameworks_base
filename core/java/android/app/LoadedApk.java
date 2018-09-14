@@ -111,7 +111,7 @@ public final class LoadedApk {
     private String mDataDir;
     @UnsupportedAppUsage
     private String mLibDir;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private File mDataDirFile;
     private File mDeviceProtectedDataDirFile;
     private File mCredentialProtectedDataDirFile;
@@ -141,7 +141,7 @@ public final class LoadedApk {
         = new ArrayMap<>();
     private final ArrayMap<Context, ArrayMap<BroadcastReceiver, LoadedApk.ReceiverDispatcher>> mUnregisteredReceivers
         = new ArrayMap<>();
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final ArrayMap<Context, ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher>> mServices
         = new ArrayMap<>();
     private final ArrayMap<Context, ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher>> mUnboundServices
@@ -1358,7 +1358,7 @@ public final class LoadedApk {
         final IIntentReceiver.Stub mIIntentReceiver;
         @UnsupportedAppUsage
         final BroadcastReceiver mReceiver;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         final Context mContext;
         final Handler mActivityThread;
         final Instrumentation mInstrumentation;
@@ -1605,7 +1605,7 @@ public final class LoadedApk {
         private final ServiceDispatcher.InnerConnection mIServiceConnection;
         @UnsupportedAppUsage
         private final ServiceConnection mConnection;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         private final Context mContext;
         private final Handler mActivityThread;
         private final ServiceConnectionLeaked mLocation;

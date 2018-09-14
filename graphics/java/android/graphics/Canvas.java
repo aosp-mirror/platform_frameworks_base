@@ -126,7 +126,7 @@ public class Canvas extends BaseCanvas {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public Canvas(long nativeCanvas) {
         if (nativeCanvas == 0) {
             throw new IllegalStateException();

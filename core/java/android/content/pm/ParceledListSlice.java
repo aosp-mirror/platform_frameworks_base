@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -72,7 +73,7 @@ public class ParceledListSlice<T extends Parcelable> extends BaseParceledListSli
     }
 
     @SuppressWarnings("unchecked")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final Parcelable.ClassLoaderCreator<ParceledListSlice> CREATOR =
             new Parcelable.ClassLoaderCreator<ParceledListSlice>() {
         public ParceledListSlice createFromParcel(Parcel in) {

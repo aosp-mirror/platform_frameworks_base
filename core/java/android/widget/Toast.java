@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -443,7 +444,7 @@ public class Toast {
          * schedule handleShow into the right thread
          */
         @Override
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public void show(IBinder windowToken) {
             if (localLOGV) Log.v(TAG, "SHOW: " + this);
             mHandler.obtainMessage(SHOW, windowToken).sendToTarget();

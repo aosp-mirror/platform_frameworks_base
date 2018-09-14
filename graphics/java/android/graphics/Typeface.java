@@ -30,6 +30,7 @@ import android.content.res.AssetManager;
 import android.graphics.fonts.FontVariationAxis;
 import android.graphics.fonts.SystemFonts;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.FontRequest;
 import android.provider.FontsContract;
 import android.text.FontConfig;
@@ -1076,7 +1077,7 @@ public class Typeface {
     }
 
     // don't allow clients to call this directly
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private Typeface(long ni) {
         if (ni == 0) {
             throw new RuntimeException("native typeface cannot be made");

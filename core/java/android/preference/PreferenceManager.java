@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.XmlResourceParser;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -68,7 +69,7 @@ public class PreferenceManager {
      * Fragment that owns this instance.
      */
     @Nullable
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private PreferenceFragment mFragment;
 
     /**
@@ -201,7 +202,7 @@ public class PreferenceManager {
     /**
      * Sets the owning preference fragment
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     void setFragment(PreferenceFragment fragment) {
         mFragment = fragment;
     }

@@ -34,6 +34,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplayStatus;
 import android.media.session.MediaSession;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
@@ -2064,7 +2065,7 @@ public class MediaRouter {
         }
 
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public boolean isDefault() {
             return this == sStatic.mDefaultAudioVideo;
         }

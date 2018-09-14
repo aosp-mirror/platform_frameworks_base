@@ -17,6 +17,7 @@ package android.graphics;
 
 import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
+import android.os.Build;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -166,7 +167,7 @@ public final class BitmapRegionDecoder {
 
         This can be called from JNI code.
     */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private BitmapRegionDecoder(long decoder) {
         mNativeBitmapRegionDecoder = decoder;
         mRecycled = false;

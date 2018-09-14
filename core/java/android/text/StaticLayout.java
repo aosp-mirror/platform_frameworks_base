@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.Paint;
+import android.os.Build;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LeadingMarginSpan.LeadingMarginSpan2;
 import android.text.style.LineHeightSpan;
@@ -1293,7 +1294,7 @@ public class StaticLayout extends Layout {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public int getHeight(boolean cap) {
         if (cap && mLineCount > mMaximumVisibleLineCount && mMaxLineHeight == -1
                 && Log.isLoggable(TAG, Log.WARN)) {
