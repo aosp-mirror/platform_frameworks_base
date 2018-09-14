@@ -929,6 +929,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
 
         List<ExportedCallStat> callStats = binderStats.getExportedCallStats();
+        binderStats.reset();
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         for (ExportedCallStat callStat : callStats) {
             StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 13 /* fields */);
@@ -957,6 +958,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
 
         ArrayMap<String, Integer> exceptionStats = binderStats.getExportedExceptionStats();
+        // TODO: decouple binder calls exceptions with the rest of the binder calls data so that we
+        // can reset the exception stats.
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         for (Entry<String, Integer> entry : exceptionStats.entrySet()) {
             StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 2 /* fields */);
