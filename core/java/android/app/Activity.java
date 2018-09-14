@@ -6385,11 +6385,13 @@ public class Activity extends ContextThemeWrapper
      * closed for you after you return.
      * @param args additional arguments to the dump request.
      */
-    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+    public void dump(@NonNull String prefix, @Nullable FileDescriptor fd,
+            @NonNull PrintWriter writer, @Nullable String[] args) {
         dumpInner(prefix, fd, writer, args);
     }
 
-    void dumpInner(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+    void dumpInner(@NonNull String prefix, @Nullable FileDescriptor fd,
+            @NonNull PrintWriter writer, @Nullable String[] args) {
         if (args != null && args.length > 0 && args[0].equals("--autofill")) {
             dumpAutofillManager(prefix, writer);
             return;
