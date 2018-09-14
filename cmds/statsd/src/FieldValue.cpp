@@ -147,6 +147,9 @@ Value::Value(const Value& from) {
         case STRING:
             str_value = from.str_value;
             break;
+        case STORAGE:
+            storage_value = from.storage_value;
+            break;
         default:
             break;
     }
@@ -164,6 +167,8 @@ std::string Value::toString() const {
             return std::to_string(double_value) + "[D]";
         case STRING:
             return str_value + "[S]";
+        case STORAGE:
+            return "bytes of size " + std::to_string(storage_value.size()) + "[ST]";
         default:
             return "[UNKNOWN]";
     }
@@ -183,6 +188,8 @@ bool Value::operator==(const Value& that) const {
             return double_value == that.double_value;
         case STRING:
             return str_value == that.str_value;
+        case STORAGE:
+            return storage_value == that.storage_value;
         default:
             return false;
     }
@@ -201,6 +208,8 @@ bool Value::operator!=(const Value& that) const {
             return double_value != that.double_value;
         case STRING:
             return str_value != that.str_value;
+        case STORAGE:
+            return storage_value != that.storage_value;
         default:
             return false;
     }
@@ -220,6 +229,8 @@ bool Value::operator<(const Value& that) const {
             return double_value < that.double_value;
         case STRING:
             return str_value < that.str_value;
+        case STORAGE:
+            return storage_value < that.storage_value;
         default:
             return false;
     }
@@ -239,6 +250,8 @@ bool Value::operator>(const Value& that) const {
             return double_value > that.double_value;
         case STRING:
             return str_value > that.str_value;
+        case STORAGE:
+            return storage_value > that.storage_value;
         default:
             return false;
     }
@@ -258,6 +271,8 @@ bool Value::operator>=(const Value& that) const {
             return double_value >= that.double_value;
         case STRING:
             return str_value >= that.str_value;
+        case STORAGE:
+            return storage_value >= that.storage_value;
         default:
             return false;
     }
@@ -271,6 +286,11 @@ Value Value::operator-(const Value& that) const {
     }
     if (type == STRING) {
         ALOGE("Can't operate on string value type");
+        return v;
+    }
+
+    if (type == STORAGE) {
+        ALOGE("Can't operate on storage value type");
         return v;
     }
 
@@ -311,6 +331,9 @@ Value& Value::operator=(const Value& that) {
         case STRING:
             str_value = that.str_value;
             break;
+        case STORAGE:
+            storage_value = that.storage_value;
+            break;
         default:
             break;
     }
@@ -324,6 +347,10 @@ Value& Value::operator+=(const Value& that) {
     }
     if (type == STRING) {
         ALOGE("Can't operate on string value type");
+        return *this;
+    }
+    if (type == STORAGE) {
+        ALOGE("Can't operate on storage value type");
         return *this;
     }
 

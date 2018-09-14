@@ -41,6 +41,44 @@ LogEvent::LogEvent(log_msg& msg) {
     }
 }
 
+LogEvent::LogEvent(const StatsLogEventWrapper& statsLogEventWrapper) {
+    mTagId = statsLogEventWrapper.getTagId();
+    mLogdTimestampNs = statsLogEventWrapper.getWallClockTimeNs();
+    mElapsedTimestampNs = statsLogEventWrapper.getElapsedRealTimeNs();
+    mLogUid = 0;
+    for (int i = 0; i < (int)statsLogEventWrapper.getElements().size(); i++) {
+        Field field(statsLogEventWrapper.getTagId(), getSimpleField(i + 1));
+        switch (statsLogEventWrapper.getElements()[i].type) {
+            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::INT:
+                mValues.push_back(
+                        FieldValue(field, Value(statsLogEventWrapper.getElements()[i].int_value)));
+                break;
+            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::LONG:
+                mValues.push_back(
+                        FieldValue(field, Value(statsLogEventWrapper.getElements()[i].long_value)));
+                break;
+            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::FLOAT:
+                mValues.push_back(FieldValue(
+                        field, Value(statsLogEventWrapper.getElements()[i].float_value)));
+                break;
+            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::DOUBLE:
+                mValues.push_back(FieldValue(
+                        field, Value(statsLogEventWrapper.getElements()[i].double_value)));
+                break;
+            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::STRING:
+                mValues.push_back(
+                        FieldValue(field, Value(statsLogEventWrapper.getElements()[i].str_value)));
+                break;
+            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::STORAGE:
+                mValues.push_back(FieldValue(
+                        field, Value(statsLogEventWrapper.getElements()[i].storage_value)));
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs) {
     mLogdTimestampNs = wallClockTimestampNs;
     mTagId = tagId;

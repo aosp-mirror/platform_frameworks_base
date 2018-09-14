@@ -170,9 +170,9 @@ message Atom {
         DirectoryUsage directory_usage = 10026;
         AppSize app_size = 10027;
         CategorySize category_size = 10028;
-        android.service.procstats.ProcessStatsSectionProto proc_stats = 10029;
         BatteryVoltage battery_voltage = 10030;
         NumFingerprints num_fingerprints = 10031;
+        ProcStats proc_stats = 10029;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP. Field numbers above
@@ -2478,4 +2478,11 @@ message NumFingerprints {
     optional int32 user = 1;
     // Number of fingerprints registered to that user.
     optional int32 num_fingerprints = 2;
+}
+
+/**
+ * Pulled from ProcessStatsService.java
+ */
+message ProcStats {
+    optional android.service.procstats.ProcessStatsSectionProto proc_stats_section = 1;
 }
