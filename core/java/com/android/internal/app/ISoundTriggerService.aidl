@@ -52,6 +52,4 @@ interface ISoundTriggerService {
 
     /** For both ...Intent and ...Service based usage */
     boolean isRecognitionActive(in ParcelUuid parcelUuid);
-
-    SoundTrigger.RecognitionEvent getModelState(in ParcelUuid parcelUuid);
 }

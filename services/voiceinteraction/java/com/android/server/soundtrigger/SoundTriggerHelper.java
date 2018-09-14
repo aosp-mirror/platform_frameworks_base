@@ -566,40 +566,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
     }
 
-    SoundTrigger.RecognitionEvent getGenericModelState(UUID modelId) {
-        synchronized (mLock) {
-            MetricsLogger.count(mContext, "sth_get_generic_model_state", 1);
-            if (modelId == null || mModule == null) {
-                return null;
-            }
-            ModelData modelData = mModelDataMap.get(modelId);
-            if (modelData == null || !modelData.isGenericModel()) {
-                Slog.w(TAG, "GetGenericModelState error: Invalid generic model id:" +
-                        modelId);
-                return null;
-            }
-            if (!modelData.isModelLoaded()) {
-                Slog.i(TAG, "GetGenericModelState: Given generic model is not loaded:" + modelId);
-                return null;
-            }
-            if (!modelData.isModelStarted()) {
-                Slog.i(TAG, "GetGenericModelState: Given generic model is not started:" + modelId);
-                return null;
-            }
-
-            SoundTrigger.RecognitionEvent ret = mModule.getModelState(modelData.getHandle());
-            if (ret == null) {
-                Slog.w(TAG, "GetGenericModelState() call failed");
-            }
-            return ret;
-        }
-    }
-
-    SoundTrigger.RecognitionEvent getKeyphraseModelState(UUID modelId) {
-        Slog.w(TAG, "GetKeyphraseModelState error: Not implemented");
-        return null;
-    }
-
     //---- SoundTrigger.StatusListener methods
     @Override
     public void onRecognition(RecognitionEvent event) {

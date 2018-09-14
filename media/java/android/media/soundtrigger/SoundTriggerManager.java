@@ -365,22 +365,4 @@ public final class SoundTriggerManager {
             return Integer.MAX_VALUE;
         }
     }
-
-    /**
-     * Synchronously get state of the indicated model.  The model state is returned as
-     * a recognition event, or null if the model is not loaded, or if this method
-     * is not supported.
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
-    public SoundTrigger.RecognitionEvent getModelState(UUID soundModelId) {
-        if (soundModelId == null) {
-            return null;
-        }
-        try {
-            return mSoundTriggerService.getModelState(new ParcelUuid(soundModelId));
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
 }
