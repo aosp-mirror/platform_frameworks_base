@@ -920,6 +920,41 @@ public class AudioSystem
     @UnsupportedAppUsage
     private static native int setStreamVolumeIndex(int stream, int index, int device);
     public static native int getStreamVolumeIndex(int stream, int device);
+    /**
+     * @hide
+     * set a volume for the given {@link AudioAttributes} and for all other stream that belong to
+     * the same volume group.
+     * @param attributes the {@link AudioAttributes} to be considered
+     * @param index to be applied
+     * @param device the volume device to be considered
+     * @return command completion status.
+     */
+    public static native int setVolumeIndexForAttributes(@NonNull AudioAttributes attributes,
+                                                         int index, int device);
+   /**
+    * @hide
+    * get the volume index for the given {@link AudioAttributes}.
+    * @param attributes the {@link AudioAttributes} to be considered
+    * @param device the volume device to be considered
+    * @return volume index for the given {@link AudioAttributes} and volume device.
+    */
+    public static native int getVolumeIndexForAttributes(@NonNull AudioAttributes attributes,
+                                                         int device);
+    /**
+     * @hide
+     * get the minimum volume index for the given {@link AudioAttributes}.
+     * @param attributes the {@link AudioAttributes} to be considered
+     * @return minimum volume index for the given {@link AudioAttributes}.
+     */
+    public static native int getMinVolumeIndexForAttributes(@NonNull AudioAttributes attributes);
+    /**
+     * @hide
+     * get the maximum volume index for the given {@link AudioAttributes}.
+     * @param attributes the {@link AudioAttributes} to be considered
+     * @return maximum volume index for the given {@link AudioAttributes}.
+     */
+    public static native int getMaxVolumeIndexForAttributes(@NonNull AudioAttributes attributes);
+
     public static native int setMasterVolume(float value);
     public static native float getMasterVolume();
     @UnsupportedAppUsage
