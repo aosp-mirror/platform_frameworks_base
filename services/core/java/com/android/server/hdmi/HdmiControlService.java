@@ -303,19 +303,19 @@ public final class HdmiControlService extends SystemService {
     private final class CecMessageBuffer {
         private List<HdmiCecMessage> mBuffer = new ArrayList<>();
 
-        public void bufferMessage(HdmiCecMessage message) {
+        public boolean bufferMessage(HdmiCecMessage message) {
             switch (message.getOpcode()) {
                 case Constants.MESSAGE_ACTIVE_SOURCE:
                     bufferActiveSource(message);
-                    break;
+                    return true;
                 case Constants.MESSAGE_IMAGE_VIEW_ON:
                 case Constants.MESSAGE_TEXT_VIEW_ON:
                     bufferImageOrTextViewOn(message);
-                    break;
+                    return true;
                     // Add here if new message that needs to buffer
                 default:
                     // Do not need to buffer messages other than above
-                    break;
+                    return false;
             }
         }
 
@@ -869,10 +869,6 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     boolean handleCecCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        if (!mAddressAllocated) {
-            mCecMessageBuffer.bufferMessage(message);
-            return true;
-        }
         int errorCode = mMessageValidator.isValid(message);
         if (errorCode != HdmiCecMessageValidator.OK) {
             // We'll not response on the messages with the invalid source or destination
@@ -882,7 +878,12 @@ public final class HdmiControlService extends SystemService {
             }
             return true;
         }
-        return dispatchMessageToLocalDevice(message);
+
+        if (dispatchMessageToLocalDevice(message)) {
+            return true;
+        }
+
+        return (!mAddressAllocated) ? mCecMessageBuffer.bufferMessage(message) : false;
     }
 
     void enableAudioReturnChannel(int portId, boolean enabled) {
