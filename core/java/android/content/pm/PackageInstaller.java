@@ -961,6 +961,10 @@ public class PackageInstaller {
          * If the installer is the device owner or the affiliated profile owner, there will be no
          * user intervention.
          *
+         * @param statusReceiver Called when the state of the session changes. Intents
+         *                       sent to this receiver contain {@link #EXTRA_STATUS}. Refer to the
+         *                       individual status codes on how to handle them.
+         *
          * @throws SecurityException if streams opened through
          *             {@link #openWrite(String, long, long)} are still open.
          *
@@ -987,7 +991,9 @@ public class PackageInstaller {
          * that new properties are added to the session with a new API revision. In this case the
          * callers need to be updated.
          *
-         * @param statusReceiver Callbacks called when the state of the session changes.
+         * @param statusReceiver Called when the state of the session changes. Intents
+         *                       sent to this receiver contain {@link #EXTRA_STATUS}. Refer to the
+         *                       individual status codes on how to handle them.
          *
          * @hide
          */
