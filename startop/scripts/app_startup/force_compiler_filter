@@ -100,36 +100,6 @@ parse_arguments() {
   fi
 }
 
-get_activity_name() {
-  local package="$1"
-  local action_key="android.intent.action.MAIN:"
-
-  local activity_line="$(adb shell cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER | grep "$package")"
-  verbose_print $activity_line
-  IFS="/" read -a array <<< "$activity_line"
-  local activity_name="${array[1]}"
-  echo "$activity_name"
-  #adb shell am start "$package/$activity_name"
-}
-
-remote_pidof() {
-  local procname="$1"
-  adb shell ps | grep "$procname" | awk '{print $2;}'
-}
-
-remote_pkill() {
-  local procname="$1"
-  shift
-
-  local the_pids=$(remote_pidof "$procname")
-  local pid
-
-  for pid in $the_pids; do
-    verbose_print adb shell kill "$@" "$pid"
-    adb shell kill "$@" "$pid"
-  done
-}
-
 force_package_compilation() {
   local arg_compiler_filter="$1"
   local arg_package="$2"
@@ -150,13 +120,13 @@ main() {
     # screen needs to be unlocked in order to run an app
     "$DIR"/unlock_screen
 
-    am_output="$(adb shell am start -S -W "$package"/"$activity")"
+    local output=$("$DIR"/launch_application "$package" "$activity")
     if [[ $? -ne 0 ]]; then
-      echo "am start failed" >&2
+      echo "launching application failed" >&2
       exit 1
     fi
 
-    verbose_print "$am_output"
+    verbose_print "$output"
     # give some time for app startup to complete.
     # this is supposed to be an upper bound for measuring startup time.
     sleep "$wait_time"
