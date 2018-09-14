@@ -285,10 +285,6 @@ static int statsLinesToNetworkStats(JNIEnv* env, jclass clazz, jobject stats,
 static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats, jstring path,
                                   jint limitUid, jobjectArray limitIfacesObj, jint limitTag,
                                   jboolean useBpfStats) {
-    ScopedUtfChars path8(env, path);
-    if (path8.c_str() == NULL) {
-        return -1;
-    }
 
     std::vector<std::string> limitIfaces;
     if (limitIfacesObj != NULL && env->GetArrayLength(limitIfacesObj) > 0) {
@@ -308,6 +304,11 @@ static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats, jstr
         if (parseBpfNetworkStatsDetail(&lines, limitIfaces, limitTag, limitUid) < 0)
             return -1;
     } else {
+        ScopedUtfChars path8(env, path);
+        if (path8.c_str() == NULL) {
+            ALOGE("the qtaguid legacy path is invalid: %s", path8.c_str());
+            return -1;
+        }
         if (legacyReadNetworkStatsDetail(&lines, limitIfaces, limitTag,
                                          limitUid, path8.c_str()) < 0)
             return -1;
