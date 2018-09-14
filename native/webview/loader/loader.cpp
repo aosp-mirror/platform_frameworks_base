@@ -26,6 +26,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <sys/prctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -58,6 +59,7 @@ jboolean DoReserveAddressSpace(jlong size) {
           vsize, strerror(errno));
     return JNI_FALSE;
   }
+  prctl(PR_SET_VMA, PR_SET_VMA_ANON_NAME, addr, vsize, "libwebview reservation");
   gReservedAddress = addr;
   gReservedSize = vsize;
   ALOGV("Reserved %zd bytes at %p", vsize, addr);
