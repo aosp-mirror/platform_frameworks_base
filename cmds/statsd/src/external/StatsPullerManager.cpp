@@ -168,7 +168,7 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_STATE)}},
         // temperature
-        {android::util::TEMPERATURE, {{}, {}, 1, new ResourceThermalManagerPuller()}},
+        {android::util::TEMPERATURE, {{}, {}, 1 * NS_PER_SEC, new ResourceThermalManagerPuller()}},
         // binder_calls
         {android::util::BINDER_CALLS,
          {{4, 5, 6, 8, 12},
