@@ -3756,6 +3756,10 @@
     <permission android:name="android.permission.USE_BIOMETRIC_INTERNAL"
         android:protectionLevel="signature" />
 
+    <!-- Allows the system to control the BiometricDialog (SystemUI). Reserved for the system. @hide -->
+    <permission android:name="android.permission.MANAGE_BIOMETRIC_DIALOG"
+        android:protectionLevel="signature" />
+
     <!-- Allows an app to reset face authentication attempt counter. Reserved for the system. @hide -->
     <permission android:name="android.permission.RESET_FACE_LOCKOUT"
         android:protectionLevel="signature" />
