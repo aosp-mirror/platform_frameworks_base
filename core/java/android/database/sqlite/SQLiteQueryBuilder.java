@@ -34,6 +34,7 @@ import libcore.util.EmptyArray;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -50,6 +51,8 @@ public class SQLiteQueryBuilder {
             Pattern.compile("\\s*\\d+\\s*(,\\s*\\d+\\s*)?");
 
     private Map<String, String> mProjectionMap = null;
+    private List<Pattern> mProjectionGreylist = null;
+
     @UnsupportedAppUsage
     private String mTables = "";
     @UnsupportedAppUsage
@@ -161,6 +164,17 @@ public class SQLiteQueryBuilder {
      */
     public void setProjectionMap(Map<String, String> columnMap) {
         mProjectionMap = columnMap;
+    }
+
+    /**
+     * Sets a projection greylist of columns that will be allowed through, even
+     * when {@link #setStrict(boolean)} is enabled. This provides a way for
+     * abusive custom columns like {@code COUNT(*)} to continue working.
+     *
+     * @hide
+     */
+    public void setProjectionGreylist(List<Pattern> projectionGreylist) {
+        mProjectionGreylist = projectionGreylist;
     }
 
     /**
@@ -807,6 +821,24 @@ public class SQLiteQueryBuilder {
                         /* A column alias already exist */
                         projection[i] = userColumn;
                         continue;
+                    }
+
+                    // If greylist is configured, we might be willing to let
+                    // this custom column bypass our strict checks.
+                    if (mProjectionGreylist != null) {
+                        boolean match = false;
+                        for (Pattern p : mProjectionGreylist) {
+                            if (p.matcher(userColumn).matches()) {
+                                match = true;
+                                break;
+                            }
+                        }
+
+                        if (match) {
+                            Log.w(TAG, "Allowing abusive custom column: " + userColumn);
+                            projection[i] = userColumn;
+                            continue;
+                        }
                     }
 
                     throw new IllegalArgumentException("Invalid column "

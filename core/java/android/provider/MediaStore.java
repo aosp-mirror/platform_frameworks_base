@@ -717,7 +717,11 @@ public final class MediaStore {
             /**
              * The picasa id of the image
              * <P>Type: TEXT</P>
+             *
+             * @deprecated this value was only relevant for images hosted on
+             *             Picasa, which are no longer supported.
              */
+            @Deprecated
             public static final String PICASA_ID = "picasa_id";
 
             /**
@@ -755,7 +759,12 @@ public final class MediaStore {
             /**
              * The mini thumb id.
              * <P>Type: INTEGER</P>
+             *
+             * @deprecated all thumbnails should be obtained via
+             *             {@link Images.Thumbnails#getThumbnail}, as this
+             *             value is no longer supported.
              */
+            @Deprecated
             public static final String MINI_THUMB_MAGIC = "mini_thumb_magic";
 
             /**
@@ -1947,7 +1956,12 @@ public final class MediaStore {
             /**
              * The mini thumb id.
              * <P>Type: INTEGER</P>
+             *
+             * @deprecated all thumbnails should be obtained via
+             *             {@link Images.Thumbnails#getThumbnail}, as this
+             *             value is no longer supported.
              */
+            @Deprecated
             public static final String MINI_THUMB_MAGIC = "mini_thumb_magic";
 
             /**
