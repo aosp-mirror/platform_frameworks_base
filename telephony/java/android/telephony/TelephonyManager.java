@@ -1498,22 +1498,23 @@ public class TelephonyManager {
                 Rlog.d(TAG, "getCellLocation returning null because telephony is null");
                 return null;
             }
+
             Bundle bundle = telephony.getCellLocation(mContext.getOpPackageName());
-            if (bundle.isEmpty()) {
-                Rlog.d(TAG, "getCellLocation returning null because bundle is empty");
+            if (bundle == null || bundle.isEmpty()) {
+                Rlog.d(TAG, "getCellLocation returning null because CellLocation is unavailable");
                 return null;
             }
+
             CellLocation cl = CellLocation.newFromBundle(bundle);
-            if (cl.isEmpty()) {
-                Rlog.d(TAG, "getCellLocation returning null because CellLocation is empty");
+            if (cl == null || cl.isEmpty()) {
+                Rlog.d(TAG, "getCellLocation returning null because CellLocation is empty or"
+                        + " phone type doesn't match CellLocation type");
                 return null;
             }
+
             return cl;
         } catch (RemoteException ex) {
             Rlog.d(TAG, "getCellLocation returning null due to RemoteException " + ex);
-            return null;
-        } catch (NullPointerException ex) {
-            Rlog.d(TAG, "getCellLocation returning null due to NullPointerException " + ex);
             return null;
         }
     }
