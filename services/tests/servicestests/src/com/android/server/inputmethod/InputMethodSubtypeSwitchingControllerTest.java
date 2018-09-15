@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.inputmethod;
+package com.android.server.inputmethod;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -23,15 +23,15 @@ import static org.junit.Assert.assertTrue;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
-import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController.ControllerImpl;
-import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
-import com.android.internal.inputmethod.InputMethodUtils;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ControllerImpl;
+import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
