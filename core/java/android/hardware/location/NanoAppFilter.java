@@ -85,7 +85,7 @@ public class NanoAppFilter implements Parcelable {
         mAppId = in.readLong();
         mAppVersion = in.readInt();
         mVersionRestrictionMask = in.readInt();
-        mAppIdVendorMask = in.readInt();
+        mAppIdVendorMask = in.readLong();
     }
 
     public int describeContents() {
@@ -93,7 +93,6 @@ public class NanoAppFilter implements Parcelable {
     }
 
     public void writeToParcel(Parcel out, int flags) {
-
         out.writeLong(mAppId);
         out.writeInt(mAppVersion);
         out.writeInt(mVersionRestrictionMask);
