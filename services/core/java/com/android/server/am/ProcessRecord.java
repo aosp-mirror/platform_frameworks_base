@@ -198,6 +198,7 @@ final class ProcessRecord implements WindowProcessListener {
     long lastRequestedGc;       // When we last asked the app to do a gc
     long lastLowMemory;         // When we last told the app that memory is low
     long lastProviderTime;      // The last time someone else was using a provider in this process.
+    long lastTopTime;           // The last time the process was in the TOP state or greater.
     boolean reportLowMemory;    // Set to true when waiting to report low mem
     boolean empty;              // Is this an empty background process?
     boolean cached;             // Is this a cached process?
@@ -413,6 +414,11 @@ final class ProcessRecord implements WindowProcessListener {
         if (lastProviderTime > 0) {
             pw.print(prefix); pw.print("lastProviderTime=");
             TimeUtils.formatDuration(lastProviderTime, nowUptime, pw);
+            pw.println();
+        }
+        if (lastTopTime > 0) {
+            pw.print(prefix); pw.print("lastTopTime=");
+            TimeUtils.formatDuration(lastTopTime, nowUptime, pw);
             pw.println();
         }
         if (hasStartedServices) {
