@@ -1083,27 +1083,6 @@ public class InputMethodUtilsTest {
     }
 
     @Test
-    public void testConstructLocaleFromString() throws Exception {
-        assertEquals(new Locale("en"), InputMethodUtils.constructLocaleFromString("en"));
-        assertEquals(new Locale("en", "US"), InputMethodUtils.constructLocaleFromString("en_US"));
-        assertEquals(new Locale("en", "US", "POSIX"),
-                InputMethodUtils.constructLocaleFromString("en_US_POSIX"));
-
-        // Special rewrite rule for "tl" for versions of Android earlier than Lollipop that did not
-        // support three letter language codes, and used "tl" (Tagalog) as the language string for
-        // "fil" (Filipino).
-        assertEquals(new Locale("fil"), InputMethodUtils.constructLocaleFromString("tl"));
-        assertEquals(new Locale("fil", "PH"), InputMethodUtils.constructLocaleFromString("tl_PH"));
-        assertEquals(new Locale("fil", "PH", "POSIX"),
-                InputMethodUtils.constructLocaleFromString("tl_PH_POSIX"));
-
-        // So far rejecting an invalid/unexpected locale string is out of the scope of this method.
-        assertEquals(new Locale("a"), InputMethodUtils.constructLocaleFromString("a"));
-        assertEquals(new Locale("a b c"), InputMethodUtils.constructLocaleFromString("a b c"));
-        assertEquals(new Locale("en-US"), InputMethodUtils.constructLocaleFromString("en-US"));
-    }
-
-    @Test
     public void testIsSoftInputModeStateVisibleAllowed() {
         // On pre-P devices, SOFT_INPUT_STATE_VISIBLE/SOFT_INPUT_STATE_ALWAYS_VISIBLE are always
         // allowed, regardless of the focused view state.
