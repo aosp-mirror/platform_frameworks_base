@@ -27,6 +27,8 @@
 #include "utils/GLUtils.h"
 #include "utils/TraceUtils.h"
 
+#include <GLES3/gl3.h>
+
 #include <GrBackendSurface.h>
 #include <SkBlendMode.h>
 #include <SkImageInfo.h>

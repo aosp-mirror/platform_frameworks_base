@@ -28,6 +28,7 @@
 #include "Properties.h"
 
 #include <EGL/eglext.h>
+#include <GLES/gl.h>
 
 #include <string>
 #include <vector>
