@@ -227,7 +227,6 @@ cc_library_shared {
     static_libs: [
         "libgif",
         "libseccomp_policy",
-        "libselinux",
         "libgrallocusage",
         "libscrypt_static",
     ],
