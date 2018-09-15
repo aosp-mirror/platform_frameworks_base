@@ -41,7 +41,6 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputManager.TvInputCallback;
-import android.os.RemoteException;
 import android.provider.Settings.Global;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -452,17 +451,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return info.getLogicalAddress();
         }
         return Constants.ADDR_INVALID;
-    }
-
-    private static void invokeCallback(IHdmiControlCallback callback, int result) {
-        if (callback == null) {
-            return;
-        }
-        try {
-            callback.onComplete(result);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Invoking callback failed:" + e);
-        }
     }
 
     @Override

@@ -1393,17 +1393,24 @@ public class HdmiControlService extends SystemService {
                         return;
                     }
                     HdmiCecLocalDeviceTv tv = tv();
-                    if (tv == null) {
-                        if (!mAddressAllocated) {
-                            mSelectRequestBuffer.set(SelectRequestBuffer.newPortSelect(
-                                    HdmiControlService.this, portId, callback));
-                            return;
-                        }
-                        Slog.w(TAG, "Local tv device not available");
-                        invokeCallback(callback, HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE);
+                    if (tv != null) {
+                        tv.doManualPortSwitching(portId, callback);
                         return;
                     }
-                    tv.doManualPortSwitching(portId, callback);
+                    HdmiCecLocalDeviceAudioSystem audioSystem = audioSystem();
+                    if (audioSystem != null) {
+                        audioSystem.doManualPortSwitching(portId, callback);
+                        return;
+                    }
+
+                    if (!mAddressAllocated) {
+                        mSelectRequestBuffer.set(SelectRequestBuffer.newPortSelect(
+                                HdmiControlService.this, portId, callback));
+                        return;
+                    }
+                    Slog.w(TAG, "Local device not available");
+                    invokeCallback(callback, HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE);
+                    return;
                 }
             });
         }

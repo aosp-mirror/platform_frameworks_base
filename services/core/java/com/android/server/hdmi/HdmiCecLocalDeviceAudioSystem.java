@@ -21,7 +21,9 @@ import static com.android.server.hdmi.Constants.USE_LAST_STATE_SYSTEM_AUDIO_CONT
 
 import android.annotation.Nullable;
 import android.content.Intent;
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.hardware.hdmi.IHdmiControlCallback;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.AudioSystem;
@@ -482,6 +484,33 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         synchronized (mLock) {
             mSystemAudioControlFeatureEnabled = enabled;
         }
+    }
+
+    @ServiceThreadOnly
+    void doManualPortSwitching(int portId, IHdmiControlCallback callback) {
+        assertRunOnServiceThread();
+        // TODO: validate port ID
+        if (portId == getLocalActivePort()) {
+            invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
+            return;
+        }
+        getActiveSource().invalidate();
+        if (!mService.isControlEnabled()) {
+            setLocalActivePort(portId);
+            invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
+            return;
+        }
+        int oldPath = getLocalActivePort() != Constants.CEC_SWITCH_HOME
+                ? getActivePathOnSwitchFromActivePortId(getLocalActivePort())
+                : getDeviceInfo().getPhysicalAddress();
+        int newPath = getActivePathOnSwitchFromActivePortId(portId);
+        if (oldPath == newPath) {
+            return;
+        }
+        setLocalActivePort(portId);
+        HdmiCecMessage routingChange =
+                HdmiCecMessageBuilder.buildRoutingChange(mAddress, oldPath, newPath);
+        mService.sendCecCommand(routingChange);
     }
 
     boolean isSystemAudioControlFeatureEnabled() {

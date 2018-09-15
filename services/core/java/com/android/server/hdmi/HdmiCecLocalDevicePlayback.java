@@ -21,7 +21,6 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
-import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.provider.Settings.Global;
 import android.util.Slog;
@@ -118,16 +117,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
             return;
         }
         addAndStartAction(action);
-    }
-
-    @ServiceThreadOnly
-    private void invokeCallback(IHdmiControlCallback callback, int result) {
-        assertRunOnServiceThread();
-        try {
-            callback.onComplete(result);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Invoking callback failed:" + e);
-        }
     }
 
     @Override

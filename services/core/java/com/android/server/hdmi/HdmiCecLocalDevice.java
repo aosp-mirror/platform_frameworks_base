@@ -18,10 +18,12 @@ package com.android.server.hdmi;
 
 import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.view.InputDevice;
@@ -1019,6 +1021,19 @@ abstract class HdmiCecLocalDevice {
     protected int findKeyReceiverAddress() {
         Slog.w(TAG, "findKeyReceiverAddress is not implemented");
         return Constants.ADDR_INVALID;
+    }
+
+    @ServiceThreadOnly
+    void invokeCallback(IHdmiControlCallback callback, int result) {
+        assertRunOnServiceThread();
+        if (callback == null) {
+            return;
+        }
+        try {
+            callback.onComplete(result);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Invoking callback failed:" + e);
+        }
     }
 
     void sendUserControlPressedAndReleased(int targetAddress, int cecKeycode) {

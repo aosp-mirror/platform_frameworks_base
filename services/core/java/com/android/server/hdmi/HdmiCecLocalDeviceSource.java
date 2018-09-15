@@ -18,7 +18,6 @@ package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
-import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.Slog;
 
@@ -106,16 +105,6 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
             return;
         }
         addAndStartAction(action);
-    }
-
-    @ServiceThreadOnly
-    private void invokeCallback(IHdmiControlCallback callback, int result) {
-        assertRunOnServiceThread();
-        try {
-            callback.onComplete(result);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Invoking callback failed:" + e);
-        }
     }
 
     @ServiceThreadOnly
