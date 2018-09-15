@@ -2731,6 +2731,7 @@ Ljava/net/Socket;->impl:Ljava/net/SocketImpl;
 Ljava/net/SocketException;-><init>(Ljava/lang/String;Ljava/lang/Throwable;)V
 Ljava/net/SocketImpl;->serverSocket:Ljava/net/ServerSocket;
 Ljava/net/SocketImpl;->socket:Ljava/net/Socket;
+Ljava/net/SocksSocketImpl;-><init>()V
 Ljava/net/URI;->fragment:Ljava/lang/String;
 Ljava/net/URI;->host:Ljava/lang/String;
 Ljava/net/URI;->port:I
