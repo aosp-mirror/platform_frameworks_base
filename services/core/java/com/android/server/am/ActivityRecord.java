@@ -2331,7 +2331,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
 
         final CompatibilityInfo compatInfo =
-                service.mAm.compatibilityInfoForPackageLocked(info.applicationInfo);
+                service.compatibilityInfoForPackageLocked(info.applicationInfo);
         final boolean shown = mWindowContainerController.addStartingWindow(packageName, theme,
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                 prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning(),

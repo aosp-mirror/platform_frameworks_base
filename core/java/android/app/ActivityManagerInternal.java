@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -183,12 +184,6 @@ public abstract class ActivityManagerInternal {
     /** Trims memory usage in the system by removing/stopping unused application processes. */
     public abstract void trimApplications();
 
-    /** Returns the screen compatibility mode for the given application. */
-    public abstract int getPackageScreenCompatMode(ApplicationInfo ai);
-
-    /** Sets the screen compatibility mode for the given application. */
-    public abstract void setPackageScreenCompatMode(ApplicationInfo ai, int mode);
-
     /** Closes all system dialogs. */
     public abstract void closeSystemDialogs(String reason);
 
@@ -201,6 +196,11 @@ public abstract class ActivityManagerInternal {
     public abstract boolean hasRunningActivity(int uid, @Nullable String packageName);
 
     public abstract void updateOomAdj();
+    public abstract void updateCpuStats();
+    public abstract void updateUsageStats(
+            ComponentName activity, int uid, int userId, boolean resumed);
+    public abstract void updateForegroundTimeIfOnBattery(
+            String packageName, int uid, long cpuTimeDiff);
     public abstract void sendForegroundProfileChanged(int userId);
 
     /**
@@ -226,4 +226,10 @@ public abstract class ActivityManagerInternal {
 
     /** Gets the task id for a given activity. */
     public abstract int getTaskIdForActivity(@NonNull IBinder token, boolean onlyRoot);
+
+    public abstract void setBooting(boolean booting);
+    public abstract boolean isBooting();
+    public abstract void setBooted(boolean booted);
+    public abstract boolean isBooted();
+    public abstract void finishBooting();
 }

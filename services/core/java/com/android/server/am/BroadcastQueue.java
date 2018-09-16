@@ -302,7 +302,7 @@ public final class BroadcastQueue {
             mService.notifyPackageUse(r.intent.getComponent().getPackageName(),
                                       PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER);
             app.thread.scheduleReceiver(new Intent(r.intent), r.curReceiver,
-                    mService.compatibilityInfoForPackageLocked(r.curReceiver.applicationInfo),
+                    mService.compatibilityInfoForPackage(r.curReceiver.applicationInfo),
                     r.resultCode, r.resultData, r.resultExtras, r.ordered, r.userId,
                     app.getReportedProcState());
             if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,

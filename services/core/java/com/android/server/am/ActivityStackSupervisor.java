@@ -804,7 +804,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         final ActivityRecord r = topRunningActivityLocked();
-        if (mService.mAm.mBooting || !mService.mAm.mBooted) {
+        if (mService.isBooting() || !mService.isBooted()) {
             if (r != null && r.idle) {
                 checkFinishBootingLocked();
             }
@@ -836,7 +836,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     boolean resumeHomeStackTask(ActivityRecord prev, String reason) {
-        if (!mService.mAm.mBooting && !mService.mAm.mBooted) {
+        if (!mService.isBooting() && !mService.isBooted()) {
             // Not ready yet!
             return false;
         }
@@ -1534,7 +1534,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 r.sleeping = false;
                 r.forceNewConfig = false;
                 mService.getAppWarningsLocked().onStartActivity(r);
-                r.compat = mService.mAm.compatibilityInfoForPackageLocked(r.info.applicationInfo);
+                r.compat = mService.compatibilityInfoForPackageLocked(r.info.applicationInfo);
                 ProfilerInfo profilerInfo = null;
                 if (mService.mAm.mProfileApp != null && mService.mAm.mProfileApp.equals(app.processName)) {
                     if (mService.mAm.mProfileProc == null || mService.mAm.mProfileProc == app) {
@@ -1595,22 +1595,17 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
                 if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0
                         && mService.mAm.mHasHeavyWeightFeature) {
-                    // This may be a heavy-weight process!  Note that the package
-                    // manager will ensure that only activity can run in the main
-                    // process of the .apk, which is the only thing that will be
-                    // considered heavy-weight.
+                    // This may be a heavy-weight process! Note that the package manager will ensure
+                    // that only activity can run in the main process of the .apk, which is the only
+                    // thing that will be considered heavy-weight.
                     if (app.processName.equals(app.info.packageName)) {
-                        if (mService.mAm.mHeavyWeightProcess != null
-                                && mService.mAm.mHeavyWeightProcess != app) {
-                            Slog.w(TAG, "Starting new heavy weight process " + app
+                        if (mService.mHeavyWeightProcess != null
+                                && mService.mHeavyWeightProcess != proc) {
+                            Slog.w(TAG, "Starting new heavy weight process " + proc
                                     + " when already running "
-                                    + mService.mAm.mHeavyWeightProcess);
+                                    + mService.mHeavyWeightProcess);
                         }
-                        mService.mAm.mHeavyWeightProcess = app;
-                        Message msg = mService.mAm.mHandler.obtainMessage(
-                                ActivityManagerService.POST_HEAVY_NOTIFICATION_MSG);
-                        msg.obj = r;
-                        mService.mAm.mHandler.sendMessage(msg);
+                        mService.setHeavyWeightProcess(r);
                     }
                 }
 
@@ -2057,15 +2052,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      */
     @GuardedBy("mService")
     private boolean checkFinishBootingLocked() {
-        final boolean booting = mService.mAm.mBooting;
+        final boolean booting = mService.isBooting();
         boolean enableScreen = false;
-        mService.mAm.mBooting = false;
-        if (!mService.mAm.mBooted) {
-            mService.mAm.mBooted = true;
+        mService.setBooting(false);
+        if (!mService.isBooted()) {
+            mService.setBooted(true);
             enableScreen = true;
         }
         if (booting || enableScreen) {
-            mService.mAm.postFinishBooting(booting, enableScreen);
+            mService.postFinishBooting(booting, enableScreen);
         }
         return booting;
     }
@@ -3686,7 +3681,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         final ActivityStack stack = r.getStack();
         if (isTopDisplayFocusedStack(stack)) {
-            mService.mAm.updateUsageStats(r, true);
+            mService.updateUsageStats(r, true);
         }
         if (allResumedActivitiesComplete()) {
             ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);

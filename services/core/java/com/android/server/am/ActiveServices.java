@@ -2490,7 +2490,7 @@ public final class ActiveServices {
                                  PackageManager.NOTIFY_PACKAGE_USE_SERVICE);
             app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_SERVICE);
             app.thread.scheduleCreateService(r, r.serviceInfo,
-                    mAm.compatibilityInfoForPackageLocked(r.serviceInfo.applicationInfo),
+                    mAm.compatibilityInfoForPackage(r.serviceInfo.applicationInfo),
                     app.getReportedProcState());
             r.postNotification();
             created = true;

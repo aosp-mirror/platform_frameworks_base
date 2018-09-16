@@ -1085,9 +1085,9 @@ class ActivityStarter {
                 // This may be a heavy-weight process!  Check to see if we already
                 // have another, different heavy-weight process running.
                 if (aInfo.processName.equals(aInfo.applicationInfo.packageName)) {
-                    final ProcessRecord heavy = mService.mAm.mHeavyWeightProcess;
-                    if (heavy != null && (heavy.info.uid != aInfo.applicationInfo.uid
-                            || !heavy.processName.equals(aInfo.processName))) {
+                    final WindowProcessController heavy = mService.mHeavyWeightProcess;
+                    if (heavy != null && (heavy.mInfo.uid != aInfo.applicationInfo.uid
+                            || !heavy.mName.equals(aInfo.processName))) {
                         int appCallingUid = callingUid;
                         if (caller != null) {
                             ProcessRecord callerApp = mService.mAm.getRecordForAppLocked(caller);
@@ -1115,8 +1115,7 @@ class ActivityStarter {
                         }
                         newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_INTENT,
                                 new IntentSender(target));
-                        heavy.getWindowProcessController().updateIntentForHeavyWeightActivity(
-                                newIntent);
+                        heavy.updateIntentForHeavyWeightActivity(newIntent);
                         newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_NEW_APP,
                                 aInfo.packageName);
                         newIntent.setFlags(intent.getFlags());
