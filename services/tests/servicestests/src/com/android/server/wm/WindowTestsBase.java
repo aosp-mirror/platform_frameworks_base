@@ -125,7 +125,7 @@ class WindowTestsBase {
             synchronized (sWm.mWindowMap) {
                 mWallpaperWindow = createCommonWindow(null, TYPE_WALLPAPER, "wallpaperWindow");
                 mImeWindow = createCommonWindow(null, TYPE_INPUT_METHOD, "mImeWindow");
-                sWm.mInputMethodWindow = mImeWindow;
+                mDisplayContent.mInputMethodWindow = mImeWindow;
                 mImeDialogWindow = createCommonWindow(null, TYPE_INPUT_METHOD_DIALOG,
                         "mImeDialogWindow");
                 mStatusBarWindow = createCommonWindow(null, TYPE_STATUS_BAR, "mStatusBarWindow");

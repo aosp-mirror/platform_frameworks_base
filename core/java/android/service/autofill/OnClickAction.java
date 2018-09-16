@@ -21,6 +21,9 @@ package android.service.autofill;
  *
  * <p>Typically used to switch the visibility of other views in a
  * {@link CustomDescription custom save UI}.
+ *
+ * <p><b>Note:</b> This interface is not meant to be implemented by app developers; only
+ * implementations provided by the Android System can be used in other Autofill APIs.
  */
 public interface OnClickAction {
 }

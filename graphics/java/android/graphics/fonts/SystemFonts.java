@@ -19,7 +19,6 @@ package android.graphics.fonts;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.FontListParser;
-import android.os.LocaleList;
 import android.text.FontConfig;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -54,7 +53,7 @@ public class SystemFonts {
 
     private static final Map<String, FontFamily[]> sSystemFallbackMap;
     private static final FontConfig.Alias[] sAliases;
-    private static final Set<Font> sAvailableFonts;
+    private static final List<Font> sAvailableFonts;
 
     /**
      * Returns all available font files in the system.
@@ -63,7 +62,9 @@ public class SystemFonts {
      * @return an array of system fonts
      */
     public static @NonNull Set<Font> getAvailableFonts() {
-        return sAvailableFonts;
+        HashSet<Font> set = new HashSet<>();
+        set.addAll(sAvailableFonts);
+        return set;
     }
 
     /**
@@ -114,7 +115,7 @@ public class SystemFonts {
             @NonNull ArrayMap<String, ArrayList<FontFamily>> fallbackMap,
             @NonNull Map<String, ByteBuffer> cache,
             @NonNull String fontDir,
-            @NonNull HashSet<Font> availableFonts) {
+            @NonNull ArrayList<Font> availableFonts) {
 
         final String languageTags = xmlFamily.getLanguages();
         final int variant = xmlFamily.getVariant();
@@ -170,13 +171,12 @@ public class SystemFonts {
             @FontConfig.Family.Variant int variant,
             @NonNull Map<String, ByteBuffer> cache,
             @NonNull String fontDir,
-            @NonNull HashSet<Font> availableFonts) {
+            @NonNull ArrayList<Font> availableFonts) {
         if (fonts.size() == 0) {
             return null;
         }
 
         FontFamily.Builder b = null;
-        final LocaleList localeList = LocaleList.forLanguageTags(languageTags);
         for (int i = 0; i < fonts.size(); i++) {
             final FontConfig.Font fontConfig = fonts.get(i);
             final String fullPath = fontDir + fontConfig.getFontName();
@@ -194,7 +194,7 @@ public class SystemFonts {
 
             final Font font;
             try {
-                font = new Font.Builder(buffer, new File(fullPath), localeList)
+                font = new Font.Builder(buffer, new File(fullPath), languageTags)
                         .setWeight(fontConfig.getWeight())
                         .setItalic(fontConfig.isItalic())
                         .setTtcIndex(fontConfig.getTtcIndex())
@@ -228,7 +228,7 @@ public class SystemFonts {
     public static FontConfig.Alias[] buildSystemFallback(@NonNull String xmlPath,
             @NonNull String fontDir,
             @NonNull ArrayMap<String, FontFamily[]> fallbackMap,
-            @NonNull HashSet<Font> availableFonts) {
+            @NonNull ArrayList<Font> availableFonts) {
         try {
             final FileInputStream fontsIn = new FileInputStream(xmlPath);
             final FontConfig fontConfig = FontListParser.parse(fontsIn);
@@ -284,11 +284,11 @@ public class SystemFonts {
 
     static {
         final ArrayMap<String, FontFamily[]> systemFallbackMap = new ArrayMap<>();
-        final HashSet<Font> availableFonts = new HashSet<>();
+        final ArrayList<Font> availableFonts = new ArrayList<>();
         sAliases = buildSystemFallback("/system/etc/fonts.xml", "/system/fonts/",
                 systemFallbackMap, availableFonts);
         sSystemFallbackMap = Collections.unmodifiableMap(systemFallbackMap);
-        sAvailableFonts = Collections.unmodifiableSet(availableFonts);
+        sAvailableFonts = Collections.unmodifiableList(availableFonts);
     }
 
 }

@@ -19,17 +19,17 @@ package com.android.server.wm;
 import static android.app.ActivityTaskManager.RESIZE_MODE_USER;
 import static android.app.ActivityTaskManager.RESIZE_MODE_USER_FORCED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+
+import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.dipToPixel;
-import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_WIDTH_IN_DP;
 
 import android.annotation.IntDef;
-import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -51,7 +51,6 @@ import android.view.WindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.input.InputWindowHandle;
-import com.android.server.wm.WindowManagerService.H;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -209,7 +208,6 @@ class TaskPositioner {
                     // Post back to WM to handle clean-ups. We still need the input
                     // event handler for the last finishInputEvent()!
                     mService.mTaskPositioningController.finishTaskPositioning();
-                    mTask.getDisplayContent().getInputMonitor().updateInputWindowsLw(true /*force*/);
                 }
                 handled = true;
             } catch (Exception e) {
@@ -237,7 +235,7 @@ class TaskPositioner {
     }
 
     /**
-     * @param display The Display that the window being dragged is on.
+     * @param displayContent The Display that the window being dragged is on.
      */
     void register(DisplayContent displayContent) {
         final Display display = displayContent.getDisplay();
@@ -303,6 +301,9 @@ class TaskPositioner {
         }
         mDisplayContent.pauseRotationLocked();
 
+        // Notify InputMonitor to take mDragWindowHandle.
+        mDisplayContent.getInputMonitor().updateInputWindowsLw(true /*force*/);
+
         mSideMargin = dipToPixel(SIDE_MARGIN_DIP, mDisplayMetrics);
         mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, mDisplayMetrics);
         mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, mDisplayMetrics);
@@ -333,6 +334,9 @@ class TaskPositioner {
         mDragWindowHandle = null;
         mDragApplicationHandle = null;
         mDragEnded = true;
+
+        // Notify InputMonitor to remove mDragWindowHandle.
+        mDisplayContent.getInputMonitor().updateInputWindowsLw(true /*force*/);
 
         // Resume rotations after a drag.
         if (DEBUG_ORIENTATION) {

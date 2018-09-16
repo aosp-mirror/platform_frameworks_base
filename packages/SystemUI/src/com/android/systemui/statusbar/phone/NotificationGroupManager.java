@@ -415,10 +415,10 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
             return false;
         }
         NotificationGroup group = mGroupMap.get(getGroupKey(sbn));
-        if (group == null) {
+        if (group == null || group.summary == null) {
             return false;
         }
-        return !group.children.isEmpty();
+        return !group.children.isEmpty() && Objects.equals(group.summary.notification, sbn);
     }
 
     /**

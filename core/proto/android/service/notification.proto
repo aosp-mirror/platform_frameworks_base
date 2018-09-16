@@ -72,7 +72,8 @@ message ListenersDisablingEffectsProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional int32 hint = 1;
-    repeated ManagedServiceInfoProto listeners = 2;
+    reserved 2; // ManagedServiceInfoProto listeners
+    repeated android.content.ComponentNameProto listener_components = 3;
 }
 
 message ManagedServiceInfoProto {
@@ -199,6 +200,7 @@ message ZenRuleProto {
     optional string condition_id = 8;
     optional ConditionProto condition = 9;
     optional android.content.ComponentNameProto component = 10;
+    optional ZenPolicyProto zenPolicy = 11;
 }
 
 // A dump from com.android.server.notification.ZenModeHelper.
@@ -210,4 +212,48 @@ message ZenModeProto {
     optional int32 suppressed_effects = 3;
     repeated android.content.ComponentNameProto suppressors = 4;
     optional android.app.PolicyProto policy = 5;
+}
+
+// An android.service.notification.ZenPolicy object
+message ZenPolicyProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    enum State {
+        STATE_UNSET = 0;
+        STATE_ALLOW = 1;
+        STATE_DISALLOW = 2;
+    }
+
+    // Notifications and sounds allowed/disallowed when DND is active
+    optional State reminders = 1;
+    optional State events = 2;
+    optional State messages = 3;
+    optional State calls = 4;
+    optional State repeat_callers = 5;
+    optional State alarms = 6;
+    optional State media = 7;
+    optional State system = 8;
+
+    // Visual effects allowed/disallowed for intercepted notifications when DND is active
+    optional State full_screen_intent = 9;
+    optional State lights = 10;
+    optional State peek = 11;
+    optional State status_bar = 12;
+    optional State badge= 13;
+    optional State ambient = 14;
+    optional State notification_list = 15;
+
+    enum Sender {
+        SENDER_UNSET = 0;
+        // Any sender is prioritized.
+        SENDER_ANY = 1;
+        // Saved contacts are prioritized.
+        SENDER_CONTACTS = 2;
+        // Only starred contacts are prioritized.
+        SENDER_STARRED = 3;
+        // No calls/messages are prioritized.
+        SENDER_NONE = 4;
+    }
+    optional Sender priority_calls = 16;
+    optional Sender priority_messages = 17;
 }

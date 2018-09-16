@@ -1129,10 +1129,8 @@ public class Resources {
      *
      * @throws NotFoundException Throws NotFoundException if the given ID does
      *         not exist or is not a floating-point value.
-     * @hide Pending API council approval.
      */
-    @UnsupportedAppUsage
-    public float getFloat(int id) {
+    public float getFloat(@DimenRes int id) {
         final TypedValue value = obtainTempTypedValue();
         try {
             mResourcesImpl.getValue(id, value, true);

@@ -280,7 +280,7 @@ public abstract class NotificationListenerService extends Service {
 
     private final Object mLock = new Object();
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private Handler mHandler;
 
     /** @hide */
@@ -985,6 +985,21 @@ public abstract class NotificationListenerService extends Service {
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
             return INTERRUPTION_FILTER_UNKNOWN;
+        }
+    }
+
+    /**
+     * Clears listener hints set via {@link #getCurrentListenerHints()}.
+     *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing this operation.
+     */
+    public final void clearRequestedListenerHints() {
+        if (!isBound()) return;
+        try {
+            getNotificationInterface().clearRequestedListenerHints(mWrapper);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
         }
     }
 

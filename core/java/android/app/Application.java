@@ -127,7 +127,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     }
 
     @CallSuper
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         Object[] callbacks = collectComponentCallbacks();
         if (callbacks != null) {
             for (int i=0; i<callbacks.length; i++) {

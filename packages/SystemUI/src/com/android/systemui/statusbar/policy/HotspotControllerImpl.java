@@ -205,6 +205,8 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
         public void onTetheringFailed() {
             if (DEBUG) Log.d(TAG, "onTetheringFailed");
             mWaitingForCallback = false;
+            // TODO(b/110697252): stopTethering must be called to reset soft ap state after failure
+            mConnectivityManager.stopTethering(ConnectivityManager.TETHERING_WIFI);
             fireHotspotChangedCallback(isHotspotEnabled());
           // TODO: Show error.
         }

@@ -116,7 +116,8 @@ public abstract class CameraMetadata<TKey> {
     public List<TKey> getKeys() {
         Class<CameraMetadata<TKey>> thisClass = (Class<CameraMetadata<TKey>>) getClass();
         return Collections.unmodifiableList(
-                getKeys(thisClass, getKeyClass(), this, /*filterTags*/null));
+                getKeys(thisClass, getKeyClass(), this, /*filterTags*/null,
+                    /*includeSynthetic*/ true));
     }
 
     /**
@@ -131,13 +132,14 @@ public abstract class CameraMetadata<TKey> {
      * Optionally, if {@code filterTags} is not {@code null}, then filter out any keys
      * whose native {@code tag} is not in {@code filterTags}. The {@code filterTags} array will be
      * sorted as a side effect.
+     * {@code includeSynthetic} Includes public syntenthic fields by default.
      * </p>
      */
      /*package*/ @SuppressWarnings("unchecked")
     <TKey> ArrayList<TKey> getKeys(
              Class<?> type, Class<TKey> keyClass,
              CameraMetadata<TKey> instance,
-             int[] filterTags) {
+             int[] filterTags, boolean includeSynthetic) {
 
         if (DEBUG) Log.v(TAG, "getKeysStatic for " + type);
 
@@ -168,7 +170,7 @@ public abstract class CameraMetadata<TKey> {
                 }
 
                 if (instance == null || instance.getProtected(key) != null) {
-                    if (shouldKeyBeAdded(key, field, filterTags)) {
+                    if (shouldKeyBeAdded(key, field, filterTags, includeSynthetic)) {
                         keyList.add(key);
 
                         if (DEBUG) {
@@ -215,7 +217,8 @@ public abstract class CameraMetadata<TKey> {
     }
 
     @SuppressWarnings("rawtypes")
-    private static <TKey> boolean shouldKeyBeAdded(TKey key, Field field, int[] filterTags) {
+    private static <TKey> boolean shouldKeyBeAdded(TKey key, Field field, int[] filterTags,
+            boolean includeSynthetic) {
         if (key == null) {
             throw new NullPointerException("key must not be null");
         }
@@ -249,8 +252,7 @@ public abstract class CameraMetadata<TKey> {
         if (field.getAnnotation(SyntheticKey.class) != null) {
             // This key is synthetic, so calling #getTag will throw IAE
 
-            // TODO: don't just assume all public+synthetic keys are always available
-            return true;
+            return includeSynthetic;
         }
 
         /*
@@ -811,8 +813,14 @@ public abstract class CameraMetadata<TKey> {
     public static final int REQUEST_AVAILABLE_CAPABILITIES_MOTION_TRACKING = 10;
 
     /**
-     * <p>The camera device is a logical camera backed by two or more physical cameras that are
-     * also exposed to the application.</p>
+     * <p>The camera device is a logical camera backed by two or more physical cameras. In
+     * API level 28, the physical cameras must also be exposed to the application via
+     * {@link android.hardware.camera2.CameraManager#getCameraIdList }. Starting from API
+     * level 29, some or all physical cameras may not be independently exposed to the
+     * application, in which case the physical camera IDs will not be available in
+     * {@link android.hardware.camera2.CameraManager#getCameraIdList }. But the application
+     * can still query the physical cameras' characteristics by calling
+     * {@link android.hardware.camera2.CameraManager#getCameraCharacteristics }.</p>
      * <p>Camera application shouldn't assume that there are at most 1 rear camera and 1 front
      * camera in the system. For an application that switches between front and back cameras,
      * the recommendation is to switch between the first rear camera and the first front

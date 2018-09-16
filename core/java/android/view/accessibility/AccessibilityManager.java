@@ -139,6 +139,8 @@ public final class AccessibilityManager {
 
     int mRelevantEventTypes = AccessibilityEvent.TYPES_ALL_MASK;
 
+    int mMinimumUiTimeout;
+
     boolean mIsTouchExplorationEnabled;
 
     @UnsupportedAppUsage
@@ -319,6 +321,11 @@ public final class AccessibilityManager {
         @Override
         public void setRelevantEventTypes(int eventTypes) {
             mRelevantEventTypes = eventTypes;
+        }
+
+        @Override
+        public void setMinimumUiTimeout(int uiTimeout) {
+            mMinimumUiTimeout = uiTimeout;
         }
     };
 
@@ -827,6 +834,19 @@ public final class AccessibilityManager {
     }
 
     /**
+     * Get the minimum timeout for changes to the UI needed by this user. Controls should remain
+     * on the screen for at least this long to give users time to react. Some users may need
+     * extra time to review the controls, or to reach them, or to activate assistive technology
+     * to activate the controls automatically.
+     *
+     * @return The minimum ui timeout for the current user in milliseconds.
+     * {@link Integer#MAX_VALUE} if timeout is infinite.
+     */
+    public int getMinimumUiTimeoutMillis() {
+        return mMinimumUiTimeout;
+    }
+
+    /**
      * Get the preparers that are registered for an accessibility ID
      *
      * @param id The ID of interest
@@ -1139,6 +1159,7 @@ public final class AccessibilityManager {
             final long userStateAndRelevantEvents = service.addClient(mClient, mUserId);
             setStateLocked(IntPair.first(userStateAndRelevantEvents));
             mRelevantEventTypes = IntPair.second(userStateAndRelevantEvents);
+            mMinimumUiTimeout = service.getMinimumUiTimeout();
             mService = service;
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "AccessibilityManagerService is dead", re);

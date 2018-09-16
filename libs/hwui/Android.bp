@@ -247,7 +247,7 @@ cc_library {
         // Enables fine-grained GLES error checking
         // If enabled, every GLES call is wrapped & error checked
         // Has moderate overhead
-        "hwui_enable_opengl_validation",
+        //"hwui_enable_opengl_validation",
     ],
 }
 

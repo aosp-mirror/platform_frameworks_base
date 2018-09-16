@@ -409,6 +409,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private InputMonitor mInputMonitor;
 
+    /**
+     * The input method window for this display.
+     */
+    WindowState mInputMethodWindow;
+
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
         final AppWindowToken atoken = w.mAppToken;
@@ -2107,18 +2112,16 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 mTouchExcludeRegion.op(mTmpRect2, Region.Op.UNION);
             }
         }
-        final WindowState inputMethod = mService.mInputMethodWindow;
-        if (inputMethod != null && inputMethod.isVisibleLw()) {
+        if (mInputMethodWindow != null && mInputMethodWindow.isVisibleLw()) {
             // If the input method is visible and the user is typing, we don't want these touch
             // events to be intercepted and used to change focus. This would likely cause a
             // disappearance of the input method.
-            inputMethod.getTouchableRegion(mTmpRegion);
-            if (inputMethod.getDisplayId() == mDisplayId) {
+            mInputMethodWindow.getTouchableRegion(mTmpRegion);
+            if (mInputMethodWindow.getDisplayId() == mDisplayId) {
                 mTouchExcludeRegion.op(mTmpRegion, Op.UNION);
             } else {
                 // IME is on a different display, so we need to update its tap detector.
-                // TODO(multidisplay): Remove when IME will always appear on same display.
-                inputMethod.getDisplayContent().setTouchExcludeRegion(null /* focusedTask */);
+                setTouchExcludeRegion(null /* focusedTask */);
             }
         }
         for (int i = mTapExcludedWindows.size() - 1; i >= 0; i--) {
@@ -2257,7 +2260,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void adjustForImeIfNeeded() {
-        final WindowState imeWin = mService.mInputMethodWindow;
+        final WindowState imeWin = mInputMethodWindow;
         final boolean imeVisible = imeWin != null && imeWin.isVisibleLw() && imeWin.isDisplayedLw()
                 && !mDividerControllerLocked.isImeHideRequested();
         final boolean dockVisible = isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
@@ -2640,12 +2643,21 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     /**
+     * Set input method window for the display.
+     * @param win Set when window added or Null when destroyed.
+     */
+    void setInputMethodWindowLocked(WindowState win) {
+        mInputMethodWindow = win;
+        computeImeTarget(true /* updateImeTarget */);
+    }
+
+    /**
      * Determine and return the window that should be the IME target.
      * @param updateImeTarget If true the system IME target will be updated to match what we found.
      * @return The window that should be used as the IME target or null if there isn't any.
      */
     WindowState computeImeTarget(boolean updateImeTarget) {
-        if (mService.mInputMethodWindow == null) {
+        if (mInputMethodWindow == null) {
             // There isn't an IME so there shouldn't be a target...That was easy!
             if (updateImeTarget) {
                 if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from "
@@ -3593,6 +3605,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
             final int targetPosition = findPositionForStack(position, child, false /* adding */);
             super.positionChildAt(targetPosition, child, includingParents);
+
+            if (includingParents) {
+                // We still want to move the display of this stack container to top because even the
+                // target position is adjusted to non-top, the intention of the condition is to have
+                // higher z-order to gain focus (e.g. moving a task of a fullscreen stack to front
+                // in a non-top display which is using picture-in-picture mode).
+                final int topChildPosition = getChildCount() - 1;
+                if (targetPosition < topChildPosition && position >= topChildPosition) {
+                    getParent().positionChildAt(POSITION_TOP, this /* child */,
+                            true /* includingParents */);
+                }
+            }
 
             setLayoutNeeded();
         }

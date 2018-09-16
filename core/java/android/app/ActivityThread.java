@@ -340,7 +340,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     // An executor that performs multi-step transactions.
     private final TransactionExecutor mTransactionExecutor = new TransactionExecutor(this);
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final ResourcesManager mResourcesManager;
 
     private static final class ProviderKey {
@@ -374,7 +374,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     @UnsupportedAppUsage
     final ArrayMap<IBinder, ProviderRefCount> mProviderRefCountMap
         = new ArrayMap<IBinder, ProviderRefCount>();
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     final ArrayMap<IBinder, ProviderClientRecord> mLocalProviders
         = new ArrayMap<IBinder, ProviderClientRecord>();
     @UnsupportedAppUsage
@@ -394,7 +394,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     final GcIdler mGcIdler = new GcIdler();
     boolean mGcIdlerScheduled = false;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     static volatile Handler sMainThreadHandler;  // set once in main()
 
     Bundle mCoreSettings = null;
@@ -456,7 +456,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         private int mLifecycleState = PRE_ON_CREATE;
 
         @VisibleForTesting
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public ActivityClientRecord() {
             this.isForward = false;
             init();
@@ -704,7 +704,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         @UnsupportedAppUsage
         boolean persistent;
         Configuration config;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         CompatibilityInfo compatInfo;
         String buildSerial;
 
@@ -2088,7 +2088,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         return mH;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
             int flags) {
         return getPackageInfo(packageName, compatInfo, flags, UserHandle.myUserId());
@@ -2131,7 +2131,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             ai = getPackageManager().getApplicationInfo(packageName,
                     PackageManager.GET_SHARED_LIBRARY_FILES
                             | PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                    userId);
+                    (userId < 0) ? UserHandle.myUserId() : userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2177,7 +2177,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         return getPackageInfo(ai, compatInfo, null, false, true, false);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final LoadedApk peekPackageInfo(String packageName, boolean includeCode) {
         synchronized (mResourcesManager) {
             WeakReference<LoadedApk> ref;
@@ -2850,7 +2850,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         return aInfo;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final Activity startActivityNow(Activity parent, String id,
         Intent intent, ActivityInfo activityInfo, IBinder token, Bundle state,
         Activity.NonConfigurationInstances lastNonConfigurationInstances) {

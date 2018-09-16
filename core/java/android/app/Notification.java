@@ -1417,7 +1417,7 @@ public class Notification implements Parcelable
         public static final int SEMANTIC_ACTION_CALL = 10;
 
         private final Bundle mExtras;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         private Icon mIcon;
         private final RemoteInput[] mRemoteInputs;
         private boolean mAllowGeneratedReplies = true;
@@ -3499,7 +3499,7 @@ public class Notification implements Parcelable
 
         /**
          * Set the small icon, which will be used to represent the notification in the
-         * status bar and content view (unless overriden there by a
+         * status bar and content view (unless overridden there by a
          * {@link #setLargeIcon(Bitmap) large icon}).
          *
          * @param icon An Icon object to use.

@@ -57,7 +57,6 @@ import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.PasswordMetrics;
-import android.app.backup.ISelectBackupTransportCallback;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -2251,8 +2250,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertEquals(UserManager.DISALLOW_ADJUST_VOLUME,
                 intent.getStringExtra(DevicePolicyManager.EXTRA_RESTRICTION));
 
-        // Try with POLICY_DISABLE_CAMERA, POLICY_DISABLE_SCREEN_CAPTURE and
-        // POLICY_MANDATORY_BACKUPS, which are not user restrictions
+        // Try with POLICY_DISABLE_CAMERA and POLICY_DISABLE_SCREEN_CAPTURE, which are not
+        // user restrictions
 
         // Camera is not disabled
         intent = dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_DISABLE_CAMERA);
@@ -2274,34 +2273,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         intent = dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE);
         assertNotNull(intent);
         assertEquals(DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE,
-                intent.getStringExtra(DevicePolicyManager.EXTRA_RESTRICTION));
-
-        // Make the backup transport selection succeed
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                ISelectBackupTransportCallback callback =
-                    (ISelectBackupTransportCallback) invocation.getArguments()[1];
-                if (callback != null) {
-                    callback.onSuccess("");
-                }
-                return null;
-            }
-        }).when(getServices().ibackupManager).selectBackupTransportAsync(
-                any(ComponentName.class), any(ISelectBackupTransportCallback.class));
-
-
-        // Backups are not mandatory
-        intent = dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_MANDATORY_BACKUPS);
-        assertNull(intent);
-
-        // Backups are mandatory
-        ComponentName transportComponent = ComponentName.unflattenFromString(
-                "android/com.android.internal.backup.LocalTransport");
-        dpm.setMandatoryBackupTransport(admin1, transportComponent);
-        intent = dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_MANDATORY_BACKUPS);
-        assertNotNull(intent);
-        assertEquals(DevicePolicyManager.POLICY_MANDATORY_BACKUPS,
                 intent.getStringExtra(DevicePolicyManager.EXTRA_RESTRICTION));
 
         // Same checks for different user

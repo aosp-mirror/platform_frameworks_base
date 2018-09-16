@@ -21,6 +21,7 @@
 
 #include <SkColor.h>
 #include <SkColorSpace.h>
+#include <SkImageInfo.h>
 
 namespace android {
 namespace uirenderer {
@@ -112,6 +113,10 @@ static constexpr float EOCF(float srgb) {
 // approximated with the native sRGB transfer function. This method
 // returns true for sRGB, gamma 2.2 and Display P3 for instance
 bool transferFunctionCloseToSRGB(const SkColorSpace* colorSpace);
+
+SkColorType PixelFormatToColorType(android_pixel_format pixelFormat);
+
+SkColorSpace::Gamut DataSpaceToColorGamut(android_dataspace dataSpace);
 
 sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace);
 

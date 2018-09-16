@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.textservices;
 
 import static android.view.textservice.TextServicesManager.DISABLE_PER_PROFILE_SPELL_CHECKER;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.inputmethod.InputMethodUtils;
+import com.android.internal.inputmethod.SubtypeLocaleUtils;
 import com.android.internal.textservice.ISpellCheckerService;
 import com.android.internal.textservice.ISpellCheckerServiceCallback;
 import com.android.internal.textservice.ISpellCheckerSession;
 import com.android.internal.textservice.ISpellCheckerSessionListener;
 import com.android.internal.textservice.ITextServicesManager;
 import com.android.internal.textservice.ITextServicesSessionListener;
-import com.android.internal.textservice.LazyIntToIntMap;
 import com.android.internal.util.DumpUtils;
+import com.android.server.SystemService;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -461,7 +461,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         // is pre-installed or not.
         final Locale systemLocal = mContext.getResources().getConfiguration().locale;
         final ArrayList<Locale> suitableLocales =
-                InputMethodUtils.getSuitableLocalesForSpellChecker(systemLocal);
+                LocaleUtils.getSuitableLocalesForSpellChecker(systemLocal);
         if (DBG) {
             Slog.w(TAG, "findAvailSystemSpellCheckerLocked suitableLocales="
                     + Arrays.toString(suitableLocales.toArray(new Locale[suitableLocales.size()])));
@@ -475,7 +475,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 final int subtypeCount = info.getSubtypeCount();
                 for (int subtypeIndex = 0; subtypeIndex < subtypeCount; ++subtypeIndex) {
                     final SpellCheckerSubtype subtype = info.getSubtypeAt(subtypeIndex);
-                    final Locale subtypeLocale = InputMethodUtils.constructLocaleFromString(
+                    final Locale subtypeLocale = SubtypeLocaleUtils.constructLocaleFromString(
                             subtype.getLocale());
                     if (locale.equals(subtypeLocale)) {
                         // TODO: We may have more spell checkers that fall into this category.

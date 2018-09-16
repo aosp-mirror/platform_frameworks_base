@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.inputmethod;
+package com.android.server.inputmethod;
 
 import static android.view.inputmethod.InputMethodManager.CONTROL_WINDOW_IS_TEXT_EDITOR;
 import static android.view.inputmethod.InputMethodManager.CONTROL_WINDOW_VIEW_HAS_FOCUS;
@@ -53,10 +53,14 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * InputMethodManagerUtils contains some static methods that provides IME informations.
- * This methods are supposed to be used in both the framework and the Settings application.
+ * This class provides random static utility methods for {@link InputMethodManagerService} and its
+ * utility classes.
+ *
+ * <p>This class is intentionally package-private.  Utility methods here are tightly coupled with
+ * implementation details in {@link InputMethodManagerService}.  Hence this class is not suitable
+ * for other components to directly use.</p>
  */
-public class InputMethodUtils {
+final class InputMethodUtils {
     public static final boolean DEBUG = false;
     public static final int NOT_A_SUBTYPE_ID = -1;
     public static final String SUBTYPE_MODE_ANY = null;
@@ -332,32 +336,6 @@ public class InputMethodUtils {
     public static ArrayList<InputMethodInfo> getDefaultEnabledImes(
             Context context, ArrayList<InputMethodInfo> imis) {
         return getDefaultEnabledImes(context, imis, false /* onlyMinimum */);
-    }
-
-    public static Locale constructLocaleFromString(String localeStr) {
-        if (TextUtils.isEmpty(localeStr)) {
-            return null;
-        }
-        // TODO: Use {@link Locale#toLanguageTag()} and {@link Locale#forLanguageTag(languageTag)}.
-        String[] localeParams = localeStr.split("_", 3);
-        if (localeParams.length >= 1 && "tl".equals(localeParams[0])) {
-             // Convert a locale whose language is "tl" to one whose language is "fil".
-             // For example, "tl_PH" will get converted to "fil_PH".
-             // Versions of Android earlier than Lollipop did not support three letter language
-             // codes, and used "tl" (Tagalog) as the language string for "fil" (Filipino).
-             // On Lollipop and above, the current three letter version must be used.
-             localeParams[0] = "fil";
-        }
-        // The length of localeStr is guaranteed to always return a 1 <= value <= 3
-        // because localeStr is not empty.
-        if (localeParams.length == 1) {
-            return new Locale(localeParams[0]);
-        } else if (localeParams.length == 2) {
-            return new Locale(localeParams[0], localeParams[1]);
-        } else if (localeParams.length == 3) {
-            return new Locale(localeParams[0], localeParams[1], localeParams[2]);
-        }
-        return null;
     }
 
     public static boolean containsSubtypeOf(final InputMethodInfo imi,
@@ -1318,133 +1296,6 @@ public class InputMethodUtils {
             pw.println(prefix + "mCopyOnWrite=" + mCopyOnWrite);
             pw.println(prefix + "mEnabledInputMethodsStrCache=" + mEnabledInputMethodsStrCache);
         }
-    }
-
-    // For spell checker service manager.
-    // TODO: Should we have TextServicesUtils.java?
-    private static final Locale LOCALE_EN_US = new Locale("en", "US");
-    private static final Locale LOCALE_EN_GB = new Locale("en", "GB");
-
-    /**
-     * Returns a list of {@link Locale} in the order of appropriateness for the default spell
-     * checker service.
-     *
-     * <p>If the system language is English, and the region is also explicitly specified in the
-     * system locale, the following fallback order will be applied.</p>
-     * <ul>
-     * <li>(system-locale-language, system-locale-region, system-locale-variant) (if exists)</li>
-     * <li>(system-locale-language, system-locale-region)</li>
-     * <li>("en", "US")</li>
-     * <li>("en", "GB")</li>
-     * <li>("en")</li>
-     * </ul>
-     *
-     * <p>If the system language is English, but no region is specified in the system locale,
-     * the following fallback order will be applied.</p>
-     * <ul>
-     * <li>("en")</li>
-     * <li>("en", "US")</li>
-     * <li>("en", "GB")</li>
-     * </ul>
-     *
-     * <p>If the system language is not English, the following fallback order will be applied.</p>
-     * <ul>
-     * <li>(system-locale-language, system-locale-region, system-locale-variant) (if exists)</li>
-     * <li>(system-locale-language, system-locale-region) (if exists)</li>
-     * <li>(system-locale-language) (if exists)</li>
-     * <li>("en", "US")</li>
-     * <li>("en", "GB")</li>
-     * <li>("en")</li>
-     * </ul>
-     *
-     * @param systemLocale the current system locale to be taken into consideration.
-     * @return a list of {@link Locale}. The first one is considered to be most appropriate.
-     */
-    @VisibleForTesting
-    public static ArrayList<Locale> getSuitableLocalesForSpellChecker(
-            @Nullable final Locale systemLocale) {
-        final Locale systemLocaleLanguageCountryVariant;
-        final Locale systemLocaleLanguageCountry;
-        final Locale systemLocaleLanguage;
-        if (systemLocale != null) {
-            final String language = systemLocale.getLanguage();
-            final boolean hasLanguage = !TextUtils.isEmpty(language);
-            final String country = systemLocale.getCountry();
-            final boolean hasCountry = !TextUtils.isEmpty(country);
-            final String variant = systemLocale.getVariant();
-            final boolean hasVariant = !TextUtils.isEmpty(variant);
-            if (hasLanguage && hasCountry && hasVariant) {
-                systemLocaleLanguageCountryVariant = new Locale(language, country, variant);
-            } else {
-                systemLocaleLanguageCountryVariant = null;
-            }
-            if (hasLanguage && hasCountry) {
-                systemLocaleLanguageCountry = new Locale(language, country);
-            } else {
-                systemLocaleLanguageCountry = null;
-            }
-            if (hasLanguage) {
-                systemLocaleLanguage = new Locale(language);
-            } else {
-                systemLocaleLanguage = null;
-            }
-        } else {
-            systemLocaleLanguageCountryVariant = null;
-            systemLocaleLanguageCountry = null;
-            systemLocaleLanguage = null;
-        }
-
-        final ArrayList<Locale> locales = new ArrayList<>();
-        if (systemLocaleLanguageCountryVariant != null) {
-            locales.add(systemLocaleLanguageCountryVariant);
-        }
-
-        if (Locale.ENGLISH.equals(systemLocaleLanguage)) {
-            if (systemLocaleLanguageCountry != null) {
-                // If the system language is English, and the region is also explicitly specified,
-                // following fallback order will be applied.
-                // - systemLocaleLanguageCountry [if systemLocaleLanguageCountry is non-null]
-                // - en_US [if systemLocaleLanguageCountry is non-null and not en_US]
-                // - en_GB [if systemLocaleLanguageCountry is non-null and not en_GB]
-                // - en
-                if (systemLocaleLanguageCountry != null) {
-                    locales.add(systemLocaleLanguageCountry);
-                }
-                if (!LOCALE_EN_US.equals(systemLocaleLanguageCountry)) {
-                    locales.add(LOCALE_EN_US);
-                }
-                if (!LOCALE_EN_GB.equals(systemLocaleLanguageCountry)) {
-                    locales.add(LOCALE_EN_GB);
-                }
-                locales.add(Locale.ENGLISH);
-            } else {
-                // If the system language is English, but no region is specified, following
-                // fallback order will be applied.
-                // - en
-                // - en_US
-                // - en_GB
-                locales.add(Locale.ENGLISH);
-                locales.add(LOCALE_EN_US);
-                locales.add(LOCALE_EN_GB);
-            }
-        } else {
-            // If the system language is not English, the fallback order will be
-            // - systemLocaleLanguageCountry  [if non-null]
-            // - systemLocaleLanguage  [if non-null]
-            // - en_US
-            // - en_GB
-            // - en
-            if (systemLocaleLanguageCountry != null) {
-                locales.add(systemLocaleLanguageCountry);
-            }
-            if (systemLocaleLanguage != null) {
-                locales.add(systemLocaleLanguage);
-            }
-            locales.add(LOCALE_EN_US);
-            locales.add(LOCALE_EN_GB);
-            locales.add(Locale.ENGLISH);
-        }
-        return locales;
     }
 
     public static boolean isSoftInputModeStateVisibleAllowed(

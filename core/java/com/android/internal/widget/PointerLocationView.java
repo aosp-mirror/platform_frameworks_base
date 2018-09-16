@@ -840,7 +840,11 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 scale *= 10;
             }
             value = (float) (Math.rint(value * scale) / scale);
-            
+
+            // Corner case: (int)-0.1 will become zero, so the negative sign gets lost
+            if ((int) value == 0 && value < 0) {
+                append("-");
+            }
             append((int) value);
 
             if (precision != 0) {

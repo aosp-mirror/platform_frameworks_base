@@ -1221,7 +1221,7 @@ public class ActivityManager {
          * @return The background color.
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public int getBackgroundColor() {
             return mColorBackground;
         }

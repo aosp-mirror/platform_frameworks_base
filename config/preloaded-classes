@@ -1436,12 +1436,6 @@ android.hardware.usb.UsbDevice$1
 android.hardware.usb.UsbDeviceConnection
 android.hardware.usb.UsbManager
 android.hardware.usb.UsbRequest
-android.hidl.base.V1_0.DebugInfo
-android.hidl.base.V1_0.IBase
-android.hidl.manager.V1_0.IServiceManager
-android.hidl.manager.V1_0.IServiceManager$Proxy
-android.hidl.manager.V1_0.IServiceNotification
-android.hidl.manager.V1_0.IServiceNotification$Stub
 android.icu.impl.BMPSet
 android.icu.impl.CacheBase
 android.icu.impl.CacheValue

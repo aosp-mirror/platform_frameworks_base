@@ -728,8 +728,6 @@ Landroid/os/Environment;->buildExternalStorageAppMediaDirs(Ljava/lang/String;)[L
 Landroid/os/Environment;->buildExternalStorageAppObbDirs(Ljava/lang/String;)[Ljava/io/File;
 Landroid/os/Environment;->getDataSystemDirectory()Ljava/io/File;
 Landroid/os/Environment;->getLegacyExternalStorageObbDirectory()Ljava/io/File;
-Landroid/os/Environment;->getOemDirectory()Ljava/io/File;
-Landroid/os/Environment;->getVendorDirectory()Ljava/io/File;
 Landroid/os/Environment;->initForCurrentUser()V
 Landroid/os/Environment;->maybeTranslateEmulatedPathToInternal(Ljava/io/File;)Ljava/io/File;
 Landroid/os/Environment;->sCurrentUser:Landroid/os/Environment$UserEnvironment;
@@ -1001,8 +999,6 @@ Landroid/os/UserHandle;->AID_APP_START:I
 Landroid/os/UserHandle;->AID_CACHE_GID_START:I
 Landroid/os/UserHandle;->AID_ROOT:I
 Landroid/os/UserHandle;->AID_SHARED_GID_START:I
-Landroid/os/UserHandle;->ALL:Landroid/os/UserHandle;
-Landroid/os/UserHandle;->CURRENT:Landroid/os/UserHandle;
 Landroid/os/UserHandle;->CURRENT_OR_SELF:Landroid/os/UserHandle;
 Landroid/os/UserHandle;->ERR_GID:I
 Landroid/os/UserHandle;->formatUid(Ljava/io/PrintWriter;I)V

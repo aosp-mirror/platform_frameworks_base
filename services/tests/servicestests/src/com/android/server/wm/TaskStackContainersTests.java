@@ -109,4 +109,22 @@ public class TaskStackContainersTests extends WindowTestsBase {
         assertEquals(taskStackContainer.mChildren.get(stackPos), stack1);
         assertEquals(taskStackContainer.mChildren.get(pinnedStackPos), mPinnedStack);
     }
+
+    @Test
+    public void testDisplayPositionWithPinnedStack() {
+        // The display contains pinned stack that was added in {@link #setUp}.
+        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
+
+        // Add another display at top.
+        sWm.mRoot.positionChildAt(WindowContainer.POSITION_TOP, createNewDisplay(),
+                false /* includingParents */);
+
+        // Move the task of {@code mDisplayContent} to top.
+        stack.positionChildAt(WindowContainer.POSITION_TOP, task, true /* includingParents */);
+        final int indexOfDisplayWithPinnedStack = sWm.mRoot.mChildren.indexOf(mDisplayContent);
+
+        assertEquals("The testing DisplayContent should be moved to top with task",
+                sWm.mRoot.getChildCount() - 1, indexOfDisplayWithPinnedStack);
+    }
 }

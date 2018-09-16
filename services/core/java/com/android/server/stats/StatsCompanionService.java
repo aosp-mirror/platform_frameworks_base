@@ -44,6 +44,8 @@ import android.os.IBinder;
 import android.os.IStatsCompanionService;
 import android.os.IStatsManager;
 import android.os.IStoraged;
+import android.os.IThermalEventListener;
+import android.os.IThermalService;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
@@ -53,6 +55,7 @@ import android.os.StatsDimensionsValue;
 import android.os.StatsLogEventWrapper;
 import android.os.SynchronousResultReceiver;
 import android.os.SystemClock;
+import android.os.Temperature;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
@@ -169,6 +172,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private KernelUidCpuClusterTimeReader mKernelUidCpuClusterTimeReader =
             new KernelUidCpuClusterTimeReader();
 
+    private static IThermalService sThermalService;
+
     public StatsCompanionService(Context context) {
         super();
         mContext = context;
@@ -213,6 +218,24 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         long[] freqs = mKernelUidCpuFreqTimeReader.readFreqs(powerProfile);
         mKernelUidCpuClusterTimeReader.setThrottleInterval(0);
         mKernelUidCpuActiveTimeReader.setThrottleInterval(0);
+
+        // Enable push notifications of throttling from vendor thermal
+        // management subsystem via thermalservice.
+        IBinder b = ServiceManager.getService("thermalservice");
+
+        if (b != null) {
+            sThermalService = IThermalService.Stub.asInterface(b);
+            try {
+                sThermalService.registerThermalEventListener(
+                        new ThermalEventListener());
+                Slog.i(TAG, "register thermal listener successfully");
+            } catch (RemoteException e) {
+                // Should never happen.
+                Slog.e(TAG, "register thermal listener error");
+            }
+        } else {
+            Slog.e(TAG, "cannot find thermalservice, no throttling push notifications");
+        }
     }
 
     @Override
@@ -906,6 +929,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
 
         List<ExportedCallStat> callStats = binderStats.getExportedCallStats();
+        binderStats.reset();
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         for (ExportedCallStat callStat : callStats) {
             StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 13 /* fields */);
@@ -934,6 +958,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
 
         ArrayMap<String, Integer> exceptionStats = binderStats.getExportedExceptionStats();
+        // TODO: decouple binder calls exceptions with the rest of the binder calls data so that we
+        // can reset the exception stats.
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         for (Entry<String, Integer> entry : exceptionStats.entrySet()) {
             StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 2 /* fields */);
@@ -1456,4 +1482,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    // Thermal event received from vendor thermal management subsystem
+    private static final class ThermalEventListener extends IThermalEventListener.Stub {
+        @Override public void notifyThrottling(boolean isThrottling, Temperature temp) {
+            StatsLog.write(StatsLog.THERMAL_THROTTLING, temp.getType(),
+                    isThrottling ? 1 : 0, temp.getValue());
+        }
+    }
 }

@@ -355,6 +355,11 @@ package android.app {
     field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.PackageOps> CREATOR;
   }
 
+  public final class AutomaticZenRule implements android.os.Parcelable {
+    ctor public AutomaticZenRule(java.lang.String, android.content.ComponentName, android.net.Uri, int, boolean, long);
+    ctor public AutomaticZenRule(java.lang.String, android.content.ComponentName, android.net.Uri, int, boolean, long, android.service.notification.ZenPolicy);
+  }
+
   public class BroadcastOptions {
     method public static android.app.BroadcastOptions makeBasic();
     method public void setDontSendToRestrictedApps(boolean);
@@ -3807,6 +3812,14 @@ package android.os {
     field public static final java.lang.String ACTION_UPDATE_SMS_SHORT_CODES = "android.intent.action.UPDATE_SMS_SHORT_CODES";
   }
 
+  public class Environment {
+    method public static java.io.File getOdmDirectory();
+    method public static java.io.File getOemDirectory();
+    method public static java.io.File getProductDirectory();
+    method public static java.io.File getProductServicesDirectory();
+    method public static java.io.File getVendorDirectory();
+  }
+
   public class HidlSupport {
     method public static boolean deepEquals(java.lang.Object, java.lang.Object);
     method public static int deepHashCode(java.lang.Object);
@@ -4107,6 +4120,9 @@ package android.os {
     method public boolean isSystem();
     method public static int myUserId();
     method public static android.os.UserHandle of(int);
+    field public static final android.os.UserHandle ALL;
+    field public static final android.os.UserHandle CURRENT;
+    field public static final android.os.UserHandle SYSTEM;
     field public static final int USER_NULL = -10000; // 0xffffd8f0
   }
 

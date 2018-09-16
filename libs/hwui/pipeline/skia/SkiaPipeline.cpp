@@ -83,16 +83,15 @@ void SkiaPipeline::onPrepareTree() {
 
 void SkiaPipeline::renderLayers(const LightGeometry& lightGeometry,
                                 LayerUpdateQueue* layerUpdateQueue, bool opaque,
-                                bool wideColorGamut, const LightInfo& lightInfo) {
+                                const LightInfo& lightInfo) {
     updateLighting(lightGeometry, lightInfo);
     ATRACE_NAME("draw layers");
     renderVectorDrawableCache();
-    renderLayersImpl(*layerUpdateQueue, opaque, wideColorGamut);
+    renderLayersImpl(*layerUpdateQueue, opaque);
     layerUpdateQueue->clear();
 }
 
-void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque,
-                                    bool wideColorGamut) {
+void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque) {
     sk_sp<GrContext> cachedContext;
 
     // Render all layers that need to be updated, in order.
@@ -161,7 +160,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque,
 }
 
 bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
-                                       bool wideColorGamut, ErrorHandler* errorHandler) {
+                                       ErrorHandler* errorHandler) {
     // compute the size of the surface (i.e. texture) to be allocated for this layer
     const int surfaceWidth = ceilf(node->getWidth() / float(LAYER_SIZE)) * LAYER_SIZE;
     const int surfaceHeight = ceilf(node->getHeight() / float(LAYER_SIZE)) * LAYER_SIZE;
@@ -169,12 +168,8 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
     SkSurface* layer = node->getLayerSurface();
     if (!layer || layer->width() != surfaceWidth || layer->height() != surfaceHeight) {
         SkImageInfo info;
-        if (wideColorGamut) {
-            info = SkImageInfo::Make(surfaceWidth, surfaceHeight, kRGBA_F16_SkColorType,
-                                     kPremul_SkAlphaType);
-        } else {
-            info = SkImageInfo::MakeN32Premul(surfaceWidth, surfaceHeight);
-        }
+        info = SkImageInfo::Make(surfaceWidth, surfaceHeight, getSurfaceColorType(),
+                                 kPremul_SkAlphaType);
         SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
         SkASSERT(mRenderThread.getGrContext() != nullptr);
         node->setLayerSurface(SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
@@ -321,19 +316,18 @@ void SkiaPipeline::endCapture(SkSurface* surface) {
 
 void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& clip,
                                const std::vector<sp<RenderNode>>& nodes, bool opaque,
-                               bool wideColorGamut, const Rect& contentDrawBounds,
-                               sk_sp<SkSurface> surface) {
+                               const Rect& contentDrawBounds, sk_sp<SkSurface> surface) {
     renderVectorDrawableCache();
 
     // draw all layers up front
-    renderLayersImpl(layers, opaque, wideColorGamut);
+    renderLayersImpl(layers, opaque);
 
     // initialize the canvas for the current frame, that might be a recording canvas if SKP
     // capture is enabled.
     std::unique_ptr<SkPictureRecorder> recorder;
     SkCanvas* canvas = tryCapture(surface.get());
 
-    renderFrameImpl(layers, clip, nodes, opaque, wideColorGamut, contentDrawBounds, canvas);
+    renderFrameImpl(layers, clip, nodes, opaque, contentDrawBounds, canvas);
 
     endCapture(surface.get());
 
@@ -354,13 +348,12 @@ static Rect nodeBounds(RenderNode& node) {
 
 void SkiaPipeline::renderFrameImpl(const LayerUpdateQueue& layers, const SkRect& clip,
                                    const std::vector<sp<RenderNode>>& nodes, bool opaque,
-                                   bool wideColorGamut, const Rect& contentDrawBounds,
-                                   SkCanvas* canvas) {
+                                   const Rect& contentDrawBounds, SkCanvas* canvas) {
     SkAutoCanvasRestore saver(canvas, true);
     canvas->androidFramework_setDeviceClipRestriction(clip.roundOut());
 
     // STOPSHIP: Revert, temporary workaround to clear always F16 frame buffer for b/74976293
-    if (!opaque || wideColorGamut) {
+    if (!opaque || getSurfaceColorType() == kRGBA_F16_SkColorType) {
         canvas->clear(SK_ColorTRANSPARENT);
     }
 
@@ -493,7 +486,7 @@ void SkiaPipeline::renderOverdraw(const LayerUpdateQueue& layers, const SkRect& 
     // each time a pixel would have been drawn.
     // Pass true for opaque so we skip the clear - the overdrawCanvas is already zero
     // initialized.
-    renderFrameImpl(layers, clip, nodes, true, false, contentDrawBounds, &overdrawCanvas);
+    renderFrameImpl(layers, clip, nodes, true, contentDrawBounds, &overdrawCanvas);
     sk_sp<SkImage> counts = offscreen->makeImageSnapshot();
 
     // Draw overdraw colors to the canvas.  The color filter will convert counts to colors.

@@ -12,8 +12,8 @@ readarray A < "$source_list"
 # Sort
 IFS=$'\n'
 # Stash away comments
-C=( $(grep -E '^#' <<< "${A[*]}") )
-A=( $(grep -v -E '^#' <<< "${A[*]}") )
+C=( $(grep -E '^#' <<< "${A[*]}" || :) )
+A=( $(grep -v -E '^#' <<< "${A[*]}" || :) )
 # Sort entries
 A=( $(LC_COLLATE=C sort -f <<< "${A[*]}") )
 A=( $(uniq <<< "${A[*]}") )

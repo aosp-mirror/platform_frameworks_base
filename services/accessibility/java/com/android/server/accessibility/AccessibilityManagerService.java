@@ -21,6 +21,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
 import static android.view.accessibility.AccessibilityEvent.WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS;
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_AUTO;
@@ -1689,6 +1691,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 this, userState));
     }
 
+    private void scheduleSetAllClientsMinimumUiTimeout(UserState userState) {
+        mMainHandler.sendMessage(obtainMessage(
+                AccessibilityManagerService::sendMinimumUiTimeoutChanged,
+                this, userState.mUserClients, userState.mMinimumUiTimeout));
+    }
+
+    private void sendMinimumUiTimeoutChanged(
+            RemoteCallbackList<IAccessibilityManagerClient> userClients, int uiTimeout) {
+        notifyClientsOfServicesMinimumUiTimeoutChange(mGlobalClients, uiTimeout);
+        notifyClientsOfServicesMinimumUiTimeoutChange(userClients, uiTimeout);
+    }
+
+    private void notifyClientsOfServicesMinimumUiTimeoutChange(
+            RemoteCallbackList<IAccessibilityManagerClient> clients, int uiTimeout) {
+        clients.broadcast(ignoreRemoteException(
+                client -> client.setMinimumUiTimeout(uiTimeout)));
+    }
+
     private void updateInputFilter(UserState userState) {
         if (mUiAutomationManager.suppressingAccessibilityServicesLocked()) return;
 
@@ -1822,6 +1842,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         scheduleUpdateClientsIfNeededLocked(userState);
         updateRelevantEventsLocked(userState);
         updateAccessibilityButtonTargetsLocked(userState);
+        updateMinimumUiTimeoutLocked(userState);
     }
 
     private void updateAccessibilityFocusBehaviorLocked(UserState userState) {
@@ -1940,6 +1961,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         somethingChanged |= readAutoclickEnabledSettingLocked(userState);
         somethingChanged |= readAccessibilityShortcutSettingLocked(userState);
         somethingChanged |= readAccessibilityButtonSettingsLocked(userState);
+        somethingChanged |= readUserMinimumUiTimeoutSettingsLocked(userState);
         return somethingChanged;
     }
 
@@ -2082,6 +2104,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         userState.mServiceAssignedToAccessibilityButton = componentName;
         userState.mIsNavBarMagnificationAssignedToAccessibilityButton = false;
         return true;
+    }
+
+    private boolean readUserMinimumUiTimeoutSettingsLocked(UserState userState) {
+        final boolean enabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED, 0,
+                userState.mUserId) == 1;
+        final int timeout = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_MINIMUM_UI_TIMEOUT_MS, 0,
+                userState.mUserId);
+        if (enabled != userState.mUserMinimumUiTimeoutEnabled
+                || timeout != userState.mUserMinimumUiTimeout) {
+            userState.mUserMinimumUiTimeoutEnabled = enabled;
+            userState.mUserMinimumUiTimeout = timeout;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -2250,6 +2288,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    private void updateMinimumUiTimeoutLocked(UserState userState) {
+        int newUiTimeout = 0;
+        if (userState.mUserMinimumUiTimeoutEnabled) {
+            newUiTimeout = userState.mUserMinimumUiTimeout;
+        } else {
+            final List<AccessibilityServiceConnection> services = userState.mBoundServices;
+            final int numServices = services.size();
+            for (int i = 0; i < numServices; i++) {
+                final int serviceUiTimeout = services.get(i).getServiceInfo()
+                        .getMinimumUiTimeoutMillis();
+                if (newUiTimeout < serviceUiTimeout) {
+                    newUiTimeout = serviceUiTimeout;
+                }
+            }
+        }
+        if (newUiTimeout != userState.mMinimumUiTimeout) {
+            userState.mMinimumUiTimeout = newUiTimeout;
+            scheduleSetAllClientsMinimumUiTimeout(userState);
+        }
+    }
+
     @GuardedBy("mLock")
     @Override
     public MagnificationSpec getCompatibleMagnificationSpecLocked(int windowId) {
@@ -2388,6 +2447,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return mFingerprintGestureDispatcher.onFingerprintGesture(gestureKeyCode);
     }
 
+    /**
+     * Get the minimum timeout for changes to the UI needed by this user. Controls should remain
+     * on the screen for at least this long to give users time to react.
+     *
+     * @return The minimum timeout for the current user in milliseconds.
+     */
+    @Override
+    public int getMinimumUiTimeout() {
+        synchronized(mLock) {
+            final UserState userState = getCurrentUserStateLocked();
+            return userState.mMinimumUiTimeout;
+        }
+    }
+
     @Override
     public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
@@ -2405,6 +2478,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 pw.append(", navBarMagnificationEnabled="
                         + userState.mIsNavBarMagnificationEnabled);
                 pw.append(", autoclickEnabled=" + userState.mIsAutoclickEnabled);
+                pw.append(", minimumUiTimeout=" + userState.mMinimumUiTimeout);
                 if (mUiAutomationManager.isUiAutomationRunningLocked()) {
                     pw.append(", ");
                     mUiAutomationManager.dumpUiAutomationService(fd, pw, args);
@@ -2549,6 +2623,38 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return -1;
     }
 
+    private void notifyOutsideTouchIfNeeded(int targetWindowId, int action, Bundle arguments,
+            int interactionId, IAccessibilityInteractionConnectionCallback callback, int fetchFlags,
+            int interrogatingPid, long interrogatingTid) {
+        if (action != ACTION_CLICK && action != ACTION_LONG_CLICK) {
+            return;
+        }
+
+        final List<Integer> outsideWindowsIds;
+        final List<RemoteAccessibilityConnection> connectionList = new ArrayList<>();
+        synchronized (mLock) {
+            outsideWindowsIds = mSecurityPolicy.getWatchOutsideTouchWindowId(targetWindowId);
+            for (int i = 0; i < outsideWindowsIds.size(); i++) {
+                connectionList.add(getConnectionLocked(outsideWindowsIds.get(i)));
+            }
+        }
+        for (int i = 0; i < connectionList.size(); i++) {
+            final RemoteAccessibilityConnection connection = connectionList.get(i);
+            if (connection != null) {
+                try {
+                    connection.mConnection.performAccessibilityAction(
+                            AccessibilityNodeInfo.ROOT_ITEM_ID,
+                            R.id.accessibilityActionOutsideTouch, arguments, interactionId,
+                            callback, fetchFlags, interrogatingPid, interrogatingTid);
+                } catch (RemoteException re) {
+                    if (DEBUG) {
+                        Slog.e(LOG_TAG, "Error calling performAccessibilityAction: " + re);
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public void ensureWindowsAvailableTimed() {
         synchronized (mLock) {
@@ -2628,6 +2734,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mPowerManager.userActivity(SystemClock.uptimeMillis(),
                     PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY, 0);
 
+            notifyOutsideTouchIfNeeded(resolvedWindowId, action, arguments, interactionId, callback,
+                    fetchFlags, interrogatingPid, interrogatingTid);
             if (activityToken != null) {
                 LocalServices.getService(ActivityTaskManagerInternal.class)
                         .setFocusedActivity(activityToken);
@@ -2955,6 +3063,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         public long mAccessibilityFocusNodeId = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
 
         private boolean mTouchInteractionInProgress;
+        private boolean mHasWatchOutsideTouchWindow;
 
         private boolean canDispatchAccessibilityEventLocked(AccessibilityEvent event) {
             final int eventType = event.getEventType();
@@ -3112,6 +3221,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mWindowInfoById.valueAt(i).recycle();
             }
             mWindowInfoById.clear();
+            mHasWatchOutsideTouchWindow = false;
 
             mFocusedWindowId = INVALID_WINDOW_ID;
             if (!mTouchInteractionInProgress) {
@@ -3155,6 +3265,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             } else if (windowId == mActiveWindowId) {
                                 activeWindowGone = false;
                             }
+                        }
+                        if (!mHasWatchOutsideTouchWindow && windowInfo.hasFlagWatchOutsideTouch) {
+                            mHasWatchOutsideTouchWindow = true;
                         }
                         mWindows.add(window);
                         mA11yWindowInfoById.put(windowId, window);
@@ -3574,6 +3687,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return mWindowInfoById.get(windowId);
         }
 
+        private List<Integer> getWatchOutsideTouchWindowId(int targetWindowId) {
+            if (mWindowInfoById != null && mHasWatchOutsideTouchWindow) {
+                final List<Integer> outsideWindowsId = new ArrayList<>();
+                final WindowInfo targetWindow = mWindowInfoById.get(targetWindowId);
+                for (int i = 0; i < mWindowInfoById.size(); i++) {
+                    WindowInfo window = mWindowInfoById.valueAt(i);
+                    if (window.layer < targetWindow.layer
+                            && window.hasFlagWatchOutsideTouch) {
+                        outsideWindowsId.add(mWindowInfoById.keyAt(i));
+                    }
+                }
+                return outsideWindowsId;
+            }
+            return Collections.emptyList();
+        }
+
         private AccessibilityWindowInfo getPictureInPictureWindow() {
             if (mWindows != null) {
                 final int windowCount = mWindows.size();
@@ -3660,6 +3789,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         public ComponentName mServiceToEnableWithShortcut;
 
         public int mLastSentClientState = -1;
+        public int mMinimumUiTimeout = 0;
 
         private int mSoftKeyboardShowMode = 0;
 
@@ -3674,6 +3804,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         public boolean mIsPerformGesturesEnabled;
         public boolean mIsFilterKeyEventsEnabled;
         public boolean mAccessibilityFocusOnlyInActiveWindow;
+        public boolean mUserMinimumUiTimeoutEnabled;
+        public int mUserMinimumUiTimeout;
 
         public boolean mBindInstantServiceAllowed;
 
@@ -3713,6 +3845,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // Clear event management state.
             mLastSentClientState = -1;
 
+            // clear minimum ui timeout
+            mMinimumUiTimeout = 0;
+
             // Clear state persisted in settings.
             mEnabledServices.clear();
             mTouchExplorationGrantedServices.clear();
@@ -3722,6 +3857,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mServiceAssignedToAccessibilityButton = null;
             mIsNavBarMagnificationAssignedToAccessibilityButton = false;
             mIsAutoclickEnabled = false;
+            mUserMinimumUiTimeoutEnabled = false;
+            mUserMinimumUiTimeout = 0;
         }
 
         public void addServiceLocked(AccessibilityServiceConnection serviceConnection) {
@@ -3948,6 +4085,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private final Uri mAccessibilityButtonComponentIdUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT);
 
+        private final Uri mUserMinimumUiTimeoutEnabledUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED);
+
+        private final Uri mUserMinimumUiTimeoutUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_MINIMUM_UI_TIMEOUT_MS);
+
         public AccessibilityContentObserver(Handler handler) {
             super(handler);
         }
@@ -3982,6 +4125,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     mAccessibilityShortcutServiceIdUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mAccessibilityButtonComponentIdUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mUserMinimumUiTimeoutEnabledUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mUserMinimumUiTimeoutUri, false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -4031,6 +4178,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 } else if (mAccessibilityButtonComponentIdUri.equals(uri)) {
                     if (readAccessibilityButtonSettingsLocked(userState)) {
                         onUserStateChangedLocked(userState);
+                    }
+                } else if (mUserMinimumUiTimeoutEnabledUri.equals(uri)
+                        || mUserMinimumUiTimeoutUri.equals(uri)) {
+                    if (readUserMinimumUiTimeoutSettingsLocked(userState)) {
+                        updateMinimumUiTimeoutLocked(userState);
                     }
                 }
             }

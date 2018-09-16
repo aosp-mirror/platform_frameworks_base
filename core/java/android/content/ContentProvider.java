@@ -37,6 +37,7 @@ import android.database.SQLException;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.IBinder;
@@ -163,7 +164,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * in the test, which is available via {@link #getPathPermissions()}.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public ContentProvider(
             Context context,
             String readPermission,

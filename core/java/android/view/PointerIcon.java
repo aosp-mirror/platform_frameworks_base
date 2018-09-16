@@ -31,6 +31,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -146,7 +147,7 @@ public final class PointerIcon implements Parcelable {
     private static final SparseArray<PointerIcon> gSystemIcons = new SparseArray<PointerIcon>();
     private static boolean sUseLargeIcons = false;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int mType;
     private int mSystemIconResourceId;
     @UnsupportedAppUsage
@@ -319,7 +320,7 @@ public final class PointerIcon implements Parcelable {
      * @throws IllegalArgumentException if context is null.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public PointerIcon load(@NonNull Context context) {
         if (context == null) {
             throw new IllegalArgumentException("context must not be null");

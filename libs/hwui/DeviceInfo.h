@@ -17,6 +17,7 @@
 #define DEVICEINFO_H
 
 #include <ui/DisplayInfo.h>
+#include <ui/GraphicTypes.h>
 
 #include "Extensions.h"
 #include "utils/Macros.h"
@@ -39,6 +40,8 @@ public:
     static void initialize(int maxTextureSize);
 
     int maxTextureSize() const { return mMaxTextureSize; }
+    ui::Dataspace getTargetDataSpace() const { return mTargetDataSpace; }
+    ui::PixelFormat getTargetPixelFormat() const { return mTargetPixelFormat; }
     const DisplayInfo& displayInfo() const { return mDisplayInfo; }
     const Extensions& extensions() const { return mExtensions; }
 
@@ -50,6 +53,9 @@ public:
     static DisplayInfo queryDisplayInfo();
 
 private:
+    static void queryCompositionPreference(ui::Dataspace* dataSpace,
+                                           ui::PixelFormat* pixelFormat);
+
     DeviceInfo() {}
     ~DeviceInfo() {}
 
@@ -58,6 +64,9 @@ private:
     int mMaxTextureSize;
     DisplayInfo mDisplayInfo;
     Extensions mExtensions;
+    // TODO(lpy) Replace below with android_ prefix types.
+    ui::Dataspace mTargetDataSpace;
+    ui::PixelFormat mTargetPixelFormat;
 };
 
 } /* namespace uirenderer */

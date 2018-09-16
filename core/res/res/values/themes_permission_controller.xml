@@ -15,8 +15,8 @@
   limitations under the License.
   -->
 
-<!-- themes for the permission grant dialog. -->
 <resources>
+    <!-- themes for the permission grant dialog. -->
     <style name="Theme.DeviceDefault.PermissionGrantApp"
            parent="@style/Theme.DeviceDefault.Light.Panel">
         <item name="windowIsFloating">false</item>
@@ -31,5 +31,14 @@
         <item name="radioButtonStyle">@style/PermissionGrantRadioButton</item>
         <item name="checkboxStyle">@style/PermissionGrantCheckbox</item>
         <item name="buttonBarStyle">@style/PermissionGrantButtonBar</item>
+    </style>
+
+    <!-- themes for the permission review dialog. -->
+    <style name="Theme.DeviceDefault.PermissionReviewApp"
+           parent="@style/Theme.DeviceDefault.Settings">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="titleTextStyle">@style/PermissionReviewTitleMessage</item>
+        <item name="buttonBarStyle">@style/PermissionReviewButtonBar</item>
     </style>
 </resources>

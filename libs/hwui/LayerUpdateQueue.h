@@ -19,6 +19,7 @@
 
 #include <utils/StrongPointer.h>
 #include "Rect.h"
+#include "RenderNode.h"
 #include "utils/Macros.h"
 
 #include <unordered_map>

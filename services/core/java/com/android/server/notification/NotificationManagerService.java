@@ -33,6 +33,10 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
+import static android.content.Context.BIND_ADJUST_BELOW_PERCEPTIBLE;
+import static android.content.Context.BIND_ALLOW_WHITELIST_MANAGEMENT;
+import static android.content.Context.BIND_AUTO_CREATE;
+import static android.content.Context.BIND_FOREGROUND_SERVICE;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
@@ -345,7 +349,7 @@ public class NotificationManagerService extends SystemService {
     private String mSoundNotificationKey;
     private String mVibrateNotificationKey;
 
-    private final SparseArray<ArraySet<ManagedServiceInfo>> mListenersDisablingEffects =
+    private final SparseArray<ArraySet<ComponentName>> mListenersDisablingEffects =
             new SparseArray<>();
     private List<ComponentName> mEffectsSuppressors = new ArrayList<>();
     private int mListenerHints;  // right now, all hints are global
@@ -1784,10 +1788,10 @@ public class NotificationManagerService extends SystemService {
     private ArrayList<ComponentName> getSuppressors() {
         ArrayList<ComponentName> names = new ArrayList<ComponentName>();
         for (int i = mListenersDisablingEffects.size() - 1; i >= 0; --i) {
-            ArraySet<ManagedServiceInfo> serviceInfoList = mListenersDisablingEffects.valueAt(i);
+            ArraySet<ComponentName> serviceInfoList = mListenersDisablingEffects.valueAt(i);
 
-            for (ManagedServiceInfo info : serviceInfoList) {
-                names.add(info.component);
+            for (ComponentName info : serviceInfoList) {
+                names.add(info);
             }
         }
 
@@ -1803,11 +1807,10 @@ public class NotificationManagerService extends SystemService {
 
         for (int i = mListenersDisablingEffects.size() - 1; i >= 0; --i) {
             final int hint = mListenersDisablingEffects.keyAt(i);
-            final ArraySet<ManagedServiceInfo> listeners =
-                    mListenersDisablingEffects.valueAt(i);
+            final ArraySet<ComponentName> listeners = mListenersDisablingEffects.valueAt(i);
 
             if (hints == 0 || (hint & hints) == hint) {
-                removed = removed || listeners.remove(info);
+                removed |= listeners.remove(info.component);
             }
         }
 
@@ -1830,18 +1833,18 @@ public class NotificationManagerService extends SystemService {
 
     private void addDisabledHint(ManagedServiceInfo info, int hint) {
         if (mListenersDisablingEffects.indexOfKey(hint) < 0) {
-            mListenersDisablingEffects.put(hint, new ArraySet<ManagedServiceInfo>());
+            mListenersDisablingEffects.put(hint, new ArraySet<>());
         }
 
-        ArraySet<ManagedServiceInfo> hintListeners = mListenersDisablingEffects.get(hint);
-        hintListeners.add(info);
+        ArraySet<ComponentName> hintListeners = mListenersDisablingEffects.get(hint);
+        hintListeners.add(info.component);
     }
 
     private int calculateHints() {
         int hints = 0;
         for (int i = mListenersDisablingEffects.size() - 1; i >= 0; --i) {
             int hint = mListenersDisablingEffects.keyAt(i);
-            ArraySet<ManagedServiceInfo> serviceInfoList = mListenersDisablingEffects.valueAt(i);
+            ArraySet<ComponentName> serviceInfoList = mListenersDisablingEffects.valueAt(i);
 
             if (!serviceInfoList.isEmpty()) {
                 hints |= hint;
@@ -2955,6 +2958,21 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public void clearRequestedListenerHints(INotificationListener token) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mNotificationLock) {
+                    final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                    removeDisabledHints(info);
+                    updateListenerHintsLocked();
+                    updateEffectsSuppressorLocked();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void requestHintsFromListener(INotificationListener token, int hints) {
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -3860,11 +3878,12 @@ public class NotificationManagerService extends SystemService {
 
                 proto.write(
                     ListenersDisablingEffectsProto.HINT, mListenersDisablingEffects.keyAt(i));
-                final ArraySet<ManagedServiceInfo> listeners =
+                final ArraySet<ComponentName> listeners =
                     mListenersDisablingEffects.valueAt(i);
                 for (int j = 0; j < listeners.size(); j++) {
-                    final ManagedServiceInfo listener = listeners.valueAt(i);
-                    listener.writeToProto(proto, ListenersDisablingEffectsProto.LISTENERS, null);
+                    final ComponentName componentName = listeners.valueAt(i);
+                    componentName.writeToProto(proto,
+                            ListenersDisablingEffectsProto.LISTENER_COMPONENTS);
                 }
 
                 proto.end(effectsToken);
@@ -4003,15 +4022,14 @@ public class NotificationManagerService extends SystemService {
                     if (i > 0) pw.print(';');
                     pw.print("hint[" + hint + "]:");
 
-                    final ArraySet<ManagedServiceInfo> listeners =
-                            mListenersDisablingEffects.valueAt(i);
+                    final ArraySet<ComponentName> listeners = mListenersDisablingEffects.valueAt(i);
                     final int listenerSize = listeners.size();
 
                     for (int j = 0; j < listenerSize; j++) {
                         if (i > 0) pw.print(',');
-                        final ManagedServiceInfo listener = listeners.valueAt(i);
+                        final ComponentName listener = listeners.valueAt(i);
                         if (listener != null) {
-                            pw.print(listener.component);
+                            pw.print(listener);
                         }
                     }
                 }
@@ -4070,25 +4088,30 @@ public class NotificationManagerService extends SystemService {
         public void removeForegroundServiceFlagFromNotification(String pkg, int notificationId,
                 int userId) {
             checkCallerIsSystem();
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    synchronized (mNotificationLock) {
-                        removeForegroundServiceFlagByListLocked(
-                                mEnqueuedNotifications, pkg, notificationId, userId);
-                        removeForegroundServiceFlagByListLocked(
-                                mNotificationList, pkg, notificationId, userId);
+            mHandler.post(() -> {
+                synchronized (mNotificationLock) {
+                    // strip flag from all enqueued notifications. listeners will be informed
+                    // in post runnable.
+                    List<NotificationRecord> enqueued = findNotificationsByListLocked(
+                            mEnqueuedNotifications, pkg, null, notificationId, userId);
+                    for (int i = 0; i < enqueued.size(); i++) {
+                        removeForegroundServiceFlagLocked(enqueued.get(i));
+                    }
+
+                    // if posted notification exists, strip its flag and tell listeners
+                    NotificationRecord r = findNotificationByListLocked(
+                            mNotificationList, pkg, null, notificationId, userId);
+                    if (r != null) {
+                        removeForegroundServiceFlagLocked(r);
+                        mRankingHelper.sort(mNotificationList);
+                        mListeners.notifyPostedLocked(r, r);
                     }
                 }
             });
         }
 
         @GuardedBy("mNotificationLock")
-        private void removeForegroundServiceFlagByListLocked(
-                ArrayList<NotificationRecord> notificationList, String pkg, int notificationId,
-                int userId) {
-            NotificationRecord r = findNotificationByListLocked(
-                    notificationList, pkg, null, notificationId, userId);
+        private void removeForegroundServiceFlagLocked(NotificationRecord r) {
             if (r == null) {
                 return;
             }
@@ -4099,8 +4122,6 @@ public class NotificationManagerService extends SystemService {
             // initially *and* force remove FLAG_FOREGROUND_SERVICE.
             sbn.getNotification().flags =
                     (r.mOriginalFlags & ~FLAG_FOREGROUND_SERVICE);
-            mRankingHelper.sort(mNotificationList);
-            mListeners.notifyPostedLocked(r, r);
         }
     };
 
@@ -6253,6 +6274,21 @@ public class NotificationManagerService extends SystemService {
     }
 
     @GuardedBy("mNotificationLock")
+    private List<NotificationRecord> findNotificationsByListLocked(
+            ArrayList<NotificationRecord> list, String pkg, String tag, int id, int userId) {
+        List<NotificationRecord> matching = new ArrayList<>();
+        final int len = list.size();
+        for (int i = 0; i < len; i++) {
+            NotificationRecord r = list.get(i);
+            if (notificationMatchesUserId(r, userId) && r.sbn.getId() == id &&
+                    TextUtils.equals(r.sbn.getTag(), tag) && r.sbn.getPackageName().equals(pkg)) {
+                matching.add(r);
+            }
+        }
+        return matching;
+    }
+
+    @GuardedBy("mNotificationLock")
     private NotificationRecord findNotificationByListLocked(ArrayList<NotificationRecord> list,
             String key) {
         final int N = list.size();
@@ -6783,6 +6819,16 @@ public class NotificationManagerService extends SystemService {
         public NotificationListeners(IPackageManager pm) {
             super(getContext(), mNotificationLock, mUserProfiles, pm);
 
+        }
+
+        @Override
+        protected int getBindFlags() {
+            // Most of the same flags as the base, but also add BIND_ADJUST_BELOW_PERCEPTIBLE
+            // because too many 3P apps could be kept in memory as notification listeners and
+            // cause extreme memory pressure.
+            // TODO: Change the binding lifecycle of NotificationListeners to avoid this situation.
+            return BIND_AUTO_CREATE | BIND_FOREGROUND_SERVICE
+                    | BIND_ADJUST_BELOW_PERCEPTIBLE | BIND_ALLOW_WHITELIST_MANAGEMENT;
         }
 
         @Override

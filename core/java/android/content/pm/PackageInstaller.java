@@ -32,6 +32,7 @@ import android.content.pm.PackageManager.DeleteFlags;
 import android.content.pm.PackageManager.InstallReason;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.FileBridge;
 import android.os.Handler;
 import android.os.Looper;
@@ -960,6 +961,10 @@ public class PackageInstaller {
          * If the installer is the device owner or the affiliated profile owner, there will be no
          * user intervention.
          *
+         * @param statusReceiver Called when the state of the session changes. Intents
+         *                       sent to this receiver contain {@link #EXTRA_STATUS}. Refer to the
+         *                       individual status codes on how to handle them.
+         *
          * @throws SecurityException if streams opened through
          *             {@link #openWrite(String, long, long)} are still open.
          *
@@ -986,7 +991,9 @@ public class PackageInstaller {
          * that new properties are added to the session with a new API revision. In this case the
          * callers need to be updated.
          *
-         * @param statusReceiver Callbacks called when the state of the session changes.
+         * @param statusReceiver Called when the state of the session changes. Intents
+         *                       sent to this receiver contain {@link #EXTRA_STATUS}. Refer to the
+         *                       individual status codes on how to handle them.
          *
          * @hide
          */
@@ -1091,7 +1098,7 @@ public class PackageInstaller {
         public static final int UID_UNKNOWN = -1;
 
         /** {@hide} */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public int mode = MODE_INVALID;
         /** {@hide} */
         @UnsupportedAppUsage
@@ -1104,13 +1111,13 @@ public class PackageInstaller {
         @UnsupportedAppUsage
         public long sizeBytes = -1;
         /** {@hide} */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public String appPackageName;
         /** {@hide} */
         @UnsupportedAppUsage
         public Bitmap appIcon;
         /** {@hide} */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public String appLabel;
         /** {@hide} */
         public long appIconLastModified = -1;
@@ -1435,40 +1442,40 @@ public class PackageInstaller {
     public static class SessionInfo implements Parcelable {
 
         /** {@hide} */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public int sessionId;
         /** {@hide} */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public String installerPackageName;
         /** {@hide} */
         @UnsupportedAppUsage
         public String resolvedBaseCodePath;
         /** {@hide} */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public float progress;
         /** {@hide} */
         @UnsupportedAppUsage
         public boolean sealed;
         /** {@hide} */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public boolean active;
 
         /** {@hide} */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public int mode;
         /** {@hide} */
         public @InstallReason int installReason;
         /** {@hide} */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public long sizeBytes;
         /** {@hide} */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public String appPackageName;
         /** {@hide} */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public Bitmap appIcon;
         /** {@hide} */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public CharSequence appLabel;
 
         /** {@hide} */

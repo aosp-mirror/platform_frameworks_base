@@ -1617,6 +1617,12 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
                 SecureSettingsProto.Accessibility.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED,
+                SecureSettingsProto.Accessibility.MINIMUM_UI_TIMEOUT_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_MINIMUM_UI_TIMEOUT_MS,
+                SecureSettingsProto.Accessibility.MINIMUM_UI_TIMEOUT_MS);
         p.end(accessibilityToken);
 
         dumpSetting(s, p,

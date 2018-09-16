@@ -537,7 +537,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, projectionHwLayer) {
     layerUpdateQueue.enqueueLayerWithDamage(child.get(),
                                             android::uirenderer::Rect(LAYER_WIDTH, LAYER_HEIGHT));
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
-    pipeline->renderLayersImpl(layerUpdateQueue, true, false);
+    pipeline->renderLayersImpl(layerUpdateQueue, true);
     EXPECT_EQ(1, drawCounter);  // assert index 0 is drawn on the layer
 
     RenderNodeDrawable drawable(parent.get(), surfaceLayer1->getCanvas(), true);

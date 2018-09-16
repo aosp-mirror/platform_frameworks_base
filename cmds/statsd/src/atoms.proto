@@ -132,6 +132,7 @@ message Atom {
         KeyValuePairsAtom key_value_pairs_atom = 83;
         VibratorStateChanged vibrator_state_changed = 84;
         DeferredJobStatsReported deferred_job_stats_reported = 85;
+        ThermalThrottlingStateChanged thermal_throttling = 86;
     }
 
     // Pulled events will start at field 10000.
@@ -227,6 +228,26 @@ message KeyValuePairsAtom {
  *   - If there is a UID, it goes first. Think in an object-oriented fashion.
  * *****************************************************************************
  */
+
+/**
+ * Logs when the Thermal service HAL notifies the throttling start/stop events.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/stats/StatsCompanionService.java
+ */
+message ThermalThrottlingStateChanged {
+    optional android.os.TemperatureTypeEnum sensor_type = 1;
+
+    enum State {
+        UNKNOWN = 0;
+        START = 1;
+        STOP = 2;
+    }
+
+    optional State state = 2;
+
+    optional float temperature = 3;
+}
 
 /**
  * Logs when the screen state changes.
@@ -2175,8 +2196,8 @@ message Temperature {
 /**
  * Pulls the statistics of calls to Binder.
  *
- * Binder stats are cumulative from boot unless somebody reset the data using
- * > adb shell dumpsys binder_calls_stats --reset
+ * Binder stats will be reset every time the data is pulled. It means it can only be pulled by one
+ * config on the device.
  *
  * Next tag: 14
  */

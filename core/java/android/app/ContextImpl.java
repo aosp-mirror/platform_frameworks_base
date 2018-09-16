@@ -164,7 +164,7 @@ class ContextImpl extends Context {
      * Map from preference name to generated path.
      */
     @GuardedBy("ContextImpl.class")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private ArrayMap<String, File> mSharedPrefsPaths;
 
     @UnsupportedAppUsage
@@ -183,7 +183,7 @@ class ContextImpl extends Context {
 
     @UnsupportedAppUsage
     private final String mBasePackageName;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final String mOpPackageName;
 
     private final @NonNull ResourcesManager mResourcesManager;
@@ -191,7 +191,7 @@ class ContextImpl extends Context {
     private @NonNull Resources mResources;
     private @Nullable Display mDisplay; // may be null if default display
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int mFlags;
 
     @UnsupportedAppUsage

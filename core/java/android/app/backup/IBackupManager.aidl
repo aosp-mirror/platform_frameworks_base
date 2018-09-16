@@ -299,8 +299,7 @@ interface IBackupManager {
      *
      * @param transport ComponentName of the service hosting the transport. This is different from
      *                  the transport's name that is returned by {@link BackupTransport#name()}.
-     * @param listener A listener object to get a callback on the transport being selected. It may
-     *                 be {@code null}.
+     * @param listener A listener object to get a callback on the transport being selected.
      */
     void selectBackupTransportAsync(in ComponentName transport, ISelectBackupTransportCallback listener);
 

@@ -32,6 +32,7 @@ import android.os.Message;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.text.style.AccessibilityClickableSpan;
 import android.text.style.ClickableSpan;
 import android.util.LongSparseArray;
@@ -702,6 +703,14 @@ final class AccessibilityInteractionController {
                     // Handle this hidden action separately
                     succeeded = handleClickableSpanActionUiThread(
                             target, virtualDescendantId, arguments);
+                } else if (action == R.id.accessibilityActionOutsideTouch) {
+                    // trigger ACTION_OUTSIDE to notify windows
+                    final long now = SystemClock.uptimeMillis();
+                    MotionEvent event = MotionEvent.obtain(now, now, MotionEvent.ACTION_OUTSIDE,
+                            0, 0, 0);
+                    event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+                    mViewRootImpl.dispatchInputEvent(event);
+                    succeeded = true;
                 } else {
                     AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
                     if (provider != null) {

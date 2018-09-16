@@ -1565,10 +1565,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             try {
                 // TODO: support quota shared across interfaces
-                mConnector.execute("bandwidth", "setiquota", iface, quotaBytes);
+                mNetdService.bandwidthSetInterfaceQuota(iface, quotaBytes);
+
                 mActiveQuotas.put(iface, quotaBytes);
-            } catch (NativeDaemonConnectorException e) {
-                throw e.rethrowAsParcelableException();
+            } catch (RemoteException | ServiceSpecificException e) {
+                throw new IllegalStateException(e);
             }
 
             synchronized (mTetheringStatsProviders) {
@@ -1599,9 +1600,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             try {
                 // TODO: support quota shared across interfaces
-                mConnector.execute("bandwidth", "removeiquota", iface);
-            } catch (NativeDaemonConnectorException e) {
-                throw e.rethrowAsParcelableException();
+                mNetdService.bandwidthRemoveInterfaceQuota(iface);
+            } catch (RemoteException | ServiceSpecificException e) {
+                throw new IllegalStateException(e);
             }
 
             synchronized (mTetheringStatsProviders) {
@@ -1633,10 +1634,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             try {
                 // TODO: support alert shared across interfaces
-                mConnector.execute("bandwidth", "setinterfacealert", iface, alertBytes);
+                mNetdService.bandwidthSetInterfaceAlert(iface, alertBytes);
                 mActiveAlerts.put(iface, alertBytes);
-            } catch (NativeDaemonConnectorException e) {
-                throw e.rethrowAsParcelableException();
+            } catch (RemoteException | ServiceSpecificException e) {
+                throw new IllegalStateException(e);
             }
         }
     }
@@ -1653,10 +1654,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             try {
                 // TODO: support alert shared across interfaces
-                mConnector.execute("bandwidth", "removeinterfacealert", iface);
+                mNetdService.bandwidthRemoveInterfaceAlert(iface);
                 mActiveAlerts.remove(iface);
-            } catch (NativeDaemonConnectorException e) {
-                throw e.rethrowAsParcelableException();
+            } catch (RemoteException | ServiceSpecificException e) {
+                throw new IllegalStateException(e);
             }
         }
     }
@@ -1666,17 +1667,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         try {
-            mConnector.execute("bandwidth", "setglobalalert", alertBytes);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            mNetdService.bandwidthSetGlobalAlert(alertBytes);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new IllegalStateException(e);
         }
     }
 
     private void setUidOnMeteredNetworkList(int uid, boolean blacklist, boolean enable) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-
-        final String chain = blacklist ? "naughtyapps" : "niceapps";
-        final String suffix = enable ? "add" : "remove";
 
         synchronized (mQuotaLock) {
             boolean oldEnable;
@@ -1692,7 +1690,19 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "inetd bandwidth");
             try {
-                mConnector.execute("bandwidth", suffix + chain, uid);
+                if (blacklist) {
+                    if (enable) {
+                        mNetdService.bandwidthAddNaughtyApp(uid);
+                    } else {
+                        mNetdService.bandwidthRemoveNaughtyApp(uid);
+                    }
+                } else {
+                    if (enable) {
+                        mNetdService.bandwidthAddNiceApp(uid);
+                    } else {
+                        mNetdService.bandwidthRemoveNiceApp(uid);
+                    }
+                }
                 synchronized (mRulesLock) {
                     if (enable) {
                         quotaList.put(uid, true);
@@ -1700,8 +1710,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                         quotaList.delete(uid);
                     }
                 }
-            } catch (NativeDaemonConnectorException e) {
-                throw e.rethrowAsParcelableException();
+            } catch (RemoteException | ServiceSpecificException e) {
+                throw new IllegalStateException(e);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
             }

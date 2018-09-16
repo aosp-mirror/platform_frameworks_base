@@ -16,11 +16,14 @@
 
 package android.app;
 
+import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
+
 import android.app.NotificationManager.InterruptionFilter;
 import android.content.ComponentName;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.service.notification.ZenPolicy;
 
 import java.util.Objects;
 
@@ -35,6 +38,7 @@ public final class AutomaticZenRule implements Parcelable {
     private Uri conditionId;
     private ComponentName owner;
     private long creationTime;
+    private ZenPolicy mZenPolicy;
 
     /**
      * Creates an automatic zen rule.
@@ -58,12 +62,41 @@ public final class AutomaticZenRule implements Parcelable {
     }
 
     /**
-     * @SystemApi
+     * Creates an automatic zen rule.
+     *
+     * @param name The name of the rule.
+     * @param owner The Condition Provider service that owns this rule.
+     * @param conditionId A representation of the state that should cause the Condition Provider
+     *                    service to apply the given interruption filter.
+     * @param policy The policy defines which notifications are allowed to interrupt the user
+     *               while this rule is active
+     * @param enabled Whether the rule is enabled.
+     */
+    public AutomaticZenRule(String name, ComponentName owner, Uri conditionId, ZenPolicy policy,
+            boolean enabled) {
+        this.name = name;
+        this.owner = owner;
+        this.conditionId = conditionId;
+        this.interruptionFilter = INTERRUPTION_FILTER_PRIORITY;
+        this.enabled = enabled;
+        this.mZenPolicy = policy;
+    }
+
+    /**
      * @hide
      */
     public AutomaticZenRule(String name, ComponentName owner, Uri conditionId,
             int interruptionFilter, boolean enabled, long creationTime) {
         this(name, owner, conditionId, interruptionFilter, enabled);
+        this.creationTime = creationTime;
+    }
+
+    /**
+     * @hide
+     */
+    public AutomaticZenRule(String name, ComponentName owner, Uri conditionId, ZenPolicy policy,
+            boolean enabled, long creationTime) {
+        this(name, owner, conditionId, policy, enabled);
         this.creationTime = creationTime;
     }
 
@@ -76,6 +109,7 @@ public final class AutomaticZenRule implements Parcelable {
         conditionId = source.readParcelable(null);
         owner = source.readParcelable(null);
         creationTime = source.readLong();
+        mZenPolicy = source.readParcelable(null);
     }
 
     /**
@@ -114,6 +148,13 @@ public final class AutomaticZenRule implements Parcelable {
     }
 
     /**
+     * Gets the zen policy.
+     */
+    public ZenPolicy getZenPolicy() {
+        return this.mZenPolicy.copy();
+    }
+
+    /**
      * Returns the time this rule was created, represented as milliseconds since the epoch.
      */
     public long getCreationTime() {
@@ -149,6 +190,13 @@ public final class AutomaticZenRule implements Parcelable {
         this.enabled = enabled;
     }
 
+    /**
+     * Sets the zen policy.
+     */
+    public void setZenPolicy(ZenPolicy zenPolicy) {
+        this.mZenPolicy = zenPolicy;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -167,6 +215,7 @@ public final class AutomaticZenRule implements Parcelable {
         dest.writeParcelable(conditionId, 0);
         dest.writeParcelable(owner, 0);
         dest.writeLong(creationTime);
+        dest.writeParcelable(mZenPolicy, 0);
     }
 
     @Override
@@ -178,6 +227,7 @@ public final class AutomaticZenRule implements Parcelable {
                 .append(",conditionId=").append(conditionId)
                 .append(",owner=").append(owner)
                 .append(",creationTime=").append(creationTime)
+                .append(",mZenPolicy=").append(mZenPolicy)
                 .append(']').toString();
     }
 
@@ -191,12 +241,14 @@ public final class AutomaticZenRule implements Parcelable {
                 && other.interruptionFilter == interruptionFilter
                 && Objects.equals(other.conditionId, conditionId)
                 && Objects.equals(other.owner, owner)
-                && other.creationTime == creationTime;
+                && other.creationTime == creationTime
+                && Objects.equals(other.mZenPolicy, mZenPolicy);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(enabled, name, interruptionFilter, conditionId, owner, creationTime);
+        return Objects.hash(enabled, name, interruptionFilter, conditionId, owner, creationTime,
+                mZenPolicy);
     }
 
     public static final Parcelable.Creator<AutomaticZenRule> CREATOR

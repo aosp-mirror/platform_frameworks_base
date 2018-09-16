@@ -177,7 +177,7 @@ public class AnimatedTemperatureView extends FrameLayout implements TemperatureV
                             }
                         }
                         textView.getViewTreeObserver().removeOnPreDrawListener(this);
-                        return false;
+                        return true;
                     }
                 });
         textView.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,

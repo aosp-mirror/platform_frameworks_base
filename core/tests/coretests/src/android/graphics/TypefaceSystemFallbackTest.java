@@ -44,7 +44,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Locale;
 
 @SmallTest
@@ -112,7 +112,7 @@ public class TypefaceSystemFallbackTest {
 
     private static void buildSystemFallback(String xml,
             ArrayMap<String, Typeface> fontMap, ArrayMap<String, FontFamily[]> fallbackMap) {
-        final HashSet<Font> availableFonts = new HashSet<>();
+        final ArrayList<Font> availableFonts = new ArrayList<>();
         try (FileOutputStream fos = new FileOutputStream(TEST_FONTS_XML)) {
             fos.write(xml.getBytes(Charset.forName("UTF-8")));
         } catch (IOException e) {
@@ -127,7 +127,7 @@ public class TypefaceSystemFallbackTest {
     public void testBuildSystemFallback() {
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final HashSet<Font> availableFonts = new HashSet<>();
+        final ArrayList<Font> availableFonts = new ArrayList<>();
 
         final FontConfig.Alias[] aliases = SystemFonts.buildSystemFallback(SYSTEM_FONTS_XML,
                 SYSTEM_FONT_DIR, fallbackMap, availableFonts);

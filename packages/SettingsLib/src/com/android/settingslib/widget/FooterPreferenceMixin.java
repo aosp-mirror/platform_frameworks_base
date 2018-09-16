@@ -25,6 +25,12 @@ import com.android.settingslib.core.lifecycle.Lifecycle;
 import com.android.settingslib.core.lifecycle.LifecycleObserver;
 import com.android.settingslib.core.lifecycle.events.SetPreferenceScreen;
 
+/**
+ * Framework mixin is deprecated, use the compat version instead.
+ *
+ * @deprecated
+ */
+@Deprecated
 public class FooterPreferenceMixin implements LifecycleObserver, SetPreferenceScreen {
 
     private final PreferenceFragment mFragment;

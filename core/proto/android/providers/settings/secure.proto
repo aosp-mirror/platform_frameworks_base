@@ -72,6 +72,9 @@ message SecureSettingsProto {
         // List of the accessibility services to which the user has granted
         // permission to put the device into touch exploration mode.
         optional SettingProto touch_exploration_granted_accessibility_services = 31;
+        optional SettingProto minimum_ui_timeout_enabled = 32 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto minimum_ui_timeout_ms = 33 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     }
     optional Accessibility accessibility = 2;
 

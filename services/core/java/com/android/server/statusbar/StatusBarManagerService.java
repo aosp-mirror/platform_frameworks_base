@@ -566,6 +566,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
     @Override
     public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver, int type) {
+        enforceBiometricDialog();
         if (mBar != null) {
             try {
                 mBar.showBiometricDialog(bundle, receiver, type);
@@ -576,6 +577,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
     @Override
     public void onBiometricAuthenticated() {
+        enforceBiometricDialog();
         if (mBar != null) {
             try {
                 mBar.onBiometricAuthenticated();
@@ -586,6 +588,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
     @Override
     public void onBiometricHelp(String message) {
+        enforceBiometricDialog();
         if (mBar != null) {
             try {
                 mBar.onBiometricHelp(message);
@@ -596,6 +599,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
     @Override
     public void onBiometricError(String error) {
+        enforceBiometricDialog();
         if (mBar != null) {
             try {
                 mBar.onBiometricError(error);
@@ -606,6 +610,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
     @Override
     public void hideBiometricDialog() {
+        enforceBiometricDialog();
         if (mBar != null) {
             try {
                 mBar.hideBiometricDialog();
@@ -863,6 +868,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
     private void enforceStatusBarService() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
+                "StatusBarManagerService");
+    }
+
+    private void enforceBiometricDialog() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_BIOMETRIC_DIALOG,
                 "StatusBarManagerService");
     }
 

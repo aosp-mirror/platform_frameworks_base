@@ -24,6 +24,7 @@ import android.database.CrossProcessCursorWrapper;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.DeadObjectException;
@@ -73,7 +74,7 @@ public class ContentProviderClient implements AutoCloseable {
     private final ContentResolver mContentResolver;
     @UnsupportedAppUsage
     private final IContentProvider mContentProvider;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final String mPackageName;
     private final boolean mStable;
 

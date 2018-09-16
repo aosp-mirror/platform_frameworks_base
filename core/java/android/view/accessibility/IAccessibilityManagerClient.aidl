@@ -29,4 +29,6 @@ oneway interface IAccessibilityManagerClient {
     void notifyServicesStateChanged();
 
     void setRelevantEventTypes(int eventTypes);
+
+    void setMinimumUiTimeout(int uiTimeout);
 }

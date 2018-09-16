@@ -75,6 +75,7 @@ import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
+import android.net.ip.IpServer;
 import android.net.ip.RouterAdvertisementDaemon;
 import android.net.util.InterfaceParams;
 import android.net.util.NetworkConstants;
@@ -99,10 +100,8 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.StateMachine;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
-import com.android.server.connectivity.tethering.IControlsTethering;
 import com.android.server.connectivity.tethering.IPv6TetheringCoordinator;
 import com.android.server.connectivity.tethering.OffloadHardwareInterface;
-import com.android.server.connectivity.tethering.TetherInterfaceStateMachine;
 import com.android.server.connectivity.tethering.TetheringDependencies;
 import com.android.server.connectivity.tethering.UpstreamNetworkMonitor;
 
@@ -190,7 +189,7 @@ public class TetheringTest {
 
     public class MockTetheringDependencies extends TetheringDependencies {
         StateMachine upstreamNetworkMonitorMasterSM;
-        ArrayList<TetherInterfaceStateMachine> ipv6CoordinatorNotifyList;
+        ArrayList<IpServer> ipv6CoordinatorNotifyList;
         int isTetheringSupportedCalls;
 
         public void reset() {
@@ -213,29 +212,35 @@ public class TetheringTest {
 
         @Override
         public IPv6TetheringCoordinator getIPv6TetheringCoordinator(
-                ArrayList<TetherInterfaceStateMachine> notifyList, SharedLog log) {
+                ArrayList<IpServer> notifyList, SharedLog log) {
             ipv6CoordinatorNotifyList = notifyList;
             return mIPv6TetheringCoordinator;
         }
 
         @Override
-        public RouterAdvertisementDaemon getRouterAdvertisementDaemon(InterfaceParams ifParams) {
-            return mRouterAdvertisementDaemon;
-        }
+        public IpServer.Dependencies getIpServerDependencies() {
+            return new IpServer.Dependencies() {
+                @Override
+                public RouterAdvertisementDaemon getRouterAdvertisementDaemon(
+                        InterfaceParams ifParams) {
+                    return mRouterAdvertisementDaemon;
+                }
 
-        @Override
-        public INetd getNetdService() {
-            return mNetd;
-        }
+                @Override
+                public InterfaceParams getInterfaceParams(String ifName) {
+                    final String[] ifaces = new String[] {
+                            TEST_USB_IFNAME, TEST_WLAN_IFNAME, TEST_MOBILE_IFNAME };
+                    final int index = ArrayUtils.indexOf(ifaces, ifName);
+                    assertTrue("Non-mocked interface: " + ifName, index >= 0);
+                    return new InterfaceParams(ifName, index + IFINDEX_OFFSET,
+                            MacAddress.ALL_ZEROS_ADDRESS);
+                }
 
-        @Override
-        public InterfaceParams getInterfaceParams(String ifName) {
-            final String[] ifaces = new String[] { TEST_USB_IFNAME, TEST_WLAN_IFNAME,
-                    TEST_MOBILE_IFNAME };
-            final int index = ArrayUtils.indexOf(ifaces, ifName);
-            assertTrue("Non-mocked interface: " + ifName, index >= 0);
-            return new InterfaceParams(ifName, index + IFINDEX_OFFSET,
-                    MacAddress.ALL_ZEROS_ADDRESS);
+                @Override
+                public INetd getNetdService() {
+                    return mNetd;
+                }
+            };
         }
 
         @Override
@@ -458,9 +463,9 @@ public class TetheringTest {
         sendWifiApStateChanged(WIFI_AP_STATE_ENABLED);
         mLooper.dispatchAll();
 
-        // If, and only if, Tethering received an interface status changed
-        // then it creates a TetherInterfaceStateMachine and sends out a
-        // broadcast indicating that the interface is "available".
+        // If, and only if, Tethering received an interface status changed then
+        // it creates a IpServer and sends out a broadcast indicating that the
+        // interface is "available".
         if (emulateInterfaceStatusChanged) {
             assertEquals(1, mTetheringDependencies.isTetheringSupportedCalls);
             verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_AVAILABLE_TETHER);
@@ -557,18 +562,18 @@ public class TetheringTest {
     }
 
     /**
-     * Send CMD_IPV6_TETHER_UPDATE to TISMs as would be done by IPv6TetheringCoordinator.
+     * Send CMD_IPV6_TETHER_UPDATE to IpServers as would be done by IPv6TetheringCoordinator.
      */
     private void sendIPv6TetherUpdates(NetworkState upstreamState) {
         // IPv6TetheringCoordinator must have been notified of downstream
         verify(mIPv6TetheringCoordinator, times(1)).addActiveDownstream(
                 argThat(sm -> sm.linkProperties().getInterfaceName().equals(TEST_USB_IFNAME)),
-                eq(IControlsTethering.STATE_TETHERED));
+                eq(IpServer.STATE_TETHERED));
 
-        for (TetherInterfaceStateMachine tism :
+        for (IpServer ipSrv :
                 mTetheringDependencies.ipv6CoordinatorNotifyList) {
             NetworkState ipv6OnlyState = buildMobileUpstreamState(false, true, false);
-            tism.sendMessage(TetherInterfaceStateMachine.CMD_IPV6_TETHER_UPDATE, 0, 0,
+            ipSrv.sendMessage(IpServer.CMD_IPV6_TETHER_UPDATE, 0, 0,
                     upstreamState.linkProperties.isIPv6Provisioned()
                             ? ipv6OnlyState.linkProperties
                             : null);
@@ -812,7 +817,7 @@ public class TetheringTest {
 
         // We verify get/set called thrice here: once for setup and twice during
         // teardown because all events happen over the course of the single
-        // dispatchAll() above. Note that once the TISM IPv4 address config
+        // dispatchAll() above. Note that once the IpServer IPv4 address config
         // code is refactored the two calls during shutdown will revert to one.
         verify(mNMService, times(2)).getInterfaceConfig(TEST_WLAN_IFNAME);
         verify(mNMService, times(3))

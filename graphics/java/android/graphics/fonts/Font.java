@@ -119,7 +119,7 @@ public final class Font {
 
         private @Nullable ByteBuffer mBuffer;
         private @Nullable File mFile;
-        private @NonNull LocaleList mLocaleList = LocaleList.getEmptyLocaleList();
+        private @NonNull String mLocaleList = "";
         private @IntRange(from = -1, to = 1000) int mWeight = NOT_SPECIFIED;
         private @IntRange(from = -1, to = 1) int mItalic = NOT_SPECIFIED;
         private @IntRange(from = 0) int mTtcIndex = 0;
@@ -150,7 +150,7 @@ public final class Font {
          * @hide
          */
         public Builder(@NonNull ByteBuffer buffer, @NonNull File path,
-                @NonNull LocaleList localeList) {
+                @NonNull String localeList) {
             this(buffer);
             mFile = path;
             mLocaleList = localeList;
@@ -457,7 +457,7 @@ public final class Font {
     private final boolean mItalic;
     private final @IntRange(from = 0) int mTtcIndex;
     private final @Nullable FontVariationAxis[] mAxes;
-    private final @NonNull LocaleList mLocaleList;
+    private final @NonNull String mLocaleList;
 
     /**
      * Use Builder instead
@@ -465,7 +465,7 @@ public final class Font {
     private Font(long nativePtr, @NonNull ByteBuffer buffer, @Nullable File file,
             @IntRange(from = 0, to = 1000) int weight, boolean italic,
             @IntRange(from = 0) int ttcIndex, @Nullable FontVariationAxis[] axes,
-            @NonNull LocaleList localeList) {
+            @NonNull String localeList) {
         mBuffer = buffer;
         mFile = file;
         mWeight = weight;
@@ -546,7 +546,7 @@ public final class Font {
      * @return a locale list
      */
     public @NonNull LocaleList getLocaleList() {
-        return mLocaleList;
+        return LocaleList.forLanguageTags(mLocaleList);
     }
 
     /** @hide */
@@ -580,7 +580,7 @@ public final class Font {
             + ", italic=" + mItalic
             + ", ttcIndex=" + mTtcIndex
             + ", axes=" + FontVariationAxis.toFontVariationSettings(mAxes)
-            + ", localeList=" + mLocaleList.toLanguageTags()
+            + ", localeList=" + mLocaleList
             + ", buffer=" + mBuffer
             + "}";
     }

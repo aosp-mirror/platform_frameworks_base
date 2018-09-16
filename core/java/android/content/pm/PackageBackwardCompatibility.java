@@ -53,6 +53,8 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
                 "android.content.pm.OrgApacheHttpLegacyUpdater",
                 RemoveUnnecessaryOrgApacheHttpLegacyLibrary::new);
 
+        packageUpdaters.add(new AndroidHidlUpdater());
+
         // Add this before adding AndroidTestBaseUpdater so that android.test.base comes before
         // android.test.mock.
         packageUpdaters.add(new AndroidTestRunnerSplitUpdater());

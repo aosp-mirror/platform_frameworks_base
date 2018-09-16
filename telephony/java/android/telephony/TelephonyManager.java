@@ -39,6 +39,7 @@ import android.net.NetworkStats;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.BatteryStats;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PersistableBundle;
@@ -702,7 +703,7 @@ public class TelephonyManager {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final String ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED =
             "android.intent.action.PRECISE_DATA_CONNECTION_STATE_CHANGED";
 
@@ -1499,22 +1500,23 @@ public class TelephonyManager {
                 Rlog.d(TAG, "getCellLocation returning null because telephony is null");
                 return null;
             }
+
             Bundle bundle = telephony.getCellLocation(mContext.getOpPackageName());
-            if (bundle.isEmpty()) {
-                Rlog.d(TAG, "getCellLocation returning null because bundle is empty");
+            if (bundle == null || bundle.isEmpty()) {
+                Rlog.d(TAG, "getCellLocation returning null because CellLocation is unavailable");
                 return null;
             }
+
             CellLocation cl = CellLocation.newFromBundle(bundle);
-            if (cl.isEmpty()) {
-                Rlog.d(TAG, "getCellLocation returning null because CellLocation is empty");
+            if (cl == null || cl.isEmpty()) {
+                Rlog.d(TAG, "getCellLocation returning null because CellLocation is empty or"
+                        + " phone type doesn't match CellLocation type");
                 return null;
             }
+
             return cl;
         } catch (RemoteException ex) {
             Rlog.d(TAG, "getCellLocation returning null due to RemoteException " + ex);
-            return null;
-        } catch (NullPointerException ex) {
-            Rlog.d(TAG, "getCellLocation returning null due to NullPointerException " + ex);
             return null;
         }
     }
@@ -1690,7 +1692,7 @@ public class TelephonyManager {
     }
 
     /** {@hide} */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int getPhoneTypeFromProperty(int phoneId) {
         String type = getTelephonyProperty(phoneId,
                 TelephonyProperties.CURRENT_ACTIVE_PHONE, null);

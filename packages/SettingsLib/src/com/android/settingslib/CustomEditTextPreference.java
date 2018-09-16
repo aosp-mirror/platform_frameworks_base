@@ -31,6 +31,12 @@ import androidx.annotation.CallSuper;
 import androidx.preference.EditTextPreference;
 import androidx.preference.EditTextPreferenceDialogFragment;
 
+/**
+ * Framework version is deprecated, use the compat version instead.
+ *
+ * @deprecated
+ */
+@Deprecated
 public class CustomEditTextPreference extends EditTextPreference {
 
     private CustomPreferenceDialogFragment mFragment;

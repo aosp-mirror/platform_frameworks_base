@@ -33,7 +33,7 @@ import com.android.internal.view.IInputSessionCallback;
  * {@hide}
  */
 oneway interface IInputMethod {
-    void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps);
+    void initializeInternal(IBinder token, int displayId, IInputMethodPrivilegedOperations privOps);
 
     void bindInput(in InputBinding binding);
 

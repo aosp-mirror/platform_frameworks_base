@@ -63,8 +63,7 @@ Frame SkiaVulkanPipeline::getFrame() {
 bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
                               const LightGeometry& lightGeometry,
                               LayerUpdateQueue* layerUpdateQueue, const Rect& contentDrawBounds,
-                              bool opaque, bool wideColorGamut,
-                              const LightInfo& lightInfo,
+                              bool opaque, const LightInfo& lightInfo,
                               const std::vector<sp<RenderNode>>& renderNodes,
                               FrameInfoVisualizer* profiler) {
     sk_sp<SkSurface> backBuffer = mVkSurface->getBackBufferSurface();
@@ -72,8 +71,7 @@ bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
         return false;
     }
     SkiaPipeline::updateLighting(lightGeometry, lightInfo);
-    renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, wideColorGamut, contentDrawBounds,
-                backBuffer);
+    renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, backBuffer);
     layerUpdateQueue->clear();
 
     // Draw visual debugging features
@@ -137,6 +135,14 @@ bool SkiaVulkanPipeline::isSurfaceReady() {
 
 bool SkiaVulkanPipeline::isContextReady() {
     return CC_LIKELY(mVkManager.hasVkContext());
+}
+
+SkColorType SkiaVulkanPipeline::getSurfaceColorType() const {
+    return mVkManager.getSurfaceColorType();
+}
+
+sk_sp<SkColorSpace> SkiaVulkanPipeline::getSurfaceColorSpace() {
+    return mVkManager.getSurfaceColorSpace();
 }
 
 void SkiaVulkanPipeline::invokeFunctor(const RenderThread& thread, Functor* functor) {
