@@ -2948,7 +2948,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 171;
+            private static final int SETTINGS_VERSION = 172;
 
             private final int mUserId;
 
@@ -3898,6 +3898,37 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 171;
+                }
+
+                if (currentVersion == 171) {
+                    // Version 171: by default, add STREAM_VOICE_CALL to list of streams that can
+                    // be muted.
+                    final SettingsState systemSettings = getSystemSettingsLocked(userId);
+                    final Setting currentSetting = systemSettings.getSettingLocked(
+                              Settings.System.MUTE_STREAMS_AFFECTED);
+                    if (!currentSetting.isNull()) {
+                        try {
+                            int currentSettingIntegerValue = Integer.parseInt(
+                                    currentSetting.getValue());
+                            if ((currentSettingIntegerValue
+                                 & (1 << AudioManager.STREAM_VOICE_CALL)) == 0) {
+                                systemSettings.insertSettingLocked(
+                                    Settings.System.MUTE_STREAMS_AFFECTED,
+                                    Integer.toString(
+                                        currentSettingIntegerValue
+                                        | (1 << AudioManager.STREAM_VOICE_CALL)),
+                                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                            }
+                        } catch (NumberFormatException e) {
+                            // remove the setting in case it is not a valid integer
+                            Slog.w("Failed to parse integer value of MUTE_STREAMS_AFFECTED"
+                                   + "setting, removing setting", e);
+                            systemSettings.deleteSettingLocked(
+                                Settings.System.MUTE_STREAMS_AFFECTED);
+                        }
+
+                    }
+                    currentVersion = 172;
                 }
 
                 // vXXX: Add new settings above this point.
