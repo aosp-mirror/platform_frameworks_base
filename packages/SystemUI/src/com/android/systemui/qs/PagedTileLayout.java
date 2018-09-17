@@ -391,6 +391,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                 position = mPages.size() - 1 - position;
             }
             ViewGroup view = mPages.get(position);
+            if (view.getParent() != null) {
+                container.removeView(view);
+            }
             container.addView(view);
             updateListening();
             return view;
