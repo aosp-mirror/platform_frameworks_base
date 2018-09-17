@@ -63,6 +63,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
 
     private final Context mContext;
     private final PackageManagerService mPackageManagerService;
+    private final MetricsLogger metricsLogger;
 
     // TODO: Evaluate the need for WeakReferences here.
 
@@ -95,6 +96,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
     public OtaDexoptService(Context context, PackageManagerService packageManagerService) {
         this.mContext = context;
         this.mPackageManagerService = packageManagerService;
+        metricsLogger = new MetricsLogger();
     }
 
     public static OtaDexoptService main(Context context,
@@ -445,24 +447,22 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
     private void performMetricsLogging() {
         long finalTime = System.nanoTime();
 
-        MetricsLogger.histogram(mContext, "ota_dexopt_available_space_before_mb",
+        metricsLogger.histogram("ota_dexopt_available_space_before_mb",
                 inMegabytes(availableSpaceBefore));
-        MetricsLogger.histogram(mContext, "ota_dexopt_available_space_after_bulk_delete_mb",
+        metricsLogger.histogram("ota_dexopt_available_space_after_bulk_delete_mb",
                 inMegabytes(availableSpaceAfterBulkDelete));
-        MetricsLogger.histogram(mContext, "ota_dexopt_available_space_after_dexopt_mb",
+        metricsLogger.histogram("ota_dexopt_available_space_after_dexopt_mb",
                 inMegabytes(availableSpaceAfterDexopt));
 
-        MetricsLogger.histogram(mContext, "ota_dexopt_num_important_packages",
-                importantPackageCount);
-        MetricsLogger.histogram(mContext, "ota_dexopt_num_other_packages", otherPackageCount);
+        metricsLogger.histogram("ota_dexopt_num_important_packages", importantPackageCount);
+        metricsLogger.histogram("ota_dexopt_num_other_packages", otherPackageCount);
 
-        MetricsLogger.histogram(mContext, "ota_dexopt_num_commands", dexoptCommandCountTotal);
-        MetricsLogger.histogram(mContext, "ota_dexopt_num_commands_executed",
-                dexoptCommandCountExecuted);
+        metricsLogger.histogram("ota_dexopt_num_commands", dexoptCommandCountTotal);
+        metricsLogger.histogram("ota_dexopt_num_commands_executed", dexoptCommandCountExecuted);
 
         final int elapsedTimeSeconds =
                 (int) TimeUnit.NANOSECONDS.toSeconds(finalTime - otaDexoptTimeStart);
-        MetricsLogger.histogram(mContext, "ota_dexopt_time_s", elapsedTimeSeconds);
+        metricsLogger.histogram("ota_dexopt_time_s", elapsedTimeSeconds);
     }
 
     private static class OTADexoptPackageDexOptimizer extends
