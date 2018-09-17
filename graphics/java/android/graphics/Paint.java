@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.annotation.ColorInt;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -37,6 +38,8 @@ import dalvik.annotation.optimization.FastNative;
 
 import libcore.util.NativeAllocationRegistry;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -309,38 +312,47 @@ public class Paint {
      */
     public static final int DIRECTION_RTL = 1;
 
+    /** @hide */
+    @IntDef(prefix = { "CURSOR_" }, value = {
+        CURSOR_AFTER, CURSOR_AT_OR_AFTER, CURSOR_BEFORE, CURSOR_AT_OR_BEFORE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CursorOption {}
+
     /**
-     * Option for getTextRunCursor to compute the valid cursor after
-     * offset or the limit of the context, whichever is less.
-     * @hide
+     * Option for getTextRunCursor.
+     *
+     * Compute the valid cursor after offset or the limit of the context, whichever is less.
      */
     public static final int CURSOR_AFTER = 0;
 
     /**
-     * Option for getTextRunCursor to compute the valid cursor at or after
-     * the offset or the limit of the context, whichever is less.
-     * @hide
+     * Option for getTextRunCursor.
+     *
+     * Compute the valid cursor at or after the offset or the limit of the context, whichever is
+     * less.
      */
     public static final int CURSOR_AT_OR_AFTER = 1;
 
      /**
-     * Option for getTextRunCursor to compute the valid cursor before
-     * offset or the start of the context, whichever is greater.
-     * @hide
+     * Option for getTextRunCursor.
+     *
+     * Compute the valid cursor before offset or the start of the context, whichever is greater.
      */
     public static final int CURSOR_BEFORE = 2;
 
    /**
-     * Option for getTextRunCursor to compute the valid cursor at or before
-     * offset or the start of the context, whichever is greater.
-     * @hide
+     * Option for getTextRunCursor.
+     *
+     * Compute the valid cursor at or before offset or the start of the context, whichever is
+     * greater.
      */
     public static final int CURSOR_AT_OR_BEFORE = 3;
 
     /**
-     * Option for getTextRunCursor to return offset if the cursor at offset
-     * is valid, or -1 if it isn't.
-     * @hide
+     * Option for getTextRunCursor.
+     *
+     * Return offset if the cursor at offset is valid, or -1 if it isn't.
      */
     public static final int CURSOR_AT = 4;
 
@@ -2410,34 +2422,32 @@ public class Paint {
     }
 
     /**
-     * Returns the next cursor position in the run.  This avoids placing the
-     * cursor between surrogates, between characters that form conjuncts,
-     * between base characters and combining marks, or within a reordering
-     * cluster.
+     * Returns the next cursor position in the run.
      *
-     * <p>ContextStart and offset are relative to the start of text.
-     * The context is the shaping context for cursor movement, generally
-     * the bounds of the metric span enclosing the cursor in the direction of
-     * movement.
+     * This avoids placing the cursor between surrogates, between characters that form conjuncts,
+     * between base characters and combining marks, or within a reordering cluster.
      *
-     * <p>If cursorOpt is {@link #CURSOR_AT} and the offset is not a valid
-     * cursor position, this returns -1.  Otherwise this will never return a
-     * value before contextStart or after contextStart + contextLength.
+     * <p>
+     * ContextStart and offset are relative to the start of text.
+     * The context is the shaping context for cursor movement, generally the bounds of the metric
+     * span enclosing the cursor in the direction of movement.
+     *
+     * <p>
+     * If cursorOpt is {@link #CURSOR_AT} and the offset is not a valid cursor position, this
+     * returns -1.  Otherwise this will never return a value before contextStart or after
+     * contextStart + contextLength.
      *
      * @param text the text
      * @param contextStart the start of the context
      * @param contextLength the length of the context
-     * @param dir either {@link #DIRECTION_RTL} or {@link #DIRECTION_LTR}
+     * @param isRtl true if the paragraph context is RTL, otherwise false
      * @param offset the cursor position to move from
-     * @param cursorOpt how to move the cursor, one of {@link #CURSOR_AFTER},
-     * {@link #CURSOR_AT_OR_AFTER}, {@link #CURSOR_BEFORE},
-     * {@link #CURSOR_AT_OR_BEFORE}, or {@link #CURSOR_AT}
+     * @param cursorOpt how to move the cursor
      * @return the offset of the next position, or -1
-     * @hide
      */
-    @UnsupportedAppUsage
-    public int getTextRunCursor(char[] text, int contextStart, int contextLength,
-            int dir, int offset, int cursorOpt) {
+    public int getTextRunCursor(@NonNull char[] text, @IntRange(from = 0) int contextStart,
+            @IntRange(from = 0) int contextLength, boolean isRtl, @IntRange(from = 0) int offset,
+            @CursorOption int cursorOpt) {
         int contextEnd = contextStart + contextLength;
         if (((contextStart | contextEnd | offset | (contextEnd - contextStart)
                 | (offset - contextStart) | (contextEnd - offset)
@@ -2446,85 +2456,87 @@ public class Paint {
             throw new IndexOutOfBoundsException();
         }
 
-        return nGetTextRunCursor(mNativePaint, text, contextStart, contextLength, dir, offset,
-                cursorOpt);
+        return nGetTextRunCursor(mNativePaint, text, contextStart, contextLength,
+                isRtl ? DIRECTION_RTL : DIRECTION_LTR, offset, cursorOpt);
     }
 
     /**
-     * Returns the next cursor position in the run.  This avoids placing the
-     * cursor between surrogates, between characters that form conjuncts,
-     * between base characters and combining marks, or within a reordering
-     * cluster.
+     * Returns the next cursor position in the run.
      *
-     * <p>ContextStart, contextEnd, and offset are relative to the start of
+     * This avoids placing the cursor between surrogates, between characters that form conjuncts,
+     * between base characters and combining marks, or within a reordering cluster.
+     *
+     * <p>
+     * ContextStart, contextEnd, and offset are relative to the start of
      * text.  The context is the shaping context for cursor movement, generally
      * the bounds of the metric span enclosing the cursor in the direction of
      * movement.
      *
-     * <p>If cursorOpt is {@link #CURSOR_AT} and the offset is not a valid
-     * cursor position, this returns -1.  Otherwise this will never return a
-     * value before contextStart or after contextEnd.
+     * <p>
+     * If cursorOpt is {@link #CURSOR_AT} and the offset is not a valid cursor position, this
+     * returns -1.  Otherwise this will never return a value before contextStart or after
+     * contextEnd.
      *
      * @param text the text
      * @param contextStart the start of the context
      * @param contextEnd the end of the context
-     * @param dir either {@link #DIRECTION_RTL} or {@link #DIRECTION_LTR}
+     * @param isRtl true if the paragraph context is RTL, otherwise false
      * @param offset the cursor position to move from
-     * @param cursorOpt how to move the cursor, one of {@link #CURSOR_AFTER},
-     * {@link #CURSOR_AT_OR_AFTER}, {@link #CURSOR_BEFORE},
-     * {@link #CURSOR_AT_OR_BEFORE}, or {@link #CURSOR_AT}
+     * @param cursorOpt how to move the cursor
      * @return the offset of the next position, or -1
-     * @hide
      */
-    public int getTextRunCursor(CharSequence text, int contextStart,
-           int contextEnd, int dir, int offset, int cursorOpt) {
+    public int getTextRunCursor(@NonNull CharSequence text, @IntRange(from = 0) int contextStart,
+            @IntRange(from = 0) int contextEnd, boolean isRtl, @IntRange(from = 0) int offset,
+            @CursorOption int cursorOpt) {
 
         if (text instanceof String || text instanceof SpannedString ||
                 text instanceof SpannableString) {
             return getTextRunCursor(text.toString(), contextStart, contextEnd,
-                    dir, offset, cursorOpt);
+                    isRtl, offset, cursorOpt);
         }
         if (text instanceof GraphicsOperations) {
             return ((GraphicsOperations) text).getTextRunCursor(
-                    contextStart, contextEnd, dir, offset, cursorOpt, this);
+                    contextStart, contextEnd, isRtl, offset, cursorOpt, this);
         }
 
         int contextLen = contextEnd - contextStart;
         char[] buf = TemporaryBuffer.obtain(contextLen);
         TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
-        int relPos = getTextRunCursor(buf, 0, contextLen, dir, offset - contextStart, cursorOpt);
+        int relPos = getTextRunCursor(buf, 0, contextLen, isRtl, offset - contextStart, cursorOpt);
         TemporaryBuffer.recycle(buf);
         return (relPos == -1) ? -1 : relPos + contextStart;
     }
 
     /**
-     * Returns the next cursor position in the run.  This avoids placing the
-     * cursor between surrogates, between characters that form conjuncts,
-     * between base characters and combining marks, or within a reordering
-     * cluster.
+     * Returns the next cursor position in the run.
      *
-     * <p>ContextStart, contextEnd, and offset are relative to the start of
-     * text.  The context is the shaping context for cursor movement, generally
-     * the bounds of the metric span enclosing the cursor in the direction of
-     * movement.
+     * This avoids placing the cursor between surrogates, between characters that form conjuncts,
+     * between base characters and combining marks, or within a reordering cluster.
      *
-     * <p>If cursorOpt is {@link #CURSOR_AT} and the offset is not a valid
-     * cursor position, this returns -1.  Otherwise this will never return a
-     * value before contextStart or after contextEnd.
+     * <p>
+     * ContextStart, contextEnd, and offset are relative to the start of text.  The context is the
+     * shaping context for cursor movement, generally the bounds of the metric span enclosing the
+     * cursor in the direction of movement.
+     * </p>
+     *
+     * <p>
+     * If cursorOpt is {@link #CURSOR_AT} and the offset is not a valid cursor position, this
+     * returns -1.  Otherwise this will never return a value before contextStart or after
+     * contextEnd.
+     * </p>
      *
      * @param text the text
      * @param contextStart the start of the context
      * @param contextEnd the end of the context
-     * @param dir either {@link #DIRECTION_RTL} or {@link #DIRECTION_LTR}
+     * @param isRtl true if the paragraph context is RTL, otherwise false.
      * @param offset the cursor position to move from
-     * @param cursorOpt how to move the cursor, one of {@link #CURSOR_AFTER},
-     * {@link #CURSOR_AT_OR_AFTER}, {@link #CURSOR_BEFORE},
-     * {@link #CURSOR_AT_OR_BEFORE}, or {@link #CURSOR_AT}
+     * @param cursorOpt how to move the cursor
      * @return the offset of the next position, or -1
      * @hide
      */
-    public int getTextRunCursor(String text, int contextStart, int contextEnd,
-            int dir, int offset, int cursorOpt) {
+    public int getTextRunCursor(@NonNull String text, @IntRange(from = 0) int contextStart,
+            @IntRange(from = 0) int contextEnd, boolean isRtl, @IntRange(from = 0) int offset,
+            @CursorOption int cursorOpt) {
         if (((contextStart | contextEnd | offset | (contextEnd - contextStart)
                 | (offset - contextStart) | (contextEnd - offset)
                 | (text.length() - contextEnd) | cursorOpt) < 0)
@@ -2532,8 +2544,8 @@ public class Paint {
             throw new IndexOutOfBoundsException();
         }
 
-        return nGetTextRunCursor(mNativePaint, text, contextStart, contextEnd, dir, offset,
-                cursorOpt);
+        return nGetTextRunCursor(mNativePaint, text, contextStart, contextEnd,
+                isRtl ? DIRECTION_RTL : DIRECTION_LTR, offset, cursorOpt);
     }
 
     /**
