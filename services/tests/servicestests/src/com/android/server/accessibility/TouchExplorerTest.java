@@ -16,12 +16,14 @@
 
 package com.android.server.accessibility;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.graphics.PointF;
 import android.os.SystemClock;
+import android.testing.DexmakerShareClassLoaderRule;
 import android.util.DebugUtils;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -30,6 +32,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -66,6 +69,11 @@ public class TouchExplorerTest {
     private TouchExplorer mTouchExplorer;
     private long mLastDownTime = Integer.MIN_VALUE;
 
+    // mock package-private AccessibilityGestureDetector class
+    @Rule
+    public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
+            new DexmakerShareClassLoaderRule();
+
     /**
      * {@link TouchExplorer#sendDownForAllNotInjectedPointers} injecting events with the same object
      * is resulting {@link ArgumentCaptor} to capture events with last state. Before implementation
@@ -93,8 +101,9 @@ public class TouchExplorerTest {
     public void setUp() {
         Context context = InstrumentationRegistry.getContext();
         AccessibilityManagerService ams = new AccessibilityManagerService(context);
+        AccessibilityGestureDetector detector = mock(AccessibilityGestureDetector.class);
         mCaptor = new EventCaptor();
-        mTouchExplorer = new TouchExplorer(context, ams);
+        mTouchExplorer = new TouchExplorer(context, ams, detector);
         mTouchExplorer.setNext(mCaptor);
     }
 

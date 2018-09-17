@@ -33,16 +33,14 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 
 import com.android.server.wm.WindowManagerInternal;
 
+import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -74,13 +72,6 @@ public class AccessibilityServiceConnectionTest {
 
     MessageCapturingHandler mHandler = new MessageCapturingHandler(null);
 
-    @BeforeClass
-    public static void oneTimeInitialization() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-    }
-
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -97,6 +88,12 @@ public class AccessibilityServiceConnectionTest {
                 mMockSecurityPolicy, mMockSystemSupport, mMockWindowManagerInternal,
                 mMockGlobalActionPerformer);
     }
+
+    @After
+    public void tearDown() {
+        mHandler.removeAllMessages();
+    }
+
 
     @Test
     public void bind_requestsContextToBindService() {

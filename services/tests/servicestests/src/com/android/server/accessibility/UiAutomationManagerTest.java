@@ -32,13 +32,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.IBinder;
-import android.os.Looper;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.server.wm.WindowManagerInternal;
 
+import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -66,13 +65,6 @@ public class UiAutomationManagerTest {
     @Mock IAccessibilityServiceClient mMockAccessibilityServiceClient;
     @Mock IBinder mMockServiceAsBinder;
 
-    @BeforeClass
-    public static void oneTimeInitialization() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-    }
-
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -87,6 +79,12 @@ public class UiAutomationManagerTest {
 
         mMessageCapturingHandler = new MessageCapturingHandler(null);
     }
+
+    @After
+    public void tearDown() {
+        mMessageCapturingHandler.removeAllMessages();
+    }
+
 
     @Test
     public void isRunning_returnsTrueOnlyWhenRunning() {

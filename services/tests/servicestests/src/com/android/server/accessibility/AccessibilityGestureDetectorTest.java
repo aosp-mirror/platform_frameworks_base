@@ -18,23 +18,22 @@ package com.android.server.accessibility;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import java.util.ArrayList;
+
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.ArrayList;
 
 /**
  * Tests for AccessibilityGestureDetector
@@ -50,14 +49,6 @@ public class AccessibilityGestureDetectorTest {
     private AccessibilityGestureDetector mDetector;
     private AccessibilityGestureDetector.Listener mResultListener;
 
-
-    @BeforeClass
-    public static void oneTimeInitialization() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-    }
-
     @Before
     public void setUp() {
         // Construct a mock Context.
@@ -67,7 +58,6 @@ public class AccessibilityGestureDetectorTest {
         Resources mockResources = mock(Resources.class);
         when(mockResources.getDisplayMetrics()).thenReturn(displayMetricsMock);
         Context contextMock = mock(Context.class);
-        when(contextMock.getMainLooper()).thenReturn(Looper.myLooper());
         when(contextMock.getResources()).thenReturn(mockResources);
 
         // Construct a testable AccessibilityGestureDetector.

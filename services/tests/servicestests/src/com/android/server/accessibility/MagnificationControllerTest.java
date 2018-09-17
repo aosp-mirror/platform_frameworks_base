@@ -43,9 +43,9 @@ import android.graphics.Region;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.test.filters.FlakyTest;
 import android.view.MagnificationSpec;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
@@ -55,8 +55,8 @@ import com.android.server.wm.WindowManagerInternal.MagnificationCallbacks;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -67,7 +67,6 @@ import org.mockito.stubbing.Answer;
 import java.util.Locale;
 
 @RunWith(AndroidJUnit4.class)
-@FlakyTest
 public class MagnificationControllerTest {
     static final Rect INITIAL_MAGNIFICATION_BOUNDS = new Rect(0, 0, 100, 200);
     static final PointF INITIAL_MAGNIFICATION_BOUNDS_CENTER = new PointF(
@@ -75,8 +74,10 @@ public class MagnificationControllerTest {
     static final PointF INITIAL_BOUNDS_UPPER_LEFT_2X_CENTER = new PointF(25, 50);
     static final PointF INITIAL_BOUNDS_LOWER_RIGHT_2X_CENTER = new PointF(75, 150);
     static final Rect OTHER_MAGNIFICATION_BOUNDS = new Rect(100, 200, 500, 600);
+    static final Rect OTHER_MAGNIFICATION_BOUNDS_COMPAT = new Rect(50, 100, 450, 500);
     static final PointF OTHER_BOUNDS_LOWER_RIGHT_2X_CENTER = new PointF(400, 500);
     static final Region INITIAL_MAGNIFICATION_REGION = new Region(INITIAL_MAGNIFICATION_BOUNDS);
+    static final Region OTHER_REGION_COMPAT = new Region(OTHER_MAGNIFICATION_BOUNDS_COMPAT);
     static final Region OTHER_REGION = new Region(OTHER_MAGNIFICATION_BOUNDS);
     static final int SERVICE_ID_1 = 1;
     static final int SERVICE_ID_2 = 2;
@@ -91,25 +92,17 @@ public class MagnificationControllerTest {
             return mMagnificationController.handleMessage(msg);
         }
     });
-    final ArgumentCaptor<MagnificationSpec> mMagnificationSpecCaptor =
-            ArgumentCaptor.forClass(MagnificationSpec.class);
     final ValueAnimator mMockValueAnimator = mock(ValueAnimator.class);
     MagnificationController.SettingsBridge mMockSettingsBridge;
-
 
     MagnificationController mMagnificationController;
     ValueAnimator.AnimatorUpdateListener mTargetAnimationListener;
 
-    @BeforeClass
-    public static void oneTimeInitialization() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-    }
-
     @Before
     public void setUp() {
-        when(mMockContext.getMainLooper()).thenReturn(Looper.myLooper());
+        Looper looper = InstrumentationRegistry.getContext().getMainLooper();
+        // Pretending ID of the Thread associated with looper as main thread ID in controller
+        when(mMockContext.getMainLooper()).thenReturn(looper);
         Resources mockResources = mock(Resources.class);
         when(mMockContext.getResources()).thenReturn(mockResources);
         when(mockResources.getInteger(R.integer.config_longAnimTime))
@@ -135,6 +128,12 @@ public class MagnificationControllerTest {
         mTargetAnimationListener = listenerArgumentCaptor.getValue();
         Mockito.reset(mMockValueAnimator); // Ignore other initialization
     }
+
+    @After
+    public void tearDown() {
+        mMessageCapturingHandler.removeAllMessages();
+    }
+
 
     @Test
     public void testRegister_WindowManagerAndContextRegisterListeners() {
@@ -202,6 +201,7 @@ public class MagnificationControllerTest {
         final PointF offsets = computeOffsets(INITIAL_MAGNIFICATION_BOUNDS, center, scale);
         assertTrue(mMagnificationController
                 .setScale(scale, center.x, center.y, false, SERVICE_ID_1));
+        mMessageCapturingHandler.sendAllMessages();
 
         final MagnificationSpec expectedSpec = getMagnificationSpec(scale, offsets);
         verify(mMockWindowManager).setMagnificationSpec(argThat(closeTo(expectedSpec)));
@@ -219,6 +219,7 @@ public class MagnificationControllerTest {
         PointF pivotPoint = INITIAL_BOUNDS_LOWER_RIGHT_2X_CENTER;
         assertTrue(mMagnificationController
                 .setScale(scale, pivotPoint.x, pivotPoint.y, true, SERVICE_ID_1));
+        mMessageCapturingHandler.sendAllMessages();
 
         // New center should be halfway between original center and pivot
         PointF newCenter = new PointF((pivotPoint.x + INITIAL_MAGNIFICATION_BOUNDS.centerX()) / 2,
@@ -264,6 +265,7 @@ public class MagnificationControllerTest {
         PointF newCenter = INITIAL_BOUNDS_LOWER_RIGHT_2X_CENTER;
         assertTrue(mMagnificationController
                 .setCenter(newCenter.x, newCenter.y, false, SERVICE_ID_1));
+        mMessageCapturingHandler.sendAllMessages();
         PointF expectedOffsets = computeOffsets(INITIAL_MAGNIFICATION_BOUNDS, newCenter, scale);
         MagnificationSpec expectedSpec = getMagnificationSpec(scale, expectedOffsets);
 
@@ -284,6 +286,7 @@ public class MagnificationControllerTest {
 
         assertTrue(mMagnificationController.setScaleAndCenter(scale, newCenter.x, newCenter.y,
                 true, SERVICE_ID_1));
+        mMessageCapturingHandler.sendAllMessages();
 
         assertEquals(newCenter.x, mMagnificationController.getCenterX(), 0.5);
         assertEquals(newCenter.y, mMagnificationController.getCenterY(), 0.5);
@@ -325,6 +328,7 @@ public class MagnificationControllerTest {
         assertTrue(mMagnificationController.setScaleAndCenter(
                 MagnificationController.MAX_SCALE + 1.0f,
                 newCenter.x, newCenter.y, false, SERVICE_ID_1));
+        mMessageCapturingHandler.sendAllMessages();
 
         assertEquals(newCenter.x, mMagnificationController.getCenterX(), 0.5);
         assertEquals(newCenter.y, mMagnificationController.getCenterY(), 0.5);
@@ -335,6 +339,7 @@ public class MagnificationControllerTest {
         assertTrue(mMagnificationController.setScaleAndCenter(0.5f,
                 INITIAL_MAGNIFICATION_BOUNDS_CENTER.x, INITIAL_MAGNIFICATION_BOUNDS_CENTER.y,
                 false, SERVICE_ID_1));
+        mMessageCapturingHandler.sendAllMessages();
 
         assertEquals(INITIAL_MAGNIFICATION_BOUNDS_CENTER.x,
                 mMagnificationController.getCenterX(), 0.5);
@@ -351,6 +356,7 @@ public class MagnificationControllerTest {
         // Off the edge to the top and left
         assertTrue(mMagnificationController.setScaleAndCenter(
                 scale, -100f, -200f, false, SERVICE_ID_1));
+        mMessageCapturingHandler.sendAllMessages();
 
         PointF newCenter = INITIAL_BOUNDS_UPPER_LEFT_2X_CENTER;
         PointF newOffsets = computeOffsets(INITIAL_MAGNIFICATION_BOUNDS, newCenter, scale);
@@ -364,6 +370,7 @@ public class MagnificationControllerTest {
         assertTrue(mMagnificationController.setScaleAndCenter(scale,
                 INITIAL_MAGNIFICATION_BOUNDS.right + 1, INITIAL_MAGNIFICATION_BOUNDS.bottom + 1,
                 false, SERVICE_ID_1));
+        mMessageCapturingHandler.sendAllMessages();
         newCenter = INITIAL_BOUNDS_LOWER_RIGHT_2X_CENTER;
         newOffsets = computeOffsets(INITIAL_MAGNIFICATION_BOUNDS, newCenter, scale);
         assertEquals(newCenter.x, mMagnificationController.getCenterX(), 0.5);
@@ -391,12 +398,14 @@ public class MagnificationControllerTest {
         // First zoom in
         assertTrue(mMagnificationController
                 .setScaleAndCenter(scale, startCenter.x, startCenter.y, false, SERVICE_ID_1));
+        mMessageCapturingHandler.sendAllMessages();
         Mockito.reset(mMockWindowManager);
 
         PointF newCenter = INITIAL_BOUNDS_LOWER_RIGHT_2X_CENTER;
         PointF newOffsets = computeOffsets(INITIAL_MAGNIFICATION_BOUNDS, newCenter, scale);
         mMagnificationController.offsetMagnifiedRegion(
                 startOffsets.x - newOffsets.x, startOffsets.y - newOffsets.y, SERVICE_ID_1);
+        mMessageCapturingHandler.sendAllMessages();
 
         MagnificationSpec expectedSpec = getMagnificationSpec(scale, newOffsets);
         verify(mMockWindowManager).setMagnificationSpec(argThat(closeTo(expectedSpec)));
@@ -490,6 +499,7 @@ public class MagnificationControllerTest {
     public void testResetIfNeeded_doesWhatItSays() {
         mMagnificationController.register();
         zoomIn2xToMiddle();
+        mMessageCapturingHandler.sendAllMessages();
         reset(mMockAms);
         assertTrue(mMagnificationController.resetIfNeeded(false));
         verify(mMockAms).notifyMagnificationChanged(
@@ -507,6 +517,7 @@ public class MagnificationControllerTest {
                 broadcastReceiverCaptor.capture(), (IntentFilter) anyObject());
         BroadcastReceiver br = broadcastReceiverCaptor.getValue();
         zoomIn2xToMiddle();
+        mMessageCapturingHandler.sendAllMessages();
         br.onReceive(mMockContext, null);
         mMessageCapturingHandler.sendAllMessages();
         assertFalse(mMagnificationController.isMagnifying());
@@ -517,6 +528,7 @@ public class MagnificationControllerTest {
         mMagnificationController.register();
         MagnificationCallbacks callbacks = getMagnificationCallbacks();
         zoomIn2xToMiddle();
+        mMessageCapturingHandler.sendAllMessages();
         callbacks.onUserContextChanged();
         mMessageCapturingHandler.sendAllMessages();
         assertFalse(mMagnificationController.isMagnifying());
@@ -539,10 +551,11 @@ public class MagnificationControllerTest {
         // Going from a small region to a large one leads to no issues
         mMagnificationController.register();
         zoomIn2xToMiddle();
+        mMessageCapturingHandler.sendAllMessages();
         MagnificationSpec startSpec = getCurrentMagnificationSpec();
         MagnificationCallbacks callbacks = getMagnificationCallbacks();
         Mockito.reset(mMockWindowManager);
-        callbacks.onMagnificationRegionChanged(OTHER_REGION);
+        callbacks.onMagnificationRegionChanged(OTHER_REGION_COMPAT);
         mMessageCapturingHandler.sendAllMessages();
         assertThat(getCurrentMagnificationSpec(), closeTo(startSpec));
         verifyNoMoreInteractions(mMockWindowManager);
@@ -553,11 +566,12 @@ public class MagnificationControllerTest {
         mMagnificationController.register();
         PointF startCenter = INITIAL_MAGNIFICATION_BOUNDS_CENTER;
         float scale = 2.0f;
+        // setting animate parameter to true is differ from zoomIn2xToMiddle()
         mMagnificationController.setScale(scale, startCenter.x, startCenter.y, true, SERVICE_ID_1);
         MagnificationSpec startSpec = getCurrentMagnificationSpec();
         MagnificationCallbacks callbacks = getMagnificationCallbacks();
         Mockito.reset(mMockWindowManager);
-        callbacks.onMagnificationRegionChanged(OTHER_REGION);
+        callbacks.onMagnificationRegionChanged(OTHER_REGION_COMPAT);
         mMessageCapturingHandler.sendAllMessages();
         assertThat(getCurrentMagnificationSpec(), closeTo(startSpec));
         verifyNoMoreInteractions(mMockWindowManager);
@@ -573,6 +587,7 @@ public class MagnificationControllerTest {
         PointF startCenter = OTHER_BOUNDS_LOWER_RIGHT_2X_CENTER;
         float scale = 2.0f;
         mMagnificationController.setScale(scale, startCenter.x, startCenter.y, false, SERVICE_ID_1);
+        mMessageCapturingHandler.sendAllMessages();
         MagnificationSpec startSpec = getCurrentMagnificationSpec();
         verify(mMockWindowManager).setMagnificationSpec(argThat(closeTo(startSpec)));
         Mockito.reset(mMockWindowManager);
@@ -597,8 +612,9 @@ public class MagnificationControllerTest {
         PointF startCenter = OTHER_BOUNDS_LOWER_RIGHT_2X_CENTER;
         float scale = 2.0f;
         mMagnificationController.setScale(scale, startCenter.x, startCenter.y, true, SERVICE_ID_1);
+        mMessageCapturingHandler.sendAllMessages();
         MagnificationSpec startSpec = getCurrentMagnificationSpec();
-        when (mMockValueAnimator.isRunning()).thenReturn(true);
+        when(mMockValueAnimator.isRunning()).thenReturn(true);
 
         callbacks.onMagnificationRegionChanged(INITIAL_MAGNIFICATION_REGION);
         mMessageCapturingHandler.sendAllMessages();
@@ -616,6 +632,7 @@ public class MagnificationControllerTest {
     public void testRequestRectOnScreen_rectAlreadyOnScreen_doesNothing() {
         mMagnificationController.register();
         zoomIn2xToMiddle();
+        mMessageCapturingHandler.sendAllMessages();
         MagnificationSpec startSpec = getCurrentMagnificationSpec();
         MagnificationCallbacks callbacks = getMagnificationCallbacks();
         Mockito.reset(mMockWindowManager);
@@ -631,6 +648,7 @@ public class MagnificationControllerTest {
     public void testRequestRectOnScreen_rectCanFitOnScreen_pansToGetRectOnScreen() {
         mMagnificationController.register();
         zoomIn2xToMiddle();
+        mMessageCapturingHandler.sendAllMessages();
         MagnificationCallbacks callbacks = getMagnificationCallbacks();
         Mockito.reset(mMockWindowManager);
         callbacks.onRectangleOnScreenRequested(0, 0, 1, 1);
@@ -644,6 +662,7 @@ public class MagnificationControllerTest {
     public void testRequestRectOnScreen_garbageInput_doesNothing() {
         mMagnificationController.register();
         zoomIn2xToMiddle();
+        mMessageCapturingHandler.sendAllMessages();
         MagnificationSpec startSpec = getCurrentMagnificationSpec();
         MagnificationCallbacks callbacks = getMagnificationCallbacks();
         Mockito.reset(mMockWindowManager);
@@ -653,12 +672,12 @@ public class MagnificationControllerTest {
         verifyNoMoreInteractions(mMockWindowManager);
     }
 
-
     @Test
     public void testRequestRectOnScreen_rectTooWide_pansToGetStartOnScreenBasedOnLocale() {
         Locale.setDefault(new Locale("en", "us"));
         mMagnificationController.register();
         zoomIn2xToMiddle();
+        mMessageCapturingHandler.sendAllMessages();
         MagnificationCallbacks callbacks = getMagnificationCallbacks();
         MagnificationSpec startSpec = getCurrentMagnificationSpec();
         Mockito.reset(mMockWindowManager);
@@ -685,6 +704,7 @@ public class MagnificationControllerTest {
     public void testRequestRectOnScreen_rectTooTall_pansMinimumToGetTopOnScreen() {
         mMagnificationController.register();
         zoomIn2xToMiddle();
+        mMessageCapturingHandler.sendAllMessages();
         MagnificationCallbacks callbacks = getMagnificationCallbacks();
         MagnificationSpec startSpec = getCurrentMagnificationSpec();
         Mockito.reset(mMockWindowManager);
@@ -708,6 +728,7 @@ public class MagnificationControllerTest {
 
         assertTrue(mMagnificationController.setScaleAndCenter(scale, firstCenter.x, firstCenter.y,
                 true, SERVICE_ID_1));
+        mMessageCapturingHandler.sendAllMessages();
 
         assertEquals(firstCenter.x, mMagnificationController.getCenterX(), 0.5);
         assertEquals(firstCenter.y, mMagnificationController.getCenterY(), 0.5);
@@ -736,6 +757,7 @@ public class MagnificationControllerTest {
                 scale, computeOffsets(INITIAL_MAGNIFICATION_BOUNDS, newCenter, scale));
         assertTrue(mMagnificationController.setCenter(
                 newCenter.x, newCenter.y, true, SERVICE_ID_1));
+        mMessageCapturingHandler.sendAllMessages();
 
         // Animation should have been restarted
         verify(mMockValueAnimator, times(2)).start();
