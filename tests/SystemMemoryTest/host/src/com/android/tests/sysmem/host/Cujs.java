@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.tests.sysmem.host;
@@ -24,10 +24,10 @@ import com.android.tradefed.device.ITestDevice;
  * host.
  */
 public class Cujs {
-    private ITestDevice device;
+    private ITestDevice mDevice;
 
     public Cujs(ITestDevice device) {
-        this.device = device;
+        this.mDevice = device;
     }
 
     /**
@@ -38,6 +38,6 @@ public class Cujs {
         // TODO: Consider exercising the system in other interesting ways as
         // well.
         String command = "am instrument -w com.android.tests.sysmem.device/.Cujs";
-        device.executeShellCommand(command);
+        mDevice.executeShellCommand(command);
     }
 }
