@@ -40,6 +40,7 @@ public class ContextualButtonGroup extends ButtonDispatcher {
      * @param button the button added to the group
      */
     public void addButton(@NonNull ContextualButton button) {
+        button.attachToGroup(this);
         mButtonData.add(new ButtonData(button));
     }
 
