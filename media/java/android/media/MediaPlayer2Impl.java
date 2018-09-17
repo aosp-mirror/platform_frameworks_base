@@ -544,29 +544,11 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private static final int INVOKE_ID_GET_SELECTED_TRACK = 7;
 
     /**
-     * Create a request parcel which can be routed to the native media
-     * player using {@link #invoke(Parcel, Parcel)}. The Parcel
-     * returned has the proper InterfaceToken set. The caller should
-     * not overwrite that token, i.e it can only append data to the
-     * Parcel.
-     *
-     * @return A parcel suitable to hold a request for the native
-     * player.
-     * {@hide}
-     */
-    @Override
-    public Parcel newRequest() {
-        Parcel parcel = Parcel.obtain();
-        return parcel;
-    }
-
-    /**
      * Invoke a generic method on the native player using opaque protocol
      * buffer message for the request and reply. Both payloads' format is a
      * convention between the java caller and the native player.
      *
-     * @param request PlayerMessage for the extension. The
-     * caller must use {@link #newRequest()} to get one.
+     * @param msg PlayerMessage for the extension.
      *
      * @return PlayerMessage with the data returned by the
      * native player.
@@ -1536,91 +1518,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     }
 
     /**
-     * Gets the media metadata.
-     *
-     * @param update_only controls whether the full set of available
-     * metadata is returned or just the set that changed since the
-     * last call. See {@see #METADATA_UPDATE_ONLY} and {@see
-     * #METADATA_ALL}.
-     *
-     * @param apply_filter if true only metadata that matches the
-     * filter is returned. See {@see #APPLY_METADATA_FILTER} and {@see
-     * #BYPASS_METADATA_FILTER}.
-     *
-     * @return The metadata, possibly empty. null if an error occured.
-     // FIXME: unhide.
-     * {@hide}
-     */
-    @Override
-    public Metadata getMetadata(final boolean update_only,
-                                final boolean apply_filter) {
-        Parcel reply = Parcel.obtain();
-        Metadata data = new Metadata();
-
-        if (!native_getMetadata(update_only, apply_filter, reply)) {
-            reply.recycle();
-            return null;
-        }
-
-        // Metadata takes over the parcel, don't recycle it unless
-        // there is an error.
-        if (!data.parse(reply)) {
-            reply.recycle();
-            return null;
-        }
-        return data;
-    }
-
-    /**
-     * Set a filter for the metadata update notification and update
-     * retrieval. The caller provides 2 set of metadata keys, allowed
-     * and blocked. The blocked set always takes precedence over the
-     * allowed one.
-     * Metadata.MATCH_ALL and Metadata.MATCH_NONE are 2 sets available as
-     * shorthands to allow/block all or no metadata.
-     *
-     * By default, there is no filter set.
-     *
-     * @param allow Is the set of metadata the client is interested
-     *              in receiving new notifications for.
-     * @param block Is the set of metadata the client is not interested
-     *              in receiving new notifications for.
-     * @return The call status code.
-     *
-     // FIXME: unhide.
-     * {@hide}
-     */
-    @Override
-    public int setMetadataFilter(Set<Integer> allow, Set<Integer> block) {
-        // Do our serialization manually instead of calling
-        // Parcel.writeArray since the sets are made of the same type
-        // we avoid paying the price of calling writeValue (used by
-        // writeArray) which burns an extra int per element to encode
-        // the type.
-        Parcel request =  newRequest();
-
-        // The parcel starts already with an interface token. There
-        // are 2 filters. Each one starts with a 4bytes number to
-        // store the len followed by a number of int (4 bytes as well)
-        // representing the metadata type.
-        int capacity = request.dataSize() + 4 * (1 + allow.size() + 1 + block.size());
-
-        if (request.dataCapacity() < capacity) {
-            request.setDataCapacity(capacity);
-        }
-
-        request.writeInt(allow.size());
-        for(Integer t: allow) {
-            request.writeInt(t);
-        }
-        request.writeInt(block.size());
-        for(Integer t: block) {
-            request.writeInt(t);
-        }
-        return native_setMetadataFilter(request);
-    }
-
-    /**
      * Resets the MediaPlayer2 to its uninitialized state. After calling
      * this method, you will have to initialize it again by setting the
      * data source and calling prepare().
@@ -1802,32 +1699,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private native void _setAuxEffectSendLevel(float level);
 
-    /*
-     * @param update_only If true fetch only the set of metadata that have
-     *                    changed since the last invocation of getMetadata.
-     *                    The set is built using the unfiltered
-     *                    notifications the native player sent to the
-     *                    MediaPlayer2Manager during that period of
-     *                    time. If false, all the metadatas are considered.
-     * @param apply_filter  If true, once the metadata set has been built based on
-     *                     the value update_only, the current filter is applied.
-     * @param reply[out] On return contains the serialized
-     *                   metadata. Valid only if the call was successful.
-     * @return The status code.
-     */
-    private native final boolean native_getMetadata(boolean update_only,
-                                                    boolean apply_filter,
-                                                    Parcel reply);
-
-    /*
-     * @param request Parcel with the 2 serialized lists of allowed
-     *                metadata types followed by the one to be
-     *                dropped. Each list starts with an integer
-     *                indicating the number of metadata type elements.
-     * @return The status code.
-     */
-    private native final int native_setMetadataFilter(Parcel request);
-
     private static native final void native_init();
     private native final void native_setup(Object mediaplayer2_this);
     private native final void native_finalize();
@@ -1901,25 +1772,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         TrackInfoImpl(int type, MediaFormat format) {
             mTrackType = type;
             mFormat = format;
-        }
-
-        /**
-         * Flatten this object in to a Parcel.
-         *
-         * @param dest The Parcel in which the object should be written.
-         * @param flags Additional flags about how the object should be written.
-         * May be 0 or {@link android.os.Parcelable#PARCELABLE_WRITE_RETURN_VALUE}.
-         */
-        /* package private */ void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(mTrackType);
-            dest.writeString(getLanguage());
-
-            if (mTrackType == MEDIA_TRACK_TYPE_SUBTITLE) {
-                dest.writeString(mFormat.getString(MediaFormat.KEY_MIME));
-                dest.writeInt(mFormat.getInteger(MediaFormat.KEY_IS_AUTOSELECT));
-                dest.writeInt(mFormat.getInteger(MediaFormat.KEY_IS_DEFAULT));
-                dest.writeInt(mFormat.getInteger(MediaFormat.KEY_IS_FORCED_SUBTITLE));
-            }
         }
 
         @Override
