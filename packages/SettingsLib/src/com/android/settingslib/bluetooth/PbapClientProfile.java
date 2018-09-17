@@ -34,7 +34,6 @@ import java.util.List;
 
 public final class PbapClientProfile implements LocalBluetoothProfile {
     private static final String TAG = "PbapClientProfile";
-    private static boolean V = false;
 
     private BluetoothPbapClient mService;
     private boolean mIsProfileReady;
@@ -56,9 +55,7 @@ public final class PbapClientProfile implements LocalBluetoothProfile {
             implements BluetoothProfile.ServiceListener {
 
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            if (V) {
-                Log.d(TAG,"Bluetooth service connected");
-            }
+            Log.d(TAG, "Bluetooth service connected, profile:" + profile);
             mService = (BluetoothPbapClient) proxy;
             // We just bound to the service, so refresh the UI for any connected PBAP devices.
             List<BluetoothDevice> deviceList = mService.getConnectedDevices();
@@ -77,9 +74,7 @@ public final class PbapClientProfile implements LocalBluetoothProfile {
         }
 
         public void onServiceDisconnected(int profile) {
-            if (V) {
-                Log.d(TAG,"Bluetooth service disconnected");
-            }
+            Log.d(TAG, "Bluetooth service disconnected, profile:" + profile);
             mIsProfileReady = false;
         }
     }
@@ -131,31 +126,16 @@ public final class PbapClientProfile implements LocalBluetoothProfile {
     }
 
     public boolean connect(BluetoothDevice device) {
-        if (V) {
-            Log.d(TAG,"PBAPClientProfile got connect request");
-        }
+        Log.d(TAG,"PBAPClientProfile got connect request");
         if (mService == null) {
             return false;
         }
-        List<BluetoothDevice> srcs = getConnectedDevices();
-        if (srcs != null) {
-            for (BluetoothDevice src : srcs) {
-                if (src.equals(device)) {
-                    // Connect to same device, Ignore it
-                    Log.d(TAG,"Ignoring Connect");
-                    return true;
-                }
-            }
-        }
         Log.d(TAG,"PBAPClientProfile attempting to connect to " + device.getAddress());
-
         return mService.connect(device);
     }
 
     public boolean disconnect(BluetoothDevice device) {
-        if (V) {
-            Log.d(TAG,"PBAPClientProfile got disconnect request");
-        }
+        Log.d(TAG,"PBAPClientProfile got disconnect request");
         if (mService == null) {
             return false;
         }
@@ -218,9 +198,7 @@ public final class PbapClientProfile implements LocalBluetoothProfile {
     }
 
     protected void finalize() {
-        if (V) {
-            Log.d(TAG, "finalize()");
-        }
+        Log.d(TAG, "finalize()");
         if (mService != null) {
             try {
                 BluetoothAdapter.getDefaultAdapter().closeProfileProxy(
