@@ -1070,6 +1070,16 @@ public class CarrierConfigManager {
 
     /**
      * Indexes of SPN format strings in wfcSpnFormats and wfcDataSpnFormats.
+     *
+     * <p>Available options are:
+     * <ul>
+     * <li> 0: %s</li>
+     * <li> 1: %s Wi-Fi Calling</li>
+     * <li> 2: WLAN Call</li>
+     * <li> 3: %s WLAN Call</li>
+     * <li> 4: %s Wi-Fi</li>
+     * <li> 5: WiFi Calling | %s</li>
+     * <li> 6: %s VoWifi</li>
      * @hide
      */
     public static final String KEY_WFC_SPN_FORMAT_IDX_INT = "wfc_spn_format_idx_int";
