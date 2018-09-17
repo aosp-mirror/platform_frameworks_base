@@ -539,16 +539,18 @@ public final class Settings {
             if((p.pkg != null) && (p.pkg.applicationInfo != null)) {
                 p.pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
             }
-            mDisabledSysPackages.put(name, p);
-
+            final PackageSetting disabled;
             if (replaced) {
                 // a little trick...  when we install the new package, we don't
                 // want to modify the existing PackageSetting for the built-in
-                // version.  so at this point we need a new PackageSetting that
-                // is okay to muck with.
-                PackageSetting newp = new PackageSetting(p);
-                replacePackageLPw(name, newp);
+                // version.  so at this point we make a copy to place into the
+                // disabled set.
+                disabled = new PackageSetting(p);
+            } else {
+                disabled = p;
             }
+            mDisabledSysPackages.put(name, disabled);
+
             return true;
         }
         return false;
@@ -1103,19 +1105,6 @@ public final class Settings {
             }
         }
         mInstallerPackages.remove(packageName);
-    }
-
-    private void replacePackageLPw(String name, PackageSetting newp) {
-        final PackageSetting p = mPackages.get(name);
-        if (p != null) {
-            if (p.sharedUser != null) {
-                p.sharedUser.removePackage(p);
-                p.sharedUser.addPackage(newp);
-            } else {
-                replaceUserIdLPw(p.appId, newp);
-            }
-        }
-        mPackages.put(name, newp);
     }
 
     private boolean addUserIdLPw(int uid, Object obj, Object name) {
