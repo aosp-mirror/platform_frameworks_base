@@ -314,6 +314,12 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public static final int FLAG_REQUEST_FINGERPRINT_GESTURES = 0x00000200;
 
+    /**
+     * This flag requests that accessibility shortcut warning dialog has spoken feedback when
+     * dialog is shown.
+     */
+    public static final int FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK = 0x00000400;
+
     /** {@hide} */
     public static final int FLAG_FORCE_DIRECT_BOOT_AWARE = 0x00010000;
 
@@ -414,6 +420,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see #FLAG_RETRIEVE_INTERACTIVE_WINDOWS
      * @see #FLAG_ENABLE_ACCESSIBILITY_VOLUME
      * @see #FLAG_REQUEST_ACCESSIBILITY_BUTTON
+     * @see #FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK
      */
     public int flags;
 
@@ -1050,6 +1057,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "FLAG_REQUEST_ACCESSIBILITY_BUTTON";
             case FLAG_REQUEST_FINGERPRINT_GESTURES:
                 return "FLAG_REQUEST_FINGERPRINT_GESTURES";
+            case FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK:
+                return "FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK";
             default:
                 return null;
         }
