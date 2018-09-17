@@ -67,6 +67,7 @@ bool ResourceHealthManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* dat
     data->clear();
     bool result_success = true;
 
+    // Get the data from the Health HAL (hardware/interfaces/health/1.0/types.hal).
     Return<void> ret = gHealthHal->getHealthInfo([&](Result r, HealthInfo v) {
         if (r != Result::SUCCESS) {
             result_success = false;
@@ -82,6 +83,12 @@ bool ResourceHealthManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* dat
             auto ptr = make_shared<LogEvent>(android::util::FULL_BATTERY_CAPACITY,
                 wallClockTimestampNs, elapsedTimestampNs);
             ptr->write(v.legacy.batteryFullCharge);
+            ptr->init();
+            data->push_back(ptr);
+        } else if (mTagId == android::util::BATTERY_VOLTAGE) {
+            auto ptr = make_shared<LogEvent>(android::util::BATTERY_VOLTAGE,
+                wallClockTimestampNs, elapsedTimestampNs);
+            ptr->write(v.legacy.batteryVoltage);
             ptr->init();
             data->push_back(ptr);
         } else {
