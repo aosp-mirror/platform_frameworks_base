@@ -5800,8 +5800,6 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i = 0; i < N; i++) {
             int uid = mapUid(ws.get(i));
             getUidStatsLocked(uid).noteBluetoothScanResultsLocked(numNewResults);
-            StatsLog.write_non_chained(StatsLog.BLE_SCAN_RESULT_RECEIVED, ws.get(i), ws.getName(i),
-                    numNewResults);
         }
 
         final List<WorkChain> workChains = ws.getWorkChains();
@@ -5810,8 +5808,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 final WorkChain wc = workChains.get(i);
                 int uid = mapUid(wc.getAttributionUid());
                 getUidStatsLocked(uid).noteBluetoothScanResultsLocked(numNewResults);
-                StatsLog.write(StatsLog.BLE_SCAN_RESULT_RECEIVED,
-                        wc.getUids(), wc.getTags(), numNewResults);
             }
         }
     }
