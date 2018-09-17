@@ -139,7 +139,7 @@ public class CachedBluetoothDeviceManagerTest {
     public void testGetName_validCachedDevice_nameFound() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
-        assertThat(mCachedDeviceManager.findDevice(mDevice1).getName()).isEqualTo(DEVICE_ALIAS_1);
+        assertThat(mCachedDeviceManager.getName(mDevice1)).isEqualTo(DEVICE_ALIAS_1);
     }
 
     /**

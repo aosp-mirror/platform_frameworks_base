@@ -211,6 +211,26 @@ public class CachedBluetoothDeviceManager {
         }
     }
 
+    /**
+     * Attempts to get the name of a remote device, otherwise returns the address.
+     *
+     * @param device The remote device.
+     * @return The name, or if unavailable, the address.
+     */
+    public String getName(BluetoothDevice device) {
+        CachedBluetoothDevice cachedDevice = findDevice(device);
+        if (cachedDevice != null && cachedDevice.getName() != null) {
+            return cachedDevice.getName();
+        }
+
+        String name = device.getAliasName();
+        if (name != null) {
+            return name;
+        }
+
+        return device.getAddress();
+    }
+
     public synchronized void clearNonBondedDevices() {
 
         mCachedDevicesMapForHearingAids.entrySet().removeIf(entries
