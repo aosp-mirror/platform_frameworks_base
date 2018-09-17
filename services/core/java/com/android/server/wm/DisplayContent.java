@@ -2652,6 +2652,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     void setInputMethodWindowLocked(WindowState win) {
         mInputMethodWindow = win;
+        // Update display configuration for IME process.
+        if (mInputMethodWindow != null) {
+            final int imePid = mInputMethodWindow.mSession.mPid;
+            mService.mAtmInternal.onImeWindowSetOnDisplay(imePid,
+                    mInputMethodWindow.getDisplayId());
+        }
         computeImeTarget(true /* updateImeTarget */);
     }
 
