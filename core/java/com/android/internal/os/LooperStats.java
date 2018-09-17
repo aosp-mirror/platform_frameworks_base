@@ -106,6 +106,7 @@ public class LooperStats implements Looper.Observer {
         synchronized (entry) {
             entry.exceptionCount++;
         }
+
         recycleSession(session);
     }
 
@@ -116,29 +117,29 @@ public class LooperStats implements Looper.Observer {
 
     /** Returns an array of {@link ExportedEntry entries} with the aggregated statistics. */
     public List<ExportedEntry> getEntries() {
-        final ArrayList<ExportedEntry> entries;
+        final ArrayList<ExportedEntry> exportedEntries;
         synchronized (mLock) {
             final int size = mEntries.size();
-            entries = new ArrayList<>(size);
+            exportedEntries = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 Entry entry = mEntries.valueAt(i);
                 synchronized (entry) {
-                    entries.add(new ExportedEntry(entry));
+                    exportedEntries.add(new ExportedEntry(entry));
                 }
             }
         }
         // Add the overflow and collision entries only if they have any data.
-        if (mOverflowEntry.messageCount > 0 || mOverflowEntry.exceptionCount > 0) {
-            synchronized (mOverflowEntry) {
-                entries.add(new ExportedEntry(mOverflowEntry));
+        maybeAddSpecialEntry(exportedEntries, mOverflowEntry);
+        maybeAddSpecialEntry(exportedEntries, mHashCollisionEntry);
+        return exportedEntries;
+    }
+
+    private void maybeAddSpecialEntry(List<ExportedEntry> exportedEntries, Entry specialEntry) {
+        synchronized (specialEntry) {
+            if (specialEntry.messageCount > 0 || specialEntry.exceptionCount > 0) {
+                exportedEntries.add(new ExportedEntry(specialEntry));
             }
         }
-        if (mHashCollisionEntry.messageCount > 0 || mHashCollisionEntry.exceptionCount > 0) {
-            synchronized (mHashCollisionEntry) {
-                entries.add(new ExportedEntry(mHashCollisionEntry));
-            }
-        }
-        return entries;
     }
 
     /** Removes all collected data. */
