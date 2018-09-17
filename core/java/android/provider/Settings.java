@@ -10895,6 +10895,7 @@ public final class Settings {
          * idle_pending_to                  (long)
          * max_idle_pending_to              (long)
          * idle_pending_factor              (float)
+         * quick_doze_delay_to              (long)
          * idle_to                          (long)
          * max_idle_to                      (long)
          * idle_factor                      (float)
@@ -10928,6 +10929,11 @@ public final class Settings {
          * gps_mode                          (int)
          * adjust_brightness_disabled        (boolean)
          * adjust_brightness_factor          (float)
+         * force_all_apps_standby            (boolean)
+         * force_background_check            (boolean)
+         * optional_sensors_disabled         (boolean)
+         * aod_disabled                      (boolean)
+         * quick_doze_enabled                (boolean)
          * </pre>
          * @hide
          * @see com.android.server.power.BatterySaverPolicy

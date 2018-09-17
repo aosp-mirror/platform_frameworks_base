@@ -557,6 +557,7 @@ public final class PowerManager {
             ServiceType.FORCE_ALL_APPS_STANDBY,
             ServiceType.OPTIONAL_SENSORS,
             ServiceType.AOD,
+            ServiceType.QUICK_DOZE,
     })
     public @interface ServiceType {
         int NULL = 0;
@@ -586,6 +587,11 @@ public final class PowerManager {
          * Whether to disable non-essential sensors. (e.g. edge sensors.)
          */
         int OPTIONAL_SENSORS = 13;
+
+        /**
+         * Whether to go into Deep Doze as soon as the screen turns off or not.
+         */
+        int QUICK_DOZE = 15;
     }
 
     /**
