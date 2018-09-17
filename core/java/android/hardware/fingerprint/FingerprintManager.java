@@ -426,7 +426,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 // Though this may not be a hardware issue, it will cause apps to give up or try
                 // again later.
                 callback.onAuthenticationError(FINGERPRINT_ERROR_HW_UNAVAILABLE,
-                        getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */));
+                        getErrorString(mContext, FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                            0 /* vendorCode */));
             }
         }
     }
@@ -476,7 +477,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 // Though this may not be a hardware issue, it will cause apps to give up or try
                 // again later.
                 callback.onEnrollmentError(FINGERPRINT_ERROR_HW_UNAVAILABLE,
-                        getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */));
+                        getErrorString(mContext, FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                            0 /* vendorCode */));
             }
         }
     }
@@ -546,7 +548,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             Slog.w(TAG, "Remote exception in remove: ", e);
             if (callback != null) {
                 callback.onRemovalError(fp, FINGERPRINT_ERROR_HW_UNAVAILABLE,
-                        getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */));
+                        getErrorString(mContext, FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                            0 /* vendorCode */));
             }
         }
     }
@@ -568,7 +571,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             Slog.w(TAG, "Remote exception in enumerate: ", e);
             if (callback != null) {
                 callback.onEnumerateError(FINGERPRINT_ERROR_HW_UNAVAILABLE,
-                        getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */));
+                        getErrorString(mContext, FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                            0 /* vendorCode */));
             }
         }
     }
@@ -862,7 +866,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         if (mAuthenticationCallback != null) {
             mAuthenticationCallback.onAuthenticationAcquired(acquireInfo);
         }
-        final String msg = getAcquiredString(acquireInfo, vendorCode);
+        final String msg = getAcquiredString(mContext, acquireInfo, vendorCode);
         if (msg == null) {
             return;
         }
@@ -882,16 +886,16 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 ? (vendorCode + FINGERPRINT_ERROR_VENDOR_BASE) : errMsgId;
         if (mEnrollmentCallback != null) {
             mEnrollmentCallback.onEnrollmentError(clientErrMsgId,
-                    getErrorString(errMsgId, vendorCode));
+                    getErrorString(mContext, errMsgId, vendorCode));
         } else if (mAuthenticationCallback != null) {
             mAuthenticationCallback.onAuthenticationError(clientErrMsgId,
-                    getErrorString(errMsgId, vendorCode));
+                    getErrorString(mContext, errMsgId, vendorCode));
         } else if (mRemovalCallback != null) {
             mRemovalCallback.onRemovalError(mRemovalFingerprint, clientErrMsgId,
-                    getErrorString(errMsgId, vendorCode));
+                    getErrorString(mContext, errMsgId, vendorCode));
         } else if (mEnumerateCallback != null) {
             mEnumerateCallback.onEnumerateError(clientErrMsgId,
-                    getErrorString(errMsgId, vendorCode));
+                    getErrorString(mContext, errMsgId, vendorCode));
         }
     }
 
@@ -934,38 +938,37 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     /**
      * @hide
      */
-    @Override
-    public String getErrorString(int errMsg, int vendorCode) {
+    public static String getErrorString(Context context, int errMsg, int vendorCode) {
         switch (errMsg) {
             case FINGERPRINT_ERROR_UNABLE_TO_PROCESS:
-                return mContext.getString(
+                return context.getString(
                     com.android.internal.R.string.fingerprint_error_unable_to_process);
             case FINGERPRINT_ERROR_HW_UNAVAILABLE:
-                return mContext.getString(
+                return context.getString(
                     com.android.internal.R.string.fingerprint_error_hw_not_available);
             case FINGERPRINT_ERROR_NO_SPACE:
-                return mContext.getString(
+                return context.getString(
                     com.android.internal.R.string.fingerprint_error_no_space);
             case FINGERPRINT_ERROR_TIMEOUT:
-                return mContext.getString(com.android.internal.R.string.fingerprint_error_timeout);
+                return context.getString(com.android.internal.R.string.fingerprint_error_timeout);
             case FINGERPRINT_ERROR_CANCELED:
-                return mContext.getString(com.android.internal.R.string.fingerprint_error_canceled);
+                return context.getString(com.android.internal.R.string.fingerprint_error_canceled);
             case FINGERPRINT_ERROR_LOCKOUT:
-                return mContext.getString(com.android.internal.R.string.fingerprint_error_lockout);
+                return context.getString(com.android.internal.R.string.fingerprint_error_lockout);
             case FINGERPRINT_ERROR_LOCKOUT_PERMANENT:
-                return mContext.getString(
+                return context.getString(
                         com.android.internal.R.string.fingerprint_error_lockout_permanent);
             case FINGERPRINT_ERROR_USER_CANCELED:
-                return mContext.getString(
+                return context.getString(
                         com.android.internal.R.string.fingerprint_error_user_canceled);
             case FINGERPRINT_ERROR_NO_FINGERPRINTS:
-                return mContext.getString(
+                return context.getString(
                         com.android.internal.R.string.fingerprint_error_no_fingerprints);
             case FINGERPRINT_ERROR_HW_NOT_PRESENT:
-                return mContext.getString(
+                return context.getString(
                         com.android.internal.R.string.fingerprint_error_hw_not_present);
             case FINGERPRINT_ERROR_VENDOR: {
-                    String[] msgArray = mContext.getResources().getStringArray(
+                    String[] msgArray = context.getResources().getStringArray(
                             com.android.internal.R.array.fingerprint_error_vendor);
                     if (vendorCode < msgArray.length) {
                         return msgArray[vendorCode];
@@ -979,28 +982,27 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     /**
      * @hide
      */
-    @Override
-    public String getAcquiredString(int acquireInfo, int vendorCode) {
+    public static String getAcquiredString(Context context, int acquireInfo, int vendorCode) {
         switch (acquireInfo) {
             case FINGERPRINT_ACQUIRED_GOOD:
                 return null;
             case FINGERPRINT_ACQUIRED_PARTIAL:
-                return mContext.getString(
+                return context.getString(
                     com.android.internal.R.string.fingerprint_acquired_partial);
             case FINGERPRINT_ACQUIRED_INSUFFICIENT:
-                return mContext.getString(
+                return context.getString(
                     com.android.internal.R.string.fingerprint_acquired_insufficient);
             case FINGERPRINT_ACQUIRED_IMAGER_DIRTY:
-                return mContext.getString(
+                return context.getString(
                     com.android.internal.R.string.fingerprint_acquired_imager_dirty);
             case FINGERPRINT_ACQUIRED_TOO_SLOW:
-                return mContext.getString(
+                return context.getString(
                     com.android.internal.R.string.fingerprint_acquired_too_slow);
             case FINGERPRINT_ACQUIRED_TOO_FAST:
-                return mContext.getString(
+                return context.getString(
                     com.android.internal.R.string.fingerprint_acquired_too_fast);
             case FINGERPRINT_ACQUIRED_VENDOR: {
-                    String[] msgArray = mContext.getResources().getStringArray(
+                    String[] msgArray = context.getResources().getStringArray(
                             com.android.internal.R.array.fingerprint_acquired_vendor);
                     if (vendorCode < msgArray.length) {
                         return msgArray[vendorCode];
@@ -1009,14 +1011,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
         Slog.w(TAG, "Invalid acquired message: " + acquireInfo + ", " + vendorCode);
         return null;
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public int getType() {
-        return TYPE_FINGERPRINT;
     }
 
     private IFingerprintServiceReceiver mServiceReceiver = new IFingerprintServiceReceiver.Stub() {

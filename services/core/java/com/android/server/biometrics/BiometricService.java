@@ -217,16 +217,16 @@ public abstract class BiometricService extends SystemService implements IHwBinde
      */
     protected void notifyClientActiveCallbacks(boolean isActive) {}
 
-    protected class AuthenticationClientImpl extends AuthenticationClient {
+    protected abstract class AuthenticationClientImpl extends AuthenticationClient {
 
         public AuthenticationClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
                 IBinder token, ServiceListener listener, int targetUserId, int groupId, long opId,
                 boolean restricted, String owner, Bundle bundle,
                 IBiometricPromptReceiver dialogReceiver,
-                IStatusBarService statusBarService, BiometricAuthenticator authenticator) {
+                IStatusBarService statusBarService) {
             super(context, getMetrics(), daemon, halDeviceId, token, listener,
                     targetUserId, groupId, opId, restricted, owner, bundle, dialogReceiver,
-                    statusBarService, authenticator);
+                    statusBarService);
         }
 
         @Override
