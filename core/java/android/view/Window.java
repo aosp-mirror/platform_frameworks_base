@@ -25,6 +25,7 @@ import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
+import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.WindowConfiguration;
 import android.content.Context;
@@ -1079,8 +1080,18 @@ public abstract class Window {
         setFlags(flags, flags);
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
+    /**
+     * Add private flag bits.
+     *
+     * <p>Refer to the individual flags for the permissions needed.
+     *
+     * <p>Note: Only for updateable system components (aka. mainline modules)
+     *
+     * @param flags The flag bits to add.
+     *
+     * @hide
+     */
+    @SystemApi
     public void addPrivateFlags(int flags) {
         setPrivateFlags(flags, flags);
     }
