@@ -4138,11 +4138,16 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the IMS home network domain name that was loaded from the ISIM.
-     * @return the IMS domain name, or null if not present or not loaded
+     * Returns the IMS home network domain name that was loaded from the ISIM {@see #APPTYPE_ISIM}.
+     * @return the IMS domain name. Returns {@code null} if ISIM hasn't been loaded or IMS domain
+     * hasn't been loaded or isn't present on the ISIM.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getIsimDomain() {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
