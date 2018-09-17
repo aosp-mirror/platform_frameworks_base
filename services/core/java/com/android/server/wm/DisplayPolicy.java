@@ -118,10 +118,12 @@ import android.app.ActivityThread;
 import android.app.LoadedApk;
 import android.app.ResourcesManager;
 import android.app.StatusBarManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -132,8 +134,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
@@ -178,6 +180,8 @@ import com.android.server.wallpaper.WallpaperManagerInternal;
 import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
+
+import com.android.internal.util.custom.NavbarUtils;
 
 /**
  * The policy that provides the basic behaviors and states of a display to show UI.
@@ -373,6 +377,8 @@ public class DisplayPolicy {
 
     private PointerLocationView mPointerLocationView;
 
+    private SettingsObserver mSettingsObserver;
+
     /**
      * The area covered by system windows which belong to another display. Forwarded insets is set
      * in case this is a virtual display, this is displayed on another display that has insets, and
@@ -424,6 +430,24 @@ public class DisplayPolicy {
                     disablePointerLocation();
                     break;
             }
+        }
+    }
+
+    private class SettingsObserver extends ContentObserver {
+        public SettingsObserver(Handler handler) {
+            super(handler);
+
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NAVIGATION_BAR_SHOW), false, this,
+                    UserHandle.USER_ALL);
+
+            updateSettings();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            updateSettings();
         }
     }
 
@@ -589,24 +613,25 @@ public class DisplayPolicy {
 
         if (mDisplayContent.isDefaultDisplay) {
             mHasStatusBar = true;
-            mHasNavigationBar = mContext.getResources().getBoolean(R.bool.config_showNavigationBar);
-
-            // Allow a system property to override this. Used by the emulator.
-            // See also hasNavigationBar().
-            String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
-            if ("1".equals(navBarOverride)) {
-                mHasNavigationBar = false;
-            } else if ("0".equals(navBarOverride)) {
-                mHasNavigationBar = true;
-            }
         } else {
             mHasStatusBar = false;
-            mHasNavigationBar = mDisplayContent.supportsSystemDecorations();
         }
+
+        updateNavigationBarState();
 
         mRefreshRatePolicy = new RefreshRatePolicy(mService,
                 mDisplayContent.getDisplayInfo(),
                 mService.mHighRefreshRateBlacklist);
+
+        mSettingsObserver = new SettingsObserver(mHandler);
+    }
+
+    private void updateNavigationBarState(){
+        if (mDisplayContent.isDefaultDisplay) {
+            mHasNavigationBar = NavbarUtils.isEnabled(mContext);
+        } else {
+            mHasNavigationBar = mDisplayContent.supportsSystemDecorations();
+        }
     }
 
     void systemReady() {
@@ -614,6 +639,10 @@ public class DisplayPolicy {
         if (mService.mPointerLocationEnabled) {
             setPointerLocationEnabled(true);
         }
+    }
+
+    public void updateSettings() {
+        updateNavigationBarState();
     }
 
     private int getDisplayId() {

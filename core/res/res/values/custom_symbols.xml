@@ -62,4 +62,7 @@
 
     <!-- Device has OnePlus haptic motor -->
     <java-symbol type="bool" name="config_hasOnePlusHapticMotor" />
+
+    <!-- Whether device can force navbar disabling -->
+    <java-symbol type="bool" name="config_canForceDisableNavigationBar" />
 </resources>
