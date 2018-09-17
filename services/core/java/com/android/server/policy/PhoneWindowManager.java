@@ -3543,8 +3543,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return 0;
         } else if (mHasFeatureLeanback && interceptBugreportGestureTv(keyCode, down)) {
             return -1;
-        } else if (mHasFeatureLeanback && interceptAccessibilityGestureTv(keyCode, down)) {
-            return -1;
         } else if (keyCode == KeyEvent.KEYCODE_ALL_APPS) {
             if (!down) {
                 mHandler.removeMessages(MSG_HANDLE_ALL_APPS);
@@ -6034,6 +6032,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
                 break;
+            }
+        }
+
+        // Intercept the Accessibility keychord for TV (DPAD_DOWN + Back) before the keyevent is
+        // processed through interceptKeyEventBeforeDispatch since Talkback may consume this event
+        // before it has a chance to reach that method.
+        if (mHasFeatureLeanback) {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_DPAD_DOWN:
+                case KeyEvent.KEYCODE_BACK: {
+                    boolean handled = interceptAccessibilityGestureTv(keyCode, down);
+                    if (handled) {
+                        result &= ~ACTION_PASS_TO_USER;
+                    }
+                    break;
+                }
             }
         }
 
