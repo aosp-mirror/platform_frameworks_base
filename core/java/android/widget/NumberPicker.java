@@ -1293,7 +1293,8 @@ public class NumberPicker extends LinearLayout {
      * Shows the soft input for its input text.
      */
     private void showSoftInput() {
-        InputMethodManager inputMethodManager = InputMethodManager.peekInstance();
+        InputMethodManager inputMethodManager =
+                getContext().getSystemService(InputMethodManager.class);
         if (inputMethodManager != null) {
             if (mHasSelectorWheel) {
                 mInputText.setVisibility(View.VISIBLE);
@@ -1307,7 +1308,8 @@ public class NumberPicker extends LinearLayout {
      * Hides the soft input if it is active for the input text.
      */
     private void hideSoftInput() {
-        InputMethodManager inputMethodManager = InputMethodManager.peekInstance();
+        InputMethodManager inputMethodManager =
+                getContext().getSystemService(InputMethodManager.class);
         if (inputMethodManager != null && inputMethodManager.isActive(mInputText)) {
             inputMethodManager.hideSoftInputFromWindow(getWindowToken(), 0);
         }
