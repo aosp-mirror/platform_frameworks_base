@@ -1477,7 +1477,7 @@ class ActivityStarter {
         if (mStartActivity.resultTo == null && mInTask == null && !mAddingToTask
                 && (mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
             newTask = true;
-            result = setTaskFromReuseOrCreateNewTask(taskToAffiliate, topStack);
+            result = setTaskFromReuseOrCreateNewTask(taskToAffiliate);
         } else if (mSourceRecord != null) {
             result = setTaskFromSourceRecord();
         } else if (mInTask != null) {
@@ -2125,8 +2125,7 @@ class ActivityStarter {
         mSupervisor.updateUserStackLocked(mStartActivity.userId, mTargetStack);
     }
 
-    private int setTaskFromReuseOrCreateNewTask(
-            TaskRecord taskToAffiliate, ActivityStack topStack) {
+    private int setTaskFromReuseOrCreateNewTask(TaskRecord taskToAffiliate) {
         mTargetStack = computeStackFocus(mStartActivity, true, mLaunchFlags, mOptions);
 
         // Do no move the target stack to front yet, as we might bail if
@@ -2431,17 +2430,6 @@ class ActivityStarter {
             }
         }
         if (stack == null) {
-            // We first try to put the task in the first dynamic stack on home display.
-            final ActivityDisplay display = mSupervisor.getDefaultDisplay();
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                stack = display.getChildAt(stackNdx);
-                if (!stack.isOnHomeDisplay()) {
-                    if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
-                            "computeStackFocus: Setting focused stack=" + stack);
-                    return stack;
-                }
-            }
-            // If there is no suitable dynamic stack then we figure out which static stack to use.
             stack = mSupervisor.getLaunchStack(r, aOptions, task, ON_TOP);
         }
         if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS, "computeStackFocus: New stack r="

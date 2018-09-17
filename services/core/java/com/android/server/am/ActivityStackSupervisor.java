@@ -53,6 +53,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.TYPE_VIRTUAL;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_IDLE;
@@ -99,6 +100,7 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.am.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
+
 import static java.lang.Integer.MAX_VALUE;
 
 import android.Manifest;
@@ -4456,10 +4458,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             if (!task.canBeLaunchedOnDisplay(actualDisplayId)) {
                 throw new IllegalStateException("Task resolved to incompatible display");
             }
-            // The task might have landed on a display different from requested.
-            // TODO(multi-display): Find proper stack for the task on the default display.
-            mService.setTaskWindowingMode(task.taskId,
-                    WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY, true /* toTop */);
             if (preferredDisplayId != actualDisplayId) {
                 Slog.w(TAG, "Failed to put " + task + " on display " + preferredDisplayId);
                 // Display a warning toast that we failed to put a task on a secondary display.
