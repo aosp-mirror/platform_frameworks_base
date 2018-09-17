@@ -43,6 +43,8 @@ import java.nio.ReadOnlyBufferException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  MediaCodec class can be used to access low-level media codecs, i.e. encoder/decoder components.
@@ -3582,7 +3584,18 @@ final public class MediaCodec {
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private long mNativeContext;
+    private long mNativeContext = 0;
+    private final Lock mNativeContextLock = new ReentrantLock();
+
+    private final long lockAndGetContext() {
+        mNativeContextLock.lock();
+        return mNativeContext;
+    }
+
+    private final void setAndUnlockContext(long context) {
+        mNativeContext = context;
+        mNativeContextLock.unlock();
+    }
 
     /** @hide */
     public static class MediaImage extends Image {
