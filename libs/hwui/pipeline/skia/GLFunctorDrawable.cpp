@@ -18,7 +18,6 @@
 #include <GrContext.h>
 #include <private/hwui/DrawGlInfo.h>
 #include "GlFunctorLifecycleListener.h"
-#include "Properties.h"
 #include "RenderNode.h"
 #include "SkAndroidFrameworkUtils.h"
 #include "SkClipStack.h"
@@ -77,11 +76,6 @@ static bool GetFboDetails(SkCanvas* canvas, GLuint* outFboID, SkISize* outFboSiz
 void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
     if (canvas->getGrContext() == nullptr) {
         SkDEBUGF(("Attempting to draw GLFunctor into an unsupported surface"));
-        return;
-    }
-
-    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
-        canvas->clear(SK_ColorRED);
         return;
     }
 

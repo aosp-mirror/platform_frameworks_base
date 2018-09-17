@@ -138,7 +138,7 @@ protected:
             renderNodeDrawable->getRenderNode()->output(mOutput, mLevel + 1);
             return;
         }
-        auto glFunctorDrawable = getGLFunctorDrawable(drawable);
+        auto glFunctorDrawable = getFunctorDrawable(drawable);
         if (nullptr != glFunctorDrawable) {
             mOutput << std::string(mLevel * 2, ' ') << "drawGLFunctorDrawable" << std::endl;
             return;
@@ -157,10 +157,10 @@ private:
         return nullptr;
     }
 
-    GLFunctorDrawable* getGLFunctorDrawable(SkDrawable* drawable) {
+    FunctorDrawable* getFunctorDrawable(SkDrawable* drawable) {
         for (auto& child : mDisplayList.mChildFunctors) {
-            if (drawable == &child) {
-                return &child;
+            if (drawable == child) {
+                return child;
             }
         }
         return nullptr;

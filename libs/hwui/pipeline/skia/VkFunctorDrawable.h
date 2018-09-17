@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 #include "FunctorDrawable.h"
 
 #include <utils/RefBase.h>
+#include <ui/GraphicBuffer.h>
 
 namespace android {
 namespace uirenderer {
@@ -26,19 +27,27 @@ namespace uirenderer {
 namespace skiapipeline {
 
 /**
- * This drawable wraps a OpenGL functor enabling it to be recorded into a list
+ * This drawable wraps a Vulkan functor enabling it to be recorded into a list
  * of Skia drawing commands.
  */
-class GLFunctorDrawable : public FunctorDrawable {
+class VkFunctorDrawable : public FunctorDrawable {
 public:
-    GLFunctorDrawable(Functor* functor, GlFunctorLifecycleListener* listener, SkCanvas* canvas)
+    VkFunctorDrawable(Functor* functor, GlFunctorLifecycleListener* listener, SkCanvas* canvas)
             : FunctorDrawable(functor, listener, canvas) {}
-    virtual ~GLFunctorDrawable();
+    virtual ~VkFunctorDrawable();
 
     void syncFunctor() const override;
 
+    static void vkInvokeFunctor(Functor* functor);
+
 protected:
     virtual void onDraw(SkCanvas* canvas) override;
+
+private:
+
+    // Variables below describe/store temporary offscreen buffer used for Vulkan pipeline.
+    sp<GraphicBuffer> mFrameBuffer;
+    SkImageInfo mFBInfo;
 };
 
 };  // namespace skiapipeline

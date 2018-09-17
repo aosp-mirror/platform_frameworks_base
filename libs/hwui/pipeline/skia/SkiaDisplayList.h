@@ -17,7 +17,7 @@
 #pragma once
 
 #include "hwui/AnimatedImageDrawable.h"
-#include "GLFunctorDrawable.h"
+#include "FunctorDrawable.h"
 #include "RecordingCanvas.h"
 #include "RenderNodeDrawable.h"
 #include "TreeInfo.h"
@@ -77,7 +77,7 @@ public:
      * that creates them. Allocator dtor invokes all SkDrawable dtors.
      */
     template <class T, typename... Params>
-    SkDrawable* allocateDrawable(Params&&... params) {
+    T* allocateDrawable(Params&&... params) {
         return allocator.create<T>(std::forward<Params>(params)...);
     }
 
@@ -155,7 +155,7 @@ public:
      * cannot relocate.
      */
     std::deque<RenderNodeDrawable> mChildNodes;
-    std::deque<GLFunctorDrawable> mChildFunctors;
+    std::deque<FunctorDrawable*> mChildFunctors;
     std::vector<SkImage*> mMutableImages;
     std::vector<VectorDrawableRoot*> mVectorDrawables;
     std::vector<AnimatedImageDrawable*> mAnimatedImages;
