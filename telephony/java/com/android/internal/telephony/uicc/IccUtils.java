@@ -93,11 +93,23 @@ public class IccUtils {
      *     converted. If the array size is more than needed, the rest of array remains unchanged.
      */
     public static void bcdToBytes(String bcd, byte[] bytes) {
+        bcdToBytes(bcd, bytes, 0);
+    }
+
+    /**
+     * Converts BCD string to bytes and put it into the given byte array.
+     *
+     * @param bcd This should have an even length. If not, an "0" will be appended to the string.
+     * @param bytes If the array size is less than needed, the rest of the BCD string isn't be
+     *     converted. If the array size is more than needed, the rest of array remains unchanged.
+     * @param offset the offset into the bytes[] to fill the data
+     */
+    public static void bcdToBytes(String bcd, byte[] bytes, int offset) {
         if (bcd.length() % 2 != 0) {
             bcd += "0";
         }
-        int size = Math.min(bytes.length * 2, bcd.length());
-        for (int i = 0, j = 0; i + 1 < size; i += 2, j++) {
+        int size = Math.min((bytes.length - offset) * 2, bcd.length());
+        for (int i = 0, j = offset; i + 1 < size; i += 2, j++) {
             bytes[j] = (byte) (charToByte(bcd.charAt(i + 1)) << 4 | charToByte(bcd.charAt(i)));
         }
     }
@@ -122,6 +134,20 @@ public class IccUtils {
             ret = ret.replaceAll("F", "");
         }
         return ret;
+    }
+
+    /**
+     * Convert a 5 or 6 - digit PLMN string to a nibble-swizzled encoding as per 24.008 10.5.1.3
+     *
+     * @param plmn the PLMN to convert
+     * @param data a byte array for the output
+     * @param offset the offset into data to start writing
+     */
+    public static void stringToBcdPlmn(final String plmn, byte[] data, int offset) {
+        char digit6 = (plmn.length() > 5) ? plmn.charAt(5) : 'F';
+        data[offset] = (byte) (charToByte(plmn.charAt(1)) << 4 | charToByte(plmn.charAt(0)));
+        data[offset + 1] = (byte) (charToByte(digit6) << 4 | charToByte(plmn.charAt(2)));
+        data[offset + 2] = (byte) (charToByte(plmn.charAt(4)) << 4 | charToByte(plmn.charAt(3)));
     }
 
     /**
@@ -844,7 +870,7 @@ public class IccUtils {
     }
 
     /**
-     * Converts a character of [0-9a-aA-F] to its hex value in a byte. If the character is not a
+     * Converts a character of [0-9a-fA-F] to its hex value in a byte. If the character is not a
      * hex number, 0 will be returned.
      */
     private static byte charToByte(char c) {
