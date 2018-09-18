@@ -67,6 +67,10 @@ public class BarTransitions {
         mView.setBackground(mBarBackground);
     }
 
+    public void destroy() {
+        // To be overridden
+    }
+
     public int getMode() {
         return mMode;
     }
