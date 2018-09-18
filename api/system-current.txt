@@ -365,11 +365,6 @@ package android.app {
     field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.PackageOps> CREATOR;
   }
 
-  public final class AutomaticZenRule implements android.os.Parcelable {
-    ctor public AutomaticZenRule(java.lang.String, android.content.ComponentName, android.net.Uri, int, boolean, long);
-    ctor public AutomaticZenRule(java.lang.String, android.content.ComponentName, android.net.Uri, int, boolean, long, android.service.notification.ZenPolicy);
-  }
-
   public class BroadcastOptions {
     method public static android.app.BroadcastOptions makeBasic();
     method public void setDontSendToRestrictedApps(boolean);

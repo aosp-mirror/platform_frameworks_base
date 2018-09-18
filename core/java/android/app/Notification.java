@@ -8253,7 +8253,10 @@ public class Notification implements Parcelable
          * <p>For custom display notifications created using {@link #setDisplayIntent},
          * the default is {@link #SIZE_MEDIUM}. All other notifications size automatically based
          * on their content.
+         *
+         * @deprecated Display intents are no longer supported.
          */
+        @Deprecated
         public static final int SIZE_DEFAULT = 0;
 
         /**
@@ -8261,7 +8264,10 @@ public class Notification implements Parcelable
          * with an extra small size.
          * <p>This value is only applicable for custom display notifications created using
          * {@link #setDisplayIntent}.
+         *
+         * @deprecated Display intents are no longer supported.
          */
+        @Deprecated
         public static final int SIZE_XSMALL = 1;
 
         /**
@@ -8269,7 +8275,10 @@ public class Notification implements Parcelable
          * with a small size.
          * <p>This value is only applicable for custom display notifications created using
          * {@link #setDisplayIntent}.
+         *
+         * @deprecated Display intents are no longer supported.
          */
+        @Deprecated
         public static final int SIZE_SMALL = 2;
 
         /**
@@ -8277,7 +8286,10 @@ public class Notification implements Parcelable
          * with a medium size.
          * <p>This value is only applicable for custom display notifications created using
          * {@link #setDisplayIntent}.
+         *
+         * @deprecated Display intents are no longer supported.
          */
+        @Deprecated
         public static final int SIZE_MEDIUM = 3;
 
         /**
@@ -8285,7 +8297,10 @@ public class Notification implements Parcelable
          * with a large size.
          * <p>This value is only applicable for custom display notifications created using
          * {@link #setDisplayIntent}.
+         *
+         * @deprecated Display intents are no longer supported.
          */
+        @Deprecated
         public static final int SIZE_LARGE = 4;
 
         /**
@@ -8293,20 +8308,29 @@ public class Notification implements Parcelable
          * full screen.
          * <p>This value is only applicable for custom display notifications created using
          * {@link #setDisplayIntent}.
+         *
+         * @deprecated Display intents are no longer supported.
          */
+        @Deprecated
         public static final int SIZE_FULL_SCREEN = 5;
 
         /**
          * Sentinel value for use with {@link #setHintScreenTimeout} to keep the screen on for a
          * short amount of time when this notification is displayed on the screen. This
          * is the default value.
+         *
+         * @deprecated This feature is no longer supported.
          */
+        @Deprecated
         public static final int SCREEN_TIMEOUT_SHORT = 0;
 
         /**
          * Sentinel value for use with {@link #setHintScreenTimeout} to keep the screen on
          * for a longer amount of time when this notification is displayed on the screen.
+         *
+         * @deprecated This feature is no longer supported.
          */
+        @Deprecated
         public static final int SCREEN_TIMEOUT_LONG = -1;
 
         /** Notification extra which contains wearable extensions */
@@ -8556,7 +8580,9 @@ public class Notification implements Parcelable
          * @param intent the {@link PendingIntent} for an activity
          * @return this object for method chaining
          * @see android.app.Notification.WearableExtender#getDisplayIntent
+         * @deprecated Display intents are no longer supported.
          */
+        @Deprecated
         public WearableExtender setDisplayIntent(PendingIntent intent) {
             mDisplayIntent = intent;
             return this;
@@ -8565,7 +8591,10 @@ public class Notification implements Parcelable
         /**
          * Get the intent to launch inside of an activity view when displaying this
          * notification. This {@code PendingIntent} should be for an activity.
+         *
+         * @deprecated Display intents are no longer supported.
          */
+        @Deprecated
         public PendingIntent getDisplayIntent() {
             return mDisplayIntent;
         }
@@ -8579,7 +8608,9 @@ public class Notification implements Parcelable
          * @param page the notification to add as another page
          * @return this object for method chaining
          * @see android.app.Notification.WearableExtender#getPages
+         * @deprecated Multiple content pages are no longer supported.
          */
+        @Deprecated
         public WearableExtender addPage(Notification page) {
             mPages.add(page);
             return this;
@@ -8594,7 +8625,9 @@ public class Notification implements Parcelable
          * @param pages a list of notifications
          * @return this object for method chaining
          * @see android.app.Notification.WearableExtender#getPages
+         * @deprecated Multiple content pages are no longer supported.
          */
+        @Deprecated
         public WearableExtender addPages(List<Notification> pages) {
             mPages.addAll(pages);
             return this;
@@ -8604,7 +8637,9 @@ public class Notification implements Parcelable
          * Clear all additional pages present on this builder.
          * @return this object for method chaining.
          * @see #addPage
+         * @deprecated Multiple content pages are no longer supported.
          */
+        @Deprecated
         public WearableExtender clearPages() {
             mPages.clear();
             return this;
@@ -8616,7 +8651,9 @@ public class Notification implements Parcelable
          * subsequent pages. This field can be used to separate a notification into multiple
          * sections.
          * @return the pages for this notification
+         * @deprecated Multiple content pages are no longer supported.
          */
+        @Deprecated
         public List<Notification> getPages() {
             return mPages;
         }
@@ -8629,7 +8666,9 @@ public class Notification implements Parcelable
          * @param background the background bitmap
          * @return this object for method chaining
          * @see android.app.Notification.WearableExtender#getBackground
+         * @deprecated Background images are no longer supported.
          */
+        @Deprecated
         public WearableExtender setBackground(Bitmap background) {
             mBackground = background;
             return this;
@@ -8642,7 +8681,9 @@ public class Notification implements Parcelable
          *
          * @return the background image
          * @see android.app.Notification.WearableExtender#setBackground
+         * @deprecated Background images are no longer supported.
          */
+        @Deprecated
         public Bitmap getBackground() {
             return mBackground;
         }
@@ -8688,15 +8729,11 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Set an action from this notification's actions to be clickable with the content of
-         * this notification. This action will no longer display separately from the
-         * notification's content.
+         * Set an action from this notification's actions as the primary action. If the action has a
+         * {@link RemoteInput} associated with it, shortcuts to the options for that input are shown
+         * directly on the notification.
          *
-         * <p>For notifications with multiple pages, child pages can also have content actions
-         * set, although the list of available actions comes from the main notification and not
-         * from the child page's notification.
-         *
-         * @param actionIndex The index of the action to hoist onto the current notification page.
+         * @param actionIndex The index of the primary action.
          *                    If wearable actions were added to the main notification, this index
          *                    will apply to that list, otherwise it will apply to the regular
          *                    actions list.
@@ -8707,13 +8744,8 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Get the index of the notification action, if any, that was specified as being clickable
-         * with the content of this notification. This action will no longer display separately
-         * from the notification's content.
-         *
-         * <p>For notifications with multiple pages, child pages can also have content actions
-         * set, although the list of available actions comes from the main notification and not
-         * from the child page's notification.
+         * Get the index of the notification action, if any, that was specified as the primary
+         * action.
          *
          * <p>If wearable specific actions were added to the main notification, this index will
          * apply to that list, otherwise it will apply to the regular actions list.
@@ -8938,7 +8970,9 @@ public class Notification implements Parcelable
          * qr codes, as well as other simple black-and-white tickets.
          * @param hintAmbientBigPicture {@code true} to enable converstion and ambient.
          * @return this object for method chaining
+         * @deprecated This feature is no longer supported.
          */
+        @Deprecated
         public WearableExtender setHintAmbientBigPicture(boolean hintAmbientBigPicture) {
             setFlag(FLAG_BIG_PICTURE_AMBIENT, hintAmbientBigPicture);
             return this;
@@ -8950,7 +8984,9 @@ public class Notification implements Parcelable
          * qr codes, as well as other simple black-and-white tickets.
          * @return {@code true} if it should be displayed in ambient, false otherwise
          * otherwise. The default value is {@code false} if this was never set.
+         * @deprecated This feature is no longer supported.
          */
+        @Deprecated
         public boolean getHintAmbientBigPicture() {
             return (mFlags & FLAG_BIG_PICTURE_AMBIENT) != 0;
         }
