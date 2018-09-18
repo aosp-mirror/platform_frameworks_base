@@ -27,6 +27,8 @@
 #include "shell/ShellSubscriber.h"
 #include "statscompanion_util.h"
 
+#include <android/frameworks/stats/1.0/IStats.h>
+#include <android/frameworks/stats/1.0/types.h>
 #include <android/os/BnStatsManager.h>
 #include <android/os/IStatsCompanionService.h>
 #include <binder/IResultReceiver.h>
@@ -38,6 +40,7 @@
 using namespace android;
 using namespace android::base;
 using namespace android::binder;
+using namespace android::frameworks::stats::V1_0;
 using namespace android::os;
 using namespace std;
 
@@ -45,7 +48,12 @@ namespace android {
 namespace os {
 namespace statsd {
 
-class StatsService : public BnStatsManager, public LogListener, public IBinder::DeathRecipient {
+using android::hardware::Return;
+
+class StatsService : public BnStatsManager,
+                     public LogListener,
+                     public IStats,
+                     public IBinder::DeathRecipient {
 public:
     StatsService(const sp<Looper>& handlerLooper);
     virtual ~StatsService();
@@ -145,6 +153,44 @@ public:
      * Binder call to get AppBreadcrumbReported atom.
      */
     virtual Status sendAppBreadcrumbAtom(int32_t label, int32_t state) override;
+
+    /**
+     * Binder call to get SpeakerImpedance atom.
+     */
+    virtual Return<void> reportSpeakerImpedance(const SpeakerImpedance& speakerImpedance) override;
+
+    /**
+     * Binder call to get HardwareFailed atom.
+     */
+    virtual Return<void> reportHardwareFailed(const HardwareFailed& hardwareFailed) override;
+
+    /**
+     * Binder call to get PhysicalDropDetected atom.
+     */
+    virtual Return<void> reportPhysicalDropDetected(
+            const PhysicalDropDetected& physicalDropDetected) override;
+
+    /**
+     * Binder call to get ChargeCyclesReported atom.
+     */
+    virtual Return<void> reportChargeCycles(const ChargeCycles& chargeCycles) override;
+
+    /**
+     * Binder call to get BatteryHealthSnapshot atom.
+     */
+    virtual Return<void> reportBatteryHealthSnapshot(
+            const BatteryHealthSnapshotArgs& batteryHealthSnapshotArgs) override;
+
+    /**
+     * Binder call to get SlowIo atom.
+     */
+    virtual Return<void> reportSlowIo(const SlowIo& slowIo) override;
+
+    /**
+     * Binder call to get BatteryCausedShutdown atom.
+     */
+    virtual Return<void> reportBatteryCausedShutdown(
+            const BatteryCausedShutdown& batteryCausedShutdown) override;
 
     /** IBinder::DeathRecipient */
     virtual void binderDied(const wp<IBinder>& who) override;

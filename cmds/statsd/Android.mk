@@ -99,6 +99,7 @@ statsd_common_shared_libraries := \
     libhidlbase \
     libhidltransport \
     libhwbinder \
+    android.frameworks.stats@1.0 \
     android.hardware.health@2.0 \
     android.hardware.power@1.0 \
     android.hardware.power@1.1 \
