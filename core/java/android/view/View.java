@@ -8881,6 +8881,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         populateAccessibilityNodeInfoDrawingOrderInParent(info);
         info.setPaneTitle(mAccessibilityPaneTitle);
         info.setHeading(isAccessibilityHeading());
+
+        if (mTouchDelegate != null) {
+            info.setTouchDelegateInfo(mTouchDelegate.getTouchDelegateInfo());
+        }
     }
 
     /**

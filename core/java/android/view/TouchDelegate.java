@@ -16,8 +16,12 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
+import android.graphics.Region;
+import android.util.ArrayMap;
+import android.view.accessibility.AccessibilityNodeInfo.TouchDelegateInfo;
 
 /**
  * Helper class to handle situations where you want a view to have a larger touch area than its
@@ -76,6 +80,11 @@ public class TouchDelegate {
     public static final int TO_RIGHT = 8;
 
     private int mSlop;
+
+    /**
+     * Touch delegate information for accessibility
+     */
+    private TouchDelegateInfo mTouchDelegateInfo;
 
     /**
      * Constructor
@@ -144,5 +153,21 @@ public class TouchDelegate {
             handled = delegateView.dispatchTouchEvent(event);
         }
         return handled;
+    }
+
+    /**
+     * Return a {@link TouchDelegateInfo} mapping from regions (in view coordinates) to
+     * delegated views for accessibility usage.
+     *
+     * @return A TouchDelegateInfo.
+     */
+    @NonNull
+    public TouchDelegateInfo getTouchDelegateInfo() {
+        if (mTouchDelegateInfo == null) {
+            final ArrayMap<Region, View> targetMap = new ArrayMap<>(1);
+            targetMap.put(new Region(mBounds), mDelegateView);
+            mTouchDelegateInfo = new TouchDelegateInfo(targetMap);
+        }
+        return mTouchDelegateInfo;
     }
 }
