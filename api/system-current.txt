@@ -6600,6 +6600,10 @@ package android.util {
 
 package android.view {
 
+  public abstract class Window {
+    method public void addPrivateFlags(int);
+  }
+
   public abstract interface WindowManager implements android.view.ViewManager {
     method public abstract android.graphics.Region getCurrentImeTouchRegion();
   }
@@ -6607,6 +6611,7 @@ package android.view {
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
     method public final long getUserActivityTimeout();
     method public final void setUserActivityTimeout(long);
+    field public static final int PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 524288; // 0x80000
   }
 
 }
