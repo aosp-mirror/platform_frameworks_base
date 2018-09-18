@@ -615,6 +615,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                         ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0);
         getImeSwitchButton().setVisibility(showImeButton ? View.VISIBLE : View.INVISIBLE);
         getImeSwitchButton().setImageDrawable(mImeIcon);
+        updateContextualContainerVisibility();
 
         // Update menu button, visibility logic in method
         setMenuVisibility(mShowMenu, true);
@@ -796,6 +797,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) == 0);
 
         getMenuButton().setVisibility(shouldShow ? View.VISIBLE : View.INVISIBLE);
+        updateContextualContainerVisibility();
     }
 
     public void setAccessibilityButtonState(final boolean visible, final boolean longClickable) {
@@ -810,6 +812,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         getAccessibilityButton().setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         getAccessibilityButton().setLongClickable(longClickable);
+        updateContextualContainerVisibility();
     }
 
     public void updateRotateSuggestionButtonStyle(@StyleRes int style, boolean setIcon) {
@@ -839,6 +842,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         getRotateSuggestionButton().setVisibility(vis);
         mShowRotateButton = visible;
+        updateContextualContainerVisibility();
 
         // Stop any active animations if hidden
         if (!visible && mRotateSuggestionIcon.canAnimate()) {
@@ -854,6 +858,13 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     public boolean isRotateButtonVisible() { return mShowRotateButton; }
+
+    private void updateContextualContainerVisibility() {
+        // Only show the menu container when one of its buttons are visible
+        getMenuContainer().setVisibility((mShowAccessibilityButton || mShowRotateButton || mShowMenu
+                || (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0)
+                ? VISIBLE : INVISIBLE);
+    }
 
     void hideRecentsOnboarding() {
         mRecentsOnboarding.hide(true);
