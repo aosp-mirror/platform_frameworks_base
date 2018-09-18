@@ -21,6 +21,7 @@ import android.Manifest;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.os.Binder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.Rlog;
@@ -306,5 +307,18 @@ public final class TelephonyPermissions {
         }
         Rlog.e(LOG_TAG, "Phone process is down, cannot check carrier privileges");
         return TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
+    }
+
+    /**
+     * Throws if the caller is not of a shell (or root) UID.
+     *
+     * @param callingUid pass Binder.callingUid().
+     */
+    public static void enforceShellOnly(int callingUid, String message) {
+        if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
+            return; // okay
+        }
+
+        throw new SecurityException(message + ": Only shell user can call it");
     }
 }

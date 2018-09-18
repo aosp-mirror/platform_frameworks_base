@@ -1232,6 +1232,17 @@ public final class Telephony {
                           "android.provider.action.EXTERNAL_PROVIDER_CHANGE";
 
             /**
+             * Same as {@link #ACTION_DEFAULT_SMS_PACKAGE_CHANGED} but it's implicit (e.g. sent to
+             * all apps) and requires
+             * {@link android.Manifest.permission#MONITOR_DEFAULT_SMS_PACKAGE} to receive.
+             *
+             * @hide
+             */
+            @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+            public static final String ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL =
+                    "android.provider.action.DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL";
+
+            /**
              * Read the PDUs out of an {@link #SMS_RECEIVED_ACTION} or a
              * {@link #DATA_SMS_RECEIVED_ACTION} intent.
              *
