@@ -136,6 +136,24 @@ public abstract class PackageManagerInternal {
     public abstract void setVoiceInteractionPackagesProvider(PackagesProvider provider);
 
     /**
+     * Sets the SMS packages provider.
+     * @param provider The packages provider.
+     */
+    public abstract void setSmsAppPackagesProvider(PackagesProvider provider);
+
+    /**
+     * Sets the dialer packages provider.
+     * @param provider The packages provider.
+     */
+    public abstract void setDialerAppPackagesProvider(PackagesProvider provider);
+
+    /**
+     * Sets the sim call manager packages provider.
+     * @param provider The packages provider.
+     */
+    public abstract void setSimCallManagerPackagesProvider(PackagesProvider provider);
+
+    /**
      * Sets the Use Open Wifi packages provider.
      * @param provider The packages provider.
      */
@@ -148,28 +166,26 @@ public abstract class PackageManagerInternal {
     public abstract void setSyncAdapterPackagesprovider(SyncAdapterPackagesProvider provider);
 
     /**
-     * Called when the package for the default dialer changed
-     *
-     * @param packageName the new dialer package
-     * @param userId user for which the change was made
+     * Requests granting of the default permissions to the current default SMS app.
+     * @param packageName The default SMS package name.
+     * @param userId The user for which to grant the permissions.
      */
-    public void onDefaultDialerAppChanged(String packageName, int userId) {}
+    public abstract void grantDefaultPermissionsToDefaultSmsApp(String packageName, int userId);
 
     /**
-     * Called when the package for the default SMS handler changed
-     *
-     * @param packageName the new sms package
-     * @param userId user for which the change was made
+     * Requests granting of the default permissions to the current default dialer app.
+     * @param packageName The default dialer package name.
+     * @param userId The user for which to grant the permissions.
      */
-    public void onDefaultSmsAppChanged(String packageName, int userId) {}
+    public abstract void grantDefaultPermissionsToDefaultDialerApp(String packageName, int userId);
 
     /**
-     * Called when the package for the default sim call manager changed
-     *
-     * @param packageName the new sms package
-     * @param userId user for which the change was made
+     * Requests granting of the default permissions to the current default sim call manager.
+     * @param packageName The default sim call manager package name.
+     * @param userId The user for which to grant the permissions.
      */
-    public void onDefaultSimCallManagerAppChanged(String packageName, int userId) {}
+    public abstract void grantDefaultPermissionsToDefaultSimCallManager(String packageName,
+            int userId);
 
     /**
      * Requests granting of the default permissions to the current default Use Open Wifi app.
@@ -430,8 +446,8 @@ public abstract class PackageManagerInternal {
          *
          * @param packageName The package to check for
          * @param uid the uid in which the package is running
-         * @return {@link #USER_TRUSTED} if the user has trusted the package, {@link #USER_BLOCKED}
-         * if user has blocked requests from the package, {@link #USER_DEFAULT} if the user response
+         * @return {@link USER_TRUSTED} if the user has trusted the package, {@link USER_BLOCKED}
+         * if user has blocked requests from the package, {@link USER_DEFAULT} if the user response
          * is not yet available
          */
         int getPackageTrustedToInstallApps(String packageName, int uid);
@@ -545,7 +561,7 @@ public abstract class PackageManagerInternal {
     /**
      * Returns a list without a change observer.
      *
-     * @see #getPackageList(PackageListObserver)
+     * {@see #getPackageList(PackageListObserver)}
      */
     public @NonNull PackageList getPackageList() {
         return getPackageList(null);
@@ -574,16 +590,7 @@ public abstract class PackageManagerInternal {
     /**
      * Returns a package object for the disabled system package name.
      */
-    public abstract @Nullable PackageParser.Package getDisabledSystemPackage(
-            @NonNull String packageName);
-
-    /**
-     * Returns the package name for the disabled system package.
-     *
-     * This is equivalent to
-     * {@link #getDisabledSystemPackage(String)}.{@link PackageParser.Package#packageName}
-     */
-    public abstract @Nullable String getDisabledSystemPackageName(@NonNull String packageName);
+    public abstract @Nullable PackageParser.Package getDisabledPackage(@NonNull String packageName);
 
     /**
      * Returns whether or not the component is the resolver activity.
@@ -612,7 +619,7 @@ public abstract class PackageManagerInternal {
      * Access may be limited based upon whether the calling or target applications
      * are instant applications.
      *
-     * @see #canAccessInstantApps
+     * @see #canAccessInstantApps(int)
      */
     public abstract boolean filterAppAccess(
             @Nullable PackageParser.Package pkg, int callingUid, int userId);
@@ -627,9 +634,6 @@ public abstract class PackageManagerInternal {
     /** Updates the flags for the given permission. */
     public abstract void updatePermissionFlagsTEMP(@NonNull String permName,
             @NonNull String packageName, int flagMask, int flagValues, int userId);
-
-    /** Returns whether the given package was signed by the platform */
-    public abstract boolean isPlatformSigned(String pkg);
 
     /**
      * Returns true if it's still safe to restore data backed up from this app's version

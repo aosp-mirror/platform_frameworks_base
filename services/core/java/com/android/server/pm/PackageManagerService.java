@@ -718,8 +718,6 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mPackages")
     final private ArraySet<PackageListObserver> mPackageListObservers = new ArraySet<>();
 
-    private PackageManager mPackageManager;
-
     class PackageParserCallback implements PackageParser.Callback {
         @Override public final boolean hasFeature(String feature) {
             return PackageManagerService.this.hasSystemFeature(feature, 0);
@@ -22238,22 +22236,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public boolean isPlatformSigned(String packageName) {
-            PackageSetting packageSetting = mSettings.mPackages.get(packageName);
-            if (packageSetting == null) {
-                return false;
-            }
-            PackageParser.Package pkg = packageSetting.pkg;
-            if (pkg == null) {
-                // May happen if package in on a removable sd card
-                return false;
-            }
-            return pkg.mSigningDetails.hasAncestorOrSelf(mPlatformPackage.mSigningDetails)
-                    || mPlatformPackage.mSigningDetails.checkCapability(pkg.mSigningDetails,
-                    PackageParser.SigningDetails.CertCapabilities.PERMISSION);
-        }
-
-        @Override
         public boolean isDataRestoreSafe(byte[] restoringFromSigHash, String packageName) {
             SigningDetails sd = getSigningDetails(packageName);
             if (sd == null) {
@@ -22365,17 +22347,11 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public PackageParser.Package getDisabledSystemPackage(String packageName) {
+        public PackageParser.Package getDisabledPackage(String packageName) {
             synchronized (mPackages) {
                 final PackageSetting ps = mSettings.getDisabledSystemPkgLPr(packageName);
                 return (ps != null) ? ps.pkg : null;
             }
-        }
-
-        @Override
-        public @Nullable String getDisabledSystemPackageName(@NonNull String packageName) {
-            PackageParser.Package pkg = getDisabledSystemPackage(packageName);
-            return pkg == null ? null : pkg.packageName;
         }
 
         @Override
@@ -22416,6 +22392,21 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
+        public void setSmsAppPackagesProvider(PackagesProvider provider) {
+            mDefaultPermissionPolicy.setSmsAppPackagesProvider(provider);
+        }
+
+        @Override
+        public void setDialerAppPackagesProvider(PackagesProvider provider) {
+            mDefaultPermissionPolicy.setDialerAppPackagesProvider(provider);
+        }
+
+        @Override
+        public void setSimCallManagerPackagesProvider(PackagesProvider provider) {
+            mDefaultPermissionPolicy.setSimCallManagerPackagesProvider(provider);
+        }
+
+        @Override
         public void setUseOpenWifiAppPackagesProvider(PackagesProvider provider) {
             mDefaultPermissionPolicy.setUseOpenWifiAppPackagesProvider(provider);
         }
@@ -22426,10 +22417,22 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public void onDefaultDialerAppChanged(String packageName, int userId) {
+        public void grantDefaultPermissionsToDefaultSmsApp(String packageName, int userId) {
+            mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultSmsApp(packageName, userId);
+        }
+
+        @Override
+        public void grantDefaultPermissionsToDefaultDialerApp(String packageName, int userId) {
             synchronized (mPackages) {
                 mSettings.setDefaultDialerPackageNameLPw(packageName, userId);
             }
+            mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultDialerApp(packageName, userId);
+        }
+
+        @Override
+        public void grantDefaultPermissionsToDefaultSimCallManager(String packageName, int userId) {
+            mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultSimCallManager(
+                    packageName, userId);
         }
 
         @Override
