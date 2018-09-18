@@ -1144,11 +1144,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onUiModeChanged() {
-        // UiMode will change the style was already evaluated.
-        // We need to force the re-evaluation to make sure that all parents
-        // are up to date and new attrs will be rettrieved.
-        mContext.getTheme().applyStyle(mContext.getThemeResId(), true);
-
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onUiModeChanged();
         }
