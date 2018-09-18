@@ -127,7 +127,7 @@ public abstract class ProvisioningCallback {
     public static final int OSU_STATUS_SERVICE_PROVIDER_VERIFIED = 5;
 
     /**
-     * The status code for provisioning flow to indicate starting the SOAP exchange.
+     * The status code for provisioning flow to indicate starting the first SOAP exchange.
      */
     public static final int OSU_STATUS_INIT_SOAP_EXCHANGE = 6;
 
@@ -140,6 +140,11 @@ public abstract class ProvisioningCallback {
      * The status code for provisioning flow to indicate a HTTP redirect response is received.
      */
     public static final int OSU_STATUS_REDIRECT_RESPONSE_RECEIVED = 8;
+
+    /**
+     * The status code for provisioning flow to indicate starting the second SOAP exchange.
+     */
+    public static final int OSU_STATUS_SECOND_SOAP_EXCHANGE = 9;
 
     /**
      * Provisioning status for OSU failure
