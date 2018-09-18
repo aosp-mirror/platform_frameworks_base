@@ -26,8 +26,6 @@
 
 #include <log/log.h>
 
-#include <GLES2/gl2.h>
-
 namespace android {
 namespace uirenderer {
 
@@ -46,39 +44,12 @@ static constexpr android::DisplayInfo sDummyDisplay{
         1920,   // viewportH
 };
 
-static DeviceInfo* sDeviceInfo = nullptr;
-static std::once_flag sInitializedFlag;
-
 const DeviceInfo* DeviceInfo::get() {
-    LOG_ALWAYS_FATAL_IF(!sDeviceInfo, "DeviceInfo not yet initialized.");
-    return sDeviceInfo;
+        static DeviceInfo sDeviceInfo;
+        return &sDeviceInfo;
 }
 
-void DeviceInfo::initialize() {
-    std::call_once(sInitializedFlag, []() {
-        sDeviceInfo = new DeviceInfo();
-        sDeviceInfo->load();
-    });
-}
-
-void DeviceInfo::initialize(int maxTextureSize) {
-    std::call_once(sInitializedFlag, [maxTextureSize]() {
-        sDeviceInfo = new DeviceInfo();
-        sDeviceInfo->mDisplayInfo = DeviceInfo::queryDisplayInfo();
-        sDeviceInfo->mMaxTextureSize = maxTextureSize;
-        sDeviceInfo->queryCompositionPreference(&sDeviceInfo->mTargetDataSpace,
-                                                &sDeviceInfo->mTargetPixelFormat);
-    });
-}
-
-void DeviceInfo::load() {
-    mDisplayInfo = queryDisplayInfo();
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
-    sDeviceInfo->queryCompositionPreference(&sDeviceInfo->mTargetDataSpace,
-                                            &sDeviceInfo->mTargetPixelFormat);
-}
-
-DisplayInfo DeviceInfo::queryDisplayInfo() {
+DisplayInfo QueryDisplayInfo() {
     if (Properties::isolatedProcess) {
         return sDummyDisplay;
     }
@@ -90,16 +61,35 @@ DisplayInfo DeviceInfo::queryDisplayInfo() {
     return displayInfo;
 }
 
-void DeviceInfo::queryCompositionPreference(ui::Dataspace* dataSpace,
-                                            ui::PixelFormat* pixelFormat) {
+void QueryCompositionPreference(ui::Dataspace* dataSpace,
+                                ui::PixelFormat* pixelFormat) {
     if (Properties::isolatedProcess) {
         *dataSpace = ui::Dataspace::V0_SRGB;
         *pixelFormat = ui::PixelFormat::RGBA_8888;
     }
 
     status_t status =
-        SurfaceComposerClient::getCompositionPreference(dataSpace, pixelFormat);
+            SurfaceComposerClient::getCompositionPreference(dataSpace, pixelFormat);
     LOG_ALWAYS_FATAL_IF(status, "Failed to get composition preference, error %d", status);
+}
+
+DeviceInfo::DeviceInfo() {
+#if HWUI_NULL_GPU
+        mMaxTextureSize = NULL_GPU_MAX_TEXTURE_SIZE;
+#else
+        mMaxTextureSize = -1;
+#endif
+    mDisplayInfo = QueryDisplayInfo();
+    QueryCompositionPreference(&mTargetDataSpace, &mTargetPixelFormat);
+}
+
+int DeviceInfo::maxTextureSize() const {
+    LOG_ALWAYS_FATAL_IF(mMaxTextureSize < 0, "MaxTextureSize has not been initialized yet.");
+    return mMaxTextureSize;
+}
+
+void DeviceInfo::setMaxTextureSize(int maxTextureSize) {
+    const_cast<DeviceInfo*>(DeviceInfo::get())->mMaxTextureSize = maxTextureSize;
 }
 
 } /* namespace uirenderer */
