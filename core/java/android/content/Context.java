@@ -3031,6 +3031,7 @@ public abstract class Context {
             AUDIO_SERVICE,
             FINGERPRINT_SERVICE,
             //@hide: FACE_SERVICE,
+            BIOMETRIC_SERVICE,
             MEDIA_ROUTER_SERVICE,
             TELEPHONY_SERVICE,
             TELEPHONY_SUBSCRIPTION_SERVICE,
@@ -3681,14 +3682,6 @@ public abstract class Context {
     public static final String AUDIO_SERVICE = "audio";
 
     /**
-     * Use with {@link #getSystemService(String)}
-     *
-     * @hide
-     * @see #getSystemService(String)
-     */
-    public static final String BIOMETRIC_SERVICE = "biometric";
-
-    /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.hardware.fingerprint.FingerprintManager} for handling management
      * of fingerprints.
@@ -3700,7 +3693,6 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * Use with {@link #getSystemService} to retrieve a
      * {@link android.hardware.face.FaceManager} for handling management
      * of face authentication.
      *
@@ -3709,6 +3701,16 @@ public abstract class Context {
      * @see android.hardware.face.FaceManager
      */
     public static final String FACE_SERVICE = "face";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.hardware.biometrics.BiometricManager} for handling management
+     * of face authentication.
+     *
+     * @see #getSystemService
+     * @see android.hardware.biometrics.BiometricManager
+     */
+    public static final String BIOMETRIC_SERVICE = "biometric";
 
     /**
      * Use with {@link #getSystemService} to retrieve a

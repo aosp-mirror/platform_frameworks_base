@@ -198,6 +198,27 @@ public class BiometricService extends SystemService {
                 }
             });
         }
+
+        @Override // Binder call
+        public boolean hasEnrolledBiometrics() {
+            checkPermission();
+
+            boolean hasEnrolled = false;
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                // Note: On devices with multi-modal authentication, the selection logic will need to
+                // be updated.
+                for (int i = 0; i < mAuthenticators.size(); i++) {
+                    if (mAuthenticators.get(i).getAuthenticator().hasEnrolledTemplates()) {
+                        hasEnrolled = true;
+                        break;
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+            return hasEnrolled;
+        }
     }
 
     private void checkPermission() {

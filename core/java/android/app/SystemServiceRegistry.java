@@ -53,6 +53,8 @@ import android.hardware.ISerialManager;
 import android.hardware.SensorManager;
 import android.hardware.SerialManager;
 import android.hardware.SystemSensorManager;
+import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.IBiometricService;
 import android.hardware.camera2.CameraManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
@@ -815,6 +817,19 @@ final class SystemServiceRegistry {
                         }
                         IFaceService service = IFaceService.Stub.asInterface(binder);
                         return new FaceManager(ctx.getOuterContext(), service);
+                    }
+                });
+
+        registerService(Context.BIOMETRIC_SERVICE, BiometricManager.class,
+                new CachedServiceFetcher<BiometricManager>() {
+                    @Override
+                    public BiometricManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        final IBinder binder =
+                                ServiceManager.getServiceOrThrow(Context.BIOMETRIC_SERVICE);
+                        final IBiometricService service =
+                                IBiometricService.Stub.asInterface(binder);
+                        return new BiometricManager(ctx.getOuterContext(), service);
                     }
                 });
 
