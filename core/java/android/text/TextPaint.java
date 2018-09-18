@@ -17,7 +17,7 @@
 package android.text;
 
 import android.annotation.ColorInt;
-import android.annotation.NonNull;
+import android.annotation.Px;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.Paint;
 
@@ -37,17 +37,14 @@ public class TextPaint extends Paint {
     public float density = 1.0f;
     /**
      * Special value 0 means no custom underline
-     * @hide
      */
     @ColorInt
-    @UnsupportedAppUsage
     public int underlineColor = 0;
+
     /**
      * Thickness of the underline, in pixels.
-     * @hide
      */
-    @UnsupportedAppUsage
-    public float underlineThickness;
+    public @Px float underlineThickness;
 
     public TextPaint() {
         super();
@@ -75,24 +72,6 @@ public class TextPaint extends Paint {
         density = tp.density;
         underlineColor = tp.underlineColor;
         underlineThickness = tp.underlineThickness;
-    }
-
-    /**
-     * Returns true if all attributes, including the attributes inherited from Paint, are equal.
-     *
-     * The caller is expected to have checked the trivial cases, like the pointers being equal,
-     * the objects having different classes, or the parameter being null.
-     * @hide
-     */
-    public boolean hasEqualAttributes(@NonNull TextPaint other) {
-        return bgColor == other.bgColor
-                && baselineShift == other.baselineShift
-                && linkColor == other.linkColor
-                && drawableState == other.drawableState
-                && density == other.density
-                && underlineColor == other.underlineColor
-                && underlineThickness == other.underlineThickness
-                && super.hasEqualAttributes((Paint) other);
     }
 
     /**

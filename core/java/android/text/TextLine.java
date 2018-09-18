@@ -1231,7 +1231,7 @@ public class TextLine {
                     // with the next chunk. So we just save the TextPaint for future comparisons
                     // and use.
                     activePaint.set(wp);
-                } else if (!wp.hasEqualAttributes(activePaint)) {
+                } else if (!equalAttributes(wp, activePaint)) {
                     // The style of the present chunk of text is substantially different from the
                     // style of the previous chunk. We need to handle the active piece of text
                     // and restart with the present chunk.
@@ -1336,4 +1336,42 @@ public class TextLine {
     }
 
     private static final int TAB_INCREMENT = 20;
+
+    private static boolean equalAttributes(@NonNull TextPaint lp, @NonNull TextPaint rp) {
+        return lp.getColorFilter() == rp.getColorFilter()
+                && lp.getMaskFilter() == rp.getMaskFilter()
+                && lp.getShader() == rp.getShader()
+                && lp.getTypeface() == rp.getTypeface()
+                && lp.getXfermode() == rp.getXfermode()
+                && lp.getTextLocales().equals(rp.getTextLocales())
+                && TextUtils.equals(lp.getFontFeatureSettings(), rp.getFontFeatureSettings())
+                && TextUtils.equals(lp.getFontVariationSettings(), rp.getFontVariationSettings())
+                && lp.getShadowLayerRadius() == rp.getShadowLayerRadius()
+                && lp.getShadowLayerDx() == rp.getShadowLayerDx()
+                && lp.getShadowLayerDy() == rp.getShadowLayerDy()
+                && lp.getShadowLayerColor() == rp.getShadowLayerColor()
+                && lp.getFlags() == rp.getFlags()
+                && lp.getHinting() == rp.getHinting()
+                && lp.getStyle() == rp.getStyle()
+                && lp.getColor() == rp.getColor()
+                && lp.getStrokeWidth() == rp.getStrokeWidth()
+                && lp.getStrokeMiter() == rp.getStrokeMiter()
+                && lp.getStrokeCap() == rp.getStrokeCap()
+                && lp.getStrokeJoin() == rp.getStrokeJoin()
+                && lp.getTextAlign() == rp.getTextAlign()
+                && lp.isElegantTextHeight() == rp.isElegantTextHeight()
+                && lp.getTextSize() == rp.getTextSize()
+                && lp.getTextScaleX() == rp.getTextScaleX()
+                && lp.getTextSkewX() == rp.getTextSkewX()
+                && lp.getLetterSpacing() == rp.getLetterSpacing()
+                && lp.getWordSpacing() == rp.getWordSpacing()
+                && lp.getHyphenEdit() == rp.getHyphenEdit()
+                && lp.bgColor == rp.bgColor
+                && lp.baselineShift == rp.baselineShift
+                && lp.linkColor == rp.linkColor
+                && lp.drawableState == rp.drawableState
+                && lp.density == rp.density
+                && lp.underlineColor == rp.underlineColor
+                && lp.underlineThickness == rp.underlineThickness;
+    }
 }
