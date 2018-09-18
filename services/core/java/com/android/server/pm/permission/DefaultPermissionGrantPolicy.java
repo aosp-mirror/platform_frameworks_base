@@ -946,7 +946,7 @@ public final class DefaultPermissionGrantPolicy {
     }
 
     private boolean isSystemPackage(String packageName) {
-        return isSystemPackage(getSystemPackageInfo(packageName));
+        return isSystemPackage(getPackageInfo(packageName));
     }
 
     private boolean isSystemPackage(PackageInfo pkg) {
