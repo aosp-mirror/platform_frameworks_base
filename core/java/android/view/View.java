@@ -8523,6 +8523,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         if (importance == IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS
                 || importance == IMPORTANT_FOR_AUTOFILL_NO) {
+            if (Log.isLoggable(AUTOFILL_LOG_TAG, Log.VERBOSE)) {
+                Log.v(AUTOFILL_LOG_TAG, "View (autofillId=" +  getAutofillViewId() + ", "
+                        + getClass() + ") is not important for autofill because its "
+                        + "importance is " + importance);
+            }
             return false;
         }
 
