@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -83,17 +82,5 @@ public class StatusBarWindowControllerTest extends SysuiTestCase {
         flag = captor.getValue().privateFlags
                 & WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
         assertThat(flag).isEqualTo(0);
-    }
-
-    @Test
-    public void testOnThemeChanged_doesntCrash() {
-        mStatusBarWindowController = new StatusBarWindowController(mContext, mWindowManager,
-                mActivityManager, mDozeParameters);
-        mStatusBarWindowController.onThemeChanged();
-    }
-
-    @Test
-    public void testAdd_updatesVisibilityFlags() {
-        verify(mStatusBarView).setSystemUiVisibility(anyInt());
     }
 }

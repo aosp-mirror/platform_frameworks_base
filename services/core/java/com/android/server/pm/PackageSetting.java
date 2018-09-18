@@ -207,4 +207,13 @@ public final class PackageSetting extends PackageSettingBase {
         writeUsersInfoToProto(proto, PackageProto.USERS);
         proto.end(packageToken);
     }
+
+    /** Updates all fields in the current setting from another. */
+    public void updateFrom(PackageSetting other) {
+        super.updateFrom(other);
+        appId = other.appId;
+        pkg = other.pkg;
+        sharedUserId = other.sharedUserId;
+        sharedUser = other.sharedUser;
+    }
 }

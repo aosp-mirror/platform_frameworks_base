@@ -28,7 +28,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
-import android.os.Looper;
 import android.view.KeyEvent;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -38,8 +37,8 @@ import com.android.server.policy.WindowManagerPolicy.WindowState;
 
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
@@ -58,18 +57,17 @@ public class KeyboardInterceptorTest {
     @Mock AccessibilityManagerService mMockAms;
     @Mock WindowManagerPolicy mMockPolicy;
 
-    @BeforeClass
-    public static void oneTimeInitialization() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-    }
-
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mInterceptor = new KeyboardInterceptor(mMockAms, mMockPolicy, mHandler);
     }
+
+    @After
+    public void tearDown() {
+        mHandler.removeAllMessages();
+    }
+
 
     @Test
     public void whenNonspecialKeyArrives_withNothingInQueue_eventGoesToAms() {

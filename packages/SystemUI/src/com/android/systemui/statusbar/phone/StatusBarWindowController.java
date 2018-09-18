@@ -135,7 +135,6 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         mWindowManager.addView(mStatusBarView, mLp);
         mLpChanged = new WindowManager.LayoutParams();
         mLpChanged.copyFrom(mLp);
-        onThemeChanged();
     }
 
     public void setDozeScreenBrightness(int value) {
@@ -484,10 +483,6 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
 
     @Override
     public void onThemeChanged() {
-        if (mStatusBarView == null) {
-            return;
-        }
-
         StatusBarStateController state = Dependency.get(StatusBarStateController.class);
         int which;
         if (state.getState() == StatusBarState.KEYGUARD

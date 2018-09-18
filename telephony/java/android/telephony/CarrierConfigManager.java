@@ -1070,6 +1070,16 @@ public class CarrierConfigManager {
 
     /**
      * Indexes of SPN format strings in wfcSpnFormats and wfcDataSpnFormats.
+     *
+     * <p>Available options are:
+     * <ul>
+     * <li> 0: %s</li>
+     * <li> 1: %s Wi-Fi Calling</li>
+     * <li> 2: WLAN Call</li>
+     * <li> 3: %s WLAN Call</li>
+     * <li> 4: %s Wi-Fi</li>
+     * <li> 5: WiFi Calling | %s</li>
+     * <li> 6: %s VoWifi</li>
      * @hide
      */
     public static final String KEY_WFC_SPN_FORMAT_IDX_INT = "wfc_spn_format_idx_int";
@@ -2272,7 +2282,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SUPPORT_DIRECT_FDN_DIALING_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_DEFAULT_DATA_ROAMING_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_SKIP_CF_FAIL_TO_DISABLE_DIALOG_BOOL, false);
-        sDefaults.putBoolean(KEY_SUPPORT_ENHANCED_CALL_BLOCKING_BOOL, false);
+        sDefaults.putBoolean(KEY_SUPPORT_ENHANCED_CALL_BLOCKING_BOOL, true);
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);

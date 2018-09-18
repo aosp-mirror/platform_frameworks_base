@@ -17,7 +17,9 @@
 package android.graphics;
 
 import android.annotation.ColorInt;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.Px;
 import android.annotation.Size;
 import android.annotation.UnsupportedAppUsage;
@@ -2325,17 +2327,53 @@ public class Paint {
     }
 
     /**
-     * Convenience overload that takes a char array instead of a
-     * String.
+     * Retrieve the character advances of the text.
      *
-     * @see #getTextRunAdvances(String, int, int, int, int, boolean, float[], int)
-     * @hide
+     * Returns the total advance width for the characters in the run from {@code index} for
+     * {@code count} of chars, and if {@code advances} is not null, the advance assigned to each of
+     * these characters (java chars).
+     *
+     * <p>
+     * The trailing surrogate in a valid surrogate pair is assigned an advance of 0.  Thus the
+     * number of returned advances is always equal to count, not to the number of unicode codepoints
+     * represented by the run.
+     * </p>
+     *
+     * <p>
+     * In the case of conjuncts or combining marks, the total advance is assigned to the first
+     * logical character, and the following characters are assigned an advance of 0.
+     * </p>
+     *
+     * <p>
+     * This generates the sum of the advances of glyphs for characters in a reordered cluster as the
+     * width of the first logical character in the cluster, and 0 for the widths of all other
+     * characters in the cluster.  In effect, such clusters are treated like conjuncts.
+     * </p>
+     *
+     * <p>
+     * The shaping bounds limit the amount of context available outside start and end that can be
+     * used for shaping analysis.  These bounds typically reflect changes in bidi level or font
+     * metrics across which shaping does not occur.
+     * </p>
+     *
+     * @param chars the text to measure.
+     * @param index the index of the first character to measure
+     * @param count the number of characters to measure
+     * @param contextIndex the index of the first character to use for shaping context.
+     *                     Context must cover the measureing target.
+     * @param contextCount the number of character to use for shaping context.
+     *                     Context must cover the measureing target.
+     * @param isRtl whether the run is in RTL direction
+     * @param advances array to receive the advances, must have room for all advances.
+     *                 This can be null if only total advance is needed
+     * @param advancesIndex the position in advances at which to put the advance corresponding to
+     *                      the character at start
+     * @return the total advance in pixels
      */
-    @UnsupportedAppUsage
-    public float getTextRunAdvances(char[] chars, int index, int count,
-            int contextIndex, int contextCount, boolean isRtl, float[] advances,
-            int advancesIndex) {
-
+    public float getTextRunAdvances(@NonNull char[] chars, @IntRange(from = 0) int index,
+            @IntRange(from = 0) int count, @IntRange(from = 0) int contextIndex,
+            @IntRange(from = 0) int contextCount, boolean isRtl, @Nullable float[] advances,
+            @IntRange(from = 0) int advancesIndex) {
         if (chars == null) {
             throw new IllegalArgumentException("text cannot be null");
         }
@@ -2369,131 +2407,6 @@ public class Paint {
             }
         }
         return res * mInvCompatScaling; // assume errors are not significant
-    }
-
-    /**
-     * Convenience overload that takes a CharSequence instead of a
-     * String.
-     *
-     * @see #getTextRunAdvances(String, int, int, int, int, boolean, float[], int)
-     * @hide
-     */
-    public float getTextRunAdvances(CharSequence text, int start, int end,
-            int contextStart, int contextEnd, boolean isRtl, float[] advances,
-            int advancesIndex) {
-        if (text == null) {
-            throw new IllegalArgumentException("text cannot be null");
-        }
-        if ((start | end | contextStart | contextEnd | advancesIndex | (end - start)
-                | (start - contextStart) | (contextEnd - end)
-                | (text.length() - contextEnd)
-                | (advances == null ? 0 :
-                    (advances.length - advancesIndex - (end - start)))) < 0) {
-            throw new IndexOutOfBoundsException();
-        }
-
-        if (text instanceof String) {
-            return getTextRunAdvances((String) text, start, end,
-                    contextStart, contextEnd, isRtl, advances, advancesIndex);
-        }
-        if (text instanceof SpannedString ||
-            text instanceof SpannableString) {
-            return getTextRunAdvances(text.toString(), start, end,
-                    contextStart, contextEnd, isRtl, advances, advancesIndex);
-        }
-        if (text instanceof GraphicsOperations) {
-            return ((GraphicsOperations) text).getTextRunAdvances(start, end,
-                    contextStart, contextEnd, isRtl, advances, advancesIndex, this);
-        }
-        if (text.length() == 0 || end == start) {
-            return 0f;
-        }
-
-        int contextLen = contextEnd - contextStart;
-        int len = end - start;
-        char[] buf = TemporaryBuffer.obtain(contextLen);
-        TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
-        float result = getTextRunAdvances(buf, start - contextStart, len,
-                0, contextLen, isRtl, advances, advancesIndex);
-        TemporaryBuffer.recycle(buf);
-        return result;
-    }
-
-    /**
-     * Returns the total advance width for the characters in the run
-     * between start and end, and if advances is not null, the advance
-     * assigned to each of these characters (java chars).
-     *
-     * <p>The trailing surrogate in a valid surrogate pair is assigned
-     * an advance of 0.  Thus the number of returned advances is
-     * always equal to count, not to the number of unicode codepoints
-     * represented by the run.
-     *
-     * <p>In the case of conjuncts or combining marks, the total
-     * advance is assigned to the first logical character, and the
-     * following characters are assigned an advance of 0.
-     *
-     * <p>This generates the sum of the advances of glyphs for
-     * characters in a reordered cluster as the width of the first
-     * logical character in the cluster, and 0 for the widths of all
-     * other characters in the cluster.  In effect, such clusters are
-     * treated like conjuncts.
-     *
-     * <p>The shaping bounds limit the amount of context available
-     * outside start and end that can be used for shaping analysis.
-     * These bounds typically reflect changes in bidi level or font
-     * metrics across which shaping does not occur.
-     *
-     * @param text the text to measure. Cannot be null.
-     * @param start the index of the first character to measure
-     * @param end the index past the last character to measure
-     * @param contextStart the index of the first character to use for shaping context,
-     * must be <= start
-     * @param contextEnd the index past the last character to use for shaping context,
-     * must be >= end
-     * @param isRtl whether the run is in RTL direction
-     * @param advances array to receive the advances, must have room for all advances,
-     * can be null if only total advance is needed
-     * @param advancesIndex the position in advances at which to put the
-     * advance corresponding to the character at start
-     * @return the total advance
-     *
-     * @hide
-     */
-    public float getTextRunAdvances(String text, int start, int end, int contextStart,
-            int contextEnd, boolean isRtl, float[] advances, int advancesIndex) {
-        if (text == null) {
-            throw new IllegalArgumentException("text cannot be null");
-        }
-        if ((start | end | contextStart | contextEnd | advancesIndex | (end - start)
-                | (start - contextStart) | (contextEnd - end)
-                | (text.length() - contextEnd)
-                | (advances == null ? 0 :
-                    (advances.length - advancesIndex - (end - start)))) < 0) {
-            throw new IndexOutOfBoundsException();
-        }
-
-        if (text.length() == 0 || start == end) {
-            return 0f;
-        }
-
-        if (!mHasCompatScaling) {
-            return nGetTextAdvances(mNativePaint, text, start, end, contextStart, contextEnd,
-                    isRtl ? BIDI_FORCE_RTL : BIDI_FORCE_LTR, advances, advancesIndex);
-        }
-
-        final float oldSize = getTextSize();
-        setTextSize(oldSize * mCompatScaling);
-        final float totalAdvance = nGetTextAdvances(mNativePaint, text, start, end, contextStart,
-                contextEnd, isRtl ? BIDI_FORCE_RTL : BIDI_FORCE_LTR, advances, advancesIndex);
-        setTextSize(oldSize);
-
-        if (advances != null) {
-            for (int i = advancesIndex, e = i + (end - start); i < e; i++) {
-                advances[i] *= mInvCompatScaling;
-            }
-        }
-        return totalAdvance * mInvCompatScaling; // assume errors are insignificant
     }
 
     /**

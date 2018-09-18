@@ -43,7 +43,6 @@ import android.accessibilityservice.GestureDescription.TouchPoint;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.graphics.Point;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
@@ -57,8 +56,8 @@ import androidx.test.runner.AndroidJUnit4;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -127,13 +126,6 @@ public class MotionEventInjectorTest {
     Matcher<MotionEvent> mIsClickDown;
     Matcher<MotionEvent> mIsClickUp;
 
-    @BeforeClass
-    public static void oneTimeInitialization() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-    }
-
     @Before
     public void setUp() {
         mMessageCapturingHandler = new MessageCapturingHandler(new Handler.Callback() {
@@ -171,6 +163,12 @@ public class MotionEventInjectorTest {
         mIsClickUp = allOf(IS_ACTION_UP, isAtPoint(CLICK_POINT), hasStandardInitialization(),
                 hasTimeFromDown(CLICK_DURATION));
     }
+
+    @After
+    public void tearDown() {
+        mMessageCapturingHandler.removeAllMessages();
+    }
+
 
     @Test
     public void testInjectEvents_shouldEmergeInOrderWithCorrectTiming() throws RemoteException {

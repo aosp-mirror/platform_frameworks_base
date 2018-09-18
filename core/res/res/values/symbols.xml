@@ -3083,6 +3083,7 @@
   <java-symbol type="string" name="color_inversion_feature_name" />
   <java-symbol type="string" name="color_correction_feature_name" />
   <java-symbol type="string" name="config_defaultAccessibilityService" />
+  <java-symbol type="string" name="accessibility_shortcut_spoken_feedback" />
 
   <!-- Accessibility Button -->
   <java-symbol type="layout" name="accessibility_button_chooser" />

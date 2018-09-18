@@ -2222,13 +2222,6 @@ Lcom/android/org/conscrypt/AbstractConscryptSocket;->setSoWriteTimeout(I)V
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->setUseSessionTickets(Z)V
 Lcom/android/org/conscrypt/ConscryptFileDescriptorSocket;->setHostname(Ljava/lang/String;)V
 Lcom/android/org/conscrypt/ConscryptFileDescriptorSocket;->setUseSessionTickets(Z)V
-Lcom/android/org/conscrypt/ConscryptSocketBase;->getHostname()Ljava/lang/String;
-Lcom/android/org/conscrypt/ConscryptSocketBase;->getHostnameOrIP()Ljava/lang/String;
-Lcom/android/org/conscrypt/ConscryptSocketBase;->getSoWriteTimeout()I
-Lcom/android/org/conscrypt/ConscryptSocketBase;->setHandshakeTimeout(I)V
-Lcom/android/org/conscrypt/ConscryptSocketBase;->setHostname(Ljava/lang/String;)V
-Lcom/android/org/conscrypt/ConscryptSocketBase;->setSoWriteTimeout(I)V
-Lcom/android/org/conscrypt/ConscryptSocketBase;->socket:Ljava/net/Socket;
 Lcom/android/org/conscrypt/OpenSSLKey;-><init>(J)V
 Lcom/android/org/conscrypt/OpenSSLKey;->fromPrivateKey(Ljava/security/PrivateKey;)Lcom/android/org/conscrypt/OpenSSLKey;
 Lcom/android/org/conscrypt/OpenSSLKey;->getNativeRef()Lcom/android/org/conscrypt/NativeRef$EVP_PKEY;

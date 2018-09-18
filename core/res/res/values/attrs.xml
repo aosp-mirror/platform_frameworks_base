@@ -3606,6 +3606,8 @@
             <flag name="flagRequestAccessibilityButton" value="0x00000100" />
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_FINGERPRINT_GESTURES}. -->
             <flag name="flagRequestFingerprintGestures" value="0x00000200" />
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK}. -->
+            <flag name="flagRequestShortcutWarningDialogSpokenFeedback" value="0x00000400" />
         </attr>
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. This setting cannot be changed at runtime. -->

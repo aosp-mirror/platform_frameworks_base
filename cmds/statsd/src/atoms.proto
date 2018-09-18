@@ -168,6 +168,7 @@ message Atom {
         AppSize app_size = 10027;
         CategorySize category_size = 10028;
         android.service.procstats.ProcessStatsSectionProto proc_stats = 10029;
+        BatteryVoltage battery_voltage = 10030;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP. Field numbers above
@@ -431,9 +432,9 @@ message BleScanStateChanged {
  * Logs reporting of a ble scan finding results.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   packages/apps/Bluetooth/src/com/android/bluetooth/gatt/AppScanStats.java
  */
-// TODO: Consider changing to tracking per-scanner-id (log from AppScanStats).
+// TODO: Consider also tracking per-scanner-id.
 message BleScanResultReceived {
     repeated AttributionNode attribution_node = 1;
 
@@ -2176,6 +2177,16 @@ message FullBatteryCapacity {
 }
 
 /**
+ * Pulls battery voltage.
+ * Pulled from:
+ *   frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
+ */
+message BatteryVoltage {
+    // The voltage of the battery, in millivolts.
+    optional int32 voltage_mV = 1;
+}
+
+/**
  * Pulls the temperature of various parts of the device.
  * The units are tenths of a degree Celsius. Eg: 30.3C is reported as 303.
  *
@@ -2261,6 +2272,14 @@ message BinderCallsExceptions {
     optional int64 exception_count = 2;
 }
 
+/**
+ * Pulls the statistics of message dispatching on HandlerThreads.
+ *
+ * Looper stats will be reset every time the data is pulled. It means it can only be pulled by one
+ * config on the device.
+ *
+ * Next tag: 11
+ */
 message LooperStats {
     // Currently not collected and always set to 0.
     optional int32 uid = 1 [(is_uid) = true];
@@ -2304,8 +2323,11 @@ message LooperStats {
     // Total CPU usage of all processed message.
     // Average can be computed using recorded_total_cpu_micros /
     // recorded_message_count. Total can be computed using
-    // recorded_total_cpu_micros / recorded_message_count * call_count.
+    // recorded_total_cpu_micros / recorded_message_count * message_count.
     optional int64 recorded_total_cpu_micros = 9;
+
+    // True if the screen was interactive PowerManager#isInteractive at the end of the call.
+    optional bool screen_interactive = 10;
 }
 
 /**

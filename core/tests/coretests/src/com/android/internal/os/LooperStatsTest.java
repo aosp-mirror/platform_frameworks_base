@@ -342,6 +342,20 @@ public final class LooperStatsTest {
         assertThat(looperStats.getEntries().get(0).messageCount).isEqualTo(2);
     }
 
+    @Test
+    public void testReset() {
+        TestableLooperStats looperStats = new TestableLooperStats(1, 1);
+
+        Object token1 = looperStats.messageDispatchStarting();
+        looperStats.messageDispatched(token1, mHandlerFirst.obtainMessage(1000));
+        Object token2 = looperStats.messageDispatchStarting();
+        looperStats.messageDispatched(token2, mHandlerFirst.obtainMessage(2000));
+        looperStats.reset();
+
+        List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
+        assertThat(entries).hasSize(0);
+    }
+
     private static void assertThrows(Class<? extends Exception> exceptionClass, Runnable r) {
         try {
             r.run();

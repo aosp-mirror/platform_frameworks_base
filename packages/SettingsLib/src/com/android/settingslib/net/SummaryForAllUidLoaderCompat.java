@@ -25,6 +25,12 @@ import android.os.RemoteException;
 
 import androidx.loader.content.AsyncTaskLoader;
 
+/**
+ * Deprecated in favor of {@link NetworkStatsDetailLoader}
+ *
+ * @deprecated
+ */
+@Deprecated
 public class SummaryForAllUidLoaderCompat extends AsyncTaskLoader<NetworkStats> {
     private static final String KEY_TEMPLATE = "template";
     private static final String KEY_START = "start";

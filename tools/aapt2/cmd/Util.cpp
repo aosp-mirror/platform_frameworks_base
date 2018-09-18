@@ -73,6 +73,7 @@ bool ParseSplitParameter(const StringPiece& arg, IDiagnostics* diag, std::string
   }
 
   *out_path = parts[0];
+  out_split->name = parts[1];
   for (const StringPiece& config_str : util::Tokenize(parts[1], ',')) {
     ConfigDescription config;
     if (!ConfigDescription::Parse(config_str, &config)) {
@@ -119,12 +120,15 @@ std::vector<SplitConstraints> AdjustSplitConstraintsForMinSdk(
   for (const SplitConstraints& constraints : split_constraints) {
     SplitConstraints constraint;
     for (const ConfigDescription& config : constraints.configs) {
-      if (config.sdkVersion <= min_sdk) {
-        constraint.configs.insert(config.CopyWithoutSdkVersion());
-      } else {
-        constraint.configs.insert(config);
+      const ConfigDescription &configToInsert = (config.sdkVersion <= min_sdk)
+          ? config.CopyWithoutSdkVersion()
+          : config;
+      // only add the config if it actually selects something
+      if (configToInsert != ConfigDescription::DefaultConfig()) {
+        constraint.configs.insert(configToInsert);
       }
     }
+    constraint.name = constraints.name;
     adjusted_constraints.push_back(std::move(constraint));
   }
   return adjusted_constraints;

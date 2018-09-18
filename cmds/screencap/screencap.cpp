@@ -207,7 +207,14 @@ int main(int argc, char** argv)
 
     result = outBuffer->lock(GraphicBuffer::USAGE_SW_READ_OFTEN, &base);
 
-    if (base == NULL) {
+    if (base == nullptr || result != NO_ERROR) {
+        String8 reason;
+        if (base == nullptr) {
+            reason = "Failed to write to buffer";
+        } else {
+            reason.appendFormat("Error Code: %d", result);
+        }
+        fprintf(stderr, "Failed to take screenshot (%s)\n", reason.c_str());
         close(fd);
         return 1;
     }

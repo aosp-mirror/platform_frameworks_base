@@ -21,6 +21,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -732,10 +733,13 @@ public class DisplayRotation {
             boolean shouldUpdateOrientationListener = false;
 
             // Configure rotation suggestions.
-            final int showRotationSuggestions = Settings.Secure.getIntForUser(resolver,
-                    Settings.Secure.SHOW_ROTATION_SUGGESTIONS,
-                    Settings.Secure.SHOW_ROTATION_SUGGESTIONS_DEFAULT,
-                    UserHandle.USER_CURRENT);
+            final int showRotationSuggestions =
+                    ActivityManager.isLowRamDeviceStatic()
+                            ? Settings.Secure.SHOW_ROTATION_SUGGESTIONS_DISABLED
+                            : Settings.Secure.getIntForUser(resolver,
+                            Settings.Secure.SHOW_ROTATION_SUGGESTIONS,
+                            Settings.Secure.SHOW_ROTATION_SUGGESTIONS_DEFAULT,
+                            UserHandle.USER_CURRENT);
             if (mShowRotationSuggestions != showRotationSuggestions) {
                 mShowRotationSuggestions = showRotationSuggestions;
                 shouldUpdateOrientationListener = true;

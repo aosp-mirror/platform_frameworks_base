@@ -2588,12 +2588,32 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     ActiveAdmin getActiveAdminForCallerLocked(ComponentName who, int reqPolicy)
             throws SecurityException {
+        return getActiveAdminOrCheckPermissionForCallerLocked(who,
+                reqPolicy, /* permission= */ null);
+    }
+
+    /**
+     * Finds an active admin for the caller then checks {@code permission} if admin check failed.
+     *
+     * @return an active admin or {@code null} if there is no active admin but
+     * {@code permission} is granted
+     * @throws SecurityException if caller neither has an active admin nor {@code permission}
+     */
+    @Nullable
+    ActiveAdmin getActiveAdminOrCheckPermissionForCallerLocked(
+            ComponentName who,
+            int reqPolicy,
+            @Nullable String permission) throws SecurityException {
         ensureLocked();
         final int callingUid = mInjector.binderGetCallingUid();
 
         ActiveAdmin result = getActiveAdminWithPolicyForUidLocked(who, reqPolicy, callingUid);
         if (result != null) {
             return result;
+        } else if (permission != null
+                && (mContext.checkCallingPermission(permission)
+                        == PackageManager.PERMISSION_GRANTED)) {
+            return null;
         }
 
         if (who != null) {
@@ -2605,7 +2625,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             if (reqPolicy == DeviceAdminInfo.USES_POLICY_DEVICE_OWNER) {
                 throw new SecurityException("Admin " + admin.info.getComponent()
-                         + " does not own the device");
+                        + " does not own the device");
             }
             if (reqPolicy == DeviceAdminInfo.USES_POLICY_PROFILE_OWNER) {
                 throw new SecurityException("Admin " + admin.info.getComponent()
@@ -2621,20 +2641,39 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     + admin.info.getTagForPolicy(reqPolicy));
         } else {
             throw new SecurityException("No active admin owned by uid "
-                    + mInjector.binderGetCallingUid() + " for policy #" + reqPolicy);
+                    + callingUid + " for policy #" + reqPolicy);
         }
     }
 
     ActiveAdmin getActiveAdminForCallerLocked(ComponentName who, int reqPolicy, boolean parent)
             throws SecurityException {
+        return getActiveAdminOrCheckPermissionForCallerLocked(
+                who, reqPolicy, parent, /* permission= */ null);
+    }
+
+    /**
+     * Finds an active admin for the caller then checks {@code permission} if admin check failed.
+     *
+     * @return an active admin or {@code null} if there is no active admin but
+     * {@code permission} is granted
+     * @throws SecurityException if caller neither has an active admin nor {@code permission}
+     */
+    @Nullable
+    ActiveAdmin getActiveAdminOrCheckPermissionForCallerLocked(
+            ComponentName who,
+            int reqPolicy,
+            boolean parent,
+            @Nullable String permission) throws SecurityException {
         ensureLocked();
         if (parent) {
             enforceManagedProfile(mInjector.userHandleGetCallingUserId(),
                     "call APIs on the parent profile");
         }
-        ActiveAdmin admin = getActiveAdminForCallerLocked(who, reqPolicy);
+        ActiveAdmin admin = getActiveAdminOrCheckPermissionForCallerLocked(
+                who, reqPolicy, permission);
         return parent ? admin.getParentActiveAdmin() : admin;
     }
+
     /**
      * Find the admin for the component and userId bit of the uid, then check
      * the admin's uid matches the uid.
@@ -4744,10 +4783,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 preN = getTargetSdk(admin.info.getPackageName(),
                         userHandle) <= android.os.Build.VERSION_CODES.M;
             } else {
-                // Otherwise, make sure the caller has any active admin with the right policy.
-                admin = getActiveAdminForCallerLocked(null,
-                        DeviceAdminInfo.USES_POLICY_RESET_PASSWORD);
-                preN = getTargetSdk(admin.info.getPackageName(),
+                // Otherwise, make sure the caller has any active admin with the right policy or
+                // the required permission.
+                admin = getActiveAdminOrCheckPermissionForCallerLocked(
+                        null,
+                        DeviceAdminInfo.USES_POLICY_RESET_PASSWORD,
+                        android.Manifest.permission.RESET_PASSWORD);
+                // Cannot be preN if admin is null because an exception would have been
+                // thrown before getting here
+                preN = admin == null ? false : getTargetSdk(admin.info.getPackageName(),
                         userHandle) <= android.os.Build.VERSION_CODES.M;
 
                 // As of N, password resetting to empty/null is not allowed anymore.
@@ -4763,9 +4807,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // As of N, password cannot be changed by the admin if it is already set.
                 if (isLockScreenSecureUnchecked(userHandle)) {
                     if (!preN) {
-                        throw new SecurityException("Admin cannot change current password");
+                        throw new SecurityException("Cannot change current password");
                     } else {
-                        Slog.e(LOG_TAG, "Admin cannot change current password");
+                        Slog.e(LOG_TAG, "Cannot change current password");
                         return false;
                     }
                 }
@@ -5136,31 +5180,37 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         synchronized (getLockObject()) {
-            // This API can only be called by an active device admin,
-            // so try to retrieve it to check that the caller is one.
-            final ActiveAdmin admin = getActiveAdminForCallerLocked(
-                    null, DeviceAdminInfo.USES_POLICY_FORCE_LOCK, parent);
-
+            // Make sure the caller has any active admin with the right policy or
+            // the required permission.
+            final ActiveAdmin admin = getActiveAdminOrCheckPermissionForCallerLocked(
+                    null,
+                    DeviceAdminInfo.USES_POLICY_FORCE_LOCK,
+                    parent,
+                    android.Manifest.permission.LOCK_DEVICE);
             final long ident = mInjector.binderClearCallingIdentity();
             try {
-                final ComponentName adminComponent = admin.info.getComponent();
-                // Evict key
-                if ((flags & DevicePolicyManager.FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY) != 0) {
-                    enforceManagedProfile(
-                            callingUserId, "set FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY");
-                    if (!isProfileOwner(adminComponent, callingUserId)) {
-                        throw new SecurityException("Only profile owner admins can set "
-                                + "FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY");
+                final ComponentName adminComponent = admin == null ?
+                        null : admin.info.getComponent();
+                if (adminComponent != null) {
+                    // For Profile Owners only, callers with only permission not allowed.
+                    if ((flags & DevicePolicyManager.FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY) != 0) {
+                        // Evict key
+                        enforceManagedProfile(
+                                callingUserId, "set FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY");
+                        if (!isProfileOwner(adminComponent, callingUserId)) {
+                            throw new SecurityException("Only profile owner admins can set "
+                                    + "FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY");
+                        }
+                        if (parent) {
+                            throw new IllegalArgumentException(
+                                    "Cannot set FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY for the parent");
+                        }
+                        if (!mInjector.storageManagerIsFileBasedEncryptionEnabled()) {
+                            throw new UnsupportedOperationException(
+                                    "FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY only applies to FBE devices");
+                        }
+                        mUserManager.evictCredentialEncryptionKey(callingUserId);
                     }
-                    if (parent) {
-                        throw new IllegalArgumentException(
-                                "Cannot set FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY for the parent");
-                    }
-                    if (!mInjector.storageManagerIsFileBasedEncryptionEnabled()) {
-                        throw new UnsupportedOperationException(
-                                "FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY only applies to FBE devices");
-                    }
-                    mUserManager.evictCredentialEncryptionKey(callingUserId);
                 }
 
                 // Lock all users unless this is a managed profile with a separate challenge
@@ -5179,7 +5229,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     mInjector.getTrustManager().setDeviceLockedForUser(userToLock, true);
                 }
 
-                if (SecurityLog.isLoggingEnabled()) {
+                if (SecurityLog.isLoggingEnabled() && adminComponent != null) {
                     final int affectedUserId =
                             parent ? getProfileParentId(callingUserId) : callingUserId;
                     SecurityLog.writeEvent(SecurityLog.TAG_REMOTE_LOCK,

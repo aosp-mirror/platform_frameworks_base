@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.tests.sysmem.host;
@@ -22,46 +22,54 @@ import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner.TestLogData;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner.TestMetrics;
 import com.android.tradefed.testtype.IDeviceTest;
-import java.io.IOException;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.IOException;
+
+/**
+ * Runs a system memory test.
+ */
 @RunWith(DeviceJUnit4ClassRunner.class)
 public class MemoryTest implements IDeviceTest {
 
     @Rule public TestMetrics testMetrics = new TestMetrics();
     @Rule public TestLogData testLogs = new TestLogData();
 
-    private ITestDevice testDevice;
-    private int iterations = 0;     // Number of times cujs have been run.
-    private Metrics metrics;
-    private Cujs cujs;
+    private ITestDevice mTestDevice;
+    private int mIterations = 0;     // Number of times cujs have been run.
+    private Metrics mMetrics;
+    private Cujs mCujs;
 
     @Override
     public void setDevice(ITestDevice device) {
-        testDevice = device;
-        metrics = new Metrics(device, testMetrics, testLogs);
-        cujs = new Cujs(device);
+        mTestDevice = device;
+        mMetrics = new Metrics(device, testMetrics, testLogs);
+        mCujs = new Cujs(device);
     }
 
     @Override
     public ITestDevice getDevice() {
-        return testDevice;
+        return mTestDevice;
     }
 
     // Invoke a single iteration of running the cujs.
     private void runCujs() throws DeviceNotAvailableException {
-        cujs.run();
-        iterations++;
+        mCujs.run();
+        mIterations++;
     }
 
     // Sample desired memory.
     private void sample()
             throws DeviceNotAvailableException, IOException, Metrics.MetricsException {
-        metrics.sample(String.format("%03d", iterations));
+        mMetrics.sample(String.format("%03d", mIterations));
     }
 
+    /**
+     * Runs the memory tests.
+     */
     @Test
     public void run() throws Exception {
         sample();   // Sample before running cujs

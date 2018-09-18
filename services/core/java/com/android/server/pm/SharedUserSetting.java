@@ -24,7 +24,6 @@ import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -69,24 +68,26 @@ public final class SharedUserSetting extends SettingBase {
         proto.end(token);
     }
 
-    void removePackage(PackageSetting packageSetting) {
-        if (packages.remove(packageSetting)) {
-            // recalculate the pkgFlags for this shared user if needed
-            if ((this.pkgFlags & packageSetting.pkgFlags) != 0) {
-                int aggregatedFlags = uidFlags;
-                for (PackageSetting ps : packages) {
-                    aggregatedFlags |= ps.pkgFlags;
-                }
-                setFlags(aggregatedFlags);
-            }
-            if ((this.pkgPrivateFlags & packageSetting.pkgPrivateFlags) != 0) {
-                int aggregatedPrivateFlags = uidPrivateFlags;
-                for (PackageSetting ps : packages) {
-                    aggregatedPrivateFlags |= ps.pkgPrivateFlags;
-                }
-                setPrivateFlags(aggregatedPrivateFlags);
-            }
+    boolean removePackage(PackageSetting packageSetting) {
+        if (!packages.remove(packageSetting)) {
+            return false;
         }
+        // recalculate the pkgFlags for this shared user if needed
+        if ((this.pkgFlags & packageSetting.pkgFlags) != 0) {
+            int aggregatedFlags = uidFlags;
+            for (PackageSetting ps : packages) {
+                aggregatedFlags |= ps.pkgFlags;
+            }
+            setFlags(aggregatedFlags);
+        }
+        if ((this.pkgPrivateFlags & packageSetting.pkgPrivateFlags) != 0) {
+            int aggregatedPrivateFlags = uidPrivateFlags;
+            for (PackageSetting ps : packages) {
+                aggregatedPrivateFlags |= ps.pkgPrivateFlags;
+            }
+            setPrivateFlags(aggregatedPrivateFlags);
+        }
+        return true;
     }
 
     void addPackage(PackageSetting packageSetting) {
@@ -143,4 +144,16 @@ public final class SharedUserSetting extends SettingBase {
         }
     }
 
+    /** Updates all fields in this shared user setting from another. */
+    public SharedUserSetting updateFrom(SharedUserSetting sharedUser) {
+        copyFrom(sharedUser);
+        this.userId = sharedUser.userId;
+        this.uidFlags = sharedUser.uidFlags;
+        this.uidPrivateFlags = sharedUser.uidPrivateFlags;
+        this.seInfoTargetSdkVersion = sharedUser.seInfoTargetSdkVersion;
+        this.packages.clear();
+        this.packages.addAll(sharedUser.packages);
+        this.signaturesChanged = sharedUser.signaturesChanged;
+        return this;
+    }
 }

@@ -240,10 +240,31 @@
         <item>Issue registering Wi\u2011Fi calling with your carrier: <xliff:g id="code" example="REG09 - No 911 Address">%1$s</xliff:g></item>
     </string-array>
     <!-- Template for showing mobile network operator name while WFC is active -->
-    <string-array name="wfcSpnFormats">
-        <item>%s</item>
-        <item>%s Wi-Fi Calling</item>
+    <string-array name="wfcSpnFormats" translatable="false">
+        <item>@string/wfcSpnFormat_spn</item>
+        <item>@string/wfcSpnFormat_spn_wifi_calling</item>
+        <item>@string/wfcSpnFormat_wlan_call</item>
+        <item>@string/wfcSpnFormat_spn_wlan_call</item>
+        <item>@string/wfcSpnFormat_spn_wifi</item>
+        <item>@string/wfcSpnFormat_wifi_calling_bar_spn</item>
+        <item>@string/wfcSpnFormat_spn_vowifi</item>
     </string-array>
+
+    <!-- Spn during Wi-Fi Calling: "<operator>" -->
+    <string name="wfcSpnFormat_spn"><xliff:g id="spn" example="Operator">%s</xliff:g></string>
+    <!-- Spn during Wi-Fi Calling: "<operator> Wi-Fi Calling" -->
+    <string name="wfcSpnFormat_spn_wifi_calling"><xliff:g id="spn" example="Operator">%s</xliff:g> Wi-Fi Calling</string>
+    <!-- Spn during Wi-Fi Calling: "WLAN Call" -->
+    <string name="wfcSpnFormat_wlan_call">WLAN Call</string>
+    <!-- Spn during Wi-Fi Calling: "<operator> WLAN Call" -->
+    <string name="wfcSpnFormat_spn_wlan_call"><xliff:g id="spn" example="Operator">%s</xliff:g> WLAN Call</string>
+    <!-- Spn during Wi-Fi Calling: "<operator> Wi-Fi" -->
+    <string name="wfcSpnFormat_spn_wifi"><xliff:g id="spn" example="Operator">%s</xliff:g> Wi-Fi</string>
+    <!-- Spn during Wi-Fi Calling: "WiFi Calling | <operator>" -->
+    <string name="wfcSpnFormat_wifi_calling_bar_spn">WiFi Calling | <xliff:g id="spn" example="Operator">%s</xliff:g></string>
+    <!-- Spn during Wi-Fi Calling: "<operator> VoWifi" -->
+    <string name="wfcSpnFormat_spn_vowifi"><xliff:g id="spn" example="Operator">%s</xliff:g> VoWifi</string>
+
     <!-- WFC, summary for Disabled -->
     <string name="wifi_calling_off_summary">Off</string>
     <!-- WFC, summary for Wi-Fi Preferred -->
@@ -4333,6 +4354,9 @@
     service.-->
     <string name="accessibility_shortcut_disabling_service">Accessibility Shortcut turned
         <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> off</string>
+
+    <!-- Text spoken when accessibility shortcut warning dialog is shown. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_spoken_feedback">Use Accessibility Shortcut again to start the current accessibility feature</string>
 
     <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. -->
     <string name="accessibility_button_prompt_text">Choose a feature to use when you tap the Accessibility button:</string>

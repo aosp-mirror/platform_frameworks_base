@@ -161,6 +161,12 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
           {},
           1 * NS_PER_SEC,
           new ResourceHealthManagerPuller(android::util::FULL_BATTERY_CAPACITY)}},
+        // battery_voltage
+        {android::util::BATTERY_VOLTAGE,
+         {{},
+          {},
+          1 * NS_PER_SEC,
+          new ResourceHealthManagerPuller(android::util::BATTERY_VOLTAGE)}},
         // process_memory_state
         {android::util::PROCESS_MEMORY_STATE,
          {{4, 5, 6, 7, 8},
@@ -184,7 +190,7 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // looper_stats
         {android::util::LOOPER_STATS,
          {{5, 6, 7, 8, 9},
-          {2, 3, 4},
+          {2, 3, 4, 10},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::LOOPER_STATS)}},
         // Disk Stats
