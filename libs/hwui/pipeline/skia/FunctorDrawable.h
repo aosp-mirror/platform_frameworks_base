@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 #pragma once
 
-#include "FunctorDrawable.h"
+#include "GlFunctorLifecycleListener.h"
 
-#include <utils/RefBase.h>
+#include <SkCanvas.h>
+#include <SkDrawable.h>
+
+#include <utils/Functor.h>
 
 namespace android {
 namespace uirenderer {
@@ -26,19 +29,23 @@ namespace uirenderer {
 namespace skiapipeline {
 
 /**
- * This drawable wraps a OpenGL functor enabling it to be recorded into a list
+ * This drawable wraps a functor enabling it to be recorded into a list
  * of Skia drawing commands.
  */
-class GLFunctorDrawable : public FunctorDrawable {
+class FunctorDrawable : public SkDrawable {
 public:
-    GLFunctorDrawable(Functor* functor, GlFunctorLifecycleListener* listener, SkCanvas* canvas)
-            : FunctorDrawable(functor, listener, canvas) {}
-    virtual ~GLFunctorDrawable();
+    FunctorDrawable(Functor* functor, GlFunctorLifecycleListener* listener, SkCanvas* canvas)
+            : mFunctor(functor), mListener(listener), mBounds(canvas->getLocalClipBounds()) {}
+    virtual ~FunctorDrawable() {}
 
-    void syncFunctor() const override;
+    virtual void syncFunctor() const = 0;
 
 protected:
-    virtual void onDraw(SkCanvas* canvas) override;
+    virtual SkRect onGetBounds() override { return mBounds; }
+
+    Functor* mFunctor;
+    sp<GlFunctorLifecycleListener> mListener;
+    const SkRect mBounds;
 };
 
 };  // namespace skiapipeline
