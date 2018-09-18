@@ -219,6 +219,14 @@ package android {
     field public static final int config_sendPackageName = 17891328; // 0x1110000
   }
 
+  public static final class R.dimen {
+    field public static final int config_restricted_icon_size = 17104903; // 0x1050007
+  }
+
+  public static final class R.drawable {
+    field public static final int ic_info = 17301684; // 0x10800b4
+  }
+
   public static final class R.raw {
     field public static final int loaderror = 17825792; // 0x1100000
     field public static final int nodomain = 17825793; // 0x1100001
@@ -1115,6 +1123,7 @@ package android.content.pm {
   public class PackageItemInfo {
     method public deprecated java.lang.CharSequence loadSafeLabel(android.content.pm.PackageManager);
     method public java.lang.CharSequence loadSafeLabel(android.content.pm.PackageManager, float, int);
+    method public static void setForceSafeLabels(boolean);
     field public static final int SAFE_LABEL_FLAG_FIRST_LINE = 4; // 0x4
     field public static final int SAFE_LABEL_FLAG_SINGLE_LINE = 2; // 0x2
     field public static final int SAFE_LABEL_FLAG_TRIM = 1; // 0x1
@@ -4195,6 +4204,7 @@ package android.permissionpresenterservice {
     method public final void attachBaseContext(android.content.Context);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract java.util.List<android.content.pm.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(java.lang.String);
+    method public abstract void onRevokeRuntimePermission(java.lang.String, java.lang.String);
     field public static final java.lang.String SERVICE_INTERFACE = "android.permissionpresenterservice.RuntimePermissionPresenterService";
   }
 
