@@ -89,8 +89,13 @@ public abstract class StorageManagerInternal {
      * @param appId The appId for the given package.
      * @param sharedUserId The sharedUserId for given package if it specified
      *      {@code android:sharedUserId} in the manifest, otherwise {@code null}
-     * @param userId
+     * @param userId The userId in which the storage needs to be mounted.
      */
     public abstract void mountExternalStorageForApp(String packageName, int appId,
             String sharedUserId, int userId);
+
+    /**
+     * @return Labels of storage volumes that are visible to the given userId.
+     */
+    public abstract String[] getVisibleVolumesForUser(int userId);
 }

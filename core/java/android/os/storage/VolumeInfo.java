@@ -157,7 +157,7 @@ public class VolumeInfo implements Parcelable {
     public final DiskInfo disk;
     public final String partGuid;
     public int mountFlags = 0;
-    public int mountUserId = -1;
+    public int mountUserId = UserHandle.USER_NULL;
     @UnsupportedAppUsage
     public int state = STATE_UNMOUNTED;
     public String fsType;

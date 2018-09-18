@@ -329,6 +329,12 @@ class StorageManagerService extends IStorageManager.Stub
     @GuardedBy("mPackagesLock")
     private final SparseArray<String> mSandboxIds = new SparseArray<>();
 
+    /**
+     * List of volumes visible to any user.
+     * TODO: may be have a map of userId -> volumes?
+     */
+    private final CopyOnWriteArrayList<VolumeInfo> mVisibleVols = new CopyOnWriteArrayList<>();
+
     private volatile int mCurrentUserId = UserHandle.USER_SYSTEM;
 
     /** Holding lock for AppFuse business */
@@ -623,16 +629,12 @@ class StorageManagerService extends IStorageManager.Stub
                         Slog.i(TAG, "Ignoring mount " + vol.getId() + " due to policy");
                         break;
                     }
-                    try {
-                        mVold.mount(vol.id, vol.mountFlags, vol.mountUserId);
-                    } catch (Exception e) {
-                        Slog.wtf(TAG, e);
-                    }
+                    mount(vol);
                     break;
                 }
                 case H_VOLUME_UNMOUNT: {
                     final VolumeInfo vol = (VolumeInfo) msg.obj;
-                    unmount(vol.getId());
+                    unmount(vol);
                     break;
                 }
                 case H_VOLUME_BROADCAST: {
@@ -868,6 +870,8 @@ class StorageManagerService extends IStorageManager.Stub
 
                 addInternalVolumeLocked();
             }
+
+            mVisibleVols.clear();
 
             try {
                 mVold.reset();
@@ -1466,7 +1470,7 @@ class StorageManagerService extends IStorageManager.Stub
                     = mContext.getPackageManager().getInstalledApplicationsAsUser(
                             PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
             synchronized (mPackagesLock) {
-                final ArraySet<String> userPackages = getPackagesForUserPL(userId);
+                final ArraySet<String> userPackages = getAvailablePackagesForUserPL(userId);
                 for (int i = appInfos.size() - 1; i >= 0; --i) {
                     if (appInfos.get(i).isInstantApp()) {
                         continue;
@@ -1523,7 +1527,7 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     @GuardedBy("mPackagesLock")
-    private ArraySet<String> getPackagesForUserPL(int userId) {
+    private ArraySet<String> getAvailablePackagesForUserPL(int userId) {
         ArraySet<String> userPackages = mPackages.get(userId);
         if (userPackages == null) {
             userPackages = new ArraySet<>();
@@ -1535,8 +1539,24 @@ class StorageManagerService extends IStorageManager.Stub
     private String[] getPackagesArrayForUser(int userId) {
         if (!ENABLE_ISOLATED_STORAGE) return EmptyArray.STRING;
 
+        final ArraySet<String> userPackages;
         synchronized (mPackagesLock) {
-            return getPackagesForUserPL(userId).toArray(new String[0]);
+            userPackages = getAvailablePackagesForUserPL(userId);
+            if (!userPackages.isEmpty()) {
+                return userPackages.toArray(new String[0]);
+            }
+        }
+        final List<ApplicationInfo> appInfos =
+                mContext.getPackageManager().getInstalledApplicationsAsUser(
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
+        synchronized (mPackagesLock) {
+            for (int i = appInfos.size() - 1; i >= 0; --i) {
+                if (appInfos.get(i).isInstantApp()) {
+                    continue;
+                }
+                userPackages.add(appInfos.get(i).packageName);
+            }
+            return userPackages.toArray(new String[0]);
         }
     }
 
@@ -1747,8 +1767,15 @@ class StorageManagerService extends IStorageManager.Stub
         if (isMountDisallowed(vol)) {
             throw new SecurityException("Mounting " + volId + " restricted by policy");
         }
+        mount(vol);
+    }
+
+    private void mount(VolumeInfo vol) {
         try {
             mVold.mount(vol.id, vol.mountFlags, vol.mountUserId);
+            if ((vol.mountFlags & VolumeInfo.MOUNT_FLAG_VISIBLE) != 0) {
+                mVisibleVols.add(vol);
+            }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
@@ -1759,8 +1786,15 @@ class StorageManagerService extends IStorageManager.Stub
         enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
 
         final VolumeInfo vol = findVolumeByIdOrThrow(volId);
+        unmount(vol);
+    }
+
+    private void unmount(VolumeInfo vol) {
         try {
             mVold.unmount(vol.id);
+            if ((vol.mountFlags & VolumeInfo.MOUNT_FLAG_VISIBLE) != 0) {
+                mVisibleVols.remove(vol);
+            }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
@@ -3596,6 +3630,14 @@ class StorageManagerService extends IStorageManager.Stub
             pw.decreaseIndent();
 
             pw.println();
+            pw.println("mVisibleVols:");
+            pw.increaseIndent();
+            for (int i = 0; i < mVisibleVols.size(); i++) {
+                mVisibleVols.get(i).dump(pw);
+            }
+            pw.decreaseIndent();
+
+            pw.println();
             pw.println("Primary storage UUID: " + mPrimaryStorageUuid);
             final Pair<String, Long> pair = StorageManager.getPrimaryStoragePathAndSize();
             if (pair == null) {
@@ -3716,7 +3758,7 @@ class StorageManagerService extends IStorageManager.Stub
                 int userId) {
             final String sandboxId;
             synchronized (mPackagesLock) {
-                final ArraySet<String> userPackages = getPackagesForUserPL(userId);
+                final ArraySet<String> userPackages = getAvailablePackagesForUserPL(userId);
                 // If userPackages is empty, it means the user is not started yet, so no need to
                 // do anything now.
                 if (userPackages.isEmpty() || userPackages.contains(packageName)) {
@@ -3732,6 +3774,30 @@ class StorageManagerService extends IStorageManager.Stub
                 mVold.mountExternalStorageForApp(packageName, appId, sandboxId, userId);
             } catch (Exception e) {
                 Slog.wtf(TAG, e);
+            }
+        }
+
+        @Override
+        public String[] getVisibleVolumesForUser(int userId) {
+            final ArrayList<String> visibleVolsForUser = new ArrayList<>();
+            for (int i = mVisibleVols.size() - 1; i >= 0; --i) {
+                final VolumeInfo vol = mVisibleVols.get(i);
+                if (vol.isVisibleForUser(userId)) {
+                    visibleVolsForUser.add(getVolumeLabel(vol));
+                }
+            }
+            return visibleVolsForUser.toArray(new String[visibleVolsForUser.size()]);
+        }
+
+        private String getVolumeLabel(VolumeInfo vol) {
+            // STOPSHIP: Label needs to part of VolumeInfo and need to be passed on from vold
+            switch (vol.getType()) {
+                case VolumeInfo.TYPE_EMULATED:
+                    return "emulated";
+                case VolumeInfo.TYPE_PUBLIC:
+                    return vol.fsUuid == null ? vol.id : vol.fsUuid;
+                default:
+                    return null;
             }
         }
     }
