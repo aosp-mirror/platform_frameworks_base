@@ -202,31 +202,6 @@ public interface BiometricAuthenticator {
     }
 
     /**
-     * @param error
-     * @param vendorCode
-     * @return the error string associated with this error
-     */
-    default String getErrorString(int error, int vendorCode) {
-        throw new UnsupportedOperationException("Stub!");
-    }
-
-    /**
-     * @param acquireInfo
-     * @param vendorCode
-     * @return the help string associated with this code
-     */
-    default String getAcquiredString(int acquireInfo, int vendorCode) {
-        throw new UnsupportedOperationException("Stub!");
-    }
-
-    /**
-     * @return one of {@link #TYPE_FINGERPRINT} {@link #TYPE_IRIS} or {@link #TYPE_FACE}
-     */
-    default int getType() {
-        throw new UnsupportedOperationException("Stub!");
-    }
-
-    /**
      * This call warms up the hardware and starts scanning for valid biometrics. It terminates
      * when {@link AuthenticationCallback#onAuthenticationError(int,
      * CharSequence)} is called or when {@link AuthenticationCallback#onAuthenticationSucceeded(

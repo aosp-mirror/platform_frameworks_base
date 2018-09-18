@@ -55,6 +55,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.biometrics.AuthenticationClient;
@@ -101,6 +102,33 @@ public class FingerprintService extends BiometricService {
         public UserFingerprint(Fingerprint f, int userId) {
             this.f = f;
             this.userId = userId;
+        }
+    }
+
+    private final class FingerprintAuthClient extends AuthenticationClientImpl {
+        public FingerprintAuthClient(Context context,
+                DaemonWrapper daemon, long halDeviceId, IBinder token,
+                ServiceListener listener, int targetUserId, int groupId, long opId,
+                boolean restricted, String owner, Bundle bundle,
+                IBiometricPromptReceiver dialogReceiver, IStatusBarService statusBarService) {
+            super(context, daemon, halDeviceId, token, listener, targetUserId, groupId, opId,
+                    restricted,
+                    owner, bundle, dialogReceiver, statusBarService);
+        }
+
+        @Override
+        public String getErrorString(int error, int vendorCode) {
+            return FingerprintManager.getErrorString(getContext(), error, vendorCode);
+        }
+
+        @Override
+        public String getAcquiredString(int acquireInfo, int vendorCode) {
+            return FingerprintManager.getAcquiredString(getContext(), acquireInfo, vendorCode);
+        }
+
+        @Override
+        public int getBiometricType() {
+            return BiometricAuthenticator.TYPE_FINGERPRINT;
         }
     }
 
@@ -151,10 +179,10 @@ public class FingerprintService extends BiometricService {
                 final IFingerprintServiceReceiver receiver, final int flags,
                 final String opPackageName) {
             final boolean restricted = isRestricted();
-            final AuthenticationClientImpl client = new AuthenticationClientImpl(getContext(),
+            final AuthenticationClientImpl client = new FingerprintAuthClient(getContext(),
                     mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver),
                     mCurrentUserId, groupId, opId, restricted, opPackageName, null /* bundle */,
-                    null /* dialogReceiver */, mStatusBarService, mFingerprintManager);
+                    null /* dialogReceiver */, mStatusBarService);
 
             authenticateInternal(client, opId, opPackageName);
         }
@@ -166,11 +194,11 @@ public class FingerprintService extends BiometricService {
                 int callingUid, int callingPid, int callingUserId) {
             checkPermission(MANAGE_BIOMETRIC);
             final boolean restricted = true; // BiometricPrompt is always restricted
-            final AuthenticationClientImpl client = new AuthenticationClientImpl(getContext(),
+            final AuthenticationClientImpl client = new FingerprintAuthClient(getContext(),
                     mDaemonWrapper, mHalDeviceId, token,
                     new BiometricPromptServiceListenerImpl(receiver),
                     mCurrentUserId, groupId, opId, restricted, opPackageName, bundle,
-                    dialogReceiver, mStatusBarService, mFingerprintManager);
+                    dialogReceiver, mStatusBarService);
             authenticateInternal(client, opId, opPackageName, callingUid, callingPid,
                     callingUserId);
         }
@@ -373,7 +401,8 @@ public class FingerprintService extends BiometricService {
                 throws RemoteException {
             if (mBiometricPromptServiceReceiver != null) {
                 mBiometricPromptServiceReceiver.onAcquired(deviceId, acquiredInfo,
-                        mFingerprintManager.getAcquiredString(acquiredInfo, vendorCode));
+                        FingerprintManager.getAcquiredString(
+                            getContext(), acquiredInfo, vendorCode));
             }
         }
 
@@ -396,7 +425,7 @@ public class FingerprintService extends BiometricService {
         public void onError(long deviceId, int error, int vendorCode) throws RemoteException {
             if (mBiometricPromptServiceReceiver != null) {
                 mBiometricPromptServiceReceiver.onError(deviceId, error,
-                        mFingerprintManager.getErrorString(error, vendorCode));
+                        FingerprintManager.getErrorString(getContext(), error, vendorCode));
             }
         }
     }
@@ -569,8 +598,6 @@ public class FingerprintService extends BiometricService {
     private long mHalDeviceId;
     private IBinder mToken = new Binder(); // used for internal FingerprintService enumeration
     private ArrayList<UserFingerprint> mUnknownFingerprints = new ArrayList<>(); // hw fingerprints
-    // Use FingerprintManager to get strings, so BiometricPrompt interface is cleaner.
-    private FingerprintManager mFingerprintManager;
 
     /**
      * Receives callbacks from the HAL.
@@ -740,8 +767,6 @@ public class FingerprintService extends BiometricService {
         super.onStart();
         publishBinderService(Context.FINGERPRINT_SERVICE, new FingerprintServiceWrapper());
         SystemServerInitThreadPool.get().submit(this::getFingerprintDaemon, TAG + ".onStart");
-        mFingerprintManager = (FingerprintManager)
-                getContext().getSystemService(Context.FINGERPRINT_SERVICE);
     }
 
     @Override
