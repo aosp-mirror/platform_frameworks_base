@@ -1171,6 +1171,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mScrimController, this, UnlockMethodCache.getInstance(mContext));
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,
                 getBouncerContainer(), mNotificationPanel, mBiometricUnlockController);
+        //TODO: Can we put the keyguard view manager in Dependency?
+        mLockscreenUserManager.setKeyguardViewManager(mStatusBarKeyguardViewManager);
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
@@ -2916,8 +2918,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         // End old BaseStatusBar.userSwitched
         if (MULTIUSER_DEBUG) mNotificationPanelDebugText.setText("USER " + newUserId);
         animateCollapsePanels();
-        updatePublicMode();
-        mEntryManager.getNotificationData().filterAndSort();
         if (mReinflateNotificationsOnUserSwitched) {
             mEntryManager.updateNotificationsOnDensityOrFontScaleChanged();
             mReinflateNotificationsOnUserSwitched = false;
@@ -3461,7 +3461,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             // notify listeners.
 
             // If the state didn't change, we may still need to update public mode
-            updatePublicMode();
+            mLockscreenUserManager.updatePublicMode();
             mEntryManager.updateNotifications();
         }
         View viewToClick = null;
@@ -3547,34 +3547,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void finishKeyguardFadingAway() {
         mKeyguardMonitor.notifyKeyguardDoneFading();
         mScrimController.setExpansionAffectsAlpha(true);
-    }
-
-    // TODO: Move this to NotificationLockscreenUserManager.
-    private void updatePublicMode() {
-        final boolean showingKeyguard = mStatusBarKeyguardViewManager.isShowing();
-        final boolean devicePublic = showingKeyguard
-                && mStatusBarKeyguardViewManager.isSecure(
-                        mLockscreenUserManager.getCurrentUserId());
-
-        // Look for public mode users. Users are considered public in either case of:
-        //   - device keyguard is shown in secure mode;
-        //   - profile is locked with a work challenge.
-        SparseArray<UserInfo> currentProfiles = mLockscreenUserManager.getCurrentProfiles();
-        for (int i = currentProfiles.size() - 1; i >= 0; i--) {
-            final int userId = currentProfiles.valueAt(i).id;
-            boolean isProfilePublic = devicePublic;
-            if (!devicePublic && userId != mLockscreenUserManager.getCurrentUserId()) {
-                // We can't rely on KeyguardManager#isDeviceLocked() for unified profile challenge
-                // due to a race condition where this code could be called before
-                // TrustManagerService updates its internal records, resulting in an incorrect
-                // state being cached in mLockscreenPublicMode. (b/35951989)
-                if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)
-                        && mStatusBarKeyguardViewManager.isSecure(userId)) {
-                    isProfilePublic = mKeyguardManager.isDeviceLocked(userId);
-                }
-            }
-            mLockscreenUserManager.setLockscreenPublicMode(isProfilePublic, userId);
-        }
     }
 
     /**
@@ -3766,8 +3738,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         }
         updateDozingState();
-        updatePublicMode();
-        mEntryManager.updateNotifications();
         checkBarModes();
         updateScrimController();
         updateMediaMetaData(false, mState != StatusBarState.KEYGUARD);
@@ -4020,8 +3990,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onWorkChallengeChanged() {
-        updatePublicMode();
-        mEntryManager.updateNotifications();
         if (mPendingWorkRemoteInputView != null
                 && !mLockscreenUserManager.isAnyProfilePublicMode()) {
             // Expand notification panel and the notification row, then click on remote input view
