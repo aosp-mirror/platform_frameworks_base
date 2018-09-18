@@ -45,6 +45,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.XmlResourceParser;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
@@ -60,6 +61,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.Xml;
 
 import com.android.internal.R;
@@ -74,12 +76,16 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -88,7 +94,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
     ConditionProviders mConditionProviders;
     @Mock NotificationManager mNotificationManager;
-    @Mock private Resources mResources;
+    private Resources mResources;
     private TestableLooper mTestableLooper;
     private ZenModeHelper mZenModeHelperSpy;
     private Context mContext;
@@ -101,16 +107,46 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mTestableLooper = TestableLooper.get(this);
         mContext = spy(getContext());
         mContentResolver = mContext.getContentResolver();
-        when(mContext.getResources()).thenReturn(mResources);
-        when(mResources.getString(R.string.zen_mode_default_every_night_name)).thenReturn("night");
-        when(mResources.getString(R.string.zen_mode_default_events_name)).thenReturn("events");
-        when(mContext.getSystemService(NotificationManager.class)).thenReturn(mNotificationManager);
 
+        mResources = spy(mContext.getResources());
+        try {
+            when(mResources.getXml(R.xml.default_zen_mode_config)).thenReturn(
+                    getDefaultConfigParser());
+        } catch (Exception e) {
+            Log.d("ZenModeHelperTest", "Couldn't mock default zen mode config xml file err=" +
+                    e.toString());
+        }
+
+        when(mContext.getSystemService(NotificationManager.class)).thenReturn(mNotificationManager);
         mConditionProviders = new ConditionProviders(mContext, new UserProfiles(),
                 AppGlobals.getPackageManager());
         mConditionProviders.addSystemProvider(new CountdownConditionProvider());
         mZenModeHelperSpy = spy(new ZenModeHelper(mContext, mTestableLooper.getLooper(),
                 mConditionProviders));
+    }
+
+    private XmlResourceParser getDefaultConfigParser() throws IOException, XmlPullParserException {
+        String xml = "<zen version=\"8\" user=\"0\">\n"
+                + "<allow calls=\"false\" repeatCallers=\"false\" messages=\"true\" "
+                + "reminders=\"false\" events=\"false\" callsFrom=\"1\" messagesFrom=\"2\" "
+                + "visualScreenOff=\"true\" alarms=\"true\" "
+                + "media=\"true\" system=\"false\" />\n"
+                + "<automatic ruleId=\"EVENTS_DEFAULT_RULE\" enabled=\"false\" snoozing=\"false\""
+                + " name=\"Event\" zen=\"1\""
+                + " component=\"android/com.android.server.notification.EventConditionProvider\""
+                + " conditionId=\"condition://android/event?userId=-10000&amp;calendar=&amp;"
+                + "reply=1\"/>\n"
+                + "<automatic ruleId=\"EVERY_NIGHT_DEFAULT_RULE\" enabled=\"false\""
+                + " snoozing=\"false\" name=\"Sleeping\" zen=\"1\""
+                + " component=\"android/com.android.server.notification.ScheduleConditionProvider\""
+                + " conditionId=\"condition://android/schedule?days=1.2.3.4.5.6.7 &amp;start=22.0"
+                + "&amp;end=7.0&amp;exitAtAlarm=true\"/>"
+                + "<disallow visualEffects=\"511\" />"
+                + "</zen>";
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())), null);
+        parser.nextTag();
+        return new XmlResourceParserImpl(parser);
     }
 
     private ByteArrayOutputStream writeXmlAndPurge(boolean forBackup, Integer version)
@@ -649,8 +685,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         customRule.id = "customRule";
         customRule.name = "Custom Rule";
         customRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        customRule.component = new ComponentName("test", "test");
         customRule.conditionId = ZenModeConfig.toScheduleConditionId(customRuleInfo);
+        customRule.component = new ComponentName("android", "ScheduleConditionProvider");
         automaticRules.put("customRule", customRule);
         mZenModeHelperSpy.mConfig.automaticRules = automaticRules;
 
@@ -662,8 +698,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
         mZenModeHelperSpy.readXml(parser, true);
-        assertEquals(original.hashCode(), mZenModeHelperSpy.mConfig.hashCode());
         assertEquals(original, mZenModeHelperSpy.mConfig);
+        assertEquals(original.hashCode(), mZenModeHelperSpy.mConfig.hashCode());
     }
 
     @Test
@@ -678,6 +714,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         customRule.name = "Custom Rule";
         customRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         customRule.conditionId = ZenModeConfig.toScheduleConditionId(weeknights);
+        customRule.component = new ComponentName("android", "ScheduleConditionProvider");
         enabledAutoRule.put("customRule", customRule);
         mZenModeHelperSpy.mConfig.automaticRules = enabledAutoRule;
 
@@ -842,6 +879,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         customRule.name = "Custom Rule";
         customRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         customRule.conditionId = ZenModeConfig.toScheduleConditionId(weeknights);
+        customRule.component = new ComponentName("android", "ScheduleConditionProvider");
         disabledAutoRule.put("customRule", customRule);
         mZenModeHelperSpy.mConfig.automaticRules = disabledAutoRule;
 
@@ -877,6 +915,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         customRule.name = "Custom Rule";
         customRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         customRule.conditionId = ZenModeConfig.toScheduleConditionId(customRuleInfo);
+        customRule.component = new ComponentName("android", "ScheduleConditionProvider");
         automaticRules.put("customRule", customRule);
 
         ZenModeConfig.ZenRule defaultScheduleRule = new ZenModeConfig.ZenRule();
@@ -886,6 +925,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         defaultScheduleRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         defaultScheduleRule.conditionId = ZenModeConfig.toScheduleConditionId(
                 defaultScheduleRuleInfo);
+        customRule.component = new ComponentName("android", "ScheduleConditionProvider");
         defaultScheduleRule.id = ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID;
         automaticRules.put(ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID, defaultScheduleRule);
 
@@ -922,6 +962,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         customRule.name = "Custom Rule";
         customRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         customRule.conditionId = ZenModeConfig.toScheduleConditionId(customRuleInfo);
+        customRule.component = new ComponentName("android", "ScheduleConditionProvider");
         automaticRules.put("customRule", customRule);
 
         ZenModeConfig.ZenRule defaultScheduleRule = new ZenModeConfig.ZenRule();
@@ -1014,5 +1055,295 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertTrue(mZenModeHelperSpy.mConfig.allowEvents);
         assertTrue(mZenModeHelperSpy.mConfig.allowRepeatCallers);
         assertEquals(SUPPRESSED_EFFECT_BADGE, mZenModeHelperSpy.mConfig.suppressedVisualEffects);
+    }
+
+    /**
+     * Wrapper to use XmlPullParser as XmlResourceParser for Resources.getXml()
+     */
+    final class XmlResourceParserImpl implements XmlResourceParser {
+        private XmlPullParser parser;
+
+        public XmlResourceParserImpl(XmlPullParser parser) {
+            this.parser = parser;
+        }
+
+        public int getEventType() throws XmlPullParserException {
+            return parser.getEventType();
+        }
+
+        @Override
+        public void setFeature(String name, boolean state) throws XmlPullParserException {
+            parser.setFeature(name, state);
+        }
+
+        @Override
+        public boolean getFeature(String name) {
+            return false;
+        }
+
+        @Override
+        public void setProperty(String name, Object value) throws XmlPullParserException {
+            parser.setProperty(name, value);
+        }
+
+        @Override
+        public Object getProperty(String name) {
+            return parser.getProperty(name);
+        }
+
+        @Override
+        public void setInput(Reader in) throws XmlPullParserException {
+            parser.setInput(in);
+        }
+
+        @Override
+        public void setInput(InputStream inputStream, String inputEncoding)
+                throws XmlPullParserException {
+            parser.setInput(inputStream, inputEncoding);
+        }
+
+        @Override
+        public String getInputEncoding() {
+            return parser.getInputEncoding();
+        }
+
+        @Override
+        public void defineEntityReplacementText(String entityName, String replacementText)
+                throws XmlPullParserException {
+            parser.defineEntityReplacementText(entityName, replacementText);
+        }
+
+        @Override
+        public int getNamespaceCount(int depth) throws XmlPullParserException {
+            return parser.getNamespaceCount(depth);
+        }
+
+        @Override
+        public String getNamespacePrefix(int pos) throws XmlPullParserException {
+            return parser.getNamespacePrefix(pos);
+        }
+
+        @Override
+        public String getNamespaceUri(int pos) throws XmlPullParserException {
+            return parser.getNamespaceUri(pos);
+        }
+
+        @Override
+        public String getNamespace(String prefix) {
+            return parser.getNamespace(prefix);
+        }
+
+        @Override
+        public int getDepth() {
+            return parser.getDepth();
+        }
+
+        @Override
+        public String getPositionDescription() {
+            return parser.getPositionDescription();
+        }
+
+        @Override
+        public int getLineNumber() {
+            return parser.getLineNumber();
+        }
+
+        @Override
+        public int getColumnNumber() {
+            return parser.getColumnNumber();
+        }
+
+        @Override
+        public boolean isWhitespace() throws XmlPullParserException {
+            return parser.isWhitespace();
+        }
+
+        @Override
+        public String getText() {
+            return parser.getText();
+        }
+
+        @Override
+        public char[] getTextCharacters(int[] holderForStartAndLength) {
+            return parser.getTextCharacters(holderForStartAndLength);
+        }
+
+        @Override
+        public String getNamespace() {
+            return parser.getNamespace();
+        }
+
+        @Override
+        public String getName() {
+            return parser.getName();
+        }
+
+        @Override
+        public String getPrefix() {
+            return parser.getPrefix();
+        }
+
+        @Override
+        public boolean isEmptyElementTag() throws XmlPullParserException {
+            return false;
+        }
+
+        @Override
+        public int getAttributeCount() {
+            return parser.getAttributeCount();
+        }
+
+        public int next() throws IOException, XmlPullParserException {
+            return parser.next();
+        }
+
+        @Override
+        public int nextToken() throws XmlPullParserException, IOException {
+            return parser.next();
+        }
+
+        @Override
+        public void require(int type, String namespace, String name)
+                throws XmlPullParserException, IOException {
+            parser.require(type, namespace, name);
+        }
+
+        @Override
+        public String nextText() throws XmlPullParserException, IOException {
+            return parser.nextText();
+        }
+
+        @Override
+        public String getAttributeNamespace(int index) {
+            return "";
+        }
+
+        @Override
+        public String getAttributeName(int index) {
+            return parser.getAttributeName(index);
+        }
+
+        @Override
+        public String getAttributePrefix(int index) {
+            return parser.getAttributePrefix(index);
+        }
+
+        @Override
+        public String getAttributeType(int index) {
+            return parser.getAttributeType(index);
+        }
+
+        @Override
+        public boolean isAttributeDefault(int index) {
+            return parser.isAttributeDefault(index);
+        }
+
+        @Override
+        public String getAttributeValue(int index) {
+            return parser.getAttributeValue(index);
+        }
+
+        @Override
+        public String getAttributeValue(String namespace, String name) {
+            return parser.getAttributeValue(namespace, name);
+        }
+
+        @Override
+        public int getAttributeNameResource(int index) {
+            return 0;
+        }
+
+        @Override
+        public int getAttributeListValue(String namespace, String attribute, String[] options,
+                int defaultValue) {
+            return 0;
+        }
+
+        @Override
+        public boolean getAttributeBooleanValue(String namespace, String attribute,
+                boolean defaultValue) {
+            return false;
+        }
+
+        @Override
+        public int getAttributeResourceValue(String namespace, String attribute, int defaultValue) {
+            return 0;
+        }
+
+        @Override
+        public int getAttributeIntValue(String namespace, String attribute, int defaultValue) {
+            return 0;
+        }
+
+        @Override
+        public int getAttributeUnsignedIntValue(String namespace, String attribute,
+                int defaultValue) {
+            return 0;
+        }
+
+        @Override
+        public float getAttributeFloatValue(String namespace, String attribute,
+                float defaultValue) {
+            return 0;
+        }
+
+        @Override
+        public int getAttributeListValue(int index, String[] options, int defaultValue) {
+            return 0;
+        }
+
+        @Override
+        public boolean getAttributeBooleanValue(int index, boolean defaultValue) {
+            return false;
+        }
+
+        @Override
+        public int getAttributeResourceValue(int index, int defaultValue) {
+            return 0;
+        }
+
+        @Override
+        public int getAttributeIntValue(int index, int defaultValue) {
+            return 0;
+        }
+
+        @Override
+        public int getAttributeUnsignedIntValue(int index, int defaultValue) {
+            return 0;
+        }
+
+        @Override
+        public float getAttributeFloatValue(int index, float defaultValue) {
+            return 0;
+        }
+
+        @Override
+        public String getIdAttribute() {
+            return null;
+        }
+
+        @Override
+        public String getClassAttribute() {
+            return null;
+        }
+
+        @Override
+        public int getIdAttributeResourceValue(int defaultValue) {
+            return 0;
+        }
+
+        @Override
+        public int getStyleAttribute() {
+            return 0;
+        }
+
+        @Override
+        public void close() {
+        }
+
+        @Override
+        public int nextTag() throws IOException, XmlPullParserException {
+            return parser.nextTag();
+        }
     }
 }

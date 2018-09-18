@@ -146,6 +146,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String RULE_ATT_CONDITION_ID = "conditionId";
     private static final String RULE_ATT_CREATION_TIME = "creationTime";
     private static final String RULE_ATT_ENABLER = "enabler";
+    private static final String RULE_ATT_MODIFIED = "modified";
 
     @UnsupportedAppUsage
     public boolean allowAlarms = DEFAULT_ALLOW_ALARMS;
@@ -633,6 +634,7 @@ public class ZenModeConfig implements Parcelable {
             Slog.i(TAG, "Updating zenMode of automatic rule " + rt.name);
             rt.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         }
+        rt.modified = safeBoolean(parser, RULE_ATT_MODIFIED, false);
         return rt;
     }
 
@@ -656,6 +658,7 @@ public class ZenModeConfig implements Parcelable {
         if (rule.condition != null) {
             writeConditionXml(rule.condition, out);
         }
+        out.attribute(null, RULE_ATT_MODIFIED, Boolean.toString(rule.modified));
     }
 
     public static Condition readConditionXml(XmlPullParser parser) {
@@ -1456,6 +1459,7 @@ public class ZenModeConfig implements Parcelable {
         public long creationTime;        // required for automatic
         public String enabler;          // package name, only used for manual rules.
         public ZenPolicy zenPolicy;
+        public boolean modified;    // rule has been modified from initial creation
 
         public ZenRule() { }
 
@@ -1477,6 +1481,7 @@ public class ZenModeConfig implements Parcelable {
                 enabler = source.readString();
             }
             zenPolicy = source.readParcelable(null);
+            modified = source.readInt() == 1;
         }
 
         @Override
@@ -1512,6 +1517,7 @@ public class ZenModeConfig implements Parcelable {
                 dest.writeInt(0);
             }
             dest.writeParcelable(zenPolicy, 0);
+            dest.writeInt(modified ? 1 : 0);
         }
 
         @Override
@@ -1528,6 +1534,7 @@ public class ZenModeConfig implements Parcelable {
                     .append(",creationTime=").append(creationTime)
                     .append(",enabler=").append(enabler)
                     .append(",zenPolicy=").append(zenPolicy)
+                    .append(",modified=").append(modified)
                     .append(']').toString();
         }
 
@@ -1554,6 +1561,7 @@ public class ZenModeConfig implements Parcelable {
             if (zenPolicy != null) {
                 zenPolicy.writeToProto(proto, ZenRuleProto.ZEN_POLICY);
             }
+            proto.write(ZenRuleProto.MODIFIED, modified);
             proto.end(token);
         }
 
@@ -1606,6 +1614,9 @@ public class ZenModeConfig implements Parcelable {
             if (!Objects.equals(zenPolicy, to.zenPolicy)) {
                 d.addLine(item, "zenPolicy", zenPolicy, to.zenPolicy);
             }
+            if (modified != to.modified) {
+                d.addLine(item, "modified", modified, to.modified);
+            }
         }
 
         @Override
@@ -1622,13 +1633,14 @@ public class ZenModeConfig implements Parcelable {
                     && Objects.equals(other.component, component)
                     && Objects.equals(other.id, id)
                     && Objects.equals(other.enabler, enabler)
-                    && Objects.equals(other.zenPolicy, zenPolicy);
+                    && Objects.equals(other.zenPolicy, zenPolicy)
+                    && other.modified == modified;
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
-                    component, id, enabler, zenPolicy);
+                    component, id, enabler, zenPolicy, modified);
         }
 
         public boolean isAutomaticActive() {
