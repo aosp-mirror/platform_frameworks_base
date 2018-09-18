@@ -16,23 +16,16 @@
 
 package com.android.systemui.recents.events;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
-import android.util.MutableBoolean;
 
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -117,11 +110,7 @@ class EventHandlerMethod {
  * <p>
  * Currently, there is a single EventBus that handles {@link EventBus.Event}s for each subscriber
  * on the main application thread.  Publishers can send() events to synchronously call subscribers
- * of that event, or post() events to be processed in the next run of the {@link Looper}.  In
- * addition, the EventBus supports sending and handling {@link EventBus.InterprocessEvent}s
- * (within the same package) implemented using standard {@link BroadcastReceiver} mechanism.
- * Interprocess events must be posted using postInterprocess() to ensure that it is dispatched
- * correctly across processes.
+ * of that event, or post() events to be processed in the next run of the {@link Looper}.
  *
  * <p>
  * Subscribers must be registered with a particular EventBus before they will receive events, and
@@ -135,24 +124,10 @@ class EventHandlerMethod {
  * <li>Methods must take one parameter, of class type deriving from {@link EventBus.Event}
  * </ul>
  *
- * <p>
- * Interprocess-Event method signature:<ul>
- * <li>Methods must be public final
- * <li>Methods must return void
- * <li>Methods must be called "onInterprocessBusEvent"
- * <li>Methods must take one parameter, of class type deriving from {@link EventBus.InterprocessEvent}
- * </ul>
- * </p>
- *
  * </p>
  * Each subscriber can be registered with a given priority (default 1), and events will be dispatch
  * in decreasing order of priority.  For subscribers with the same priority, events will be
  * dispatched by latest registration time to earliest.
- *
- * <p>
- * Interprocess events must extend {@link EventBus.InterprocessEvent}, have a constructor which
- * takes a {@link Bundle} and implement toBundle().  This allows us to serialize events to be sent
- * across processes.
  *
  * <p>
  * Caveats:<ul>
@@ -201,7 +176,7 @@ class EventHandlerMethod {
  * result?
  * </p>
  */
-public class EventBus extends BroadcastReceiver {
+public class EventBus {
 
     private static final String TAG = "EventBus";
     private static final boolean DEBUG_TRACE_ALL = false;
@@ -314,35 +289,6 @@ public class EventBus extends BroadcastReceiver {
     }
 
     /**
-     * An inter-process event super class that allows us to track user state across subscriber
-     * invocations.
-     */
-    public static class InterprocessEvent extends Event {
-        private static final String EXTRA_USER = "_user";
-
-        // The user which this event originated from
-        public final int user;
-
-        // Only accessible from derived events
-        protected InterprocessEvent(int user) {
-            this.user = user;
-        }
-
-        /**
-         * Called from the event bus
-         */
-        protected InterprocessEvent(Bundle b) {
-            user = b.getInt(EXTRA_USER);
-        }
-
-        protected Bundle toBundle() {
-            Bundle b = new Bundle();
-            b.putInt(EXTRA_USER, user);
-            return b;
-        }
-    }
-
-    /**
      * Proguard must also know, and keep, all methods matching this signature.
      *
      * -keepclassmembers class ** {
@@ -351,13 +297,6 @@ public class EventBus extends BroadcastReceiver {
      * }
      */
     private static final String METHOD_PREFIX = "onBusEvent";
-    private static final String INTERPROCESS_METHOD_PREFIX = "onInterprocessBusEvent";
-
-    // Ensures that interprocess events can only be sent from a process holding this permission. */
-    private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
-
-    // Used for passing event data across process boundaries
-    private static final String EXTRA_INTERPROCESS_EVENT_BUNDLE = "interprocess_event_bundle";
 
     // The default priority of all subscribers
     private static final int DEFAULT_SUBSCRIBER_PRIORITY = 1;
@@ -383,10 +322,6 @@ public class EventBus extends BroadcastReceiver {
     // The handler to post all events
     private Handler mHandler;
 
-    // Keep track of whether we have registered a broadcast receiver already, so that we can
-    // unregister ourselves before re-registering again with a new IntentFilter.
-    private boolean mHasRegisteredReceiver;
-
     /**
      * Map from event class -> event handler list.  Keeps track of the actual mapping from event
      * to subscriber method.
@@ -399,13 +334,6 @@ public class EventBus extends BroadcastReceiver {
      * reflection or whether we can just add the subscriber to the event type map.
      */
     private HashMap<Class<? extends Object>, ArrayList<EventHandlerMethod>> mSubscriberTypeMap = new HashMap<>();
-
-    /**
-     * Map from interprocess event name -> interprocess event class.  Used for mapping the event
-     * name after receiving the broadcast, to the event type.  After which a new instance is created
-     * and posted in the local process.
-     */
-    private HashMap<String, Class<? extends InterprocessEvent>> mInterprocessEventNameMap = new HashMap<>();
 
     /**
      * Set of all currently registered subscribers
@@ -447,7 +375,7 @@ public class EventBus extends BroadcastReceiver {
      *                   be scanned for appropriate event handler methods.
      */
     public void register(Object subscriber) {
-        registerSubscriber(subscriber, DEFAULT_SUBSCRIBER_PRIORITY, null);
+        registerSubscriber(subscriber, DEFAULT_SUBSCRIBER_PRIORITY);
     }
 
     /**
@@ -460,44 +388,7 @@ public class EventBus extends BroadcastReceiver {
      *                 subscribers
      */
     public void register(Object subscriber, int priority) {
-        registerSubscriber(subscriber, priority, null);
-    }
-
-    /**
-     * Explicitly registers a subscriber to receive interprocess events with the default priority.
-     *
-     * @param subscriber the subscriber to handle events.  If this is the first instance of the
-     *                   subscriber's class type that has been registered, the class's methods will
-     *                   be scanned for appropriate event handler methods.
-     */
-    public void registerInterprocessAsCurrentUser(Context context, Object subscriber) {
-        registerInterprocessAsCurrentUser(context, subscriber, DEFAULT_SUBSCRIBER_PRIORITY);
-    }
-
-    /**
-     * Registers a subscriber to receive interprocess events with the given priority.
-     *
-     * @param subscriber the subscriber to handle events.  If this is the first instance of the
-     *                   subscriber's class type that has been registered, the class's methods will
-     *                   be scanned for appropriate event handler methods.
-     * @param priority the priority that this subscriber will receive events relative to other
-     *                 subscribers
-     */
-    public void registerInterprocessAsCurrentUser(Context context, Object subscriber, int priority) {
-        if (DEBUG_TRACE_ALL) {
-            logWithPid("registerInterprocessAsCurrentUser(" + subscriber.getClass().getSimpleName() + ")");
-        }
-
-        // Register the subscriber normally, and update the broadcast receiver filter if this is
-        // a new subscriber type with interprocess events
-        MutableBoolean hasInterprocessEventsChanged = new MutableBoolean(false);
-        registerSubscriber(subscriber, priority, hasInterprocessEventsChanged);
-        if (DEBUG_TRACE_ALL) {
-            logWithPid("hasInterprocessEventsChanged: " + hasInterprocessEventsChanged.value);
-        }
-        if (hasInterprocessEventsChanged.value) {
-            registerReceiverForInterprocessEvents(context);
-        }
+        registerSubscriber(subscriber, priority);
     }
 
     /**
@@ -535,18 +426,6 @@ public class EventBus extends BroadcastReceiver {
                 }
             }
         }
-    }
-
-    /**
-     * Explicit unregistration for interprocess event subscribers.  This actually behaves exactly
-     * the same as unregister() since we also do not want to stop listening for specific
-     * inter-process messages in case new instances of that subscriber is registered.
-     */
-    public void unregisterInterprocess(Context context, Object subscriber) {
-        if (DEBUG_TRACE_ALL) {
-            logWithPid("unregisterInterprocess()");
-        }
-        unregister(subscriber);
     }
 
     /**
@@ -596,57 +475,6 @@ public class EventBus extends BroadcastReceiver {
             post(event);
         } else {
             send(event);
-        }
-    }
-
-    /** Prevent post()ing an InterprocessEvent */
-    @Deprecated
-    public void post(InterprocessEvent event) {
-        throw new RuntimeException("Not supported, use postInterprocess");
-    }
-
-    /** Prevent send()ing an InterprocessEvent */
-    @Deprecated
-    public void send(InterprocessEvent event) {
-        throw new RuntimeException("Not supported, use postInterprocess");
-    }
-
-    /**
-     * Posts an interprocess event.
-     */
-    public void postInterprocess(Context context, final InterprocessEvent event) {
-        if (DEBUG_TRACE_ALL) {
-            logWithPid("postInterprocess(" + event.getClass().getSimpleName() + ")");
-        }
-        String eventType = event.getClass().getName();
-        Bundle eventBundle = event.toBundle();
-        Intent intent = new Intent(eventType);
-        intent.setPackage(context.getPackageName());
-        intent.putExtra(EXTRA_INTERPROCESS_EVENT_BUNDLE, eventBundle);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
-                Intent.FLAG_RECEIVER_FOREGROUND);
-        context.sendBroadcastAsUser(intent, UserHandle.ALL);
-    }
-
-    /**
-     * Receiver for interprocess events.
-     */
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        if (DEBUG_TRACE_ALL) {
-            logWithPid("onReceive(" + intent.getAction() + ", user " + UserHandle.myUserId() + ")");
-        }
-
-        Bundle eventBundle = intent.getBundleExtra(EXTRA_INTERPROCESS_EVENT_BUNDLE);
-        Class<? extends InterprocessEvent> eventType = mInterprocessEventNameMap.get(intent.getAction());
-        try {
-            Constructor<? extends InterprocessEvent> ctor = eventType.getConstructor(Bundle.class);
-            send((Event) ctor.newInstance(eventBundle));
-        } catch (NoSuchMethodException|
-                InvocationTargetException|
-                InstantiationException|
-                IllegalAccessException e) {
-            Log.e(TAG, "Failed to create InterprocessEvent", e.getCause());
         }
     }
 
@@ -711,8 +539,7 @@ public class EventBus extends BroadcastReceiver {
     /**
      * Registers a new subscriber.
      */
-    private void registerSubscriber(Object subscriber, int priority,
-            MutableBoolean hasInterprocessEventsChangedOut) {
+    private void registerSubscriber(Object subscriber, int priority) {
         // Fail immediately if we are being called from the non-main thread
         long callingThreadId = Thread.currentThread().getId();
         if (callingThreadId != mHandler.getLooper().getThread().getId()) {
@@ -759,31 +586,15 @@ public class EventBus extends BroadcastReceiver {
         }
 
         // Find all the valid event bus handler methods of the subscriber
-        MutableBoolean isInterprocessEvent = new MutableBoolean(false);
         Method[] methods = subscriberType.getDeclaredMethods();
         for (Method m : methods) {
             Class<?>[] parameterTypes = m.getParameterTypes();
-            isInterprocessEvent.value = false;
-            if (isValidEventBusHandlerMethod(m, parameterTypes, isInterprocessEvent)) {
+            if (isValidEventBusHandlerMethod(m, parameterTypes)) {
                 Class<? extends Event> eventType = (Class<? extends Event>) parameterTypes[0];
                 ArrayList<EventHandler> eventTypeHandlers = mEventTypeMap.get(eventType);
                 if (eventTypeHandlers == null) {
                     eventTypeHandlers = new ArrayList<>();
                     mEventTypeMap.put(eventType, eventTypeHandlers);
-                }
-                if (isInterprocessEvent.value) {
-                    try {
-                        // Enforce that the event must have a Bundle constructor
-                        eventType.getConstructor(Bundle.class);
-
-                        mInterprocessEventNameMap.put(eventType.getName(),
-                                (Class<? extends InterprocessEvent>) eventType);
-                        if (hasInterprocessEventsChangedOut != null) {
-                            hasInterprocessEventsChangedOut.value = true;
-                        }
-                    } catch (NoSuchMethodException e) {
-                        throw new RuntimeException("Expected InterprocessEvent to have a Bundle constructor");
-                    }
                 }
                 EventHandlerMethod method = new EventHandlerMethod(m, eventType);
                 EventHandler handler = new EventHandler(sub, method, priority);
@@ -793,8 +604,7 @@ public class EventBus extends BroadcastReceiver {
 
                 if (DEBUG_TRACE_ALL) {
                     logWithPid("  * Method: " + m.getName() +
-                            " event: " + parameterTypes[0].getSimpleName() +
-                            " interprocess? " + isInterprocessEvent.value);
+                            " event: " + parameterTypes[0].getSimpleName());
                 }
             }
         }
@@ -830,12 +640,7 @@ public class EventBus extends BroadcastReceiver {
             final EventHandler eventHandler = eventHandlers.get(i);
             if (eventHandler.subscriber.getReference() != null) {
                 if (event.requiresPost) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            processEvent(eventHandler, event);
-                        }
-                    });
+                    mHandler.post(() -> processEvent(eventHandler, event));
                     hasPostedEvent = true;
                 } else {
                     processEvent(eventHandler, event);
@@ -845,12 +650,7 @@ public class EventBus extends BroadcastReceiver {
 
         // Clean up after this event, deferring until all subscribers have been called
         if (hasPostedEvent) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    event.onPostDispatch();
-                }
-            });
+            mHandler.post(event::onPostDispatch);
         } else {
             event.onPostDispatch();
         }
@@ -898,29 +698,6 @@ public class EventBus extends BroadcastReceiver {
     }
 
     /**
-     * Re-registers the broadcast receiver for any new messages that we want to listen for.
-     */
-    private void registerReceiverForInterprocessEvents(Context context) {
-        if (DEBUG_TRACE_ALL) {
-            logWithPid("registerReceiverForInterprocessEvents()");
-        }
-        // Rebuild the receiver filter with the new interprocess events
-        IntentFilter filter = new IntentFilter();
-        for (String eventName : mInterprocessEventNameMap.keySet()) {
-            filter.addAction(eventName);
-            if (DEBUG_TRACE_ALL) {
-                logWithPid("  filter: " + eventName);
-            }
-        }
-        // Re-register the receiver with the new filter
-        if (mHasRegisteredReceiver) {
-            context.unregisterReceiver(this);
-        }
-        context.registerReceiverAsUser(this, UserHandle.ALL, filter, PERMISSION_SELF, mHandler);
-        mHasRegisteredReceiver = true;
-    }
-
-    /**
      * Returns whether this subscriber is currently registered.  If {@param removeFoundSubscriber}
      * is true, then remove the subscriber before returning.
      */
@@ -940,28 +717,19 @@ public class EventBus extends BroadcastReceiver {
     /**
      * @return whether {@param method} is a valid (normal or interprocess) event bus handler method
      */
-    private boolean isValidEventBusHandlerMethod(Method method, Class<?>[] parameterTypes,
-            MutableBoolean isInterprocessEventOut) {
+    private boolean isValidEventBusHandlerMethod(Method method, Class<?>[] parameterTypes) {
         int modifiers = method.getModifiers();
         if (Modifier.isPublic(modifiers) &&
                 Modifier.isFinal(modifiers) &&
                 method.getReturnType().equals(Void.TYPE) &&
                 parameterTypes.length == 1) {
-            if (EventBus.InterprocessEvent.class.isAssignableFrom(parameterTypes[0]) &&
-                    method.getName().startsWith(INTERPROCESS_METHOD_PREFIX)) {
-                isInterprocessEventOut.value = true;
-                return true;
-            } else if (EventBus.Event.class.isAssignableFrom(parameterTypes[0]) &&
+            if (EventBus.Event.class.isAssignableFrom(parameterTypes[0]) &&
                             method.getName().startsWith(METHOD_PREFIX)) {
-                isInterprocessEventOut.value = false;
                 return true;
             } else {
                 if (DEBUG_TRACE_ALL) {
                     if (!EventBus.Event.class.isAssignableFrom(parameterTypes[0])) {
                         logWithPid("  Expected method take an Event-based parameter: " + method.getName());
-                    } else if (!method.getName().startsWith(INTERPROCESS_METHOD_PREFIX) &&
-                            !method.getName().startsWith(METHOD_PREFIX)) {
-                        logWithPid("  Expected method start with method prefix: " + method.getName());
                     }
                 }
             }
