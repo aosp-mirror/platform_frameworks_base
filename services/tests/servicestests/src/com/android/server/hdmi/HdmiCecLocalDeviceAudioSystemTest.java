@@ -580,7 +580,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mTestLooper.dispatchAll();
         assertThat(mHdmiCecLocalDeviceAudioSystem.getActiveSource())
             .isEqualTo(expectedActiveSource);
-        assertThat(mHdmiCecLocalDeviceAudioSystem.getLocalActivePort())
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getRoutingPort())
             .isEqualTo(expectedLocalActivePort);
         assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
     }
@@ -589,7 +589,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     public void handleRoutingInformation_currentActivePortIsHDMI1() {
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildRoutingInformation(ADDR_TV, 0x2000);
-        mHdmiCecLocalDeviceAudioSystem.setLocalActivePort(Constants.CEC_SWITCH_HDMI1);
+        mHdmiCecLocalDeviceAudioSystem.setRoutingPort(Constants.CEC_SWITCH_HDMI1);
         HdmiCecMessage expectedMessage =
                 HdmiCecMessageBuilder.buildRoutingInformation(ADDR_AUDIO_SYSTEM, 0x2100);
 

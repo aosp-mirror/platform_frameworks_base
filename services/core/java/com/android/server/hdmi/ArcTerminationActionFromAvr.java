@@ -50,6 +50,9 @@ public class ArcTerminationActionFromAvr extends HdmiCecFeatureAction {
             case Constants.MESSAGE_REPORT_ARC_TERMINATED:
                 mState = STATE_ARC_TERMINATED;
                 audioSystem().setArcStatus(false);
+                if (audioSystem().getLocalActivePort() == Constants.CEC_SWITCH_ARC) {
+                    audioSystem().routeToInputFromPortId(audioSystem().getRoutingPort());
+                }
                 finish();
                 return true;
         }

@@ -88,6 +88,11 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
         source.mService.setAndBroadcastActiveSourceFromOneDeviceType(
                 mTargetAddress, getSourcePath());
         // Set local active port to HOME when One Touch Play.
+        // Active Port and Current Input are handled by the switch functionality device.
+        if (source.mService.audioSystem() != null) {
+            source = source.mService.audioSystem();
+        }
+        source.setRoutingPort(Constants.CEC_SWITCH_HOME);
         source.setLocalActivePort(Constants.CEC_SWITCH_HOME);
     }
 

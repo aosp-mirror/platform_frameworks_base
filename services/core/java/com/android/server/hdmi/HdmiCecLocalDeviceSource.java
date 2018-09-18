@@ -45,14 +45,24 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     protected boolean mIsSwitchDevice = SystemProperties.getBoolean(
             Constants.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
 
-    // Local active port number used for Routing Control.
-    // This records the default active port or the previous valid active port.
+    // Routing port number used for Routing Control.
+    // This records the default routing port or the previous valid routing port.
     // Default is HOME input.
     // Note that we don't save active path here because for source device,
-    // new Active Source physical address might not match the local active path
+    // new Active Source physical address might not match the active path
     @GuardedBy("mLock")
     @LocalActivePort
-    private int mLocalActivePort = Constants.CEC_SWITCH_HOME;
+    private int mRoutingPort = Constants.CEC_SWITCH_HOME;
+
+    // This records the current input of the device.
+    // When device is switched to ARC input, mRoutingPort does not record it
+    // since it's not an HDMI port used for Routing Control.
+    // mLocalActivePort will record whichever input we switch to to keep tracking on
+    // the current input status of the device.
+    // This can help prevent duplicate switching and provide status information.
+    @GuardedBy("mLock")
+    @LocalActivePort
+    protected int mLocalActivePort = Constants.CEC_SWITCH_HOME;
 
     protected HdmiCecLocalDeviceSource(HdmiControlService service, int deviceType) {
         super(service, deviceType);
@@ -219,19 +229,59 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         }
     }
 
+    /**
+     * Set {@link #mRoutingPort} to a specific {@link LocalActivePort} to record the current active
+     * CEC Routing Control related port.
+     *
+     * @param portId The portId of the new routing port.
+     */
     @VisibleForTesting
-    protected void setLocalActivePort(@LocalActivePort int portId) {
+    protected void setRoutingPort(@LocalActivePort int portId) {
         synchronized (mLock) {
-            mLocalActivePort = portId;
+            mRoutingPort = portId;
         }
     }
 
-    // To get the local active port to switch to
-    // when receivng routing change or information.
+    /**
+     * Get {@link #mRoutingPort}. This is useful when the device needs to route to the last valid
+     * routing port.
+     */
+    @LocalActivePort
+    protected int getRoutingPort() {
+        synchronized (mLock) {
+            return mRoutingPort;
+        }
+    }
+
+    /**
+     * Get {@link #mLocalActivePort}. This is useful when device needs to know the current active
+     * port.
+     */
     @LocalActivePort
     protected int getLocalActivePort() {
         synchronized (mLock) {
             return mLocalActivePort;
         }
+    }
+
+    /**
+     * Set {@link #mLocalActivePort} to a specific {@link LocalActivePort} to record the current
+     * active port.
+     *
+     * <p>It does not have to be a Routing Control related port. For example it can be
+     * set to {@link Constants#CEC_SWITCH_ARC} but this port is System Audio related.
+     *
+     * @param activePort The portId of the new active port.
+     */
+    protected void setLocalActivePort(@LocalActivePort int activePort) {
+        synchronized (mLock) {
+            mLocalActivePort = activePort;
+        }
+    }
+
+    // Check if the device is trying to switch to the same input that is active right now.
+    // This can help avoid redundant port switching.
+    protected boolean isSwitchingToTheSameInput(@LocalActivePort int activePort) {
+        return activePort == getLocalActivePort();
     }
 }
