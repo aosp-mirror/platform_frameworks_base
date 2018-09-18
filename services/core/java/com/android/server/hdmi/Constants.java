@@ -334,6 +334,16 @@ final class Constants {
             "ro.hdmi.property_hdmi_cec_never_claim_playback_logical_address";
 
     /**
+     * A comma separated list of logical addresses that HdmiControlService
+     * will never assign local CEC devices to.
+     *
+     * <p> This is useful when HDMI CEC hardware module can't assign multiple logical addresses
+     * in the range same range of 0-7 or 8-15.
+     */
+    static final String PROPERTY_HDMI_CEC_NEVER_ASSIGN_LOGICAL_ADDRESSES =
+            "ro.hdmi.property_hdmi_cec_never_assign_logical_addresses";
+
+    /**
      * Property to indicate if the current device is a cec switch device.
      *
      * <p> Default is false.

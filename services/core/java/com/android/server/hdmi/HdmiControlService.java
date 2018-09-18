@@ -417,7 +417,7 @@ public class HdmiControlService extends SystemService {
         mSettingsObserver = new SettingsObserver(mHandler);
     }
 
-    private static List<Integer> getIntList(String string) {
+    protected static List<Integer> getIntList(String string) {
         ArrayList<Integer> list = new ArrayList<>();
         TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(',');
         splitter.setString(string);
