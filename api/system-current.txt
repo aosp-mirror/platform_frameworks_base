@@ -3456,15 +3456,18 @@ package android.media {
     method public void clearAudioServerStateCallback();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int dispatchAudioFocusChange(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.audiopolicy.AudioProductStrategies getAudioProductStrategies();
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.audiopolicy.AudioVolumeGroups getAudioVolumeGroups();
     method public boolean isAudioServerRunning();
     method public boolean isHdmiSystemAudioSupported();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int registerAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
+    method public void registerVolumeGroupCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.VolumeGroupCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, @NonNull android.media.AudioAttributes, int, int) throws java.lang.IllegalArgumentException;
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.MODIFY_AUDIO_ROUTING}) public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, @NonNull android.media.AudioAttributes, int, int, android.media.audiopolicy.AudioPolicy) throws java.lang.IllegalArgumentException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int requestAudioFocus(@NonNull android.media.AudioFocusRequest, @Nullable android.media.audiopolicy.AudioPolicy);
     method public void setAudioServerStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.AudioServerStateCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setFocusRequestResult(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void unregisterAudioPolicyAsync(@NonNull android.media.audiopolicy.AudioPolicy);
+    method public void unregisterVolumeGroupCallback(@NonNull android.media.AudioManager.VolumeGroupCallback);
     field public static final int AUDIOFOCUS_FLAG_DELAY_OK = 1; // 0x1
     field public static final int AUDIOFOCUS_FLAG_LOCK = 4; // 0x4
     field public static final int AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS = 2; // 0x2
@@ -3476,6 +3479,11 @@ package android.media {
     ctor public AudioManager.AudioServerStateCallback();
     method public void onAudioServerDown();
     method public void onAudioServerUp();
+  }
+
+  public abstract static class AudioManager.VolumeGroupCallback {
+    ctor public AudioManager.VolumeGroupCallback();
+    method public void onAudioVolumeGroupChanged(int, int);
   }
 
   public final class AudioPlaybackConfiguration implements android.os.Parcelable {
@@ -3649,6 +3657,8 @@ package android.media.audiopolicy {
     method @Nullable public android.media.audiopolicy.AudioProductStrategy getById(int);
     method public int getLegacyStreamTypeForAudioAttributes(@NonNull android.media.AudioAttributes);
     method @Nullable public android.media.audiopolicy.AudioProductStrategy getProductStrategyForAudioAttributes(@NonNull android.media.AudioAttributes);
+    method public int getVolumeGroupIdForAttributes(@NonNull android.media.AudioAttributes);
+    method public int getVolumeGroupIdForLegacyStreamType(int);
     method public java.util.Iterator<android.media.audiopolicy.AudioProductStrategy> iterator();
     method public int size();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -3662,6 +3672,27 @@ package android.media.audiopolicy {
     method @NonNull public String name();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioProductStrategy> CREATOR;
+  }
+
+  public final class AudioVolumeGroup implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.util.List<android.media.AudioAttributes> getAudioAttributes();
+    method public int getId();
+    method @NonNull public int[] getLegacyStreamTypes();
+    method @NonNull public String name();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioVolumeGroup> CREATOR;
+  }
+
+  public final class AudioVolumeGroups implements java.lang.Iterable<android.media.audiopolicy.AudioVolumeGroup> android.os.Parcelable {
+    ctor public AudioVolumeGroups();
+    method public int describeContents();
+    method @Nullable public android.media.audiopolicy.AudioVolumeGroup getById(int);
+    method public java.util.Iterator<android.media.audiopolicy.AudioVolumeGroup> iterator();
+    method public int size();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioVolumeGroups> CREATOR;
+    field public static final int DEFAULT_VOLUME_GROUP = -1; // 0xffffffff
   }
 
 }

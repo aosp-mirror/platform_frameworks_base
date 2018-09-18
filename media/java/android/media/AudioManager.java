@@ -37,6 +37,8 @@ import android.content.Intent;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicy.AudioPolicyFocusListener;
 import android.media.audiopolicy.AudioProductStrategies;
+import android.media.audiopolicy.AudioVolumeGroupChangeHandler;
+import android.media.audiopolicy.AudioVolumeGroups;
 import android.media.projection.MediaProjection;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -61,6 +63,7 @@ import android.util.Pair;
 import android.view.KeyEvent;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -90,6 +93,8 @@ public class AudioManager {
     private static final String TAG = "AudioManager";
     private static final boolean DEBUG = false;
     private static final AudioPortEventHandler sAudioPortEventHandler = new AudioPortEventHandler();
+    private static final AudioVolumeGroupChangeHandler sAudioAudioVolumeGroupChangedHandler =
+            new AudioVolumeGroupChangeHandler();
 
     /**
      * Broadcast intent, a hint for applications that audio is about to become
@@ -5246,6 +5251,60 @@ public class AudioManager {
         }
     }
 
+    /**
+     * @hide
+     * Introspection API to retrieve audio volume groups.
+     * When implementing {Car|Oem}AudioManager, use this method  to retrieve the collection of
+     * audio volume groups.
+     * @return a (possibly zero-length) array of
+     *         {@see android.media.audiopolicy.AudioVolumeGroups} objects.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public @NonNull AudioVolumeGroups getAudioVolumeGroups() {
+        return new AudioVolumeGroups();
+    }
+
+    /**
+     * @hide
+     * Callback registered by client to be notified upon volume group change.
+     */
+    @SystemApi
+    public abstract static class VolumeGroupCallback {
+        /**
+         * Callback method called upon audio volume group change.
+         * @param group the group for which the volume has changed
+         */
+        public void onAudioVolumeGroupChanged(int group, int flags) {}
+    }
+
+   /**
+    * @hide
+    * Register an audio volume group change listener.
+    * @param callback the {@link VolumeGroupCallback} to register
+    */
+    @SystemApi
+    public void registerVolumeGroupCallback(
+            @NonNull Executor executor,
+            @NonNull VolumeGroupCallback callback) {
+        Preconditions.checkNotNull(executor, "executor must not be null");
+        Preconditions.checkNotNull(callback, "volume group change cb must not be null");
+        sAudioAudioVolumeGroupChangedHandler.init();
+        // TODO: make use of executor
+        sAudioAudioVolumeGroupChangedHandler.registerListener(callback);
+    }
+
+   /**
+    * @hide
+    * Unregister an audio volume group change listener.
+    * @param callback the {@link VolumeGroupCallback} to unregister
+    */
+    @SystemApi
+    public void unregisterVolumeGroupCallback(
+            @NonNull VolumeGroupCallback callback) {
+        Preconditions.checkNotNull(callback, "volume group change cb must not be null");
+        sAudioAudioVolumeGroupChangedHandler.unregisterListener(callback);
+    }
 
     //---------------------------------------------------------
     // Inner classes
