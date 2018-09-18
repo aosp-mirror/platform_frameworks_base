@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
@@ -1810,6 +1811,19 @@ public class SubscriptionManager {
      */
     @UnsupportedAppUsage
     public static Resources getResourcesForSubId(Context context, int subId) {
+        return getResourcesForSubId(context, subId, false);
+    }
+
+    /**
+     * Returns the resources associated with Subscription.
+     * @param context Context object
+     * @param subId Subscription Id of Subscription who's resources are required
+     * @param useRootLocale if root locale should be used. Localized locale is used if false.
+     * @return Resources associated with Subscription.
+     * @hide
+     */
+    public static Resources getResourcesForSubId(Context context, int subId,
+            boolean useRootLocale) {
         final SubscriptionInfo subInfo =
                 SubscriptionManager.from(context).getActiveSubscriptionInfo(subId);
 
@@ -1821,6 +1835,11 @@ public class SubscriptionManager {
             newConfig.mnc = subInfo.getMnc();
             if (newConfig.mnc == 0) newConfig.mnc = Configuration.MNC_ZERO;
         }
+
+        if (useRootLocale) {
+            newConfig.setLocale(Locale.ROOT);
+        }
+
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         DisplayMetrics newMetrics = new DisplayMetrics();
         newMetrics.setTo(metrics);

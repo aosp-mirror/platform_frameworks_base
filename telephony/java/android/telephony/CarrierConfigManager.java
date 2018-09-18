@@ -1087,6 +1087,15 @@ public class CarrierConfigManager {
     public static final String KEY_WFC_DATA_SPN_FORMAT_IDX_INT = "wfc_data_spn_format_idx_int";
 
     /**
+     * Use root locale when reading wfcSpnFormats.
+     *
+     * If true, then the root locale will always be used when reading wfcSpnFormats. This means the
+     * non localized version of wfcSpnFormats will be used.
+     * @hide
+     */
+    public static final String KEY_WFC_SPN_USE_ROOT_LOCALE = "wfc_spn_use_root_locale";
+
+    /**
      * The Component Name of the activity that can setup the emergency addrees for WiFi Calling
      * as per carrier requirement.
      * @hide
@@ -2274,6 +2283,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_WFC_OPERATOR_ERROR_CODES_STRING_ARRAY, null);
         sDefaults.putInt(KEY_WFC_SPN_FORMAT_IDX_INT, 0);
         sDefaults.putInt(KEY_WFC_DATA_SPN_FORMAT_IDX_INT, 0);
+        sDefaults.putBoolean(KEY_WFC_SPN_USE_ROOT_LOCALE, false);
         sDefaults.putString(KEY_WFC_EMERGENCY_ADDRESS_CARRIER_APP_STRING, "");
         sDefaults.putBoolean(KEY_CONFIG_WIFI_DISABLE_IN_ECBM, false);
         sDefaults.putBoolean(KEY_CARRIER_NAME_OVERRIDE_BOOL, false);
