@@ -3088,6 +3088,7 @@ public abstract class Context {
             //@hide: SYSTEM_UPDATE_SERVICE,
             //@hide: TIME_DETECTOR_SERVICE,
             //@hide: TIME_ZONE_DETECTOR_SERVICE,
+            PERMISSION_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -3860,6 +3861,14 @@ public abstract class Context {
      */
     public static final String SOUND_TRIGGER_SERVICE = "soundtrigger";
 
+    /**
+     * Official published name of the (internal) permission service.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    @SystemApi
+    public static final String PERMISSION_SERVICE = "permission";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an

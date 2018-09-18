@@ -134,6 +134,7 @@ import android.os.UserManager;
 import android.os.Vibrator;
 import android.os.health.SystemHealthManager;
 import android.os.storage.StorageManager;
+import android.permission.PermissionManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
 import android.service.oemlock.IOemLockService;
@@ -1063,6 +1064,13 @@ final class SystemServiceRegistry {
                     public TimeZoneDetector createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
                         return new TimeZoneDetector();
+                    }});
+
+        registerService(Context.PERMISSION_SERVICE, PermissionManager.class,
+                new CachedServiceFetcher<PermissionManager>() {
+                    @Override
+                    public PermissionManager createService(ContextImpl ctx) {
+                        return new PermissionManager(ctx.getOuterContext());
                     }});
     }
 

@@ -950,6 +950,7 @@ package android.content {
     field public static final java.lang.String HDMI_CONTROL_SERVICE = "hdmi_control";
     field public static final java.lang.String NETWORK_SCORE_SERVICE = "network_score";
     field public static final java.lang.String OEM_LOCK_SERVICE = "oem_lock";
+    field public static final java.lang.String PERMISSION_SERVICE = "permission";
     field public static final java.lang.String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
     field public static final java.lang.String SECURE_ELEMENT_SERVICE = "secure_element";
     field public static final java.lang.String STATS_MANAGER = "stats";
@@ -4188,6 +4189,20 @@ package android.os.storage {
     method public void allocateBytes(java.io.FileDescriptor, long, int) throws java.io.IOException;
     method public long getAllocatableBytes(java.util.UUID, int) throws java.io.IOException;
     field public static final int FLAG_ALLOCATE_AGGRESSIVE = 1; // 0x1
+  }
+
+}
+
+package android.permission {
+
+  public final class PermissionManager {
+    method public java.util.List<android.permission.PermissionManager.SplitPermissionInfo> getSplitPermissions();
+  }
+
+  public static final class PermissionManager.SplitPermissionInfo {
+    method public java.lang.String[] getNewPermissions();
+    method public java.lang.String getRootPermission();
+    method public int getTargetSdk();
   }
 
 }
