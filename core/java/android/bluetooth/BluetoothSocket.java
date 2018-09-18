@@ -667,6 +667,10 @@ public final class BluetoothSocket implements Closeable {
      * @return one of {@link #TYPE_RFCOMM}, {@link #TYPE_SCO} or {@link #TYPE_L2CAP}
      */
     public int getConnectionType() {
+        if (mType == TYPE_L2CAP_LE) {
+            // Treat the LE CoC to be the same type as L2CAP.
+            return TYPE_L2CAP;
+        }
         return mType;
     }
 
