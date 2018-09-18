@@ -714,7 +714,12 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         }
         if (getLocalActivePort() == Constants.CEC_SWITCH_HOME && mService.isPlaybackDevice()) {
             routeToInputFromPortId(Constants.CEC_SWITCH_HOME);
-            setAndBroadcastActiveSource(message, mService.getPhysicalAddress());
+            if (mService.playback() != null) {
+                mService.playback().setAndBroadcastActiveSource(
+                        message, mService.getPhysicalAddress());
+            } else {
+                setAndBroadcastActiveSource(message, mService.getPhysicalAddress());
+            }
             return;
         }
 
