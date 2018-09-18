@@ -45,7 +45,7 @@ static bool shouldTimeOutLocked() {
 }
 
 static void checkIdleTimeout() {
-    std::lock_guard{sLock};
+    std::lock_guard _lock{sLock};
     if (sPendingUploads == 0 && shouldTimeOutLocked()) {
         sEglManager.destroy();
     } else {
@@ -54,7 +54,7 @@ static void checkIdleTimeout() {
 }
 
 static void beginUpload() {
-    std::lock_guard{sLock};
+    std::lock_guard _lock{sLock};
     sPendingUploads++;
 
     if (!sUploadThread) {
@@ -75,13 +75,13 @@ static void beginUpload() {
 }
 
 static void endUpload() {
-    std::lock_guard{sLock};
+    std::lock_guard _lock{sLock};
     sPendingUploads--;
     sLastUpload = systemTime();
 }
 
 static EGLDisplay getUploadEglDisplay() {
-    std::lock_guard{sLock};
+    std::lock_guard _lock{sLock};
     LOG_ALWAYS_FATAL_IF(!sEglManager.hasEglContext(), "Forgot to begin an upload?");
     return sEglManager.eglDisplay();
 }
