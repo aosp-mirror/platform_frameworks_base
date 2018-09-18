@@ -16,6 +16,7 @@
 
 package android.permissionpresenterservice;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Context;
@@ -73,12 +74,13 @@ public abstract class RuntimePermissionPresenterService extends Service {
     public abstract List<RuntimePermissionPresentationInfo> onGetAppPermissions(String packageName);
 
     /**
-     * Revoke the permission {@code permissionName} for app {@code packageName}
+     * Revokes the permission {@code permissionName} for app {@code packageName}
      *
      * @param packageName The package for which to revoke
      * @param permissionName The permission to revoke
      */
-    public abstract void onRevokeRuntimePermission(String packageName, String permissionName);
+    public abstract void onRevokeRuntimePermission(@NonNull String packageName,
+            @NonNull String permissionName);
 
     @Override
     public final IBinder onBind(Intent intent) {
