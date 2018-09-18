@@ -2579,7 +2579,7 @@ public final class ViewRootImpl implements ViewParent,
                     .mayUseInputMethod(mWindowAttributes.flags);
             if (imTarget != mLastWasImTarget) {
                 mLastWasImTarget = imTarget;
-                InputMethodManager imm = InputMethodManager.peekInstance();
+                InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
                 if (imm != null && imTarget) {
                     imm.onPreWindowFocus(mView, hasWindowFocus);
                     imm.onPostWindowFocus(mView, mView.findFocus(),
@@ -2695,7 +2695,7 @@ public final class ViewRootImpl implements ViewParent,
             mLastWasImTarget = WindowManager.LayoutParams
                     .mayUseInputMethod(mWindowAttributes.flags);
 
-            InputMethodManager imm = InputMethodManager.peekInstance();
+            InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
             if (imm != null && mLastWasImTarget && !isInLocalFocusMode()) {
                 imm.onPreWindowFocus(mView, hasWindowFocus);
             }
@@ -4329,7 +4329,7 @@ public final class ViewRootImpl implements ViewParent,
                     enqueueInputEvent(event, null, 0, true);
                 } break;
                 case MSG_CHECK_FOCUS: {
-                    InputMethodManager imm = InputMethodManager.peekInstance();
+                    InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
                     if (imm != null) {
                         imm.checkFocus();
                     }
@@ -4871,7 +4871,7 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         protected int onProcess(QueuedInputEvent q) {
             if (mLastWasImTarget && !isInLocalFocusMode()) {
-                InputMethodManager imm = InputMethodManager.peekInstance();
+                InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
                 if (imm != null) {
                     final InputEvent event = q.mEvent;
                     if (DEBUG_IMF) Log.v(mTag, "Sending input event to IME: " + event);

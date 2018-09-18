@@ -1158,7 +1158,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * <p>Closes the drop down if present on screen.</p>
      */
     public void dismissDropDown() {
-        InputMethodManager imm = InputMethodManager.peekInstance();
+        InputMethodManager imm = getContext().getSystemService(InputMethodManager.class);
         if (imm != null) {
             imm.displayCompletions(this, null);
         }
@@ -1247,7 +1247,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     private void buildImeCompletions() {
         final ListAdapter adapter = mAdapter;
         if (adapter != null) {
-            InputMethodManager imm = InputMethodManager.peekInstance();
+            InputMethodManager imm = getContext().getSystemService(InputMethodManager.class);
             if (imm != null) {
                 final int count = Math.min(adapter.getCount(), 20);
                 CompletionInfo[] completions = new CompletionInfo[count];

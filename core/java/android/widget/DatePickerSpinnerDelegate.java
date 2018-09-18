@@ -639,7 +639,7 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
         // changed the value via the IME and there is a next input the IME will
         // be shown, otherwise the user chose another means of changing the
         // value and having the IME up makes no sense.
-        InputMethodManager inputMethodManager = InputMethodManager.peekInstance();
+        InputMethodManager inputMethodManager = mContext.getSystemService(InputMethodManager.class);
         if (inputMethodManager != null) {
             if (inputMethodManager.isActive(mYearSpinnerInput)) {
                 mYearSpinnerInput.clearFocus();

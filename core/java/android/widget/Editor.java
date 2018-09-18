@@ -1539,6 +1539,10 @@ public class Editor {
         }
     }
 
+    private InputMethodManager getInputMethodManager() {
+        return mTextView.getContext().getSystemService(InputMethodManager.class);
+    }
+
     public void beginBatchEdit() {
         mInBatchEditControllers = true;
         final InputMethodState ims = mInputMethodState;
@@ -1707,7 +1711,7 @@ public class Editor {
         if (req == null) {
             return false;
         }
-        final InputMethodManager imm = InputMethodManager.peekInstance();
+        final InputMethodManager imm = getInputMethodManager();
         if (imm == null) {
             return false;
         }
@@ -1742,7 +1746,7 @@ public class Editor {
 
     private void sendUpdateSelection() {
         if (null != mInputMethodState && mInputMethodState.mBatchEditNesting <= 0) {
-            final InputMethodManager imm = InputMethodManager.peekInstance();
+            final InputMethodManager imm = getInputMethodManager();
             if (null != imm) {
                 final int selectionStart = mTextView.getSelectionStart();
                 final int selectionEnd = mTextView.getSelectionEnd();
@@ -1768,7 +1772,7 @@ public class Editor {
 
         final InputMethodState ims = mInputMethodState;
         if (ims != null && ims.mBatchEditNesting == 0) {
-            InputMethodManager imm = InputMethodManager.peekInstance();
+            InputMethodManager imm = getInputMethodManager();
             if (imm != null) {
                 if (imm.isActive(mTextView)) {
                     if (ims.mContentChanged || ims.mSelectionModeChanged) {
@@ -2245,7 +2249,7 @@ public class Editor {
                 && mTextView.isTextEditable() && !mTextView.isTextSelectable()
                 && mShowSoftInputOnFocus) {
             // Show the IME to be able to replace text, except when selecting non editable text.
-            final InputMethodManager imm = InputMethodManager.peekInstance();
+            final InputMethodManager imm = getInputMethodManager();
             if (imm != null) {
                 imm.showSoftInput(mTextView, 0, null);
             }
@@ -2255,7 +2259,7 @@ public class Editor {
 
     private boolean extractedTextModeWillBeStarted() {
         if (!(mTextView.isInExtractedMode())) {
-            final InputMethodManager imm = InputMethodManager.peekInstance();
+            final InputMethodManager imm = getInputMethodManager();
             return  imm != null && imm.isFullscreenMode();
         }
         return false;
@@ -4272,7 +4276,7 @@ public class Editor {
             if (ims == null || ims.mBatchEditNesting > 0) {
                 return;
             }
-            final InputMethodManager imm = InputMethodManager.peekInstance();
+            final InputMethodManager imm = getInputMethodManager();
             if (null == imm) {
                 return;
             }
