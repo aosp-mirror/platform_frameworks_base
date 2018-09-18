@@ -587,6 +587,7 @@ final class RemoteFillService implements DeathRecipient {
             }
             final RemoteFillService remoteService = getService();
             if (remoteService != null) {
+                if (sVerbose) Slog.v(LOG_TAG, "calling onFillRequest() for id=" + mRequest.getId());
                 try {
                     remoteService.mAutoFillService.onFillRequest(mRequest, mCallback);
                 } catch (RemoteException e) {
@@ -659,6 +660,7 @@ final class RemoteFillService implements DeathRecipient {
         public void run() {
             final RemoteFillService remoteService = getService();
             if (remoteService != null) {
+                if (sVerbose) Slog.v(LOG_TAG, "calling onSaveRequest()");
                 try {
                     remoteService.mAutoFillService.onSaveRequest(mRequest, mCallback);
                 } catch (RemoteException e) {

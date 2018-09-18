@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.IntentSender;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
@@ -29,6 +30,9 @@ import com.android.internal.util.Preconditions;
  * autofilled.
  */
 public final class SaveCallback {
+
+    private static final String TAG = "SaveCallback";
+
     private final ISaveCallback mCallback;
     private boolean mCalled;
 
@@ -89,6 +93,7 @@ public final class SaveCallback {
      * @param message error message to be displayed to the user.
      */
     public void onFailure(CharSequence message) {
+        Log.w(TAG, "onFailure(): " + (message == null ? null : message.length() + "_chars"));
         assertNotCalled();
         mCalled = true;
         try {
