@@ -105,7 +105,7 @@ public class A2dpProfile implements LocalBluetoothProfile {
                 BluetoothProfile.A2DP);
     }
 
-    public boolean isConnectable() {
+    public boolean accessProfileEnabled() {
         return true;
     }
 

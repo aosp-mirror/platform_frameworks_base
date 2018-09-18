@@ -103,7 +103,7 @@ public class HearingAidProfile implements LocalBluetoothProfile {
                 BluetoothProfile.HEARING_AID);
     }
 
-    public boolean isConnectable() {
+    public boolean accessProfileEnabled() {
         return false;
     }
 
