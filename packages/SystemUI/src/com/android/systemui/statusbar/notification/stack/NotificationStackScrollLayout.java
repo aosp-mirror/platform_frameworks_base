@@ -620,7 +620,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        Dependency.get(StatusBarStateController.class).addListener(mStateListener);
+        Dependency.get(StatusBarStateController.class)
+                .addListener(mStateListener, StatusBarStateController.RANK_STACK_SCROLLER);
         Dependency.get(ConfigurationController.class).addCallback(this);
     }
 
@@ -4248,8 +4249,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         mDimAnimator.addUpdateListener(mDimUpdateListener);
         mDimAnimator.start();
     }
+
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setHideSensitive(boolean hideSensitive, boolean animate) {
+    private void setHideSensitive(boolean hideSensitive, boolean animate) {
         if (hideSensitive != mAmbientState.isHideSensitive()) {
             int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
@@ -5008,8 +5010,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     private void setStatusBarState(int statusBarState) {
         mStatusBarState = statusBarState;
         mAmbientState.setStatusBarState(statusBarState);
+    }
+
+    private void onStatePostChange() {
         boolean onKeyguard = onKeyguard();
         boolean publicMode = mLockscreenUserManager.isAnyProfilePublicMode();
+
         if (mHeadsUpAppearanceController != null) {
             mHeadsUpAppearanceController.setPublicMode(publicMode);
         }
@@ -5026,6 +5032,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         updateFooter();
         updateChildren();
         onUpdateRowStates();
+
+        mEntryManager.updateNotifications();
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -5949,5 +5957,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         public void onStateChanged(int newState) {
             setStatusBarState(newState);
         }
-    };
+
+      @Override
+      public void onStatePostChange() {
+          NotificationStackScrollLayout.this.onStatePostChange();
+      }
+  };
 }

@@ -121,7 +121,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        Dependency.get(StatusBarStateController.class).addListener(mStateListener);
+        Dependency.get(StatusBarStateController.class)
+                .addListener(mStateListener, StatusBarStateController.RANK_SHELF);
     }
 
     @Override

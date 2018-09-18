@@ -632,7 +632,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mColorExtractor.addOnColorsChangedListener(this);
-        mStatusBarStateController.addListener(this);
+        mStatusBarStateController.addListener(this, StatusBarStateController.RANK_STATUS_BAR);
 
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
 
@@ -3456,7 +3456,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         mIsKeyguard = false;
         Trace.beginSection("StatusBar#hideKeyguard");
         boolean staying = mStatusBarStateController.leaveOpenOnKeyguardHide();
-        mStatusBarStateController.setState(StatusBarState.SHADE);
+        if (!(mStatusBarStateController.setState(StatusBarState.SHADE))) {
+            //TODO: StatusBarStateController should probably know about hiding the keyguard and
+            // notify listeners.
+
+            // If the state didn't change, we may still need to update public mode
+            updatePublicMode();
+            mEntryManager.updateNotifications();
+        }
         View viewToClick = null;
         if (mStatusBarStateController.leaveOpenOnKeyguardHide()) {
             if (!mKeyguardRequested) {
