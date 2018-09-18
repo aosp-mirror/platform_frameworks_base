@@ -202,6 +202,15 @@ public class BinderCallsStatsService extends Binder {
                     reset();
                     pw.println("binder_calls_stats reset.");
                     return;
+                } else if ("--enable".equals(arg)) {
+                    Binder.setObserver(mBinderCallsStats);
+                    return;
+                } else if ("--disable".equals(arg)) {
+                    Binder.setObserver(null);
+                    return;
+                } else if ("--no-sampling".equals(arg)) {
+                    mBinderCallsStats.setSamplingInterval(1);
+                    return;
                 } else if ("--enable-detailed-tracking".equals(arg)) {
                     SystemProperties.set(PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING, "1");
                     mBinderCallsStats.setDetailedTracking(true);
@@ -215,6 +224,9 @@ public class BinderCallsStatsService extends Binder {
                 } else if ("-h".equals(arg)) {
                     pw.println("binder_calls_stats commands:");
                     pw.println("  --reset: Reset stats");
+                    pw.println("  --enable: Enable tracking binder calls");
+                    pw.println("  --disable: Disables tracking binder calls");
+                    pw.println("  --no-sampling: Tracks all calls");
                     pw.println("  --enable-detailed-tracking: Enables detailed tracking");
                     pw.println("  --disable-detailed-tracking: Disables detailed tracking");
                     return;
