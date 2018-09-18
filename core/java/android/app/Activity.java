@@ -544,12 +544,12 @@ import java.util.List;
  * <a name="SavingPersistentState"></a>
  * <h3>Saving Persistent State</h3>
  *
- * <p>There are generally two kinds of persistent state than an activity
+ * <p>There are generally two kinds of persistent state that an activity
  * will deal with: shared document-like data (typically stored in a SQLite
  * database using a {@linkplain android.content.ContentProvider content provider})
  * and internal state such as user preferences.</p>
  *
- * <p>For content provider data, we suggest that activities use a
+ * <p>For content provider data, we suggest that activities use an
  * "edit in place" user model.  That is, any edits a user makes are effectively
  * made immediately without requiring an additional confirmation step.
  * Supporting this model is generally a simple matter of following two rules:</p>
