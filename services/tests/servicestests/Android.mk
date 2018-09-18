@@ -9,7 +9,9 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 # Include all test java files.
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
+LOCAL_SRC_FILES := \
+    $(call all-java-files-under, src) \
+    $(call all-java-files-under, utils) \
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     frameworks-base-testutils \
