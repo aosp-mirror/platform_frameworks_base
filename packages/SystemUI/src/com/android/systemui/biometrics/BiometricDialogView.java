@@ -50,9 +50,9 @@ import com.android.systemui.R;
  * Application Icon, Title, Subtitle, Description, Fingerprint Icon, Error/Help message area,
  * and positive/negative buttons.
  */
-public class FingerprintDialogView extends LinearLayout {
+public class BiometricDialogView extends LinearLayout {
 
-    private static final String TAG = "FingerprintDialogView";
+    private static final String TAG = "BiometricDialogView";
 
     private static final int ANIMATION_DURATION_SHOW = 250; // ms
     private static final int ANIMATION_DURATION_AWAY = 350; // ms
@@ -114,7 +114,7 @@ public class FingerprintDialogView extends LinearLayout {
         }
     };
 
-    public FingerprintDialogView(Context context, DialogViewCallback callback) {
+    public BiometricDialogView(Context context, DialogViewCallback callback) {
         super(context);
         mCallback = callback;
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
@@ -257,7 +257,7 @@ public class FingerprintDialogView extends LinearLayout {
         final Runnable endActionRunnable = new Runnable() {
             @Override
             public void run() {
-                mWindowManager.removeView(FingerprintDialogView.this);
+                mWindowManager.removeView(BiometricDialogView.this);
                 mAnimatingAway = false;
             }
         };
@@ -290,7 +290,7 @@ public class FingerprintDialogView extends LinearLayout {
     public void forceRemove() {
         mLayout.animate().cancel();
         mDialog.animate().cancel();
-        mWindowManager.removeView(FingerprintDialogView.this);
+        mWindowManager.removeView(BiometricDialogView.this);
         mAnimatingAway = false;
         mWasForceRemoved = true;
     }
@@ -393,7 +393,7 @@ public class FingerprintDialogView extends LinearLayout {
                 WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-        lp.setTitle("FingerprintDialogView");
+        lp.setTitle("BiometricDialogView");
         lp.token = mWindowToken;
         return lp;
     }

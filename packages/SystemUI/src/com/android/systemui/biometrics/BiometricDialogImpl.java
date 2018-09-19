@@ -33,7 +33,7 @@ import com.android.systemui.statusbar.CommandQueue;
 
 /**
  * Receives messages sent from AuthenticationClient and shows the appropriate biometric UI (e.g.
- * FingerprintDialogView).
+ * BiometricDialogView).
  */
 public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callbacks {
     private static final String TAG = "BiometricDialogImpl";
@@ -48,7 +48,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     private static final int MSG_USER_CANCELED = 7;
     private static final int MSG_BUTTON_POSITIVE = 8;
 
-    private FingerprintDialogView mDialogView;
+    private BiometricDialogView mDialogView;
     private WindowManager mWindowManager;
     private IBiometricPromptReceiver mReceiver;
     private boolean mDialogShowing;
@@ -116,7 +116,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         }
         getComponent(CommandQueue.class).addCallbacks(this);
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        mDialogView = new FingerprintDialogView(mContext, mCallback);
+        mDialogView = new BiometricDialogView(mContext, mCallback);
     }
 
     @Override
