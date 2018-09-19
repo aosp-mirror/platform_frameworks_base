@@ -19,6 +19,7 @@
 
 #include "Command.h"
 #include "Debug.h"
+#include "dump/DumpManifest.h"
 
 namespace aapt {
 
@@ -133,8 +134,10 @@ class DumpCommand : public Command {
  public:
   explicit DumpCommand(IDiagnostics* diag) : Command("dump", "d"), diag_(diag) {
     AddOptionalSubcommand(util::make_unique<DumpAPCCommand>(diag_));
+    AddOptionalSubcommand(util::make_unique<DumpBadgingCommand>(diag_));
     AddOptionalSubcommand(util::make_unique<DumpConfigsCommand>(diag_));
     AddOptionalSubcommand(util::make_unique<DumpPackageNameCommand>(diag_));
+    AddOptionalSubcommand(util::make_unique<DumpPermissionsCommand>(diag_));
     AddOptionalSubcommand(util::make_unique<DumpStringsCommand>(diag_));
     AddOptionalSubcommand(util::make_unique<DumpTableCommand>(diag_));
     AddOptionalSubcommand(util::make_unique<DumpXmlStringsCommand>(diag_));

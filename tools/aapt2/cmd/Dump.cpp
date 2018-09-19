@@ -223,6 +223,12 @@ int DumpConfigsCommand::Action(const std::vector<std::string>& args) {
     return 1;
   }
 
+  ResourceTable* table = loaded_apk->GetResourceTable();
+  if (!table) {
+    diag_->Error(DiagMessage() << "Failed to retrieve resource table.");
+    return 1;
+  }
+
   io::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
   Printer printer(&fout);
 
@@ -233,7 +239,7 @@ int DumpConfigsCommand::Action(const std::vector<std::string>& args) {
 
   // Insert the configurations into a set in order to keep every configuarion seen
   std::set<ConfigDescription, decltype(compare)> configs(compare);
-  for (auto& package : loaded_apk->GetResourceTable()->packages) {
+  for (auto& package : table->packages) {
     for (auto& type : package->types) {
       for (auto& entry : type->entries) {
         for (auto& value : entry->values) {
@@ -267,10 +273,15 @@ int DumpStringsCommand::Action(const std::vector<std::string>& args) {
       return 1;
     }
 
+    ResourceTable* table = loaded_apk->GetResourceTable();
+    if (!table) {
+      diag_->Error(DiagMessage() << "Failed to retrieve resource table.");
+      return 1;
+    }
+
     // Load the run-time xml string pool using the flattened data
     BigBuffer buffer(4096);
-    StringPool::FlattenUtf8(&buffer, loaded_apk->GetResourceTable()->string_pool,
-                            context.GetDiagnostics());
+    StringPool::FlattenUtf8(&buffer, table->string_pool, context.GetDiagnostics());
     auto data = buffer.to_string();
     android::ResStringPool pool(data.data(), data.size(), false);
     Debug::DumpResStringPool(&pool, &printer);
@@ -304,7 +315,13 @@ int DumpTableCommand::Action(const std::vector<std::string>& args) {
       printer.Println("Binary APK");
     }
 
-    Debug::PrintTable(*loaded_apk->GetResourceTable(), print_options, &printer);
+    ResourceTable* table = loaded_apk->GetResourceTable();
+    if (!table) {
+      diag_->Error(DiagMessage() << "Failed to retrieve resource table.");
+      return 1;
+    }
+
+    Debug::PrintTable(*table, print_options, &printer);
   }
 
   return 0;

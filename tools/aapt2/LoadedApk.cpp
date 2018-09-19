@@ -255,7 +255,7 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
 }
 
 std::unique_ptr<xml::XmlResource> LoadedApk::LoadXml(const std::string& file_path,
-                                                     IDiagnostics* diag) {
+                                                     IDiagnostics* diag) const {
   io::IFile* file = apk_->FindFile(file_path);
   if (file == nullptr) {
     diag->Error(DiagMessage() << "failed to find file");

@@ -83,6 +83,7 @@ cc_library_host_static {
         "compile/Pseudolocalizer.cpp",
         "compile/XmlIdCollector.cpp",
         "configuration/ConfigurationParser.cpp",
+        "dump/DumpManifest.cpp",
         "filter/AbiFilter.cpp",
         "filter/ConfigFilter.cpp",
         "format/Archive.cpp",
