@@ -12495,11 +12495,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     advancesIndex);
         }
 
-        public int getTextRunCursor(int contextStart, int contextEnd, int dir,
+        public int getTextRunCursor(int contextStart, int contextEnd, boolean isRtl,
                 int offset, int cursorOpt, Paint p) {
             int contextCount = contextEnd - contextStart;
             return p.getTextRunCursor(mChars, contextStart + mStart,
-                    contextCount, dir, offset + mStart, cursorOpt);
+                    contextCount, isRtl, offset + mStart, cursorOpt);
         }
     }
 
