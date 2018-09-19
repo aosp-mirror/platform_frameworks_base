@@ -170,8 +170,8 @@ class BinaryApkSerializer : public IApkSerializer {
       }
 
       pb::XmlNode pb_node;
-      io::ZeroCopyInputAdaptor adaptor(in.get());
-      if (!pb_node.ParseFromZeroCopyStream(&adaptor)) {
+      io::ProtoInputStreamReader proto_reader(in.get());
+      if (!proto_reader.ReadMessage(&pb_node)) {
         context_->GetDiagnostics()->Error(DiagMessage(source_)
                                           << "failed to parse proto XML " << *file->path);
         return false;
