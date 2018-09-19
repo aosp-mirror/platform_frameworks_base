@@ -177,7 +177,6 @@ void RenderThread::requireGlContext() {
         return;
     }
     mEglManager->initialize();
-    renderState().onContextCreated();
 
 #ifdef HWUI_GLES_WRAP_ENABLED
     debug::GlesDriver* driver = debug::GlesDriver::get();
@@ -201,7 +200,6 @@ void RenderThread::requireGlContext() {
 void RenderThread::destroyGlContext() {
     if (mEglManager->hasEglContext()) {
         setGrContext(nullptr);
-        renderState().onContextDestroyed();
         mEglManager->destroy();
     }
 }
@@ -243,10 +241,12 @@ Readback& RenderThread::readback() {
 void RenderThread::setGrContext(sk_sp<GrContext> context) {
     mCacheManager->reset(context);
     if (mGrContext) {
+        mRenderState->onContextDestroyed();
         mGrContext->releaseResourcesAndAbandonContext();
     }
     mGrContext = std::move(context);
     if (mGrContext) {
+        mRenderState->onContextCreated();
         DeviceInfo::setMaxTextureSize(mGrContext->maxRenderTargetSize());
     }
 }

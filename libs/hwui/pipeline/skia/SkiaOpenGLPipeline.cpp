@@ -43,7 +43,13 @@ namespace uirenderer {
 namespace skiapipeline {
 
 SkiaOpenGLPipeline::SkiaOpenGLPipeline(RenderThread& thread)
-        : SkiaPipeline(thread), mEglManager(thread.eglManager()) {}
+        : SkiaPipeline(thread), mEglManager(thread.eglManager()) {
+    thread.renderState().registerContextCallback(this);
+}
+
+SkiaOpenGLPipeline::~SkiaOpenGLPipeline() {
+    mRenderThread.renderState().removeContextCallback(this);
+}
 
 MakeCurrentResult SkiaOpenGLPipeline::makeCurrent() {
     // TODO: Figure out why this workaround is needed, see b/13913604
@@ -133,6 +139,13 @@ bool SkiaOpenGLPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect
 DeferredLayerUpdater* SkiaOpenGLPipeline::createTextureLayer() {
     mRenderThread.requireGlContext();
     return new DeferredLayerUpdater(mRenderThread.renderState());
+}
+
+void SkiaOpenGLPipeline::onContextDestroyed() {
+    if (mEglSurface != EGL_NO_SURFACE) {
+        mEglManager.destroySurface(mEglSurface);
+        mEglSurface = EGL_NO_SURFACE;
+    }
 }
 
 void SkiaOpenGLPipeline::onStop() {

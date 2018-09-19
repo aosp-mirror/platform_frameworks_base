@@ -41,8 +41,15 @@ void RenderState::onContextCreated() {
     GpuMemoryTracker::onGpuContextCreated();
 }
 
+static void destroyLayerInUpdater(DeferredLayerUpdater* layerUpdater) {
+    layerUpdater->destroyLayer();
+}
+
 void RenderState::onContextDestroyed() {
-    destroyLayersInUpdater();
+    std::for_each(mActiveLayerUpdaters.begin(), mActiveLayerUpdaters.end(), destroyLayerInUpdater);
+    for(auto callback : mContextCallbacks) {
+        callback->onContextDestroyed();
+    }
     GpuMemoryTracker::onGpuContextDestroyed();
 }
 
@@ -89,14 +96,6 @@ void RenderState::deleteFramebuffer(GLuint fbo) {
 
 void RenderState::debugOverdraw(bool enable, bool clear) {
     // DEAD CODE
-}
-
-static void destroyLayerInUpdater(DeferredLayerUpdater* layerUpdater) {
-    layerUpdater->destroyLayer();
-}
-
-void RenderState::destroyLayersInUpdater() {
-    std::for_each(mActiveLayerUpdaters.begin(), mActiveLayerUpdaters.end(), destroyLayerInUpdater);
 }
 
 void RenderState::postDecStrong(VirtualLightRefBase* object) {

@@ -41,6 +41,13 @@ class CanvasContext;
 class RenderThread;
 }
 
+class IGpuContextCallback {
+public:
+    virtual void onContextDestroyed() = 0;
+protected:
+    virtual ~IGpuContextCallback() {}
+};
+
 // wrapper of Caches for users to migrate to.
 class RenderState {
     PREVENT_COPY_AND_ASSIGN(RenderState);
@@ -48,9 +55,6 @@ class RenderState {
     friend class renderthread::CacheManager;
 
 public:
-    void onContextCreated();
-    void onContextDestroyed();
-
     void onBitmapDestroyed(uint32_t pixelRefId);
 
     void setViewport(GLsizei width, GLsizei height);
@@ -62,6 +66,9 @@ public:
     void deleteFramebuffer(GLuint fbo);
 
     void debugOverdraw(bool enable, bool clear);
+
+    void registerContextCallback(IGpuContextCallback* cb) { mContextCallbacks.insert(cb); }
+    void removeContextCallback(IGpuContextCallback* cb) { mContextCallbacks.erase(cb); }
 
     void registerLayer(Layer* layer) { mActiveLayers.insert(layer); }
     void unregisterLayer(Layer* layer) { mActiveLayers.erase(layer); }
@@ -93,13 +100,16 @@ public:
     renderthread::RenderThread& getRenderThread();
 
 private:
-    void destroyLayersInUpdater();
-
     explicit RenderState(renderthread::RenderThread& thread);
     ~RenderState();
 
+    // Context notifications are only to be triggered by renderthread::RenderThread
+    void onContextCreated();
+    void onContextDestroyed();
+
     renderthread::RenderThread& mRenderThread;
 
+    std::set<IGpuContextCallback*> mContextCallbacks;
     std::set<Layer*> mActiveLayers;
     std::set<DeferredLayerUpdater*> mActiveLayerUpdaters;
     std::set<renderthread::CanvasContext*> mRegisteredContexts;

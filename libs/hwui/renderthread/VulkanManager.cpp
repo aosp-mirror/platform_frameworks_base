@@ -39,7 +39,6 @@ namespace renderthread {
 VulkanManager::VulkanManager(RenderThread& thread) : mRenderThread(thread) {}
 
 void VulkanManager::destroy() {
-    mRenderThread.renderState().onContextDestroyed();
     mRenderThread.setGrContext(nullptr);
 
     if (VK_NULL_HANDLE != mCommandPool) {
@@ -401,8 +400,6 @@ void VulkanManager::initialize() {
     if (Properties::enablePartialUpdates && Properties::useBufferAge) {
         mSwapBehavior = SwapBehavior::BufferAge;
     }
-
-    mRenderThread.renderState().onContextCreated();
 }
 
 // Returns the next BackbufferInfo to use for the next draw. The function will make sure all
