@@ -79,7 +79,7 @@ public class SwitchToGuestTimer {
 
                 @Override
                 public void onFinish() {
-                    mCarUserManagerHelper.startNewGuestSession(mGuestName);
+                    mCarUserManagerHelper.startGuestSession(mGuestName);
                     cancel();
                 }
             };
