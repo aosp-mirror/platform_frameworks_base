@@ -1420,6 +1420,10 @@ public final class InputMethodManager {
                     mServedView.getWindowToken() == appWindowToken) {
                 finishInputLocked();
             }
+            if (mCurRootView != null &&
+                    mCurRootView.getWindowToken() == appWindowToken) {
+                mCurRootView = null;
+            }
         }
     }
 
