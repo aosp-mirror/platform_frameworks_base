@@ -54,7 +54,7 @@ import java.util.List;
 public class KeyValueBackupReporter {
     @VisibleForTesting static final String TAG = "KeyValueBackupTask";
     private static final boolean DEBUG = BackupManagerService.DEBUG;
-    @VisibleForTesting static final boolean MORE_DEBUG = BackupManagerService.MORE_DEBUG || true;
+    @VisibleForTesting static final boolean MORE_DEBUG = BackupManagerService.MORE_DEBUG || false;
 
     static void onNewThread(String threadName) {
         if (DEBUG) {
