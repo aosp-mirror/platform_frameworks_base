@@ -26,6 +26,7 @@
 #include <ui/Fence.h>
 #include <utils/StrongPointer.h>
 #include <vk/GrVkBackendContext.h>
+#include "IRenderPipeline.h"
 
 class GrVkExtensions;
 
@@ -37,7 +38,7 @@ class RenderThread;
 
 class VulkanSurface {
 public:
-    VulkanSurface() {}
+    VulkanSurface(ColorMode colorMode) : mColorMode(colorMode) {}
 
     sk_sp<SkSurface> getBackBufferSurface() { return mBackbuffer; }
 
@@ -73,6 +74,7 @@ private:
     VkImage* mImages = nullptr;
     ImageInfo* mImageInfos;
     uint16_t mCurrentTime = 0;
+    ColorMode mColorMode;
 };
 
 // This class contains the shared global Vulkan objects, such as VkInstance, VkDevice and VkQueue,
@@ -90,7 +92,7 @@ public:
 
     // Given a window this creates a new VkSurfaceKHR and VkSwapchain and stores them inside a new
     // VulkanSurface object which is returned.
-    VulkanSurface* createSurface(ANativeWindow* window);
+    VulkanSurface* createSurface(ANativeWindow* window, ColorMode colorMode);
 
     // Destroy the VulkanSurface and all associated vulkan objects.
     void destroySurface(VulkanSurface* surface);

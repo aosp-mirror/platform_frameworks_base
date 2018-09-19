@@ -123,8 +123,7 @@ bool SkiaVulkanPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior,
     }
 
     if (surface) {
-        // TODO: handle color mode
-        mVkSurface = mVkManager.createSurface(surface);
+        mVkSurface = mVkManager.createSurface(surface, colorMode);
     }
 
     return mVkSurface != nullptr;
