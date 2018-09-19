@@ -283,6 +283,9 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                         } catch (android.os.RemoteException ex) {
                             Log.v(TAG, "Unable to contact notification manager", ex);
                             throw ex.rethrowFromSystemServer();
+                        } catch (SecurityException e) {
+                            // app cannot catch and recover from this, so do on their behalf
+                            Log.w(TAG, "Enqueue adjustment failed; no longer connected", e);
                         }
                     }
                     break;

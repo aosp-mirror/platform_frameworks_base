@@ -20,6 +20,7 @@ import static com.android.server.notification.ManagedServices.APPROVAL_BY_PACKAG
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Matchers.any;
@@ -34,6 +35,7 @@ import static org.mockito.Mockito.when;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -47,6 +49,9 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.IntArray;
+import android.util.SparseArray;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
@@ -68,7 +73,9 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public class ManagedServicesTest extends UiServiceTestCase {
 
@@ -113,7 +120,12 @@ public class ManagedServicesTest extends UiServiceTestCase {
             when(mUm.getUserInfo(eq(user.id))).thenReturn(user);
         }
         when(mUm.getUsers()).thenReturn(users);
-        when(mUserProfiles.getCurrentProfileIds()).thenReturn(new int[] {0, 10, 11, 12});
+        IntArray profileIds = new IntArray();
+        profileIds.add(0);
+        profileIds.add(11);
+        profileIds.add(10);
+        profileIds.add(12);
+        when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
 
         mExpectedPrimaryPackages = new ArrayMap<>();
         mExpectedPrimaryPackages.put(0, "this.is.a.package.name:another.package");
@@ -165,12 +177,12 @@ public class ManagedServicesTest extends UiServiceTestCase {
 
     @Test
     public void testBackupAndRestore_migration_preO() throws Exception {
-        ArrayMap backupPrimaryPackages = new ArrayMap<>();
+        ArrayMap<Integer, String> backupPrimaryPackages = new ArrayMap<>();
         backupPrimaryPackages.put(0, "backup.0:backup:0a");
         backupPrimaryPackages.put(10, "10.backup");
         backupPrimaryPackages.put(11, "eleven");
         backupPrimaryPackages.put(12, "");
-        ArrayMap backupPrimaryComponentNames = new ArrayMap<>();
+        ArrayMap<Integer, String> backupPrimaryComponentNames = new ArrayMap<>();
         backupPrimaryComponentNames.put(0, "backup.first/whatever:a/b");
         backupPrimaryComponentNames.put(10, "again/M1");
         backupPrimaryComponentNames.put(11, "orange/youglad:itisnot/banana");
@@ -179,11 +191,11 @@ public class ManagedServicesTest extends UiServiceTestCase {
         backupPrimary.put(APPROVAL_BY_PACKAGE, backupPrimaryPackages);
         backupPrimary.put(APPROVAL_BY_COMPONENT, backupPrimaryComponentNames);
 
-        ArrayMap backupSecondaryComponentNames = new ArrayMap<>();
+        ArrayMap<Integer, String> backupSecondaryComponentNames = new ArrayMap<>();
         backupSecondaryComponentNames.put(0, "secondary.1/component.Name");
         backupSecondaryComponentNames.put(10,
                 "this.is.another.package.backup/with.Component:component.backup/2");
-        ArrayMap backupSecondaryPackages = new ArrayMap<>();
+        ArrayMap<Integer, String> backupSecondaryPackages = new ArrayMap<>();
         backupSecondaryPackages.put(0, "");
         backupSecondaryPackages.put(10,
                 "this.is.another.package.backup:package.backup");
@@ -368,7 +380,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
             serializer.endDocument();
             serializer.flush();
 
-            for (int userId : mUserProfiles.getCurrentProfileIds()) {
+            for (int userId : mUserProfiles.getCurrentProfileIds().toArray()) {
                 List<String> expected =
                         stringToList(mExpectedPrimary.get(approvalLevel).get(userId));
                 List<String> actual = stringToList(Settings.Secure.getStringForUser(
@@ -633,7 +645,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testGetAllowedComponents() throws Exception {
+    public void testGetAllowedComponentsByUser() throws Exception {
         ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles, mIpm,
                 APPROVAL_BY_COMPONENT);
         loadXml(service);
@@ -708,6 +720,145 @@ public class ManagedServicesTest extends UiServiceTestCase {
         assertTrue(services.isSameUser(service, 10));
     }
 
+    @Test
+    public void testGetAllowedComponents() throws Exception {
+        ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles, mIpm,
+                APPROVAL_BY_COMPONENT);
+        loadXml(service);
+
+        SparseArray<ArraySet<ComponentName>> expected = new SparseArray<>();
+
+        ArraySet<ComponentName> expected10 = new ArraySet<>();
+        expected10.add(ComponentName.unflattenFromString("this.is.another.package/M1"));
+        expected10.add(ComponentName.unflattenFromString("this.is.another.package/with.Component"));
+        expected10.add(ComponentName.unflattenFromString("component/2"));
+        expected10.add(ComponentName.unflattenFromString("package/component2"));
+        expected.put(10, expected10);
+        ArraySet<ComponentName> expected0 = new ArraySet<>();
+        expected0.add(ComponentName.unflattenFromString("secondary/component.Name"));
+        expected0.add(ComponentName.unflattenFromString("this.is.a.package.name/Ba"));
+        expected0.add(ComponentName.unflattenFromString("another.package/B1"));
+        expected.put(0, expected0);
+        ArraySet<ComponentName> expected12 = new ArraySet<>();
+        expected12.add(ComponentName.unflattenFromString("bananas!/Bananas!"));
+        expected.put(12, expected12);
+        expected.put(11, new ArraySet<>());
+
+        SparseArray<ArraySet<ComponentName>> actual =
+                service.getAllowedComponents(mUserProfiles.getCurrentProfileIds());
+
+        assertContentsInAnyOrder(expected, actual);
+    }
+
+    @Test
+    public void testPopulateComponentsToUnbind_forceRebind() {
+        ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles, mIpm,
+                APPROVAL_BY_COMPONENT);
+
+        IInterface iInterface = mock(IInterface.class);
+        when(iInterface.asBinder()).thenReturn(mock(IBinder.class));
+
+        ManagedServices.ManagedServiceInfo service0 = service.new ManagedServiceInfo(
+                iInterface, ComponentName.unflattenFromString("a/a"), 0, false,
+                mock(ServiceConnection.class), 26);
+        ManagedServices.ManagedServiceInfo service10 = service.new ManagedServiceInfo(
+                iInterface, ComponentName.unflattenFromString("b/b"), 10, false,
+                mock(ServiceConnection.class), 26);
+        Set<ManagedServices.ManagedServiceInfo> removableBoundServices = new ArraySet<>();
+        removableBoundServices.add(service0);
+        removableBoundServices.add(service10);
+
+        SparseArray<Set<ComponentName>> allowedComponentsToBind = new SparseArray<>();
+        Set<ComponentName> allowed0 = new ArraySet<>();
+        allowed0.add(ComponentName.unflattenFromString("a/a"));
+        allowedComponentsToBind.put(0, allowed0);
+        Set<ComponentName> allowed10 = new ArraySet<>();
+        allowed10.add(ComponentName.unflattenFromString("b/b"));
+        allowedComponentsToBind.put(10, allowed10);
+
+        SparseArray<Set<ComponentName>> componentsToUnbind = new SparseArray<>();
+
+        service.populateComponentsToUnbind(true, removableBoundServices, allowedComponentsToBind,
+                componentsToUnbind);
+
+        assertEquals(2, componentsToUnbind.size());
+        assertTrue(componentsToUnbind.get(0).contains(ComponentName.unflattenFromString("a/a")));
+        assertTrue(componentsToUnbind.get(10).contains(ComponentName.unflattenFromString("b/b")));
+    }
+
+    @Test
+    public void testPopulateComponentsToUnbind() {
+        ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles, mIpm,
+                APPROVAL_BY_COMPONENT);
+
+        IInterface iInterface = mock(IInterface.class);
+        when(iInterface.asBinder()).thenReturn(mock(IBinder.class));
+
+        ManagedServices.ManagedServiceInfo service0 = service.new ManagedServiceInfo(
+                iInterface, ComponentName.unflattenFromString("a/a"), 0, false,
+                mock(ServiceConnection.class), 26);
+        ManagedServices.ManagedServiceInfo service0a = service.new ManagedServiceInfo(
+                iInterface, ComponentName.unflattenFromString("c/c"), 0, false,
+                mock(ServiceConnection.class), 26);
+        ManagedServices.ManagedServiceInfo service10 = service.new ManagedServiceInfo(
+                iInterface, ComponentName.unflattenFromString("b/b"), 10, false,
+                mock(ServiceConnection.class), 26);
+        Set<ManagedServices.ManagedServiceInfo> removableBoundServices = new ArraySet<>();
+        removableBoundServices.add(service0);
+        removableBoundServices.add(service0a);
+        removableBoundServices.add(service10);
+
+        SparseArray<Set<ComponentName>> allowedComponentsToBind = new SparseArray<>();
+        Set<ComponentName> allowed0 = new ArraySet<>();
+        allowed0.add(ComponentName.unflattenFromString("a/a"));
+        allowedComponentsToBind.put(0, allowed0);
+        Set<ComponentName> allowed10 = new ArraySet<>();
+        allowed10.add(ComponentName.unflattenFromString("b/b"));
+        allowedComponentsToBind.put(10, allowed10);
+
+        SparseArray<Set<ComponentName>> componentsToUnbind = new SparseArray<>();
+
+        service.populateComponentsToUnbind(false, removableBoundServices, allowedComponentsToBind,
+                componentsToUnbind);
+
+        assertEquals(1, componentsToUnbind.size());
+        assertEquals(1, componentsToUnbind.get(0).size());
+        assertTrue(componentsToUnbind.get(0).contains(ComponentName.unflattenFromString("c/c")));
+    }
+
+    @Test
+    public void populateComponentsToBind() {
+        ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles, mIpm,
+                APPROVAL_BY_COMPONENT);
+
+        SparseArray<ArraySet<ComponentName>> approvedComponentsByUser = new SparseArray<>();
+        ArraySet<ComponentName> allowed0 = new ArraySet<>();
+        allowed0.add(ComponentName.unflattenFromString("a/a"));
+        approvedComponentsByUser.put(0, allowed0);
+        ArraySet<ComponentName> allowed10 = new ArraySet<>();
+        allowed10.add(ComponentName.unflattenFromString("b/b"));
+        allowed10.add(ComponentName.unflattenFromString("c/c"));
+        approvedComponentsByUser.put(10, allowed10);
+        ArraySet<ComponentName> allowed15 = new ArraySet<>();
+        allowed15.add(ComponentName.unflattenFromString("d/d"));
+        approvedComponentsByUser.put(15, allowed15);
+
+        IntArray users = new IntArray();
+        users.add(10);
+        users.add(0);
+
+        SparseArray<Set<ComponentName>> componentsToBind = new SparseArray<>();
+
+        service.populateComponentsToBind(componentsToBind, users, approvedComponentsByUser);
+
+        assertEquals(2, componentsToBind.size());
+        assertEquals(1, componentsToBind.get(0).size());
+        assertTrue(componentsToBind.get(0).contains(ComponentName.unflattenFromString("a/a")));
+        assertEquals(2, componentsToBind.get(10).size());
+        assertTrue(componentsToBind.get(10).contains(ComponentName.unflattenFromString("b/b")));
+        assertTrue(componentsToBind.get(10).contains(ComponentName.unflattenFromString("c/c")));
+    }
+
     private void loadXml(ManagedServices service) throws Exception {
         final StringBuffer xml = new StringBuffer();
         xml.append("<" + service.getConfig().xmlTag + ">\n");
@@ -775,7 +926,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
                 ManagedServices.ENABLED_SERVICES_SEPARATOR)));
     }
 
-    private void assertContentsInAnyOrder(List<?> expected, List<?> actual) {
+    private void assertContentsInAnyOrder(Collection<?> expected, Collection<?> actual) {
+        assertNotNull(actual);
         assertEquals(expected.size(), actual.size());
 
         for (Object o : expected) {
@@ -784,6 +936,21 @@ public class ManagedServicesTest extends UiServiceTestCase {
 
         for (Object o : actual) {
             assertTrue("Actual contains extra " + o, expected.contains(o));
+        }
+    }
+
+    private void assertContentsInAnyOrder(SparseArray<ArraySet<ComponentName>> expected,
+            SparseArray<ArraySet<ComponentName>> actual) throws Exception {
+        assertEquals(expected.size(), actual.size());
+
+        for (int i = 0; i < expected.size(); i++) {
+            int key = expected.keyAt(i);
+            assertTrue(actual.indexOfKey(key) >= 0);
+            try {
+                assertContentsInAnyOrder(expected.valueAt(i), actual.get(key));
+            } catch (Throwable t) {
+                throw new Exception("Error validating " + key, t);
+            }
         }
     }
 
@@ -920,7 +1087,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
 
         @Override
         protected boolean checkType(IInterface service) {
-            return false;
+            return true;
         }
 
         @Override

@@ -178,6 +178,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -1566,7 +1567,7 @@ public class NotificationManagerService extends SystemService {
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
-        getContext().registerReceiver(mIntentReceiver, filter);
+        getContext().registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, filter, null, null);
 
         IntentFilter pkgFilter = new IntentFilter();
         pkgFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -1698,10 +1699,10 @@ public class NotificationManagerService extends SystemService {
                     UserHandle.getUserId(uid), REASON_CHANNEL_BANNED,
                     null);
             if (isUidSystemOrPhone(uid)) {
-                int[] profileIds = mUserProfiles.getCurrentProfileIds();
-                int N = profileIds.length;
+                IntArray profileIds = mUserProfiles.getCurrentProfileIds();
+                int N = profileIds.size();
                 for (int i = 0; i < N; i++) {
-                    int profileId = profileIds[i];
+                    int profileId = profileIds.get(i);
                     cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
                             profileId, REASON_CHANNEL_BANNED,
                             null);
@@ -6691,7 +6692,9 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onUserUnlocked(int user) {
             if (DEBUG) Slog.d(TAG, "onUserUnlocked u=" + user);
-            rebindServices(true);
+            // force rebind the assistant, as it might be keeping its own state in user locked
+            // storage
+            rebindServices(true, user);
         }
 
         protected void onNotificationsSeenLocked(ArrayList<NotificationRecord> records) {

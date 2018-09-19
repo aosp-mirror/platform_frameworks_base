@@ -15,17 +15,8 @@
  */
 package com.android.server.notification;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
 import android.annotation.NonNull;
 import android.app.AlarmManager;
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -37,8 +28,17 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
+
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -105,12 +105,12 @@ public class SnoozeHelper {
 
     protected @NonNull List<NotificationRecord> getSnoozed() {
         List<NotificationRecord> snoozedForUser = new ArrayList<>();
-        int[] userIds = mUserProfiles.getCurrentProfileIds();
+        IntArray userIds = mUserProfiles.getCurrentProfileIds();
         if (userIds != null) {
-            final int N = userIds.length;
+            final int N = userIds.size();
             for (int i = 0; i < N; i++) {
                 final ArrayMap<String, ArrayMap<String, NotificationRecord>> snoozedPkgs =
-                        mSnoozedNotifications.get(userIds[i]);
+                        mSnoozedNotifications.get(userIds.get(i));
                 if (snoozedPkgs != null) {
                     final int M = snoozedPkgs.size();
                     for (int j = 0; j < M; j++) {
@@ -179,7 +179,7 @@ public class SnoozeHelper {
     protected boolean cancel(int userId, boolean includeCurrentProfiles) {
         int[] userIds = {userId};
         if (includeCurrentProfiles) {
-            userIds = mUserProfiles.getCurrentProfileIds();
+            userIds = mUserProfiles.getCurrentProfileIds().toArray();
         }
         final int N = userIds.length;
         for (int i = 0; i < N; i++) {

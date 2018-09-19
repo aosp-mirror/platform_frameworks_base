@@ -33,6 +33,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.os.UserManager;
+import android.util.IntArray;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
@@ -103,7 +104,12 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         }
         when(mUm.getUsers()).thenReturn(users);
         when(mUm.getUsers(anyBoolean())).thenReturn(users);
-        when(mUserProfiles.getCurrentProfileIds()).thenReturn(new int[] {0, 10, 11, 12});
+        IntArray profileIds = new IntArray();
+        profileIds.add(0);
+        profileIds.add(11);
+        profileIds.add(10);
+        profileIds.add(12);
+        when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
     }
 
     @Test
