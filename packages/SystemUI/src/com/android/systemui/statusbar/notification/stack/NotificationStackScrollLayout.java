@@ -115,6 +115,8 @@ import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.ShadeViewRefactor;
+import com.android.systemui.statusbar.notification.ShadeViewRefactor.RefactorComponent;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
@@ -134,8 +136,6 @@ import com.android.systemui.statusbar.policy.ScrollAdapter;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.lang.annotation.ShadeViewRefactor;
-import java.lang.annotation.ShadeViewRefactor.RefactorComponent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
