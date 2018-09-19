@@ -20,25 +20,23 @@ import android.app.usage.NetworkStatsManager;
 import android.app.usage.NetworkStats;
 import android.content.Context;
 import android.os.RemoteException;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import androidx.loader.content.AsyncTaskLoader;
 
 /**
- * Loader for retrieving the network stats details for all UIDs.
+ * Loader for retrieving the network stats summary for all UIDs.
  */
-public class NetworkStatsDetailLoader extends AsyncTaskLoader<NetworkStats> {
+public class NetworkStatsSummaryLoader extends AsyncTaskLoader<NetworkStats> {
 
     private static final String TAG = "NetworkDetailLoader";
     private final NetworkStatsManager mNetworkStatsManager;
-    private final TelephonyManager mTelephonyManager;
     private final long mStart;
     private final long mEnd;
-    private final int mSubId;
+    private final String mSubId;
     private final int mNetworkType;
 
-    private NetworkStatsDetailLoader(Builder builder) {
+    private NetworkStatsSummaryLoader(Builder builder) {
         super(builder.mContext);
         mStart = builder.mStart;
         mEnd = builder.mEnd;
@@ -46,8 +44,6 @@ public class NetworkStatsDetailLoader extends AsyncTaskLoader<NetworkStats> {
         mNetworkType = builder.mNetworkType;
         mNetworkStatsManager = (NetworkStatsManager)
                 builder.mContext.getSystemService(Context.NETWORK_STATS_SERVICE);
-        mTelephonyManager =
-                (TelephonyManager) builder.mContext.getSystemService(Context.TELEPHONY_SERVICE);
     }
 
     @Override
@@ -59,8 +55,7 @@ public class NetworkStatsDetailLoader extends AsyncTaskLoader<NetworkStats> {
     @Override
     public NetworkStats loadInBackground() {
         try {
-            return mNetworkStatsManager.queryDetails(
-                    mNetworkType, mTelephonyManager.getSubscriberId(mSubId), mStart, mEnd);
+            return mNetworkStatsManager.querySummary(mNetworkType, mSubId, mStart, mEnd);
         } catch (RemoteException e) {
             Log.e(TAG, "Exception querying network detail.", e);
             return null;
@@ -83,7 +78,7 @@ public class NetworkStatsDetailLoader extends AsyncTaskLoader<NetworkStats> {
         private final Context mContext;
         private long mStart;
         private long mEnd;
-        private int mSubId;
+        private String mSubId;
         private int mNetworkType;
 
         public Builder(Context context) {
@@ -100,7 +95,7 @@ public class NetworkStatsDetailLoader extends AsyncTaskLoader<NetworkStats> {
             return this;
         }
 
-        public Builder setSubscriptionId(int subId) {
+        public Builder setSubscriberId(String subId) {
             mSubId = subId;
             return this;
         }
@@ -110,8 +105,8 @@ public class NetworkStatsDetailLoader extends AsyncTaskLoader<NetworkStats> {
             return this;
         }
 
-        public NetworkStatsDetailLoader build() {
-            return new NetworkStatsDetailLoader(this);
+        public NetworkStatsSummaryLoader build() {
+            return new NetworkStatsSummaryLoader(this);
         }
     }
 }
