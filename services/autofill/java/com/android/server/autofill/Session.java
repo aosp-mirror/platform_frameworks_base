@@ -50,6 +50,7 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.metrics.LogMaker;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -63,6 +64,7 @@ import android.service.autofill.AutofillService;
 import android.service.autofill.Dataset;
 import android.service.autofill.FieldClassification;
 import android.service.autofill.FieldClassification.Match;
+import android.text.TextUtils;
 import android.service.autofill.FillContext;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
@@ -744,11 +746,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private void onFillRequestFailureOrTimeout(int requestId, boolean timedOut,
             @Nullable CharSequence message) {
+        boolean showMessage = !TextUtils.isEmpty(message);
         synchronized (mLock) {
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#onFillRequestFailureOrTimeout(req=" + requestId
                         + ") rejected - session: " + id + " destroyed");
                 return;
+            }
+            if (sDebug) {
+                Slog.d(TAG, "finishing session due to service "
+                        + (timedOut ? "timeout" : "failure"));
             }
             mService.resetLastResponse();
             final LogMaker requestLog = mRequestLogs.get(requestId);
@@ -757,8 +764,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             } else {
                 requestLog.setType(timedOut ? MetricsEvent.TYPE_CLOSE : MetricsEvent.TYPE_FAILURE);
             }
+            if (showMessage) {
+                final int targetSdk = mService.getTargedSdkLocked();
+                if (targetSdk >= Build.VERSION_CODES.Q) {
+                    showMessage = false;
+                    Slog.w(TAG, "onFillRequestFailureOrTimeout(): not showing '" + message
+                            + "' because service's targetting API " + targetSdk);
+                }
+                if (message != null) {
+                    requestLog.addTaggedData(MetricsEvent.FIELD_AUTOFILL_TEXT_LEN,
+                            message.length());
+                }
+            }
         }
-        if (message != null) {
+        notifyUnavailableToClient(AutofillManager.STATE_UNKNOWN_FAILED);
+        if (showMessage) {
             getUiForShowing().showError(message, this);
         }
         removeSelf();
@@ -793,6 +813,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @Override
     public void onSaveRequestFailure(@Nullable CharSequence message,
             @NonNull String servicePackageName) {
+        boolean showMessage = !TextUtils.isEmpty(message);
         synchronized (mLock) {
             mIsSaving = false;
 
@@ -801,12 +822,26 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + id + " destroyed");
                 return;
             }
+            if (showMessage) {
+                final int targetSdk = mService.getTargedSdkLocked();
+                if (targetSdk >= Build.VERSION_CODES.Q) {
+                    showMessage = false;
+                    Slog.w(TAG, "onSaveRequestFailure(): not showing '" + message
+                            + "' because service's targetting API " + targetSdk);
+                }
+            }
         }
-        LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_DATA_SAVE_REQUEST, servicePackageName)
+        final LogMaker log =
+                newLogMaker(MetricsEvent.AUTOFILL_DATA_SAVE_REQUEST, servicePackageName)
                 .setType(MetricsEvent.TYPE_FAILURE);
+        if (message != null) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_TEXT_LEN, message.length());
+        }
         mMetricsLogger.write(log);
 
-        getUiForShowing().showError(message, this);
+        if (showMessage) {
+            getUiForShowing().showError(message, this);
+        }
         removeSelf();
     }
 

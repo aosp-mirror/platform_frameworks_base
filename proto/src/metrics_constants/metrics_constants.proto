@@ -4026,6 +4026,8 @@ message MetricsEvent {
     // - AUTOFILL_DATASET_AUTHENTICATED
     // - AUTOFILL_INVALID_AUTHENTICATION
     // - AUTOFILL_INVALID_DATASET_AUTHENTICATION
+    // NOTE: starting on OS Q, it also added the following fields:
+    // Tag FIELD_AUTOFILL_TEXT_LEN: length of the error message provided by the service
     AUTOFILL_REQUEST = 907;
 
     // Tag of a field for a package of an autofill service
@@ -4102,6 +4104,8 @@ message MetricsEvent {
     // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
     // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // NOTE: starting on OS Q, it also added the following fields:
+    // Tag FIELD_AUTOFILL_TEXT_LEN: length of the error message provided by the service
     AUTOFILL_DATA_SAVE_REQUEST = 918;
 
     // An auto-fill session was finished
@@ -6516,6 +6520,9 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: Q
     MOBILE_NETWORK = 1571;
+
+    // Tag of a field for the length of a text
+    FIELD_AUTOFILL_TEXT_LEN = 1572;
 
     // ---- End Q Constants, all Q constants go above this line ----
 
