@@ -2599,11 +2599,13 @@ public class Paint {
      * Return in bounds (allocated by the caller) the smallest rectangle that
      * encloses all of the characters, with an implied origin at (0,0).
      *
+     * Note that styles are ignored even if you pass {@link android.text.Spanned} instance.
+     * Use {@link android.text.StaticLayout} for measuring bounds of {@link android.text.Spanned}.
+     *
      * @param text text to measure and return its bounds
      * @param start index of the first char in the text to measure
      * @param end 1 past the last char in the text to measure
      * @param bounds returns the unioned bounds of all the text. Must be allocated by the caller
-     * @hide
      */
     public void getTextBounds(CharSequence text, int start, int end, Rect bounds) {
         if ((start | end | (end - start) | (text.length() - end)) < 0) {
