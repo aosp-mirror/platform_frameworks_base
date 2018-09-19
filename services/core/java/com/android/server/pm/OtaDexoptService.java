@@ -53,10 +53,6 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
     private final static String TAG = "OTADexopt";
     private final static boolean DEBUG_DEXOPT = true;
 
-    // The synthetic library dependencies denoting "no checks."
-    private final static String[] NO_LIBRARIES =
-            new String[] { PackageDexOptimizer.SKIP_SHARED_LIBRARY_CHECK };
-
     // The amount of "available" (free - low threshold) space necessary at the start of an OTA to
     // not bulk-delete unused apps' odex files.
     private final static long BULK_DELETE_THRESHOLD = 1024 * 1024 * 1024;  // 1GB.
@@ -338,11 +334,6 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 collectingInstaller, mPackageManagerService.mInstallLock, mContext);
 
         String[] libraryDependencies = pkg.usesLibraryFiles;
-        if (pkg.isSystem()) {
-            // For system apps, we want to avoid classpaths checks.
-            libraryDependencies = NO_LIBRARIES;
-        }
-
 
         optimizer.performDexOpt(pkg, libraryDependencies,
                 null /* ISAs */,
