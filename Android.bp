@@ -1576,6 +1576,7 @@ droidstubs {
             removed_api_file: "api/removed.txt",
         },
     },
+    jdiff_enabled: true,
 }
 
 droidstubs {
@@ -1600,6 +1601,7 @@ droidstubs {
             removed_api_file: "api/system-removed.txt",
         },
     },
+    jdiff_enabled: true,
 }
 
 droidstubs {
