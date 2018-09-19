@@ -378,7 +378,7 @@ public class ComponentResolver {
         for (int i = newIntents.size() - 1; i >= 0; --i) {
             final PackageParser.ActivityIntentInfo intentInfo = newIntents.get(i);
             final PackageParser.Package disabledPkg = sPackageManagerInternal
-                    .getDisabledSystemPackage(intentInfo.activity.info.packageName);
+                    .getDisabledPackage(intentInfo.activity.info.packageName);
             final List<PackageParser.Activity> systemActivities =
                     disabledPkg != null ? disabledPkg.activities : null;
             adjustPriority(systemActivities, intentInfo, setupWizardPackage);
