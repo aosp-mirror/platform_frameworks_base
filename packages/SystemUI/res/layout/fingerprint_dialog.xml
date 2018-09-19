@@ -19,7 +19,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="bottom"
-    android:background="@color/fingerprint_dialog_dim_color"
+    android:background="@color/biometric_dialog_dim_color"
     android:orientation="vertical">
 
     <!-- This is not a Space since Spaces cannot be clicked -->
@@ -63,7 +63,7 @@
                 android:singleLine="true"
                 android:ellipsize="marquee"
                 android:marqueeRepeatLimit="marquee_forever"
-                android:textColor="@color/fingerprint_dialog_text_dark_color"/>
+                android:textColor="@color/biometric_dialog_text_dark_color"/>
 
             <TextView
                 android:id="@+id/subtitle"
@@ -78,7 +78,7 @@
                 android:singleLine="true"
                 android:ellipsize="marquee"
                 android:marqueeRepeatLimit="marquee_forever"
-                android:textColor="@color/fingerprint_dialog_text_dark_color"/>
+                android:textColor="@color/biometric_dialog_text_dark_color"/>
 
             <TextView
                 android:id="@+id/description"
@@ -90,12 +90,12 @@
                 android:paddingTop="8dp"
                 android:textSize="16sp"
                 android:maxLines="4"
-                android:textColor="@color/fingerprint_dialog_text_dark_color"/>
+                android:textColor="@color/biometric_dialog_text_dark_color"/>
 
             <ImageView
                 android:id="@+id/fingerprint_icon"
-                android:layout_width="@dimen/fingerprint_dialog_fp_icon_size"
-                android:layout_height="@dimen/fingerprint_dialog_fp_icon_size"
+                android:layout_width="@dimen/biometric_dialog_biometric_icon_size"
+                android:layout_height="@dimen/biometric_dialog_biometric_icon_size"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="48dp"
                 android:scaleType="fitXY"
@@ -114,7 +114,7 @@
                 android:accessibilityLiveRegion="polite"
                 android:text="@string/fingerprint_dialog_touch_sensor"
                 android:contentDescription="@string/accessibility_fingerprint_dialog_help_area"
-                android:textColor="@color/fingerprint_dialog_text_light_color"/>
+                android:textColor="@color/biometric_dialog_text_light_color"/>
 
             <LinearLayout
                 android:layout_width="match_parent"

@@ -116,7 +116,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         }
         getComponent(CommandQueue.class).addCallbacks(this);
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        mDialogView = new BiometricDialogView(mContext, mCallback);
+        mDialogView = new FingerprintDialogView(mContext, mCallback);
     }
 
     @Override

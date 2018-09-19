@@ -19,8 +19,6 @@ package com.android.systemui.biometrics;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.drawable.AnimatedVectorDrawable;
-import android.graphics.drawable.Drawable;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Binder;
 import android.os.Bundle;
@@ -38,7 +36,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -46,11 +43,9 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
 /**
- * This class loads the view for the system-provided dialog. The view consists of:
- * Application Icon, Title, Subtitle, Description, Fingerprint Icon, Error/Help message area,
- * and positive/negative buttons.
+ * Abstract base class. Shows a dialog for BiometricPrompt.
  */
-public class BiometricDialogView extends LinearLayout {
+public abstract class BiometricDialogView extends LinearLayout {
 
     private static final String TAG = "BiometricDialogView";
 
@@ -59,10 +54,10 @@ public class BiometricDialogView extends LinearLayout {
 
     private static final int MSG_CLEAR_MESSAGE = 1;
 
-    private static final int STATE_NONE = 0;
-    private static final int STATE_FINGERPRINT = 1;
-    private static final int STATE_FINGERPRINT_ERROR = 2;
-    private static final int STATE_FINGERPRINT_AUTHENTICATED = 3;
+    protected static final int STATE_NONE = 0;
+    protected static final int STATE_AUTHENTICATING = 1;
+    protected static final int STATE_ERROR = 2;
+    protected static final int STATE_AUTHENTICATED = 3;
 
     private final IBinder mWindowToken = new Binder();
     private final Interpolator mLinearOutSlowIn;
@@ -70,7 +65,6 @@ public class BiometricDialogView extends LinearLayout {
     private final float mAnimationTranslationOffset;
     private final int mErrorColor;
     private final int mTextColor;
-    private final int mFingerprintColor;
     private final float mDisplayWidth;
     private final DialogViewCallback mCallback;
 
@@ -81,6 +75,11 @@ public class BiometricDialogView extends LinearLayout {
     private int mLastState;
     private boolean mAnimatingAway;
     private boolean mWasForceRemoved;
+
+    protected abstract int getLayoutResourceId();
+    protected abstract float getAnimationTranslationOffset();
+    protected abstract void updateIcon(int lastState, int newState);
+    protected abstract int getHintStringResource();
 
     private final Runnable mShowAnimationRunnable = new Runnable() {
         @Override
@@ -119,14 +118,11 @@ public class BiometricDialogView extends LinearLayout {
         mCallback = callback;
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        mAnimationTranslationOffset = getResources()
-                .getDimension(R.dimen.fingerprint_dialog_animation_translation_offset);
+        mAnimationTranslationOffset = getAnimationTranslationOffset();
         mErrorColor = Color.parseColor(
-                getResources().getString(R.color.fingerprint_dialog_error_color));
+                getResources().getString(R.color.biometric_dialog_error_color));
         mTextColor = Color.parseColor(
-                getResources().getString(R.color.fingerprint_dialog_text_light_color));
-        mFingerprintColor = Color.parseColor(
-                getResources().getString(R.color.fingerprint_dialog_fingerprint_color));
+                getResources().getString(R.color.biometric_dialog_text_light_color));
 
         DisplayMetrics metrics = new DisplayMetrics();
         mWindowManager.getDefaultDisplay().getMetrics(metrics);
@@ -134,7 +130,7 @@ public class BiometricDialogView extends LinearLayout {
 
         // Create the dialog
         LayoutInflater factory = LayoutInflater.from(getContext());
-        mLayout = (ViewGroup) factory.inflate(R.layout.fingerprint_dialog, this, false);
+        mLayout = (ViewGroup) factory.inflate(getLayoutResourceId(), this, false);
         addView(mLayout);
 
         mDialog = mLayout.findViewById(R.id.dialog);
@@ -195,7 +191,7 @@ public class BiometricDialogView extends LinearLayout {
         mDialog.getLayoutParams().width = (int) mDisplayWidth;
 
         mLastState = STATE_NONE;
-        updateFingerprintIcon(STATE_FINGERPRINT);
+        updateState(STATE_AUTHENTICATING);
 
         title.setText(mBundle.getCharSequence(BiometricPrompt.KEY_TITLE));
         title.setSelected(true);
@@ -303,17 +299,21 @@ public class BiometricDialogView extends LinearLayout {
         mBundle = bundle;
     }
 
+    public ViewGroup getLayout() {
+        return mLayout;
+    }
+
     // Clears the temporary message and shows the help message.
     private void handleClearMessage() {
-        updateFingerprintIcon(STATE_FINGERPRINT);
-        mErrorText.setText(R.string.fingerprint_dialog_touch_sensor);
+        updateState(STATE_AUTHENTICATING);
+        mErrorText.setText(getHintStringResource());
         mErrorText.setTextColor(mTextColor);
     }
 
     // Shows an error/help message
     private void showTemporaryMessage(String message) {
         mHandler.removeMessages(MSG_CLEAR_MESSAGE);
-        updateFingerprintIcon(STATE_FINGERPRINT_ERROR);
+        updateState(STATE_ERROR);
         mErrorText.setText(message);
         mErrorText.setTextColor(mErrorColor);
         mErrorText.setContentDescription(message);
@@ -330,59 +330,9 @@ public class BiometricDialogView extends LinearLayout {
         mCallback.onErrorShown();
     }
 
-    private void updateFingerprintIcon(int newState) {
-        Drawable icon  = getAnimationForTransition(mLastState, newState);
-
-        if (icon == null) {
-            Log.e(TAG, "Animation not found");
-            return;
-        }
-
-        final AnimatedVectorDrawable animation = icon instanceof AnimatedVectorDrawable
-                ? (AnimatedVectorDrawable) icon
-                : null;
-
-        final ImageView fingerprint_icon = mLayout.findViewById(R.id.fingerprint_icon);
-        fingerprint_icon.setImageDrawable(icon);
-
-        if (animation != null && shouldAnimateForTransition(mLastState, newState)) {
-            animation.forceAnimationOnUI();
-            animation.start();
-        }
-
+    private void updateState(int newState) {
+        updateIcon(mLastState, newState);
         mLastState = newState;
-    }
-
-    private boolean shouldAnimateForTransition(int oldState, int newState) {
-        if (oldState == STATE_NONE && newState == STATE_FINGERPRINT) {
-            return false;
-        } else if (oldState == STATE_FINGERPRINT && newState == STATE_FINGERPRINT_ERROR) {
-            return true;
-        } else if (oldState == STATE_FINGERPRINT_ERROR && newState == STATE_FINGERPRINT) {
-            return true;
-        } else if (oldState == STATE_FINGERPRINT && newState == STATE_FINGERPRINT_AUTHENTICATED) {
-            // TODO(b/77328470): add animation when fingerprint is authenticated
-            return false;
-        }
-        return false;
-    }
-
-    private Drawable getAnimationForTransition(int oldState, int newState) {
-        int iconRes;
-        if (oldState == STATE_NONE && newState == STATE_FINGERPRINT) {
-            iconRes = R.drawable.fingerprint_dialog_fp_to_error;
-        } else if (oldState == STATE_FINGERPRINT && newState == STATE_FINGERPRINT_ERROR) {
-            iconRes = R.drawable.fingerprint_dialog_fp_to_error;
-        } else if (oldState == STATE_FINGERPRINT_ERROR && newState == STATE_FINGERPRINT) {
-            iconRes = R.drawable.fingerprint_dialog_error_to_fp;
-        } else if (oldState == STATE_FINGERPRINT && newState == STATE_FINGERPRINT_AUTHENTICATED) {
-            // TODO(b/77328470): add animation when fingerprint is authenticated
-            iconRes = R.drawable.fingerprint_dialog_error_to_fp;
-        }
-        else {
-            return null;
-        }
-        return mContext.getDrawable(iconRes);
     }
 
     public WindowManager.LayoutParams getLayoutParams() {
