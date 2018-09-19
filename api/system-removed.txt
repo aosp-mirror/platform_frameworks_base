@@ -143,3 +143,12 @@ package android.service.notification {
 
 }
 
+package android.telephony {
+
+  public class TelephonyManager {
+    method public deprecated void answerRingingCall();
+    method public deprecated boolean endCall();
+  }
+
+}
+
