@@ -284,8 +284,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                     throws InstallerException {
                 final StringBuilder builder = new StringBuilder();
 
-                // The current version.
-                builder.append("9 ");
+                // The current version. For v10, see b/115993344.
+                builder.append("10 ");
 
                 builder.append("dexopt");
 
