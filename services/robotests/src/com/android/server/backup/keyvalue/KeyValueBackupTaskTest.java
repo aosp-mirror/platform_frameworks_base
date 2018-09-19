@@ -155,9 +155,7 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
-// TODO: When returning to RUNNING_QUEUE vs FINAL, RUNNING_QUEUE sets status = OK. Why? Verify?
-// TODO: Check queue in general, behavior w/ multiple packages
-// TODO: Test PM invocation
+// TODO: Test agents timing out
 @RunWith(FrameworkRobolectricTestRunner.class)
 @Config(
         manifest = Config.NONE,
@@ -370,6 +368,47 @@ public class KeyValueBackupTaskTest {
     }
 
     @Test
+    public void testRunTask_whenOnePackage_cleansUpPmFiles() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgent(PACKAGE_1);
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+
+        runTask(task);
+
+        assertCleansUpFiles(mTransport, PM_PACKAGE);
+    }
+
+    @Test
+    public void testRunTask_whenTransportReturnsTransportErrorForPm_cleansUpPmFiles()
+            throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        when(transportMock.transport.performBackup(
+                        argThat(packageInfo(PM_PACKAGE)), any(), anyInt()))
+                .thenReturn(BackupTransport.TRANSPORT_PACKAGE_REJECTED);
+        setUpAgent(PACKAGE_1);
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+
+        runTask(task);
+
+        assertCleansUpFiles(mTransport, PM_PACKAGE);
+    }
+
+    @Test
+    public void testRunTask_whenTransportReturnsTransportErrorForPm_resetsBackupState()
+            throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        when(transportMock.transport.performBackup(
+                        argThat(packageInfo(PM_PACKAGE)), any(), anyInt()))
+                .thenReturn(BackupTransport.TRANSPORT_PACKAGE_REJECTED);
+        setUpAgent(PACKAGE_1);
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+
+        runTask(task);
+
+        verify(mBackupManagerService).resetBackupState(getStateDirectory(mTransport).toFile());
+    }
+
+    @Test
     public void testRunTask_whenOnePackage_updatesBookkeeping() throws Exception {
         // Transport has to be initialized to not reset current token
         TransportMock transportMock = setUpInitializedTransport(mTransport);
@@ -418,7 +457,7 @@ public class KeyValueBackupTaskTest {
     public void testRunTask_whenNonPmPackageAndNonIncremental_doesNotBackUpPm() throws Exception {
         TransportMock transportMock = setUpInitializedTransport(mTransport);
         setUpAgentWithData(PACKAGE_1);
-        PackageManagerBackupAgent pmAgent = spy(createPmAgent());
+        BackupAgent pmAgent = spy(createPmAgent());
         when(mBackupManagerService.makeMetadataAgent()).thenReturn(forward(pmAgent));
         KeyValueBackupTask task = createKeyValueBackupTask(transportMock, true, PACKAGE_1);
 
@@ -431,7 +470,7 @@ public class KeyValueBackupTaskTest {
     public void testRunTask_whenNonPmPackageAndPmAndNonIncremental_backsUpPm() throws Exception {
         TransportMock transportMock = setUpInitializedTransport(mTransport);
         setUpAgentWithData(PACKAGE_1);
-        PackageManagerBackupAgent pmAgent = spy(createPmAgent());
+        BackupAgent pmAgent = spy(createPmAgent());
         when(mBackupManagerService.makeMetadataAgent()).thenReturn(forward(pmAgent));
         KeyValueBackupTask task =
                 createKeyValueBackupTask(transportMock, true, PACKAGE_1, PM_PACKAGE);
@@ -445,7 +484,7 @@ public class KeyValueBackupTaskTest {
     public void testRunTask_whenNonPmPackageAndIncremental_backsUpPm() throws Exception {
         TransportMock transportMock = setUpInitializedTransport(mTransport);
         setUpAgentWithData(PACKAGE_1);
-        PackageManagerBackupAgent pmAgent = spy(createPmAgent());
+        BackupAgent pmAgent = spy(createPmAgent());
         when(mBackupManagerService.makeMetadataAgent()).thenReturn(forward(pmAgent));
         KeyValueBackupTask task = createKeyValueBackupTask(transportMock, false, PACKAGE_1);
 
@@ -529,6 +568,35 @@ public class KeyValueBackupTaskTest {
     }
 
     @Test
+    public void testRunTask_whenPackageUnknown() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        // Not calling setUpAgent() for PACKAGE_1
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+
+        runTask(task);
+
+        verify(transportMock.transport, never())
+                .performBackup(argThat(packageInfo(PACKAGE_1)), any(), anyInt());
+        verify(mObserver).onResult(PACKAGE_1.packageName, ERROR_PACKAGE_NOT_FOUND);
+        verify(mObserver).backupFinished(SUCCESS);
+        assertBackupNotPendingFor(PACKAGE_1);
+    }
+
+    @Test
+    public void testRunTask_whenFirstPackageUnknown_callsTransportForSecondPackage()
+            throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        // Not calling setUpAgent() for PACKAGE_1
+        setUpAgentWithData(PACKAGE_2);
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1, PACKAGE_2);
+
+        runTask(task);
+
+        verify(transportMock.transport)
+                .performBackup(argThat(packageInfo(PACKAGE_2)), any(), anyInt());
+    }
+
+    @Test
     public void testRunTask_whenPackageNotEligibleForBackup() throws Exception {
         TransportMock transportMock = setUpInitializedTransport(mTransport);
         AgentMock agentMock = setUpAgentWithData(PACKAGE_1.backupNotAllowed());
@@ -542,6 +610,19 @@ public class KeyValueBackupTaskTest {
         verify(mObserver).onResult(PACKAGE_1.packageName, ERROR_BACKUP_NOT_ALLOWED);
         verify(mObserver).backupFinished(SUCCESS);
         assertBackupNotPendingFor(PACKAGE_1);
+    }
+
+    @Test
+    public void testRunTask_whenFirstPackageNotEligibleForBackup_callsTransportForSecondPackage()
+            throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgentsWithData(PACKAGE_1.backupNotAllowed(), PACKAGE_2);
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1, PACKAGE_2);
+
+        runTask(task);
+
+        verify(transportMock.transport)
+                .performBackup(argThat(packageInfo(PACKAGE_2)), any(), anyInt());
     }
 
     @Test
@@ -561,6 +642,20 @@ public class KeyValueBackupTaskTest {
     }
 
     @Test
+    public void testRunTask_whenFirstPackageDoesFullBackup_callsTransportForSecondPackage()
+            throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        PackageData packageData = fullBackupPackage(1);
+        setUpAgentsWithData(packageData, PACKAGE_2);
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, packageData, PACKAGE_2);
+
+        runTask(task);
+
+        verify(transportMock.transport)
+                .performBackup(argThat(packageInfo(PACKAGE_2)), any(), anyInt());
+    }
+
+    @Test
     public void testRunTask_whenPackageIsStopped() throws Exception {
         TransportMock transportMock = setUpInitializedTransport(mTransport);
         AgentMock agentMock = setUpAgentWithData(PACKAGE_1.stopped());
@@ -575,18 +670,16 @@ public class KeyValueBackupTaskTest {
     }
 
     @Test
-    public void testRunTask_whenPackageUnknown() throws Exception {
+    public void testRunTask_whenFirstPackageIsStopped_callsTransportForSecondPackage()
+            throws Exception {
         TransportMock transportMock = setUpInitializedTransport(mTransport);
-        // Not calling setUpAgent()
-        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+        setUpAgentsWithData(PACKAGE_1.stopped(), PACKAGE_2);
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1, PACKAGE_2);
 
         runTask(task);
 
-        verify(transportMock.transport, never())
-                .performBackup(argThat(packageInfo(PACKAGE_1)), any(), anyInt());
-        verify(mObserver).onResult(PACKAGE_1.packageName, ERROR_PACKAGE_NOT_FOUND);
-        verify(mObserver).backupFinished(SUCCESS);
-        assertBackupNotPendingFor(PACKAGE_1);
+        verify(transportMock.transport)
+                .performBackup(argThat(packageInfo(PACKAGE_2)), any(), anyInt());
     }
 
     @Test
@@ -629,6 +722,7 @@ public class KeyValueBackupTaskTest {
         verify(mBackupManagerService).setWorkSource(null);
         verify(mObserver).onResult(PACKAGE_1.packageName, ERROR_AGENT_FAILURE);
         verify(mObserver).backupFinished(BackupManager.SUCCESS);
+        assertBackupPendingFor(PACKAGE_1);
     }
 
     @Test
@@ -645,6 +739,7 @@ public class KeyValueBackupTaskTest {
         verify(mBackupManagerService).setWorkSource(null);
         verify(mObserver).onResult(PACKAGE_1.packageName, ERROR_AGENT_FAILURE);
         verify(mObserver).backupFinished(BackupManager.SUCCESS);
+        assertBackupPendingFor(PACKAGE_1);
     }
 
     @Test
@@ -798,7 +893,7 @@ public class KeyValueBackupTaskTest {
 
         runTask(task);
 
-        assertBackupNotPendingFor(PACKAGE_1);
+        assertBackupPendingFor(PACKAGE_1);
     }
 
     @Test
@@ -1140,6 +1235,38 @@ public class KeyValueBackupTaskTest {
     }
 
     @Test
+    public void testRunTask_whenPmAgentWritesData_callsTransportPerformBackupWithAgentData()
+            throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgent(PACKAGE_1);
+        Path backupDataPath = createTemporaryFile();
+        when(transportMock.transport.performBackup(
+                        argThat(packageInfo(PM_PACKAGE)), any(), anyInt()))
+                .then(copyBackupDataTo(backupDataPath));
+        BackupAgent pmAgent = spy(createPmAgent());
+        when(mBackupManagerService.makeMetadataAgent()).thenReturn(forward(pmAgent));
+        agentOnBackupDo(
+                pmAgent,
+                (oldState, dataOutput, newState) -> {
+                    writeData(dataOutput, "key1", "data1".getBytes());
+                    writeData(dataOutput, "key2", "data2".getBytes());
+                    writeState(newState, "newState".getBytes());
+                });
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+
+        runTask(task);
+
+        verify(transportMock.transport)
+                .performBackup(argThat(packageInfo(PM_PACKAGE)), any(), anyInt());
+        try (FileInputStream inputStream = new FileInputStream(backupDataPath.toFile())) {
+            BackupDataInput backupData = new BackupDataInput(inputStream.getFD());
+            assertDataHasKeyValue(backupData, "key1", "data1".getBytes());
+            assertDataHasKeyValue(backupData, "key2", "data2".getBytes());
+            assertThat(backupData.readNextHeader()).isFalse();
+        }
+    }
+
+    @Test
     public void testRunTask_whenPerformBackupSucceeds_callsTransportFinishBackup()
             throws Exception {
         TransportMock transportMock = setUpInitializedTransport(mTransport);
@@ -1173,6 +1300,50 @@ public class KeyValueBackupTaskTest {
         assertThat(Files.readAllBytes(getStateFile(mTransport, PACKAGE_1)))
                 .isEqualTo("newState".getBytes());
         assertCleansUpFilesAndAgent(mTransport, PACKAGE_1);
+    }
+
+    @Test
+    public void testRunTask_whenFinishBackupSucceedsForPm_cleansUp() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgent(PACKAGE_1);
+        when(transportMock.transport.finishBackup()).thenReturn(BackupTransport.TRANSPORT_OK);
+        BackupAgent pmAgent = spy(createPmAgent());
+        when(mBackupManagerService.makeMetadataAgent()).thenReturn(forward(pmAgent));
+        agentOnBackupDo(
+                pmAgent,
+                (oldState, dataOutput, newState) -> {
+                    writeData(dataOutput, "key", "data".getBytes());
+                    writeState(newState, "newState".getBytes());
+                });
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+
+        runTask(task);
+
+        assertThat(Files.readAllBytes(getStateFile(mTransport, PM_PACKAGE)))
+                .isEqualTo("newState".getBytes());
+        assertCleansUpFiles(mTransport, PM_PACKAGE);
+        // We don't unbind PM
+        verify(mBackupManagerService, never()).unbindAgent(argThat(applicationInfo(PM_PACKAGE)));
+    }
+
+    @Test
+    public void testRunTask_whenFinishBackupSucceedsForPm_doesNotUnbindPm() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgent(PACKAGE_1);
+        when(transportMock.transport.finishBackup()).thenReturn(BackupTransport.TRANSPORT_OK);
+        BackupAgent pmAgent = spy(createPmAgent());
+        when(mBackupManagerService.makeMetadataAgent()).thenReturn(forward(pmAgent));
+        agentOnBackupDo(
+                pmAgent,
+                (oldState, dataOutput, newState) -> {
+                    writeData(dataOutput, "key", "data".getBytes());
+                    writeState(newState, "newState".getBytes());
+                });
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+
+        runTask(task);
+
+        verify(mBackupManagerService, never()).unbindAgent(argThat(applicationInfo(PM_PACKAGE)));
     }
 
     @Test
@@ -1354,6 +1525,7 @@ public class KeyValueBackupTaskTest {
     public void testRunTask_whenTransportReturnsQuotaExceeded_updatesBookkeeping()
             throws Exception {
         TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgentWithData(PACKAGE_1);
         when(transportMock.transport.performBackup(
                         argThat(packageInfo(PACKAGE_1)), any(), anyInt()))
                 .thenReturn(BackupTransport.TRANSPORT_QUOTA_EXCEEDED);
@@ -1701,9 +1873,9 @@ public class KeyValueBackupTaskTest {
     }
 
     @Test
-    public void testRunTask_whenPmAgentFails() throws Exception {
+    public void testRunTask_whenPmAgentFails_reportsCorrectly() throws Exception {
         TransportMock transportMock = setUpInitializedTransport(mTransport);
-        PackageManagerBackupAgent pmAgent = createThrowingPmAgent(new RuntimeException());
+        BackupAgent pmAgent = createThrowingPmAgent(new RuntimeException());
         when(mBackupManagerService.makeMetadataAgent()).thenReturn(pmAgent);
         KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
 
@@ -1715,6 +1887,75 @@ public class KeyValueBackupTaskTest {
                 EventLogTags.BACKUP_AGENT_FAILURE,
                 PM_PACKAGE.packageName,
                 new RuntimeException().toString());
+    }
+
+    @Test
+    public void testRunTask_whenPmAgentFails_revertsTask() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgent(PACKAGE_1);
+        BackupAgent pmAgent = createThrowingPmAgent(new RuntimeException());
+        when(mBackupManagerService.makeMetadataAgent()).thenReturn(pmAgent);
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+
+        runTask(task);
+
+        assertTaskReverted(transportMock, PACKAGE_1);
+    }
+
+    @Test
+    public void testRunTask_whenPmAgentFails_cleansUpFiles() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgent(PACKAGE_1);
+        BackupAgent pmAgent = createThrowingPmAgent(new RuntimeException());
+        when(mBackupManagerService.makeMetadataAgent()).thenReturn(pmAgent);
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+
+        runTask(task);
+
+        assertCleansUpFiles(mTransport, PM_PACKAGE);
+    }
+
+    @Test
+    public void testRunTask_whenPmAgentFails_resetsBackupState() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgent(PACKAGE_1);
+        BackupAgent pmAgent = createThrowingPmAgent(new RuntimeException());
+        when(mBackupManagerService.makeMetadataAgent()).thenReturn(pmAgent);
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+
+        runTask(task);
+
+        verify(mBackupManagerService).resetBackupState(getStateDirectory(mTransport).toFile());
+    }
+
+    @Test
+    public void testRunTask_whenMarkCancelDuringPmOnBackup_resetsBackupState() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgent(PACKAGE_1);
+        BackupAgent pmAgent = spy(createPmAgent());
+        when(mBackupManagerService.makeMetadataAgent()).thenReturn(forward(pmAgent));
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+        agentOnBackupDo(
+                pmAgent, (oldState, dataOutput, newState) -> runInWorkerThread(task::markCancel));
+
+        runTask(task);
+
+        verify(mBackupManagerService).resetBackupState(getStateDirectory(mTransport).toFile());
+    }
+
+    @Test
+    public void testRunTask_whenMarkCancelDuringPmOnBackup_cleansUpFiles() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgent(PACKAGE_1);
+        BackupAgent pmAgent = spy(createPmAgent());
+        when(mBackupManagerService.makeMetadataAgent()).thenReturn(forward(pmAgent));
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+        agentOnBackupDo(
+                pmAgent, (oldState, dataOutput, newState) -> runInWorkerThread(task::markCancel));
+
+        runTask(task);
+
+        assertCleansUpFiles(mTransport, PM_PACKAGE);
     }
 
     @Test
@@ -1736,7 +1977,7 @@ public class KeyValueBackupTaskTest {
 
         runTask(task);
 
-        verify(mReporter).onReadAgentDataError(eq(PACKAGE_1.packageName), any());
+        verify(mReporter).onAgentDataError(eq(PACKAGE_1.packageName), any());
     }
 
     @Test
@@ -1776,6 +2017,24 @@ public class KeyValueBackupTaskTest {
 
         assertCleansUpFiles(mTransport, PACKAGE_2);
         assertTaskReverted(transportMock, PACKAGE_1, PACKAGE_2);
+    }
+
+    @Test
+    public void testRunTask_whenMarkCancelDuringAgentOnBackup_cleansUpFiles() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        AgentMock agentMock = setUpAgent(PACKAGE_1);
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+        agentOnBackupDo(
+                agentMock,
+                (oldState, dataOutput, newState) -> {
+                    writeData(dataOutput, "key", "data".getBytes());
+                    writeState(newState, "newState".getBytes());
+                    runInWorkerThread(task::markCancel);
+                });
+
+        runTask(task);
+
+        assertCleansUpFiles(mTransport, PACKAGE_1);
     }
 
     @Test
@@ -2293,20 +2552,28 @@ public class KeyValueBackupTaskTest {
      */
     private static void agentOnBackupDo(AgentMock agentMock, BackupAgentOnBackup function)
             throws Exception {
-        doAnswer(
-                        (BackupAgentOnBackup)
-                                (oldState, dataOutput, newState) -> {
-                                    ByteArrayOutputStream outputStream =
-                                            new ByteArrayOutputStream();
-                                    transferStreamedData(
-                                            new FileInputStream(oldState.getFileDescriptor()),
-                                            outputStream);
-                                    agentMock.oldState = outputStream.toByteArray();
-                                    agentMock.oldStateHistory.add(agentMock.oldState);
-                                    function.onBackup(oldState, dataOutput, newState);
-                                })
-                .when(agentMock.agent)
-                .onBackup(any(), any(), any());
+        agentOnBackupDo(
+                agentMock.agent,
+                (oldState, dataOutput, newState) -> {
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    transferStreamedData(
+                            new FileInputStream(oldState.getFileDescriptor()), outputStream);
+                    agentMock.oldState = outputStream.toByteArray();
+                    agentMock.oldStateHistory.add(agentMock.oldState);
+                    function.onBackup(oldState, dataOutput, newState);
+                });
+    }
+
+    /**
+     * Implements {@code function} for {@link BackupAgent#onBackup(ParcelFileDescriptor,
+     * BackupDataOutput, ParcelFileDescriptor)} of {@code agentMock}.
+     *
+     * @see #agentOnBackupDo(AgentMock, BackupAgentOnBackup)
+     * @see #remoteAgentOnBackupThrows(AgentMock, BackupAgentOnBackup)
+     */
+    private static void agentOnBackupDo(BackupAgent backupAgent, BackupAgentOnBackup function)
+            throws IOException {
+        doAnswer(function).when(backupAgent).onBackup(any(), any(), any());
     }
 
     /**
@@ -2400,6 +2667,10 @@ public class KeyValueBackupTaskTest {
             // constructor
             assertJournalDoesNotContain(mBackupManagerService.getJournal(), packageName);
             assertThat(mBackupManagerService.getPendingBackups()).doesNotContainKey(packageName);
+            // Also verifying BMS is never called since for some cases the package wouldn't be
+            // pending for other reasons (for example it's not eligible for backup). Regardless of
+            // these reasons, we shouldn't mark them as pending backup (call dataChangedImpl()).
+            verify(mBackupManagerService, never()).dataChangedImpl(packageName);
         }
     }
 
