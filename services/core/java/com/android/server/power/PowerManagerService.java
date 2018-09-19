@@ -64,7 +64,6 @@ import android.os.UserManager;
 import android.os.WorkSource;
 import android.os.WorkSource.WorkChain;
 import android.provider.Settings;
-import android.provider.Settings.Global;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.dreams.DreamManagerInternal;
 import android.service.vr.IVrManager;
@@ -84,7 +83,6 @@ import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LockGuard;
@@ -230,6 +228,10 @@ public final class PowerManagerService extends SystemService
     private final BatterySaverController mBatterySaverController;
     private final BatterySaverStateMachine mBatterySaverStateMachine;
     private final BatterySavingStats mBatterySavingStats;
+    private final BinderService mBinderService;
+    private final LocalService mLocalService;
+    private final NativeWrapper mNativeWrapper;
+    private final Injector mInjector;
 
     private LightsManager mLightsManager;
     private BatteryManagerInternal mBatteryManagerInternal;
@@ -636,10 +638,76 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    /**
+     * Wrapper around the static-native methods of PowerManagerService.
+     *
+     * This class exists to allow us to mock static native methods in our tests. If mocking static
+     * methods becomes easier than this in the future, we can delete this class.
+     */
+    @VisibleForTesting
+    public static class NativeWrapper {
+        /** Wrapper for PowerManager.nativeInit */
+        public void nativeInit(PowerManagerService service) {
+            service.nativeInit();
+        }
+
+        /** Wrapper for PowerManager.nativeAcquireSuspectBlocker */
+        public void nativeAcquireSuspendBlocker(String name) {
+            PowerManagerService.nativeAcquireSuspendBlocker(name);
+        }
+
+        /** Wrapper for PowerManager.nativeReleaseSuspendBlocker */
+        public void nativeReleaseSuspendBlocker(String name) {
+            PowerManagerService.nativeReleaseSuspendBlocker(name);
+        }
+
+        /** Wrapper for PowerManager.nativeSetInteractive */
+        public void nativeSetInteractive(boolean enable) {
+            PowerManagerService.nativeSetInteractive(enable);
+        }
+
+        /** Wrapper for PowerManager.nativeSetAutoSuspend */
+        public void nativeSetAutoSuspend(boolean enable) {
+            PowerManagerService.nativeSetAutoSuspend(enable);
+        }
+
+        /** Wrapper for PowerManager.nativeSendPowerHint */
+        public void nativeSendPowerHint(int hintId, int data) {
+            PowerManagerService.nativeSendPowerHint(hintId, data);
+        }
+
+        /** Wrapper for PowerManager.nativeSetFeature */
+        public void nativeSetFeature(int featureId, int data) {
+            PowerManagerService.nativeSetFeature(featureId, data);
+        }
+    }
+
+    @VisibleForTesting
+    static class Injector {
+        Notifier createNotifier(Looper looper, Context context, IBatteryStats batteryStats,
+                SuspendBlocker suspendBlocker, WindowManagerPolicy policy) {
+            return new Notifier(looper, context, batteryStats, suspendBlocker, policy);
+        }
+
+        SuspendBlocker createSuspendBlocker(PowerManagerService service, String name) {
+            SuspendBlocker suspendBlocker = service.new SuspendBlockerImpl(name);
+            service.mSuspendBlockers.add(suspendBlocker);
+            return suspendBlocker;
+        }
+
+        BatterySaverPolicy createBatterySaverPolicy(
+                Object lock, Context context, BatterySavingStats batterySavingStats) {
+            return new BatterySaverPolicy(lock, context, batterySavingStats);
+        }
+
+        NativeWrapper createNativeWrapper() {
+            return new NativeWrapper();
+        }
+    }
+
     final Constants mConstants;
 
     private native void nativeInit();
-
     private static native void nativeAcquireSuspendBlocker(String name);
     private static native void nativeReleaseSuspendBlocker(String name);
     private static native void nativeSetInteractive(boolean enable);
@@ -648,8 +716,19 @@ public final class PowerManagerService extends SystemService
     private static native void nativeSetFeature(int featureId, int data);
 
     public PowerManagerService(Context context) {
+        this(context, new Injector());
+    }
+
+    @VisibleForTesting
+    PowerManagerService(Context context, Injector injector) {
         super(context);
+
         mContext = context;
+        mBinderService = new BinderService();
+        mLocalService = new LocalService();
+        mNativeWrapper = injector.createNativeWrapper();
+        mInjector = injector;
+
         mHandlerThread = new ServiceThread(TAG,
                 Process.THREAD_PRIORITY_DISPLAY, false /*allowIo*/);
         mHandlerThread.start();
@@ -658,57 +737,40 @@ public final class PowerManagerService extends SystemService
         mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
 
         mBatterySavingStats = new BatterySavingStats(mLock);
-        mBatterySaverPolicy = new BatterySaverPolicy(mLock, mContext, mBatterySavingStats);
+        mBatterySaverPolicy =
+                mInjector.createBatterySaverPolicy(mLock, mContext, mBatterySavingStats);
         mBatterySaverController = new BatterySaverController(mLock, mContext,
-                BackgroundThread.get().getLooper(), mBatterySaverPolicy, mBatterySavingStats);
+                BackgroundThread.get().getLooper(), mBatterySaverPolicy,
+                mBatterySavingStats);
         mBatterySaverStateMachine = new BatterySaverStateMachine(
                 mLock, mContext, mBatterySaverController);
 
         synchronized (mLock) {
-            mWakeLockSuspendBlocker = createSuspendBlockerLocked("PowerManagerService.WakeLocks");
-            mDisplaySuspendBlocker = createSuspendBlockerLocked("PowerManagerService.Display");
-            mDisplaySuspendBlocker.acquire();
-            mHoldingDisplaySuspendBlocker = true;
+            mWakeLockSuspendBlocker =
+                    mInjector.createSuspendBlocker(this, "PowerManagerService.WakeLocks");
+            mDisplaySuspendBlocker =
+                    mInjector.createSuspendBlocker(this, "PowerManagerService.Display");
+            if (mDisplaySuspendBlocker != null) {
+                mDisplaySuspendBlocker.acquire();
+                mHoldingDisplaySuspendBlocker = true;
+            }
             mHalAutoSuspendModeEnabled = false;
             mHalInteractiveModeEnabled = true;
 
             mWakefulness = WAKEFULNESS_AWAKE;
-
             sQuiescent = SystemProperties.get(SYSTEM_PROPERTY_QUIESCENT, "0").equals("1");
 
-            nativeInit();
-            nativeSetAutoSuspend(false);
-            nativeSetInteractive(true);
-            nativeSetFeature(POWER_FEATURE_DOUBLE_TAP_TO_WAKE, 0);
+            mNativeWrapper.nativeInit(this);
+            mNativeWrapper.nativeSetAutoSuspend(false);
+            mNativeWrapper.nativeSetInteractive(true);
+            mNativeWrapper.nativeSetFeature(POWER_FEATURE_DOUBLE_TAP_TO_WAKE, 0);
         }
-    }
-
-    @VisibleForTesting
-    PowerManagerService(Context context, BatterySaverPolicy batterySaverPolicy) {
-        super(context);
-
-        mContext = context;
-        mHandlerThread = new ServiceThread(TAG,
-                Process.THREAD_PRIORITY_DISPLAY, false /*allowIo*/);
-        mHandlerThread.start();
-        mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
-        mConstants = new Constants(mHandler);
-        mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
-        mDisplaySuspendBlocker = null;
-        mWakeLockSuspendBlocker = null;
-
-        mBatterySavingStats = new BatterySavingStats(mLock);
-        mBatterySaverPolicy = batterySaverPolicy;
-        mBatterySaverController = new BatterySaverController(mLock, context,
-                BackgroundThread.getHandler().getLooper(), batterySaverPolicy, mBatterySavingStats);
-        mBatterySaverStateMachine = new BatterySaverStateMachine(
-                mLock, mContext, mBatterySaverController);
     }
 
     @Override
     public void onStart() {
-        publishBinderService(Context.POWER_SERVICE, new BinderService());
-        publishLocalService(PowerManagerInternal.class, new LocalService());
+        publishBinderService(Context.POWER_SERVICE, mBinderService);
+        publishLocalService(PowerManagerInternal.class, mLocalService);
 
         Watchdog.getInstance().addMonitor(this);
         Watchdog.getInstance().addThread(mHandler);
@@ -752,11 +814,13 @@ public final class PowerManagerService extends SystemService
             // The notifier runs on the system server's main looper so as not to interfere
             // with the animations and other critical functions of the power manager.
             mBatteryStats = BatteryStatsService.getService();
-            mNotifier = new Notifier(Looper.getMainLooper(), mContext, mBatteryStats,
-                    createSuspendBlockerLocked("PowerManagerService.Broadcasts"), mPolicy);
+            mNotifier = mInjector.createNotifier(Looper.getMainLooper(), mContext, mBatteryStats,
+                    mInjector.createSuspendBlocker(this, "PowerManagerService.Broadcasts"),
+                    mPolicy);
 
             mWirelessChargerDetector = new WirelessChargerDetector(sensorManager,
-                    createSuspendBlockerLocked("PowerManagerService.WirelessChargerDetector"),
+                    mInjector.createSuspendBlocker(
+                            this, "PowerManagerService.WirelessChargerDetector"),
                     mHandler);
             mSettingsObserver = new SettingsObserver(mHandler);
 
@@ -824,7 +888,7 @@ public final class PowerManagerService extends SystemService
         resolver.registerContentObserver(Settings.Global.getUriFor(
                 Settings.Global.DEVICE_DEMO_MODE),
                 false, mSettingsObserver, UserHandle.USER_SYSTEM);
-        IVrManager vrManager = (IVrManager) getBinderService(Context.VR_SERVICE);
+        IVrManager vrManager = IVrManager.Stub.asInterface(getBinderService(Context.VR_SERVICE));
         if (vrManager != null) {
             try {
                 vrManager.registerListener(mVrStateCallbacks);
@@ -927,7 +991,8 @@ public final class PowerManagerService extends SystemService
                             UserHandle.USER_CURRENT) != 0;
             if (doubleTapWakeEnabled != mDoubleTapWakeEnabled) {
                 mDoubleTapWakeEnabled = doubleTapWakeEnabled;
-                nativeSetFeature(POWER_FEATURE_DOUBLE_TAP_TO_WAKE, mDoubleTapWakeEnabled ? 1 : 0);
+                mNativeWrapper.nativeSetFeature(
+                        POWER_FEATURE_DOUBLE_TAP_TO_WAKE, mDoubleTapWakeEnabled ? 1 : 0);
             }
         }
 
@@ -1507,6 +1572,11 @@ public final class PowerManagerService extends SystemService
                 mNotifier.onWakefulnessChangeStarted(wakefulness, reason);
             }
         }
+    }
+
+    @VisibleForTesting
+    int getWakefulness() {
+        return mWakefulness;
     }
 
     /**
@@ -2640,7 +2710,7 @@ public final class PowerManagerService extends SystemService
             mHalAutoSuspendModeEnabled = enable;
             Trace.traceBegin(Trace.TRACE_TAG_POWER, "setHalAutoSuspend(" + enable + ")");
             try {
-                nativeSetAutoSuspend(enable);
+                mNativeWrapper.nativeSetAutoSuspend(enable);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_POWER);
             }
@@ -2655,7 +2725,7 @@ public final class PowerManagerService extends SystemService
             mHalInteractiveModeEnabled = enable;
             Trace.traceBegin(Trace.TRACE_TAG_POWER, "setHalInteractive(" + enable + ")");
             try {
-                nativeSetInteractive(enable);
+                mNativeWrapper.nativeSetInteractive(enable);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_POWER);
             }
@@ -3127,7 +3197,7 @@ public final class PowerManagerService extends SystemService
                 break;
         }
 
-        nativeSendPowerHint(hintId, data);
+        mNativeWrapper.nativeSendPowerHint(hintId, data);
     }
 
     /**
@@ -3718,12 +3788,6 @@ public final class PowerManagerService extends SystemService
         proto.flush();
     }
 
-    private SuspendBlocker createSuspendBlockerLocked(String name) {
-        SuspendBlocker suspendBlocker = new SuspendBlockerImpl(name);
-        mSuspendBlockers.add(suspendBlocker);
-        return suspendBlocker;
-    }
-
     private void incrementBootCount() {
         synchronized (mLock) {
             int count;
@@ -4022,7 +4086,7 @@ public final class PowerManagerService extends SystemService
                     Slog.wtf(TAG, "Suspend blocker \"" + mName
                             + "\" was finalized without being released!");
                     mReferenceCount = 0;
-                    nativeReleaseSuspendBlocker(mName);
+                    mNativeWrapper.nativeReleaseSuspendBlocker(mName);
                     Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, mTraceName, 0);
                 }
             } finally {
@@ -4039,7 +4103,7 @@ public final class PowerManagerService extends SystemService
                         Slog.d(TAG, "Acquiring suspend blocker \"" + mName + "\".");
                     }
                     Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, mTraceName, 0);
-                    nativeAcquireSuspendBlocker(mName);
+                    mNativeWrapper.nativeAcquireSuspendBlocker(mName);
                 }
             }
         }
@@ -4052,7 +4116,7 @@ public final class PowerManagerService extends SystemService
                     if (DEBUG_SPEW) {
                         Slog.d(TAG, "Releasing suspend blocker \"" + mName + "\".");
                     }
-                    nativeReleaseSuspendBlocker(mName);
+                    mNativeWrapper.nativeReleaseSuspendBlocker(mName);
                     Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, mTraceName, 0);
                 } else if (mReferenceCount < 0) {
                     Slog.wtf(TAG, "Suspend blocker \"" + mName
@@ -4090,7 +4154,8 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    private final class BinderService extends IPowerManager.Stub {
+    @VisibleForTesting
+    final class BinderService extends IPowerManager.Stub {
         @Override
         public void onShellCommand(FileDescriptor in, FileDescriptor out,
                 FileDescriptor err, String[] args, ShellCallback callback,
@@ -4589,6 +4654,16 @@ public final class PowerManagerService extends SystemService
                 Binder.restoreCallingIdentity(ident);
             }
         }
+    }
+
+    @VisibleForTesting
+    BinderService getBinderServiceInstance() {
+        return mBinderService;
+    }
+
+    @VisibleForTesting
+    LocalService getLocalServiceInstance() {
+        return mLocalService;
     }
 
     @VisibleForTesting
