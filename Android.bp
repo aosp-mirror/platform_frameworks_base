@@ -1230,6 +1230,11 @@ stubs_defaults {
         "metalava-manual",
         "ojluni-annotated-sdk-stubs",
     ],
+    api_levels_annotations_enabled: true,
+    api_levels_annotations_dirs: [
+        "sdk-dir",
+        "api-versions-jars-dir",
+    ],
 }
 
 droidstubs {
