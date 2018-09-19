@@ -307,7 +307,10 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mNavigationBarView.getLightTransitionsController().destroy(getContext());
+        if (mNavigationBarView != null) {
+            mNavigationBarView.getBarTransitions().destroy();
+            mNavigationBarView.getLightTransitionsController().destroy(getContext());
+        }
         mOverviewProxyService.removeCallback(mOverviewProxyListener);
         getContext().unregisterReceiver(mBroadcastReceiver);
     }

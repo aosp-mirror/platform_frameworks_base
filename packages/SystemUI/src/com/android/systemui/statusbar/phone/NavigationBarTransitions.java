@@ -44,6 +44,17 @@ public final class NavigationBarTransitions extends BarTransitions {
     private boolean mAutoDim;
     private View mNavButtons;
 
+    private final Handler mHandler = Handler.getMain();
+    private final IWallpaperVisibilityListener mWallpaperVisibilityListener =
+            new IWallpaperVisibilityListener.Stub() {
+        @Override
+        public void onWallpaperVisibilityChanged(boolean newVisibility,
+        int displayId) throws RemoteException {
+            mWallpaperVisible = newVisibility;
+            mHandler.post(() -> applyLightsOut(true, false));
+        }
+    };
+
     public NavigationBarTransitions(NavigationBarView view) {
         super(view, R.drawable.nav_background);
         mView = view;
@@ -55,17 +66,9 @@ public final class NavigationBarTransitions extends BarTransitions {
                 .getBoolean(R.bool.config_navigation_bar_enable_auto_dim_no_visible_wallpaper);
 
         IWindowManager windowManagerService = Dependency.get(IWindowManager.class);
-        Handler handler = Handler.getMain();
         try {
             mWallpaperVisible = windowManagerService.registerWallpaperVisibilityListener(
-                new IWallpaperVisibilityListener.Stub() {
-                    @Override
-                    public void onWallpaperVisibilityChanged(boolean newVisibility,
-                            int displayId) throws RemoteException {
-                        mWallpaperVisible = newVisibility;
-                        handler.post(() -> applyLightsOut(true, false));
-                    }
-                }, Display.DEFAULT_DISPLAY);
+                    mWallpaperVisibilityListener, Display.DEFAULT_DISPLAY);
         } catch (RemoteException e) {
         }
         mView.addOnLayoutChangeListener(
@@ -85,6 +88,16 @@ public final class NavigationBarTransitions extends BarTransitions {
     public void init() {
         applyModeBackground(-1, getMode(), false /*animate*/);
         applyLightsOut(false /*animate*/, true /*force*/);
+    }
+
+    @Override
+    public void destroy() {
+        IWindowManager windowManagerService = Dependency.get(IWindowManager.class);
+        try {
+            windowManagerService.unregisterWallpaperVisibilityListener(mWallpaperVisibilityListener,
+                    Display.DEFAULT_DISPLAY);
+        } catch (RemoteException e) {
+        }
     }
 
     @Override
