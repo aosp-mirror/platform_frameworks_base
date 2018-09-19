@@ -14,7 +14,10 @@
  * limitations under the License
  */
 
-package java.lang.annotation;
+package com.android.systemui.statusbar.notification;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.SOURCE)
 public @interface ShadeViewRefactor {
