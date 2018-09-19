@@ -5405,7 +5405,6 @@ package android.telephony {
   }
 
   public class TelephonyManager {
-    method public deprecated void answerRingingCall();
     method public deprecated void call(java.lang.String, java.lang.String);
     method public int checkCarrierPrivilegesForPackage(java.lang.String);
     method public int checkCarrierPrivilegesForPackageAnyPhone(java.lang.String);
@@ -5413,7 +5412,6 @@ package android.telephony {
     method public boolean disableDataConnectivity();
     method public boolean enableDataConnectivity();
     method public void enableVideoCalling(boolean);
-    method public deprecated boolean endCall();
     method public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers(int);
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntent(android.content.Intent);
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntentAndPhone(android.content.Intent, int);
