@@ -17,45 +17,23 @@
 #ifndef AAPT2_DUMP_MANIFEST_H
 #define AAPT2_DUMP_MANIFEST_H
 
-#include <Diagnostics.h>
-#include <ValueVisitor.h>
-#include <io/ZipArchive.h>
-
-
-#include "cmd/Command.h"
-#include "process/IResourceTableConsumer.h"
+#include "Diagnostics.h"
+#include "LoadedApk.h"
 #include "text/Printer.h"
-#include "xml/XmlDom.h"
 
 namespace aapt {
 
-class DumpBadgingCommand : public Command {
- public:
-  explicit DumpBadgingCommand(IDiagnostics* diag) : Command("badging"), diag_(diag) {
-    SetDescription("Print information extracted from the manifest of the APK.");
-    AddOptionalSwitch("--include-meta-data", "Include meta-data information.",
-                      &include_metadata_);
-  }
-
-  int Action(const std::vector<std::string>& args) override;
-
- private:
-  IDiagnostics* diag_;
-  bool include_metadata_ = false;
+struct DumpManifestOptions {
+  /** Include meta information from <meta-data> elements in the output. */
+  bool include_meta_data = false;
+  /** Only output permission information. */
+  bool only_permissions = false;
 };
 
-class DumpPermissionsCommand : public Command {
- public:
-  explicit DumpPermissionsCommand(IDiagnostics* diag) : Command("permissions"), diag_(diag) {
-    SetDescription("Print the permissions extracted from the manifest of the APK.");
-  }
+/** Print information extracted from the manifest of the APK. */
+int DumpManifest(LoadedApk* apk, DumpManifestOptions& options, text::Printer* printer,
+                 IDiagnostics* diag);
 
-  int Action(const std::vector<std::string>& args) override;
+}  // namespace aapt
 
- private:
-  IDiagnostics* diag_;
-};
-
-}// namespace aapt
-
-#endif //AAPT2_DUMP_MANIFEST_H
+#endif  // AAPT2_DUMP_MANIFEST_H

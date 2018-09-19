@@ -49,7 +49,7 @@ class Command {
       const android::StringPiece& description, std::unordered_set<std::string>* value);
   void AddOptionalSwitch(const android::StringPiece& name, const android::StringPiece& description,
       bool* value);
-  void AddOptionalSubcommand(std::unique_ptr<Command>&& subcommand);
+  void AddOptionalSubcommand(std::unique_ptr<Command>&& subcommand, bool experimental = false);
 
   void SetDescription(const android::StringPiece& name);
 
@@ -83,6 +83,7 @@ class Command {
   std::string fullname_;
   std::vector<Flag> flags_;
   std::vector<std::unique_ptr<Command>> subcommands_;
+  std::vector<std::unique_ptr<Command>> experimental_subcommands_;
 };
 
 }  // namespace aapt
