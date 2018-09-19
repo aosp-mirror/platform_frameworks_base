@@ -33,19 +33,18 @@ public class FingerprintDialogView extends BiometricDialogView {
     private static final String TAG = "FingerprintDialogView";
 
     @Override
-    protected int getLayoutResourceId() {
-        return R.layout.fingerprint_dialog;
-    }
-
-    @Override
-    protected int getHintStringResource() {
+    protected int getHintStringResourceId() {
         return R.string.fingerprint_dialog_touch_sensor;
     }
 
     @Override
-    protected float getAnimationTranslationOffset() {
-        return getResources()
-                .getDimension(R.dimen.fingerprint_dialog_animation_translation_offset);
+    protected int getAuthenticatedAccessibilityResourceId() {
+        return com.android.internal.R.string.fingerprint_authenticated;
+    }
+
+    @Override
+    protected int getIconDescriptionResourceId() {
+        return R.string.accessibility_fingerprint_dialog_fingerprint_icon;
     }
 
     @Override
@@ -61,8 +60,8 @@ public class FingerprintDialogView extends BiometricDialogView {
                 ? (AnimatedVectorDrawable) icon
                 : null;
 
-        final ImageView fingerprint_icon = getLayout().findViewById(R.id.fingerprint_icon);
-        fingerprint_icon.setImageDrawable(icon);
+        final ImageView fingerprintIcon = getLayout().findViewById(R.id.biometric_icon);
+        fingerprintIcon.setImageDrawable(icon);
 
         if (animation != null && shouldAnimateForTransition(lastState, newState)) {
             animation.forceAnimationOnUI();

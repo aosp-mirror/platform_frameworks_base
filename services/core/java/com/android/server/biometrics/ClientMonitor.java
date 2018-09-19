@@ -28,6 +28,7 @@ import android.util.Slog;
 
 import com.android.internal.logging.MetricsLogger;
 
+import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
 /**
@@ -128,7 +129,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     public abstract boolean onEnrollResult(BiometricAuthenticator.Identifier identifier,
             int remaining);
     public abstract boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
-            boolean authenticated);
+            boolean authenticated, ArrayList<Byte> token);
     public abstract boolean onRemoved(BiometricAuthenticator.Identifier identifier,
             int remaining);
     public abstract boolean onEnumerationResult(

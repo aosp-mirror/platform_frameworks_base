@@ -110,10 +110,11 @@ public class FingerprintService extends BiometricService {
                 DaemonWrapper daemon, long halDeviceId, IBinder token,
                 ServiceListener listener, int targetUserId, int groupId, long opId,
                 boolean restricted, String owner, Bundle bundle,
-                IBiometricPromptReceiver dialogReceiver, IStatusBarService statusBarService) {
+                IBiometricPromptReceiver dialogReceiver, IStatusBarService statusBarService,
+                boolean requireConfirmation) {
             super(context, daemon, halDeviceId, token, listener, targetUserId, groupId, opId,
-                    restricted,
-                    owner, bundle, dialogReceiver, statusBarService);
+                    restricted, owner, bundle, dialogReceiver, statusBarService,
+                    requireConfirmation);
         }
 
         @Override
@@ -182,8 +183,7 @@ public class FingerprintService extends BiometricService {
             final AuthenticationClientImpl client = new FingerprintAuthClient(getContext(),
                     mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver),
                     mCurrentUserId, groupId, opId, restricted, opPackageName, null /* bundle */,
-                    null /* dialogReceiver */, mStatusBarService);
-
+                    null /* dialogReceiver */, mStatusBarService, false /* requireConfirmation */);
             authenticateInternal(client, opId, opPackageName);
         }
 
@@ -198,7 +198,7 @@ public class FingerprintService extends BiometricService {
                     mDaemonWrapper, mHalDeviceId, token,
                     new BiometricPromptServiceListenerImpl(receiver),
                     mCurrentUserId, groupId, opId, restricted, opPackageName, bundle,
-                    dialogReceiver, mStatusBarService);
+                    dialogReceiver, mStatusBarService, false /* requireConfirmation */);
             authenticateInternal(client, opId, opPackageName, callingUid, callingPid,
                     callingUserId);
         }

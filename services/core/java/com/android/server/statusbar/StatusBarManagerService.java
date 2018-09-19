@@ -565,11 +565,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
-    public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver, int type) {
+    public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver, int type,
+            boolean requireConfirmation) {
         enforceBiometricDialog();
         if (mBar != null) {
             try {
-                mBar.showBiometricDialog(bundle, receiver, type);
+                mBar.showBiometricDialog(bundle, receiver, type, requireConfirmation);
             } catch (RemoteException ex) {
             }
         }

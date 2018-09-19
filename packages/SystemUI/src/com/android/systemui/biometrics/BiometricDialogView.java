@@ -36,6 +36,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -75,11 +76,12 @@ public abstract class BiometricDialogView extends LinearLayout {
     private int mLastState;
     private boolean mAnimatingAway;
     private boolean mWasForceRemoved;
+    protected boolean mRequireConfirmation;
 
-    protected abstract int getLayoutResourceId();
-    protected abstract float getAnimationTranslationOffset();
     protected abstract void updateIcon(int lastState, int newState);
-    protected abstract int getHintStringResource();
+    protected abstract int getHintStringResourceId();
+    protected abstract int getAuthenticatedAccessibilityResourceId();
+    protected abstract int getIconDescriptionResourceId();
 
     private final Runnable mShowAnimationRunnable = new Runnable() {
         @Override
@@ -118,7 +120,8 @@ public abstract class BiometricDialogView extends LinearLayout {
         mCallback = callback;
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        mAnimationTranslationOffset = getAnimationTranslationOffset();
+        mAnimationTranslationOffset = getResources()
+                .getDimension(R.dimen.biometric_dialog_animation_translation_offset);
         mErrorColor = Color.parseColor(
                 getResources().getString(R.color.biometric_dialog_error_color));
         mTextColor = Color.parseColor(
@@ -130,7 +133,7 @@ public abstract class BiometricDialogView extends LinearLayout {
 
         // Create the dialog
         LayoutInflater factory = LayoutInflater.from(getContext());
-        mLayout = (ViewGroup) factory.inflate(getLayoutResourceId(), this, false);
+        mLayout = (ViewGroup) factory.inflate(R.layout.biometric_dialog, this, false);
         addView(mLayout);
 
         mDialog = mLayout.findViewById(R.id.dialog);
@@ -161,6 +164,10 @@ public abstract class BiometricDialogView extends LinearLayout {
         final View rightSpace = mLayout.findViewById(R.id.right_space);
         final Button negative = mLayout.findViewById(R.id.button2);
         final Button positive = mLayout.findViewById(R.id.button1);
+        final ImageView icon = mLayout.findViewById(R.id.biometric_icon);
+
+        icon.setContentDescription(getResources().getString(getIconDescriptionResourceId()));
+        mErrorText.setText(getResources().getString(getHintStringResourceId()));
 
         setDismissesDialog(space);
         setDismissesDialog(leftSpace);
@@ -196,6 +203,8 @@ public abstract class BiometricDialogView extends LinearLayout {
         title.setText(mBundle.getCharSequence(BiometricPrompt.KEY_TITLE));
         title.setSelected(true);
 
+        positive.setVisibility(View.INVISIBLE);
+
         final CharSequence subtitleText = mBundle.getCharSequence(BiometricPrompt.KEY_SUBTITLE);
         if (TextUtils.isEmpty(subtitleText)) {
             subtitle.setVisibility(View.GONE);
@@ -213,15 +222,6 @@ public abstract class BiometricDialogView extends LinearLayout {
         }
 
         negative.setText(mBundle.getCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT));
-
-        final CharSequence positiveText =
-                mBundle.getCharSequence(BiometricPrompt.KEY_POSITIVE_TEXT);
-        positive.setText(positiveText); // needs to be set for marquee to work
-        if (positiveText != null) {
-            positive.setVisibility(View.VISIBLE);
-        } else {
-            positive.setVisibility(View.GONE);
-        }
 
         if (!mWasForceRemoved) {
             // Dim the background and slide the dialog up
@@ -299,6 +299,19 @@ public abstract class BiometricDialogView extends LinearLayout {
         mBundle = bundle;
     }
 
+    public void setRequireConfirmation(boolean requireConfirmation) {
+        mRequireConfirmation = requireConfirmation;
+    }
+
+    public boolean requiresConfirmation() {
+        return mRequireConfirmation;
+    }
+
+    public void showConfirmationButton() {
+        final Button positive = mLayout.findViewById(R.id.button1);
+        positive.setVisibility(View.VISIBLE);
+    }
+
     public ViewGroup getLayout() {
         return mLayout;
     }
@@ -306,7 +319,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     // Clears the temporary message and shows the help message.
     private void handleClearMessage() {
         updateState(STATE_AUTHENTICATING);
-        mErrorText.setText(getHintStringResource());
+        mErrorText.setText(getHintStringResourceId());
         mErrorText.setTextColor(mTextColor);
     }
 

@@ -18,6 +18,7 @@ package com.android.systemui.biometrics;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricPromptReceiver;
 import android.os.Bundle;
@@ -30,6 +31,9 @@ import android.view.WindowManager;
 import com.android.internal.os.SomeArgs;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.CommandQueue;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Receives messages sent from AuthenticationClient and shows the appropriate biometric UI (e.g.
@@ -48,7 +52,8 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     private static final int MSG_USER_CANCELED = 7;
     private static final int MSG_BUTTON_POSITIVE = 8;
 
-    private BiometricDialogView mDialogView;
+    private Map<Integer, BiometricDialogView> mDialogs; // BiometricAuthenticator type, view
+    private BiometricDialogView mCurrentDialog;
     private WindowManager mWindowManager;
     private IBiometricPromptReceiver mReceiver;
     private boolean mDialogShowing;
@@ -111,16 +116,25 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
 
     @Override
     public void start() {
-        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
-            return;
+        final PackageManager pm = mContext.getPackageManager();
+        mDialogs = new HashMap<>();
+        if (pm.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+            mDialogs.put(BiometricAuthenticator.TYPE_FACE, new FaceDialogView(mContext, mCallback));
         }
-        getComponent(CommandQueue.class).addCallbacks(this);
-        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        mDialogView = new FingerprintDialogView(mContext, mCallback);
+        if (pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+            mDialogs.put(BiometricAuthenticator.TYPE_FINGERPRINT,
+                    new FingerprintDialogView(mContext, mCallback));
+        }
+
+        if (!mDialogs.isEmpty()) {
+            getComponent(CommandQueue.class).addCallbacks(this);
+            mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        }
     }
 
     @Override
-    public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver, int type) {
+    public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver, int type,
+            boolean requireConfirmation) {
         if (DEBUG) Log.d(TAG, "showBiometricDialog, type: " + type);
         // Remove these messages as they are part of the previous client
         mHandler.removeMessages(MSG_BIOMETRIC_ERROR);
@@ -129,6 +143,8 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = bundle;
         args.arg2 = receiver;
+        args.argi1 = type;
+        args.arg3 = requireConfirmation;
         mHandler.obtainMessage(MSG_SHOW_DIALOG, args).sendToTarget();
     }
 
@@ -157,33 +173,41 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     }
 
     private void handleShowDialog(SomeArgs args) {
+        final int type = args.argi1;
+        mCurrentDialog = mDialogs.get(type);
+
         if (DEBUG) Log.d(TAG, "handleShowDialog, isAnimatingAway: "
-                + mDialogView.isAnimatingAway());
-        if (mDialogView.isAnimatingAway()) {
-            mDialogView.forceRemove();
+                + mCurrentDialog.isAnimatingAway() + " type: " + type);
+
+        if (mCurrentDialog.isAnimatingAway()) {
+            mCurrentDialog.forceRemove();
         } else if (mDialogShowing) {
             Log.w(TAG, "Dialog already showing");
             return;
         }
         mReceiver = (IBiometricPromptReceiver) args.arg2;
-        mDialogView.setBundle((Bundle)args.arg1);
-        mWindowManager.addView(mDialogView, mDialogView.getLayoutParams());
+        mCurrentDialog.setBundle((Bundle)args.arg1);
+        mCurrentDialog.setRequireConfirmation((boolean)args.arg3);
+        mWindowManager.addView(mCurrentDialog, mCurrentDialog.getLayoutParams());
         mDialogShowing = true;
     }
 
     private void handleBiometricAuthenticated() {
         if (DEBUG) Log.d(TAG, "handleBiometricAuthenticated");
 
-        // TODO: announce correct string depending on modality
-        mDialogView.announceForAccessibility(
-                mContext.getResources().getText(
-                        com.android.internal.R.string.fingerprint_authenticated));
-        handleHideDialog(false /* userCanceled */);
+        mCurrentDialog.announceForAccessibility(
+                mContext.getResources()
+                        .getText(mCurrentDialog.getAuthenticatedAccessibilityResourceId()));
+        if (mCurrentDialog.requiresConfirmation()) {
+            mCurrentDialog.showConfirmationButton();
+        } else {
+            handleHideDialog(false /* userCanceled */);
+        }
     }
 
     private void handleBiometricHelp(String message) {
         if (DEBUG) Log.d(TAG, "handleBiometricHelp: " + message);
-        mDialogView.showHelpMessage(message);
+        mCurrentDialog.showHelpMessage(message);
     }
 
     private void handleBiometricError(String error) {
@@ -192,7 +216,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
             if (DEBUG) Log.d(TAG, "Dialog already dismissed");
             return;
         }
-        mDialogView.showErrorMessage(error);
+        mCurrentDialog.showErrorMessage(error);
     }
 
     private void handleHideDialog(boolean userCanceled) {
@@ -212,7 +236,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         }
         mReceiver = null;
         mDialogShowing = false;
-        mDialogView.startDismiss();
+        mCurrentDialog.startDismiss();
     }
 
     private void handleButtonNegative() {

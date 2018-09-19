@@ -1439,6 +1439,10 @@
     <string name="biometric_not_recognized">Not recognized</string>
     <!-- Accessibility message announced when a fingerprint has been authenticated [CHAR LIMIT=NONE] -->
     <string name="fingerprint_authenticated">Fingerprint authenticated</string>
+    <!-- Accessibility message announced when a face has been authenticated [CHAR LIMIT=NONE] -->
+    <string name="face_authenticated_no_confirmation_required">Face authenticated</string>
+    <!-- Accessibility message announced when a face has been authenticated, but requires the user to press the confirm button [CHAR LIMIT=NONE] -->
+    <string name="face_authenticated_confirmation_required">Face authenticated, please press confirm</string>
 
     <!-- Error message shown when the fingerprint hardware can't be accessed -->
     <string name="fingerprint_error_hw_not_available">Fingerprint hardware not available.</string>
@@ -1516,6 +1520,8 @@
     <string name="face_error_no_space">Face can\u2019t be stored.</string>
     <!-- Generic error message shown when the face operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user. [CHAR LIMIT=50] -->
     <string name="face_error_canceled">Face operation canceled.</string>
+    <!-- Generic error message shown when the face authentication operation is canceled due to user input. Generally not shown to the user [CHAR LIMIT=50] -->
+    <string name="face_error_user_canceled">Face authentication canceled by user.</string>
     <!-- Generic error message shown when the face operation fails because too many attempts have been made. [CHAR LIMIT=50] -->
     <string name="face_error_lockout">Too many attempts. Try again later.</string>
     <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=50] -->

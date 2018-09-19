@@ -51,7 +51,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.security.KeyStore;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
@@ -225,10 +224,10 @@ public abstract class BiometricService extends SystemService implements IHwBinde
                 IBinder token, ServiceListener listener, int targetUserId, int groupId, long opId,
                 boolean restricted, String owner, Bundle bundle,
                 IBiometricPromptReceiver dialogReceiver,
-                IStatusBarService statusBarService) {
+                IStatusBarService statusBarService, boolean requireConfirmation) {
             super(context, getMetrics(), daemon, halDeviceId, token, listener,
                     targetUserId, groupId, opId, restricted, owner, bundle, dialogReceiver,
-                    statusBarService);
+                    statusBarService, requireConfirmation);
         }
 
         @Override
@@ -278,6 +277,11 @@ public abstract class BiometricService extends SystemService implements IHwBinde
                 return lockoutMode;
             }
             return AuthenticationClient.LOCKOUT_NONE;
+        }
+
+        @Override
+        public void onAuthenticationConfirmed() {
+            removeClient(mCurrentClient);
         }
     }
 
@@ -587,14 +591,7 @@ public abstract class BiometricService extends SystemService implements IHwBinde
         ClientMonitor client = mCurrentClient;
         final boolean authenticated = identifier.getBiometricId() != 0;
 
-        if (authenticated) {
-            final byte[] byteToken = new byte[token.size()];
-            for (int i = 0; i < token.size(); i++) {
-                byteToken[i] = token.get(i);
-            }
-            KeyStore.getInstance().addAuthToken(byteToken);
-        }
-        if (client != null && client.onAuthenticated(identifier, authenticated)) {
+        if (client != null && client.onAuthenticated(identifier, authenticated, token)) {
             removeClient(client);
         }
         if (authenticated) {
