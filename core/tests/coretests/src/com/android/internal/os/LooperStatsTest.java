@@ -77,9 +77,13 @@ public final class LooperStatsTest {
 
         Message message = mHandlerFirst.obtainMessage(1000);
         message.workSourceUid = 1000;
+        message.when = looperStats.getSystemUptimeMillis();
+
+        looperStats.tickUptime(30);
         Object token = looperStats.messageDispatchStarting();
         looperStats.tickRealtime(100);
         looperStats.tickThreadTime(10);
+        looperStats.tickUptime(200);
         looperStats.messageDispatched(token, message);
 
         List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
@@ -98,6 +102,10 @@ public final class LooperStatsTest {
         assertThat(entry.maxLatencyMicros).isEqualTo(100);
         assertThat(entry.cpuUsageMicros).isEqualTo(10);
         assertThat(entry.maxCpuUsageMicros).isEqualTo(10);
+        assertThat(entry.recordedDelayMessageCount).isEqualTo(1);
+        assertThat(entry.delayMillis).isEqualTo(30);
+        assertThat(entry.maxDelayMillis).isEqualTo(30);
+
     }
 
     @Test
@@ -212,6 +220,56 @@ public final class LooperStatsTest {
         assertThat(entry3.maxLatencyMicros).isEqualTo(10);
         assertThat(entry3.cpuUsageMicros).isEqualTo(10);
         assertThat(entry3.maxCpuUsageMicros).isEqualTo(10);
+    }
+
+    @Test
+    public void testDispatchDelayIsRecorded() {
+        TestableLooperStats looperStats = new TestableLooperStats(1, 100);
+
+        // Dispatched right on time.
+        Message message1 = mHandlerFirst.obtainMessage(1000);
+        message1.when = looperStats.getSystemUptimeMillis();
+        Object token1 = looperStats.messageDispatchStarting();
+        looperStats.tickUptime(10);
+        looperStats.messageDispatched(token1, message1);
+
+        // Dispatched 100ms late.
+        Message message2 = mHandlerFirst.obtainMessage(1000);
+        message2.when = looperStats.getSystemUptimeMillis() - 100;
+        Object token2 = looperStats.messageDispatchStarting();
+        looperStats.tickUptime(10);
+        looperStats.messageDispatched(token2, message2);
+
+        // No target dispatching time.
+        Message message3 = mHandlerFirst.obtainMessage(1000);
+        message3.when = 0;
+        Object token3 = looperStats.messageDispatchStarting();
+        looperStats.tickUptime(10);
+        looperStats.messageDispatched(token3, message3);
+
+        // Dispatched too soon (should never happen).
+        Message message4 = mHandlerFirst.obtainMessage(1000);
+        message4.when = looperStats.getSystemUptimeMillis() + 200;
+        Object token4 = looperStats.messageDispatchStarting();
+        looperStats.tickUptime(10);
+        looperStats.messageDispatched(token4, message4);
+
+        // Dispatched 300ms late.
+        Message message5 = mHandlerFirst.obtainMessage(1000);
+        message5.when = looperStats.getSystemUptimeMillis() - 300;
+        Object token5 = looperStats.messageDispatchStarting();
+        looperStats.tickUptime(10);
+        looperStats.messageDispatched(token5, message5);
+
+        List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
+        assertThat(entries).hasSize(1);
+
+        LooperStats.ExportedEntry entry = entries.get(0);
+        assertThat(entry.messageCount).isEqualTo(5);
+        assertThat(entry.recordedMessageCount).isEqualTo(5);
+        assertThat(entry.recordedDelayMessageCount).isEqualTo(4);
+        assertThat(entry.delayMillis).isEqualTo(400);
+        assertThat(entry.maxDelayMillis).isEqualTo(300);
     }
 
     @Test
@@ -385,6 +443,7 @@ public final class LooperStatsTest {
         private int mCount;
         private long mRealtimeMicros;
         private long mThreadTimeMicros;
+        private long mUptimeMillis;
         private int mSamplingInterval;
 
         TestableLooperStats(int samplingInterval, int sizeCap) {
@@ -401,6 +460,10 @@ public final class LooperStatsTest {
             mThreadTimeMicros += micros;
         }
 
+        void tickUptime(long millis) {
+            mUptimeMillis += millis;
+        }
+
         @Override
         protected long getElapsedRealtimeMicro() {
             return INITIAL_MICROS + mRealtimeMicros;
@@ -409,6 +472,11 @@ public final class LooperStatsTest {
         @Override
         protected long getThreadTimeMicro() {
             return INITIAL_MICROS + mThreadTimeMicros;
+        }
+
+        @Override
+        protected long getSystemUptimeMillis() {
+            return INITIAL_MICROS / 1000 + mUptimeMillis;
         }
 
         @Override
