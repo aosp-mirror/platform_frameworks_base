@@ -1,13 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-/**
- * Copyright (c) 2017, Google Inc.
+/*
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,13 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
--->
 
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+package com.android.tests.sysmem.host;
 
-     <!-- Do not translate. Template for showing mobile network operator name while WFC is active -->
-     <string-array name="wfcSpnFormats">
-         <item>%s</item>
-         <item>%s Wi-Fi Calling</item>
-     </string-array>
-</resources>
+/**
+ * Exception thrown in case of unexpected error encountered when executing the
+ * test.
+ */
+class TestException extends Exception {
+    TestException(Exception cause) {
+        super(cause);
+    }
+
+    TestException(String msg) {
+        super(msg);
+    }
+
+    TestException(String msg, Exception cause) {
+        super(msg, cause);
+    }
+}

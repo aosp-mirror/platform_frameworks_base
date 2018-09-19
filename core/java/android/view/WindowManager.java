@@ -1668,6 +1668,7 @@ public interface WindowManager extends ViewManager {
          * this window is visible.
          * @hide
          */
+        @SystemApi
         @RequiresPermission(permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS)
         public static final int PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 0x00080000;
 

@@ -162,7 +162,7 @@ void RenderThread::initializeDisplayEventReceiver() {
 }
 
 void RenderThread::initThreadLocals() {
-    mDisplayInfo = DeviceInfo::queryDisplayInfo();
+    mDisplayInfo = DeviceInfo::get()->displayInfo();
     nsecs_t frameIntervalNanos = static_cast<nsecs_t>(1000000000 / mDisplayInfo.fps);
     mTimeLord.setFrameInterval(frameIntervalNanos);
     initializeDisplayEventReceiver();
@@ -246,6 +246,9 @@ void RenderThread::setGrContext(sk_sp<GrContext> context) {
         mGrContext->releaseResourcesAndAbandonContext();
     }
     mGrContext = std::move(context);
+    if (mGrContext) {
+        DeviceInfo::setMaxTextureSize(mGrContext->maxRenderTargetSize());
+    }
 }
 
 int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {

@@ -18,6 +18,7 @@
 
 #include <math.h>
 #include <system/graphics.h>
+#include <ui/PixelFormat.h>
 
 #include <SkColor.h>
 #include <SkColorSpace.h>
@@ -115,6 +116,8 @@ static constexpr float EOCF(float srgb) {
 bool transferFunctionCloseToSRGB(const SkColorSpace* colorSpace);
 
 SkColorType PixelFormatToColorType(android_pixel_format pixelFormat);
+
+android::PixelFormat ColorTypeToPixelFormat(SkColorType colorType);
 
 SkColorSpace::Gamut DataSpaceToColorGamut(android_dataspace dataSpace);
 

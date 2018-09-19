@@ -171,23 +171,6 @@ public class NearestTouchFrameTest extends SysuiTestCase {
         ev.recycle();
     }
 
-    @Test
-    public void testFurtherSelectedWhenCloserNotFocusable() {
-        View closer = mockViewAt(0, 0, 10, 10);
-        View further = mockViewAt(20, 0, 10, 10);
-        closer.setFocusable(false);
-
-        mNearestTouchFrame.addView(closer);
-        mNearestTouchFrame.addView(further);
-        mNearestTouchFrame.onMeasure(0, 0);
-
-        MotionEvent ev = MotionEvent.obtain(0, 0, 0,
-                12 /* x */, 5 /* y */, 0);
-        mNearestTouchFrame.onTouchEvent(ev);
-        verify(further).onTouchEvent(eq(ev));
-        ev.recycle();
-    }
-
     private View mockViewAt(int x, int y, int width, int height) {
         View v = spy(new View(mContext));
         doAnswer(invocation -> {
@@ -204,7 +187,6 @@ public class NearestTouchFrameTest extends SysuiTestCase {
         v.setRight(width);
         v.setTop(0);
         v.setBottom(height);
-        v.setFocusable(true);
         return v;
     }
 }

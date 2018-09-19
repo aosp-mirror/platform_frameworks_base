@@ -23,7 +23,6 @@
 #include "utils/Color.h"
 #include "utils/StringUtils.h"
 
-#include "DeviceInfo.h"
 #include "Frame.h"
 #include "Properties.h"
 
@@ -127,7 +126,6 @@ void EglManager::initialize() {
     createContext();
     createPBufferSurface();
     makeCurrent(mPBufferSurface, nullptr, /* force */ true);
-    DeviceInfo::initialize();
 
     mSurfaceColorGamut = DataSpaceToColorGamut(
         static_cast<android_dataspace>(DeviceInfo::get()->getTargetDataSpace()));

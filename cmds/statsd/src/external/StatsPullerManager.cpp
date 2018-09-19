@@ -217,6 +217,12 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
           {},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::CATEGORY_SIZE)}},
+        // Number of fingerprints registered to each user.
+        {android::util::NUM_FINGERPRINTS,
+         {{},
+          {},
+          1 * NS_PER_SEC,
+          new StatsCompanionServicePuller(android::util::NUM_FINGERPRINTS)}},
         };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {

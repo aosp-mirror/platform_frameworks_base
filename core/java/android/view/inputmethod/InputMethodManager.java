@@ -665,10 +665,12 @@ public final class InputMethodManager {
     }
 
     /**
-     * Private optimization: retrieve the global InputMethodManager instance,
-     * if it exists.
+     * Private optimization: retrieve the global InputMethodManager instance, if it exists.
      * @hide
+     * @deprecated Use {@link Context#getSystemService(Class)} instead. This method cannot fully
+     *             support multi-display scenario.
      */
+    @Deprecated
     @UnsupportedAppUsage
     public static InputMethodManager peekInstance() {
         return sInstance;

@@ -29,7 +29,7 @@ namespace skiapipeline {
 
 void SkiaDisplayList::syncContents() {
     for (auto& functor : mChildFunctors) {
-        functor.syncFunctor();
+        functor->syncFunctor();
     }
     for (auto& animatedImage : mAnimatedImages) {
         animatedImage->syncProperties();

@@ -32,26 +32,32 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
+import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 
+import static com.android.server.am.ActivityDisplay.POSITION_BOTTOM;
 import static com.android.server.am.ActivityManagerService.ANIMATE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.anyObject;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.WindowLayout;
@@ -64,28 +70,6 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.service.voice.IVoiceInteractionSession;
 import android.view.Gravity;
-
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.content.Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
-import static com.android.server.am.ActivityManagerService.ANIMATE;
-import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.anyObject;
-import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -106,7 +90,6 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ActivityStarterTests extends ActivityTestsBase {
-    private ActivityTaskManagerService mService;
     private ActivityStarter mStarter;
     private ActivityStartController mController;
     private ActivityMetricsLogger mActivityMetricsLogger;
@@ -130,7 +113,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        mService = createActivityTaskManagerService();
+        setupActivityTaskManagerService();
         mController = mock(ActivityStartController.class);
         mActivityMetricsLogger = mock(ActivityMetricsLogger.class);
         clearInvocations(mActivityMetricsLogger);
@@ -323,7 +306,22 @@ public class ActivityStarterTests extends ActivityTestsBase {
         }
     }
 
-    private ActivityStarter prepareStarter(int launchFlags) {
+    private ActivityStarter prepareStarter(@Intent.Flags int launchFlags) {
+        return prepareStarter(launchFlags, true /* mockGetLaunchStack */);
+    }
+
+    /**
+     * Creates a {@link ActivityStarter} with default parameters and necessary mocks.
+     *
+     * @param launchFlags The intent flags to launch activity.
+     * @param mockGetLaunchStack Whether to mock {@link ActivityStackSupervisor#getLaunchStack} for
+     *                           always launching to the testing stack. Set to false when allowing
+     *                           the activity can be launched to any stack that is decided by real
+     *                           implementation.
+     * @return A {@link ActivityStarter} with default setup.
+     */
+    private ActivityStarter prepareStarter(@Intent.Flags int launchFlags,
+            boolean mockGetLaunchStack) {
         // always allow test to start activity.
         doReturn(true).when(mService.mStackSupervisor).checkStartAnyActivityPermission(
                 any(), any(), any(), anyInt(), anyInt(), anyInt(), any(),
@@ -343,11 +341,13 @@ public class ActivityStarterTests extends ActivityTestsBase {
         // return task when created.
         doReturn(task).when(factory).create(any(), anyInt(), any(), any(), any(), any());
 
-        // direct starter to use spy stack.
-        doReturn(stack).when(mService.mStackSupervisor)
-                .getLaunchStack(any(), any(), any(), anyBoolean());
-        doReturn(stack).when(mService.mStackSupervisor)
-                .getLaunchStack(any(), any(), any(), anyBoolean(), anyInt());
+        if (mockGetLaunchStack) {
+            // Direct starter to use spy stack.
+            doReturn(stack).when(mService.mStackSupervisor)
+                    .getLaunchStack(any(), any(), any(), anyBoolean());
+            doReturn(stack).when(mService.mStackSupervisor)
+                    .getLaunchStack(any(), any(), any(), anyBoolean(), anyInt());
+        }
 
         // Set up mock package manager internal and make sure no unmocked methods are called
         PackageManagerInternal mockPackageManager = mock(PackageManagerInternal.class,
@@ -545,5 +545,85 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 eq(FAKE_REAL_CALLING_UID), anyInt(), anyBoolean(), anyInt(),
                 eq(ActivityBuilder.getDefaultComponent().getPackageName()), anyInt(), anyBoolean(),
                 any(), eq(false));
+    }
+
+    /**
+     * This test ensures that when starting an existing single task activity on secondary display
+     * which is not the top focused display, it should deliver new intent to the activity and not
+     * create a new stack.
+     */
+    @Test
+    public void testDeliverIntentToTopActivityOfNonTopDisplay() {
+        final ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK,
+                false /* mockGetLaunchStack */);
+
+        // Create a secondary display at bottom.
+        final TestActivityDisplay secondaryDisplay = spy(addNewActivityDisplayAt(POSITION_BOTTOM));
+        final ActivityStack stack = secondaryDisplay.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, true /* onTop */);
+
+        // Create an activity record on the top of secondary display.
+        final ComponentName componentName = ComponentName.createRelative(
+                DEFAULT_COMPONENT_PACKAGE_NAME,
+                DEFAULT_COMPONENT_PACKAGE_NAME + ".ReusableActivity");
+        final TaskRecord taskRecord = new TaskBuilder(mSupervisor)
+                .setComponent(componentName)
+                .setStack(stack)
+                .build();
+        final ActivityRecord topActivityOnSecondaryDisplay = new ActivityBuilder(mService)
+                .setComponent(componentName)
+                .setLaunchMode(LAUNCH_SINGLE_TASK)
+                .setTask(taskRecord)
+                .build();
+
+        // Put an activity on default display as the top focused activity.
+        new ActivityBuilder(mService).setCreateTask(true).build();
+
+        // Start activity with the same intent as {@code topActivityOnSecondaryDisplay}
+        // on secondary display.
+        final ActivityOptions options = ActivityOptions.makeBasic()
+                .setLaunchDisplayId(secondaryDisplay.mDisplayId);
+        final int result = starter.setReason("testDeliverIntentToTopActivityOfNonTopDisplay")
+                .setIntent(topActivityOnSecondaryDisplay.intent)
+                .setActivityOptions(options.toBundle())
+                .execute();
+
+        // Ensure result is delivering intent to top.
+        assertEquals(START_DELIVERED_TO_TOP, result);
+
+        // Ensure secondary display only creates one stack.
+        verify(secondaryDisplay, times(1)).createStack(anyInt(), anyInt(), anyBoolean());
+    }
+
+    /**
+     * This test ensures that a reused top activity in the top focused stack is able to be
+     * reparented to another display.
+     */
+    @Test
+    public void testReparentTopFocusedActivityToSecondaryDisplay() {
+        final ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK,
+                false /* mockGetLaunchStack */);
+
+        // Create a secondary display at bottom.
+        final TestActivityDisplay secondaryDisplay = addNewActivityDisplayAt(POSITION_BOTTOM);
+        secondaryDisplay.createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
+                true /* onTop */);
+
+        // Put an activity on default display as the top focused activity.
+        final ActivityRecord topActivity = new ActivityBuilder(mService)
+                .setCreateTask(true)
+                .setLaunchMode(LAUNCH_SINGLE_TASK)
+                .build();
+
+        // Start activity with the same intent as {@code topActivity} on secondary display.
+        final ActivityOptions options = ActivityOptions.makeBasic()
+                .setLaunchDisplayId(secondaryDisplay.mDisplayId);
+        starter.setReason("testReparentTopFocusedActivityToSecondaryDisplay")
+                .setIntent(topActivity.intent)
+                .setActivityOptions(options.toBundle())
+                .execute();
+
+        // Ensure the activity is moved to secondary display.
+        assertEquals(secondaryDisplay, topActivity.getDisplay());
     }
 }

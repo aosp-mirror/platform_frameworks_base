@@ -16,8 +16,6 @@
 
 package com.android.tests.sysmem.host;
 
-import com.android.tradefed.device.DeviceNotAvailableException;
-import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.result.FileInputStreamSource;
 import com.android.tradefed.result.LogDataType;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner.TestLogData;
@@ -34,22 +32,9 @@ import java.util.Scanner;
  */
 class Metrics {
 
-    private ITestDevice mDevice;
+    private Device mDevice;
     private TestMetrics mMetrics;
     private TestLogData mLogs;
-
-    /**
-     * Exception thrown in case of error sampling metrics.
-     */
-    public static class MetricsException extends Exception {
-        MetricsException(String msg) {
-            super(msg);
-        }
-
-        MetricsException(String msg, Exception cause) {
-            super(msg, cause);
-        }
-    }
 
     /**
      * Constructs a metrics instance that will output high level metrics and
@@ -60,7 +45,7 @@ class Metrics {
      * @param metrics where to log the high level metrics when taking a sample
      * @param logs where to log detailed breakdowns when taking a sample
      */
-    Metrics(ITestDevice device, TestMetrics metrics, TestLogData logs) {
+    Metrics(Device device, TestMetrics metrics, TestLogData logs) {
         this.mDevice = device;
         this.mMetrics = metrics;
         this.mLogs = logs;
@@ -69,43 +54,17 @@ class Metrics {
     /**
      * Writes the given <code>text</code> to a log with the given label.
      */
-    private void logText(String label, String text) throws IOException {
-        File file = File.createTempFile(label, "txt");
-        PrintStream ps = new PrintStream(file);
-        ps.print(text);
-        try (FileInputStreamSource dataStream = new FileInputStreamSource(file)) {
-            mLogs.addTestLog(label, LogDataType.TEXT, dataStream);
-        }
-    }
-
-    /**
-     * Returns the pid for the process with the given name.
-     */
-    private int getPidForProcess(String name)
-            throws DeviceNotAvailableException, IOException, MetricsException {
-        String psout = mDevice.executeShellCommand("ps -A -o PID,CMD");
-        Scanner sc = new Scanner(psout);
+    private void logText(String label, String text) throws TestException {
         try {
-            // ps output is of the form:
-            //  PID CMD
-            //    1 init
-            //    2 kthreadd
-            //    ...
-            // 9693 ps
-            sc.nextLine();
-            while (sc.hasNextLine()) {
-                int pid = sc.nextInt();
-                String cmd = sc.next();
-
-                if (name.equals(cmd)) {
-                    return pid;
-                }
+            File file = File.createTempFile(label, "txt");
+            PrintStream ps = new PrintStream(file);
+            ps.print(text);
+            try (FileInputStreamSource dataStream = new FileInputStreamSource(file)) {
+                mLogs.addTestLog(label, LogDataType.TEXT, dataStream);
             }
-        } catch (InputMismatchException e) {
-            throw new MetricsException("unexpected ps output format: " + psout, e);
+        } catch (IOException e) {
+            throw new TestException(e);
         }
-
-        throw new MetricsException("failed to get pid for process " + name);
     }
 
     /**
@@ -116,11 +75,11 @@ class Metrics {
      *
      * @param label prefix to use for metrics and logs output for this sample.
      */
-    void sample(String label) throws DeviceNotAvailableException, IOException, MetricsException {
+    void sample(String label) throws TestException {
         // adb root access is required to get showmap
         mDevice.enableAdbRoot();
 
-        int pid = getPidForProcess("system_server");
+        int pid = mDevice.getPidForProcess("system_server");
 
         // Read showmap for system server and add it as a test log
         String showmap = mDevice.executeShellCommand("showmap " + pid);
@@ -146,7 +105,7 @@ class Metrics {
             mMetrics.addTestMetric(label + ".system_server.rss", Long.toString(rss));
             mMetrics.addTestMetric(label + ".system_server.pss", Long.toString(pss));
         } catch (InputMismatchException e) {
-            throw new MetricsException("unexpected showmap format", e);
+            throw new TestException("unexpected showmap format", e);
         }
 
         // Run debuggerd -j to get GC stats for system server and add it as a

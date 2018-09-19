@@ -34,9 +34,11 @@ class ConfigurationControllerImpl(context: Context)
     private val inCarMode: Boolean
     private var uiMode: Int = 0
     private var localeList: LocaleList? = null
+    private val context: Context
 
     init {
         val currentConfig = context.resources.configuration
+        this.context = context
         fontScale = currentConfig.fontScale
         density = currentConfig.densityDpi
         inCarMode = currentConfig.uiMode and Configuration.UI_MODE_TYPE_MASK ==
@@ -82,6 +84,10 @@ class ConfigurationControllerImpl(context: Context)
         }
 
         if (uiModeChanged) {
+            // We need to force the style re-evaluation to make sure that it's up to date
+            // and attrs were reloaded.
+            context.theme.applyStyle(context.themeResId, true)
+
             this.uiMode = uiMode
             listeners.filterForEach({ this.listeners.contains(it) }) {
                 it.onUiModeChanged()

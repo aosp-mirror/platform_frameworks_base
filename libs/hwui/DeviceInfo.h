@@ -19,51 +19,38 @@
 #include <ui/DisplayInfo.h>
 #include <ui/GraphicTypes.h>
 
-#include "Extensions.h"
 #include "utils/Macros.h"
 
 namespace android {
 namespace uirenderer {
 
+namespace renderthread {
+    class RenderThread;
+}
+
 class DeviceInfo {
     PREVENT_COPY_AND_ASSIGN(DeviceInfo);
 
 public:
-    // returns nullptr if DeviceInfo is not initialized yet
-    // Note this does not have a memory fence so it's up to the caller
-    // to use one if required. Normally this should not be necessary
     static const DeviceInfo* get();
 
-    // only call this after GL has been initialized, or at any point if compiled
-    // with HWUI_NULL_GPU
-    static void initialize();
-    static void initialize(int maxTextureSize);
+    // this value is only valid after the GPU has been initialized and there is a valid graphics
+    // context or if you are using the HWUI_NULL_GPU
+    int maxTextureSize() const;
 
-    int maxTextureSize() const { return mMaxTextureSize; }
     ui::Dataspace getTargetDataSpace() const { return mTargetDataSpace; }
     ui::PixelFormat getTargetPixelFormat() const { return mTargetPixelFormat; }
     const DisplayInfo& displayInfo() const { return mDisplayInfo; }
-    const Extensions& extensions() const { return mExtensions; }
-
-    static uint32_t multiplyByResolution(uint32_t in) {
-        auto di = DeviceInfo::get()->displayInfo();
-        return di.w * di.h * in;
-    }
-
-    static DisplayInfo queryDisplayInfo();
 
 private:
-    static void queryCompositionPreference(ui::Dataspace* dataSpace,
-                                           ui::PixelFormat* pixelFormat);
+    friend class renderthread::RenderThread;
+    static void setMaxTextureSize(int maxTextureSize);
 
-    DeviceInfo() {}
-    ~DeviceInfo() {}
-
-    void load();
+    DeviceInfo();
 
     int mMaxTextureSize;
     DisplayInfo mDisplayInfo;
-    Extensions mExtensions;
+
     // TODO(lpy) Replace below with android_ prefix types.
     ui::Dataspace mTargetDataSpace;
     ui::PixelFormat mTargetPixelFormat;

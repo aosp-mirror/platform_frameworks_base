@@ -45,7 +45,7 @@ static bool shouldTimeOutLocked() {
 }
 
 static void checkIdleTimeout() {
-    std::lock_guard{sLock};
+    std::lock_guard _lock{sLock};
     if (sPendingUploads == 0 && shouldTimeOutLocked()) {
         sEglManager.destroy();
     } else {
@@ -54,7 +54,7 @@ static void checkIdleTimeout() {
 }
 
 static void beginUpload() {
-    std::lock_guard{sLock};
+    std::lock_guard _lock{sLock};
     sPendingUploads++;
 
     if (!sUploadThread) {
@@ -75,13 +75,13 @@ static void beginUpload() {
 }
 
 static void endUpload() {
-    std::lock_guard{sLock};
+    std::lock_guard _lock{sLock};
     sPendingUploads--;
     sLastUpload = systemTime();
 }
 
 static EGLDisplay getUploadEglDisplay() {
-    std::lock_guard{sLock};
+    std::lock_guard _lock{sLock};
     LOG_ALWAYS_FATAL_IF(!sEglManager.hasEglContext(), "Forgot to begin an upload?");
     return sEglManager.eglDisplay();
 }
@@ -106,39 +106,6 @@ static bool hasFP16Support() {
 }
 
 #define FENCE_TIMEOUT 2000000000
-
-class AutoEglImage {
-public:
-    AutoEglImage(EGLDisplay display, EGLClientBuffer clientBuffer) : mDisplay(display) {
-        EGLint imageAttrs[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE};
-        image = eglCreateImageKHR(display, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID, clientBuffer,
-                                  imageAttrs);
-    }
-
-    ~AutoEglImage() {
-        if (image != EGL_NO_IMAGE_KHR) {
-            eglDestroyImageKHR(mDisplay, image);
-        }
-    }
-
-    EGLImageKHR image = EGL_NO_IMAGE_KHR;
-
-private:
-    EGLDisplay mDisplay = EGL_NO_DISPLAY;
-};
-
-class AutoSkiaGlTexture {
-public:
-    AutoSkiaGlTexture() {
-        glGenTextures(1, &mTexture);
-        glBindTexture(GL_TEXTURE_2D, mTexture);
-    }
-
-    ~AutoSkiaGlTexture() { glDeleteTextures(1, &mTexture); }
-
-private:
-    GLuint mTexture = 0;
-};
 
 struct FormatInfo {
     PixelFormat pixelFormat;

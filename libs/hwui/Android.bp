@@ -175,6 +175,7 @@ cc_defaults {
         "pipeline/skia/SkiaRecordingCanvas.cpp",
         "pipeline/skia/SkiaVulkanPipeline.cpp",
         "pipeline/skia/VectorDrawableAtlas.cpp",
+        "pipeline/skia/VkFunctorDrawable.cpp",
         "renderstate/RenderState.cpp",
         "renderthread/CacheManager.cpp",
         "renderthread/CanvasContext.cpp",

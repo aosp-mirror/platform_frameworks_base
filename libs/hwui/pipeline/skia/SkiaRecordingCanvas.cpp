@@ -23,6 +23,8 @@
 #include "NinePatchUtils.h"
 #include "RenderNode.h"
 #include "pipeline/skia/AnimatedDrawables.h"
+#include "pipeline/skia/GLFunctorDrawable.h"
+#include "pipeline/skia/VkFunctorDrawable.h"
 
 namespace android {
 namespace uirenderer {
@@ -118,9 +120,16 @@ void SkiaRecordingCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
 
 void SkiaRecordingCanvas::callDrawGLFunction(Functor* functor,
                                              uirenderer::GlFunctorLifecycleListener* listener) {
-    // Drawable dtor will be invoked when mChildFunctors deque is cleared.
-    mDisplayList->mChildFunctors.emplace_back(functor, listener, asSkCanvas());
-    drawDrawable(&mDisplayList->mChildFunctors.back());
+    FunctorDrawable* functorDrawable;
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
+        functorDrawable = mDisplayList->allocateDrawable<VkFunctorDrawable>(functor, listener,
+                asSkCanvas());
+    } else {
+        functorDrawable = mDisplayList->allocateDrawable<GLFunctorDrawable>(functor, listener,
+                asSkCanvas());
+    }
+    mDisplayList->mChildFunctors.push_back(functorDrawable);
+    drawDrawable(functorDrawable);
 }
 
 class VectorDrawable : public SkDrawable {

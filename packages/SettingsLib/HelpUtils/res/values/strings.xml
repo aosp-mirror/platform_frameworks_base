@@ -17,7 +17,7 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <!-- Label for Help and feedback menu item -->
+    <!-- Label for Help and feedback menu item [CHAR LIMIT=45]-->
     <string name="help_feedback_label">Help &amp; feedback</string>
 
 </resources>

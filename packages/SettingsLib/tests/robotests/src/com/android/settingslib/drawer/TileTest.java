@@ -77,10 +77,10 @@ public class TileTest {
 
     @Test
     public void getIcon_hasIconMetadata_returnIcon() {
-        mActivityInfo.metaData.putInt(META_DATA_PREFERENCE_ICON, R.drawable.ic_info);
+        mActivityInfo.metaData.putInt(META_DATA_PREFERENCE_ICON, android.R.drawable.ic_info);
 
         assertThat(mTile.getIcon(RuntimeEnvironment.application).getResId())
-                .isEqualTo(R.drawable.ic_info);
+                .isEqualTo(android.R.drawable.ic_info);
     }
 
     @Test

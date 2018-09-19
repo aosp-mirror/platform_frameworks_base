@@ -22,6 +22,7 @@
 #include "SkiaProfileRenderer.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/Frame.h"
+#include "VkFunctorDrawable.h"
 
 #include <SkSurface.h>
 #include <SkTypes.h>
@@ -146,9 +147,7 @@ sk_sp<SkColorSpace> SkiaVulkanPipeline::getSurfaceColorSpace() {
 }
 
 void SkiaVulkanPipeline::invokeFunctor(const RenderThread& thread, Functor* functor) {
-    // TODO: we currently don't support OpenGL WebView's
-    DrawGlInfo::Mode mode = DrawGlInfo::kModeProcessNoContext;
-    (*functor)(mode, nullptr);
+    VkFunctorDrawable::vkInvokeFunctor(functor);
 }
 
 sk_sp<Bitmap> SkiaVulkanPipeline::allocateHardwareBitmap(renderthread::RenderThread& renderThread,

@@ -468,7 +468,7 @@ public final class WindowManagerGlobal {
         View view = root.getView();
 
         if (view != null) {
-            InputMethodManager imm = InputMethodManager.getInstance();
+            InputMethodManager imm = view.getContext().getSystemService(InputMethodManager.class);
             if (imm != null) {
                 imm.windowDismissed(mViews.get(index).getWindowToken());
             }

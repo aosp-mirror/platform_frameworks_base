@@ -125,7 +125,7 @@ import java.util.Set;
  *
  * <p><strong>Data Authority</strong> matches if any of the given values match
  * the Intent's data authority <em>and</em> one of the data schemes in the filter
- * has matched the Intent, <em>or</em> no authories were supplied in the filter.
+ * has matched the Intent, <em>or</em> no authorities were supplied in the filter.
  * The Intent authority is determined by calling
  * {@link Intent#getData} and {@link android.net.Uri#getAuthority} on that URI.
  * <em>Note that authority matching here is <b>case sensitive</b>, unlike

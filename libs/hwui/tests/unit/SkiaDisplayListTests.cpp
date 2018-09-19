@@ -20,6 +20,7 @@
 #include "AnimationContext.h"
 #include "DamageAccumulator.h"
 #include "IContextFactory.h"
+#include "pipeline/skia/GLFunctorDrawable.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #include "renderthread/CanvasContext.h"
 #include "tests/common/TestUtils.h"
@@ -46,7 +47,8 @@ TEST(SkiaDisplayList, reset) {
     SkCanvas dummyCanvas;
     RenderNodeDrawable drawable(nullptr, &dummyCanvas);
     skiaDL->mChildNodes.emplace_back(nullptr, &dummyCanvas);
-    skiaDL->mChildFunctors.emplace_back(nullptr, nullptr, &dummyCanvas);
+    GLFunctorDrawable functorDrawable(nullptr, nullptr, &dummyCanvas);
+    skiaDL->mChildFunctors.push_back(&functorDrawable);
     skiaDL->mMutableImages.push_back(nullptr);
     skiaDL->mVectorDrawables.push_back(nullptr);
     skiaDL->mProjectionReceiver = &drawable;
@@ -95,7 +97,8 @@ TEST(SkiaDisplayList, syncContexts) {
 
     SkCanvas dummyCanvas;
     TestUtils::MockFunctor functor;
-    skiaDL.mChildFunctors.emplace_back(&functor, nullptr, &dummyCanvas);
+    GLFunctorDrawable functorDrawable(&functor, nullptr, &dummyCanvas);
+    skiaDL.mChildFunctors.push_back(&functorDrawable);
 
     SkRect bounds = SkRect::MakeWH(200, 200);
     VectorDrawableRoot vectorDrawable(new VectorDrawable::Group());

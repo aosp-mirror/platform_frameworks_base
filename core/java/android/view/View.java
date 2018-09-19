@@ -7315,7 +7315,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Here we check whether we still need the default focus highlight, and switch it on/off.
         switchDefaultFocusHighlight();
 
-        InputMethodManager imm = InputMethodManager.peekInstance();
+        InputMethodManager imm = getContext().getSystemService(InputMethodManager.class);
         if (!gainFocus) {
             if (isPressed()) {
                 setPressed(false);
@@ -8523,6 +8523,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         if (importance == IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS
                 || importance == IMPORTANT_FOR_AUTOFILL_NO) {
+            if (Log.isLoggable(AUTOFILL_LOG_TAG, Log.VERBOSE)) {
+                Log.v(AUTOFILL_LOG_TAG, "View (autofillId=" +  getAutofillViewId() + ", "
+                        + getClass() + ") is not important for autofill because its "
+                        + "importance is " + importance);
+            }
             return false;
         }
 
@@ -12476,7 +12481,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mPrivateFlags3 &= ~PFLAG3_TEMPORARY_DETACH;
         onFinishTemporaryDetach();
         if (hasWindowFocus() && hasFocus()) {
-            InputMethodManager.getInstance().focusIn(this);
+            getContext().getSystemService(InputMethodManager.class).focusIn(this);
         }
         notifyEnterOrExitForAutoFillIfNeeded(true);
     }
@@ -12867,7 +12872,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *        focus, false otherwise.
      */
     public void onWindowFocusChanged(boolean hasWindowFocus) {
-        InputMethodManager imm = InputMethodManager.peekInstance();
+        InputMethodManager imm = getContext().getSystemService(InputMethodManager.class);
         if (!hasWindowFocus) {
             if (isPressed()) {
                 setPressed(false);
@@ -17932,7 +17937,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         rebuildOutline();
 
         if (isFocused()) {
-            InputMethodManager imm = InputMethodManager.peekInstance();
+            InputMethodManager imm = getContext().getSystemService(InputMethodManager.class);
             if (imm != null) {
                 imm.focusIn(this);
             }
@@ -18515,7 +18520,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         onDetachedFromWindow();
         onDetachedFromWindowInternal();
 
-        InputMethodManager imm = InputMethodManager.peekInstance();
+        InputMethodManager imm = getContext().getSystemService(InputMethodManager.class);
         if (imm != null) {
             imm.onViewDetachedFromWindow(this);
         }

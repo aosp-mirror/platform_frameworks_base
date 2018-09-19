@@ -420,7 +420,7 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
             intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_HASHCODE, hashCode());
             context.sendBroadcast(intent);
         } else {
-            InputMethodManager imm = InputMethodManager.peekInstance();
+            InputMethodManager imm = context.getSystemService(InputMethodManager.class);
             if (imm != null) {
                 imm.notifySuggestionPicked(this, original, index);
             }

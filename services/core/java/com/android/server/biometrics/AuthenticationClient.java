@@ -39,12 +39,17 @@ public abstract class AuthenticationClient extends ClientMonitor {
 
     public abstract int handleFailedAttempt();
     public abstract void resetFailedAttempts();
+    public abstract String getErrorString(int error, int vendorCode);
+    public abstract String getAcquiredString(int acquireInfo, int vendorCode);
+    /**
+      * @return one of {@link #TYPE_FINGERPRINT} {@link #TYPE_IRIS} or {@link #TYPE_FACE}
+      */
+    public abstract int getBiometricType();
 
     public static final int LOCKOUT_NONE = 0;
     public static final int LOCKOUT_TIMED = 1;
     public static final int LOCKOUT_PERMANENT = 2;
 
-    private final BiometricAuthenticator mAuthenticator;
     // Callback mechanism received from the client
     // (BiometricPrompt -> BiometricPromptService -> <Biometric>Service -> AuthenticationClient)
     private IBiometricPromptReceiver mDialogReceiverFromClient;
@@ -88,15 +93,13 @@ public abstract class AuthenticationClient extends ClientMonitor {
             BiometricService.DaemonWrapper daemon, long halDeviceId, IBinder token,
             BiometricService.ServiceListener listener, int targetUserId, int groupId, long opId,
             boolean restricted, String owner, Bundle bundle,
-            IBiometricPromptReceiver dialogReceiver, IStatusBarService statusBarService,
-            BiometricAuthenticator authenticator) {
+            IBiometricPromptReceiver dialogReceiver, IStatusBarService statusBarService) {
         super(context, metrics, daemon, halDeviceId, token, listener, targetUserId, groupId,
                 restricted, owner);
         mOpId = opId;
         mBundle = bundle;
         mDialogReceiverFromClient = dialogReceiver;
         mStatusBarService = statusBarService;
-        mAuthenticator = authenticator;
         mHandler = new Handler(Looper.getMainLooper());
     }
 
@@ -115,8 +118,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
         if (mBundle != null) {
             try {
                 if (acquiredInfo != BiometricConstants.BIOMETRIC_ACQUIRED_GOOD) {
-                    mStatusBarService.onBiometricHelp(
-                            mAuthenticator.getAcquiredString(acquiredInfo, vendorCode));
+                    mStatusBarService.onBiometricHelp(getAcquiredString(acquiredInfo, vendorCode));
                 }
                 return false; // acquisition continues
             } catch (RemoteException e) {
@@ -144,8 +146,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
         }
         if (mBundle != null) {
             try {
-                mStatusBarService.onBiometricError(
-                        mAuthenticator.getErrorString(error, vendorCode));
+                mStatusBarService.onBiometricError(getErrorString(error, vendorCode));
             } catch (RemoteException e) {
                 Slog.e(getLogTag(), "Remote exception when sending error", e);
             }
@@ -220,7 +221,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                     // Send the lockout message to the system dialog
                     if (mBundle != null) {
                         mStatusBarService.onBiometricError(
-                                mAuthenticator.getErrorString(errorCode, 0 /* vendorCode */));
+                                getErrorString(errorCode, 0 /* vendorCode */));
                         mHandler.postDelayed(() -> {
                             try {
                                 listener.onError(getHalDeviceId(), errorCode, 0 /* vendorCode */);
@@ -268,7 +269,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             if (mBundle != null) {
                 try {
                     mStatusBarService.showBiometricDialog(mBundle, mDialogReceiver,
-                            mAuthenticator.getType());
+                            getBiometricType());
                 } catch (RemoteException e) {
                     Slog.e(getLogTag(), "Unable to show biometric dialog", e);
                 }

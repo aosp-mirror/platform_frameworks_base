@@ -57,7 +57,7 @@ public class AccessibilityNodeInfoTest {
 
     // The number of flags held in boolean properties. Their values should also be double-checked
     // in the methods above.
-    private static final int NUM_BOOLEAN_PROPERTIES = 17;
+    private static final int NUM_BOOLEAN_PROPERTIES = 18;
 
     @Test
     public void testStandardActions_serializationFlagIsValid() {

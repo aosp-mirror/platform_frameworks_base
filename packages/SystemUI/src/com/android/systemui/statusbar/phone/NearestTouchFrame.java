@@ -98,7 +98,6 @@ public class NearestTouchFrame extends FrameLayout {
         return mClickableChildren
                 .stream()
                 .filter(v -> v.isAttachedToWindow())
-                .filter(v -> v.isFocusable())
                 .map(v -> new Pair<>(distance(v, event), v))
                 .min(Comparator.comparingInt(f -> f.first))
                 .get().second;

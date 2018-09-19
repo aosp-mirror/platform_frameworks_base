@@ -111,18 +111,6 @@ echo_to_output_file() {
   echo "$@"
 }
 
-get_activity_name() {
-  local package="$1"
-  local action_key="android.intent.action.MAIN:"
-
-  local activity_line="$(adb shell cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER | grep "$package")"
-  #echo $activity_line
-  IFS="/" read -a array <<< "$activity_line"
-  local activity_name="${array[1]}"
-  echo "$activity_name"
-  #adb shell am start "$package/$activity_name"
-}
-
 find_package_path() {
   local pkg="$1"
 
@@ -131,11 +119,6 @@ find_package_path() {
     res="$(adb shell find "/system/app/$pkg"-'*' -maxdepth 0 2> /dev/null)"
   fi
   echo "$res"
-}
-
-remote_pkill() {
-  local what="$1"
-  adb shell "for i in $(pid $what); do kill \$i; done"
 }
 
 # Main entry point

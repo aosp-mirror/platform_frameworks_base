@@ -16,7 +16,6 @@
 
 #include "VulkanManager.h"
 
-#include "DeviceInfo.h"
 #include "Properties.h"
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
@@ -398,8 +397,6 @@ void VulkanManager::initialize() {
     mRenderThread.setGrContext(grContext);
 
     free_features_extensions_structs(features);
-
-    DeviceInfo::initialize(mRenderThread.getGrContext()->maxRenderTargetSize());
 
     if (Properties::enablePartialUpdates && Properties::useBufferAge) {
         mSwapBehavior = SwapBehavior::BufferAge;

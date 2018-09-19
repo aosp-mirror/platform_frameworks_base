@@ -2909,12 +2909,14 @@
         <public name="opticalInsetBottom" />
         <public name="allowForceDark" />
         <public name="supportsAmbientMode" />
-    </public-group>
-
-    <public-group type="attr" first-id="0x0101058d">
         <!-- @hide For use by platform and tools only. Developers should not specify this value. -->
         <public name="usesNonSdkApi" />
         <public name="minimumUiTimeout" />
+    </public-group>
+
+    <public-group type="drawable" first-id="0x010800b4">
+        <!-- @hide @SystemApi -->
+        <public name="ic_info" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e2">
@@ -2941,6 +2943,11 @@
     <public-group type="bool" first-id="0x01110000">
         <!-- @hide @SystemApi -->
         <public name="config_sendPackageName" />
+    </public-group>
+
+    <public-group type="dimen" first-id="0x01050007">
+        <!-- @hide @SystemApi -->
+        <public name="config_restricted_icon_size" />
     </public-group>
 
   <!-- ===============================================================

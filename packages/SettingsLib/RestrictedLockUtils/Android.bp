@@ -2,6 +2,7 @@ android_library {
     name: "SettingsLibRestrictedLockUtils",
 
     srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
 
     libs: [
         "androidx.annotation_annotation",

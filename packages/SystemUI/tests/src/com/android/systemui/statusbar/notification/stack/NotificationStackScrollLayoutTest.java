@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -316,7 +317,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     private void setBarStateForTest(int state) {
         ArgumentCaptor<StatusBarStateController.StateListener> captor =
                 ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
-        verify(mBarState).addListener(captor.capture());
+        verify(mBarState, atLeastOnce()).addListener(captor.capture());
         captor.getValue().onStateChanged(state);
     }
 }
