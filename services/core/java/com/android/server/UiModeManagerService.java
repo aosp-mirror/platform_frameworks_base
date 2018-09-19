@@ -42,30 +42,24 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.Sandman;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
-import android.text.TextUtils;
 import android.util.Slog;
-
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collections;
 
 import com.android.internal.R;
 import com.android.internal.app.DisableCarModeActivity;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.DumpUtils;
-import com.android.server.power.ShutdownThread;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 final class UiModeManagerService extends SystemService {
     private static final String TAG = UiModeManager.class.getSimpleName();
@@ -466,7 +460,7 @@ final class UiModeManagerService extends SystemService {
             uiMode |= mNightMode << 4;
         }
 
-        if (mPowerSave && !mNightModeLocked) {
+        if (mPowerSave) {
             uiMode &= ~Configuration.UI_MODE_NIGHT_NO;
             uiMode |= Configuration.UI_MODE_NIGHT_YES;
         }
