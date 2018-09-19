@@ -29,12 +29,19 @@ import java.util.WeakHashMap;
 /**
  * A weak-reference-based mapper from IME token to {@link InputMethodPrivilegedOperations} that is
  * used only to support deprecated IME APIs in {@link android.view.inputmethod.InputMethodManager}.
+ *
+ * <p>This class is designed to be used as a per-process global registry.</p>
  */
 public final class InputMethodPrivilegedOperationsRegistry {
-    private final Object mLock = new Object();
-    @GuardedBy("mLock")
-    private final WeakHashMap<IBinder, WeakReference<InputMethodPrivilegedOperations>>
-            mRegistry = new WeakHashMap<>();
+    private InputMethodPrivilegedOperationsRegistry() {
+        // Not intended to be instantiated.
+    }
+
+    private static final Object sLock = new Object();
+
+    @Nullable
+    @GuardedBy("sLock")
+    private static WeakHashMap<IBinder, WeakReference<InputMethodPrivilegedOperations>> sRegistry;
 
     @Nullable
     private static InputMethodPrivilegedOperations sNop;
@@ -62,10 +69,13 @@ public final class InputMethodPrivilegedOperationsRegistry {
      * @param ops {@link InputMethodPrivilegedOperations} to be associated with the given IME token
      */
     @AnyThread
-    public void put(IBinder token, InputMethodPrivilegedOperations ops) {
-        synchronized (mLock) {
+    public static void put(IBinder token, InputMethodPrivilegedOperations ops) {
+        synchronized (sLock) {
+            if (sRegistry == null) {
+                sRegistry = new WeakHashMap<>();
+            }
             final WeakReference<InputMethodPrivilegedOperations> previousOps =
-                    mRegistry.put(token, new WeakReference<>(ops));
+                    sRegistry.put(token, new WeakReference<>(ops));
             if (previousOps != null) {
                 throw new IllegalStateException(previousOps.get() + " is already registered for "
                         + " this token=" + token + " newOps=" + ops);
@@ -84,9 +94,12 @@ public final class InputMethodPrivilegedOperationsRegistry {
      */
     @NonNull
     @AnyThread
-    public InputMethodPrivilegedOperations get(IBinder token) {
-        synchronized (mLock) {
-            final WeakReference<InputMethodPrivilegedOperations> wrapperRef = mRegistry.get(token);
+    public static InputMethodPrivilegedOperations get(IBinder token) {
+        synchronized (sLock) {
+            if (sRegistry == null) {
+                return getNopOps();
+            }
+            final WeakReference<InputMethodPrivilegedOperations> wrapperRef = sRegistry.get(token);
             if (wrapperRef == null) {
                 return getNopOps();
             }
@@ -108,9 +121,15 @@ public final class InputMethodPrivilegedOperationsRegistry {
      * @param token IME token to be removed.
      */
     @AnyThread
-    public void remove(IBinder token) {
-        synchronized (mLock) {
-            mRegistry.remove(token);
+    public static void remove(IBinder token) {
+        synchronized (sLock) {
+            if (sRegistry == null) {
+                return;
+            }
+            sRegistry.remove(token);
+            if (sRegistry.isEmpty()) {
+                sRegistry = null;
+            }
         }
     }
 }

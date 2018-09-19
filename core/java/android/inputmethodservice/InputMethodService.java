@@ -85,6 +85,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -465,7 +466,7 @@ public class InputMethodService extends AbstractInputMethodService {
         public final void initializeInternal(IBinder token, int displayId,
                 IInputMethodPrivilegedOperations privilegedOperations) {
             mPrivOps.set(privilegedOperations);
-            mImm.registerInputMethodPrivOps(token, mPrivOps);
+            InputMethodPrivilegedOperationsRegistry.put(token, mPrivOps);
             updateInputMethodDisplay(displayId);
             attachToken(token);
         }
@@ -1031,7 +1032,7 @@ public class InputMethodService extends AbstractInputMethodService {
         if (mToken != null) {
             // This is completely optional, but allows us to show more explicit error messages
             // when IME developers are doing something unsupported.
-            mImm.unregisterInputMethodPrivOps(mToken);
+            InputMethodPrivilegedOperationsRegistry.remove(mToken);
         }
     }
 
