@@ -2298,6 +2298,7 @@ Lcom/android/org/conscrypt/OpenSSLKey;-><init>(J)V
 Lcom/android/org/conscrypt/OpenSSLKey;->fromPrivateKey(Ljava/security/PrivateKey;)Lcom/android/org/conscrypt/OpenSSLKey;
 Lcom/android/org/conscrypt/OpenSSLKey;->getNativeRef()Lcom/android/org/conscrypt/NativeRef$EVP_PKEY;
 Lcom/android/org/conscrypt/OpenSSLKey;->getPublicKey()Ljava/security/PublicKey;
+Lcom/android/org/conscrypt/OpenSSLProvider;-><init>()V
 Lcom/android/org/conscrypt/OpenSSLSocketImpl;->getAlpnSelectedProtocol()[B
 Lcom/android/org/conscrypt/OpenSSLSocketImpl;->getChannelId()[B
 Lcom/android/org/conscrypt/OpenSSLSocketImpl;->getHostname()Ljava/lang/String;
