@@ -6261,36 +6261,25 @@ public class TelephonyManager {
     /**
      * @deprecated Use {@link android.telecom.TelecomManager#endCall()} instead.
      * @hide
+     * @removed
      */
     @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.CALL_PHONE)
     public boolean endCall() {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                return telephony.endCall();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#endCall", e);
-        }
         return false;
     }
 
     /**
      * @deprecated Use {@link android.telecom.TelecomManager#acceptRingingCall} instead
      * @hide
+     * @removed
      */
     @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void answerRingingCall() {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                telephony.answerRingingCall();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#answerRingingCall", e);
-        }
+
     }
 
     /**
