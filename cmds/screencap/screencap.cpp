@@ -31,6 +31,7 @@
 #include <gui/ISurfaceComposer.h>
 
 #include <ui/DisplayInfo.h>
+#include <ui/GraphicTypes.h>
 #include <ui/PixelFormat.h>
 
 #include <system/graphics.h>
@@ -74,12 +75,12 @@ static SkColorType flinger2skia(PixelFormat f)
     }
 }
 
-static sk_sp<SkColorSpace> dataSpaceToColorSpace(android_dataspace d)
+static sk_sp<SkColorSpace> dataSpaceToColorSpace(ui::Dataspace d)
 {
     switch (d) {
-        case HAL_DATASPACE_V0_SRGB:
+        case ui::Dataspace::V0_SRGB:
             return SkColorSpace::MakeSRGB();
-        case HAL_DATASPACE_DISPLAY_P3:
+        case ui::Dataspace::DISPLAY_P3:
             return SkColorSpace::MakeRGB(
                     SkColorSpace::kSRGB_RenderTargetGamma, SkColorSpace::kDCIP3_D65_Gamut);
         default:
@@ -87,12 +88,26 @@ static sk_sp<SkColorSpace> dataSpaceToColorSpace(android_dataspace d)
     }
 }
 
-static uint32_t dataSpaceToInt(android_dataspace d)
+static ui::Dataspace pickBestDataspace(ui::ColorMode colorMode)
+{
+    switch (colorMode) {
+        case ui::ColorMode::SRGB:
+            return ui::Dataspace::V0_SRGB;
+        case ui::ColorMode::DISPLAY_P3:
+        case ui::ColorMode::BT2100_PQ:
+        case ui::ColorMode::BT2100_HLG:
+            return ui::Dataspace::DISPLAY_P3;
+        default:
+            return ui::Dataspace::V0_SRGB;
+    }
+}
+
+static uint32_t dataSpaceToInt(ui::Dataspace d)
 {
     switch (d) {
-        case HAL_DATASPACE_V0_SRGB:
+        case ui::Dataspace::V0_SRGB:
             return COLORSPACE_SRGB;
-        case HAL_DATASPACE_DISPLAY_P3:
+        case ui::Dataspace::DISPLAY_P3:
             return COLORSPACE_DISPLAY_P3;
         default:
             return COLORSPACE_UNKNOWN;
@@ -161,7 +176,6 @@ int main(int argc, char** argv)
 
     void* base = NULL;
     uint32_t w, s, h, f;
-    android_dataspace d;
     size_t size = 0;
 
     // Maps orientations from DisplayInfo to ISurfaceComposer
@@ -197,8 +211,15 @@ int main(int argc, char** argv)
     uint32_t captureOrientation = ORIENTATION_MAP[displayOrientation];
 
     sp<GraphicBuffer> outBuffer;
-    status_t result = ScreenshotClient::capture(display, Rect(), 0 /* reqWidth */,
-            0 /* reqHeight */, false, captureOrientation, &outBuffer);
+    ui::Dataspace reqDataspace =
+        pickBestDataspace(SurfaceComposerClient::getActiveColorMode(display));
+
+    // Due to the fact that we hard code the way we write pixels into screenshot,
+    // we hard code RGBA_8888 here.
+    ui::PixelFormat reqPixelFormat = ui::PixelFormat::RGBA_8888;
+    status_t result = ScreenshotClient::capture(display, reqDataspace, reqPixelFormat, Rect(),
+                                                0 /* reqWidth */, 0 /* reqHeight */, false,
+                                                captureOrientation, &outBuffer);
     if (result != NO_ERROR) {
         close(fd);
         return 1;
@@ -222,12 +243,12 @@ int main(int argc, char** argv)
     h = outBuffer->getHeight();
     s = outBuffer->getStride();
     f = outBuffer->getPixelFormat();
-    d = HAL_DATASPACE_UNKNOWN;
     size = s * h * bytesPerPixel(f);
 
     if (png) {
         const SkImageInfo info =
-            SkImageInfo::Make(w, h, flinger2skia(f), kPremul_SkAlphaType, dataSpaceToColorSpace(d));
+            SkImageInfo::Make(w, h, flinger2skia(f), kPremul_SkAlphaType,
+                              dataSpaceToColorSpace(reqDataspace));
         SkPixmap pixmap(info, base, s * bytesPerPixel(f));
         struct FDWStream final : public SkWStream {
           size_t fBytesWritten = 0;
@@ -244,7 +265,7 @@ int main(int argc, char** argv)
             notifyMediaScanner(fn);
         }
     } else {
-        uint32_t c = dataSpaceToInt(d);
+        uint32_t c = dataSpaceToInt(reqDataspace);
         write(fd, &w, 4);
         write(fd, &h, 4);
         write(fd, &f, 4);
