@@ -18,6 +18,7 @@
 
 #include "FieldValue.h"
 
+#include <android/os/StatsLogEventWrapper.h>
 #include <android/util/ProtoOutputStream.h>
 #include <log/log_event_list.h>
 #include <log/log_read.h>
@@ -60,6 +61,8 @@ public:
      * Read a LogEvent from a log_msg.
      */
     explicit LogEvent(log_msg& msg);
+
+    explicit LogEvent(const StatsLogEventWrapper& statsLogEventWrapper);
 
     /**
      * Constructs a LogEvent with synthetic data for testing. Must call init() before reading.

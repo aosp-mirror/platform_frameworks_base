@@ -32,7 +32,7 @@ const int32_t kLastBitMask = 0x80;
 const int32_t kClearLastBitDeco = 0x7f;
 const int32_t kClearAllPositionMatcherMask = 0xffff00ff;
 
-enum Type { UNKNOWN, INT, LONG, FLOAT, DOUBLE, STRING };
+enum Type { UNKNOWN, INT, LONG, FLOAT, DOUBLE, STRING, STORAGE };
 
 int32_t getEncodedField(int32_t pos[], int32_t depth, bool includeDepth);
 
@@ -293,6 +293,11 @@ struct Value {
         type = STRING;
     }
 
+    Value(const std::vector<uint8_t>& v) {
+        storage_value = v;
+        type = STORAGE;
+    }
+
     void setInt(int32_t v) {
         int_value = v;
         type = INT;
@@ -320,6 +325,7 @@ struct Value {
         double double_value;
     };
     std::string str_value;
+    std::vector<uint8_t> storage_value;
 
     Type type;
 
