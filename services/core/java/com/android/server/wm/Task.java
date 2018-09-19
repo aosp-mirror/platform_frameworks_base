@@ -561,9 +561,10 @@ class Task extends WindowContainer<AppWindowToken> {
 
     @Override
     public SurfaceControl getAnimationLeashParent() {
-        // Reparent to the animation layer so that we aren't clipped by the non-minimized
-        // stack bounds, currently we only animate the task for the recents animation
-        return getAppAnimationLayer(ANIMATION_LAYER_STANDARD);
+        // Currently, only the recents animation will create animation leashes for tasks. In this
+        // case, reparent the task to the home animation layer while it is being animated to allow
+        // the home activity to reorder the app windows relative to its own.
+        return getAppAnimationLayer(ANIMATION_LAYER_HOME);
     }
 
     boolean isTaskAnimating() {
