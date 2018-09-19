@@ -84,7 +84,8 @@ public class ShellUiAutomatorBridge extends UiAutomatorBridge {
                     cursor.close();
                 }
                 if (provider != null) {
-                    activityManager.removeContentProviderExternal(providerName, token);
+                    activityManager.removeContentProviderExternalAsUser(providerName, token,
+                            UserHandle.USER_SYSTEM);
                 }
             }
         } catch (RemoteException e) {

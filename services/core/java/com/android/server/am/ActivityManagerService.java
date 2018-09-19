@@ -8406,10 +8406,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    /** @deprecated - Use {@link #removeContentProviderExternalAsUser} which takes a user ID. */
+    @Deprecated
+    @Override
     public void removeContentProviderExternal(String name, IBinder token) {
+        removeContentProviderExternalAsUser(name, token, UserHandle.getCallingUserId());
+    }
+
+    @Override
+    public void removeContentProviderExternalAsUser(String name, IBinder token, int userId) {
         enforceCallingPermission(android.Manifest.permission.ACCESS_CONTENT_PROVIDERS_EXTERNALLY,
             "Do not have permission in call removeContentProviderExternal()");
-        int userId = UserHandle.getCallingUserId();
         long ident = Binder.clearCallingIdentity();
         try {
             removeContentProviderExternalUnchecked(name, token, userId);
