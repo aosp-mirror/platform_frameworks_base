@@ -32,6 +32,7 @@
 #include "pipeline/skia/SkiaRecordingCanvas.h"
 #include "renderthread/CanvasContext.h"
 #include "tests/common/TestUtils.h"
+#include "utils/Color.h"
 
 using namespace android;
 using namespace android::uirenderer;

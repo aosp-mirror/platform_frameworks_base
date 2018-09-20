@@ -16,7 +16,6 @@
 
 #include <benchmark/benchmark.h>
 
-#include "CanvasState.h"
 #include "DisplayList.h"
 #include "hwui/Canvas.h"
 #include "pipeline/skia/SkiaDisplayList.h"
@@ -115,52 +114,6 @@ void BM_DisplayListCanvas_record_simpleBitmapView(benchmark::State& benchState) 
     }
 }
 BENCHMARK(BM_DisplayListCanvas_record_simpleBitmapView);
-
-class NullClient : public CanvasStateClient {
-    void onViewportInitialized() override {}
-    void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {}
-    GLuint getTargetFbo() const override { return 0; }
-};
-
-void BM_CanvasState_saverestore(benchmark::State& benchState) {
-    NullClient client;
-    CanvasState state(client);
-    state.initializeSaveStack(100, 100, 0, 0, 100, 100, Vector3());
-
-    while (benchState.KeepRunning()) {
-        state.save(SaveFlags::MatrixClip);
-        state.save(SaveFlags::MatrixClip);
-        benchmark::DoNotOptimize(&state);
-        state.restore();
-        state.restore();
-    }
-}
-BENCHMARK(BM_CanvasState_saverestore);
-
-void BM_CanvasState_init(benchmark::State& benchState) {
-    NullClient client;
-    CanvasState state(client);
-    state.initializeSaveStack(100, 100, 0, 0, 100, 100, Vector3());
-
-    while (benchState.KeepRunning()) {
-        state.initializeSaveStack(100, 100, 0, 0, 100, 100, Vector3());
-        benchmark::DoNotOptimize(&state);
-    }
-}
-BENCHMARK(BM_CanvasState_init);
-
-void BM_CanvasState_translate(benchmark::State& benchState) {
-    NullClient client;
-    CanvasState state(client);
-    state.initializeSaveStack(100, 100, 0, 0, 100, 100, Vector3());
-
-    while (benchState.KeepRunning()) {
-        state.translate(5, 5, 0);
-        benchmark::DoNotOptimize(&state);
-        state.translate(-5, -5, 0);
-    }
-}
-BENCHMARK(BM_CanvasState_translate);
 
 void BM_DisplayListCanvas_basicViewGroupDraw(benchmark::State& benchState) {
     sp<RenderNode> child = TestUtils::createNode(50, 50, 100, 100, [](auto& props, auto& canvas) {
