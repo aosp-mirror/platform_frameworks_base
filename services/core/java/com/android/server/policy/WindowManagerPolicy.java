@@ -63,12 +63,10 @@ import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -95,7 +93,6 @@ import com.android.internal.policy.IShortcutService;
 import com.android.server.wm.DisplayFrames;
 import com.android.server.wm.DisplayRotation;
 import com.android.server.wm.WindowFrames;
-import com.android.server.wm.utils.WmDisplayCutout;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -201,10 +198,8 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * getFrame() if so desired.  Must be called with the window manager
          * lock held.
          *
-         * @param windowFrames Container for all the window frames that affect how the window is
-         *                     laid out.
          */
-        public void computeFrameLw(WindowFrames windowFrames);
+        public void computeFrameLw();
 
         /**
          * Retrieve the current frame of the window that has been assigned by
@@ -477,6 +472,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * Writes {@link com.android.server.wm.IdentifierProto} to stream.
          */
         void writeIdentifierToProto(ProtoOutputStream proto, long fieldId);
+
+        /**
+         * @return The {@link WindowFrames} associated with this {@link WindowState}
+         */
+        WindowFrames getWindowFrames();
     }
 
     /**
@@ -1166,7 +1166,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      */
     default void layoutWindowLw(
             WindowState win, WindowState attached, DisplayFrames displayFrames) {}
-
 
     /**
      * Return the layout hints for a newly added window. These values are computed on the

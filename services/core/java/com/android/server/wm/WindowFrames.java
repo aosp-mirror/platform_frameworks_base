@@ -36,7 +36,6 @@ import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayCutout;
-import android.view.WindowManager;
 
 import com.android.server.wm.utils.InsetUtils;
 import com.android.server.wm.utils.WmDisplayCutout;
@@ -191,6 +190,10 @@ public class WindowFrames {
 
     private final Rect mTmpRect = new Rect();
 
+    private boolean mHasOutsets;
+
+    private boolean mContentChanged;
+
     public WindowFrames() {
     }
 
@@ -237,11 +240,9 @@ public class WindowFrames {
      * Calculates the outsets for this windowFrame. The outsets are calculated by the area between
      * the {@link #mOutsetFrame} and the {@link #mContentFrame}. If there are no outsets, then
      * {@link #mOutsets} is set to empty.
-     *
-     * @param hasOutsets Whether this frame has outsets.
      */
-    void calculateOutsets(boolean hasOutsets) {
-        if (hasOutsets) {
+    void calculateOutsets() {
+        if (mHasOutsets) {
             InsetUtils.insetsBetweenFrames(mOutsetFrame, mContentFrame, mOutsets);
         } else {
             mOutsets.setEmpty();
@@ -249,7 +250,8 @@ public class WindowFrames {
     }
 
     /**
-     * Calculate the insets for the type {@link WindowManager.LayoutParams#TYPE_DOCK_DIVIDER}
+     * Calculate the insets for the type
+     * {@link android.view.WindowManager.LayoutParams#TYPE_DOCK_DIVIDER}
      *
      * @param cutoutInsets The insets for the cutout.
      */
@@ -365,6 +367,28 @@ public class WindowFrames {
      */
     void resetLastContentInsets() {
         mLastContentInsets.set(-1, -1, -1, -1);
+    }
+
+    /**
+     * Sets whether the frame has outsets.
+     */
+    public void setHasOutsets(boolean hasOutsets) {
+        mHasOutsets = hasOutsets;
+    }
+
+    /**
+     * Sets whether the content has changed. This means that either the size or parent frame has
+     * changed.
+     */
+    public void setContentChanged(boolean contentChanged) {
+        mContentChanged = contentChanged;
+    }
+
+    /**
+     * @see #setContentChanged(boolean)
+     */
+    boolean hasContentChanged() {
+        return mContentChanged;
     }
 
     public void writeToProto(@NonNull ProtoOutputStream proto, long fieldId) {

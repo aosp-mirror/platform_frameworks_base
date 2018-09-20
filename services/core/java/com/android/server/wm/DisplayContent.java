@@ -571,7 +571,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (!w.mLayoutAttached) {
                 if (mTmpInitial) {
                     //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
-                    w.mContentChanged = false;
+                    w.resetContentChanged();
                 }
                 if (w.mAttrs.type == TYPE_DREAM) {
                     // Don't layout windows behind a dream, so that if it does stuff like hide
@@ -616,7 +616,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     || w.mLayoutNeeded) {
                 if (mTmpInitial) {
                     //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
-                    w.mContentChanged = false;
+                    w.resetContentChanged();
                 }
                 w.mLayoutNeeded = false;
                 w.prelayout();
@@ -699,7 +699,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final WindowStateAnimator winAnimator = w.mWinAnimator;
 
         //Slog.i(TAG, "Window " + this + " clearing mContentChanged - done placing");
-        w.mContentChanged = false;
+        w.resetContentChanged();
 
         // Moved from updateWindowsAndWallpaperLocked().
         if (w.mHasSurface) {

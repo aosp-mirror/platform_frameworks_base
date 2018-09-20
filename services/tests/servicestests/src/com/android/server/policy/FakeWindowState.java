@@ -30,7 +30,7 @@ import com.android.server.wm.utils.WmDisplayCutout;
 
 public class FakeWindowState implements WindowManagerPolicy.WindowState {
 
-    private WindowFrames windowFrames;
+    private WindowFrames mWindowFrames = new WindowFrames();
 
     public WindowManager.LayoutParams attrs;
     public int displayId;
@@ -53,41 +53,40 @@ public class FakeWindowState implements WindowManagerPolicy.WindowState {
     }
 
     @Override
-    public void computeFrameLw(WindowFrames windowFrames) {
-        this.windowFrames = windowFrames;
+    public void computeFrameLw() {
     }
 
     @Override
     public Rect getFrameLw() {
-        return windowFrames.mParentFrame;
+        return mWindowFrames.mParentFrame;
     }
 
     @Override
     public Rect getDisplayFrameLw() {
-        return windowFrames.mDisplayFrame;
+        return mWindowFrames.mDisplayFrame;
     }
 
     @Override
     public Rect getOverscanFrameLw() {
-        return windowFrames.mOverscanFrame;
+        return mWindowFrames.mOverscanFrame;
     }
 
     @Override
     public Rect getContentFrameLw() {
-        return windowFrames.mContentFrame;
+        return mWindowFrames.mContentFrame;
     }
 
     @Override
     public Rect getVisibleFrameLw() {
-        return windowFrames.mVisibleFrame;
+        return mWindowFrames.mVisibleFrame;
     }
 
     public Rect getStableFrame() {
-        return windowFrames.mStableFrame;
+        return mWindowFrames.mStableFrame;
     }
 
     public Rect getDecorFrame() {
-        return windowFrames.mDecorFrame;
+        return mWindowFrames.mDecorFrame;
     }
 
     @Override
@@ -249,6 +248,11 @@ public class FakeWindowState implements WindowManagerPolicy.WindowState {
     @Override
     public void writeIdentifierToProto(ProtoOutputStream proto, long fieldId){
         throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public WindowFrames getWindowFrames() {
+        return mWindowFrames;
     }
 
     @Override
