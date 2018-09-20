@@ -232,8 +232,6 @@ import com.android.internal.policy.IShortcutService;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.LatencyTracker;
-import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.WindowManagerPolicyThread;
 import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
@@ -5037,12 +5035,8 @@ public class WindowManagerService extends IWindowManager.Stub
     // -------------------------------------------------------------
 
     @Override
-    public IWindowSession openSession(IWindowSessionCallback callback, IInputMethodClient client,
-            IInputContext inputContext) {
-        if (client == null) throw new IllegalArgumentException("null client");
-        if (inputContext == null) throw new IllegalArgumentException("null inputContext");
-        Session session = new Session(this, callback, client, inputContext);
-        return session;
+    public IWindowSession openSession(IWindowSessionCallback callback) {
+        return new Session(this, callback);
     }
 
     @Override

@@ -225,6 +225,44 @@ public final class InputMethodManager {
 
     static final String PENDING_EVENT_COUNTER = "aq:imm";
 
+    /**
+     * {@code true} if we want to instantiate {@link InputMethodManager} eagerly in
+     * {@link android.view.WindowManagerGlobal#getWindowSession()}, which is often called in an
+     * early stage of process startup, which is how Android has worked.
+     *
+     * <p>We still have this settings because we know there are possible compatibility concerns if
+     * we stop doing so. Here are scenarios we know and there could be more scenarios we are not
+     * aware of right know.</p>
+     *
+     * <ul>
+     *     <li>Apps that directly access {@link #sInstance} via reflection, which is currently
+     *     allowed because of {@link UnsupportedAppUsage} annotation.  Currently
+     *     {@link android.view.WindowManagerGlobal#getWindowSession()} is likely to guarantee that
+     *     {@link #sInstance} is not {@code null} when such an app is accessing it, but removing
+     *     that code from {@link android.view.WindowManagerGlobal#getWindowSession()} can reveal
+     *     untested code paths in their apps, which probably happen in an early startup time of that
+     *     app.</li>
+     *     <li>Apps that directly access {@link #peekInstance()} via reflection, which is currently
+     *     allowed because of {@link UnsupportedAppUsage} annotation.  Currently
+     *     {@link android.view.WindowManagerGlobal#getWindowSession()} is likely to guarantee that
+     *     {@link #peekInstance()} returns non-{@code null} object when such an app is calling
+     *     {@link #peekInstance()}, but removing that code from
+     *     {@link android.view.WindowManagerGlobal#getWindowSession()} can reveal untested code
+     *     paths in their apps, which probably happen in an early startup time of that app. The good
+     *     news is that unlike {@link #sInstance}'s case we can at least work around this scenario
+     *     by changing the semantics of {@link #peekInstance()}, which is currently defined as
+     *     "retrieve the global {@link InputMethodManager} instance, if it exists" to something that
+     *     always returns non-{@code null} {@link InputMethodManager}.  However, introducing such an
+     *     workaround can also trigger different compatibility issues if {@link #peekInstance()} was
+     *     called before {@link android.view.WindowManagerGlobal#getWindowSession()} and it expected
+     *     {@link #peekInstance()} to return {@code null} as written in the JavaDoc.</li>
+     * </ul>
+     *
+     * <p>TODO(Bug 116157766): Check if we can set {@code false} here then remove this settings.</p>
+     * @hide
+     */
+    public static final boolean ENABLE_LEGACY_EAGER_INITIALIZATION = true;
+
     @UnsupportedAppUsage
     static InputMethodManager sInstance;
 
@@ -651,8 +689,10 @@ public final class InputMethodManager {
         synchronized (InputMethodManager.class) {
             if (sInstance == null) {
                 try {
-                    sInstance = new InputMethodManager(Looper.getMainLooper());
-                } catch (ServiceNotFoundException e) {
+                    final InputMethodManager imm = new InputMethodManager(Looper.getMainLooper());
+                    imm.mService.addClient(imm.mClient, imm.mIInputContext);
+                    sInstance = imm;
+                } catch (ServiceNotFoundException | RemoteException e) {
                     throw new IllegalStateException(e);
                 }
             }
