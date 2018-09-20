@@ -322,6 +322,11 @@ void writeFieldValueTreeToStreamHelper(const std::vector<FieldValue>& dims, size
                 case STRING:
                     protoOutput->write(FIELD_TYPE_STRING | fieldNum, dim.mValue.str_value);
                     break;
+                case STORAGE:
+                    protoOutput->write(FIELD_TYPE_MESSAGE | fieldNum,
+                                       (const char*)dim.mValue.storage_value.data(),
+                                       dim.mValue.storage_value.size());
+                    break;
                 default:
                     break;
             }

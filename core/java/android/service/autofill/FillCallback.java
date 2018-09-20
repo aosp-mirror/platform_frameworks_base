@@ -19,6 +19,7 @@ package android.service.autofill;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.os.RemoteException;
+import android.util.Log;
 
 /**
  * <p><code>FillCallback</code> handles autofill requests from the {@link AutofillService} into
@@ -28,6 +29,9 @@ import android.os.RemoteException;
  * <a href="/guide/topics/text/autofill-services">Build autofill services</a>.
  */
 public final class FillCallback {
+
+    private static final String TAG = "FillCallback";
+
     private final IFillCallback mCallback;
     private final int mRequestId;
     private boolean mCalled;
@@ -70,6 +74,7 @@ public final class FillCallback {
      * @param message error message to be displayed to the user.
      */
     public void onFailure(@Nullable CharSequence message) {
+        Log.w(TAG, "onFailure(): " + (message == null ? null : message.length() + "_chars"));
         assertNotCalled();
         mCalled = true;
         try {

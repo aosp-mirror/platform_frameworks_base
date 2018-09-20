@@ -3167,11 +3167,11 @@ public abstract class Context {
      *
      * <p>Note: Instant apps, for which {@link PackageManager#isInstantApp()} returns true,
      * don't have access to the following system services: {@link #DEVICE_POLICY_SERVICE},
-     * {@link #FINGERPRINT_SERVICE}, {@link #SHORTCUT_SERVICE}, {@link #USB_SERVICE},
-     * {@link #WALLPAPER_SERVICE}, {@link #WIFI_P2P_SERVICE}, {@link #WIFI_SERVICE},
-     * {@link #WIFI_AWARE_SERVICE}. For these services this method will return <code>null</code>.
-     * Generally, if you are running as an instant app you should always check whether the result
-     * of this method is null.
+     * {@link #FINGERPRINT_SERVICE}, {@link #KEYGUARD_SERVICE}, {@link #SHORTCUT_SERVICE},
+     * {@link #USB_SERVICE}, {@link #WALLPAPER_SERVICE}, {@link #WIFI_P2P_SERVICE},
+     * {@link #WIFI_SERVICE}, {@link #WIFI_AWARE_SERVICE}. For these services this method will
+     * return <code>null</code>.  Generally, if you are running as an instant app you should always
+     * check whether the result of this method is null.
      *
      * @param name The name of the desired service.
      *
@@ -3258,11 +3258,11 @@ public abstract class Context {
      *
      * <p>Note: Instant apps, for which {@link PackageManager#isInstantApp()} returns true,
      * don't have access to the following system services: {@link #DEVICE_POLICY_SERVICE},
-     * {@link #FINGERPRINT_SERVICE}, {@link #SHORTCUT_SERVICE}, {@link #USB_SERVICE},
-     * {@link #WALLPAPER_SERVICE}, {@link #WIFI_P2P_SERVICE}, {@link #WIFI_SERVICE},
-     * {@link #WIFI_AWARE_SERVICE}. For these services this method will return <code>null</code>.
-     * Generally, if you are running as an instant app you should always check whether the result
-     * of this method is null.
+     * {@link #FINGERPRINT_SERVICE}, {@link #KEYGUARD_SERVICE}, {@link #SHORTCUT_SERVICE},
+     * {@link #USB_SERVICE}, {@link #WALLPAPER_SERVICE}, {@link #WIFI_P2P_SERVICE},
+     * {@link #WIFI_SERVICE}, {@link #WIFI_AWARE_SERVICE}. For these services this method will
+     * return <code>null</code>.  Generally, if you are running as an instant app you should always
+     * check whether the result of this method is null.
      *
      * @param serviceClass The class of the desired service.
      * @return The service or null if the class is not a supported system service.

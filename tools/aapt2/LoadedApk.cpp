@@ -69,8 +69,8 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadProtoApkFromFileCollection(
       return {};
     }
 
-    io::ZeroCopyInputAdaptor adaptor(in.get());
-    if (!pb_table.ParseFromZeroCopyStream(&adaptor)) {
+    io::ProtoInputStreamReader proto_reader(in.get());
+    if (!proto_reader.ReadMessage(&pb_table)) {
       diag->Error(DiagMessage(source) << "failed to read " << kProtoResourceTablePath);
       return {};
     }
@@ -97,8 +97,8 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadProtoApkFromFileCollection(
   }
 
   pb::XmlNode pb_node;
-  io::ZeroCopyInputAdaptor manifest_adaptor(manifest_in.get());
-  if (!pb_node.ParseFromZeroCopyStream(&manifest_adaptor)) {
+  io::ProtoInputStreamReader proto_reader(manifest_in.get());
+  if (!proto_reader.ReadMessage(&pb_node)) {
     diag->Error(DiagMessage(source) << "failed to read proto " << kAndroidManifestPath);
     return {};
   }
@@ -270,9 +270,9 @@ std::unique_ptr<xml::XmlResource> LoadedApk::LoadXml(const std::string& file_pat
       return nullptr;
     }
 
-    io::ZeroCopyInputAdaptor adaptor(in.get());
     pb::XmlNode pb_node;
-    if (!pb_node.ParseFromZeroCopyStream(&adaptor)) {
+    io::ProtoInputStreamReader proto_reader(in.get());
+    if (!proto_reader.ReadMessage(&pb_node)) {
       diag->Error(DiagMessage() << "failed to parse file as proto XML");
       return nullptr;
     }
@@ -317,8 +317,8 @@ ApkFormat LoadedApk::DetermineApkFormat(io::IFileCollection* apk) {
     std::unique_ptr<io::InputStream> manifest_in = manifest_file->OpenInputStream();
     if (manifest_in != nullptr) {
       pb::XmlNode pb_node;
-      io::ZeroCopyInputAdaptor manifest_adaptor(manifest_in.get());
-      if (pb_node.ParseFromZeroCopyStream(&manifest_adaptor)) {
+      io::ProtoInputStreamReader proto_reader(manifest_in.get());
+      if (!proto_reader.ReadMessage(&pb_node)) {
         return ApkFormat::kProto;
       }
     }

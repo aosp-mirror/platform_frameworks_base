@@ -802,14 +802,13 @@ public class TextLine {
             }
         }
 
-        int dir = runIsRtl ? Paint.DIRECTION_RTL : Paint.DIRECTION_LTR;
         int cursorOpt = after ? Paint.CURSOR_AFTER : Paint.CURSOR_BEFORE;
         if (mCharsValid) {
             return wp.getTextRunCursor(mChars, spanStart, spanLimit - spanStart,
-                    dir, offset, cursorOpt);
+                    runIsRtl, offset, cursorOpt);
         } else {
             return wp.getTextRunCursor(mText, mStart + spanStart,
-                    mStart + spanLimit, dir, mStart + offset, cursorOpt) - mStart;
+                    mStart + spanLimit, runIsRtl, mStart + offset, cursorOpt) - mStart;
         }
     }
 

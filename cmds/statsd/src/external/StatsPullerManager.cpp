@@ -195,22 +195,13 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
           new StatsCompanionServicePuller(android::util::LOOPER_STATS)}},
         // Disk Stats
         {android::util::DISK_STATS,
-         {{},
-          {},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::DISK_STATS)}},
+         {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::DISK_STATS)}},
         // Directory usage
         {android::util::DIRECTORY_USAGE,
-         {{},
-          {},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::DIRECTORY_USAGE)}},
+         {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::DIRECTORY_USAGE)}},
         // Size of app's code, data, and cache
         {android::util::APP_SIZE,
-         {{},
-          {},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::APP_SIZE)}},
+         {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::APP_SIZE)}},
         // Size of specific categories of files. Eg. Music.
         {android::util::CATEGORY_SIZE,
          {{},

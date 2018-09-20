@@ -30,6 +30,7 @@
 #include <media/stagefright/foundation/ByteUtils.h>  // for FOURCC definition
 #include <mediaplayer2/JAudioTrack.h>
 #include <mediaplayer2/JavaVMHelper.h>
+#include <mediaplayer2/JMedia2HTTPService.h>
 #include <mediaplayer2/mediaplayer2.h>
 #include <stdio.h>
 #include <assert.h>
@@ -45,7 +46,6 @@
 #include "utils/KeyedVector.h"
 #include "utils/String8.h"
 #include "android_media_BufferingParams.h"
-#include "android_media_Media2HTTPService.h"
 #include "android_media_Media2DataSource.h"
 #include "android_media_MediaMetricsJNI.h"
 #include "android_media_PlaybackParams.h"

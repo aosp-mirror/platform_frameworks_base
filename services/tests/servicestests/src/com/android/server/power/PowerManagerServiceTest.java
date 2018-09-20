@@ -21,18 +21,32 @@ import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManagerInternal;
+import android.content.Context;
+import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
+import android.os.BatteryManagerInternal;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.server.power.batterysaver.BatterySaverController;
+import com.android.internal.app.IBatteryStats;
+import com.android.server.LocalServices;
+import com.android.server.SystemService;
+import com.android.server.lights.LightsManager;
+import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.power.PowerManagerService.Injector;
+import com.android.server.power.PowerManagerService.NativeWrapper;
+import com.android.server.power.batterysaver.BatterySavingStats;
 
 import org.junit.Rule;
 import org.mockito.Mock;
@@ -47,10 +61,18 @@ public class PowerManagerServiceTest extends AndroidTestCase {
     private static final boolean BATTERY_SAVER_ENABLED = true;
     private static final String TEST_LAST_REBOOT_PROPERTY = "test.sys.boot.reason";
 
-    private @Mock BatterySaverPolicy mBatterySaverPolicy;
+    private @Mock BatterySaverPolicy mBatterySaverPolicyMock;
+    private @Mock LightsManager mLightsManagerMock;
+    private @Mock DisplayManagerInternal mDisplayManagerInternalMock;
+    private @Mock BatteryManagerInternal mBatteryManagerInternalMock;
+    private @Mock ActivityManagerInternal mActivityManagerInternalMock;
+    private @Mock PowerManagerService.NativeWrapper mNativeWrapperMock;
+    private @Mock Notifier mNotifierMock;
     private PowerManagerService mService;
     private PowerSaveState mPowerSaveState;
     private DisplayPowerRequest mDisplayPowerRequest;
+
+
 
     @Rule
     public void setUp() throws Exception {
@@ -61,11 +83,51 @@ public class PowerManagerServiceTest extends AndroidTestCase {
                 .setBatterySaverEnabled(BATTERY_SAVER_ENABLED)
                 .setBrightnessFactor(BRIGHTNESS_FACTOR)
                 .build();
-        when(mBatterySaverPolicy.getBatterySaverPolicy(
+        when(mBatterySaverPolicyMock.getBatterySaverPolicy(
                 eq(PowerManager.ServiceType.SCREEN_BRIGHTNESS), anyBoolean()))
                 .thenReturn(mPowerSaveState);
+
         mDisplayPowerRequest = new DisplayPowerRequest();
-        mService = new PowerManagerService(getContext(), mBatterySaverPolicy);
+        addLocalServiceMock(LightsManager.class, mLightsManagerMock);
+        addLocalServiceMock(DisplayManagerInternal.class, mDisplayManagerInternalMock);
+        addLocalServiceMock(BatteryManagerInternal.class, mBatteryManagerInternalMock);
+        addLocalServiceMock(ActivityManagerInternal.class, mActivityManagerInternalMock);
+
+        mService = new PowerManagerService(getContext(), new Injector() {
+            Notifier createNotifier(Looper looper, Context context, IBatteryStats batteryStats,
+                    SuspendBlocker suspendBlocker, WindowManagerPolicy policy) {
+                return mNotifierMock;
+            }
+
+            SuspendBlocker createSuspendBlocker(PowerManagerService service, String name) {
+                return mock(SuspendBlocker.class);
+            }
+
+            BatterySaverPolicy createBatterySaverPolicy(
+                    Object lock, Context context, BatterySavingStats batterySavingStats) {
+                return mBatterySaverPolicyMock;
+            }
+
+            NativeWrapper createNativeWrapper() {
+                return mNativeWrapperMock;
+            }
+        });
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        LocalServices.removeServiceForTest(LightsManager.class);
+        LocalServices.removeServiceForTest(DisplayManagerInternal.class);
+        LocalServices.removeServiceForTest(BatteryManagerInternal.class);
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+    }
+
+    /**
+     * Creates a mock and registers it to {@link LocalServices}.
+     */
+    private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {
+        LocalServices.removeServiceForTest(clazz);
+        LocalServices.addService(clazz, mock);
     }
 
     @SmallTest
@@ -110,6 +172,25 @@ public class PowerManagerServiceTest extends AndroidTestCase {
         mService.setVrModeEnabled(false);
         assertThat(mService.getDesiredScreenPolicyLocked()).isEqualTo(
                 DisplayPowerRequest.POLICY_BRIGHT);
+    }
 
+    @SmallTest
+    public void testWakefulnessAwake_InitialValue() throws Exception {
+        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_AWAKE);
+    }
+
+    @SmallTest
+    public void testWakefulnessSleep_NoDozeSleepFlag() throws Exception {
+        // Start with AWAKE state
+        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        mService.systemReady(null);
+        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+
+        // Take a nap with a flag.
+        mService.getBinderServiceInstance().goToSleep(SystemClock.uptimeMillis(),
+            PowerManager.GO_TO_SLEEP_REASON_APPLICATION, PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
+
+        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
     }
 }

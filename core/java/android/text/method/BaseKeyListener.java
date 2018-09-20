@@ -310,7 +310,7 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
             return len;
         }
 
-        offset = paint.getTextRunCursor(text, offset, len, Paint.DIRECTION_LTR /* not used */,
+        offset = paint.getTextRunCursor(text, offset, len, false /* LTR, not used */,
                 offset, Paint.CURSOR_AFTER);
 
         return adjustReplacementSpan(text, offset, false /* move to the end */);

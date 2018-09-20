@@ -150,7 +150,6 @@ import android.view.SurfaceSession;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
-import com.android.internal.view.IInputMethodClient;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.RotationCache;
 import com.android.server.wm.utils.WmDisplayCutout;
@@ -2949,7 +2948,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
-    boolean inputMethodClientHasFocus(IInputMethodClient client) {
+    boolean isInputMethodClientFocus(int uid, int pid) {
         final WindowState imFocus = computeImeTarget(false /* updateImeTarget */);
         if (imFocus == null) {
             return false;
@@ -2961,17 +2960,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             Slog.i(TAG_WM, "Last focus: " + mService.mLastFocus);
         }
 
-        final IInputMethodClient imeClient = imFocus.mSession.mClient;
-
         if (DEBUG_INPUT_METHOD) {
-            Slog.i(TAG_WM, "IM target client: " + imeClient);
-            if (imeClient != null) {
-                Slog.i(TAG_WM, "IM target client binder: " + imeClient.asBinder());
-                Slog.i(TAG_WM, "Requesting client binder: " + client.asBinder());
-            }
+            Slog.i(TAG_WM, "IM target uid/pid: " + imFocus.mSession.mUid
+                    + "/" + imFocus.mSession.mPid);
+            Slog.i(TAG_WM, "Requesting client uid/pid: " + uid + "/" + pid);
         }
 
-        return imeClient != null && imeClient.asBinder() == client.asBinder();
+        return imFocus.mSession.mUid == uid && imFocus.mSession.mPid == pid;
     }
 
     boolean hasSecureWindowOnScreen() {

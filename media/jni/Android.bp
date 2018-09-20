@@ -88,8 +88,6 @@ cc_library_shared {
     name: "libmedia2_jni",
 
     srcs: [
-        "android_media_Media2HTTPConnection.cpp",
-        "android_media_Media2HTTPService.cpp",
         "android_media_Media2DataSource.cpp",
         "android_media_MediaMetricsJNI.cpp",
         "android_media_MediaPlayer2.cpp",
@@ -142,6 +140,7 @@ cc_library_shared {
         "libstagefright_player2",
         "libstagefright_rtsp",
         "libstagefright_timedtext2",
+        "libmedia2_jni_core",
     ],
 
     group_static_libs: true,

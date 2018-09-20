@@ -470,7 +470,8 @@ public class Content {
                     onExecute(provider);
                 } finally {
                     if (provider != null) {
-                        activityManager.removeContentProviderExternal(providerName, token);
+                        activityManager.removeContentProviderExternalAsUser(
+                                providerName, token, mUserId);
                     }
                 }
             } catch (Exception e) {

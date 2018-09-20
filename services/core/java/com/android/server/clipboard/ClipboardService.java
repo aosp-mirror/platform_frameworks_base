@@ -639,12 +639,20 @@ public class ClipboardService extends SystemService {
             }
         }
 
-        // Otherwise only focused applications can access the clipboard.
-        boolean uidFocused = mWm.isUidFocused(callingUid);
-        if (!uidFocused) {
-            Slog.e(TAG, "Denying clipboard access to " + callingPackage
-                    + ", application is not in focus.");
+        switch (op) {
+            case AppOpsManager.OP_READ_CLIPBOARD:
+                // Clipboard can only be read by applications with focus.
+                boolean uidFocused = mWm.isUidFocused(callingUid);
+                if (!uidFocused) {
+                    Slog.e(TAG, "Denying clipboard access to " + callingPackage
+                            + ", application is not in focus.");
+                }
+                return uidFocused;
+            case AppOpsManager.OP_WRITE_CLIPBOARD:
+                // Writing is allowed without focus.
+                return true;
+            default:
+                throw new IllegalArgumentException("Unknown clipboard appop " + op);
         }
-        return uidFocused;
     }
 }

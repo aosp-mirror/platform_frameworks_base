@@ -1108,12 +1108,9 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
 
     /**
      * Sets playback rate using {@link PlaybackParams}. The object sets its internal
-     * PlaybackParams to the input, except that the object remembers previous speed
-     * when input speed is zero. This allows the object to resume at previous speed
-     * when play() is called. Calling it before the object is prepared does not change
-     * the object state. After the object is prepared, calling it with zero speed is
-     * equivalent to calling pause(). After the object is prepared, calling it with
-     * non-zero speed is equivalent to calling play().
+     * PlaybackParams to the input. This allows the object to resume at previous speed
+     * when play() is called. Speed of zero is not allowed. Calling it does not change
+     * the object state.
      *
      * @param params the playback params.
      */

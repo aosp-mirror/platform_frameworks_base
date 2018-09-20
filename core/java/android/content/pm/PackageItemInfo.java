@@ -102,7 +102,13 @@ public class PackageItemInfo {
 
     private static volatile boolean sForceSafeLabels = false;
 
-    /** {@hide} */
+    /**
+     * Always use {@link #loadSafeLabel safe labels} when calling {@link #loadLabel}.
+     *
+     * @param forceSafeLabels {@code true} to enforce safe labels
+     *
+     * @hide
+     */
     @SystemApi
     public static void setForceSafeLabels(boolean forceSafeLabels) {
         sForceSafeLabels = forceSafeLabels;

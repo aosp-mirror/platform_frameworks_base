@@ -32,6 +32,7 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.IntArray;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -235,18 +236,22 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         mSnoozeHelper.snooze(r2, 1000);
         mSnoozeHelper.snooze(r3, 1000);
         mSnoozeHelper.snooze(r4, 1000);
-        when(mUserProfiles.getCurrentProfileIds()).thenReturn(
-                new int[] {UserHandle.USER_SYSTEM});
+        IntArray profileIds = new IntArray();
+        profileIds.add(UserHandle.USER_SYSTEM);
+        when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
         assertEquals(3, mSnoozeHelper.getSnoozed().size());
-        when(mUserProfiles.getCurrentProfileIds()).thenReturn(
-                new int[] {UserHandle.USER_CURRENT});
+        profileIds = new IntArray();
+        profileIds.add(UserHandle.USER_CURRENT);
+        when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
         assertEquals(1, mSnoozeHelper.getSnoozed().size());
     }
 
     @Test
     public void testGetSnoozedByUser_managedProfiles() throws Exception {
-        when(mUserProfiles.getCurrentProfileIds()).thenReturn(
-                new int[] {UserHandle.USER_SYSTEM, UserHandle.USER_CURRENT});
+        IntArray profileIds = new IntArray();
+        profileIds.add(UserHandle.USER_CURRENT);
+        profileIds.add(UserHandle.USER_SYSTEM);
+        when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
         NotificationRecord r2 = getNotificationRecord("pkg", 2, "two", UserHandle.SYSTEM);
         NotificationRecord r3 = getNotificationRecord("pkg2", 3, "three", UserHandle.SYSTEM);
@@ -273,8 +278,9 @@ public class SnoozeHelperTest extends UiServiceTestCase {
 
     @Test
     public void repostGroupSummary_repostsSummary() throws Exception {
-        when(mUserProfiles.getCurrentProfileIds()).thenReturn(
-                new int[] {UserHandle.USER_SYSTEM});
+        IntArray profileIds = new IntArray();
+        profileIds.add(UserHandle.USER_SYSTEM);
+        when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
         NotificationRecord r = getNotificationRecord(
                 "pkg", 1, "one", UserHandle.SYSTEM, "group1", true);
         NotificationRecord r2 = getNotificationRecord(

@@ -263,7 +263,9 @@ interface IActivityManager {
     void killAllBackgroundProcesses();
     ContentProviderHolder getContentProviderExternal(in String name, int userId,
             in IBinder token, String tag);
+    /** @deprecated - Use {@link #removeContentProviderExternalAsUser} which takes a user ID. */
     void removeContentProviderExternal(in String name, in IBinder token);
+    void removeContentProviderExternalAsUser(in String name, in IBinder token, int userId);
     // Get memory information about the calling process.
     void getMyMemoryState(out ActivityManager.RunningAppProcessInfo outInfo);
     boolean killProcessesBelowForeground(in String reason);

@@ -20,6 +20,7 @@
 #include <string>
 
 #include "google/protobuf/message_lite.h"
+#include "google/protobuf/io/coded_stream.h"
 
 #include "format/Archive.h"
 #include "io/File.h"
@@ -119,6 +120,23 @@ class ZeroCopyInputAdaptor : public ::google::protobuf::io::ZeroCopyInputStream 
  private:
   DISALLOW_COPY_AND_ASSIGN(ZeroCopyInputAdaptor);
 
+  io::InputStream* in_;
+};
+
+class ProtoInputStreamReader {
+ public:
+  explicit ProtoInputStreamReader(io::InputStream* in) : in_(in) { }
+
+  /** Deserializes a MessageLite proto from the current position in the input stream.*/
+  template <typename T> bool ReadMessage(T *message_lite) {
+    ZeroCopyInputAdaptor adapter(in_);
+    google::protobuf::io::CodedInputStream coded_stream(&adapter);
+    coded_stream.SetTotalBytesLimit(std::numeric_limits<int32_t>::max(),
+                                    coded_stream.BytesUntilTotalBytesLimit());
+    return message_lite->ParseFromCodedStream(&coded_stream);
+  }
+
+ private:
   io::InputStream* in_;
 };
 

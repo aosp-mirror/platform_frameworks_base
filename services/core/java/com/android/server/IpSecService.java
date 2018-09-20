@@ -1490,23 +1490,19 @@ public class IpSecService extends IIpSecService.Stub {
         }
     }
 
-    private static final String TUNNEL_OP = "STOPSHIP"; // = AppOpsManager.OP_MANAGE_IPSEC_TUNNELS;
+    private static final String TUNNEL_OP = AppOpsManager.OPSTR_MANAGE_IPSEC_TUNNELS;
 
     private void enforceTunnelPermissions(String callingPackage) {
         checkNotNull(callingPackage, "Null calling package cannot create IpSec tunnels");
-        if (false) { // STOPSHIP if this line is present
-            switch (getAppOpsManager().noteOp(
-                        TUNNEL_OP,
-                        Binder.getCallingUid(), callingPackage)) {
-                case AppOpsManager.MODE_DEFAULT:
-                    mContext.enforceCallingOrSelfPermission(
-                            android.Manifest.permission.MANAGE_IPSEC_TUNNELS, "IpSecService");
-                    break;
-                case AppOpsManager.MODE_ALLOWED:
-                    return;
-                default:
-                    throw new SecurityException("Request to ignore AppOps for non-legacy API");
-            }
+        switch (getAppOpsManager().noteOp(TUNNEL_OP, Binder.getCallingUid(), callingPackage)) {
+            case AppOpsManager.MODE_DEFAULT:
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.MANAGE_IPSEC_TUNNELS, "IpSecService");
+                break;
+            case AppOpsManager.MODE_ALLOWED:
+                return;
+            default:
+                throw new SecurityException("Request to ignore AppOps for non-legacy API");
         }
     }
 

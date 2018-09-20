@@ -232,6 +232,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         displayName = FileUtils.buildValidFatFilename(displayName);
 
         final File before = getFileForDocId(docId);
+        final File beforeVisibleFile = getFileForDocId(docId, true);
         final File after = FileUtils.buildUniqueFile(before.getParentFile(), displayName);
         if (!before.renameTo(after)) {
             throw new IllegalStateException("Failed to rename to " + after);
@@ -241,7 +242,6 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         onDocIdChanged(docId);
         onDocIdChanged(afterDocId);
 
-        final File beforeVisibleFile = getFileForDocId(docId, true);
         final File afterVisibleFile = getFileForDocId(afterDocId, true);
         moveInMediaStore(beforeVisibleFile, afterVisibleFile);
 
