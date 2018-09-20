@@ -534,11 +534,11 @@ public class ApkSignatureSchemeV3Verifier {
                    NoSuchAlgorithmException {
         try (RandomAccessFile apk = new RandomAccessFile(apkPath, "r")) {
             SignatureInfo signatureInfo = findSignature(apk);
-            return ApkSigningBlockUtils.generateApkVerity(apkPath, bufferFactory, signatureInfo);
+            return ApkVerityBuilder.generateApkVerity(apkPath, bufferFactory, signatureInfo);
         }
     }
 
-    static byte[] generateFsverityRootHash(String apkPath)
+    static byte[] generateApkVerityRootHash(String apkPath)
             throws NoSuchAlgorithmException, DigestException, IOException,
                    SignatureNotFoundException {
         try (RandomAccessFile apk = new RandomAccessFile(apkPath, "r")) {
@@ -547,7 +547,7 @@ public class ApkSignatureSchemeV3Verifier {
             if (vSigner.verityRootHash == null) {
                 return null;
             }
-            return ApkVerityBuilder.generateFsverityRootHash(
+            return ApkVerityBuilder.generateApkVerityRootHash(
                     apk, ByteBuffer.wrap(vSigner.verityRootHash), signatureInfo);
         }
     }

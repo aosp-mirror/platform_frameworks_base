@@ -23,11 +23,11 @@ import android.annotation.NonNull;
 import android.os.SharedMemory;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.util.Pair;
+import android.util.Slog;
 import android.util.apk.ApkSignatureVerifier;
 import android.util.apk.ByteBufferFactory;
 import android.util.apk.SignatureNotFoundException;
-import android.util.Pair;
-import android.util.Slog;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -85,7 +85,7 @@ abstract public class VerityUtils {
      */
     public static byte[] generateFsverityRootHash(@NonNull String apkPath)
             throws NoSuchAlgorithmException, DigestException, IOException {
-        return ApkSignatureVerifier.generateFsverityRootHash(apkPath);
+        return ApkSignatureVerifier.generateApkVerityRootHash(apkPath);
     }
 
     /**
