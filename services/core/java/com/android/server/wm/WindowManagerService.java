@@ -5069,9 +5069,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Must hold permission " +
                     android.Manifest.permission.WRITE_SECURE_SETTINGS);
         }
-        if (displayId != DEFAULT_DISPLAY) {
-            throw new IllegalArgumentException("Can only set the default display");
-        }
+
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized(mWindowMap) {
@@ -5104,9 +5102,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Must hold permission " +
                     android.Manifest.permission.WRITE_SECURE_SETTINGS);
         }
-        if (displayId != DEFAULT_DISPLAY) {
-            throw new IllegalArgumentException("Can only set the default display");
-        }
+
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized(mWindowMap) {
@@ -5186,9 +5182,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Must hold permission " +
                     android.Manifest.permission.WRITE_SECURE_SETTINGS);
         }
-        if (displayId != DEFAULT_DISPLAY) {
-            throw new IllegalArgumentException("Can only set the default display");
-        }
+
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized(mWindowMap) {
@@ -5235,9 +5229,6 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Must hold permission " +
                     android.Manifest.permission.WRITE_SECURE_SETTINGS);
         }
-        if (displayId != DEFAULT_DISPLAY) {
-            throw new IllegalArgumentException("Can only set the default display");
-        }
 
         final int targetUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), userId, false, true, "setForcedDisplayDensityForUser",
@@ -5265,9 +5256,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Must hold permission " +
                     android.Manifest.permission.WRITE_SECURE_SETTINGS);
-        }
-        if (displayId != DEFAULT_DISPLAY) {
-            throw new IllegalArgumentException("Can only set the default display");
         }
 
         final int callingUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),

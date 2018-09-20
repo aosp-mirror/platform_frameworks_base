@@ -20,7 +20,6 @@ import static android.os.Build.IS_USER;
 
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
@@ -28,10 +27,6 @@ import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.IWindowManager;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -87,21 +82,48 @@ public class WindowManagerShellCommand extends ShellCommand {
         return -1;
     }
 
+    private int getDisplayId(String opt) {
+        int displayId = Display.DEFAULT_DISPLAY;
+        String option = "-d".equals(opt) ? opt : getNextOption();
+        if (option != null && "-d".equals(option)) {
+            try {
+                displayId = Integer.parseInt(getNextArgRequired());
+            } catch (NumberFormatException e) {
+                getErrPrintWriter().println("Error: bad number " + e);
+            } catch (IllegalArgumentException e) {
+                getErrPrintWriter().println("Error: " + e);
+            }
+        }
+        return displayId;
+    }
+
+    private void printInitialDisplaySize(PrintWriter pw , int displayId) {
+        final Point initialSize = new Point();
+        final Point baseSize = new Point();
+
+        try {
+            mInterface.getInitialDisplaySize(displayId, initialSize);
+            mInterface.getBaseDisplaySize(displayId, baseSize);
+            pw.println("Physical size: " + initialSize.x + "x" + initialSize.y);
+            if (!initialSize.equals(baseSize)) {
+                pw.println("Override size: " + baseSize.x + "x" + baseSize.y);
+            }
+        } catch (RemoteException e) {
+            // Can't call getInitialDisplaySize() on IWindowManager or
+            // Can't call getBaseDisplaySize() on IWindowManager
+            pw.println("Remote exception: " + e);
+        }
+    }
+
     private int runDisplaySize(PrintWriter pw) throws RemoteException {
         String size = getNextArg();
         int w, h;
+        final int displayId = getDisplayId(size);
         if (size == null) {
-            Point initialSize = new Point();
-            Point baseSize = new Point();
-            try {
-                mInterface.getInitialDisplaySize(Display.DEFAULT_DISPLAY, initialSize);
-                mInterface.getBaseDisplaySize(Display.DEFAULT_DISPLAY, baseSize);
-                pw.println("Physical size: " + initialSize.x + "x" + initialSize.y);
-                if (!initialSize.equals(baseSize)) {
-                    pw.println("Override size: " + baseSize.x + "x" + baseSize.y);
-                }
-            } catch (RemoteException e) {
-            }
+            printInitialDisplaySize(pw, displayId);
+            return 0;
+        } else if ("-d".equals(size)) {
+            printInitialDisplaySize(pw, displayId);
             return 0;
         } else if ("reset".equals(size)) {
             w = h = -1;
@@ -114,8 +136,8 @@ public class WindowManagerShellCommand extends ShellCommand {
             String wstr = size.substring(0, div);
             String hstr = size.substring(div+1);
             try {
-                w = parseDimension(wstr);
-                h = parseDimension(hstr);
+                w = parseDimension(wstr, displayId);
+                h = parseDimension(hstr, displayId);
             } catch (NumberFormatException e) {
                 getErrPrintWriter().println("Error: bad number " + e);
                 return -1;
@@ -123,27 +145,38 @@ public class WindowManagerShellCommand extends ShellCommand {
         }
 
         if (w >= 0 && h >= 0) {
-            // TODO(multidisplay): For now Configuration only applies to main screen.
-            mInterface.setForcedDisplaySize(Display.DEFAULT_DISPLAY, w, h);
+            mInterface.setForcedDisplaySize(displayId, w, h);
         } else {
-            mInterface.clearForcedDisplaySize(Display.DEFAULT_DISPLAY);
+            mInterface.clearForcedDisplaySize(displayId);
         }
         return 0;
+    }
+
+    private void printInitialDisplayDensity(PrintWriter pw , int displayId) {
+        try {
+            final int initialDensity = mInterface.getInitialDisplayDensity(displayId);
+            final int baseDensity = mInterface.getBaseDisplayDensity(displayId);
+            pw.println("Physical density: " + initialDensity);
+            if (initialDensity != baseDensity) {
+                pw.println("Override density: " + baseDensity);
+            }
+        } catch (RemoteException e) {
+            // Can't call getInitialDisplayDensity() on IWindowManager or
+            // Can't call getBaseDisplayDensity() on IWindowManager
+            pw.println("Remote exception: " + e);
+        }
     }
 
     private int runDisplayDensity(PrintWriter pw) throws RemoteException {
         String densityStr = getNextArg();
         int density;
+        final int displayId = getDisplayId(densityStr);
+
         if (densityStr == null) {
-            try {
-                int initialDensity = mInterface.getInitialDisplayDensity(Display.DEFAULT_DISPLAY);
-                int baseDensity = mInterface.getBaseDisplayDensity(Display.DEFAULT_DISPLAY);
-                pw.println("Physical density: " + initialDensity);
-                if (initialDensity != baseDensity) {
-                    pw.println("Override density: " + baseDensity);
-                }
-            } catch (RemoteException e) {
-            }
+            printInitialDisplayDensity(pw, displayId);
+            return 0;
+        } else if ("-d".equals(densityStr)) {
+            printInitialDisplayDensity(pw, displayId);
             return 0;
         } else if ("reset".equals(densityStr)) {
             density = -1;
@@ -161,11 +194,10 @@ public class WindowManagerShellCommand extends ShellCommand {
         }
 
         if (density > 0) {
-            // TODO(multidisplay): For now Configuration only applies to main screen.
-            mInterface.setForcedDisplayDensityForUser(Display.DEFAULT_DISPLAY, density,
+            mInterface.setForcedDisplayDensityForUser(displayId, density,
                     UserHandle.USER_CURRENT);
         } else {
-            mInterface.clearForcedDisplayDensityForUser(Display.DEFAULT_DISPLAY,
+            mInterface.clearForcedDisplayDensityForUser(displayId,
                     UserHandle.USER_CURRENT);
         }
         return 0;
@@ -174,6 +206,7 @@ public class WindowManagerShellCommand extends ShellCommand {
     private int runDisplayOverscan(PrintWriter pw) throws RemoteException {
         String overscanStr = getNextArgRequired();
         Rect rect = new Rect();
+        final int displayId = getDisplayId(overscanStr);
         if ("reset".equals(overscanStr)) {
             rect.set(0, 0, 0, 0);
         } else {
@@ -190,17 +223,16 @@ public class WindowManagerShellCommand extends ShellCommand {
             rect.bottom = Integer.parseInt(matcher.group(4));
         }
 
-        mInterface.setOverscan(Display.DEFAULT_DISPLAY, rect.left, rect.top, rect.right,
-                rect.bottom);
+        mInterface.setOverscan(displayId, rect.left, rect.top, rect.right, rect.bottom);
         return 0;
     }
 
     private int runDisplayScaling(PrintWriter pw) throws RemoteException {
         String scalingStr = getNextArgRequired();
         if ("auto".equals(scalingStr)) {
-            mInterface.setForcedDisplayScalingMode(Display.DEFAULT_DISPLAY, 0);
+            mInterface.setForcedDisplayScalingMode(getDisplayId(scalingStr), 0);
         } else if ("off".equals(scalingStr)) {
-            mInterface.setForcedDisplayScalingMode(Display.DEFAULT_DISPLAY, 1);
+            mInterface.setForcedDisplayScalingMode(getDisplayId(scalingStr), 1);
         } else {
             getErrPrintWriter().println("Error: scaling must be 'auto' or 'off'");
             return -1;
@@ -213,14 +245,14 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int parseDimension(String s) throws NumberFormatException {
+    private int parseDimension(String s, int displayId) throws NumberFormatException {
         if (s.endsWith("px")) {
             return Integer.parseInt(s.substring(0, s.length() - 2));
         }
         if (s.endsWith("dp")) {
             int density;
             try {
-                density = mInterface.getBaseDisplayDensity(Display.DEFAULT_DISPLAY);
+                density = mInterface.getBaseDisplayDensity(displayId);
             } catch (RemoteException e) {
                 density = DisplayMetrics.DENSITY_DEFAULT;
             }
@@ -236,14 +268,14 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("Window manager (window) commands:");
         pw.println("  help");
         pw.println("      Print this help text.");
-        pw.println("  size [reset|WxH|WdpxHdp]");
+        pw.println("  size [reset|WxH|WdpxHdp] [-d DISPLAY_ID]");
         pw.println("    Return or override display size.");
         pw.println("    width and height in pixels unless suffixed with 'dp'.");
-        pw.println("  density [reset|DENSITY]");
+        pw.println("  density [reset|DENSITY] [-d DISPLAY_ID]");
         pw.println("    Return or override display density.");
-        pw.println("  overscan [reset|LEFT,TOP,RIGHT,BOTTOM]");
+        pw.println("  overscan [reset|LEFT,TOP,RIGHT,BOTTOM] [-d DISPLAY ID]");
         pw.println("    Set overscan area for display.");
-        pw.println("  scaling [off|auto]");
+        pw.println("  scaling [off|auto] [-d DISPLAY_ID]");
         pw.println("    Set display scaling mode.");
         pw.println("  dismiss-keyguard");
         pw.println("    Dismiss the keyguard, prompting user for auth if necessary.");
