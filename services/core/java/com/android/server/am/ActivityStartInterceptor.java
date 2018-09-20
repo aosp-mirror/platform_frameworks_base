@@ -126,7 +126,7 @@ class ActivityStartInterceptor {
 
     private IntentSender createIntentSenderForOriginalIntent(int callingUid, int flags) {
         Bundle activityOptions = deferCrossProfileAppsAnimationIfNecessary();
-        final IIntentSender target = mService.mAm.getIntentSenderLocked(
+        final IIntentSender target = mService.getIntentSenderLocked(
                 INTENT_SENDER_ACTIVITY, mCallingPackage, callingUid, mUserId, null /*token*/,
                 null /*resultCode*/, 0 /*requestCode*/,
                 new Intent[] { mIntent }, new String[] { mResolvedType },

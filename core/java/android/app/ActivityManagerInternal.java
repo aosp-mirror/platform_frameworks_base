@@ -19,11 +19,14 @@ package android.app;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
+import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.UserInfo;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.os.TransactionTooLargeException;
 import android.view.RemoteAnimationAdapter;
 
 import java.util.ArrayList;
@@ -232,4 +235,14 @@ public abstract class ActivityManagerInternal {
     public abstract void setBooted(boolean booted);
     public abstract boolean isBooted();
     public abstract void finishBooting();
+
+    public abstract void tempWhitelistForPendingIntent(int callerPid, int callerUid, int targetUid,
+            long duration, String tag);
+    public abstract int broadcastIntentInPackage(String packageName, int uid, Intent intent,
+            String resolvedType, IIntentReceiver resultTo, int resultCode, String resultData,
+            Bundle resultExtras, String requiredPermission, Bundle bOptions, boolean serialized,
+            boolean sticky, int userId);
+    public abstract ComponentName startServiceInPackage(int uid, Intent service,
+            String resolvedType, boolean fgRequired, String callingPackage, int userId)
+            throws TransactionTooLargeException;
 }
