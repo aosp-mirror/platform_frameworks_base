@@ -422,4 +422,9 @@ interface IActivityTaskManager {
     void resumeAppSwitches();
     void setActivityController(in IActivityController watcher, boolean imAMonkey);
     void setVoiceKeepAwake(in IVoiceInteractionSession session, boolean keepAwake);
+
+    int getPackageScreenCompatMode(in String packageName);
+    void setPackageScreenCompatMode(in String packageName, int mode);
+    boolean getPackageAskScreenCompat(in String packageName);
+    void setPackageAskScreenCompat(in String packageName, boolean ask);
 }

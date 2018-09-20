@@ -665,11 +665,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     int mNextIsolatedProcessUid = 0;
 
     /**
-     * The currently running heavy-weight process, if any.
-     */
-    ProcessRecord mHeavyWeightProcess = null;
-
-    /**
      * Non-persistent appId whitelist for background restrictions
      */
     int[] mBackgroundAppIdWhitelist = new int[] {
@@ -824,12 +819,6 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     static final boolean VALIDATE_UID_STATES = true;
     final SparseArray<UidRecord> mValidateUids = new SparseArray<>();
-
-    /**
-     * Packages that the user has asked to have run in screen size
-     * compatibility mode instead of filling the screen.
-     */
-    final CompatModePackages mCompatModePackages;
 
     /**
      * Set of IntentSenderRecord objects that are currently active.
@@ -1097,11 +1086,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     volatile boolean mSystemReady = false;
     volatile boolean mOnBattery = false;
     volatile int mFactoryTest;
+    volatile boolean mBooting = false;
 
-    @GuardedBy("this") boolean mBooting = false;
     @GuardedBy("this") boolean mCallFinishBooting = false;
     @GuardedBy("this") boolean mBootAnimationComplete = false;
-    @GuardedBy("this") boolean mLaunchWarningShown = false;
     private @GuardedBy("this") boolean mCheckedForSetup = false;
 
     final Context mContext;
@@ -1388,10 +1376,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     long mLastWriteTime = 0;
 
-    /**
-     * Set to true after the system has finished booting.
-     */
-    boolean mBooted = false;
+    /** Set to true after the system has finished booting. */
+    volatile boolean mBooted = false;
 
     /**
      * Current boot phase.
@@ -1441,8 +1427,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int PROC_START_TIMEOUT_MSG = 20;
     static final int KILL_APPLICATION_MSG = 22;
     static final int FINALIZE_PENDING_INTENT_MSG = 23;
-    static final int POST_HEAVY_NOTIFICATION_MSG = 24;
-    static final int CANCEL_HEAVY_NOTIFICATION_MSG = 25;
     static final int SHOW_STRICT_MODE_VIOLATION_UI_MSG = 26;
     static final int CHECK_EXCESSIVE_POWER_USE_MSG = 27;
     static final int CLEAR_DNS_CACHE_MSG = 28;
@@ -1451,7 +1435,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int DISPATCH_PROCESS_DIED_UI_MSG = 32;
     static final int REPORT_MEM_USAGE_MSG = 33;
     static final int UPDATE_TIME_PREFERENCE_MSG = 41;
-    static final int FINISH_BOOTING_MSG = 45;
     static final int SEND_LOCALE_TO_MOUNT_DAEMON_MSG = 47;
     static final int NOTIFY_CLEARTEXT_NETWORK_MSG = 49;
     static final int POST_DUMP_HEAP_NOTIFICATION_MSG = 50;
@@ -1758,65 +1741,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             case FINALIZE_PENDING_INTENT_MSG: {
                 ((PendingIntentRecord)msg.obj).completeFinalize();
             } break;
-            case POST_HEAVY_NOTIFICATION_MSG: {
-                INotificationManager inm = NotificationManager.getService();
-                if (inm == null) {
-                    return;
-                }
-
-                ActivityRecord root = (ActivityRecord)msg.obj;
-                final WindowProcessController process = root.app;
-                if (process == null) {
-                    return;
-                }
-
-                try {
-                    Context context = mContext.createPackageContext(process.mInfo.packageName, 0);
-                    String text = mContext.getString(R.string.heavy_weight_notification,
-                            context.getApplicationInfo().loadLabel(context.getPackageManager()));
-                    Notification notification =
-                            new Notification.Builder(context,
-                                    SystemNotificationChannels.HEAVY_WEIGHT_APP)
-                            .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
-                            .setWhen(0)
-                            .setOngoing(true)
-                            .setTicker(text)
-                            .setColor(mContext.getColor(
-                                    com.android.internal.R.color.system_notification_accent_color))
-                            .setContentTitle(text)
-                            .setContentText(
-                                    mContext.getText(R.string.heavy_weight_notification_detail))
-                            .setContentIntent(PendingIntent.getActivityAsUser(mContext, 0,
-                                    root.intent, PendingIntent.FLAG_CANCEL_CURRENT, null,
-                                    new UserHandle(root.userId)))
-                            .build();
-                    try {
-                        inm.enqueueNotificationWithTag("android", "android", null,
-                                SystemMessage.NOTE_HEAVY_WEIGHT_NOTIFICATION,
-                                notification, root.userId);
-                    } catch (RuntimeException e) {
-                        Slog.w(ActivityManagerService.TAG,
-                                "Error showing notification for heavy-weight app", e);
-                    } catch (RemoteException e) {
-                    }
-                } catch (NameNotFoundException e) {
-                    Slog.w(TAG, "Unable to create context for heavy notification", e);
-                }
-            } break;
-            case CANCEL_HEAVY_NOTIFICATION_MSG: {
-                INotificationManager inm = NotificationManager.getService();
-                if (inm == null) {
-                    return;
-                }
-                try {
-                    inm.cancelNotificationWithTag("android", null,
-                            SystemMessage.NOTE_HEAVY_WEIGHT_NOTIFICATION, msg.arg1);
-                } catch (RuntimeException e) {
-                    Slog.w(ActivityManagerService.TAG,
-                            "Error canceling notification for service", e);
-                } catch (RemoteException e) {
-                }
-            } break;
             case CHECK_EXCESSIVE_POWER_USE_MSG: {
                 synchronized (ActivityManagerService.this) {
                     checkExcessivePowerUsageLocked();
@@ -1850,17 +1774,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                             }
                         }
                     }
-                }
-                break;
-            }
-            case FINISH_BOOTING_MSG: {
-                if (msg.arg1 != 0) {
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "FinishBooting");
-                    finishBooting();
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                }
-                if (msg.arg2 != 0) {
-                    mAtmInternal.enableScreenAfterBoot(mBooted);
                 }
                 break;
             }
@@ -2430,7 +2343,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mAppErrors = null;
         mAppOpsService = mInjector.getAppOpsService(null, null);
         mBatteryStatsService = null;
-        mCompatModePackages = null;
         mConstants = null;
         mHandler = null;
         mHandlerThread = null;
@@ -2519,7 +2431,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         mTrackingAssociations = "1".equals(SystemProperties.get("debug.track-associations"));
-        mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
 
         mActivityTaskManager = atm;
@@ -3791,31 +3702,31 @@ public class ActivityManagerService extends IActivityManager.Stub
         return true;
     }
 
-    void updateUsageStats(ActivityRecord component, boolean resumed) {
+    void updateUsageStats(ComponentName activity, int uid, int userId, boolean resumed) {
         if (DEBUG_SWITCH) Slog.d(TAG_SWITCH,
-                "updateUsageStats: comp=" + component + "res=" + resumed);
+                "updateUsageStats: comp=" + activity + "res=" + resumed);
         final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         StatsLog.write(StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED,
-            component.app.mUid, component.realActivity.getPackageName(),
-            component.realActivity.getShortClassName(), resumed ?
+            uid, activity.getPackageName(),
+            activity.getShortClassName(), resumed ?
                         StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__STATE__FOREGROUND :
                         StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__STATE__BACKGROUND);
         if (resumed) {
             if (mUsageStatsService != null) {
-                mUsageStatsService.reportEvent(component.realActivity, component.userId,
+                mUsageStatsService.reportEvent(activity, userId,
                         UsageEvents.Event.MOVE_TO_FOREGROUND);
 
             }
             synchronized (stats) {
-                stats.noteActivityResumedLocked(component.app.mUid);
+                stats.noteActivityResumedLocked(uid);
             }
         } else {
             if (mUsageStatsService != null) {
-                mUsageStatsService.reportEvent(component.realActivity, component.userId,
+                mUsageStatsService.reportEvent(activity, userId,
                         UsageEvents.Event.MOVE_TO_BACKGROUND);
             }
             synchronized (stats) {
-                stats.noteActivityPausedLocked(component.app.mUid);
+                stats.noteActivityPausedLocked(uid);
             }
         }
     }
@@ -3895,8 +3806,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mCheckedForSetup = checked;
     }
 
-    CompatibilityInfo compatibilityInfoForPackageLocked(ApplicationInfo ai) {
-        return mCompatModePackages.compatibilityInfoForPackageLocked(ai);
+    CompatibilityInfo compatibilityInfoForPackage(ApplicationInfo ai) {
+        return mAtmInternal.compatibilityInfoForPackage(ai);
     }
 
     private void enforceNotIsolatedCaller(String caller) {
@@ -3906,37 +3817,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public int getPackageScreenCompatMode(String packageName) {
-        enforceNotIsolatedCaller("getPackageScreenCompatMode");
-        synchronized (this) {
-            return mCompatModePackages.getPackageScreenCompatModeLocked(packageName);
-        }
-    }
-
-    @Override
     public void setPackageScreenCompatMode(String packageName, int mode) {
-        enforceCallingPermission(android.Manifest.permission.SET_SCREEN_COMPATIBILITY,
-                "setPackageScreenCompatMode");
-        synchronized (this) {
-            mCompatModePackages.setPackageScreenCompatModeLocked(packageName, mode);
-        }
-    }
-
-    @Override
-    public boolean getPackageAskScreenCompat(String packageName) {
-        enforceNotIsolatedCaller("getPackageAskScreenCompat");
-        synchronized (this) {
-            return mCompatModePackages.getPackageAskCompatModeLocked(packageName);
-        }
-    }
-
-    @Override
-    public void setPackageAskScreenCompat(String packageName, boolean ask) {
-        enforceCallingPermission(android.Manifest.permission.SET_SCREEN_COMPATIBILITY,
-                "setPackageAskScreenCompat");
-        synchronized (this) {
-            mCompatModePackages.setPackageAskCompatModeLocked(packageName, ask);
-        }
+        mActivityTaskManager.setPackageScreenCompatMode(packageName, mode);
     }
 
     private boolean hasUsageStatsPermission(String callingPackage) {
@@ -4307,19 +4189,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-
-        synchronized(this) {
-            final ProcessRecord proc = mHeavyWeightProcess;
-            if (proc == null) {
-                return;
-            }
-
-            proc.getWindowProcessController().finishActivities();
-
-            mHandler.sendMessage(mHandler.obtainMessage(CANCEL_HEAVY_NOTIFICATION_MSG,
-                    proc.userId, 0));
-            mHeavyWeightProcess = null;
-        }
+        mAtmInternal.finishHeavyWeightApp();
     }
 
     @Override
@@ -5789,11 +5659,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             return false;
         }
         removeProcessNameLocked(name, uid);
-        if (mHeavyWeightProcess == app) {
-            mHandler.sendMessage(mHandler.obtainMessage(CANCEL_HEAVY_NOTIFICATION_MSG,
-                    mHeavyWeightProcess.userId, 0));
-            mHeavyWeightProcess = null;
-        }
+        mAtmInternal.clearHeavyWeightProcessIfEquals(app.getWindowProcessController());
+
         boolean needRestart = false;
         if ((app.pid > 0 && app.pid != MY_PID) || (app.pid == 0 && app.pendingStart)) {
             int pid = app.pid;
@@ -5851,11 +5718,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             EventLog.writeEvent(EventLogTags.AM_PROCESS_START_TIMEOUT, app.userId,
                     pid, app.uid, app.processName);
             removeProcessNameLocked(app.processName, app.uid);
-            if (mHeavyWeightProcess == app) {
-                mHandler.sendMessage(mHandler.obtainMessage(CANCEL_HEAVY_NOTIFICATION_MSG,
-                        mHeavyWeightProcess.userId, 0));
-                mHeavyWeightProcess = null;
-            }
+            mAtmInternal.clearHeavyWeightProcessIfEquals(app.getWindowProcessController());
             mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
             // Take care of any launching providers waiting for this process.
             cleanupAppInLaunchingProvidersLocked(app, true);
@@ -6034,7 +5897,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Binding proc "
                     + processName + " with config " + getGlobalConfiguration());
             ApplicationInfo appInfo = instr != null ? instr.mTargetInfo : app.info;
-            app.compat = compatibilityInfoForPackageLocked(appInfo);
+            app.compat = compatibilityInfoForPackage(appInfo);
 
             ProfilerInfo profilerInfo = null;
             String preBindAgent = null;
@@ -6231,7 +6094,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                              PackageManager.NOTIFY_PACKAGE_USE_BACKUP);
             try {
                 thread.scheduleCreateBackupAgent(mBackupTarget.appInfo,
-                        compatibilityInfoForPackageLocked(mBackupTarget.appInfo),
+                        compatibilityInfoForPackage(mBackupTarget.appInfo),
                         mBackupTarget.backupMode);
             } catch (Exception e) {
                 Slog.wtf(TAG, "Exception thrown creating backup agent in " + app, e);
@@ -6264,11 +6127,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    void postFinishBooting(boolean finishBooting, boolean enableScreen) {
-        mHandler.sendMessage(mHandler.obtainMessage(FINISH_BOOTING_MSG,
-                finishBooting ? 1 : 0, enableScreen ? 1 : 0));
-    }
-
     @Override
     public void showBootMessage(final CharSequence msg, final boolean always) {
         if (Binder.getCallingUid() != myUid()) {
@@ -6278,6 +6136,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     final void finishBooting() {
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "FinishBooting");
+
         synchronized (this) {
             if (!mBootAnimationComplete) {
                 mCallFinishBooting = true;
@@ -6383,6 +6243,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     });
             mUserController.scheduleStartProfiles();
         }
+
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     @Override
@@ -6393,9 +6255,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mBootAnimationComplete = true;
         }
         if (callFinishBooting) {
-            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "FinishBooting");
             finishBooting();
-            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
 
@@ -6410,9 +6270,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (booting) {
-            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "FinishBooting");
             finishBooting();
-            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
 
         if (enableScreen) {
@@ -10852,7 +10710,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             int clientTargetSdk) {
         outInfo.pid = app.pid;
         outInfo.uid = app.info.uid;
-        if (mHeavyWeightProcess == app) {
+        if (mAtmInternal.isHeavyWeightProcess(app.getWindowProcessController())) {
             outInfo.flags |= ActivityManager.RunningAppProcessInfo.FLAG_CANT_SAVE_STATE;
         }
         if (app.isPersistent()) {
@@ -11895,13 +11753,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             TimeUtils.formatDuration(mActivityTaskManager.mPreviousProcessVisibleTime, sb);
             pw.println(sb);
         }
-        if (mHeavyWeightProcess != null && (dumpPackage == null
-                || mHeavyWeightProcess.pkgList.containsKey(dumpPackage))) {
+        if (mActivityTaskManager.mHeavyWeightProcess != null && (dumpPackage == null
+                || mActivityTaskManager.mHeavyWeightProcess.mPkgList.contains(dumpPackage))) {
             if (needSep) {
                 pw.println();
                 needSep = false;
             }
-            pw.println("  mHeavyWeightProcess: " + mHeavyWeightProcess);
+            pw.println("  mHeavyWeightProcess: " + mActivityTaskManager.mHeavyWeightProcess);
         }
         if (dumpAll && mPendingStarts.size() > 0) {
             if (needSep) pw.println();
@@ -11920,10 +11778,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("  mConfigWillChange: "
                         + mActivityTaskManager.getTopDisplayFocusedStack().mConfigWillChange);
             }
-            if (mCompatModePackages.getPackages().size() > 0) {
+            if (mActivityTaskManager.mCompatModePackages.getPackages().size() > 0) {
                 boolean printed = false;
                 for (Map.Entry<String, Integer> entry
-                        : mCompatModePackages.getPackages().entrySet()) {
+                        : mActivityTaskManager.mCompatModePackages.getPackages().entrySet()) {
                     String pkg = entry.getKey();
                     int mode = entry.getValue();
                     if (dumpPackage != null && !dumpPackage.equals(pkg)) {
@@ -12305,12 +12163,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             proto.write(ActivityManagerServiceDumpProcessesProto.PREVIOUS_PROC_VISIBLE_TIME_MS, mActivityTaskManager.mPreviousProcessVisibleTime);
         }
 
-        if (mHeavyWeightProcess != null && (dumpPackage == null
-                || mHeavyWeightProcess.pkgList.containsKey(dumpPackage))) {
-            mHeavyWeightProcess.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.HEAVY_WEIGHT_PROC);
+        if (mActivityTaskManager.mHeavyWeightProcess != null && (dumpPackage == null
+                || mActivityTaskManager.mHeavyWeightProcess.mPkgList.contains(dumpPackage))) {
+            ((ProcessRecord) mActivityTaskManager.mHeavyWeightProcess.mOwner).writeToProto(proto, ActivityManagerServiceDumpProcessesProto.HEAVY_WEIGHT_PROC);
         }
 
-        for (Map.Entry<String, Integer> entry : mCompatModePackages.getPackages().entrySet()) {
+        for (Map.Entry<String, Integer> entry
+                : mActivityTaskManager.mCompatModePackages.getPackages().entrySet()) {
             String pkg = entry.getKey();
             int mode = entry.getValue();
             if (dumpPackage == null || dumpPackage.equals(pkg)) {
@@ -12563,8 +12422,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         pw.println();
         pw.println("  mHomeProcess: " + mActivityTaskManager.mHomeProcess);
         pw.println("  mPreviousProcess: " + mActivityTaskManager.mPreviousProcess);
-        if (mHeavyWeightProcess != null) {
-            pw.println("  mHeavyWeightProcess: " + mHeavyWeightProcess);
+        if (mActivityTaskManager.mHeavyWeightProcess != null) {
+            pw.println("  mHeavyWeightProcess: " + mActivityTaskManager.mHeavyWeightProcess);
         }
 
         return true;
@@ -15196,11 +15055,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (!replacingPid) {
                 removeProcessNameLocked(app.processName, app.uid, app);
             }
-            if (mHeavyWeightProcess == app) {
-                mHandler.sendMessage(mHandler.obtainMessage(CANCEL_HEAVY_NOTIFICATION_MSG,
-                        mHeavyWeightProcess.userId, 0));
-                mHeavyWeightProcess = null;
-            }
+            mAtmInternal.clearHeavyWeightProcessIfEquals(app.getWindowProcessController());
         } else if (!app.removed) {
             // This app is persistent, so we need to keep its record around.
             // If it is not already on the pending app list, add it there
@@ -15584,7 +15439,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "Agent proc already running: " + proc);
                 try {
                     proc.thread.scheduleCreateBackupAgent(app,
-                            compatibilityInfoForPackageLocked(app), backupMode);
+                            compatibilityInfoForPackage(app), backupMode);
                 } catch (RemoteException e) {
                     // Will time out on the backup manager side
                 }
@@ -15683,7 +15538,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (proc.thread != null) {
                     try {
                         proc.thread.scheduleDestroyBackupAgent(appInfo,
-                                compatibilityInfoForPackageLocked(appInfo));
+                                compatibilityInfoForPackage(appInfo));
                     } catch (Exception e) {
                         Slog.e(TAG, "Exception when unbinding backup agent:");
                         e.printStackTrace();
@@ -16392,7 +16247,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                                         mServices.forceStopPackageLocked(ssp, userId);
                                         mAtmInternal.onPackageUninstalled(ssp);
-                                        mCompatModePackages.handlePackageUninstalledLocked(ssp);
                                         mBatteryStatsService.notePackageUninstalled(ssp);
                                     }
                                 } else {
@@ -16454,7 +16308,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (data != null && (ssp = data.getSchemeSpecificPart()) != null) {
                         final boolean replacing =
                                 intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
-                        mCompatModePackages.handlePackageAddedLocked(ssp, replacing);
+                        mAtmInternal.onPackageAdded(ssp, replacing);
 
                         try {
                             ApplicationInfo ai = AppGlobals.getPackageManager().
@@ -16471,7 +16325,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Uri data = intent.getData();
                     String ssp;
                     if (data != null && (ssp = data.getSchemeSpecificPart()) != null) {
-                        mCompatModePackages.handlePackageDataClearedLocked(ssp);
                         mAtmInternal.onPackageDataCleared(ssp);
                     }
                     break;
@@ -17816,7 +17669,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        if (app == mHeavyWeightProcess) {
+        if (mAtmInternal.isHeavyWeightProcess(app.getWindowProcessController())) {
             if (adj > ProcessList.HEAVY_WEIGHT_APP_ADJ) {
                 // We don't want to kill the current heavy-weight process.
                 adj = ProcessList.HEAVY_WEIGHT_APP_ADJ;
@@ -21097,18 +20950,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             ActivityManagerService.this.trimApplications();
         }
 
-        public int getPackageScreenCompatMode(ApplicationInfo ai) {
-            synchronized (ActivityManagerService.this) {
-                return mCompatModePackages.computeCompatModeLocked(ai);
-            }
-        }
-
-        public void setPackageScreenCompatMode(ApplicationInfo ai, int mode) {
-            synchronized (ActivityManagerService.this) {
-                mCompatModePackages.setPackageScreenCompatModeLocked(ai, mode);
-            }
-        }
-
         public void closeSystemDialogs(String reason) {
             ActivityManagerService.this.closeSystemDialogs(reason);
         }
@@ -21153,6 +20994,38 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void updateOomAdj() {
             synchronized (ActivityManagerService.this) {
                 ActivityManagerService.this.updateOomAdjLocked();
+            }
+        }
+
+        @Override
+        public void updateCpuStats() {
+            synchronized (ActivityManagerService.this) {
+                ActivityManagerService.this.updateCpuStats();
+            }
+        }
+
+        @Override
+        public void updateUsageStats(ComponentName activity, int uid, int userId, boolean resumed) {
+            synchronized (ActivityManagerService.this) {
+                ActivityManagerService.this.updateUsageStats(activity, uid, userId, resumed);
+            }
+        }
+
+        @Override
+        public void updateForegroundTimeIfOnBattery(
+                String packageName, int uid, long cpuTimeDiff) {
+            synchronized (ActivityManagerService.this) {
+                if (!mBatteryStatsService.isOnBattery()) {
+                    return;
+                }
+                final BatteryStatsImpl bsi = mBatteryStatsService.getActiveStatistics();
+                synchronized (bsi) {
+                    final BatteryStatsImpl.Uid.Proc ps =
+                            bsi.getProcessStatsLocked(uid, packageName);
+                    if (ps != null) {
+                        ps.addForegroundTimeLocked(cpuTimeDiff);
+                    }
+                }
             }
         }
 
@@ -21215,6 +21088,31 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (ActivityManagerService.this) {
                 return ActivityManagerService.this.getTaskForActivity(token, onlyRoot);
             }
+        }
+
+        @Override
+        public void setBooting(boolean booting) {
+            mBooting = booting;
+        }
+
+        @Override
+        public boolean isBooting() {
+            return mBooting;
+        }
+
+        @Override
+        public void setBooted(boolean booted) {
+            mBooted = booted;
+        }
+
+        @Override
+        public boolean isBooted() {
+            return mBooted;
+        }
+
+        @Override
+        public void finishBooting() {
+            ActivityManagerService.this.finishBooting();
         }
     }
 

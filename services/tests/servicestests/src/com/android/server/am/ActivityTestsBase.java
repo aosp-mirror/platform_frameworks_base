@@ -439,6 +439,10 @@ public class ActivityTestsBase {
         }
 
         @Override
+        void updateUsageStats(ActivityRecord component, boolean resumed) {
+        }
+
+        @Override
         final protected ActivityStackSupervisor createStackSupervisor() {
             final ActivityStackSupervisor supervisor = spy(createTestSupervisor());
             final KeyguardController keyguardController = mock(KeyguardController.class);
@@ -494,10 +498,6 @@ public class ActivityTestsBase {
         TestActivityManagerService(Context context, TestActivityTaskManagerService atm) {
             super(context, atm);
             mUgmInternal = mock(UriGrantsManagerInternal.class);
-        }
-
-        @Override
-        void updateUsageStats(ActivityRecord component, boolean resumed) {
         }
 
         @Override

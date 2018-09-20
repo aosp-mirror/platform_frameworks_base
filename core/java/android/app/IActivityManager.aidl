@@ -248,10 +248,7 @@ interface IActivityManager {
             boolean runGc, in String path, in ParcelFileDescriptor fd,
             in RemoteCallback finishCallback);
     boolean isUserRunning(int userid, int flags);
-    int getPackageScreenCompatMode(in String packageName);
     void setPackageScreenCompatMode(in String packageName, int mode);
-    boolean getPackageAskScreenCompat(in String packageName);
-    void setPackageAskScreenCompat(in String packageName, boolean ask);
     boolean switchUser(int userid);
     boolean removeTask(int taskId);
     void registerProcessObserver(in IProcessObserver observer);

@@ -23,6 +23,8 @@ import android.app.IActivityManager;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.res.CompatibilityInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -267,6 +269,9 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void onProcessRemoved(String name, int uid);
     public abstract void onCleanUpApplicationRecord(WindowProcessController proc);
     public abstract int getTopProcessState();
+    public abstract boolean isHeavyWeightProcess(WindowProcessController proc);
+    public abstract void clearHeavyWeightProcessIfEquals(WindowProcessController proc);
+    public abstract void finishHeavyWeightApp();
 
     public abstract boolean isSleeping();
     public abstract boolean isShuttingDown();
@@ -281,4 +286,7 @@ public abstract class ActivityTaskManagerInternal {
 
     public abstract void onPackageDataCleared(String name);
     public abstract void onPackageUninstalled(String name);
+    public abstract void onPackageAdded(String name, boolean replacing);
+
+    public abstract CompatibilityInfo compatibilityInfoForPackage(ApplicationInfo ai);
 }
