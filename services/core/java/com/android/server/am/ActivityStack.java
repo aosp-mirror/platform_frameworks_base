@@ -1146,6 +1146,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return mStackSupervisor.isFocusable(this, r != null && r.isFocusable());
     }
 
+    boolean isFocusableAndVisible() {
+        return isFocusable() && shouldBeVisible(null /* starting */);
+    }
+
     final boolean isAttached() {
         return getParent() != null;
     }

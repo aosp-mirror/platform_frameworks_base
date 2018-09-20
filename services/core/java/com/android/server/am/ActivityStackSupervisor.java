@@ -733,10 +733,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     ActivityRecord getTopResumedActivity() {
-        if (mWindowManager == null) {
-            return null;
-        }
-
         final ActivityStack focusedStack = getTopDisplayFocusedStack();
         if (focusedStack == null) {
             return null;
@@ -2284,7 +2280,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return false;
         }
 
-        if (targetStack != null && targetStack.isTopStackOnDisplay()) {
+        if (targetStack != null && (targetStack.isTopStackOnDisplay()
+                || getTopDisplayFocusedStack() == targetStack)) {
             return targetStack.resumeTopActivityUncheckedLocked(target, targetOptions);
         }
 
@@ -3982,8 +3979,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.print("mFocusedStack=" + getTopDisplayFocusedStack());
-                pw.print(" mLastFocusedStack="); pw.println(mLastFocusedStack);
+        pw.println();
+        pw.println("ActivityStackSupervisor state:");
+        pw.print(prefix);
+        pw.println("topDisplayFocusedStack=" + getTopDisplayFocusedStack());
+        pw.print(prefix);
+        pw.println("mLastFocusedStack=" + mLastFocusedStack);
         pw.print(prefix);
         pw.println("mCurTaskIdForUser=" + mCurTaskIdForUser);
         pw.print(prefix); pw.println("mUserStackInFront=" + mUserStackInFront);
