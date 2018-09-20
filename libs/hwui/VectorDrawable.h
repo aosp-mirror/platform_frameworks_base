@@ -120,6 +120,8 @@ public:
     virtual void syncProperties() = 0;
     virtual void setAntiAlias(bool aa) = 0;
 
+    virtual void forEachFillColor(const std::function<void(SkColor)>& func) const { }
+
 protected:
     std::string mName;
     PropertyChangedListener* mPropertyChangedListener = nullptr;
@@ -349,6 +351,9 @@ public:
         }
     }
     virtual void setAntiAlias(bool aa) { mAntiAlias = aa; }
+    void forEachFillColor(const std::function<void(SkColor)>& func) const override {
+        func(mStagingProperties.getFillColor());
+    }
 
 protected:
     const SkPath& getUpdatedPath(bool useStagingData, SkPath* tempStagingPath) override;
@@ -480,6 +485,12 @@ public:
         }
     }
 
+    void forEachFillColor(const std::function<void(SkColor)>& func) const override {
+        for (auto& child : mChildren) {
+            child->forEachFillColor(func);
+        }
+    }
+
 private:
     GroupProperties mProperties = GroupProperties(this);
     GroupProperties mStagingProperties = GroupProperties(this);
@@ -495,8 +506,8 @@ public:
 
     // Copy properties from the tree and use the give node as the root node
     Tree(const Tree* copy, Group* rootNode) : Tree(rootNode) {
-        mStagingProperties.syncAnimatableProperties(*copy->stagingProperties());
-        mStagingProperties.syncNonAnimatableProperties(*copy->stagingProperties());
+        mStagingProperties.syncAnimatableProperties(copy->stagingProperties());
+        mStagingProperties.syncNonAnimatableProperties(copy->stagingProperties());
     }
     // Draws the VD onto a bitmap cache, then the bitmap cache will be rendered onto the input
     // canvas. Returns the number of pixels needed for the bitmap cache.
@@ -506,7 +517,6 @@ public:
 
     Bitmap& getBitmapUpdateIfDirty();
     void setAllowCaching(bool allowCaching) { mAllowCaching = allowCaching; }
-    SkPaint* getPaint();
     void syncProperties() {
         if (mStagingProperties.mNonAnimatablePropertiesDirty) {
             mCache.dirty |= (mProperties.mNonAnimatableProperties.viewportWidth !=
@@ -618,7 +628,7 @@ public:
     };
     void onPropertyChanged(TreeProperties* prop);
     TreeProperties* mutateStagingProperties() { return &mStagingProperties; }
-    const TreeProperties* stagingProperties() const { return &mStagingProperties; }
+    const TreeProperties& stagingProperties() const { return mStagingProperties; }
 
     // This should only be called from animations on RT
     TreeProperties* mutateProperties() { return &mProperties; }
@@ -636,7 +646,10 @@ public:
      * Draws VD cache into a canvas. This should always be called from RT and it works with Skia
      * pipelines only.
      */
-    void draw(SkCanvas* canvas, const SkRect& bounds);
+    void draw(SkCanvas* canvas, const SkRect& bounds, const SkPaint& paint);
+
+    void getPaintFor(SkPaint* outPaint, const TreeProperties &props) const;
+    BitmapPalette computePalette();
 
     /**
      * Draws VD into a GPU backed surface.
@@ -680,7 +693,6 @@ private:
         skiapipeline::AtlasKey mAtlasKey = INVALID_ATLAS_KEY;
     };
 
-    SkPaint* updatePaint(SkPaint* outPaint, TreeProperties* prop);
     bool allocateBitmapIfNeeded(Cache& cache, int width, int height);
     bool canReuseBitmap(Bitmap*, int width, int height);
     void updateBitmapCache(Bitmap& outCache, bool useStagingData);
@@ -695,8 +707,6 @@ private:
 
     TreeProperties mProperties = TreeProperties(this);
     TreeProperties mStagingProperties = TreeProperties(this);
-
-    SkPaint mPaint;
 
     Cache mStagingCache;
     Cache mCache;
