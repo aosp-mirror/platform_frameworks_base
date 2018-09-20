@@ -70,6 +70,7 @@ import com.android.internal.view.InputMethodClient;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -670,13 +671,63 @@ public final class InputMethodManager {
 
     final InputConnection mDummyInputConnection = new BaseInputConnection(this, false);
 
-    InputMethodManager(Looper looper) throws ServiceNotFoundException {
-        this(IInputMethodManager.Stub.asInterface(
-                ServiceManager.getServiceOrThrow(Context.INPUT_METHOD_SERVICE)), looper);
+    /**
+     * For layoutlib to clean up static objects inside {@link InputMethodManager}.
+     */
+    static void tearDownEditMode() {
+        if (!isInEditMode()) {
+            throw new UnsupportedOperationException(
+                    "This method must be called only from layoutlib");
+        }
+        synchronized (sLock) {
+            sInstance = null;
+        }
     }
 
-    InputMethodManager(IInputMethodManager service, Looper looper) {
-        mService = service;
+    /**
+     * For layoutlib to override this method to return {@code true}.
+     *
+     * @return {@code true} if the process is running for developer tools
+     * @see View#isInEditMode()
+     */
+    private static boolean isInEditMode() {
+        return false;
+    }
+
+    private static IInputMethodManager getIInputMethodManager() throws ServiceNotFoundException {
+        if (!isInEditMode()) {
+            return IInputMethodManager.Stub.asInterface(
+                    ServiceManager.getServiceOrThrow(Context.INPUT_METHOD_SERVICE));
+        }
+        // If InputMethodManager is running for layoutlib, stub out IPCs into IMMS.
+        final Class<IInputMethodManager> c = IInputMethodManager.class;
+        return (IInputMethodManager) Proxy.newProxyInstance(c.getClassLoader(),
+                new Class[]{c}, (proxy, method, args) -> {
+                    final Class<?> returnType = method.getReturnType();
+                    if (returnType == boolean.class) {
+                        return false;
+                    } else if (returnType == int.class) {
+                        return 0;
+                    } else if (returnType == long.class) {
+                        return 0L;
+                    } else if (returnType == short.class) {
+                        return 0;
+                    } else if (returnType == char.class) {
+                        return 0;
+                    } else if (returnType == byte.class) {
+                        return 0;
+                    } else if (returnType == float.class) {
+                        return 0f;
+                    } else if (returnType == double.class) {
+                        return 0.0;
+                    } else {
+                        return null;
+                    }
+                });
+    }
+
+    InputMethodManager(Looper looper) throws ServiceNotFoundException {
+        mService = getIInputMethodManager();
         mMainLooper = looper;
         mH = new H(looper);
         mIInputContext = new ControlledInputConnectionWrapper(looper,
