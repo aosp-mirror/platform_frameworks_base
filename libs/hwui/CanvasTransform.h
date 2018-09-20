@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "hwui/Bitmap.h"
+
 #include <SkCanvas.h>
 #include <SkPaintFilterCanvas.h>
 
@@ -26,6 +28,7 @@ namespace android::uirenderer {
 enum class UsageHint {
     Unknown = 0,
     Background = 1,
+    Foreground = 2,
 };
 
 enum class ColorTransform {
@@ -36,5 +39,7 @@ enum class ColorTransform {
 
 // True if the paint was modified, false otherwise
 bool transformPaint(ColorTransform transform, SkPaint* paint);
+
+bool transformPaint(ColorTransform transform, SkPaint* paint, BitmapPalette palette);
 
 }  // namespace android::uirenderer;

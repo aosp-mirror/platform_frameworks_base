@@ -132,7 +132,6 @@ void SkiaDisplayList::reset() {
     mChildFunctors.clear();
     mChildNodes.clear();
 
-    projectionReceiveIndex = -1;
     allocator.~LinearAllocator();
     new (&allocator) LinearAllocator();
 }

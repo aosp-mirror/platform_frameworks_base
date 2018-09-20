@@ -330,15 +330,6 @@ sk_sp<SkImage> Bitmap::makeImage(sk_sp<SkColorFilter>* outputColorFilter) {
     if (image->colorSpace() != nullptr && !image->colorSpace()->isSRGB()) {
         *outputColorFilter = SkToSRGBColorFilter::Make(image->refColorSpace());
     }
-
-    // TODO: Move this to the canvas (or other?) layer where we have the target lightness
-    // mode and can selectively do the right thing.
-    //    if (palette() != BitmapPalette::Unknown && uirenderer::Properties::forceDarkMode) {
-    //        SkHighContrastConfig config;
-    //        config.fInvertStyle = SkHighContrastConfig::InvertStyle::kInvertLightness;
-    //        *outputColorFilter =
-    //        SkHighContrastFilter::Make(config)->makeComposed(*outputColorFilter);
-    //    }
     return image;
 }
 
