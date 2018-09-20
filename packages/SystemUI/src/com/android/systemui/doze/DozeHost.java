@@ -48,7 +48,15 @@ public interface DozeHost {
     void onIgnoreTouchWhilePulsing(boolean ignore);
 
     interface Callback {
-        default void onNotificationHeadsUp() {}
+        /**
+         * Called when a high priority notification is added.
+         */
+        default void onNotificationAlerted() {}
+
+        /**
+         * Called when battery state or power save mode changes.
+         * @param active whether power save is active or not
+         */
         default void onPowerSaveChanged(boolean active) {}
     }
 

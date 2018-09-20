@@ -31,6 +31,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.widget.RemoteViews;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.row.NotificationInflaterTest;
@@ -63,6 +64,7 @@ public class NotificationTestHelper {
         mContext = context;
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mHeadsUpManager = new HeadsUpManagerPhone(mContext, null, mGroupManager, null, null);
+        mGroupManager.setHeadsUpManager(mHeadsUpManager);
     }
 
     public ExpandableNotificationRow createRow() throws Exception {

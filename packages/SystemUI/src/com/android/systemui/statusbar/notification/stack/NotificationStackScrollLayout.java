@@ -4828,7 +4828,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setHeadsUpManager(HeadsUpManagerPhone headsUpManager) {
         mHeadsUpManager = headsUpManager;
-        mAmbientState.setHeadsUpManager(headsUpManager);
         mHeadsUpManager.addListener(mRoundnessManager);
         mHeadsUpManager.setAnimationStateHandler(this);
     }

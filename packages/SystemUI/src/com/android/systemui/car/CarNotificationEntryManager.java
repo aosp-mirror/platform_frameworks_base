@@ -16,7 +16,6 @@
 package com.android.systemui.car;
 
 import android.content.Context;
-import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.NotificationData;
@@ -41,7 +40,7 @@ public class CarNotificationEntryManager extends NotificationEntryManager {
     }
 
     @Override
-    public boolean shouldPeek(NotificationData.Entry entry, StatusBarNotification sbn) {
+    public boolean shouldHeadsUp(NotificationData.Entry entry) {
         // Because space is usually constrained in the auto use-case, there should not be a
         // pinned notification when the shade has been expanded. Ensure this by not pinning any
         // notification if the shade is already opened.
@@ -49,6 +48,6 @@ public class CarNotificationEntryManager extends NotificationEntryManager {
             return false;
         }
 
-        return super.shouldPeek(entry, sbn);
+        return super.shouldHeadsUp(entry);
     }
 }

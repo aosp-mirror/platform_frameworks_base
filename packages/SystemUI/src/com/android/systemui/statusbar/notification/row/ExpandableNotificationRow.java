@@ -174,6 +174,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     private boolean mOnKeyguard;
 
+    /**
+     * Whether or not the row is currently on the doze screen.
+     */
+    private boolean mOnAmbient;
+
     private Animator mTranslateAnim;
     private ArrayList<View> mTranslateableViews;
     private NotificationContentView mPublicLayout;
@@ -186,7 +191,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private NotificationData.Entry mEntry;
     private StatusBarNotification mStatusBarNotification;
     private String mAppName;
+
+    /**
+     * Whether or not the notification is using the heads up view and should peek from the top.
+     */
     private boolean mIsHeadsUp;
+
+    /**
+     * Whether or not the notification is using the ambient display view and is pulsing.  This
+     * occurs when a high priority notification alerts while the phone is dozing or is on AOD.
+     */
+    private boolean mIsAmbientPulsing;
+
     private boolean mLastChronometerRunning = true;
     private ViewStub mChildrenContainerStub;
     private NotificationGroupManager mGroupManager;
@@ -289,7 +305,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private float mContentTransformationAmount;
     private boolean mIconsVisible = true;
     private boolean mAboveShelf;
-    private boolean mShowAmbient;
     private boolean mIsLastChild;
     private Runnable mOnDismissRunnable;
     private boolean mIsLowPriority;
@@ -604,6 +619,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         } else if (isAboveShelf() != wasAboveShelf) {
             mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
         }
+    }
+
+    public boolean isAmbientPulsing() {
+        return mIsAmbientPulsing;
+    }
+
+    public void setAmbientPulsing(boolean isAmbientPulsing) {
+        mIsAmbientPulsing = isAmbientPulsing;
     }
 
     public void setGroupManager(NotificationGroupManager groupManager) {
@@ -1854,7 +1877,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void setDark(boolean dark, boolean fade, long delay) {
         super.setDark(dark, fade, delay);
         mDark = dark;
-        if (!mIsHeadsUp) {
+        if (!mIsAmbientPulsing) {
             // Only fade the showing view of the pulsing notification.
             fade = false;
         }
@@ -2155,7 +2178,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             return mPrivateLayout.getMinHeight();
         } else if (mSensitive && mHideSensitiveForIntrinsicHeight) {
             return getMinHeight();
-        } else if (mIsSummaryWithChildren && (!mOnKeyguard || mShowAmbient)) {
+        } else if (mIsSummaryWithChildren && (!mOnKeyguard || mOnAmbient)) {
             return mChildrenContainer.getIntrinsicHeight();
         } else if (isHeadsUpAllowed() && (mIsHeadsUp || mHeadsupDisappearRunning)) {
             if (isPinned() || mHeadsupDisappearRunning) {
@@ -2173,7 +2196,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private boolean isHeadsUpAllowed() {
-        return !mOnKeyguard && !mShowAmbient;
+        return !mOnKeyguard && !mOnAmbient;
     }
 
     @Override
@@ -2818,11 +2841,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 || mExpandAnimationRunning || mChildIsExpanding);
     }
 
-    public void setShowAmbient(boolean showAmbient) {
-        if (showAmbient != mShowAmbient) {
-            mShowAmbient = showAmbient;
+    public void setOnAmbient(boolean onAmbient) {
+        if (onAmbient != mOnAmbient) {
+            mOnAmbient = onAmbient;
             if (mChildrenContainer != null) {
-                mChildrenContainer.notifyShowAmbientChanged();
+                mChildrenContainer.notifyDozingStateChanged();
             }
             notifyHeightChanged(false /* needsAnimation */);
         }
@@ -2891,8 +2914,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return getCurrentBottomRoundness() == 0.0f && getCurrentTopRoundness() == 0.0f;
     }
 
-    public boolean isShowingAmbient() {
-        return mShowAmbient;
+    public boolean isOnAmbient() {
+        return mOnAmbient;
     }
 
     public void setAboveShelf(boolean aboveShelf) {

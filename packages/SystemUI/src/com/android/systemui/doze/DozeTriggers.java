@@ -409,7 +409,7 @@ public class DozeTriggers implements DozeMachine.Part {
 
     private DozeHost.Callback mHostCallback = new DozeHost.Callback() {
         @Override
-        public void onNotificationHeadsUp() {
+        public void onNotificationAlerted() {
             onNotification();
         }
 

@@ -88,14 +88,14 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTriggers.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
         mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
 
-        mHost.callback.onNotificationHeadsUp();
+        mHost.callback.onNotificationAlerted();
 
         mSensors.getMockProximitySensor().sendProximityResult(false); /* Near */
 
         verify(mMachine, never()).requestState(any());
         verify(mMachine, never()).requestPulse(anyInt());
 
-        mHost.callback.onNotificationHeadsUp();
+        mHost.callback.onNotificationAlerted();
 
         mSensors.getMockProximitySensor().sendProximityResult(true); /* Far */
 
