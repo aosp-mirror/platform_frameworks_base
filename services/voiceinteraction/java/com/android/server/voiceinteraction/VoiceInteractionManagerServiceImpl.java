@@ -25,6 +25,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
+
+import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
@@ -57,6 +59,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConnection.Callback {
     final static String TAG = "VoiceInteractionServiceManager";
@@ -175,6 +178,23 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         }
         return mActiveSession.showLocked(args, flags, mDisabledShowContext, showCallback,
                 activityTokens);
+    }
+
+    public void getActiveServiceSupportedActions(List<String> commands,
+            IVoiceActionCheckCallback callback) {
+        if (mService == null) {
+            Slog.w(TAG, "Not bound to voice interaction service " + mComponent);
+            try {
+                callback.onComplete(null);
+            } catch (RemoteException e) {
+            }
+            return;
+        }
+        try {
+            mService.getActiveServiceSupportedActions(commands, callback);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "RemoteException while calling getActiveServiceSupportedActions", e);
+        }
     }
 
     public boolean hideSessionLocked() {

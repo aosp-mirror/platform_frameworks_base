@@ -19,6 +19,8 @@ package com.android.server.voiceinteraction;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+
+import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import android.app.AppGlobals;
 import android.content.ComponentName;
@@ -1125,6 +1127,27 @@ public class VoiceInteractionManagerService extends SystemService {
             enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
             synchronized (this) {
                 mVoiceInteractionSessionListeners.register(listener);
+            }
+        }
+
+        @Override
+        public void getActiveServiceSupportedActions(List<String> voiceActions,
+                IVoiceActionCheckCallback callback) {
+            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            synchronized (this) {
+                if (mImpl == null) {
+                    try {
+                        callback.onComplete(null);
+                    } catch (RemoteException e) {
+                    }
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.getActiveServiceSupportedActions(voiceActions, callback);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
             }
         }
 
