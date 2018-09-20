@@ -337,6 +337,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
     private final PlatformIdleStateCallback mPlatformIdleStateCallback;
 
+    /**
+     * This handler is running on {@link BackgroundThread}.
+     */
     final class MyHandler extends Handler {
         public MyHandler(Looper looper) {
             super(looper, null, true);
