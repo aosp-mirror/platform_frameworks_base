@@ -146,7 +146,7 @@ void JankTracker::finishFrame(const FrameInfo& frame) {
                              frame[FrameInfoIndex::IntendedVsync] + mFrameInterval);
 
     // If we hit the deadline, cool!
-    if (frame[FrameInfoIndex::FrameCompleted] < mSwapDeadline) {
+    if (frame[FrameInfoIndex::FrameCompleted] < mSwapDeadline || totalDuration < mFrameInterval) {
         if (isTripleBuffered) {
             mData->reportJankType(JankType::kHighInputLatency);
             (*mGlobalData)->reportJankType(JankType::kHighInputLatency);
