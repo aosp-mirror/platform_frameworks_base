@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.statusbar.notification.NotificationUtils.interpolate;
 
 import android.content.res.Resources;
@@ -29,10 +30,6 @@ import com.android.systemui.R;
  * Utility class to calculate the clock position and top padding of notifications on Keyguard.
  */
 public class KeyguardClockPositionAlgorithm {
-
-    private static final long MILLIS_PER_MINUTES = 1000 * 60;
-    private static final float BURN_IN_PREVENTION_PERIOD_Y = 521;
-    private static final float BURN_IN_PREVENTION_PERIOD_X = 83;
 
     /**
      * How much the clock height influences the shade position.
@@ -228,32 +225,13 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     private float burnInPreventionOffsetY() {
-        return zigzag(System.currentTimeMillis() / MILLIS_PER_MINUTES,
-                mBurnInPreventionOffsetY * 2,
-                BURN_IN_PREVENTION_PERIOD_Y)
+        return getBurnInOffset(mBurnInPreventionOffsetY * 2, false /* xAxis */)
                 - mBurnInPreventionOffsetY;
     }
 
     private float burnInPreventionOffsetX() {
-        return zigzag(System.currentTimeMillis() / MILLIS_PER_MINUTES,
-                mBurnInPreventionOffsetX * 2,
-                BURN_IN_PREVENTION_PERIOD_X)
+        return getBurnInOffset(mBurnInPreventionOffsetX * 2, true /* xAxis */)
                 - mBurnInPreventionOffsetX;
-    }
-
-    /**
-     * Implements a continuous, piecewise linear, periodic zig-zag function
-     *
-     * Can be thought of as a linear approximation of abs(sin(x)))
-     *
-     * @param period period of the function, ie. zigzag(x + period) == zigzag(x)
-     * @param amplitude maximum value of the function
-     * @return a value between 0 and amplitude
-     */
-    private float zigzag(float x, float amplitude, float period) {
-        float xprime = (x % period) / (period / 2);
-        float interpolationAmount = (xprime <= 1) ? xprime : (2 - xprime);
-        return interpolate(0, amplitude, interpolationAmount);
     }
 
     public static class Result {

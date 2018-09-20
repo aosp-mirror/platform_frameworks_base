@@ -381,8 +381,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     // settings
     private QSPanel mQSPanel;
 
-    // top bar
-    private KeyguardStatusBarView mKeyguardStatusBar;
     KeyguardIndicationController mKeyguardIndicationController;
 
     // RemoteInputView to be activated after unlock
@@ -805,7 +803,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mAboveShelfObserver = new AboveShelfObserver(mStackScroller);
         mAboveShelfObserver.setListener(mStatusBarWindow.findViewById(
                 R.id.notification_container_parent));
-        mKeyguardStatusBar = mStatusBarWindow.findViewById(R.id.keyguard_header);
 
         mNotificationIconAreaController = SystemUIFactory.getInstance()
                 .createNotificationIconAreaController(context, this);
@@ -980,7 +977,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                     ((QSFragment) qs).setHost(qsh);
                     mQSPanel = ((QSFragment) qs).getQsPanel();
                     mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
-                    mKeyguardStatusBar.setQSPanel(mQSPanel);
                 }
             });
         }
@@ -1118,8 +1114,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onThemeChanged() {
-        // The status bar on the keyguard is a special layout.
-        if (mKeyguardStatusBar != null) mKeyguardStatusBar.onThemeChanged();
         // Recreate Indication controller because internal references changed
         mKeyguardIndicationController =
                 SystemUIFactory.getInstance().createKeyguardIndicationController(mContext,
@@ -1154,7 +1148,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected void createUserSwitcher() {
         mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext,
-                mStatusBarWindow.findViewById(R.id.keyguard_user_switcher), mKeyguardStatusBar,
+                mStatusBarWindow.findViewById(R.id.keyguard_user_switcher),
+                mStatusBarWindow.findViewById(R.id.keyguard_header),
                 mNotificationPanel);
     }
 

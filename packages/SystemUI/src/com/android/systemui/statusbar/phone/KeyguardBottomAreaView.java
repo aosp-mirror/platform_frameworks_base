@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
+import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_BUTTON;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_UNLOCK;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_RIGHT_BUTTON;
@@ -171,7 +172,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mDozing;
     private int mIndicationBottomMargin;
-    private int mIndicationBottomMarginAmbient;
     private float mDarkAmount;
     private int mBurnInXOffset;
     private int mBurnInYOffset;
@@ -246,10 +246,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mIndicationText = findViewById(R.id.keyguard_indication_text);
         mIndicationBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_margin_bottom);
-        mIndicationBottomMarginAmbient = getResources().getDimensionPixelSize(
-                R.dimen.keyguard_indication_margin_bottom_ambient);
         mBurnInYOffset = getResources().getDimensionPixelSize(
-                R.dimen.charging_indication_burn_in_prevention_offset_y);
+                R.dimen.default_burn_in_prevention_offset);
         updateCameraVisibility();
         mUnlockMethodCache = UnlockMethodCache.getInstance(getContext());
         mUnlockMethodCache.addListener(this);
@@ -320,10 +318,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         super.onConfigurationChanged(newConfig);
         mIndicationBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_margin_bottom);
-        mIndicationBottomMarginAmbient = getResources().getDimensionPixelSize(
-                R.dimen.keyguard_indication_margin_bottom_ambient);
         mBurnInYOffset = getResources().getDimensionPixelSize(
-                R.dimen.charging_indication_burn_in_prevention_offset_y);
+                R.dimen.default_burn_in_prevention_offset);
         MarginLayoutParams mlp = (MarginLayoutParams) mIndicationArea.getLayoutParams();
         if (mlp.bottomMargin != mIndicationBottomMargin) {
             mlp.bottomMargin = mIndicationBottomMargin;
@@ -567,9 +563,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             return;
         }
         mDarkAmount = darkAmount;
-        mIndicationArea.setAlpha(MathUtils.lerp(1f, 0.7f, darkAmount));
-        mIndicationArea.setTranslationY(MathUtils.lerp(0,
-                mIndicationBottomMargin - mIndicationBottomMarginAmbient, darkAmount));
+        mIndicationArea.setAlpha(1f - darkAmount);
     }
 
     private static boolean isSuccessfulLaunch(int result) {
@@ -842,10 +836,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     public void dozeTimeTick() {
         if (mDarkAmount == 1) {
-            // Move indication every minute to avoid burn-in
-            int dozeTranslation = mIndicationBottomMargin - mIndicationBottomMarginAmbient;
-            int burnInYOffset = (int) (-mBurnInYOffset + Math.random() * mBurnInYOffset * 2);
-            mIndicationArea.setTranslationY(dozeTranslation + burnInYOffset);
+            // Move views every minute to avoid burn-in
+            int burnInYOffset = getBurnInOffset(mBurnInYOffset * 2, false /* xAxis */)
+                    - mBurnInYOffset;
+            mLockIcon.setTranslationY(burnInYOffset);
         }
     }
 
@@ -854,7 +848,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             return;
         }
         mBurnInXOffset = burnInXOffset;
-        mIndicationArea.setTranslationX(burnInXOffset);
+        mLockIcon.setTranslationX(burnInXOffset);
     }
 
     private class DefaultLeftButton implements IntentButton {
