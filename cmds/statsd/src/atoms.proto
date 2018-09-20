@@ -2339,7 +2339,7 @@ message BinderCallsExceptions {
  * Next tag: 11
  */
 message LooperStats {
-    // Currently not collected and always set to 0.
+    // The uid that made a call to the System Server and caused the message to be enqueued.
     optional int32 uid = 1 [(is_uid) = true];
 
     // Fully qualified class name of the handler target class.
