@@ -1682,12 +1682,10 @@ easier.
 
 
     <!-- @hide DeviceDefault theme for the autofill FillUi -->
-    <style name="Theme.DeviceDefault.Autofill" parent="Theme.Material.Autofill.Light">
-    </style>
+    <style name="Theme.DeviceDefault.Autofill" parent="Theme.DeviceDefault.Light"/>
 
     <!-- @hide DeviceDefault theme for the autofill SaveUi -->
-    <style name="Theme.DeviceDefault.Autofill.Save" parent="Theme.Material.Autofill.Save.Light">
-    </style>
+    <style name="Theme.DeviceDefault.Autofill.Save" parent="Theme.DeviceDefault.Light.Panel"/>
 
     <!-- DeviceDefault theme for the default system theme.  -->
     <style name="Theme.DeviceDefault.System" parent="Theme.DeviceDefault.Light.DarkActionBar" />
