@@ -686,7 +686,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
 
         final Display[] displays = mDisplayManager.getDisplays();
-        for (int displayNdx = displays.length - 1; displayNdx >= 0; --displayNdx) {
+        for (int displayNdx = 0; displayNdx < displays.length; ++displayNdx) {
             final Display display = displays[displayNdx];
             final ActivityDisplay activityDisplay = new ActivityDisplay(this, display);
             if (activityDisplay.mDisplayId == DEFAULT_DISPLAY) {
