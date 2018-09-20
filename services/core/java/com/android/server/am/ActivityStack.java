@@ -5375,12 +5375,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         display.positionChildAtTop(this, false /* includingParents */);
     }
 
+    /** NOTE: Should only be called from {@link TaskRecord#reparent}. */
     void moveToFrontAndResumeStateIfNeeded(ActivityRecord r, boolean moveToFront, boolean setResume,
             boolean setPause, String reason) {
         if (!moveToFront) {
             return;
         }
 
+        final ActivityState origState = r.getState();
         // If the activity owns the last resumed activity, transfer that together,
         // so that we don't resume the same activity again in the new stack.
         // Apps may depend on onResume()/onPause() being called in pairs.
@@ -5393,9 +5395,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             mPausingActivity = r;
             schedulePauseTimeout(r);
         }
-        // Move the stack in which we are placing the activity to the front. The call will also
-        // make sure the activity focus is set.
+        // Move the stack in which we are placing the activity to the front.
         moveToFront(reason);
+        // If the original state is resumed, there is no state change to update focused app.
+        // So here makes sure the activity focus is set if it is the top.
+        if (origState == RESUMED && r == mStackSupervisor.getTopResumedActivity()) {
+            // TODO(b/111361570): Support multiple focused apps in WM
+            mService.setResumedActivityUncheckLocked(r, reason);
+        }
     }
 
     public int getStackId() {

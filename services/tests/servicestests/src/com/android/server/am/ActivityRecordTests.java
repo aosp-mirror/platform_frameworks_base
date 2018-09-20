@@ -188,17 +188,13 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testCanBeLaunchedOnDisplay() throws Exception {
-        testSupportsLaunchingResizeable(false /*taskPresent*/, true /*taskResizeable*/,
-                true /*activityResizeable*/, true /*expected*/);
+        mService.mSupportsMultiWindow = true;
+        final ActivityRecord activity = new ActivityBuilder(mService).build();
 
-        testSupportsLaunchingResizeable(false /*taskPresent*/, true /*taskResizeable*/,
-                false /*activityResizeable*/, false /*expected*/);
-
-        testSupportsLaunchingResizeable(true /*taskPresent*/, false /*taskResizeable*/,
-                true /*activityResizeable*/, false /*expected*/);
-
-        testSupportsLaunchingResizeable(true /*taskPresent*/, true /*taskResizeable*/,
-                false /*activityResizeable*/, true /*expected*/);
+        // An activity can be launched on default display.
+        assertTrue(activity.canBeLaunchedOnDisplay(DEFAULT_DISPLAY));
+        // An activity cannot be launched on a non-existent display.
+        assertFalse(activity.canBeLaunchedOnDisplay(DEFAULT_DISPLAY + 1));
     }
 
     @Test
@@ -228,27 +224,5 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.applyOptionsLocked();
         assertNull(mActivity.pendingOptions);
         assertNotNull(activity2.pendingOptions);
-    }
-
-    private void testSupportsLaunchingResizeable(boolean taskPresent, boolean taskResizeable,
-            boolean activityResizeable, boolean expected) {
-        mService.mSupportsMultiWindow = true;
-
-        final TaskRecord task = taskPresent
-                ? new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build() : null;
-
-        if (task != null) {
-            task.setResizeMode(taskResizeable ? RESIZE_MODE_RESIZEABLE : RESIZE_MODE_UNRESIZEABLE);
-        }
-
-        final ActivityRecord record = new ActivityBuilder(mService).setTask(task).build();
-        record.info.resizeMode = activityResizeable
-                ? RESIZE_MODE_RESIZEABLE : RESIZE_MODE_UNRESIZEABLE;
-
-        record.canBeLaunchedOnDisplay(DEFAULT_DISPLAY);
-
-
-        verify(mService.mStackSupervisor, times(1)).canPlaceEntityOnDisplay(anyInt(), eq(expected),
-                anyInt(), anyInt(), eq(record.info));
     }
 }

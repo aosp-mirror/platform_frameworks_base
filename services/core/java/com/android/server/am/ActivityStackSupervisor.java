@@ -488,18 +488,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     /** Check if placing task or activity on specified display is allowed. */
-    boolean canPlaceEntityOnDisplay(int displayId, boolean resizeable, int callingPid,
-            int callingUid, ActivityInfo activityInfo) {
+    boolean canPlaceEntityOnDisplay(int displayId, int callingPid, int callingUid,
+            ActivityInfo activityInfo) {
         if (displayId == DEFAULT_DISPLAY) {
             // No restrictions for the default display.
             return true;
         }
         if (!mService.mSupportsMultiDisplay) {
             // Can't launch on secondary displays if feature is not supported.
-            return false;
-        }
-        if (!resizeable && !displayConfigMatchesGlobal(displayId)) {
-            // Can't apply wrong configuration to non-resizeable activities.
             return false;
         }
         if (!isCallerAllowedToLaunchOnDisplay(callingPid, callingUid, displayId, activityInfo)) {
@@ -4530,10 +4526,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             mService.setTaskWindowingMode(task.taskId,
                     WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY, true /* toTop */);
             if (preferredDisplayId != actualDisplayId) {
-                // Display a warning toast that we tried to put a non-resizeable task on a secondary
-                // display with config different from global config.
+                Slog.w(TAG, "Failed to put " + task + " on display " + preferredDisplayId);
+                // Display a warning toast that we failed to put a task on a secondary display.
                 mService.getTaskChangeNotificationController()
                         .notifyActivityLaunchOnSecondaryDisplayFailed();
+                return;
+            } else if (!forceNonResizable && handleForcedResizableTask(task,
+                    FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY)) {
                 return;
             }
         }
@@ -4554,16 +4553,23 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return;
         }
 
+        handleForcedResizableTask(task, FORCED_RESIZEABLE_REASON_SPLIT_SCREEN);
+    }
+
+    /**
+     * @return {@code true} if the top activity of the task is forced to be resizable and the user
+     *         was notified about activity being forced resized.
+     */
+    private boolean handleForcedResizableTask(TaskRecord task, int reason) {
         final ActivityRecord topActivity = task.getTopActivity();
         if (topActivity != null && topActivity.isNonResizableOrForcedResizable()
-            && !topActivity.noDisplay) {
+                && !topActivity.noDisplay) {
             final String packageName = topActivity.appInfo.packageName;
-            final int reason = isSecondaryDisplayPreferred
-                    ? FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY
-                    : FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
             mService.getTaskChangeNotificationController().notifyActivityForcedResizable(
                     task.taskId, reason, packageName);
+            return true;
         }
+        return false;
     }
 
     void activityRelaunchedLocked(IBinder token) {
