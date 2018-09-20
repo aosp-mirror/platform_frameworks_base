@@ -38,7 +38,6 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.MergedConfiguration;
@@ -56,10 +55,6 @@ import android.view.SurfaceSession;
 import android.view.WindowManager;
 
 import com.android.internal.os.logging.MetricsLoggerWrapper;
-import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethodClient;
-import com.android.server.LocalServices;
-import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
@@ -73,8 +68,6 @@ import java.util.Set;
 class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     final WindowManagerService mService;
     final IWindowSessionCallback mCallback;
-    final IInputMethodClient mClient;
-    final InputMethodManagerInternal mInputMethodManagerInternal;
     final int mUid;
     final int mPid;
     private final String mStringName;
@@ -95,17 +88,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private String mPackageName;
     private String mRelayoutTag;
 
-    public Session(WindowManagerService service, IWindowSessionCallback callback,
-            IInputMethodClient client, IInputContext inputContext) {
+    public Session(WindowManagerService service, IWindowSessionCallback callback) {
         mService = service;
         mCallback = callback;
-        mClient = client;
-        // Depending on the timing when Session object gets called and SystemServer#mFactoryTestMode
-        // this could be null, right?
-        final InputMethodManagerInternal immInternal =
-                LocalServices.getService(InputMethodManagerInternal.class);
-        mInputMethodManagerInternal =
-                immInternal != null ? immInternal : InputMethodManagerInternal.NOP;
         mUid = Binder.getCallingUid();
         mPid = Binder.getCallingPid();
         mLastReportedAnimatorScale = service.getCurrentAnimatorScale();
@@ -134,12 +119,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         sb.append("}");
         mStringName = sb.toString();
 
-        mInputMethodManagerInternal.addClient(client, inputContext, mUid, mPid);
         try {
-            client.asBinder().linkToDeath(this, 0);
+            mCallback.asBinder().linkToDeath(this, 0);
         } catch (RemoteException e) {
             // The caller has died, so we can just forget about this.
-            mInputMethodManagerInternal.removeClient(client);
+            // Hmmm, should we call killSessionLocked()??
         }
     }
 
@@ -159,9 +143,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void binderDied() {
-        mInputMethodManagerInternal.removeClient(mClient);
         synchronized(mService.mWindowMap) {
-            mClient.asBinder().unlinkToDeath(this, 0);
+            mCallback.asBinder().unlinkToDeath(this, 0);
             mClientDead = true;
             killSessionLocked();
         }

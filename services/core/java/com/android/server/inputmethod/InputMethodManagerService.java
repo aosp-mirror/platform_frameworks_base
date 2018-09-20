@@ -401,12 +401,28 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    private static final class ClientDeathRecipient implements IBinder.DeathRecipient {
+        private final InputMethodManagerService mImms;
+        private final IInputMethodClient mClient;
+
+        ClientDeathRecipient(InputMethodManagerService imms, IInputMethodClient client) {
+            mImms = imms;
+            mClient = client;
+        }
+
+        @Override
+        public void binderDied() {
+            mImms.removeClient(mClient);
+        }
+    }
+
     static final class ClientState {
         final IInputMethodClient client;
         final IInputContext inputContext;
         final int uid;
         final int pid;
         final InputBinding binding;
+        final ClientDeathRecipient clientDeathRecipient;
 
         boolean sessionRequested;
         SessionState curSession;
@@ -419,12 +435,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         ClientState(IInputMethodClient _client, IInputContext _inputContext,
-                int _uid, int _pid) {
+                int _uid, int _pid, ClientDeathRecipient _clientDeathRecipient) {
             client = _client;
             inputContext = _inputContext;
             uid = _uid;
             pid = _pid;
             binding = new InputBinding(null, inputContext.asBinder(), uid, pid);
+            clientDeathRecipient = _clientDeathRecipient;
         }
     }
 
@@ -1716,9 +1733,39 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    void addClient(ClientState clientState) {
+    /**
+     * Called by each application process as a preparation to start interacting with
+     * {@link InputMethodManagerService}.
+     *
+     * <p>As a general principle, IPCs from the application process that take
+     * {@link InputMethodClient} will be rejected without this step.</p>
+     *
+     * @param client {@link android.os.Binder} proxy that is associated with the singleton instance
+     *               of {@link android.view.inputmethod.InputMethodManager} that runs on the client
+     *               process
+     * @param inputContext communication channel for the dummy
+     *                     {@link android.view.inputmethod.InputConnection}
+     */
+    @Override
+    public void addClient(IInputMethodClient client, IInputContext inputContext) {
+        final int callerUid = Binder.getCallingUid();
+        final int callerPid = Binder.getCallingPid();
         synchronized (mMethodMap) {
-            mClients.put(clientState.client.asBinder(), clientState);
+            // TODO: Optimize this linear search.
+            for (ClientState state : mClients.values()) {
+                if (state.uid == callerUid && state.pid == callerPid) {
+                    throw new SecurityException("uid=" + callerUid + "/pid=" + callerPid
+                            + " is already registered");
+                }
+            }
+            final ClientDeathRecipient deathRecipient = new ClientDeathRecipient(this, client);
+            try {
+                client.asBinder().linkToDeath(deathRecipient, 0);
+            } catch (RemoteException e) {
+                throw new IllegalStateException(e);
+            }
+            mClients.put(client.asBinder(),
+                    new ClientState(client, inputContext, callerUid, callerPid, deathRecipient));
         }
     }
 
@@ -1726,6 +1773,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         synchronized (mMethodMap) {
             ClientState cs = mClients.remove(client.asBinder());
             if (cs != null) {
+                client.asBinder().unlinkToDeath(cs.clientDeathRecipient, 0);
                 clearClientSessionLocked(cs);
                 if (mCurClient == cs) {
                     if (mBoundToMethod) {
@@ -4404,20 +4452,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         LocalServiceImpl(@NonNull InputMethodManagerService service) {
             mService = service;
-        }
-
-        @Override
-        public void addClient(IInputMethodClient client, IInputContext inputContext, int uid,
-                int pid) {
-            // Work around Bug 113877122: We need to handle this synchronously.  Otherwise, some
-            // IMM binder calls from the client process before we register this client.
-            mService.addClient(new ClientState(client, inputContext, uid, pid));
-        }
-
-        @Override
-        public void removeClient(IInputMethodClient client) {
-            // Handle this synchronously to be consistent with addClient().
-            mService.removeClient(client);
         }
 
         @Override
