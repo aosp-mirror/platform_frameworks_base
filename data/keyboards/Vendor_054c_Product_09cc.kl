@@ -60,7 +60,6 @@ axis 0x11 HAT_Y
 key 0x138    BUTTON_SELECT
 # Options
 key 0x139    BUTTON_START
-
 # PS key
 key 0x13c    BUTTON_MODE
 
