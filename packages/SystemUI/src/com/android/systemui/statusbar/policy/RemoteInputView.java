@@ -586,7 +586,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             final InputConnection inputConnection = super.onCreateInputConnection(outAttrs);
 
             if (mShowImeOnInputConnection && inputConnection != null) {
-                final InputMethodManager imm = InputMethodManager.getInstance();
+                final InputMethodManager imm =
+                        getContext().getSystemService(InputMethodManager.class);
                 if (imm != null) {
                     // onCreateInputConnection is called by InputMethodManager in the middle of
                     // setting up the connection to the IME; wait with requesting the IME until that
