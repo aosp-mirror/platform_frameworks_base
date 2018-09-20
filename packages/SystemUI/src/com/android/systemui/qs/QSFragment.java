@@ -256,7 +256,7 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     public void setExpanded(boolean expanded) {
         if (DEBUG) Log.d(TAG, "setExpanded " + expanded);
         mQsExpanded = expanded;
-        mQSPanel.setListening(mListening && mQsExpanded);
+        mQSPanel.setListening(mListening, mQsExpanded);
         updateQsState();
     }
 
@@ -287,8 +287,7 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
         mListening = listening;
         mHeader.setListening(listening);
         mFooter.setListening(listening);
-        mQSPanel.setListening(mListening && mQsExpanded);
-        mQSPanel.getFooter().setListening(listening);
+        mQSPanel.setListening(mListening, mQsExpanded);
     }
 
     @Override

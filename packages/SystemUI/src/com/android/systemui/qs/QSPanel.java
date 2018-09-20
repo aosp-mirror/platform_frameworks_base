@@ -353,12 +353,21 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (mListening) {
             refreshAllTiles();
         }
-        if (mBrightnessView.getVisibility() == View.VISIBLE) {
-            if (listening) {
-                mBrightnessController.registerCallbacks();
-            } else {
-                mBrightnessController.unregisterCallbacks();
-            }
+    }
+
+    public void setListening(boolean listening, boolean expanded) {
+        setListening(listening && expanded);
+        getFooter().setListening(listening);
+        // Set the listening as soon as the QS fragment starts listening regardless of the expansion,
+        // so it will update the current brightness before the slider is visible.
+        setBrightnessListening(listening);
+    }
+
+    public void setBrightnessListening(boolean listening) {
+        if (listening) {
+            mBrightnessController.registerCallbacks();
+        } else {
+            mBrightnessController.unregisterCallbacks();
         }
     }
 
