@@ -21,6 +21,7 @@
 #include "SkiaPipeline.h"
 #include "SkiaProfileRenderer.h"
 #include "hwui/Bitmap.h"
+#include "private/hwui/DrawGlInfo.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/EglManager.h"
 #include "renderthread/Frame.h"

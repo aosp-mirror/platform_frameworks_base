@@ -29,12 +29,16 @@ DeferredLayerUpdater::DeferredLayerUpdater(RenderState& renderState)
         , mGLContextAttached(false)
         , mUpdateTexImage(false)
         , mLayer(nullptr) {
-    renderState.registerDeferredLayerUpdater(this);
+    renderState.registerContextCallback(this);
 }
 
 DeferredLayerUpdater::~DeferredLayerUpdater() {
     setTransform(nullptr);
-    mRenderState.unregisterDeferredLayerUpdater(this);
+    mRenderState.removeContextCallback(this);
+    destroyLayer();
+}
+
+void DeferredLayerUpdater::onContextDestroyed() {
     destroyLayer();
 }
 

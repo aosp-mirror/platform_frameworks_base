@@ -24,6 +24,7 @@
 #include <Snapshot.h>
 #include <hwui/Bitmap.h>
 #include <pipeline/skia/SkiaRecordingCanvas.h>
+#include <private/hwui/DrawGlInfo.h>
 #include <renderstate/RenderState.h>
 #include <renderthread/RenderThread.h>
 
