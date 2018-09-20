@@ -198,8 +198,7 @@ int main(int argc, char** argv)
 
     sp<GraphicBuffer> outBuffer;
     status_t result = ScreenshotClient::capture(display, Rect(), 0 /* reqWidth */,
-            0 /* reqHeight */, INT32_MIN, INT32_MAX, /* all layers */ false, captureOrientation,
-            &outBuffer);
+            0 /* reqHeight */, false, captureOrientation, &outBuffer);
     if (result != NO_ERROR) {
         close(fd);
         return 1;

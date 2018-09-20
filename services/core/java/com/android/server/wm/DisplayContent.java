@@ -3251,7 +3251,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // TODO(b/68392460): We should screenshot Task controls directly
         // but it's difficult at the moment as the Task doesn't have the
         // correct size set.
-        final Bitmap bitmap = SurfaceControl.screenshot(frame, dw, dh, 0, 1, inRotation, rot);
+        final Bitmap bitmap = SurfaceControl.screenshot(frame, dw, dh, inRotation, rot);
         if (bitmap == null) {
             Slog.w(TAG_WM, "Failed to take screenshot");
             return null;
