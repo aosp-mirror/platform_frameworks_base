@@ -107,7 +107,7 @@ public:
     bool isRenderable() const { return mDisplayList && !mDisplayList->isEmpty(); }
 
     bool hasProjectionReceiver() const {
-        return mDisplayList && mDisplayList->projectionReceiveIndex >= 0;
+        return mDisplayList && mDisplayList->containsProjectionReceiver();
     }
 
     const char* getName() const { return mName.string(); }

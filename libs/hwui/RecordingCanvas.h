@@ -17,6 +17,7 @@
 #pragma once
 
 #include "CanvasTransform.h"
+#include "hwui/Bitmap.h"
 #include "hwui/Canvas.h"
 #include "utils/Macros.h"
 #include "utils/TypeLogic.h"
@@ -53,6 +54,7 @@ class RecordingCanvas;
 
 class DisplayListData final {
 public:
+    DisplayListData() : mHasText(false) {}
     ~DisplayListData();
 
     void draw(SkCanvas* canvas) const;
@@ -61,6 +63,8 @@ public:
     bool empty() const { return fUsed == 0; }
 
     void applyColorTransform(ColorTransform transform);
+
+    bool hasText() const { return mHasText; }
 
 private:
     friend class RecordingCanvas;
@@ -101,10 +105,10 @@ private:
     void drawTextRSXform(const void*, size_t, const SkRSXform[], const SkRect*, const SkPaint&);
     void drawTextBlob(const SkTextBlob*, SkScalar, SkScalar, const SkPaint&);
 
-    void drawImage(sk_sp<const SkImage>, SkScalar, SkScalar, const SkPaint*);
+    void drawImage(sk_sp<const SkImage>, SkScalar, SkScalar, const SkPaint*, BitmapPalette palette);
     void drawImageNine(sk_sp<const SkImage>, const SkIRect&, const SkRect&, const SkPaint*);
     void drawImageRect(sk_sp<const SkImage>, const SkRect*, const SkRect&, const SkPaint*,
-                       SkCanvas::SrcRectConstraint);
+                       SkCanvas::SrcRectConstraint, BitmapPalette palette);
     void drawImageLattice(sk_sp<const SkImage>, const SkCanvas::Lattice&, const SkRect&,
                           const SkPaint*);
 
@@ -126,6 +130,8 @@ private:
     SkAutoTMalloc<uint8_t> fBytes;
     size_t fUsed = 0;
     size_t fReserved = 0;
+
+    bool mHasText : 1;
 };
 
 class RecordingCanvas final : public SkCanvasVirtualEnforcer<SkNoDrawCanvas> {
@@ -177,6 +183,12 @@ public:
     void onDrawBitmapNine(const SkBitmap&, const SkIRect&, const SkRect&, const SkPaint*) override;
     void onDrawBitmapRect(const SkBitmap&, const SkRect*, const SkRect&, const SkPaint*,
                           SrcRectConstraint) override;
+
+    void drawImage(const sk_sp<SkImage>& image, SkScalar left, SkScalar top,
+                   const SkPaint* paint, BitmapPalette pallete);
+
+    void drawImageRect(const sk_sp<SkImage>& image, const SkRect& src, const SkRect& dst,
+                       const SkPaint* paint, SrcRectConstraint constraint, BitmapPalette palette);
 
     void onDrawImage(const SkImage*, SkScalar, SkScalar, const SkPaint*) override;
     void onDrawImageLattice(const SkImage*, const Lattice&, const SkRect&, const SkPaint*) override;

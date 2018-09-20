@@ -272,8 +272,12 @@ void RenderNode::syncDisplayList(TreeObserver& observer, TreeInfo* info) {
     mStagingDisplayList = nullptr;
     if (mDisplayList) {
         mDisplayList->syncContents();
+
         if (CC_UNLIKELY(Properties::forceDarkMode)) {
             auto usage = usageHint();
+            if (mDisplayList->hasText()) {
+                usage = UsageHint::Foreground;
+            }
             if (usage == UsageHint::Unknown) {
                 if (mDisplayList->mChildNodes.size() > 1) {
                     usage = UsageHint::Background;

@@ -28,6 +28,7 @@
 #include <cmath>
 
 #include <log/log.h>
+#include <SkHighContrastFilter.h>
 
 namespace android::uirenderer {
 
@@ -111,6 +112,22 @@ bool transformPaint(ColorTransform transform, SkPaint* paint) {
     // TODO
     applyColorTransform(transform, *paint);
     return true;
+}
+
+bool transformPaint(ColorTransform transform, SkPaint* paint, BitmapPalette palette) {
+    bool shouldInvert = false;
+    if (palette == BitmapPalette::Light && transform == ColorTransform::Dark) {
+        shouldInvert = true;
+    }
+    if (palette == BitmapPalette::Dark && transform == ColorTransform::Light) {
+        shouldInvert = true;
+    }
+    if (shouldInvert) {
+        SkHighContrastConfig config;
+        config.fInvertStyle = SkHighContrastConfig::InvertStyle::kInvertLightness;
+        paint->setColorFilter(SkHighContrastFilter::Make(config)->makeComposed(paint->refColorFilter()));
+    }
+    return shouldInvert;
 }
 
 };  // namespace android::uirenderer

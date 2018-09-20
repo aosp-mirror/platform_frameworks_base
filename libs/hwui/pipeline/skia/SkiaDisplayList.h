@@ -49,9 +49,6 @@ namespace skiapipeline {
  */
 class SkiaDisplayList {
 public:
-    // index of DisplayListOp restore, after which projected descendants should be drawn
-    int projectionReceiveIndex = -1;
-
     size_t getUsedSize() { return allocator.usedSize(); }
 
     ~SkiaDisplayList() {
@@ -95,6 +92,8 @@ public:
      * Returns true if this list directly contains a VectorDrawable drawing command.
      */
     bool hasVectorDrawables() const { return !mVectorDrawables.empty(); }
+
+    bool hasText() const { return mDisplayList.hasText(); }
 
     /**
      * Attempts to reset and reuse this DisplayList.
