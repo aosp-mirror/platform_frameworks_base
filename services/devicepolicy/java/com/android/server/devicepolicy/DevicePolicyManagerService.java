@@ -55,12 +55,18 @@ import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATI
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_UNKNOWN;
+import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_OFF;
+import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
+import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 
+import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
+import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import static android.provider.Telephony.Carriers.DPC_URI;
 import static android.provider.Telephony.Carriers.ENFORCE_KEY;
 import static android.provider.Telephony.Carriers.ENFORCE_MANAGED_URI;
@@ -145,6 +151,7 @@ import android.media.AudioManager;
 import android.media.IAudioService;
 import android.net.ConnectivityManager;
 import android.net.IIpConnectivityMetrics;
+import android.net.NetworkUtils;
 import android.net.ProxyInfo;
 import android.net.Uri;
 import android.net.metrics.IpConnectivityLog;
@@ -395,6 +402,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.WIFI_SLEEP_POLICY);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.STAY_ON_WHILE_PLUGGED_IN);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN);
+        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.PRIVATE_DNS_MODE);
+        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.PRIVATE_DNS_SPECIFIER);
 
         GLOBAL_SETTINGS_DEPRECATED = new ArraySet<>();
         GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.BLUETOOTH_ON);
@@ -13113,5 +13122,79 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private static String getManagedProvisioningPackage(Context context) {
         return context.getResources().getString(R.string.config_managed_provisioning_package);
+    }
+
+    private void putPrivateDnsSettings(@Nullable String mode, @Nullable String host) {
+        // Set Private DNS settings using system permissions, as apps cannot write
+        // to global settings.
+        long origId = mInjector.binderClearCallingIdentity();
+        try {
+            mInjector.settingsGlobalPutString(PRIVATE_DNS_MODE, mode);
+            mInjector.settingsGlobalPutString(PRIVATE_DNS_SPECIFIER, host);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void setGlobalPrivateDns(@NonNull ComponentName who, int mode, String privateDnsHost) {
+        if (!mHasFeature) {
+            return;
+        }
+
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        enforceDeviceOwner(who);
+
+        switch (mode) {
+            case PRIVATE_DNS_MODE_OPPORTUNISTIC:
+                if (!TextUtils.isEmpty(privateDnsHost)) {
+                    throw new IllegalArgumentException("A DNS host should not be provided when " +
+                            "setting opportunistic mode.");
+                }
+                putPrivateDnsSettings(ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC, null);
+                break;
+            case PRIVATE_DNS_MODE_PROVIDER_HOSTNAME:
+                if (!NetworkUtils.isWeaklyValidatedHostname(privateDnsHost)) {
+                    throw new IllegalArgumentException(
+                            String.format("Provided hostname is not valid: %s", privateDnsHost));
+                }
+                putPrivateDnsSettings(ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME,
+                        privateDnsHost);
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("Unsupported mode: %d", mode));
+        }
+    }
+
+    @Override
+    public int getGlobalPrivateDnsMode(@NonNull ComponentName who) {
+        if (!mHasFeature) {
+            return PRIVATE_DNS_MODE_UNKNOWN;
+        }
+
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        enforceDeviceOwner(who);
+        switch (mInjector.settingsGlobalGetString(PRIVATE_DNS_MODE)) {
+            case ConnectivityManager.PRIVATE_DNS_MODE_OFF:
+                return PRIVATE_DNS_MODE_OFF;
+            case ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC:
+                return PRIVATE_DNS_MODE_OPPORTUNISTIC;
+            case ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME:
+                return PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
+        }
+
+        return PRIVATE_DNS_MODE_UNKNOWN;
+    }
+
+    @Override
+    public String getGlobalPrivateDnsHost(@NonNull ComponentName who) {
+        if (!mHasFeature) {
+            return null;
+        }
+
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        enforceDeviceOwner(who);
+
+        return mInjector.settingsGlobalGetString(PRIVATE_DNS_SPECIFIER);
     }
 }

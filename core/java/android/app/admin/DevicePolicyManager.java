@@ -1898,6 +1898,36 @@ public class DevicePolicyManager {
     public static final String ACTION_PROFILE_OWNER_CHANGED =
             "android.app.action.PROFILE_OWNER_CHANGED";
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = {"PRIVATE_DNS_MODE_"}, value = {
+            PRIVATE_DNS_MODE_UNKNOWN,
+            PRIVATE_DNS_MODE_OFF,
+            PRIVATE_DNS_MODE_OPPORTUNISTIC,
+            PRIVATE_DNS_MODE_PROVIDER_HOSTNAME
+    })
+    public @interface PrivateDnsMode {}
+
+    /**
+     * Specifies that the Private DNS setting is in an unknown state.
+     */
+    public static final int PRIVATE_DNS_MODE_UNKNOWN = 0;
+
+    /**
+     * Specifies that Private DNS was turned off completely.
+     */
+    public static final int PRIVATE_DNS_MODE_OFF = 1;
+
+    /**
+     * Specifies that the device owner requested opportunistic DNS over TLS
+     */
+    public static final int PRIVATE_DNS_MODE_OPPORTUNISTIC = 2;
+
+    /**
+     * Specifies that the device owner configured a specific host to use for Private DNS.
+     */
+    public static final int PRIVATE_DNS_MODE_PROVIDER_HOSTNAME = 3;
+
     /**
      * Return true if the given administrator component is currently active (enabled) in the system.
      *
@@ -9750,6 +9780,82 @@ public class DevicePolicyManager {
         throwIfParentInstance("getTransferOwnershipBundle");
         try {
             return mService.getTransferOwnershipBundle();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
+     * Sets the global Private DNS mode and host to be used.
+     * May only be called by the device owner.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @param mode Which mode to set - either {@code PRIVATE_DNS_MODE_OPPORTUNISTIC} or
+     *             {@code PRIVATE_DNS_MODE_PROVIDER_HOSTNAME}.
+     *             Since the opportunistic mode defaults to ordinary DNS lookups, the
+     *             option to turn it completely off is not available, so this method
+     *             may not be called with {@code PRIVATE_DNS_MODE_OFF}.
+     * @param privateDnsHost The hostname of a server that implements DNS over TLS (RFC7858), if
+     *                       {@code PRIVATE_DNS_MODE_PROVIDER_HOSTNAME} was specified as the mode,
+     *                       null otherwise.
+     * @throws IllegalArgumentException in the following cases: if a {@code privateDnsHost} was
+     * provided but the mode was not {@code PRIVATE_DNS_MODE_PROVIDER_HOSTNAME}, if the mode
+     * specified was {@code PRIVATE_DNS_MODE_PROVIDER_HOSTNAME} but {@code privateDnsHost} does
+     * not look like a valid hostname, or if the mode specified is not one of the two valid modes.
+     *
+     * @throws SecurityException if the caller is not the device owner.
+     */
+    public void setGlobalPrivateDns(@NonNull ComponentName admin,
+            @PrivateDnsMode int mode, @Nullable String privateDnsHost) {
+        throwIfParentInstance("setGlobalPrivateDns");
+        if (mService == null) {
+            return;
+        }
+
+        try {
+            mService.setGlobalPrivateDns(admin, mode, privateDnsHost);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the system-wide Private DNS mode.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @return one of {@code PRIVATE_DNS_MODE_OFF}, {@code PRIVATE_DNS_MODE_OPPORTUNISTIC},
+     * {@code PRIVATE_DNS_MODE_PROVIDER_HOSTNAME} or {@code PRIVATE_DNS_MODE_UNKNOWN}.
+     * @throws SecurityException if the caller is not the device owner.
+     */
+    public int getGlobalPrivateDnsMode(@NonNull ComponentName admin) {
+        throwIfParentInstance("setGlobalPrivateDns");
+        if (mService == null) {
+            return PRIVATE_DNS_MODE_UNKNOWN;
+        }
+
+        try {
+            return mService.getGlobalPrivateDnsMode(admin);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the system-wide Private DNS host.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @return The hostname used for Private DNS queries.
+     * @throws SecurityException if the caller is not the device owner.
+     */
+    public String getGlobalPrivateDnsHost(@NonNull ComponentName admin) {
+        throwIfParentInstance("setGlobalPrivateDns");
+        if (mService == null) {
+            return null;
+        }
+
+        try {
+            return mService.getGlobalPrivateDnsHost(admin);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
