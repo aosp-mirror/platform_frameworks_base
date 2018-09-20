@@ -392,13 +392,13 @@ void StorageManager::trimToFit(const char* path) {
     }
 }
 
-void StorageManager::printStats(FILE* out) {
-    printDirStats(out, STATS_SERVICE_DIR);
-    printDirStats(out, STATS_DATA_DIR);
+void StorageManager::printStats(int outFd) {
+    printDirStats(outFd, STATS_SERVICE_DIR);
+    printDirStats(outFd, STATS_DATA_DIR);
 }
 
-void StorageManager::printDirStats(FILE* out, const char* path) {
-    fprintf(out, "Printing stats of %s\n", path);
+void StorageManager::printDirStats(int outFd, const char* path) {
+    dprintf(outFd, "Printing stats of %s\n", path);
     unique_ptr<DIR, decltype(&closedir)> dir(opendir(path), closedir);
     if (dir == NULL) {
         VLOG("Path %s does not exist", path);
@@ -418,25 +418,22 @@ void StorageManager::printDirStats(FILE* out, const char* path) {
         int64_t timestamp = result[0];
         int64_t uid = result[1];
         int64_t configID = result[2];
-        fprintf(out, "\t #%d, Last updated: %lld, UID: %d, Config ID: %lld",
-                fileCount + 1,
-                (long long)timestamp,
-                (int)uid,
-                (long long)configID);
+        dprintf(outFd, "\t #%d, Last updated: %lld, UID: %d, Config ID: %lld", fileCount + 1,
+                (long long)timestamp, (int)uid, (long long)configID);
         string file_name = getFilePath(path, timestamp, uid, configID);
         ifstream file(file_name.c_str(), ifstream::in | ifstream::binary);
         if (file.is_open()) {
             file.seekg(0, ios::end);
             int fileSize = file.tellg();
             file.close();
-            fprintf(out, ", File Size: %d bytes", fileSize);
+            dprintf(outFd, ", File Size: %d bytes", fileSize);
             totalFileSize += fileSize;
         }
-        fprintf(out, "\n");
+        dprintf(outFd, "\n");
         fileCount++;
     }
-    fprintf(out, "\tTotal number of files: %d, Total size of files: %d bytes.\n",
-            fileCount, totalFileSize);
+    dprintf(outFd, "\tTotal number of files: %d, Total size of files: %d bytes.\n", fileCount,
+            totalFileSize);
 }
 
 }  // namespace statsd

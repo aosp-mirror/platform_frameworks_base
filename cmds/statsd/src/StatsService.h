@@ -24,6 +24,7 @@
 #include "external/StatsPullerManager.h"
 #include "logd/LogListener.h"
 #include "packages/UidMap.h"
+#include "shell/ShellSubscriber.h"
 #include "statscompanion_util.h"
 
 #include <android/os/BnStatsManager.h>
@@ -54,7 +55,8 @@ public:
 
     virtual status_t onTransact(uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
     virtual status_t dump(int fd, const Vector<String16>& args);
-    virtual status_t command(FILE* in, FILE* out, FILE* err, Vector<String8>& args);
+    virtual status_t command(int inFd, int outFd, int err, Vector<String8>& args,
+                             sp<IResultReceiver> resultReceiver);
 
     virtual Status systemRunning();
     virtual Status statsCompanionReady();
@@ -162,73 +164,73 @@ private:
     /**
      * Text or proto output of dumpsys.
      */
-    void dump_impl(FILE* out, bool verbose, bool proto);
+    void dump_impl(int outFd, bool verbose, bool proto);
 
     /**
      * Print usage information for the commands
      */
-    void print_cmd_help(FILE* out);
+    void print_cmd_help(int out);
 
     /**
      * Trigger a broadcast.
      */
-    status_t cmd_trigger_broadcast(FILE* out, Vector<String8>& args);
+    status_t cmd_trigger_broadcast(int outFd, Vector<String8>& args);
 
     /**
      * Handle the config sub-command.
      */
-    status_t cmd_config(FILE* in, FILE* out, FILE* err, Vector<String8>& args);
+    status_t cmd_config(int inFd, int outFd, int err, Vector<String8>& args);
 
     /**
      * Prints some basic stats to std out.
      */
-    status_t cmd_print_stats(FILE* out, const Vector<String8>& args);
+    status_t cmd_print_stats(int outFd, const Vector<String8>& args);
 
     /**
      * Print the event log.
      */
-    status_t cmd_dump_report(FILE* out, FILE* err, const Vector<String8>& args);
+    status_t cmd_dump_report(int outFd, int err, const Vector<String8>& args);
 
     /**
      * Print the mapping of uids to package names.
      */
-    status_t cmd_print_uid_map(FILE* out, const Vector<String8>& args);
+    status_t cmd_print_uid_map(int outFd, const Vector<String8>& args);
 
     /**
      * Flush the data to disk.
      */
-    status_t cmd_write_data_to_disk(FILE* out);
+    status_t cmd_write_data_to_disk(int outFd);
 
     /**
      * Write an AppBreadcrumbReported event to the StatsLog buffer, as if calling
      * StatsLog.write(APP_BREADCRUMB_REPORTED).
      */
-    status_t cmd_log_app_breadcrumb(FILE* out, const Vector<String8>& args);
+    status_t cmd_log_app_breadcrumb(int outFd, const Vector<String8>& args);
 
     /**
      * Print contents of a pulled metrics source.
      */
-    status_t cmd_print_pulled_metrics(FILE* out, const Vector<String8>& args);
+    status_t cmd_print_pulled_metrics(int outFd, const Vector<String8>& args);
 
     /**
      * Removes all configs stored on disk and on memory.
      */
-    status_t cmd_remove_all_configs(FILE* out);
+    status_t cmd_remove_all_configs(int outFd);
 
     /*
      * Dump memory usage by statsd.
      */
-    status_t cmd_dump_memory_info(FILE* out);
+    status_t cmd_dump_memory_info(int outFd);
 
     /*
      * Clear all puller cached data
      */
-    status_t cmd_clear_puller_cache(FILE* out);
+    status_t cmd_clear_puller_cache(int outFd);
 
     /**
      * Print all stats logs received to logcat.
      */
-    status_t cmd_print_logs(FILE* out, const Vector<String8>& args);
+    status_t cmd_print_logs(int outFd, const Vector<String8>& args);
 
     /**
      * Adds a configuration after checking permissions and obtaining UID from binder call.
@@ -274,6 +276,8 @@ private:
      * Whether this is an eng build.
      */
     bool mEngBuild;
+
+    sp<ShellSubscriber> mShellSubscriber;
 
     FRIEND_TEST(StatsServiceTest, TestAddConfig_simple);
     FRIEND_TEST(StatsServiceTest, TestAddConfig_empty);

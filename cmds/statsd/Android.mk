@@ -67,7 +67,9 @@ statsd_common_src := \
     src/subscriber/SubscriberReporter.cpp \
     src/HashableDimensionKey.cpp \
     src/guardrail/StatsdStats.cpp \
-    src/socket/StatsSocketListener.cpp
+    src/socket/StatsSocketListener.cpp \
+    src/shell/ShellSubscriber.cpp \
+    src/shell/shell_config.proto
 
 # TODO(b/110563449): Once statsd is using a blueprint file, migrate to the proper filegroups.
 statsd_common_src += \

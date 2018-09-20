@@ -400,36 +400,35 @@ string buildTimeString(int64_t timeSec) {
     return string(timeBuffer);
 }
 
-void StatsdStats::dumpStats(FILE* out) const {
+void StatsdStats::dumpStats(int out) const {
     lock_guard<std::mutex> lock(mLock);
     time_t t = mStartTimeSec;
     struct tm* tm = localtime(&t);
     char timeBuffer[80];
     strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %I:%M%p\n", tm);
-    fprintf(out, "Stats collection start second: %s\n", timeBuffer);
-    fprintf(out, "%lu Config in icebox: \n", (unsigned long)mIceBox.size());
+    dprintf(out, "Stats collection start second: %s\n", timeBuffer);
+    dprintf(out, "%lu Config in icebox: \n", (unsigned long)mIceBox.size());
     for (const auto& configStats : mIceBox) {
-        fprintf(out,
+        dprintf(out,
                 "Config {%d_%lld}: creation=%d, deletion=%d, reset=%d, #metric=%d, #condition=%d, "
                 "#matcher=%d, #alert=%d,  valid=%d\n",
                 configStats->uid, (long long)configStats->id, configStats->creation_time_sec,
                 configStats->deletion_time_sec, configStats->reset_time_sec,
-                configStats->metric_count,
-                configStats->condition_count, configStats->matcher_count, configStats->alert_count,
-                configStats->is_valid);
+                configStats->metric_count, configStats->condition_count, configStats->matcher_count,
+                configStats->alert_count, configStats->is_valid);
 
         for (const auto& broadcastTime : configStats->broadcast_sent_time_sec) {
-            fprintf(out, "\tbroadcast time: %d\n", broadcastTime);
+            dprintf(out, "\tbroadcast time: %d\n", broadcastTime);
         }
 
         for (const auto& dataDropTime : configStats->data_drop_time_sec) {
-            fprintf(out, "\tdata drop time: %d\n", dataDropTime);
+            dprintf(out, "\tdata drop time: %d\n", dataDropTime);
         }
     }
-    fprintf(out, "%lu Active Configs\n", (unsigned long)mConfigStats.size());
+    dprintf(out, "%lu Active Configs\n", (unsigned long)mConfigStats.size());
     for (auto& pair : mConfigStats) {
         auto& configStats = pair.second;
-        fprintf(out,
+        dprintf(out,
                 "Config {%d-%lld}: creation=%d, deletion=%d, #metric=%d, #condition=%d, "
                 "#matcher=%d, #alert=%d,  valid=%d\n",
                 configStats->uid, (long long)configStats->id, configStats->creation_time_sec,
@@ -437,81 +436,81 @@ void StatsdStats::dumpStats(FILE* out) const {
                 configStats->condition_count, configStats->matcher_count, configStats->alert_count,
                 configStats->is_valid);
         for (const auto& annotation : configStats->annotations) {
-            fprintf(out, "\tannotation: %lld, %d\n", (long long)annotation.first,
+            dprintf(out, "\tannotation: %lld, %d\n", (long long)annotation.first,
                     annotation.second);
         }
 
         for (const auto& broadcastTime : configStats->broadcast_sent_time_sec) {
-            fprintf(out, "\tbroadcast time: %s(%lld)\n",
-                    buildTimeString(broadcastTime).c_str(), (long long)broadcastTime);
+            dprintf(out, "\tbroadcast time: %s(%lld)\n", buildTimeString(broadcastTime).c_str(),
+                    (long long)broadcastTime);
         }
 
         for (const auto& dataDropTime : configStats->data_drop_time_sec) {
-            fprintf(out, "\tdata drop time: %s(%lld)\n",
-                    buildTimeString(dataDropTime).c_str(), (long long)dataDropTime);
+            dprintf(out, "\tdata drop time: %s(%lld)\n", buildTimeString(dataDropTime).c_str(),
+                    (long long)dataDropTime);
         }
 
         for (const auto& dump : configStats->dump_report_stats) {
-            fprintf(out, "\tdump report time: %s(%lld) bytes: %lld\n",
+            dprintf(out, "\tdump report time: %s(%lld) bytes: %lld\n",
                     buildTimeString(dump.first).c_str(), (long long)dump.first,
                     (long long)dump.second);
         }
 
         for (const auto& stats : pair.second->matcher_stats) {
-            fprintf(out, "matcher %lld matched %d times\n", (long long)stats.first, stats.second);
+            dprintf(out, "matcher %lld matched %d times\n", (long long)stats.first, stats.second);
         }
 
         for (const auto& stats : pair.second->condition_stats) {
-            fprintf(out, "condition %lld max output tuple size %d\n", (long long)stats.first,
+            dprintf(out, "condition %lld max output tuple size %d\n", (long long)stats.first,
                     stats.second);
         }
 
         for (const auto& stats : pair.second->condition_stats) {
-            fprintf(out, "metrics %lld max output tuple size %d\n", (long long)stats.first,
+            dprintf(out, "metrics %lld max output tuple size %d\n", (long long)stats.first,
                     stats.second);
         }
 
         for (const auto& stats : pair.second->alert_stats) {
-            fprintf(out, "alert %lld declared %d times\n", (long long)stats.first, stats.second);
+            dprintf(out, "alert %lld declared %d times\n", (long long)stats.first, stats.second);
         }
     }
-    fprintf(out, "********Disk Usage stats***********\n");
+    dprintf(out, "********Disk Usage stats***********\n");
     StorageManager::printStats(out);
-    fprintf(out, "********Pushed Atom stats***********\n");
+    dprintf(out, "********Pushed Atom stats***********\n");
     const size_t atomCounts = mPushedAtomStats.size();
     for (size_t i = 2; i < atomCounts; i++) {
         if (mPushedAtomStats[i] > 0) {
-            fprintf(out, "Atom %lu->%d\n", (unsigned long)i, mPushedAtomStats[i]);
+            dprintf(out, "Atom %lu->%d\n", (unsigned long)i, mPushedAtomStats[i]);
         }
     }
 
-    fprintf(out, "********Pulled Atom stats***********\n");
+    dprintf(out, "********Pulled Atom stats***********\n");
     for (const auto& pair : mPulledAtomStats) {
-        fprintf(out, "Atom %d->%ld, %ld, %ld\n", (int)pair.first, (long)pair.second.totalPull,
+        dprintf(out, "Atom %d->%ld, %ld, %ld\n", (int)pair.first, (long)pair.second.totalPull,
                 (long)pair.second.totalPullFromCache, (long)pair.second.minPullIntervalSec);
     }
 
     if (mAnomalyAlarmRegisteredStats > 0) {
-        fprintf(out, "********AnomalyAlarmStats stats***********\n");
-        fprintf(out, "Anomaly alarm registrations: %d\n", mAnomalyAlarmRegisteredStats);
+        dprintf(out, "********AnomalyAlarmStats stats***********\n");
+        dprintf(out, "Anomaly alarm registrations: %d\n", mAnomalyAlarmRegisteredStats);
     }
 
     if (mPeriodicAlarmRegisteredStats > 0) {
-        fprintf(out, "********SubscriberAlarmStats stats***********\n");
-        fprintf(out, "Subscriber alarm registrations: %d\n", mPeriodicAlarmRegisteredStats);
+        dprintf(out, "********SubscriberAlarmStats stats***********\n");
+        dprintf(out, "Subscriber alarm registrations: %d\n", mPeriodicAlarmRegisteredStats);
     }
 
-    fprintf(out, "UID map stats: bytes=%d, changes=%d, deleted=%d, changes lost=%d\n",
+    dprintf(out, "UID map stats: bytes=%d, changes=%d, deleted=%d, changes lost=%d\n",
             mUidMapStats.bytes_used, mUidMapStats.changes, mUidMapStats.deleted_apps,
             mUidMapStats.dropped_changes);
 
     for (const auto& restart : mSystemServerRestartSec) {
-        fprintf(out, "System server restarts at %s(%lld)\n",
-            buildTimeString(restart).c_str(), (long long)restart);
+        dprintf(out, "System server restarts at %s(%lld)\n", buildTimeString(restart).c_str(),
+                (long long)restart);
     }
 
     for (const auto& loss : mLogLossStats) {
-        fprintf(out, "Log loss: %lld (wall clock sec) - %d (count)\n", (long long)loss.first,
+        dprintf(out, "Log loss: %lld (wall clock sec) - %d (count)\n", (long long)loss.first,
                 loss.second);
     }
 }

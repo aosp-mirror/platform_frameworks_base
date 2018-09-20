@@ -83,7 +83,7 @@ public:
         return mUidMap;
     }
 
-    void dumpStates(FILE* out, bool verbose);
+    void dumpStates(int outFd, bool verbose);
 
     void informPullAlarmFired(const int64_t timestampNs);
 
