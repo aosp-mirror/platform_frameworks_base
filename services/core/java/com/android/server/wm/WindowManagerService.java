@@ -7412,12 +7412,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public boolean inputMethodClientHasFocus(IInputMethodClient client) {
+        public boolean isInputMethodClientFocus(int uid, int pid) {
             synchronized (mWindowMap) {
                 // Check all displays if any input method window has focus.
                 for (int i = mRoot.mChildren.size() - 1; i >= 0; --i) {
                     final DisplayContent displayContent = mRoot.mChildren.get(i);
-                    if (displayContent.inputMethodClientHasFocus(client)) {
+                    if (displayContent.isInputMethodClientFocus(uid, pid)) {
                         return true;
                     }
                 }
@@ -7430,8 +7430,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // press home.  Sometimes the IME won't go down.)
                 // Would be nice to fix this more correctly, but it's
                 // way at the end of a release, and this should be good enough.
-                if (mCurrentFocus != null && mCurrentFocus.mSession.mClient != null
-                        && mCurrentFocus.mSession.mClient.asBinder() == client.asBinder()) {
+                if (mCurrentFocus != null && mCurrentFocus.mSession.mUid == uid
+                        && mCurrentFocus.mSession.mPid == pid) {
                     return true;
                 }
             }

@@ -2536,7 +2536,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // We need to check if this is the current client with
                     // focus in the window manager, to allow this call to
                     // be made before input is started in it.
-                    if (!mWindowManagerInternal.inputMethodClientHasFocus(client)) {
+                    final ClientState cs = mClients.get(client.asBinder());
+                    if (cs == null) {
+                        throw new IllegalArgumentException("unknown client " + client.asBinder());
+                    }
+                    if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid)) {
                         Slog.w(TAG, "Ignoring showSoftInput of uid " + uid + ": " + client);
                         return false;
                     }
@@ -2616,7 +2620,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // We need to check if this is the current client with
                     // focus in the window manager, to allow this call to
                     // be made before input is started in it.
-                    if (!mWindowManagerInternal.inputMethodClientHasFocus(client)) {
+                    final ClientState cs = mClients.get(client.asBinder());
+                    if (cs == null) {
+                        throw new IllegalArgumentException("unknown client " + client.asBinder());
+                    }
+                    if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid)) {
                         if (DEBUG) {
                             Slog.w(TAG, "Ignoring hideSoftInput of uid " + uid + ": " + client);
                         }
@@ -2734,7 +2742,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             + client.asBinder());
                 }
 
-                if (!mWindowManagerInternal.inputMethodClientHasFocus(cs.client)) {
+                if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid)) {
                     // Check with the window manager to make sure this client actually
                     // has a window with focus.  If not, reject.  This is thread safe
                     // because if the focus changes some time before or after, the
