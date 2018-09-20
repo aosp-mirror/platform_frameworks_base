@@ -460,6 +460,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 boolean staying = mStatusBar.hideKeyguard();
                 if (!staying) {
                     mStatusBarWindowController.setKeyguardFadingAway(true);
+                    // hide() will happen asynchronously and might arrive after the scrims
+                    // were already hidden, this means that the transition callback won't
+                    // be triggered anymore and StatusBarWindowController will be forever in
+                    // the fadingAway state.
+                    mStatusBar.updateScrimController();
                     wakeAndUnlockDejank();
                 } else {
                     mStatusBar.finishKeyguardFadingAway();
