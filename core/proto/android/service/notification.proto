@@ -201,6 +201,9 @@ message ZenRuleProto {
     optional ConditionProto condition = 9;
     optional android.content.ComponentNameProto component = 10;
     optional ZenPolicyProto zenPolicy = 11;
+
+    // Indicates whether this ZenRule has been modified after its initial creation
+    optional bool modified = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
 }
 
 // A dump from com.android.server.notification.ZenModeHelper.
