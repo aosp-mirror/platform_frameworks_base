@@ -1,0 +1,57 @@
+# Copyright (C) 2018 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#
+# Sony Playstation(R)3 Controller
+# - Version 0x8000 and 0x8100 are for Linux hid-sony driver >=4.12
+#   and when connected over Bluetooth
+#
+
+key 0x220   DPAD_UP
+key 0x223   DPAD_RIGHT
+key 0x221   DPAD_DOWN
+key 0x222   DPAD_LEFT
+
+key 0x130   BUTTON_A
+key 0x131   BUTTON_B
+key 0x134   BUTTON_X
+key 0x133   BUTTON_Y
+key 0x136   BUTTON_L1
+key 0x137   BUTTON_R1
+key 0x138   BUTTON_L2
+key 0x139   BUTTON_R2
+key 0x13d   BUTTON_THUMBL
+key 0x13e   BUTTON_THUMBR
+
+# left Analog Stick
+axis 0x00   X
+axis 0x01   Y
+
+# Right Analog Stick
+axis 0x03   Z
+axis 0x04   RZ
+
+# L2 trigger
+axis 0x02   LTRIGGER
+
+# R2 trigger
+axis 0x05   RTRIGGER
+
+# Mapping according to https://www.kernel.org/doc/Documentation/input/gamepad.txt
+# Select
+key 0x13a   BUTTON_SELECT
+# Start
+key 0x13b   BUTTON_START
+# PS key
+key 0x13c   BUTTON_MODE
