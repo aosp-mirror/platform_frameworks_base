@@ -15,7 +15,6 @@
 #include "SkPM4f.h"
 #include "SkPM4fPriv.h"
 #include "GraphicsJNI.h"
-#include "SkDither.h"
 #include "SkUnPreMultiply.h"
 #include "SkStream.h"
 
