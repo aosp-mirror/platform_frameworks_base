@@ -20,6 +20,9 @@ import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.telephony.IccCardConstants.State.ABSENT;
+import static com.android.internal.telephony.IccCardConstants.State.PIN_REQUIRED;
+import static com.android.internal.telephony.IccCardConstants.State.PUK_REQUIRED;
+import static com.android.internal.telephony.IccCardConstants.State.READY;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
@@ -30,7 +33,6 @@ import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
-import android.hardware.biometrics.BiometricSourceType;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -38,6 +40,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.BiometricSourceType;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Bundle;
@@ -58,6 +61,7 @@ import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.ViewGroup;
 import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
@@ -70,21 +74,21 @@ import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardStateCallback;
 import com.android.internal.telephony.IccCardConstants;
+import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardSecurityView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.classifier.FalsingManager;
-import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
+import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 
@@ -274,6 +278,12 @@ public class KeyguardViewMediator extends SystemUI {
 
     private KeyguardUpdateMonitor mUpdateMonitor;
 
+    /**
+     * Last SIM state reported by the telephony system.
+     * Index is the slotId - in case of multiple SIM cards.
+     */
+    private final SparseArray<IccCardConstants.State> mLastSimStates = new SparseArray<>();
+
     private boolean mDeviceInteractive;
     private boolean mGoingToSleep;
 
@@ -450,6 +460,14 @@ public class KeyguardViewMediator extends SystemUI {
                 }
             }
 
+            boolean simWasLocked;
+            synchronized (KeyguardViewMediator.this) {
+                IccCardConstants.State lastState = mLastSimStates.get(slotId);
+                simWasLocked = (lastState == PIN_REQUIRED || lastState == PUK_REQUIRED)
+                    && simState == READY;
+                mLastSimStates.append(slotId, simState);
+            }
+
             switch (simState) {
                 case NOT_READY:
                 case ABSENT:
@@ -503,6 +521,9 @@ public class KeyguardViewMediator extends SystemUI {
                 case READY:
                     synchronized (KeyguardViewMediator.this) {
                         if (DEBUG_SIM_STATES) Log.d(TAG, "READY, reset state? " + mShowing);
+                        if (mShowing && simWasLocked) {
+                            resetStateLocked();
+                        }
                         mLockWhenSimRemoved = true;
                     }
                     break;
