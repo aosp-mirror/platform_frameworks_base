@@ -290,7 +290,7 @@ public class CloseableLock implements AutoCloseable {
     /**
      * Release a single lock that was acquired.
      *
-     * <p>Any other other that is blocked and trying to acquire a lock will get a chance
+     * <p>Any other thread that is blocked and trying to acquire a lock will get a chance
      * to acquire the lock.</p>
      *
      * @throws IllegalStateException if no locks were acquired, or if the lock was already closed
