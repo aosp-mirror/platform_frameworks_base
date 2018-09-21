@@ -730,8 +730,9 @@ public class FaceService extends BiometricServiceBase {
     }
 
     @Override
-    protected int getAppOp() {
-        return AppOpsManager.OP_USE_FACE;
+    protected boolean checkAppOps(int uid, String opPackageName) {
+        return mAppOps.noteOp(AppOpsManager.OP_USE_BIOMETRIC, uid, opPackageName)
+                == AppOpsManager.MODE_ALLOWED;
     }
 
     @Override
