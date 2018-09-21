@@ -14,14 +14,9 @@ LOCAL_SRC_FILES := \
     $(call all-java-files-under, ../servicestests/utils)
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    frameworks-base-testutils \
-    services.core \
     androidx-test \
     mockito-target-minus-junit4 \
     platform-test-annotations \
-    truth-prebuilt \
-    testables \
-    ub-uiautomator \
 
 LOCAL_JAVA_LIBRARIES := \
     android.test.mock \

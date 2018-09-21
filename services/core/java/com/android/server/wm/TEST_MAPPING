@@ -12,6 +12,20 @@
       ]
     },
     {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.wm."
+        },
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
       "name": "WmTests",
       "options": [
         {
@@ -29,6 +43,14 @@
   "postsubmit": [
     {
       "name": "CtsWindowManagerDeviceTestCases"
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.wm."
+        }
+      ]
     },
     {
       "name": "WmTests",
