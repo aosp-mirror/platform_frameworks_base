@@ -22,6 +22,8 @@ import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.telecom.Connection.VideoProvider;
+import android.telephony.ServiceState;
+import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 
 import java.util.ArrayList;
@@ -573,6 +575,20 @@ public abstract class Conference extends Conferenceable {
     }
 
     /**
+     * Updates RIL voice radio technology used for current conference after its creation.
+     *
+     * @hide
+     */
+    public void updateCallRadioTechAfterCreation() {
+        final Connection primaryConnection = getPrimaryConnection();
+        if (primaryConnection != null) {
+            setCallRadioTech(primaryConnection.getCallRadioTech());
+        } else {
+            Log.w(this, "No primary connection found while updateCallRadioTechAfterCreation");
+        }
+    }
+
+    /**
      * @hide
      * @deprecated Use {@link #setConnectionTime}.
      */
@@ -649,6 +665,37 @@ public abstract class Conference extends Conferenceable {
      */
     public final long getConnectionStartElapsedRealTime() {
         return mConnectionStartElapsedRealTime;
+    }
+
+    /**
+     * Sets RIL voice radio technology used for current conference.
+     *
+     * @param vrat the RIL voice radio technology used for current conference,
+     *             see {@code RIL_RADIO_TECHNOLOGY_*} in {@link android.telephony.ServiceState}.
+     *
+     * @hide
+     */
+    public final void setCallRadioTech(@ServiceState.RilRadioTechnology int vrat) {
+        putExtra(TelecomManager.EXTRA_CALL_NETWORK_TYPE,
+                ServiceState.rilRadioTechnologyToNetworkType(vrat));
+    }
+
+    /**
+     * Returns RIL voice radio technology used for current conference.
+     *
+     * @return the RIL voice radio technology used for current conference,
+     *         see {@code RIL_RADIO_TECHNOLOGY_*} in {@link android.telephony.ServiceState}.
+     *
+     * @hide
+     */
+    public final @ServiceState.RilRadioTechnology int getCallRadioTech() {
+        int voiceNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        Bundle extras = getExtras();
+        if (extras != null) {
+            voiceNetworkType = extras.getInt(TelecomManager.EXTRA_CALL_NETWORK_TYPE,
+                    TelephonyManager.NETWORK_TYPE_UNKNOWN);
+        }
+        return ServiceState.networkTypeToRilRadioTechnology(voiceNetworkType);
     }
 
     /**
