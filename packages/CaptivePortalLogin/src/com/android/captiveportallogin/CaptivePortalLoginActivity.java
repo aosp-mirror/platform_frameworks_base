@@ -130,6 +130,22 @@ public class CaptivePortalLoginActivity extends Activity {
             mProbeSpec = null;
         }
 
+        mNetworkCallback = new NetworkCallback() {
+            @Override
+            public void onLost(Network lostNetwork) {
+                // If the network disappears while the app is up, exit.
+                if (mNetwork.equals(lostNetwork)) done(Result.UNWANTED);
+            }
+        };
+        mCm.registerNetworkCallback(new NetworkRequest.Builder().build(), mNetworkCallback);
+
+        // If the network has disappeared, exit.
+        final NetworkCapabilities networkCapabilities = mCm.getNetworkCapabilities(mNetwork);
+        if (networkCapabilities == null) {
+            finishAndRemoveTask();
+            return;
+        }
+
         // Also initializes proxy system properties.
         mNetwork = mNetwork.getPrivateDnsBypassingCopy();
         mCm.bindProcessToNetwork(mNetwork);
@@ -138,24 +154,6 @@ public class CaptivePortalLoginActivity extends Activity {
         // Proxy system properties must be initialized before setContentView is called because
         // setContentView initializes the WebView logic which in turn reads the system properties.
         setContentView(R.layout.activity_captive_portal_login);
-
-        // Exit app if Network disappears.
-        final NetworkCapabilities networkCapabilities = mCm.getNetworkCapabilities(mNetwork);
-        if (networkCapabilities == null) {
-            finishAndRemoveTask();
-            return;
-        }
-        mNetworkCallback = new NetworkCallback() {
-            @Override
-            public void onLost(Network lostNetwork) {
-                if (mNetwork.equals(lostNetwork)) done(Result.UNWANTED);
-            }
-        };
-        final NetworkRequest.Builder builder = new NetworkRequest.Builder();
-        for (int transportType : networkCapabilities.getTransportTypes()) {
-            builder.addTransportType(transportType);
-        }
-        mCm.registerNetworkCallback(builder.build(), mNetworkCallback);
 
         getActionBar().setDisplayShowHomeEnabled(false);
         getActionBar().setElevation(0); // remove shadow
