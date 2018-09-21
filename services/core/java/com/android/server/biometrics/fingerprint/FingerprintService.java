@@ -31,7 +31,7 @@ import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.IBiometricPromptReceiver;
-import android.hardware.biometrics.IBiometricPromptServiceReceiver;
+import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprintClientCallback;
@@ -189,7 +189,7 @@ public class FingerprintService extends BiometricServiceBase {
 
         @Override // Binder call
         public void authenticateFromService(IBinder token, long opId, int groupId,
-                IBiometricPromptServiceReceiver receiver, int flags, String opPackageName,
+                IBiometricServiceReceiver receiver, int flags, String opPackageName,
                 Bundle bundle, IBiometricPromptReceiver dialogReceiver,
                 int callingUid, int callingPid, int callingUserId) {
             checkPermission(MANAGE_BIOMETRIC);
@@ -390,17 +390,17 @@ public class FingerprintService extends BiometricServiceBase {
      */
     private class BiometricPromptServiceListenerImpl implements ServiceListener {
 
-        private IBiometricPromptServiceReceiver mBiometricPromptServiceReceiver;
+        private IBiometricServiceReceiver mBiometricServiceReceiver;
 
-        public BiometricPromptServiceListenerImpl(IBiometricPromptServiceReceiver receiver) {
-            mBiometricPromptServiceReceiver = receiver;
+        public BiometricPromptServiceListenerImpl(IBiometricServiceReceiver receiver) {
+            mBiometricServiceReceiver = receiver;
         }
 
         @Override
         public void onAcquired(long deviceId, int acquiredInfo, int vendorCode)
                 throws RemoteException {
-            if (mBiometricPromptServiceReceiver != null) {
-                mBiometricPromptServiceReceiver.onAcquired(deviceId, acquiredInfo,
+            if (mBiometricServiceReceiver != null) {
+                mBiometricServiceReceiver.onAcquired(deviceId, acquiredInfo,
                         FingerprintManager.getAcquiredString(
                             getContext(), acquiredInfo, vendorCode));
             }
@@ -409,22 +409,22 @@ public class FingerprintService extends BiometricServiceBase {
         @Override
         public void onAuthenticationSucceeded(long deviceId,
                 BiometricAuthenticator.Identifier biometric, int userId) throws RemoteException {
-            if (mBiometricPromptServiceReceiver != null) {
-                mBiometricPromptServiceReceiver.onAuthenticationSucceeded(deviceId);
+            if (mBiometricServiceReceiver != null) {
+                mBiometricServiceReceiver.onAuthenticationSucceeded(deviceId);
             }
         }
 
         @Override
         public void onAuthenticationFailed(long deviceId) throws RemoteException {
-            if (mBiometricPromptServiceReceiver != null) {
-                mBiometricPromptServiceReceiver.onAuthenticationFailed(deviceId);
+            if (mBiometricServiceReceiver != null) {
+                mBiometricServiceReceiver.onAuthenticationFailed(deviceId);
             }
         }
 
         @Override
         public void onError(long deviceId, int error, int vendorCode) throws RemoteException {
-            if (mBiometricPromptServiceReceiver != null) {
-                mBiometricPromptServiceReceiver.onError(deviceId, error,
+            if (mBiometricServiceReceiver != null) {
+                mBiometricServiceReceiver.onError(deviceId, error,
                         FingerprintManager.getErrorString(getContext(), error, vendorCode));
             }
         }

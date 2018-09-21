@@ -3685,9 +3685,8 @@ public abstract class Context {
      *
      * @hide
      * @see #getSystemService(String)
-     * @see com.android.server.biometrics.BiometricPromptService
      */
-    public static final String BIOMETRIC_PROMPT_SERVICE = "biometric_prompt";
+    public static final String BIOMETRIC_SERVICE = "biometric";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a

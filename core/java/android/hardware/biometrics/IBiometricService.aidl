@@ -18,19 +18,20 @@ package android.hardware.biometrics;
 
 import android.os.Bundle;
 import android.hardware.biometrics.IBiometricPromptReceiver;
-import android.hardware.biometrics.IBiometricPromptServiceReceiver;
+import android.hardware.biometrics.IBiometricServiceReceiver;
 
 /**
- * Communication channel from BiometricPrompt to BiometricPromptService. The interface does not
- * expose specific biometric modalities. The system will use the default biometric for apps. On
- * devices with more than one, the choice is dictated by user preference in Settings.
+ * Communication channel from BiometricPrompt and BiometricManager to BiometricService. The
+ * interface does not expose specific biometric modalities. The system will use the default
+ * biometric for apps. On devices with more than one, the choice is dictated by user preference in
+ * Settings.
  * @hide
  */
-interface IBiometricPromptService {
+interface IBiometricService {
     // Requests authentication. The service choose the appropriate biometric to use, and show
     // the corresponding BiometricDialog.
     void authenticate(IBinder token, long sessionId, int userId,
-            IBiometricPromptServiceReceiver receiver, int flags, String opPackageName,
+            IBiometricServiceReceiver receiver, int flags, String opPackageName,
             in Bundle bundle, IBiometricPromptReceiver dialogReceiver);
 
     // Cancel authentication for the given sessionId

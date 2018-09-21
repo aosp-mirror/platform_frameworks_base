@@ -17,7 +17,7 @@ package android.hardware.face;
 
 import android.os.Bundle;
 import android.hardware.biometrics.IBiometricPromptReceiver;
-import android.hardware.biometrics.IBiometricPromptServiceReceiver;
+import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.Face;
@@ -35,7 +35,7 @@ interface IFaceService {
     // This method invokes the BiometricDialog. The arguments are almost the same as above,
     // but should only be called from (BiometricPromptService).
     void authenticateFromService(boolean requireConfirmation, IBinder token, long sessionId,
-            int userId, IBiometricPromptServiceReceiver receiver, int flags, String opPackageName,
+            int userId, IBiometricServiceReceiver receiver, int flags, String opPackageName,
             in Bundle bundle, IBiometricPromptReceiver dialogReceiver,
             int callingUid, int callingPid, int callingUserId);
 

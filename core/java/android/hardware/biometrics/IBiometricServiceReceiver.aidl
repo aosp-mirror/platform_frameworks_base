@@ -20,10 +20,10 @@ import android.os.Bundle;
 import android.os.UserHandle;
 
 /**
- * Communication channel from the BiometricPromptService back to BiometricPrompt.
+ * Communication channel from the BiometricService back to BiometricPrompt.
  * @hide
  */
-oneway interface IBiometricPromptServiceReceiver {
+oneway interface IBiometricServiceReceiver {
     void onAuthenticationSucceeded(long deviceId);
     void onAuthenticationFailed(long deviceId);
     void onError(long deviceId, int error, String message);

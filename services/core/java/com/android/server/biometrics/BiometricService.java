@@ -24,8 +24,8 @@ import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.IBiometricPromptReceiver;
-import android.hardware.biometrics.IBiometricPromptService;
-import android.hardware.biometrics.IBiometricPromptServiceReceiver;
+import android.hardware.biometrics.IBiometricService;
+import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.face.FaceManager;
 import android.hardware.face.IFaceService;
 import android.hardware.fingerprint.FingerprintManager;
@@ -48,7 +48,7 @@ import java.util.ArrayList;
 /**
  * System service that arbitrates the modality for BiometricPrompt to use.
  */
-public class BiometricPromptService extends SystemService {
+public class BiometricService extends SystemService {
 
     private static final String TAG = "BiometricPromptService";
 
@@ -122,11 +122,11 @@ public class BiometricPromptService extends SystemService {
      * should not carry any state. The reality is we need to keep a tiny amount of state so that
      * cancelAuthentication() can go to the right place.
      */
-    private final class BiometricPromptServiceWrapper extends IBiometricPromptService.Stub {
+    private final class BiometricPromptServiceWrapper extends IBiometricService.Stub {
 
         @Override // Binder call
         public void authenticate(IBinder token, long sessionId, int userId,
-                IBiometricPromptServiceReceiver receiver, int flags, String opPackageName,
+                IBiometricServiceReceiver receiver, int flags, String opPackageName,
                 Bundle bundle, IBiometricPromptReceiver dialogReceiver) throws RemoteException {
             // Check the USE_BIOMETRIC permission here. In the BiometricService, check do the
             // AppOps and foreground check.
@@ -217,7 +217,7 @@ public class BiometricPromptService extends SystemService {
      *
      * @param context The system server context.
      */
-    public BiometricPromptService(Context context) {
+    public BiometricService(Context context) {
         super(context);
 
         mHandler = new Handler(Looper.getMainLooper());
@@ -249,7 +249,7 @@ public class BiometricPromptService extends SystemService {
             }
         }
 
-        publishBinderService(Context.BIOMETRIC_PROMPT_SERVICE, new BiometricPromptServiceWrapper());
+        publishBinderService(Context.BIOMETRIC_SERVICE, new BiometricPromptServiceWrapper());
     }
 
     /**
@@ -257,7 +257,7 @@ public class BiometricPromptService extends SystemService {
      * returns errors through the callback (no biometric feature, hardware not detected, no
      * templates enrolled, etc). This service must not start authentication if errors are sent.
      */
-    private int checkAndGetBiometricModality(IBiometricPromptServiceReceiver receiver) {
+    private int checkAndGetBiometricModality(IBiometricServiceReceiver receiver) {
         int modality = BIOMETRIC_NONE;
         final String hardwareUnavailable =
                 getContext().getString(R.string.biometric_error_hw_unavailable);

@@ -225,7 +225,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
 
     private final IBinder mToken = new Binder();
     private final Context mContext;
-    private final IBiometricPromptService mService;
+    private final IBiometricService mService;
     private final Bundle mBundle;
     private final ButtonInfo mPositiveButtonInfo;
     private final ButtonInfo mNegativeButtonInfo;
@@ -250,8 +250,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
     };
 
-    IBiometricPromptServiceReceiver mBiometricPromptServiceReceiver =
-            new IBiometricPromptServiceReceiver.Stub() {
+    IBiometricServiceReceiver mBiometricServiceReceiver =
+            new IBiometricServiceReceiver.Stub() {
 
         @Override
         public void onAuthenticationSucceeded(long deviceId) throws RemoteException {
@@ -290,8 +290,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         mBundle = bundle;
         mPositiveButtonInfo = positiveButtonInfo;
         mNegativeButtonInfo = negativeButtonInfo;
-        mService = IBiometricPromptService.Stub.asInterface(
-                ServiceManager.getService(Context.BIOMETRIC_PROMPT_SERVICE));
+        mService = IBiometricService.Stub.asInterface(
+                ServiceManager.getService(Context.BIOMETRIC_SERVICE));
     }
 
     /**
@@ -516,7 +516,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             mAuthenticationCallback = callback;
             final long sessionId = crypto != null ? crypto.getOpId() : 0;
             mService.authenticate(mToken, sessionId, mContext.getUserId(),
-                    mBiometricPromptServiceReceiver, 0 /* flags */, mContext.getOpPackageName(),
+                    mBiometricServiceReceiver, 0 /* flags */, mContext.getOpPackageName(),
                     mBundle, mDialogReceiver);
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception while authenticating", e);
