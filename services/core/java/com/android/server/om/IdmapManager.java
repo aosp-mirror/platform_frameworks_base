@@ -46,7 +46,7 @@ import java.io.File;
  * Note: this class is subclassed in the OMS unit tests, and hence not marked as final.
  */
 class IdmapManager {
-    private static final boolean FEATURE_FLAG_IDMAP2 = false;
+    private static final boolean FEATURE_FLAG_IDMAP2 = true;
 
     private final Installer mInstaller;
     private IIdmap2 mIdmap2Service;
