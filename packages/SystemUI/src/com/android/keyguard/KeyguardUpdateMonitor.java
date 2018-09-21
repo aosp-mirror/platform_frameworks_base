@@ -39,9 +39,9 @@ import android.app.PendingIntent;
 import android.app.UserSwitchObserver;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
-import android.hardware.biometrics.BiometricSourceType;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -49,11 +49,13 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
+import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.CancellationSignal;
 import android.os.Handler;
@@ -75,7 +77,6 @@ import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.SparseBooleanArray;
-import android.util.SparseIntArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IccCardConstants;
@@ -249,6 +250,51 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private int mHardwareFaceUnavailableRetryCount = 0;
     private static final int HW_UNAVAILABLE_TIMEOUT = 3000; // ms
     private static final int HW_UNAVAILABLE_RETRY_MAX = 3;
+
+    private class SettingObserver extends ContentObserver {
+        private final Uri FACE_UNLOCK_KEYGUARD_ENABLED =
+                Settings.Secure.getUriFor(Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED);
+
+        private final ContentResolver mContentResolver;
+
+        /**
+         * Creates a content observer.
+         *
+         * @param handler The handler to run {@link #onChange} on, or null if none.
+         */
+        public SettingObserver(Handler handler) {
+            super(handler);
+            mContentResolver = mContext.getContentResolver();
+            updateContentObserver();
+        }
+
+        public void updateContentObserver() {
+            mContentResolver.unregisterContentObserver(this);
+            mContentResolver.registerContentObserver(FACE_UNLOCK_KEYGUARD_ENABLED,
+                    false /* notifyForDescendents */,
+                    this,
+                    UserHandle.USER_CURRENT);
+
+            // Update the value immediately
+            onChange(true /* selfChange */, FACE_UNLOCK_KEYGUARD_ENABLED);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (FACE_UNLOCK_KEYGUARD_ENABLED.equals(uri)) {
+                    mFaceSettingEnabledForUser =
+                            Settings.Secure.getIntForUser(
+                                    mContentResolver,
+                                    Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED,
+                                    1 /* default */,
+                                    UserHandle.USER_CURRENT) != 0;
+                    updateBiometricListeningState();
+            }
+        }
+    }
+
+    private final SettingObserver mSettingObserver;
+    private boolean mFaceSettingEnabledForUser;
 
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -1389,6 +1435,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mSubscriptionManager = SubscriptionManager.from(context);
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
         mStrongAuthTracker = new StrongAuthTracker(context);
+        mSettingObserver = new SettingObserver(mHandler);
 
         // Since device can't be un-provisioned, we only need to register a content observer
         // to update mDeviceProvisioned when we are...
@@ -1549,7 +1596,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
                 shouldListenForFaceAssistant() || (mKeyguardOccluded && mIsDreaming))
                 && !mSwitchingUser && !isFaceDisabled(getCurrentUser())
-                && !mKeyguardGoingAway;
+                && !mKeyguardGoingAway && mFaceSettingEnabledForUser;
     }
 
 
@@ -1719,6 +1766,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Handle {@link #MSG_USER_SWITCH_COMPLETE}
      */
     private void handleUserSwitchComplete(int userId) {
+        mSettingObserver.updateContentObserver();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
