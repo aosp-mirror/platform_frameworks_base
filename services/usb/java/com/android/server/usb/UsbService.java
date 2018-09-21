@@ -16,6 +16,14 @@
 
 package com.android.server.usb;
 
+import static android.hardware.usb.UsbPortStatus.DATA_ROLE_DEVICE;
+import static android.hardware.usb.UsbPortStatus.DATA_ROLE_HOST;
+import static android.hardware.usb.UsbPortStatus.MODE_DFP;
+import static android.hardware.usb.UsbPortStatus.MODE_DUAL;
+import static android.hardware.usb.UsbPortStatus.MODE_UFP;
+import static android.hardware.usb.UsbPortStatus.POWER_ROLE_SINK;
+import static android.hardware.usb.UsbPortStatus.POWER_ROLE_SOURCE;
+
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
@@ -27,6 +35,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.usb.IUsbManager;
+import android.hardware.usb.ParcelableUsbPort;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
@@ -52,7 +61,9 @@ import com.android.server.SystemService;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * UsbService manages all USB related state, including both host and device support.
@@ -489,12 +500,25 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
-    public UsbPort[] getPorts() {
+    public List<ParcelableUsbPort> getPorts() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            return mPortManager != null ? mPortManager.getPorts() : null;
+            if (mPortManager == null) {
+                return null;
+            } else {
+                final UsbPort[] ports = mPortManager.getPorts();
+
+                final int numPorts = ports.length;
+                ArrayList<ParcelableUsbPort> parcelablePorts = new ArrayList<>();
+                for (int i = 0; i < numPorts; i++) {
+                    parcelablePorts.add(ParcelableUsbPort.of(ports[i]));
+                }
+
+                return parcelablePorts;
+            }
+
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -588,10 +612,10 @@ public class UsbService extends IUsbManager.Stub {
                 final int powerRole;
                 switch (args[2]) {
                     case "source":
-                        powerRole = UsbPort.POWER_ROLE_SOURCE;
+                        powerRole = POWER_ROLE_SOURCE;
                         break;
                     case "sink":
-                        powerRole = UsbPort.POWER_ROLE_SINK;
+                        powerRole = POWER_ROLE_SINK;
                         break;
                     case "no-power":
                         powerRole = 0;
@@ -603,10 +627,10 @@ public class UsbService extends IUsbManager.Stub {
                 final int dataRole;
                 switch (args[3]) {
                     case "host":
-                        dataRole = UsbPort.DATA_ROLE_HOST;
+                        dataRole = DATA_ROLE_HOST;
                         break;
                     case "device":
-                        dataRole = UsbPort.DATA_ROLE_DEVICE;
+                        dataRole = DATA_ROLE_DEVICE;
                         break;
                     case "no-data":
                         dataRole = 0;
@@ -631,13 +655,13 @@ public class UsbService extends IUsbManager.Stub {
                 final int supportedModes;
                 switch (args[2]) {
                     case "ufp":
-                        supportedModes = UsbPort.MODE_UFP;
+                        supportedModes = MODE_UFP;
                         break;
                     case "dfp":
-                        supportedModes = UsbPort.MODE_DFP;
+                        supportedModes = MODE_DFP;
                         break;
                     case "dual":
-                        supportedModes = UsbPort.MODE_DUAL;
+                        supportedModes = MODE_DUAL;
                         break;
                     case "none":
                         supportedModes = 0;
@@ -658,10 +682,10 @@ public class UsbService extends IUsbManager.Stub {
                 final boolean canChangeMode = args[2].endsWith("?");
                 switch (canChangeMode ? removeLastChar(args[2]) : args[2]) {
                     case "ufp":
-                        mode = UsbPort.MODE_UFP;
+                        mode = MODE_UFP;
                         break;
                     case "dfp":
-                        mode = UsbPort.MODE_DFP;
+                        mode = MODE_DFP;
                         break;
                     default:
                         pw.println("Invalid mode: " + args[2]);
@@ -671,10 +695,10 @@ public class UsbService extends IUsbManager.Stub {
                 final boolean canChangePowerRole = args[3].endsWith("?");
                 switch (canChangePowerRole ? removeLastChar(args[3]) : args[3]) {
                     case "source":
-                        powerRole = UsbPort.POWER_ROLE_SOURCE;
+                        powerRole = POWER_ROLE_SOURCE;
                         break;
                     case "sink":
-                        powerRole = UsbPort.POWER_ROLE_SINK;
+                        powerRole = POWER_ROLE_SINK;
                         break;
                     default:
                         pw.println("Invalid power role: " + args[3]);
@@ -684,10 +708,10 @@ public class UsbService extends IUsbManager.Stub {
                 final boolean canChangeDataRole = args[4].endsWith("?");
                 switch (canChangeDataRole ? removeLastChar(args[4]) : args[4]) {
                     case "host":
-                        dataRole = UsbPort.DATA_ROLE_HOST;
+                        dataRole = DATA_ROLE_HOST;
                         break;
                     case "device":
-                        dataRole = UsbPort.DATA_ROLE_DEVICE;
+                        dataRole = DATA_ROLE_DEVICE;
                         break;
                     default:
                         pw.println("Invalid data role: " + args[4]);

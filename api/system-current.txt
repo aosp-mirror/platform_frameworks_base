@@ -2515,7 +2515,37 @@ package android.hardware.usb {
   }
 
   public class UsbManager {
+    method public java.util.List<android.hardware.usb.UsbPort> getPorts();
     method public void grantPermission(android.hardware.usb.UsbDevice, java.lang.String);
+    field public static final java.lang.String ACTION_USB_PORT_CHANGED = "android.hardware.usb.action.USB_PORT_CHANGED";
+  }
+
+  public final class UsbPort {
+    method public android.hardware.usb.UsbPortStatus getStatus();
+    method public void setRoles(int, int);
+  }
+
+  public final class UsbPortStatus implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getCurrentDataRole();
+    method public int getCurrentMode();
+    method public int getCurrentPowerRole();
+    method public int getSupportedRoleCombinations();
+    method public boolean isConnected();
+    method public boolean isRoleCombinationSupported(int, int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.hardware.usb.UsbPortStatus> CREATOR;
+    field public static final int DATA_ROLE_DEVICE = 2; // 0x2
+    field public static final int DATA_ROLE_HOST = 1; // 0x1
+    field public static final int DATA_ROLE_NONE = 0; // 0x0
+    field public static final int MODE_AUDIO_ACCESSORY = 4; // 0x4
+    field public static final int MODE_DEBUG_ACCESSORY = 8; // 0x8
+    field public static final int MODE_DFP = 2; // 0x2
+    field public static final int MODE_NONE = 0; // 0x0
+    field public static final int MODE_UFP = 1; // 0x1
+    field public static final int POWER_ROLE_NONE = 0; // 0x0
+    field public static final int POWER_ROLE_SINK = 2; // 0x2
+    field public static final int POWER_ROLE_SOURCE = 1; // 0x1
   }
 
 }
