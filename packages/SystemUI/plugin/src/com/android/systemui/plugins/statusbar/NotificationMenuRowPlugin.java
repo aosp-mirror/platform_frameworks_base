@@ -38,11 +38,12 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem
 public interface NotificationMenuRowPlugin extends Plugin {
 
     public static final String ACTION = "com.android.systemui.action.PLUGIN_NOTIFICATION_MENU_ROW";
-    public static final int VERSION = 4;
+    public static final int VERSION = 5;
 
     @ProvidesInterface(version = OnMenuEventListener.VERSION)
     public interface OnMenuEventListener {
         public static final int VERSION = 1;
+
         public void onMenuClicked(View row, int x, int y, MenuItem menu);
 
         public void onMenuReset(View row);
@@ -53,6 +54,7 @@ public interface NotificationMenuRowPlugin extends Plugin {
     @ProvidesInterface(version = MenuItem.VERSION)
     public interface MenuItem {
         public static final int VERSION = 1;
+
         public View getMenuView();
 
         public View getGutsView();
@@ -84,34 +86,136 @@ public interface NotificationMenuRowPlugin extends Plugin {
 
     public void setMenuClickListener(OnMenuEventListener listener);
 
-    public void setSwipeActionHelper(NotificationSwipeActionHelper listener);
-
     public void setAppName(String appName);
 
     public void createMenu(ViewGroup parent, StatusBarNotification sbn);
 
-    public View getMenuView();
-
-    public boolean isMenuVisible();
-
     public void resetMenu();
 
-    public void onTranslationUpdate(float translation);
+    public View getMenuView();
 
-    public void onHeightUpdate();
+    /**
+     * Get the target position that a notification row should be snapped open to in order to reveal
+     * the menu. This is generally determined by the number of icons in the notification menu and the
+     * size of each icon. This method accounts for whether the menu appears on the left or ride side
+     * of the parent notification row.
+     *
 
-    public void onNotificationUpdated(StatusBarNotification sbn);
+     * @return an int representing the x-offset in pixels that the notification should snap open to.
+     * Positive values imply that the notification should be offset to the right to reveal the menu,
+     * and negative alues imply that the notification should be offset to the right.
+     */
+    public int getMenuSnapTarget();
 
-    public boolean onTouchEvent(View view, MotionEvent ev, float velocity);
+    /**
+     * Determines whether or not the menu should be shown in response to user input.
+     * @return true if the menu should be shown, false otherwise.
+     */
+    public boolean shouldShowMenu();
+
+    /**
+     * Determines whether the menu is currently visible.
+     * @return true if the menu is visible, false otherwise.
+     */
+    public boolean isMenuVisible();
+
+    /**
+     * Determines whether a given movement is towards or away from the current location of the menu.
+     * @param movement
+     * @return true if the movement is towards the menu, false otherwise.
+     */
+    public boolean isTowardsMenu(float movement);
+
+    /**
+     * Determines whether the menu should snap closed instead of dismissing the
+     * parent notification, as a function of its current state.
+     *
+     * @return true if the menu should snap closed, false otherwise.
+     */
+    public boolean shouldSnapBack();
+
+    /**
+     * Determines whether the menu was previously snapped open to the same side that it is currently
+     * being shown on.
+     * @return true if the menu is snapped open to the same side on which it currently appears,
+     * false otherwise.
+     */
+    public boolean isSnappedAndOnSameSide();
+
+    /**
+     * Determines whether the notification the menu is attached to is able to be dismissed.
+     * @return true if the menu's parent notification is dismissable, false otherwise.
+     */
+    public boolean canBeDismissed();
+
+    /**
+     * Determines whether the menu should remain open given its current state, or snap closed.
+     * @return true if the menu should remain open, false otherwise.
+     */
+    public boolean isWithinSnapMenuThreshold();
+
+    /**
+     * Determines whether the menu has been swiped far enough to snap open.
+     * @return true if the menu has been swiped far enough to open, false otherwise.
+     */
+    public boolean isSwipedEnoughToShowMenu();
 
     public default boolean onInterceptTouchEvent(View view, MotionEvent ev) {
         return false;
     }
 
-    public default boolean useDefaultMenuItems() {
+    public default boolean shouldUseDefaultMenuItems() {
         return false;
     }
 
-    public default void onConfigurationChanged() {
-    }
+    /**
+     * Callback used to signal the menu that its parent's translation has changed.
+     * @param translation The new x-translation of the menu as a position (not an offset).
+     */
+    public void onParentTranslationUpdate(float translation);
+
+    /**
+     * Callback used to signal the menu that its parent's height has changed.
+     */
+    public void onParentHeightUpdate();
+
+    /**
+     * Callback used to signal the menu that its parent notification has been updated.
+     * @param sbn
+     */
+    public void onNotificationUpdated(StatusBarNotification sbn);
+
+    /**
+     * Callback used to signal the menu that a user is moving the parent notification.
+     * @param delta The change in the parent notification's position.
+     */
+    public void onTouchMove(float delta);
+
+    /**
+     * Callback used to signal the menu that a user has begun touching its parent notification.
+     */
+    public void onTouchStart();
+
+    /**
+     * Callback used to signal the menu that a user has finished touching its parent notification.
+     */
+    public void onTouchEnd();
+
+    /**
+     * Callback used to signal the menu that it has been snapped closed.
+     */
+    public void onSnapClosed();
+
+    /**
+     * Callback used to signal the menu that it has been snapped open.
+     */
+    public void onSnapOpen();
+
+    /**
+     * Callback used to signal the menu that its parent notification has been dismissed.
+     */
+    public void onDismiss();
+
+    public default void onConfigurationChanged() { }
+
 }

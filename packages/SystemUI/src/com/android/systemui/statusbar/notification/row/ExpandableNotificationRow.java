@@ -1037,7 +1037,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             removeView(mMenuRow.getMenuView());
         }
         mMenuRow = plugin;
-        if (mMenuRow.useDefaultMenuItems()) {
+        if (mMenuRow.shouldUseDefaultMenuItems()) {
             ArrayList<MenuItem> items = new ArrayList<>();
             items.add(NotificationMenuRow.createInfoItem(mContext));
             items.add(NotificationMenuRow.createSnoozeItem(mContext));
@@ -1787,7 +1787,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             getEntry().expandedIcon.setScrollX((int) -translationX);
         }
         if (mMenuRow.getMenuView() != null) {
-            mMenuRow.onTranslationUpdate(translationX);
+            mMenuRow.onParentTranslationUpdate(translationX);
         }
     }
 
@@ -2292,7 +2292,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             notifyHeightChanged(true  /* needsAnimation */);
         }
         if (mMenuRow.getMenuView() != null) {
-            mMenuRow.onHeightUpdate();
+            mMenuRow.onParentHeightUpdate();
         }
         updateContentShiftHeight();
         if (mLayoutListener != null) {
@@ -2543,7 +2543,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mGuts.setActualHeight(height);
         }
         if (mMenuRow.getMenuView() != null) {
-            mMenuRow.onHeightUpdate();
+            mMenuRow.onParentHeightUpdate();
         }
     }
 
