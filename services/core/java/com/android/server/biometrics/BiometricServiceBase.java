@@ -72,7 +72,8 @@ import java.util.Map;
  *
  * @hide
  */
-public abstract class BiometricService extends SystemService implements IHwBinder.DeathRecipient {
+public abstract class BiometricServiceBase extends SystemService
+        implements IHwBinder.DeathRecipient {
 
     protected static final boolean DEBUG = true;
 
@@ -529,7 +530,7 @@ public abstract class BiometricService extends SystemService implements IHwBinde
      *
      * @param context The system server context.
      */
-    public BiometricService(Context context) {
+    public BiometricServiceBase(Context context) {
         super(context);
         mContext = context;
         mStatusBarService = IStatusBarService.Stub.asInterface(
@@ -630,7 +631,8 @@ public abstract class BiometricService extends SystemService implements IHwBinde
         if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
             mHandler.removeCallbacks(mResetClientState);
             if (mPendingClient != null) {
-                if (DEBUG) Slog.v(getTag(), "start pending client " + mPendingClient.getOwnerString());
+                if (DEBUG) Slog.v(getTag(), "start pending client " +
+                        mPendingClient.getOwnerString());
                 startClient(mPendingClient, false);
                 mPendingClient = null;
             }

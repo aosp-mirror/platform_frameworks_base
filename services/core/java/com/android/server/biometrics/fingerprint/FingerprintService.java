@@ -59,7 +59,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.biometrics.AuthenticationClient;
-import com.android.server.biometrics.BiometricService;
+import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
 import com.android.server.biometrics.ClientMonitor;
 import com.android.server.biometrics.EnumerateClient;
@@ -84,7 +84,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @hide
  */
-public class FingerprintService extends BiometricService {
+public class FingerprintService extends BiometricServiceBase {
 
     protected static final String TAG = "FingerprintService";
     private static final boolean DEBUG = true;
@@ -514,7 +514,7 @@ public class FingerprintService extends BiometricService {
     /**
      * An internal class to help clean up unknown fingerprints in the hardware and software.
      */
-    private final class InternalEnumerateClient extends BiometricService.EnumerateClientImpl {
+    private final class InternalEnumerateClient extends BiometricServiceBase.EnumerateClientImpl {
 
         private List<Fingerprint> mEnrolledList;
         private List<Fingerprint> mUnknownFingerprints = new ArrayList<>(); // list of fp to delete
@@ -577,7 +577,7 @@ public class FingerprintService extends BiometricService {
     /**
      * An internal class to help clean up unknown fingerprints in hardware and software.
      */
-    private final class InternalRemovalClient extends BiometricService.RemovalClientImpl {
+    private final class InternalRemovalClient extends BiometricServiceBase.RemovalClientImpl {
         public InternalRemovalClient(Context context,
                 DaemonWrapper daemon, long halDeviceId, IBinder token,
                 ServiceListener listener, int fingerId, int groupId, int userId, boolean restricted,

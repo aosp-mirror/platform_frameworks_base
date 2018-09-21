@@ -29,9 +29,10 @@ import java.util.ArrayList;
  * A class to keep track of the enumeration state for a given client.
  */
 public abstract class EnumerateClient extends ClientMonitor {
-    public EnumerateClient(Context context, Metrics metrics, BiometricService.DaemonWrapper daemon,
-            long halDeviceId, IBinder token, BiometricService.ServiceListener listener, int groupId,
-            int userId, boolean restricted, String owner) {
+    public EnumerateClient(Context context, Metrics metrics,
+            BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
+            BiometricServiceBase.ServiceListener listener, int groupId, int userId,
+            boolean restricted, String owner) {
         super(context, metrics, daemon, halDeviceId, token, listener, userId, groupId, restricted,
                 owner);
     }

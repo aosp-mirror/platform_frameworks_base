@@ -139,8 +139,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
     public abstract void onAuthenticationConfirmed();
 
     public AuthenticationClient(Context context, Metrics metrics,
-            BiometricService.DaemonWrapper daemon, long halDeviceId, IBinder token,
-            BiometricService.ServiceListener listener, int targetUserId, int groupId, long opId,
+            BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
+            BiometricServiceBase.ServiceListener listener, int targetUserId, int groupId, long opId,
             boolean restricted, String owner, Bundle bundle,
             IBiometricPromptReceiver dialogReceiver, IStatusBarService statusBarService,
             boolean requireConfirmation) {
@@ -207,7 +207,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
 
     private void notifyClientAuthenticationSucceeded(BiometricAuthenticator.Identifier identifier)
             throws RemoteException {
-        final BiometricService.ServiceListener listener = getListener();
+        final BiometricServiceBase.ServiceListener listener = getListener();
         // Explicitly have if/else here to make it super obvious in case the code is
         // touched in the future.
         if (!getIsRestricted()) {
@@ -256,7 +256,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             }
         }
 
-        final BiometricService.ServiceListener listener = getListener();
+        final BiometricServiceBase.ServiceListener listener = getListener();
         if (listener != null) {
             try {
                 mMetricsLogger.action(mMetrics.actionBiometricAuth(), authenticated);

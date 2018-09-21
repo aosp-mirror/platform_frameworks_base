@@ -52,7 +52,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemServerInitThreadPool;
-import com.android.server.biometrics.BiometricService;
+import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
 import com.android.server.biometrics.Metrics;
 
@@ -73,7 +73,7 @@ import java.util.List;
  *
  * @hide
  */
-public class FaceService extends BiometricService {
+public class FaceService extends BiometricServiceBase {
 
     protected static final String TAG = "FaceService";
     private static final boolean DEBUG = true;
