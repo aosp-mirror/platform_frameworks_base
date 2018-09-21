@@ -54,8 +54,6 @@ public:
 
     std::vector<VectorDrawableRoot*>* getVectorDrawables() { return &mVectorDrawables; }
 
-    static void destroyLayer(RenderNode* node);
-
     static void prepareToDraw(const renderthread::RenderThread& thread, Bitmap* bitmap);
 
     void renderLayersImpl(const LayerUpdateQueue& layers, bool opaque);

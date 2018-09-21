@@ -230,8 +230,6 @@ Bitmap::~Bitmap() {
             mPixelStorage.hardware.buffer = nullptr;
             break;
     }
-
-    android::uirenderer::renderthread::RenderProxy::onBitmapDestroyed(getStableID());
 }
 
 bool Bitmap::hasHardwareMipMap() const {

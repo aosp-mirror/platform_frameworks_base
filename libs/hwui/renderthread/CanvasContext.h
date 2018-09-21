@@ -96,12 +96,6 @@ public:
      */
     void unpinImages() { mRenderPipeline->unpinImages(); }
 
-    /**
-     * Destroy any layers that have been attached to the provided RenderNode removing
-     * any state that may have been set during createOrUpdateLayer().
-     */
-    static void destroyLayer(RenderNode* node);
-
     static void invokeFunctor(const RenderThread& thread, Functor* functor);
 
     static void prepareToDraw(const RenderThread& thread, Bitmap* bitmap);

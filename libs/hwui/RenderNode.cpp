@@ -158,7 +158,7 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
         CC_UNLIKELY(properties().getWidth() == 0) || CC_UNLIKELY(properties().getHeight() == 0) ||
         CC_UNLIKELY(!properties().fitsOnLayer())) {
         if (CC_UNLIKELY(hasLayer())) {
-            renderthread::CanvasContext::destroyLayer(this);
+            this->setLayerSurface(nullptr);
         }
         return;
     }
@@ -317,7 +317,7 @@ void RenderNode::deleteDisplayList(TreeObserver& observer, TreeInfo* info) {
 
 void RenderNode::destroyHardwareResources(TreeInfo* info) {
     if (hasLayer()) {
-        renderthread::CanvasContext::destroyLayer(this);
+        this->setLayerSurface(nullptr);
     }
     setStagingDisplayList(nullptr);
 
@@ -327,7 +327,7 @@ void RenderNode::destroyHardwareResources(TreeInfo* info) {
 
 void RenderNode::destroyLayers() {
     if (hasLayer()) {
-        renderthread::CanvasContext::destroyLayer(this);
+        this->setLayerSurface(nullptr);
     }
     if (mDisplayList) {
         mDisplayList->updateChildren([](RenderNode* child) { child->destroyLayers(); });
