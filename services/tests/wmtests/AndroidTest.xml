@@ -24,9 +24,9 @@
     </target_preparer>
 
     <option name="test-tag" value="WmTests" />
-    <test class="com.android.tradefed.testtype.AndroidJUnitTest">
+    <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.frameworks.wmtests" />
-        <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
-        <option name="hidden-api-checks" value="false" />
+        <option name="runner" value="android.support.test.runner.AndroidJUnitRunner" />
+        <option name="hidden-api-checks" value="false"/>
     </test>
 </configuration>
