@@ -325,33 +325,6 @@ bool GraphicsJNI::SetPixels(JNIEnv* env, jintArray srcColors, int srcOffset, int
     return true;
 }
 
-//////////////////// ToColor procs
-
-static void ToColor_SA8(SkColor dst[], const void* src, int width) {
-    SkASSERT(width > 0);
-    const uint8_t* s = (const uint8_t*)src;
-    do {
-        uint8_t c = *s++;
-        *dst++ = SkColorSetARGB(c, 0, 0, 0);
-    } while (--width != 0);
-}
-
-static void ToF16_SA8(void* dst, const void* src, int width) {
-    SkASSERT(width > 0);
-    uint64_t* d = (uint64_t*)dst;
-    const uint8_t* s = (const uint8_t*)src;
-
-    for (int i = 0; i < width; i++) {
-        uint8_t c = *s++;
-        SkPM4f a;
-        a.fVec[SkPM4f::R] = 0.0f;
-        a.fVec[SkPM4f::G] = 0.0f;
-        a.fVec[SkPM4f::B] = 0.0f;
-        a.fVec[SkPM4f::A] = c / 255.0f;
-        *d++ = a.toF16();
-    }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -416,23 +389,12 @@ static bool bitmapCopyTo(SkBitmap* dst, SkColorType dstCT, const SkBitmap& src,
     SkImageInfo dstInfo = srcPM.info().makeColorType(dstCT);
     switch (dstCT) {
         case kRGB_565_SkColorType:
-            // copyTo() has never been strict on alpha type.  Here we set the src to opaque to
-            // allow the call to readPixels() to succeed and preserve this lenient behavior.
-            if (kOpaque_SkAlphaType != srcPM.alphaType()) {
-                srcPM = SkPixmap(srcPM.info().makeAlphaType(kOpaque_SkAlphaType), srcPM.addr(),
-                                 srcPM.rowBytes());
-                dstInfo = dstInfo.makeAlphaType(kOpaque_SkAlphaType);
-            }
+            dstInfo = dstInfo.makeAlphaType(kOpaque_SkAlphaType);
             break;
         case kRGBA_F16_SkColorType:
             // The caller does not have an opportunity to pass a dst color space.  Assume that
             // they want linear sRGB.
             dstInfo = dstInfo.makeColorSpace(SkColorSpace::MakeSRGBLinear());
-
-            if (!srcPM.colorSpace()) {
-                // Skia needs a color space to convert to F16.  nullptr should be treated as sRGB.
-                srcPM.setColorSpace(SkColorSpace::MakeSRGB());
-            }
             break;
         default:
             break;
@@ -445,55 +407,9 @@ static bool bitmapCopyTo(SkBitmap* dst, SkColorType dstCT, const SkBitmap& src,
         return false;
     }
 
-    // Skia does not support copying from kAlpha8 to types that are not alpha only.
-    // We will handle this case here.
-    if (kAlpha_8_SkColorType == srcPM.colorType() && kAlpha_8_SkColorType != dstCT) {
-        switch (dstCT) {
-            case kRGBA_8888_SkColorType:
-            case kBGRA_8888_SkColorType: {
-                for (int y = 0; y < src.height(); y++) {
-                    const uint8_t* srcRow = srcPM.addr8(0, y);
-                    uint32_t* dstRow = dst->getAddr32(0, y);
-                    ToColor_SA8(dstRow, srcRow, src.width());
-                }
-                return true;
-            }
-            case kRGB_565_SkColorType: {
-                for (int y = 0; y < src.height(); y++) {
-                    uint16_t* dstRow = dst->getAddr16(0, y);
-                    memset(dstRow, 0, sizeof(uint16_t) * src.width());
-                }
-                return true;
-            }
-            case kRGBA_F16_SkColorType: {
-               for (int y = 0; y < src.height(); y++) {
-                   const uint8_t* srcRow = srcPM.addr8(0, y);
-                   void* dstRow = dst->getAddr(0, y);
-                   ToF16_SA8(dstRow, srcRow, src.width());
-               }
-               return true;
-           }
-            default:
-                return false;
-        }
-    }
-
     SkPixmap dstPM;
     if (!dst->peekPixels(&dstPM)) {
         return false;
-    }
-
-    // Skia needs a color space to convert from F16.  nullptr should be treated as sRGB.
-    if (kRGBA_F16_SkColorType == srcPM.colorType() && !dstPM.colorSpace()) {
-        dstPM.setColorSpace(SkColorSpace::MakeSRGB());
-    }
-
-    // readPixels does not support color spaces with parametric transfer functions.  This
-    // works around that restriction when the color spaces are equal.
-    if (kRGBA_F16_SkColorType != dstCT && kRGBA_F16_SkColorType != srcPM.colorType() &&
-            dstPM.colorSpace() == srcPM.colorSpace()) {
-        dstPM.setColorSpace(nullptr);
-        srcPM.setColorSpace(nullptr);
     }
 
     return srcPM.readPixels(dstPM);
