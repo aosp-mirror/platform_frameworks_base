@@ -82,6 +82,7 @@ import com.android.internal.os.KernelWakelockReader;
 import com.android.internal.os.KernelWakelockStats;
 import com.android.internal.os.LooperStats;
 import com.android.internal.os.PowerProfile;
+import com.android.internal.os.StoragedUidIoStatsReader;
 import com.android.internal.util.DumpUtils;
 import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalServices;
@@ -178,6 +179,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             new KernelUidCpuActiveTimeReader();
     private KernelUidCpuClusterTimeReader mKernelUidCpuClusterTimeReader =
             new KernelUidCpuClusterTimeReader();
+    private StoragedUidIoStatsReader mStoragedUidIoStatsReader =
+            new StoragedUidIoStatsReader();
 
     private static IThermalService sThermalService;
     private File mBaseDir =
@@ -1333,6 +1336,27 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    private void pullDiskIo(int tagId, long elapsedNanos, final long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        mStoragedUidIoStatsReader.readAbsolute((uid, fgCharsRead, fgCharsWrite, fgBytesRead,
+                fgBytesWrite, bgCharsRead, bgCharsWrite, bgBytesRead, bgBytesWrite,
+                fgFsync, bgFsync) -> {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(uid);
+            e.writeLong(fgCharsRead);
+            e.writeLong(fgCharsWrite);
+            e.writeLong(fgBytesRead);
+            e.writeLong(fgBytesWrite);
+            e.writeLong(bgCharsRead);
+            e.writeLong(bgCharsWrite);
+            e.writeLong(bgBytesRead);
+            e.writeLong(bgBytesWrite);
+            e.writeLong(fgFsync);
+            e.writeLong(bgFsync);
+            pulledData.add(e);
+        });
+    }
+
     /**
      * Pulls various data.
      */
@@ -1448,6 +1472,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.PROC_STATS: {
                 pullProcessStats(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DISK_IO: {
+                pullDiskIo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             default:
