@@ -175,8 +175,9 @@ message Atom {
         ProcStats proc_stats = 10029;
     }
 
-    // DO NOT USE field numbers above 100,000 in AOSP. Field numbers above
-    // 100,000 are reserved for non-AOSP (e.g. OEMs) to use.
+    // DO NOT USE field numbers above 100,000 in AOSP.
+    // Field numbers 100,000 - 199,999 are reserved for non-AOSP (e.g. OEMs) to use.
+    // Field numbers 200,000 and above are reserved for future use; do not use them at all.
 }
 
 /**
