@@ -57,6 +57,7 @@ import android.view.ViewRootImpl;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillManager;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputConnectionWrapper;
@@ -263,6 +264,9 @@ public final class InputMethodManager {
      */
     public static final boolean ENABLE_LEGACY_EAGER_INITIALIZATION = true;
 
+    private static final Object sLock = new Object();
+
+    @GuardedBy("sLock")
     @UnsupportedAppUsage
     static InputMethodManager sInstance;
 
@@ -686,7 +690,7 @@ public final class InputMethodManager {
      */
     @UnsupportedAppUsage
     public static InputMethodManager getInstance() {
-        synchronized (InputMethodManager.class) {
+        synchronized (sLock) {
             if (sInstance == null) {
                 try {
                     final InputMethodManager imm = new InputMethodManager(Looper.getMainLooper());
@@ -709,7 +713,9 @@ public final class InputMethodManager {
     @Deprecated
     @UnsupportedAppUsage
     public static InputMethodManager peekInstance() {
-        return sInstance;
+        synchronized (sLock) {
+            return sInstance;
+        }
     }
 
     /** @hide */
