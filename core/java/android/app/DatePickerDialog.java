@@ -239,7 +239,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
          * @param year the selected year
          * @param month the selected month (0-11 for compatibility with
          *              {@link Calendar#MONTH})
-         * @param dayOfMonth th selected day of the month (1-31, depending on
+         * @param dayOfMonth the selected day of the month (1-31, depending on
          *                   month)
          */
         void onDateSet(DatePicker view, int year, int month, int dayOfMonth);
