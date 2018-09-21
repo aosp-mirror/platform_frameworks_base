@@ -67,6 +67,7 @@ import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.ITelephonyRegistry;
+import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.TelephonyProperties;
@@ -5816,21 +5817,46 @@ public class TelephonyManager {
      * @param persistSelection whether the selection will persist until reboot. If true, only allows
      * attaching to the selected PLMN until reboot; otherwise, attach to the chosen PLMN and resume
      * normal network selection next time.
-     * @return true on success; false on any failure.
+     * @return {@code true} on success; {@code false} on any failure.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean setNetworkSelectionModeManual(String operatorNumeric, boolean persistSelection) {
+        return setNetworkSelectionModeManual(
+                new OperatorInfo(
+                        "" /* operatorAlphaLong */, "" /* operatorAlphaShort */, operatorNumeric),
+                persistSelection);
+    }
+
+    /**
+     * Ask the radio to connect to the input network and change selection mode to manual.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @param operatorInfo included the PLMN id, long name, short name of the operator to attach to.
+     * @param persistSelection whether the selection will persist until reboot. If true, only allows
+     * attaching to the selected PLMN until reboot; otherwise, attach to the chosen PLMN and resume
+     * normal network selection next time.
+     * @return {@code true} on success; {@code true} on any failure.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean setNetworkSelectionModeManual(
+            OperatorInfo operatorInfo, boolean persistSelection) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony.setNetworkSelectionModeManual(
-                        getSubId(), operatorNumeric, persistSelection);
+                        getSubId(), operatorInfo, persistSelection);
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setNetworkSelectionModeManual RemoteException", ex);
-        } catch (NullPointerException ex) {
-            Rlog.e(TAG, "setNetworkSelectionModeManual NPE", ex);
         }
         return false;
     }
