@@ -284,8 +284,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         compareChannels(channel2,
                 mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, channel2.getId(), false));
 
-        List<NotificationChannelGroup> actualGroups =
-                mHelper.getNotificationChannelGroups(PKG_N_MR1, UID_N_MR1, false, true).getList();
+        List<NotificationChannelGroup> actualGroups = mHelper.getNotificationChannelGroups(
+                PKG_N_MR1, UID_N_MR1, false, true, false).getList();
         boolean foundNcg = false;
         for (NotificationChannelGroup actual : actualGroups) {
             if (ncg.getId().equals(actual.getId())) {
@@ -354,8 +354,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         compareChannels(channel3,
                 mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, channel3.getId(), false));
 
-        List<NotificationChannelGroup> actualGroups =
-                mHelper.getNotificationChannelGroups(PKG_N_MR1, UID_N_MR1, false, true).getList();
+        List<NotificationChannelGroup> actualGroups = mHelper.getNotificationChannelGroups(
+                PKG_N_MR1, UID_N_MR1, false, true, false).getList();
         boolean foundNcg = false;
         for (NotificationChannelGroup actual : actualGroups) {
             if (ncg.getId().equals(actual.getId())) {
@@ -1350,8 +1350,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.onPackagesChanged(true, UserHandle.USER_SYSTEM, new String[]{PKG_N_MR1}, new int[]{
                 UID_N_MR1});
 
-        assertEquals(0,
-                mHelper.getNotificationChannelGroups(PKG_N_MR1, UID_N_MR1, true, true).getList().size());
+        assertEquals(0, mHelper.getNotificationChannelGroups(
+                PKG_N_MR1, UID_N_MR1, true, true, false).getList().size());
     }
 
     @Test
@@ -1440,8 +1440,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 new NotificationChannel("id3", "name1", NotificationManager.IMPORTANCE_HIGH);
         mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel3, true, false);
 
-        List<NotificationChannelGroup> actual =
-                mHelper.getNotificationChannelGroups(PKG_N_MR1, UID_N_MR1, true, true).getList();
+        List<NotificationChannelGroup> actual = mHelper.getNotificationChannelGroups(
+                PKG_N_MR1, UID_N_MR1, true, true, false).getList();
         assertEquals(3, actual.size());
         for (NotificationChannelGroup group : actual) {
             if (group.getId() == null) {
@@ -1473,18 +1473,44 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
         channel1.setGroup(ncg.getId());
         mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1, true, false);
-        mHelper.getNotificationChannelGroups(PKG_N_MR1, UID_N_MR1, true, true).getList();
+        mHelper.getNotificationChannelGroups(PKG_N_MR1, UID_N_MR1, true, true, false).getList();
 
         channel1.setImportance(IMPORTANCE_LOW);
         mHelper.updateNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1, true);
 
-        List<NotificationChannelGroup> actual =
-                mHelper.getNotificationChannelGroups(PKG_N_MR1, UID_N_MR1, true, true).getList();
+        List<NotificationChannelGroup> actual = mHelper.getNotificationChannelGroups(
+                PKG_N_MR1, UID_N_MR1, true, true, false).getList();
 
         assertEquals(2, actual.size());
         for (NotificationChannelGroup group : actual) {
             if (Objects.equals(group.getId(), ncg.getId())) {
                 assertEquals(1, group.getChannels().size());
+            }
+        }
+    }
+
+    @Test
+    public void testGetChannelGroups_includeEmptyGroups() {
+        NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, ncg, true);
+        NotificationChannelGroup ncgEmpty = new NotificationChannelGroup("group2", "name2");
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, ncgEmpty, true);
+
+        NotificationChannel channel1 =
+                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
+        channel1.setGroup(ncg.getId());
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1, true, false);
+
+        List<NotificationChannelGroup> actual = mHelper.getNotificationChannelGroups(
+                PKG_N_MR1, UID_N_MR1, false, false, true).getList();
+
+        assertEquals(2, actual.size());
+        for (NotificationChannelGroup group : actual) {
+            if (Objects.equals(group.getId(), ncg.getId())) {
+                assertEquals(1, group.getChannels().size());
+            }
+            if (Objects.equals(group.getId(), ncgEmpty.getId())) {
+                assertEquals(0, group.getChannels().size());
             }
         }
     }
