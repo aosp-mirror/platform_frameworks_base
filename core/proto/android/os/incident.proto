@@ -26,6 +26,7 @@ import "frameworks/base/core/proto/android/os/kernelwake.proto";
 import "frameworks/base/core/proto/android/os/pagetypeinfo.proto";
 import "frameworks/base/core/proto/android/os/procrank.proto";
 import "frameworks/base/core/proto/android/os/ps.proto";
+import "frameworks/base/core/proto/android/os/statsdata.proto";
 import "frameworks/base/core/proto/android/os/system_properties.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/server/activitymanagerservice.proto";
@@ -298,6 +299,12 @@ message IncidentProto {
     optional android.service.batterystats.BatteryStatsServiceDumpHistoryProto battery_history = 3022 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "batterystats --proto --history",
+        (section).userdebug_and_eng_only = true
+    ];
+
+    optional android.os.StatsDataDumpProto stats_data = 3023 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "stats --proto",
         (section).userdebug_and_eng_only = true
     ];
 

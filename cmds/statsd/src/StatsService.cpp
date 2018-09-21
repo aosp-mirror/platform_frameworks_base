@@ -46,6 +46,8 @@
 using namespace android;
 
 using android::base::StringPrintf;
+using android::util::FIELD_COUNT_REPEATED;
+using android::util::FIELD_TYPE_MESSAGE;
 
 namespace android {
 namespace os {
@@ -57,6 +59,9 @@ constexpr const char* kPermissionUsage = "android.permission.PACKAGE_USAGE_STATS
 constexpr const char* kOpUsage = "android:get_usage_stats";
 
 #define STATS_SERVICE_DIR "/data/misc/stats-service"
+
+// for StatsDataDumpProto
+const int FIELD_ID_REPORTS_LIST = 1;
 
 static binder::Status ok() {
     return binder::Status::ok();
@@ -224,23 +229,40 @@ status_t StatsService::onTransact(uint32_t code, const Parcel& data, Parcel* rep
 }
 
 /**
- * Write debugging data about statsd.
+ * Write data from statsd.
+ * Format for statsdStats:  adb shell dumpsys stats --metadata [-v] [--proto]
+ * Format for data report:  adb shell dumpsys stats [anything other than --metadata] [--proto]
+ * Anything ending in --proto will be in proto format.
+ * Anything without --metadata as the first argument will be report information.
+ *     (bugreports call "adb shell dumpsys stats --dump-priority NORMAL -a --proto")
+ * TODO: Come up with a more robust method of enacting <serviceutils/PriorityDumper.h>.
  */
 status_t StatsService::dump(int fd, const Vector<String16>& args) {
     if (!checkCallingPermission(String16(kPermissionDump))) {
         return PERMISSION_DENIED;
     }
-
-    bool verbose = false;
-    bool proto = false;
-    if (args.size() > 0 && !args[0].compare(String16("-v"))) {
-        verbose = true;
+    int lastArg = args.size() - 1;
+    bool asProto = false;
+    if (lastArg >= 0 && !args[lastArg].compare(String16("--proto"))) { // last argument
+        asProto = true;
+        lastArg--;
     }
-    if (args.size() > 0 && !args[args.size()-1].compare(String16("--proto"))) {
-        proto = true;
+    if (args.size() > 0 && !args[0].compare(String16("--metadata"))) { // first argument
+        // Request is to dump statsd stats.
+        bool verbose = false;
+        if (lastArg >= 0 && !args[lastArg].compare(String16("-v"))) {
+            verbose = true;
+            lastArg--;
+        }
+        dumpStatsdStats(fd, verbose, asProto);
+    } else {
+        // Request is to dump statsd report data.
+        if (asProto) {
+            dumpIncidentSection(fd);
+        } else {
+            dprintf(fd, "Non-proto format of stats data dump not available; see proto version.\n");
+        }
     }
-
-    dump_impl(fd, verbose, proto);
 
     return NO_ERROR;
 }
@@ -248,7 +270,7 @@ status_t StatsService::dump(int fd, const Vector<String16>& args) {
 /**
  * Write debugging data about statsd in text or proto format.
  */
-void StatsService::dump_impl(int out, bool verbose, bool proto) {
+void StatsService::dumpStatsdStats(int out, bool verbose, bool proto) {
     if (proto) {
         vector<uint8_t> data;
         StatsdStats::getInstance().dumpStats(&data, false); // does not reset statsdStats.
@@ -258,6 +280,22 @@ void StatsService::dump_impl(int out, bool verbose, bool proto) {
     } else {
         StatsdStats::getInstance().dumpStats(out);
         mProcessor->dumpStates(out, verbose);
+    }
+}
+
+/**
+ * Write stats report data in StatsDataDumpProto incident section format.
+ */
+void StatsService::dumpIncidentSection(int out) {
+    ProtoOutputStream proto;
+    for (const ConfigKey& configKey : mConfigManager->GetAllConfigKeys()) {
+        uint64_t reportsListToken =
+                proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_REPORTS_LIST);
+        mProcessor->onDumpReport(configKey, getElapsedRealtimeNs(),
+                                 true /* includeCurrentBucket */, false /* erase_data */,
+                                 ADB_DUMP, &proto);
+        proto.end(reportsListToken);
+        proto.flush(out);
     }
 }
 
@@ -283,7 +321,7 @@ status_t StatsService::command(int in, int out, int err, Vector<String8>& args,
         }
 
         if (!args[0].compare(String8("dump-report"))) {
-            return cmd_dump_report(out, err, args);
+            return cmd_dump_report(out, args);
         }
 
         if (!args[0].compare(String8("pull-source")) && args.size() > 1) {
@@ -546,7 +584,7 @@ status_t StatsService::cmd_config(int in, int out, int err, Vector<String8>& arg
     return UNKNOWN_ERROR;
 }
 
-status_t StatsService::cmd_dump_report(int out, int err, const Vector<String8>& args) {
+status_t StatsService::cmd_dump_report(int out, const Vector<String8>& args) {
     if (mProcessor != nullptr) {
         int argCount = args.size();
         bool good = false;
@@ -589,14 +627,13 @@ status_t StatsService::cmd_dump_report(int out, int err, const Vector<String8>& 
         if (good) {
             vector<uint8_t> data;
             mProcessor->onDumpReport(ConfigKey(uid, StrToInt64(name)), getElapsedRealtimeNs(),
-                                     includeCurrentBucket, ADB_DUMP, &data);
+                                     includeCurrentBucket, true /* erase_data */, ADB_DUMP, &data);
             if (proto) {
                 for (size_t i = 0; i < data.size(); i ++) {
                     dprintf(out, "%c", data[i]);
                 }
             } else {
-                dprintf(out, "Dump report for Config [%d,%s]\n", uid, name.c_str());
-                dprintf(out, "See the StatsLogReport in logcat...\n");
+                dprintf(out, "Non-proto stats data dump not currently supported.\n");
             }
             return android::OK;
         } else {
@@ -888,7 +925,7 @@ Status StatsService::getData(int64_t key, const String16& packageName, vector<ui
     VLOG("StatsService::getData with Pid %i, Uid %i", ipc->getCallingPid(), ipc->getCallingUid());
     ConfigKey configKey(ipc->getCallingUid(), key);
     mProcessor->onDumpReport(configKey, getElapsedRealtimeNs(), false /* include_current_bucket*/,
-                             GET_DATA_CALLED, output);
+                             true /* erase_data */, GET_DATA_CALLED, output);
     return Status::ok();
 }
 

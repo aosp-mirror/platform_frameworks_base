@@ -107,6 +107,7 @@ public:
 
     virtual void onDumpReport(const int64_t dumpTimeNs,
                               const bool include_current_partial_bucket,
+                              const bool erase_data,
                               std::set<string> *str_set,
                               android::util::ProtoOutputStream* protoOutput);
 
