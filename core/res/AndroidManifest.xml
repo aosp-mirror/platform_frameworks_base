@@ -615,6 +615,8 @@
     <protected-broadcast android:name="com.android.server.jobscheduler.FORCE_IDLE" />
     <protected-broadcast android:name="com.android.server.jobscheduler.UNFORCE_IDLE" />
 
+    <protected-broadcast android:name="android.provider.action.DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
@@ -4135,6 +4137,12 @@
          @hide <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.DISABLE_HIDDEN_API_CHECKS"
                 android:protectionLevel="signature" />
+
+    <!-- @hide Permission that protects the
+        {@link android.provider.Telephony.Intents#ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL}
+        broadcast -->
+    <permission android:name="android.permission.MONITOR_DEFAULT_SMS_PACKAGE"
+        android:protectionLevel="signature" />
 
     <application android:process="system"
                  android:persistent="true"
