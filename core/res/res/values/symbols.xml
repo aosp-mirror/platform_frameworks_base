@@ -2429,6 +2429,7 @@
   <java-symbol type="string" name="face_error_timeout" />
   <java-symbol type="array" name="face_error_vendor" />
   <java-symbol type="string" name="face_error_canceled" />
+  <java-symbol type="string" name="face_error_user_canceled" />
   <java-symbol type="string" name="face_error_lockout" />
   <java-symbol type="string" name="face_error_lockout_permanent" />
   <java-symbol type="string" name="face_error_not_enrolled" />
@@ -2446,6 +2447,8 @@
   <java-symbol type="string" name="face_acquired_not_detected" />
   <java-symbol type="array" name="face_acquired_vendor" />
   <java-symbol type="string" name="face_name_template" />
+  <java-symbol type="string" name="face_authenticated_no_confirmation_required" />
+  <java-symbol type="string" name="face_authenticated_confirmation_required" />
 
   <!-- Face config -->
   <java-symbol type="integer" name="config_faceMaxTemplatesPerUser" />

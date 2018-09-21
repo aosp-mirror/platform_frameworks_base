@@ -34,8 +34,8 @@ interface IFaceService {
 
     // This method invokes the BiometricDialog. The arguments are almost the same as above,
     // but should only be called from (BiometricPromptService).
-    void authenticateFromService(IBinder token, long sessionId, int userId,
-            IBiometricPromptServiceReceiver receiver, int flags, String opPackageName,
+    void authenticateFromService(boolean requireConfirmation, IBinder token, long sessionId,
+            int userId, IBiometricPromptServiceReceiver receiver, int flags, String opPackageName,
             in Bundle bundle, IBiometricPromptReceiver dialogReceiver,
             int callingUid, int callingPid, int callingUserId);
 

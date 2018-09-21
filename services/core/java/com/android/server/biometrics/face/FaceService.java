@@ -88,10 +88,11 @@ public class FaceService extends BiometricService {
                 DaemonWrapper daemon, long halDeviceId, IBinder token,
                 ServiceListener listener, int targetUserId, int groupId, long opId,
                 boolean restricted, String owner, Bundle bundle,
-                IBiometricPromptReceiver dialogReceiver, IStatusBarService statusBarService) {
+                IBiometricPromptReceiver dialogReceiver, IStatusBarService statusBarService,
+                boolean requireConfirmation) {
             super(context, daemon, halDeviceId, token, listener, targetUserId, groupId, opId,
-                    restricted,
-                    owner, bundle, dialogReceiver, statusBarService);
+                    restricted, owner, bundle, dialogReceiver, statusBarService,
+                    requireConfirmation);
         }
 
         @Override
@@ -159,15 +160,15 @@ public class FaceService extends BiometricService {
             final AuthenticationClientImpl client = new FaceAuthClient(getContext(),
                     mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver),
                     mCurrentUserId, 0 /* groupId */, opId, restricted, opPackageName,
-                    null /* bundle */, null /* dialogReceiver */, mStatusBarService);
-
+                    null /* bundle */, null /* dialogReceiver */, mStatusBarService,
+                    false /* requireConfirmation */);
             authenticateInternal(client, opId, opPackageName);
         }
 
         @Override // Binder call
-        public void authenticateFromService(IBinder token, long opId, int groupId,
-                IBiometricPromptServiceReceiver receiver, int flags, String opPackageName,
-                Bundle bundle, IBiometricPromptReceiver dialogReceiver,
+        public void authenticateFromService(boolean requireConfirmation, IBinder token, long opId,
+                int groupId, IBiometricPromptServiceReceiver receiver, int flags,
+                String opPackageName, Bundle bundle, IBiometricPromptReceiver dialogReceiver,
                 int callingUid, int callingPid, int callingUserId) {
             checkPermission(USE_BIOMETRIC_INTERNAL);
             final boolean restricted = true; // BiometricPrompt is always restricted
@@ -175,7 +176,7 @@ public class FaceService extends BiometricService {
                     mDaemonWrapper, mHalDeviceId, token,
                     new BiometricPromptServiceListenerImpl(receiver),
                     mCurrentUserId, 0 /* groupId */, opId, restricted, opPackageName,
-                    bundle, dialogReceiver, mStatusBarService);
+                    bundle, dialogReceiver, mStatusBarService, true /* requireConfirmation */);
             authenticateInternal(client, opId, opPackageName, callingUid, callingPid,
                     callingUserId);
         }

@@ -23,6 +23,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import java.util.ArrayList;
+
 /**
  * A class to keep track of the enumeration state for a given client.
  */
@@ -94,7 +96,7 @@ public abstract class EnumerateClient extends ClientMonitor {
 
     @Override
     public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
-            boolean authenticated) {
+            boolean authenticated, ArrayList<Byte> token) {
         if (DEBUG) Slog.w(getLogTag(), "onAuthenticated() called for enumerate!");
         return true; // Invalid for Enumerate.
     }

@@ -154,9 +154,9 @@ public class BiometricPromptService extends SystemService {
                     } else if (mCurrentModality == BIOMETRIC_IRIS) {
                         Slog.w(TAG, "Unsupported modality");
                     } else if (mCurrentModality == BIOMETRIC_FACE) {
-                        mFaceService.authenticateFromService(token, sessionId, userId,
-                                receiver, flags, opPackageName, bundle, dialogReceiver,
-                                callingUid, callingPid, callingUserId);
+                        mFaceService.authenticateFromService(true /* requireConfirmation */, token,
+                                sessionId, userId, receiver, flags, opPackageName, bundle,
+                                dialogReceiver, callingUid, callingPid, callingUserId);
                     } else {
                         Slog.w(TAG, "Unsupported modality");
                     }
@@ -305,7 +305,9 @@ public class BiometricPromptService extends SystemService {
             try {
                 receiver.onError(0 /* deviceId */,
                         BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS,
-                        hardwareUnavailable);
+                        FaceManager.getErrorString(getContext(),
+                                BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS,
+                                0 /* vendorCode */));
             } catch (RemoteException e) {
                 Slog.e(TAG, "Unable to send error", e);
             }

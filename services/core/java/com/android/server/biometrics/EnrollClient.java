@@ -23,6 +23,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -126,7 +127,7 @@ public abstract class EnrollClient extends ClientMonitor {
 
     @Override
     public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
-            boolean authenticated) {
+            boolean authenticated, ArrayList<Byte> token) {
         if (DEBUG) Slog.w(getLogTag(), "onAuthenticated() called for enroll!");
         return true; // Invalid for EnrollClient
     }

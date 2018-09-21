@@ -26,9 +26,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.security.KeyStore;
 import android.util.Slog;
 
 import com.android.internal.statusbar.IStatusBarService;
+
+import java.util.ArrayList;
 
 /**
  * A class to keep track of the authentication state for a given client.
@@ -50,13 +53,37 @@ public abstract class AuthenticationClient extends ClientMonitor {
     public static final int LOCKOUT_TIMED = 1;
     public static final int LOCKOUT_PERMANENT = 2;
 
+    private final boolean mRequireConfirmation;
     // Callback mechanism received from the client
     // (BiometricPrompt -> BiometricPromptService -> <Biometric>Service -> AuthenticationClient)
     private IBiometricPromptReceiver mDialogReceiverFromClient;
     private Bundle mBundle;
     private IStatusBarService mStatusBarService;
     private boolean mInLockout;
+    private TokenEscrow mEscrow;
     protected boolean mDialogDismissed;
+
+    /**
+     * Container that holds the identifier and authToken. For biometrics that require user
+     * confirmation, these should not be sent to their final destinations until the user confirms.
+     */
+    class TokenEscrow {
+        final BiometricAuthenticator.Identifier mIdentifier;
+        final ArrayList<Byte> mToken;
+
+        TokenEscrow(BiometricAuthenticator.Identifier identifier, ArrayList<Byte> token) {
+            mIdentifier = identifier;
+            mToken = token;
+        }
+
+        BiometricAuthenticator.Identifier getIdentifier() {
+            return mIdentifier;
+        }
+
+        ArrayList<Byte> getToken() {
+            return mToken;
+        }
+    }
 
     // Receives events from SystemUI and handles them before forwarding them to BiometricDialog
     protected IBiometricPromptReceiver mDialogReceiver = new IBiometricPromptReceiver.Stub() {
@@ -64,14 +91,30 @@ public abstract class AuthenticationClient extends ClientMonitor {
         public void onDialogDismissed(int reason) {
             if (mBundle != null && mDialogReceiverFromClient != null) {
                 try {
-                    mDialogReceiverFromClient.onDialogDismissed(reason);
+                    if (reason != BiometricPrompt.DISMISSED_REASON_POSITIVE) {
+                        // Positive button is used by passive modalities as a "confirm" button,
+                        // do not send to client
+                        mDialogReceiverFromClient.onDialogDismissed(reason);
+                    }
                     if (reason == BiometricPrompt.DISMISSED_REASON_USER_CANCEL) {
                         onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED,
                                 0 /* vendorCode */);
+                    } else if (reason == BiometricPrompt.DISMISSED_REASON_POSITIVE) {
+                        // Have the service send the token to KeyStore, and send onAuthenticated
+                        // to the application.
+                        if (mEscrow != null) {
+                            if (DEBUG) Slog.d(getLogTag(), "Confirmed");
+                            addTokenToKeyStore(mEscrow.getToken());
+                            notifyClientAuthenticationSucceeded(mEscrow.getIdentifier());
+                            mEscrow = null;
+                            onAuthenticationConfirmed();
+                        } else {
+                            Slog.e(getLogTag(), "Escrow is null!!!");
+                        }
                     }
                     mDialogDismissed = true;
                 } catch (RemoteException e) {
-                    Slog.e(getLogTag(), "Unable to notify dialog dismissed", e);
+                    Slog.e(getLogTag(), "Remote exception", e);
                 }
                 stop(true /* initiatedByClient */);
             }
@@ -89,11 +132,18 @@ public abstract class AuthenticationClient extends ClientMonitor {
      */
     public abstract void onStop();
 
+    /**
+     * This method is called when biometric authentication was confirmed by the user. The client
+     * should be removed.
+     */
+    public abstract void onAuthenticationConfirmed();
+
     public AuthenticationClient(Context context, Metrics metrics,
             BiometricService.DaemonWrapper daemon, long halDeviceId, IBinder token,
             BiometricService.ServiceListener listener, int targetUserId, int groupId, long opId,
             boolean restricted, String owner, Bundle bundle,
-            IBiometricPromptReceiver dialogReceiver, IStatusBarService statusBarService) {
+            IBiometricPromptReceiver dialogReceiver, IStatusBarService statusBarService,
+            boolean requireConfirmation) {
         super(context, metrics, daemon, halDeviceId, token, listener, targetUserId, groupId,
                 restricted, owner);
         mOpId = opId;
@@ -101,6 +151,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
         mDialogReceiverFromClient = dialogReceiver;
         mStatusBarService = statusBarService;
         mHandler = new Handler(Looper.getMainLooper());
+        mRequireConfirmation = requireConfirmation;
     }
 
     @Override
@@ -154,9 +205,41 @@ public abstract class AuthenticationClient extends ClientMonitor {
         return super.onError(deviceId, error, vendorCode);
     }
 
+    private void notifyClientAuthenticationSucceeded(BiometricAuthenticator.Identifier identifier)
+            throws RemoteException {
+        final BiometricService.ServiceListener listener = getListener();
+        // Explicitly have if/else here to make it super obvious in case the code is
+        // touched in the future.
+        if (!getIsRestricted()) {
+            listener.onAuthenticationSucceeded(
+                    getHalDeviceId(), identifier, getTargetUserId());
+        } else {
+            listener.onAuthenticationSucceeded(
+                    getHalDeviceId(), null, getTargetUserId());
+        }
+    }
+
+    private void addTokenToKeyStore(ArrayList<Byte> token) {
+        // Send the token to KeyStore
+        final byte[] byteToken = new byte[token.size()];
+        for (int i = 0; i < token.size(); i++) {
+            byteToken[i] = token.get(i);
+        }
+        KeyStore.getInstance().addAuthToken(byteToken);
+    }
+
     @Override
     public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
-            boolean authenticated) {
+            boolean authenticated, ArrayList<Byte> token) {
+        if (authenticated) {
+            if (mRequireConfirmation) {
+                // Store the token so it can be sent to keystore after the user presses confirm
+                mEscrow = new TokenEscrow(identifier, token);
+            } else {
+                addTokenToKeyStore(token);
+            }
+        }
+
         boolean result = false;
 
         // If the biometric dialog is showing, notify authentication succeeded
@@ -184,15 +267,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
                         Slog.v(getLogTag(), "onAuthenticated(owner=" + getOwnerString()
                                 + ", id=" + identifier.getBiometricId());
                     }
-
-                    // Explicitly have if/else here to make it super obvious in case the code is
-                    // touched in the future.
-                    if (!getIsRestricted()) {
-                        listener.onAuthenticationSucceeded(
-                                getHalDeviceId(), identifier, getTargetUserId());
-                    } else {
-                        listener.onAuthenticationSucceeded(
-                                getHalDeviceId(), null, getTargetUserId());
+                    if (!mRequireConfirmation) {
+                        notifyClientAuthenticationSucceeded(identifier);
                     }
                 }
             } catch (RemoteException e) {
@@ -241,7 +317,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
             if (listener != null) {
                 vibrateSuccess();
             }
-            result |= true; // we have a valid biometric, done
+            // we have a valid biometric that doesn't require confirmation, done
+            result |= !mRequireConfirmation;
             resetFailedAttempts();
             onStop();
         }
@@ -269,7 +346,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             if (mBundle != null) {
                 try {
                     mStatusBarService.showBiometricDialog(mBundle, mDialogReceiver,
-                            getBiometricType());
+                            getBiometricType(), mRequireConfirmation);
                 } catch (RemoteException e) {
                     Slog.e(getLogTag(), "Unable to show biometric dialog", e);
                 }

@@ -19,7 +19,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="bottom"
-    android:background="@color/fingerprint_dialog_dim_color"
+    android:background="@color/biometric_dialog_dim_color"
     android:orientation="vertical">
 
     <!-- This is not a Space since Spaces cannot be clicked -->
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:elevation="2dp"
-            android:background="@drawable/fingerprint_dialog_bg">
+            android:background="@drawable/biometric_dialog_bg">
 
             <TextView
                 android:id="@+id/title"
@@ -57,13 +57,13 @@
                 android:layout_marginEnd="24dp"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="24dp"
-                android:gravity="@integer/fingerprint_dialog_text_gravity"
+                android:gravity="@integer/biometric_dialog_text_gravity"
                 android:textSize="20sp"
                 android:maxLines="1"
                 android:singleLine="true"
                 android:ellipsize="marquee"
                 android:marqueeRepeatLimit="marquee_forever"
-                android:textColor="@color/fingerprint_dialog_text_dark_color"/>
+                android:textColor="@color/biometric_dialog_text_dark_color"/>
 
             <TextView
                 android:id="@+id/subtitle"
@@ -72,13 +72,13 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
-                android:gravity="@integer/fingerprint_dialog_text_gravity"
+                android:gravity="@integer/biometric_dialog_text_gravity"
                 android:textSize="16sp"
                 android:maxLines="1"
                 android:singleLine="true"
                 android:ellipsize="marquee"
                 android:marqueeRepeatLimit="marquee_forever"
-                android:textColor="@color/fingerprint_dialog_text_dark_color"/>
+                android:textColor="@color/biometric_dialog_text_dark_color"/>
 
             <TextView
                 android:id="@+id/description"
@@ -86,20 +86,19 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:layout_marginStart="24dp"
-                android:gravity="@integer/fingerprint_dialog_text_gravity"
+                android:gravity="@integer/biometric_dialog_text_gravity"
                 android:paddingTop="8dp"
                 android:textSize="16sp"
                 android:maxLines="4"
-                android:textColor="@color/fingerprint_dialog_text_dark_color"/>
+                android:textColor="@color/biometric_dialog_text_dark_color"/>
 
             <ImageView
-                android:id="@+id/fingerprint_icon"
-                android:layout_width="@dimen/fingerprint_dialog_fp_icon_size"
-                android:layout_height="@dimen/fingerprint_dialog_fp_icon_size"
+                android:id="@+id/biometric_icon"
+                android:layout_width="@dimen/biometric_dialog_biometric_icon_size"
+                android:layout_height="@dimen/biometric_dialog_biometric_icon_size"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="48dp"
-                android:scaleType="fitXY"
-                android:contentDescription="@string/accessibility_fingerprint_dialog_fingerprint_icon" />
+                android:scaleType="fitXY" />
 
             <TextView
                 android:id="@+id/error"
@@ -112,9 +111,8 @@
                 android:textSize="12sp"
                 android:gravity="center_horizontal"
                 android:accessibilityLiveRegion="polite"
-                android:text="@string/fingerprint_dialog_touch_sensor"
-                android:contentDescription="@string/accessibility_fingerprint_dialog_help_area"
-                android:textColor="@color/fingerprint_dialog_text_light_color"/>
+                android:contentDescription="@string/accessibility_biometric_dialog_help_area"
+                android:textColor="@color/biometric_dialog_text_light_color"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -125,7 +123,7 @@
                 android:orientation="horizontal"
                 android:measureWithLargestChild="true">
                 <Space android:id="@+id/leftSpacer"
-                    android:layout_width="24dp"
+                    android:layout_width="12dp"
                     android:layout_height="match_parent"
                     android:visibility="visible" />
                 <!-- Negative Button -->
@@ -133,20 +131,26 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
-                    android:layout_marginStart="-12dp"
-                    android:gravity="start|center_vertical"
+                    android:gravity="center"
                     android:maxLines="2" />
+                <Space android:id="@+id/middleSpacer"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:visibility="visible" />
                 <!-- Positive Button -->
                 <Button android:id="@+id/button1"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
-                    android:layout_marginEnd="12dp"
-                    android:maxLines="2" />
+                    style="@*android:style/Widget.DeviceDefault.Button.Colored"
+                    android:gravity="center"
+                    android:maxLines="2"
+                    android:text="@string/biometric_dialog_confirm"
+                    android:visibility="gone"/>
                 <Space android:id="@+id/rightSpacer"
-                    android:layout_width="24dip"
+                    android:layout_width="12dip"
                     android:layout_height="match_parent"
-                    android:visibility="gone" />
+                    android:visibility="visible" />
             </LinearLayout>
         </LinearLayout>
 
