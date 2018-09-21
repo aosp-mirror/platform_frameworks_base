@@ -137,6 +137,7 @@ public class InstallInstalling extends AlertActivity {
                         UID_UNKNOWN);
                 params.installerPackageName =
                         getIntent().getStringExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME);
+                params.installReason = PackageManager.INSTALL_REASON_USER;
 
                 File file = new File(mPackageURI.getPath());
                 try {
