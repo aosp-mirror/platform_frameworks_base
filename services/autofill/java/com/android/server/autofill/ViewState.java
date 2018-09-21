@@ -69,8 +69,10 @@ final class ViewState {
     public static final int STATE_RESTARTED_SESSION = 0x100;
     /** View is the URL bar of a package on compat mode. */
     public  static final int STATE_URL_BAR = 0x200;
-    /** View was asked to autofil but failed to do so. */
+    /** View was asked to autofill but failed to do so. */
     public static final int STATE_AUTOFILL_FAILED = 0x400;
+    /** View has been autofilled at least once. */
+    public static final int STATE_AUTOFILLED_ONCE = 0x800;
 
     public final AutofillId id;
 
@@ -160,6 +162,9 @@ final class ViewState {
             mState = state;
         } else {
             mState |= state;
+        }
+        if (state == STATE_AUTOFILLED) {
+            mState |= STATE_AUTOFILLED_ONCE;
         }
     }
 

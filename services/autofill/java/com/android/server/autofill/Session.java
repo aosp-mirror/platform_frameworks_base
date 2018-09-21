@@ -1206,7 +1206,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             // - not autofilled but matches a dataset value -> manuallyFilledIds
             if ((state & ViewState.STATE_CHANGED) != 0) {
                 // Check if autofilled value was changed
-                if ((state & ViewState.STATE_AUTOFILLED) != 0) {
+                if ((state & ViewState.STATE_AUTOFILLED_ONCE) != 0) {
                     final String datasetId = viewState.getDatasetId();
                     if (datasetId == null) {
                         // Sanity check - should never happen.
@@ -2181,12 +2181,28 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     // Must check if this update was caused by autofilling the view, in which
                     // case we just update the value, but not the UI.
                     final AutofillValue filledValue = viewState.getAutofilledValue();
-                    if (filledValue != null && filledValue.equals(value)) {
-                        if (sVerbose) {
-                            Slog.v(TAG, "ignoring autofilled change on id " + id);
+                    if (filledValue != null) {
+                        if (filledValue.equals(value)) {
+                            if (sVerbose) {
+                                Slog.v(TAG, "ignoring autofilled change on id " + id);
+                            }
+                            viewState.resetState(ViewState.STATE_CHANGED);
+                            return;
                         }
-                        return;
+                        else {
+                            if ((viewState.id.equals(this.mCurrentViewId)) &&
+                                    (viewState.getState() & ViewState.STATE_AUTOFILLED) != 0) {
+                                // Remove autofilled state once field is changed after autofilling.
+                                if (sVerbose) {
+                                    Slog.v(TAG, "field changed after autofill on id " + id);
+                                }
+                                viewState.resetState(ViewState.STATE_AUTOFILLED);
+                                final ViewState currentView = mViewStates.get(mCurrentViewId);
+                                currentView.maybeCallOnFillReady(flags);
+                            }
+                        }
                     }
+
                     // Update the internal state...
                     viewState.setState(ViewState.STATE_CHANGED);
 
