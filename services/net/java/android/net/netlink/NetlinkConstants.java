@@ -54,6 +54,12 @@ public class NetlinkConstants {
         return String.valueOf(family);
     }
 
+    public static String stringForProtocol(int protocol) {
+        if (protocol == OsConstants.IPPROTO_TCP) { return "IPPROTO_TCP"; }
+        if (protocol == OsConstants.IPPROTO_UDP) { return "IPPROTO_UDP"; }
+        return String.valueOf(protocol);
+    }
+
     public static String hexify(byte[] bytes) {
         if (bytes == null) { return "(null)"; }
         return HexDump.toHexString(bytes);
@@ -89,6 +95,9 @@ public class NetlinkConstants {
     public static final short RTM_DELRULE        = 33;
     public static final short RTM_GETRULE        = 34;
     public static final short RTM_NEWNDUSEROPT   = 68;
+
+    /* see &lt;linux_src&gt;/include/uapi/linux/sock_diag.h */
+    public static final short SOCK_DIAG_BY_FAMILY = 20;
 
     public static String stringForNlMsgType(short nlm_type) {
         switch (nlm_type) {
