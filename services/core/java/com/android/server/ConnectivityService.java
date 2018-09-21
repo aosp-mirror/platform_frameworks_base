@@ -35,6 +35,9 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
+import static android.os.Process.INVALID_UID;
+import static android.system.OsConstants.IPPROTO_TCP;
+import static android.system.OsConstants.IPPROTO_UDP;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
@@ -49,6 +52,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.net.ConnectionInfo;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.PacketKeepalive;
 import android.net.IConnectivityManager;
@@ -75,7 +79,6 @@ import android.net.NetworkSpecifier;
 import android.net.NetworkState;
 import android.net.NetworkUtils;
 import android.net.NetworkWatchlistManager;
-import android.net.Proxy;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.UidRange;
@@ -83,6 +86,7 @@ import android.net.Uri;
 import android.net.VpnService;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
+import android.net.netlink.InetDiagMessage;
 import android.net.util.MultinetworkPolicyTracker;
 import android.os.Binder;
 import android.os.Build;
@@ -153,7 +157,6 @@ import com.android.server.connectivity.NetworkDiagnostics;
 import com.android.server.connectivity.NetworkMonitor;
 import com.android.server.connectivity.NetworkNotificationManager;
 import com.android.server.connectivity.NetworkNotificationManager.NotificationType;
-import com.android.server.connectivity.PacManager;
 import com.android.server.connectivity.PermissionMonitor;
 import com.android.server.connectivity.ProxyTracker;
 import com.android.server.connectivity.Tethering;
@@ -1678,6 +1681,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CONNECTIVITY_INTERNAL,
                 "ConnectivityService");
+    }
+
+    private boolean checkNetworkStackPermission() {
+        return PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.NETWORK_STACK);
     }
 
     private void enforceConnectivityRestrictedNetworksPermission() {
@@ -5921,5 +5929,50 @@ public class ConnectivityService extends IConnectivityManager.Stub
             pw.println("  airplane-mode");
             pw.println("    Get airplane mode.");
         }
+    }
+
+    /**
+     * Caller either needs to be an active VPN, or hold the NETWORK_STACK permission
+     * for testing.
+     */
+    private Vpn enforceActiveVpnOrNetworkStackPermission() {
+        if (checkNetworkStackPermission()) {
+            return null;
+        }
+        final int uid = Binder.getCallingUid();
+        final int user = UserHandle.getUserId(uid);
+        synchronized (mVpns) {
+            Vpn vpn = mVpns.get(user);
+            try {
+                if (vpn.getVpnInfo().ownerUid == uid) return vpn;
+            } catch (NullPointerException e) {
+                /* vpn is null, or VPN is not connected and getVpnInfo() is null. */
+            }
+        }
+        throw new SecurityException("App must either be an active VPN or have the NETWORK_STACK "
+                + "permission");
+    }
+
+    /**
+     * @param connectionInfo the connection to resolve.
+     * @return {@code uid} if the connection is found and the app has permission to observe it
+     * (e.g., if it is associated with the calling VPN app's tunnel) or {@code INVALID_UID} if the
+     * connection is not found.
+     */
+    public int getConnectionOwnerUid(ConnectionInfo connectionInfo) {
+        final Vpn vpn = enforceActiveVpnOrNetworkStackPermission();
+        if (connectionInfo.protocol != IPPROTO_TCP && connectionInfo.protocol != IPPROTO_UDP) {
+            throw new IllegalArgumentException("Unsupported protocol " + connectionInfo.protocol);
+        }
+
+        final int uid = InetDiagMessage.getConnectionOwnerUid(connectionInfo.protocol,
+                connectionInfo.local, connectionInfo.remote);
+
+        /* Filter out Uids not associated with the VPN. */
+        if (vpn != null && !vpn.appliesToUid(uid)) {
+            return INVALID_UID;
+        }
+
+        return uid;
     }
 }
