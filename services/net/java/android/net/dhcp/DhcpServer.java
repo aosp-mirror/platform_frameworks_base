@@ -20,6 +20,7 @@ import static android.net.NetworkUtils.getBroadcastAddress;
 import static android.net.NetworkUtils.getPrefixMaskAsInet4Address;
 import static android.net.TrafficStats.TAG_SYSTEM_DHCP_SERVER;
 import static android.net.dhcp.DhcpPacket.DHCP_CLIENT;
+import static android.net.dhcp.DhcpPacket.DHCP_HOST_NAME;
 import static android.net.dhcp.DhcpPacket.DHCP_SERVER;
 import static android.net.dhcp.DhcpPacket.ENCAP_BOOTP;
 import static android.net.dhcp.DhcpPacket.INFINITE_LEASE;
@@ -46,6 +47,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.HexDump;
@@ -350,6 +352,19 @@ public class DhcpServer {
         return isEmpty(request.mClientIp) && (request.mBroadcast || isEmpty(lease.getNetAddr()));
     }
 
+    /**
+     * Get the hostname from a lease if non-empty and requested in the incoming request.
+     * @param request The incoming request.
+     * @return The hostname, or null if not requested or empty.
+     */
+    @Nullable
+    private static String getHostnameIfRequested(@NonNull DhcpPacket request,
+            @NonNull DhcpLease lease) {
+        return request.hasRequestedParam(DHCP_HOST_NAME) && !TextUtils.isEmpty(lease.getHostname())
+                ? lease.getHostname()
+                : null;
+    }
+
     private boolean transmitOffer(@NonNull DhcpPacket request, @NonNull DhcpLease lease,
             @NonNull MacAddress clientMac) {
         final boolean broadcastFlag = getBroadcastFlag(request, lease);
@@ -358,12 +373,14 @@ public class DhcpServer {
                 getPrefixMaskAsInet4Address(mServingParams.serverAddr.getPrefixLength());
         final Inet4Address broadcastAddr = getBroadcastAddress(
                 mServingParams.getServerInet4Addr(), mServingParams.serverAddr.getPrefixLength());
+        final String hostname = getHostnameIfRequested(request, lease);
         final ByteBuffer offerPacket = DhcpPacket.buildOfferPacket(
                 ENCAP_BOOTP, request.mTransId, broadcastFlag, mServingParams.getServerInet4Addr(),
                 request.mRelayIp, lease.getNetAddr(), request.mClientMac, timeout, prefixMask,
                 broadcastAddr, new ArrayList<>(mServingParams.defaultRouters),
                 new ArrayList<>(mServingParams.dnsServers),
-                mServingParams.getServerInet4Addr(), null /* domainName */, mServingParams.metered);
+                mServingParams.getServerInet4Addr(), null /* domainName */, hostname,
+                mServingParams.metered, (short) mServingParams.linkMtu);
 
         return transmitOfferOrAckPacket(offerPacket, request, lease, clientMac, broadcastFlag);
     }
@@ -374,13 +391,15 @@ public class DhcpServer {
         // transmitOffer above
         final boolean broadcastFlag = getBroadcastFlag(request, lease);
         final int timeout = getLeaseTimeout(lease);
+        final String hostname = getHostnameIfRequested(request, lease);
         final ByteBuffer ackPacket = DhcpPacket.buildAckPacket(ENCAP_BOOTP, request.mTransId,
                 broadcastFlag, mServingParams.getServerInet4Addr(), request.mRelayIp,
                 lease.getNetAddr(), request.mClientIp, request.mClientMac, timeout,
                 mServingParams.getPrefixMaskAsAddress(), mServingParams.getBroadcastAddress(),
                 new ArrayList<>(mServingParams.defaultRouters),
                 new ArrayList<>(mServingParams.dnsServers),
-                mServingParams.getServerInet4Addr(), null /* domainName */, mServingParams.metered);
+                mServingParams.getServerInet4Addr(), null /* domainName */, hostname,
+                mServingParams.metered, (short) mServingParams.linkMtu);
 
         return transmitOfferOrAckPacket(ackPacket, request, lease, clientMac, broadcastFlag);
     }
