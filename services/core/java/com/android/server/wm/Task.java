@@ -29,6 +29,8 @@ import static com.android.server.wm.TaskProto.BOUNDS;
 import static com.android.server.wm.TaskProto.DEFER_REMOVAL;
 import static com.android.server.wm.TaskProto.FILLS_PARENT;
 import static com.android.server.wm.TaskProto.ID;
+import static com.android.server.wm.TaskProto.SURFACE_HEIGHT;
+import static com.android.server.wm.TaskProto.SURFACE_WIDTH;
 import static com.android.server.wm.TaskProto.TEMP_INSET_BOUNDS;
 import static com.android.server.wm.TaskProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
@@ -295,6 +297,12 @@ class Task extends WindowContainer<AppWindowToken> {
         mRotation = rotation;
 
         return boundsChange;
+    }
+
+    @Override
+    void onDisplayChanged(DisplayContent dc) {
+        updateSurfaceSize(dc);
+        super.onDisplayChanged(dc);
     }
 
     /**
@@ -703,6 +711,8 @@ class Task extends WindowContainer<AppWindowToken> {
         getBounds().writeToProto(proto, BOUNDS);
         mTempInsetBounds.writeToProto(proto, TEMP_INSET_BOUNDS);
         proto.write(DEFER_REMOVAL, mDeferRemoval);
+        proto.write(SURFACE_WIDTH, mSurfaceControl.getWidth());
+        proto.write(SURFACE_HEIGHT, mSurfaceControl.getHeight());
         proto.end(token);
     }
 
