@@ -593,14 +593,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (mForceSeamlesslyRotate || requested) {
             mPendingSeamlessRotate = new SeamlessRotator(oldRotation, rotation, getDisplayInfo());
-            mPendingSeamlessRotate.unrotate(transaction, this.mToken);
+            mPendingSeamlessRotate.unrotate(transaction, this);
             mService.markForSeamlessRotation(this, true);
         }
     }
 
     void finishSeamlessRotation() {
         if (mPendingSeamlessRotate != null) {
-            mPendingSeamlessRotate.finish(this.mToken, this);
+            mPendingSeamlessRotate.finish(this);
             mFinishSeamlessRotateFrameNumber = getFrameNumber();
             mPendingSeamlessRotate = null;
             mService.markForSeamlessRotation(this, false);
