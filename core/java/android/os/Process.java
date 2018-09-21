@@ -40,6 +40,11 @@ public class Process {
     public static final String SECONDARY_ZYGOTE_SOCKET = "zygote_secondary";
 
     /**
+     * An invalid UID value.
+     */
+    public static final int INVALID_UID = -1;
+
+    /**
      * Defines the root UID.
      * @hide
      */
