@@ -378,7 +378,7 @@ final class SystemServiceRegistry {
                 new StaticServiceFetcher<InputMethodManager>() {
             @Override
             public InputMethodManager createService() {
-                return InputMethodManager.getInstance();
+                return InputMethodManager.getInstanceInternal();
             }});
 
         registerService(Context.TEXT_SERVICES_MANAGER_SERVICE, TextServicesManager.class,

@@ -196,11 +196,10 @@ public final class WindowManagerGlobal {
         synchronized (WindowManagerGlobal.class) {
             if (sWindowSession == null) {
                 try {
-                    if (InputMethodManager.ENABLE_LEGACY_EAGER_INITIALIZATION) {
-                        // Emulate the legacy behavior.  The global instance of InputMethodManager
-                        // was instantiated here.
-                        InputMethodManager.getInstance();
-                    }
+                    // Emulate the legacy behavior.  The global instance of InputMethodManager
+                    // was instantiated here.
+                    // TODO(b/116157766): Remove this hack after cleaning up @UnsupportedAppUsage
+                    InputMethodManager.ensureDefaultInstanceForDefaultDisplayIfNecessary();
                     IWindowManager windowManager = getWindowManagerService();
                     sWindowSession = windowManager.openSession(
                             new IWindowSessionCallback.Stub() {
