@@ -895,6 +895,7 @@ public class Surface implements Parcelable {
         HwuiContext(boolean isWideColorGamut) {
             mRenderNode = RenderNode.create("HwuiCanvas", null);
             mRenderNode.setClipToBounds(false);
+            mRenderNode.setAllowForceDark(false);
             mIsWideColorGamut = isWideColorGamut;
             mHwuiRenderer = nHwuiCreate(mRenderNode.mNativeRenderNode, mNativeObject,
                     isWideColorGamut);

@@ -17,6 +17,7 @@
 #pragma once
 
 #include "utils/Macros.h"
+#include "Properties.h"
 
 #include <utils/Timers.h>
 
@@ -92,6 +93,8 @@ public:
     ErrorHandler* errorHandler = nullptr;
 
     bool updateWindowPositions = false;
+
+    int disableForceDark = Properties::forceDarkMode ? 0 : 1;
 
     struct Out {
         bool hasFunctors = false;
