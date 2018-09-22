@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Error al registrar la Llamada con Wi‑Fi con tu operador: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Llamada por Wi-Fi de %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Llamada por Wi-Fi de <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Llamada por WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Llamada por WLAN de <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi de <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Llamada por Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi de <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivada"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Red Wi-Fi preferida"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Red móvil preferida"</string>
@@ -524,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"No se reconoció"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Se autenticó la huella digital"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"El hardware para detectar huellas digitales no está disponible."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"No se puede almacenar la huella digital. Elimina una de las existentes."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Finalizó el tiempo de espera para la huella digital. Vuelve a intentarlo."</string>
@@ -560,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Se agotó el tiempo. Vuelve a intentarlo."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"No se puede almacenar el rostro."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Se canceló el reconocimiento facial."</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Demasiados intentos. Inténtalo de nuevo más tarde."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Demasiados intentos. Autent. facial inhabilitada."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Vuelve a intentarlo."</string>
@@ -1616,6 +1626,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Corrección de color"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"El acceso directo de accesibilidad activó <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"El acceso directo de accesibilidad desactivó <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Vuelve a usar el acceso directo de accesibilidad para iniciar la función de accesibilidad actual"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Elige una función para usar cuando presionas el botón Accesibilidad:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Para cambiar funciones, mantén presionado el botón Accesibilidad."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Ampliación"</string>

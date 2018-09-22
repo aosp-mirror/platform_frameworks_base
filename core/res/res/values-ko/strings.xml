@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"이동통신사를 통해 Wi‑Fi 통화를 등록하는 중에 문제가 발생했습니다. 오류 코드: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s Wi-Fi 통화"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi 통화"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN 통화"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN 통화"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi 통화 | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"꺼짐"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi를 기본으로 설정"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"모바일에 최적화됨"</string>
@@ -524,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"인식할 수 없음"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"지문이 인증됨"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"지문 인식 하드웨어를 사용할 수 없습니다."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"지문을 저장할 수 없습니다. 기존 지문을 삭제하세요."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"지문 인식 시간이 초과되었습니다. 다시 시도하세요."</string>
@@ -560,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"얼굴 인식 시간이 초과되었습니다. 다시 시도하세요."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"얼굴을 저장할 수 없습니다."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"얼굴 인식 작업이 취소되었습니다."</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"시도 횟수가 너무 많습니다. 나중에 다시 시도하세요."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"시도 횟수가 너무 많아 얼굴 인증이 사용 중지되었습니다."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"다시 시도해 보세요."</string>
@@ -1616,6 +1626,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"색상 보정"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"접근성 단축키로 인해 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 설정되었습니다."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"접근성 단축키로 인해 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 중지되었습니다."</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"현재 접근성 기능을 시작하려면 접근성 단축키를 다시 사용하세요"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"접근성 버튼을 탭할 때 사용할 기능을 선택하세요."</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"기능을 변경하려면 접근성 버튼을 길게 터치하세요."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"확대"</string>

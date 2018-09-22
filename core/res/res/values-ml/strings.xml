@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"നിങ്ങളുടെ കാരിയർ ഉപയോഗിച്ച് വൈഫൈ കോളിംഗ് രജിസ്‌റ്റർ ചെയ്യുന്നതിൽ പ്രശ്‌നം: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s വൈഫൈ കോളിംഗ്"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> വൈഫൈ കോളിംഗ്"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN കോൾ"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN കോൾ"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> വൈഫൈ"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"വൈഫൈ കോളിംഗ് | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> Voവൈഫൈ"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ഓഫ്"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"വൈഫൈ തിരഞ്ഞെടുത്തിരിക്കുന്നു"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"മൊബൈൽ ഡാറ്റ ഉപയോഗിക്കാൻ താൽപ്പര്യപ്പെടുന്നു"</string>
@@ -524,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"തിരിച്ചറിഞ്ഞില്ല"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"ഫിംഗർപ്രിന്റ് പരിശോധിച്ചുറപ്പിച്ചു"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ ലഭ്യമല്ല."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"വിരലടയാളം സംഭരിക്കാനാവില്ല. നിലവിലുള്ള വിരലടയാളം നീക്കംചെയ്യുക."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"വിരലടയാളം നൽകേണ്ട സമയം കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
@@ -560,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"മുഖം നൽകേണ്ട സമയം കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"മുഖം സൂക്ഷിക്കാനാവില്ല."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"മുഖത്തിന്റെ പ്രവർത്തനം റദ്ദാക്കി."</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"നിരവധി തവണ ശ്രമിച്ചു. മുഖം തിരിച്ചറിയൽ പ്രവർത്തനരഹിതമാക്കി."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"വീണ്ടും ശ്രമിക്കുക."</string>
@@ -1617,6 +1627,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"വർണ്ണം ക്രമീകരിക്കൽ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ഉപയോഗസഹായിക്കുള്ള കുറുക്കുവഴി <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓൺ ചെയ്തിരിക്കുന്നു"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ഉപയോഗസഹായിക്കുള്ള കുറുക്കുവഴി <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓഫ് ചെയ്തിരിക്കുന്നു"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"നിലവിലെ ഉപയോഗസഹായി ഫീച്ചർ ആരംഭിക്കാൻ വീണ്ടും ഉപയോഗസഹായി കുറുക്കുവഴി ഉപയോഗിക്കുക"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"നിങ്ങൾ ഉപയോഗസഹായി ബട്ടൺ ടാപ്പുചെയ്യുമ്പോൾ ഉപയോഗിക്കുന്നതിന് ഒരു ഫീച്ചർ തിരഞ്ഞെടുക്കുക:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ഫീച്ചറുകൾ മാറ്റുന്നതിന് ഉപയോഗസഹായി ബട്ടൺ സ്‌പർശിച്ചുപിടിക്കുക."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"മാഗ്നിഫിക്കേഷൻ"</string>

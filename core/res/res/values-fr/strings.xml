@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Problème lors de l\'enregistrement des appels Wi‑Fi avec votre opérateur : <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Appels Wi-Fi %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Appels Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Appel WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Appel WLAN <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Appels Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWiFi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Désactivé"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi de préférence"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Priorité au mobile"</string>
@@ -524,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Non reconnu"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Empreinte digitale authentifiée"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Matériel d\'empreinte numérique indisponible."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Impossible d\'enregistrer l\'empreinte numérique. Veuillez supprimer une empreinte."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Délai de détection de l\'empreinte numérique expiré. Veuillez réessayer."</string>
@@ -560,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Délai de détection du visage expiré. Réessayez."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Impossible de stocker les informations du visage."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Opération de reconnaissance faciale annulée."</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Trop de tentatives. Réessayez plus tard."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Trop d\'essais. Authentification faciale désactivée."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Réessayez."</string>
@@ -1300,14 +1310,14 @@
     <string name="perm_costs_money" msgid="4902470324142151116">"Cela peut engendrer des frais"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_charging_notification_title" msgid="1595122345358177163">"Appareil en charge via USB"</string>
-    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Rechargement via USB de l\'appareil connecté"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Recharge via USB de l\'appareil connecté"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Transfert de fichiers via USB activé"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"PTP via USB activé"</string>
     <string name="usb_tether_notification_title" msgid="3716143122035802501">"Partage de connexion via USB activé"</string>
     <string name="usb_midi_notification_title" msgid="5356040379749154805">"MIDI via USB activé"</string>
     <string name="usb_accessory_notification_title" msgid="1785694450621427730">"Accessoire USB connecté"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Appuyez ici pour plus d\'options."</string>
-    <string name="usb_power_notification_message" msgid="4647527153291917218">"Rechargement de l\'appareil connecté. Appuyez ici pour plus d\'options."</string>
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"Recharge de l\'appareil connecté. Appuyez ici pour plus d\'options."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Accessoire audio analogique détecté"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"L\'appareil connecté n\'est pas compatible avec ce téléphone. Appuyez ici pour en savoir plus."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Débogage USB activé"</string>
@@ -1616,6 +1626,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Correction des couleurs"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Le raccourci d\'accessibilité a activé <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Le raccourci d\'accessibilité a désactivé <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Utilisez à nouveau le raccourci d\'accessibilité pour démarrer la fonctionnalité d\'accessibilité actuelle"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Choisissez une fonctionnalité à utiliser lorsque vous appuyez sur le bouton d\'accessibilité :"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Pour changer des fonctionnalités, appuyez de manière prolongée sur le bouton d\'accessibilité."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Agrandissement"</string>

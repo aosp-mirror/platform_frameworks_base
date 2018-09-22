@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"သင်၏ ဝန်ဆောင်မှုပေးသူဖြင့် Wi‑Fi ခေါ်ဆိုမှုကို မှတ်ပုံတင်ရာတွင် ပြဿနာရှိနေသည်− <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s Wi-Fi  ခေါ်ဆိုမှု"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi ခေါ်ဆိုမှု"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN ခေါ်ဆိုမှု"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN ခေါ်ဆိုမှု"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"WiFi ခေါ်ဆိုမှု | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ပိတ်ထားရသည်"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ဝိုင်ဖိုင်အား ပိုနှစ်သက်သော"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"မိုဘိုင်းကို အသုံးပြုလိုပါသည်"</string>
@@ -524,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"မသိပါ"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"လက်ဗွေကို အထောက်အထား စိစစ်ပြီးပါပြီ"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"လက်ဗွေရာ ဟာ့ဒ်ဝဲ မရနိုင်ပါ။"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"လက်ဗွေရာ သိုလှောင်၍မရပါ။ ကျေးဇူးပြု၍ ရှိပြီးလက်ဗွေရာအား ဖယ်ရှားပါ။"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"လက်ဗွေရာအချိန်ကုန် သွားပါသည်။ ထပ်မံကြိုးစားပါ။"</string>
@@ -560,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"မျက်နှာ သက်တမ်းကုန်သွားပါပြီ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"မျက်နှာကို သိမ်း၍မရပါ။"</string>
     <string name="face_error_canceled" msgid="283945501061931023">"မျက်နှာ ဆောင်ရွက်ခြင်းကို ပယ်ဖျက်လိုက်ပါပြီ။"</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"အကြိမ်များစွာ စမ်းပြီးပါပြီ။ နောက်မှထပ်စမ်းပါ။"</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"အကြိမ်များစွာ စမ်းပြီးပါပြီ။ ပိတ်လိုက်ပါပြီ။"</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"ထပ်စမ်းကြည့်ပါ။"</string>
@@ -1617,6 +1627,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"အရောင်ပြင်ဆင်ခြင်း"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်သည် <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို ဖွင့်လိုက်ပါသည်"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်သည် <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို ပိတ်လိုက်ပါသည်"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"လက်ရှိ အသုံးလွယ်ရေး ဝန်ဆောင်မှုကို စတင်ရန် အသုံးလွယ်ရေး ဖြတ်လမ်းလင့်ခ်ကို သုံးပါ"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"အများသုံးစွဲနိုင်မှု ခလုတ်ကို တို့သည့်အခါ အသုံးပြုမည့် ဝန်ဆောင်မှုကို ရွေးချယ်ပါ−"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ဝန်ဆောင်မှုများကို ပြောင်းလဲရန် အများသုံးစွဲနိုင်မှု ခလုတ်ကို တို့၍ ထိထားပါ။"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"ချဲ့ခြင်း"</string>
