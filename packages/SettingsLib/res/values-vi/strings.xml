@@ -395,8 +395,6 @@
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Đã cắm nhưng không thể sạc ngay"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Đầy"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Do quản trị viên kiểm soát"</string>
-    <string name="enabled_by_admin" msgid="5302986023578399263">"Kích hoạt bởi quản trị viên"</string>
-    <string name="disabled_by_admin" msgid="8505398946020816620">"Bị quản trị viên vô hiệu hóa"</string>
     <string name="disabled" msgid="9206776641295849915">"Đã tắt"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Được phép"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"Không được phép"</string>

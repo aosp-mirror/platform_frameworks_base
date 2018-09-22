@@ -395,8 +395,6 @@
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Conectouse, pero non se pode cargar neste momento"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Completa"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Opción controlada polo administrador"</string>
-    <string name="enabled_by_admin" msgid="5302986023578399263">"Activado polo administrador"</string>
-    <string name="disabled_by_admin" msgid="8505398946020816620">"Desactivado polo administrador"</string>
     <string name="disabled" msgid="9206776641295849915">"Desactivada"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Permitida"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"Non permitida"</string>
