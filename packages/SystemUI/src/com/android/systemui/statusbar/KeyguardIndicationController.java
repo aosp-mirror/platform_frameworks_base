@@ -298,27 +298,6 @@ public class KeyguardIndicationController {
         if (mVisible) {
             // Walk down a precedence-ordered list of what indication
             // should be shown based on user or device state
-            if (mDozing) {
-                mTextView.setTextColor(Color.WHITE);
-                if (!TextUtils.isEmpty(mTransientIndication)) {
-                    // When dozing we ignore any text color and use white instead, because
-                    // colors can be hard to read in low brightness.
-                    mTextView.switchIndication(mTransientIndication);
-                } else if (mPowerPluggedIn) {
-                    String indication = computePowerIndication();
-                    if (animate) {
-                        animateText(mTextView, indication);
-                    } else {
-                        mTextView.switchIndication(indication);
-                    }
-                } else {
-                    String percentage = NumberFormat.getPercentInstance()
-                            .format(mBatteryLevel / 100f);
-                    mTextView.switchIndication(percentage);
-                }
-                return;
-            }
-
             KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
             int userId = KeyguardUpdateMonitor.getCurrentUser();
             String trustGrantedIndication = getTrustGrantedIndication();

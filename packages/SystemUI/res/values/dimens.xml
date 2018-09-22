@@ -650,7 +650,6 @@
     <dimen name="keyguard_affordance_icon_width">24dp</dimen>
 
     <dimen name="keyguard_indication_margin_bottom">65dp</dimen>
-    <dimen name="keyguard_indication_margin_bottom_ambient">16dp</dimen>
 
     <!-- The text size for battery level -->
     <dimen name="battery_level_text_size">12sp</dimen>
@@ -939,9 +938,8 @@
          burn-in on AOD. -->
     <dimen name="burn_in_prevention_offset_y">50dp</dimen>
 
-    <!-- The maximum offset in either direction that the charging indication moves vertically
-         to prevent burn-in on AOD. -->
-    <dimen name="charging_indication_burn_in_prevention_offset_y">5dp</dimen>
+    <!-- The maximum offset in either direction that icons move to prevent burn-in on AOD. -->
+    <dimen name="default_burn_in_prevention_offset">5dp</dimen>
 
     <dimen name="corner_size">8dp</dimen>
     <dimen name="top_padding">0dp</dimen>
