@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Terdapat masalah semasa mendaftarkan panggilan Wi-Fi dengan pembawa anda: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s Panggilan Wi-Fi"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Panggilan Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Panggilan WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Panggilan WLAN <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Panggilan Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Mati"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi diutamakan"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mudah alih diutamakan"</string>
@@ -524,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Tidak dikenali"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Cap jari disahkan"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Perkakasan cap jari tidak tersedia."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Cap jari tidak dapat disimpan. Sila alih keluar cap jari sedia ada."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Tamat masa cap jari dicapai. Cuba lagi."</string>
@@ -560,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Tamat masa wajah dicapai. Cuba lagi."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Wajah tidak dapat disimpan."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Pengendalian wajah dibatalkan."</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Terlalu banyak percubaan. Cuba sebentar lagi."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Terlalu banyak percubaan. Pengesahan wajah dilumpuhkan."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Cuba lagi."</string>
@@ -1616,6 +1626,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Pembetulan Warna"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Pintasan kebolehaksesan menghidupkan <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Pintasan Kebolehaksesan mematikan <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Gunakan Pintasan Kebolehaksesan sekali lagi untuk memulakan ciri kebolehaksesan semasa"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Pilih ciri yang hendak digunakan apabila anda mengetik butang Kebolehaksesan:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Untuk menukar ciri, sentuh &amp; tahan butang Kebolehaksesan."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Pembesaran"</string>

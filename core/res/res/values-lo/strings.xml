@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"ເກີດບັນຫາໃນການລົງທະບຽນການໂທ Wi‑Fi ກັບຜູ້ໃຫ້ບໍລິການຂອງທ່ານ: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"ການ​ໂທ %s Wi-Fi"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi Calling"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN Call"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN Call"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"WiFi Calling | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ປິດ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ເລືອກໃຊ້ Wi​-Fi ກ່ອນ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ຕ້ອງການໃຊ້ມືຖື"</string>
@@ -524,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"ບໍ່ຮັບຮູ້"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"ພິສູດຢືນຢັນລາຍນິ້ວມືແລ້ວ"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ບໍ່​ມີ​ຮາດ​ແວລາຍ​ນີ້ວ​ມື​ໃຫ້​ຢູ່."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ບໍ່​ສາ​ມາດ​ເກັບ​ຮັກ​ສາ​ລາຍ​ນີ້ວ​ມື​ໄວ້​ໄດ້. ກະ​ລຸ​ນາ​ເອົາ​ລາຍ​ນີ້ວ​ມື​ທີ່​ມີ​ຢູ່​ອອກ​ໄປ."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ເວ​ລາ​ລາຍ​ນີ້ວ​ມື​ບໍ່​ເຂົ້າ​ເຖິງ​ໄດ້. ລອງ​ໃໝ່​ອີກ."</string>
@@ -560,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"ໝົດເວລາກວດໃບໜ້າແລ້ວ. ກະລຸນາລອງອີກຄັ້ງ."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"ບໍ່ສາມາດເກັບຮັກສາໃບໜ້າໄວ້ໄດ້."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"ຍົກເລີກການດຳເນີນການກັບໃບໜ້າແລ້ວ."</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"ມີຄວາມພະຍາຍາມຫຼາຍຄັ້ງເກີນໄປ. ກະລຸນາລອງໃໝ່ໃນພາຍຫຼັງ."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"ມີຄວາມພະຍາຍາມຫຼາຍຄັ້ງເກີນໄປ. ປິດນຳໃຊ້ການກວດສອບຄວາມຖືກຕ້ອງດ້ວຍໃບໜ້າແລ້ວ."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"ລອງອີກຄັ້ງ."</string>
@@ -1616,6 +1626,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"ການແກ້ໄຂຄ່າສີ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Accessibility Shortcut turned <xliff:g id="SERVICE_NAME">%1$s</xliff:g> on"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Accessibility Shortcut turned <xliff:g id="SERVICE_NAME">%1$s</xliff:g> off"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"ໃຊ້ປຸ່ມລັດການຊ່ວຍເຂົ້າເຖິງອີກເທື່ອໜຶ່ງເພື່ອຊອກຫາຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງໃນປັດຈຸບັນ"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"ເລືອກຄຸນສົມບັດທີ່ຈະໃຊ້ເມື່ອທ່ານແຕະປຸ່ມການຊ່ວຍເຂົ້າເຖິງ:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ເພື່ອປ່ຽນຄຸນສົມບັດ, ໃຫ້ແຕະປຸ່ມການຊ່ວຍເຂົ້າເຖິງຄ້າງໄວ້."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"ການຂະຫຍາຍ"</string>

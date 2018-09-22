@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"មាន​បញ្ហា​ក្នុង​ការ​ចុះ​ឈ្មោះ​ការហៅ​តាម Wi‑Fi ជាមួយ​ក្រុមហ៊ុន​សេវា​ទូរសព្ទ​របស់អ្នក៖ <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"ការហៅតាមរយៈ Wi-Fi %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> ការហៅតាម Wi-Fi"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"ការហៅ​តាម WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> ការហៅតាម WLAN"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"ការហៅតាម WiFi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"បិទ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi ជាអាទិភាព"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ទិន្នន័យទូរសព្ទចល័តជាអាទិភាព"</string>
@@ -524,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"មិនអាចសម្គាល់បានទេ"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"បាន​ផ្ទៀង​ផ្ទាត់​ស្នាម​ម្រាមដៃ"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ផ្នែករឹងស្នាមម្រាមដៃមិនមានទេ។"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"មិនអាចផ្ទុកស្នាមម្រាមដៃទេ។ សូមយកស្នាមម្រាមដៃដែលមានស្រាប់ចេញ។"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ការផ្តិតម្រាមដៃបានអស់ពេល។ សូមព្យាយាមម្តងទៀត។"</string>
@@ -560,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"ការសម្គាល់​ផ្ទៃមុខ​បាន​អស់ម៉ោង។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"មិន​អាច​រក្សាទុក​ផ្ទៃ​មុខ​បានទេ។"</string>
     <string name="face_error_canceled" msgid="283945501061931023">"បាន​បោះបង់​ប្រតិបត្តិការចាប់​ផ្ទៃមុខ។"</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"ព្យាយាមចូលច្រើនពេកហើយ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។"</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"ព្យាយាមចូលច្រើនពេកហើយ។ បាន​បិទការផ្ទៀងផ្ទាត់​ផ្ទៃ​មុខ។"</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"សូមព្យាយាម​ម្ដងទៀត។"</string>
@@ -1618,6 +1628,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"ការ​កែ​ពណ៌"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ផ្លូវកាត់​ភាព​ងាយ​ស្រួល​បាន​បើក <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ផ្លូវកាត់​ភាព​ងាយ​ស្រួល​បាន​បិទ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"ប្រើផ្លូវកាត់​ភាពងាយស្រួល​ម្ដងទៀត ដើម្បី​ចាប់ផ្ដើម​មុខងារ​ភាពងាយប្រើ​បច្ចុប្បន្ន"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"ជ្រើសរើស​មុខងារ​ដែលត្រូវ​ប្រើ នៅពេល​ដែល​អ្នកចុច​ប៊ូតុង​ភាពងាយស្រួល៖"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ដើម្បី​ផ្លាស់ប្តូរ​មុខងារ សូម​ចុច​ប៊ូតុង​ភាព​ងាយស្រួល​ឲ្យ​ជាប់។"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"ការ​ពង្រីក"</string>

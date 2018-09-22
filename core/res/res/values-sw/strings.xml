@@ -128,8 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Tatizo limetokea wakati wa kuisajili huduma ya kupiga simu kupitia Wi‑Fi kwa mtoa huduma wako: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for wfcSpnFormats:0 (6830082633573257149) -->
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g>Kupiga simu Kupitia Wi-Fi"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Simu ya WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> Simu ya WLAN"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi ya <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Kupiga Simu kupitia WiFi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi ya <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Imezimwa"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi inapedelewa"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mtandao wa simu unapendelewa"</string>
@@ -522,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Hayatambuliki"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Imethibitisha alama ya kidole"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Maunzi ya kitambulisho hayapatikani."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Kitambulisho hakiwezi kuhifadhiwa. Tafadhali ondoa kitambulisho kilichopo."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Muda wa kitambulisho umekwisha. Jaribu tena."</string>
@@ -558,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Muda wa kutambua uso umeisha. Jaribu tena."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Huwezi kuhifadhi uso."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Utendaji wa kitambulisho umeghairiwa."</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Umejaribu mara nyingi mno. Jaribu tena baadaye."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Umejaribu mara nyingi mno. Kitambuzi cha uso kimezimwa."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Jaribu tena."</string>
@@ -1614,6 +1626,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Usahihishaji wa rangi"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Njia ya mkato ya zana za walio na matatizo ya kuona au kusikia imewasha <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Njia ya mkato ya zana za walio na matatizo ya kuona au kusikia imezima <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Tumia njia ya Mkato wa Zana za walio na matatizo ya kuona au kusikia tena ili kuanzisha kipengele kilichopo cha walio na matatizo ya kuona au kusikia"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Chagua kipengele utakachotumia, ukigonga Kitufe cha zana za walio na matatizo ya kuona au kusikia."</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Ili kubadilisha vipengele, gusa na ushikile Kitufe cha zana za walio na matatizo ya kuona au kusikia."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Ukuzaji"</string>

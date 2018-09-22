@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Wi‑Fi-ի միջոցով արվող զանգերը չհաջողվեց գրանցել ձեր օպերատորի մոտ՝ <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s Wi-Fi զանգեր"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi-ի միջոցով զանգեր"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Զանգ WLAN ցանցով"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN ցանցով զանգեր"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Զանգեր Wi-Fi-ի միջոցով | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Անջատված է"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi, նախընտրելի"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Նախընտրելի է բջջային ցանցը"</string>
@@ -524,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Չհաջողվեց ճանաչել"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Մատնահետքը նույնականացվեց"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Մատնահետքի սարքն անհասանելի է:"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Հնարավոր չէ պահել մատնահետքը: Հեռացրեք առկա մատնահետքը:"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Մատնահետքի գրանցման ժամանակը սպառվել է: Փորձեք նորից:"</string>
@@ -560,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Ժամանակը սպառվել է: Նորից փորձեք:"</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Դեմքը հնարավոր չէ պահել։"</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Դեմքի ճանաչումը չեղարկվել է։"</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Չափից շատ փորձեր եք կատարել: Փորձեք ավելի ուշ:"</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Չափից շատ փորձեր եք կատարել: Դեմքի ճանաչման գործառույթն անջատվել է։"</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Նորից փորձեք:"</string>
@@ -1616,6 +1626,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Գունաշտկում"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Մատչելիության դյուրանցումն միացրել է <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Մատչելիության դյուրանցումն անջատել է <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Հատուկ գործառույթների դյուրանցումը գործարկելու համար նորից օգտագործեք համապատասխան դյուրանցումը"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Ընտրեք որևէ գործառույթ, որը կօգտագործվի Հատուկ գործառույթներ կոճակին հպելու դեպքում՝"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Գործառույթները փոխելու համար հպեք և պահեք Հատուկ գործառույթներ կոճակը։"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Խոշորացում"</string>

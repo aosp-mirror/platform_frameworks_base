@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"ଆପଣଙ୍କ କେରିଅର୍ ସହିତ ୱାଇ-ଫାଇ କଲ୍ କରିବା ପାଇଁ ପଞ୍ଜୀକରଣ କରିବାରେ ସମସ୍ୟା: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s ୱାଇ-ଫାଇ କଲିଙ୍ଗ"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> ୱାଇ-ଫାଇ କଲିଂ"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN କଲ୍‍"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN କଲ୍‍"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> ୱାଇ-ଫାଇ"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"ୱାଇଫାଇ କଲିଂ | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ଅଫ୍"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ପସନ୍ଦ କରାଯାଇଥିବା ୱାଇ-ଫାଇ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ପସନ୍ଦର ମୋବାଇଲ୍‌"</string>
@@ -524,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"ଚିହ୍ନଟ ହେଲାନାହିଁ"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ପ୍ରମାଣୀକୃତ ହେଲା"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ହାର୍ଡୱେର୍‍ ଉପଲବ୍ଧ ନାହିଁ।"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ଷ୍ଟୋର୍‍ କରାଯାଇପାରିବ ନାହିଁ। ଦୟାକରି ପୂର୍ବରୁ ଥିବା ଆଙ୍ଗୁଠି ଚିହ୍ନକୁ ବାହାର କରିଦିଅନ୍ତୁ।"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ଆଙ୍ଗୁଠି ଚିହ୍ନର ସମୟ ଶେଷ ହେଲା । ପୁଣିଥରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
@@ -560,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"ଫେସ୍‍ର ସମୟସୀମା ସରିଗଲା। ପୁଣିଥରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"ଫେସ୍‍ ମେମୋରୀରେ ଷ୍ଟୋର୍‍ କରାଯାଇପାରିବ ନାହିଁ।"</string>
     <string name="face_error_canceled" msgid="283945501061931023">"ଫେସ୍‍ର ଅପରେଶନ୍‍ କ୍ୟାନ୍ସଲ୍‍ ହୋ‍ଇଗଲା"</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"ବାରମ୍ବାର ଚେଷ୍ଟା। ପରେ ପୁଣିଥରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"ବାରମ୍ବାର ଚେଷ୍ଟା। ଫେସ୍‍ ପ୍ରମାଣୀକରଣ ଅକ୍ଷମ କରାଗଲା।"</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"ପୁଣିଥରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
@@ -1617,6 +1627,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"ରଙ୍ଗ ସଂଶୋଧନ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ଆକ୍ସେସିବିଲିଟୀ ଶର୍ଟକଟ୍‍ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ଅନ୍‍ କରାଯାଇଛି"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ଆକ୍ସେସିବିଲିଟୀ ଶର୍ଟକଟ୍‍ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ଅଫ୍‍ କରାଯାଇଛି"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"ବର୍ତ୍ତମାନର ଆକ୍ସେସିବିଲିଟୀ ବୈଶିଷ୍ଟ୍ୟ ଆରମ୍ଭ କରିବାକୁ ପୁଣି ଆକ୍ସେସିବିଲିଟୀ ସର୍ଟ୍‍କର୍ଟ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"ଆପଣ ଆକ୍ସେସବିଲିଟି ବଟନ୍‍ ଟାପ୍‍ କରିବା ବେଳେ ଏକ ବୈଶିଷ୍ଟ୍ୟ ବ୍ୟବହାର କରିବାକୁ ବାଛନ୍ତୁ:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ବୈଶିଷ୍ଟ୍ୟ ବଦଳାଇବାକୁ, ଆକ୍ସେସବିଲିଟି ବଟନ୍‍ ସ୍ପର୍ଶ କରନ୍ତୁ ଓ ଧରିରଖନ୍ତୁ।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"ମ୍ୟାଗ୍ନିଫିକେସନ୍‍"</string>

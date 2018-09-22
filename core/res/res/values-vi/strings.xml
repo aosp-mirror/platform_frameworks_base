@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Sự cố khi đăng ký dịch vụ gọi qua Wi‑Fi với nhà mạng của bạn: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Gọi điện qua Wi-Fi %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Gọi qua Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Cuộc gọi qua WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Cuộc gọi qua WLAN <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Gọi qua Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Tắt"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Ưu tiên Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Ưu tiên dữ liệu di động"</string>
@@ -524,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Không nhận dạng được"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Đã xác thực vân tay"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Phần cứng vân tay không khả dụng."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Không thể lưu vân tay. Vui lòng xóa vân tay hiện có."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Đã hết thời gian chờ vân tay. Hãy thử lại."</string>
@@ -560,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Đã hết thời gian chờ khuôn mặt. Hãy thử lại."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Không thể lưu khuôn mặt."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Đã hủy thao tác dùng khuôn mặt."</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Bạn đã thử quá nhiều lần. Hãy thử lại sau."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Đã thử quá nhiều lần. Đã tắt xác thực khuôn mặt."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Hãy thử lại."</string>
@@ -1616,6 +1626,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Sửa màu"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Đã bật phím tắt trợ năng <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Đã tắt phím tắt trợ năng <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Sử dụng lại Phím tắt hỗ trợ tiếp cận để bắt đầu tính năng hỗ trợ tiếp cận hiện tại"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Chọn tính năng sẽ sử dụng khi bạn nhấn nút Trợ năng:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Để thay đổi các tính năng, hãy chạm và giữ nút Trợ năng."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Phóng to"</string>

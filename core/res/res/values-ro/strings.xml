@@ -129,10 +129,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"A apărut o problemă la înregistrarea apelării prin Wi‑Fi la operatorul dvs.: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Apelare prin Wi-Fi %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Apelare prin Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Apel WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Apel WLAN <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Apelare prin Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Dezactivată"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Se preferă conexiunea Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Se preferă datele mobile"</string>
@@ -527,6 +531,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Nu este recunoscut"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Amprentă autentificată"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardware-ul pentru amprentă nu este disponibil."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Amprenta nu poate fi stocată. Eliminați o amprentă existentă."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Timpul pentru amprentare a expirat. Încercați din nou."</string>
@@ -563,6 +571,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Timpul pentru reunoaștere facială a expirat. Încercați din nou."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Chipul nu poate fi stocat."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Operațiunea privind chipul a fost anulată."</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Prea multe încercări. Reîncercați mai târziu."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Prea multe încercări. Autentificarea facială este dezactivată."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Încercați din nou."</string>
@@ -1640,6 +1650,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Corecția culorii"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Comanda rapidă de accesibilitate a activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Comanda rapidă de accesibilitate a dezactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Folosiți din nou comanda rapidă Accesibilitate pentru a porni funcția de accesibilitate prezentă"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Alegeți o funcție pe care să o folosiți când atingeți butonul Accesibilitate:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Pentru a schimba funcțiile, atingeți lung butonul Accesibilitate."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Mărire"</string>

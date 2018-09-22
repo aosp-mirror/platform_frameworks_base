@@ -129,10 +129,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Reģistrējot Wi-Fi zvanus pie mobilo sakaru operatora, radās problēma: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s Wi-Fi zvani"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi zvani"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN zvans"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN zvans"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi zvani | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Izslēgts"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Vēlams Wi-Fi tīkls"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Vēlams mobilo datu savienojums"</string>
@@ -527,6 +531,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Dati nav atpazīti"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Pirksta nospiedums tika autentificēts."</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Nospieduma aparatūra nav pieejama."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Pirkstu nospiedumu nevar saglabāt. Lūdzu, noņemiet esošu pirksta nospiedumu."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Pirkstu nospiedumu nolasīšanas aparatūras noildze. Mēģiniet vēlreiz."</string>
@@ -563,6 +571,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Sejas datu nolasīšanas noildze. Mēģiniet vēlreiz."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Sejas datus nevar saglabāt."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Darbība ar sejas datiem atcelta."</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Pārāk daudz mēģinājumu. Vēlāk mēģiniet vēlreiz."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Par daudz mēģinājumu. Sejas atpazīšana atspējota."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Mēģiniet vēlreiz."</string>
@@ -1640,6 +1650,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Krāsu korekcija"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Pieejamības saīsne aktivizēja lietotni <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Pieejamības saīsne deaktivizēja lietotni <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Lai sāktu izmantot pašreizējo pieejamības funkciju, vēlreiz izmantojiet pieejamības saīsni."</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Izvēlieties funkciju, ko izmantot, kad pieskaraties pogai Pieejamība."</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Lai mainītu funkcijas, pieskarieties pogai Pieejamība un turiet to."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Palielinājums"</string>
