@@ -16,6 +16,15 @@
 
 package com.android.server;
 
+import static android.app.AppOpsManager.UID_STATE_BACKGROUND;
+import static android.app.AppOpsManager.UID_STATE_CACHED;
+import static android.app.AppOpsManager.UID_STATE_FOREGROUND;
+import static android.app.AppOpsManager.UID_STATE_FOREGROUND_SERVICE;
+import static android.app.AppOpsManager.UID_STATE_LAST_NON_RESTRICTED;
+import static android.app.AppOpsManager.UID_STATE_PERSISTENT;
+import static android.app.AppOpsManager.UID_STATE_TOP;
+import static android.app.AppOpsManager._NUM_UID_STATE;
+
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -97,15 +106,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import static android.app.AppOpsManager._NUM_UID_STATE;
-import static android.app.AppOpsManager.UID_STATE_BACKGROUND;
-import static android.app.AppOpsManager.UID_STATE_CACHED;
-import static android.app.AppOpsManager.UID_STATE_FOREGROUND;
-import static android.app.AppOpsManager.UID_STATE_FOREGROUND_SERVICE;
-import static android.app.AppOpsManager.UID_STATE_LAST_NON_RESTRICTED;
-import static android.app.AppOpsManager.UID_STATE_PERSISTENT;
-import static android.app.AppOpsManager.UID_STATE_TOP;
 
 public class AppOpsService extends IAppOpsService.Stub {
     static final String TAG = "AppOps";
@@ -1016,7 +1016,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     scheduleWriteLocked();
                 }
             } else {
-                if (uidState.opModes.get(code) == mode) {
+                if (uidState.opModes.indexOfKey(code) >= 0 && uidState.opModes.get(code) == mode) {
                     return;
                 }
                 if (mode == defaultMode) {
@@ -1971,6 +1971,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                             continue;
                         }
                         boolean doAllPackages = uidState.opModes != null
+                                && uidState.opModes.indexOfKey(code) >= 0
                                 && uidState.opModes.get(code) == AppOpsManager.MODE_FOREGROUND;
                         if (uidState.pkgOps != null) {
                             for (int pkgi = uidState.pkgOps.size() - 1; pkgi >= 0; pkgi--) {
