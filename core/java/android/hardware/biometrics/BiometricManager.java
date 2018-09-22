@@ -48,7 +48,7 @@ public class BiometricManager {
     @RequiresPermission(USE_BIOMETRIC)
     public boolean hasEnrolledBiometrics() {
         try {
-            return mService.hasEnrolledBiometrics();
+            return mService.hasEnrolledBiometrics(mContext.getOpPackageName());
         } catch (RemoteException e) {
             return false;
         }
