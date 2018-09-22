@@ -19,6 +19,7 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ClipData;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
@@ -456,4 +457,11 @@ public abstract class WindowManagerInternal {
      * Return the display Id for given window.
      */
     public abstract int getDisplayIdForWindow(IBinder windowToken);
+
+    // TODO: use WindowProcessController once go/wm-unified is done.
+    /**
+     * Notifies the window manager that configuration of the process associated with the input pid
+     * changed.
+     */
+    public abstract void onProcessConfigurationChanged(int pid, Configuration newConfig);
 }

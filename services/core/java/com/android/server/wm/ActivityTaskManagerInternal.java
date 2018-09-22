@@ -30,7 +30,6 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.SparseIntArray;
-import android.view.RemoteAnimationAdapter;
 
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.WindowProcessController;
@@ -289,4 +288,13 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void onPackageAdded(String name, boolean replacing);
 
     public abstract CompatibilityInfo compatibilityInfoForPackage(ApplicationInfo ai);
+
+    /**
+     * Set the corresponding display information for the process global configuration. To be called
+     * when we need to show IME on a different display.
+     *
+     * @param pid The process id associated with the IME window.
+     * @param displayId The ID of the display showing the IME.
+     */
+    public abstract void onImeWindowSetOnDisplay(int pid, int displayId);
 }

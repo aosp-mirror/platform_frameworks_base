@@ -208,8 +208,6 @@ interface IActivityManager {
     List<ActivityManager.RunningServiceInfo> getServices(int maxNum, int flags);
     // Retrieve running application processes in the system
     List<ActivityManager.RunningAppProcessInfo> getRunningAppProcesses();
-    // Get device configuration
-    ConfigurationInfo getDeviceConfigurationInfo();
     IBinder peekService(in Intent service, in String resolvedType, in String callingPackage);
     // Turn on/off profiling in a particular process.
     boolean profileControl(in String process, int userId, boolean start,

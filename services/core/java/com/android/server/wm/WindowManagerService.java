@@ -182,6 +182,7 @@ import android.util.Log;
 import android.util.MergedConfiguration;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
@@ -479,6 +480,10 @@ public class WindowManagerService extends IWindowManager.Stub
      * Used when processing mPendingRemove to avoid working on the original array.
      */
     WindowState[] mPendingRemoveTmp = new WindowState[20];
+
+    // TODO: use WindowProcessController once go/wm-unified is done.
+    /** Mapping of process pids to configurations */
+    final SparseArray<Configuration> mProcessConfigurations = new SparseArray<>();
 
     /**
      * Windows whose surface should be destroyed.
@@ -7428,6 +7433,19 @@ public class WindowManagerService extends IWindowManager.Stub
                     return window.getDisplayContent().getDisplayId();
                 }
                 return Display.INVALID_DISPLAY;
+            }
+        }
+
+        @Override
+        public void onProcessConfigurationChanged(int pid, Configuration newConfig) {
+            synchronized (mWindowMap) {
+                Configuration currentConfig = mProcessConfigurations.get(pid);
+                if (currentConfig == null) {
+                    currentConfig = new Configuration(newConfig);
+                } else {
+                    currentConfig.setTo(newConfig);
+                }
+                mProcessConfigurations.put(pid, currentConfig);
             }
         }
     }

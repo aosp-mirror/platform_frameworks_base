@@ -344,6 +344,9 @@ interface IActivityTaskManager {
     void notifyPinnedStackAnimationStarted();
     void notifyPinnedStackAnimationEnded();
 
+    // Get device configuration
+    ConfigurationInfo getDeviceConfigurationInfo();
+
     /**
      * Resizes the pinned stack.
      *

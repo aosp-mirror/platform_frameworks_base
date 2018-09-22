@@ -1558,7 +1558,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // we have to always create a new Configuration here.
 
                 final MergedConfiguration mergedConfiguration = new MergedConfiguration(
-                        mService.getGlobalConfiguration(), r.getMergedOverrideConfiguration());
+                        app.getWindowProcessController().getConfiguration(),
+                        r.getMergedOverrideConfiguration());
                 r.setLastReportedConfiguration(mergedConfiguration);
 
                 logIfTransactionTooLarge(r.intent, r.icicle);
