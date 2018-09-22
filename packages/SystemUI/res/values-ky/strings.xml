@@ -103,10 +103,16 @@
     <string name="camera_label" msgid="7261107956054836961">"камераны ачуу"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Жаңы тапшырманын планын тандаңыз"</string>
     <string name="cancel" msgid="6442560571259935130">"Жокко чыгаруу"</string>
+    <!-- no translation found for accessibility_biometric_dialog_help_area (8953787076940186847) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_confirm (6468457350041712674) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Манжа изинин сенсорун басыңыз"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Манжа изинин сүрөтчөсү"</string>
-    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Колдонмонун сүрөтчөсү"</string>
-    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Жардам билдирүүсү"</string>
+    <!-- no translation found for face_dialog_looking_for_face (7049276266074494689) -->
+    <skip />
+    <!-- no translation found for accessibility_face_dialog_face_icon (2658119009870383490) -->
+    <skip />
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Масштабды сыйыштыруу баскычы."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Кичинекейди чоң экранга масштабдоо."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth байланышта"</string>
@@ -209,7 +215,7 @@
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Учак режими өчүрүлдү."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Учак режими күйгүзүлдү."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"тымтырс"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"ойготкучтар гана"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"ойготкуч гана"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Тынчымды алба."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Тынчымды алба деген өчүрүлдү."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Тынчымды алба деген күйгүзүлдү."</string>
@@ -276,7 +282,7 @@
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Кошумча параметрлерди ачуу үчүн сүрөтчөлөрдү басып, кармап туруңуз"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Тынчымды алба"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Шашылыш эскертмелер гана"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Ойготкучтар гана"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Ойготкуч гана"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Тымтырс"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> түзмөк)"</string>
@@ -395,7 +401,7 @@
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Толук жымжырттык талап кылынат. Бул экрандагыны окугучтарды да тынчтандырат."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Тымтырс"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Шашылыш эскертмелер гана"</string>
-    <string name="interruption_level_alarms" msgid="5226306993448328896">"Ойготкучтар гана"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"Ойготкуч гана"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Тым-\nтырс"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Артыкчылыктуу\nгана"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Ойготкучтар\nгана"</string>
