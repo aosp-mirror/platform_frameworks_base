@@ -32,10 +32,10 @@ public abstract class RemovalClient extends ClientMonitor {
     private final int mBiometricId;
     private final BiometricUtils mBiometricUtils;
 
-    public RemovalClient(Context context, Metrics metrics, BiometricService.DaemonWrapper daemon,
-            long halDeviceId, IBinder token, BiometricService.ServiceListener listener,
-            int biometricId, int groupId, int userId, boolean restricted, String owner,
-            BiometricUtils utils) {
+    public RemovalClient(Context context, Metrics metrics,
+            BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
+            BiometricServiceBase.ServiceListener listener, int biometricId, int groupId, int userId,
+            boolean restricted, String owner, BiometricUtils utils) {
         super(context, metrics, daemon, halDeviceId, token, listener, userId, groupId, restricted,
                 owner);
         mBiometricId = biometricId;

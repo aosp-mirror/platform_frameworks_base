@@ -35,10 +35,10 @@ public abstract class EnrollClient extends ClientMonitor {
     private final byte[] mCryptoToken;
     private final BiometricUtils mBiometricUtils;
 
-    public EnrollClient(Context context, Metrics metrics, BiometricService.DaemonWrapper daemon,
-            long halDeviceId, IBinder token, BiometricService.ServiceListener listener, int userId,
-            int groupId, byte[] cryptoToken, boolean restricted, String owner,
-            BiometricUtils utils) {
+    public EnrollClient(Context context, Metrics metrics,
+            BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
+            BiometricServiceBase.ServiceListener listener, int userId, int groupId,
+            byte[] cryptoToken, boolean restricted, String owner, BiometricUtils utils) {
         super(context, metrics, daemon, halDeviceId, token, listener, userId, groupId, restricted,
                 owner);
         mBiometricUtils = utils;
