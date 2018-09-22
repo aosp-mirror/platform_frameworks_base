@@ -1541,7 +1541,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         public void scheduleTrimMemory(int level) {
             final Runnable r = PooledLambda.obtainRunnable(ActivityThread::handleTrimMemory,
-                    ActivityThread.this, level);
+                    ActivityThread.this, level).recycleOnUse();
             // Schedule trimming memory after drawing the frame to minimize jank-risk.
             Choreographer choreographer = Choreographer.getMainThreadInstance();
             if (choreographer != null) {
