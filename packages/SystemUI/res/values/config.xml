@@ -508,4 +508,7 @@
 
     <!-- Allow dragging the PIP to a location to close it -->
     <bool name="config_pipEnableDismissDragToEdge">true</bool>
+
+    <!-- SystemUI Plugins that can be loaded on user builds. -->
+    <string-array name="config_pluginWhitelist" translatable="false" />
 </resources>
