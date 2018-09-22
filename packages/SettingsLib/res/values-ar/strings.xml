@@ -395,8 +395,6 @@
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"تم التوصيل، ولكن يتعذّر الشحن الآن"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ممتلئة"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"إعدادات يتحكم فيها المشرف"</string>
-    <string name="enabled_by_admin" msgid="5302986023578399263">"تم تفعيل الإعداد بواسطة المشرف"</string>
-    <string name="disabled_by_admin" msgid="8505398946020816620">"تم إيقاف الإعداد بواسطة المشرف"</string>
     <string name="disabled" msgid="9206776641295849915">"غير مفعّل"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"مسموح به"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"غير مسموح به"</string>
