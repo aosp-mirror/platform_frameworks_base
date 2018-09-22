@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.policy;
 import android.animation.ArgbEvaluator;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -35,6 +36,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.FloatProperty;
+import android.view.ContextThemeWrapper;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
@@ -386,6 +388,23 @@ public class KeyButtonDrawable extends Drawable {
         public boolean canApplyTheme() {
             return true;
         }
+    }
+
+    /**
+     * Creates a KeyButtonDrawable with a shadow given its icon. The tint applied to the drawable
+     * is determined by the dark and light theme given by the context.
+     * @param ctx Context to get the drawable and determine the dark and light theme
+     * @param icon the icon resource id
+     * @param hasShadow if a shadow will appear with the drawable
+     * @return KeyButtonDrawable
+     */
+    public static KeyButtonDrawable create(@NonNull Context ctx, @DrawableRes int icon,
+        boolean hasShadow) {
+        final int dualToneDarkTheme = Utils.getThemeAttr(ctx, R.attr.darkIconTheme);
+        final int dualToneLightTheme = Utils.getThemeAttr(ctx, R.attr.lightIconTheme);
+        Context lightContext = new ContextThemeWrapper(ctx, dualToneLightTheme);
+        Context darkContext = new ContextThemeWrapper(ctx, dualToneDarkTheme);
+        return KeyButtonDrawable.create(lightContext, darkContext, icon, hasShadow);
     }
 
     public static KeyButtonDrawable create(Context lightContext, Context darkContext,
