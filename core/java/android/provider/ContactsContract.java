@@ -2783,7 +2783,48 @@ public final class ContactsContract {
          * The content:// style URI for this table, which requests a directory of
          * raw contact rows matching the selection criteria.
          */
-        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "raw_contacts");
+        public static final Uri CONTENT_URI =
+                Uri.withAppendedPath(AUTHORITY_URI, "raw_contacts");
+
+        /**
+         * The URI to register for all raw contacts change notification.
+         *
+         * @hide
+         */
+        @SystemApi
+        @TestApi
+        public static final Uri RAW_CONTACTS_NOTIFICATION_URI =
+                Uri.parse("content://com.android.contacts.raw_contacts");
+
+        /**
+         * The URI to register for raw contacts insert notification.
+         *
+         * @hide
+         */
+        @SystemApi
+        @TestApi
+        public static final Uri RAW_CONTACTS_NOTIFICATION_INSERT_URI =
+                Uri.withAppendedPath(RAW_CONTACTS_NOTIFICATION_URI, "insert");
+
+        /**
+         * The URI to register for raw contacts update notification.
+         *
+         * @hide
+         */
+        @SystemApi
+        @TestApi
+        public static final Uri RAW_CONTACTS_NOTIFICATION_UPDATE_URI =
+                Uri.withAppendedPath(RAW_CONTACTS_NOTIFICATION_URI, "update");
+
+        /**
+         * The URI to register for raw contacts delete notification.
+         *
+         * @hide
+         */
+        @SystemApi
+        @TestApi
+        public static final Uri RAW_CONTACTS_NOTIFICATION_DELETE_URI =
+                Uri.withAppendedPath(RAW_CONTACTS_NOTIFICATION_URI, "delete");
 
         /**
          * The MIME type of the results from {@link #CONTENT_URI} when a specific

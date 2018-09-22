@@ -4305,6 +4305,13 @@ package android.provider {
     field public static final java.lang.String STATE = "state";
   }
 
+  public static final class ContactsContract.RawContacts implements android.provider.BaseColumns android.provider.ContactsContract.ContactNameColumns android.provider.ContactsContract.ContactOptionsColumns android.provider.ContactsContract.RawContactsColumns android.provider.ContactsContract.SyncColumns {
+    field public static final android.net.Uri RAW_CONTACTS_NOTIFICATION_DELETE_URI;
+    field public static final android.net.Uri RAW_CONTACTS_NOTIFICATION_INSERT_URI;
+    field public static final android.net.Uri RAW_CONTACTS_NOTIFICATION_UPDATE_URI;
+    field public static final android.net.Uri RAW_CONTACTS_NOTIFICATION_URI;
+  }
+
   public abstract class SearchIndexableData {
     ctor public SearchIndexableData();
     ctor public SearchIndexableData(android.content.Context);
