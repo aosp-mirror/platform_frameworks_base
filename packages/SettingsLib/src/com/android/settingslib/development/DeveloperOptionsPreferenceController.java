@@ -75,14 +75,18 @@ public abstract class DeveloperOptionsPreferenceController extends AbstractPrefe
      * Called when developer options is enabled and the preference is available
      */
     protected void onDeveloperOptionsSwitchEnabled() {
-        mPreference.setEnabled(true);
+        if (mPreference != null) {
+            mPreference.setEnabled(true);
+        }
     }
 
     /**
      * Called when developer options is disabled and the preference is available
      */
     protected void onDeveloperOptionsSwitchDisabled() {
-        mPreference.setEnabled(false);
+        if (mPreference != null) {
+            mPreference.setEnabled(false);
+        }
     }
 
 }
