@@ -91,9 +91,9 @@ public class OomAdjProfiler {
                 return;
             }
             mSystemServerCpuTimeUpdateScheduled = true;
-            BackgroundThread.getHandler().post(PooledLambda.obtainRunnable(
+            BackgroundThread.getHandler().sendMessage(PooledLambda.obtainMessage(
                     OomAdjProfiler::updateSystemServerCpuTime,
-                    this, mOnBattery, mScreenOff).recycleOnUse());
+                    this, mOnBattery, mScreenOff));
         }
     }
 
