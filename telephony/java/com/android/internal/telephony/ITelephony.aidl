@@ -865,14 +865,15 @@ interface ITelephony {
      * Ask the radio to connect to the input network and change selection mode to manual.
      *
      * @param subId the id of the subscription.
-     * @param operatorNumeric the PLMN of the operator to attach to.
-     * @param persistSelection Whether the selection will persist until reboot. If true, only allows
+     * @param operatorInfo the operator inforamtion, included the PLMN, long name and short name of
+     * the operator to attach to.
+     * @param persistSelection whether the selection will persist until reboot. If true, only allows
      * attaching to the selected PLMN until reboot; otherwise, attach to the chosen PLMN and resume
      * normal network selection next time.
-     * @return true if the request suceeded.
+     * @return {@code true} on success; {@code true} on any failure.
      */
-    boolean setNetworkSelectionModeManual(int subId, in String operatorNumeric,
-            boolean persistSelection);
+    boolean setNetworkSelectionModeManual(
+            int subId, in OperatorInfo operatorInfo, boolean persisSelection);
 
     /**
      * Set the preferred network type.
@@ -1586,4 +1587,19 @@ interface ITelephony {
      * Return the network selection mode on the subscription with id {@code subId}.
      */
      int getNetworkSelectionMode(int subId);
+
+    /**
+     * Get a list of SMS apps on a user.
+     */
+    String[] getSmsApps(int userId);
+
+    /**
+     * Get the default SMS app on a given user.
+     */
+    String getDefaultSmsApp(int userId);
+
+    /**
+     * Set the default SMS app to a given package on a given user.
+     */
+    void setDefaultSmsApp(int userId, String packageName);
 }

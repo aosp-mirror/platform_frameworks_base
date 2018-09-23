@@ -17,18 +17,18 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
-import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.ActivityManager.TaskDescription.ATTR_TASKDESCRIPTION_PREFIX;
 import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
 import static android.app.ActivityOptions.ANIM_CUSTOM;
+import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.ANIM_REMOTE_ANIMATION;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
-import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
+import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
@@ -81,6 +81,8 @@ import static android.os.Build.VERSION_CODES.HONEYCOMB;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STATES;
@@ -93,6 +95,13 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityRecordProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.ActivityRecordProto.FRONT_OF_TASK;
+import static com.android.server.am.ActivityRecordProto.IDENTIFIER;
+import static com.android.server.am.ActivityRecordProto.PROC_ID;
+import static com.android.server.am.ActivityRecordProto.STATE;
+import static com.android.server.am.ActivityRecordProto.TRANSLUCENT;
+import static com.android.server.am.ActivityRecordProto.VISIBLE;
 import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
@@ -110,14 +119,6 @@ import static com.android.server.am.EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY;
 import static com.android.server.am.TaskPersister.DEBUG;
 import static com.android.server.am.TaskPersister.IMAGE_EXTENSION;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
-import static com.android.server.am.ActivityRecordProto.CONFIGURATION_CONTAINER;
-import static com.android.server.am.ActivityRecordProto.FRONT_OF_TASK;
-import static com.android.server.am.ActivityRecordProto.IDENTIFIER;
-import static com.android.server.am.ActivityRecordProto.PROC_ID;
-import static com.android.server.am.ActivityRecordProto.STATE;
-import static com.android.server.am.ActivityRecordProto.TRANSLUCENT;
-import static com.android.server.am.ActivityRecordProto.VISIBLE;
-import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_LEFT;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
@@ -132,6 +133,7 @@ import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
 import android.app.ResultInfo;
+import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityRelaunchItem;
 import android.app.servertransaction.ClientTransaction;
@@ -143,7 +145,6 @@ import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.PipModeChangeItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.WindowVisibilityItem;
-import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -1279,20 +1280,14 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     /**
      * Check whether this activity can be launched on the specified display.
+     *
      * @param displayId Target display id.
-     * @return {@code true} if either it is the default display or this activity is resizeable and
-     *         can be put a secondary screen.
+     * @return {@code true} if either it is the default display or this activity can be put on a
+     *         secondary screen.
      */
     boolean canBeLaunchedOnDisplay(int displayId) {
-        final TaskRecord task = getTask();
-
-        // The resizeability of an Activity's parent task takes precendence over the ActivityInfo.
-        // This allows for a non resizable activity to be launched into a resizeable task.
-        final boolean resizeable =
-                task != null ? task.isResizeable() : supportsResizeableMultiWindow();
-
-        return service.mStackSupervisor.canPlaceEntityOnDisplay(displayId,
-                resizeable, launchedFromPid, launchedFromUid, info);
+        return service.mStackSupervisor.canPlaceEntityOnDisplay(displayId, launchedFromPid,
+                launchedFromUid, info);
     }
 
     /**
@@ -2331,7 +2326,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
 
         final CompatibilityInfo compatInfo =
-                service.mAm.compatibilityInfoForPackageLocked(info.applicationInfo);
+                service.compatibilityInfoForPackageLocked(info.applicationInfo);
         final boolean shown = mWindowContainerController.addStartingWindow(packageName, theme,
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                 prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning(),
@@ -2493,6 +2488,14 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             outBounds.left = appBounds.right - maxActivityWidth;
             outBounds.right = appBounds.right;
         }
+    }
+
+    /**
+     * @return {@code true} if this activity was reparented to another display but
+     *         {@link #ensureActivityConfiguration} is not called.
+     */
+    boolean shouldUpdateConfigForDisplayChanged() {
+        return mLastReportedDisplayId != getDisplayId();
     }
 
     boolean ensureActivityConfiguration(int globalChanges, boolean preserveWindow) {

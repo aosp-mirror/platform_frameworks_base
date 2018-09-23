@@ -103,7 +103,7 @@ public:
 
     // Helper for debugging contents of this uid map. Can be triggered with:
     // adb shell cmd stats print-uid-map
-    void printUidMap(FILE* out) const;
+    void printUidMap(int outFd) const;
 
     // Commands for indicating to the map that a producer should be notified if an app is updated.
     // This allows the metric producer to distinguish when the same uid or app represents a

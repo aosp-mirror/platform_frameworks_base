@@ -208,7 +208,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // If no caller app, return {@code null} {@link ProcessRecord}.
         final ProcessRecord record = containsConditions(preconditions, PRECONDITION_NO_CALLER_APP)
-                ? null : new ProcessRecord(service.mAm, mock(ApplicationInfo.class), null, 0);
+                ? null : new ProcessRecord(service.mAm, mock(ApplicationInfo.class), null, 0, null);
 
         doReturn(record).when(service.mAm).getRecordForAppLocked(anyObject());
 

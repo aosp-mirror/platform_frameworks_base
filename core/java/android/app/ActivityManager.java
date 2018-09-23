@@ -776,7 +776,7 @@ public class ActivityManager {
     /** @hide */
     public int getPackageScreenCompatMode(String packageName) {
         try {
-            return getService().getPackageScreenCompatMode(packageName);
+            return getTaskService().getPackageScreenCompatMode(packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -785,7 +785,7 @@ public class ActivityManager {
     /** @hide */
     public void setPackageScreenCompatMode(String packageName, int mode) {
         try {
-            getService().setPackageScreenCompatMode(packageName, mode);
+            getTaskService().setPackageScreenCompatMode(packageName, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -794,7 +794,7 @@ public class ActivityManager {
     /** @hide */
     public boolean getPackageAskScreenCompat(String packageName) {
         try {
-            return getService().getPackageAskScreenCompat(packageName);
+            return getTaskService().getPackageAskScreenCompat(packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -803,7 +803,7 @@ public class ActivityManager {
     /** @hide */
     public void setPackageAskScreenCompat(String packageName, boolean ask) {
         try {
-            getService().setPackageAskScreenCompat(packageName, ask);
+            getTaskService().setPackageAskScreenCompat(packageName, ask);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3379,7 +3379,7 @@ public class ActivityManager {
      */
     public ConfigurationInfo getDeviceConfigurationInfo() {
         try {
-            return getService().getDeviceConfigurationInfo();
+            return getTaskService().getDeviceConfigurationInfo();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

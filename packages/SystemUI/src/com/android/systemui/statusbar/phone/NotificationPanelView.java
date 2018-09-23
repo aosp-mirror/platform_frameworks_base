@@ -63,6 +63,7 @@ import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.qs.QSFragment;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
@@ -454,6 +455,10 @@ public class NotificationPanelView extends PanelView implements
         addView(mKeyguardBottomArea, index);
         initBottomArea();
         setDarkAmount(mLinearDarkAmount, mInterpolatedDarkAmount);
+
+        if (mKeyguardStatusBar != null) {
+            mKeyguardStatusBar.onThemeChanged();
+        }
 
         setKeyguardStatusViewVisibility(mBarState, false, false);
         setKeyguardBottomAreaVisibility(mBarState, false);
@@ -1836,10 +1841,10 @@ public class NotificationPanelView extends PanelView implements
             return;
         }
         float alphaQsExpansion = 1 - Math.min(1, getQsExpansionFraction() * 2);
-        mKeyguardStatusBar.setAlpha(Math.min(getKeyguardContentsAlpha(), alphaQsExpansion)
-                * mKeyguardStatusBarAnimateAlpha);
-        mKeyguardStatusBar.setVisibility(mKeyguardStatusBar.getAlpha() != 0f
-                && !mDozing ? VISIBLE : INVISIBLE);
+        float newAlpha = Math.min(getKeyguardContentsAlpha(), alphaQsExpansion)
+                * mKeyguardStatusBarAnimateAlpha;
+        mKeyguardStatusBar.setAlpha(newAlpha);
+        mKeyguardStatusBar.setVisibility(newAlpha != 0f ? VISIBLE : INVISIBLE);
     }
 
     private void updateKeyguardBottomAreaAlpha() {
@@ -2347,16 +2352,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void updateDozingVisibilities(boolean animate) {
-        if (mDozing) {
-            mKeyguardStatusBar.setVisibility(View.INVISIBLE);
-            mKeyguardBottomArea.setDozing(mDozing, animate);
-        } else {
-            mKeyguardStatusBar.setVisibility(View.VISIBLE);
-            mKeyguardBottomArea.setDozing(mDozing, animate);
-            if (animate) {
-                animateKeyguardStatusBarIn(DOZE_ANIMATION_DURATION);
-            }
-        }
+        mKeyguardBottomArea.setDozing(mDozing, animate);
     }
 
     @Override
@@ -2749,6 +2745,9 @@ public class NotificationPanelView extends PanelView implements
                         }
                     });
             mNotificationStackScroller.setQsContainer((ViewGroup) mQs.getView());
+            if (mQs instanceof QSFragment) {
+                mKeyguardStatusBar.setQSPanel(((QSFragment) mQs).getQsPanel());
+            }
             updateQsExpansion();
         }
 
@@ -2811,6 +2810,7 @@ public class NotificationPanelView extends PanelView implements
     private void setDarkAmount(float linearAmount, float amount) {
         mInterpolatedDarkAmount = amount;
         mLinearDarkAmount = linearAmount;
+        mKeyguardStatusBar.setDarkAmount(mInterpolatedDarkAmount);
         mKeyguardStatusView.setDarkAmount(mInterpolatedDarkAmount);
         mKeyguardBottomArea.setDarkAmount(mInterpolatedDarkAmount);
         positionClockAndNotifications();
@@ -2837,6 +2837,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void dozeTimeTick() {
+        mKeyguardStatusBar.dozeTimeTick();
         mKeyguardStatusView.dozeTimeTick();
         mKeyguardBottomArea.dozeTimeTick();
         if (mInterpolatedDarkAmount > 0) {

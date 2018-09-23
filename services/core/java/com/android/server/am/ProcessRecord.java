@@ -17,17 +17,9 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-
-import android.os.Debug;
-import android.util.ArraySet;
-import android.util.DebugUtils;
-import android.util.EventLog;
-import android.util.Slog;
-import com.android.internal.app.procstats.ProcessStats;
-import com.android.internal.app.procstats.ProcessState;
-import com.android.internal.os.BatteryStatsImpl;
 
 import android.app.ActivityManager;
 import android.app.Dialog;
@@ -36,7 +28,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
+import android.content.res.Configuration;
 import android.os.Binder;
+import android.os.Debug;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -44,9 +38,17 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.DebugUtils;
+import android.util.EventLog;
+import android.util.Slog;
 import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+
+import com.android.internal.app.procstats.ProcessState;
+import com.android.internal.app.procstats.ProcessStats;
+import com.android.internal.os.BatteryStatsImpl;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -307,6 +309,7 @@ final class ProcessRecord implements WindowProcessListener {
             pw.print(prefix); pw.print("manageSpaceActivityName=");
             pw.println(info.manageSpaceActivityName);
         }
+
         pw.print(prefix); pw.print("dir="); pw.print(info.sourceDir);
                 pw.print(" publicDir="); pw.print(info.publicSourceDir);
                 pw.print(" data="); pw.println(info.dataDir);
@@ -520,7 +523,7 @@ final class ProcessRecord implements WindowProcessListener {
     }
 
     ProcessRecord(ActivityManagerService _service, ApplicationInfo _info, String _processName,
-            int _uid) {
+            int _uid, Configuration config) {
         mService = _service;
         info = _info;
         isolated = _info.uid != _uid;
@@ -534,7 +537,7 @@ final class ProcessRecord implements WindowProcessListener {
         removed = false;
         lastStateTime = lastPssTime = nextPssTime = SystemClock.uptimeMillis();
         mWindowProcessController = new WindowProcessController(
-                mService.mActivityTaskManager, info, processName, uid, userId, this, this);
+                mService.mActivityTaskManager, info, processName, uid, userId, this, this, config);
         pkgList.put(_info.packageName, new ProcessStats.ProcessStateHolder(_info.longVersionCode));
     }
 

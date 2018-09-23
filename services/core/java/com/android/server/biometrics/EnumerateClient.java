@@ -23,13 +23,16 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import java.util.ArrayList;
+
 /**
  * A class to keep track of the enumeration state for a given client.
  */
 public abstract class EnumerateClient extends ClientMonitor {
-    public EnumerateClient(Context context, Metrics metrics, BiometricService.DaemonWrapper daemon,
-            long halDeviceId, IBinder token, BiometricService.ServiceListener listener, int groupId,
-            int userId, boolean restricted, String owner) {
+    public EnumerateClient(Context context, Metrics metrics,
+            BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
+            BiometricServiceBase.ServiceListener listener, int groupId, int userId,
+            boolean restricted, String owner) {
         super(context, metrics, daemon, halDeviceId, token, listener, userId, groupId, restricted,
                 owner);
     }
@@ -94,7 +97,7 @@ public abstract class EnumerateClient extends ClientMonitor {
 
     @Override
     public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
-            boolean authenticated) {
+            boolean authenticated, ArrayList<Byte> token) {
         if (DEBUG) Slog.w(getLogTag(), "onAuthenticated() called for enumerate!");
         return true; // Invalid for Enumerate.
     }

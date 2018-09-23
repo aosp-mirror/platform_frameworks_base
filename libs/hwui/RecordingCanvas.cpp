@@ -278,8 +278,8 @@ struct DrawPicture final : Op {
 
 struct DrawImage final : Op {
     static const auto kType = Type::DrawImage;
-    DrawImage(sk_sp<const SkImage>&& image, SkScalar x, SkScalar y, const SkPaint* paint)
-            : image(std::move(image)), x(x), y(y) {
+    DrawImage(sk_sp<const SkImage>&& image, SkScalar x, SkScalar y, const SkPaint* paint, BitmapPalette palette)
+            : image(std::move(image)), x(x), y(y), palette(palette) {
         if (paint) {
             this->paint = *paint;
         }
@@ -287,6 +287,7 @@ struct DrawImage final : Op {
     sk_sp<const SkImage> image;
     SkScalar x, y;
     SkPaint paint;
+    BitmapPalette palette;
     void draw(SkCanvas* c, const SkMatrix&) const { c->drawImage(image.get(), x, y, &paint); }
 };
 struct DrawImageNine final : Op {
@@ -309,8 +310,8 @@ struct DrawImageNine final : Op {
 struct DrawImageRect final : Op {
     static const auto kType = Type::DrawImageRect;
     DrawImageRect(sk_sp<const SkImage>&& image, const SkRect* src, const SkRect& dst,
-                  const SkPaint* paint, SkCanvas::SrcRectConstraint constraint)
-            : image(std::move(image)), dst(dst), constraint(constraint) {
+                  const SkPaint* paint, SkCanvas::SrcRectConstraint constraint, BitmapPalette palette)
+            : image(std::move(image)), dst(dst), constraint(constraint), palette(palette) {
         this->src = src ? *src : SkRect::MakeIWH(this->image->width(), this->image->height());
         if (paint) {
             this->paint = *paint;
@@ -320,6 +321,7 @@ struct DrawImageRect final : Op {
     SkRect src, dst;
     SkPaint paint;
     SkCanvas::SrcRectConstraint constraint;
+    BitmapPalette palette;
     void draw(SkCanvas* c, const SkMatrix&) const {
         c->drawImageRect(image.get(), src, dst, &paint, constraint);
     }
@@ -609,8 +611,8 @@ void DisplayListData::drawPicture(const SkPicture* picture, const SkMatrix* matr
     this->push<DrawPicture>(0, picture, matrix, paint);
 }
 void DisplayListData::drawImage(sk_sp<const SkImage> image, SkScalar x, SkScalar y,
-                                const SkPaint* paint) {
-    this->push<DrawImage>(0, std::move(image), x, y, paint);
+                                const SkPaint* paint, BitmapPalette palette) {
+    this->push<DrawImage>(0, std::move(image), x, y, paint, palette);
 }
 void DisplayListData::drawImageNine(sk_sp<const SkImage> image, const SkIRect& center,
                                     const SkRect& dst, const SkPaint* paint) {
@@ -618,8 +620,8 @@ void DisplayListData::drawImageNine(sk_sp<const SkImage> image, const SkIRect& c
 }
 void DisplayListData::drawImageRect(sk_sp<const SkImage> image, const SkRect* src,
                                     const SkRect& dst, const SkPaint* paint,
-                                    SkCanvas::SrcRectConstraint constraint) {
-    this->push<DrawImageRect>(0, std::move(image), src, dst, paint, constraint);
+                                    SkCanvas::SrcRectConstraint constraint, BitmapPalette palette) {
+    this->push<DrawImageRect>(0, std::move(image), src, dst, paint, constraint, palette);
 }
 void DisplayListData::drawImageLattice(sk_sp<const SkImage> image, const SkCanvas::Lattice& lattice,
                                        const SkRect& dst, const SkPaint* paint) {
@@ -638,28 +640,33 @@ void DisplayListData::drawText(const void* text, size_t bytes, SkScalar x, SkSca
                                const SkPaint& paint) {
     void* pod = this->push<DrawText>(bytes, bytes, x, y, paint);
     copy_v(pod, (const char*)text, bytes);
+    mHasText = true;
 }
 void DisplayListData::drawPosText(const void* text, size_t bytes, const SkPoint pos[],
                                   const SkPaint& paint) {
     int n = paint.countText(text, bytes);
     void* pod = this->push<DrawPosText>(n * sizeof(SkPoint) + bytes, bytes, paint, n);
     copy_v(pod, pos, n, (const char*)text, bytes);
+    mHasText = true;
 }
 void DisplayListData::drawPosTextH(const void* text, size_t bytes, const SkScalar xs[], SkScalar y,
                                    const SkPaint& paint) {
     int n = paint.countText(text, bytes);
     void* pod = this->push<DrawPosTextH>(n * sizeof(SkScalar) + bytes, bytes, y, paint, n);
     copy_v(pod, xs, n, (const char*)text, bytes);
+    mHasText = true;
 }
 void DisplayListData::drawTextRSXform(const void* text, size_t bytes, const SkRSXform xforms[],
                                       const SkRect* cull, const SkPaint& paint) {
     int n = paint.countText(text, bytes);
     void* pod = this->push<DrawTextRSXform>(bytes + n * sizeof(SkRSXform), bytes, n, cull, paint);
     copy_v(pod, xforms, n, (const char*)text, bytes);
+    mHasText = true;
 }
 void DisplayListData::drawTextBlob(const SkTextBlob* blob, SkScalar x, SkScalar y,
                                    const SkPaint& paint) {
     this->push<DrawTextBlob>(0, blob, x, y, paint);
+    mHasText = true;
 }
 
 void DisplayListData::drawPatch(const SkPoint points[12], const SkColor colors[4],
@@ -733,20 +740,35 @@ void DisplayListData::reset() {
 }
 
 template <class T>
-using has_paint_t = decltype(std::declval<T>().paint);
+using has_paint_helper = decltype(std::declval<T>().paint);
+
+template <class T>
+constexpr bool has_paint = std::experimental::is_detected_v<has_paint_helper, T>;
+
+template <class T>
+using has_palette_helper = decltype(std::declval<T>().palette);
+
+template <class T>
+constexpr bool has_palette = std::experimental::is_detected_v<has_palette_helper, T>;
 
 template <class T>
 constexpr color_transform_fn colorTransformForOp() {
-    if
-        constexpr(std::experimental::is_detected_v<has_paint_t, T>) {
-            return [](const void* op, ColorTransform transform) {
-                // TODO: We should be const. Or not. Or just use a different map
-                // Unclear, but this is the quick fix
-                transformPaint(transform,
-                               const_cast<SkPaint*>(&(reinterpret_cast<const T*>(op)->paint)));
-            };
-        }
-    else {
+    if constexpr(has_paint<T> && has_palette<T>) {
+        // It's a bitmap
+        return [](const void* opRaw, ColorTransform transform) {
+            // TODO: We should be const. Or not. Or just use a different map
+            // Unclear, but this is the quick fix
+            const T* op = reinterpret_cast<const T*>(opRaw);
+            transformPaint(transform, const_cast<SkPaint*>(&(op->paint)), op->palette);
+        };
+    } else if constexpr(has_paint<T>) {
+        return [](const void* opRaw, ColorTransform transform) {
+            // TODO: We should be const. Or not. Or just use a different map
+            // Unclear, but this is the quick fix
+            const T* op = reinterpret_cast<const T*>(opRaw);
+            transformPaint(transform, const_cast<SkPaint*>(&(op->paint)));
+        };
+    } else {
         return nullptr;
     }
 }
@@ -875,7 +897,7 @@ void RecordingCanvas::onDrawTextBlob(const SkTextBlob* blob, SkScalar x, SkScala
 
 void RecordingCanvas::onDrawBitmap(const SkBitmap& bm, SkScalar x, SkScalar y,
                                    const SkPaint* paint) {
-    fDL->drawImage(SkImage::MakeFromBitmap(bm), x, y, paint);
+    fDL->drawImage(SkImage::MakeFromBitmap(bm), x, y, paint, BitmapPalette::Unknown);
 }
 void RecordingCanvas::onDrawBitmapNine(const SkBitmap& bm, const SkIRect& center, const SkRect& dst,
                                        const SkPaint* paint) {
@@ -883,16 +905,26 @@ void RecordingCanvas::onDrawBitmapNine(const SkBitmap& bm, const SkIRect& center
 }
 void RecordingCanvas::onDrawBitmapRect(const SkBitmap& bm, const SkRect* src, const SkRect& dst,
                                        const SkPaint* paint, SrcRectConstraint constraint) {
-    fDL->drawImageRect(SkImage::MakeFromBitmap(bm), src, dst, paint, constraint);
+    fDL->drawImageRect(SkImage::MakeFromBitmap(bm), src, dst, paint, constraint, BitmapPalette::Unknown);
 }
 void RecordingCanvas::onDrawBitmapLattice(const SkBitmap& bm, const SkCanvas::Lattice& lattice,
                                           const SkRect& dst, const SkPaint* paint) {
     fDL->drawImageLattice(SkImage::MakeFromBitmap(bm), lattice, dst, paint);
 }
 
+void RecordingCanvas::drawImage(const sk_sp<SkImage>& image, SkScalar x, SkScalar y,
+                                const SkPaint* paint, BitmapPalette palette) {
+    fDL->drawImage(image, x, y, paint, palette);
+}
+
+void RecordingCanvas::drawImageRect(const sk_sp<SkImage>& image, const SkRect& src, const SkRect& dst,
+                   const SkPaint* paint, SrcRectConstraint constraint, BitmapPalette palette) {
+    fDL->drawImageRect(image, &src, dst, paint, constraint, palette);
+}
+
 void RecordingCanvas::onDrawImage(const SkImage* img, SkScalar x, SkScalar y,
                                   const SkPaint* paint) {
-    fDL->drawImage(sk_ref_sp(img), x, y, paint);
+    fDL->drawImage(sk_ref_sp(img), x, y, paint, BitmapPalette::Unknown);
 }
 void RecordingCanvas::onDrawImageNine(const SkImage* img, const SkIRect& center, const SkRect& dst,
                                       const SkPaint* paint) {
@@ -900,7 +932,7 @@ void RecordingCanvas::onDrawImageNine(const SkImage* img, const SkIRect& center,
 }
 void RecordingCanvas::onDrawImageRect(const SkImage* img, const SkRect* src, const SkRect& dst,
                                       const SkPaint* paint, SrcRectConstraint constraint) {
-    fDL->drawImageRect(sk_ref_sp(img), src, dst, paint, constraint);
+    fDL->drawImageRect(sk_ref_sp(img), src, dst, paint, constraint, BitmapPalette::Unknown);
 }
 void RecordingCanvas::onDrawImageLattice(const SkImage* img, const SkCanvas::Lattice& lattice,
                                          const SkRect& dst, const SkPaint* paint) {

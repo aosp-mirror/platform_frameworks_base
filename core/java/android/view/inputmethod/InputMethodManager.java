@@ -57,6 +57,7 @@ import android.view.ViewRootImpl;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillManager;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputConnectionWrapper;
@@ -69,6 +70,7 @@ import com.android.internal.view.InputMethodClient;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -225,6 +227,47 @@ public final class InputMethodManager {
 
     static final String PENDING_EVENT_COUNTER = "aq:imm";
 
+    /**
+     * {@code true} if we want to instantiate {@link InputMethodManager} eagerly in
+     * {@link android.view.WindowManagerGlobal#getWindowSession()}, which is often called in an
+     * early stage of process startup, which is how Android has worked.
+     *
+     * <p>We still have this settings because we know there are possible compatibility concerns if
+     * we stop doing so. Here are scenarios we know and there could be more scenarios we are not
+     * aware of right know.</p>
+     *
+     * <ul>
+     *     <li>Apps that directly access {@link #sInstance} via reflection, which is currently
+     *     allowed because of {@link UnsupportedAppUsage} annotation.  Currently
+     *     {@link android.view.WindowManagerGlobal#getWindowSession()} is likely to guarantee that
+     *     {@link #sInstance} is not {@code null} when such an app is accessing it, but removing
+     *     that code from {@link android.view.WindowManagerGlobal#getWindowSession()} can reveal
+     *     untested code paths in their apps, which probably happen in an early startup time of that
+     *     app.</li>
+     *     <li>Apps that directly access {@link #peekInstance()} via reflection, which is currently
+     *     allowed because of {@link UnsupportedAppUsage} annotation.  Currently
+     *     {@link android.view.WindowManagerGlobal#getWindowSession()} is likely to guarantee that
+     *     {@link #peekInstance()} returns non-{@code null} object when such an app is calling
+     *     {@link #peekInstance()}, but removing that code from
+     *     {@link android.view.WindowManagerGlobal#getWindowSession()} can reveal untested code
+     *     paths in their apps, which probably happen in an early startup time of that app. The good
+     *     news is that unlike {@link #sInstance}'s case we can at least work around this scenario
+     *     by changing the semantics of {@link #peekInstance()}, which is currently defined as
+     *     "retrieve the global {@link InputMethodManager} instance, if it exists" to something that
+     *     always returns non-{@code null} {@link InputMethodManager}.  However, introducing such an
+     *     workaround can also trigger different compatibility issues if {@link #peekInstance()} was
+     *     called before {@link android.view.WindowManagerGlobal#getWindowSession()} and it expected
+     *     {@link #peekInstance()} to return {@code null} as written in the JavaDoc.</li>
+     * </ul>
+     *
+     * <p>TODO(Bug 116157766): Check if we can set {@code false} here then remove this settings.</p>
+     * @hide
+     */
+    public static final boolean ENABLE_LEGACY_EAGER_INITIALIZATION = true;
+
+    private static final Object sLock = new Object();
+
+    @GuardedBy("sLock")
     @UnsupportedAppUsage
     static InputMethodManager sInstance;
 
@@ -628,13 +671,63 @@ public final class InputMethodManager {
 
     final InputConnection mDummyInputConnection = new BaseInputConnection(this, false);
 
-    InputMethodManager(Looper looper) throws ServiceNotFoundException {
-        this(IInputMethodManager.Stub.asInterface(
-                ServiceManager.getServiceOrThrow(Context.INPUT_METHOD_SERVICE)), looper);
+    /**
+     * For layoutlib to clean up static objects inside {@link InputMethodManager}.
+     */
+    static void tearDownEditMode() {
+        if (!isInEditMode()) {
+            throw new UnsupportedOperationException(
+                    "This method must be called only from layoutlib");
+        }
+        synchronized (sLock) {
+            sInstance = null;
+        }
     }
 
-    InputMethodManager(IInputMethodManager service, Looper looper) {
-        mService = service;
+    /**
+     * For layoutlib to override this method to return {@code true}.
+     *
+     * @return {@code true} if the process is running for developer tools
+     * @see View#isInEditMode()
+     */
+    private static boolean isInEditMode() {
+        return false;
+    }
+
+    private static IInputMethodManager getIInputMethodManager() throws ServiceNotFoundException {
+        if (!isInEditMode()) {
+            return IInputMethodManager.Stub.asInterface(
+                    ServiceManager.getServiceOrThrow(Context.INPUT_METHOD_SERVICE));
+        }
+        // If InputMethodManager is running for layoutlib, stub out IPCs into IMMS.
+        final Class<IInputMethodManager> c = IInputMethodManager.class;
+        return (IInputMethodManager) Proxy.newProxyInstance(c.getClassLoader(),
+                new Class[]{c}, (proxy, method, args) -> {
+                    final Class<?> returnType = method.getReturnType();
+                    if (returnType == boolean.class) {
+                        return false;
+                    } else if (returnType == int.class) {
+                        return 0;
+                    } else if (returnType == long.class) {
+                        return 0L;
+                    } else if (returnType == short.class) {
+                        return 0;
+                    } else if (returnType == char.class) {
+                        return 0;
+                    } else if (returnType == byte.class) {
+                        return 0;
+                    } else if (returnType == float.class) {
+                        return 0f;
+                    } else if (returnType == double.class) {
+                        return 0.0;
+                    } else {
+                        return null;
+                    }
+                });
+    }
+
+    InputMethodManager(Looper looper) throws ServiceNotFoundException {
+        mService = getIInputMethodManager();
         mMainLooper = looper;
         mH = new H(looper);
         mIInputContext = new ControlledInputConnectionWrapper(looper,
@@ -648,11 +741,13 @@ public final class InputMethodManager {
      */
     @UnsupportedAppUsage
     public static InputMethodManager getInstance() {
-        synchronized (InputMethodManager.class) {
+        synchronized (sLock) {
             if (sInstance == null) {
                 try {
-                    sInstance = new InputMethodManager(Looper.getMainLooper());
-                } catch (ServiceNotFoundException e) {
+                    final InputMethodManager imm = new InputMethodManager(Looper.getMainLooper());
+                    imm.mService.addClient(imm.mClient, imm.mIInputContext);
+                    sInstance = imm;
+                } catch (ServiceNotFoundException | RemoteException e) {
                     throw new IllegalStateException(e);
                 }
             }
@@ -669,7 +764,9 @@ public final class InputMethodManager {
     @Deprecated
     @UnsupportedAppUsage
     public static InputMethodManager peekInstance() {
-        return sInstance;
+        synchronized (sLock) {
+            return sInstance;
+        }
     }
 
     /** @hide */
@@ -1347,6 +1444,10 @@ public final class InputMethodManager {
             if (mServedView != null &&
                     mServedView.getWindowToken() == appWindowToken) {
                 finishInputLocked();
+            }
+            if (mCurRootView != null &&
+                    mCurRootView.getWindowToken() == appWindowToken) {
+                mCurRootView = null;
             }
         }
     }

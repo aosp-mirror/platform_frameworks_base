@@ -321,7 +321,7 @@ public class NotificationViewHierarchyManager {
                         && !row.isLowPriority()));
             }
 
-            entry.row.setShowAmbient(mPresenter.isDozing());
+            entry.row.setOnAmbient(mPresenter.isDozing());
             int userId = entry.notification.getUserId();
             boolean suppressedSummary = mGroupManager.isSummaryOfSuppressedGroup(
                     entry.notification) && !entry.row.isRemoved();

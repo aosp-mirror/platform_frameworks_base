@@ -17,6 +17,7 @@
 package android.net;
 
 import android.app.PendingIntent;
+import android.net.ConnectionInfo;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -182,4 +183,6 @@ interface IConnectivityManager
     String getCaptivePortalServerUrl();
 
     byte[] getNetworkWatchlistConfigHash();
+
+    int getConnectionOwnerUid(in ConnectionInfo connectionInfo);
 }

@@ -107,6 +107,7 @@ import static java.lang.Integer.MAX_VALUE;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityController;
@@ -151,6 +152,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.wm.ConfigurationContainer;
@@ -1514,14 +1516,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         mStackSupervisor.getLaunchTimeTracker().stopFullyDrawnTraceIfNeeded(getWindowingMode());
 
-        mService.mAm.updateCpuStats();
+        mService.updateCpuStats();
 
         if (prev.attachedToProcess()) {
             if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Enqueueing pending pause: " + prev);
             try {
                 EventLogTags.writeAmPauseActivity(prev.userId, System.identityHashCode(prev),
                         prev.shortComponentName, "userLeaving=" + userLeaving);
-                mService.mAm.updateUsageStats(prev, false);
+                mService.updateUsageStats(prev, false);
 
                 mService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
                         prev.appToken, PauseActivityItem.obtain(prev.finishing, userLeaving,
@@ -1683,20 +1685,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (prev != null) {
             prev.resumeKeyDispatchingLocked();
 
-            if (prev.hasProcess() && prev.cpuTimeAtResume > 0
-                    && mService.mAm.mBatteryStatsService.isOnBattery()) {
-                long diff = prev.app.getCpuTime() - prev.cpuTimeAtResume;
-                if (diff > 0) {
-                    BatteryStatsImpl bsi = mService.mAm.mBatteryStatsService.getActiveStatistics();
-                    synchronized (bsi) {
-                        BatteryStatsImpl.Uid.Proc ps =
-                                bsi.getProcessStatsLocked(prev.info.applicationInfo.uid,
-                                        prev.info.packageName);
-                        if (ps != null) {
-                            ps.addForegroundTimeLocked(diff);
-                        }
-                    }
-                }
+            final long diff = prev.app.getCpuTime() - prev.cpuTimeAtResume;
+            if (prev.hasProcess() && prev.cpuTimeAtResume > 0 && diff > 0) {
+                final Runnable r = PooledLambda.obtainRunnable(
+                        ActivityManagerInternal::updateForegroundTimeIfOnBattery,
+                        mService.mAmInternal, prev.info.packageName, prev.info.applicationInfo.uid,
+                        diff);
+                mService.mH.post(r);
             }
             prev.cpuTimeAtResume = 0; // reset it
         }
@@ -1713,7 +1708,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mStackSupervisor.ensureActivitiesVisibleLocked(resuming, 0, !PRESERVE_WINDOWS);
     }
 
-    void addToStopping(ActivityRecord r, boolean scheduleIdle, boolean idleDelayed) {
+    private void addToStopping(ActivityRecord r, boolean scheduleIdle, boolean idleDelayed) {
         if (!mStackSupervisor.mStoppingActivities.contains(r)) {
             mStackSupervisor.mStoppingActivities.add(r);
 
@@ -2407,7 +2402,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     @GuardedBy("mService")
     private boolean resumeTopActivityInnerLocked(ActivityRecord prev, ActivityOptions options) {
-        if (!mService.mAm.mBooting && !mService.mAm.mBooted) {
+        if (!mService.isBooting() && !mService.isBooted()) {
             // Not ready yet!
             return false;
         }
@@ -2691,7 +2686,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         lastStack == null ? null :lastStack.mResumedActivity;
                 final ActivityState lastState = next.getState();
 
-                mService.mAm.updateCpuStats();
+                mService.updateCpuStats();
 
                 if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to RESUMED: " + next
                         + " (in existing)");
@@ -4166,7 +4161,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mWindowManager.notifyAppRelaunchesCleared(r.appToken);
     }
 
-    void removeTimeoutsForActivityLocked(ActivityRecord r) {
+    private void removeTimeoutsForActivityLocked(ActivityRecord r) {
         mStackSupervisor.removeTimeoutsForActivityLocked(r);
         mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
         mHandler.removeMessages(STOP_TIMEOUT_MSG, r);
@@ -4368,12 +4363,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (hadApp) {
             if (removeFromApp) {
                 r.app.removeActivity(r);
-                if (mService.mAm.mHeavyWeightProcess != null
-                        && mService.mAm.mHeavyWeightProcess.getWindowProcessController() == r.app
-                        && !r.app.hasActivities()) {
-                    mService.mAm.mHeavyWeightProcess = null;
-                    mService.mAm.mHandler.sendEmptyMessage(
-                            ActivityManagerService.CANCEL_HEAVY_NOTIFICATION_MSG);
+                if (!r.app.hasActivities()) {
+                    mService.clearHeavyWeightProcessIfEquals(r.app);
                 }
                 if (!r.app.hasActivities()) {
                     // Update any services we are bound to that might care about whether
@@ -4564,7 +4555,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                                     r.getTask().taskId, r.shortComponentName,
                                     "proc died without state saved");
                             if (r.getState() == RESUMED) {
-                                mService.mAm.updateUsageStats(r, false);
+                                mService.updateUsageStats(r, false);
                             }
                         }
                     } else {
@@ -5375,12 +5366,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         display.positionChildAtTop(this, false /* includingParents */);
     }
 
+    /** NOTE: Should only be called from {@link TaskRecord#reparent}. */
     void moveToFrontAndResumeStateIfNeeded(ActivityRecord r, boolean moveToFront, boolean setResume,
             boolean setPause, String reason) {
         if (!moveToFront) {
             return;
         }
 
+        final ActivityState origState = r.getState();
         // If the activity owns the last resumed activity, transfer that together,
         // so that we don't resume the same activity again in the new stack.
         // Apps may depend on onResume()/onPause() being called in pairs.
@@ -5393,9 +5386,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             mPausingActivity = r;
             schedulePauseTimeout(r);
         }
-        // Move the stack in which we are placing the activity to the front. The call will also
-        // make sure the activity focus is set.
+        // Move the stack in which we are placing the activity to the front.
         moveToFront(reason);
+        // If the original state is resumed, there is no state change to update focused app.
+        // So here makes sure the activity focus is set if it is the top.
+        if (origState == RESUMED && r == mStackSupervisor.getTopResumedActivity()) {
+            // TODO(b/111361570): Support multiple focused apps in WM
+            mService.setResumedActivityUncheckLocked(r, reason);
+        }
     }
 
     public int getStackId() {

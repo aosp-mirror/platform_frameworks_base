@@ -33,11 +33,13 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A Parcelable class for Subscription Information.
@@ -552,11 +554,49 @@ public class SubscriptionInfo implements Parcelable {
         String cardIdToPrint = givePrintableIccid(mCardId);
         return "{id=" + mId + ", iccId=" + iccIdToPrint + " simSlotIndex=" + mSimSlotIndex
                 + " displayName=" + mDisplayName + " carrierName=" + mCarrierName
-                + " nameSource=" + mNameSource + " iconTint=" + mIconTint
+                + " nameSource=" + mNameSource + " iconTint=" + mIconTint + " mNumber=" + mNumber
                 + " dataRoaming=" + mDataRoaming + " iconBitmap=" + mIconBitmap + " mcc " + mMcc
-                + " mnc " + mMnc + " isEmbedded " + mIsEmbedded
+                + " mnc " + mMnc + "mCountryIso=" + mCountryIso + " isEmbedded " + mIsEmbedded
                 + " accessRules " + Arrays.toString(mAccessRules)
                 + " cardId=" + cardIdToPrint + " isOpportunistic " + mIsOpportunistic
                 + " parentSubId=" + mParentSubId + "}";
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mId, mSimSlotIndex, mNameSource, mIconTint, mDataRoaming, mIsEmbedded,
+                mIsOpportunistic, mParentSubId, mIccId, mNumber, mMcc, mMnc, mCountryIso,
+                mCardId, mDisplayName, mCarrierName, mAccessRules);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (obj == this) return true;
+
+        SubscriptionInfo toCompare;
+        try {
+            toCompare = (SubscriptionInfo) obj;
+        } catch (ClassCastException ex) {
+            return false;
+        }
+
+        return mId == toCompare.mId
+                && mSimSlotIndex == toCompare.mSimSlotIndex
+                && mNameSource == toCompare.mNameSource
+                && mIconTint == toCompare.mIconTint
+                && mDataRoaming == toCompare.mDataRoaming
+                && mIsEmbedded == toCompare.mIsEmbedded
+                && mIsOpportunistic == toCompare.mIsOpportunistic
+                && mParentSubId == toCompare.mParentSubId
+                && Objects.equals(mIccId, toCompare.mIccId)
+                && Objects.equals(mNumber, toCompare.mNumber)
+                && Objects.equals(mMcc, toCompare.mMcc)
+                && Objects.equals(mMnc, toCompare.mMnc)
+                && Objects.equals(mCountryIso, toCompare.mCountryIso)
+                && Objects.equals(mCardId, toCompare.mCardId)
+                && TextUtils.equals(mDisplayName, toCompare.mDisplayName)
+                && TextUtils.equals(mCarrierName, toCompare.mCarrierName)
+                && Arrays.equals(mAccessRules, toCompare.mAccessRules);
     }
 }

@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"আপোনাৰ বাহকৰ ওচৰত ৱাই-ফাই কলিং সুবিধা পঞ্জীয়ন কৰাত সমস্যাৰ উদ্ভৱ হৈছে: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s ৱাই- ফাই কলিং"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> ৱাই- ফাই কলিং"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN কল"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN কল"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> ৱাই-ফাই"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"ৱাই- ফাই কলিং | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"অফ হৈ আছে"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ৱাই-ফাইক অগ্ৰাধিকাৰ দিয়া হৈছে"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ম\'বাইলক অগ্ৰাধিকাৰ দিয়া হৈছে"</string>
@@ -524,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"চিনাক্ত কৰিব পৰা নাই"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"ফিংগাৰপ্ৰিণ্টৰ সত্যাপন কৰা হ’ল"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ফিংগাৰপ্ৰিণ্ট হাৰ্ডৱেৰ নাই।"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ফিংগাৰপ্ৰিণ্ট সঞ্চয় কৰিব পৰা নগ\'ল। পূর্বে সঞ্চিত ফিংগাৰপ্ৰিণ্ট এটা আঁতৰাওক।"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ফিংগাৰপ্ৰিণ্ট গ্ৰহণৰ সময়সীমা উকলি গৈছে। আকৌ চেষ্টা কৰক।"</string>
@@ -560,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"মুখমণ্ডল গ্ৰহণৰ সময়সীমা উকলি গৈছে। আকৌ চেষ্টা কৰক।"</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"মুখমণ্ডল সঞ্চয় কৰিব নোৱাৰি।"</string>
     <string name="face_error_canceled" msgid="283945501061931023">"মুখমণ্ডলৰ প্ৰক্ৰিয়া বাতিল কৰা হ’ল।"</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"অত্যধিক ভুল প্ৰয়াস। কিছুসময়ৰ পাছত আকৌ চেষ্টা কৰক।"</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"অত্যধিক প্ৰয়াস। মুখমণ্ডলৰ জৰিয়তে সত্যাপন অক্ষম কৰা হ’ল।"</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"আকৌ চেষ্টা কৰক।"</string>
@@ -1404,7 +1414,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"আপুনি আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইলৰ ভিতৰত এই এপটো ব্যৱহাৰ কৰি আছে"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"ইনপুট পদ্ধতি"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"ছিংক"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"সাধ্য় সুবিধাসমূহ"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"সাধ্য সুবিধাসমূহ"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"ৱালপেপাৰ"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"ৱালপেপাৰ সলনি কৰক"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"জাননী নিৰীক্ষক"</string>
@@ -1617,6 +1627,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"ৰং শুধৰণী"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"দিব্যাংগসকলৰ সুবিধাৰ শ্বৰ্টকাটটোৱে <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ক অন কৰিছে"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"দিব্যাংগসকলৰ সুবিধাৰ শ্বৰ্টকাটটোৱে <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ক অফ কৰিছে"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"বর্তমানৰ সাধ্য সুবিধাসমূহৰ আৰম্ভ কৰিবলৈ সাধ্য সুবিধাসমূহৰ শ্বৰ্টকাট পুনৰ ব্যৱহাৰ কৰক"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"আপুনি দিব্যাংগসকলৰ সুবিধাৰ বুটামটো টিপিলে ব্যৱহাৰ কৰিবলগীয়া কোনো সুবিধা বাছক:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"সুবিধাসমূহ সলনি কৰিবলৈ দিব্যাংগসকলৰ সুবিধাৰ বুটামটো স্পৰ্শ কৰি থাকক।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"বিবৰ্ধন"</string>

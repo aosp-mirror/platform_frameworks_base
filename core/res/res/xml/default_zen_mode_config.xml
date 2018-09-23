@@ -18,13 +18,17 @@
 -->
 
 <!-- Default configuration for zen mode.  See android.service.notification.ZenModeConfig. -->
-<zen version="7">
+<zen version="8">
     <allow alarms="true" media="true" system="false" calls="true" callsFrom="2" messages="false"
            reminders="false" events="false" repeatCallers="true" />
-
+    <automatic ruleId="EVENTS_DEFAULT_RULE" enabled="false" snoozing="false" name="Event" zen="1"
+               component="android/com.android.server.notification.EventConditionProvider"
+               conditionId="condition://android/event?userId=-10000&amp;calendar=&amp;reply=1"/>
+    <automatic ruleId="EVERY_NIGHT_DEFAULT_RULE" enabled="false" snoozing="false" name="Sleeping"
+               zen="1" component="android/com.android.server.notification.ScheduleConditionProvider"
+               conditionId="condition://android/schedule?days=1.2.3.4.5.6.7&amp;start=22.0&amp;end=7.0&amp;exitAtAlarm=true"/>
     <!-- all visual effects that exist as of P -->
     <disallow visualEffects="511" />
-
     <!-- whether there are notification channels that can bypass dnd -->
     <state areChannelsBypassingDnd="false" />
 </zen>

@@ -18,44 +18,10 @@ package com.android.server.inputmethod;
 
 import android.content.ComponentName;
 
-import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethodClient;
-
 /**
  * Input method manager local system service interface.
  */
 public abstract class InputMethodManagerInternal {
-    /**
-     * Called by the window manager service when a client process is being attached to the window
-     * manager service.
-     *
-     * <p>The caller must not have WindowManagerService lock.  This method internally acquires
-     * InputMethodManagerService lock.</p>
-     *
-     * @param client {@link android.os.Binder} proxy that is associated with the singleton instance
-     *               of {@link android.view.inputmethod.InputMethodManager} that runs on the client
-     *               process
-     * @param inputContext communication channel for the dummy
-     *                     {@link android.view.inputmethod.InputConnection}
-     * @param uid UID of the client process
-     * @param pid PID of the client process
-     */
-    public abstract void addClient(IInputMethodClient client, IInputContext inputContext, int uid,
-            int pid);
-
-    /**
-     * Called by the window manager service when a client process is being attached to the window
-     * manager service.
-     *
-     * <p>The caller must not have WindowManagerService lock.  This method internally acquires
-     * InputMethodManagerService lock.</p>
-     *
-     * @param client {@link android.os.Binder} proxy that is associated with the singleton instance
-     *               of {@link android.view.inputmethod.InputMethodManager} that runs on the client
-     *               process
-     */
-    public abstract void removeClient(IInputMethodClient client);
-
     /**
      * Called by the power manager to tell the input method manager whether it
      * should start watching for wake events.
@@ -77,15 +43,6 @@ public abstract class InputMethodManagerInternal {
      */
     public static final InputMethodManagerInternal NOP =
             new InputMethodManagerInternal() {
-                @Override
-                public void addClient(IInputMethodClient client, IInputContext inputContext,
-                        int uid, int pid) {
-                }
-
-                @Override
-                public void removeClient(IInputMethodClient client) {
-                }
-
                 @Override
                 public void setInteractive(boolean interactive) {
                 }

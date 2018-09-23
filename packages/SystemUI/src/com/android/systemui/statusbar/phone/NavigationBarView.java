@@ -36,8 +36,6 @@ import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.drawable.AnimatedVectorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -46,7 +44,6 @@ import androidx.annotation.ColorInt;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -59,7 +56,6 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 
-import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.DockedStackExistsListener;
 import com.android.systemui.Interpolators;
@@ -106,10 +102,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     boolean mVertical;
     private int mCurrentRotation = -1;
 
-    boolean mShowMenu;
-    boolean mShowAccessibilityButton;
     boolean mLongClickableAccessibilityButton;
-    boolean mShowRotateButton;
     int mDisabledFlags = 0;
     int mNavigationIconHints = 0;
 
@@ -125,10 +118,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private KeyButtonDrawable mHomeDefaultIcon;
     private KeyButtonDrawable mRecentIcon;
     private KeyButtonDrawable mDockedIcon;
-    private KeyButtonDrawable mImeIcon;
-    private KeyButtonDrawable mMenuIcon;
-    private KeyButtonDrawable mAccessibilityIcon;
-    private KeyButtonDrawable mRotateSuggestionIcon;
 
     private GestureHelper mGestureHelper;
     private final DeadZone mDeadZone;
@@ -151,6 +140,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private boolean mDockedStackExists;
 
     private final SparseArray<ButtonDispatcher> mButtonDispatchers = new SparseArray<>();
+    private final ContextualButtonGroup mContextualButtonGroup;
     private Configuration mConfiguration;
 
     private NavigationBarInflaterView mNavigationInflaterView;
@@ -158,8 +148,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private Divider mDivider;
     private RecentsOnboarding mRecentsOnboarding;
     private NotificationPanelView mPanelView;
-
-    private int mRotateBtnStyle = R.style.RotateButtonCCWStart90;
 
     /**
      * Helper that is responsible for showing the right toast when a disallowed activity operation
@@ -279,17 +267,30 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 Context.WINDOW_SERVICE)).getDefaultDisplay();
 
         mVertical = false;
-        mShowMenu = false;
-
-        mShowAccessibilityButton = false;
         mLongClickableAccessibilityButton = false;
+
+        // Set up the context group of buttons
+        mContextualButtonGroup = new ContextualButtonGroup(R.id.menu_container);
+        final ContextualButton menuButton = new ContextualButton(R.id.menu,
+                R.drawable.ic_sysbar_menu);
+        final ContextualButton imeSwitcherButton = new ContextualButton(R.id.ime_switcher,
+                R.drawable.ic_ime_switcher_default);
+        final RotationContextButton rotateSuggestionButton = new RotationContextButton(
+                R.id.rotate_suggestion, R.drawable.ic_sysbar_rotate_button,
+                R.style.RotateButtonCCWStart90);
+        final ContextualButton accessibilityButton =
+                new ContextualButton(R.id.accessibility_button,
+                        R.drawable.ic_sysbar_accessibility_button);
+        mContextualButtonGroup.addButton(menuButton);
+        mContextualButtonGroup.addButton(imeSwitcherButton);
+        mContextualButtonGroup.addButton(rotateSuggestionButton);
+        mContextualButtonGroup.addButton(accessibilityButton);
 
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
         mRecentsOnboarding = new RecentsOnboarding(context, mOverviewProxyService);
 
         mConfiguration = new Configuration();
         mConfiguration.updateFrom(context.getResources().getConfiguration());
-        reloadNavIcons();
 
         mScreenPinningNotify = new ScreenPinningNotify(mContext);
         mBarTransitions = new NavigationBarTransitions(this);
@@ -297,14 +298,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mButtonDispatchers.put(R.id.back, new ButtonDispatcher(R.id.back));
         mButtonDispatchers.put(R.id.home, new ButtonDispatcher(R.id.home));
         mButtonDispatchers.put(R.id.recent_apps, new ButtonDispatcher(R.id.recent_apps));
-        mButtonDispatchers.put(R.id.menu, new ButtonDispatcher(R.id.menu));
-        mButtonDispatchers.put(R.id.ime_switcher, new ButtonDispatcher(R.id.ime_switcher));
-        mButtonDispatchers.put(R.id.accessibility_button,
-                new ButtonDispatcher(R.id.accessibility_button));
-        mButtonDispatchers.put(R.id.rotate_suggestion,
-                new ButtonDispatcher(R.id.rotate_suggestion));
-        mButtonDispatchers.put(R.id.menu_container,
-                new ButtonDispatcher(R.id.menu_container));
+        mButtonDispatchers.put(R.id.menu, menuButton);
+        mButtonDispatchers.put(R.id.ime_switcher, imeSwitcherButton);
+        mButtonDispatchers.put(R.id.accessibility_button, accessibilityButton);
+        mButtonDispatchers.put(R.id.rotate_suggestion, rotateSuggestionButton);
+        mButtonDispatchers.put(R.id.menu_container, mContextualButtonGroup);
         mDeadZone = new DeadZone(this);
     }
 
@@ -432,10 +430,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         return mButtonDispatchers.get(R.id.rotate_suggestion);
     }
 
-    public ButtonDispatcher getMenuContainer() {
-        return mButtonDispatchers.get(R.id.menu_container);
-    }
-
     public SparseArray<ButtonDispatcher> getButtonDispatchers() {
         return mButtonDispatchers;
     }
@@ -473,14 +467,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
         if (densityChange || dirChange) {
             mRecentIcon = getDrawable(R.drawable.ic_sysbar_recent);
-            mMenuIcon = getDrawable(R.drawable.ic_sysbar_menu);
-
-            mAccessibilityIcon = getDrawable(R.drawable.ic_sysbar_accessibility_button,
-                    false /* hasShadow */);
-
-            mImeIcon = getDrawable(R.drawable.ic_ime_switcher_default, false /* hasShadow */);
-
-            updateRotateSuggestionButtonStyle(mRotateBtnStyle, false);
+            mContextualButtonGroup.updateIcons();
         }
         if (orientationChange || densityChange || dirChange) {
             mBackIcon = getBackDrawable();
@@ -538,19 +525,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     private KeyButtonDrawable getDrawable(@DrawableRes int icon) {
-        return getDrawable(mContext, icon, true /* hasShadow */);
+        return KeyButtonDrawable.create(mContext, icon, true /* hasShadow */);
     }
 
     private KeyButtonDrawable getDrawable(@DrawableRes int icon, boolean hasShadow) {
-        return getDrawable(mContext, icon, hasShadow);
-    }
-
-    private KeyButtonDrawable getDrawable(Context ctx, @DrawableRes int icon, boolean hasShadow) {
-        final int dualToneDarkTheme = Utils.getThemeAttr(ctx, R.attr.darkIconTheme);
-        final int dualToneLightTheme = Utils.getThemeAttr(ctx, R.attr.lightIconTheme);
-        Context lightContext = new ContextThemeWrapper(ctx, dualToneLightTheme);
-        Context darkContext = new ContextThemeWrapper(ctx, dualToneDarkTheme);
-        return KeyButtonDrawable.create(lightContext, darkContext, icon, hasShadow);
+        return KeyButtonDrawable.create(mContext, icon, hasShadow);
     }
 
     @Override
@@ -609,24 +588,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         updateRecentsIcon();
 
         // Update IME button visibility, a11y and rotate button always overrides the appearance
-        final boolean showImeButton =
-                !mShowAccessibilityButton &&
-                        !mShowRotateButton &&
-                        ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0);
-        getImeSwitchButton().setVisibility(showImeButton ? View.VISIBLE : View.INVISIBLE);
-        getImeSwitchButton().setImageDrawable(mImeIcon);
-        updateContextualContainerVisibility();
-
-        // Update menu button, visibility logic in method
-        setMenuVisibility(mShowMenu, true);
-        getMenuButton().setImageDrawable(mMenuIcon);
-
-        // Update rotate button, visibility altered by a11y button logic
-        getRotateSuggestionButton().setImageDrawable(mRotateSuggestionIcon);
-
-        // Update a11y button, visibility logic in state method
-        setAccessibilityButtonState(mShowAccessibilityButton, mLongClickableAccessibilityButton);
-        getAccessibilityButton().setImageDrawable(mAccessibilityIcon);
+        mContextualButtonGroup.setButtonVisiblity(R.id.ime_switcher,
+                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0);
 
         mBarTransitions.reapplyDarkIntensity();
 
@@ -782,88 +745,28 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     public void setMenuVisibility(final boolean show) {
-        setMenuVisibility(show, false);
+        mContextualButtonGroup.setButtonVisiblity(R.id.menu, show);
     }
 
-    public void setMenuVisibility(final boolean show, final boolean force) {
-        if (!force && mShowMenu == show) return;
-
-        mShowMenu = show;
-
-        // Only show Menu if IME switcher, rotate and Accessibility buttons are not shown.
-        final boolean shouldShow = mShowMenu &&
-                !mShowAccessibilityButton &&
-                !mShowRotateButton &&
-                ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) == 0);
-
-        getMenuButton().setVisibility(shouldShow ? View.VISIBLE : View.INVISIBLE);
-        updateContextualContainerVisibility();
+    public void updateRotateSuggestionButtonStyle(@StyleRes int style) {
+        RotationContextButton button = (RotationContextButton) mContextualButtonGroup
+                .getContextButton(R.id.rotate_suggestion);
+        button.setStyle(style);
+        button.updateIcon();
     }
 
     public void setAccessibilityButtonState(final boolean visible, final boolean longClickable) {
-        mShowAccessibilityButton = visible;
         mLongClickableAccessibilityButton = longClickable;
-        if (visible) {
-            // Accessibility button overrides Menu, IME switcher and rotate buttons.
-            setMenuVisibility(false, true);
-            getImeSwitchButton().setVisibility(View.INVISIBLE);
-            setRotateButtonVisibility(false);
-        }
-
-        getAccessibilityButton().setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         getAccessibilityButton().setLongClickable(longClickable);
-        updateContextualContainerVisibility();
-    }
-
-    public void updateRotateSuggestionButtonStyle(@StyleRes int style, boolean setIcon) {
-        mRotateBtnStyle = style;
-        final Context ctx = getContext();
-
-        // Use the supplied style to set the icon's rotation parameters
-        Context rotateContext = new ContextThemeWrapper(ctx, style);
-
-        // Recreate the icon and set it if needed
-        float previousIntensity = mRotateSuggestionIcon != null
-                ? mRotateSuggestionIcon.getDarkIntensity() : 0;
-        mRotateSuggestionIcon = getDrawable(rotateContext, R.drawable.ic_sysbar_rotate_button,
-                false /* hasShadow */);
-        mRotateSuggestionIcon.setDarkIntensity(previousIntensity);
-
-        if (setIcon) getRotateSuggestionButton().setImageDrawable(mRotateSuggestionIcon);
+        mContextualButtonGroup.setButtonVisiblity(R.id.accessibility_button, visible);
     }
 
     public int setRotateButtonVisibility(boolean visible) {
-        // Never show if a11y is visible
-        final boolean adjVisible = visible && !mShowAccessibilityButton;
-        final int vis = adjVisible ? View.VISIBLE : View.INVISIBLE;
-
-        // No need to do anything if the request matches the current state
-        if (vis == getRotateSuggestionButton().getVisibility()) return vis;
-
-        getRotateSuggestionButton().setVisibility(vis);
-        mShowRotateButton = visible;
-        updateContextualContainerVisibility();
-
-        // Stop any active animations if hidden
-        if (!visible && mRotateSuggestionIcon.canAnimate()) {
-            mRotateSuggestionIcon.clearAnimationCallbacks();
-            mRotateSuggestionIcon.resetAnimation();
-        }
-
-        // Hide/restore other button visibility, if necessary
-        updateNavButtonIcons();
-
-        // Return applied visibility
-        return vis;
+        return mContextualButtonGroup.setButtonVisiblity(R.id.rotate_suggestion, visible);
     }
 
-    public boolean isRotateButtonVisible() { return mShowRotateButton; }
-
-    private void updateContextualContainerVisibility() {
-        // Only show the menu container when one of its buttons are visible
-        getMenuContainer().setVisibility((mShowAccessibilityButton || mShowRotateButton || mShowMenu
-                || (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0)
-                ? VISIBLE : INVISIBLE);
+    public boolean isRotateButtonVisible() {
+        return getRotateSuggestionButton().isVisible();
     }
 
     void hideRecentsOnboarding() {
@@ -897,6 +800,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         DockedStackExistsListener.register(mDockedListener);
         updateRotatedViews();
+        reloadNavIcons();
     }
 
     public void onDarkIntensityChange(float intensity) {
@@ -998,7 +902,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         // force the low profile & disabled states into compliance
         mBarTransitions.init();
-        setMenuVisibility(mShowMenu, true /* force */);
 
         if (DEBUG) {
             Log.d(TAG, "reorient(): rot=" + mCurrentRotation);
@@ -1204,17 +1107,19 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         pw.println(String.format("      disabled=0x%08x vertical=%s menu=%s",
                         mDisabledFlags,
                         mVertical ? "true" : "false",
-                        mShowMenu ? "true" : "false"));
+                        getMenuButton().isVisible() ? "true" : "false"));
 
         dumpButton(pw, "back", getBackButton());
         dumpButton(pw, "home", getHomeButton());
         dumpButton(pw, "rcnt", getRecentsButton());
         dumpButton(pw, "menu", getMenuButton());
+        dumpButton(pw, "rota", getRotateSuggestionButton());
         dumpButton(pw, "a11y", getAccessibilityButton());
 
-        mRecentsOnboarding.dump(pw);
-
         pw.println("    }");
+
+        mContextualButtonGroup.dump(pw);
+        mRecentsOnboarding.dump(pw);
     }
 
     @Override

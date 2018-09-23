@@ -208,8 +208,6 @@ interface IActivityManager {
     List<ActivityManager.RunningServiceInfo> getServices(int maxNum, int flags);
     // Retrieve running application processes in the system
     List<ActivityManager.RunningAppProcessInfo> getRunningAppProcesses();
-    // Get device configuration
-    ConfigurationInfo getDeviceConfigurationInfo();
     IBinder peekService(in Intent service, in String resolvedType, in String callingPackage);
     // Turn on/off profiling in a particular process.
     boolean profileControl(in String process, int userId, boolean start,
@@ -248,10 +246,7 @@ interface IActivityManager {
             boolean runGc, in String path, in ParcelFileDescriptor fd,
             in RemoteCallback finishCallback);
     boolean isUserRunning(int userid, int flags);
-    int getPackageScreenCompatMode(in String packageName);
     void setPackageScreenCompatMode(in String packageName, int mode);
-    boolean getPackageAskScreenCompat(in String packageName);
-    void setPackageAskScreenCompat(in String packageName, boolean ask);
     boolean switchUser(int userid);
     boolean removeTask(int taskId);
     void registerProcessObserver(in IProcessObserver observer);

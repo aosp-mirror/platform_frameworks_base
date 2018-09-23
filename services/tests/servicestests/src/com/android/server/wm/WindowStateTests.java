@@ -391,14 +391,14 @@ public class WindowStateTests extends WindowTestsBase {
     @Test
     public void testDisplayCutoutIsCalculatedRelativeToFrame() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
-        WindowFrames wf = new WindowFrames();
+        WindowFrames wf = app.getWindowFrames();
         wf.mParentFrame.set(7, 10, 185, 380);
         wf.mDisplayFrame.set(wf.mParentFrame);
         final DisplayCutout cutout = new DisplayCutout(new Rect(0, 15, 0, 22),
                 Arrays.asList(new Rect(95, 0, 105, 15), new Rect(95, 378, 105, 400)));
         wf.setDisplayCutout(new WmDisplayCutout(cutout, new Size(200, 400)));
 
-        app.computeFrameLw(wf);
+        app.computeFrameLw();
         assertThat(app.getWmDisplayCutout().getDisplayCutout(), is(cutout.inset(7, 10, 5, 20)));
     }
 

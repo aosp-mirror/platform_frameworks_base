@@ -521,16 +521,16 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      */
     public static String getErrorString(Context context, int errMsg, int vendorCode) {
         switch (errMsg) {
-            case FACE_ERROR_HW_UNAVAILABLE:
-                return context.getString(
-                        com.android.internal.R.string.face_error_hw_not_available);
             case FACE_ERROR_UNABLE_TO_PROCESS:
                 return context.getString(
                         com.android.internal.R.string.face_error_unable_to_process);
-            case FACE_ERROR_TIMEOUT:
-                return context.getString(com.android.internal.R.string.face_error_timeout);
+            case FACE_ERROR_HW_UNAVAILABLE:
+                return context.getString(
+                        com.android.internal.R.string.face_error_hw_not_available);
             case FACE_ERROR_NO_SPACE:
                 return context.getString(com.android.internal.R.string.face_error_no_space);
+            case FACE_ERROR_TIMEOUT:
+                return context.getString(com.android.internal.R.string.face_error_timeout);
             case FACE_ERROR_CANCELED:
                 return context.getString(com.android.internal.R.string.face_error_canceled);
             case FACE_ERROR_LOCKOUT:
@@ -538,6 +538,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             case FACE_ERROR_LOCKOUT_PERMANENT:
                 return context.getString(
                         com.android.internal.R.string.face_error_lockout_permanent);
+            case FACE_ERROR_USER_CANCELED:
+                return context.getString(com.android.internal.R.string.face_error_user_canceled);
             case FACE_ERROR_NOT_ENROLLED:
                 return context.getString(com.android.internal.R.string.face_error_not_enrolled);
             case FACE_ERROR_HW_NOT_PRESENT:

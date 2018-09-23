@@ -725,7 +725,7 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public int getMaxHeight() {
-        if (mContainingNotification.isShowingAmbient()) {
+        if (mContainingNotification.isOnAmbient()) {
             return getShowingAmbientView().getHeight();
         } else if (mExpandedChild != null) {
             return getViewHeight(VISIBLE_TYPE_EXPANDED)
@@ -752,7 +752,7 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public int getMinHeight(boolean likeGroupExpanded) {
-        if (mContainingNotification.isShowingAmbient()) {
+        if (mContainingNotification.isOnAmbient()) {
             return getShowingAmbientView().getHeight();
         } else if (likeGroupExpanded || !mIsChildInGroup || isGroupExpanded()) {
             return getViewHeight(VISIBLE_TYPE_CONTRACTED);
@@ -1039,7 +1039,7 @@ public class NotificationContentView extends FrameLayout {
      * @return one of the static enum types in this view, calculated form the current state
      */
     public int calculateVisibleType() {
-        if (mContainingNotification.isShowingAmbient()) {
+        if (mContainingNotification.isOnAmbient()) {
             if (mIsChildInGroup && mAmbientSingleLineChild != null) {
                 return VISIBLE_TYPE_AMBIENT_SINGLELINE;
             } else if (mAmbientChild != null) {

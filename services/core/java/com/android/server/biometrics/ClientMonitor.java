@@ -28,6 +28,7 @@ import android.util.Slog;
 
 import com.android.internal.logging.MetricsLogger;
 
+import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
 /**
@@ -37,7 +38,7 @@ import java.util.NoSuchElementException;
  */
 public abstract class ClientMonitor implements IBinder.DeathRecipient {
     protected static final int ERROR_ESRCH = 3; // Likely HAL is dead. See errno.h.
-    protected static final boolean DEBUG = BiometricService.DEBUG;
+    protected static final boolean DEBUG = BiometricServiceBase.DEBUG;
     private static final AudioAttributes FINGERPRINT_SONFICATION_ATTRIBUTES =
             new AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -53,10 +54,10 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     private final String mOwner;
     private final VibrationEffect mSuccessVibrationEffect;
     private final VibrationEffect mErrorVibrationEffect;
-    private final BiometricService.DaemonWrapper mDaemon;
+    private final BiometricServiceBase.DaemonWrapper mDaemon;
 
     private IBinder mToken;
-    private BiometricService.ServiceListener mListener;
+    private BiometricServiceBase.ServiceListener mListener;
 
     protected final MetricsLogger mMetricsLogger;
     protected final Metrics mMetrics;
@@ -75,9 +76,10 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
      * permission
      * @param owner name of the client that owns this
      */
-    public ClientMonitor(Context context, Metrics metrics, BiometricService.DaemonWrapper daemon,
-            long halDeviceId, IBinder token, BiometricService.ServiceListener listener, int userId,
-            int groupId, boolean restricted, String owner) {
+    public ClientMonitor(Context context, Metrics metrics,
+            BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
+            BiometricServiceBase.ServiceListener listener, int userId, int groupId,
+            boolean restricted, String owner) {
         mContext = context;
         mMetrics = metrics;
         mDaemon = daemon;
@@ -128,7 +130,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     public abstract boolean onEnrollResult(BiometricAuthenticator.Identifier identifier,
             int remaining);
     public abstract boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
-            boolean authenticated);
+            boolean authenticated, ArrayList<Byte> token);
     public abstract boolean onRemoved(BiometricAuthenticator.Identifier identifier,
             int remaining);
     public abstract boolean onEnumerationResult(
@@ -220,11 +222,11 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
         return mOwner;
     }
 
-    public final BiometricService.ServiceListener getListener() {
+    public final BiometricServiceBase.ServiceListener getListener() {
         return mListener;
     }
 
-    public final BiometricService.DaemonWrapper getDaemonWrapper() {
+    public final BiometricServiceBase.DaemonWrapper getDaemonWrapper() {
         return mDaemon;
     }
 

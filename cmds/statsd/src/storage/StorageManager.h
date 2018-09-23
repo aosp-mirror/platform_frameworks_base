@@ -100,13 +100,13 @@ public:
     /**
      * Prints disk usage statistics related to statsd.
      */
-    static void printStats(FILE* out);
+    static void printStats(int out);
 
 private:
     /**
      * Prints disk usage statistics about a directory related to statsd.
      */
-    static void printDirStats(FILE* out, const char* path);
+    static void printDirStats(int out, const char* path);
 };
 
 }  // namespace statsd

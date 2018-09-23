@@ -51,13 +51,13 @@ public final class CompatModePackages {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "CompatModePackages" : TAG_AM;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
 
-    private final ActivityManagerService mService;
+    private final ActivityTaskManagerService mService;
     private final AtomicFile mFile;
 
     // Compatibility state: no longer ask user to select the mode.
-    public static final int COMPAT_FLAG_DONT_ASK = 1<<0;
+    private static final int COMPAT_FLAG_DONT_ASK = 1<<0;
     // Compatibility state: compatibility mode is enabled.
-    public static final int COMPAT_FLAG_ENABLED = 1<<1;
+    private static final int COMPAT_FLAG_ENABLED = 1<<1;
 
     private final HashMap<String, Integer> mPackages = new HashMap<String, Integer>();
 
@@ -80,7 +80,7 @@ public final class CompatModePackages {
         }
     };
 
-    public CompatModePackages(ActivityManagerService service, File systemDir, Handler handler) {
+    public CompatModePackages(ActivityTaskManagerService service, File systemDir, Handler handler) {
         mService = service;
         mFile = new AtomicFile(new File(systemDir, "packages-compat.xml"), "compat-mode");
         mHandler = new CompatHandler(handler.getLooper());
@@ -317,12 +317,12 @@ public final class CompatModePackages {
 
             scheduleWrite();
 
-            final ActivityStack stack = mService.mActivityTaskManager.getTopDisplayFocusedStack();
+            final ActivityStack stack = mService.getTopDisplayFocusedStack();
             ActivityRecord starting = stack.restartPackage(packageName);
 
             // Tell all processes that loaded this package about the change.
-            for (int i=mService.mLruProcesses.size()-1; i>=0; i--) {
-                ProcessRecord app = mService.mLruProcesses.get(i);
+            for (int i = mService.mAm.mLruProcesses.size() - 1; i >= 0; i--) {
+                final ProcessRecord app = mService.mAm.mLruProcesses.get(i);
                 if (!app.pkgList.containsKey(packageName)) {
                     continue;
                 }
@@ -346,10 +346,10 @@ public final class CompatModePackages {
         }
     }
 
-    void saveCompatModes() {
+    private void saveCompatModes() {
         HashMap<String, Integer> pkgs;
-        synchronized (mService) {
-            pkgs = new HashMap<String, Integer>(mPackages);
+        synchronized (mService.mGlobalLock) {
+            pkgs = new HashMap<>(mPackages);
         }
 
         FileOutputStream fos = null;

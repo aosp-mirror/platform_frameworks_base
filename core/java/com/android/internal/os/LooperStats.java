@@ -17,6 +17,7 @@
 package com.android.internal.os;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -36,7 +37,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @hide Only for use within the system server.
  */
 public class LooperStats implements Looper.Observer {
-    private static final int TOKEN_POOL_SIZE = 50;
+    private static final int SESSION_POOL_SIZE = 50;
 
     @GuardedBy("mLock")
     private final SparseArray<Entry> mEntries = new SparseArray<>(512);
@@ -78,17 +79,19 @@ public class LooperStats implements Looper.Observer {
         }
 
         DispatchSession session = (DispatchSession) token;
-        Entry entry = getOrCreateEntry(msg);
-        synchronized (entry) {
-            entry.messageCount++;
-            if (session != DispatchSession.NOT_SAMPLED) {
-                entry.recordedMessageCount++;
-                long latency = getElapsedRealtimeMicro() - session.startTimeMicro;
-                long cpuUsage = getThreadTimeMicro() - session.cpuStartMicro;
-                entry.totalLatencyMicro += latency;
-                entry.maxLatencyMicro = Math.max(entry.maxLatencyMicro, latency);
-                entry.cpuUsageMicro += cpuUsage;
-                entry.maxCpuUsageMicro = Math.max(entry.maxCpuUsageMicro, cpuUsage);
+        Entry entry = findEntry(msg, /* allowCreateNew= */session != DispatchSession.NOT_SAMPLED);
+        if (entry != null) {
+            synchronized (entry) {
+                entry.messageCount++;
+                if (session != DispatchSession.NOT_SAMPLED) {
+                    entry.recordedMessageCount++;
+                    long latency = getElapsedRealtimeMicro() - session.startTimeMicro;
+                    long cpuUsage = getThreadTimeMicro() - session.cpuStartMicro;
+                    entry.totalLatencyMicro += latency;
+                    entry.maxLatencyMicro = Math.max(entry.maxLatencyMicro, latency);
+                    entry.cpuUsageMicro += cpuUsage;
+                    entry.maxCpuUsageMicro = Math.max(entry.maxCpuUsageMicro, cpuUsage);
+                }
             }
         }
 
@@ -102,7 +105,7 @@ public class LooperStats implements Looper.Observer {
         }
 
         DispatchSession session = (DispatchSession) token;
-        Entry entry = getOrCreateEntry(msg);
+        Entry entry = findEntry(msg, /* allowCreateNew= */true);
         synchronized (entry) {
             entry.exceptionCount++;
         }
@@ -159,24 +162,28 @@ public class LooperStats implements Looper.Observer {
         mSamplingInterval = samplingInterval;
     }
 
-    @NonNull
-    private Entry getOrCreateEntry(Message msg) {
+    @Nullable
+    private Entry findEntry(Message msg, boolean allowCreateNew) {
         final boolean isInteractive = mDeviceState.isScreenInteractive();
         final int id = Entry.idFor(msg, isInteractive);
         Entry entry;
         synchronized (mLock) {
             entry = mEntries.get(id);
             if (entry == null) {
-                if (mEntries.size() >= mEntriesSizeCap) {
-                    // If over the size cap, track totals under a single entry.
+                if (!allowCreateNew) {
+                    return null;
+                } else if (mEntries.size() >= mEntriesSizeCap) {
+                    // If over the size cap track totals under OVERFLOW entry.
                     return mOverflowEntry;
+                } else {
+                    entry = new Entry(msg, isInteractive);
+                    mEntries.put(id, entry);
                 }
-                entry = new Entry(msg, isInteractive);
-                mEntries.put(id, entry);
             }
         }
 
-        if (entry.handler.getClass() != msg.getTarget().getClass()
+        if (entry.workSourceUid != msg.workSourceUid
+                || entry.handler.getClass() != msg.getTarget().getClass()
                 || entry.handler.getLooper().getThread() != msg.getTarget().getLooper().getThread()
                 || entry.isInteractive != isInteractive) {
             // If a hash collision happened, track totals under a single entry.
@@ -186,7 +193,7 @@ public class LooperStats implements Looper.Observer {
     }
 
     private void recycleSession(DispatchSession session) {
-        if (session != DispatchSession.NOT_SAMPLED && mSessionPool.size() < TOKEN_POOL_SIZE) {
+        if (session != DispatchSession.NOT_SAMPLED && mSessionPool.size() < SESSION_POOL_SIZE) {
             mSessionPool.add(session);
         }
     }
@@ -210,6 +217,7 @@ public class LooperStats implements Looper.Observer {
     }
 
     private static class Entry {
+        public final int workSourceUid;
         public final Handler handler;
         public final String messageName;
         public final boolean isInteractive;
@@ -222,12 +230,14 @@ public class LooperStats implements Looper.Observer {
         public long maxCpuUsageMicro;
 
         Entry(Message msg, boolean isInteractive) {
+            this.workSourceUid = msg.workSourceUid;
             this.handler = msg.getTarget();
             this.messageName = handler.getMessageName(msg);
             this.isInteractive = isInteractive;
         }
 
         Entry(String specialEntryName) {
+            this.workSourceUid = Message.UID_NONE;
             this.messageName = specialEntryName;
             this.handler = null;
             this.isInteractive = false;
@@ -245,6 +255,7 @@ public class LooperStats implements Looper.Observer {
 
         static int idFor(Message msg, boolean isInteractive) {
             int result = 7;
+            result = 31 * result + msg.workSourceUid;
             result = 31 * result + msg.getTarget().getLooper().getThread().hashCode();
             result = 31 * result + msg.getTarget().getClass().hashCode();
             result = 31 * result + (isInteractive ? 1231 : 1237);
@@ -258,6 +269,7 @@ public class LooperStats implements Looper.Observer {
 
     /** Aggregated data of Looper message dispatching in the in the current process. */
     public static class ExportedEntry {
+        public final int workSourceUid;
         public final String handlerClassName;
         public final String threadName;
         public final String messageName;
@@ -271,6 +283,7 @@ public class LooperStats implements Looper.Observer {
         public final long maxCpuUsageMicros;
 
         ExportedEntry(Entry entry) {
+            this.workSourceUid = entry.workSourceUid;
             if (entry.handler != null) {
                 this.handlerClassName = entry.handler.getClass().getName();
                 this.threadName = entry.handler.getLooper().getThread().getName();

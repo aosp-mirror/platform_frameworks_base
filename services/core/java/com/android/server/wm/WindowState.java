@@ -304,6 +304,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private final MergedConfiguration mLastReportedConfiguration = new MergedConfiguration();
 
+    private final Configuration mTempConfiguration = new Configuration();
+
     /**
      * The last content insets returned to the client in relayout. We use
      * these in the bounds animation to ensure we only observe inset changes
@@ -358,8 +360,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      *{@link android.app.IActivityTaskManager#resizeDockedStack}.
      */
     private final Rect mInsetFrame = new Rect();
-
-    boolean mContentChanged;
 
     // If a window showing a wallpaper: the requested offset for the
     // wallpaper; if a wallpaper window: the currently applied offset.
@@ -593,14 +593,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (mForceSeamlesslyRotate || requested) {
             mPendingSeamlessRotate = new SeamlessRotator(oldRotation, rotation, getDisplayInfo());
-            mPendingSeamlessRotate.unrotate(transaction, this.mToken);
+            mPendingSeamlessRotate.unrotate(transaction, this);
             mService.markForSeamlessRotation(this, true);
         }
     }
 
     void finishSeamlessRotation() {
         if (mPendingSeamlessRotate != null) {
-            mPendingSeamlessRotate.finish(this.mToken, this);
+            mPendingSeamlessRotate.finish(this);
             mFinishSeamlessRotateFrameNumber = getFrameNumber();
             mPendingSeamlessRotate = null;
             mService.markForSeamlessRotation(this, false);
@@ -787,7 +787,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    public void computeFrameLw(WindowFrames windowFrames) {
+    public void computeFrameLw() {
         if (mWillReplaceWindow && (mAnimatingExit || !mReplacingRemoveRequested)) {
             // This window is being replaced and either already got information that it's being
             // removed or we are still waiting for some information. Because of this we don't
@@ -796,8 +796,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
         mHaveFrame = true;
-        mWindowFrames.setParentFrameWasClippedByDisplayCutout(
-                windowFrames.parentFrameWasClippedByDisplayCutout());
 
         final Task task = getTask();
         final boolean inFullscreenContainer = inFullscreenContainer();
@@ -827,10 +825,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int layoutYDiff;
         if (inFullscreenContainer || layoutInParentFrame()) {
             // We use the parent frame as the containing frame for fullscreen and child windows
-            mWindowFrames.mContainingFrame.set(windowFrames.mParentFrame);
-            mWindowFrames.mDisplayFrame.set(windowFrames.mDisplayFrame);
-            layoutDisplayFrame = windowFrames.mDisplayFrame;
-            layoutContainingFrame = windowFrames.mParentFrame;
+            mWindowFrames.mContainingFrame.set(mWindowFrames.mParentFrame);
+            layoutDisplayFrame = mWindowFrames.mDisplayFrame;
+            layoutContainingFrame = mWindowFrames.mParentFrame;
             layoutXDiff = 0;
             layoutYDiff = 0;
         } else {
@@ -849,17 +846,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // IME is up and obscuring this window. Adjust the window position so it is visible.
             if (imeWin != null && imeWin.isVisibleNow() && isInputMethodTarget()) {
                 if (inFreeformWindowingMode() && mWindowFrames.mContainingFrame.bottom
-                        > windowFrames.mContentFrame.bottom) {
+                        > mWindowFrames.mContentFrame.bottom) {
                     // In freeform we want to move the top up directly.
                     // TODO: Investigate why this is contentFrame not parentFrame.
                     mWindowFrames.mContainingFrame.top -= mWindowFrames.mContainingFrame.bottom
-                            - windowFrames.mContentFrame.bottom;
+                            - mWindowFrames.mContentFrame.bottom;
                 } else if (!inPinnedWindowingMode() && mWindowFrames.mContainingFrame.bottom
-                        > windowFrames.mParentFrame.bottom) {
+                        > mWindowFrames.mParentFrame.bottom) {
                     // But in docked we want to behave like fullscreen and behave as if the task
                     // were given smaller bounds for the purposes of layout. Skip adjustments for
                     // the pinned stack, they are handled separately in the PinnedStackController.
-                    mWindowFrames.mContainingFrame.bottom = windowFrames.mParentFrame.bottom;
+                    mWindowFrames.mContainingFrame.bottom = mWindowFrames.mParentFrame.bottom;
                 }
             }
 
@@ -868,7 +865,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // if it wasn't set already. No need to intersect it with the (visible)
                 // "content frame" since it is allowed to be outside the visible desktop.
                 if (mWindowFrames.mContainingFrame.isEmpty()) {
-                    mWindowFrames.mContainingFrame.set(windowFrames.mContentFrame);
+                    mWindowFrames.mContainingFrame.set(mWindowFrames.mContentFrame);
                 }
             }
 
@@ -878,10 +875,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // PIP edge case: When going from pinned to fullscreen, we apply a
                 // tempInsetFrame for the full task - but we're still at the start of the animation.
                 // To prevent a jump if there's a letterbox, restrict to the parent frame.
-                mInsetFrame.intersectUnchecked(windowFrames.mParentFrame);
-                mWindowFrames.mContainingFrame.intersectUnchecked(windowFrames.mParentFrame);
+                mInsetFrame.intersectUnchecked(mWindowFrames.mParentFrame);
+                mWindowFrames.mContainingFrame.intersectUnchecked(mWindowFrames.mParentFrame);
             }
 
+            layoutDisplayFrame = new Rect(mWindowFrames.mDisplayFrame);
             mWindowFrames.mDisplayFrame.set(mWindowFrames.mContainingFrame);
             layoutXDiff =
                     !mInsetFrame.isEmpty() ? mInsetFrame.left - mWindowFrames.mContainingFrame.left
@@ -892,41 +890,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             layoutContainingFrame =
                     !mInsetFrame.isEmpty() ? mInsetFrame : mWindowFrames.mContainingFrame;
             mTmpRect.set(0, 0, dc.getDisplayInfo().logicalWidth, dc.getDisplayInfo().logicalHeight);
-            subtractInsets(mWindowFrames.mDisplayFrame, layoutContainingFrame,
-                    windowFrames.mDisplayFrame, mTmpRect);
+            subtractInsets(mWindowFrames.mDisplayFrame, layoutContainingFrame, layoutDisplayFrame,
+                    mTmpRect);
             if (!layoutInParentFrame()) {
                 subtractInsets(mWindowFrames.mContainingFrame, layoutContainingFrame,
-                        windowFrames.mParentFrame, mTmpRect);
-                subtractInsets(mInsetFrame, layoutContainingFrame, windowFrames.mParentFrame,
+                        mWindowFrames.mParentFrame, mTmpRect);
+                subtractInsets(mInsetFrame, layoutContainingFrame, mWindowFrames.mParentFrame,
                         mTmpRect);
             }
-            layoutDisplayFrame = windowFrames.mDisplayFrame;
             layoutDisplayFrame.intersect(layoutContainingFrame);
         }
 
         final int pw = mWindowFrames.mContainingFrame.width();
         final int ph = mWindowFrames.mContainingFrame.height();
 
-        if (!mWindowFrames.mParentFrame.equals(windowFrames.mParentFrame)) {
-            //Slog.i(TAG_WM, "Window " + this + " content frame from " + mParentFrame
-            //        + " to " + parentFrame);
-            mWindowFrames.mParentFrame.set(windowFrames.mParentFrame);
-            mContentChanged = true;
-        }
         if (mRequestedWidth != mLastRequestedWidth || mRequestedHeight != mLastRequestedHeight) {
             mLastRequestedWidth = mRequestedWidth;
             mLastRequestedHeight = mRequestedHeight;
-            mContentChanged = true;
-        }
-
-        mWindowFrames.mOverscanFrame.set(windowFrames.mOverscanFrame);
-        mWindowFrames.mContentFrame.set(windowFrames.mContentFrame);
-        mWindowFrames.mVisibleFrame.set(windowFrames.mVisibleFrame);
-        mWindowFrames.mDecorFrame.set(windowFrames.mDecorFrame);
-        mWindowFrames.mStableFrame.set(windowFrames.mStableFrame);
-        final boolean hasOutsets = !windowFrames.mOutsetFrame.isEmpty();
-        if (hasOutsets) {
-            mWindowFrames.mOutsetFrame.set(windowFrames.mOutsetFrame);
+            mWindowFrames.setContentChanged(true);
         }
 
         final int fw = mWindowFrames.mFrame.width();
@@ -935,7 +916,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         applyGravityAndUpdateFrame(layoutContainingFrame, layoutDisplayFrame);
 
         // Calculate the outsets before the content frame gets shrinked to the window frame.
-        mWindowFrames.calculateOutsets(hasOutsets);
+        mWindowFrames.calculateOutsets();
 
         // Make sure the content and visible frames are inside of the
         // final window frame.
@@ -997,7 +978,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         if (mAttrs.type == TYPE_DOCK_DIVIDER) {
-            final WmDisplayCutout c = windowFrames.mDisplayCutout.calculateRelativeTo(
+            final WmDisplayCutout c = mWindowFrames.mDisplayCutout.calculateRelativeTo(
                     mWindowFrames.mDisplayFrame);
             mWindowFrames.calculateDockedDividerInsets(c.getDisplayCutout().getSafeInsets());
         } else {
@@ -1006,7 +987,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         mWindowFrames.setDisplayCutout(
-                windowFrames.mDisplayCutout.calculateRelativeTo(mWindowFrames.mFrame));
+                mWindowFrames.mDisplayCutout.calculateRelativeTo(mWindowFrames.mFrame));
 
         // Offset the actual frame by the amount layout frame is off.
         mWindowFrames.offsetFrames(-layoutXDiff, -layoutYDiff);
@@ -1280,6 +1261,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void onDisplayChanged(DisplayContent dc) {
+        updateSurfaceSize(dc);
         super.onDisplayChanged(dc);
         // Window was not laid out for this display yet, so make sure mLayoutSeq does not match.
         if (dc != null) {
@@ -1733,7 +1715,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * sense to call from performLayoutAndPlaceSurfacesLockedInner().)
      */
     private boolean hasMoved() {
-        return mHasSurface && (mContentChanged || mMovedByResize)
+        return mHasSurface && (mWindowFrames.hasContentChanged() || mMovedByResize)
                 && !mAnimatingExit
                 && (mWindowFrames.mFrame.top != mWindowFrames.mLastFrame.top
                     || mWindowFrames.mFrame.left != mWindowFrames.mLastFrame.left)
@@ -2270,8 +2252,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
+    private Configuration getProcessGlobalConfiguration() {
+        // For child windows we want to use the pid for the parent window in case the the child
+        // window was added from another process.
+        final int pid = isChildWindow() ? getParentWindow().mSession.mPid : mSession.mPid;
+        mTempConfiguration.setTo(mService.mProcessConfigurations.get(
+                pid, mService.mRoot.getConfiguration()));
+        return mTempConfiguration;
+    }
+
     void getMergedConfiguration(MergedConfiguration outConfiguration) {
-        final Configuration globalConfig = mService.mRoot.getConfiguration();
+        final Configuration globalConfig = getProcessGlobalConfiguration();
         final Configuration overrideConfig = getMergedOverrideConfiguration();
         outConfiguration.setConfiguration(globalConfig, overrideConfig);
     }
@@ -2874,7 +2865,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return mAppToken.mFrozenMergedConfig.peek();
         }
 
-        return super.getConfiguration();
+        // We use the process config this window is associated with as the based global config since
+        // the process can override it config, but isn't part of the window hierarchy.
+        final Configuration config = getProcessGlobalConfiguration();
+        config.updateFrom(getMergedOverrideConfiguration());
+        return config;
     }
 
     void reportResized() {
@@ -4760,6 +4755,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     Rect getVisibleInsets() {
         return mWindowFrames.mVisibleInsets;
+    }
+
+    @Override
+    public WindowFrames getWindowFrames() {
+        return mWindowFrames;
+    }
+
+    void resetContentChanged() {
+        mWindowFrames.setContentChanged(false);
     }
 
     private final class MoveAnimationSpec implements AnimationSpec {

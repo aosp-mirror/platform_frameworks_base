@@ -21,7 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * {@hide}
+ * @hide
  */
 public class OperatorInfo implements Parcelable {
     public enum State {

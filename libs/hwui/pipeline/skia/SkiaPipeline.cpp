@@ -200,10 +200,6 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
     return false;
 }
 
-void SkiaPipeline::destroyLayer(RenderNode* node) {
-    node->setLayerSurface(nullptr);
-}
-
 void SkiaPipeline::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
     GrContext* context = thread.getGrContext();
     if (context) {

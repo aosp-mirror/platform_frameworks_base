@@ -105,7 +105,7 @@ public class AppBackupUtils {
                 try {
                     IBackupTransport transport =
                             transportClient.connectOrThrow(
-                                    "AppBackupUtils.appIsEligibleForBackupAtRuntime");
+                                    "AppBackupUtils.appIsRunningAndEligibleForBackupWithTransport");
                     return transport.isAppEligibleForBackup(
                             packageInfo, AppBackupUtils.appGetsFullBackup(packageInfo));
                 } catch (Exception e) {

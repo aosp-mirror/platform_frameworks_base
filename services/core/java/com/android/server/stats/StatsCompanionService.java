@@ -1031,7 +1031,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         looperStats.reset();
         for (LooperStats.ExportedEntry entry : entries) {
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(1000); // uid collection not implemented yet
+            e.writeInt(entry.workSourceUid);
             e.writeString(entry.handlerClassName);
             e.writeString(entry.threadName);
             e.writeString(entry.messageName);

@@ -16,12 +16,12 @@
 
 package com.android.server.wm;
 
-import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
 import android.graphics.Matrix;
 import android.view.DisplayInfo;
+import android.view.Surface;
 import android.view.Surface.Rotation;
 import android.view.SurfaceControl.Transaction;
 
@@ -33,10 +33,10 @@ import java.io.StringWriter;
 /**
  * Helper class for seamless rotation.
  *
- * Works by transforming the window token back into the old display rotation.
+ * Works by transforming the {@link WindowState} back into the old display rotation.
  *
- * Uses deferTransactionUntil instead of latching on the buffer size to allow for seamless 180
- * degree rotations.
+ * Uses {@link android.view.SurfaceControl#deferTransactionUntil(Surface, long)} instead of
+ * latching on the buffer size to allow for seamless 180 degree rotations.
  */
 public class SeamlessRotator {
 
@@ -45,7 +45,7 @@ public class SeamlessRotator {
     private final int mOldRotation;
     private final int mNewRotation;
 
-    public SeamlessRotator(int oldRotation, int newRotation, DisplayInfo info) {
+    public SeamlessRotator(@Rotation int oldRotation, @Rotation int newRotation, DisplayInfo info) {
         mOldRotation = oldRotation;
         mNewRotation = newRotation;
 
@@ -60,11 +60,16 @@ public class SeamlessRotator {
     }
 
     /**
-     * Applies a transform to the window token's surface that undoes the effect of the global
+     * Applies a transform to the {@link WindowState} surface that undoes the effect of the global
      * display rotation.
      */
-    public void unrotate(Transaction transaction, WindowToken token) {
-        transaction.setMatrix(token.getSurfaceControl(), mTransform, mFloat9);
+    public void unrotate(Transaction transaction, WindowState win) {
+        transaction.setMatrix(win.getSurfaceControl(), mTransform, mFloat9);
+
+        // WindowState sets the position of the window so transform the position and update it.
+        final float[] winSurfacePos = {win.mLastSurfacePosition.x, win.mLastSurfacePosition.y};
+        mTransform.mapPoints(winSurfacePos);
+        transaction.setPosition(win.getSurfaceControl(), winSurfacePos[0], winSurfacePos[1]);
     }
 
     /**
@@ -78,27 +83,23 @@ public class SeamlessRotator {
     }
 
     /**
-     * Removes the transform to the window token's surface that undoes the effect of the global
-     * display rotation.
+     * Removes the transform and sets the previously known surface position for {@link WindowState}
+     * surface that undoes the effect of the global display rotation.
      *
-     * Removing the transform and the result of the WindowState's layout are both tied to the
-     * WindowState's next frame, such that they apply at the same time the client draws the
+     * Removing the transform and the result of the {@link WindowState} layout are both tied to the
+     * {@link WindowState} next frame, such that they apply at the same time the client draws the
      * window in the new orientation.
      */
-    public void finish(WindowToken token, WindowState win) {
+    public void finish(WindowState win) {
         mTransform.reset();
-        token.getPendingTransaction().setMatrix(token.mSurfaceControl, mTransform, mFloat9);
+        final Transaction t = win.getPendingTransaction();
+        t.setMatrix(win.mSurfaceControl, mTransform, mFloat9);
+        t.setPosition(win.mSurfaceControl, win.mLastSurfacePosition.x, win.mLastSurfacePosition.y);
         if (win.mWinAnimator.mSurfaceController != null) {
-            token.getPendingTransaction().deferTransactionUntil(token.mSurfaceControl,
-                    win.mWinAnimator.mSurfaceController.mSurfaceControl.getHandle(),
-                    win.getFrameNumber());
-            win.getPendingTransaction().deferTransactionUntil(win.mSurfaceControl,
-                    win.mWinAnimator.mSurfaceController.mSurfaceControl.getHandle(),
-                    win.getFrameNumber());
-            win.getPendingTransaction().deferTransactionUntil(
-                    win.mWinAnimator.mSurfaceController.mSurfaceControl,
-                    win.mWinAnimator.mSurfaceController.mSurfaceControl.getHandle(),
-                    win.getFrameNumber());
+            t.deferTransactionUntil(win.mSurfaceControl,
+                    win.mWinAnimator.mSurfaceController.getHandle(), win.getFrameNumber());
+            t.deferTransactionUntil(win.mWinAnimator.mSurfaceController.mSurfaceControl,
+                    win.mWinAnimator.mSurfaceController.getHandle(), win.getFrameNumber());
         }
     }
 

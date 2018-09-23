@@ -177,7 +177,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             mReleaseOnExpandFinish = false;
         } else {
             for (NotificationData.Entry entry : mEntriesToRemoveAfterExpand) {
-                if (contains(entry.key)) {
+                if (isAlerting(entry.key)) {
                     // Maybe the heads-up was removed already
                     removeAlertEntry(entry.key);
                 }
@@ -345,7 +345,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     public void onReorderingAllowed() {
         mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(false);
         for (NotificationData.Entry entry : mEntriesToRemoveWhenReorderingAllowed) {
-            if (contains(entry.key)) {
+            if (isAlerting(entry.key)) {
                 // Maybe the heads-up was removed already
                 removeAlertEntry(entry.key);
             }

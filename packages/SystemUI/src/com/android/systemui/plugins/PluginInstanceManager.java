@@ -33,6 +33,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.LayoutInflater;
 
@@ -41,7 +42,9 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.plugins.VersionInfo.InvalidVersionException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import com.android.systemui.R;
 
 public class PluginInstanceManager<T extends Plugin> {
 
@@ -63,17 +66,19 @@ public class PluginInstanceManager<T extends Plugin> {
     private final boolean isDebuggable;
     private final PackageManager mPm;
     private final PluginManagerImpl mManager;
+    private final ArraySet<String> mWhitelistedPlugins = new ArraySet<>();
 
     PluginInstanceManager(Context context, String action, PluginListener<T> listener,
             boolean allowMultiple, Looper looper, VersionInfo version, PluginManagerImpl manager) {
         this(context, context.getPackageManager(), action, listener, allowMultiple, looper, version,
-                manager, Build.IS_DEBUGGABLE);
+                manager, Build.IS_DEBUGGABLE,
+                context.getResources().getStringArray(R.array.config_pluginWhitelist));
     }
 
     @VisibleForTesting
     PluginInstanceManager(Context context, PackageManager pm, String action,
             PluginListener<T> listener, boolean allowMultiple, Looper looper, VersionInfo version,
-            PluginManagerImpl manager, boolean debuggable) {
+            PluginManagerImpl manager, boolean debuggable, String[] pluginWhitelist) {
         mMainHandler = new MainHandler(Looper.getMainLooper());
         mPluginHandler = new PluginHandler(looper);
         mManager = manager;
@@ -83,6 +88,7 @@ public class PluginInstanceManager<T extends Plugin> {
         mListener = listener;
         mAllowMultiple = allowMultiple;
         mVersion = version;
+        mWhitelistedPlugins.addAll(Arrays.asList(pluginWhitelist));
         isDebuggable = debuggable;
     }
 
@@ -294,9 +300,9 @@ public class PluginInstanceManager<T extends Plugin> {
         protected PluginInfo<T> handleLoadPlugin(ComponentName component) {
             // This was already checked, but do it again here to make extra extra sure, we don't
             // use these on production builds.
-            if (!isDebuggable) {
+            if (!isDebuggable && !mWhitelistedPlugins.contains(component.getPackageName())) {
                 // Never ever ever allow these on production builds, they are only for prototyping.
-                Log.d(TAG, "Somehow hit second debuggable check");
+                Log.w(TAG, "Plugin cannot be loaded on production build: " + component);
                 return null;
             }
             String pkg = component.getPackageName();

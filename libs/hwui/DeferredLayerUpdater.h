@@ -27,6 +27,7 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+#include "renderstate/RenderState.h"
 #include "surfacetexture/SurfaceTexture.h"
 #include "Layer.h"
 #include "Rect.h"
@@ -38,7 +39,7 @@ class RenderState;
 
 // Container to hold the properties a layer should be set to at the start
 // of a render pass
-class DeferredLayerUpdater : public VirtualLightRefBase {
+class DeferredLayerUpdater : public VirtualLightRefBase, public IGpuContextCallback {
 public:
     // Note that DeferredLayerUpdater assumes it is taking ownership of the layer
     // and will not call incrementRef on it as a result.
@@ -97,6 +98,9 @@ public:
             android_dataspace dataspace, const sk_sp<SkImage>& layerImage);
 
     void destroyLayer();
+
+protected:
+    void onContextDestroyed() override;
 
 private:
     RenderState& mRenderState;

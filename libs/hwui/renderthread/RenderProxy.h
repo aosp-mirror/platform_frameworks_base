@@ -127,8 +127,6 @@ public:
 
     static int copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap);
 
-    static void onBitmapDestroyed(uint32_t pixelRefId);
-
     ANDROID_API static void disableVsync();
 
     static void repackVectorDrawableAtlas();

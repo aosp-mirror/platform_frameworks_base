@@ -395,8 +395,6 @@
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"已接上電源，但現在無法充電"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"電力充足"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"已由管理員停用"</string>
-    <string name="enabled_by_admin" msgid="5302986023578399263">"已由管理員啟用"</string>
-    <string name="disabled_by_admin" msgid="8505398946020816620">"已由管理員停用"</string>
     <string name="disabled" msgid="9206776641295849915">"已停用"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"允許"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"不允許"</string>

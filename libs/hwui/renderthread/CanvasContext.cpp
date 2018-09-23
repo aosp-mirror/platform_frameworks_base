@@ -27,7 +27,6 @@
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
 #include "pipeline/skia/SkiaPipeline.h"
 #include "pipeline/skia/SkiaVulkanPipeline.h"
-#include "renderstate/RenderState.h"
 #include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
 #include "../Properties.h"
@@ -76,10 +75,6 @@ CanvasContext* CanvasContext::create(RenderThread& thread, bool translucent,
     return nullptr;
 }
 
-void CanvasContext::destroyLayer(RenderNode* node) {
-    skiapipeline::SkiaPipeline::destroyLayer(node);
-}
-
 void CanvasContext::invokeFunctor(const RenderThread& thread, Functor* functor) {
     ATRACE_CALL();
     auto renderType = Properties::getRenderPipelineType();
@@ -113,13 +108,11 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode*
         , mRenderPipeline(std::move(renderPipeline)) {
     rootRenderNode->makeRoot();
     mRenderNodes.emplace_back(rootRenderNode);
-    mRenderThread.renderState().registerCanvasContext(this);
     mProfiler.setDensity(mRenderThread.mainDisplayInfo().density);
 }
 
 CanvasContext::~CanvasContext() {
     destroy();
-    mRenderThread.renderState().unregisterCanvasContext(this);
     for (auto& node : mRenderNodes) {
         node->clearRoot();
     }

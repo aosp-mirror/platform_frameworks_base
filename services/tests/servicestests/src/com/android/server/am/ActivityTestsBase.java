@@ -281,7 +281,7 @@ public class ActivityTestsBase {
             final WindowProcessController wpc = new WindowProcessController(mService,
                     mService.mContext.getApplicationInfo(), "name", 12345,
                     UserHandle.getUserId(12345), mock(Object.class),
-                    mock(WindowProcessListener.class));
+                    mock(WindowProcessListener.class), null);
             wpc.setThread(mock(IApplicationThread.class));
             activity.setProcess(wpc);
             return activity;
@@ -439,6 +439,10 @@ public class ActivityTestsBase {
         }
 
         @Override
+        void updateUsageStats(ActivityRecord component, boolean resumed) {
+        }
+
+        @Override
         final protected ActivityStackSupervisor createStackSupervisor() {
             final ActivityStackSupervisor supervisor = spy(createTestSupervisor());
             final KeyguardController keyguardController = mock(KeyguardController.class);
@@ -494,10 +498,6 @@ public class ActivityTestsBase {
         TestActivityManagerService(Context context, TestActivityTaskManagerService atm) {
             super(context, atm);
             mUgmInternal = mock(UriGrantsManagerInternal.class);
-        }
-
-        @Override
-        void updateUsageStats(ActivityRecord component, boolean resumed) {
         }
 
         @Override

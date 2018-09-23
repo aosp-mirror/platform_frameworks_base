@@ -76,6 +76,7 @@ import static com.android.server.wm.DisplayContentProto.PINNED_STACK_CONTROLLER;
 import static com.android.server.wm.DisplayContentProto.ROTATION;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.DisplayContentProto.STACKS;
+import static com.android.server.wm.DisplayContentProto.SURFACE_SIZE;
 import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
@@ -571,7 +572,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (!w.mLayoutAttached) {
                 if (mTmpInitial) {
                     //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
-                    w.mContentChanged = false;
+                    w.resetContentChanged();
                 }
                 if (w.mAttrs.type == TYPE_DREAM) {
                     // Don't layout windows behind a dream, so that if it does stuff like hide
@@ -616,7 +617,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     || w.mLayoutNeeded) {
                 if (mTmpInitial) {
                     //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
-                    w.mContentChanged = false;
+                    w.resetContentChanged();
                 }
                 w.mLayoutNeeded = false;
                 w.prelayout();
@@ -699,7 +700,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final WindowStateAnimator winAnimator = w.mWinAnimator;
 
         //Slog.i(TAG, "Window " + this + " clearing mContentChanged - done placing");
-        w.mContentChanged = false;
+        w.resetContentChanged();
 
         // Moved from updateWindowsAndWallpaperLocked().
         if (w.mHasSurface) {
@@ -2409,6 +2410,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             screenRotationAnimation.writeToProto(proto, SCREEN_ROTATION_ANIMATION);
         }
         mDisplayFrames.writeToProto(proto, DISPLAY_FRAMES);
+        proto.write(SURFACE_SIZE, mSurfaceSize);
         proto.end(token);
     }
 
@@ -3151,6 +3153,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
+    int getSurfaceSize() {
+        return mSurfaceSize;
+    }
+
     void performLayout(boolean initial, boolean updateInputWindows) {
         if (!isLayoutNeeded()) {
             return;
@@ -3251,7 +3257,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // TODO(b/68392460): We should screenshot Task controls directly
         // but it's difficult at the moment as the Task doesn't have the
         // correct size set.
-        final Bitmap bitmap = SurfaceControl.screenshot(frame, dw, dh, 0, 1, inRotation, rot);
+        final Bitmap bitmap = SurfaceControl.screenshot(frame, dw, dh, inRotation, rot);
         if (bitmap == null) {
             Slog.w(TAG_WM, "Failed to take screenshot");
             return null;

@@ -187,6 +187,7 @@ import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.AppOpsListener;
 import com.android.systemui.statusbar.BackDropView;
@@ -254,7 +255,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         ActivityStarter, OnUnlockMethodChangedListener,
         OnHeadsUpChangedListener, CommandQueue.Callbacks, ZenModeController.Callback,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener, NotificationPresenter,
-        StatusBarStateController.StateListener {
+        StatusBarStateController.StateListener,  AmbientPulseManager.OnAmbientChangedListener {
     public static final boolean MULTIUSER_DEBUG = false;
 
     public static final boolean ENABLE_CHILD_NOTIFICATIONS
@@ -380,8 +381,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     // settings
     private QSPanel mQSPanel;
 
-    // top bar
-    private KeyguardStatusBarView mKeyguardStatusBar;
     KeyguardIndicationController mKeyguardIndicationController;
 
     // RemoteInputView to be activated after unlock
@@ -804,7 +803,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mAboveShelfObserver = new AboveShelfObserver(mStackScroller);
         mAboveShelfObserver.setListener(mStatusBarWindow.findViewById(
                 R.id.notification_container_parent));
-        mKeyguardStatusBar = mStatusBarWindow.findViewById(R.id.keyguard_header);
 
         mNotificationIconAreaController = SystemUIFactory.getInstance()
                 .createNotificationIconAreaController(context, this);
@@ -865,6 +863,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mHeadsUpManager.addListener(mNotificationPanel);
         mHeadsUpManager.addListener(mGroupManager);
         mHeadsUpManager.addListener(mVisualStabilityManager);
+        mAmbientPulseManager.addListener(this);
+        mAmbientPulseManager.addListener(mGroupManager);
         mNotificationPanel.setHeadsUpManager(mHeadsUpManager);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
         putComponent(HeadsUpManager.class, mHeadsUpManager);
@@ -977,7 +977,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                     ((QSFragment) qs).setHost(qsh);
                     mQSPanel = ((QSFragment) qs).getQsPanel();
                     mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
-                    mKeyguardStatusBar.setQSPanel(mQSPanel);
                 }
             });
         }
@@ -1115,8 +1114,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onThemeChanged() {
-        // The status bar on the keyguard is a special layout.
-        if (mKeyguardStatusBar != null) mKeyguardStatusBar.onThemeChanged();
         // Recreate Indication controller because internal references changed
         mKeyguardIndicationController =
                 SystemUIFactory.getInstance().createKeyguardIndicationController(mContext,
@@ -1151,7 +1148,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected void createUserSwitcher() {
         mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext,
-                mStatusBarWindow.findViewById(R.id.keyguard_user_switcher), mKeyguardStatusBar,
+                mStatusBarWindow.findViewById(R.id.keyguard_user_switcher),
+                mStatusBarWindow.findViewById(R.id.keyguard_header),
                 mNotificationPanel);
     }
 
@@ -1233,7 +1231,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onPerformRemoveNotification(StatusBarNotification n) {
         if (mNotificationPanel.hasPulsingNotifications() &&
-                    !mHeadsUpManager.hasNotifications()) {
+                    !mAmbientPulseManager.hasNotifications()) {
             // We were showing a pulse for a notification, but no notifications are pulsing anymore.
             // Finish the pulse.
             mDozeScrimController.pulseOutNow();
@@ -1697,8 +1695,12 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override
-    public boolean shouldPeek(Entry entry, StatusBarNotification sbn) {
-        if (mIsOccluded && !isDozing()) {
+    public boolean canHeadsUp(Entry entry, StatusBarNotification sbn) {
+        if (isDozing()) {
+            return false;
+        }
+
+        if (mIsOccluded) {
             boolean devicePublic = mLockscreenUserManager.
                     isLockscreenPublicMode(mLockscreenUserManager.getCurrentUserId());
             boolean userPublic = devicePublic
@@ -1711,17 +1713,14 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if (!panelsEnabled()) {
             if (DEBUG) {
-                Log.d(TAG, "No peeking: disabled panel : " + sbn.getKey());
+                Log.d(TAG, "No heads up: disabled panel : " + sbn.getKey());
             }
             return false;
         }
 
         if (sbn.getNotification().fullScreenIntent != null) {
             if (mAccessibilityManager.isTouchExplorationEnabled()) {
-                if (DEBUG) Log.d(TAG, "No peeking: accessible fullscreen: " + sbn.getKey());
-                return false;
-            } else if (isDozing()) {
-                // We never want heads up when we are dozing.
+                if (DEBUG) Log.d(TAG, "No heads up: accessible fullscreen: " + sbn.getKey());
                 return false;
             } else {
                 // we only allow head-up on the lockscreen if it doesn't have a fullscreen intent
@@ -1797,9 +1796,16 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onHeadsUpStateChanged(Entry entry, boolean isHeadsUp) {
         mEntryManager.updateNotificationRanking(null /* rankingMap */);
+    }
 
-        if (isHeadsUp) {
-            mDozeServiceHost.fireNotificationHeadsUp();
+    @Override
+    public void onAmbientStateChanged(Entry entry, boolean isAmbient) {
+        mEntryManager.updateNotificationRanking(null);
+        if (isAmbient) {
+            mDozeServiceHost.fireNotificationPulse();
+        } else if (!mAmbientPulseManager.hasNotifications()) {
+            // There are no longer any notifications to show.  We should end the pulse now.
+            mDozeScrimController.pulseOutNow();
         }
     }
 
@@ -3603,6 +3609,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardIndicationController.setDozing(mDozing);
         mNotificationPanel.setDozing(mDozing, animate, mWakeUpTouchLocation);
         mNotificationLogger.setDozing(mDozing);
+        mGroupManager.setDozing(mDozing);
         updateQsExpansionEnabled();
         Trace.endSection();
     }
@@ -4149,6 +4156,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         @Override
         public void onStartedWakingUp() {
             mDeviceInteractive = true;
+            mAmbientPulseManager.releaseAllImmediately();
             mVisualStabilityManager.setScreenOn(true);
             mNotificationPanel.setTouchAndAnimationDisabled(false);
             mDozeServiceHost.stopDozing();
@@ -4181,11 +4189,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         public void onScreenTurnedOff() {
             mFalsingManager.onScreenOff();
             mScrimController.onScreenTurnedOff();
-            // If we pulse in from AOD, we turn the screen off first. However, updatingIsKeyguard
-            // in that case destroys the HeadsUpManager state, so don't do it in that case.
-            if (!isPulsing()) {
-                updateIsKeyguard();
-            }
+            updateIsKeyguard();
         }
     };
 
@@ -4424,9 +4428,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         }
 
-        public void fireNotificationHeadsUp() {
+        public void fireNotificationPulse() {
             for (Callback callback : mCallbacks) {
-                callback.onNotificationHeadsUp();
+                callback.onNotificationAlerted();
             }
         }
 
@@ -4462,7 +4466,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 @Override
                 public void onPulseStarted() {
                     callback.onPulseStarted();
-                    if (mHeadsUpManager.hasNotifications()) {
+                    if (mAmbientPulseManager.hasNotifications()) {
                         // Only pulse the stack scroller if there's actually something to show.
                         // Otherwise just show the always-on screen.
                         setPulsing(true);
@@ -4543,7 +4547,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void extendPulse() {
-            mDozeScrimController.extendPulse();
+            if (mDozeScrimController.isPulsing() && mAmbientPulseManager.hasNotifications()) {
+                mAmbientPulseManager.extendPulse();
+            } else {
+                mDozeScrimController.extendPulse();
+            }
         }
 
         @Override
@@ -4628,6 +4636,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     // for heads up notifications
     protected HeadsUpManagerPhone mHeadsUpManager;
+
+    protected AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
 
     private AboveShelfObserver mAboveShelfObserver;
 
@@ -4734,7 +4744,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         final boolean wasOccluded = mIsOccluded;
         dismissKeyguardThenExecute(() -> {
             // TODO: Some of this code may be able to move to NotificationEntryManager.
-            if (mHeadsUpManager != null && mHeadsUpManager.contains(notificationKey)) {
+            if (mHeadsUpManager != null && mHeadsUpManager.isAlerting(notificationKey)) {
                 // Release the HUN notification to the shade.
 
                 if (isPresenterFullyCollapsed()) {

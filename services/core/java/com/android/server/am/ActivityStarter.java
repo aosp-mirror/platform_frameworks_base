@@ -945,7 +945,8 @@ class ActivityStarter {
                 auxiliaryResponse == null ? null : auxiliaryResponse.filters);
     }
 
-    void postStartActivityProcessing(ActivityRecord r, int result, ActivityStack targetStack) {
+    void postStartActivityProcessing(ActivityRecord r, int result,
+            ActivityStack startedActivityStack) {
         if (ActivityManager.isStartResultFatalError(result)) {
             return;
         }
@@ -956,14 +957,6 @@ class ActivityStarter {
         // considered focused as the trampoline will be finished). Let startActivityMayWait() know
         // about this, so it waits for the new activity to become visible instead.
         mSupervisor.reportWaitingActivityLaunchedIfNeeded(r, result);
-
-        ActivityStack startedActivityStack = null;
-        final ActivityStack currentStack = r.getStack();
-        if (currentStack != null) {
-            startedActivityStack = currentStack;
-        } else if (mTargetStack != null) {
-            startedActivityStack = targetStack;
-        }
 
         if (startedActivityStack == null) {
             return;
@@ -1086,9 +1079,9 @@ class ActivityStarter {
                 // This may be a heavy-weight process!  Check to see if we already
                 // have another, different heavy-weight process running.
                 if (aInfo.processName.equals(aInfo.applicationInfo.packageName)) {
-                    final ProcessRecord heavy = mService.mAm.mHeavyWeightProcess;
-                    if (heavy != null && (heavy.info.uid != aInfo.applicationInfo.uid
-                            || !heavy.processName.equals(aInfo.processName))) {
+                    final WindowProcessController heavy = mService.mHeavyWeightProcess;
+                    if (heavy != null && (heavy.mInfo.uid != aInfo.applicationInfo.uid
+                            || !heavy.mName.equals(aInfo.processName))) {
                         int appCallingUid = callingUid;
                         if (caller != null) {
                             ProcessRecord callerApp = mService.mAm.getRecordForAppLocked(caller);
@@ -1116,8 +1109,7 @@ class ActivityStarter {
                         }
                         newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_INTENT,
                                 new IntentSender(target));
-                        heavy.getWindowProcessController().updateIntentForHeavyWeightActivity(
-                                newIntent);
+                        heavy.updateIntentForHeavyWeightActivity(newIntent);
                         newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_NEW_APP,
                                 aInfo.packageName);
                         newIntent.setFlags(intent.getFlags());
@@ -1240,23 +1232,41 @@ class ActivityStarter {
                 int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
                 ActivityRecord[] outActivity) {
         int result = START_CANCELED;
+        final ActivityStack startedActivityStack;
         try {
             mService.mWindowManager.deferSurfaceLayout();
             result = startActivityUnchecked(r, sourceRecord, voiceSession, voiceInteractor,
                     startFlags, doResume, options, inTask, outActivity);
         } finally {
-            // If we are not able to proceed, disassociate the activity from the task. Leaving an
-            // activity in an incomplete state can lead to issues, such as performing operations
-            // without a window container.
-            final ActivityStack stack = mStartActivity.getStack();
-            if (!ActivityManager.isStartResultSuccessful(result) && stack != null) {
-                stack.finishActivityLocked(mStartActivity, RESULT_CANCELED,
-                        null /* intentResultData */, "startActivity", true /* oomAdj */);
+            final ActivityStack currentStack = r.getStack();
+            startedActivityStack = currentStack != null ? currentStack : mTargetStack;
+
+            if (ActivityManager.isStartResultSuccessful(result)) {
+                if (startedActivityStack != null) {
+                    // If there is no state change (e.g. a resumed activity is reparented to
+                    // top of another display) to trigger a visibility/configuration checking,
+                    // we have to update the configuration for changing to different display.
+                    final ActivityRecord currentTop =
+                            startedActivityStack.topRunningActivityLocked();
+                    if (currentTop != null && currentTop.shouldUpdateConfigForDisplayChanged()) {
+                        mSupervisor.ensureVisibilityAndConfig(currentTop, currentTop.getDisplayId(),
+                                true /* markFrozenIfConfigChanged */, false /* deferResume */);
+                    }
+                }
+            } else {
+                // If we are not able to proceed, disassociate the activity from the task.
+                // Leaving an activity in an incomplete state can lead to issues, such as
+                // performing operations without a window container.
+                final ActivityStack stack = mStartActivity.getStack();
+                if (stack != null) {
+                    stack.finishActivityLocked(mStartActivity, RESULT_CANCELED,
+                            null /* intentResultData */, "startActivity", true /* oomAdj */);
+                }
             }
             mService.mWindowManager.continueSurfaceLayout();
         }
 
-        postStartActivityProcessing(r, result, mTargetStack);
+        postStartActivityProcessing(r, result, startedActivityStack);
 
         return result;
     }

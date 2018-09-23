@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
@@ -275,6 +276,7 @@ class WindowToken extends WindowContainer<WindowState> {
         // to another display before the window behind
         // it is ready.
 
+        updateSurfaceSize(dc);
         super.onDisplayChanged(dc);
     }
 

@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
@@ -103,6 +102,10 @@ public class WifiTrackerTest {
     private static final int RSSI_2 = -30;
     private static final byte SCORE_2 = 15;
     private static final int BADGE_2 = AccessPoint.Speed.FAST;
+
+    private static final String SSID_3 = "ssid3";
+    private static final String BSSID_3 = "CC:00:00:00:00:00";
+    private static final int RSSI_3 = -40;
 
     // TODO(b/65594609): Convert mutable Data objects to instance variables / builder pattern
     private static final int NETWORK_ID_1 = 123;
@@ -253,6 +256,19 @@ public class WifiTrackerTest {
                 RSSI_2,
                 0, // frequency
                 SystemClock.elapsedRealtime() * 1000 /* microsecond timestamp */);
+    }
+
+    private static ScanResult buildStaleScanResult() {
+        return new ScanResult(
+                WifiSsid.createFromAsciiEncoded(SSID_3),
+                BSSID_3,
+                0, // hessid
+                0, //anqpDomainId
+                null, // osuProviders
+                "", // capabilities
+                RSSI_3,
+                0, // frequency
+                0 /* microsecond timestamp */);
     }
 
     private WifiTracker createTrackerWithImmediateBroadcastsAndInjectInitialScanResults(
@@ -895,5 +911,19 @@ public class WifiTrackerTest {
 
         assertThat(aps.get(0).isReachable()).isTrue();
         assertThat(aps.get(1).isReachable()).isTrue();
+    }
+
+    @Test
+    public void onStart_updateScanResults_evictOldScanResult() {
+        when(mockWifiManager.getScanResults()).thenReturn(
+                Arrays.asList(buildScanResult1(), buildScanResult2(), buildStaleScanResult()));
+        WifiTracker tracker = createMockedWifiTracker();
+
+        tracker.forceUpdate();
+
+        // Only has scanResult1 and scanResult2
+        assertThat(tracker.getAccessPoints()).hasSize(2);
+        assertThat(tracker.getAccessPoints().get(0).getBssid()).isEqualTo(BSSID_1);
+        assertThat(tracker.getAccessPoints().get(1).getBssid()).isEqualTo(BSSID_2);
     }
 }

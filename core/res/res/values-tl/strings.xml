@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Nagkaroon ng isyu sa pagrehistro ng pagtawag gamit ang Wi‑Fi sa iyong carrier: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Pagtawag sa Pamamagitan ng Wi-Fi ng %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Pagtawag Gamit ang Wi-Fi ng <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Pagtawag Gamit ang WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Pagtawag Gamit ang WLAN ng <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi ng <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Pagtawag Gamit ang Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi ng <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Naka-off"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Mas gusto ang Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mas gusto ang mobile"</string>
@@ -524,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Hindi nakilala"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Na-authenticate ang fingerprint"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hindi available ang hardware na ginagamitan ng fingerprint."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Hindi maiimbak ang fingerprint. Mangyaring mag-alis ng umiiral nang fingerprint."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Nag-time out ang fingerprint. Subukang muli."</string>
@@ -560,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Nag-time out ang mukha. Subukang muli."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Hindi ma-store ang mukha."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Nakansela ang operation kaugnay ng mukha."</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Masyadong maraming pagsubok. Subukang muli mamaya."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Sobrang pagsubok. Bawal na: facial authentication."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Subukang muli."</string>
@@ -1616,6 +1626,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Pagwawasto ng Kulay"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Na-on ng Shortcut sa Accessibility ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Na-off ng Shortcut sa Accessibility ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Gamiting muli ang Shortcut sa Pagiging Naa-access para simulan ang kasalukuyang feature ng pagiging naa-access"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Pumili ng feature na gagamitin kapag na-tap mo ang button ng Pagiging Naa-access:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Upang baguhin ang mga feature, pindutin nang matagal ang button ng Pagiging Naa-access."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Pag-magnify"</string>

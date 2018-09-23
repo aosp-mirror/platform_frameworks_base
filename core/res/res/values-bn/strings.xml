@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"পরিষেবা প্রদানকারীতে ওয়াই-ফাই কলিং রেজিস্টার করতে সমস্যা হয়েছে: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s ওয়াই-ফাই কলিং"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> ওয়াই-ফাই কলিং"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN কল"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN কল"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> ওয়াই-ফাই"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"ওয়াই-ফাই কলিং | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"বন্ধ আছে"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"পছন্দের ওয়াই-ফাই"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"পছন্দের মোবাইল"</string>
@@ -524,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"স্বীকৃত নয়"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"আঙ্গুলের ছাপ যাচাই করা হয়েছে"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"আঙ্গুলের ছাপ নেওয়ার হার্ডওয়্যার অনুপলব্ধ৷"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"আঙ্গুলের ছাপ সংরক্ষণ করা যাবে না৷ অনুগ্রহ করে একটি বিদ্যমান আঙ্গুলের ছাপ সরান৷"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"আঙ্গুলের ছাপ নেওয়ার সময়সীমা শেষ হযেছে৷ আবার চেষ্টা করুন৷"</string>
@@ -560,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"ফেসের ছাপ নেওয়ার সময়সীমা শেষ৷ আবার চেষ্টা করুন৷"</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"ফেস স্টোর করা যাবে না।"</string>
     <string name="face_error_canceled" msgid="283945501061931023">"ফেস অপারেশন বাতিল করা হয়েছে৷"</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"অনেকবার চেষ্টা করা হয়েছে। পরে আবার চেষ্টা করুন।"</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"অনেকবার চেষ্টা করা হয়েছে৷ ফেস যাচাইকরণ বন্ধ আছে।"</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"আবার চেষ্টা করুন।"</string>
@@ -1617,6 +1627,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"রঙ সংশোধন"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"অ্যাক্সেসযোগ্যতা শর্টকাট <xliff:g id="SERVICE_NAME">%1$s</xliff:g> কে চালু করেছে"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"অ্যাক্সেসযোগ্যতা শর্টকাট <xliff:g id="SERVICE_NAME">%1$s</xliff:g> কে বন্ধ করেছে"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"বর্তমান অ্যাক্সেসিবিলিটি বৈশিষ্ট্য শুরু করার জন্য অ্যাক্সেসিবিলিটি শর্টকাটটি আবার ব্যবহার করুন"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"অ্যাক্সেসযোগ্যতা বোতামের সাহায্যে যে বৈশিষ্ট্যটি নিয়ন্ত্রণ করতে চান, সেটি বেছে নিন:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"বৈশিষ্ট্যগুলি পরিবর্তন করতে অ্যাক্সেসযোগ্যতা বোতামটি ট্যাপ করে ধরে রাখুন।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"বড় করে দেখা"</string>

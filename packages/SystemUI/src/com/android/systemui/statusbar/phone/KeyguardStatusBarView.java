@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
+import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 
 import android.annotation.ColorInt;
 import android.content.Context;
@@ -70,16 +71,18 @@ public class KeyguardStatusBarView extends RelativeLayout
     private static final int LAYOUT_CUTOUT = 1;
     private static final int LAYOUT_NO_CUTOUT = 2;
 
+    private final Rect mEmptyRect = new Rect(0, 0, 0, 0);
+
     private boolean mShowPercentAvailable;
     private boolean mBatteryCharging;
     private boolean mKeyguardUserSwitcherShowing;
     private boolean mBatteryListening;
 
     private TextView mCarrierLabel;
-    private View mSystemIconsSuperContainer;
     private MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;
     private BatteryMeterView mBatteryView;
+    private StatusIconContainer mStatusIconContainer;
 
     private BatteryController mBatteryController;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
@@ -99,6 +102,18 @@ public class KeyguardStatusBarView extends RelativeLayout
      */
     private int mCutoutSideNudge = 0;
 
+    /**
+     * How much to move icons to avoid burn in.
+     */
+    private int mBurnInOffset;
+    private int mCurrentBurnInOffsetX;
+    private int mCurrentBurnInOffsetY;
+
+    /**
+     * Ratio representing being in ambient mode or not.
+     */
+    private float mDarkAmount;
+
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -113,6 +128,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         mBatteryView = mSystemIconsContainer.findViewById(R.id.battery);
         mCutoutSpace = findViewById(R.id.cutout_space_view);
         mStatusIconArea = findViewById(R.id.status_icon_area);
+        mStatusIconContainer = findViewById(R.id.statusIcons);
 
         loadDimens();
         updateUserSwitcher();
@@ -169,6 +185,8 @@ public class KeyguardStatusBarView extends RelativeLayout
                 R.dimen.system_icons_super_container_avatarless_margin_end);
         mCutoutSideNudge = getResources().getDimensionPixelSize(
                 R.dimen.display_cutout_margin_consumption);
+        mBurnInOffset = getResources().getDimensionPixelSize(
+                R.dimen.default_burn_in_prevention_offset);
         mShowPercentAvailable = getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_battery_percentage_setting_available);
     }
@@ -440,6 +458,14 @@ public class KeyguardStatusBarView extends RelativeLayout
     }
 
     public void onThemeChanged() {
+        mBatteryView.setColorsFromContext(mContext);
+        updateIconsAndTextColors();
+        // Reload user avatar
+        ((UserInfoControllerImpl) Dependency.get(UserInfoController.class))
+                .onDensityOrFontScaleChanged();
+    }
+
+    private void updateIconsAndTextColors() {
         @ColorInt int textColor = Utils.getColorAttrDefaultColor(mContext,
                 R.attr.wallpaperTextColor);
         @ColorInt int iconColor = Utils.getColorStateListDefaultColor(mContext,
@@ -448,14 +474,9 @@ public class KeyguardStatusBarView extends RelativeLayout
         float intensity = textColor == Color.WHITE ? 0 : 1;
         mCarrierLabel.setTextColor(iconColor);
         mIconManager.setTint(iconColor);
-        mBatteryView.setColorsFromContext(mContext);
-        Rect tintArea = new Rect(0, 0, 0, 0);
 
-        applyDarkness(R.id.battery, tintArea, intensity, iconColor);
-        applyDarkness(R.id.clock, tintArea, intensity, iconColor);
-        // Reload user avatar
-        ((UserInfoControllerImpl) Dependency.get(UserInfoController.class))
-                .onDensityOrFontScaleChanged();
+        applyDarkness(R.id.battery, mEmptyRect, intensity * (1f - mDarkAmount), iconColor);
+        applyDarkness(R.id.clock, mEmptyRect, intensity, iconColor);
     }
 
     private void applyDarkness(int id, Rect tintArea, float intensity, int color) {
@@ -475,4 +496,32 @@ public class KeyguardStatusBarView extends RelativeLayout
             mBatteryView.dump(fd, pw, args);
         }
     }
+
+    public void setDarkAmount(float darkAmount) {
+        mDarkAmount = darkAmount;
+        if (darkAmount == 0) {
+            dozeTimeTick();
+        }
+        updateDozeState();
+    }
+
+    public void dozeTimeTick() {
+        mCurrentBurnInOffsetX = getBurnInOffset(mBurnInOffset, true /* xAxis */);
+        mCurrentBurnInOffsetY = getBurnInOffset(mBurnInOffset, false /* xAxis */);
+        updateDozeState();
+    }
+
+    private void updateDozeState() {
+        float alpha = 1f - mDarkAmount;
+        int visibility = alpha != 0f ? VISIBLE : INVISIBLE;
+        mCarrierLabel.setAlpha(alpha);
+        mCarrierLabel.setVisibility(visibility);
+        mStatusIconContainer.setAlpha(alpha);
+        mStatusIconContainer.setVisibility(visibility);
+
+        mSystemIconsContainer.setTranslationX(-mCurrentBurnInOffsetX * mDarkAmount);
+        mSystemIconsContainer.setTranslationY(mCurrentBurnInOffsetY * mDarkAmount);
+        updateIconsAndTextColors();
+    }
+
 }

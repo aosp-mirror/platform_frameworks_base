@@ -52,8 +52,6 @@ import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.ConditionProviderService;
 import android.service.notification.ZenModeConfig;
-import android.service.notification.ZenModeConfig.EventInfo;
-import android.service.notification.ZenModeConfig.ScheduleInfo;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.service.notification.ZenModeProto;
 import android.util.AndroidRuntimeException;
@@ -119,8 +117,6 @@ public class ZenModeHelper {
     public static final long SUPPRESSED_EFFECT_ALL = SUPPRESSED_EFFECT_CALLS
             | SUPPRESSED_EFFECT_NOTIFICATIONS;
 
-    protected String mDefaultRuleEveryNightName;
-    protected String mDefaultRuleEventsName;
     @VisibleForTesting protected boolean mIsBootComplete;
 
     public ZenModeHelper(Context context, Looper looper, ConditionProviders conditionProviders) {
@@ -130,9 +126,9 @@ public class ZenModeHelper {
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mNotificationManager =  context.getSystemService(NotificationManager.class);
 
-        mDefaultConfig = new ZenModeConfig();
-        setDefaultZenRules(mContext);
-        mConfig = mDefaultConfig;
+        mDefaultConfig = readDefaultConfig(mContext.getResources());
+        updateDefaultAutomaticRuleNames();
+        mConfig = mDefaultConfig.copy();
         mConfigs.put(UserHandle.USER_SYSTEM, mConfig);
 
         mSettingsObserver = new SettingsObserver(mHandler);
@@ -311,7 +307,9 @@ public class ZenModeHelper {
             newConfig = mConfig.copy();
             ZenRule rule = new ZenRule();
             populateZenRule(automaticZenRule, rule, true);
-            newConfig.automaticRules.put(rule.id, rule);
+            if (newConfig.automaticRules.put(rule.id, rule) != null) {
+                rule.modified = true;
+            }
             if (setConfigLocked(newConfig, reason, rule.component, true)) {
                 return rule.id;
             } else {
@@ -341,7 +339,9 @@ public class ZenModeHelper {
                 }
             }
             populateZenRule(automaticZenRule, rule, false);
-            newConfig.automaticRules.put(ruleId, rule);
+            if (newConfig.automaticRules.put(ruleId, rule) != null) {
+                rule.modified = true;
+            }
             return setConfigLocked(newConfig, reason, rule.component, true);
         }
     }
@@ -413,17 +413,6 @@ public class ZenModeHelper {
         }
     }
 
-    public void setDefaultZenRules(Context context) {
-        mDefaultConfig = readDefaultConfig(context.getResources());
-        appendDefaultRules(mDefaultConfig);
-    }
-
-    private void appendDefaultRules (ZenModeConfig config) {
-        getDefaultRuleNames();
-        appendDefaultEveryNightRule(config);
-        appendDefaultEventRules(config);
-    }
-
     // Checks zen rule properties are the same (doesn't check creation time, name nor enabled)
     // used to check if default rules were customized or not
     private boolean ruleValuesEqual(AutomaticZenRule rule, ZenRule defaultRule) {
@@ -437,22 +426,16 @@ public class ZenModeHelper {
     }
 
     protected void updateDefaultZenRules() {
-        ZenModeConfig configDefaultRules = new ZenModeConfig();
-        appendDefaultRules(configDefaultRules); // "new" localized default rules
-        for (String ruleId : ZenModeConfig.DEFAULT_RULE_IDS) {
-            AutomaticZenRule currRule = getAutomaticZenRule(ruleId);
-            ZenRule defaultRule = configDefaultRules.automaticRules.get(ruleId);
-            // if default rule wasn't customized, use localized name instead of previous
-            if (ruleValuesEqual(currRule, defaultRule) &&
-                    !defaultRule.name.equals(currRule.getName())) {
+        updateDefaultAutomaticRuleNames();
+        for (ZenRule defaultRule : mDefaultConfig.automaticRules.values()) {
+            ZenRule currRule = mConfig.automaticRules.get(defaultRule.id);
+            // if default rule wasn't modified, use localized name instead of previous
+            if (!currRule.modified && !defaultRule.name.equals(currRule.name)) {
                 if (canManageAutomaticZenRule(defaultRule)) {
                     if (DEBUG) Slog.d(TAG, "Locale change - updating default zen rule name "
-                            + "from " + currRule.getName() + " to " + defaultRule.name);
+                            + "from " + currRule.name + " to " + defaultRule.name);
                     // update default rule (if locale changed, name of rule will change)
-                    AutomaticZenRule defaultAutoRule = createAutomaticZenRule(defaultRule);
-                    // ensure enabled state is carried over from current rule
-                    defaultAutoRule.setEnabled(currRule.isEnabled());
-                    updateAutomaticZenRule(ruleId, defaultAutoRule,
+                    updateAutomaticZenRule(defaultRule.id, createAutomaticZenRule(defaultRule),
                             "locale changed");
                 }
             }
@@ -642,7 +625,9 @@ public class ZenModeHelper {
                 // - doesn't already have default rules and
                 // - all previous automatic rules were disabled
                 config.automaticRules = new ArrayMap<>();
-                appendDefaultRules(config);
+                for (ZenRule rule : mDefaultConfig.automaticRules.values()) {
+                    config.automaticRules.put(rule.id, rule);
+                }
                 reason += ", reset to default rules";
             }
 
@@ -854,12 +839,16 @@ public class ZenModeHelper {
         }
     }
 
-    private void getDefaultRuleNames() {
-        // on locale-change, these values differ
-        mDefaultRuleEveryNightName = mContext.getResources()
-                .getString(R.string.zen_mode_default_every_night_name);
-        mDefaultRuleEventsName = mContext.getResources()
-                .getString(R.string.zen_mode_default_events_name);
+    private void updateDefaultAutomaticRuleNames() {
+        for (ZenRule rule : mDefaultConfig.automaticRules.values()) {
+            if (ZenModeConfig.EVENTS_DEFAULT_RULE_ID.equals(rule.id)) {
+                rule.name = mContext.getResources()
+                        .getString(R.string.zen_mode_default_events_name);
+            } else if (ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID.equals(rule.id)) {
+                rule.name = mContext.getResources()
+                        .getString(R.string.zen_mode_default_every_night_name);
+            }
+        }
     }
 
     @VisibleForTesting
@@ -999,42 +988,6 @@ public class ZenModeHelper {
             IoUtils.closeQuietly(parser);
         }
         return new ZenModeConfig();
-    }
-
-    private void appendDefaultEveryNightRule(ZenModeConfig config) {
-        if (config == null) return;
-
-        final ScheduleInfo weeknights = new ScheduleInfo();
-        weeknights.days = ZenModeConfig.ALL_DAYS;
-        weeknights.startHour = 22;
-        weeknights.endHour = 7;
-        weeknights.exitAtAlarm = true;
-        final ZenRule rule = new ZenRule();
-        rule.enabled = false;
-        rule.name = mDefaultRuleEveryNightName;
-        rule.conditionId = ZenModeConfig.toScheduleConditionId(weeknights);
-        rule.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        rule.component = ScheduleConditionProvider.COMPONENT;
-        rule.id = ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID;
-        rule.creationTime = System.currentTimeMillis();
-        config.automaticRules.put(rule.id, rule);
-    }
-
-    private void appendDefaultEventRules(ZenModeConfig config) {
-        if (config == null) return;
-
-        final EventInfo events = new EventInfo();
-        events.calendar = null; // any calendar
-        events.reply = EventInfo.REPLY_YES_OR_MAYBE;
-        final ZenRule rule = new ZenRule();
-        rule.enabled = false;
-        rule.name = mDefaultRuleEventsName;
-        rule.conditionId = ZenModeConfig.toEventConditionId(events);
-        rule.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        rule.component = EventConditionProvider.COMPONENT;
-        rule.id = ZenModeConfig.EVENTS_DEFAULT_RULE_ID;
-        rule.creationTime = System.currentTimeMillis();
-        config.automaticRules.put(rule.id, rule);
     }
 
     private static int zenSeverity(int zen) {

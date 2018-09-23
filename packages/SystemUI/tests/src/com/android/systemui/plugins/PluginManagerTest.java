@@ -13,8 +13,9 @@
  */
 package com.android.systemui.plugins;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -26,8 +27,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.support.test.annotation.UiThreadTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -36,11 +35,10 @@ import android.testing.TestableLooper.RunWithLooper;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.annotations.ProvidesInterface;
 import com.android.systemui.plugins.PluginInstanceManager.PluginInfo;
 import com.android.systemui.plugins.PluginManagerImpl.PluginInstanceManagerFactory;
+import com.android.systemui.plugins.annotations.ProvidesInterface;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,6 +51,8 @@ import java.lang.Thread.UncaughtExceptionHandler;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 public class PluginManagerTest extends SysuiTestCase {
+
+    private static final String WHITELISTED_PACKAGE = "com.android.systemui";
 
     private PluginInstanceManagerFactory mMockFactory;
     private PluginInstanceManager mMockPluginInstance;
@@ -74,7 +74,7 @@ public class PluginManagerTest extends SysuiTestCase {
         when(mMockFactory.createPluginInstanceManager(Mockito.any(), Mockito.any(), Mockito.any(),
                 Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(mMockPluginInstance);
-        mPluginManager = new PluginManagerImpl(getContext(), mMockFactory, true,
+        mPluginManager = new PluginManagerImpl(getContext(), mMockFactory, true, new String[0],
                 mMockExceptionHandler);
         resetExceptionHandler();
         mMockListener = mock(PluginListener.class);
@@ -87,7 +87,7 @@ public class PluginManagerTest extends SysuiTestCase {
         when(mMockPluginInstance.getPlugin()).thenReturn(new PluginInfo(null, null, mockPlugin,
                 null, null));
         Plugin result = mPluginManager.getOneShotPlugin("myAction", TestPlugin.class);
-        assertTrue(result == mockPlugin);
+        assertSame(mockPlugin, result);
     }
 
     @Test
@@ -106,16 +106,27 @@ public class PluginManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNonDebuggable() {
+    @RunWithLooper(setAsMainLooper = true)
+    public void testNonDebuggable_noWhitelist() {
         mPluginManager = new PluginManagerImpl(getContext(), mMockFactory, false,
-                mMockExceptionHandler);
+                new String[0], mMockExceptionHandler);
         resetExceptionHandler();
 
         mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
-        verify(mMockPluginInstance, Mockito.never()).loadAll();
-
         assertNull(mPluginManager.getOneShotPlugin("myPlugin", TestPlugin.class));
-        verify(mMockPluginInstance, Mockito.never()).getPlugin();
+        assertNull(mPluginManager.getClassLoader("myPlugin", WHITELISTED_PACKAGE));
+    }
+
+    @Test
+    @RunWithLooper(setAsMainLooper = true)
+    public void testNonDebuggable_whitelistedPkg() {
+        mPluginManager = new PluginManagerImpl(getContext(), mMockFactory, false,
+                new String[] {WHITELISTED_PACKAGE}, mMockExceptionHandler);
+        resetExceptionHandler();
+
+        mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
+        assertNotNull(mPluginManager.getClassLoader("myPlugin", WHITELISTED_PACKAGE));
+        assertNull(mPluginManager.getClassLoader("myPlugin", "com.android.invalidpackage"));
     }
 
     @Test

@@ -182,6 +182,7 @@ import android.util.Log;
 import android.util.MergedConfiguration;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
@@ -232,8 +233,6 @@ import com.android.internal.policy.IShortcutService;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.LatencyTracker;
-import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.WindowManagerPolicyThread;
 import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
@@ -481,6 +480,10 @@ public class WindowManagerService extends IWindowManager.Stub
      * Used when processing mPendingRemove to avoid working on the original array.
      */
     WindowState[] mPendingRemoveTmp = new WindowState[20];
+
+    // TODO: use WindowProcessController once go/wm-unified is done.
+    /** Mapping of process pids to configurations */
+    final SparseArray<Configuration> mProcessConfigurations = new SparseArray<>();
 
     /**
      * Windows whose surface should be destroyed.
@@ -5037,12 +5040,8 @@ public class WindowManagerService extends IWindowManager.Stub
     // -------------------------------------------------------------
 
     @Override
-    public IWindowSession openSession(IWindowSessionCallback callback, IInputMethodClient client,
-            IInputContext inputContext) {
-        if (client == null) throw new IllegalArgumentException("null client");
-        if (inputContext == null) throw new IllegalArgumentException("null inputContext");
-        Session session = new Session(this, callback, client, inputContext);
-        return session;
+    public IWindowSession openSession(IWindowSessionCallback callback) {
+        return new Session(this, callback);
     }
 
     @Override
@@ -5075,9 +5074,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Must hold permission " +
                     android.Manifest.permission.WRITE_SECURE_SETTINGS);
         }
-        if (displayId != DEFAULT_DISPLAY) {
-            throw new IllegalArgumentException("Can only set the default display");
-        }
+
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized(mWindowMap) {
@@ -5110,9 +5107,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Must hold permission " +
                     android.Manifest.permission.WRITE_SECURE_SETTINGS);
         }
-        if (displayId != DEFAULT_DISPLAY) {
-            throw new IllegalArgumentException("Can only set the default display");
-        }
+
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized(mWindowMap) {
@@ -5192,9 +5187,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Must hold permission " +
                     android.Manifest.permission.WRITE_SECURE_SETTINGS);
         }
-        if (displayId != DEFAULT_DISPLAY) {
-            throw new IllegalArgumentException("Can only set the default display");
-        }
+
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized(mWindowMap) {
@@ -5241,9 +5234,6 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Must hold permission " +
                     android.Manifest.permission.WRITE_SECURE_SETTINGS);
         }
-        if (displayId != DEFAULT_DISPLAY) {
-            throw new IllegalArgumentException("Can only set the default display");
-        }
 
         final int targetUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), userId, false, true, "setForcedDisplayDensityForUser",
@@ -5271,9 +5261,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Must hold permission " +
                     android.Manifest.permission.WRITE_SECURE_SETTINGS);
-        }
-        if (displayId != DEFAULT_DISPLAY) {
-            throw new IllegalArgumentException("Can only set the default display");
         }
 
         final int callingUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
@@ -7446,6 +7433,19 @@ public class WindowManagerService extends IWindowManager.Stub
                     return window.getDisplayContent().getDisplayId();
                 }
                 return Display.INVALID_DISPLAY;
+            }
+        }
+
+        @Override
+        public void onProcessConfigurationChanged(int pid, Configuration newConfig) {
+            synchronized (mWindowMap) {
+                Configuration currentConfig = mProcessConfigurations.get(pid);
+                if (currentConfig == null) {
+                    currentConfig = new Configuration(newConfig);
+                } else {
+                    currentConfig.setTo(newConfig);
+                }
+                mProcessConfigurations.put(pid, currentConfig);
             }
         }
     }

@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"உங்கள் மொபைல் நிறுவனத்துடன் வைஃபை அழைப்பைப் பதிவுசெய்வதில் சிக்கல்: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s வைஃபை அழைப்பு"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> வைஃபை அழைப்பு"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN அழைப்பு"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN அழைப்பு"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> வைஃபை"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"வைஃபை அழைப்பு | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ஆஃப்"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"வைஃபைக்கு முன்னுரிமை"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"மொபைல் தரவிற்கு முன்னுரிமை"</string>
@@ -514,8 +518,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"உங்களின் படத் தொகுப்பை மாற்ற ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"மீடியா தொகுப்பிலிருந்து இடங்களை அறிதல்"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"உங்களின் மீடியா தொகுப்பிலிருந்து இடங்களை அறிந்துகொள்ள ஆப்ஸை அனுமதிக்கும்."</string>
-    <!-- no translation found for biometric_error_hw_unavailable (645781226537551036) -->
-    <skip />
+    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"பயோமெட்ரிக் வன்பொருள் இல்லை"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"கைரேகையை ஓரளவுதான் கண்டறிய முடிந்தது. மீண்டும் முயலவும்."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"கைரேகையைச் செயலாக்க முடியவில்லை. மீண்டும் முயலவும்."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"கைரேகை உணர்வியில் தூசி உள்ளது. சுத்தம் செய்து, முயலவும்."</string>
@@ -523,9 +526,12 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"விரலை மிகவும் மெதுவாக நகர்த்திவிட்டீர்கள். மீண்டும் முயற்சிக்கவும்."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for biometric_not_recognized (5770511773560736082) -->
-    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"அடையாளங்காணபடவில்லை"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"கைரேகை அங்கீகரிக்கப்பட்டது"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"கைரேகை வன்பொருள் இல்லை."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"கைரேகையைச் சேமிக்க முடியவில்லை. ஏற்கனவே உள்ள கைரேகையை அகற்றவும்."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"கைரேகைக்கான நேரம் முடிந்தது. மீண்டும் முயலவும்."</string>
@@ -562,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"முகப் பதிவிற்கான நேரம் முடிந்தது. மீண்டும் முயல்க."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"முகத்தைச் சேமிக்க இயலாது."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"முக அங்கீகாரச் செயல்பாடு ரத்துசெய்யப்பட்டது."</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"பலமுறை முயன்றுவிட்டீர்கள். பிறகு முயலவும்."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"பலமுறை தோல்வி. முக அங்கீகாரம் முடக்கப்பட்டது."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"மீண்டும் முயலவும்."</string>
@@ -1619,6 +1627,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"வண்ணத் திருத்தம்"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"அணுகல்தன்மைக் குறுக்குவழியானது <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐ இயக்கியது"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"அணுகல்தன்மைக் குறுக்குவழியானது <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐ முடக்கியது"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"தற்போதுள்ள அணுகல்தன்மை அம்சத்தை மீண்டும் தொடங்க ’அணுகல்தன்மை ஷார்ட்கட்டைப்’ பயன்படுத்தவும்"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"அணுகல்தன்மைப் பொத்தானைத் தட்டி, பயன்படுத்துவதற்கான அம்சத்தைத் தேர்ந்தெடுக்கவும்:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"அம்சங்களை மாற்ற, அணுகல்தன்மைப் பொத்தானைத் தொட்டுப் பிடித்திருக்கவும்."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"பெரிதாக்கல்"</string>

@@ -395,8 +395,6 @@
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Kytketty virtalähteeseen, lataaminen ei onnistu"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Täynnä"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Järjestelmänvalvoja hallinnoi tätä asetusta."</string>
-    <string name="enabled_by_admin" msgid="5302986023578399263">"Järjestelmänvalvojan käyttöön ottama"</string>
-    <string name="disabled_by_admin" msgid="8505398946020816620">"Järjestelmänvalvojan estämä"</string>
     <string name="disabled" msgid="9206776641295849915">"Pois käytöstä"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Sallittu"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"Ei sallittu"</string>

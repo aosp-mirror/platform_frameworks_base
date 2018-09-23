@@ -345,13 +345,6 @@ int RenderProxy::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
     }
 }
 
-void RenderProxy::onBitmapDestroyed(uint32_t pixelRefId) {
-    if (!RenderThread::hasInstance()) return;
-    RenderThread& thread = RenderThread::getInstance();
-    thread.queue().post(
-            [&thread, pixelRefId]() { thread.renderState().onBitmapDestroyed(pixelRefId); });
-}
-
 void RenderProxy::disableVsync() {
     Properties::disableVsync = true;
 }

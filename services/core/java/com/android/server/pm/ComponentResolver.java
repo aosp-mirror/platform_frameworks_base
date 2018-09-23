@@ -1049,7 +1049,7 @@ public class ComponentResolver {
                                 (other != null && other.getComponentName() != null)
                                         ? other.getComponentName().getPackageName() : "?";
                         // if we're installing over the same already-installed package, this is ok
-                        if (otherPackageName != pkg.packageName) {
+                        if (!otherPackageName.equals(pkg.packageName)) {
                             throw new PackageManagerException(
                                     INSTALL_FAILED_CONFLICTING_PROVIDER,
                                     "Can't install because provider name " + names[j]

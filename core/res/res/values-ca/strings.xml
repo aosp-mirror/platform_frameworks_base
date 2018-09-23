@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Hi ha hagut un problema en registrar les trucades per Wi-Fi amb el teu operador de telefonia mòbil: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Trucades per Wi-Fi %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Trucades per Wi‑Fi (<xliff:g id="SPN">%s</xliff:g>)"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Trucada per WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Trucada per WLAN (<xliff:g id="SPN">%s</xliff:g>)"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi‑Fi (<xliff:g id="SPN">%s</xliff:g>)"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Trucades per Wi‑Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi (<xliff:g id="SPN">%s</xliff:g>)"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivat"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferència per la Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferència per dades mòbils"</string>
@@ -295,7 +299,7 @@
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"llegir i editar el registre de trucades del telèfon"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; accedeixi als registres de trucades del telèfon?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telèfon"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"fer i gestionar trucades telefòniques"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"fer i gestionar trucades"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; faci trucades i les gestioni?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensors corporals"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accedir a les dades del sensor sobre els signes vitals"</string>
@@ -524,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"No s\'ha reconegut"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"L\'empremta digital s\'ha autenticat"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"El maquinari per a empremtes digitals no està disponible."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"L\'empremta digital no es pot desar. Suprimeix-ne una."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"S\'ha esgotat el temps d\'espera per a l\'empremta digital. Torna-ho a provar."</string>
@@ -560,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"S\'ha esgotat el temps d\'espera. Torna-ho a provar."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"La cara no es pot desar."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"S\'ha cancel·lat el reconeixement facial."</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Massa intents. Torna-ho a provar més tard."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Massa intents. Autenticació facial desactivada."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Torna-ho a provar."</string>
@@ -1616,6 +1626,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Correcció del color"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"La drecera d\'accessibilitat ha activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"La drecera d\'accessibilitat ha desactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Torna a utilitzar la drecera d\'accessibilitat per iniciar la funció d\'accessibilitat actual"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Tria la funció que s\'utilitzarà quan toquis el botó Accessibilitat:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Per canviar les funcions, toca i mantén premut el botó Accessibilitat."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Ampliació"</string>

@@ -15,7 +15,7 @@
   ~ limitations under the License
   -->
 <resources>
-    <integer name="fingerprint_dialog_text_gravity">8388611</integer> <!-- gravity start -->
+    <integer name="biometric_dialog_text_gravity">8388611</integer> <!-- gravity start -->
 
     <!-- Action footer width used for layout_width to indicate WRAP_CONTENT (along with a weight of
          0) as we can allow the carrier text to stretch as far as needed in the QS footer. -->

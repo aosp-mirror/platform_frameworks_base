@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.stack;
 
 import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.NotificationHeaderView;
@@ -51,7 +50,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
 
     @Test
     public void testGetMaxAllowedVisibleChildren_ambient() {
-        mGroup.setShowAmbient(true);
+        mGroup.setOnAmbient(true);
         Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),
             NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_AMBIENT);
     }

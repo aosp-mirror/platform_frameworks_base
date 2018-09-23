@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"ከእርስዎ አገልግሎት አቅራቢ ጋር የWi‑Fi ጥሪን በማስመዝገብ ላይ ችግር፦ <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"የ%s Wi-Fi ጥሪ"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> የWi-Fi ጥሪ አደራረግ"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"የWLAN ጥሪ"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> የWLAN ጥሪ"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"የWiFi ጥሪ አደራረግ | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ጠፍቷል"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi ተመርጧል"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"የተንቀሳቃሽ ስልክ ተመራጭ ነው"</string>
@@ -524,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"አልታወቀም"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"የጣት አሻራ ትክክለኛነት ተረጋግጧል"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"የጣት አሻራ ሃርድዌር አይገኝም።"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"የጣት አሻራ ሊከማች አይችልም። እባክዎ አሁን ያለውን የጣት አሻራ ያስወግዱ።"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"የጣት አሻራ ማብቂያ ጊዜ ደርሷል። እንደገና ይሞክሩ።"</string>
@@ -560,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"የፊት ማብቂያ ጊዜ ደርሷል። እንደገና ይሞክሩ።"</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"ፊት ሊከማች አይችልም።"</string>
     <string name="face_error_canceled" msgid="283945501061931023">"የፊት ሥርዓተ ክወና ተሰርዟል።"</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"ከልክ በላይ ብዙ ሙከራዎች። በኋላ ላይ እንደገና ይሞክሩ።"</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"በጣም ብዙ ሙከራዎች። የፊት ማረጋገጫ ተሰናክሏል።"</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"እንደገና ይሞክሩ።"</string>
@@ -868,7 +878,7 @@
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"በፊት መክፈት።"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"በፒን መክፈት።"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"የሲም ፒን ክፈት።"</string>
-    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"የሲም ፒዩኬ ክፈት።"</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"የሲም PUK ክፈት።"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"በይለፍ ቃል መክፈት።"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"የስርዓተ-ጥለት አካባቢ።"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"የማንሸራተቻ አካባቢ።"</string>
@@ -1582,7 +1592,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"ሲም ካርዱን በመክፈት ላይ…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"ትክክል ያልሆነ ፒን ኮድ።"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"ከ4 እስከ 8 ቁጥሮች የያዘ ፒን ይተይቡ።"</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"የፒዩኬ ኮድ 8 ቁጥሮች ነው መሆን ያለበት።"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"የPUK ኮድ 8 ቁጥሮች ነው መሆን ያለበት።"</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"ትክክለኛውን የPUK ኮድ እንደገና ያስገቡ። ተደጋጋሚ ሙከራዎች ሲም ካርዱን እስከመጨረሻው ያሰናክሉታል።"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"ፒን ኮዶች አይገጣጠሙም"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"በጣም ብዙ የስርዓተ ጥለት ሙከራዎች"</string>
@@ -1616,6 +1626,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"የቀለም ማስተካከያ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"የተደራሽነት አቋራጭ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ን አብርቶታል"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"የተደራሽነት አቋራጭ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ን አጥፍቶታል"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"አሁን ያለውን የተደራሽነት ባህሪ ለመጀመር እንደገና የተደራሽነት አቋራጭን ይጠቀሙ"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"የተደራሽነት አዝራርን መታ በሚያደርጉበት ጊዜ ጥቅም ላይ የሚውለውን ባህሪ ይምረጡ፦"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ባህሪያትን ለመለወጥ የተደራሽነት አዝራሩን ይንኩ እና ይያዙት።"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"ማጉላት"</string>

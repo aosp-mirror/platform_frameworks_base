@@ -1521,14 +1521,14 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
 
     /**
      * Check whether this task can be launched on the specified display.
+     *
      * @param displayId Target display id.
-     * @return {@code true} if either it is the default display or this activity is resizeable and
-     *         can be put a secondary screen.
+     * @return {@code true} if either it is the default display or this activity can be put on a
+     *         secondary display.
      */
     boolean canBeLaunchedOnDisplay(int displayId) {
         return mService.mStackSupervisor.canPlaceEntityOnDisplay(displayId,
-                isResizeable(false /* checkSupportsPip */), -1 /* don't check PID */,
-                -1 /* don't check UID */, null /* activityInfo */);
+                -1 /* don't check PID */, -1 /* don't check UID */, null /* activityInfo */);
     }
 
     /**

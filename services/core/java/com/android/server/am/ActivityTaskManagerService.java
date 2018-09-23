@@ -125,7 +125,11 @@ import android.app.IActivityController;
 import android.app.IActivityTaskManager;
 import android.app.IApplicationThread;
 import android.app.IAssistDataReceiver;
+import android.app.INotificationManager;
 import android.app.ITaskStackListener;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
 import android.app.ProfilerInfo;
 import android.app.RemoteAction;
@@ -145,11 +149,13 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -208,10 +214,13 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.KeyguardDismissCallback;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.LocalServices;
@@ -266,6 +275,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     ActivityManagerInternal mAmInternal;
     UriGrantsManagerInternal mUgmInternal;
     private PackageManagerInternal mPmInternal;
+    private ActivityTaskManagerInternal mInternal;
     /* Global service lock used by the package the owns this service. */
     Object mGlobalLock;
     ActivityStackSupervisor mStackSupervisor;
@@ -278,6 +288,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     final SparseArray<WindowProcessController> mPidMap = new SparseArray<>();
     /** This is the process holding what we currently consider to be the "home" activity. */
     WindowProcessController mHomeProcess;
+    /** The currently running heavy-weight process, if any. */
+    WindowProcessController mHeavyWeightProcess = null;
     /**
      * This is the process holding the activity the user last visited that is in a different process
      * from the one they are currently in.
@@ -475,6 +487,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private AppWarnings mAppWarnings;
 
+    /**
+     * Packages that the user has asked to have run in screen size
+     * compatibility mode instead of filling the screen.
+     */
+    CompatModePackages mCompatModePackages;
+
     private FontScaleSettingObserver mFontScaleSettingObserver;
 
     private final class FontScaleSettingObserver extends ContentObserver {
@@ -607,8 +625,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mGlobalLock = mAm;
         mH = new H(mAm.mHandlerThread.getLooper());
         mUiHandler = new UiHandler();
-        mAppWarnings = new AppWarnings(
-                this, mUiContext, mH, mUiHandler, SystemServiceManager.ensureSystemDir());
+        final File systemDir = SystemServiceManager.ensureSystemDir();
+        mAppWarnings = new AppWarnings(this, mUiContext, mH, mUiHandler, systemDir);
+        mCompatModePackages = new CompatModePackages(this, systemDir, mH);
 
         mTempConfig.setToDefaults();
         mTempConfig.setLocales(LocaleList.getDefault());
@@ -629,6 +648,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     void onActivityManagerInternalAdded() {
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
         mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
+    }
+
+    int increaseConfigurationSeqLocked() {
+        mConfigurationSeq = Math.max(++mConfigurationSeq, 1);
+        return mConfigurationSeq;
     }
 
     protected ActivityStackSupervisor createStackSupervisor() {
@@ -686,8 +710,49 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mLockTaskController;
     }
 
+    /**
+     * Return the global configuration used by the process corresponding to the input pid. This is
+     * usually the global configuration with some overrides specific to that process.
+     */
+    Configuration getGlobalConfigurationForCallingPid() {
+        final int pid = Binder.getCallingPid();
+        if (pid == MY_PID || pid < 0) {
+            return getGlobalConfiguration();
+        }
+        synchronized (mGlobalLock) {
+            final WindowProcessController app = mPidMap.get(pid);
+            return app != null ? app.getConfiguration() : getGlobalConfiguration();
+        }
+    }
+
+    /**
+     * Return the device configuration info used by the process corresponding to the input pid.
+     * The value is consistent with the global configuration for the process.
+     */
+    @Override
+    public ConfigurationInfo getDeviceConfigurationInfo() {
+        ConfigurationInfo config = new ConfigurationInfo();
+        synchronized (mGlobalLock) {
+            final Configuration globalConfig = getGlobalConfigurationForCallingPid();
+            config.reqTouchScreen = globalConfig.touchscreen;
+            config.reqKeyboardType = globalConfig.keyboard;
+            config.reqNavigation = globalConfig.navigation;
+            if (globalConfig.navigation == Configuration.NAVIGATION_DPAD
+                    || globalConfig.navigation == Configuration.NAVIGATION_TRACKBALL) {
+                config.reqInputFeatures |= ConfigurationInfo.INPUT_FEATURE_FIVE_WAY_NAV;
+            }
+            if (globalConfig.keyboard != Configuration.KEYBOARD_UNDEFINED
+                    && globalConfig.keyboard != Configuration.KEYBOARD_NOKEYS) {
+                config.reqInputFeatures |= ConfigurationInfo.INPUT_FEATURE_HARD_KEYBOARD;
+            }
+            config.reqGlEsVersion = mAm.GL_ES_VERSION;
+        }
+        return config;
+    }
+
     private void start() {
-        LocalServices.addService(ActivityTaskManagerInternal.class, new LocalService());
+        mInternal = new LocalService();
+        LocalServices.addService(ActivityTaskManagerInternal.class, mInternal);
     }
 
     public static final class Lifecycle extends SystemService {
@@ -1461,16 +1526,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public int getFrontActivityScreenCompatMode() {
         enforceNotIsolatedCaller("getFrontActivityScreenCompatMode");
-        ApplicationInfo ai;
         synchronized (mGlobalLock) {
             final ActivityRecord r = getTopDisplayFocusedStack().topRunningActivityLocked();
             if (r == null) {
                 return ActivityManager.COMPAT_MODE_UNKNOWN;
             }
-            ai = r.info.applicationInfo;
+            return mCompatModePackages.computeCompatModeLocked(r.info.applicationInfo);
         }
-
-        return mAmInternal.getPackageScreenCompatMode(ai);
     }
 
     @Override
@@ -1485,9 +1547,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 return;
             }
             ai = r.info.applicationInfo;
+            mCompatModePackages.setPackageScreenCompatModeLocked(ai, mode);
         }
-
-        mAmInternal.setPackageScreenCompatMode(ai, mode);
     }
 
     @Override
@@ -4112,7 +4173,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mVrController.shouldDisableNonVrUiLocked();
     }
 
-    void applyUpdateVrModeLocked(ActivityRecord r) {
+    private void applyUpdateVrModeLocked(ActivityRecord r) {
         // VR apps are expected to run in a main display. If an app is turning on VR for
         // itself, but lives in a dynamic stack, then make sure that it is moved to the main
         // fullscreen stack before enabling VR Mode.
@@ -4141,6 +4202,40 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
             }
         });
+    }
+
+    @Override
+    public int getPackageScreenCompatMode(String packageName) {
+        enforceNotIsolatedCaller("getPackageScreenCompatMode");
+        synchronized (mGlobalLock) {
+            return mCompatModePackages.getPackageScreenCompatModeLocked(packageName);
+        }
+    }
+
+    @Override
+    public void setPackageScreenCompatMode(String packageName, int mode) {
+        mAmInternal.enforceCallingPermission(android.Manifest.permission.SET_SCREEN_COMPATIBILITY,
+                "setPackageScreenCompatMode");
+        synchronized (mGlobalLock) {
+            mCompatModePackages.setPackageScreenCompatModeLocked(packageName, mode);
+        }
+    }
+
+    @Override
+    public boolean getPackageAskScreenCompat(String packageName) {
+        enforceNotIsolatedCaller("getPackageAskScreenCompat");
+        synchronized (mGlobalLock) {
+            return mCompatModePackages.getPackageAskCompatModeLocked(packageName);
+        }
+    }
+
+    @Override
+    public void setPackageAskScreenCompat(String packageName, boolean ask) {
+        mAmInternal.enforceCallingPermission(android.Manifest.permission.SET_SCREEN_COMPATIBILITY,
+                "setPackageAskScreenCompat");
+        synchronized (mGlobalLock) {
+            mCompatModePackages.setPackageAskCompatModeLocked(packageName, ask);
+        }
     }
 
     ActivityStack getTopDisplayFocusedStack() {
@@ -4215,7 +4310,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public Configuration getConfiguration() {
         Configuration ci;
         synchronized(mGlobalLock) {
-            ci = new Configuration(getGlobalConfiguration());
+            ci = new Configuration(getGlobalConfigurationForCallingPid());
             ci.userSetLocale = false;
         }
         return ci;
@@ -4371,8 +4466,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     locales.get(bestLocaleIndex)));
         }
 
-        mConfigurationSeq = Math.max(++mConfigurationSeq, 1);
-        mTempConfig.seq = mConfigurationSeq;
+        mTempConfig.seq = increaseConfigurationSeqLocked();
 
         // Update stored global config and notify everyone about the change.
         mStackSupervisor.onConfigurationChanged(mTempConfig);
@@ -4406,6 +4500,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mAm.mHandler.sendMessage(msg);
         }
 
+        // TODO: Consider using mPidMap to update configurations for processes.
         for (int i = mAm.mLruProcesses.size() - 1; i >= 0; i--) {
             ProcessRecord app = mAm.mLruProcesses.get(i);
             try {
@@ -4688,11 +4783,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mSleeping;
     }
 
-    /**
-     * Update AMS states when an activity is resumed. This should only be called by
-     * {@link ActivityStack#onActivityStateChanged(
-     * ActivityRecord, ActivityStack.ActivityState, String)} when an activity is resumed.
-     */
+    /** Update AMS states when an activity is resumed. */
     void setResumedActivityUncheckLocked(ActivityRecord r, String reason) {
         final TaskRecord task = r.getTask();
         if (task.isActivityTypeStandard()) {
@@ -4812,6 +4903,122 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mH.post(mAmInternal::updateOomAdj);
     }
 
+    void updateCpuStats() {
+        mH.post(mAmInternal::updateCpuStats);
+    }
+
+    void updateUsageStats(ActivityRecord component, boolean resumed) {
+        final Message m = PooledLambda.obtainMessage(ActivityManagerInternal::updateUsageStats,
+                mAmInternal, component.realActivity, component.app.mUid, component.userId, resumed);
+        mH.sendMessage(m);
+    }
+
+    void setBooting(boolean booting) {
+        mAmInternal.setBooting(booting);
+    }
+
+    boolean isBooting() {
+        return mAmInternal.isBooting();
+    }
+
+    void setBooted(boolean booted) {
+        mAmInternal.setBooted(booted);
+    }
+
+    boolean isBooted() {
+        return mAmInternal.isBooted();
+    }
+
+    void postFinishBooting(boolean finishBooting, boolean enableScreen) {
+        mH.post(() -> {
+            if (finishBooting) {
+                mAmInternal.finishBooting();
+            }
+            if (enableScreen) {
+                mInternal.enableScreenAfterBoot(isBooted());
+            }
+        });
+    }
+
+    void setHeavyWeightProcess(ActivityRecord root) {
+        mHeavyWeightProcess = root.app;
+        final Message m = PooledLambda.obtainMessage(
+                ActivityTaskManagerService::postHeavyWeightProcessNotification, this,
+                root.app, root.intent, root.userId);
+        mH.sendMessage(m);
+    }
+
+    void clearHeavyWeightProcessIfEquals(WindowProcessController proc) {
+        if (mHeavyWeightProcess == null || mHeavyWeightProcess != proc) {
+            return;
+        }
+
+        mHeavyWeightProcess = null;
+        final Message m = PooledLambda.obtainMessage(
+                ActivityTaskManagerService::cancelHeavyWeightProcessNotification, this,
+                proc.mUserId);
+        mH.sendMessage(m);
+    }
+
+    private void cancelHeavyWeightProcessNotification(int userId) {
+        final INotificationManager inm = NotificationManager.getService();
+        if (inm == null) {
+            return;
+        }
+        try {
+            inm.cancelNotificationWithTag("android", null,
+                    SystemMessage.NOTE_HEAVY_WEIGHT_NOTIFICATION, userId);
+        } catch (RuntimeException e) {
+            Slog.w(TAG, "Error canceling notification for service", e);
+        } catch (RemoteException e) {
+        }
+
+    }
+
+    private void postHeavyWeightProcessNotification(
+            WindowProcessController proc, Intent intent, int userId) {
+        if (proc == null) {
+            return;
+        }
+
+        final INotificationManager inm = NotificationManager.getService();
+        if (inm == null) {
+            return;
+        }
+
+        try {
+            Context context = mContext.createPackageContext(proc.mInfo.packageName, 0);
+            String text = mContext.getString(R.string.heavy_weight_notification,
+                    context.getApplicationInfo().loadLabel(context.getPackageManager()));
+            Notification notification =
+                    new Notification.Builder(context,
+                            SystemNotificationChannels.HEAVY_WEIGHT_APP)
+                            .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+                            .setWhen(0)
+                            .setOngoing(true)
+                            .setTicker(text)
+                            .setColor(mContext.getColor(
+                                    com.android.internal.R.color.system_notification_accent_color))
+                            .setContentTitle(text)
+                            .setContentText(
+                                    mContext.getText(R.string.heavy_weight_notification_detail))
+                            .setContentIntent(PendingIntent.getActivityAsUser(mContext, 0,
+                                    intent, PendingIntent.FLAG_CANCEL_CURRENT, null,
+                                    new UserHandle(userId)))
+                            .build();
+            try {
+                inm.enqueueNotificationWithTag("android", "android", null,
+                        SystemMessage.NOTE_HEAVY_WEIGHT_NOTIFICATION, notification, userId);
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Error showing notification for heavy-weight app", e);
+            } catch (RemoteException e) {
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.w(TAG, "Unable to create context for heavy notification", e);
+        }
+
+    }
+
     // TODO(b/111541062): Update app time tracking to make it aware of multiple resumed activities
     private void startTimeTrackingFocusedActivityLocked() {
         final ActivityRecord resumedActivity = mStackSupervisor.getTopResumedActivity();
@@ -4886,6 +5093,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     void scheduleAppGcsLocked() {
         mH.post(() -> mAmInternal.scheduleAppGcs());
+    }
+
+    CompatibilityInfo compatibilityInfoForPackageLocked(ApplicationInfo ai) {
+        return mCompatModePackages.compatibilityInfoForPackageLocked(ai);
     }
 
     /**
@@ -5274,6 +5485,28 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
+        public boolean isHeavyWeightProcess(WindowProcessController proc) {
+            synchronized (mGlobalLock) {
+                return proc == mHeavyWeightProcess;
+            }
+        }
+
+        @Override
+        public void clearHeavyWeightProcessIfEquals(WindowProcessController proc) {
+            synchronized (mGlobalLock) {
+                ActivityTaskManagerService.this.clearHeavyWeightProcessIfEquals(proc);
+            }
+        }
+
+        @Override
+        public void finishHeavyWeightApp() {
+            synchronized (mGlobalLock) {
+                ActivityTaskManagerService.this.clearHeavyWeightProcessIfEquals(
+                        mHeavyWeightProcess);
+            }
+        }
+
+        @Override
         public boolean isSleeping() {
             synchronized (mGlobalLock) {
                 return isSleepingLocked();
@@ -5382,6 +5615,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onPackageDataCleared(String name) {
             synchronized (mGlobalLock) {
+                mCompatModePackages.handlePackageDataClearedLocked(name);
                 mAppWarnings.onPackageDataCleared(name);
             }
         }
@@ -5390,7 +5624,65 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void onPackageUninstalled(String name) {
             synchronized (mGlobalLock) {
                 mAppWarnings.onPackageUninstalled(name);
+                mCompatModePackages.handlePackageUninstalledLocked(name);
             }
+        }
+
+        @Override
+        public void onPackageAdded(String name, boolean replacing) {
+            synchronized (mGlobalLock) {
+                mCompatModePackages.handlePackageAddedLocked(name, replacing);
+            }
+        }
+
+        @Override
+        public CompatibilityInfo compatibilityInfoForPackage(ApplicationInfo ai) {
+            synchronized (mGlobalLock) {
+                return compatibilityInfoForPackageLocked(ai);
+            }
+        }
+
+        /**
+         * Set the corresponding display information for the process global configuration. To be
+         * called when we need to show IME on a different display.
+         *
+         * @param pid The process id associated with the IME window.
+         * @param displayId The ID of the display showing the IME.
+         */
+        @Override
+        public void onImeWindowSetOnDisplay(int pid, int displayId) {
+            if (pid == MY_PID || pid < 0) {
+                if (DEBUG_CONFIGURATION) {
+                    Slog.w(TAG,
+                            "Trying to update display configuration for system/invalid process.");
+                }
+                return;
+            }
+            mH.post(() -> {
+                synchronized (mGlobalLock) {
+                    // Check if display is initialized in AM.
+                    if (!mStackSupervisor.isDisplayAdded(displayId)) {
+                        // Call come when display is not yet added or has already been removed.
+                        if (DEBUG_CONFIGURATION) {
+                            Slog.w(TAG, "Trying to update display configuration for non-existing "
+                                            + "displayId=" + displayId);
+                        }
+                        return;
+                    }
+                    final WindowProcessController imeProcess = mPidMap.get(pid);
+                    if (imeProcess == null) {
+                        if (DEBUG_CONFIGURATION) {
+                            Slog.w(TAG, "Trying to update display configuration for invalid pid: "
+                                            + pid);
+                        }
+                        return;
+                    }
+                    // Fetch the current override configuration of the display and set it to the
+                    // process global configuration.
+                    imeProcess.onConfigurationChanged(
+                            mStackSupervisor.getDisplayOverrideConfiguration(displayId));
+                }
+            });
         }
     }
 }

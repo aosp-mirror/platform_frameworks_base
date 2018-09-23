@@ -2234,6 +2234,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "--install-location":
                     sessionParams.installLocation = Integer.parseInt(getNextArg());
                     break;
+                case "--install-reason":
+                    sessionParams.installReason = Integer.parseInt(getNextArg());
+                    break;
                 case "--force-uuid":
                     sessionParams.installFlags |= PackageManager.INSTALL_FORCE_VOLUME_UUID;
                     sessionParams.volumeUuid = getNextArg();
@@ -2742,8 +2745,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  install [-lrtsfdg] [-i PACKAGE] [--user USER_ID|all|current]");
         pw.println("       [-p INHERIT_PACKAGE] [--install-location 0/1/2]");
-        pw.println("       [--originating-uri URI] [---referrer URI]");
-        pw.println("       [--abi ABI_NAME] [--force-sdk]");
+        pw.println("       [--install-reason 0/1/2/3/4] [--originating-uri URI]");
+        pw.println("       [--referrer URI] [--abi ABI_NAME] [--force-sdk]");
         pw.println("       [--preload] [--instantapp] [--full] [--dont-kill]");
         pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [-S BYTES] [PATH|-]");
         pw.println("    Install an application.  Must provide the apk data to install, either as a");
@@ -2768,14 +2771,17 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      --full: cause the app to be installed as a non-ephemeral full app");
         pw.println("      --install-location: force the install location:");
         pw.println("          0=auto, 1=internal only, 2=prefer external");
+        pw.println("      --install-reason: indicates why the app is being installed:");
+        pw.println("          0=unknown, 1=admin policy, 2=device restore,");
+        pw.println("          3=device setup, 4=user request");
         pw.println("      --force-uuid: force install on to disk volume with given UUID");
         pw.println("      --force-sdk: allow install even when existing app targets platform");
         pw.println("          codename but new one targets a final API level");
         pw.println("");
         pw.println("  install-create [-lrtsfdg] [-i PACKAGE] [--user USER_ID|all|current]");
         pw.println("       [-p INHERIT_PACKAGE] [--install-location 0/1/2]");
-        pw.println("       [--originating-uri URI] [---referrer URI]");
-        pw.println("       [--abi ABI_NAME] [--force-sdk]");
+        pw.println("       [--install-reason 0/1/2/3/4] [--originating-uri URI]");
+        pw.println("       [--referrer URI] [--abi ABI_NAME] [--force-sdk]");
         pw.println("       [--preload] [--instantapp] [--full] [--dont-kill]");
         pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [-S BYTES]");
         pw.println("    Like \"install\", but starts an install session.  Use \"install-write\"");

@@ -23,6 +23,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -34,10 +35,10 @@ public abstract class EnrollClient extends ClientMonitor {
     private final byte[] mCryptoToken;
     private final BiometricUtils mBiometricUtils;
 
-    public EnrollClient(Context context, Metrics metrics, BiometricService.DaemonWrapper daemon,
-            long halDeviceId, IBinder token, BiometricService.ServiceListener listener, int userId,
-            int groupId, byte[] cryptoToken, boolean restricted, String owner,
-            BiometricUtils utils) {
+    public EnrollClient(Context context, Metrics metrics,
+            BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
+            BiometricServiceBase.ServiceListener listener, int userId, int groupId,
+            byte[] cryptoToken, boolean restricted, String owner, BiometricUtils utils) {
         super(context, metrics, daemon, halDeviceId, token, listener, userId, groupId, restricted,
                 owner);
         mBiometricUtils = utils;
@@ -126,7 +127,7 @@ public abstract class EnrollClient extends ClientMonitor {
 
     @Override
     public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
-            boolean authenticated) {
+            boolean authenticated, ArrayList<Byte> token) {
         if (DEBUG) Slog.w(getLogTag(), "onAuthenticated() called for enroll!");
         return true; // Invalid for EnrollClient
     }

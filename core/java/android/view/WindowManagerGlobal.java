@@ -196,7 +196,11 @@ public final class WindowManagerGlobal {
         synchronized (WindowManagerGlobal.class) {
             if (sWindowSession == null) {
                 try {
-                    InputMethodManager imm = InputMethodManager.getInstance();
+                    if (InputMethodManager.ENABLE_LEGACY_EAGER_INITIALIZATION) {
+                        // Emulate the legacy behavior.  The global instance of InputMethodManager
+                        // was instantiated here.
+                        InputMethodManager.getInstance();
+                    }
                     IWindowManager windowManager = getWindowManagerService();
                     sWindowSession = windowManager.openSession(
                             new IWindowSessionCallback.Stub() {
@@ -204,8 +208,7 @@ public final class WindowManagerGlobal {
                                 public void onAnimatorScaleChanged(float scale) {
                                     ValueAnimator.setDurationScale(scale);
                                 }
-                            },
-                            imm.getClient(), imm.getInputContext());
+                            });
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }

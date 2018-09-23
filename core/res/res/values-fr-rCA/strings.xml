@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Une erreur s\'est produite lors de l\'enregistrement des appels Wi-Fi avec votre fournisseur de services : <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Appels Wi-Fi %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Appels Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Appel WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Appel WLAN <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Appels Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"Voix par Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Désactivé"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Réseau Wi-Fi de préférence"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Connexion cellulaire de préférence"</string>
@@ -524,6 +528,10 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Données biométriques non reconnues"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Empreinte digitale authentifiée"</string>
+    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
+    <skip />
+    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Matériel d\'empreinte numérique indisponible."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"L\'empreinte digitale ne peut pas être enregistrée. Veuillez supprimer une empreinte existante."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Le temps attribué pour lire l\'empreinte est écoulé. Veuillez essayer de nouveau."</string>
@@ -560,6 +568,8 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Temps de reconn. visage écoulé. Veuillez réessayer."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Impossible de stocker le visage."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Opération de reconnaissance du visage annulée."</string>
+    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Trop de tentatives. Veuillez réessayer plus tard."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Trop de tentatives. Capt. reconn. visage désactivé."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Réessayez."</string>
@@ -1616,6 +1626,7 @@
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Correction des couleurs"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Le raccourci d\'accessibilité a activé la fonction <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Le raccourci d\'accessibilité a désactivé la fonction <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="6143872712930414829">"Utilisez à nouveau le raccourci d\'accessibilité pour démarrer la fonctionnalité d\'accessibilité actuelle"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Choisissez une fonctionnalité à utiliser lorsque vous touchez le bouton d\'accessibilité :"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Pour changer des fonctionnalités, maintenez le doigt sur le bouton d\'accessibilité."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Zoom"</string>

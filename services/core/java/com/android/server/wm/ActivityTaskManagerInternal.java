@@ -23,12 +23,13 @@ import android.app.IActivityManager;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.res.CompatibilityInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.SparseIntArray;
-import android.view.RemoteAnimationAdapter;
 
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.WindowProcessController;
@@ -267,6 +268,9 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void onProcessRemoved(String name, int uid);
     public abstract void onCleanUpApplicationRecord(WindowProcessController proc);
     public abstract int getTopProcessState();
+    public abstract boolean isHeavyWeightProcess(WindowProcessController proc);
+    public abstract void clearHeavyWeightProcessIfEquals(WindowProcessController proc);
+    public abstract void finishHeavyWeightApp();
 
     public abstract boolean isSleeping();
     public abstract boolean isShuttingDown();
@@ -281,4 +285,16 @@ public abstract class ActivityTaskManagerInternal {
 
     public abstract void onPackageDataCleared(String name);
     public abstract void onPackageUninstalled(String name);
+    public abstract void onPackageAdded(String name, boolean replacing);
+
+    public abstract CompatibilityInfo compatibilityInfoForPackage(ApplicationInfo ai);
+
+    /**
+     * Set the corresponding display information for the process global configuration. To be called
+     * when we need to show IME on a different display.
+     *
+     * @param pid The process id associated with the IME window.
+     * @param displayId The ID of the display showing the IME.
+     */
+    public abstract void onImeWindowSetOnDisplay(int pid, int displayId);
 }
