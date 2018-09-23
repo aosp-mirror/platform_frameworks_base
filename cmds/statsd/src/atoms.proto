@@ -753,6 +753,9 @@ message WakeupAlarmOccurred {
 
     // Name of the wakeup alarm.
     optional string tag = 2;
+
+    // Name of source package (for historical reasons, since BatteryStats tracked it).
+    optional string package_name = 3;
 }
 
 /**
