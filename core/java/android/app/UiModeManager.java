@@ -234,7 +234,7 @@ public class UiModeManager {
      * Changes to night mode take effect globally and will result in a configuration change
      * (and potentially an Activity lifecycle event) being applied to all running apps.
      * Developers interested in an app-local implementation of night mode should consider using
-     * {@link androidx.appcompat.app.AppCompatDelegate#setDefaultNightMode(int)} to manage the
+     * {@link android.support.v7.app.AppCompatDelegate#setDefaultNightMode(int)} to manage the
      * -night qualifier locally.
      *
      * @param mode the night mode to set
