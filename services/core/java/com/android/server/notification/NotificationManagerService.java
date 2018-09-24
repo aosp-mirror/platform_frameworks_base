@@ -2391,7 +2391,7 @@ public class NotificationManagerService extends SystemService {
                 String pkg) {
             checkCallerIsSystemOrSameApp(pkg);
             return mPreferencesHelper.getNotificationChannelGroups(
-                    pkg, Binder.getCallingUid(), false, false);
+                    pkg, Binder.getCallingUid(), false, false, true);
         }
 
         @Override
@@ -2467,7 +2467,8 @@ public class NotificationManagerService extends SystemService {
         public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroupsForPackage(
                 String pkg, int uid, boolean includeDeleted) {
             checkCallerIsSystem();
-            return mPreferencesHelper.getNotificationChannelGroups(pkg, uid, includeDeleted, true);
+            return mPreferencesHelper.getNotificationChannelGroups(
+                    pkg, uid, includeDeleted, true, false);
         }
 
         @Override

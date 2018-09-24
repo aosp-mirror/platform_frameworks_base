@@ -755,7 +755,7 @@ public class PreferencesHelper implements RankingConfig {
 
     @Override
     public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
-            int uid, boolean includeDeleted, boolean includeNonGrouped) {
+            int uid, boolean includeDeleted, boolean includeNonGrouped, boolean includeEmpty) {
         Preconditions.checkNotNull(pkg);
         Map<String, NotificationChannelGroup> groups = new ArrayMap<>();
         PackagePreferences r = getPackagePreferences(pkg, uid);
@@ -785,6 +785,13 @@ public class PreferencesHelper implements RankingConfig {
         }
         if (includeNonGrouped && nonGrouped.getChannels().size() > 0) {
             groups.put(null, nonGrouped);
+        }
+        if (includeEmpty) {
+            for (NotificationChannelGroup group : r.groups.values()) {
+                if (!groups.containsKey(group.getId())) {
+                    groups.put(group.getId(), group);
+                }
+            }
         }
         return new ParceledListSlice<>(new ArrayList<>(groups.values()));
     }
