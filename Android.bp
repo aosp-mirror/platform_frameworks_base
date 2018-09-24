@@ -77,6 +77,7 @@ java_defaults {
         "core/java/android/app/ISearchManager.aidl",
         "core/java/android/app/ISearchManagerCallback.aidl",
         "core/java/android/app/IServiceConnection.aidl",
+        "core/java/android/app/ISmsAppService.aidl",
         "core/java/android/app/IStopUserCallback.aidl",
         "core/java/android/app/job/IJobCallback.aidl",
         "core/java/android/app/job/IJobScheduler.aidl",
