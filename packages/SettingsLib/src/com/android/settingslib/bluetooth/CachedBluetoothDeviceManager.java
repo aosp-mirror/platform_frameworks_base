@@ -285,11 +285,6 @@ public class CachedBluetoothDeviceManager {
                     {
                         mCachedDevicesMapForHearingAids.remove(cachedDevice.getHiSyncId());
                     }
-                } else {
-                    // For bonded devices, we need to clear the connection status so that
-                    // when BT is enabled next time, device connection status shall be retrieved
-                    // by making a binder call.
-                    cachedDevice.clearProfileConnectionState();
                 }
             }
             for (int i = mHearingAidDevicesNotAddedInCache.size() - 1; i >= 0; i--) {
@@ -297,11 +292,6 @@ public class CachedBluetoothDeviceManager {
                 if (notCachedDevice.getBondState() != BluetoothDevice.BOND_BONDED) {
                     notCachedDevice.setJustDiscovered(false);
                     mHearingAidDevicesNotAddedInCache.remove(i);
-                } else {
-                    // For bonded devices, we need to clear the connection status so that
-                    // when BT is enabled next time, device connection status shall be retrieved
-                    // by making a binder call.
-                    notCachedDevice.clearProfileConnectionState();
                 }
             }
         }

@@ -118,7 +118,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify addDevice().
      */
     @Test
-    public void testAddDevice_validCachedDevices_devicesAdded() {
+    public void addDevice_validCachedDevices_devicesAdded() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
@@ -136,7 +136,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify getName().
      */
     @Test
-    public void testGetName_validCachedDevice_nameFound() {
+    public void getName_validCachedDevice_nameFound() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         assertThat(mCachedDeviceManager.getName(mDevice1)).isEqualTo(DEVICE_ALIAS_1);
@@ -146,7 +146,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify onDeviceNameUpdated().
      */
     @Test
-    public void testOnDeviceNameUpdated_validName_nameUpdated() {
+    public void onDeviceNameUpdated_validName_nameUpdated() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         assertThat(cachedDevice1.getName()).isEqualTo(DEVICE_ALIAS_1);
@@ -161,7 +161,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify clearNonBondedDevices().
      */
     @Test
-    public void testClearNonBondedDevices_bondedAndNonBondedDevices_nonBondedDevicesCleared() {
+    public void clearNonBondedDevices_bondedAndNonBondedDevices_nonBondedDevicesCleared() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
@@ -193,7 +193,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify clearNonBondedDevices() for hearing aids.
      */
     @Test
-    public void testClearNonBondedDevices_HearingAids_nonBondedHAsClearedFromCachedDevicesMap() {
+    public void clearNonBondedDevices_HearingAids_nonBondedHAsClearedFromCachedDevicesMap() {
         when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
         when(mDevice2.getBondState()).thenReturn(BluetoothDevice.BOND_NONE);
 
@@ -214,7 +214,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify onHiSyncIdChanged() for hearing aid devices with same HiSyncId.
      */
     @Test
-    public void testOnHiSyncIdChanged_sameHiSyncId_populateInDifferentLists() {
+    public void onHiSyncIdChanged_sameHiSyncId_populateInDifferentLists() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
@@ -247,7 +247,7 @@ public class CachedBluetoothDeviceManagerTest {
      * device is connected and other is disconnected. The connected device should be chosen.
      */
     @Test
-    public void testOnHiSyncIdChanged_sameHiSyncIdAndOneConnected_chooseConnectedDevice() {
+    public void onHiSyncIdChanged_sameHiSyncIdAndOneConnected_chooseConnectedDevice() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
@@ -282,7 +282,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify onHiSyncIdChanged() for hearing aid devices with different HiSyncId.
      */
     @Test
-    public void testOnHiSyncIdChanged_differentHiSyncId_populateInSameList() {
+    public void onHiSyncIdChanged_differentHiSyncId_populateInSameList() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
@@ -316,7 +316,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify onProfileConnectionStateChanged() for single hearing aid device connection.
      */
     @Test
-    public void testOnProfileConnectionStateChanged_singleDeviceConnected_visible() {
+    public void onProfileConnectionStateChanged_singleDeviceConnected_visible() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         cachedDevice1.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
@@ -353,7 +353,7 @@ public class CachedBluetoothDeviceManagerTest {
      * devices are disconnected and they get connected.
      */
     @Test
-    public void testOnProfileConnectionStateChanged_twoDevicesConnected_oneDeviceVisible() {
+    public void onProfileConnectionStateChanged_twoDevicesConnected_oneDeviceVisible() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
@@ -405,7 +405,7 @@ public class CachedBluetoothDeviceManagerTest {
      * devices are connected and they get disconnected.
      */
     @Test
-    public void testOnProfileConnectionStateChanged_twoDevicesDisconnected_oneDeviceVisible() {
+    public void onProfileConnectionStateChanged_twoDevicesDisconnected_oneDeviceVisible() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
@@ -458,7 +458,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify OnDeviceUnpaired() for a paired hearing Aid device pair.
      */
     @Test
-    public void testOnDeviceUnpaired_bothHearingAidsPaired_removesItsPairFromList() {
+    public void onDeviceUnpaired_bothHearingAidsPaired_removesItsPairFromList() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
@@ -488,7 +488,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify OnDeviceUnpaired() for paired hearing Aid devices which are not a pair.
      */
     @Test
-    public void testOnDeviceUnpaired_bothHearingAidsNotPaired_doesNotRemoveAnyDeviceFromList() {
+    public void onDeviceUnpaired_bothHearingAidsNotPaired_doesNotRemoveAnyDeviceFromList() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
@@ -532,7 +532,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify addDevice() for hearing aid devices with same HiSyncId.
      */
     @Test
-    public void testAddDevice_hearingAidDevicesWithSameHiSyncId_populateInDifferentLists() {
+    public void addDevice_hearingAidDevicesWithSameHiSyncId_populateInDifferentLists() {
         doAnswer((invocation) -> mHearingAidProfile).when(mLocalProfileManager)
             .getHearingAidProfile();
         doAnswer((invocation) -> HISYNCID1).when(mHearingAidProfile).getHiSyncId(mDevice1);
@@ -560,7 +560,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify addDevice() for hearing aid devices with different HiSyncId.
      */
     @Test
-    public void testAddDevice_hearingAidDevicesWithDifferentHiSyncId_populateInSameList() {
+    public void addDevice_hearingAidDevicesWithDifferentHiSyncId_populateInSameList() {
         doAnswer((invocation) -> mHearingAidProfile).when(mLocalProfileManager)
             .getHearingAidProfile();
         doAnswer((invocation) -> HISYNCID1).when(mHearingAidProfile).getHiSyncId(mDevice1);
@@ -592,7 +592,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify getHearingAidPairDeviceSummary() for hearing aid devices with same HiSyncId.
      */
     @Test
-    public void testGetHearingAidPairDeviceSummary_bothHearingAidsPaired_returnsSummaryOfPair() {
+    public void getHearingAidPairDeviceSummary_bothHearingAidsPaired_returnsSummaryOfPair() {
         mCachedDevice1.setHiSyncId(HISYNCID1);
         mCachedDevice2.setHiSyncId(HISYNCID1);
         mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
@@ -609,7 +609,7 @@ public class CachedBluetoothDeviceManagerTest {
      * HiSyncId.
      */
     @Test
-    public void testGetHearingAidPairDeviceSummary_bothHearingAidsNotPaired_returnsNull() {
+    public void getHearingAidPairDeviceSummary_bothHearingAidsNotPaired_returnsNull() {
         mCachedDevice1.setHiSyncId(HISYNCID1);
         mCachedDevice2.setHiSyncId(HISYNCID2);
         mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
@@ -625,7 +625,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify updateHearingAidsDevices().
      */
     @Test
-    public void testUpdateHearingAidDevices_hiSyncIdAvailable_setsHiSyncId() {
+    public void updateHearingAidDevices_hiSyncIdAvailable_setsHiSyncId() {
         doAnswer((invocation) -> mHearingAidProfile).when(mLocalProfileManager)
             .getHearingAidProfile();
         doAnswer((invocation) -> HISYNCID1).when(mHearingAidProfile).getHiSyncId(mDevice1);
@@ -643,7 +643,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify onBtClassChanged().
      */
     @Test
-    public void testOnBtClassChanged_validBtClass_classChanged() {
+    public void onBtClassChanged_validBtClass_classChanged() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         assertThat(cachedDevice1.getBtClass()).isEqualTo(DEVICE_CLASS_1);
@@ -658,7 +658,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify onDeviceDisappeared().
      */
     @Test
-    public void testOnDeviceDisappeared_deviceBondedUnbonded_unbondedDeviceDisappeared() {
+    public void onDeviceDisappeared_deviceBondedUnbonded_unbondedDeviceDisappeared() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
 
@@ -673,7 +673,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify onActiveDeviceChanged().
      */
     @Test
-    public void testOnActiveDeviceChanged_connectedDevices_activeDeviceChanged() {
+    public void onActiveDeviceChanged_connectedDevices_activeDeviceChanged() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
@@ -736,7 +736,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify onActiveDeviceChanged() with A2DP and Hearing Aid.
      */
     @Test
-    public void testOnActiveDeviceChanged_withA2dpAndHearingAid() {
+    public void onActiveDeviceChanged_withA2dpAndHearingAid() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         assertThat(cachedDevice1).isNotNull();
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
