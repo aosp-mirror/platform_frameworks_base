@@ -1884,6 +1884,27 @@ public class TelecomManager {
         }
     }
 
+    /**
+     * Determines if there is an ongoing emergency call.  This can be either an outgoing emergency
+     * call, as identified by the dialed number, or because a call was identified by the network
+     * as an emergency call.
+     * @return {@code true} if there is an ongoing emergency call, {@code false} otherwise.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean isInEmergencyCall() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecomService().isInEmergencyCall();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException isInEmergencyCall: " + e);
+            return false;
+        }
+        return false;
+    }
+
     private ITelecomService getTelecomService() {
         if (mTelecomServiceOverride != null) {
             return mTelecomServiceOverride;
