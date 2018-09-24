@@ -24,7 +24,6 @@ import android.graphics.Matrix;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.drawable.AnimatedVectorDrawable;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -148,12 +147,12 @@ public class RenderNode {
      * @hide
      */
     final long mNativeRenderNode;
-    private final View mOwningView;
+    private final AnimationHost mAnimationHost;
 
-    private RenderNode(String name, View owningView) {
+    private RenderNode(String name, AnimationHost animationHost) {
         mNativeRenderNode = nCreate(name);
         NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativeRenderNode);
-        mOwningView = owningView;
+        mAnimationHost = animationHost;
     }
 
     /**
@@ -162,7 +161,7 @@ public class RenderNode {
     private RenderNode(long nativePtr) {
         mNativeRenderNode = nativePtr;
         NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativeRenderNode);
-        mOwningView = null;
+        mAnimationHost = null;
     }
 
     /**
@@ -174,8 +173,8 @@ public class RenderNode {
      * @return A new RenderNode.
      */
     @UnsupportedAppUsage
-    public static RenderNode create(String name, @Nullable View owningView) {
-        return new RenderNode(name, owningView);
+    public static RenderNode create(String name, @Nullable AnimationHost animationHost) {
+        return new RenderNode(name, animationHost);
     }
 
     /**
@@ -189,10 +188,37 @@ public class RenderNode {
     }
 
     /**
+     * Listens for RenderNode position updates for synchronous window movement.
+     *
+     * This is not suitable for generic position listening, it is only designed & intended
+     * for use by things which require external position events like SurfaceView, PopupWindow, etc..
+     *
+     * @hide
+     */
+    interface PositionUpdateListener {
+
+        /**
+         * Called by native by a Rendering Worker thread to update window position
+         *
+         * @hide
+         */
+        void positionChanged(long frameNumber, int left, int top, int right, int bottom);
+
+        /**
+         * Called by native on RenderThread to notify that the view is no longer in the
+         * draw tree. UI thread is blocked at this point.
+         *
+         * @hide
+         */
+        void positionLost(long frameNumber);
+
+    }
+
+    /**
      * Enable callbacks for position changes.
      */
-    public void requestPositionUpdates(SurfaceView view) {
-        nRequestPositionUpdates(mNativeRenderNode, view);
+    public void requestPositionUpdates(PositionUpdateListener listener) {
+        nRequestPositionUpdates(mNativeRenderNode, listener);
     }
 
 
@@ -873,26 +899,42 @@ public class RenderNode {
     // Animations
     ///////////////////////////////////////////////////////////////////////////
 
+    /**
+     * TODO: Figure out if this can be eliminated/refactored away
+     *
+     * For now this interface exists to de-couple RenderNode from anything View-specific in a
+     * bit of a kludge.
+     *
+     * @hide */
+    interface AnimationHost {
+        void registerAnimatingRenderNode(RenderNode animator);
+        void registerVectorDrawableAnimator(NativeVectorDrawableAnimator animator);
+        boolean isAttached();
+    }
+
+    /** @hide */
     public void addAnimator(RenderNodeAnimator animator) {
-        if (mOwningView == null || mOwningView.mAttachInfo == null) {
+        if (!isAttached()) {
             throw new IllegalStateException("Cannot start this animator on a detached view!");
         }
         nAddAnimator(mNativeRenderNode, animator.getNativeAnimator());
-        mOwningView.mAttachInfo.mViewRootImpl.registerAnimatingRenderNode(this);
+        mAnimationHost.registerAnimatingRenderNode(this);
     }
 
+    /** @hide */
     public boolean isAttached() {
-        return mOwningView != null && mOwningView.mAttachInfo != null;
+        return mAnimationHost != null && mAnimationHost.isAttached();
     }
 
-    public void registerVectorDrawableAnimator(
-            AnimatedVectorDrawable.VectorDrawableAnimatorRT animatorSet) {
-        if (mOwningView == null || mOwningView.mAttachInfo == null) {
+    /** @hide */
+    public void registerVectorDrawableAnimator(NativeVectorDrawableAnimator animatorSet) {
+        if (!isAttached()) {
             throw new IllegalStateException("Cannot start this animator on a detached view!");
         }
-        mOwningView.mAttachInfo.mViewRootImpl.registerVectorDrawableAnimator(animatorSet);
+        mAnimationHost.registerVectorDrawableAnimator(animatorSet);
     }
 
+    /** @hide */
     public void endAllAnimators() {
         nEndAllAnimators(mNativeRenderNode);
     }
@@ -906,7 +948,8 @@ public class RenderNode {
     private static native long nGetNativeFinalizer();
     private static native void nOutput(long renderNode);
     private static native int nGetDebugSize(long renderNode);
-    private static native void nRequestPositionUpdates(long renderNode, SurfaceView callback);
+    private static native void nRequestPositionUpdates(long renderNode,
+            PositionUpdateListener callback);
 
     // Animations
 

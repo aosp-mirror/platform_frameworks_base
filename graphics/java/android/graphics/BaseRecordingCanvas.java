@@ -14,25 +14,12 @@
  * limitations under the License.
  */
 
-package android.view;
+package android.graphics;
 
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
-import android.graphics.BaseCanvas;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Matrix;
-import android.graphics.NinePatch;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.Picture;
-import android.graphics.PorterDuff;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.graphics.TemporaryBuffer;
 import android.text.GraphicsOperations;
 import android.text.MeasuredParagraph;
 import android.text.PrecomputedText;
@@ -49,9 +36,9 @@ import dalvik.annotation.optimization.FastNative;
  *
  * @hide
  */
-public class RecordingCanvas extends Canvas {
+public class BaseRecordingCanvas extends Canvas {
 
-    public RecordingCanvas(long nativeCanvas) {
+    public BaseRecordingCanvas(long nativeCanvas) {
         super(nativeCanvas);
     }
 
