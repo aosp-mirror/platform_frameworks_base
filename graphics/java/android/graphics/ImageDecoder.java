@@ -187,7 +187,7 @@ public final class ImageDecoder implements AutoCloseable {
      *  {@link OnHeaderDecodedListener OnHeaderDecodedListener} and once with an
      *  implementation of {@link OnHeaderDecodedListener#onHeaderDecoded onHeaderDecoded}
      *  that calls {@link #setTargetSize} with smaller dimensions. One {@code Source}
-     *  even used simultaneously in multiple threads.</p>
+     *  can even be used simultaneously in multiple threads.</p>
      */
     public static abstract class Source {
         private Source() {}
