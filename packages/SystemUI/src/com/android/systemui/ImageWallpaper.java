@@ -256,12 +256,6 @@ public class ImageWallpaper extends WallpaperService {
                 Log.d(TAG, "onSurfaceRedrawNeeded");
             }
             super.onSurfaceRedrawNeeded(holder);
-            // At the end of this method we should have drawn into the surface.
-            // This means that the bitmap should be loaded synchronously if
-            // it was already unloaded.
-            if (mBackground == null) {
-                updateBitmap(mWallpaperManager.getBitmap(true /* hardware */));
-            }
             mSurfaceRedrawNeeded = true;
             drawFrame();
         }
