@@ -255,7 +255,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         ActivityStarter, OnUnlockMethodChangedListener,
         OnHeadsUpChangedListener, CommandQueue.Callbacks, ZenModeController.Callback,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener, NotificationPresenter,
-        StatusBarStateController.StateListener,  AmbientPulseManager.OnAmbientChangedListener {
+        StatusBarStateController.StateListener,  AmbientPulseManager.OnAmbientChangedListener,
+        ActivityLaunchAnimator.Callback {
     public static final boolean MULTIUSER_DEBUG = false;
 
     public static final boolean ENABLE_CHILD_NOTIFICATIONS
@@ -1906,6 +1907,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
+    @Override
     public void onLaunchAnimationCancelled() {
         if (!isCollapsing()) {
             onClosingFinished();
@@ -1914,6 +1916,31 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public boolean isHeadsUpShouldBeVisible() {
         return mHeadsUpAppearanceController.shouldBeVisible();
+    }
+
+    @Override
+    public void onExpandAnimationFinished(boolean launchIsFullScreen) {
+        if (!isCollapsing()) {
+            onClosingFinished();
+        }
+        if (launchIsFullScreen) {
+            instantCollapseNotificationPanel();
+        }
+    }
+
+    @Override
+    public void onExpandAnimationTimedOut() {
+        if (isPresenterFullyCollapsed() && !isCollapsing()
+                && !mActivityLaunchAnimator.isLaunchForActivity()) {
+            onClosingFinished();
+        } else {
+            collapsePanel(true /* animate */);
+        }
+    }
+
+    @Override
+    public boolean areLaunchAnimationsEnabled() {
+        return mState == StatusBarState.SHADE;
     }
 
     /**
@@ -3353,7 +3380,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public boolean isCollapsing() {
-        return mNotificationPanel.isCollapsing() || mActivityLaunchAnimator.isAnimationPending();
+        return mNotificationPanel.isCollapsing()
+                || mActivityLaunchAnimator.isAnimationPending()
+                || mActivityLaunchAnimator.isAnimationRunning();
     }
 
     public void addPostCollapseAction(Runnable r) {
@@ -4738,7 +4767,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 : notification.fullScreenIntent;
         final String notificationKey = sbn.getKey();
 
-        final boolean afterKeyguardGone = intent.isActivity()
+        boolean isActivityIntent = intent.isActivity();
+        final boolean afterKeyguardGone = isActivityIntent
                 && PreviewInflater.wouldLaunchResolverActivity(mContext, intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
         final boolean wasOccluded = mIsOccluded;
@@ -4779,7 +4809,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     // If we are launching a work activity and require to launch
                     // separate work challenge, we defer the activity action and cancel
                     // notification until work challenge is unlocked.
-                    if (intent.isActivity()) {
+                    if (isActivityIntent) {
                         final int userId = intent.getCreatorUserHandle().getIdentifier();
                         if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)
                                 && mKeyguardManager.isDeviceLocked(userId)) {
@@ -4815,7 +4845,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         }
                         launchResult = intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
                                 null, null, getActivityOptions(adapter));
-                        mActivityLaunchAnimator.setLaunchResult(launchResult);
+                        mActivityLaunchAnimator.setLaunchResult(launchResult, isActivityIntent);
                     } catch (RemoteException | PendingIntent.CanceledException e) {
                         // the stack trace isn't very helpful here.
                         // Just log the exception message.
@@ -4823,7 +4853,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
                         // TODO: Dismiss Keyguard.
                     }
-                    if (intent.isActivity()) {
+                    if (isActivityIntent) {
                         mAssistManager.hideAssist();
                     }
                 }
@@ -4942,7 +4972,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         .startActivities(getActivityOptions(
                                 mActivityLaunchAnimator.getLaunchAnimation(row, mIsOccluded)),
                                 new UserHandle(UserHandle.getUserId(appUid)));
-                mActivityLaunchAnimator.setLaunchResult(launchResult);
+                mActivityLaunchAnimator.setLaunchResult(launchResult, true /* isActivityIntent */);
                 if (shouldCollapse()) {
                     // Putting it back on the main thread, since we're touching views
                     mStatusBarWindow.post(() -> animateCollapsePanels(
