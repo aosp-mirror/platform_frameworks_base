@@ -44,6 +44,7 @@ import java.util.zip.ZipOutputStream;
 
 import libcore.io.Streams;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ChooserActivity;
 import com.android.internal.logging.MetricsLogger;
@@ -234,6 +235,7 @@ public class BugreportProgressService extends Service {
      */
     private boolean mTakingScreenshot;
 
+    @GuardedBy("sNotificationBundle")
     private static final Bundle sNotificationBundle = new Bundle();
 
     private boolean mIsWatch;
@@ -1059,10 +1061,12 @@ public class BugreportProgressService extends Service {
     }
 
     private static Notification.Builder newBaseNotification(Context context) {
-        if (sNotificationBundle.isEmpty()) {
-            // Rename notifcations from "Shell" to "Android System"
-            sNotificationBundle.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
-                    context.getString(com.android.internal.R.string.android_system_label));
+        synchronized (sNotificationBundle) {
+            if (sNotificationBundle.isEmpty()) {
+                // Rename notifcations from "Shell" to "Android System"
+                sNotificationBundle.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
+                        context.getString(com.android.internal.R.string.android_system_label));
+            }
         }
         return new Notification.Builder(context, NOTIFICATION_CHANNEL_ID)
                 .addExtras(sNotificationBundle)
