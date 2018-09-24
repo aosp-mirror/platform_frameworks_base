@@ -144,8 +144,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private Configuration mConfiguration;
 
     private NavigationBarInflaterView mNavigationInflaterView;
-    private RecentsComponent mRecentsComponent;
-    private Divider mDivider;
     private RecentsOnboarding mRecentsOnboarding;
     private NotificationPanelView mPanelView;
 
@@ -314,14 +312,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         return mBarTransitions.getLightTransitionsController();
     }
 
-    public void setComponents(RecentsComponent recentsComponent, Divider divider,
-            NotificationPanelView panel) {
-        mRecentsComponent = recentsComponent;
-        mDivider = divider;
+    public void setComponents(NotificationPanelView panel) {
         mPanelView = panel;
         if (mGestureHelper instanceof NavigationBarGestureHelper) {
-            ((NavigationBarGestureHelper) mGestureHelper).setComponents(
-                    recentsComponent, divider, this);
+            ((NavigationBarGestureHelper) mGestureHelper).setComponents(this);
         }
     }
 
@@ -1078,7 +1072,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     @Override
     public void onPluginDisconnected(NavGesture plugin) {
         NavigationBarGestureHelper defaultHelper = new NavigationBarGestureHelper(getContext());
-        defaultHelper.setComponents(mRecentsComponent, mDivider, this);
+        defaultHelper.setComponents(this);
         if (mGestureHelper != null) {
             mGestureHelper.destroy();
         }

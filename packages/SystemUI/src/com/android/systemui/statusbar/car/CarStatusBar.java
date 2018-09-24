@@ -36,8 +36,8 @@ import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.car.hvac.HvacController;
 import com.android.systemui.statusbar.car.hvac.TemperatureView;
@@ -461,16 +461,11 @@ public class CarStatusBar extends StatusBar implements
         }
     }
 
-
-    public boolean hasDockedTask() {
-        return Recents.getSystemServices().hasDockedTask();
-    }
-
     /**
-     * An implementation of SysUiTaskStackChangeListener, that listens for changes in the system
+     * An implementation of TaskStackChangeListener, that listens for changes in the system
      * task stack and notifies the navigation bar.
      */
-    private class TaskStackListenerImpl extends SysUiTaskStackChangeListener {
+    private class TaskStackListenerImpl extends TaskStackChangeListener {
         @Override
         public void onTaskStackChanged() {
             try {

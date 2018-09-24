@@ -49,6 +49,7 @@ import android.widget.Toast;
 import com.android.systemui.Dependency;
 import com.android.systemui.OverviewProxyService;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.pip.phone.ForegroundThread;
 import com.google.android.collect.Lists;
 
 import com.android.internal.logging.MetricsLogger;
@@ -72,7 +73,6 @@ import com.android.systemui.recents.events.ui.DraggingInRecentsEndedEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEvent;
 import com.android.systemui.recents.events.ui.TaskSnapshotChangedEvent;
 import com.android.systemui.recents.misc.DozeTrigger;
-import com.android.systemui.recents.misc.ForegroundThread;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.shared.recents.model.RecentsTaskLoadPlan;
@@ -690,14 +690,13 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         showRelativeAffiliatedTask(false);
     }
 
-    public void splitPrimaryTask(int taskId, int dragMode, int stackCreateMode,
-            Rect initialBounds) {
+    public void splitPrimaryTask(int taskId, int stackCreateMode, Rect initialBounds) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Make sure we inform DividerView before we actually start the activity so we can change
         // the resize mode already.
         if (ssp.setTaskWindowingModeSplitScreenPrimary(taskId, stackCreateMode, initialBounds)) {
-            EventBus.getDefault().send(new DockedTopTaskEvent(dragMode, initialBounds));
+            EventBus.getDefault().send(new DockedTopTaskEvent(initialBounds));
         }
     }
 

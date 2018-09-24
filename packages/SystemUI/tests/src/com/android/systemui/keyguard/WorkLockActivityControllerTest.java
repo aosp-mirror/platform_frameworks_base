@@ -40,9 +40,9 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 
+import com.android.systemui.shared.system.TaskStackChangeListener;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,7 +65,7 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
     private @Mock IActivityTaskManager mIActivityTaskManager;
 
     private WorkLockActivityController mController;
-    private SysUiTaskStackChangeListener mTaskStackListener;
+    private TaskStackChangeListener mTaskStackListener;
 
     @Before
     public void setUp() throws Exception {
@@ -75,8 +75,8 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
         doReturn("com.example.test").when(mContext).getPackageName();
 
         // Construct controller. Save the TaskStackListener for injecting events.
-        final ArgumentCaptor<SysUiTaskStackChangeListener> listenerCaptor =
-                ArgumentCaptor.forClass(SysUiTaskStackChangeListener.class);
+        final ArgumentCaptor<TaskStackChangeListener> listenerCaptor =
+                ArgumentCaptor.forClass(TaskStackChangeListener.class);
         mController = new WorkLockActivityController(mContext, mActivityManager,
                 mIActivityTaskManager);
 

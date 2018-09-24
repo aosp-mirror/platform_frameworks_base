@@ -21,11 +21,12 @@ import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-
+import android.os.UserHandle;
+import android.os.UserManager;
 import com.android.systemui.SystemUI;
-import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.component.ExpandPipEvent;
 import com.android.systemui.statusbar.CommandQueue;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
@@ -47,8 +48,8 @@ public class PipUI extends SystemUI implements CommandQueue.Callbacks {
         }
 
         // Ensure that we are the primary user's SystemUI.
-        final int processUser = SystemServicesProxy.getInstance(mContext).getProcessUser();
-        if (!SystemServicesProxy.getInstance(mContext).isSystemUser(processUser)) {
+        final int processUser = UserManager.get(mContext).getUserHandle();
+        if (processUser != UserHandle.USER_SYSTEM) {
             throw new IllegalStateException("Non-primary Pip component not currently supported.");
         }
 
@@ -58,11 +59,16 @@ public class PipUI extends SystemUI implements CommandQueue.Callbacks {
         mPipManager.initialize(mContext);
 
         getComponent(CommandQueue.class).addCallbacks(this);
+        putComponent(PipUI.class, this);
     }
 
     @Override
     public void showPictureInPictureMenu() {
         mPipManager.showPictureInPictureMenu();
+    }
+
+    public void expandPip() {
+        EventBus.getDefault().send(new ExpandPipEvent());
     }
 
     @Override

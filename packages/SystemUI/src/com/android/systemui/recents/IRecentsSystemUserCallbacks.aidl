@@ -29,7 +29,7 @@ oneway interface IRecentsSystemUserCallbacks {
     void updateRecentsVisibility(boolean visible);
     void startScreenPinning(int taskId);
     void sendRecentsDrawnEvent();
-    void sendDockingTopTaskEvent(int dragMode, in Rect initialRect);
+    void sendDockingTopTaskEvent(in Rect initialRect);
     void sendLaunchRecentsEvent();
     void sendDockedFirstAnimationFrameEvent();
     void setWaitingForTransitionStartEvent(boolean waitingForTransitionStart);
