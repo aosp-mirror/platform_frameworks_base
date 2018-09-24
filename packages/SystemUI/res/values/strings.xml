@@ -2138,14 +2138,23 @@
     <!-- App label of the instant apps notification [CHAR LIMIT=60] -->
     <string name="instant_apps">Instant Apps</string>
 
-    <!-- Message of the instant apps notification indicating they don't need install [CHAR LIMIT=NONE] -->
-    <string name="instant_apps_message">Instant apps don\'t require installation.</string>
+    <!-- Title of notification indicating that an instant app is running. [CHAR LIMIT=60] -->
+    <string name="instant_apps_title"><xliff:g id="app" example="Gmail">%1$s</xliff:g> running</string>
+
+    <!-- Message of the instant apps notification indicating they don't need install. [CHAR LIMIT=NONE] -->
+    <string name="instant_apps_message">App opened without being installed.</string>
+
+    <!-- Message of the instant apps notification indicating they don't need install, plus a link to more information. [CHAR LIMIT=NONE] -->
+    <string name="instant_apps_message_with_help">App opened without being installed. Tap to learn more.</string>
+
+    <!-- URL of the webpage that explains instant apps. -->
+    <string name="instant_apps_help_url" translatable="false"></string>
 
     <!-- Action label for launching app info on the specified app [CHAR LIMIT=20] -->
     <string name="app_info">App info</string>
 
     <!-- Action label for switching to a browser for an instant app [CHAR LIMIT=20] -->
-    <string name="go_to_web">Go to browser</string>
+    <string name="go_to_web">Go to web</string>
 
     <!-- Quick settings tile for toggling mobile data [CHAR LIMIT=20] -->
     <string name="mobile_data">Mobile data</string>
