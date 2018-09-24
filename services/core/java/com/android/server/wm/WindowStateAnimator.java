@@ -1185,15 +1185,17 @@ class WindowStateAnimator {
                         if (mIsWallpaper) {
                             w.dispatchWallpaperVisibility(true);
                         }
-                        // This draw means the difference between unique content and mirroring.
-                        // Run another pass through performLayout to set mHasContent in the
-                        // LogicalDisplay.
-                        mAnimator.setPendingLayoutChanges(w.getDisplayId(),
-                                FINISH_LAYOUT_REDO_ANIM);
-                        if (DEBUG_LAYOUT_REPEATS) {
-                            mService.mWindowPlacerLocked.debugLayoutRepeats(
-                                    "showSurfaceRobustlyLocked " + w,
-                                    mAnimator.getPendingLayoutChanges(w.getDisplayId()));
+                        if (!w.getDisplayContent().getLastHasContent()) {
+                            // This draw means the difference between unique content and mirroring.
+                            // Run another pass through performLayout to set mHasContent in the
+                            // LogicalDisplay.
+                            mAnimator.setPendingLayoutChanges(w.getDisplayId(),
+                                    FINISH_LAYOUT_REDO_ANIM);
+                            if (DEBUG_LAYOUT_REPEATS) {
+                                mService.mWindowPlacerLocked.debugLayoutRepeats(
+                                        "showSurfaceRobustlyLocked " + w,
+                                        mAnimator.getPendingLayoutChanges(w.getDisplayId()));
+                            }
                         }
                     } else {
                         w.setOrientationChanging(false);
