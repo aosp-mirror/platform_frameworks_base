@@ -632,6 +632,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         boolean disableHome = ((mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
 
+        // TODO(b/113914868): investigation log for disappearing home button
+        Log.i(TAG, "updateNavButtonIcons (b/113914868): home disabled=" + disableHome
+                + " mDisabledFlags=" + mDisabledFlags);
+
         // Always disable recents when alternate car mode UI is active.
         boolean disableRecent = mUseCarModeUi || !isOverviewEnabled();
 
