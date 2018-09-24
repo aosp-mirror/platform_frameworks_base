@@ -167,59 +167,6 @@ public abstract class ImsFeature {
      */
     public static final int CAPABILITY_SUCCESS = 0;
 
-
-    /**
-     * The framework implements this callback in order to register for Feature Capability status
-     * updates, via {@link #onCapabilitiesStatusChanged(Capabilities)}, query Capability
-     * configurations, via {@link #onQueryCapabilityConfiguration}, as well as to receive error
-     * callbacks when the ImsService can not change the capability as requested, via
-     * {@link #onChangeCapabilityConfigurationError}.
-     *
-     * @hide
-     */
-    public static class CapabilityCallback extends IImsCapabilityCallback.Stub {
-
-        @Override
-        public final void onCapabilitiesStatusChanged(int config) throws RemoteException {
-            onCapabilitiesStatusChanged(new Capabilities(config));
-        }
-
-        /**
-         * Returns the result of a query for the capability configuration of a requested capability.
-         *
-         * @param capability The capability that was requested.
-         * @param radioTech The IMS radio technology associated with the capability.
-         * @param isEnabled true if the capability is enabled, false otherwise.
-         */
-        @Override
-        public void onQueryCapabilityConfiguration(int capability, int radioTech,
-                boolean isEnabled) {
-
-        }
-
-        /**
-         * Called when a change to the capability configuration has returned an error.
-         *
-         * @param capability The capability that was requested to be changed.
-         * @param radioTech The IMS radio technology associated with the capability.
-         * @param reason error associated with the failure to change configuration.
-         */
-        @Override
-        public void onChangeCapabilityConfigurationError(int capability, int radioTech,
-                @ImsCapabilityError int reason) {
-        }
-
-        /**
-         * The status of the feature's capabilities has changed to either available or unavailable.
-         * If unavailable, the feature is not able to support the unavailable capability at this
-         * time.
-         *
-         * @param config The new availability of the capabilities.
-         */
-        public void onCapabilitiesStatusChanged(Capabilities config) {
-        }
-    }
-
     /**
      * Used by the ImsFeature to call back to the CapabilityCallback that the framework has
      * provided.
