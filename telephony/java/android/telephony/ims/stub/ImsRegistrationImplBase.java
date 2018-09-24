@@ -76,64 +76,6 @@ public class ImsRegistrationImplBase {
     private static final int REGISTRATION_STATE_REGISTERING = 1;
     private static final int REGISTRATION_STATE_REGISTERED = 2;
 
-    /**
-     * Callback class for receiving Registration callback events.
-     * @hide
-     */
-    public static class Callback extends IImsRegistrationCallback.Stub {
-        /**
-         * Notifies the framework when the IMS Provider is connected to the IMS network.
-         *
-         * @param imsRadioTech the radio access technology. Valid values are defined in
-         * {@link ImsRegistrationTech}.
-         */
-        @Override
-        public void onRegistered(@ImsRegistrationTech int imsRadioTech) {
-        }
-
-        /**
-         * Notifies the framework when the IMS Provider is trying to connect the IMS network.
-         *
-         * @param imsRadioTech the radio access technology. Valid values are defined in
-         * {@link ImsRegistrationTech}.
-         */
-        @Override
-        public void onRegistering(@ImsRegistrationTech int imsRadioTech) {
-        }
-
-        /**
-         * Notifies the framework when the IMS Provider is disconnected from the IMS network.
-         *
-         * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
-         */
-        @Override
-        public void onDeregistered(ImsReasonInfo info) {
-        }
-
-        /**
-         * A failure has occurred when trying to handover registration to another technology type,
-         * defined in {@link ImsRegistrationTech}
-         *
-         * @param imsRadioTech The {@link ImsRegistrationTech} type that has failed
-         * @param info A {@link ImsReasonInfo} that identifies the reason for failure.
-         */
-        @Override
-        public void onTechnologyChangeFailed(@ImsRegistrationTech int imsRadioTech,
-                ImsReasonInfo info) {
-        }
-
-        /**
-         * Returns a list of subscriber {@link Uri}s associated with this IMS subscription when
-         * it changes.
-         * @param uris new array of subscriber {@link Uri}s that are associated with this IMS
-         *         subscription.
-         */
-        @Override
-        public void onSubscriberAssociatedUriChanged(Uri[] uris) {
-
-        }
-    }
-
     private final IImsRegistration mBinder = new IImsRegistration.Stub() {
 
         @Override

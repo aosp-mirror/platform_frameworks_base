@@ -59,6 +59,7 @@ import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsRegistration;
+import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.text.TextUtils;
 import android.util.Log;
@@ -7388,7 +7389,9 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public boolean isVolteAvailable() {
         try {
-            return getITelephony().isVolteAvailable(getSubId());
+            return getITelephony().isAvailable(getSubId(),
+                    MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                    ImsRegistrationImplBase.REGISTRATION_TECH_LTE, getOpPackageName());
         } catch (RemoteException | NullPointerException ex) {
             return false;
         }
