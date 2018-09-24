@@ -414,6 +414,13 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int PROPERTY_ASSISTED_DIALING_USED = 1 << 9;
 
+    /**
+     * Set by the framework to indicate that the network has identified a Connection as an emergency
+     * call.
+     * @hide
+     */
+    public static final int PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL = 1 << 10;
+
     //**********************************************************************************************
     // Next PROPERTY value: 1<<10
     //**********************************************************************************************
@@ -801,6 +808,10 @@ public abstract class Connection extends Conferenceable {
 
         if (can(properties, PROPERTY_IS_RTT)) {
             builder.append(isLong ? " PROPERTY_IS_RTT" : " rtt");
+        }
+
+        if (can(properties, PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL)) {
+            builder.append(isLong ? " PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL" : " ecall");
         }
 
         builder.append("]");
