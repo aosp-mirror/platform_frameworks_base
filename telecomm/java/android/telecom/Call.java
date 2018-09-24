@@ -434,8 +434,15 @@ public final class Call {
          */
         public static final int PROPERTY_RTT = 0x00000400;
 
+        /**
+         * Indicates that the call has been identified as the network as an emergency call. This
+         * property may be set for both incoming and outgoing calls which the network identifies as
+         * emergency calls.
+         */
+        public static final int PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL = 0x00000800;
+
         //******************************************************************************************
-        // Next PROPERTY value: 0x00000800
+        // Next PROPERTY value: 0x00001000
         //******************************************************************************************
 
         private final String mTelecomCallId;
@@ -600,6 +607,9 @@ public final class Call {
             }
             if(hasProperty(properties, PROPERTY_ASSISTED_DIALING_USED)) {
                 builder.append(" PROPERTY_ASSISTED_DIALING_USED");
+            }
+            if (hasProperty(properties, PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL)) {
+                builder.append(" PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL");
             }
             builder.append("]");
             return builder.toString();
