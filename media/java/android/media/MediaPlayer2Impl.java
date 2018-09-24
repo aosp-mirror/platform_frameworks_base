@@ -86,6 +86,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -260,12 +261,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     synchronized (mSrcLock) {
                         dsd = mCurrentDSD;
                     }
-                    synchronized (mEventCbLock) {
-                        for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                            cb.first.execute(() -> cb.second.onInfo(
-                                    MediaPlayer2Impl.this, dsd, MEDIA_INFO_DATA_SOURCE_START, 0));
+                    sendEvent(new EventNotifier() {
+                        @Override
+                        public void notify(EventCallback callback) {
+                            callback.onInfo(
+                                    MediaPlayer2Impl.this, dsd, MEDIA_INFO_DATA_SOURCE_START, 0);
                         }
-                    }
+                    });
                 }
 
                 _pause();
@@ -572,12 +574,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         addTask(new Task(CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED, false) {
             @Override
             void process() {
-                synchronized (mEventCbLock) {
-                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                        cb.first.execute(() -> cb.second.onCommandLabelReached(
-                                MediaPlayer2Impl.this, label));
+                sendEvent(new EventNotifier() {
+                    @Override
+                    public void notify(EventCallback callback) {
+                        callback.onCommandLabelReached(
+                                MediaPlayer2Impl.this, label);
                     }
-                }
+                });
             }
         });
     }
@@ -995,12 +998,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }
 
         if (!hasNextDSD) {
-            synchronized (mEventCbLock) {
-                for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                    cb.first.execute(() -> cb.second.onInfo(
-                            MediaPlayer2Impl.this, null, MEDIA_INFO_DATA_SOURCE_LIST_END, 0));
+            sendEvent(new EventNotifier() {
+                @Override
+                public void notify(EventCallback callback) {
+                    callback.onInfo(
+                            MediaPlayer2Impl.this, null, MEDIA_INFO_DATA_SOURCE_LIST_END, 0);
                 }
-            }
+            });
         }
     }
 
@@ -2583,12 +2587,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 }
 
                 if (dsd != null) {
-                    synchronized (mEventCbLock) {
-                        for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                            cb.first.execute(() -> cb.second.onInfo(
-                                    mMediaPlayer, dsd, MEDIA_INFO_PREPARED, 0));
+                    sendEvent(new EventNotifier() {
+                        @Override
+                        public void notify(EventCallback callback) {
+                            callback.onInfo(
+                                    mMediaPlayer, dsd, MEDIA_INFO_PREPARED, 0);
                         }
-                    }
+                    });
                 }
 
                 synchronized (mSrcLock) {
@@ -2636,12 +2641,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
                     // notifying the client outside the lock
                     if (drmInfo != null) {
-                        synchronized (mEventCbLock) {
-                            for (Pair<Executor, DrmEventCallback> cb : mDrmEventCallbackRecords) {
-                                cb.first.execute(() -> cb.second.onDrmInfo(
-                                        mMediaPlayer, dsd, drmInfo));
+                        sendDrmEvent(new DrmEventNotifier() {
+                            @Override
+                            public void notify(DrmEventCallback callback) {
+                                callback.onDrmInfo(
+                                        mMediaPlayer, dsd, drmInfo);
                             }
-                        }
+                        });
                     }
                 } else {
                     Log.w(TAG, "MEDIA_DRM_INFO msg.obj of unexpected type " + msg.obj);
@@ -2652,12 +2658,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             case MEDIA_PLAYBACK_COMPLETE:
             {
                 if (isCurrentSrcId) {
-                    synchronized (mEventCbLock) {
-                        for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                            cb.first.execute(() -> cb.second.onInfo(
-                                    mMediaPlayer, dsd, MEDIA_INFO_DATA_SOURCE_END, 0));
+                    sendEvent(new EventNotifier() {
+                        @Override
+                        public void notify(EventCallback callback) {
+                            callback.onInfo(
+                                    mMediaPlayer, dsd, MEDIA_INFO_DATA_SOURCE_END, 0);
                         }
-                    }
+                    });
                     stayAwake(false);
 
                     synchronized (mSrcLock) {
@@ -2695,13 +2702,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             case MEDIA_BUFFERING_UPDATE:
             {
                 final int percent = msg.arg1;
-                synchronized (mEventCbLock) {
-                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                        cb.first.execute(() -> cb.second.onInfo(
-                                mMediaPlayer, dsd, MEDIA_INFO_BUFFERING_UPDATE,
-                                percent));
+                sendEvent(new EventNotifier() {
+                    @Override
+                    public void notify(EventCallback callback) {
+                        callback.onInfo(
+                                mMediaPlayer, dsd, MEDIA_INFO_BUFFERING_UPDATE, percent);
                     }
-                }
+                });
 
                 synchronized (mSrcLock) {
                     if (isCurrentSrcId) {
@@ -2740,26 +2747,33 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             {
                 final int width = msg.arg1;
                 final int height = msg.arg2;
-                synchronized (mEventCbLock) {
-                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                        cb.first.execute(() -> cb.second.onVideoSizeChanged(
-                                mMediaPlayer, dsd, width, height));
+                sendEvent(new EventNotifier() {
+                    @Override
+                    public void notify(EventCallback callback) {
+                        callback.onVideoSizeChanged(
+                                mMediaPlayer, dsd, width, height);
                     }
-                }
+                });
                 return;
             }
 
             case MEDIA_ERROR:
             {
                 Log.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
-                synchronized (mEventCbLock) {
-                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                        cb.first.execute(() -> cb.second.onError(
-                                mMediaPlayer, dsd, what, extra));
-                        cb.first.execute(() -> cb.second.onInfo(
-                                mMediaPlayer, dsd, MEDIA_INFO_DATA_SOURCE_END, 0));
+                sendEvent(new EventNotifier() {
+                    @Override
+                    public void notify(EventCallback callback) {
+                        callback.onError(
+                                mMediaPlayer, dsd, what, extra);
                     }
-                }
+                });
+                sendEvent(new EventNotifier() {
+                    @Override
+                    public void notify(EventCallback callback) {
+                        callback.onInfo(
+                                mMediaPlayer, dsd, MEDIA_INFO_DATA_SOURCE_END, 0);
+                    }
+                });
                 stayAwake(false);
                 return;
             }
@@ -2799,12 +2813,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                         break;
                 }
 
-                synchronized (mEventCbLock) {
-                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                        cb.first.execute(() -> cb.second.onInfo(
-                                mMediaPlayer, dsd, what, extra));
+                sendEvent(new EventNotifier() {
+                    @Override
+                    public void notify(EventCallback callback) {
+                        callback.onInfo(
+                                mMediaPlayer, dsd, what, extra);
                     }
-                }
+                });
 
                 if (msg.arg1 == MEDIA_INFO_DATA_SOURCE_START) {
                     if (isCurrentSrcId) {
@@ -2841,12 +2856,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     text = null;
                 }
 
-                synchronized (mEventCbLock) {
-                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                        cb.first.execute(() -> cb.second.onTimedText(
-                                mMediaPlayer, dsd, text));
+                sendEvent(new EventNotifier() {
+                    @Override
+                    public void notify(EventCallback callback) {
+                        callback.onTimedText(
+                                mMediaPlayer, dsd, text);
                     }
-                }
+                });
                 return;
             }
 
@@ -2866,12 +2882,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                             in.next().getInt64Value(),  // startTimeUs
                             in.next().getInt64Value(),  // durationUs
                             in.next().getBytesValue().toByteArray());  // data
-                    synchronized (mEventCbLock) {
-                        for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                            cb.first.execute(() -> cb.second.onSubtitleData(
-                                    mMediaPlayer, dsd, data));
+                    sendEvent(new EventNotifier() {
+                        @Override
+                        public void notify(EventCallback callback) {
+                            callback.onSubtitleData(
+                                    mMediaPlayer, dsd, data);
                         }
-                    }
+                    });
                 }
                 return;
             }
@@ -2895,12 +2912,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     data = null;
                 }
 
-                synchronized (mEventCbLock) {
-                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                        cb.first.execute(() -> cb.second.onTimedMetaDataAvailable(
-                                mMediaPlayer, dsd, data));
+                sendEvent(new EventNotifier() {
+                    @Override
+                    public void notify(EventCallback callback) {
+                        callback.onTimedMetaDataAvailable(
+                                mMediaPlayer, dsd, data);
                     }
-                }
+                });
                 return;
             }
 
@@ -3031,6 +3049,40 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 }
             }
         }
+    }
+
+    private void sendEvent(final EventNotifier notifier) {
+        synchronized (mEventCbLock) {
+            try {
+                for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
+                    cb.first.execute(() -> notifier.notify(cb.second));
+                }
+            } catch (RejectedExecutionException e) {
+                // The executor has been shut down.
+                Log.w(TAG, "The executor has been shut down. Ignoring event.");
+            }
+        }
+    }
+
+    private void sendDrmEvent(final DrmEventNotifier notifier) {
+        synchronized (mDrmEventCbLock) {
+            try {
+                for (Pair<Executor, DrmEventCallback> cb : mDrmEventCallbackRecords) {
+                    cb.first.execute(() -> notifier.notify(cb.second));
+                }
+            } catch (RejectedExecutionException e) {
+                // The executor has been shut down.
+                Log.w(TAG, "The executor has been shut down. Ignoring drm event.");
+            }
+        }
+    }
+
+    private interface EventNotifier {
+        void notify(EventCallback callback);
+    }
+
+    private interface DrmEventNotifier {
+        void notify(DrmEventCallback callback);
     }
 
     // Modular DRM begin
@@ -3283,12 +3335,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
         // if finished successfully without provisioning, call the callback outside the lock
         if (allDoneWithoutProvisioning) {
-            synchronized (mDrmEventCbLock) {
-                for (Pair<Executor, DrmEventCallback> cb : mDrmEventCallbackRecords) {
-                    cb.first.execute(() -> cb.second.onDrmPrepared(
-                            this, mCurrentDSD, PREPARE_DRM_STATUS_SUCCESS));
+            sendDrmEvent(new DrmEventNotifier() {
+                @Override
+                public void notify(DrmEventCallback callback) {
+                    callback.onDrmPrepared(
+                            MediaPlayer2Impl.this, mCurrentDSD, PREPARE_DRM_STATUS_SUCCESS);
                 }
-            }
+            });
         }
 
     }
@@ -3968,12 +4021,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 } // synchronized
 
                 // calling the callback outside the lock
-                synchronized (mDrmEventCbLock) {
-                    for (Pair<Executor, DrmEventCallback> cb : mDrmEventCallbackRecords) {
-                        cb.first.execute(() -> cb.second.onDrmPrepared(
-                                mediaPlayer, mCurrentDSD, status));
+                sendDrmEvent(new DrmEventNotifier() {
+                    @Override
+                    public void notify(DrmEventCallback callback) {
+                        callback.onDrmPrepared(
+                                mediaPlayer, mCurrentDSD, status);
                     }
-                }
+                });
             } else {   // blocking mode already has the lock
 
                 // continuing with prepareDrm
@@ -4632,12 +4686,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             if (mMediaCallType == CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED) {
                 return;
             }
-            synchronized (mEventCbLock) {
-                for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                    cb.first.execute(() -> cb.second.onCallCompleted(
-                            MediaPlayer2Impl.this, mDSD, mMediaCallType, status));
+            sendEvent(new EventNotifier() {
+                @Override
+                public void notify(EventCallback callback) {
+                    callback.onCallCompleted(
+                            MediaPlayer2Impl.this, mDSD, mMediaCallType, status);
                 }
-            }
+            });
         }
     };
 
