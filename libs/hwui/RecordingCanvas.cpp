@@ -16,6 +16,8 @@
 
 #include "RecordingCanvas.h"
 
+#include "VectorDrawable.h"
+
 #include "SkCanvas.h"
 #include "SkData.h"
 #include "SkDrawShadowInfo.h"
@@ -498,6 +500,27 @@ struct DrawShadowRec final : Op {
     SkDrawShadowRec fRec;
     void draw(SkCanvas* c, const SkMatrix&) const { c->private_draw_shadow_rec(fPath, fRec); }
 };
+
+struct DrawVectorDrawable final : Op {
+    static const auto kType = Type::DrawVectorDrawable;
+    DrawVectorDrawable(VectorDrawableRoot* tree)
+            : mRoot(tree)
+            , mBounds(tree->stagingProperties().getBounds())
+            , palette(tree->computePalette()) {
+        // Recording, so use staging properties
+        tree->getPaintFor(&paint, tree->stagingProperties());
+    }
+
+    void draw(SkCanvas* canvas, const SkMatrix&) const {
+        mRoot->draw(canvas, mBounds, paint);
+    }
+
+    sp<VectorDrawableRoot> mRoot;
+    SkRect mBounds;
+    SkPaint paint;
+    BitmapPalette palette;
+};
+
 }
 
 template <typename T, typename... Args>
@@ -697,6 +720,9 @@ void DisplayListData::drawAtlas(const SkImage* atlas, const SkRSXform xforms[], 
 }
 void DisplayListData::drawShadowRec(const SkPath& path, const SkDrawShadowRec& rec) {
     this->push<DrawShadowRec>(0, path, rec);
+}
+void DisplayListData::drawVectorDrawable(VectorDrawableRoot* tree) {
+    this->push<DrawVectorDrawable>(0, tree);
 }
 
 typedef void (*draw_fn)(const void*, SkCanvas*, const SkMatrix&);
@@ -960,6 +986,10 @@ void RecordingCanvas::onDrawAtlas(const SkImage* atlas, const SkRSXform xforms[]
 }
 void RecordingCanvas::onDrawShadowRec(const SkPath& path, const SkDrawShadowRec& rec) {
     fDL->drawShadowRec(path, rec);
+}
+
+void RecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
+    fDL->drawVectorDrawable(tree);
 }
 
 };  // namespace uirenderer

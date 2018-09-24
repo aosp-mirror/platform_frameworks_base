@@ -34,6 +34,8 @@ enum class PixelStorageType {
     Hardware,
 };
 
+// TODO: Find a better home for this. It's here because hwui/Bitmap is exported and CanvasTransform
+// isn't, but cleanup should be done
 enum class BitmapPalette {
     Unknown,
     Light,

@@ -130,7 +130,7 @@ static jboolean setRootAlpha(JNIEnv*, jobject, jlong treePtr, jfloat alpha) {
 
 static jfloat getRootAlpha(JNIEnv*, jobject, jlong treePtr) {
     VectorDrawable::Tree* tree = reinterpret_cast<VectorDrawable::Tree*>(treePtr);
-    return tree->stagingProperties()->getRootAlpha();
+    return tree->stagingProperties().getRootAlpha();
 }
 
 static void updateFullPathPropertiesAndStrokeStyles(JNIEnv*, jobject, jlong fullPathPtr,

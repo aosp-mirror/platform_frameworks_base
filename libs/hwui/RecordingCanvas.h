@@ -120,6 +120,7 @@ private:
     void drawAtlas(const SkImage*, const SkRSXform[], const SkRect[], const SkColor[], int,
                    SkBlendMode, const SkRect*, const SkPaint*);
     void drawShadowRec(const SkPath&, const SkDrawShadowRec&);
+    void drawVectorDrawable(VectorDrawableRoot* tree);
 
     template <typename T, typename... Args>
     void* push(size_t, Args&&...);
@@ -204,6 +205,8 @@ public:
     void onDrawAtlas(const SkImage*, const SkRSXform[], const SkRect[], const SkColor[], int,
                      SkBlendMode, const SkRect*, const SkPaint*) override;
     void onDrawShadowRec(const SkPath&, const SkDrawShadowRec&) override;
+
+    void drawVectorDrawable(VectorDrawableRoot* tree);
 
 private:
     typedef SkCanvasVirtualEnforcer<SkNoDrawCanvas> INHERITED;
