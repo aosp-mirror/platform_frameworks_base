@@ -138,7 +138,7 @@ static void splitAndPrint(const string& args) {
     size_t base = 0;
     size_t found;
     while (true) {
-        found = args.find_first_of(" ", base);
+        found = args.find_first_of(' ', base);
         if (found != base) {
             string arg = args.substr(base, found - base);
             printf(" \"%s\",", arg.c_str());
