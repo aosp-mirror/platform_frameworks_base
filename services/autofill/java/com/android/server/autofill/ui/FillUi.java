@@ -73,7 +73,10 @@ import java.util.stream.Collectors;
 final class FillUi {
     private static final String TAG = "FillUi";
 
-    private static final int THEME_ID = com.android.internal.R.style.Theme_DeviceDefault_Autofill;
+    private static final int THEME_ID_LIGHT =
+            com.android.internal.R.style.Theme_DeviceDefault_Light_Autofill;
+    private static final int THEME_ID_DARK =
+            com.android.internal.R.style.Theme_DeviceDefault_Autofill;
 
     private static final TypedValue sTempTypedValue = new TypedValue();
 
@@ -117,6 +120,8 @@ final class FillUi {
 
     private boolean mDestroyed;
 
+    private final int mThemeId;
+
     public static boolean isFullScreen(Context context) {
         if (sFullScreenMode != null) {
             if (sVerbose) Slog.v(TAG, "forcing full-screen mode to " + sFullScreenMode);
@@ -128,10 +133,13 @@ final class FillUi {
     FillUi(@NonNull Context context, @NonNull FillResponse response,
            @NonNull AutofillId focusedViewId, @NonNull @Nullable String filterText,
            @NonNull OverlayControl overlayControl, @NonNull CharSequence serviceLabel,
-           @NonNull Drawable serviceIcon, @NonNull Callback callback) {
+           @NonNull Drawable serviceIcon, boolean nightMode, @NonNull Callback callback) {
+        if (sVerbose) Slog.v(TAG, "nightMode: " + nightMode);
+        mThemeId = nightMode ? THEME_ID_DARK : THEME_ID_LIGHT;
         mCallback = callback;
         mFullScreen = isFullScreen(context);
-        mContext = new ContextThemeWrapper(context, THEME_ID);
+        mContext = new ContextThemeWrapper(context, mThemeId);
+
         final LayoutInflater inflater = LayoutInflater.from(mContext);
 
         final RemoteViews headerPresentation = response.getHeader();
@@ -216,7 +224,7 @@ final class FillUi {
             ViewGroup container = decor.findViewById(R.id.autofill_dataset_picker);
             final View content;
             try {
-                response.getPresentation().setApplyTheme(THEME_ID);
+                response.getPresentation().setApplyTheme(mThemeId);
                 content = response.getPresentation().apply(mContext, decor, interceptionHandler);
                 container.addView(content);
             } catch (RuntimeException e) {
@@ -257,7 +265,7 @@ final class FillUi {
             RemoteViews.OnClickHandler clickBlocker = null;
             if (headerPresentation != null) {
                 clickBlocker = newClickBlocker();
-                headerPresentation.setApplyTheme(THEME_ID);
+                headerPresentation.setApplyTheme(mThemeId);
                 mHeader = headerPresentation.apply(mContext, null, clickBlocker);
                 final LinearLayout headerContainer =
                         decor.findViewById(R.id.autofill_dataset_header);
@@ -275,7 +283,7 @@ final class FillUi {
                     if (clickBlocker == null) { // already set for header
                         clickBlocker = newClickBlocker();
                     }
-                    footerPresentation.setApplyTheme(THEME_ID);
+                    footerPresentation.setApplyTheme(mThemeId);
                     mFooter = footerPresentation.apply(mContext, null, clickBlocker);
                     // Footer not supported on some platform e.g. TV
                     if (sVerbose) Slog.v(TAG, "adding footer");
@@ -302,7 +310,7 @@ final class FillUi {
                     final View view;
                     try {
                         if (sVerbose) Slog.v(TAG, "setting remote view for " + focusedViewId);
-                        presentation.setApplyTheme(THEME_ID);
+                        presentation.setApplyTheme(mThemeId);
                         view = presentation.apply(mContext, null, interceptionHandler);
                     } catch (RuntimeException e) {
                         Slog.e(TAG, "Error inflating remote views", e);
@@ -732,6 +740,18 @@ final class FillUi {
         pw.print(prefix); pw.print("mContentWidth: "); pw.println(mContentWidth);
         pw.print(prefix); pw.print("mContentHeight: "); pw.println(mContentHeight);
         pw.print(prefix); pw.print("mDestroyed: "); pw.println(mDestroyed);
+        pw.print(prefix); pw.print("theme id: "); pw.print(mThemeId);
+        switch (mThemeId) {
+            case THEME_ID_DARK:
+                pw.println(" (dark)");
+                break;
+            case THEME_ID_LIGHT:
+                pw.println(" (light)");
+                break;
+            default:
+                pw.println("(UNKNOWN_MODE)");
+                break;
+        }
         if (mWindow != null) {
             pw.print(prefix); pw.print("mWindow: ");
             final String prefix2 = prefix + "  ";

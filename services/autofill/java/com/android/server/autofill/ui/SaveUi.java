@@ -72,9 +72,11 @@ import java.util.ArrayList;
  */
 final class SaveUi {
 
-    private static final String TAG = "AutofillSaveUi";
+    private static final String TAG = "SaveUi";
 
-    private static final int THEME_ID =
+    private static final int THEME_ID_LIGHT =
+            com.android.internal.R.style.Theme_DeviceDefault_Light_Autofill_Save;
+    private static final int THEME_ID_DARK =
             com.android.internal.R.style.Theme_DeviceDefault_Autofill_Save;
 
     public interface OnSaveListener {
@@ -144,6 +146,7 @@ final class SaveUi {
     private final String mServicePackageName;
     private final ComponentName mComponentName;
     private final boolean mCompatMode;
+    private final int mThemeId;
 
     private boolean mDestroyed;
 
@@ -152,7 +155,9 @@ final class SaveUi {
            @Nullable String servicePackageName, @NonNull ComponentName componentName,
            @NonNull SaveInfo info, @NonNull ValueFinder valueFinder,
            @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener,
-           boolean isUpdate, boolean compatMode) {
+           boolean nightMode, boolean isUpdate, boolean compatMode) {
+        if (sVerbose) Slog.v(TAG, "nightMode: " + nightMode);
+        mThemeId = nightMode ? THEME_ID_DARK : THEME_ID_LIGHT;
         mPendingUi= pendingUi;
         mListener = new OneActionThenDestroyListener(listener);
         mOverlayControl = overlayControl;
@@ -160,7 +165,7 @@ final class SaveUi {
         mComponentName = componentName;
         mCompatMode = compatMode;
 
-        context = new ContextThemeWrapper(context, THEME_ID);
+        context = new ContextThemeWrapper(context, mThemeId);
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(R.layout.autofill_save, null);
 
@@ -250,7 +255,7 @@ final class SaveUi {
         }
         yesButton.setOnClickListener((v) -> mListener.onSave());
 
-        mDialog = new Dialog(context, THEME_ID);
+        mDialog = new Dialog(context, mThemeId);
         mDialog.setContentView(view);
 
         // Dialog can be dismissed when touched outside, but the negative listener should not be
@@ -337,7 +342,7 @@ final class SaveUi {
 
         try {
             // Create the remote view peer.
-            template.setApplyTheme(THEME_ID);
+            template.setApplyTheme(mThemeId);
             final View customSubtitleView = template.apply(context, null, handler);
 
             // Apply batch updates (if any).
@@ -556,7 +561,18 @@ final class SaveUi {
         pw.print(prefix); pw.print("service: "); pw.println(mServicePackageName);
         pw.print(prefix); pw.print("app: "); pw.println(mComponentName.toShortString());
         pw.print(prefix); pw.print("compat mode: "); pw.println(mCompatMode);
-
+        pw.print(prefix); pw.print("theme id: "); pw.print(mThemeId);
+        switch (mThemeId) {
+            case THEME_ID_DARK:
+                pw.println(" (dark)");
+                break;
+            case THEME_ID_LIGHT:
+                pw.println(" (light)");
+                break;
+            default:
+                pw.println("(UNKNOWN_MODE)");
+                break;
+        }
         final View view = mDialog.getWindow().getDecorView();
         final int[] loc = view.getLocationOnScreen();
         pw.print(prefix); pw.print("coordinates: ");
