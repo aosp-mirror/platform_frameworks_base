@@ -103,10 +103,16 @@
     <string name="camera_label" msgid="7261107956054836961">"ক্যামেরা খুলুন"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"নতুন কার্য লেআউট বেছে নিন"</string>
     <string name="cancel" msgid="6442560571259935130">"বাতিল করুন"</string>
+    <!-- no translation found for accessibility_biometric_dialog_help_area (8953787076940186847) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_confirm (6468457350041712674) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"আঙ্গুলের ছাপের সেন্সর স্পর্শ করুন"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"আঙ্গুলের ছাপের আইকন"</string>
-    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"অ্যাপ্লিকেশনের আইকন"</string>
-    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"সহায়তার মেসেজ দেখানোর জায়গা"</string>
+    <!-- no translation found for face_dialog_looking_for_face (7049276266074494689) -->
+    <skip />
+    <!-- no translation found for accessibility_face_dialog_face_icon (2658119009870383490) -->
+    <skip />
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"সামঞ্জস্যের জুম বোতাম৷"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ছোট থেকে বৃহৎ স্ক্রীণে জুম করুন৷"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ব্লুটুথ সংযুক্ত হয়েছে৷"</string>
@@ -576,7 +582,7 @@
     <string name="broadcast_tile" msgid="3894036511763289383">"সম্প্রচার টাইল"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"তার আগে আপনি এটিকে বন্ধ না করা পর্যন্ত আপনি পরবর্তী <xliff:g id="WHEN">%1$s</xliff:g> অ্যালার্ম শুনতে পাবেন না"</string>
     <string name="zen_alarm_warning" msgid="444533119582244293">"আপনি আপনার পরবর্তী <xliff:g id="WHEN">%1$s</xliff:g> অ্যালার্ম শুনতে পাবেন না"</string>
-    <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g> -টায়"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g> -তে"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"দ্রুত সেটিংস, <xliff:g id="TITLE">%s</xliff:g>৷"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"হটস্পট"</string>

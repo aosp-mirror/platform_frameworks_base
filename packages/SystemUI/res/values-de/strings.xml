@@ -103,10 +103,16 @@
     <string name="camera_label" msgid="7261107956054836961">"Kamera öffnen"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Neues Aufgabenlayout auswählen"</string>
     <string name="cancel" msgid="6442560571259935130">"Abbrechen"</string>
+    <!-- no translation found for accessibility_biometric_dialog_help_area (8953787076940186847) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_confirm (6468457350041712674) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Berühre den Fingerabdrucksensor"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Fingerabdruck-Symbol"</string>
-    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"App-Symbol"</string>
-    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Bereich für die Hilfemeldung"</string>
+    <!-- no translation found for face_dialog_looking_for_face (7049276266074494689) -->
+    <skip />
+    <!-- no translation found for accessibility_face_dialog_face_icon (2658119009870383490) -->
+    <skip />
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Schaltfläche für Kompatibilitätszoom"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom auf einen größeren Bildschirm"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Mit Bluetooth verbunden"</string>
@@ -448,9 +454,9 @@
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Benachrichtigungen durch \"Bitte nicht stören\" pausiert"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Jetzt starten"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Keine Benachrichtigungen"</string>
-    <string name="profile_owned_footer" msgid="8021888108553696069">"Profil wird möglicherweise überwacht."</string>
-    <string name="vpn_footer" msgid="2388611096129106812">"Das Netzwerk wird möglicherweise überwacht."</string>
-    <string name="branded_vpn_footer" msgid="2168111859226496230">"Das Netzwerk wird möglicherweise überwacht"</string>
+    <string name="profile_owned_footer" msgid="8021888108553696069">"Profil wird eventuell überwacht."</string>
+    <string name="vpn_footer" msgid="2388611096129106812">"Das Netzwerk wird eventuell überwacht."</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Das Netzwerk wird eventuell überwacht"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="6645176135063957394">"Deine Organisation verwaltet dieses Gerät und kann den Netzwerkverkehr überwachen"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="370622174777570853">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> verwaltet dieses Gerät und kann den Netzwerkverkehr überwachen"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="1085137869053332307">"Das Gerät wird von deiner Organisation verwaltet und ist mit <xliff:g id="VPN_APP">%1$s</xliff:g> verbunden"</string>
@@ -461,7 +467,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="7777821385318891527">"Das Gerät wird von <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> verwaltet und ist mit VPNs verbunden"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="5125463987558278215">"Deine Organisation kann den Netzwerkverkehr in deinem Arbeitsprofil überwachen"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8973606847896650284">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> kann den Netzwerkverkehr in deinem Arbeitsprofil überwachen"</string>
-    <string name="quick_settings_disclosure_monitoring" msgid="679658227269205728">"Das Netzwerk wird möglicherweise überwacht"</string>
+    <string name="quick_settings_disclosure_monitoring" msgid="679658227269205728">"Das Netzwerk wird eventuell überwacht"</string>
     <string name="quick_settings_disclosure_vpns" msgid="8170318392053156330">"Das Gerät ist mit VPNs verbunden"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Arbeitsprofil verbunden mit <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Das persönliche Profil ist mit <xliff:g id="VPN_APP">%1$s</xliff:g> verbunden"</string>

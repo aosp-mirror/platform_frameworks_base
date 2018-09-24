@@ -103,10 +103,16 @@
     <string name="camera_label" msgid="7261107956054836961">"কেমেৰা খোলক"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"নতুন কাৰ্যৰ চানেকি বাছনি কৰক"</string>
     <string name="cancel" msgid="6442560571259935130">"বাতিল কৰক"</string>
+    <!-- no translation found for accessibility_biometric_dialog_help_area (8953787076940186847) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_confirm (6468457350041712674) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰটো স্পৰ্শ কৰক"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ফিংগাৰপ্ৰিণ্ট আইকন"</string>
-    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"এপ্লিকেশ্বন আইকন"</string>
-    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"সহায় বাৰ্তাৰ ক্ষেত্ৰ"</string>
+    <!-- no translation found for face_dialog_looking_for_face (7049276266074494689) -->
+    <skip />
+    <!-- no translation found for accessibility_face_dialog_face_icon (2658119009870383490) -->
+    <skip />
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"উপযোগিতা অনুসৰি জুম কৰা বুটাম।"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"স্ক্ৰীণৰ আকাৰ ডাঙৰ কৰিবলৈ জুম কৰক।"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ব্লুটুথ সংযোগ হ\'ল।"</string>
@@ -344,7 +350,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> সীমা"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> সকীয়নি"</string>
     <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"কৰ্মস্থানৰ প্ৰ\'ফাইল"</string>
-    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"ৰাতিৰ লাইট"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"ৰাতিৰ পোহৰ"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"সূৰ্যাস্তত অন কৰক"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"সূৰ্যোদয়ৰ লৈকে"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g>ত অন কৰক"</string>
