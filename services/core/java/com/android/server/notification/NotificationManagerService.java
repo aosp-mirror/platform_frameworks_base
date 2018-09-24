@@ -1152,15 +1152,18 @@ public class NotificationManagerService extends SystemService {
                 // turn off LED when user passes through lock screen
                 mNotificationLight.turnOff();
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
-                final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
-                // reload per-user settings
-                mSettingsObserver.update(null);
+                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 mUserProfiles.updateCache(context);
-                // Refresh managed services
-                mConditionProviders.onUserSwitched(user);
-                mListeners.onUserSwitched(user);
-                mAssistants.onUserSwitched(user);
-                mZenModeHelper.onUserSwitched(user);
+                if (!mUserProfiles.isManagedProfile(userId)) {
+                    // reload per-user settings
+                    mSettingsObserver.update(null);
+                    // Refresh managed services
+                    mConditionProviders.onUserSwitched(userId);
+                    mListeners.onUserSwitched(userId);
+                    mZenModeHelper.onUserSwitched(userId);
+                }
+                // assistant is the only thing that cares about managed profiles specifically
+                mAssistants.onUserSwitched(userId);
             } else if (action.equals(Intent.ACTION_USER_ADDED)) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 if (userId != USER_NULL) {
@@ -1170,20 +1173,23 @@ public class NotificationManagerService extends SystemService {
                     }
                 }
             } else if (action.equals(Intent.ACTION_USER_REMOVED)) {
-                final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
+                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 mUserProfiles.updateCache(context);
-                mZenModeHelper.onUserRemoved(user);
-                mPreferencesHelper.onUserRemoved(user);
-                mListeners.onUserRemoved(user);
-                mConditionProviders.onUserRemoved(user);
-                mAssistants.onUserRemoved(user);
+                mZenModeHelper.onUserRemoved(userId);
+                mPreferencesHelper.onUserRemoved(userId);
+                mListeners.onUserRemoved(userId);
+                mConditionProviders.onUserRemoved(userId);
+                mAssistants.onUserRemoved(userId);
                 savePolicyFile();
             } else if (action.equals(Intent.ACTION_USER_UNLOCKED)) {
-                final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
-                mConditionProviders.onUserUnlocked(user);
-                mListeners.onUserUnlocked(user);
-                mAssistants.onUserUnlocked(user);
-                mZenModeHelper.onUserUnlocked(user);
+                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
+                mUserProfiles.updateCache(context);
+                mAssistants.onUserUnlocked(userId);
+                if (!mUserProfiles.isManagedProfile(userId)) {
+                    mConditionProviders.onUserUnlocked(userId);
+                    mListeners.onUserUnlocked(userId);
+                    mZenModeHelper.onUserUnlocked(userId);
+                }
             }
         }
     };
