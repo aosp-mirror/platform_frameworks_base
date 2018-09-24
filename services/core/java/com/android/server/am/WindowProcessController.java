@@ -38,6 +38,7 @@ import android.app.servertransaction.ConfigurationChangeItem;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Log;
@@ -510,48 +511,50 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     void clearProfilerIfNeeded() {
         if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
-        mAtm.mH.post(() -> mListener.clearProfilerIfNeeded());
+        mAtm.mH.sendMessage(PooledLambda.obtainMessage(
+                WindowProcessListener::clearProfilerIfNeeded, mListener));
     }
 
     void updateProcessInfo(boolean updateServiceConnectionActivities, boolean updateLru,
             boolean activityChange, boolean updateOomAdj) {
         if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
-        final Runnable r = PooledLambda.obtainRunnable(WindowProcessListener::updateProcessInfo,
+        final Message m = PooledLambda.obtainMessage(WindowProcessListener::updateProcessInfo,
                 mListener, updateServiceConnectionActivities, updateLru, activityChange,
                 updateOomAdj);
-        mAtm.mH.post(r);
+        mAtm.mH.sendMessage(m);
     }
 
     void updateServiceConnectionActivities() {
         if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
-        mAtm.mH.post(() -> mListener.updateServiceConnectionActivities());
+        mAtm.mH.sendMessage(PooledLambda.obtainMessage(
+                WindowProcessListener::updateServiceConnectionActivities, mListener));
     }
 
     void setPendingUiClean(boolean pendingUiClean) {
         if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
-        final Runnable r = PooledLambda.obtainRunnable(
+        final Message m = PooledLambda.obtainMessage(
                 WindowProcessListener::setPendingUiClean, mListener, pendingUiClean);
-        mAtm.mH.post(r);
+        mAtm.mH.sendMessage(m);
     }
 
     void setPendingUiCleanAndForceProcessStateUpTo(int newState) {
         if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
-        final Runnable r = PooledLambda.obtainRunnable(
+        final Message m = PooledLambda.obtainMessage(
                 WindowProcessListener::setPendingUiCleanAndForceProcessStateUpTo,
                 mListener, newState);
-        mAtm.mH.post(r);
+        mAtm.mH.sendMessage(m);
     }
 
     void setRemoved(boolean removed) {
         if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
-        final Runnable r = PooledLambda.obtainRunnable(
+        final Message m = PooledLambda.obtainMessage(
                 WindowProcessListener::setRemoved, mListener, removed);
-        mAtm.mH.post(r);
+        mAtm.mH.sendMessage(m);
     }
 
     @Override

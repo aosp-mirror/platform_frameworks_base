@@ -1197,10 +1197,9 @@ public final class UiAutomation {
                     }
                     if (listener != null) {
                         // Calling out only without a lock held.
-                        mLocalCallbackHandler.post(PooledLambda.obtainRunnable(
+                        mLocalCallbackHandler.sendMessage(PooledLambda.obtainMessage(
                                 OnAccessibilityEventListener::onAccessibilityEvent,
-                                listener, AccessibilityEvent.obtain(event))
-                                .recycleOnUse());
+                                listener, AccessibilityEvent.obtain(event)));
                     }
                 }
 

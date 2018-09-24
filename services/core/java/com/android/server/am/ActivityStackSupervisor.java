@@ -3188,10 +3188,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         // Kill the running processes. Post on handle since we don't want to hold the service lock
         // while calling into AM.
-        final Runnable r = PooledLambda.obtainRunnable(
+        final Message m = PooledLambda.obtainMessage(
                 ActivityManagerInternal::killProcessesForRemovedTask, mService.mAmInternal,
                 procsToKill);
-        mService.mH.post(r);
+        mService.mH.sendMessage(m);
     }
 
     /**
