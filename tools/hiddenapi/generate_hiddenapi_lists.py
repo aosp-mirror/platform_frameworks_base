@@ -212,8 +212,8 @@ def main(argv):
     move_from_files(args.input_greylists, uncategorized, light_greylist)
     move_from_files(args.input_blacklists, uncategorized, blacklist)
 
-    # Iterate over all uncategorized members and move serialization API to light greylist.
-    move_serialization(uncategorized, light_greylist)
+    # Iterate over all uncategorized members and move serialization API to whitelist.
+    move_serialization(uncategorized, whitelist)
 
     # Extract package names of members from whitelist and light greylist, which
     # are assumed to have been finalized at this point. Assign all uncategorized
