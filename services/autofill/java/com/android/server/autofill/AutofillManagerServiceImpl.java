@@ -235,6 +235,13 @@ final class AutofillManagerServiceImpl {
         }
     }
 
+    int getTargedSdkLocked() {
+        if (mInfo == null) {
+            return 0;
+        }
+        return mInfo.getServiceInfo().applicationInfo.targetSdkVersion;
+    }
+
     private boolean isSetupCompletedLocked() {
         final String setupComplete = Settings.Secure.getStringForUser(
                 mContext.getContentResolver(), Settings.Secure.USER_SETUP_COMPLETE, mUserId);
@@ -953,6 +960,7 @@ final class AutofillManagerServiceImpl {
             pw.println();
             mInfo.dump(prefix2, pw);
             pw.print(prefix); pw.print("Service Label: "); pw.println(getServiceLabel());
+            pw.print(prefix); pw.print("Target SDK: "); pw.println(getTargedSdkLocked());
         }
         pw.print(prefix); pw.print("Component from settings: ");
             pw.println(getComponentNameFromSettings());
