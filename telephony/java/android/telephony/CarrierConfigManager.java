@@ -1077,22 +1077,42 @@ public class CarrierConfigManager {
             "wfc_operator_error_codes_string_array";
 
     /**
-     * Indexes of SPN format strings in wfcSpnFormats and wfcDataSpnFormats.
+     * Indexes of SPN format strings in wfcSpnFormats.
      *
      * <p>Available options are:
      * <ul>
-     * <li> 0: %s</li>
-     * <li> 1: %s Wi-Fi Calling</li>
-     * <li> 2: WLAN Call</li>
-     * <li> 3: %s WLAN Call</li>
-     * <li> 4: %s Wi-Fi</li>
-     * <li> 5: WiFi Calling | %s</li>
-     * <li> 6: %s VoWifi</li>
+     * <li>  0: %s</li>
+     * <li>  1: %s Wi-Fi Calling</li>
+     * <li>  2: WLAN Call</li>
+     * <li>  3: %s WLAN Call</li>
+     * <li>  4: %s Wi-Fi</li>
+     * <li>  5: WiFi Calling | %s</li>
+     * <li>  6: %s VoWifi</li>
+     * <li>  7: Wi-Fi Calling</li>
+     * <li>  8: Wi-Fi</li>
+     * <li>  9: WiFi Calling</li>
+     * <li> 10: VoWifi</li>
      * @hide
      */
     public static final String KEY_WFC_SPN_FORMAT_IDX_INT = "wfc_spn_format_idx_int";
-    /** @hide */
+
+    /**
+     * Indexes of data SPN format strings in wfcSpnFormats.
+     *
+     * @see KEY_WFC_SPN_FORMAT_IDX_INT for available options.
+     * @hide
+     */
     public static final String KEY_WFC_DATA_SPN_FORMAT_IDX_INT = "wfc_data_spn_format_idx_int";
+
+    /**
+     * Indexes of SPN format strings in wfcSpnFormats used during flight mode.
+     *
+     * Set to -1 to use the value from KEY_WFC_SPN_FORMAT_IDX_INT also in this case.
+     * @see KEY_WFC_SPN_FORMAT_IDX_INT for other available options.
+     * @hide
+     */
+    public static final String KEY_WFC_FLIGHT_MODE_SPN_FORMAT_IDX_INT =
+            "wfc_flight_mode_spn_format_idx_int";
 
     /**
      * Use root locale when reading wfcSpnFormats.
@@ -2362,6 +2382,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_WFC_OPERATOR_ERROR_CODES_STRING_ARRAY, null);
         sDefaults.putInt(KEY_WFC_SPN_FORMAT_IDX_INT, 0);
         sDefaults.putInt(KEY_WFC_DATA_SPN_FORMAT_IDX_INT, 0);
+        sDefaults.putInt(KEY_WFC_FLIGHT_MODE_SPN_FORMAT_IDX_INT, -1);
         sDefaults.putBoolean(KEY_WFC_SPN_USE_ROOT_LOCALE, false);
         sDefaults.putString(KEY_WFC_EMERGENCY_ADDRESS_CARRIER_APP_STRING, "");
         sDefaults.putBoolean(KEY_CONFIG_WIFI_DISABLE_IN_ECBM, false);
