@@ -146,10 +146,10 @@ LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries) \
 LOCAL_MODULE_CLASS := EXECUTABLES
 
 # Enable sanitizer ONLY on eng builds.
-ifeq ($(TARGET_BUILD_VARIANT),eng)
-    LOCAL_CLANG := true
-    LOCAL_SANITIZE := address
-endif
+#ifeq ($(TARGET_BUILD_VARIANT),eng)
+#    LOCAL_CLANG := true
+#    LOCAL_SANITIZE := address
+#endif
 
 # Add a flag to enable stats log printing from statsd on debug builds.
 ifneq (,$(filter userdebug eng, $(TARGET_BUILD_VARIANT)))
