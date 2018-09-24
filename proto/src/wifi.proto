@@ -482,6 +482,9 @@ message WifiLog {
 
   // Total wifi link layer usage data over the logging duration in ms.
   optional WifiLinkLayerUsageStats wifi_link_layer_usage_stats = 125;
+
+  // Multiple lists of timestamped link layer stats with labels to represent whether wifi is usable
+  repeated WifiUsabilityStats wifi_usability_stats_list = 126;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -1690,4 +1693,74 @@ message WifiLinkLayerUsageStats {
   // Total time the wifi radio spent doing hotspot 2.0 scans and GAS exchange
   // in ms over the logging duration.
   optional int64 radio_hs20_scan_time_ms = 10;
+}
+
+message WifiUsabilityStatsEntry {
+  // Absolute milliseconds from device boot when these stats were sampled
+  optional int64 time_stamp_ms = 1;
+
+  // The RSSI at the sample time
+  optional int32 rssi = 2;
+
+  // Link speed at the sample time in Mbps
+  optional int32 link_speed_mbps = 3;
+
+  // The total number of tx success counted from the last radio chip reset
+  optional int64 total_tx_success = 4;
+
+  // The total number of MPDU data packet retries counted from the last radio chip reset
+  optional int64 total_tx_retries = 5;
+
+  // The total number of tx bad counted from the last radio chip reset
+  optional int64 total_tx_bad = 6;
+
+  // The total number of rx success counted from the last radio chip reset
+  optional int64 total_rx_success = 7;
+
+  // The total time the wifi radio is on in ms counted from the last radio chip reset
+  optional int64 total_radio_on_time_ms = 8;
+
+  // The total time the wifi radio is doing tx in ms counted from the last radio chip reset
+  optional int64 total_radio_tx_time_ms = 9;
+
+  // The total time the wifi radio is doing rx in ms counted from the last radio chip reset
+  optional int64 total_radio_rx_time_ms = 10;
+
+  // The total time spent on all types of scans in ms counted from the last radio chip reset
+  optional int64 total_scan_time_ms = 11;
+
+  // The total time spent on nan scans in ms counted from the last radio chip reset
+  optional int64 total_nan_scan_time_ms = 12;
+
+  // The total time spent on background scans in ms counted from the last radio chip reset
+  optional int64 total_background_scan_time_ms = 13;
+
+  // The total time spent on roam scans in ms counted from the last radio chip reset
+  optional int64 total_roam_scan_time_ms = 14;
+
+  // The total time spent on pno scans in ms counted from the last radio chip reset
+  optional int64 total_pno_scan_time_ms = 15;
+
+  // The total time spent on hotspot2.0 scans and GAS exchange in ms counted from the last radio
+  // chip reset
+  optional int64 total_hotspot_2_scan_time_ms = 16;
+}
+
+message WifiUsabilityStats {
+  enum Label {
+    // Default label
+    LABEL_UNKNOWN = 0;
+
+    // Wifi is usable
+    LABEL_GOOD = 1;
+
+    // Wifi is unusable
+    LABEL_BAD = 2;
+  }
+
+  // The current wifi usability state
+  optional Label label = 1;
+
+  // The list of timestamped wifi usability stats
+  repeated WifiUsabilityStatsEntry stats = 2;
 }
