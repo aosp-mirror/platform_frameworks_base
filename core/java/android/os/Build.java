@@ -30,6 +30,8 @@ import com.android.internal.telephony.TelephonyProperties;
 
 import dalvik.system.VMRuntime;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -1083,7 +1085,67 @@ public class Build {
         return true;
     }
 
+    /** Build information for a particular device partition. */
+    public static class Partition {
+        /** The name identifying the system partition. */
+        public static final String PARTITION_NAME_SYSTEM = "system";
+
+        private String mName;
+        private String mFingerprint;
+        private long mTimeMs;
+
+        public Partition() {}
+
+        private Partition(String name, String fingerprint, long timeMs) {
+            mName = name;
+            mFingerprint = fingerprint;
+            mTimeMs = timeMs;
+        }
+
+        /** The name of this partition, e.g. "system", or "vendor" */
+        public String getName() {
+            return mName;
+        }
+
+        /** The build fingerprint of this partition, see {@link Build#FINGERPRINT}. */
+        public String getFingerprint() {
+            return mFingerprint;
+        }
+
+        /** The time (ms since epoch), at which this partition was built, see {@link Build#TIME}. */
+        public long getTimeMillis() {
+            return mTimeMs;
+        }
+    }
+
+    /**
+     * Get build information about partitions that have a separate fingerprint defined.
+     *
+     * The list includes partitions that are suitable candidates for over-the-air updates. This is
+     * not an exhaustive list of partitions on the device.
+     */
+    public static List<Partition> getPartitions() {
+        ArrayList<Partition> partitions = new ArrayList();
+
+        String[] names = new String[] {
+            "bootimage", "odm", "product", "product_services", Partition.PARTITION_NAME_SYSTEM,
+            "vendor"
+        };
+        for (String name : names) {
+            String fingerprint = SystemProperties.get("ro." + name + ".build.fingerprint");
+            if (TextUtils.isEmpty(fingerprint)) {
+                continue;
+            }
+            long time = getLong("ro." + name + ".build.date.utc") * 1000;
+            partitions.add(new Partition(name, fingerprint, time));
+        }
+
+        return partitions;
+    }
+
     // The following properties only make sense for internal engineering builds.
+
+    /** The time at which the build was produced, given in milliseconds since the UNIX epoch. */
     public static final long TIME = getLong("ro.build.date.utc") * 1000;
     public static final String USER = getString("ro.build.user");
     public static final String HOST = getString("ro.build.host");
