@@ -843,6 +843,32 @@ public class RenderNode {
         return nGetDebugSize(mNativeRenderNode);
     }
 
+    /**
+     * Sets whether or not to allow force dark to apply to this RenderNode.
+     *
+     * Setting this to false will disable the auto-dark feature on everything this RenderNode
+     * draws, including any descendants.
+     *
+     * Setting this to true will allow this RenderNode to be automatically made dark, however
+     * a value of 'true' will not override any 'false' value in its parent chain nor will
+     * it prevent any 'false' in any of its children.
+     *
+     * @param allow Whether or not to allow force dark.
+     * @return true If the value has changed, false otherwise.
+     */
+    public boolean setAllowForceDark(boolean allow) {
+        return nSetAllowForceDark(mNativeRenderNode, allow);
+    }
+
+    /**
+     * See {@link #setAllowForceDark(boolean)}
+     *
+     * @return true if force dark is allowed (default), false if it is disabled
+     */
+    public boolean getAllowForceDark() {
+        return nGetAllowForceDark(mNativeRenderNode);
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Animations
     ///////////////////////////////////////////////////////////////////////////
@@ -1043,4 +1069,8 @@ public class RenderNode {
     private static native int nGetWidth(long renderNode);
     @CriticalNative
     private static native int nGetHeight(long renderNode);
+    @CriticalNative
+    private static native boolean nSetAllowForceDark(long renderNode, boolean allowForceDark);
+    @CriticalNative
+    private static native boolean nGetAllowForceDark(long renderNode);
 }

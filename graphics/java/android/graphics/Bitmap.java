@@ -1253,6 +1253,7 @@ public final class Bitmap implements Parcelable {
             final RenderNode node = RenderNode.create("BitmapTemporary", null);
             node.setLeftTopRightBottom(0, 0, width, height);
             node.setClipToBounds(false);
+            node.setAllowForceDark(false);
             final DisplayListCanvas canvas = node.start(width, height);
             if (source.getWidth() != width || source.getHeight() != height) {
                 canvas.scale(width / (float) source.getWidth(),

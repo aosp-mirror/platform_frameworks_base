@@ -187,9 +187,11 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
         mOverlay.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         mOverlay.setAlpha(0);
+        mOverlay.setAllowForceDark(false);
 
         mBottomOverlay.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         mBottomOverlay.setAlpha(0);
+        mBottomOverlay.setAllowForceDark(false);
 
         updateViews();
 
