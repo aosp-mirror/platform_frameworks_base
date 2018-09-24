@@ -85,5 +85,23 @@ class TestHiddenapiListGeneration(unittest.TestCase):
         self.assertEqual(
             dst, set([ "Lfoo/bar/ClassA;->abc()J", "Lfoo/bar/ClassA;->def()J" ]))
 
+    def test_move_serialization(self):
+        # All the entries should be moved apart from the last one
+        src = set([ "Lfoo/bar/ClassA;->readObject(Ljava/io/ObjectInputStream;)V",
+                    "Lfoo/bar/ClassA;->readObjectNoData()V",
+                    "Lfoo/bar/ClassA;->readResolve()Ljava/lang/Object;",
+                    "Lfoo/bar/ClassA;->serialVersionUID:J",
+                    "Lfoo/bar/ClassA;->serialPersistentFields:[Ljava/io/ObjectStreamField;",
+                    "Lfoo/bar/ClassA;->writeObject(Ljava/io/ObjectOutputStream;)V",
+                    "Lfoo/bar/ClassA;->writeReplace()Ljava/lang/Object;",
+                    # Should not be moved as signature does not match
+                    "Lfoo/bar/ClassA;->readObject(Ljava/io/ObjectInputStream;)I"])
+        expectedToMove = len(src) - 1
+        dst = set()
+        packages = set([ "Lfoo/bar/" ])
+        move_serialization(src, dst)
+        self.assertEqual(len(src), 1)
+        self.assertEqual(len(dst), expectedToMove)
+
 if __name__ == '__main__':
     unittest.main()
