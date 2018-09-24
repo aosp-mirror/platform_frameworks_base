@@ -1414,7 +1414,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             win.mToken.addWindow(win);
             if (type == TYPE_INPUT_METHOD) {
-                win.mGivenInsetsPending = true;
                 displayContent.setInputMethodWindowLocked(win);
                 imMayMove = false;
             } else if (type == TYPE_INPUT_METHOD_DIALOG) {
@@ -5670,11 +5669,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mInputManagerCallback.freezeInputDispatchingLw();
 
-        // Clear the last input window -- that is just used for
-        // clean transitions between IMEs, and if we are freezing
-        // the screen then the whole world is changing behind the scenes.
-        mPolicy.setLastInputMethodWindowLw(null, null);
-
         if (mAppTransition.isTransitionSet()) {
             mAppTransition.freeze();
         }
@@ -7283,23 +7277,6 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mWindowMap) {
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
                 return dc.mDisplayFrames.getInputMethodWindowVisibleHeight();
-            }
-        }
-
-        @Override
-        public void saveLastInputMethodWindowForTransition() {
-            synchronized (mWindowMap) {
-                final WindowState imeWindow = mRoot.getCurrentInputMethodWindow();
-                if (imeWindow != null) {
-                    mPolicy.setLastInputMethodWindowLw(imeWindow, mInputMethodTarget);
-                }
-            }
-        }
-
-        @Override
-        public void clearLastInputMethodWindowForTransition() {
-            synchronized (mWindowMap) {
-                mPolicy.setLastInputMethodWindowLw(null, null);
             }
         }
 

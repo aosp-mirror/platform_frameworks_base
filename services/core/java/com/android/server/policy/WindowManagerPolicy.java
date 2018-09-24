@@ -1536,13 +1536,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     public void lockNow(Bundle options);
 
     /**
-     * Set the last used input method window state. This state is used to make IME transition
-     * smooth.
-     * @hide
-     */
-    public void setLastInputMethodWindowLw(WindowState ime, WindowState target);
-
-    /**
      * An internal callback (from InputMethodManagerService) to notify a state change regarding
      * whether the back key should dismiss the software keyboard (IME) or not.
      *

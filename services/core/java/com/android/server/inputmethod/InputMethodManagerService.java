@@ -1976,7 +1976,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
         }
 
-        unbindCurrentMethodLocked(true);
+        unbindCurrentMethodLocked();
 
         mCurIntent = new Intent(InputMethod.SERVICE_INTERFACE);
         mCurIntent.setComponent(info.getComponent());
@@ -2020,7 +2020,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mCurMethod = IInputMethod.Stub.asInterface(service);
                 if (mCurToken == null) {
                     Slog.w(TAG, "Service connected without a token!");
-                    unbindCurrentMethodLocked(false);
+                    unbindCurrentMethodLocked();
                     return;
                 }
                 if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
@@ -2059,7 +2059,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         channel.dispose();
     }
 
-    void unbindCurrentMethodLocked(boolean savePosition) {
+    void unbindCurrentMethodLocked() {
         if (mVisibleBound) {
             mContext.unbindService(mVisibleConnection);
             mVisibleBound = false;
@@ -2076,10 +2076,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     Slog.v(TAG, "Removing window token: " + mCurToken + " for display: "
                             + mCurTokenDisplayId);
                 }
-                if ((mImeWindowVis & InputMethodService.IME_ACTIVE) != 0 && savePosition) {
-                    // The current IME is shown. Hence an IME switch (transition) is happening.
-                    mWindowManagerInternal.saveLastInputMethodWindowForTransition();
-                }
                 mIWindowManager.removeWindowToken(mCurToken, mCurTokenDisplayId);
             } catch (RemoteException e) {
             }
@@ -2094,7 +2090,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     void resetCurrentMethodAndClient(
             /* @InputMethodClient.UnbindReason */ final int unbindClientReason) {
         mCurMethodId = null;
-        unbindCurrentMethodLocked(false);
+        unbindCurrentMethodLocked();
         unbindCurrentClientLocked(unbindClientReason);
     }
 
@@ -2865,7 +2861,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 final int newFocusDisplayId =
                                         mWindowManagerInternal.getDisplayIdForWindow(windowToken);
                                 if (newFocusDisplayId != mCurTokenDisplayId) {
-                                    unbindCurrentMethodLocked(false);
+                                    unbindCurrentMethodLocked();
                                 }
                             }
                         } else if (isTextEditor && doAutoShow && (softInputMode &
@@ -3234,19 +3230,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public int getInputMethodWindowVisibleHeight() {
         return mWindowManagerInternal.getInputMethodWindowVisibleHeight(mCurTokenDisplayId);
-    }
-
-    @BinderThread
-    private void clearLastInputMethodWindowForTransition(IBinder token) {
-        if (!calledFromValidUser()) {
-            return;
-        }
-        synchronized (mMethodMap) {
-            if (!calledWithValidToken(token)) {
-                return;
-            }
-        }
-        mWindowManagerInternal.clearLastInputMethodWindowForTransition();
     }
 
     @BinderThread
@@ -4957,7 +4940,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             try {
                 synchronized (mMethodMap) {
                     hideCurrentInputLocked(0, null);
-                    unbindCurrentMethodLocked(false);
+                    unbindCurrentMethodLocked();
                     // Reset the current IME
                     resetSelectedInputMethodAndSubtypeLocked(null);
                     // Also reset the settings of the current IME
@@ -5026,12 +5009,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void reportStartInput(IBinder startInputToken) {
             mImms.reportStartInput(mToken, startInputToken);
-        }
-
-        @BinderThread
-        @Override
-        public void clearLastInputMethodWindowForTransition() {
-            mImms.clearLastInputMethodWindowForTransition(mToken);
         }
 
         @BinderThread

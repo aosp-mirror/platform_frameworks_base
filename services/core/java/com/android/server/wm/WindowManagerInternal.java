@@ -340,20 +340,6 @@ public abstract class WindowManagerInternal {
     public abstract int getInputMethodWindowVisibleHeight(int displayId);
 
     /**
-      * Saves last input method window for transition.
-      *
-      * Note that it is assumed that this method is called only by InputMethodManagerService.
-      */
-    public abstract void saveLastInputMethodWindowForTransition();
-
-    /**
-     * Clears last input method window for transition.
-     *
-     * Note that it is assumed that this method is called only by InputMethodManagerService.
-     */
-    public abstract void clearLastInputMethodWindowForTransition();
-
-    /**
      * Notifies WindowManagerService that the current IME window status is being changed.
      *
      * <p>Only {@link com.android.server.inputmethod.InputMethodManagerService} is the expected and
