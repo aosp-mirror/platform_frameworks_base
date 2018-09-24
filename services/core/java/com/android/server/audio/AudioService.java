@@ -637,6 +637,26 @@ public class AudioService extends IAudioService.Stub
         sAudioVolumeGroups = new AudioVolumeGroups();
 
         // Initialize volume
+        // Priority 1 - Android Property
+        // Priority 2 - Audio Policy Service
+        // Priority 3 - Default Value
+        if (sAudioProductStrategies.size() > 0) {
+            int numStreamTypes = AudioSystem.getNumStreamTypes();
+
+            for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
+                AudioAttributes attr =
+                        sAudioProductStrategies.getAudioAttributesForLegacyStreamType(streamType);
+                int maxVolume = AudioSystem.getMaxVolumeIndexForAttributes(attr);
+                if (maxVolume != -1) {
+                    MAX_STREAM_VOLUME[streamType] = maxVolume;
+                }
+                int minVolume = AudioSystem.getMinVolumeIndexForAttributes(attr);
+                if (minVolume != -1) {
+                    MIN_STREAM_VOLUME[streamType] = minVolume;
+                }
+            }
+        }
+
         int maxCallVolume = SystemProperties.getInt("ro.config.vc_call_vol_steps", -1);
         if (maxCallVolume != -1) {
             MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = maxCallVolume;
@@ -1465,6 +1485,11 @@ public class AudioService extends IAudioService.Stub
     }
 
     private int rescaleIndex(int index, int srcStream, int dstStream) {
+        int max = mStreamStates[srcStream].getMaxIndex();
+        if (max == 0) {
+            Log.e(TAG, "rescaleIndex : Max index should not be zero");
+            return mStreamStates[srcStream].getMinIndex();
+        }
         final int rescaled =
                 (index * mStreamStates[dstStream].getMaxIndex()
                         + mStreamStates[srcStream].getMaxIndex() / 2)
