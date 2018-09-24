@@ -19,6 +19,7 @@ package com.android.server.biometrics;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_FINGERPRINT;
 
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -80,6 +81,7 @@ public class BiometricService extends SystemService {
             BIOMETRIC_FACE
     };
 
+    private final AppOpsManager mAppOps;
     private final Handler mHandler;
     private final boolean mHasFeatureFingerprint;
     private final boolean mHasFeatureIris;
@@ -200,14 +202,20 @@ public class BiometricService extends SystemService {
         }
 
         @Override // Binder call
-        public boolean hasEnrolledBiometrics() {
+        public boolean hasEnrolledBiometrics(String opPackageName) {
             checkPermission();
 
-            boolean hasEnrolled = false;
+            if (mAppOps.noteOp(AppOpsManager.OP_USE_BIOMETRIC, Binder.getCallingUid(),
+                    opPackageName) != AppOpsManager.MODE_ALLOWED) {
+                Slog.w(TAG, "Rejecting " + opPackageName + "; permission denied");
+                throw new SecurityException("Permission denied");
+            }
+
             final long ident = Binder.clearCallingIdentity();
+            boolean hasEnrolled = false;
             try {
-                // Note: On devices with multi-modal authentication, the selection logic will need to
-                // be updated.
+                // Note: On devices with multi-modal authentication, the selection logic will need
+                // to be updated.
                 for (int i = 0; i < mAuthenticators.size(); i++) {
                     if (mAuthenticators.get(i).getAuthenticator().hasEnrolledTemplates()) {
                         hasEnrolled = true;
@@ -241,6 +249,7 @@ public class BiometricService extends SystemService {
     public BiometricService(Context context) {
         super(context);
 
+        mAppOps = context.getSystemService(AppOpsManager.class);
         mHandler = new Handler(Looper.getMainLooper());
 
         final PackageManager pm = context.getPackageManager();

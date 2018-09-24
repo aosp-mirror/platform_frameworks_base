@@ -902,8 +902,16 @@ public class FingerprintService extends BiometricServiceBase {
     }
 
     @Override
-    protected int getAppOp() {
-        return AppOpsManager.OP_USE_FINGERPRINT;
+    protected boolean checkAppOps(int uid, String opPackageName) {
+        boolean appOpsOk = false;
+        if (mAppOps.noteOp(AppOpsManager.OP_USE_BIOMETRIC, uid, opPackageName)
+                == AppOpsManager.MODE_ALLOWED) {
+            appOpsOk = true;
+        } else if (mAppOps.noteOp(AppOpsManager.OP_USE_FINGERPRINT, uid, opPackageName)
+                == AppOpsManager.MODE_ALLOWED) {
+            appOpsOk = true;
+        }
+        return appOpsOk;
     }
 
     @Override
