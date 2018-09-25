@@ -389,7 +389,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
      *   - create the current primary profile to save time at app startup time.
      *   - copy the profiles from the associated dex metadata file to the reference profile.
      */
-    public void prepareAppProfiles(PackageParser.Package pkg, @UserIdInt int user) {
+    public void prepareAppProfiles(PackageParser.Package pkg, @UserIdInt int user,
+            boolean updateReferenceProfileContent) {
         final int appId = UserHandle.getAppId(pkg.applicationInfo.uid);
         if (user < 0) {
             Slog.wtf(TAG, "Invalid user id: " + user);
@@ -404,8 +405,14 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             for (int i = codePathsProfileNames.size() - 1; i >= 0; i--) {
                 String codePath = codePathsProfileNames.keyAt(i);
                 String profileName = codePathsProfileNames.valueAt(i);
-                File dexMetadata = DexMetadataHelper.findDexMetadataForFile(new File(codePath));
-                String dexMetadataPath = dexMetadata == null ? null : dexMetadata.getAbsolutePath();
+                String dexMetadataPath = null;
+                // Passing the dex metadata file to the prepare method will update the reference
+                // profile content. As such, we look for the dex metadata file only if we need to
+                // perform an update.
+                if (updateReferenceProfileContent) {
+                    File dexMetadata = DexMetadataHelper.findDexMetadataForFile(new File(codePath));
+                    dexMetadataPath = dexMetadata == null ? null : dexMetadata.getAbsolutePath();
+                }
                 synchronized (mInstaller) {
                     boolean result = mInstaller.prepareAppProfile(pkg.packageName, user, appId,
                             profileName, codePath, dexMetadataPath);
@@ -423,9 +430,10 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     /**
      * Prepares the app profiles for a set of users. {@see ArtManagerService#prepareAppProfiles}.
      */
-    public void prepareAppProfiles(PackageParser.Package pkg, int[] user) {
+    public void prepareAppProfiles(PackageParser.Package pkg, int[] user,
+            boolean updateReferenceProfileContent) {
         for (int i = 0; i < user.length; i++) {
-            prepareAppProfiles(pkg, user[i]);
+            prepareAppProfiles(pkg, user[i], updateReferenceProfileContent);
         }
     }
 
