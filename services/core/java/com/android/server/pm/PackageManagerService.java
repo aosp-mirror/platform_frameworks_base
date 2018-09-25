@@ -15336,7 +15336,9 @@ public class PackageManagerService extends IPackageManager.Stub
             // This needs to be done before invoking dexopt so that any install-time profile
             // can be used for optimizations.
             mArtManagerService.prepareAppProfiles(
-                    pkg, resolveUserIds(reconciledPkg.installForUser.getIdentifier()));
+                    pkg,
+                    resolveUserIds(reconciledPkg.installForUser.getIdentifier()),
+                    /* updateReferenceProfileContent= */ true);
 
             // Check whether we need to dexopt the app.
             //
@@ -21184,8 +21186,18 @@ public class PackageManagerService extends IPackageManager.Stub
         //
         // We also have to cover non system users because we do not call the usual install package
         // methods for them.
+        //
+        // NOTE: in order to speed up first boot time we only create the current profile and do not
+        // update the content of the reference profile. A system image should already be configured
+        // with the right profile keys and the profiles for the speed-profile prebuilds should
+        // already be copied. That's done in #performDexOptUpgrade.
+        //
+        // TODO(calin, mathieuc): We should use .dm files for prebuilds profiles instead of
+        // manually copying them in #performDexOptUpgrade. When we do that we should have a more
+        // granular check here and only update the existing profiles.
         if (mIsUpgrade || mFirstBoot || (userId != UserHandle.USER_SYSTEM)) {
-            mArtManagerService.prepareAppProfiles(pkg, userId);
+            mArtManagerService.prepareAppProfiles(pkg, userId,
+                /* updateReferenceProfileContent= */ false);
         }
 
         if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 && ceDataInode != -1) {
