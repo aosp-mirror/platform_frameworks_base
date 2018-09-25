@@ -6524,6 +6524,31 @@ message MetricsEvent {
     // Tag of a field for the length of a text
     FIELD_AUTOFILL_TEXT_LEN = 1572;
 
+    // Action: the notification assistant is changing a notification
+    // OS: Q
+    NOTIFICATION_ASSISTANT_ADJUSTMENT = 1573;
+
+    // Subtype: The people attached to a notification was changed
+    ADJUSTMENT_KEY_PEOPLE = 1574;
+
+    // Subtype: The snooze options attached to a notification was changed
+    ADJUSTMENT_KEY_SNOOZE_CRITERIA = 1575;
+
+    // Subtype: The group of a notification was changed
+    ADJUSTMENT_KEY_GROUP_KEY = 1576;
+
+    // Subtype: The user sentiment of a notification was changed
+    ADJUSTMENT_KEY_USER_SENTIMENT = 1577;
+
+    // Subtype: New actions have been added to a notification
+    ADJUSTMENT_KEY_SMART_ACTIONS = 1578;
+
+    // Subtype: New smart replies have been added to a notification
+    ADJUSTMENT_KEY_SMART_REPLIES = 1579;
+
+    // Subtype: The importance of a notification has been changed
+    ADJUSTMENT_KEY_IMPORTANCE = 1580;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.
