@@ -1260,7 +1260,7 @@ class Linker {
       return false;
     }
 
-    proguard::WriteKeepSet(keep_set, &fout);
+    proguard::WriteKeepSet(keep_set, &fout, options_.generate_minimal_proguard_rules);
     fout.Flush();
 
     if (fout.HadError()) {
