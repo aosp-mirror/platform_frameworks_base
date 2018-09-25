@@ -122,6 +122,13 @@ public class BackupManagerServiceTest {
         ShadowAppBackupUtils.reset();
     }
 
+    @Test
+    public void testMoreDebug_isFalse() throws Exception {
+        boolean moreDebug = BackupManagerService.MORE_DEBUG;
+
+        assertThat(moreDebug).isFalse();
+    }
+
     /* Tests for destination string */
 
     @Test
