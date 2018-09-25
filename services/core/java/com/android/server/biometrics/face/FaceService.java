@@ -28,10 +28,11 @@ import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.IBiometricPromptReceiver;
-import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
+import android.hardware.biometrics.face.V1_0.Status;
 import android.hardware.face.Face;
 import android.hardware.face.FaceManager;
 import android.hardware.face.IFaceService;
@@ -121,15 +122,15 @@ public class FaceService extends BiometricServiceBase {
          * The following methods contain common code which is shared in biometrics/common.
          */
         @Override // Binder call
-        public long preEnroll(IBinder token) {
+        public long generateChallenge(IBinder token) {
             checkPermission(MANAGE_BIOMETRIC);
-            return startPreEnroll(token);
+            return startGenerateChallenge(token);
         }
 
         @Override // Binder call
-        public int postEnroll(IBinder token) {
+        public int revokeChallenge(IBinder token) {
             checkPermission(MANAGE_BIOMETRIC);
-            return startPostEnroll(token);
+            return startRevokeChallenge(token);
         }
 
         @Override // Binder call
@@ -345,6 +346,45 @@ public class FaceService extends BiometricServiceBase {
             checkPermission(MANAGE_BIOMETRIC);
             // TODO: confirm security token when we move timeout management into the HAL layer.
             mHandler.post(mResetFailedAttemptsForCurrentUserRunnable);
+        }
+
+        @Override
+        public int setRequireAttention(boolean requireAttention, final byte[] token) {
+            checkPermission(MANAGE_BIOMETRIC);
+
+            final ArrayList<Byte> byteToken = new ArrayList<>();
+            for (int i = 0; i < token.length; i++) {
+                byteToken.add(token[i]);
+            }
+
+            int result;
+            try {
+                result = mDaemon != null ? mDaemon.setRequireAttention(requireAttention, byteToken)
+                        : Status.INTERNAL_ERROR;
+            } catch (RemoteException e) {
+                Slog.e(getTag(), "Unable to setRequireAttention to " + requireAttention);
+                result = Status.INTERNAL_ERROR;
+            }
+
+            return result;
+        }
+
+        @Override
+        public boolean getRequireAttention(final byte[] token) {
+            checkPermission(MANAGE_BIOMETRIC);
+
+            final ArrayList<Byte> byteToken = new ArrayList<>();
+            for (int i = 0; i < token.length; i++) {
+                byteToken.add(token[i]);
+            }
+
+            boolean result = true;
+            try {
+                result = mDaemon != null ? mDaemon.getRequireAttention(byteToken).value : true;
+            } catch (RemoteException e) {
+                Slog.e(getTag(), "Unable to getRequireAttention");
+            }
+            return result;
         }
     }
 
@@ -779,30 +819,30 @@ public class FaceService extends BiometricServiceBase {
         return mDaemon;
     }
 
-    private long startPreEnroll(IBinder token) {
+    private long startGenerateChallenge(IBinder token) {
         IBiometricsFace daemon = getFaceDaemon();
         if (daemon == null) {
-            Slog.w(TAG, "startPreEnroll: no face HAL!");
+            Slog.w(TAG, "startGenerateChallenge: no face HAL!");
             return 0;
         }
         try {
             return daemon.generateChallenge(CHALLENGE_TIMEOUT_SEC).value;
         } catch (RemoteException e) {
-            Slog.e(TAG, "startPreEnroll failed", e);
+            Slog.e(TAG, "startGenerateChallenge failed", e);
         }
         return 0;
     }
 
-    private int startPostEnroll(IBinder token) {
+    private int startRevokeChallenge(IBinder token) {
         IBiometricsFace daemon = getFaceDaemon();
         if (daemon == null) {
-            Slog.w(TAG, "startPostEnroll: no face HAL!");
+            Slog.w(TAG, "startRevokeChallenge: no face HAL!");
             return 0;
         }
         try {
             return daemon.revokeChallenge();
         } catch (RemoteException e) {
-            Slog.e(TAG, "startPostEnroll failed", e);
+            Slog.e(TAG, "startRevokeChallenge failed", e);
         }
         return 0;
     }
