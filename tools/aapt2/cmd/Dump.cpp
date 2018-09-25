@@ -251,19 +251,12 @@ int DumpConfigsCommand::Dump(LoadedApk* apk) {
 }
 
 int DumpPackageNameCommand::Dump(LoadedApk* apk) {
-  xml::Element* manifest_el = apk->GetManifest()->root.get();
-  if (!manifest_el) {
-    GetDiagnostics()->Error(DiagMessage() << "No AndroidManifest");
+  Maybe<std::string> package_name = GetPackageName(apk);
+  if (!package_name) {
     return 1;
   }
 
-  xml::Attribute* attr = manifest_el->FindAttribute({}, "package");
-  if (!attr) {
-    GetDiagnostics()->Error(DiagMessage() << "No package name");
-    return 1;
-  }
-
-  GetPrinter()->Println(StringPrintf("%s", attr->value.c_str()));
+  GetPrinter()->Println(package_name.value());
   return 0;
 }
 
@@ -280,6 +273,31 @@ int DumpStringsCommand::Dump(LoadedApk* apk) {
   auto data = buffer.to_string();
   android::ResStringPool pool(data.data(), data.size(), false);
   Debug::DumpResStringPool(&pool, GetPrinter());
+  return 0;
+}
+
+int DumpStyleParentCommand::Dump(LoadedApk* apk) {
+  Maybe<std::string> package_name = GetPackageName(apk);
+  if (!package_name) {
+    return 1;
+  }
+
+  const auto target_style = ResourceName(package_name.value(), ResourceType::kStyle, style_);
+  const auto table = apk->GetResourceTable();
+
+  if (!table) {
+    GetDiagnostics()->Error(DiagMessage() << "Failed to retrieve resource table");
+    return 1;
+  }
+
+  Maybe<ResourceTable::SearchResult> target = table->FindResource(target_style);
+  if (!target) {
+    GetDiagnostics()->Error(
+        DiagMessage() << "Target style \"" << target_style.entry << "\" does not exist");
+    return 1;
+  }
+
+  Debug::PrintStyleGraph(table, target_style);
   return 0;
 }
 

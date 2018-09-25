@@ -42,6 +42,21 @@ class DumpApkCommand : public Command {
     return diag_;
   }
 
+  Maybe<std::string> GetPackageName(LoadedApk* apk) {
+    xml::Element* manifest_el = apk->GetManifest()->root.get();
+    if (!manifest_el) {
+      GetDiagnostics()->Error(DiagMessage() << "No AndroidManifest.");
+      return Maybe<std::string>();
+    }
+
+    xml::Attribute* attr = manifest_el->FindAttribute({}, "package");
+    if (!attr) {
+      GetDiagnostics()->Error(DiagMessage() << "No package name.");
+      return Maybe<std::string>();
+    }
+    return attr->value;
+  }
+
   /** Perform the dump operation on the apk. */
   virtual int Dump(LoadedApk* apk) = 0;
 
@@ -164,6 +179,21 @@ class DumpStringsCommand : public DumpApkCommand {
   int Dump(LoadedApk* apk) override;
 };
 
+/** Prints the graph of parents of a style in an APK. */
+class DumpStyleParentCommand : public DumpApkCommand {
+ public:
+  explicit DumpStyleParentCommand(text::Printer* printer, IDiagnostics* diag)
+      : DumpApkCommand("styleparents", printer, diag) {
+    SetDescription("Print the parents of a style in an APK.");
+    AddRequiredFlag("--style", "The name of the style to print", &style_);
+  }
+
+  int Dump(LoadedApk* apk) override;
+
+ private:
+  std::string style_;
+};
+
 class DumpTableCommand : public DumpApkCommand {
  public:
   explicit DumpTableCommand(text::Printer* printer, IDiagnostics* diag)
@@ -220,6 +250,7 @@ class DumpCommand : public Command {
     AddOptionalSubcommand(util::make_unique<DumpPackageNameCommand>(printer, diag_));
     AddOptionalSubcommand(util::make_unique<DumpPermissionsCommand>(printer, diag_));
     AddOptionalSubcommand(util::make_unique<DumpStringsCommand>(printer, diag_));
+    AddOptionalSubcommand(util::make_unique<DumpStyleParentCommand>(printer, diag_));
     AddOptionalSubcommand(util::make_unique<DumpTableCommand>(printer, diag_));
     AddOptionalSubcommand(util::make_unique<DumpXmlStringsCommand>(printer, diag_));
     AddOptionalSubcommand(util::make_unique<DumpXmlTreeCommand>(printer, diag_));
