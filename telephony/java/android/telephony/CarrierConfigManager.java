@@ -2116,6 +2116,16 @@ public class CarrierConfigManager {
     public static final String KEY_CALL_REDIRECTION_SERVICE_COMPONENT_NAME_STRING =
             "call_redirection_service_component_name_string";
 
+    /**
+     * Flag specifying whether to show notification(call blocking disabled) when Enhanced Call
+     * Blocking(KEY_SUPPORT_ENHANCED_CALL_BLOCKING_BOOL) is enabled and making emergency call.
+     * When true, notification is shown always.
+     * When false, notification is shown only when any setting of "Enhanced Blocked number" is
+     * enabled.
+     */
+    public static final String KEY_SHOW_CALL_BLOCKING_DISABLED_NOTIFICATION_ALWAYS_BOOL =
+            "show_call_blocking_disabled_notification_always_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -2454,6 +2464,7 @@ public class CarrierConfigManager {
                 });
         sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "");
         sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_CALL_BLOCKING_DISABLED_NOTIFICATION_ALWAYS_BOOL, false);
     }
 
     /**
