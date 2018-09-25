@@ -39,7 +39,7 @@ import java.util.Locale;
 /**
  * Represent a logical device of type Playback residing in Android system.
  */
-final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
+public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     private static final String TAG = "HdmiCecLocalDevicePlayback";
 
     private static final boolean WAKE_ON_HOTPLUG =
@@ -174,6 +174,7 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     }
 
     @ServiceThreadOnly
+    @VisibleForTesting
     void setIsActiveSource(boolean on) {
         assertRunOnServiceThread();
         mIsActiveSource = on;
