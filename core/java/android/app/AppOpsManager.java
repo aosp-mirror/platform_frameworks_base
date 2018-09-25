@@ -18,6 +18,7 @@ package android.app;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -1522,6 +1523,19 @@ public class AppOpsManager {
     }
 
     /**
+     * Retrieve the permission associated with an operation, or null if there is not one.
+     *
+     * @param op The operation name.
+     *
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public static String opToPermission(@NonNull String op) {
+        return opToPermission(strOpToOp(op));
+    }
+
+    /**
      * Retrieve the user restriction associated with an operation, or null if there is not one.
      * @hide
      */
@@ -1965,6 +1979,26 @@ public class AppOpsManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Resets given app op in its default mode for app ops in the UID.
+     * This applies to all apps currently in the UID or installed in this UID in the future.
+     *
+     * @param appOp The app op.
+     * @param uid The UID for which to set the app.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
+    @SystemApi
+    public void resetUidMode(String appOp, int uid, boolean force) {
+        int code = strOpToOp(appOp);
+        if (!(opAllowsReset(code) || force)) {
+            return;
+        }
+        int mode = opToDefaultMode(code);
+        setUidMode(code, uid, mode);
     }
 
     /** @hide */

@@ -101,6 +101,7 @@ package android {
     field public static final java.lang.String MANAGE_CA_CERTIFICATES = "android.permission.MANAGE_CA_CERTIFICATES";
     field public static final java.lang.String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
     field public static final java.lang.String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
+    field public static final java.lang.String MANAGE_ROLE_HOLDERS = "android.permission.MANAGE_ROLE_HOLDERS";
     field public static final java.lang.String MANAGE_SOUND_TRIGGER = "android.permission.MANAGE_SOUND_TRIGGER";
     field public static final java.lang.String MANAGE_SUBSCRIPTION_PLANS = "android.permission.MANAGE_SUBSCRIPTION_PLANS";
     field public static final java.lang.String MANAGE_USB = "android.permission.MANAGE_USB";
@@ -293,6 +294,8 @@ package android.app {
   public class AppOpsManager {
     method public static java.lang.String[] getOpStrs();
     method public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, java.lang.String, int[]);
+    method public static java.lang.String opToPermission(java.lang.String);
+    method public void resetUidMode(java.lang.String, int, boolean);
     method public void setMode(java.lang.String, int, java.lang.String, int);
     method public void setUidMode(java.lang.String, int, int);
     field public static final java.lang.String OPSTR_ACCEPT_HANDOVER = "android:accept_handover";
@@ -802,6 +805,23 @@ package android.app.job {
 
 }
 
+package android.app.role {
+
+  public final class RoleManager {
+    method public void addRoleHolderAsUser(java.lang.String, java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
+    method public void clearRoleHoldersAsUser(java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
+    method public java.util.Set<java.lang.String> getRoleHoldersAsUser(java.lang.String, android.os.UserHandle);
+    method public void removeRoleHolderAsUser(java.lang.String, java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
+    field public static final java.lang.String EXTRA_REQUEST_ROLE_NAME = "android.app.role.extra.REQUEST_ROLE_NAME";
+  }
+
+  public abstract interface RoleManagerCallback {
+    method public abstract void onFailure();
+    method public abstract void onSuccess();
+  }
+
+}
+
 package android.app.usage {
 
   public final class CacheQuotaHint implements android.os.Parcelable {
@@ -1148,6 +1168,7 @@ package android.content.pm {
     method public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceiversAsUser(android.content.Intent, int, android.os.UserHandle);
     method public abstract void registerDexModule(java.lang.String, android.content.pm.PackageManager.DexModuleRegisterCallback);
     method public abstract void removeOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
+    method public void replacePreferredActivity(android.content.IntentFilter, int, java.util.List<android.content.ComponentName>, android.content.ComponentName);
     method public abstract void revokeRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract boolean setDefaultBrowserPackageNameAsUser(java.lang.String, int);
     method public void setHarmfulAppWarning(java.lang.String, java.lang.CharSequence);
@@ -4470,6 +4491,19 @@ package android.provider {
     field public static final java.lang.String TYPE_INSTALL = "INSTALL";
     field public static final java.lang.String TYPE_NO_OP = "NOOP";
     field public static final java.lang.String TYPE_UNINSTALL = "UNINSTALL";
+  }
+
+}
+
+package android.rolecontrollerservice {
+
+  public abstract class RoleControllerService extends android.app.Service {
+    ctor public RoleControllerService();
+    method public abstract void onAddRoleHolder(java.lang.String, java.lang.String, android.app.role.RoleManagerCallback);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract void onClearRoleHolders(java.lang.String, android.app.role.RoleManagerCallback);
+    method public abstract void onRemoveRoleHolder(java.lang.String, java.lang.String, android.app.role.RoleManagerCallback);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.rolecontrollerservice.RoleControllerService";
   }
 
 }
