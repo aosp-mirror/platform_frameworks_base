@@ -458,12 +458,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void setLastInputMethodWindowLw(WindowState ime,
-            WindowState target) {
-
-    }
-
-    @Override
     public void showRecentApps() {
 
     }
