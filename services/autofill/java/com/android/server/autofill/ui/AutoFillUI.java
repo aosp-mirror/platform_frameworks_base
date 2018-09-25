@@ -43,6 +43,8 @@ import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.server.LocalServices;
+import com.android.server.UiModeManagerInternal;
 import com.android.server.UiThread;
 import com.android.server.autofill.Helper;
 
@@ -69,6 +71,7 @@ public final class AutoFillUI {
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
     private final @NonNull OverlayControl mOverlayControl;
+    private final @NonNull UiModeManagerInternal mUiModeMgr;
 
     public interface AutoFillUiCallback {
         void authenticate(int requestId, int datasetIndex, @NonNull IntentSender intent,
@@ -86,6 +89,7 @@ public final class AutoFillUI {
     public AutoFillUI(@NonNull Context context) {
         mContext = context;
         mOverlayControl = new OverlayControl(context);
+        mUiModeMgr = LocalServices.getService(UiModeManagerInternal.class);
     }
 
     public void setCallback(@NonNull AutoFillUiCallback callback) {
@@ -193,7 +197,9 @@ public final class AutoFillUI {
             }
             hideAllUiThread(callback);
             mFillUi = new FillUi(mContext, response, focusedId,
-                    filterText, mOverlayControl, serviceLabel, serviceIcon, new FillUi.Callback() {
+                    filterText, mOverlayControl, serviceLabel, serviceIcon,
+                    mUiModeMgr.isNightMode(),
+                    new FillUi.Callback() {
                 @Override
                 public void onResponsePicked(FillResponse response) {
                     log.setType(MetricsEvent.TYPE_DETAIL);
@@ -332,7 +338,7 @@ public final class AutoFillUI {
                     }
                     mMetricsLogger.write(log);
                 }
-            }, isUpdate, compatMode);
+            }, mUiModeMgr.isNightMode(), isUpdate, compatMode);
         });
     }
 
@@ -368,6 +374,7 @@ public final class AutoFillUI {
         pw.println("Autofill UI");
         final String prefix = "  ";
         final String prefix2 = "    ";
+        pw.print(prefix); pw.print("Night mode: "); pw.println(mUiModeMgr.isNightMode());
         if (mFillUi != null) {
             pw.print(prefix); pw.println("showsFillUi: true");
             mFillUi.dump(pw, prefix2);

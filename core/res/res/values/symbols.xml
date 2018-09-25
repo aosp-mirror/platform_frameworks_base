@@ -3154,7 +3154,9 @@
   <java-symbol type="integer" name="autofill_max_visible_datasets" />
 
   <java-symbol type="style" name="Theme.DeviceDefault.Autofill" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Autofill" />
   <java-symbol type="style" name="Theme.DeviceDefault.Autofill.Save" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Autofill.Save" />
 
   <java-symbol type="dimen" name="notification_big_picture_max_height"/>
   <java-symbol type="dimen" name="notification_big_picture_max_width"/>

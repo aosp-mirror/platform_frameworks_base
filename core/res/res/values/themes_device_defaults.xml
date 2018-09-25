@@ -1681,11 +1681,14 @@ easier.
     </style>
 
 
-    <!-- @hide DeviceDefault theme for the autofill FillUi -->
-    <style name="Theme.DeviceDefault.Autofill" parent="Theme.DeviceDefault.Light"/>
+    <!-- @hide DeviceDefault themes for the autofill FillUi -->
+    <style name="Theme.DeviceDefault.Autofill" />
+    <style name="Theme.DeviceDefault.Light.Autofill" />
 
-    <!-- @hide DeviceDefault theme for the autofill SaveUi -->
-    <style name="Theme.DeviceDefault.Autofill.Save" parent="Theme.DeviceDefault.Light.Panel"/>
+    <!-- @hide DeviceDefault theme for the autofill SaveUi. NOTE: it must be a .Panel so the dialog
+         is shown at the bottom of the screen  -->
+    <style name="Theme.DeviceDefault.Autofill.Save" parent="Theme.DeviceDefault.Panel"/>
+    <style name="Theme.DeviceDefault.Light.Autofill.Save" parent="Theme.DeviceDefault.Light.Panel"/>
 
     <!-- DeviceDefault theme for the default system theme.  -->
     <style name="Theme.DeviceDefault.System" parent="Theme.DeviceDefault.Light.DarkActionBar" />
