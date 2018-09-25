@@ -51,6 +51,8 @@ import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
@@ -58,6 +60,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Content providers are one of the primary building blocks of Android applications, providing
@@ -221,7 +224,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         @Override
         public Cursor query(String callingPkg, Uri uri, @Nullable String[] projection,
                 @Nullable Bundle queryArgs, @Nullable ICancellationSignal cancellationSignal) {
-            validateIncomingUri(uri);
+            uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 // The caller has no access to the data, so return an empty cursor with
@@ -269,7 +272,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         @Override
         public String getType(Uri uri) {
             // getCallingPackage() isn't available in getType(), as the javadoc states.
-            validateIncomingUri(uri);
+            uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             Trace.traceBegin(TRACE_TAG_DATABASE, "getType");
             try {
@@ -281,7 +284,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         @Override
         public Uri insert(String callingPkg, Uri uri, ContentValues initialValues) {
-            validateIncomingUri(uri);
+            uri = validateIncomingUri(uri);
             int userId = getUserIdFromUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
@@ -304,7 +307,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         @Override
         public int bulkInsert(String callingPkg, Uri uri, ContentValues[] initialValues) {
-            validateIncomingUri(uri);
+            uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
@@ -328,11 +331,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             for (int i = 0; i < numOperations; i++) {
                 ContentProviderOperation operation = operations.get(i);
                 Uri uri = operation.getUri();
-                validateIncomingUri(uri);
-                userIds[i] = getUserIdFromUri(uri);
-                if (userIds[i] != UserHandle.USER_CURRENT) {
-                    // Removing the user id from the uri.
-                    operation = new ContentProviderOperation(operation, true);
+                uri = validateIncomingUri(uri);
+                uri = maybeGetUriWithoutUserId(uri);
+                // Rebuild operation if we changed the Uri above
+                if (!Objects.equals(operation.getUri(), uri)) {
+                    operation = new ContentProviderOperation(operation, uri);
                     operations.set(i, operation);
                 }
                 if (operation.isReadOperation()) {
@@ -369,7 +372,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         @Override
         public int delete(String callingPkg, Uri uri, String selection, String[] selectionArgs) {
-            validateIncomingUri(uri);
+            uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
@@ -387,7 +390,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         @Override
         public int update(String callingPkg, Uri uri, ContentValues values, String selection,
                 String[] selectionArgs) {
-            validateIncomingUri(uri);
+            uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
@@ -406,7 +409,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         public ParcelFileDescriptor openFile(
                 String callingPkg, Uri uri, String mode, ICancellationSignal cancellationSignal,
                 IBinder callerToken) throws FileNotFoundException {
-            validateIncomingUri(uri);
+            uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             enforceFilePermission(callingPkg, uri, mode, callerToken);
             Trace.traceBegin(TRACE_TAG_DATABASE, "openFile");
@@ -424,7 +427,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         public AssetFileDescriptor openAssetFile(
                 String callingPkg, Uri uri, String mode, ICancellationSignal cancellationSignal)
                 throws FileNotFoundException {
-            validateIncomingUri(uri);
+            uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             enforceFilePermission(callingPkg, uri, mode, null);
             Trace.traceBegin(TRACE_TAG_DATABASE, "openAssetFile");
@@ -455,7 +458,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         @Override
         public String[] getStreamTypes(Uri uri, String mimeTypeFilter) {
             // getCallingPackage() isn't available in getType(), as the javadoc states.
-            validateIncomingUri(uri);
+            uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             Trace.traceBegin(TRACE_TAG_DATABASE, "getStreamTypes");
             try {
@@ -469,7 +472,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         public AssetFileDescriptor openTypedAssetFile(String callingPkg, Uri uri, String mimeType,
                 Bundle opts, ICancellationSignal cancellationSignal) throws FileNotFoundException {
             Bundle.setDefusable(opts, true);
-            validateIncomingUri(uri);
+            uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             enforceFilePermission(callingPkg, uri, "r", null);
             Trace.traceBegin(TRACE_TAG_DATABASE, "openTypedAssetFile");
@@ -490,7 +493,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         @Override
         public Uri canonicalize(String callingPkg, Uri uri) {
-            validateIncomingUri(uri);
+            uri = validateIncomingUri(uri);
             int userId = getUserIdFromUri(uri);
             uri = getUriWithoutUserId(uri);
             if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
@@ -508,7 +511,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         @Override
         public Uri uncanonicalize(String callingPkg, Uri uri) {
-            validateIncomingUri(uri);
+            uri = validateIncomingUri(uri);
             int userId = getUserIdFromUri(uri);
             uri = getUriWithoutUserId(uri);
             if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
@@ -527,7 +530,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         @Override
         public boolean refresh(String callingPkg, Uri uri, Bundle args,
                 ICancellationSignal cancellationSignal) throws RemoteException {
-            validateIncomingUri(uri);
+            uri = validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
             if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return false;
@@ -1966,7 +1969,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
          */
         if (mContext == null) {
             mContext = context;
-            if (context != null) {
+            if (context != null && mTransport != null) {
                 mTransport.mAppOpsManager = (AppOpsManager) context.getSystemService(
                         Context.APP_OPS_SERVICE);
             }
@@ -2075,7 +2078,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     }
 
     /** @hide */
-    private void validateIncomingUri(Uri uri) throws SecurityException {
+    @VisibleForTesting
+    public Uri validateIncomingUri(Uri uri) throws SecurityException {
         String auth = uri.getAuthority();
         if (!mSingleUser) {
             int userId = getUserIdFromAuthority(auth, UserHandle.USER_CURRENT);
@@ -2093,6 +2097,15 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 message += Arrays.toString(mAuthorities);
             }
             throw new SecurityException(message);
+        }
+
+        // Normalize the path by removing any empty path segments, which can be
+        // a source of security issues.
+        final String encodedPath = uri.getEncodedPath();
+        if (encodedPath != null && encodedPath.indexOf("//") != -1) {
+            return uri.buildUpon().encodedPath(encodedPath.replaceAll("//+", "/")).build();
+        } else {
+            return uri;
         }
     }
 
