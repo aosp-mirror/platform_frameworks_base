@@ -27,6 +27,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -80,12 +81,14 @@ public class HdmiCecLocalDevicePlaybackTest {
         mNativeWrapper.setPhysicalAddress(mPlaybackPhysicalAddress);
     }
 
+    @Ignore
     @Test
     public void handleSetStreamPath_underCurrentDevice() {
         assertThat(mHdmiCecLocalDevicePlayback.getLocalActivePath()).isEqualTo(0);
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV, 0x2100);
         assertThat(mHdmiCecLocalDevicePlayback.handleSetStreamPath(message)).isTrue();
+        // TODO(amyjojo): Move set and get LocalActivePath to Control Service.
         assertThat(mHdmiCecLocalDevicePlayback.getLocalActivePath()).isEqualTo(1);
     }
 }
