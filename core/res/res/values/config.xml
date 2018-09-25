@@ -2913,4 +2913,8 @@
 
     <!-- An array of packages that need to be treated as type service in battery settings -->
     <string-array translatable="false" name="config_batteryPackageTypeService"/>
+
+    <!-- Component name for default assistant on this device -->
+    <string name="config_defaultAssistantComponentName">#+UNSET</string>
+
 </resources>
