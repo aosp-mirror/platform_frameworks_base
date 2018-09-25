@@ -28,6 +28,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -37,6 +38,7 @@ import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
@@ -975,6 +977,16 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 < NotificationManager.IMPORTANCE_DEFAULT) {
             if (DEBUG) {
                 Log.d(TAG, "No pulsing: not important enough: " + sbn.getKey());
+            }
+            return false;
+        }
+
+        Bundle extras = sbn.getNotification().extras;
+        CharSequence title = extras.getCharSequence(Notification.EXTRA_TITLE);
+        CharSequence text = extras.getCharSequence(Notification.EXTRA_TEXT);
+        if (TextUtils.isEmpty(title) && TextUtils.isEmpty(text)) {
+            if (DEBUG) {
+                Log.d(TAG, "No pulsing: title and text are empty: " + sbn.getKey());
             }
             return false;
         }
