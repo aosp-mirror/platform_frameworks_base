@@ -3285,8 +3285,8 @@ public class SettingsProvider extends ContentProvider {
                 if (currentVersion == 133) {
                     // Version 133: Add default end button behavior
                     final SettingsState systemSettings = getSystemSettingsLocked(userId);
-                    if (systemSettings.getSettingLocked(Settings.System.END_BUTTON_BEHAVIOR) ==
-                            null) {
+                    if (systemSettings.getSettingLocked(Settings.System.END_BUTTON_BEHAVIOR)
+                            .isNull()) {
                         String defaultEndButtonBehavior = Integer.toString(getContext()
                                 .getResources().getInteger(R.integer.def_end_button_behavior));
                         systemSettings.insertSettingLocked(Settings.System.END_BUTTON_BEHAVIOR,
