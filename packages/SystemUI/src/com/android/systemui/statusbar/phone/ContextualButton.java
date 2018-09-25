@@ -67,9 +67,15 @@ public class ContextualButton extends ButtonDispatcher {
     }
 
     protected KeyButtonDrawable getNewDrawable() {
-        return KeyButtonDrawable.create(getContext(), mIconResId, false /* shadow */);
+        return KeyButtonDrawable.create(getContext().getApplicationContext(), mIconResId,
+                false /* shadow */);
     }
 
+    /**
+     * This context is from the view that could be stale after rotation or config change. To get
+     * correct resources use getApplicationContext() as well.
+     * @return current view context
+     */
     protected Context getContext() {
         return getCurrentView().getContext();
     }
