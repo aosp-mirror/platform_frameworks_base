@@ -96,6 +96,7 @@ import java.util.Arrays;
  * <p>For more information about using content providers, read the
  * <a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>
  * developer guide.</p>
+ * </div>
  */
 public abstract class ContentProvider implements ComponentCallbacks2 {
 
