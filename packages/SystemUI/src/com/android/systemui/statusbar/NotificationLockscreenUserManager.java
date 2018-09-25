@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar;
 
 import android.app.ActivityManager;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -37,12 +38,15 @@ import android.util.SparseBooleanArray;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.OverviewProxyService;
+import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import java.io.FileDescriptor;
@@ -52,7 +56,7 @@ import java.io.PrintWriter;
  * Handles keeping track of the current user, profiles, and various things related to hiding
  * contents, redacting notifications, and the lockscreen.
  */
-public class NotificationLockscreenUserManager implements Dumpable {
+public class NotificationLockscreenUserManager implements Dumpable, StateListener {
     private static final String TAG = "LockscreenUserManager";
     private static final boolean ENABLE_LOCK_SCREEN_ALLOW_REMOTE_INPUT = false;
     public static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
@@ -67,9 +71,13 @@ public class NotificationLockscreenUserManager implements Dumpable {
             Dependency.get(DeviceProvisionedController.class);
     private final UserManager mUserManager;
     private final IStatusBarService mBarService;
+    private final LockPatternUtils mLockPatternUtils;
+    private final KeyguardManager mKeyguardManager;
+    private StatusBarKeyguardViewManager mKeyguardViewManager;
 
     private boolean mShowLockscreenNotifications;
     private boolean mAllowLockscreenRemoteInput;
+    private int mState = StatusBarState.SHADE;
 
     protected final BroadcastReceiver mAllUsersReceiver = new BroadcastReceiver() {
         @Override
@@ -84,7 +92,9 @@ public class NotificationLockscreenUserManager implements Dumpable {
                 mEntryManager.updateNotifications();
             } else if (Intent.ACTION_DEVICE_LOCKED_CHANGED.equals(action)) {
                 if (userId != mCurrentUserId && isCurrentProfile(userId)) {
+                    updatePublicMode();
                     mPresenter.onWorkChallengeChanged();
+                    mEntryManager.updateNotifications();
                 }
             }
         }
@@ -100,8 +110,9 @@ public class NotificationLockscreenUserManager implements Dumpable {
                 Log.v(TAG, "userId " + mCurrentUserId + " is in the house");
 
                 updateLockscreenNotificationSetting();
-
+                updatePublicMode();
                 mPresenter.onUserSwitched(mCurrentUserId);
+                mEntryManager.getNotificationData().filterAndSort();
             } else if (Intent.ACTION_USER_ADDED.equals(action)) {
                 updateCurrentProfilesCache();
             } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
@@ -150,6 +161,9 @@ public class NotificationLockscreenUserManager implements Dumpable {
         mCurrentUserId = ActivityManager.getCurrentUser();
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+        mLockPatternUtils = new LockPatternUtils(mContext);
+        mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        Dependency.get(StatusBarStateController.class).addListener(this);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -236,6 +250,43 @@ public class NotificationLockscreenUserManager implements Dumpable {
     public boolean isCurrentProfile(int userId) {
         synchronized (mCurrentProfiles) {
             return userId == UserHandle.USER_ALL || mCurrentProfiles.get(userId) != null;
+        }
+    }
+
+    public void setKeyguardViewManager(StatusBarKeyguardViewManager sbkvm) {
+        mKeyguardViewManager = sbkvm;
+    }
+
+    @Override
+    public void onStateChanged(int newState) {
+        mState = newState;
+        updatePublicMode();
+    }
+
+    public void updatePublicMode() {
+        //TODO: I think there may be a race condition where mKeyguardViewManager.isShowing() returns
+        // false when it should be true. Therefore, if we are not on the SHADE, don't even bother
+        // asking if the keyguard is showing. We still need to check it though because showing the
+        // camera on the keyguard has a state of SHADE but the keyguard is still showing.
+        boolean showingKeyguard = mState != StatusBarState.SHADE
+                || mKeyguardViewManager.isShowing();
+        boolean devicePublic = showingKeyguard && mKeyguardViewManager.isSecure(getCurrentUserId());
+
+        SparseArray<UserInfo> currentProfiles = getCurrentProfiles();
+        for (int i = currentProfiles.size() - 1; i >= 0; i--) {
+            final int userId = currentProfiles.valueAt(i).id;
+            boolean isProfilePublic = devicePublic;
+            if (!devicePublic && userId != mCurrentUserId) {
+                // We can't rely on KeyguardManager#isDeviceLocked() for unified profile challenge
+                // due to a race condition where this code could be called before
+                // TrustManagerService updates its internal records, resulting in an incorrect
+                // state being cached in mLockscreenPublicMode. (b/35951989)
+                if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)
+                        && mKeyguardViewManager.isSecure(userId)) {
+                    isProfilePublic = mKeyguardManager.isDeviceLocked(userId);
+                }
+            }
+            setLockscreenPublicMode(isProfilePublic, userId);
         }
     }
 

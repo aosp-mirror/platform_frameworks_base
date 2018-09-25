@@ -40,8 +40,11 @@ import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import android.util.Log;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import com.google.android.collect.Lists;
@@ -61,7 +64,9 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
     // Dependency mocks:
     @Mock private NotificationEntryManager mEntryManager;
+    @Mock private NotificationData mNotificationData;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
+    @Mock private StatusBarKeyguardViewManager mKeyguardViewManager;
 
     private int mCurrentUserId;
     private TestNotificationLockscreenUserManager mLockscreenUserManager;
@@ -79,9 +84,11 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         when(mUserManager.getProfiles(mCurrentUserId)).thenReturn(Lists.newArrayList(
                 new UserInfo(mCurrentUserId, "", 0), new UserInfo(mCurrentUserId + 1, "", 0)));
         when(mPresenter.getHandler()).thenReturn(Handler.createAsync(Looper.myLooper()));
+        when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 
         mLockscreenUserManager = new TestNotificationLockscreenUserManager(mContext);
         mLockscreenUserManager.setUpWithPresenter(mPresenter, mEntryManager);
+        mLockscreenUserManager.setKeyguardViewManager(mKeyguardViewManager);
     }
 
     @Test
