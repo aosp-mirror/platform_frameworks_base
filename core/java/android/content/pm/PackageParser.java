@@ -40,7 +40,6 @@ import static android.os.Build.VERSION_CODES.O;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 
-import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -73,6 +72,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
+import android.permission.PermissionManager;
 import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.system.StructStat;
@@ -258,19 +258,6 @@ public class PackageParser {
         }
     }
 
-    /** @hide */
-    public static class SplitPermissionInfo {
-        public final String rootPerm;
-        public final String[] newPerms;
-        public final int targetSdk;
-
-        public SplitPermissionInfo(String rootPerm, String[] newPerms, int targetSdk) {
-            this.rootPerm = rootPerm;
-            this.newPerms = newPerms;
-            this.targetSdk = targetSdk;
-        }
-    }
-
     /**
      * List of new permissions that have been added since 1.0.
      * NOTE: These must be declared in SDK version order, with permissions
@@ -287,34 +274,6 @@ public class PackageParser {
                     android.os.Build.VERSION_CODES.DONUT, 0),
             new PackageParser.NewPermissionInfo(android.Manifest.permission.READ_PHONE_STATE,
                     android.os.Build.VERSION_CODES.DONUT, 0)
-    };
-
-    /**
-     * List of permissions that have been split into more granular or dependent
-     * permissions.
-     * @hide
-     */
-    public static final PackageParser.SplitPermissionInfo SPLIT_PERMISSIONS[] =
-        new PackageParser.SplitPermissionInfo[] {
-            // READ_EXTERNAL_STORAGE is always required when an app requests
-            // WRITE_EXTERNAL_STORAGE, because we can't have an app that has
-            // write access without read access.  The hack here with the target
-            // target SDK version ensures that this grant is always done.
-            new PackageParser.SplitPermissionInfo(android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    new String[] { android.Manifest.permission.READ_EXTERNAL_STORAGE },
-                    android.os.Build.VERSION_CODES.CUR_DEVELOPMENT+1),
-            new PackageParser.SplitPermissionInfo(android.Manifest.permission.READ_CONTACTS,
-                    new String[] { android.Manifest.permission.READ_CALL_LOG },
-                    android.os.Build.VERSION_CODES.JELLY_BEAN),
-            new PackageParser.SplitPermissionInfo(android.Manifest.permission.WRITE_CONTACTS,
-                    new String[] { android.Manifest.permission.WRITE_CALL_LOG },
-                    android.os.Build.VERSION_CODES.JELLY_BEAN),
-            new PackageParser.SplitPermissionInfo(Manifest.permission.ACCESS_FINE_LOCATION,
-                    new String[] { android.Manifest.permission.ACCESS_BACKGROUND_LOCATION },
-                    android.os.Build.VERSION_CODES.P0),
-            new PackageParser.SplitPermissionInfo(Manifest.permission.ACCESS_COARSE_LOCATION,
-                    new String[] { android.Manifest.permission.ACCESS_BACKGROUND_LOCATION },
-                    android.os.Build.VERSION_CODES.P0),
     };
 
     /**
@@ -2474,16 +2433,18 @@ public class PackageParser {
             Slog.i(TAG, implicitPerms.toString());
         }
 
-        final int NS = PackageParser.SPLIT_PERMISSIONS.length;
+
+        final int NS = PermissionManager.SPLIT_PERMISSIONS.length;
         for (int is=0; is<NS; is++) {
-            final PackageParser.SplitPermissionInfo spi
-                    = PackageParser.SPLIT_PERMISSIONS[is];
-            if (pkg.applicationInfo.targetSdkVersion >= spi.targetSdk
-                    || !pkg.requestedPermissions.contains(spi.rootPerm)) {
+            final PermissionManager.SplitPermissionInfo spi =
+                    PermissionManager.SPLIT_PERMISSIONS[is];
+            if (pkg.applicationInfo.targetSdkVersion >= spi.getTargetSdk()
+                    || !pkg.requestedPermissions.contains(spi.getRootPermission())) {
                 continue;
             }
-            for (int in=0; in<spi.newPerms.length; in++) {
-                final String perm = spi.newPerms[in];
+            final String[] newPerms = spi.getNewPermissions();
+            for (int in = 0; in < newPerms.length; in++) {
+                final String perm = newPerms[in];
                 if (!pkg.requestedPermissions.contains(perm)) {
                     pkg.requestedPermissions.add(perm);
                 }

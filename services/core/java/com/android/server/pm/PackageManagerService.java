@@ -232,6 +232,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
+import android.permission.PermissionManager;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.security.KeyStore;
@@ -2912,13 +2913,15 @@ public class PackageManagerService extends IPackageManager.Stub
             if (mIsUpgrade) {
                 final int callingUid = getCallingUid();
 
-                final int numSplitPerms = PackageParser.SPLIT_PERMISSIONS.length;
+                final List<PermissionManager.SplitPermissionInfo> splitPermissions =
+                        mContext.getSystemService(PermissionManager.class).getSplitPermissions();
+                final int numSplitPerms = splitPermissions.size();
                 for (int splitPermNum = 0; splitPermNum < numSplitPerms; splitPermNum++) {
-                    final PackageParser.SplitPermissionInfo splitPerm =
-                            PackageParser.SPLIT_PERMISSIONS[splitPermNum];
-                    final String rootPerm = splitPerm.rootPerm;
+                    final PermissionManager.SplitPermissionInfo splitPerm =
+                            splitPermissions.get(splitPermNum);
+                    final String rootPerm = splitPerm.getRootPermission();
 
-                    if (preUpgradeSdkVersion >= splitPerm.targetSdk) {
+                    if (preUpgradeSdkVersion >= splitPerm.getTargetSdk()) {
                         continue;
                     }
 
@@ -2926,7 +2929,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     for (int packageNum = 0; packageNum < numPackages; packageNum++) {
                         final PackageParser.Package pkg = mPackages.valueAt(packageNum);
 
-                        if (pkg.applicationInfo.targetSdkVersion >= splitPerm.targetSdk
+                        if (pkg.applicationInfo.targetSdkVersion >= splitPerm.getTargetSdk()
                                 || !pkg.requestedPermissions.contains(rootPerm)) {
                             continue;
                         }
@@ -2938,7 +2941,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             continue;
                         }
 
-                        final String[] newPerms = splitPerm.newPerms;
+                        final String[] newPerms = splitPerm.getNewPermissions();
 
                         final int numNewPerms = newPerms.length;
                         for (int newPermNum = 0; newPermNum < numNewPerms; newPermNum++) {
