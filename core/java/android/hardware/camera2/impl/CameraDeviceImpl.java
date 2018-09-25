@@ -1889,7 +1889,7 @@ public class CameraDeviceImpl extends CameraDevice
             final long ident = Binder.clearCallingIdentity();
             try {
                 CameraDeviceImpl.this.mDeviceExecutor.execute(obtainRunnable(
-                            CameraDeviceCallbacks::notifyError, this, code));
+                            CameraDeviceCallbacks::notifyError, this, code).recycleOnUse());
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
