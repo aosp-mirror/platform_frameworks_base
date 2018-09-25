@@ -159,29 +159,18 @@ public final class RemoteDisplayProviderWatcher {
                     + serviceInfo.packageName + "/" + serviceInfo.name);
             return false;
         }
-        if (!hasCaptureVideoPermission(serviceInfo.packageName)) {
-            // If the service does not have permission to capture video then it
-            // isn't going to be terribly useful as a remote display, is it?
-            // Kind of makes you wonder what it's doing there in the first place.
+        if (mPackageManager.checkPermission(Manifest.permission.REMOTE_DISPLAY_PROVIDER,
+                        serviceInfo.packageName) != PackageManager.PERMISSION_GRANTED) {
+            // If the service does not have this permission then the system will not bind to it.
+            // This is to prevent non privileged apps declaring themselves as remote display
+            // providers just to be bound to by the system and keep their process alive.
             Slog.w(TAG, "Ignoring remote display provider service because it does not "
-                    + "have the CAPTURE_VIDEO_OUTPUT or CAPTURE_SECURE_VIDEO_OUTPUT "
+                    + "have the REMOTE_DISPLAY_PROVIDER "
                     + "permission: " + serviceInfo.packageName + "/" + serviceInfo.name);
             return false;
         }
         // Looks good.
         return true;
-    }
-
-    private boolean hasCaptureVideoPermission(String packageName) {
-        if (mPackageManager.checkPermission(Manifest.permission.CAPTURE_VIDEO_OUTPUT,
-                packageName) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (mPackageManager.checkPermission(Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT,
-                packageName) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        return false;
     }
 
     private int findProvider(String packageName, String className) {
