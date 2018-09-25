@@ -47,11 +47,11 @@ class unique_cptr {
   constexpr unique_cptr() : ptr_(nullptr) {}
   constexpr unique_cptr(std::nullptr_t) : ptr_(nullptr) {}
   explicit unique_cptr(pointer ptr) : ptr_(ptr) {}
-  unique_cptr(unique_cptr&& o) : ptr_(o.ptr_) { o.ptr_ = nullptr; }
+  unique_cptr(unique_cptr&& o) noexcept : ptr_(o.ptr_) { o.ptr_ = nullptr; }
 
   ~unique_cptr() { std::free(reinterpret_cast<void*>(ptr_)); }
 
-  inline unique_cptr& operator=(unique_cptr&& o) {
+  inline unique_cptr& operator=(unique_cptr&& o) noexcept {
     if (&o == this) {
       return *this;
     }
