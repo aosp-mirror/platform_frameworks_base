@@ -29,8 +29,6 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 
-import androidx.annotation.VisibleForTesting;
-
 import com.android.settingslib.R;
 
 import java.util.ArrayList;
@@ -38,6 +36,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+
+import androidx.annotation.VisibleForTesting;
 
 /**
  * CachedBluetoothDevice represents a remote Bluetooth device. It contains
@@ -47,6 +47,10 @@ import java.util.List;
  */
 public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> {
     private static final String TAG = "CachedBluetoothDevice";
+
+    // See mConnectAttempted
+    private static final long MAX_UUID_DELAY_FOR_AUTO_CONNECT = 5000;
+    private static final long MAX_HOGP_DELAY_FOR_AUTO_CONNECT = 30000;
 
     private final Context mContext;
     private final BluetoothAdapter mLocalAdapter;
@@ -78,17 +82,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     private final static String MESSAGE_REJECTION_COUNT_PREFS_NAME = "bluetooth_message_reject";
 
-    public long getHiSyncId() {
-        return mHiSyncId;
-    }
-
-    public void setHiSyncId(long id) {
-        if (BluetoothUtils.D) {
-            Log.d(TAG, "setHiSyncId: mDevice " + mDevice + ", id " + id);
-        }
-        mHiSyncId = id;
-    }
-
     /**
      * Last time a bt profile auto-connect was attempted.
      * If an ACTION_UUID intent comes in within
@@ -97,14 +90,22 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      */
     private long mConnectAttempted;
 
-    // See mConnectAttempted
-    private static final long MAX_UUID_DELAY_FOR_AUTO_CONNECT = 5000;
-    private static final long MAX_HOGP_DELAY_FOR_AUTO_CONNECT = 30000;
-
     // Active device state
     private boolean mIsActiveDeviceA2dp = false;
     private boolean mIsActiveDeviceHeadset = false;
     private boolean mIsActiveDeviceHearingAid = false;
+
+    CachedBluetoothDevice(Context context, LocalBluetoothProfileManager profileManager,
+            BluetoothDevice device) {
+        mContext = context;
+        mLocalAdapter = BluetoothAdapter.getDefaultAdapter();
+        mProfileManager = profileManager;
+        mDevice = device;
+        mProfileConnectionState = new HashMap<>();
+        fillData();
+        mHiSyncId = BluetoothHearingAid.HI_SYNC_ID_INVALID;
+    }
+
     /**
      * Describes the current device and profile for logging.
      *
@@ -161,18 +162,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         fetchActiveDevices();
     }
 
-    CachedBluetoothDevice(Context context,
-                          LocalBluetoothProfileManager profileManager,
-                          BluetoothDevice device) {
-        mContext = context;
-        mLocalAdapter = BluetoothAdapter.getDefaultAdapter();
-        mProfileManager = profileManager;
-        mDevice = device;
-        mProfileConnectionState = new HashMap<LocalBluetoothProfile, Integer>();
-        fillData();
-        mHiSyncId = BluetoothHearingAid.HI_SYNC_ID_INVALID;
-    }
-
     public void disconnect() {
         for (LocalBluetoothProfile profile : mProfiles) {
             disconnect(profile);
@@ -202,6 +191,17 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
         mConnectAttempted = SystemClock.elapsedRealtime();
         connectWithoutResettingTimer(connectAllProfiles);
+    }
+
+    public long getHiSyncId() {
+        return mHiSyncId;
+    }
+
+    public void setHiSyncId(long id) {
+        if (BluetoothUtils.D) {
+            Log.d(TAG, "setHiSyncId: mDevice " + mDevice + ", id " + id);
+        }
+        mHiSyncId = id;
     }
 
     void onBondingDockConnect() {
@@ -298,14 +298,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
 
         return true;
-    }
-
-    /**
-     * Return true if user initiated pairing on this device. The message text is
-     * slightly different for local vs. remote initiated pairing dialogs.
-     */
-    boolean isUserInitiatedPairing() {
-        return mDevice.isBondingInitiatedLocally();
     }
 
     public void unpair() {
