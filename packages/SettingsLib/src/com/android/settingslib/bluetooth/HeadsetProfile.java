@@ -106,7 +106,7 @@ public class HeadsetProfile implements LocalBluetoothProfile {
                 BluetoothProfile.HEADSET);
     }
 
-    public boolean isConnectable() {
+    public boolean accessProfileEnabled() {
         return true;
     }
 

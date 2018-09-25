@@ -107,7 +107,7 @@ final class HfpClientProfile implements LocalBluetoothProfile {
     }
 
     @Override
-    public boolean isConnectable() {
+    public boolean accessProfileEnabled() {
         return true;
     }
 
