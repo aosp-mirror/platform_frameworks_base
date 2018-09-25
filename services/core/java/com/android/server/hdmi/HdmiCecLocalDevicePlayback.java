@@ -48,8 +48,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     private static final boolean SET_MENU_LANGUAGE =
             SystemProperties.getBoolean(Constants.PROPERTY_SET_MENU_LANGUAGE, false);
 
-    private boolean mIsActiveSource = false;
-
     // Used to keep the device awake while it is the active source. For devices that
     // cannot wake up via CEC commands, this address the inconvenience of having to
     // turn them on. True by default, and can be disabled (i.e. device can go to sleep
@@ -218,53 +216,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         assertRunOnServiceThread();
         wakeUpIfActiveSource();
         return super.handleUserControlPressed(message);
-    }
-
-    @Override
-    @ServiceThreadOnly
-    protected boolean handleSetStreamPath(HdmiCecMessage message) {
-        assertRunOnServiceThread();
-        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
-        // If current device is the target path, set to Active Source.
-        // If the path is under the current device, should switch
-        int port = getLocalPortFromPhysicalAddress(physicalAddress);
-        if (port == 0) {
-            setIsActiveSource(true);
-            maySendActiveSource(message.getSource());
-            wakeUpIfActiveSource();
-        } else if (port > 0) {
-            // Wake up the device if the power is in standby mode for routing
-            if (mService.isPowerStandbyOrTransient()) {
-                mService.wakeUp();
-            }
-            routeToPort(port);
-        }
-        return true;
-    }
-
-    // Samsung model we tested sends <Routing Change> and <Request Active Source>
-    // in a row, and then changes the input to the internal source if there is no
-    // <Active Source> in response. To handle this, we'll set ActiveSource aggressively.
-    @Override
-    @ServiceThreadOnly
-    protected boolean handleRoutingChange(HdmiCecMessage message) {
-        assertRunOnServiceThread();
-        int newPath = HdmiUtils.twoBytesToInt(message.getParams(), 2);
-        maySetActiveSource(newPath);
-        return true;  // Broadcast message.
-    }
-
-    @Override
-    @ServiceThreadOnly
-    protected boolean handleRoutingInformation(HdmiCecMessage message) {
-        assertRunOnServiceThread();
-        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
-        maySetActiveSource(physicalAddress);
-        return true;  // Broadcast message.
-    }
-
-    private void maySetActiveSource(int physicalAddress) {
-        setIsActiveSource(physicalAddress == mService.getPhysicalAddress());
     }
 
     @Override

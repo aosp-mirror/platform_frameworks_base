@@ -41,7 +41,7 @@ public class SystemAudioInitiationActionFromAvr extends HdmiCecFeatureAction {
 
     @Override
     boolean start() {
-        if (audioSystem().mActiveSource.physicalAddress == Constants.INVALID_PHYSICAL_ADDRESS) {
+        if (audioSystem().getActiveSource().physicalAddress == Constants.INVALID_PHYSICAL_ADDRESS) {
             mState = STATE_WAITING_FOR_ACTIVE_SOURCE;
             addTimer(mState, HdmiConfig.TIMEOUT_MS);
             sendRequestActiveSource();
@@ -60,10 +60,8 @@ public class SystemAudioInitiationActionFromAvr extends HdmiCecFeatureAction {
                     return false;
                 }
                 mActionTimer.clearTimerMessage();
-                int physicalAddress = HdmiUtils.twoBytesToInt(cmd.getParams());
-                if (physicalAddress != getSourcePath()) {
-                    audioSystem().setActiveSource(cmd.getSource(), physicalAddress);
-                }
+                // Broadcast message is also handled by other device types
+                audioSystem().handleActiveSource(cmd);
                 mState = STATE_WAITING_FOR_TV_SUPPORT;
                 queryTvSystemAudioModeSupport();
                 return true;

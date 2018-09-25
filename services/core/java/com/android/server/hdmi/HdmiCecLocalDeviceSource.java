@@ -37,7 +37,8 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     private static final String TAG = "HdmiCecLocalDeviceSource";
 
     // Indicate if current device is Active Source or not
-    private boolean mIsActiveSource = false;
+    @VisibleForTesting
+    protected boolean mIsActiveSource = false;
 
     // Device has cec switch functionality or not.
     // Default is false.
@@ -113,7 +114,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         int logicalAddress = message.getSource();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
         ActiveSource activeSource = ActiveSource.of(logicalAddress, physicalAddress);
-        if (!mActiveSource.equals(activeSource)) {
+        if (!getActiveSource().equals(activeSource)) {
             setActiveSource(activeSource);
         }
         setIsActiveSource(physicalAddress == mService.getPhysicalAddress());
@@ -185,37 +186,19 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         // do nothing
     }
 
-    // Active source claiming needs to be handled in the parent class
-    // since we decide who will be the active source when the device supports
+    // Active source claiming needs to be handled in Service
+    // since service can decide who will be the active source when the device supports
     // multiple device types in this method.
     // This method should only be called when the device can be the active source.
     protected void setAndBroadcastActiveSource(HdmiCecMessage message, int physicalAddress) {
-        // If the device has both playback and audio system logical addresses,
-        // playback will claim active source. Otherwise audio system will.
-        HdmiCecLocalDevice deviceToBeActiveSource = mService.playback();
-        if (deviceToBeActiveSource == null) {
-            deviceToBeActiveSource = mService.audioSystem();
-        }
-        if (this == deviceToBeActiveSource) {
-            ActiveSource activeSource = ActiveSource.of(mAddress, physicalAddress);
-            setIsActiveSource(true);
-            setActiveSource(activeSource);
-            wakeUpIfActiveSource();
-            maySendActiveSource(message.getSource());
-        }
+        mService.setAndBroadcastActiveSource(
+                message, physicalAddress, getDeviceInfo().getDeviceType());
     }
 
     @ServiceThreadOnly
     void setIsActiveSource(boolean on) {
         assertRunOnServiceThread();
         mIsActiveSource = on;
-    }
-
-    @ServiceThreadOnly
-    // Check if current device is the Active Source
-    boolean isActiveSource() {
-        assertRunOnServiceThread();
-        return mIsActiveSource;
     }
 
     protected void wakeUpIfActiveSource() {
