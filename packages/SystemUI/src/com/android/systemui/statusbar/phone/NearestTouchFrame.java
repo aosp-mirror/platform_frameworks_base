@@ -95,6 +95,9 @@ public class NearestTouchFrame extends FrameLayout {
     }
 
     private View findNearestChild(MotionEvent event) {
+        if (mClickableChildren.isEmpty()) {
+            return null;
+        }
         return mClickableChildren
                 .stream()
                 .filter(v -> v.isAttachedToWindow())
