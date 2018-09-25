@@ -2091,10 +2091,37 @@ public class TelephonyManager {
 
     /** Max network type number. Update as new types are added. Don't add negative types. {@hide} */
     public static final int MAX_NETWORK_TYPE = NETWORK_TYPE_LTE_CA;
+
+    /** @hide */
+    @IntDef({
+            NETWORK_TYPE_UNKNOWN,
+            NETWORK_TYPE_GPRS,
+            NETWORK_TYPE_EDGE,
+            NETWORK_TYPE_UMTS,
+            NETWORK_TYPE_CDMA,
+            NETWORK_TYPE_EVDO_0,
+            NETWORK_TYPE_EVDO_A,
+            NETWORK_TYPE_1xRTT,
+            NETWORK_TYPE_HSDPA,
+            NETWORK_TYPE_HSUPA,
+            NETWORK_TYPE_HSPA,
+            NETWORK_TYPE_IDEN,
+            NETWORK_TYPE_EVDO_B,
+            NETWORK_TYPE_LTE,
+            NETWORK_TYPE_EHRPD,
+            NETWORK_TYPE_HSPAP,
+            NETWORK_TYPE_GSM,
+            NETWORK_TYPE_TD_SCDMA,
+            NETWORK_TYPE_IWLAN,
+            NETWORK_TYPE_LTE_CA,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NetworkType{}
+
     /**
      * @return the NETWORK_TYPE_xxxx for current data connection.
      */
-    public int getNetworkType() {
+    public @NetworkType int getNetworkType() {
        try {
            ITelephony telephony = getITelephony();
            if (telephony != null) {
@@ -2139,24 +2166,24 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-   @UnsupportedAppUsage
-   public int getNetworkType(int subId) {
-       try {
-           ITelephony telephony = getITelephony();
-           if (telephony != null) {
-               return telephony.getNetworkTypeForSubscriber(subId, getOpPackageName());
-           } else {
-               // This can happen when the ITelephony interface is not up yet.
-               return NETWORK_TYPE_UNKNOWN;
-           }
-       } catch(RemoteException ex) {
-           // This shouldn't happen in the normal case
-           return NETWORK_TYPE_UNKNOWN;
-       } catch (NullPointerException ex) {
-           // This could happen before phone restarts due to crashing
-           return NETWORK_TYPE_UNKNOWN;
-       }
-   }
+    @UnsupportedAppUsage
+    public int getNetworkType(int subId) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getNetworkTypeForSubscriber(subId, getOpPackageName());
+            } else {
+                // This can happen when the ITelephony interface is not up yet.
+                return NETWORK_TYPE_UNKNOWN;
+            }
+        } catch (RemoteException ex) {
+            // This shouldn't happen in the normal case
+            return NETWORK_TYPE_UNKNOWN;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return NETWORK_TYPE_UNKNOWN;
+        }
+    }
 
     /**
      * Returns a constant indicating the radio technology (network type)
@@ -2189,7 +2216,7 @@ public class TelephonyManager {
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public int getDataNetworkType() {
+    public @NetworkType int getDataNetworkType() {
         return getDataNetworkType(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
     }
 
@@ -2229,7 +2256,7 @@ public class TelephonyManager {
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public int getVoiceNetworkType() {
+    public @NetworkType int getVoiceNetworkType() {
         return getVoiceNetworkType(getSubId());
     }
 
