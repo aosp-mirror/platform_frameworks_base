@@ -1079,18 +1079,39 @@ public final class PowerManagerService extends SystemService
         return false;
     }
 
+    private static WorkChain getFirstNonEmptyWorkChain(WorkSource workSource) {
+        if (workSource.getWorkChains() == null) {
+            return null;
+        }
+
+        for (WorkChain workChain: workSource.getWorkChains()) {
+            if (workChain.getSize() > 0) {
+                return workChain;
+            }
+        }
+
+        return null;
+    }
+
     private void applyWakeLockFlagsOnAcquireLocked(WakeLock wakeLock, int uid) {
         if ((wakeLock.mFlags & PowerManager.ACQUIRE_CAUSES_WAKEUP) != 0
                 && isScreenLock(wakeLock)) {
             String opPackageName;
             int opUid;
-            if (wakeLock.mWorkSource != null && wakeLock.mWorkSource.getName(0) != null) {
-                opPackageName = wakeLock.mWorkSource.getName(0);
-                opUid = wakeLock.mWorkSource.get(0);
+            if (wakeLock.mWorkSource != null && !wakeLock.mWorkSource.isEmpty()) {
+                WorkSource workSource = wakeLock.mWorkSource;
+                WorkChain workChain = getFirstNonEmptyWorkChain(workSource);
+                if (workChain != null) {
+                    opPackageName = workChain.getAttributionTag();
+                    opUid = workChain.getAttributionUid();
+                } else {
+                    opPackageName = workSource.getName(0) != null
+                            ? workSource.getName(0) : wakeLock.mPackageName;
+                    opUid = workSource.get(0);
+                }
             } else {
                 opPackageName = wakeLock.mPackageName;
-                opUid = wakeLock.mWorkSource != null ? wakeLock.mWorkSource.get(0)
-                        : wakeLock.mOwnerUid;
+                opUid = wakeLock.mOwnerUid;
             }
             wakeUpNoUpdateLocked(SystemClock.uptimeMillis(), wakeLock.mTag, opUid,
                     opPackageName, opUid);
