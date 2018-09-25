@@ -115,6 +115,12 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      */
     public static final int SHOW_SOURCE_PUSH_TO_TALK = 1 << 5;
 
+    /**
+     * Flag for use with {@link #onShow}: indicates that the voice interaction service was invoked
+     * from a notification.
+     */
+    public static final int SHOW_SOURCE_NOTIFICATION = 1 << 6;
+
     final Context mContext;
     final HandlerCaller mHandlerCaller;
 
