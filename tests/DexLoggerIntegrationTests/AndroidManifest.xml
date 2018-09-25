@@ -17,10 +17,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.frameworks.dexloggertest">
 
-    <!-- Tests feature introduced in P (27) -->
+    <!-- Tests feature introduced in P (28) -->
     <uses-sdk
-        android:minSdkVersion="27"
-        android:targetSdkVersion="27" />
+        android:minSdkVersion="28"
+        android:targetSdkVersion="28" />
 
     <uses-permission android:name="android.permission.READ_LOGS" />
 
