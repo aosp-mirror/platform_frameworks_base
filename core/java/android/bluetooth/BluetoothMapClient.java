@@ -73,6 +73,8 @@ public final class BluetoothMapClient implements BluetoothProfile {
     /** Connection canceled before completion. */
     public static final int RESULT_CANCELED = 2;
 
+    private static final int UPLOADING_FEATURE_BITMASK = 0x08;
+
     private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
             new IBluetoothStateChangeCallback.Stub() {
                 public void onBluetoothStateChange(boolean up) {
@@ -391,6 +393,23 @@ public final class BluetoothMapClient implements BluetoothProfile {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return false;
             }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the "Uploading" feature bit value from the SDP record's
+     * MapSupportedFeatures field (see Bluetooth MAP 1.4 spec, page 114).
+     * @param device The Bluetooth device to get this value for.
+     * @return Returns true if the Uploading bit value in SDP record's
+     *         MapSupportedFeatures field is set. False is returned otherwise.
+     */
+    public boolean isUploadingSupported(BluetoothDevice device) {
+        try {
+            return (mService != null && isEnabled() && isValidDevice(device))
+                && ((mService.getSupportedFeatures(device) & UPLOADING_FEATURE_BITMASK) > 0);
+        } catch (RemoteException e) {
+            Log.e(TAG, e.getMessage());
         }
         return false;
     }
