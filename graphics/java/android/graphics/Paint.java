@@ -592,49 +592,6 @@ public class Paint {
         mShadowLayerColor = paint.mShadowLayerColor;
     }
 
-    /**
-     * Returns true if all attributes are equal.
-     *
-     * The caller is expected to have checked the trivial cases, like the pointers being equal,
-     * the objects having different classes, or the parameter being null.
-     * @hide
-     */
-    public boolean hasEqualAttributes(@NonNull Paint other) {
-        return mColorFilter == other.mColorFilter
-                && mMaskFilter == other.mMaskFilter
-                && mPathEffect == other.mPathEffect
-                && mShader == other.mShader
-                && mTypeface == other.mTypeface
-                && mXfermode == other.mXfermode
-                && mHasCompatScaling == other.mHasCompatScaling
-                && mCompatScaling == other.mCompatScaling
-                && mInvCompatScaling == other.mInvCompatScaling
-                && mBidiFlags == other.mBidiFlags
-                && mLocales.equals(other.mLocales)
-                && TextUtils.equals(mFontFeatureSettings, other.mFontFeatureSettings)
-                && TextUtils.equals(mFontVariationSettings, other.mFontVariationSettings)
-                && mShadowLayerRadius == other.mShadowLayerRadius
-                && mShadowLayerDx == other.mShadowLayerDx
-                && mShadowLayerDy == other.mShadowLayerDy
-                && mShadowLayerColor == other.mShadowLayerColor
-                && getFlags() == other.getFlags()
-                && getHinting() == other.getHinting()
-                && getStyle() == other.getStyle()
-                && getColor() == other.getColor()
-                && getStrokeWidth() == other.getStrokeWidth()
-                && getStrokeMiter() == other.getStrokeMiter()
-                && getStrokeCap() == other.getStrokeCap()
-                && getStrokeJoin() == other.getStrokeJoin()
-                && getTextAlign() == other.getTextAlign()
-                && isElegantTextHeight() == other.isElegantTextHeight()
-                && getTextSize() == other.getTextSize()
-                && getTextScaleX() == other.getTextScaleX()
-                && getTextSkewX() == other.getTextSkewX()
-                && getLetterSpacing() == other.getLetterSpacing()
-                && getWordSpacing() == other.getWordSpacing()
-                && getHyphenEdit() == other.getHyphenEdit();
-    }
-
     /** @hide */
     @UnsupportedAppUsage
     public void setCompatibilityScaling(float factor) {
@@ -1392,6 +1349,38 @@ public class Paint {
      */
     public boolean hasShadowLayer() {
         return nHasShadowLayer(mNativePaint);
+    }
+
+    /**
+     * Returns the blur radius of the shadow layer.
+     * @see #setShadowLayer(float,float,float,int)
+     */
+    public float getShadowLayerRadius() {
+        return mShadowLayerRadius;
+    }
+
+    /**
+     * Returns the x offset of the shadow layer.
+     * @see #setShadowLayer(float,float,float,int)
+     */
+    public float getShadowLayerDx() {
+        return mShadowLayerDx;
+    }
+
+    /**
+     * Returns the y offset of the shadow layer.
+     * @see #setShadowLayer(float,float,float,int)
+     */
+    public float getShadowLayerDy() {
+        return mShadowLayerDy;
+    }
+
+    /**
+     * Returns the color of the shadow layer.
+     * @see #setShadowLayer(float,float,float,int)
+     */
+    public @ColorInt int getShadowLayerColor() {
+        return mShadowLayerColor;
     }
 
     /**
