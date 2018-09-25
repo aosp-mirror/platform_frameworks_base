@@ -1538,7 +1538,10 @@ public class Intent implements Parcelable, Cloneable {
      * @see #EXTRA_INSTALLER_PACKAGE_NAME
      * @see #EXTRA_NOT_UNKNOWN_SOURCE
      * @see #EXTRA_RETURN_RESULT
+     *
+     * @deprecated use {@link android.content.pm.PackageInstaller} instead
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_INSTALL_PACKAGE = "android.intent.action.INSTALL_PACKAGE";
 
@@ -1707,7 +1710,11 @@ public class Intent implements Parcelable, Cloneable {
      * <p>
      * Requires {@link android.Manifest.permission#REQUEST_DELETE_PACKAGES}
      * since {@link Build.VERSION_CODES#P}.
+     *
+     * @deprecated Use {@link android.content.pm.PackageInstaller#uninstall(String, IntentSender)}
+     *             instead
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_UNINSTALL_PACKAGE = "android.intent.action.UNINSTALL_PACKAGE";
 
