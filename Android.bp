@@ -1282,6 +1282,9 @@ droiddoc {
 }
 
 droiddoc {
+    // Please sync with android-api-council@ before making any changes for the name property below.
+    // Since there's cron jobs that fetch offline-sdk-referenceonly-docs-docs.zip periodically.
+    // See b/116221385 for reference.
     name: "offline-sdk-referenceonly-docs",
     defaults: ["framework-docs-default"],
     srcs: [
@@ -1298,6 +1301,9 @@ droiddoc {
 }
 
 droiddoc {
+    // Please sync with android-api-council@ before making any changes for the name property below.
+    // Since there's cron jobs that fetch offline-system-sdk-referenceonly-docs-docs.zip periodically.
+    // See b/116221385 for reference.
     name: "offline-system-sdk-referenceonly-docs",
     defaults: ["framework-docs-default"],
     srcs: [
