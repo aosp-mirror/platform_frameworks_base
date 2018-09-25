@@ -5256,6 +5256,7 @@ package android.telephony {
     method public deprecated boolean getDataEnabled();
     method public deprecated boolean getDataEnabled(int);
     method public boolean getEmergencyCallbackMode();
+    method public java.lang.String getIsimDomain();
     method public int getSimApplicationState();
     method public int getSimCardState();
     method public java.util.List<android.telephony.TelephonyHistogram> getTelephonyHistograms();
