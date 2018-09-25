@@ -93,7 +93,7 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
     @GuardedBy("mPackageUseInfoMap")
     private final Map<String, PackageUseInfo> mPackageUseInfoMap;
 
-    public PackageDexUsage() {
+    /* package */ PackageDexUsage() {
         super("package-dex-usage.list", "PackageDexUsage_DiskWriter", /*lock*/ false);
         mPackageUseInfoMap = new HashMap<>();
     }
@@ -116,7 +116,7 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
      * @return true if the dex load constitutes new information, or false if this information
      *         has been seen before.
      */
-    public boolean record(String owningPackageName, String dexPath, int ownerUserId,
+    /* package */ boolean record(String owningPackageName, String dexPath, int ownerUserId,
             String loaderIsa, boolean isUsedByOtherApps, boolean primaryOrSplit,
             String loadingPackageName, String classLoaderContext) {
         if (!PackageManagerServiceUtils.checkISA(loaderIsa)) {
@@ -193,7 +193,7 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
      * Convenience method for sync reads which does not force the user to pass a useless
      * (Void) null.
      */
-    public void read() {
+    /* package */ void read() {
       read((Void) null);
     }
 
@@ -558,7 +558,7 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
      * Remove the usage data associated with package {@code packageName}.
      * @return true if the package usage was found and removed successfully.
      */
-    public boolean removePackage(String packageName) {
+    /* package */ boolean removePackage(String packageName) {
         synchronized (mPackageUseInfoMap) {
             return mPackageUseInfoMap.remove(packageName) != null;
         }
@@ -653,11 +653,12 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
         return packages;
     }
 
-    public void clear() {
+    /* package */ void clear() {
         synchronized (mPackageUseInfoMap) {
             mPackageUseInfoMap.clear();
         }
     }
+
     // Creates a deep copy of the class' mPackageUseInfoMap.
     private Map<String, PackageUseInfo> clonePackageUseInfoMap() {
         Map<String, PackageUseInfo> clone = new HashMap<>();
@@ -679,7 +680,7 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
         throw new IllegalArgumentException("Unknown bool encoding: " + bool);
     }
 
-    public String dump() {
+    /* package */ String dump() {
         StringWriter sw = new StringWriter();
         write(sw);
         return sw.toString();
