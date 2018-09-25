@@ -430,7 +430,7 @@ public class ZenModeHelper {
         for (ZenRule defaultRule : mDefaultConfig.automaticRules.values()) {
             ZenRule currRule = mConfig.automaticRules.get(defaultRule.id);
             // if default rule wasn't modified, use localized name instead of previous
-            if (!currRule.modified && !defaultRule.name.equals(currRule.name)) {
+            if (currRule != null && !currRule.modified && !defaultRule.name.equals(currRule.name)) {
                 if (canManageAutomaticZenRule(defaultRule)) {
                     if (DEBUG) Slog.d(TAG, "Locale change - updating default zen rule name "
                             + "from " + currRule.name + " to " + defaultRule.name);
