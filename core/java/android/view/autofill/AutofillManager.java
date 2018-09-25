@@ -301,6 +301,14 @@ public final class AutofillManager {
      */
     public static final int STATE_UNKNOWN_COMPAT_MODE = 5;
 
+    /**
+     * Same as {@link #STATE_UNKNOWN}, but used on
+     * {@link AutofillManagerClient#setSessionFinished(int)} when the session was finished because
+     * the service failed to fullfil a request.
+     *
+     * @hide
+     */
+    public static final int STATE_UNKNOWN_FAILED = 6;
 
     /**
      * Timeout in ms for calls to the field classification service.
@@ -2023,8 +2031,10 @@ public final class AutofillManager {
      * @param newState {@link #STATE_FINISHED} (because the autofill service returned a {@code null}
      *  FillResponse), {@link #STATE_UNKNOWN} (because the session was removed),
      *  {@link #STATE_UNKNOWN_COMPAT_MODE} (beucase the session was finished when the URL bar
-     *  changed on compat mode), or {@link #STATE_DISABLED_BY_SERVICE} (because the autofill service
-     *  disabled further autofill requests for the activity).
+     *  changed on compat mode), {@link #STATE_UNKNOWN_FAILED} (because the session was finished
+     *  when the service failed to fullfil the request, or {@link #STATE_DISABLED_BY_SERVICE}
+     *  (because the autofill service or {@link #STATE_DISABLED_BY_SERVICE} (because the autofill
+     *  service disabled further autofill requests for the activity).
      */
     private void setSessionFinished(int newState) {
         synchronized (mLock) {
@@ -2032,7 +2042,7 @@ public final class AutofillManager {
                 Log.v(TAG, "setSessionFinished(): from " + getStateAsStringLocked() + " to "
                         + getStateAsString(newState));
             }
-            if (newState == STATE_UNKNOWN_COMPAT_MODE) {
+            if (newState == STATE_UNKNOWN_COMPAT_MODE || newState == STATE_UNKNOWN_FAILED) {
                 resetSessionLocked(/* resetEnteredIds= */ true);
                 mState = STATE_UNKNOWN;
             } else {
@@ -2229,6 +2239,8 @@ public final class AutofillManager {
                 return "DISABLED_BY_SERVICE";
             case STATE_UNKNOWN_COMPAT_MODE:
                 return "UNKNOWN_COMPAT_MODE";
+            case STATE_UNKNOWN_FAILED:
+                return "UNKNOWN_FAILED";
             default:
                 return "INVALID:" + state;
         }

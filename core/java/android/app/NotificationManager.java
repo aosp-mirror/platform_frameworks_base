@@ -1636,11 +1636,14 @@ public class NotificationManager {
         try {
             final ParceledListSlice<StatusBarNotification> parceledList
                     = service.getAppActiveNotifications(pkg, mContext.getUserId());
-            final List<StatusBarNotification> list = parceledList.getList();
-            return list.toArray(new StatusBarNotification[list.size()]);
+            if (parceledList != null) {
+                final List<StatusBarNotification> list = parceledList.getList();
+                return list.toArray(new StatusBarNotification[list.size()]);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+        return new StatusBarNotification[0];
     }
 
     /**

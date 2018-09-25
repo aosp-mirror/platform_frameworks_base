@@ -30,6 +30,7 @@ android_app {
         "SystemUIPluginLib",
         "SystemUISharedLib",
         "SettingsLib",
+        "android.car.user",
         "androidx.car_car",
         "androidx.legacy_legacy-support-v4",
         "androidx.recyclerview_recyclerview",
@@ -51,7 +52,6 @@ android_app {
     libs: [
         "telephony-common",
         "android.car",
-        "android.car.user",
     ],
 
     manifest: "AndroidManifest.xml",

@@ -130,25 +130,8 @@ void SkiaRecordingCanvas::callDrawGLFunction(Functor* functor,
     drawDrawable(functorDrawable);
 }
 
-class VectorDrawable : public SkDrawable {
-public:
-    VectorDrawable(VectorDrawableRoot* tree)
-            : mRoot(tree)
-            , mBounds(tree->stagingProperties()->getBounds()) {}
-
-protected:
-    virtual SkRect onGetBounds() override { return mBounds; }
-    virtual void onDraw(SkCanvas* canvas) override {
-        mRoot->draw(canvas, mBounds);
-    }
-
-private:
-    sp<VectorDrawableRoot> mRoot;
-    SkRect mBounds;
-};
-
 void SkiaRecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
-    drawDrawable(mDisplayList->allocateDrawable<VectorDrawable>(tree));
+    mRecorder.drawVectorDrawable(tree);
     mDisplayList->mVectorDrawables.push_back(tree);
 }
 

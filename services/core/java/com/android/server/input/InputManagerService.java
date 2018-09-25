@@ -1875,30 +1875,36 @@ public class InputManagerService extends IInputManager.Stub
         // Read partner-provided list of excluded input devices
         XmlPullParser parser = null;
         // Environment.getRootDirectory() is a fancy way of saying ANDROID_ROOT or "/system".
-        File confFile = new File(Environment.getRootDirectory(), EXCLUDED_DEVICES_PATH);
-        FileReader confreader = null;
-        try {
-            confreader = new FileReader(confFile);
-            parser = Xml.newPullParser();
-            parser.setInput(confreader);
-            XmlUtils.beginDocument(parser, "devices");
+        final File[] baseDirs = {
+            Environment.getRootDirectory(),
+            Environment.getVendorDirectory()
+        };
+        for (File baseDir: baseDirs) {
+            File confFile = new File(baseDir, EXCLUDED_DEVICES_PATH);
+            FileReader confreader = null;
+            try {
+                confreader = new FileReader(confFile);
+                parser = Xml.newPullParser();
+                parser.setInput(confreader);
+                XmlUtils.beginDocument(parser, "devices");
 
-            while (true) {
-                XmlUtils.nextElement(parser);
-                if (!"device".equals(parser.getName())) {
-                    break;
+                while (true) {
+                    XmlUtils.nextElement(parser);
+                    if (!"device".equals(parser.getName())) {
+                        break;
+                    }
+                    String name = parser.getAttributeValue(null, "name");
+                    if (name != null) {
+                        names.add(name);
+                    }
                 }
-                String name = parser.getAttributeValue(null, "name");
-                if (name != null) {
-                    names.add(name);
-                }
+            } catch (FileNotFoundException e) {
+                // It's ok if the file does not exist.
+            } catch (Exception e) {
+                Slog.e(TAG, "Exception while parsing '" + confFile.getAbsolutePath() + "'", e);
+            } finally {
+                try { if (confreader != null) confreader.close(); } catch (IOException e) { }
             }
-        } catch (FileNotFoundException e) {
-            // It's ok if the file does not exist.
-        } catch (Exception e) {
-            Slog.e(TAG, "Exception while parsing '" + confFile.getAbsolutePath() + "'", e);
-        } finally {
-            try { if (confreader != null) confreader.close(); } catch (IOException e) { }
         }
 
         return names.toArray(new String[names.size()]);

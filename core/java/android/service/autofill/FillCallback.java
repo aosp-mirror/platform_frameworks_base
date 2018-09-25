@@ -83,19 +83,24 @@ public final class FillCallback {
      * fulfill the request; in this case, the service should call {@link #onSuccess(FillResponse)
      * onSuccess(null)} instead.
      *
-     * <p><b>Note: </b>on Android versions up to {@link android.os.Build.VERSION_CODES#P}, this
-     * method is not working as intended, and the service should call
+     * <p><b>Note: </b>prior to {@link android.os.Build.VERSION_CODES#Q}, this
+     * method was not working as intended and the service should always call
      * {@link #onSuccess(FillResponse) onSuccess(null)} instead.
      *
-     * @param message error message to be displayed to the user. <b>Note: </b> this message is
-     * displayed on {@code logcat} logs and should not contain PII (Personally Identifiable
-     * Information, such as username or email address).
+     * <p><b>Note: </b>for apps targeting {@link android.os.Build.VERSION_CODES#Q} or higher, this
+     * method just logs the message on {@code logcat}; for apps targetting older SDKs, it also
+     * displays the message to user using a {@link android.widget.Toast}. Generally speaking, you
+     * should not display an error to the user if the request failed, unless the request had the
+     * {@link FillRequest#FLAG_MANUAL_REQUEST} flag.
+     *
+     * @param message error message. <b>Note: </b> this message should <b>not</b> contain PII
+     * (Personally Identifiable Information, such as username or email address).
      *
      * @throws IllegalStateException if this method or {@link #onSuccess(FillResponse)} was already
      * called.
      */
     public void onFailure(@Nullable CharSequence message) {
-        Log.w(TAG, "onFailure(): " + (message == null ? null : message.length() + "_chars"));
+        Log.w(TAG, "onFailure(): " + message);
         assertNotCalled();
         mCalled = true;
         try {

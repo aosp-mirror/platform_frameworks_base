@@ -15246,6 +15246,40 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Sets whether or not to allow force dark to apply to this view.
+     *
+     * Setting this to false will disable the auto-dark feature on everything this view
+     * draws, including any descendants.
+     *
+     * Setting this to true will allow this view to be automatically made dark, however
+     * a value of 'true' will not override any 'false' value in its parent chain nor will
+     * it prevent any 'false' in any of its children.
+     *
+     * @param allow Whether or not to allow force dark.
+     *
+     * @hide
+     */
+    public void setAllowForceDark(boolean allow) {
+        if (mRenderNode.setAllowForceDark(allow)) {
+            // Currently toggling force-dark requires a new display list push to apply
+            // TODO: Make it not clobber the display list so this is just a damageSelf() instead
+            invalidate();
+        }
+    }
+
+    /**
+     * See {@link #setAllowForceDark(boolean)}
+     *
+     * @return true if force dark is allowed (default), false if it is disabled
+     *
+     * @hide
+     */
+    @ViewDebug.ExportedProperty(category = "drawing")
+    public boolean getAllowForceDark() {
+        return mRenderNode.getAllowForceDark();
+    }
+
+    /**
      * Top position of this view relative to its parent.
      *
      * @return The top of this view, in pixels.

@@ -228,12 +228,10 @@ public final class InputMethodManager {
     static final String PENDING_EVENT_COUNTER = "aq:imm";
 
     /**
-     * {@code true} if we want to instantiate {@link InputMethodManager} eagerly in
-     * {@link android.view.WindowManagerGlobal#getWindowSession()}, which is often called in an
-     * early stage of process startup, which is how Android has worked.
+     * Ensures that {@link #sInstance} becomes non-{@code null} for application that have directly
+     * or indirectly relied on {@link #sInstance} via reflection or something like that.
      *
-     * <p>We still have this settings because we know there are possible compatibility concerns if
-     * we stop doing so. Here are scenarios we know and there could be more scenarios we are not
+     * <p>Here are scenarios we know and there could be more scenarios we are not
      * aware of right know.</p>
      *
      * <ul>
@@ -260,13 +258,22 @@ public final class InputMethodManager {
      *     {@link #peekInstance()} to return {@code null} as written in the JavaDoc.</li>
      * </ul>
      *
-     * <p>TODO(Bug 116157766): Check if we can set {@code false} here then remove this settings.</p>
+     * <p>Since this is purely a compatibility hack, this method must be used only from
+     * {@link android.view.WindowManagerGlobal#getWindowSession()} and {@link #getInstance()}.</p>
+     *
+     * <p>TODO(Bug 116157766): Remove this method once we clean up {@link UnsupportedAppUsage}.</p>
      * @hide
      */
-    public static final boolean ENABLE_LEGACY_EAGER_INITIALIZATION = true;
+    public static void ensureDefaultInstanceForDefaultDisplayIfNecessary() {
+        getInstanceInternal();
+    }
 
     private static final Object sLock = new Object();
 
+    /**
+     * @deprecated This cannot be compatible with multi-display. Please do not use this.
+     */
+    @Deprecated
     @GuardedBy("sLock")
     @UnsupportedAppUsage
     static InputMethodManager sInstance;
@@ -735,12 +742,13 @@ public final class InputMethodManager {
     }
 
     /**
-     * Retrieve the global InputMethodManager instance, creating it if it
-     * doesn't already exist.
+     * Retrieve the global {@link InputMethodManager} instance, creating it if it doesn't already
+     * exist.
+     *
+     * @return global {@link InputMethodManager} instance
      * @hide
      */
-    @UnsupportedAppUsage
-    public static InputMethodManager getInstance() {
+    public static InputMethodManager getInstanceInternal() {
         synchronized (sLock) {
             if (sInstance == null) {
                 try {
@@ -756,14 +764,39 @@ public final class InputMethodManager {
     }
 
     /**
-     * Private optimization: retrieve the global InputMethodManager instance, if it exists.
-     * @hide
+     * Deprecated. Do not use.
+     *
+     * @return global {@link InputMethodManager} instance
      * @deprecated Use {@link Context#getSystemService(Class)} instead. This method cannot fully
      *             support multi-display scenario.
+     * @hide
+     */
+    @Deprecated
+    @UnsupportedAppUsage
+    public static InputMethodManager getInstance() {
+        Log.w(TAG, "InputMethodManager.getInstance() is deprecated because it cannot be"
+                        + " compatible with multi-display."
+                        + " Use context.getSystemService(InputMethodManager.class) instead.",
+                new Throwable());
+        ensureDefaultInstanceForDefaultDisplayIfNecessary();
+        return peekInstance();
+    }
+
+    /**
+     * Deprecated. Do not use.
+     *
+     * @return {@link #sInstance}
+     * @deprecated Use {@link Context#getSystemService(Class)} instead. This method cannot fully
+     *             support multi-display scenario.
+     * @hide
      */
     @Deprecated
     @UnsupportedAppUsage
     public static InputMethodManager peekInstance() {
+        Log.w(TAG, "InputMethodManager.peekInstance() is deprecated because it cannot be"
+                        + " compatible with multi-display."
+                        + " Use context.getSystemService(InputMethodManager.class) instead.",
+                new Throwable());
         synchronized (sLock) {
             return sInstance;
         }

@@ -595,16 +595,29 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
                 mContext.getString(R.string.instant_apps));
         mCurrentNotifs.add(new Pair<>(pkg, userId));
-        String message = mContext.getString(R.string.instant_apps_message);
+
+        String helpUrl = mContext.getString(R.string.instant_apps_help_url);
+        boolean hasHelpUrl = !helpUrl.isEmpty();
+        String message = mContext.getString(hasHelpUrl
+                ? R.string.instant_apps_message_with_help
+                : R.string.instant_apps_message);
+
         UserHandle user = UserHandle.of(userId);
         PendingIntent appInfoAction = PendingIntent.getActivityAsUser(mContext, 0,
                 new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         .setData(Uri.fromParts("package", pkg, null)), 0, null, user);
         Action action = new Notification.Action.Builder(null, mContext.getString(R.string.app_info),
                 appInfoAction).build();
+        PendingIntent helpCenterIntent = hasHelpUrl
+                ? PendingIntent.getActivityAsUser(mContext, 0,
+                new Intent(Intent.ACTION_VIEW).setData(Uri.parse(
+                        helpUrl)),
+                0, null, user)
+                : null;
 
         Intent browserIntent = getTaskIntent(taskId, userId);
-        Notification.Builder builder = new Notification.Builder(mContext, NotificationChannels.GENERAL);
+        Notification.Builder builder = new Notification.Builder(mContext,
+                NotificationChannels.GENERAL);
         if (browserIntent != null && browserIntent.isWebIntent()) {
             // Make sure that this doesn't resolve back to an instant app
             browserIntent.setComponent(null)
@@ -632,7 +645,8 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
 
             PendingIntent webPendingIntent = PendingIntent.getActivityAsUser(mContext, 0,
                     goToWebIntent, 0, null, user);
-            Action webAction = new Notification.Action.Builder(null, mContext.getString(R.string.go_to_web),
+            Action webAction = new Notification.Action.Builder(null,
+                    mContext.getString(R.string.go_to_web),
                     webPendingIntent).build();
             builder.addAction(webAction);
         }
@@ -640,13 +654,15 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         noMan.notifyAsUser(pkg, SystemMessage.NOTE_INSTANT_APPS, builder
                         .addExtras(extras)
                         .addAction(action)
-                        .setContentIntent(appInfoAction)
+                        .setContentIntent(helpCenterIntent)
                         .setColor(mContext.getColor(R.color.instant_apps_color))
-                        .setContentTitle(appInfo.loadLabel(mContext.getPackageManager()))
+                        .setContentTitle(mContext.getString(R.string.instant_apps_title,
+                                appInfo.loadLabel(mContext.getPackageManager())))
                         .setLargeIcon(Icon.createWithResource(pkg, appInfo.icon))
                         .setSmallIcon(Icon.createWithResource(mContext.getPackageName(),
                                 R.drawable.instant_icon))
                         .setContentText(message)
+                        .setStyle(new Notification.BigTextStyle().bigText(message))
                         .setOngoing(true)
                         .build(),
                 new UserHandle(userId));

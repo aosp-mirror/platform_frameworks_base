@@ -112,7 +112,9 @@ void RenderNode::prepareTree(TreeInfo& info) {
     LOG_ALWAYS_FATAL_IF(!info.damageAccumulator, "DamageAccumulator missing");
     MarkAndSweepRemoved observer(&info);
 
+    const int before = info.disableForceDark;
     prepareTreeImpl(observer, info, false);
+    LOG_ALWAYS_FATAL_IF(before != info.disableForceDark, "Mis-matched force dark");
 }
 
 void RenderNode::addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
@@ -195,6 +197,11 @@ void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool fu
     if (info.mode == TreeInfo::MODE_FULL) {
         pushStagingPropertiesChanges(info);
     }
+
+    if (!mProperties.getAllowForceDark()) {
+        info.disableForceDark++;
+    }
+
     uint32_t animatorDirtyMask = 0;
     if (CC_LIKELY(info.runAnimations)) {
         animatorDirtyMask = mAnimatorManager.animate(info);
@@ -232,6 +239,9 @@ void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool fu
     }
     pushLayerUpdate(info);
 
+    if (!mProperties.getAllowForceDark()) {
+        info.disableForceDark--;
+    }
     info.damageAccumulator->popTransform();
 }
 
@@ -273,7 +283,7 @@ void RenderNode::syncDisplayList(TreeObserver& observer, TreeInfo* info) {
     if (mDisplayList) {
         mDisplayList->syncContents();
 
-        if (CC_UNLIKELY(Properties::forceDarkMode)) {
+        if (CC_UNLIKELY(info && !info->disableForceDark)) {
             auto usage = usageHint();
             if (mDisplayList->hasText()) {
                 usage = UsageHint::Foreground;

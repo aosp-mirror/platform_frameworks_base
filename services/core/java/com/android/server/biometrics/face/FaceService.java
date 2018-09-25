@@ -82,6 +82,7 @@ public class FaceService extends BiometricServiceBase {
             "com.android.server.biometrics.face.ACTION_LOCKOUT_RESET";
     private static final int MAX_FAILED_ATTEMPTS_LOCKOUT_TIMED = 3;
     private static final int MAX_FAILED_ATTEMPTS_LOCKOUT_PERMANENT = 12;
+    private static final int CHALLENGE_TIMEOUT_SEC = 600; // 10 minutes
 
     private final class FaceAuthClient extends AuthenticationClientImpl {
         public FaceAuthClient(Context context,
@@ -730,8 +731,9 @@ public class FaceService extends BiometricServiceBase {
     }
 
     @Override
-    protected int getAppOp() {
-        return AppOpsManager.OP_USE_FACE;
+    protected boolean checkAppOps(int uid, String opPackageName) {
+        return mAppOps.noteOp(AppOpsManager.OP_USE_BIOMETRIC, uid, opPackageName)
+                == AppOpsManager.MODE_ALLOWED;
     }
 
     @Override
@@ -784,7 +786,7 @@ public class FaceService extends BiometricServiceBase {
             return 0;
         }
         try {
-            return daemon.generateChallenge().value;
+            return daemon.generateChallenge(CHALLENGE_TIMEOUT_SEC).value;
         } catch (RemoteException e) {
             Slog.e(TAG, "startPreEnroll failed", e);
         }

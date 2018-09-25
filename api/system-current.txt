@@ -5230,6 +5230,7 @@ package android.telecom {
     method public deprecated android.content.ComponentName getDefaultPhoneApp();
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsForPackage();
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsSupportingScheme(java.lang.String);
+    method public boolean isInEmergencyCall();
     method public boolean isRinging();
     method public boolean isTtySupported();
     field public static final java.lang.String EXTRA_CALL_BACK_INTENT = "android.telecom.extra.CALL_BACK_INTENT";
@@ -5812,6 +5813,7 @@ package android.telephony.ims {
     field public static final java.lang.String EXTRA_CODEC = "Codec";
     field public static final java.lang.String EXTRA_DIALSTRING = "dialstring";
     field public static final java.lang.String EXTRA_DISPLAY_TEXT = "DisplayText";
+    field public static final java.lang.String EXTRA_E_CALL = "e_call";
     field public static final java.lang.String EXTRA_IS_CALL_PULL = "CallPull";
     field public static final java.lang.String EXTRA_OI = "oi";
     field public static final java.lang.String EXTRA_OIR = "oir";

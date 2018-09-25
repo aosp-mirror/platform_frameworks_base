@@ -444,6 +444,14 @@ static jint android_view_RenderNode_getHeight(jlong renderNodePtr) {
     return reinterpret_cast<RenderNode*>(renderNodePtr)->stagingProperties().getHeight();
 }
 
+static jboolean android_view_RenderNode_setAllowForceDark(jlong renderNodePtr, jboolean allow) {
+    return SET_AND_DIRTY(setAllowForceDark, allow, RenderNode::GENERIC);
+}
+
+static jboolean android_view_RenderNode_getAllowForceDark(jlong renderNodePtr) {
+    return reinterpret_cast<RenderNode*>(renderNodePtr)->stagingProperties().getAllowForceDark();
+}
+
 // ----------------------------------------------------------------------------
 // RenderProperties - Animations
 // ----------------------------------------------------------------------------
@@ -664,6 +672,8 @@ static const JNINativeMethod gMethods[] = {
     { "nGetPivotY",                "(J)F",  (void*) android_view_RenderNode_getPivotY },
     { "nGetWidth",                 "(J)I",  (void*) android_view_RenderNode_getWidth },
     { "nGetHeight",                "(J)I",  (void*) android_view_RenderNode_getHeight },
+    { "nSetAllowForceDark",        "(JZ)Z", (void*) android_view_RenderNode_setAllowForceDark },
+    { "nGetAllowForceDark",        "(J)Z",  (void*) android_view_RenderNode_getAllowForceDark },
 };
 
 int register_android_view_RenderNode(JNIEnv* env) {

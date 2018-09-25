@@ -429,8 +429,8 @@ public class AppOpsManager {
     /** @hide */
     @UnsupportedAppUsage
     public static final int OP_BLUETOOTH_SCAN = 77;
-    /** @hide Use the face authentication API. */
-    public static final int OP_USE_FACE = 78;
+    /** @hide Use the BiometricPrompt/BiometricManager APIs. */
+    public static final int OP_USE_BIOMETRIC = 78;
     /** @hide */
     @UnsupportedAppUsage
     public static final int _NUM_OP = 79;
@@ -678,8 +678,8 @@ public class AppOpsManager {
     /** @hide */
     public static final String OPSTR_BLUETOOTH_SCAN = "android:bluetooth_scan";
 
-    /** @hide Use the face authentication API. */
-    public static final String OPSTR_USE_FACE = "android:use_face";
+    /** @hide Use the BiometricPrompt/BiometricManager APIs. */
+    public static final String OPSTR_USE_BIOMETRIC = "android:use_biometric";
 
     // Warning: If an permission is added here it also has to be added to
     // com.android.packageinstaller.permission.utils.EventLogger
@@ -818,7 +818,7 @@ public class AppOpsManager {
             OP_MANAGE_IPSEC_TUNNELS,            // MANAGE_IPSEC_HANDOVERS
             OP_START_FOREGROUND,                // START_FOREGROUND
             OP_COARSE_LOCATION,                 // BLUETOOTH_SCAN
-            OP_USE_FACE,                        // FACE
+            OP_USE_BIOMETRIC,                   // BIOMETRIC
     };
 
     /**
@@ -903,7 +903,7 @@ public class AppOpsManager {
             OPSTR_MANAGE_IPSEC_TUNNELS,
             OPSTR_START_FOREGROUND,
             OPSTR_BLUETOOTH_SCAN,
-            OPSTR_USE_FACE,
+            OPSTR_USE_BIOMETRIC,
     };
 
     /**
@@ -989,7 +989,7 @@ public class AppOpsManager {
             "MANAGE_IPSEC_TUNNELS",
             "START_FOREGROUND",
             "BLUETOOTH_SCAN",
-            "USE_FACE",
+            "USE_BIOMETRIC",
     };
 
     /**
@@ -1163,7 +1163,7 @@ public class AppOpsManager {
             null, // MANAGE_IPSEC_TUNNELS
             null, // START_FOREGROUND
             null, // maybe should be UserManager.DISALLOW_SHARE_LOCATION, //BLUETOOTH_SCAN
-            null, // USE_FACE
+            null, // USE_BIOMETRIC
     };
 
     /**
@@ -1249,7 +1249,7 @@ public class AppOpsManager {
             false, // MANAGE_IPSEC_HANDOVERS
             false, // START_FOREGROUND
             true, // BLUETOOTH_SCAN
-            false, // USE_FACE
+            false, // USE_BIOMETRIC
     };
 
     /**
@@ -1334,7 +1334,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ERRORED,  // MANAGE_IPSEC_TUNNELS
             AppOpsManager.MODE_ALLOWED,  // OP_START_FOREGROUND
             AppOpsManager.MODE_ALLOWED,  // OP_BLUETOOTH_SCAN
-            AppOpsManager.MODE_ALLOWED,  // USE_FACE
+            AppOpsManager.MODE_ALLOWED,  // USE_BIOMETRIC
     };
 
     /**
@@ -1423,7 +1423,7 @@ public class AppOpsManager {
             false, // MANAGE_IPSEC_TUNNELS
             false, // START_FOREGROUND
             false, // BLUETOOTH_SCAN
-            false, // USE_FACE
+            false, // USE_BIOMETRIC
     };
 
     /**

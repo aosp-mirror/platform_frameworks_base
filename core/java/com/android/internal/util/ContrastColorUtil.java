@@ -523,8 +523,9 @@ public class ContrastColorUtil {
     }
 
     public static int resolveAmbientColor(Context context, int notificationColor) {
-        final int resolvedColor = resolveColor(context, notificationColor,
-                true /* defaultBackgroundIsDark */);
+        final int resolvedColor = notificationColor == Notification.COLOR_DEFAULT
+                ? context.getColor(com.android.internal.R.color.notification_default_color_dark)
+                : notificationColor;
 
         int color = resolvedColor;
         color = ContrastColorUtil.ensureTextContrastOnBlack(color);

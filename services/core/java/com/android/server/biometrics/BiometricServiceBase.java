@@ -84,7 +84,6 @@ public abstract class BiometricServiceBase extends SystemService
 
     private final Context mContext;
     private final String mKeyguardPackage;
-    private final AppOpsManager mAppOps;
     private final SparseBooleanArray mTimedLockoutCleared;
     private final SparseIntArray mFailedAttempts;
     private final IActivityTaskManager mActivityTaskManager;
@@ -102,6 +101,7 @@ public abstract class BiometricServiceBase extends SystemService
             Collections.synchronizedMap(new HashMap<>());
     protected final ResetFailedAttemptsForUserRunnable mResetFailedAttemptsForCurrentUserRunnable =
             new ResetFailedAttemptsForUserRunnable();
+    protected final AppOpsManager mAppOps;
     protected final H mHandler = new H();
 
     private ClientMonitor mCurrentClient;
@@ -206,11 +206,9 @@ public abstract class BiometricServiceBase extends SystemService
     protected abstract void checkUseBiometricPermission();
 
     /**
-     * @return Returns one of the {@link AppOpsManager} constants which pertains to the specific
-     *         biometric service.
+     * Checks if the caller passes the app ops check
      */
-    protected abstract int getAppOp();
-
+    protected abstract boolean checkAppOps(int uid, String opPackageName);
 
     /**
      * Notifies clients of any change in the biometric state (active / idle). This is mainly for
@@ -822,10 +820,11 @@ public abstract class BiometricServiceBase extends SystemService
             Slog.w(getTag(), "Rejecting " + opPackageName + "; not a current user or profile");
             return false;
         }
-        if (mAppOps.noteOp(getAppOp(), uid, opPackageName) != AppOpsManager.MODE_ALLOWED) {
+        if (!checkAppOps(uid, opPackageName)) {
             Slog.w(getTag(), "Rejecting " + opPackageName + "; permission denied");
             return false;
         }
+
         if (requireForeground && !(isForegroundActivity(uid, pid) || isCurrentClient(
                 opPackageName))) {
             Slog.w(getTag(), "Rejecting " + opPackageName + "; not in foreground");
