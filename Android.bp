@@ -706,7 +706,6 @@ java_defaults {
 
     // Loaded with System.loadLibrary by android.view.textclassifier
     required: [
-        "libtextclassifier",
         "libmedia2_jni",
     ],
 
@@ -816,6 +815,10 @@ java_library {
         "nist-sip",
         "tagsoup",
         "rappor",
+        "libtextclassifier-java",
+    ],
+    required: [
+        "libtextclassifier",
     ],
     dxflags: ["--core-library"],
 }
