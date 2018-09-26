@@ -127,6 +127,11 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_UID_OBSERVERS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.MemoryStatUtil.MEMORY_STAT_INTERESTING_NATIVE_PROCESSES;
+import static com.android.server.am.MemoryStatUtil.hasMemcg;
+import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -144,11 +149,6 @@ import static com.android.server.wm.ActivityTaskManagerService.DUMP_STARTER_CMD;
 import static com.android.server.wm.ActivityTaskManagerService.KEY_DISPATCHING_TIMEOUT_MS;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.relaunchReasonToString;
-import static com.android.server.am.MemoryStatUtil.MEMORY_STAT_INTERESTING_NATIVE_PROCESSES;
-import static com.android.server.am.MemoryStatUtil.hasMemcg;
-import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
-import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
-import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -7317,13 +7317,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         return timedout;
-    }
-
-    @Override
-    public void setLockScreenShown(boolean keyguardShowing, boolean aodShowing,
-            int secondaryDisplayShowing) {
-        mActivityTaskManager.setLockScreenShown(
-                keyguardShowing, aodShowing, secondaryDisplayShowing);
     }
 
     @Override

@@ -1,13 +1,11 @@
 package com.android.server.policy.keyguard;
 
-import static android.view.Display.INVALID_DISPLAY;
 import static com.android.server.wm.KeyguardServiceDelegateProto.INTERACTIVE_STATE;
 import static com.android.server.wm.KeyguardServiceDelegateProto.OCCLUDED;
 import static com.android.server.wm.KeyguardServiceDelegateProto.SCREEN_STATE;
 import static com.android.server.wm.KeyguardServiceDelegateProto.SECURE;
 import static com.android.server.wm.KeyguardServiceDelegateProto.SHOWING;
 
-import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -212,10 +210,10 @@ public class KeyguardServiceDelegate {
             mHandler.post(() -> {
                 try {
                     // There are no longer any keyguard windows on secondary displays, so pass
-                    // INVALID_DISPLAY. All that means is that showWhenLocked activities on
-                    // secondary displays now get to show.
+                    // {@code null}. All that means is that showWhenLocked activities on
+                    // external displays now get to show.
                     ActivityTaskManager.getService().setLockScreenShown(true /* keyguardShowing */,
-                            false /* aodShowing */, INVALID_DISPLAY);
+                            false /* aodShowing */, null /* secondaryDisplaysShowing */);
                 } catch (RemoteException e) {
                     // Local call.
                 }
