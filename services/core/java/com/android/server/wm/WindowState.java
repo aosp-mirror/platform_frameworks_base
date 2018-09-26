@@ -4535,7 +4535,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         updateSurfacePosition(getPendingTransaction());
     }
 
-    private void updateSurfacePosition(Transaction t) {
+    @VisibleForTesting
+    void updateSurfacePosition(Transaction t) {
         if (mSurfaceControl == null) {
             return;
         }
