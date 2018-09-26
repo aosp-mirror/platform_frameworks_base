@@ -245,8 +245,14 @@ public class AppLaunch extends InstrumentationTestCase {
                     mIterationCycle = false;
                     // In the "applaunch.txt" file, trail launches is referenced using
                     // "TRIAL_LAUNCH"
-                    String appPkgName = mNameToIntent.get(launch.getApp())
-                        .getComponent().getPackageName();
+                    Intent startIntent = mNameToIntent.get(launch.getApp());
+                    if (startIntent == null) {
+                        Log.w(TAG, "App does not exist: " + launch.getApp());
+                        mResult.putString(mNameToResultKey.get(launch.getApp()),
+                            "App does not exist");
+                        continue;
+                    }
+                    String appPkgName = startIntent.getComponent().getPackageName();
                     if (SPEED_PROFILE_FILTER.equals(launch.getCompilerFilter())) {
                         assertTrue(String.format("Not able to compile the app : %s", appPkgName),
                               compileApp(VERIFY_FILTER, appPkgName));
