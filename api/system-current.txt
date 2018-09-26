@@ -5242,6 +5242,7 @@ package android.telephony {
     method public boolean disableDataConnectivity();
     method public boolean enableDataConnectivity();
     method public void enableVideoCalling(boolean);
+    method public java.lang.String getAidForAppType(int);
     method public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers(int);
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntent(android.content.Intent);
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntentAndPhone(android.content.Intent, int);
