@@ -16,12 +16,86 @@
 */
 -->
 <resources>
-    <!-- TODO replace with car support lib sizes when available -->
     <dimen name="car_fullscreen_user_pod_icon_text_size">64sp</dimen>
     <dimen name="car_fullscreen_user_pod_width">243dp</dimen>
     <dimen name="car_fullscreen_user_pod_height">356dp</dimen>
     <dimen name="car_fullscreen_user_pod_image_avatar_width">96dp</dimen>
     <dimen name="car_fullscreen_user_pod_image_avatar_height">96dp</dimen>
-    <dimen name="car_padding_4">20dp</dimen>
+
+
+    <!-- Application Bar -->
+    <dimen name="car_app_bar_height">80dp</dimen>
+    <!-- Margin -->
+    <dimen name="car_margin">20dp</dimen>
+    <!-- Lists -->
+    <dimen name="car_single_line_list_item_height">96dp</dimen>
+    <dimen name="car_double_line_list_item_height">@dimen/car_single_line_list_item_height</dimen>
+    <dimen name="car_list_divider_height">1dp</dimen>
+    <!-- The diff between keyline 1 and keyline 3. -->
+    <dimen name="car_keyline_1_keyline_3_diff">88dp</dimen>
+    <dimen name="car_dialog_action_bar_height">@dimen/car_card_action_bar_height</dimen>
+    <dimen name="car_primary_icon_size">44dp</dimen>
+
+    <!-- Text size for car -->
+    <dimen name="car_title_size">32sp</dimen>
+    <dimen name="car_title2_size">32sp</dimen>
+    <dimen name="car_headline1_size">45sp</dimen>
+    <dimen name="car_headline2_size">32sp</dimen>
+    <dimen name="car_headline3_size">24sp</dimen>
+    <dimen name="car_headline4_size">20sp</dimen>
     <dimen name="car_body1_size">32sp</dimen>
+    <dimen name="car_body2_size">26sp</dimen>
+    <dimen name="car_body3_size">16sp</dimen>
+    <dimen name="car_body4_size">14sp</dimen>
+    <dimen name="car_body5_size">18sp</dimen>
+    <dimen name="car_label1_size">26sp</dimen>
+    <dimen name="car_label2_size">64sp</dimen>
+    <dimen name="car_action1_size">26sp</dimen>
+    <dimen name="car_action2_size">26sp</dimen>
+
+    <!-- Common icon size for car app -->
+    <dimen name="car_icon_size">56dp</dimen>
+
+    <dimen name="car_card_header_height">96dp</dimen>
+    <dimen name="car_card_action_bar_height">96dp</dimen>
+
+    <!-- Paddings -->
+    <dimen name="car_padding_1">4dp</dimen>
+    <dimen name="car_padding_2">10dp</dimen>
+    <dimen name="car_padding_3">16dp</dimen>
+    <dimen name="car_padding_4">28dp</dimen>
+    <dimen name="car_padding_5">32dp</dimen>
+
+    <!-- Radius -->
+    <dimen name="car_radius_1">4dp</dimen>
+    <dimen name="car_radius_2">8dp</dimen>
+    <dimen name="car_radius_3">16dp</dimen>
+    <dimen name="car_radius_5">100dp</dimen>
+
+    <!-- Keylines for content. -->
+    <dimen name="car_keyline_1">48dp</dimen>
+    <dimen name="car_keyline_2">108dp</dimen>
+    <dimen name="car_keyline_3">152dp</dimen>
+    <dimen name="car_keyline_4">182dp</dimen>
+
+    <!-- Buttons -->
+    <dimen name="car_button_height">56dp</dimen>
+    <dimen name="car_button_min_width">158dp</dimen>
+    <dimen name="car_button_horizontal_padding">@dimen/car_padding_4</dimen>
+    <dimen name="car_borderless_button_horizontal_padding">0dp</dimen>
+    <dimen name="car_button_radius">@dimen/car_radius_1</dimen>
+    <dimen name="car_pill_button_size">56dp</dimen>
+
+    <!-- Seekbar -->
+    <dimen name="car_seekbar_height">6dp</dimen>
+    <dimen name="car_seekbar_padding">26dp</dimen>
+    <dimen name="car_seekbar_thumb_size">24dp</dimen>
+    <dimen name="car_seekbar_thumb_stroke">1dp</dimen>
+    <!-- The space between seekbar and text in ListItem. This value is based on car_seekbar_padding.
+         It brings seekbar and text closer for visual balance while maintaining touch area. -->
+    <dimen name="car_seekbar_text_overlap">-20dp</dimen>
+
+    <!-- Progress Bar -->
+    <dimen name="car_progress_bar_height">@dimen/car_seekbar_height</dimen>
+
 </resources>
