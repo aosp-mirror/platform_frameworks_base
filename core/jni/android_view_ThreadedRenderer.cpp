@@ -1064,6 +1064,12 @@ static void android_view_ThreadedRenderer_allocateBuffers(JNIEnv* env, jobject c
     proxy->allocateBuffers(surface);
 }
 
+static void android_view_ThreadedRenderer_setForceDark(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jboolean enable) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->setForceDark(enable);
+}
+
 // ----------------------------------------------------------------------------
 // FrameMetricsObserver
 // ----------------------------------------------------------------------------
@@ -1177,6 +1183,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSetIsolatedProcess", "(Z)V", (void*)android_view_ThreadedRenderer_setIsolatedProcess },
     { "nSetContextPriority", "(I)V", (void*)android_view_ThreadedRenderer_setContextPriority },
     { "nAllocateBuffers", "(JLandroid/view/Surface;)V", (void*)android_view_ThreadedRenderer_allocateBuffers },
+    { "nSetForceDark", "(JZ)V", (void*)android_view_ThreadedRenderer_setForceDark },
 };
 
 static JavaVM* mJvm = nullptr;

@@ -976,6 +976,25 @@ public final class ThreadedRenderer {
         }
     }
 
+    /** The root of everything */
+    public @NonNull RenderNode getRootNode() {
+        return mRootNode;
+    }
+
+    private boolean mForceDark = false;
+
+    /**
+     * Whether or not the force-dark feature should be used for this renderer.
+     */
+    public boolean setForceDark(boolean enable) {
+        if (mForceDark != enable) {
+            mForceDark = enable;
+            nSetForceDark(mNativeProxy, enable);
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Basic synchronous renderer. Currently only used to render the Magnifier, so use with care.
      * TODO: deduplicate against ThreadedRenderer.
@@ -1255,4 +1274,5 @@ public final class ThreadedRenderer {
     private static native void nSetIsolatedProcess(boolean enabled);
     private static native void nSetContextPriority(int priority);
     private static native void nAllocateBuffers(long nativeProxy, Surface window);
+    private static native void nSetForceDark(long nativeProxy, boolean enabled);
 }

@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include "utils/Macros.h"
 #include "Properties.h"
+#include "utils/Macros.h"
 
 #include <utils/Timers.h>
 
@@ -40,7 +40,7 @@ public:
     virtual void onError(const std::string& message) = 0;
 
 protected:
-    virtual ~ErrorHandler() {}
+    virtual ~ErrorHandler() = default;
 };
 
 class TreeObserver {
@@ -52,7 +52,7 @@ public:
     virtual void onMaybeRemovedFromTree(RenderNode* node) = 0;
 
 protected:
-    virtual ~TreeObserver() {}
+    virtual ~TreeObserver() = default;
 };
 
 // This would be a struct, but we want to PREVENT_COPY_AND_ASSIGN
@@ -71,8 +71,7 @@ public:
         MODE_RT_ONLY,
     };
 
-    TreeInfo(TraversalMode mode, renderthread::CanvasContext& canvasContext)
-            : mode(mode), prepareTextures(mode == MODE_FULL), canvasContext(canvasContext) {}
+    TreeInfo(TraversalMode mode, renderthread::CanvasContext& canvasContext);
 
     TraversalMode mode;
     // TODO: Remove this? Currently this is used to signal to stop preparing
@@ -94,7 +93,7 @@ public:
 
     bool updateWindowPositions = false;
 
-    int disableForceDark = Properties::forceDarkMode ? 0 : 1;
+    int disableForceDark;
 
     struct Out {
         bool hasFunctors = false;
