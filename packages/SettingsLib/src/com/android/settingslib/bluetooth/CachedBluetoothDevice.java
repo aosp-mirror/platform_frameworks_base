@@ -34,7 +34,6 @@ import com.android.settingslib.R;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import androidx.annotation.VisibleForTesting;
@@ -59,7 +58,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private long mHiSyncId;
     // Need this since there is no method for getting RSSI
     private short mRssi;
-    private HashMap<LocalBluetoothProfile, Integer> mProfileConnectionState;
 
     private final List<LocalBluetoothProfile> mProfiles =
             new ArrayList<LocalBluetoothProfile>();
@@ -101,7 +99,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         mLocalAdapter = BluetoothAdapter.getDefaultAdapter();
         mProfileManager = profileManager;
         mDevice = device;
-        mProfileConnectionState = new HashMap<>();
         fillData();
         mHiSyncId = BluetoothHearingAid.HI_SYNC_ID_INVALID;
     }
@@ -134,7 +131,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             }
             return;
         }
-        mProfileConnectionState.put(profile, newProfileState);
         if (newProfileState == BluetoothProfile.STATE_CONNECTED) {
             if (profile instanceof MapProfile) {
                 profile.setPreferred(mDevice, true);
@@ -324,22 +320,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     public int getProfileConnectionState(LocalBluetoothProfile profile) {
-        if (mProfileConnectionState.get(profile) == null) {
-            // If cache is empty make the binder call to get the state
-            int state = profile.getConnectionStatus(mDevice);
-            mProfileConnectionState.put(profile, state);
-        }
-        return mProfileConnectionState.get(profile);
-    }
-
-    public void clearProfileConnectionState ()
-    {
-        if (BluetoothUtils.D) {
-            Log.d(TAG," Clearing all connection state for dev:" + mDevice.getName());
-        }
-        for (LocalBluetoothProfile profile :getProfiles()) {
-            mProfileConnectionState.put(profile, BluetoothProfile.STATE_DISCONNECTED);
-        }
+        return profile != null
+                ? profile.getConnectionStatus(mDevice)
+                : BluetoothProfile.STATE_DISCONNECTED;
     }
 
     // TODO: do any of these need to run async on a background thread?

@@ -290,10 +290,11 @@ public class LocalBluetoothProfileManager {
                 }
             }
 
-            mEventManager.dispatchProfileConnectionStateChanged(cachedDevice, newState,
-                    mProfile.getProfileId());
             cachedDevice.onProfileStateChanged(mProfile, newState);
             cachedDevice.refresh();
+            // Dispatch profile changed after device update
+            mEventManager.dispatchProfileConnectionStateChanged(cachedDevice, newState,
+                    mProfile.getProfileId());
         }
     }
 
