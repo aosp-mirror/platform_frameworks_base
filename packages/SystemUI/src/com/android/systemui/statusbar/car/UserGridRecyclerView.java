@@ -22,7 +22,7 @@ import static android.content.DialogInterface.BUTTON_POSITIVE;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
-import android.car.user.CarUserManagerHelper;
+import android.car.userlib.CarUserManagerHelper;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.UserInfo;
