@@ -596,11 +596,6 @@ public class HdmiControlService extends SystemService {
                     }
                     // No need to propagate to HAL.
                     break;
-                case Global.HDMI_CONTROL_AUTO_TV_OFF_ENABLED:
-                    if (isAudioSystemDevice()) {
-                        audioSystem().setAutoTvOff(enabled);
-                    }
-                    break;
                 case Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED:
                     if (isTvDeviceEnabled()) {
                         tv().setSystemAudioControlFeatureEnabled(enabled);

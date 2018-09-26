@@ -126,11 +126,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
                 @Override
                 void wakeUp() {}
-
-                @Override
-                boolean isControlEnabled() {
-                    return true;
-                }
             };
 
         mMyLooper = mTestLooper.getLooper();
@@ -297,8 +292,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
     @Test
     public void onStandbyAudioSystem_currentSystemAudioControlOn() throws Exception {
-        mHdmiCecLocalDeviceAudioSystem.setAutoDeviceOff(false);
-        mHdmiCecLocalDeviceAudioSystem.setAutoTvOff(false);
         // Set system audio control on first
         mHdmiCecLocalDeviceAudioSystem.checkSupportAndSetSystemAudioMode(true);
         // Check if standby correctly turns off the feature
@@ -514,17 +507,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         SystemProperties.set(Constants.PROPERTY_ARC_SUPPORT, "false");
 
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcInitiate(message)).isTrue();
-        mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
-    }
-
-    @Test
-    public void onStandby_setAutoDeviceOff_true() throws Exception {
-        HdmiCecMessage expectedMessage =
-                HdmiCecMessageBuilder.buildStandby(ADDR_AUDIO_SYSTEM, ADDR_BROADCAST);
-        mHdmiCecLocalDeviceAudioSystem.setAutoDeviceOff(true);
-        mHdmiCecLocalDeviceAudioSystem.onStandby(false, STANDBY_SCREEN_OFF);
-
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
