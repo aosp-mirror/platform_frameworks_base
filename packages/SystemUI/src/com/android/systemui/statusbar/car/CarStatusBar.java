@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.car;
 
 import android.app.ActivityTaskManager;
-import android.car.user.CarUserManagerHelper;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
