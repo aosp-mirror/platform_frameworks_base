@@ -41,46 +41,46 @@ TEST(FileInputStreamTest, NextAndBackup) {
   ASSERT_FALSE(in.HadError());
   EXPECT_THAT(in.ByteCount(), Eq(0u));
 
-  const char* buffer;
+  const void* buffer;
   size_t size;
-  ASSERT_TRUE(in.Next(reinterpret_cast<const void**>(&buffer), &size)) << in.GetError();
+  ASSERT_TRUE(in.Next(&buffer, &size)) << in.GetError();
   ASSERT_THAT(size, Eq(10u));
   ASSERT_THAT(buffer, NotNull());
   EXPECT_THAT(in.ByteCount(), Eq(10u));
-  EXPECT_THAT(StringPiece(buffer, size), Eq("this is a "));
+  EXPECT_THAT(StringPiece(reinterpret_cast<const char*>(buffer), size), Eq("this is a "));
 
-  ASSERT_TRUE(in.Next(reinterpret_cast<const void**>(&buffer), &size));
+  ASSERT_TRUE(in.Next(&buffer, &size));
   ASSERT_THAT(size, Eq(10u));
   ASSERT_THAT(buffer, NotNull());
   EXPECT_THAT(in.ByteCount(), Eq(20u));
-  EXPECT_THAT(StringPiece(buffer, size), Eq("cool strin"));
+  EXPECT_THAT(StringPiece(reinterpret_cast<const char*>(buffer), size), Eq("cool strin"));
 
   in.BackUp(5u);
   EXPECT_THAT(in.ByteCount(), Eq(15u));
 
-  ASSERT_TRUE(in.Next(reinterpret_cast<const void**>(&buffer), &size));
+  ASSERT_TRUE(in.Next(&buffer, &size));
   ASSERT_THAT(size, Eq(5u));
   ASSERT_THAT(buffer, NotNull());
   ASSERT_THAT(in.ByteCount(), Eq(20u));
-  EXPECT_THAT(StringPiece(buffer, size), Eq("strin"));
+  EXPECT_THAT(StringPiece(reinterpret_cast<const char*>(buffer), size), Eq("strin"));
 
   // Backup 1 more than possible. Should clamp.
   in.BackUp(11u);
   EXPECT_THAT(in.ByteCount(), Eq(10u));
 
-  ASSERT_TRUE(in.Next(reinterpret_cast<const void**>(&buffer), &size));
+  ASSERT_TRUE(in.Next(&buffer, &size));
   ASSERT_THAT(size, Eq(10u));
   ASSERT_THAT(buffer, NotNull());
   ASSERT_THAT(in.ByteCount(), Eq(20u));
-  EXPECT_THAT(StringPiece(buffer, size), Eq("cool strin"));
+  EXPECT_THAT(StringPiece(reinterpret_cast<const char*>(buffer), size), Eq("cool strin"));
 
-  ASSERT_TRUE(in.Next(reinterpret_cast<const void**>(&buffer), &size));
+  ASSERT_TRUE(in.Next(&buffer, &size));
   ASSERT_THAT(size, Eq(1u));
   ASSERT_THAT(buffer, NotNull());
   ASSERT_THAT(in.ByteCount(), Eq(21u));
-  EXPECT_THAT(StringPiece(buffer, size), Eq("g"));
+  EXPECT_THAT(StringPiece(reinterpret_cast<const char*>(buffer), size), Eq("g"));
 
-  EXPECT_FALSE(in.Next(reinterpret_cast<const void**>(&buffer), &size));
+  EXPECT_FALSE(in.Next(&buffer, &size));
   EXPECT_FALSE(in.HadError());
 }
 
@@ -93,25 +93,25 @@ TEST(FileOutputStreamTest, NextAndBackup) {
   ASSERT_FALSE(out.HadError());
   EXPECT_THAT(out.ByteCount(), Eq(0u));
 
-  char* buffer;
+  void* buffer;
   size_t size;
-  ASSERT_TRUE(out.Next(reinterpret_cast<void**>(&buffer), &size));
+  ASSERT_TRUE(out.Next(&buffer, &size));
   ASSERT_THAT(size, Eq(10u));
   ASSERT_THAT(buffer, NotNull());
   EXPECT_THAT(out.ByteCount(), Eq(10u));
-  memcpy(buffer, input.c_str(), size);
+  memcpy(reinterpret_cast<char*>(buffer), input.c_str(), size);
 
-  ASSERT_TRUE(out.Next(reinterpret_cast<void**>(&buffer), &size));
+  ASSERT_TRUE(out.Next(&buffer, &size));
   ASSERT_THAT(size, Eq(10u));
   ASSERT_THAT(buffer, NotNull());
   EXPECT_THAT(out.ByteCount(), Eq(20u));
-  memcpy(buffer, input.c_str() + 10u, size);
+  memcpy(reinterpret_cast<char*>(buffer), input.c_str() + 10u, size);
 
-  ASSERT_TRUE(out.Next(reinterpret_cast<void**>(&buffer), &size));
+  ASSERT_TRUE(out.Next(&buffer, &size));
   ASSERT_THAT(size, Eq(10u));
   ASSERT_THAT(buffer, NotNull());
   EXPECT_THAT(out.ByteCount(), Eq(30u));
-  buffer[0] = input[20u];
+  reinterpret_cast<char*>(buffer)[0] = input[20u];
   out.BackUp(size - 1);
   EXPECT_THAT(out.ByteCount(), Eq(21u));
 
