@@ -284,9 +284,6 @@ public class WindowAnimator {
         if ((bulkUpdateParams & WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE) != 0) {
             builder.append(" WALLPAPER_MAY_CHANGE");
         }
-        if ((bulkUpdateParams & WindowSurfacePlacer.SET_FORCE_HIDING_CHANGED) != 0) {
-            builder.append(" FORCE_HIDING_CHANGED");
-        }
         if ((bulkUpdateParams & WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE) != 0) {
             builder.append(" ORIENTATION_CHANGE_COMPLETE");
         }
