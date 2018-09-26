@@ -100,7 +100,7 @@ public class HearingAidProfile implements LocalBluetoothProfile {
                 new HearingAidServiceListener(), BluetoothProfile.HEARING_AID);
     }
 
-    public boolean isConnectable() {
+    public boolean accessProfileEnabled() {
         return false;
     }
 

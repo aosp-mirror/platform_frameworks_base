@@ -78,7 +78,7 @@ public class PanProfile implements LocalBluetoothProfile {
             BluetoothProfile.PAN);
     }
 
-    public boolean isConnectable() {
+    public boolean accessProfileEnabled() {
         return true;
     }
 
