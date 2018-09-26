@@ -5402,7 +5402,19 @@ public class TelephonyManager {
         }
     }
 
-    // ICC SIM Application Types
+    /**
+     * UICC SIM Application Types
+     * @hide
+     */
+    @IntDef(prefix = { "APPTYPE_" }, value = {
+            APPTYPE_SIM,
+            APPTYPE_USIM,
+            APPTYPE_RUIM,
+            APPTYPE_CSIM,
+            APPTYPE_ISIM
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UiccAppType{}
     /** UICC application type is SIM */
     public static final int APPTYPE_SIM = PhoneConstants.APPTYPE_SIM;
     /** UICC application type is USIM */
@@ -5413,6 +5425,7 @@ public class TelephonyManager {
     public static final int APPTYPE_CSIM = PhoneConstants.APPTYPE_CSIM;
     /** UICC application type is ISIM */
     public static final int APPTYPE_ISIM = PhoneConstants.APPTYPE_ISIM;
+
     // authContext (parameter P2) when doing UICC challenge,
     // per 3GPP TS 31.102 (Section 7.1.2)
     /** Authentication type for UICC challenge is EAP SIM. See RFC 4186 for details. */
@@ -8053,26 +8066,23 @@ public class TelephonyManager {
     }
 
     /**
-     * Return the application ID for the app type like {@link APPTYPE_CSIM}.
+     * Return the application ID for the uicc application type like {@link #APPTYPE_CSIM}.
+     * All uicc applications are uniquely identified by application ID. See ETSI 102.221 and 101.220
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}
      *
-     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
-     *
-     * @param appType the uicc app type like {@link APPTYPE_CSIM}
-     * @return Application ID for specificied app type or null if no uicc or error.
+     * @param appType the uicc app type.
+     * @return Application ID for specified app type or {@code null} if no uicc or error.
      * @hide
      */
-    public String getAidForAppType(int appType) {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public String getAidForAppType(@UiccAppType int appType) {
         return getAidForAppType(getSubId(), appType);
     }
 
     /**
-     * Return the application ID for the app type like {@link APPTYPE_CSIM}.
-     *
-     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
-     *
-     * @param subId the subscription ID that this request applies to.
-     * @param appType the uicc app type, like {@link APPTYPE_CSIM}
-     * @return Application ID for specificied app type or null if no uicc or error.
+     * same as {@link #getAidForAppType(int)}
      * @hide
      */
     public String getAidForAppType(int subId, int appType) {
