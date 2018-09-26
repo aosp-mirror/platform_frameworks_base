@@ -54,7 +54,7 @@ bool StatsCompanionServicePuller::PullInternal(vector<shared_ptr<LogEvent> >* da
         vector<StatsLogEventWrapper> returned_value;
         Status status = statsCompanionServiceCopy->pullData(mTagId, &returned_value);
         if (!status.isOk()) {
-            ALOGW("StatsCompanionServicePuller::pull failed to pull for %d", mTagId);
+            ALOGW("StatsCompanionServicePuller::pull failed for %d", mTagId);
             return false;
         }
         data->clear();

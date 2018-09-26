@@ -15,6 +15,8 @@
  */
 package com.android.server.stats;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
@@ -67,6 +69,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.StatsLog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.IProcessStats;
@@ -1336,12 +1339,28 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    private void pullPowerProfile(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        PowerProfile powerProfile = new PowerProfile(mContext);
+        checkNotNull(powerProfile);
+
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
+                wallClockNanos);
+        ProtoOutputStream proto = new ProtoOutputStream();
+        powerProfile.writeToProto(proto);
+        proto.flush();
+        e.writeStorage(proto.getBytes());
+        pulledData.add(e);
+    }
+
     private void pullDiskIo(int tagId, long elapsedNanos, final long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         mStoragedUidIoStatsReader.readAbsolute((uid, fgCharsRead, fgCharsWrite, fgBytesRead,
                 fgBytesWrite, bgCharsRead, bgCharsWrite, bgBytesRead, bgBytesWrite,
                 fgFsync, bgFsync) -> {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
+                    wallClockNanos);
             e.writeInt(uid);
             e.writeLong(fgCharsRead);
             e.writeLong(fgCharsWrite);
@@ -1478,6 +1497,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 pullDiskIo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+            case StatsLog.POWER_PROFILE: {
+                pullPowerProfile(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
             default:
                 Slog.w(TAG, "No such tagId data as " + tagId);
                 return null;
@@ -1539,7 +1562,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         public void onStart() {
             mStatsCompanionService = new StatsCompanionService(getContext());
             try {
-                publishBinderService(Context.STATS_COMPANION_SERVICE, mStatsCompanionService);
+                publishBinderService(Context.STATS_COMPANION_SERVICE,
+                        mStatsCompanionService);
                 if (DEBUG) Slog.d(TAG, "Published " + Context.STATS_COMPANION_SERVICE);
             } catch (Exception e) {
                 Slog.e(TAG, "Failed to publishBinderService", e);
@@ -1564,18 +1588,22 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     }
 
     /**
-     * Tells statsd that statscompanion is ready. If the binder call returns, link to statsd.
+     * Tells statsd that statscompanion is ready. If the binder call returns, link to
+     * statsd.
      */
     private void sayHiToStatsd() {
         synchronized (sStatsdLock) {
             if (sStatsd != null) {
                 Slog.e(TAG, "Trying to fetch statsd, but it was already fetched",
-                        new IllegalStateException("sStatsd is not null when being fetched"));
+                        new IllegalStateException(
+                                "sStatsd is not null when being fetched"));
                 return;
             }
             sStatsd = fetchStatsdService();
             if (sStatsd == null) {
-                Slog.i(TAG, "Could not yet find statsd to tell it that StatsCompanion is alive.");
+                Slog.i(TAG,
+                        "Could not yet find statsd to tell it that StatsCompanion is "
+                                + "alive.");
                 return;
             }
             if (DEBUG) Slog.d(TAG, "Saying hi to statsd");
@@ -1593,10 +1621,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 filter.addAction(Intent.ACTION_PACKAGE_ADDED);
                 filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
                 filter.addDataScheme("package");
-                mContext.registerReceiverAsUser(mAppUpdateReceiver, UserHandle.ALL, filter, null,
+                mContext.registerReceiverAsUser(mAppUpdateReceiver, UserHandle.ALL, filter,
+                        null,
                         null);
 
-                // Setup receiver for user initialize (which happens once for a new user) and
+                // Setup receiver for user initialize (which happens once for a new user)
+                // and
                 // if a user is removed.
                 filter = new IntentFilter(Intent.ACTION_USER_INITIALIZE);
                 filter.addAction(Intent.ACTION_USER_REMOVED);
@@ -1610,7 +1640,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         mShutdownEventReceiver, UserHandle.ALL, filter, null, null);
                 final long token = Binder.clearCallingIdentity();
                 try {
-                    // Pull the latest state of UID->app name, version mapping when statsd starts.
+                    // Pull the latest state of UID->app name, version mapping when
+                    // statsd starts.
                     informAllUidsLocked(mContext);
                 } finally {
                     restoreCallingIdentity(token);
@@ -1672,7 +1703,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, writer)) return;
 
         synchronized (sStatsdLock) {
-            writer.println("Number of configuration files deleted: " + mDeletedFiles.size());
+            writer.println(
+                    "Number of configuration files deleted: " + mDeletedFiles.size());
             if (mDeletedFiles.size() > 0) {
                 writer.println("  timestamp, deleted file name");
             }
@@ -1680,7 +1712,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     SystemClock.currentThreadTimeMillis() - SystemClock.elapsedRealtime();
             for (Long elapsedMillis : mDeletedFiles.keySet()) {
                 long deletionMillis = lastBootMillis + elapsedMillis;
-                writer.println("  " + deletionMillis + ", " + mDeletedFiles.get(elapsedMillis));
+                writer.println(
+                        "  " + deletionMillis + ", " + mDeletedFiles.get(elapsedMillis));
             }
         }
     }
