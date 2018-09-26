@@ -24,6 +24,7 @@ import android.annotation.Size;
 import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.content.res.ResourcesImpl;
+import android.hardware.HardwareBuffer;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StrictMode;
@@ -721,6 +722,48 @@ public final class Bitmap implements Parcelable {
     @UnsupportedAppUsage
     public static Bitmap createHardwareBitmap(@NonNull GraphicBuffer graphicBuffer) {
         return nativeCreateHardwareBitmap(graphicBuffer);
+    }
+
+    /**
+     * Create a hardware bitmap backed by a {@link HardwareBuffer}.
+     *
+     * <p>The passed HardwareBuffer's usage flags must contain
+     * {@link HardwareBuffer#USAGE_GPU_SAMPLED_IMAGE}.
+     *
+     * <p>The bitmap will keep a reference to the buffer so that callers can safely close the
+     * HardwareBuffer without affecting the Bitmap. However the HardwareBuffer must not be
+     * modified while a wrapped Bitmap is accessing it. Doing so will result in undefined behavior.
+     *
+     * @param hardwareBuffer The HardwareBuffer to wrap.
+     * @param colorSpace The color space of the bitmap. Must be a {@link ColorSpace.Rgb} colorspace.
+     *                   If null, SRGB is assumed.
+     * @return A bitmap wrapping the buffer, or null if there was a problem creating the bitmap.
+     * @throws IllegalArgumentException if the HardwareBuffer has an invalid usage, or an invalid
+     *                                  colorspace is given.
+     */
+    @Nullable
+    public static Bitmap wrapHardwareBuffer(@NonNull HardwareBuffer hardwareBuffer,
+            @Nullable ColorSpace colorSpace) {
+        if ((hardwareBuffer.getUsage() & HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE) == 0) {
+            throw new IllegalArgumentException("usage flags must contain USAGE_GPU_SAMPLED_IMAGE.");
+        }
+        int format = hardwareBuffer.getFormat();
+        ColorSpace.Rgb rgb = null;
+        if (colorSpace != null) {
+            if (!(colorSpace instanceof ColorSpace.Rgb)) {
+                throw new IllegalArgumentException("colorSpace must be an RGB color space");
+            }
+            rgb = (ColorSpace.Rgb) colorSpace;
+        } else {
+            rgb = (ColorSpace.Rgb) ColorSpace.get(ColorSpace.Named.SRGB);
+        }
+        ColorSpace.Rgb.TransferParameters parameters = rgb.getTransferParameters();
+        if (parameters == null) {
+            throw new IllegalArgumentException("colorSpace must use an ICC "
+                    + "parametric transfer function");
+        }
+        ColorSpace.Rgb d50 = (ColorSpace.Rgb) ColorSpace.adapt(rgb, ColorSpace.ILLUMINANT_D50);
+        return nativeWrapHardwareBufferBitmap(hardwareBuffer, d50.getTransform(), parameters);
     }
 
     /**
@@ -2118,6 +2161,9 @@ public final class Bitmap implements Parcelable {
     private static native int nativeGetAllocationByteCount(long nativeBitmap);
     private static native Bitmap nativeCopyPreserveInternalConfig(long nativeBitmap);
     private static native Bitmap nativeCreateHardwareBitmap(GraphicBuffer buffer);
+    private static native Bitmap nativeWrapHardwareBufferBitmap(HardwareBuffer buffer,
+                                                              @Size(9) float[] xyzD50,
+                                                              ColorSpace.Rgb.TransferParameters p);
     private static native GraphicBuffer nativeCreateGraphicBufferHandle(long nativeBitmap);
     private static native boolean nativeGetColorSpace(long nativePtr, float[] xyz, float[] params);
     private static native boolean nativeIsSRGB(long nativePtr);

@@ -64,6 +64,8 @@ public:
                                               size_t rowBytes);
 
     static sk_sp<Bitmap> createFrom(sp<GraphicBuffer> graphicBuffer);
+    static sk_sp<Bitmap> createFrom(sp<GraphicBuffer> graphicBuffer,
+                                    sk_sp<SkColorSpace> colorSpace);
 
     static sk_sp<Bitmap> createFrom(const SkImageInfo&, SkPixelRef&);
 
