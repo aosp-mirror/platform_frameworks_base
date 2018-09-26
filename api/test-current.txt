@@ -1188,6 +1188,10 @@ package android.telephony {
     field public static final java.lang.String MBMS_DOWNLOAD_SERVICE_OVERRIDE_METADATA = "mbms-download-service-override";
   }
 
+  public class MbmsGroupCallSession implements java.lang.AutoCloseable {
+    field public static final java.lang.String MBMS_GROUP_CALL_SERVICE_OVERRIDE_METADATA = "mbms-group-call-service-override";
+  }
+
   public class MbmsStreamingSession implements java.lang.AutoCloseable {
     field public static final java.lang.String MBMS_STREAMING_SERVICE_OVERRIDE_METADATA = "mbms-streaming-service-override";
   }
@@ -1255,6 +1259,17 @@ package android.telephony.mbms.vendor {
     method public int requestUpdateFileServices(int, java.util.List<java.lang.String>) throws android.os.RemoteException;
     method public int resetDownloadKnowledge(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public int setTempFileRootDirectory(int, java.lang.String) throws android.os.RemoteException;
+  }
+
+  public class MbmsGroupCallServiceBase extends android.app.Service {
+    ctor public MbmsGroupCallServiceBase();
+    method public void dispose(int) throws android.os.RemoteException;
+    method public int initialize(android.telephony.mbms.MbmsGroupCallSessionCallback, int) throws android.os.RemoteException;
+    method public void onAppCallbackDied(int, int);
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public int startGroupCall(int, long, int[], int[], android.telephony.mbms.GroupCallCallback);
+    method public void stopGroupCall(int, long);
+    method public void updateGroupCall(int, long, int[], int[]);
   }
 
   public class MbmsStreamingServiceBase extends android.os.Binder {

@@ -119,8 +119,9 @@ public final class Magnifier {
      *
      * @param view the view for which this magnifier is attached
      *
-     * @see Builder
+     * @deprecated Please use {@link Builder} instead
      */
+    @Deprecated
     public Magnifier(@NonNull View view) {
         this(new Builder(view));
     }

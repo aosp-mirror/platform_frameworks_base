@@ -33,6 +33,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import android.content.Intent;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -71,7 +72,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         mSensor = mSensorManager.getFakeLightSensor();
         mScreen = new DozeScreenBrightness(mContext, mServiceFake, mSensorManager,
                 mSensor.getSensor(), mHostFake, null /* handler */,
-                DEFAULT_BRIGHTNESS, SENSOR_TO_BRIGHTNESS, SENSOR_TO_OPACITY);
+                DEFAULT_BRIGHTNESS, SENSOR_TO_BRIGHTNESS, SENSOR_TO_OPACITY,
+                true /* debuggable */);
     }
 
     @Test
@@ -90,6 +92,19 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         mSensor.sendSensorEvent(3);
 
         assertEquals(3, mServiceFake.screenBrightness);
+    }
+
+    @Test
+    public void testAod_usesDebugValue() throws Exception {
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mScreen.transitionTo(INITIALIZED, DOZE_AOD);
+
+        Intent intent = new Intent(DozeScreenBrightness.ACTION_AOD_BRIGHTNESS);
+        intent.putExtra(DozeScreenBrightness.BRIGHTNESS_BUCKET, 1);
+        mScreen.onReceive(mContext, intent);
+        mSensor.sendSensorEvent(3);
+
+        assertEquals(1, mServiceFake.screenBrightness);
     }
 
     @Test
@@ -160,7 +175,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     public void testNullSensor() throws Exception {
         mScreen = new DozeScreenBrightness(mContext, mServiceFake, mSensorManager,
                 null /* sensor */, mHostFake, null /* handler */,
-                DEFAULT_BRIGHTNESS, SENSOR_TO_BRIGHTNESS, SENSOR_TO_OPACITY);
+                DEFAULT_BRIGHTNESS, SENSOR_TO_BRIGHTNESS, SENSOR_TO_OPACITY,
+                true /* debuggable */);
 
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);

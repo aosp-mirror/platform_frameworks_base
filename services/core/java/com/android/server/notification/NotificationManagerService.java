@@ -4284,8 +4284,12 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     int resolveNotificationUid(String callingPkg, String targetPkg,
             int callingUid, int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            userId = USER_SYSTEM;
+        }
         // posted from app A on behalf of app A
-        if (isCallerSameApp(targetPkg, callingUid) && TextUtils.equals(callingPkg, targetPkg)) {
+        if (isCallerSameApp(targetPkg, callingUid, userId)
+                && TextUtils.equals(callingPkg, targetPkg)) {
             return callingUid;
         }
 
@@ -4322,7 +4326,7 @@ public class NotificationManagerService extends SystemService {
         if (!isSystemNotification && !isNotificationFromListener) {
             synchronized (mNotificationLock) {
                 if (mNotificationsByKey.get(r.sbn.getKey()) == null
-                        && isCallerInstantApp(pkg, callingUid)) {
+                        && isCallerInstantApp(pkg, callingUid, r.getUserId())) {
                     // Ephemeral apps have some special constraints for notifications.
                     // They are not allowed to create new notifications however they are allowed to
                     // update notifications created by the system (e.g. a foreground service
@@ -6416,7 +6420,8 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private boolean isCallerInstantApp(String pkg, int callingUid) {
+    @VisibleForTesting
+    boolean isCallerInstantApp(String pkg, int callingUid, int userId) {
         // System is always allowed to act for ephemeral apps.
         if (isUidSystemOrPhone(callingUid)) {
             return false;
@@ -6425,8 +6430,7 @@ public class NotificationManagerService extends SystemService {
         mAppOps.checkPackage(callingUid, pkg);
 
         try {
-            ApplicationInfo ai = mPackageManager.getApplicationInfo(pkg, 0,
-                    UserHandle.getCallingUserId());
+            ApplicationInfo ai = mPackageManager.getApplicationInfo(pkg, 0, userId);
             if (ai == null) {
                 throw new SecurityException("Unknown package " + pkg);
             }
@@ -6438,13 +6442,13 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void checkCallerIsSameApp(String pkg) {
-        checkCallerIsSameApp(pkg, Binder.getCallingUid());
+        checkCallerIsSameApp(pkg, Binder.getCallingUid(), UserHandle.getCallingUserId());
     }
 
-    private void checkCallerIsSameApp(String pkg, int uid) {
+    private void checkCallerIsSameApp(String pkg, int uid, int userId) {
         try {
             ApplicationInfo ai = mPackageManager.getApplicationInfo(
-                    pkg, 0, UserHandle.getCallingUserId());
+                    pkg, 0, userId);
             if (ai == null) {
                 throw new SecurityException("Unknown package " + pkg);
             }
@@ -6466,9 +6470,9 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private boolean isCallerSameApp(String pkg, int uid) {
+    private boolean isCallerSameApp(String pkg, int uid, int userId) {
         try {
-            checkCallerIsSameApp(pkg, uid);
+            checkCallerIsSameApp(pkg, uid, userId);
             return true;
         } catch (SecurityException e) {
             return false;

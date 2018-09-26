@@ -34,7 +34,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackagesProvider;
 import android.content.pm.PackageManagerInternal.SyncAdapterPackagesProvider;
-import android.content.pm.PackageParser;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.media.RingtoneManager;
@@ -48,6 +47,7 @@ import android.os.Message;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
+import android.permission.PermissionManager;
 import android.print.PrintManager;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
@@ -1024,15 +1024,17 @@ public final class DefaultPermissionGrantPolicy {
         ApplicationInfo applicationInfo = pkg.applicationInfo;
 
         // Automatically attempt to grant split permissions to older APKs
-        final int numSplitPerms = PackageParser.SPLIT_PERMISSIONS.length;
+        final List<PermissionManager.SplitPermissionInfo> splitPermissions =
+                mContext.getSystemService(PermissionManager.class).getSplitPermissions();
+        final int numSplitPerms = splitPermissions.size();
         for (int splitPermNum = 0; splitPermNum < numSplitPerms; splitPermNum++) {
-            final PackageParser.SplitPermissionInfo splitPerm =
-                    PackageParser.SPLIT_PERMISSIONS[splitPermNum];
+            final PermissionManager.SplitPermissionInfo splitPerm =
+                    splitPermissions.get(splitPermNum);
 
             if (applicationInfo != null
-                    && applicationInfo.targetSdkVersion < splitPerm.targetSdk
-                    && permissionsWithoutSplits.contains(splitPerm.rootPerm)) {
-                Collections.addAll(permissions, splitPerm.newPerms);
+                    && applicationInfo.targetSdkVersion < splitPerm.getTargetSdk()
+                    && permissionsWithoutSplits.contains(splitPerm.getRootPermission())) {
+                Collections.addAll(permissions, splitPerm.getNewPermissions());
             }
         }
 

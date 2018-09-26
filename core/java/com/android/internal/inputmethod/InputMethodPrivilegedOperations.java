@@ -135,22 +135,6 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#clearLastInputMethodWindowForTransition()}.
-     */
-    @AnyThread
-    public void clearLastInputMethodWindowForTransition() {
-        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
-        if (ops == null) {
-            return;
-        }
-        try {
-            ops.clearLastInputMethodWindowForTransition();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Calls {@link IInputMethodPrivilegedOperations#createInputContentUriToken(Uri, String)}.
      *
      * @param contentUri Content URI to which a temporary read permission should be granted

@@ -515,11 +515,14 @@ java_defaults {
         "telephony/java/android/telephony/ims/aidl/IImsSmsListener.aidl",
         "telephony/java/android/telephony/mbms/IMbmsDownloadSessionCallback.aidl",
         "telephony/java/android/telephony/mbms/IMbmsStreamingSessionCallback.aidl",
+        "telephony/java/android/telephony/mbms/IMbmsGroupCallSessionCallback.aidl",
         "telephony/java/android/telephony/mbms/IDownloadStatusListener.aidl",
         "telephony/java/android/telephony/mbms/IDownloadProgressListener.aidl",
         "telephony/java/android/telephony/mbms/IStreamingServiceCallback.aidl",
+        "telephony/java/android/telephony/mbms/IGroupCallCallback.aidl",
         "telephony/java/android/telephony/mbms/vendor/IMbmsDownloadService.aidl",
         "telephony/java/android/telephony/mbms/vendor/IMbmsStreamingService.aidl",
+        "telephony/java/android/telephony/mbms/vendor/IMbmsGroupCallService.aidl",
         "telephony/java/android/telephony/INetworkService.aidl",
         "telephony/java/android/telephony/INetworkServiceCallback.aidl",
         "telephony/java/com/android/ims/internal/IImsCallSession.aidl",
@@ -1282,6 +1285,9 @@ droiddoc {
 }
 
 droiddoc {
+    // Please sync with android-api-council@ before making any changes for the name property below.
+    // Since there's cron jobs that fetch offline-sdk-referenceonly-docs-docs.zip periodically.
+    // See b/116221385 for reference.
     name: "offline-sdk-referenceonly-docs",
     defaults: ["framework-docs-default"],
     srcs: [
@@ -1298,6 +1304,9 @@ droiddoc {
 }
 
 droiddoc {
+    // Please sync with android-api-council@ before making any changes for the name property below.
+    // Since there's cron jobs that fetch offline-system-sdk-referenceonly-docs-docs.zip periodically.
+    // See b/116221385 for reference.
     name: "offline-system-sdk-referenceonly-docs",
     defaults: ["framework-docs-default"],
     srcs: [

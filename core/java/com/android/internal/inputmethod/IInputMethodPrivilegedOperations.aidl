@@ -28,7 +28,6 @@ import com.android.internal.inputmethod.IInputContentUriToken;
 interface IInputMethodPrivilegedOperations {
     void setImeWindowStatus(int vis, int backDisposition);
     void reportStartInput(in IBinder startInputToken);
-    void clearLastInputMethodWindowForTransition();
     IInputContentUriToken createInputContentUriToken(in Uri contentUri, in String packageName);
     void reportFullscreenMode(boolean fullscreen);
     void setInputMethod(String id);

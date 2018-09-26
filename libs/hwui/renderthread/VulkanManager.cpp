@@ -16,6 +16,8 @@
 
 #include "VulkanManager.h"
 
+#include <private/gui/SyncFeatures.h>
+
 #include "Properties.h"
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
@@ -40,6 +42,10 @@ VulkanManager::VulkanManager(RenderThread& thread) : mRenderThread(thread) {}
 
 void VulkanManager::destroy() {
     mRenderThread.setGrContext(nullptr);
+
+    // We don't need to explicitly free the command buffer since it automatically gets freed when we
+    // delete the VkCommandPool below.
+    mDummyCB = VK_NULL_HANDLE;
 
     if (VK_NULL_HANDLE != mCommandPool) {
         mDestroyCommandPool(mDevice, mCommandPool, nullptr);
@@ -226,6 +232,11 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     grExtensions.init(getProc, mInstance, mPhysicalDevice, instanceExtensions.size(),
             instanceExtensions.data(), deviceExtensions.size(), deviceExtensions.data());
 
+    if (!grExtensions.hasExtension(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME, 1)) {
+        this->destroy();
+        return false;
+    }
+
     memset(&features, 0, sizeof(VkPhysicalDeviceFeatures2));
     features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     features.pNext = nullptr;
@@ -313,6 +324,8 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     GET_DEV_PROC(DeviceWaitIdle);
     GET_DEV_PROC(CreateSemaphore);
     GET_DEV_PROC(DestroySemaphore);
+    GET_DEV_PROC(ImportSemaphoreFdKHR);
+    GET_DEV_PROC(GetSemaphoreFdKHR);
     GET_DEV_PROC(CreateFence);
     GET_DEV_PROC(DestroyFence);
     GET_DEV_PROC(WaitForFences);
@@ -384,6 +397,14 @@ void VulkanManager::initialize() {
                 &mCommandPool);
         SkASSERT(VK_SUCCESS == res);
     }
+    LOG_ALWAYS_FATAL_IF(mCommandPool == VK_NULL_HANDLE);
+
+    if (!setupDummyCommandBuffer()) {
+        this->destroy();
+        return;
+    }
+    LOG_ALWAYS_FATAL_IF(mDummyCB == VK_NULL_HANDLE);
+
 
     mGetDeviceQueue(mDevice, mPresentQueueIndex, 0, &mPresentQueue);
 
@@ -976,19 +997,176 @@ int VulkanManager::getAge(VulkanSurface* surface) {
     return surface->mCurrentTime - lastUsed;
 }
 
+bool VulkanManager::setupDummyCommandBuffer() {
+    if (mDummyCB != VK_NULL_HANDLE) {
+        return true;
+    }
+
+    VkCommandBufferAllocateInfo commandBuffersInfo;
+    memset(&commandBuffersInfo, 0, sizeof(VkCommandBufferAllocateInfo));
+    commandBuffersInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    commandBuffersInfo.pNext = nullptr;
+    commandBuffersInfo.commandPool = mCommandPool;
+    commandBuffersInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    commandBuffersInfo.commandBufferCount = 1;
+
+    VkResult err = mAllocateCommandBuffers(mDevice, &commandBuffersInfo, &mDummyCB);
+    if (err != VK_SUCCESS) {
+        // It is probably unnecessary to set this back to VK_NULL_HANDLE, but we set it anyways to
+        // make sure the driver didn't set a value and then return a failure.
+        mDummyCB = VK_NULL_HANDLE;
+        return false;
+    }
+
+    VkCommandBufferBeginInfo beginInfo;
+    memset(&beginInfo, 0, sizeof(VkCommandBufferBeginInfo));
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+
+    mBeginCommandBuffer(mDummyCB, &beginInfo);
+    mEndCommandBuffer(mDummyCB);
+    return true;
+}
+
 status_t VulkanManager::fenceWait(sp<Fence>& fence) {
-    //TODO: Insert a wait on fence command into the Vulkan command buffer.
-    // Block CPU on the fence.
-    status_t err = fence->waitForever("VulkanManager::fenceWait");
-    if (err != NO_ERROR) {
-        ALOGE("VulkanManager::fenceWait: error waiting for fence: %d", err);
-        return err;
+    if (!hasVkContext()) {
+        ALOGE("VulkanManager::fenceWait: VkDevice not initialized");
+        return INVALID_OPERATION;
+    }
+
+    if (SyncFeatures::getInstance().useWaitSync() &&
+        SyncFeatures::getInstance().useNativeFenceSync()) {
+        // Block GPU on the fence.
+        int fenceFd = fence->dup();
+        if (fenceFd == -1) {
+            ALOGE("VulkanManager::fenceWait: error dup'ing fence fd: %d", errno);
+            return -errno;
+        }
+
+        VkSemaphoreCreateInfo semaphoreInfo;
+        semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+        semaphoreInfo.pNext = nullptr;
+        semaphoreInfo.flags = 0;
+        VkSemaphore semaphore;
+        VkResult err = mCreateSemaphore(mDevice, &semaphoreInfo, nullptr, &semaphore);
+        if (VK_SUCCESS != err) {
+            ALOGE("Failed to create import semaphore, err: %d", err);
+            return UNKNOWN_ERROR;
+        }
+        VkImportSemaphoreFdInfoKHR importInfo;
+        importInfo.sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR;
+        importInfo.pNext = nullptr;
+        importInfo.semaphore = semaphore;
+        importInfo.flags = VK_SEMAPHORE_IMPORT_TEMPORARY_BIT;
+        importInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
+        importInfo.fd = fenceFd;
+
+        err = mImportSemaphoreFdKHR(mDevice, &importInfo);
+        if (VK_SUCCESS != err) {
+            ALOGE("Failed to import semaphore, err: %d", err);
+            return UNKNOWN_ERROR;
+        }
+
+        LOG_ALWAYS_FATAL_IF(mDummyCB == VK_NULL_HANDLE);
+
+        VkPipelineStageFlags waitDstStageFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+
+        VkSubmitInfo submitInfo;
+        memset(&submitInfo, 0, sizeof(VkSubmitInfo));
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.waitSemaphoreCount = 1;
+        // Wait to make sure aquire semaphore set above has signaled.
+        submitInfo.pWaitSemaphores = &semaphore;
+        submitInfo.pWaitDstStageMask = &waitDstStageFlags;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &mDummyCB;
+        submitInfo.signalSemaphoreCount = 0;
+
+        mQueueSubmit(mGraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+
+        // On Android when we import a semaphore, it is imported using temporary permanence. That
+        // means as soon as we queue the semaphore for a wait it reverts to its previous permanent
+        // state before importing. This means it will now be in an idle state with no pending
+        // signal or wait operations, so it is safe to immediately delete it.
+        mDestroySemaphore(mDevice, semaphore, nullptr);
+    } else {
+        // Block CPU on the fence.
+        status_t err = fence->waitForever("VulkanManager::fenceWait");
+        if (err != NO_ERROR) {
+            ALOGE("VulkanManager::fenceWait: error waiting for fence: %d", err);
+            return err;
+        }
     }
     return OK;
 }
 
 status_t VulkanManager::createReleaseFence(sp<Fence>& nativeFence) {
-    //TODO: Create a fence that is signaled, when all the pending Vulkan commands are flushed.
+    if (!hasVkContext()) {
+        ALOGE("VulkanManager::createReleaseFence: VkDevice not initialized");
+        return INVALID_OPERATION;
+    }
+
+    if (SyncFeatures::getInstance().useFenceSync()) {
+        ALOGE("VulkanManager::createReleaseFence: Vk backend doesn't support non-native fences");
+        return INVALID_OPERATION;
+    }
+
+    if (!SyncFeatures::getInstance().useNativeFenceSync()) {
+        return OK;
+    }
+
+    VkExportSemaphoreCreateInfo exportInfo;
+    exportInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO;
+    exportInfo.pNext = nullptr;
+    exportInfo.handleTypes = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
+
+    VkSemaphoreCreateInfo semaphoreInfo;
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    semaphoreInfo.pNext = &exportInfo;
+    semaphoreInfo.flags = 0;
+    VkSemaphore semaphore;
+    VkResult err = mCreateSemaphore(mDevice, &semaphoreInfo, nullptr, &semaphore);
+    if (VK_SUCCESS != err) {
+        ALOGE("VulkanManager::createReleaseFence: Failed to create semaphore");
+        return INVALID_OPERATION;
+    }
+
+    LOG_ALWAYS_FATAL_IF(mDummyCB == VK_NULL_HANDLE);
+
+    VkSubmitInfo submitInfo;
+    memset(&submitInfo, 0, sizeof(VkSubmitInfo));
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.waitSemaphoreCount = 0;
+    submitInfo.pWaitSemaphores = nullptr;
+    submitInfo.pWaitDstStageMask = nullptr;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &mDummyCB;
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = &semaphore;
+
+    mQueueSubmit(mGraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+
+    VkSemaphoreGetFdInfoKHR getFdInfo;
+    getFdInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR;
+    getFdInfo.pNext = nullptr;
+    getFdInfo.semaphore = semaphore;
+    getFdInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
+
+    int fenceFd = 0;
+
+    err = mGetSemaphoreFdKHR(mDevice, &getFdInfo, &fenceFd);
+    if (VK_SUCCESS != err) {
+        ALOGE("VulkanManager::createReleaseFence: Failed to get semaphore Fd");
+        return INVALID_OPERATION;
+    }
+    nativeFence = new Fence(fenceFd);
+
+    // Exporting a semaphore with copy transference via vkGetSemahporeFdKHR, has the same effect of
+    // destroying the semaphore and creating a new one with the same handle, and the payloads
+    // ownership is move to the Fd we created. Thus the semahpore is in a state that we can delete
+    // it and we don't need to wait on the command buffer we submitted to finish.
+    mDestroySemaphore(mDevice, semaphore, nullptr);
+
     return OK;
 }
 

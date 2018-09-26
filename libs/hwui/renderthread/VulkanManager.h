@@ -139,6 +139,8 @@ private:
 
     VulkanSurface::BackbufferInfo* getAvailableBackbuffer(VulkanSurface* surface);
 
+    bool setupDummyCommandBuffer();
+
     // simple wrapper class that exists only to initialize a pointer to NULL
     template <typename FNPTR_TYPE>
     class VkPtr {
@@ -199,6 +201,8 @@ private:
 
     VkPtr<PFN_vkCreateSemaphore> mCreateSemaphore;
     VkPtr<PFN_vkDestroySemaphore> mDestroySemaphore;
+    VkPtr<PFN_vkImportSemaphoreFdKHR> mImportSemaphoreFdKHR;
+    VkPtr<PFN_vkGetSemaphoreFdKHR> mGetSemaphoreFdKHR;
     VkPtr<PFN_vkCreateFence> mCreateFence;
     VkPtr<PFN_vkDestroyFence> mDestroyFence;
     VkPtr<PFN_vkWaitForFences> mWaitForFences;
@@ -215,6 +219,8 @@ private:
     uint32_t mPresentQueueIndex;
     VkQueue mPresentQueue = VK_NULL_HANDLE;
     VkCommandPool mCommandPool = VK_NULL_HANDLE;
+
+    VkCommandBuffer mDummyCB = VK_NULL_HANDLE;
 
     enum class SwapBehavior {
         Discard,

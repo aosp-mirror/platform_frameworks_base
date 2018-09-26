@@ -950,6 +950,7 @@ package android.content {
     field public static final java.lang.String HDMI_CONTROL_SERVICE = "hdmi_control";
     field public static final java.lang.String NETWORK_SCORE_SERVICE = "network_score";
     field public static final java.lang.String OEM_LOCK_SERVICE = "oem_lock";
+    field public static final java.lang.String PERMISSION_SERVICE = "permission";
     field public static final java.lang.String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
     field public static final java.lang.String SECURE_ELEMENT_SERVICE = "secure_element";
     field public static final java.lang.String STATS_MANAGER = "stats";
@@ -4192,6 +4193,20 @@ package android.os.storage {
 
 }
 
+package android.permission {
+
+  public final class PermissionManager {
+    method public java.util.List<android.permission.PermissionManager.SplitPermissionInfo> getSplitPermissions();
+  }
+
+  public static final class PermissionManager.SplitPermissionInfo {
+    method public java.lang.String[] getNewPermissions();
+    method public java.lang.String getRootPermission();
+    method public int getTargetSdk();
+  }
+
+}
+
 package android.permissionpresenterservice {
 
   public abstract class RuntimePermissionPresenterService extends android.app.Service {
@@ -5257,6 +5272,10 @@ package android.telephony {
     field public static final java.lang.String MBMS_DOWNLOAD_SERVICE_ACTION = "android.telephony.action.EmbmsDownload";
   }
 
+  public class MbmsGroupCallSession implements java.lang.AutoCloseable {
+    field public static final java.lang.String MBMS_GROUP_CALL_SERVICE_ACTION = "android.telephony.action.EmbmsGroupCall";
+  }
+
   public class MbmsStreamingSession implements java.lang.AutoCloseable {
     field public static final java.lang.String MBMS_STREAMING_SERVICE_ACTION = "android.telephony.action.EmbmsStreaming";
   }
@@ -5434,6 +5453,7 @@ package android.telephony {
     method public deprecated boolean getDataEnabled();
     method public deprecated boolean getDataEnabled(int);
     method public boolean getEmergencyCallbackMode();
+    method public java.lang.String getIsimDomain();
     method public int getSimApplicationState();
     method public int getSimCardState();
     method public java.util.List<android.telephony.TelephonyHistogram> getTelephonyHistograms();
@@ -6556,6 +6576,17 @@ package android.telephony.mbms.vendor {
     method public int requestUpdateFileServices(int, java.util.List<java.lang.String>) throws android.os.RemoteException;
     method public int resetDownloadKnowledge(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public int setTempFileRootDirectory(int, java.lang.String) throws android.os.RemoteException;
+  }
+
+  public class MbmsGroupCallServiceBase extends android.app.Service {
+    ctor public MbmsGroupCallServiceBase();
+    method public void dispose(int) throws android.os.RemoteException;
+    method public int initialize(android.telephony.mbms.MbmsGroupCallSessionCallback, int) throws android.os.RemoteException;
+    method public void onAppCallbackDied(int, int);
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public int startGroupCall(int, long, int[], int[], android.telephony.mbms.GroupCallCallback);
+    method public void stopGroupCall(int, long);
+    method public void updateGroupCall(int, long, int[], int[]);
   }
 
   public class MbmsStreamingServiceBase extends android.os.Binder {

@@ -3383,10 +3383,44 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testIsCallerInstantApp_primaryUser() throws Exception {
+        ApplicationInfo info = new ApplicationInfo();
+        info.privateFlags = ApplicationInfo.PRIVATE_FLAG_INSTANT;
+        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(0))).thenReturn(info);
+
+        assertTrue(mService.isCallerInstantApp("any", 45770, 0));
+
+        info.privateFlags = 0;
+        assertFalse(mService.isCallerInstantApp("any", 575370, 0));
+    }
+
+    @Test
+    public void testIsCallerInstantApp_secondaryUser() throws Exception {
+        ApplicationInfo info = new ApplicationInfo();
+        info.privateFlags = ApplicationInfo.PRIVATE_FLAG_INSTANT;
+        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(10))).thenReturn(info);
+        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(0))).thenReturn(null);
+
+        assertTrue(mService.isCallerInstantApp("any", 68638450, 10));
+    }
+
+    @Test
+    public void testResolveNotificationUid_sameApp_nonSystemUser() throws Exception {
+        ApplicationInfo info = new ApplicationInfo();
+        info.uid = Binder.getCallingUid();
+        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(10))).thenReturn(info);
+        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(0))).thenReturn(null);
+
+        int actualUid = mService.resolveNotificationUid("caller", "caller", info.uid, 10);
+
+        assertEquals(info.uid, actualUid);
+    }
+
+    @Test
     public void testResolveNotificationUid_sameApp() throws Exception {
         ApplicationInfo info = new ApplicationInfo();
         info.uid = Binder.getCallingUid();
-        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), anyInt())).thenReturn(info);
+        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(0))).thenReturn(info);
 
         int actualUid = mService.resolveNotificationUid("caller", "caller", info.uid, 0);
 

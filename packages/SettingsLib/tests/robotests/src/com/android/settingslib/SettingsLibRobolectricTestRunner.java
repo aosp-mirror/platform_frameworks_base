@@ -52,6 +52,7 @@ public class SettingsLibRobolectricTestRunner extends RobolectricTestRunner {
                 @Override
                 public List<ResourcePath> getIncludedResourcePaths() {
                     final List<ResourcePath> paths = super.getIncludedResourcePaths();
+                    paths.add(resourcePath("file:frameworks/base/packages/SettingsLib/AppPreference/res"));
                     paths.add(resourcePath("file:frameworks/base/packages/SettingsLib/HelpUtils/res"));
                     paths.add(resourcePath("file:frameworks/base/packages/SettingsLib/RestrictedLockUtils/res"));
                     paths.add(resourcePath("file:frameworks/base/packages/SettingsLib/res"));

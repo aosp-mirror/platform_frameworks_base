@@ -533,8 +533,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     GlobalActions mGlobalActions;
     Handler mHandler;
-    WindowState mLastInputMethodWindow = null;
-    WindowState mLastInputMethodTargetWindow = null;
 
     // FIXME This state is shared between the input reader and handler thread.
     // Technically it's broken and buggy but it has been like this for many years
@@ -4732,12 +4730,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         final WindowManager.LayoutParams attrs = win.getAttrs();
         final boolean isDefaultDisplay = win.isDefaultDisplay();
-        final boolean needsToOffsetInputMethodTarget =
-                (win == mLastInputMethodTargetWindow) && (mLastInputMethodWindow != null);
-        if (needsToOffsetInputMethodTarget) {
-            if (DEBUG_LAYOUT) Slog.i(TAG, "Offset ime target window by the last ime window state");
-            offsetInputMethodWindowLw(mLastInputMethodWindow, displayFrames);
-        }
 
         final int type = attrs.type;
         final int fl = PolicyControl.getWindowFlags(win, attrs);
@@ -5191,7 +5183,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // can't appear underneath them.
         if (type == TYPE_INPUT_METHOD && win.isVisibleLw()
                 && !win.getGivenInsetsPendingLw()) {
-            setLastInputMethodWindowLw(null, null);
             offsetInputMethodWindowLw(win, displayFrames);
         }
         if (type == TYPE_VOICE_INTERACTION && win.isVisibleLw()
@@ -7822,12 +7813,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void setLastInputMethodWindowLw(WindowState ime, WindowState target) {
-        mLastInputMethodWindow = ime;
-        mLastInputMethodTargetWindow = target;
-    }
-
-    @Override
     public void setDismissImeOnBackKeyPressed(boolean newValue) {
         mDismissImeOnBackKeyPressed = newValue;
     }
@@ -7845,7 +7830,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (statusBar != null) {
             statusBar.setCurrentUser(newUserId);
         }
-        setLastInputMethodWindowLw(null, null);
     }
 
     @Override
@@ -8020,14 +8004,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix); pw.print("mShowingDream="); pw.print(mShowingDream);
                 pw.print(" mDreamingLockscreen="); pw.print(mDreamingLockscreen);
                 pw.print(" mDreamingSleepToken="); pw.println(mDreamingSleepToken);
-        if (mLastInputMethodWindow != null) {
-            pw.print(prefix); pw.print("mLastInputMethodWindow=");
-                    pw.println(mLastInputMethodWindow);
-        }
-        if (mLastInputMethodTargetWindow != null) {
-            pw.print(prefix); pw.print("mLastInputMethodTargetWindow=");
-                    pw.println(mLastInputMethodTargetWindow);
-        }
         if (mStatusBar != null) {
             pw.print(prefix); pw.print("mStatusBar=");
                     pw.print(mStatusBar); pw.print(" isStatusBarKeyguard=");

@@ -76,7 +76,8 @@ import androidx.test.runner.AndroidJUnit4;
  */
 @SmallTest
 @FlakyTest(bugId = 74078662)
-@Presubmit
+// TODO(b/116597907): Re-enable this test in postsubmit after the bug is fixed.
+// @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class WindowStateTests extends WindowTestsBase {
 

@@ -108,6 +108,8 @@ final class UiModeManagerService extends SystemService {
 
     private PowerManager.WakeLock mWakeLock;
 
+    private final LocalService mLocalService = new LocalService();
+
     public UiModeManagerService(Context context) {
         super(context);
     }
@@ -242,6 +244,7 @@ final class UiModeManagerService extends SystemService {
 
         }, TAG + ".onStart");
         publishBinderService(Context.UI_MODE_SERVICE, mService);
+        publishLocalService(UiModeManagerInternal.class, mLocalService);
     }
 
     private final IUiModeManager.Stub mService = new IUiModeManager.Stub() {
@@ -367,7 +370,8 @@ final class UiModeManagerService extends SystemService {
             pw.println("Current UI Mode Service state:");
             pw.print("  mDockState="); pw.print(mDockState);
                     pw.print(" mLastBroadcastState="); pw.println(mLastBroadcastState);
-            pw.print("  mNightMode="); pw.print(mNightMode);
+            pw.print("  mNightMode="); pw.print(mNightMode); pw.print(" (");
+                    pw.print(Shell.nightModeToStr(mNightMode)); pw.print(") ");
                     pw.print(" mNightModeLocked="); pw.print(mNightModeLocked);
                     pw.print(" mCarModeEnabled="); pw.print(mCarModeEnabled);
                     pw.print(" mComputedNightMode="); pw.print(mComputedNightMode);
@@ -836,6 +840,24 @@ final class UiModeManagerService extends SystemService {
                     return UiModeManager.MODE_NIGHT_AUTO;
                 default:
                     return -1;
+            }
+        }
+    }
+
+    public final class LocalService extends UiModeManagerInternal {
+
+        @Override
+        public boolean isNightMode() {
+            synchronized (mLock) {
+                final boolean isIt = (mConfiguration.uiMode & Configuration.UI_MODE_NIGHT_YES) != 0;
+                if (LOG) {
+                    Slog.d(TAG,
+                        "LocalService.isNightMode(): mNightMode=" + mNightMode
+                        + "; mComputedNightMode=" + mComputedNightMode
+                        + "; uiMode=" + mConfiguration.uiMode
+                        + "; isIt=" + isIt);
+                }
+                return isIt;
             }
         }
     }

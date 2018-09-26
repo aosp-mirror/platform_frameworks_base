@@ -136,6 +136,7 @@ message Atom {
         FingerprintAcquired fingerprint_acquired = 87;
         FingerprintAuthenticated fingerprint_authenticated = 88;
         FingerprintErrorOccurred fingerprint_error_occurred = 89;
+        Notification notification = 90;
     }
 
     // Pulled events will start at field 10000.
@@ -1891,6 +1892,69 @@ message FingerprintErrorOccurred {
     // The type of error.
     optional Error error = 3;
 }
+
+message Notification {
+
+    // Type of notification event.
+    enum Type {
+        TYPE_UNKNOWN = 0;
+        // Notification became visible to the user.
+        TYPE_OPEN = 1;
+        // Notification became hidden.
+        TYPE_CLOSE = 2;
+        // Notification switched to detail mode.
+        TYPE_DETAIL = 3;
+        // Notification was clicked.
+        TYPE_ACTION = 4;
+        // Notification was dismissed.
+        TYPE_DISMISS = 5;
+        // Notification switched to summary mode. The enum value of 14 is to
+        // match that of metrics_constants.
+        TYPE_COLLAPSE = 14;
+    }
+    optional Type type = 1;
+
+    // Package name associated with the notification.
+    optional string package_name = 2;
+
+    // Tag associated with notification.
+    optional string tag = 3;
+
+    // Application-supplied ID associated with the notification.
+    optional int32 id = 4;
+
+    // Index of notification in the notification panel.
+    optional int32 shade_index = 5;
+
+    // The number of notifications in the notification panel.
+    optional int32 shade_count = 6;
+
+    // Importance for the notification.
+    optional int32 importance = 7;
+
+    // ID for the notification channel.
+    optional int32 channel_id = 8;
+
+    // Importance for the notification channel.
+    optional int32 channel_importance = 9;
+
+    // Whether notification was a group summary.
+    optional bool group_summary = 10;
+
+    // Time since notification was created in milliseconds.
+    optional int64 since_create_millis = 11;
+
+    // Time since notification was interrupted in milliseconds.
+    optional int64 since_interruption_millis = 12;
+
+    // Time since notification was updated in milliseconds.
+    optional int64 since_update_millis = 13;
+
+    // Time since notification was visible in milliseconds.
+    optional int64 since_visible_millis = 14;
+}
+
+
 //////////////////////////////////////////////////////////////////////
 // Pulled atoms below this line //
 //////////////////////////////////////////////////////////////////////
