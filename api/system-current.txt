@@ -5267,10 +5267,7 @@ package android.telephony {
     method public boolean handlePinMmi(java.lang.String);
     method public boolean handlePinMmiForSubscriber(int, java.lang.String);
     method public boolean isDataConnectivityPossible();
-    method public deprecated boolean isIdle();
-    method public deprecated boolean isOffhook();
     method public deprecated boolean isRadioOn();
-    method public deprecated boolean isRinging();
     method public boolean isVideoCallingEnabled();
     method public deprecated boolean isVisualVoicemailEnabled(android.telecom.PhoneAccountHandle);
     method public boolean needsOtaServiceProvisioning();
@@ -5284,7 +5281,6 @@ package android.telephony {
     method public void setSimPowerStateForSlot(int, int);
     method public deprecated void setVisualVoicemailEnabled(android.telecom.PhoneAccountHandle, boolean);
     method public void setVoiceActivationState(int);
-    method public deprecated void silenceRinger();
     method public boolean supplyPin(java.lang.String);
     method public int[] supplyPinReportResult(java.lang.String);
     method public boolean supplyPuk(java.lang.String, java.lang.String);
