@@ -30,6 +30,7 @@ import android.bluetooth.BluetoothMapClient;
 import android.bluetooth.BluetoothPan;
 import android.bluetooth.BluetoothPbap;
 import android.bluetooth.BluetoothPbapClient;
+import android.bluetooth.BluetoothSap;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
@@ -98,6 +99,7 @@ public class LocalBluetoothProfileManager {
     private PbapClientProfile mPbapClientProfile;
     private PbapServerProfile mPbapProfile;
     private HearingAidProfile mHearingAidProfile;
+    private SapProfile mSapProfile;
 
     /**
      * Mapping from profile name, e.g. "HEADSET" to profile object.
@@ -209,6 +211,13 @@ public class LocalBluetoothProfileManager {
             mPbapClientProfile = new PbapClientProfile(mContext, mDeviceManager,this);
             addProfile(mPbapClientProfile, PbapClientProfile.NAME,
                     BluetoothPbapClient.ACTION_CONNECTION_STATE_CHANGED);
+        }
+        if (mSapProfile == null && supportedList.contains(BluetoothProfile.SAP)) {
+            if (DEBUG) {
+                Log.d(TAG, "Adding local SAP profile");
+            }
+            mSapProfile = new SapProfile(mContext, mDeviceManager, this);
+            addProfile(mSapProfile, SapProfile.NAME, BluetoothSap.ACTION_CONNECTION_STATE_CHANGED);
         }
         mEventManager.registerProfileIntentReceiver();
     }
@@ -547,6 +556,11 @@ public class LocalBluetoothProfileManager {
             mHearingAidProfile != null) {
             profiles.add(mHearingAidProfile);
             removedProfiles.remove(mHearingAidProfile);
+        }
+
+        if (mSapProfile != null && BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.SAP)) {
+            profiles.add(mSapProfile);
+            removedProfiles.remove(mSapProfile);
         }
 
         if (DEBUG) {
