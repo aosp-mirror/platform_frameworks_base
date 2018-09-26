@@ -58,10 +58,12 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.system.NavigationBarCompat;
+import java.io.PrintWriter;
 
 /**
  * Class to detect gestures on the navigation bar and implement quick scrub.
@@ -117,6 +119,7 @@ public class QuickStepController implements GestureHelper {
     private final int mTrackEndPadding;
     private final int mHomeBackGestureDragLimit;
     private final Context mContext;
+    private final StatusBar mStatusBar;
     private final Matrix mTransformGlobalMatrix = new Matrix();
     private final Matrix mTransformLocalMatrix = new Matrix();
     private final Paint mTrackPaint = new Paint();
@@ -195,6 +198,7 @@ public class QuickStepController implements GestureHelper {
     public QuickStepController(Context context) {
         final Resources res = context.getResources();
         mContext = context;
+        mStatusBar = SysUiServiceProvider.getComponent(context, StatusBar.class);
         mOverviewEventSender = Dependency.get(OverviewProxyService.class);
         mTrackThickness = res.getDimensionPixelSize(R.dimen.nav_quick_scrub_track_thickness);
         mTrackEndPadding = res.getDimensionPixelSize(R.dimen.nav_quick_scrub_track_edge_padding);
@@ -218,6 +222,10 @@ public class QuickStepController implements GestureHelper {
      */
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (mStatusBar.isKeyguardShowing()) {
+            // Disallow any handling when the keyguard is showing
+            return false;
+        }
         return handleTouchEvent(event);
     }
 
@@ -227,6 +235,11 @@ public class QuickStepController implements GestureHelper {
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (mStatusBar.isKeyguardShowing()) {
+            // Disallow any handling when the keyguard is showing
+            return false;
+        }
+
         // The same down event was just sent on intercept and therefore can be ignored here
         final boolean ignoreProxyDownEvent = event.getAction() == MotionEvent.ACTION_DOWN
                 && mOverviewEventSender.getProxy() != null;
@@ -481,6 +494,21 @@ public class QuickStepController implements GestureHelper {
     public void onNavigationButtonLongPress(View v) {
         mAllowGestureDetection = false;
         mHandler.removeCallbacksAndMessages(null);
+    }
+
+    @Override
+    public void dump(PrintWriter pw) {
+        pw.println("QuickStepController {");
+        pw.print("    "); pw.println("mQuickScrubActive=" + mQuickScrubActive);
+        pw.print("    "); pw.println("mQuickStepStarted=" + mQuickStepStarted);
+        pw.print("    "); pw.println("mAllowGestureDetection=" + mAllowGestureDetection);
+        pw.print("    "); pw.println("mBackGestureActive=" + mBackGestureActive);
+        pw.print("    "); pw.println("mCanPerformBack=" + mCanPerformBack);
+        pw.print("    "); pw.println("mNotificationsVisibleOnDown=" + mNotificationsVisibleOnDown);
+        pw.print("    "); pw.println("mIsVertical=" + mIsVertical);
+        pw.print("    "); pw.println("mIsRTL=" + mIsRTL);
+        pw.print("    "); pw.println("mIsInScreenPinning=" + mIsInScreenPinning);
+        pw.println("}");
     }
 
     private void startQuickStep(MotionEvent event) {

@@ -314,8 +314,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public void setComponents(NotificationPanelView panel) {
         mPanelView = panel;
-        if (mGestureHelper instanceof NavigationBarGestureHelper) {
-            ((NavigationBarGestureHelper) mGestureHelper).setComponents(this);
+        if (mGestureHelper instanceof QuickStepController) {
+            ((QuickStepController) mGestureHelper).setComponents(this);
         }
     }
 
@@ -1071,7 +1071,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     @Override
     public void onPluginDisconnected(NavGesture plugin) {
-        NavigationBarGestureHelper defaultHelper = new NavigationBarGestureHelper(getContext());
+        QuickStepController defaultHelper = new QuickStepController(getContext());
         defaultHelper.setComponents(this);
         if (mGestureHelper != null) {
             mGestureHelper.destroy();
@@ -1117,6 +1117,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         pw.println("    }");
 
         mContextualButtonGroup.dump(pw);
+        mGestureHelper.dump(pw);
         mRecentsOnboarding.dump(pw);
     }
 
