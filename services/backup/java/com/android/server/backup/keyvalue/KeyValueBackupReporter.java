@@ -153,14 +153,16 @@ public class KeyValueBackupReporter {
                 mObserver, packageName, BackupManager.ERROR_BACKUP_NOT_ALLOWED);
     }
 
-    void onBindAgentError(SecurityException e) {
-        Slog.d(TAG, "Error in bind/backup", e);
-    }
-
     void onAgentUnknown(String packageName) {
         Slog.d(TAG, "Package does not exist, skipping");
         BackupObserverUtils.sendBackupOnPackageResult(
                 mObserver, packageName, BackupManager.ERROR_PACKAGE_NOT_FOUND);
+    }
+
+    void onBindAgentError(String packageName, SecurityException e) {
+        Slog.d(TAG, "Error in bind/backup", e);
+        BackupObserverUtils.sendBackupOnPackageResult(
+                mObserver, packageName, BackupManager.ERROR_AGENT_FAILURE);
     }
 
     void onAgentError(String packageName) {
@@ -190,6 +192,8 @@ public class KeyValueBackupReporter {
     void onCallAgentDoBackupError(String packageName, boolean callingAgent, Exception e) {
         if (callingAgent) {
             Slog.e(TAG, "Error invoking agent on " + packageName + ": " + e);
+            BackupObserverUtils.sendBackupOnPackageResult(
+                    mObserver, packageName, BackupManager.ERROR_AGENT_FAILURE);
         } else {
             Slog.e(TAG, "Error before invoking agent on " + packageName + ": " + e);
         }
@@ -220,12 +224,8 @@ public class KeyValueBackupReporter {
         }
     }
 
-    void onReadAgentDataError(String packageName, IOException e) {
-        Slog.w(TAG, "Unable read backup data for " + packageName + ": " + e);
-    }
-
-    void onWriteWidgetDataError(String packageName, IOException e) {
-        Slog.w(TAG, "Unable to save widget data for " + packageName + ": " + e);
+    void onAgentDataError(String packageName, IOException e) {
+        Slog.w(TAG, "Unable to read/write agent data for " + packageName + ": " + e);
     }
 
     void onDigestError(NoSuchAlgorithmException e) {
@@ -243,14 +243,10 @@ public class KeyValueBackupReporter {
         }
     }
 
-    void onSendDataToTransport(String packageName) {
+    void onTransportPerformBackup(String packageName) {
         if (MORE_DEBUG) {
             Slog.v(TAG, "Sending non-empty data to transport for " + packageName);
         }
-    }
-
-    void onNonIncrementalAndNonIncrementalRequired() {
-        Slog.e(TAG, "Transport requested non-incremental but already the case");
     }
 
     void onEmptyData(PackageInfo packageInfo) {
@@ -302,13 +298,20 @@ public class KeyValueBackupReporter {
                 /* extras */ null);
     }
 
+    void onPackageBackupNonIncrementalAndNonIncrementalRequired(String packageName) {
+        Slog.e(TAG, "Transport requested non-incremental but already the case");
+        BackupObserverUtils.sendBackupOnPackageResult(
+                mObserver, packageName, BackupManager.ERROR_TRANSPORT_ABORTED);
+        EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, packageName);
+    }
+
     void onPackageBackupTransportFailure(String packageName) {
         BackupObserverUtils.sendBackupOnPackageResult(
                 mObserver, packageName, BackupManager.ERROR_TRANSPORT_ABORTED);
         EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, packageName);
     }
 
-    void onPackageBackupError(String packageName, Exception e) {
+    void onPackageBackupTransportError(String packageName, Exception e) {
         Slog.e(TAG, "Transport error backing up " + packageName, e);
         BackupObserverUtils.sendBackupOnPackageResult(
                 mObserver, packageName, BackupManager.ERROR_TRANSPORT_ABORTED);
