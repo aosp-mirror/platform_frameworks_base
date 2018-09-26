@@ -2913,6 +2913,7 @@
         <public name="usesNonSdkApi" />
         <public name="minimumUiTimeout" />
         <public name="isLightTheme" />
+        <public name="isSplitRequired" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b4">

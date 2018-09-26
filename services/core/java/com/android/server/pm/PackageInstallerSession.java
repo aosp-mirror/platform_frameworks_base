@@ -21,6 +21,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
+import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
 import static android.content.pm.PackageParser.APK_FILE_EXTENSION;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
@@ -1060,6 +1061,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private void validateInstallLocked(@Nullable PackageInfo pkgInfo)
             throws PackageManagerException {
+        ApkLite baseApk = null;
         mPackageName = null;
         mVersionCode = -1;
         mSigningDetails = PackageParser.SigningDetails.UNKNOWN;
@@ -1136,6 +1138,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // Base is coming from session
             if (apk.splitName == null) {
                 mResolvedBaseFile = targetFile;
+                baseApk = apk;
             }
 
             mResolvedStagedFiles.add(targetFile);
@@ -1221,6 +1224,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 if (baseDexMetadataFile != null) {
                     mResolvedInheritedFiles.add(baseDexMetadataFile);
                 }
+                baseApk = existingBase;
             }
 
             // Inherit splits if not overridden
@@ -1299,6 +1303,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     mResolvedInheritedFiles.addAll(libDirsToInherit);
                 }
             }
+        }
+        if (baseApk.isSplitRequired && stagedSplits.size() <= 1) {
+            throw new PackageManagerException(INSTALL_FAILED_MISSING_SPLIT,
+                    "Missing split for " + mPackageName);
         }
     }
 
