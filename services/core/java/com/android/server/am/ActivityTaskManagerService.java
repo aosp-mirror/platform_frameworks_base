@@ -1956,10 +1956,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
             if (task == null) {
                 Slog.d(TAG, "Could not find task for id: "+ taskId);
+                SafeActivityOptions.abort(options);
                 return;
             }
             if (getLockTaskController().isLockTaskModeViolation(task)) {
                 Slog.e(TAG, "moveTaskToFront: Attempt to violate Lock Task Mode");
+                SafeActivityOptions.abort(options);
                 return;
             }
             ActivityOptions realOptions = options != null
@@ -1979,7 +1981,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
-        SafeActivityOptions.abort(options);
     }
 
     boolean checkAppSwitchAllowedLocked(int sourcePid, int sourceUid,

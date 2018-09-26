@@ -21,6 +21,8 @@ import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LE
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 
 import android.app.ActivityOptions;
+import android.content.Context;
+import android.os.Handler;
 
 /**
  * Wrapper around internal ActivityOptions creation.
@@ -42,5 +44,18 @@ public abstract class ActivityOptionsCompat {
     public static ActivityOptions makeRemoteAnimation(
             RemoteAnimationAdapterCompat remoteAnimationAdapter) {
         return ActivityOptions.makeRemoteAnimation(remoteAnimationAdapter.getWrapped());
+    }
+
+    public static ActivityOptions makeCustomAnimation(Context context, int enterResId,
+            int exitResId, final Runnable callback, final Handler callbackHandler) {
+        return ActivityOptions.makeCustomAnimation(context, enterResId, exitResId, callbackHandler,
+                new ActivityOptions.OnAnimationStartedListener() {
+                    @Override
+                    public void onAnimationStarted() {
+                        if (callback != null) {
+                            callbackHandler.post(callback);
+                        }
+                    }
+                });
     }
 }
