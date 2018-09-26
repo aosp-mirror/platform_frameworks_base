@@ -190,6 +190,8 @@ public class Notifier {
         try {
             mBatteryStats.noteInteractive(true);
         } catch (RemoteException ex) { }
+        StatsLog.write(StatsLog.INTERACTIVE_STATE_CHANGED,
+                StatsLog.INTERACTIVE_STATE_CHANGED__STATE__ON);
     }
 
     /**
@@ -401,6 +403,9 @@ public class Notifier {
             try {
                 mBatteryStats.noteInteractive(interactive);
             } catch (RemoteException ex) { }
+            StatsLog.write(StatsLog.INTERACTIVE_STATE_CHANGED,
+                    interactive ? StatsLog.INTERACTIVE_STATE_CHANGED__STATE__ON :
+                            StatsLog.INTERACTIVE_STATE_CHANGED__STATE__OFF);
 
             // Handle early behaviors.
             mInteractive = interactive;

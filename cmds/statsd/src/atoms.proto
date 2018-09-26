@@ -80,7 +80,8 @@ message Atom {
         BatteryLevelChanged battery_level_changed = 30;
         ChargingStateChanged charging_state_changed = 31;
         PluggedStateChanged plugged_state_changed = 32;
-        // 33 - 34 are available
+        InteractiveStateChanged interactive_state_changed = 33;
+        // 34 is available
         WakeupAlarmOccurred wakeup_alarm_occurred = 35;
         KernelWakeupReported kernel_wakeup_reported = 36;
         WifiLockStateChanged wifi_lock_state_changed = 37;
@@ -662,6 +663,20 @@ message LongPartialWakelockStateChanged {
         ON = 1;
     }
     optional State state = 4;
+}
+
+/**
+ * Logs when the device is interactive, according to the PowerManager Notifier.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/power/Notifier.java
+ */
+message InteractiveStateChanged {
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 1;
 }
 
 /**
