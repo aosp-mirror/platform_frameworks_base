@@ -3470,4 +3470,9 @@
   <java-symbol type="integer" name="db_wal_truncate_size" />
   <java-symbol type="integer" name="config_wakeUpDelayDoze" />
   <java-symbol type="string" name="config_dozeWakeScreenSensorType" />
+
+  <!-- For Bluetooth AbsoluteVolume -->
+  <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index1" />
+  <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index2" />
+  <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index3" />
 </resources>
