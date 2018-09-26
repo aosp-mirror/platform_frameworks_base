@@ -23,8 +23,10 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.service.procstats.ProcessStatsServiceDumpProto;
+import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
+import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -47,6 +49,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
@@ -482,6 +485,23 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return finalRes;
     }
 
+    static int parseSectionOptions(String optionsStr) {
+        final String sep = ",";
+        String[] sectionsStr = optionsStr.split(sep);
+        if (sectionsStr.length == 0) {
+            return ProcessStats.REPORT_ALL;
+        }
+        int res = 0;
+        List<String> optionStrList = Arrays.asList(ProcessStats.OPTIONS_STR);
+        for (String sectionStr : sectionsStr) {
+            int optionIndex = optionStrList.indexOf(sectionStr);
+            if (optionIndex != -1) {
+                res |= ProcessStats.OPTIONS[optionIndex];
+            }
+        }
+        return res;
+    }
+
     public byte[] getCurrentStats(List<ParcelFileDescriptor> historic) {
         mAm.mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.PACKAGE_USAGE_STATS, null);
@@ -512,6 +532,95 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             mWriteLock.unlock();
         }
         return current.marshall();
+    }
+
+    /**
+     * Get stats committed after highWaterMarkMs
+     * @param highWaterMarkMs Report stats committed after this time.
+     * @param section Integer mask to indicage which sections to include in the stats.
+     * @param doAggregate Whether to aggregate the stats or keep them separated.
+     * @return List of proto binary of individual commit files or one that is merged from them.
+     */
+    @Override
+    public long getCommittedStats(long highWaterMarkMs, int section, boolean doAggregate,
+            List<ParcelFileDescriptor> committedStats) {
+        mAm.mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.PACKAGE_USAGE_STATS, null);
+
+        ProcessStats mergedStats = new ProcessStats(false);
+        long newHighWaterMark = highWaterMarkMs;
+        mWriteLock.lock();
+        try {
+            ArrayList<String> files = getCommittedFiles(0, false, true);
+            if (files != null) {
+                String highWaterMarkStr =
+                        DateFormat.format("yyyy-MM-dd-HH-mm-ss", highWaterMarkMs).toString();
+                ProcessStats stats = new ProcessStats(false);
+                for (int i = files.size() - 1; i >= 0; i--) {
+                    String fileName = files.get(i);
+                    try {
+                        String startTimeStr = fileName.substring(
+                                fileName.lastIndexOf(STATE_FILE_PREFIX)
+                                        + STATE_FILE_PREFIX.length(),
+                                fileName.lastIndexOf(STATE_FILE_SUFFIX));
+                        if (startTimeStr.compareToIgnoreCase(highWaterMarkStr) > 0) {
+                            ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
+                                    new File(fileName),
+                                    ParcelFileDescriptor.MODE_READ_ONLY);
+                            InputStream is = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+                            stats.reset();
+                            stats.read(is);
+                            is.close();
+                            if (stats.mTimePeriodStartClock > newHighWaterMark) {
+                                newHighWaterMark = stats.mTimePeriodStartClock;
+                            }
+                            if (doAggregate) {
+                                mergedStats.add(stats);
+                            } else {
+                                committedStats.add(protoToParcelFileDescriptor(stats, section));
+                            }
+                            if (stats.mReadError != null) {
+                                Log.w(TAG, "Failure reading process stats: " + stats.mReadError);
+                                continue;
+                            }
+                        }
+                    } catch (IOException e) {
+                        Slog.w(TAG, "Failure opening procstat file " + fileName, e);
+                    } catch (IndexOutOfBoundsException e) {
+                        Slog.w(TAG, "Failure to read and parse commit file " + fileName, e);
+                    }
+                }
+                if (doAggregate) {
+                    committedStats.add(protoToParcelFileDescriptor(mergedStats, section));
+                }
+                return newHighWaterMark;
+            }
+        } catch (IOException e) {
+            Slog.w(TAG, "Failure opening procstat file", e);
+        } finally {
+            mWriteLock.unlock();
+        }
+        return newHighWaterMark;
+    }
+
+    private ParcelFileDescriptor protoToParcelFileDescriptor(ProcessStats stats, int section)
+            throws IOException {
+        final ParcelFileDescriptor[] fds = ParcelFileDescriptor.createPipe();
+        Thread thr = new Thread("ProcessStats pipe output") {
+            public void run() {
+                try {
+                    FileOutputStream fout = new ParcelFileDescriptor.AutoCloseOutputStream(fds[1]);
+                    final ProtoOutputStream proto = new ProtoOutputStream(fout);
+                    stats.writeToProto(proto, stats.mTimePeriodEndRealtime, section);
+                    proto.flush();
+                    fout.close();
+                } catch (IOException e) {
+                    Slog.w(TAG, "Failure writing pipe", e);
+                }
+            }
+        };
+        thr.start();
+        return fds[0];
     }
 
     public ParcelFileDescriptor getStatsOverTime(long minTime) {
@@ -594,7 +703,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
 
     private void dumpAggregatedStats(PrintWriter pw, long aggregateHours, long now,
             String reqPackage, boolean isCompact, boolean dumpDetails, boolean dumpFullDetails,
-            boolean dumpAll, boolean activeOnly) {
+            boolean dumpAll, boolean activeOnly, int section) {
         ParcelFileDescriptor pfd = getStatsOverTime(aggregateHours*60*60*1000
                 - (ProcessStats.COMMIT_PERIOD/2));
         if (pfd == null) {
@@ -609,11 +718,11 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             return;
         }
         if (isCompact) {
-            stats.dumpCheckinLocked(pw, reqPackage);
+            stats.dumpCheckinLocked(pw, reqPackage, section);
         } else {
             if (dumpDetails || dumpFullDetails) {
                 stats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpDetails, dumpAll,
-                        activeOnly);
+                        activeOnly, section);
             } else {
                 stats.dumpSummaryLocked(pw, reqPackage, now, activeOnly);
             }
@@ -643,6 +752,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         pw.println("  --max: for -a, max num of historical batches to print.");
         pw.println("  --active: only show currently active processes/services.");
         pw.println("  --commit: commit current stats to disk and reset to start new stats.");
+        pw.println("  --section: proc|pkg-proc|pkg-svc|pkg-asc|pkg-all|all ");
+        pw.println("    options can be combined to select desired stats");
         pw.println("  --reset: reset current stats, without committing.");
         pw.println("  --clear: clear all stats; does both --reset and deletes old stats.");
         pw.println("  --write: write current in-memory stats to disk.");
@@ -696,6 +807,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         int[] csvMemStats = new int[] { ProcessStats.ADJ_MEM_FACTOR_CRITICAL};
         boolean csvSepProcStats = true;
         int[] csvProcStats = ProcessStats.ALL_PROC_STATES;
+        int section = ProcessStats.REPORT_ALL;
         if (args != null) {
             for (int i=0; i<args.length; i++) {
                 String arg = args[i];
@@ -814,13 +926,14 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                         pw.println("Process stats committed.");
                         quit = true;
                     }
-                } else if ("--reset".equals(arg)) {
-                    synchronized (mAm) {
-                        mProcessStats.resetSafely();
-                        mAm.requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
-                        pw.println("Process stats reset.");
-                        quit = true;
+                } else if ("--section".equals(arg)) {
+                    i++;
+                    if (i >= args.length) {
+                        pw.println("Error: argument required for --section");
+                        dumpHelp(pw);
+                        return;
                     }
+                    section = parseSectionOptions(args[i]);
                 } else if ("--clear".equals(arg)) {
                     synchronized (mAm) {
                         mProcessStats.resetSafely();
@@ -946,7 +1059,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         } else if (aggregateHours != 0) {
             pw.print("AGGREGATED OVER LAST "); pw.print(aggregateHours); pw.println(" HOURS:");
             dumpAggregatedStats(pw, aggregateHours, now, reqPackage, isCompact,
-                    dumpDetails, dumpFullDetails, dumpAll, activeOnly);
+                    dumpDetails, dumpFullDetails, dumpAll, activeOnly, section);
             return;
         } else if (lastIndex > 0) {
             pw.print("LAST STATS AT INDEX "); pw.print(lastIndex); pw.println(":");
@@ -968,7 +1081,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             boolean checkedIn = fileStr.endsWith(STATE_FILE_CHECKIN_SUFFIX);
             if (isCheckin || isCompact) {
                 // Don't really need to lock because we uniquely own this object.
-                processStats.dumpCheckinLocked(pw, reqPackage);
+                processStats.dumpCheckinLocked(pw, reqPackage, section);
             } else {
                 pw.print("COMMITTED STATS FROM ");
                 pw.print(processStats.mTimePeriodStartClockStr);
@@ -976,7 +1089,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 pw.println(":");
                 if (dumpDetails || dumpFullDetails) {
                     processStats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpDetails,
-                            dumpAll, activeOnly);
+                            dumpAll, activeOnly, section);
                     if (dumpAll) {
                         pw.print("  mFile="); pw.println(mFile.getBaseFile());
                     }
@@ -1015,7 +1128,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                             boolean checkedIn = fileStr.endsWith(STATE_FILE_CHECKIN_SUFFIX);
                             if (isCheckin || isCompact) {
                                 // Don't really need to lock because we uniquely own this object.
-                                processStats.dumpCheckinLocked(pw, reqPackage);
+                                processStats.dumpCheckinLocked(pw, reqPackage, section);
                             } else {
                                 if (sepNeeded) {
                                     pw.println();
@@ -1031,7 +1144,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                                 // much crud.
                                 if (dumpFullDetails) {
                                     processStats.dumpLocked(pw, reqPackage, now, false, false,
-                                            false, activeOnly);
+                                            false, activeOnly, section);
                                 } else {
                                     processStats.dumpSummaryLocked(pw, reqPackage, now, activeOnly);
                                 }
@@ -1054,7 +1167,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         if (!isCheckin) {
             synchronized (mAm) {
                 if (isCompact) {
-                    mProcessStats.dumpCheckinLocked(pw, reqPackage);
+                    mProcessStats.dumpCheckinLocked(pw, reqPackage, section);
                 } else {
                     if (sepNeeded) {
                         pw.println();
@@ -1062,7 +1175,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     pw.println("CURRENT STATS:");
                     if (dumpDetails || dumpFullDetails) {
                         mProcessStats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpDetails,
-                                dumpAll, activeOnly);
+                                dumpAll, activeOnly, section);
                         if (dumpAll) {
                             pw.print("  mFile="); pw.println(mFile.getBaseFile());
                         }
@@ -1078,11 +1191,11 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 }
                 pw.println("AGGREGATED OVER LAST 24 HOURS:");
                 dumpAggregatedStats(pw, 24, now, reqPackage, isCompact,
-                        dumpDetails, dumpFullDetails, dumpAll, activeOnly);
+                        dumpDetails, dumpFullDetails, dumpAll, activeOnly, section);
                 pw.println();
                 pw.println("AGGREGATED OVER LAST 3 HOURS:");
                 dumpAggregatedStats(pw, 3, now, reqPackage, isCompact,
-                        dumpDetails, dumpFullDetails, dumpAll, activeOnly);
+                        dumpDetails, dumpFullDetails, dumpAll, activeOnly, section);
             }
         }
     }
@@ -1099,7 +1212,9 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         if (stats.mReadError != null) {
             return;
         }
-        stats.writeToProto(proto, fieldId, now);
+        final long token = proto.start(fieldId);
+        stats.writeToProto(proto, now, ProcessStats.REPORT_ALL);
+        proto.end(token);
     }
 
     private void dumpProto(FileDescriptor fd) {
@@ -1109,7 +1224,9 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         long now;
         synchronized (mAm) {
             now = SystemClock.uptimeMillis();
-            mProcessStats.writeToProto(proto,ProcessStatsServiceDumpProto.PROCSTATS_NOW, now);
+            final long token = proto.start(ProcessStatsServiceDumpProto.PROCSTATS_NOW);
+            mProcessStats.writeToProto(proto, now, ProcessStats.REPORT_ALL);
+            proto.end(token);
         }
 
         // aggregated over last 3 hours procstats
