@@ -56,6 +56,7 @@ import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
+import android.view.InsetsState;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
@@ -184,6 +185,7 @@ public abstract class WallpaperService extends Service {
         final DisplayCutout.ParcelableWrapper mDisplayCutout =
                 new DisplayCutout.ParcelableWrapper();
         DisplayCutout mDispatchedDisplayCutout = DisplayCutout.NO_CUTOUT;
+        final InsetsState mInsetsState = new InsetsState();
         final MergedConfiguration mMergedConfiguration = new MergedConfiguration();
 
         final WindowManager.LayoutParams mLayout
@@ -803,9 +805,11 @@ public abstract class WallpaperService extends Service {
                         mLayout.windowAnimations =
                                 com.android.internal.R.style.Animation_Wallpaper;
                         mInputChannel = new InputChannel();
+
                         if (mSession.addToDisplay(mWindow, mWindow.mSeq, mLayout, View.VISIBLE,
                                 mDisplay.getDisplayId(), mWinFrame, mContentInsets, mStableInsets,
-                                mOutsets, mDisplayCutout, mInputChannel) < 0) {
+                                mOutsets, mDisplayCutout, mInputChannel,
+                                mInsetsState) < 0) {
                             Log.w(TAG, "Failed to add window while updating wallpaper surface.");
                             return;
                         }
@@ -831,7 +835,8 @@ public abstract class WallpaperService extends Service {
                         mWindow, mWindow.mSeq, mLayout, mWidth, mHeight,
                             View.VISIBLE, 0, -1, mWinFrame, mOverscanInsets, mContentInsets,
                             mVisibleInsets, mStableInsets, mOutsets, mBackdropFrame,
-                            mDisplayCutout, mMergedConfiguration, mSurfaceHolder.mSurface);
+                            mDisplayCutout, mMergedConfiguration, mSurfaceHolder.mSurface,
+                            mInsetsState);
 
                     if (DEBUG) Log.v(TAG, "New surface: " + mSurfaceHolder.mSurface
                             + ", frame=" + mWinFrame);

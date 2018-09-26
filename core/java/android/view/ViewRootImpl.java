@@ -161,6 +161,19 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean MT_RENDERER_AVAILABLE = true;
 
     /**
+     * If set to true, the view system will switch from using rectangles retrieved from window to
+     * dispatch to the view hierarchy to using {@link InsetsController}, that derives the insets
+     * directly from the full configuration, enabling richer information about the insets state, as
+     * well as new APIs to control it frame-by-frame, and synchronize animations with it.
+     * <p>
+     * Only switch this to true once the new insets system is productionized and the old APIs are
+     * fully migrated over.
+     */
+    private static final String USE_NEW_INSETS_PROPERTY = "persist.wm.new_insets";
+    private static final boolean USE_NEW_INSETS =
+            SystemProperties.getBoolean(USE_NEW_INSETS_PROPERTY, false);
+
+    /**
      * Set this system property to true to force the view hierarchy to render
      * at 60 Hz. This can be used to measure the potential framerate.
      */
@@ -432,6 +445,8 @@ public final class ViewRootImpl implements ViewParent,
     boolean mAdded;
     boolean mAddedTouchMode;
 
+    final Rect mTmpFrame = new Rect();
+
     // These are accessed by multiple threads.
     final Rect mWinFrame; // frame given by window manager.
 
@@ -444,6 +459,7 @@ public final class ViewRootImpl implements ViewParent,
     final DisplayCutout.ParcelableWrapper mPendingDisplayCutout =
             new DisplayCutout.ParcelableWrapper(DisplayCutout.NO_CUTOUT);
     boolean mPendingAlwaysConsumeNavBar;
+    private InsetsState mPendingInsets;
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
             = new ViewTreeObserver.InternalInsetsInfo();
 
@@ -530,6 +546,8 @@ public final class ViewRootImpl implements ViewParent,
     protected final InputEventConsistencyVerifier mInputEventConsistencyVerifier =
             InputEventConsistencyVerifier.isInstrumentationEnabled() ?
                     new InputEventConsistencyVerifier(this, 0) : null;
+
+    private final InsetsController mInsetsController = new InsetsController();
 
     static final class SystemUiVisibilityInfo {
         int seq;
@@ -797,9 +815,11 @@ public final class ViewRootImpl implements ViewParent,
                     mAttachInfo.mRecomputeGlobalAttributes = true;
                     collectViewAttributes();
                     res = mWindowSession.addToDisplay(mWindow, mSeq, mWindowAttributes,
-                            getHostVisibility(), mDisplay.getDisplayId(), mWinFrame,
+                            getHostVisibility(), mDisplay.getDisplayId(), mTmpFrame,
                             mAttachInfo.mContentInsets, mAttachInfo.mStableInsets,
-                            mAttachInfo.mOutsets, mAttachInfo.mDisplayCutout, mInputChannel);
+                            mAttachInfo.mOutsets, mAttachInfo.mDisplayCutout, mInputChannel,
+                            mInsetsController.getState());
+                    setFrame(mTmpFrame);
                 } catch (RemoteException e) {
                     mAdded = false;
                     mView = null;
@@ -826,6 +846,7 @@ public final class ViewRootImpl implements ViewParent,
                 mAttachInfo.mAlwaysConsumeNavBar =
                         (res & WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_NAV_BAR) != 0;
                 mPendingAlwaysConsumeNavBar = mAttachInfo.mAlwaysConsumeNavBar;
+                mPendingInsets = mInsetsController.getState();
                 if (DEBUG_LAYOUT) Log.v(mTag, "Added window " + mWindow);
                 if (res < WindowManagerGlobal.ADD_OKAY) {
                     mAttachInfo.mRootView = null;
@@ -1780,7 +1801,8 @@ public final class ViewRootImpl implements ViewParent,
             Rect stableInsets = mDispatchStableInsets;
             DisplayCutout displayCutout = mDispatchDisplayCutout;
             // For dispatch we preserve old logic, but for direct requests from Views we allow to
-            // immediately use pending insets.
+            // immediately use pending insets. This is such that getRootWindowInsets returns the
+            // result from the layout hint before we ran a traversal shortly after adding a window.
             if (!forceConstruct
                     && (!mPendingContentInsets.equals(contentInsets) ||
                         !mPendingStableInsets.equals(stableInsets) ||
@@ -1797,10 +1819,16 @@ public final class ViewRootImpl implements ViewParent,
             }
             contentInsets = ensureInsetsNonNegative(contentInsets, "content");
             stableInsets = ensureInsetsNonNegative(stableInsets, "stable");
-            mLastWindowInsets = new WindowInsets(contentInsets,
-                    null /* windowDecorInsets */, stableInsets,
-                    mContext.getResources().getConfiguration().isScreenRound(),
-                    mAttachInfo.mAlwaysConsumeNavBar, displayCutout);
+            if (USE_NEW_INSETS) {
+                mLastWindowInsets = mInsetsController.calculateInsets(
+                        mContext.getResources().getConfiguration().isScreenRound(),
+                        mAttachInfo.mAlwaysConsumeNavBar, displayCutout);
+            } else {
+                mLastWindowInsets = new WindowInsets(contentInsets,
+                        null /* windowDecorInsets */, stableInsets,
+                        mContext.getResources().getConfiguration().isScreenRound(),
+                        mAttachInfo.mAlwaysConsumeNavBar, displayCutout);
+            }
         }
         return mLastWindowInsets;
     }
@@ -2000,6 +2028,9 @@ public final class ViewRootImpl implements ViewParent,
                 if (mPendingAlwaysConsumeNavBar != mAttachInfo.mAlwaysConsumeNavBar) {
                     insetsChanged = true;
                 }
+                if (!mPendingInsets.equals(mInsetsController.getState())) {
+                    insetsChanged = true;
+                }
                 if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT
                         || lp.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
                     windowSizeMayChange = true;
@@ -2193,6 +2224,8 @@ public final class ViewRootImpl implements ViewParent,
                         mAttachInfo.mStableInsets);
                 final boolean cutoutChanged = !mPendingDisplayCutout.equals(
                         mAttachInfo.mDisplayCutout);
+                final boolean insetsStateChanged = !mPendingInsets.equals(
+                        mInsetsController.getState());
                 final boolean outsetsChanged = !mPendingOutsets.equals(mAttachInfo.mOutsets);
                 final boolean surfaceSizeChanged = (relayoutResult
                         & WindowManagerGlobal.RELAYOUT_RES_SURFACE_RESIZED) != 0;
@@ -2228,6 +2261,10 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 if (alwaysConsumeNavBarChanged) {
                     mAttachInfo.mAlwaysConsumeNavBar = mPendingAlwaysConsumeNavBar;
+                    contentInsetsChanged = true;
+                }
+                if (insetsStateChanged) {
+                    mInsetsController.setState(mPendingInsets);
                     contentInsetsChanged = true;
                 }
                 if (contentInsetsChanged || mLastSystemUiVisibility !=
@@ -2675,7 +2712,6 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void maybeHandleWindowMove(Rect frame) {
-
         // TODO: Well, we are checking whether the frame has changed similarly
         // to how this is done for the insets. This is however incorrect since
         // the insets and the frame are translated. For example, the old frame
@@ -4180,6 +4216,7 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_UPDATE_POINTER_ICON = 27;
     private final static int MSG_POINTER_CAPTURE_CHANGED = 28;
     private final static int MSG_DRAW_FINISHED = 29;
+    private final static int MSG_INSETS_CHANGED = 30;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -4235,6 +4272,8 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_POINTER_CAPTURE_CHANGED";
                 case MSG_DRAW_FINISHED:
                     return "MSG_DRAW_FINISHED";
+                case MSG_INSETS_CHANGED:
+                    return "MSG_INSETS_CHANGED";
             }
             return super.getMessageName(message);
         }
@@ -4315,7 +4354,7 @@ public final class ViewRootImpl implements ViewParent,
                                 || !mPendingVisibleInsets.equals(args.arg3)
                                 || !mPendingOutsets.equals(args.arg7);
 
-                        mWinFrame.set((Rect) args.arg1);
+                        setFrame((Rect) args.arg1);
                         mPendingOverscanInsets.set((Rect) args.arg5);
                         mPendingContentInsets.set((Rect) args.arg2);
                         mPendingStableInsets.set((Rect) args.arg6);
@@ -4338,16 +4377,25 @@ public final class ViewRootImpl implements ViewParent,
                         requestLayout();
                     }
                     break;
+                case MSG_INSETS_CHANGED:
+                    mPendingInsets = (InsetsState) msg.obj;
+
+                    // TODO: Full traversal not needed here
+                    if (USE_NEW_INSETS) {
+                        requestLayout();
+                    }
+                    break;
                 case MSG_WINDOW_MOVED:
                     if (mAdded) {
                         final int w = mWinFrame.width();
                         final int h = mWinFrame.height();
                         final int l = msg.arg1;
                         final int t = msg.arg2;
-                        mWinFrame.left = l;
-                        mWinFrame.right = l + w;
-                        mWinFrame.top = t;
-                        mWinFrame.bottom = t + h;
+                        mTmpFrame.left = l;
+                        mTmpFrame.right = l + w;
+                        mTmpFrame.top = t;
+                        mTmpFrame.bottom = t + h;
+                        setFrame(mTmpFrame);
 
                         mPendingBackDropFrame.set(mWinFrame);
                         maybeHandleWindowMove(mWinFrame);
@@ -6733,9 +6781,9 @@ public final class ViewRootImpl implements ViewParent,
                 (int) (mView.getMeasuredWidth() * appScale + 0.5f),
                 (int) (mView.getMeasuredHeight() * appScale + 0.5f), viewVisibility,
                 insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, frameNumber,
-                mWinFrame, mPendingOverscanInsets, mPendingContentInsets, mPendingVisibleInsets,
+                mTmpFrame, mPendingOverscanInsets, mPendingContentInsets, mPendingVisibleInsets,
                 mPendingStableInsets, mPendingOutsets, mPendingBackDropFrame, mPendingDisplayCutout,
-                mPendingMergedConfiguration, mSurface);
+                mPendingMergedConfiguration, mSurface, mPendingInsets);
 
         mPendingAlwaysConsumeNavBar =
                 (relayoutResult & WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_NAV_BAR) != 0;
@@ -6745,13 +6793,20 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (mTranslator != null) {
-            mTranslator.translateRectInScreenToAppWinFrame(mWinFrame);
+            mTranslator.translateRectInScreenToAppWinFrame(mTmpFrame);
             mTranslator.translateRectInScreenToAppWindow(mPendingOverscanInsets);
             mTranslator.translateRectInScreenToAppWindow(mPendingContentInsets);
             mTranslator.translateRectInScreenToAppWindow(mPendingVisibleInsets);
             mTranslator.translateRectInScreenToAppWindow(mPendingStableInsets);
         }
+        setFrame(mTmpFrame);
+
         return relayoutResult;
+    }
+
+    private void setFrame(Rect frame) {
+        mWinFrame.set(frame);
+        mInsetsController.onFrameChanged(frame);
     }
 
     /**
@@ -6855,6 +6910,8 @@ public final class ViewRootImpl implements ViewParent,
         mFirstInputStage.dump(innerPrefix, writer);
 
         mChoreographer.dump(prefix, writer);
+
+        mInsetsController.dump(prefix, writer);
 
         writer.print(prefix); writer.println("View Hierarchy:");
         dumpViewHierarchy(innerPrefix, writer, mView);
@@ -7062,6 +7119,10 @@ public final class ViewRootImpl implements ViewParent,
         args.argi3 = displayId;
         msg.obj = args;
         mHandler.sendMessage(msg);
+    }
+
+    private void dispatchInsetsChanged(InsetsState insetsState) {
+        mHandler.obtainMessage(MSG_INSETS_CHANGED, insetsState).sendToTarget();
     }
 
     public void dispatchMoved(int newX, int newY) {
@@ -8123,6 +8184,14 @@ public final class ViewRootImpl implements ViewParent,
                 viewAncestor.dispatchResized(frame, overscanInsets, contentInsets,
                         visibleInsets, stableInsets, outsets, reportDraw, mergedConfiguration,
                         backDropFrame, forceLayout, alwaysConsumeNavBar, displayId, displayCutout);
+            }
+        }
+
+        @Override
+        public void insetsChanged(InsetsState insetsState) {
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
+            if (viewAncestor != null) {
+                viewAncestor.dispatchInsetsChanged(insetsState);
             }
         }
 

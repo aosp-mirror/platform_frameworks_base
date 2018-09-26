@@ -65,6 +65,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.InsetsState;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
@@ -141,6 +142,7 @@ class TaskSnapshotSurface implements StartingSurface {
         final Rect taskBounds;
         final Rect tmpContentInsets = new Rect();
         final Rect tmpStableInsets = new Rect();
+        final InsetsState mTmpInsetsState = new InsetsState();
         final MergedConfiguration tmpMergedConfiguration = new MergedConfiguration();
         int backgroundColor = WHITE;
         int statusBarColor = 0;
@@ -201,7 +203,7 @@ class TaskSnapshotSurface implements StartingSurface {
         try {
             final int res = session.addToDisplay(window, window.mSeq, layoutParams,
                     View.GONE, token.getDisplayContent().getDisplayId(), tmpFrame, tmpRect, tmpRect,
-                    tmpRect, tmpCutout, null);
+                    tmpRect, tmpCutout, null, mTmpInsetsState);
             if (res < 0) {
                 Slog.w(TAG, "Failed to add snapshot starting window res=" + res);
                 return null;
@@ -217,7 +219,7 @@ class TaskSnapshotSurface implements StartingSurface {
         try {
             session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, -1,
                     tmpFrame, tmpRect, tmpContentInsets, tmpRect, tmpStableInsets, tmpRect, tmpRect,
-                    tmpCutout, tmpMergedConfiguration, surface);
+                    tmpCutout, tmpMergedConfiguration, surface, mTmpInsetsState);
         } catch (RemoteException e) {
             // Local call.
         }
