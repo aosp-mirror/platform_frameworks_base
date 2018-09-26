@@ -141,6 +141,8 @@ public final class Call {
      * The caller must specify the {@link #EXTRA_HANDOVER_PHONE_ACCOUNT_HANDLE} to indicate to
      * Telecom which {@link PhoneAccountHandle} the {@link Call} should be handed over to.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EVENT_REQUEST_HANDOVER =
             "android.telecom.event.REQUEST_HANDOVER";
@@ -149,6 +151,8 @@ public final class Call {
      * Extra key used with the {@link #EVENT_REQUEST_HANDOVER} call event.  Specifies the
      * {@link PhoneAccountHandle} to which a call should be handed over to.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EXTRA_HANDOVER_PHONE_ACCOUNT_HANDLE =
             "android.telecom.extra.HANDOVER_PHONE_ACCOUNT_HANDLE";
@@ -161,6 +165,8 @@ public final class Call {
      * {@link VideoProfile#STATE_BIDIRECTIONAL}, {@link VideoProfile#STATE_RX_ENABLED}, and
      * {@link VideoProfile#STATE_TX_ENABLED}.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EXTRA_HANDOVER_VIDEO_STATE =
             "android.telecom.extra.HANDOVER_VIDEO_STATE";
@@ -176,6 +182,8 @@ public final class Call {
      * {@link ConnectionService#onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}
      * is called to initate the handover.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EXTRA_HANDOVER_EXTRAS = "android.telecom.extra.HANDOVER_EXTRAS";
 
@@ -186,6 +194,8 @@ public final class Call {
      * <p>
      * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EVENT_HANDOVER_COMPLETE =
             "android.telecom.event.HANDOVER_COMPLETE";
@@ -198,6 +208,8 @@ public final class Call {
      * <p>
      * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EVENT_HANDOVER_SOURCE_DISCONNECTED =
             "android.telecom.event.HANDOVER_SOURCE_DISCONNECTED";
@@ -209,6 +221,8 @@ public final class Call {
      * <p>
      * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EVENT_HANDOVER_FAILED =
             "android.telecom.event.HANDOVER_FAILED";
