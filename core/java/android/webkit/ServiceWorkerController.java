@@ -38,6 +38,14 @@ import android.annotation.Nullable;
 public abstract class ServiceWorkerController {
 
     /**
+     * @deprecated This class should not be constructed by applications, use {@link #getInstance()}
+     * instead to fetch the singleton instance.
+     */
+    // TODO(ntfschr): mark this as @SystemApi after a year.
+    @Deprecated
+    public ServiceWorkerController() {}
+
+    /**
      * Returns the default ServiceWorkerController instance. At present there is
      * only one ServiceWorkerController instance for all WebView instances,
      * however this restriction may be relaxed in the future.

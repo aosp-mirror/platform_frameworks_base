@@ -43,6 +43,13 @@ import java.util.concurrent.Executor;
  * </pre></p>
  */
 public abstract class TracingController {
+    /**
+     * @deprecated This class should not be constructed by applications, use {@link #getInstance}
+     * instead to fetch the singleton instance.
+     */
+    // TODO(ntfschr): mark this as @SystemApi after a year.
+    @Deprecated
+    public TracingController() {}
 
     /**
      * Returns the default TracingController instance. At present there is

@@ -25,6 +25,13 @@ import android.net.WebAddress;
  * Cookies are manipulated according to RFC2109.
  */
 public abstract class CookieManager {
+    /**
+     * @deprecated This class should not be constructed by applications, use {@link #getInstance}
+     * instead to fetch the singleton instance.
+     */
+    // TODO(ntfschr): mark this as @SystemApi after a year.
+    @Deprecated
+    public CookieManager() {}
 
     @Override
     protected Object clone() throws CloneNotSupportedException {
