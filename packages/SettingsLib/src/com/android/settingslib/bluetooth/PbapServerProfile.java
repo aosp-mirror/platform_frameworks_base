@@ -80,7 +80,7 @@ public class PbapServerProfile implements LocalBluetoothProfile {
         BluetoothPbap pbap = new BluetoothPbap(context, new PbapServiceListener());
     }
 
-    public boolean isConnectable() {
+    public boolean accessProfileEnabled() {
         return true;
     }
 

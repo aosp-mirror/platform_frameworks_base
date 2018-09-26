@@ -249,7 +249,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
         int preferredProfiles = 0;
         for (LocalBluetoothProfile profile : mProfiles) {
-            if (connectAllProfiles ? profile.isConnectable() : profile.isAutoConnectable()) {
+            if (connectAllProfiles ? profile.accessProfileEnabled() : profile.isAutoConnectable()) {
                 if (profile.isPreferred(mDevice)) {
                     ++preferredProfiles;
                     connectInt(profile);
@@ -735,7 +735,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         List<LocalBluetoothProfile> connectableProfiles =
                 new ArrayList<LocalBluetoothProfile>();
         for (LocalBluetoothProfile profile : mProfiles) {
-            if (profile.isConnectable()) {
+            if (profile.accessProfileEnabled()) {
                 connectableProfiles.add(profile);
             }
         }

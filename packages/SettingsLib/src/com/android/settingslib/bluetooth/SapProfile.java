@@ -106,7 +106,7 @@ final class SapProfile implements LocalBluetoothProfile {
                 BluetoothProfile.SAP);
     }
 
-    public boolean isConnectable() {
+    public boolean accessProfileEnabled() {
         return true;
     }
 
