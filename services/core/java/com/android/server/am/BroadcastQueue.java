@@ -741,7 +741,7 @@ public final class BroadcastQueue {
 
         // Show a permission review UI only for explicit broadcast from a foreground app
         if (callerForeground && receiverRecord.intent.getComponent() != null) {
-            IIntentSender target = mService.getIntentSenderLocked(
+            IIntentSender target = mService.mPendingIntentController.getIntentSender(
                     ActivityManager.INTENT_SENDER_BROADCAST, receiverRecord.callerPackage,
                     receiverRecord.callingUid, receiverRecord.userId, null, null, 0,
                     new Intent[]{receiverRecord.intent},

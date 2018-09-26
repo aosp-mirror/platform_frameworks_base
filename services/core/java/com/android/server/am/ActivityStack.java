@@ -4144,7 +4144,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             for (WeakReference<PendingIntentRecord> apr : r.pendingResults) {
                 PendingIntentRecord rec = apr.get();
                 if (rec != null) {
-                    mService.mAm.cancelIntentSenderLocked(rec, false);
+                    mService.mPendingIntentController.cancelIntentSender(rec, false);
                 }
             }
             r.pendingResults = null;

@@ -44,7 +44,7 @@ import com.android.internal.annotations.VisibleForTesting;
  * the inner options. Also supports having two set of options: Once from the original caller, and
  * once from the caller that is overriding it, which happens when sending a {@link PendingIntent}.
  */
-class SafeActivityOptions {
+public class SafeActivityOptions {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "SafeActivityOptions" : TAG_AM;
 

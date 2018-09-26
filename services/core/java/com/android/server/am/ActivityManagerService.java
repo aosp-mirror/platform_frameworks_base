@@ -134,7 +134,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PSS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_UID_OBSERVERS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_URI_PERMISSION;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
@@ -417,7 +416,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final String TAG_SERVICE = TAG + POSTFIX_SERVICE;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     private static final String TAG_UID_OBSERVERS = TAG + POSTFIX_UID_OBSERVERS;
-    private static final String TAG_URI_PERMISSION = TAG + POSTFIX_URI_PERMISSION;
 
     // Mock "pretend we're idle now" broadcast action to the job scheduler; declared
     // here so that while the job scheduler can depend on AMS, the other way around
@@ -563,6 +561,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     String mDeviceOwnerName;
 
     final UserController mUserController;
+    final PendingIntentController mPendingIntentController;
 
     final AppErrors mAppErrors;
 
@@ -819,12 +818,6 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     static final boolean VALIDATE_UID_STATES = true;
     final SparseArray<UidRecord> mValidateUids = new SparseArray<>();
-
-    /**
-     * Set of IntentSenderRecord objects that are currently active.
-     */
-    final HashMap<PendingIntentRecord.Key, WeakReference<PendingIntentRecord>> mIntentSenderRecords
-            = new HashMap<PendingIntentRecord.Key, WeakReference<PendingIntentRecord>>();
 
     /**
      * Fingerprints (hashCode()) of stack traces that we've
@@ -1426,7 +1419,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int UPDATE_TIME_ZONE = 13;
     static final int PROC_START_TIMEOUT_MSG = 20;
     static final int KILL_APPLICATION_MSG = 22;
-    static final int FINALIZE_PENDING_INTENT_MSG = 23;
     static final int SHOW_STRICT_MODE_VIOLATION_UI_MSG = 26;
     static final int CHECK_EXCESSIVE_POWER_USE_MSG = 27;
     static final int CLEAR_DNS_CACHE_MSG = 28;
@@ -1445,7 +1437,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int IDLE_UIDS_MSG = 58;
     static final int HANDLE_TRUST_STORAGE_UPDATE_MSG = 63;
     static final int SERVICE_FOREGROUND_TIMEOUT_MSG = 66;
-    static final int DISPATCH_PENDING_INTENT_CANCEL_MSG = 67;
     static final int PUSH_TEMP_WHITELIST_UI_MSG = 68;
     static final int SERVICE_FOREGROUND_CRASH_MSG = 69;
     static final int DISPATCH_OOM_ADJ_OBSERVER_MSG = 70;
@@ -1644,21 +1635,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mServices.serviceForegroundCrash(
                     (ProcessRecord) msg.obj, msg.getData().getCharSequence(SERVICE_RECORD_KEY));
             } break;
-            case DISPATCH_PENDING_INTENT_CANCEL_MSG: {
-                RemoteCallbackList<IResultReceiver> callbacks
-                        = (RemoteCallbackList<IResultReceiver>)msg.obj;
-                int N = callbacks.beginBroadcast();
-                for (int i = 0; i < N; i++) {
-                    try {
-                        callbacks.getBroadcastItem(i).send(Activity.RESULT_CANCELED, null);
-                    } catch (RemoteException e) {
-                    }
-                }
-                callbacks.finishBroadcast();
-                // We have to clean up the RemoteCallbackList here, because otherwise it will
-                // needlessly hold the enclosed callbacks until the remote process dies.
-                callbacks.kill();
-            } break;
             case UPDATE_TIME_ZONE: {
                 synchronized (ActivityManagerService.this) {
                     for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
@@ -1737,9 +1713,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     forceStopPackageLocked(pkg, appId, false, false, true, false,
                             false, userId, reason);
                 }
-            } break;
-            case FINALIZE_PENDING_INTENT_MSG: {
-                ((PendingIntentRecord)msg.obj).completeFinalize();
             } break;
             case CHECK_EXCESSIVE_POWER_USE_MSG: {
                 synchronized (ActivityManagerService.this) {
@@ -2354,6 +2327,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mSystemThread = null;
         mUiHandler = injector.getUiHandler(null);
         mUserController = null;
+        mPendingIntentController = null;
         mProcStartHandlerThread = null;
         mProcStartHandler = null;
         mHiddenApiBlacklist = null;
@@ -2438,6 +2412,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mStackSupervisor = mActivityTaskManager.mStackSupervisor;
 
+        mPendingIntentController = new PendingIntentController(
+                mHandlerThread.getLooper(), mUserController);
+
         mProcessCpuThread = new Thread("CpuTracker") {
             @Override
             public void run() {
@@ -2508,6 +2485,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         LocalServices.addService(ActivityManagerInternal.class, new LocalService());
         mActivityTaskManager.onActivityManagerInternalAdded();
         mUgmInternal.onActivityManagerInternalAdded();
+        mPendingIntentController.onActivityManagerInternalAdded();
         // Wait for the synchronized block started in mProcessCpuThread,
         // so that any other access to mProcessCpuTracker from main thread
         // will be blocked during mProcessCpuTracker initialization.
@@ -5511,55 +5489,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (packageName == null || uninstalling) {
-            // Remove pending intents.  For now we only do this when force
-            // stopping users, because we have some problems when doing this
-            // for packages -- app widgets are not currently cleaned up for
-            // such packages, so they can be left with bad pending intents.
-            if (mIntentSenderRecords.size() > 0) {
-                Iterator<WeakReference<PendingIntentRecord>> it
-                        = mIntentSenderRecords.values().iterator();
-                while (it.hasNext()) {
-                    WeakReference<PendingIntentRecord> wpir = it.next();
-                    if (wpir == null) {
-                        it.remove();
-                        continue;
-                    }
-                    PendingIntentRecord pir = wpir.get();
-                    if (pir == null) {
-                        it.remove();
-                        continue;
-                    }
-                    if (packageName == null) {
-                        // Stopping user, remove all objects for the user.
-                        if (pir.key.userId != userId) {
-                            // Not the same user, skip it.
-                            continue;
-                        }
-                    } else {
-                        if (UserHandle.getAppId(pir.uid) != appId) {
-                            // Different app id, skip it.
-                            continue;
-                        }
-                        if (userId != UserHandle.USER_ALL && pir.key.userId != userId) {
-                            // Different user, skip it.
-                            continue;
-                        }
-                        if (!pir.key.packageName.equals(packageName)) {
-                            // Different package, skip it.
-                            continue;
-                        }
-                    }
-                    if (!doit) {
-                        return true;
-                    }
-                    didSomething = true;
-                    it.remove();
-                    makeIntentSenderCanceledLocked(pir);
-                    if (pir.key.activity != null && pir.key.activity.pendingResults != null) {
-                        pir.key.activity.pendingResults.remove(pir.ref);
-                    }
-                }
-            }
+            didSomething |= mPendingIntentController.removePendingIntentsForPackage(
+                    packageName, userId, appId, doit);
         }
 
         if (doit) {
@@ -6342,88 +6273,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
 
-                return getIntentSenderLocked(type, packageName, callingUid, userId,
-                        token, resultWho, requestCode, intents, resolvedTypes, flags, bOptions);
-
+                if (type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT) {
+                    return mAtmInternal.getIntentSender(type, packageName, callingUid, userId,
+                            token, resultWho, requestCode, intents, resolvedTypes, flags, bOptions);
+                }
+                return mPendingIntentController.getIntentSender(type, packageName, callingUid,
+                        userId, token, resultWho, requestCode, intents, resolvedTypes, flags,
+                        bOptions);
             } catch (RemoteException e) {
                 throw new SecurityException(e);
             }
         }
-    }
-
-    IIntentSender getIntentSenderLocked(int type, String packageName,
-            int callingUid, int userId, IBinder token, String resultWho,
-            int requestCode, Intent[] intents, String[] resolvedTypes, int flags,
-            Bundle bOptions) {
-        if (DEBUG_MU) Slog.v(TAG_MU, "getIntentSenderLocked(): uid=" + callingUid);
-        ActivityRecord activity = null;
-        if (type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT) {
-            activity = ActivityRecord.isInStackLocked(token);
-            if (activity == null) {
-                Slog.w(TAG, "Failed createPendingResult: activity " + token + " not in any stack");
-                return null;
-            }
-            if (activity.finishing) {
-                Slog.w(TAG, "Failed createPendingResult: activity " + activity + " is finishing");
-                return null;
-            }
-        }
-
-        // We're going to be splicing together extras before sending, so we're
-        // okay poking into any contained extras.
-        if (intents != null) {
-            for (int i = 0; i < intents.length; i++) {
-                intents[i].setDefusable(true);
-            }
-        }
-        Bundle.setDefusable(bOptions, true);
-
-        final boolean noCreate = (flags&PendingIntent.FLAG_NO_CREATE) != 0;
-        final boolean cancelCurrent = (flags&PendingIntent.FLAG_CANCEL_CURRENT) != 0;
-        final boolean updateCurrent = (flags&PendingIntent.FLAG_UPDATE_CURRENT) != 0;
-        flags &= ~(PendingIntent.FLAG_NO_CREATE|PendingIntent.FLAG_CANCEL_CURRENT
-                |PendingIntent.FLAG_UPDATE_CURRENT);
-
-        PendingIntentRecord.Key key = new PendingIntentRecord.Key(type, packageName, activity,
-                resultWho, requestCode, intents, resolvedTypes, flags,
-                SafeActivityOptions.fromBundle(bOptions), userId);
-        WeakReference<PendingIntentRecord> ref;
-        ref = mIntentSenderRecords.get(key);
-        PendingIntentRecord rec = ref != null ? ref.get() : null;
-        if (rec != null) {
-            if (!cancelCurrent) {
-                if (updateCurrent) {
-                    if (rec.key.requestIntent != null) {
-                        rec.key.requestIntent.replaceExtras(intents != null ?
-                                intents[intents.length - 1] : null);
-                    }
-                    if (intents != null) {
-                        intents[intents.length-1] = rec.key.requestIntent;
-                        rec.key.allIntents = intents;
-                        rec.key.allResolvedTypes = resolvedTypes;
-                    } else {
-                        rec.key.allIntents = null;
-                        rec.key.allResolvedTypes = null;
-                    }
-                }
-                return rec;
-            }
-            makeIntentSenderCanceledLocked(rec);
-            mIntentSenderRecords.remove(key);
-        }
-        if (noCreate) {
-            return rec;
-        }
-        rec = new PendingIntentRecord(this, key, callingUid);
-        mIntentSenderRecords.put(key, rec.ref);
-        if (type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT) {
-            if (activity.pendingResults == null) {
-                activity.pendingResults
-                        = new HashSet<WeakReference<PendingIntentRecord>>();
-            }
-            activity.pendingResults.add(rec.ref);
-        }
-        return rec;
     }
 
     @Override
@@ -6465,44 +6325,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void cancelIntentSender(IIntentSender sender) {
-        if (!(sender instanceof PendingIntentRecord)) {
-            return;
-        }
-        synchronized(this) {
-            PendingIntentRecord rec = (PendingIntentRecord)sender;
-            try {
-                final int uid = AppGlobals.getPackageManager().getPackageUid(rec.key.packageName,
-                        MATCH_DEBUG_TRIAGED_MISSING, UserHandle.getCallingUserId());
-                if (!UserHandle.isSameApp(uid, Binder.getCallingUid())) {
-                    String msg = "Permission Denial: cancelIntentSender() from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid()
-                        + " is not allowed to cancel package "
-                        + rec.key.packageName;
-                    Slog.w(TAG, msg);
-                    throw new SecurityException(msg);
-                }
-            } catch (RemoteException e) {
-                throw new SecurityException(e);
-            }
-            cancelIntentSenderLocked(rec, true);
-        }
-    }
-
-    void cancelIntentSenderLocked(PendingIntentRecord rec, boolean cleanActivity) {
-        makeIntentSenderCanceledLocked(rec);
-        mIntentSenderRecords.remove(rec.key);
-        if (cleanActivity && rec.key.activity != null) {
-            rec.key.activity.pendingResults.remove(rec.ref);
-        }
-    }
-
-    void makeIntentSenderCanceledLocked(PendingIntentRecord rec) {
-        rec.canceled = true;
-        RemoteCallbackList<IResultReceiver> callbacks = rec.detachCancelListenersLocked();
-        if (callbacks != null) {
-            mHandler.obtainMessage(DISPATCH_PENDING_INTENT_CANCEL_MSG, callbacks).sendToTarget();
-        }
+        mPendingIntentController.cancelIntentSender(sender);
     }
 
     @Override
@@ -10866,7 +10689,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
 
             }
-            dumpPendingIntentsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+            mPendingIntentController.dumpPendingIntents(pw, dumpAll, dumpPackage);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
@@ -11159,7 +10982,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     opti++;
                 }
                 synchronized (this) {
-                    dumpPendingIntentsLocked(fd, pw, args, opti, true, dumpPackage);
+                    mPendingIntentController.dumpPendingIntents(pw, true, dumpPackage);
                 }
             } else if ("processes".equals(cmd) || "p".equals(cmd)) {
                 if (opti < args.length) {
@@ -12855,61 +12678,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         pw.println("ACTIVITY MANAGER URI PERMISSIONS (dumpsys activity permissions)");
 
         mUgmInternal.dump(pw, dumpAll, dumpPackage);
-    }
-
-    void dumpPendingIntentsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
-            int opti, boolean dumpAll, String dumpPackage) {
-        boolean printed = false;
-
-        pw.println("ACTIVITY MANAGER PENDING INTENTS (dumpsys activity intents)");
-
-        if (mIntentSenderRecords.size() > 0) {
-            // Organize these by package name, so they are easier to read.
-            final ArrayMap<String, ArrayList<PendingIntentRecord>> byPackage = new ArrayMap<>();
-            final ArrayList<WeakReference<PendingIntentRecord>> weakRefs = new ArrayList<>();
-            final Iterator<WeakReference<PendingIntentRecord>> it
-                    = mIntentSenderRecords.values().iterator();
-            while (it.hasNext()) {
-                WeakReference<PendingIntentRecord> ref = it.next();
-                PendingIntentRecord rec = ref != null ? ref.get() : null;
-                if (rec == null) {
-                    weakRefs.add(ref);
-                    continue;
-                }
-                if (dumpPackage != null && !dumpPackage.equals(rec.key.packageName)) {
-                    continue;
-                }
-                ArrayList<PendingIntentRecord> list = byPackage.get(rec.key.packageName);
-                if (list == null) {
-                    list = new ArrayList<>();
-                    byPackage.put(rec.key.packageName, list);
-                }
-                list.add(rec);
-            }
-            for (int i = 0; i < byPackage.size(); i++) {
-                ArrayList<PendingIntentRecord> intents = byPackage.valueAt(i);
-                printed = true;
-                pw.print("  * "); pw.print(byPackage.keyAt(i));
-                pw.print(": "); pw.print(intents.size()); pw.println(" items");
-                for (int j = 0; j < intents.size(); j++) {
-                    pw.print("    #"); pw.print(j); pw.print(": "); pw.println(intents.get(j));
-                    if (dumpAll) {
-                        intents.get(j).dump(pw, "      ");
-                    }
-                }
-            }
-            if (weakRefs.size() > 0) {
-                printed = true;
-                pw.println("  * WEAK REFS:");
-                for (int i = 0; i < weakRefs.size(); i++) {
-                    pw.print("    #"); pw.print(i); pw.print(": "); pw.println(weakRefs.get(i));
-                }
-            }
-        }
-
-        if (!printed) {
-            pw.println("  (nothing)");
-        }
     }
 
     private static final int dumpProcessList(PrintWriter pw,
@@ -15179,24 +14947,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 res = mServices.startServiceLocked(caller, service,
                         resolvedType, callingPid, callingUid,
                         requireForeground, callingPackage, userId);
-            } finally {
-                Binder.restoreCallingIdentity(origId);
-            }
-            return res;
-        }
-    }
-
-    ComponentName startServiceInPackage(int uid, Intent service, String resolvedType,
-            boolean fgRequired, String callingPackage, int userId)
-            throws TransactionTooLargeException {
-        synchronized(this) {
-            if (DEBUG_SERVICE) Slog.v(TAG_SERVICE,
-                    "startServiceInPackage: " + service + " type=" + resolvedType);
-            final long origId = Binder.clearCallingIdentity();
-            ComponentName res;
-            try {
-                res = mServices.startServiceLocked(null, service,
-                        resolvedType, -1, uid, fgRequired, callingPackage, userId);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -21091,6 +20841,46 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void finishBooting() {
             ActivityManagerService.this.finishBooting();
+        }
+
+        @Override
+        public void tempWhitelistForPendingIntent(int callerPid, int callerUid, int targetUid,
+                long duration, String tag) {
+            synchronized (ActivityManagerService.this) {
+                ActivityManagerService.this.tempWhitelistForPendingIntentLocked(
+                        callerPid, callerUid, targetUid, duration, tag);
+            }
+        }
+
+        @Override
+        public int broadcastIntentInPackage(String packageName, int uid, Intent intent,
+                String resolvedType, IIntentReceiver resultTo, int resultCode, String resultData,
+                Bundle resultExtras, String requiredPermission, Bundle bOptions, boolean serialized,
+                boolean sticky, int userId) {
+            synchronized (ActivityManagerService.this) {
+                return ActivityManagerService.this.broadcastIntentInPackage(packageName, uid,
+                        intent, resolvedType, resultTo, resultCode, resultData, resultExtras,
+                        requiredPermission, bOptions, serialized, sticky, userId);
+            }
+        }
+
+        @Override
+        public ComponentName startServiceInPackage(int uid, Intent service, String resolvedType,
+                boolean fgRequired, String callingPackage, int userId)
+                throws TransactionTooLargeException {
+            synchronized(ActivityManagerService.this) {
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE,
+                        "startServiceInPackage: " + service + " type=" + resolvedType);
+                final long origId = Binder.clearCallingIdentity();
+                ComponentName res;
+                try {
+                    res = mServices.startServiceLocked(null, service,
+                            resolvedType, -1, uid, fgRequired, callingPackage, userId);
+                } finally {
+                    Binder.restoreCallingIdentity(origId);
+                }
+                return res;
+            }
         }
     }
 

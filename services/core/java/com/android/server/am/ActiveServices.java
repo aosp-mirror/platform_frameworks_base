@@ -629,7 +629,7 @@ public final class ActiveServices {
                 return false;
             }
 
-            IIntentSender target = mAm.getIntentSenderLocked(
+            IIntentSender target = mAm.mPendingIntentController.getIntentSender(
                     ActivityManager.INTENT_SENDER_SERVICE, callingPackage,
                     callingUid, userId, null, null, 0, new Intent[]{service},
                     new String[]{service.resolveType(mAm.mContext.getContentResolver())},
