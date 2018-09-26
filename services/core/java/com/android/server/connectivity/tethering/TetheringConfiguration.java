@@ -320,9 +320,8 @@ public class TetheringConfiguration {
     }
 
     private static boolean getEnableLegacyDhcpServer(Context ctx) {
-        // TODO: make the default false (0) and update javadoc in Settings.java
         final ContentResolver cr = ctx.getContentResolver();
-        final int intVal = Settings.Global.getInt(cr, TETHER_ENABLE_LEGACY_DHCP_SERVER, 1);
+        final int intVal = Settings.Global.getInt(cr, TETHER_ENABLE_LEGACY_DHCP_SERVER, 0);
         return intVal != 0;
     }
 
