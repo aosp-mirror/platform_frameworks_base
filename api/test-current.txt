@@ -25,6 +25,10 @@ package android.animation {
 
 package android.app {
 
+  public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+    method public void onMovedToDisplay(int, android.content.res.Configuration);
+  }
+
   public class ActivityManager {
     method public void addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int);
     method public void alwaysShowUnsupportedCompileSdkWarning(android.content.ComponentName);
@@ -1591,6 +1595,7 @@ package android.view {
 
   public class KeyEvent extends android.view.InputEvent implements android.os.Parcelable {
     method public static java.lang.String actionToString(int);
+    method public final void setDisplayId(int);
     field public static final int LAST_KEYCODE = 288; // 0x120
   }
 
