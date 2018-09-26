@@ -95,7 +95,7 @@
     <color name="car_card_dark">@color/car_dark_blue_grey_700</color>
 
     <!-- The default color of a card in car UI. -->
-    <color name="car_card">@color/car_card_light</color>
+    <color name="car_card">@color/car_card_dark</color>
 
     <!-- The ripple colors. The "dark" and "light" designation here refers to the color of the
          ripple  itself. -->
