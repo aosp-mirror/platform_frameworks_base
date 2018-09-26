@@ -24,7 +24,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.util.Slog;
+import android.util.Log;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
@@ -100,6 +100,15 @@ public abstract class PersistentConnection<T> {
     @GuardedBy("mLock")
     private T mService;
 
+    @GuardedBy("mLock")
+    private int mNumConnected;
+
+    @GuardedBy("mLock")
+    private int mNumDisconnected;
+
+    @GuardedBy("mLock")
+    private int mNumBindingDied;
+
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -108,12 +117,14 @@ public abstract class PersistentConnection<T> {
                     // Callback came in after PersistentConnection.unbind() was called.
                     // We just ignore this.
                     // (We've already called unbindService() already in unbind)
-                    Slog.w(mTag, "Connected: " + mComponentName.flattenToShortString()
+                    Log.w(mTag, "Connected: " + mComponentName.flattenToShortString()
                             + " u" + mUserId + " but not bound, ignore.");
                     return;
                 }
-                Slog.i(mTag, "Connected: " + mComponentName.flattenToShortString()
+                Log.i(mTag, "Connected: " + mComponentName.flattenToShortString()
                         + " u" + mUserId);
+
+                mNumConnected++;
 
                 mIsConnected = true;
                 mService = asInterface(service);
@@ -123,8 +134,10 @@ public abstract class PersistentConnection<T> {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             synchronized (mLock) {
-                Slog.i(mTag, "Disconnected: " + mComponentName.flattenToShortString()
+                Log.i(mTag, "Disconnected: " + mComponentName.flattenToShortString()
                         + " u" + mUserId);
+
+                mNumDisconnected++;
 
                 cleanUpConnectionLocked();
             }
@@ -136,13 +149,16 @@ public abstract class PersistentConnection<T> {
             synchronized (mLock) {
                 if (!mBound) {
                     // Callback came in late?
-                    Slog.w(mTag, "Binding died: " + mComponentName.flattenToShortString()
+                    Log.w(mTag, "Binding died: " + mComponentName.flattenToShortString()
                             + " u" + mUserId + " but not bound, ignore.");
                     return;
                 }
 
-                Slog.w(mTag, "Binding died: " + mComponentName.flattenToShortString()
+                Log.w(mTag, "Binding died: " + mComponentName.flattenToShortString()
                         + " u" + mUserId);
+
+                mNumBindingDied++;
+
                 scheduleRebindLocked();
             }
         }
@@ -169,6 +185,12 @@ public abstract class PersistentConnection<T> {
     public final ComponentName getComponentName() {
         return mComponentName;
     }
+
+    public final int getUserId() {
+        return mUserId;
+    }
+
+    protected abstract int getBindFlags();
 
     /**
      * @return whether {@link #bind()} has been called and {@link #unbind()} hasn't.
@@ -237,15 +259,15 @@ public abstract class PersistentConnection<T> {
         final Intent service = new Intent().setComponent(mComponentName);
 
         if (DEBUG) {
-            Slog.d(mTag, "Attempting to connect to " + mComponentName);
+            Log.d(mTag, "Attempting to connect to " + mComponentName);
         }
 
         final boolean success = mContext.bindServiceAsUser(service, mServiceConnection,
-                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
+                Context.BIND_AUTO_CREATE | getBindFlags(),
                 mHandler, UserHandle.of(mUserId));
 
         if (!success) {
-            Slog.e(mTag, "Binding: " + service.getComponent() + " u" + mUserId
+            Log.e(mTag, "Binding: " + service.getComponent() + " u" + mUserId
                     + " failed.");
         }
     }
@@ -285,7 +307,7 @@ public abstract class PersistentConnection<T> {
         if (!mBound) {
             return;
         }
-        Slog.i(mTag, "Stopping: " + mComponentName.flattenToShortString() + " u" + mUserId);
+        Log.i(mTag, "Stopping: " + mComponentName.flattenToShortString() + " u" + mUserId);
         mBound = false;
         mContext.unbindService(mServiceConnection);
 
@@ -303,7 +325,7 @@ public abstract class PersistentConnection<T> {
         unbindLocked();
 
         if (!mRebindScheduled) {
-            Slog.i(mTag, "Scheduling to reconnect in " + mNextBackoffMs + " ms (uptime)");
+            Log.i(mTag, "Scheduling to reconnect in " + mNextBackoffMs + " ms (uptime)");
 
             mReconnectTime = injectUptimeMillis() + mNextBackoffMs;
 
@@ -323,10 +345,12 @@ public abstract class PersistentConnection<T> {
         synchronized (mLock) {
             pw.print(prefix);
             pw.print(mComponentName.flattenToShortString());
-            pw.print(mBound ? "  [bound]" : "  [not bound]");
-            pw.print(mIsConnected ? "  [connected]" : "  [not connected]");
+            pw.print(" u");
+            pw.print(mUserId);
+            pw.print(mBound ? " [bound]" : " [not bound]");
+            pw.print(mIsConnected ? " [connected]" : " [not connected]");
             if (mRebindScheduled) {
-                pw.print("  reconnect in ");
+                pw.print(" reconnect in ");
                 TimeUtils.formatDuration((mReconnectTime - injectUptimeMillis()), pw);
             }
             pw.println();
@@ -334,6 +358,16 @@ public abstract class PersistentConnection<T> {
             pw.print(prefix);
             pw.print("  Next backoff(sec): ");
             pw.print(mNextBackoffMs / 1000);
+            pw.println();
+
+            pw.print(prefix);
+            pw.print("  Connected: ");
+            pw.print(mNumConnected);
+            pw.print("  Disconnected: ");
+            pw.print(mNumDisconnected);
+            pw.print("  Died: ");
+            pw.print(mNumBindingDied);
+            pw.println();
         }
     }
 
