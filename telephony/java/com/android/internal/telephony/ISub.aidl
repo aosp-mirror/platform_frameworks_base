@@ -232,5 +232,5 @@ interface ISub {
      */
     int getSimStateForSlotIndex(int slotIndex);
 
-    boolean isActiveSubId(int subId);
+    boolean isActiveSubId(int subId, String callingPackage);
 }
