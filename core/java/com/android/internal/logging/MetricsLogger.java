@@ -19,6 +19,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.metrics.LogMaker;
 import android.os.Build;
+import android.util.StatsLog;
 import android.view.View;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -41,8 +42,11 @@ public class MetricsLogger {
         return sMetricsLogger;
     }
 
-    protected void saveLog(Object[] rep) {
-        EventLogTags.writeSysuiMultiAction(rep);
+    protected void saveLog(LogMaker log) {
+        // TODO(b/116684537): Flag guard logging to event log and statsd socket.
+        EventLogTags.writeSysuiMultiAction(log.serialize());
+        StatsLog.write(StatsLog.KEY_VALUE_PAIRS_ATOM, /* UID is retrieved from statsd side */ 0,
+                log.getEntries());
     }
 
     public static final int VIEW_UNKNOWN = MetricsEvent.VIEW_UNKNOWN;
@@ -53,7 +57,7 @@ public class MetricsLogger {
         if (content.getType() == MetricsEvent.TYPE_UNKNOWN) {
             content.setType(MetricsEvent.TYPE_ACTION);
         }
-        saveLog(content.serialize());
+        saveLog(content);
     }
 
     public void visible(int category) throws IllegalArgumentException {
@@ -61,9 +65,7 @@ public class MetricsLogger {
             throw new IllegalArgumentException("Must define metric category");
         }
         EventLogTags.writeSysuiViewVisibility(category, 100);
-        saveLog(new LogMaker(category)
-                        .setType(MetricsEvent.TYPE_OPEN)
-                        .serialize());
+        saveLog(new LogMaker(category).setType(MetricsEvent.TYPE_OPEN));
     }
 
     public void hidden(int category) throws IllegalArgumentException {
@@ -71,9 +73,7 @@ public class MetricsLogger {
             throw new IllegalArgumentException("Must define metric category");
         }
         EventLogTags.writeSysuiViewVisibility(category, 0);
-        saveLog(new LogMaker(category)
-                        .setType(MetricsEvent.TYPE_CLOSE)
-                        .serialize());
+        saveLog(new LogMaker(category).setType(MetricsEvent.TYPE_CLOSE));
     }
 
     public void visibility(int category, boolean visibile)
@@ -92,25 +92,17 @@ public class MetricsLogger {
 
     public void action(int category) {
         EventLogTags.writeSysuiAction(category, "");
-        saveLog(new LogMaker(category)
-                        .setType(MetricsEvent.TYPE_ACTION)
-                        .serialize());
+        saveLog(new LogMaker(category).setType(MetricsEvent.TYPE_ACTION));
     }
 
     public void action(int category, int value) {
         EventLogTags.writeSysuiAction(category, Integer.toString(value));
-        saveLog(new LogMaker(category)
-                        .setType(MetricsEvent.TYPE_ACTION)
-                        .setSubtype(value)
-                        .serialize());
+        saveLog(new LogMaker(category).setType(MetricsEvent.TYPE_ACTION).setSubtype(value));
     }
 
     public void action(int category, boolean value) {
         EventLogTags.writeSysuiAction(category, Boolean.toString(value));
-        saveLog(new LogMaker(category)
-                        .setType(MetricsEvent.TYPE_ACTION)
-                        .setSubtype(value ? 1 : 0)
-                        .serialize());
+        saveLog(new LogMaker(category).setType(MetricsEvent.TYPE_ACTION).setSubtype(value ? 1 : 0));
     }
 
     public void action(int category, String pkg) {
@@ -118,19 +110,15 @@ public class MetricsLogger {
             throw new IllegalArgumentException("Must define metric category");
         }
         EventLogTags.writeSysuiAction(category, pkg);
-        saveLog(new LogMaker(category)
-                .setType(MetricsEvent.TYPE_ACTION)
-                .setPackageName(pkg)
-                .serialize());
+        saveLog(new LogMaker(category).setType(MetricsEvent.TYPE_ACTION).setPackageName(pkg));
     }
 
     /** Add an integer value to the monotonically increasing counter with the given name. */
     public void count(String name, int value) {
         EventLogTags.writeSysuiCount(name, value);
         saveLog(new LogMaker(MetricsEvent.RESERVED_FOR_LOGBUILDER_COUNTER)
-                        .setCounterName(name)
-                        .setCounterValue(value)
-                        .serialize());
+                    .setCounterName(name)
+                    .setCounterValue(value));
     }
 
     /** Increment the bucket with the integer label on the histogram with the given name. */
@@ -138,10 +126,9 @@ public class MetricsLogger {
         // see LogHistogram in system/core/libmetricslogger/metrics_logger.cpp
         EventLogTags.writeSysuiHistogram(name, bucket);
         saveLog(new LogMaker(MetricsEvent.RESERVED_FOR_LOGBUILDER_HISTOGRAM)
-                        .setCounterName(name)
-                        .setCounterBucket(bucket)
-                        .setCounterValue(1)
-                        .serialize());
+                    .setCounterName(name)
+                    .setCounterBucket(bucket)
+                    .setCounterValue(1));
     }
 
     /** @deprecated use {@link #visible(int)} */
