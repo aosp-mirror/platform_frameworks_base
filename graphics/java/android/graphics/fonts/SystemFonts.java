@@ -45,7 +45,7 @@ import java.util.Set;
 /**
  * Provides the system font configurations.
  */
-public class SystemFonts {
+public final class SystemFonts {
     private static final String TAG = "SystemFonts";
     private static final String DEFAULT_FAMILY = "sans-serif";
 
@@ -58,8 +58,7 @@ public class SystemFonts {
     /**
      * Returns all available font files in the system.
      *
-     * Note: The order of this font doesn't indicates anything.
-     * @return an array of system fonts
+     * @return a set of system fonts
      */
     public static @NonNull Set<Font> getAvailableFonts() {
         HashSet<Font> set = new HashSet<>();
