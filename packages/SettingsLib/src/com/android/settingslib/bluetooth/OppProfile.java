@@ -32,7 +32,7 @@ final class OppProfile implements LocalBluetoothProfile {
     // Order of this profile in device profiles list
     private static final int ORDINAL = 2;
 
-    public boolean isConnectable() {
+    public boolean accessProfileEnabled() {
         return false;
     }
 
