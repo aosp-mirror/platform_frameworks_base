@@ -16,13 +16,10 @@
 
 package com.android.settingslib.net;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Matchers.nullable;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -50,6 +47,7 @@ import org.robolectric.util.ReflectionHelpers;
 
 import java.time.ZonedDateTime;
 import java.util.Iterator;
+import java.util.List;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 public class NetworkCycleDataLoaderTest {
@@ -64,8 +62,11 @@ public class NetworkCycleDataLoaderTest {
     private Iterator<Range<ZonedDateTime>> mIterator;
     @Mock
     private INetworkStatsService mNetworkStatsService;
+    @Mock
+    private NetworkCycleDataLoader.Builder mBuilder;
 
-    private NetworkCycleDataLoader mLoader;
+
+    private NetworkCycleDataTestLoader mLoader;
 
     @Before
     public void setUp() {
@@ -77,8 +78,8 @@ public class NetworkCycleDataLoaderTest {
 
     @Test
     public void loadInBackground_noNetworkPolicy_shouldLoad4WeeksData() {
-        mLoader = spy(new NetworkCycleDataLoader.Builder(mContext).build());
-        doReturn(null).when(mLoader).loadFourWeeksData();
+        mLoader = spy(new NetworkCycleDataTestLoader(mContext));
+        doNothing().when(mLoader).loadFourWeeksData();
 
         mLoader.loadInBackground();
 
@@ -86,31 +87,45 @@ public class NetworkCycleDataLoaderTest {
     }
 
     @Test
-    public void loadInBackground_shouldQueryNetworkSummary() throws RemoteException {
+    public void loadInBackground_hasNetworkPolicy_shouldLoadPolicyData() {
+        mLoader = spy(new NetworkCycleDataTestLoader(mContext));
+        ReflectionHelpers.setField(mLoader, "mPolicy", mPolicy);
+
+        mLoader.loadInBackground();
+
+        verify(mLoader).loadPolicyData();
+    }
+
+    @Test
+    public void loadPolicyData_shouldRecordUsageFromPolicyCycle() {
         final int networkType = ConnectivityManager.TYPE_MOBILE;
         final String subId = "TestSubscriber";
         final ZonedDateTime now = ZonedDateTime.now();
         final Range<ZonedDateTime> cycle = new Range<>(now, now);
+        final long nowInMs = now.toInstant().toEpochMilli();
         // mock 1 cycle data.
         // hasNext() will be called internally in next(), hence setting it to return true twice.
         when(mIterator.hasNext()).thenReturn(true).thenReturn(true).thenReturn(false);
         when(mIterator.next()).thenReturn(cycle);
-        mLoader = new NetworkCycleDataLoader.Builder(mContext)
-            .setNetworkPolicy(mPolicy).setNetworkType(networkType).setSubscriberId(subId).build();
+        mLoader = spy(new NetworkCycleDataTestLoader(mContext));
+        ReflectionHelpers.setField(mLoader, "mPolicy", mPolicy);
+        ReflectionHelpers.setField(mLoader, "mNetworkType", networkType);
+        ReflectionHelpers.setField(mLoader, "mSubId", subId);
 
-        mLoader.loadInBackground();
+        mLoader.loadPolicyData();
 
-        verify(mNetworkStatsManager).querySummary(eq(networkType), eq(subId), anyLong(), anyLong());
+        verify(mLoader).recordUsage(nowInMs, nowInMs);
     }
 
     @Test
-    public void loadFourWeeksData_shouldGetUsageForLast4Weeks() throws RemoteException {
-        mLoader = spy(new NetworkCycleDataLoader.Builder(mContext).build());
+    public void loadFourWeeksData_shouldRecordUsageForLast4Weeks() throws RemoteException {
+        mLoader = spy(new NetworkCycleDataTestLoader(mContext));
         ReflectionHelpers.setField(mLoader, "mNetworkStatsService", mNetworkStatsService);
         final INetworkStatsSession networkSession = mock(INetworkStatsSession.class);
         when(mNetworkStatsService.openSession()).thenReturn(networkSession);
         final NetworkStatsHistory networkHistory = mock(NetworkStatsHistory.class);
-        when(networkSession.getHistoryForNetwork(nullable(NetworkTemplate.class), anyInt())).thenReturn(networkHistory);
+        when(networkSession.getHistoryForNetwork(nullable(NetworkTemplate.class), anyInt()))
+            .thenReturn(networkHistory);
         final long now = System.currentTimeMillis();
         final long fourWeeksAgo = now - (DateUtils.WEEK_IN_MILLIS * 4);
         when(networkHistory.getStart()).thenReturn(fourWeeksAgo);
@@ -118,6 +133,23 @@ public class NetworkCycleDataLoaderTest {
 
         mLoader.loadFourWeeksData();
 
-        verify(mLoader).getUsage(eq(fourWeeksAgo), eq(now), any());
+        verify(mLoader).recordUsage(fourWeeksAgo, now);
+    }
+
+    public class NetworkCycleDataTestLoader extends NetworkCycleDataLoader<List<NetworkCycleData>> {
+
+        private NetworkCycleDataTestLoader(Context context) {
+            super(NetworkCycleDataLoader.builder(mContext));
+            mContext = context;
+        }
+
+        @Override
+        void recordUsage(long start, long end) {
+        }
+
+        @Override
+        List<NetworkCycleData> getCycleUsage() {
+            return null;
+        }
     }
 }
