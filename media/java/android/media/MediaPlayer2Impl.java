@@ -271,7 +271,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         addTask(new Task(CALL_COMPLETED_SKIP_TO_NEXT, false) {
             @Override
             void process() {
-                // TODO: switch to next data source and play
+                if (getState() == PLAYER_STATE_PLAYING) {
+                    pause();
+                }
+                playNextDataSource();
             }
         });
     }
