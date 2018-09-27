@@ -61,13 +61,14 @@ public class SwipeHelper implements Gefingerpoken {
     public static final float SWIPED_FAR_ENOUGH_SIZE_FRACTION = 0.6f;
     static final float MAX_SCROLL_SIZE_FRACTION = 0.3f;
 
+    protected final Handler mHandler;
+
     private float mMinSwipeProgress = 0f;
     private float mMaxSwipeProgress = 1f;
 
     private final FlingAnimationUtils mFlingAnimationUtils;
     private float mPagingTouchSlop;
     private final Callback mCallback;
-    private final Handler mHandler;
     private final int mSwipeDirection;
     private final VelocityTracker mVelocityTracker;
     private final FalsingManager mFalsingManager;
