@@ -105,16 +105,12 @@
     <string name="camera_label" msgid="7261107956054836961">"odpri fotoaparat"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Izberite novo postavitev opravil"</string>
     <string name="cancel" msgid="6442560571259935130">"Prekliči"</string>
-    <!-- no translation found for accessibility_biometric_dialog_help_area (8953787076940186847) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_confirm (6468457350041712674) -->
-    <skip />
+    <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"Območje sporočila pomoči"</string>
+    <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Potrdite"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Dotaknite se tipala prstnih odtisov"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikona prstnih odtisov"</string>
-    <!-- no translation found for face_dialog_looking_for_face (7049276266074494689) -->
-    <skip />
-    <!-- no translation found for accessibility_face_dialog_face_icon (2658119009870383490) -->
-    <skip />
+    <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Preverjanje vašega obraza …"</string>
+    <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"Ikona obraza"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Gumb povečave za združljivost."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Povečava manjšega na večji zaslon."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Povezava Bluetooth vzpostavljena."</string>
@@ -843,9 +839,11 @@
     <string name="notification_channel_storage" msgid="3077205683020695313">"Shramba"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"Namigi"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Nenamestljive aplikacije"</string>
-    <string name="instant_apps_message" msgid="8116608994995104836">"Nenamestljivih aplikacij ni treba namestiti."</string>
+    <string name="instant_apps_title" msgid="8738419517367449783">"Aplikacija <xliff:g id="APP">%1$s</xliff:g> se izvaja"</string>
+    <string name="instant_apps_message" msgid="1183313016396018086">"Aplikacija je odprta brez namestitve."</string>
+    <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Aplikacija je odprta brez namestitve. Dotaknite se, če želite izvedeti več."</string>
     <string name="app_info" msgid="6856026610594615344">"Podatki o aplikaciji"</string>
-    <string name="go_to_web" msgid="2650669128861626071">"Odpri brskalnik"</string>
+    <string name="go_to_web" msgid="1106022723459948514">"Pojdi v splet"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobilni podatki"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi je izklopljen"</string>

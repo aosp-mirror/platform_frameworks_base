@@ -103,16 +103,12 @@
     <string name="camera_label" msgid="7261107956054836961">"Kamera öffnen"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Neues Aufgabenlayout auswählen"</string>
     <string name="cancel" msgid="6442560571259935130">"Abbrechen"</string>
-    <!-- no translation found for accessibility_biometric_dialog_help_area (8953787076940186847) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_confirm (6468457350041712674) -->
-    <skip />
+    <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"Bereich für die Hilfemeldung"</string>
+    <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Bestätigen"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Berühre den Fingerabdrucksensor"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Fingerabdruck-Symbol"</string>
-    <!-- no translation found for face_dialog_looking_for_face (7049276266074494689) -->
-    <skip />
-    <!-- no translation found for accessibility_face_dialog_face_icon (2658119009870383490) -->
-    <skip />
+    <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Wir suchen nach dir…"</string>
+    <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"Gesichtssymbol"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Schaltfläche für Kompatibilitätszoom"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom auf einen größeren Bildschirm"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Mit Bluetooth verbunden"</string>
@@ -833,9 +829,11 @@
     <string name="notification_channel_storage" msgid="3077205683020695313">"Speicher"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"Hinweise"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Instant-Apps"</string>
-    <string name="instant_apps_message" msgid="8116608994995104836">"Bei Instant-Apps ist keine vorherige Installation erforderlich."</string>
+    <string name="instant_apps_title" msgid="8738419517367449783">"<xliff:g id="APP">%1$s</xliff:g> wird ausgeführt"</string>
+    <string name="instant_apps_message" msgid="1183313016396018086">"App wurde geöffnet, ohne vorher installiert zu werden."</string>
+    <string name="instant_apps_message_with_help" msgid="6179830437630729747">"App wurde geöffnet, ohne vorher installiert zu werden. Tippe, um weitere Informationen zu erhalten."</string>
     <string name="app_info" msgid="6856026610594615344">"App-Informationen"</string>
-    <string name="go_to_web" msgid="2650669128861626071">"Browser öffnen"</string>
+    <string name="go_to_web" msgid="1106022723459948514">"Web aufrufen"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobile Daten"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"WLAN ist deaktiviert"</string>
