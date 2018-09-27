@@ -4311,6 +4311,12 @@ public abstract class Context {
     public static final String TIME_ZONE_DETECTOR_SERVICE = "time_zone_detector";
 
     /**
+     * Binder service name for {@link AppBindingService}.
+     * @hide
+     */
+    public static final String APP_BINDING_SERVICE = "app_binding";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

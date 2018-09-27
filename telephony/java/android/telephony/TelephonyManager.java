@@ -1203,6 +1203,15 @@ public class TelephonyManager {
             "android.intent.action.DATA_STALL_DETECTED";
 
     /**
+     * A service action that identifies a {@link android.app.SmsAppService} subclass in the
+     * AndroidManifest.xml.
+     *
+     * <p>See {@link android.app.SmsAppService} for the details.
+     */
+    @SdkConstant(SdkConstantType.SERVICE_ACTION)
+    public static final String ACTION_SMS_APP_SERVICE = "android.telephony.action.SMS_APP_SERVICE";
+
+    /**
      * An int extra used with {@link #ACTION_DATA_STALL_DETECTED} to indicate the
      * action associated with the data stall recovery.
      *

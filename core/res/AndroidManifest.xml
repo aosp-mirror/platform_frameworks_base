@@ -4144,6 +4144,10 @@
     <permission android:name="android.permission.MONITOR_DEFAULT_SMS_PACKAGE"
         android:protectionLevel="signature" />
 
+    <!-- A subclass of {@link android.app.SmsAppService} must be protected with this permission. -->
+    <permission android:name="android.permission.BIND_SMS_APP_SERVICE"
+        android:protectionLevel="signature" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
