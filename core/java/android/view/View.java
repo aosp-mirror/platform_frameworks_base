@@ -15255,6 +15255,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * a value of 'true' will not override any 'false' value in its parent chain nor will
      * it prevent any 'false' in any of its children.
      *
+     * The default behavior of force dark is also influenced by the Theme's
+     * {@link android.R.styleable#Theme_isLightTheme isLightTheme} attribute.
+     * If a theme is isLightTheme="false", then force dark is globally disabled for that theme.
+     *
      * @param allow Whether or not to allow force dark.
      *
      * @hide

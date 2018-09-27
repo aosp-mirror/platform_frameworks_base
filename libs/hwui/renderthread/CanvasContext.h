@@ -182,6 +182,23 @@ public:
         mFrameCompleteCallbacks.push_back(std::move(func));
     }
 
+    void setForceDark(bool enable) {
+        mUseForceDark = enable;
+    }
+
+    bool useForceDark() {
+        // The force-dark override has the highest priority, followed by the disable setting
+        // for the feature as a whole, followed last by whether or not this context has had
+        // force dark set (typically automatically done via UIMode)
+        if (Properties::forceDarkMode) {
+            return true;
+        }
+        if (!Properties::enableForceDarkSupport) {
+            return false;
+        }
+        return mUseForceDark;
+    }
+
 private:
     CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
                   IContextFactory* contextFactory, std::unique_ptr<IRenderPipeline> renderPipeline);
@@ -228,6 +245,7 @@ private:
 
     bool mOpaque;
     bool mWideColorGamut = false;
+    bool mUseForceDark = false;
     LightInfo mLightInfo;
     LightGeometry mLightGeometry = {{0, 0, 0}, 0};
 
