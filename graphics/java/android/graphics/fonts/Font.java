@@ -422,9 +422,10 @@ public final class Font {
                     nAddAxis(builderPtr, axis.getOpenTypeTagValue(), axis.getStyleValue());
                 }
             }
-            final long ptr = nBuild(builderPtr, mBuffer, mWeight, italic, mTtcIndex);
-            final Font font = new Font(ptr, mBuffer, mFile, mWeight, italic, mTtcIndex, mAxes,
-                    mLocaleList);
+            final ByteBuffer readonlyBuffer = mBuffer.asReadOnlyBuffer();
+            final long ptr = nBuild(builderPtr, readonlyBuffer, mWeight, italic, mTtcIndex);
+            final Font font = new Font(ptr, readonlyBuffer, mFile, mWeight, italic, mTtcIndex,
+                    mAxes, mLocaleList);
             sFontRegistory.registerNativeAllocation(font, ptr);
             return font;
         }
@@ -477,7 +478,7 @@ public final class Font {
     }
 
     /**
-     * Retuns a font file buffer.
+     * Returns a font file buffer.
      *
      * @return a font buffer
      */
