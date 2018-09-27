@@ -38,13 +38,13 @@ import com.android.settingslib.core.lifecycle.events.OnPrepareOptionsMenu;
 import com.android.settingslib.core.lifecycle.events.OnResume;
 import com.android.settingslib.core.lifecycle.events.OnStart;
 import com.android.settingslib.core.lifecycle.events.OnStop;
-import com.android.settingslib.testutils.FragmentTestUtils;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
+import org.robolectric.shadows.androidx.fragment.FragmentController;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 public class LifecycleTest {
@@ -184,7 +184,7 @@ public class LifecycleTest {
     @Test
     public void runThroughDialogFragmentLifecycles_shouldObserveEverything() {
         final TestDialogFragment fragment = new TestDialogFragment();
-        FragmentTestUtils.startFragment(fragment);
+        FragmentController.setupFragment(fragment);
 
         fragment.onCreateOptionsMenu(null, null);
         fragment.onPrepareOptionsMenu(null);
@@ -208,7 +208,7 @@ public class LifecycleTest {
     @Test
     public void runThroughFragmentLifecycles_shouldObserveEverything() {
         final TestFragment fragment = new TestFragment();
-        FragmentTestUtils.startFragment(fragment);
+        FragmentController.setupFragment(fragment);
 
         fragment.onCreateOptionsMenu(null, null);
         fragment.onPrepareOptionsMenu(null);
@@ -248,7 +248,7 @@ public class LifecycleTest {
     @Test
     public void onOptionItemSelectedShortCircuitsIfAnObserverHandlesTheMenuItem() {
         final TestFragment fragment = new TestFragment();
-        FragmentTestUtils.startFragment(fragment);
+        FragmentController.setupFragment(fragment);
 
         final OptionItemAccepter accepter = new OptionItemAccepter();
         fragment.getLifecycle().addObserver(accepter);
