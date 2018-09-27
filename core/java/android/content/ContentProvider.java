@@ -333,6 +333,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 Uri uri = operation.getUri();
                 uri = validateIncomingUri(uri);
                 uri = maybeGetUriWithoutUserId(uri);
+                userIds[i] = getUserIdFromUri(uri);
                 // Rebuild operation if we changed the Uri above
                 if (!Objects.equals(operation.getUri(), uri)) {
                     operation = new ContentProviderOperation(operation, uri);
