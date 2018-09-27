@@ -3409,4 +3409,9 @@
 
   <java-symbol type="array" name="config_disableApksUnlessMatchedSku_apk_list" />
   <java-symbol type="array" name="config_disableApkUnlessMatchedSku_skus_list" />
+
+  <!-- For Bluetooth AbsoluteVolume -->
+  <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index1" />
+  <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index2" />
+  <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index3" />
 </resources>
