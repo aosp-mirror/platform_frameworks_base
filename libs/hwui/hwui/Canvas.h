@@ -236,6 +236,8 @@ public:
     virtual void drawRegion(const SkRegion& region, const SkPaint& paint) = 0;
     virtual void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
                                const SkPaint& paint) = 0;
+    virtual void drawDoubleRoundRect(const SkRRect& outer, const SkRRect& inner,
+                                const SkPaint& paint) = 0;
     virtual void drawCircle(float x, float y, float radius, const SkPaint& paint) = 0;
     virtual void drawOval(float left, float top, float right, float bottom,
                           const SkPaint& paint) = 0;
@@ -283,6 +285,16 @@ public:
     void drawTextOnPath(const uint16_t* text, int count, minikin::Bidi bidiFlags,
                         const SkPath& path, float hOffset, float vOffset, const Paint& paint,
                         const Typeface* typeface);
+
+    void drawDoubleRoundRectXY(float outerLeft, float outerTop, float outerRight,
+                                float outerBottom, float outerRx, float outerRy, float innerLeft,
+                                float innerTop, float innerRight, float innerBottom, float innerRx,
+                                float innerRy, const SkPaint& paint);
+
+    void drawDoubleRoundRectRadii(float outerLeft, float outerTop, float outerRight,
+                                float outerBottom, const float* outerRadii, float innerLeft,
+                                float innerTop, float innerRight, float innerBottom,
+                                const float* innerRadii, const SkPaint& paint);
 
     static int GetApiLevel() { return sApiLevel; }
 

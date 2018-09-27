@@ -504,6 +504,11 @@ void SkiaCanvas::drawRoundRect(float left, float top, float right, float bottom,
     mCanvas->drawRoundRect(rect, rx, ry, *filterPaint(paint));
 }
 
+void SkiaCanvas::drawDoubleRoundRect(const SkRRect& outer, const SkRRect& inner,
+                                const SkPaint& paint) {
+    mCanvas->drawDRRect(outer, inner, *filterPaint(paint));
+}
+
 void SkiaCanvas::drawCircle(float x, float y, float radius, const SkPaint& paint) {
     if (CC_UNLIKELY(radius <= 0 || paint.nothingToDraw())) return;
     mCanvas->drawCircle(x, y, radius, *filterPaint(paint));
