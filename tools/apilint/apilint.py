@@ -492,6 +492,7 @@ def verify_parcelable(clazz):
 def verify_protected(clazz):
     """Verify that no protected methods or fields are allowed."""
     for m in clazz.methods:
+        if m.name == "finalize": continue
         if "protected" in m.split:
             error(clazz, m, "M7", "Protected methods not allowed; must be public")
     for f in clazz.fields:
@@ -1025,6 +1026,10 @@ def verify_resource_names(clazz):
     # Resources defined by files are foo_bar_baz
     if clazz.name in ["anim","animator","color","dimen","drawable","interpolator","layout","transition","menu","mipmap","string","plurals","raw","xml"]:
         for f in clazz.fields:
+            if re.match("config_[a-z][a-zA-Z1-9]*$", f.name): continue
+            if f.name.startswith("config_"):
+                error(clazz, f, None, "Expected config name to be config_fooBarBaz style")
+
             if re.match("[a-z1-9_]+$", f.name): continue
             error(clazz, f, None, "Expected resource name in this class to be foo_bar_baz style")
 
@@ -1361,6 +1366,60 @@ def verify_clone(clazz):
             error(clazz, m, None, "Provide an explicit copy constructor instead of implementing clone()")
 
 
+def verify_pfd(clazz):
+    """Verify that android APIs use PFD over FD."""
+    examine = clazz.ctors + clazz.methods
+    for m in examine:
+        if m.typ == "java.io.FileDescriptor":
+            error(clazz, m, "FW11", "Must use ParcelFileDescriptor")
+        if m.typ == "int":
+            if "Fd" in m.name or "FD" in m.name or "FileDescriptor" in m.name:
+                error(clazz, m, "FW11", "Must use ParcelFileDescriptor")
+        for arg in m.args:
+            if arg == "java.io.FileDescriptor":
+                error(clazz, m, "FW11", "Must use ParcelFileDescriptor")
+
+    for f in clazz.fields:
+        if f.typ == "java.io.FileDescriptor":
+            error(clazz, f, "FW11", "Must use ParcelFileDescriptor")
+
+
+def verify_numbers(clazz):
+    """Discourage small numbers types like short and byte."""
+
+    discouraged = ["short","byte"]
+
+    for c in clazz.ctors:
+        for arg in c.args:
+            if arg in discouraged:
+                warn(clazz, c, "FW12", "Should avoid odd sized primitives; use int instead")
+
+    for f in clazz.fields:
+        if f.typ in discouraged:
+            warn(clazz, f, "FW12", "Should avoid odd sized primitives; use int instead")
+
+    for m in clazz.methods:
+        if m.typ in discouraged:
+            warn(clazz, m, "FW12", "Should avoid odd sized primitives; use int instead")
+        for arg in m.args:
+            if arg in discouraged:
+                warn(clazz, m, "FW12", "Should avoid odd sized primitives; use int instead")
+
+
+def verify_singleton(clazz):
+    """Catch singleton objects with constructors."""
+
+    singleton = False
+    for m in clazz.methods:
+        if m.name.startswith("get") and m.name.endswith("Instance") and " static " in m.raw:
+            singleton = True
+
+    if singleton:
+        for c in clazz.ctors:
+            error(clazz, c, None, "Singleton classes should use getInstance() methods")
+
+
+
 def is_interesting(clazz):
     """Test if given class is interesting from an Android PoV."""
 
@@ -1431,6 +1490,9 @@ def examine_clazz(clazz):
     verify_tense(clazz)
     verify_icu(clazz)
     verify_clone(clazz)
+    verify_pfd(clazz)
+    verify_numbers(clazz)
+    verify_singleton(clazz)
 
 
 def examine_stream(stream):
