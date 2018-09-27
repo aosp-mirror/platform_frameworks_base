@@ -4440,7 +4440,7 @@ public class Notification implements Parcelable
         }
 
         private CharSequence processTextSpans(CharSequence text) {
-            if (hasForegroundColor()) {
+            if (hasForegroundColor() || mInNightMode) {
                 return ContrastColorUtil.clearColorSpans(text);
             }
             return text;
