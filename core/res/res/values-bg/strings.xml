@@ -528,10 +528,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Не е разпознато"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Отпечатъкът е удостоверен"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Лицето е удостоверено"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Лицето е удостоверено. Моля, натиснете „Потвърждаване“"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Хардуерът за отпечатъци не е налице."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Отпечатъкът не може да бъде съхранен. Моля, премахнете съществуващ."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Времето за изчакване за отпечатък изтече. Опитайте отново."</string>
@@ -568,8 +566,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Времето за изчакване изтече. Опитайте отново."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Лицето не може да бъде съхранено."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Операцията с лице е анулирана."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"Удостоверяв. на лицето е анулирано от потребителя."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Твърде много опити. Опитайте отново по-късно."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Твърде много опити. Удост. с лице е деактивирано."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Опитайте отново."</string>

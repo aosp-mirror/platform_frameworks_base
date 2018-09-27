@@ -528,10 +528,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Ikke gjenkjent"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Fingeravtrykket er godkjent"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Ansiktet er autentisert"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Ansiktet er autentisert. Trykk på Bekreft"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Maskinvare for fingeravtrykk er ikke tilgjengelig."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Fingeravtrykket kan ikke lagres. Fjern et eksisterende fingeravtrykk."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Tidsavbrudd for fingeravtrykk er nådd. Prøv på nytt."</string>
@@ -568,8 +566,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Tidsavbrudd for ansikt er nådd. Prøv igjen."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Ansiktet kan ikke lagres."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Ansikt-operasjonen ble avbrutt."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"Ansiktsautentiseringen ble avbrutt av brukeren."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"For mange forsøk. Prøv igjen senere."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"For mange forsøk. Ansiktsautentisering er slått av."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Prøv igjen."</string>

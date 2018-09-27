@@ -540,10 +540,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"لم يتم التعرف عليها."</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"تم مصادقة بصمة الإصبع"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"تمّت مصادقة الوجه"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"تمّت مصادقة الوجه، يُرجى الضغط على \"تأكيد\"."</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"جهاز بصمة الإصبع غير متاح."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"يتعذر تخزين بصمة الإصبع؛ يرجى إزالة إحدى البصمات المخزنة."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"تم بلوغ مهلة إدخال بصمة الإصبع. أعد المحاولة."</string>
@@ -580,8 +578,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"انتهت مهلة التعرُّف على الوجه. أعِد المحاولة."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"يتعذَّر حفظ الوجه."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"تمّ إلغاء عملية مصادقة الوجه."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"ألغَى المستخدم مصادقة الوجه."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"تمّ إجراء محاولات كثيرة. أعِد المحاولة لاحقًا."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"تمّ إجراء محاولات كثيرة. ميزة مصادقة الوجه متوقفة."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"يُرجى إعادة المحاولة."</string>

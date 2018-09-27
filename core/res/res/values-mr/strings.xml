@@ -528,10 +528,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"ओळखले नाही"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"फिंगरप्रिंट ऑथेंटिकेट केली आहे"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"चेहरा ऑथेंटिकेशन केलेला आहे"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"चेहरा ऑथेंटिकेशन केलेला आहे, कृपया कंफर्म दाबा"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"फिंगरप्रिंट हार्डवेअर उपलब्‍ध नाही."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"फिंगरप्रिंट स्टोअर केले जाऊ शकत नाही. कृपया विद्यमान फिंगरप्रिंट काढा."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"फिंगरप्रिंट टाइमआउट झाले. पुन्हा प्रयत्न करा."</string>
@@ -568,8 +566,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"चेहरा टाइमआउट झाला. पुन्हा प्रयत्न करा."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"चेहरा स्टोअर केला जाऊ शकत नाही."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"चेहरा ऑपरेशन रद्द केले गेले."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"वापरकर्त्याने चेहरा ऑथेंटिकेशन रद्द केले."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"खूप जास्त प्रयत्न केले. नंतर पुन्हा प्रयत्न करा."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"खूप जास्त प्रयत्न केले. चेहरा ऑथेंटिकेशन बंद केले गेले."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"पुन्हा प्रयत्न करा."</string>

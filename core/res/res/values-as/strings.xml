@@ -312,7 +312,7 @@
     <string name="permgrouprequest_visual" msgid="6907523945030290376">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক আপোনাৰ ফট’ আৰু ভিডিঅ’সমূহ এক্সেছ কৰিবলৈ দিবনে?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ৱিণ্ড\' সমল বিচাৰি উলিয়াওক"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"আপুনি যোগাযোগ কৰি থকা ৱিণ্ড\'খনৰ সমল পৰীক্ষা কৰক।"</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"স্পৰ্শৰদ্বাৰা অন্বেষণ কৰাৰ সুবিধা অন কৰক"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"স্পৰ্শৰ দ্বাৰা অন্বেষণ কৰাৰ সুবিধা অন কৰক"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"টেপ কৰা বস্তুসমূহ ডাঙৰকৈ কোৱা হ\'ব আৰু আঙুলিৰ স্পৰ্শেৰে নিৰ্দেশ দি স্ক্ৰীণ অন্বেষণ কৰিব পাৰিব।"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"আপুনি লিখা পাঠ নিৰীক্ষণ কৰক"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ক্ৰেডিট কাৰ্ডৰ নম্বৰ আৰু পাছৱৰ্ডৰ দৰে ব্যক্তিগত ডেটা অন্তৰ্ভুক্ত হ\'ব পাৰে।"</string>
@@ -528,10 +528,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"চিনাক্ত কৰিব পৰা নাই"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"ফিংগাৰপ্ৰিণ্টৰ সত্যাপন কৰা হ’ল"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ\'ল"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ\'ল, অনুগ্ৰহ কৰি ‘নিশ্চিত কৰক’ বুটামটো টিপক"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ফিংগাৰপ্ৰিণ্ট হাৰ্ডৱেৰ নাই।"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ফিংগাৰপ্ৰিণ্ট সঞ্চয় কৰিব পৰা নগ\'ল। পূর্বে সঞ্চিত ফিংগাৰপ্ৰিণ্ট এটা আঁতৰাওক।"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ফিংগাৰপ্ৰিণ্ট গ্ৰহণৰ সময়সীমা উকলি গৈছে। আকৌ চেষ্টা কৰক।"</string>
@@ -568,8 +566,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"মুখমণ্ডল গ্ৰহণৰ সময়সীমা উকলি গৈছে। আকৌ চেষ্টা কৰক।"</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"মুখমণ্ডল সঞ্চয় কৰিব নোৱাৰি।"</string>
     <string name="face_error_canceled" msgid="283945501061931023">"মুখমণ্ডলৰ প্ৰক্ৰিয়া বাতিল কৰা হ’ল।"</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"ব্যৱহাৰকাৰীয়ে মুখমণ্ডলৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ বাতিল কৰিছে।"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"অত্যধিক ভুল প্ৰয়াস। কিছুসময়ৰ পাছত আকৌ চেষ্টা কৰক।"</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"অত্যধিক প্ৰয়াস। মুখমণ্ডলৰ জৰিয়তে সত্যাপন অক্ষম কৰা হ’ল।"</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"আকৌ চেষ্টা কৰক।"</string>

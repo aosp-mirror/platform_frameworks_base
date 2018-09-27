@@ -130,9 +130,9 @@
   </string-array>
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
-    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g>Kupiga simu Kupitia Wi-Fi"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Kupiga Simu Kupitia Wi-Fi ya <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Simu ya WLAN"</string>
-    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> Simu ya WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Simu ya WLAN ya <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi ya <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Kupiga Simu kupitia WiFi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi ya <xliff:g id="SPN">%s</xliff:g>"</string>
@@ -528,10 +528,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Hayatambuliki"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Imethibitisha alama ya kidole"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Uso umethibitishwa"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Uso umethibitishwa, tafadhali bonyeza thibitisha"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Maunzi ya kitambulisho hayapatikani."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Kitambulisho hakiwezi kuhifadhiwa. Tafadhali ondoa kitambulisho kilichopo."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Muda wa kitambulisho umekwisha. Jaribu tena."</string>
@@ -568,8 +566,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Muda wa kutambua uso umeisha. Jaribu tena."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Huwezi kuhifadhi uso."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Utendaji wa kitambulisho umeghairiwa."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"Uthibitishaji wa uso umeghairiwa na mtumiaji."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Umejaribu mara nyingi mno. Jaribu tena baadaye."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Umejaribu mara nyingi mno. Kitambuzi cha uso kimezimwa."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Jaribu tena."</string>
