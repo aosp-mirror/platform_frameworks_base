@@ -65,13 +65,144 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     public LoadedApk mLoadedApk;
 
     public interface ActivityLifecycleCallbacks {
+
+        /**
+         * Called as the first step of the Activity being created. This is always called before
+         * {@link Activity#onCreate}.
+         */
+        default void onActivityPreCreated(@NonNull Activity activity,
+                @Nullable Bundle savedInstanceState) {
+        }
+
+        /**
+         * Called when the Activity calls {@link Activity#onCreate super.onCreate()}.
+         */
         void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState);
+
+        /**
+         * Called as the last step of the Activity being created. This is always called after
+         * {@link Activity#onCreate}.
+         */
+        default void onActivityPostCreated(@NonNull Activity activity,
+                @Nullable Bundle savedInstanceState) {
+        }
+
+        /**
+         * Called as the first step of the Activity being started. This is always called before
+         * {@link Activity#onStart}.
+         */
+        default void onActivityPreStarted(@NonNull Activity activity) {
+        }
+
+        /**
+         * Called when the Activity calls {@link Activity#onStart super.onStart()}.
+         */
         void onActivityStarted(@NonNull Activity activity);
+
+        /**
+         * Called as the last step of the Activity being started. This is always called after
+         * {@link Activity#onStart}.
+         */
+        default void onActivityPostStarted(@NonNull Activity activity) {
+        }
+
+        /**
+         * Called as the first step of the Activity being resumed. This is always called before
+         * {@link Activity#onResume}.
+         */
+        default void onActivityPreResumed(@NonNull Activity activity) {
+        }
+
+        /**
+         * Called when the Activity calls {@link Activity#onResume super.onResume()}.
+         */
         void onActivityResumed(@NonNull Activity activity);
+
+        /**
+         * Called as the last step of the Activity being resumed. This is always called after
+         * {@link Activity#onResume} and {@link Activity#onPostResume}.
+         */
+        default void onActivityPostResumed(@NonNull Activity activity) {
+        }
+
+        /**
+         * Called as the first step of the Activity being paused. This is always called before
+         * {@link Activity#onPause}.
+         */
+        default void onActivityPrePaused(@NonNull Activity activity) {
+        }
+
+        /**
+         * Called when the Activity calls {@link Activity#onPause super.onPause()}.
+         */
         void onActivityPaused(@NonNull Activity activity);
+
+        /**
+         * Called as the last step of the Activity being paused. This is always called after
+         * {@link Activity#onPause}.
+         */
+        default void onActivityPostPaused(@NonNull Activity activity) {
+        }
+
+        /**
+         * Called as the first step of the Activity being stopped. This is always called before
+         * {@link Activity#onStop}.
+         */
+        default void onActivityPreStopped(@NonNull Activity activity) {
+        }
+
+        /**
+         * Called when the Activity calls {@link Activity#onStop super.onStop()}.
+         */
         void onActivityStopped(@NonNull Activity activity);
+
+        /**
+         * Called as the last step of the Activity being stopped. This is always called after
+         * {@link Activity#onStop}.
+         */
+        default void onActivityPostStopped(@NonNull Activity activity) {
+        }
+
+        /**
+         * Called as the first step of the Activity saving its instance state. This is always
+         * called before {@link Activity#onSaveInstanceState}.
+         */
+        default void onActivityPreSaveInstanceState(@NonNull Activity activity,
+                @NonNull Bundle outState) {
+        }
+
+        /**
+         * Called when the Activity calls
+         * {@link Activity#onSaveInstanceState super.onSaveInstanceState()}.
+         */
         void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState);
+
+        /**
+         * Called as the last step of the Activity saving its instance state. This is always
+         * called after{@link Activity#onSaveInstanceState}.
+         */
+        default void onActivityPostSaveInstanceState(@NonNull Activity activity,
+                @NonNull Bundle outState) {
+        }
+
+        /**
+         * Called as the first step of the Activity being destroyed. This is always called before
+         * {@link Activity#onDestroy}.
+         */
+        default void onActivityPreDestroyed(@NonNull Activity activity) {
+        }
+
+        /**
+         * Called when the Activity calls {@link Activity#onDestroy super.onDestroy()}.
+         */
         void onActivityDestroyed(@NonNull Activity activity);
+
+        /**
+         * Called as the last step of the Activity being destroyed. This is always called after
+         * {@link Activity#onDestroy}.
+         */
+        default void onActivityPostDestroyed(@NonNull Activity activity) {
+        }
     }
 
     /**
@@ -222,6 +353,18 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     }
 
     @UnsupportedAppUsage
+        /* package */ void dispatchActivityPreCreated(@NonNull Activity activity,
+            @Nullable Bundle savedInstanceState) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks) callbacks[i]).onActivityPreCreated(activity,
+                        savedInstanceState);
+            }
+        }
+    }
+
+    @UnsupportedAppUsage
     /* package */ void dispatchActivityCreated(@NonNull Activity activity,
             @Nullable Bundle savedInstanceState) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
@@ -229,6 +372,28 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
             for (int i=0; i<callbacks.length; i++) {
                 ((ActivityLifecycleCallbacks)callbacks[i]).onActivityCreated(activity,
                         savedInstanceState);
+            }
+        }
+    }
+
+    @UnsupportedAppUsage
+        /* package */ void dispatchActivityPostCreated(@NonNull Activity activity,
+            @Nullable Bundle savedInstanceState) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks) callbacks[i]).onActivityPostCreated(activity,
+                        savedInstanceState);
+            }
+        }
+    }
+
+    @UnsupportedAppUsage
+        /* package */ void dispatchActivityPreStarted(@NonNull Activity activity) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks) callbacks[i]).onActivityPreStarted(activity);
             }
         }
     }
@@ -244,11 +409,51 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     }
 
     @UnsupportedAppUsage
+        /* package */ void dispatchActivityPostStarted(@NonNull Activity activity) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks) callbacks[i]).onActivityPostStarted(activity);
+            }
+        }
+    }
+
+    @UnsupportedAppUsage
+        /* package */ void dispatchActivityPreResumed(@NonNull Activity activity) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks) callbacks[i]).onActivityPreResumed(activity);
+            }
+        }
+    }
+
+    @UnsupportedAppUsage
     /* package */ void dispatchActivityResumed(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
             for (int i=0; i<callbacks.length; i++) {
                 ((ActivityLifecycleCallbacks)callbacks[i]).onActivityResumed(activity);
+            }
+        }
+    }
+
+    @UnsupportedAppUsage
+        /* package */ void dispatchActivityPostResumed(@NonNull Activity activity) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks) callbacks[i]).onActivityPostResumed(activity);
+            }
+        }
+    }
+
+    @UnsupportedAppUsage
+        /* package */ void dispatchActivityPrePaused(@NonNull Activity activity) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks) callbacks[i]).onActivityPrePaused(activity);
             }
         }
     }
@@ -264,11 +469,53 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     }
 
     @UnsupportedAppUsage
+        /* package */ void dispatchActivityPostPaused(@NonNull Activity activity) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks) callbacks[i]).onActivityPostPaused(activity);
+            }
+        }
+    }
+
+    @UnsupportedAppUsage
+        /* package */ void dispatchActivityPreStopped(@NonNull Activity activity) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks) callbacks[i]).onActivityPreStopped(activity);
+            }
+        }
+    }
+
+    @UnsupportedAppUsage
     /* package */ void dispatchActivityStopped(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
             for (int i=0; i<callbacks.length; i++) {
                 ((ActivityLifecycleCallbacks)callbacks[i]).onActivityStopped(activity);
+            }
+        }
+    }
+
+    @UnsupportedAppUsage
+        /* package */ void dispatchActivityPostStopped(@NonNull Activity activity) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks) callbacks[i]).onActivityPostStopped(activity);
+            }
+        }
+    }
+
+    @UnsupportedAppUsage
+        /* package */ void dispatchActivityPreSaveInstanceState(@NonNull Activity activity,
+            @NonNull Bundle outState) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks) callbacks[i]).onActivityPreSaveInstanceState(
+                        activity, outState);
             }
         }
     }
@@ -286,11 +533,43 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     }
 
     @UnsupportedAppUsage
+        /* package */ void dispatchActivityPostSaveInstanceState(@NonNull Activity activity,
+            @NonNull Bundle outState) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks) callbacks[i]).onActivityPostSaveInstanceState(
+                        activity, outState);
+            }
+        }
+    }
+
+    @UnsupportedAppUsage
+        /* package */ void dispatchActivityPreDestroyed(@NonNull Activity activity) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks) callbacks[i]).onActivityPreDestroyed(activity);
+            }
+        }
+    }
+
+    @UnsupportedAppUsage
     /* package */ void dispatchActivityDestroyed(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
             for (int i=0; i<callbacks.length; i++) {
                 ((ActivityLifecycleCallbacks)callbacks[i]).onActivityDestroyed(activity);
+            }
+        }
+    }
+
+    @UnsupportedAppUsage
+        /* package */ void dispatchActivityPostDestroyed(@NonNull Activity activity) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks) callbacks[i]).onActivityPostDestroyed(activity);
             }
         }
     }
