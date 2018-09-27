@@ -16,6 +16,10 @@
 
 package com.android.systemui.statusbar;
 
+import static android.content.Context.LAYOUT_INFLATER_SERVICE;
+import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlertDialog;
@@ -30,10 +34,10 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
-import android.graphics.drawable.Icon;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -51,28 +55,22 @@ import android.view.View;
 import android.view.View.AccessibilityDelegate;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.WindowManager.KeyboardShortcutsReceiver;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import com.android.internal.app.AssistUtils;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
-import com.android.systemui.recents.misc.SystemServicesProxy;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import static android.content.Context.LAYOUT_INFLATER_SERVICE;
-import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
-import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 
 /**
  * Contains functionality for handling keyboard shortcuts.
@@ -372,19 +370,19 @@ public final class KeyboardShortcuts {
 
     private void showKeyboardShortcuts(int deviceId) {
         retrieveKeyCharacterMap(deviceId);
-        SystemServicesProxy.getInstance(mContext).requestKeyboardShortcuts(mContext,
-                new KeyboardShortcutsReceiver() {
-                    @Override
-                    public void onKeyboardShortcutsReceived(
-                            final List<KeyboardShortcutGroup> result) {
-                        result.add(getSystemShortcuts());
-                        final KeyboardShortcutGroup appShortcuts = getDefaultApplicationShortcuts();
-                        if (appShortcuts != null) {
-                            result.add(appShortcuts);
-                        }
-                        showKeyboardShortcutsDialog(result);
-                    }
-                }, deviceId);
+        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        wm.requestAppKeyboardShortcuts(new KeyboardShortcutsReceiver() {
+            @Override
+            public void onKeyboardShortcutsReceived(
+                    final List<KeyboardShortcutGroup> result) {
+                result.add(getSystemShortcuts());
+                final KeyboardShortcutGroup appShortcuts = getDefaultApplicationShortcuts();
+                if (appShortcuts != null) {
+                    result.add(appShortcuts);
+                }
+                showKeyboardShortcutsDialog(result);
+            }
+        }, deviceId);
     }
 
     private void dismissKeyboardShortcuts() {

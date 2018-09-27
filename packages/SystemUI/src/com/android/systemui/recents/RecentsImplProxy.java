@@ -87,12 +87,11 @@ public class RecentsImplProxy extends IRecentsNonSystemUserCallbacks.Stub {
     }
 
     @Override
-    public void splitPrimaryTask(int topTaskId, int dragMode, int stackCreateMode,
-            Rect initialBounds) throws RemoteException {
+    public void splitPrimaryTask(int topTaskId, int stackCreateMode, Rect initialBounds)
+            throws RemoteException {
         SomeArgs args = SomeArgs.obtain();
         args.argi1 = topTaskId;
-        args.argi2 = dragMode;
-        args.argi3 = stackCreateMode;
+        args.argi2 = stackCreateMode;
         args.arg1 = initialBounds;
         mHandler.sendMessage(mHandler.obtainMessage(MSG_DOCK_TOP_TASK, args));
     }
@@ -141,7 +140,7 @@ public class RecentsImplProxy extends IRecentsNonSystemUserCallbacks.Stub {
                     break;
                 case MSG_DOCK_TOP_TASK:
                     args = (SomeArgs) msg.obj;
-                    mImpl.splitPrimaryTask(args.argi1, args.argi2, args.argi3 = 0,
+                    mImpl.splitPrimaryTask(args.argi1, args.argi2 = 0,
                             (Rect) args.arg1);
                     break;
                 case MSG_ON_DRAGGING_IN_RECENTS:

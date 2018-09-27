@@ -16,6 +16,11 @@
 
 package com.android.systemui.pip.tv;
 
+import static android.app.ActivityTaskManager.INVALID_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
@@ -44,21 +49,16 @@ import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
-
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.UiOffloadThread;
 import com.android.systemui.pip.BasePipManager;
-import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
-import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-
+import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.shared.system.WindowManagerWrapper;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-
-import static android.app.ActivityTaskManager.INVALID_STACK_ID;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.view.Display.DEFAULT_DISPLAY;
 
 /**
  * Manages the picture-in-picture (PIP) UI and states.
@@ -630,7 +630,7 @@ public class PipManager implements BasePipManager {
         return false;
     }
 
-    private SysUiTaskStackChangeListener mTaskStackListener = new SysUiTaskStackChangeListener() {
+    private TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
         @Override
         public void onTaskStackChanged() {
             if (DEBUG) Log.d(TAG, "onTaskStackChanged()");
@@ -754,7 +754,9 @@ public class PipManager implements BasePipManager {
     }
 
     private void updatePipVisibility(final boolean visible) {
-        SystemServicesProxy.getInstance(mContext).setPipVisibility(visible);
+        Dependency.get(UiOffloadThread.class).submit(() -> {
+            WindowManagerWrapper.getInstance().setPipVisibility(visible);
+        });
     }
 
     @Override

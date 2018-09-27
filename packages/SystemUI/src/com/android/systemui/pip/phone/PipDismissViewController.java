@@ -19,21 +19,17 @@ package com.android.systemui.pip.phone;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnLayoutChangeListener;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
-
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.shared.system.WindowManagerWrapper;
 
 public class PipDismissViewController {
 
@@ -59,7 +55,7 @@ public class PipDismissViewController {
         if (mDismissView == null) {
             // Determine sizes for the view
             final Rect stableInsets = new Rect();
-            SystemServicesProxy.getInstance(mContext).getStableInsets(stableInsets);
+            WindowManagerWrapper.getInstance().getStableInsets(stableInsets);
             final Point windowSize = new Point();
             mWindowManager.getDefaultDisplay().getRealSize(windowSize);
             final int gradientHeight = mContext.getResources().getDimensionPixelSize(

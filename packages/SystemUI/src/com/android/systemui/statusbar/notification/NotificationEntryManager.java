@@ -35,6 +35,8 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.dreams.DreamService;
+import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
@@ -58,7 +60,6 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
-import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AmbientPulseManager;
@@ -127,11 +128,11 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             Dependency.get(NotificationListener.class);
     protected AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
 
+    protected IDreamManager mDreamManager;
     protected IStatusBarService mBarService;
     protected NotificationPresenter mPresenter;
     protected Callback mCallback;
     protected PowerManager mPowerManager;
-    protected SystemServicesProxy mSystemServicesProxy;
     protected NotificationListenerService.RankingMap mLatestRankingMap;
     protected HeadsUpManager mHeadsUpManager;
     protected NotificationData mNotificationData;
@@ -223,8 +224,9 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+        mDreamManager = IDreamManager.Stub.asInterface(
+                ServiceManager.checkService(DreamService.DREAM_SERVICE));
         mMessagingUtil = new NotificationMessagingUtil(context);
-        mSystemServicesProxy = SystemServicesProxy.getInstance(mContext);
         mGroupManager.setPendingEntries(mPendingNotifications);
     }
 
@@ -687,7 +689,13 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             } else {
                 // Stop screensaver if the notification has a fullscreen intent.
                 // (like an incoming phone call)
-                SystemServicesProxy.getInstance(mContext).awakenDreamsAsync();
+                Dependency.get(UiOffloadThread.class).submit(() -> {
+                    try {
+                        mDreamManager.awaken();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                });
 
                 // not immersive & a fullscreen alert should be shown
                 if (DEBUG)
@@ -898,7 +906,13 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             return false;
         }
 
-        boolean inUse = mPowerManager.isScreenOn() && !mSystemServicesProxy.isDreaming();
+        boolean isDreaming = false;
+        try {
+            isDreaming = mDreamManager.isDreaming();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to query dream manager.", e);
+        }
+        boolean inUse = mPowerManager.isScreenOn() && !isDreaming;
 
         if (!inUse) {
             if (DEBUG) {

@@ -102,6 +102,8 @@ import android.os.UserManager;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.service.dreams.DreamService;
+import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -154,6 +156,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.UiOffloadThread;
@@ -179,10 +182,6 @@ import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.car.CarQSFragment;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
-import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.activity.AppTransitionFinishedEvent;
-import com.android.systemui.recents.events.activity.UndockingTaskEvent;
-import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.stackdivider.WindowManagerProxy;
@@ -635,6 +634,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarStateController.addListener(this, StatusBarStateController.RANK_STATUS_BAR);
 
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        mDreamManager = IDreamManager.Stub.asInterface(
+                ServiceManager.checkService(DreamService.DREAM_SERVICE));
 
         mDisplay = mWindowManager.getDefaultDisplay();
         updateDisplaySize();
@@ -1214,17 +1215,18 @@ public class StatusBar extends SystemUI implements DemoMode,
             int createMode = navbarPos == NAV_BAR_POS_LEFT
                     ? SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT
                     : SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
-            return mRecents.splitPrimaryTask(NavigationBarGestureHelper.DRAG_MODE_NONE, createMode,
-                    null, metricsDockAction);
+            return mRecents.splitPrimaryTask(createMode, null, metricsDockAction);
         } else {
             Divider divider = getComponent(Divider.class);
-            if (divider != null && divider.isMinimized() && !divider.isHomeStackResizable()) {
-                // Undocking from the minimized state is not supported
-                return false;
-            } else {
-                EventBus.getDefault().send(new UndockingTaskEvent());
-                if (metricsUndockAction != -1) {
-                    mMetricsLogger.action(metricsUndockAction);
+            if (divider != null) {
+                if (divider.isMinimized() && !divider.isHomeStackResizable()) {
+                    // Undocking from the minimized state is not supported
+                    return false;
+                } else {
+                    divider.onUndockingTask();
+                    if (metricsUndockAction != -1) {
+                        mMetricsLogger.action(metricsUndockAction);
+                    }
                 }
             }
         }
@@ -4246,12 +4248,12 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void appTransitionCancelled() {
-        EventBus.getDefault().send(new AppTransitionFinishedEvent());
+        getComponent(Divider.class).onAppTransitionFinished();
     }
 
     @Override
     public void appTransitionFinished() {
-        EventBus.getDefault().send(new AppTransitionFinishedEvent());
+        getComponent(Divider.class).onAppTransitionFinished();
     }
 
     @Override
@@ -4663,6 +4665,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected WindowManager mWindowManager;
     protected IWindowManager mWindowManagerService;
+    private IDreamManager mDreamManager;
 
     protected Display mDisplay;
 
@@ -4967,7 +4970,13 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     void awakenDreams() {
-        SystemServicesProxy.getInstance(mContext).awakenDreamsAsync();
+        Dependency.get(UiOffloadThread.class).submit(() -> {
+            try {
+                mDreamManager.awaken();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override

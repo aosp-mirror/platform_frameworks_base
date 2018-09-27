@@ -30,7 +30,6 @@ import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.ActivityManager.StackInfo;
-import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.content.Context;
@@ -43,14 +42,11 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.animation.Interpolator;
-
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.PipSnapAlgorithm;
-import com.android.systemui.recents.misc.ForegroundThread;
-import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.FlingAnimationUtils;
-
 import java.io.PrintWriter;
 
 /**
@@ -116,7 +112,7 @@ public class PipMotionHelper implements Handler.Callback {
      */
     void onConfigurationChanged() {
         mSnapAlgorithm.onConfigurationChanged();
-        SystemServicesProxy.getInstance(mContext).getStableInsets(mStableInsets);
+        WindowManagerWrapper.getInstance().getStableInsets(mStableInsets);
     }
 
     /**

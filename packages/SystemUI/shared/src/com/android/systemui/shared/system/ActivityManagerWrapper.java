@@ -342,6 +342,20 @@ public class ActivityManagerWrapper {
     }
 
     /**
+     * Moves an already resumed task to the side of the screen to initiate split screen.
+     */
+    public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode,
+            Rect initialBounds) {
+        try {
+            return ActivityTaskManager.getService().setTaskWindowingModeSplitScreenPrimary(taskId,
+                    createMode, true /* onTop */, false /* animate */, initialBounds,
+                    true /* showRecents */);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * Registers a task stack listener with the system.
      * This should be called on the main thread.
      */

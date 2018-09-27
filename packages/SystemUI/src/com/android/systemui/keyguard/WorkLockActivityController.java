@@ -19,7 +19,6 @@ package com.android.systemui.keyguard;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
-import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.KeyguardManager;
 import android.content.ComponentName;
@@ -29,11 +28,9 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
-
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
-import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.TaskStackChangeListener;
 
 public class WorkLockActivityController {
     private static final String TAG = WorkLockActivityController.class.getSimpleName();
@@ -111,7 +108,7 @@ public class WorkLockActivityController {
         }
     }
 
-    private final SysUiTaskStackChangeListener mLockListener = new SysUiTaskStackChangeListener() {
+    private final TaskStackChangeListener mLockListener = new TaskStackChangeListener() {
         @Override
         public void onTaskProfileLocked(int taskId, int userId) {
             startWorkChallengeInTask(taskId, userId);

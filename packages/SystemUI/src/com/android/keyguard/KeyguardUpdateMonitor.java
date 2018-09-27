@@ -86,9 +86,8 @@ import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.WirelessUtils;
-import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-
+import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.google.android.collect.Lists;
 
 import java.io.FileDescriptor;
@@ -2218,8 +2217,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    private final SysUiTaskStackChangeListener
-            mTaskStackListener = new SysUiTaskStackChangeListener() {
+    private final TaskStackChangeListener
+            mTaskStackListener = new TaskStackChangeListener() {
         @Override
         public void onTaskStackChangedBackground() {
             try {
