@@ -21,6 +21,7 @@ import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.result.ByteArrayInputStreamSource;
 import com.android.tradefed.result.ITestInvocationListener;
 import com.android.tradefed.result.LogDataType;
+import com.android.tradefed.result.TestDescription;
 import com.android.tradefed.testtype.IDeviceTest;
 import com.android.tradefed.testtype.IRemoteTest;
 
@@ -84,7 +85,10 @@ public class NativeProcessesMemoryTest implements IDeviceTest, IRemoteTest {
         // showmap requires root, we enable it here for the rest of the test
         mTestDevice.enableAdbRoot();
 
-        listener.testRunStarted(RUN_NAME, 0 /* testCount */);
+        listener.testRunStarted(RUN_NAME, 1 /* testCount */);
+
+        TestDescription testDescription = new TestDescription(getClass().getName(), "run");
+        listener.testStarted(testDescription);
 
         // process name -> list of pids with that name
         Map<String, List<String>> nativeProcesses = collectNativeProcesses();
@@ -94,7 +98,8 @@ public class NativeProcessesMemoryTest implements IDeviceTest, IRemoteTest {
         mNativeProcessToMemory.put(
                 NUM_NATIVE_PROCESSES_KEY, Integer.toString(nativeProcesses.size()));
 
-        listener.testRunEnded(0, mNativeProcessToMemory);
+        listener.testEnded(testDescription, mNativeProcessToMemory);
+        listener.testRunEnded(0, new HashMap<String, String>());
     }
 
     /** Samples memory of all processes and logs the memory use. */
